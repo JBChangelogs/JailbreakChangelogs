@@ -9,9 +9,14 @@ import { Item, RobloxUser } from "@/types";
 import { InventoryItem } from "@/app/inventories/types";
 import { mergeInventoryArrayWithMetadata } from "@/utils/inventoryMerge";
 import { Icon } from "../ui/IconWrapper";
+import { getCategoryIcon, getCategoryColor } from "@/utils/categoryIcons";
 
 interface DuplicatesTabProps {
-  initialData: { data: InventoryItem[]; user_id: string };
+  initialData: {
+    data: InventoryItem[];
+    user_id: string;
+    duplicates?: InventoryItem[];
+  };
   robloxUsers: Record<string, RobloxUser>;
   robloxAvatars: Record<string, string>;
   onItemClick: (item: InventoryItem) => void;
@@ -38,6 +43,7 @@ export default function DuplicatesTab({
   itemsData,
 }: DuplicatesTabProps) {
   const [searchTerm, setSearchTerm] = useState("");
+  const [leaderboardSearch, setLeaderboardSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
   const [sortOrder, setSortOrder] = useState<SortOrder>("count-desc");
   const parentRef = useRef<HTMLDivElement>(null);
@@ -99,13 +105,22 @@ export default function DuplicatesTab({
     };
   };
 
-  // Merge inventory data with live metadata from item/list endpoint
+  // Combine data from both inventory.data and inventory.duplicates (if it exists)
+  const combinedInventoryData = useMemo(() => {
+    const combined = [...initialData.data];
+    if (initialData.duplicates && initialData.duplicates.length > 0) {
+      combined.push(...initialData.duplicates);
+    }
+    return combined;
+  }, [initialData.data, initialData.duplicates]);
+
+  // Merge combined inventory data with live metadata from item/list endpoint
   const mergedInventoryData = useMemo(
-    () => mergeInventoryArrayWithMetadata(initialData.data, itemsData),
-    [initialData.data, itemsData],
+    () => mergeInventoryArrayWithMetadata(combinedInventoryData, itemsData),
+    [combinedInventoryData, itemsData],
   );
 
-  // Count duplicates across entire inventory
+  // Count duplicates across entire inventory (including items from duplicates array)
   const duplicateCounts = (() => {
     const counts = new Map<string, number>();
     mergedInventoryData.forEach((item) => {
@@ -198,9 +213,20 @@ export default function DuplicatesTab({
     return Array.from(categories).sort();
   })();
 
+  // Filter leaderboard items based on search
+  const filteredLeaderboardItems = useMemo(() => {
+    if (!leaderboardSearch.trim()) {
+      return multiCopyStats.allDuplicateItems;
+    }
+    const searchLower = leaderboardSearch.toLowerCase();
+    return multiCopyStats.allDuplicateItems.filter((item) =>
+      item.title.toLowerCase().includes(searchLower),
+    );
+  }, [multiCopyStats.allDuplicateItems, leaderboardSearch]);
+
   // TanStack Virtual setup for performance with large duplicate datasets
   const virtualizer = useVirtualizer({
-    count: multiCopyStats.allDuplicateItems.length,
+    count: filteredLeaderboardItems.length,
     getScrollElement: () => parentRef.current,
     estimateSize: () => 80,
     overscan: 5,
@@ -318,64 +344,125 @@ export default function DuplicatesTab({
           Top Items by Copies
         </h2>
 
+        {/* Leaderboard Search */}
+        <div className="relative mb-4">
+          <input
+            type="text"
+            placeholder="Search leaderboard..."
+            value={leaderboardSearch}
+            onChange={(e) => setLeaderboardSearch(e.target.value)}
+            maxLength={MAX_SEARCH_LENGTH}
+            className="text-primary-text border-border-primary bg-tertiary-bg placeholder-secondary-text focus:border-button-info min-h-[48px] w-full rounded-lg border px-4 py-2 pr-10 pl-10 transition-all duration-300 focus:outline-none"
+          />
+          <MagnifyingGlassIcon className="text-secondary-text absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2" />
+          {leaderboardSearch && (
+            <button
+              onClick={() => setLeaderboardSearch("")}
+              className="hover:text-primary-text text-secondary-text absolute top-1/2 right-3 h-5 w-5 -translate-y-1/2 cursor-pointer"
+              aria-label="Clear search"
+            >
+              <XMarkIcon />
+            </button>
+          )}
+        </div>
+
+        {/* Results count for leaderboard */}
+        {leaderboardSearch && (
+          <div className="mb-3">
+            <p className="text-secondary-text text-xs">
+              Showing {filteredLeaderboardItems.length} of{" "}
+              {multiCopyStats.allDuplicateItems.length} items
+            </p>
+          </div>
+        )}
+
         {/* All Duplicate Items - Virtualized Scrollable */}
-        {multiCopyStats.allDuplicateItems.length > 0 && (
-          <div
-            ref={parentRef}
-            className="scrollbar-thin scrollbar-track-transparent scrollbar-thumb-border-primary hover:scrollbar-thumb-border-focus max-h-96 overflow-y-auto pr-2"
-            style={{
-              scrollbarWidth: "thin",
-              scrollbarColor: "var(--color-border-primary) transparent",
-            }}
-          >
+        {multiCopyStats.allDuplicateItems.length > 0 &&
+          filteredLeaderboardItems.length > 0 && (
             <div
+              ref={parentRef}
+              className="scrollbar-thin scrollbar-track-transparent scrollbar-thumb-border-primary hover:scrollbar-thumb-border-focus max-h-96 overflow-y-auto pr-2"
               style={{
-                height: `${virtualizer.getTotalSize()}px`,
-                width: "100%",
-                position: "relative",
+                scrollbarWidth: "thin",
+                scrollbarColor: "var(--color-border-primary) transparent",
               }}
             >
-              {virtualizer.getVirtualItems().map((virtualItem) => {
-                const item =
-                  multiCopyStats.allDuplicateItems[virtualItem.index];
-                const rank = virtualItem.index + 1;
+              <div
+                style={{
+                  height: `${virtualizer.getTotalSize()}px`,
+                  width: "100%",
+                  position: "relative",
+                }}
+              >
+                {virtualizer.getVirtualItems().map((virtualItem) => {
+                  const item = filteredLeaderboardItems[virtualItem.index];
+                  const rank = virtualItem.index + 1;
 
-                return (
-                  <div
-                    key={`${item.category}-${item.title}`}
-                    style={{
-                      position: "absolute",
-                      top: 0,
-                      left: 0,
-                      width: "100%",
-                      transform: `translateY(${virtualItem.start}px)`,
-                    }}
-                    className="bg-tertiary-bg border-border-primary flex items-center justify-between rounded-lg border p-3"
-                  >
-                    <div className="flex items-center gap-3 flex-1 min-w-0">
-                      <span className="text-primary-text font-bold text-sm w-6 shrink-0">
-                        #{rank}
-                      </span>
-                      <div className="flex flex-col gap-0.5 min-w-0">
-                        <Link
-                          href={`/item/${encodeURIComponent(item.category.toLowerCase())}/${encodeURIComponent(item.title)}`}
-                          prefetch={false}
-                          className="text-primary-text hover:text-link font-semibold text-sm truncate transition-colors"
-                        >
-                          {item.title}
-                        </Link>
-                        <span className="text-secondary-text text-xs capitalize">
-                          {item.category}
+                  return (
+                    <div
+                      key={`${item.category}-${item.title}`}
+                      style={{
+                        position: "absolute",
+                        top: 0,
+                        left: 0,
+                        width: "100%",
+                        transform: `translateY(${virtualItem.start}px)`,
+                      }}
+                      className="bg-tertiary-bg border-border-primary flex items-center justify-between rounded-lg border p-3"
+                    >
+                      <div className="flex items-center gap-3 flex-1 min-w-0">
+                        <span className="text-primary-text font-bold text-sm w-6 shrink-0">
+                          #{rank}
                         </span>
+                        <div className="flex flex-col gap-1 min-w-0">
+                          <Link
+                            href={`/item/${encodeURIComponent(item.category.toLowerCase())}/${encodeURIComponent(item.title)}`}
+                            prefetch={false}
+                            className="text-primary-text hover:text-link font-semibold text-sm truncate transition-colors"
+                          >
+                            {item.title}
+                          </Link>
+                          <span
+                            className="text-primary-text flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-medium w-fit"
+                            style={{
+                              borderColor: getCategoryColor(item.category),
+                              backgroundColor:
+                                getCategoryColor(item.category) + "20",
+                            }}
+                          >
+                            {(() => {
+                              const categoryIcon = getCategoryIcon(
+                                item.category,
+                              );
+                              return categoryIcon ? (
+                                <categoryIcon.Icon
+                                  className="h-3 w-3"
+                                  style={{
+                                    color: getCategoryColor(item.category),
+                                  }}
+                                />
+                              ) : null;
+                            })()}
+                            {item.category}
+                          </span>
+                        </div>
                       </div>
+                      <span className="text-primary-text font-bold text-sm whitespace-nowrap ml-2">
+                        {item.count}x
+                      </span>
                     </div>
-                    <span className="text-primary-text font-bold text-sm whitespace-nowrap ml-2">
-                      {item.count}x
-                    </span>
-                  </div>
-                );
-              })}
+                  );
+                })}
+              </div>
             </div>
+          )}
+
+        {/* No results message for leaderboard search */}
+        {leaderboardSearch && filteredLeaderboardItems.length === 0 && (
+          <div className="bg-tertiary-bg border-border-primary rounded-lg border p-4 text-center">
+            <p className="text-secondary-text text-sm">
+              No items found matching &quot;{leaderboardSearch}&quot;
+            </p>
           </div>
         )}
       </div>
@@ -465,7 +552,9 @@ export default function DuplicatesTab({
               className="text-button-info shrink-0 text-lg"
             />
             <span className="font-medium">
-              Helpful Tip: This tab shows items you have multiple copies of.
+              Helpful Tip: This tab shows items you have multiple copies of,
+              including items from your regular inventory and flagged duplicate
+              items.
             </span>
           </div>
         </div>

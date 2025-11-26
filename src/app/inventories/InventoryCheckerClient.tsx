@@ -897,7 +897,11 @@ export default function InventoryCheckerClient({
 
                 {effectiveActiveTab === 1 && hasDuplicates && (
                   <DuplicatesTab
-                    initialData={currentData}
+                    initialData={{
+                      data: currentData.data,
+                      user_id: currentData.user_id,
+                      duplicates: currentData.duplicates,
+                    }}
                     robloxUsers={mergedRobloxUsers}
                     robloxAvatars={robloxAvatars}
                     onItemClick={handleItemClick}
