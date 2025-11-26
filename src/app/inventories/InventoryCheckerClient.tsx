@@ -18,7 +18,7 @@ import toast from "react-hot-toast";
 import SearchForm from "@/components/Inventory/SearchForm";
 import UserStats from "@/components/Inventory/UserStats";
 import InventoryItems from "@/components/Inventory/InventoryItems";
-import DuplicatesTab from "@/components/Inventory/DuplicatesTab";
+import DuplicatesTab from "@/components/Inventory/MultipleCopiesTab";
 import DupedItemsTab from "@/components/Inventory/DupedItemsTab";
 import TradeHistoryModal from "@/components/Modals/TradeHistoryModal";
 import { useScanWebSocket } from "@/hooks/useScanWebSocket";

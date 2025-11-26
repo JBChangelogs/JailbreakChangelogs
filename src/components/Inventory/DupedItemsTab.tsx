@@ -64,6 +64,46 @@ export default function DupedItemsTab({
     return Boolean(user?.hasVerifiedBadge);
   };
 
+  // Get variant-specific values (e.g., different hyperchrome colors by year)
+  const getVariantSpecificValues = (
+    item: InventoryItem,
+    baseItemData: Item,
+  ) => {
+    // Match variant by creation year
+    if (baseItemData.children && baseItemData.children.length > 0) {
+      const createdAtInfo = item.info.find(
+        (info) => info.title === "Created At",
+      );
+      const createdYear = createdAtInfo
+        ? new Date(createdAtInfo.value).getFullYear().toString()
+        : null;
+
+      const matchingChild = createdYear
+        ? baseItemData.children.find(
+            (child) =>
+              child.sub_name === createdYear &&
+              child.data &&
+              child.data.cash_value &&
+              child.data.cash_value !== "N/A" &&
+              child.data.cash_value !== null,
+          )
+        : null;
+
+      if (matchingChild) {
+        return {
+          cash_value: matchingChild.data.cash_value,
+          duped_value: matchingChild.data.duped_value,
+        };
+      }
+    }
+
+    // Use base item values if no variant match
+    return {
+      cash_value: baseItemData.cash_value,
+      duped_value: baseItemData.duped_value,
+    };
+  };
+
   // Get available categories from duplicates
   const availableCategories = useMemo(() => {
     const categories = new Set(
@@ -122,15 +162,19 @@ export default function DupedItemsTab({
         case "cash-desc":
         case "cash-asc": {
           if (!aData || !bData) return 0;
-          const aValue = parseNumericValue(aData.cash_value);
-          const bValue = parseNumericValue(bData.cash_value);
+          const aVariantValues = getVariantSpecificValues(a, aData);
+          const bVariantValues = getVariantSpecificValues(b, bData);
+          const aValue = parseNumericValue(aVariantValues.cash_value);
+          const bValue = parseNumericValue(bVariantValues.cash_value);
           return sortOrder === "cash-desc" ? bValue - aValue : aValue - bValue;
         }
         case "duped-desc":
         case "duped-asc": {
           if (!aData || !bData) return 0;
-          const aValue = parseNumericValue(aData.duped_value);
-          const bValue = parseNumericValue(bData.duped_value);
+          const aVariantValues = getVariantSpecificValues(a, aData);
+          const bVariantValues = getVariantSpecificValues(b, bData);
+          const aValue = parseNumericValue(aVariantValues.duped_value);
+          const bValue = parseNumericValue(bVariantValues.duped_value);
           return sortOrder === "duped-desc" ? bValue - aValue : aValue - bValue;
         }
         case "alpha-asc":
@@ -254,12 +298,24 @@ export default function DupedItemsTab({
       {/* Cards container with secondary background */}
       <div className="bg-secondary-bg rounded-lg p-4">
         <InventoryItemsGrid
-          filteredItems={filteredAndSortedItems.map((item) => ({
-            item,
-            itemData: currentItemsData.find(
+          filteredItems={filteredAndSortedItems.map((item) => {
+            const baseItemData = currentItemsData.find(
               (data) => data.id === item.item_id,
-            )!,
-          }))}
+            )!;
+            const variantValues = getVariantSpecificValues(item, baseItemData);
+
+            // Create a modified item data object with variant-specific values
+            const itemDataWithVariants = {
+              ...baseItemData,
+              cash_value: variantValues.cash_value,
+              duped_value: variantValues.duped_value,
+            };
+
+            return {
+              item,
+              itemData: itemDataWithVariants,
+            };
+          })}
           getUserDisplay={getUserDisplay}
           getUserAvatar={getUserAvatar}
           getHasVerifiedBadge={getHasVerifiedBadge}

@@ -39,6 +39,7 @@ interface InventoryItemCardProps {
   duplicateCount?: number;
   duplicateOrder?: number;
   userId: string;
+  variant?: string;
 }
 
 export default function InventoryItemCard({
@@ -51,6 +52,7 @@ export default function InventoryItemCard({
   duplicateCount = 1,
   duplicateOrder = 1,
   userId,
+  variant,
 }: InventoryItemCardProps) {
   const isOriginalOwner = item.isOriginalOwner;
   const originalOwnerInfo = item.info.find(
@@ -81,7 +83,7 @@ export default function InventoryItemCard({
           className={`${bangers.className} text-primary-text mb-1 text-2xl tracking-wide break-words`}
         >
           <Link
-            href={`/item/${encodeURIComponent(item.categoryTitle.toLowerCase())}/${encodeURIComponent(item.title)}`}
+            href={`/item/${encodeURIComponent(item.categoryTitle.toLowerCase())}/${encodeURIComponent(item.title)}${variant ? `?variant=${variant}` : ""}`}
             onClick={(e) => e.stopPropagation()}
             className="hover:text-link-hover transition-colors"
             prefetch={false}
