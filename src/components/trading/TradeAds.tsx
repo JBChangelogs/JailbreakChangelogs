@@ -276,6 +276,7 @@ export default function TradeAds({
           hidden={activeTab !== "view"}
           id="trading-tabpanel-view"
           aria-labelledby="trading-tab-view"
+          className="mt-6"
         >
           {activeTab === "view" && (
             <div className="mb-8 rounded-lg border p-6 text-center">
@@ -320,6 +321,7 @@ export default function TradeAds({
           hidden={activeTab !== "create"}
           id="trading-tabpanel-create"
           aria-labelledby="trading-tab-create"
+          className="mt-6"
         >
           {activeTab === "create" && (
             <TradeAdForm
@@ -381,6 +383,7 @@ export default function TradeAds({
         hidden={activeTab !== "view"}
         id="trading-tabpanel-view"
         aria-labelledby="trading-tab-view"
+        className="mt-6"
       >
         {activeTab === "view" && (
           <>
@@ -470,6 +473,7 @@ export default function TradeAds({
         hidden={activeTab !== "supporter"}
         id="trading-tabpanel-supporter"
         aria-labelledby="trading-tab-supporter"
+        className="mt-6"
       >
         {activeTab === "supporter" && (
           <>
@@ -585,6 +589,7 @@ export default function TradeAds({
         hidden={activeTab !== "create"}
         id="trading-tabpanel-create"
         aria-labelledby="trading-tab-create"
+        className="mt-6"
       >
         {activeTab === "create" && (
           <TradeAdForm
@@ -606,6 +611,7 @@ export default function TradeAds({
         hidden={activeTab !== "myads"}
         id="trading-tabpanel-myads"
         aria-labelledby="trading-tab-myads"
+        className="mt-6"
       >
         {activeTab === "myads" && (
           <>

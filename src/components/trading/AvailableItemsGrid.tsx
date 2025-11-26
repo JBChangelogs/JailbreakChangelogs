@@ -525,20 +525,40 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
 
           {/* Helpful tip about drag and drop */}
           <div className="text-center mb-4">
-            <div className="text-secondary-text hidden items-center justify-center gap-1 text-xs lg:flex">
-              <Icon
-                icon="emojione:light-bulb"
-                className="text-sm text-yellow-500"
-              />
-              Helpful tip: Drag and drop items to{" "}
-              <span className="text-status-success font-semibold">
-                Offering
-              </span>{" "}
-              or{" "}
-              <span className="text-status-error font-semibold">
-                Requesting
-              </span>{" "}
-              sides
+            <div className="text-secondary-text hidden flex-col items-center justify-center gap-1 text-xs lg:flex">
+              <div className="flex items-center gap-1">
+                <Icon
+                  icon="emojione:light-bulb"
+                  className="text-sm text-yellow-500"
+                />
+                Helpful tips: Drag and drop items to{" "}
+                <span className="text-status-success font-semibold">
+                  Offering
+                </span>{" "}
+                or{" "}
+                <span className="text-status-error font-semibold">
+                  Requesting
+                </span>{" "}
+                sides
+              </div>
+              <div className="flex items-center gap-2">
+                <span>Or use keyboard shortcuts on item names:</span>
+                <kbd className="kbd kbd-sm bg-tertiary-bg text-primary-text border-border-primary">
+                  Shift
+                </kbd>
+                <span>+ Click for</span>
+                <span className="text-status-success font-semibold">
+                  Offering
+                </span>
+                <span>•</span>
+                <kbd className="kbd kbd-sm bg-tertiary-bg text-primary-text border-border-primary">
+                  Ctrl
+                </kbd>
+                <span>+ Click for</span>
+                <span className="text-status-error font-semibold">
+                  Requesting
+                </span>
+              </div>
             </div>
           </div>
 
@@ -668,6 +688,22 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
                                     href={`/item/${encodeURIComponent(item.type.toLowerCase())}/${encodeURIComponent(item.name)}`}
                                     prefetch={false}
                                     className="text-primary-text hover:text-link max-w-full text-sm font-semibold transition-colors cursor-pointer"
+                                    onClick={(e) => {
+                                      if (item.tradable !== 1) return;
+
+                                      // Shift+Click = Add to Offering
+                                      if (e.shiftKey) {
+                                        e.preventDefault();
+                                        e.stopPropagation();
+                                        handleAddItem(item, "offering");
+                                      }
+                                      // Ctrl+Click (or Cmd+Click on Mac) = Add to Requesting
+                                      else if (e.ctrlKey || e.metaKey) {
+                                        e.preventDefault();
+                                        e.stopPropagation();
+                                        handleAddItem(item, "requesting");
+                                      }
+                                    }}
                                   >
                                     {item.name}
                                   </Link>

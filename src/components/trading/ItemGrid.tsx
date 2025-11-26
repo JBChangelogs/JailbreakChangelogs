@@ -81,7 +81,11 @@ const groupItems = (items: TradeItem[]) => {
   return Object.values(grouped);
 };
 
-export const ItemGrid: React.FC<ItemGridProps> = ({ items, title }) => {
+export const ItemGrid: React.FC<ItemGridProps> = ({
+  items,
+  title,
+  onRemove,
+}) => {
   if (items.length === 0) {
     const isOffering = title.toLowerCase() === "offering";
     const borderColor = isOffering
@@ -236,9 +240,35 @@ export const ItemGrid: React.FC<ItemGridProps> = ({ items, title }) => {
                           />
                         )}
                         {item.count > 1 && (
-                          <div className="border-button-info bg-button-info/90 text-form-button-text absolute top-1 right-1 rounded-full border px-1.5 py-0.5 text-xs">
+                          <div className="border-button-info bg-button-info/90 text-form-button-text absolute top-1 right-1 rounded-full border px-1.5 py-0.5 text-xs z-5">
                             ×{item.count}
                           </div>
+                        )}
+                        {/* Remove button - positioned in top-left corner */}
+                        {onRemove && (
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onRemove(item.id, item.sub_name);
+                            }}
+                            className="text-form-button-text absolute top-1 left-1 z-10 flex h-6 w-6 items-center justify-center rounded-full bg-red-600/90 transition-colors hover:bg-red-700 cursor-pointer"
+                            aria-label="Remove item"
+                          >
+                            <svg
+                              className="h-4 w-4"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M6 18L18 6M6 6l12 12"
+                              />
+                            </svg>
+                          </button>
                         )}
                       </div>
                     </div>

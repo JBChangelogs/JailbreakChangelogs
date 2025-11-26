@@ -45,9 +45,9 @@ export interface User {
 export interface UserFlag {
   flag: string | null;
   created_at: number;
-  enabled: boolean;
-  index: number;
-  description: string;
+  enabled?: boolean;
+  index?: number;
+  description?: string;
 }
 
 export interface UserData extends User {

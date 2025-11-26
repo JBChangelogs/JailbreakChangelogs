@@ -34,9 +34,10 @@ export const UserBadges = ({
     "https://assets.jailbreakchangelogs.xyz/assets/website_icons";
 
   // Sort flags by index (1 as first badge)
+  // Treat flags as enabled if enabled field is missing or explicitly true
   const sortedFlags = flags
-    .filter((f) => f.enabled === true)
-    .sort((a, b) => a.index - b.index);
+    .filter((f) => f.enabled !== false)
+    .sort((a, b) => (a.index ?? 0) - (b.index ?? 0));
 
   const handleOwnerBadgeClick = () => {
     const ownerFlag = sortedFlags.find((f) => f.flag === "is_owner");
