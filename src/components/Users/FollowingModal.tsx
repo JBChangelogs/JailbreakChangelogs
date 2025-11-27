@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Dialog, CircularProgress, Button } from "@mui/material";
 import { XMarkIcon, MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import { UserAvatar } from "@/utils/avatar";
@@ -61,6 +61,19 @@ const FollowingModal: React.FC<FollowingModalProps> = ({
   }>({});
   const [searchQuery, setSearchQuery] = useState("");
 
+  // Store callbacks and values in refs to avoid unnecessary re-renders
+  const onCountUpdateRef = useRef(onCountUpdate);
+  const onCloseRef = useRef(onClose);
+  const isOwnProfileRef = useRef(isOwnProfile);
+  const userDataRef = useRef(userData);
+
+  useEffect(() => {
+    onCountUpdateRef.current = onCountUpdate;
+    onCloseRef.current = onClose;
+    isOwnProfileRef.current = isOwnProfile;
+    userDataRef.current = userData;
+  }, [onCountUpdate, onClose, isOwnProfile, userData]);
+
   useEffect(() => {
     const fetchFollowing = async () => {
       if (!isOpen) return;
@@ -71,7 +84,10 @@ const FollowingModal: React.FC<FollowingModalProps> = ({
 
       try {
         // Check privacy settings using the passed userData
-        if (userData.settings?.hide_following === 1 && !isOwnProfile) {
+        if (
+          userDataRef.current.settings?.hide_following === 1 &&
+          !isOwnProfileRef.current
+        ) {
           setIsPrivate(true);
           setLoading(false);
           return;
@@ -90,7 +106,7 @@ const FollowingModal: React.FC<FollowingModalProps> = ({
         if (response.status === 404) {
           setFollowing([]);
           setFollowingDetails({});
-          onClose();
+          onCloseRef.current();
           return;
         }
 
@@ -103,15 +119,15 @@ const FollowingModal: React.FC<FollowingModalProps> = ({
         if (!Array.isArray(data) || data.length === 0) {
           setFollowing([]);
           setFollowingDetails({});
-          onClose();
+          onCloseRef.current();
           return;
         }
 
         setFollowing(data);
 
         // Update the following count in the parent component with fresh data
-        if (onCountUpdate) {
-          onCountUpdate(data.length);
+        if (onCountUpdateRef.current) {
+          onCountUpdateRef.current(data.length);
         }
 
         // Initialize following status for all users in the list
@@ -153,11 +169,11 @@ const FollowingModal: React.FC<FollowingModalProps> = ({
       }
     };
 
-    // Fetch following every time the modal opens
+    // Fetch following every time the modal opens or userId changes
     if (isOpen) {
       fetchFollowing();
     }
-  }, [isOpen, userId, onClose, isOwnProfile, userData, onCountUpdate]);
+  }, [isOpen, userId]);
 
   const handleFollowToggle = async (followingId: string) => {
     if (!currentUserId || loadingFollow[followingId]) return;
@@ -350,8 +366,9 @@ const FollowingModal: React.FC<FollowingModalProps> = ({
                                 fontSize: "0.75rem",
                                 "&:hover": {
                                   borderColor: "var(--color-button-info-hover)",
-                                  backgroundColor:
-                                    "var(--color-button-info-hover)",
+                                  backgroundColor: followingStatus[user.id]
+                                    ? "transparent"
+                                    : "var(--color-button-info-hover)",
                                 },
                                 "&.Mui-disabled": {
                                   color: "var(--color-form-button-text)",

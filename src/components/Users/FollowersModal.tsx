@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Dialog, CircularProgress } from "@mui/material";
 import { XMarkIcon, MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import { UserAvatar } from "@/utils/avatar";
@@ -67,6 +67,19 @@ const FollowersModal: React.FC<FollowersModalProps> = ({
   }>({});
   const [isPrivate, setIsPrivate] = useState(false);
 
+  // Store callbacks and values in refs to avoid unnecessary re-renders
+  const onCountUpdateRef = useRef(onCountUpdate);
+  const onCloseRef = useRef(onClose);
+  const isOwnProfileRef = useRef(isOwnProfile);
+  const userDataRef = useRef(userData);
+
+  useEffect(() => {
+    onCountUpdateRef.current = onCountUpdate;
+    onCloseRef.current = onClose;
+    isOwnProfileRef.current = isOwnProfile;
+    userDataRef.current = userData;
+  }, [onCountUpdate, onClose, isOwnProfile, userData]);
+
   useEffect(() => {
     const fetchFollowers = async () => {
       if (!isOpen) return;
@@ -77,7 +90,10 @@ const FollowersModal: React.FC<FollowersModalProps> = ({
 
       try {
         // Check privacy settings using the passed userData
-        if (userData.settings?.hide_followers === 1 && !isOwnProfile) {
+        if (
+          userDataRef.current.settings?.hide_followers === 1 &&
+          !isOwnProfileRef.current
+        ) {
           setIsPrivate(true);
           setLoading(false);
           return;
@@ -96,7 +112,7 @@ const FollowersModal: React.FC<FollowersModalProps> = ({
         if (response.status === 404) {
           setFollowers([]);
           setFollowerDetails({});
-          onClose();
+          onCloseRef.current();
           return;
         }
 
@@ -109,15 +125,15 @@ const FollowersModal: React.FC<FollowersModalProps> = ({
         if (!Array.isArray(data) || data.length === 0) {
           setFollowers([]);
           setFollowerDetails({});
-          onClose();
+          onCloseRef.current();
           return;
         }
 
         setFollowers(data);
 
         // Update the follower count in the parent component with fresh data
-        if (onCountUpdate) {
-          onCountUpdate(data.length);
+        if (onCountUpdateRef.current) {
+          onCountUpdateRef.current(data.length);
         }
 
         // User data is now included in the API response, so we can use it directly
@@ -147,11 +163,11 @@ const FollowersModal: React.FC<FollowersModalProps> = ({
       }
     };
 
-    // Fetch followers every time the modal opens
+    // Fetch followers every time the modal opens or userId changes
     if (isOpen) {
       fetchFollowers();
     }
-  }, [isOpen, userId, onClose, isOwnProfile, userData, onCountUpdate]);
+  }, [isOpen, userId]);
 
   useEffect(() => {
     const fetchFollowingStatus = async () => {
