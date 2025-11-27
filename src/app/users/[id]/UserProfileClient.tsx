@@ -50,43 +50,87 @@ const FollowingModal = dynamic(
 );
 import type { UserFlag } from "@/types/auth";
 
+// Global audio instance to prevent overlapping playback
+let globalSuperIdolAudio: HTMLAudioElement | null = null;
+let isPlaying = false;
+
 const LinSuperIdol = ({ userId }: { userId: string }) => {
   const [showPlayButton, setShowPlayButton] = useState(false);
-  const [audio, setAudio] = useState<HTMLAudioElement | null>(null);
 
   useEffect(() => {
     if (userId === "231616789979594754") {
-      const newAudio = new Audio("/assets/images/super_idol.mp3");
-      newAudio.volume = 0.7;
+      // Create audio instance only if it doesn't exist
+      if (!globalSuperIdolAudio) {
+        globalSuperIdolAudio = new Audio("/assets/images/super_idol.mp3");
+        globalSuperIdolAudio.volume = 0.7;
+
+        // Handle when audio ends
+        globalSuperIdolAudio.onended = () => {
+          isPlaying = false;
+          globalSuperIdolAudio!.currentTime = 0;
+        };
+
+        // Handle errors
+        globalSuperIdolAudio.onerror = () => {
+          isPlaying = false;
+          setShowPlayButton(true);
+        };
+      }
 
       // Defer state updates to avoid cascading renders
       setTimeout(() => {
-        setAudio(newAudio);
-        newAudio
-          .play()
-          .then(() => {
-            console.log("Lin successfully became a super idol!");
-            setShowPlayButton(false);
-          })
-          .catch((error) => {
-            console.log("Lin refused to be a super idol:", error);
-            setShowPlayButton(true);
-          });
+        // If audio is already playing, stop it and restart
+        if (isPlaying && globalSuperIdolAudio) {
+          globalSuperIdolAudio.pause();
+          globalSuperIdolAudio.currentTime = 0;
+          isPlaying = false;
+        }
+
+        // Play the audio
+        if (globalSuperIdolAudio && !isPlaying) {
+          globalSuperIdolAudio
+            .play()
+            .then(() => {
+              console.log("Lin successfully became a super idol!");
+              isPlaying = true;
+              setShowPlayButton(false);
+            })
+            .catch((error) => {
+              console.log("Lin refused to be a super idol:", error);
+              isPlaying = false;
+              setShowPlayButton(true);
+            });
+        }
       }, 0);
 
+      // Cleanup: don't stop audio on unmount if it's playing
+      // Let it finish playing
       return () => {
-        newAudio.pause();
-        newAudio.currentTime = 0;
+        // Only cleanup if component unmounts and audio is not playing
+        // Otherwise let it finish
       };
     }
   }, [userId]);
 
   const handlePlayClick = () => {
-    if (audio) {
-      audio.play().catch((error) => {
-        console.log("Lin still refused to be a super idol:", error);
-      });
-      setShowPlayButton(false);
+    if (globalSuperIdolAudio) {
+      // If already playing, stop and restart
+      if (isPlaying) {
+        globalSuperIdolAudio.pause();
+        globalSuperIdolAudio.currentTime = 0;
+        isPlaying = false;
+      }
+
+      globalSuperIdolAudio
+        .play()
+        .then(() => {
+          isPlaying = true;
+          setShowPlayButton(false);
+        })
+        .catch((error) => {
+          console.log("Lin still refused to be a super idol:", error);
+          isPlaying = false;
+        });
     }
   };
 
@@ -94,17 +138,31 @@ const LinSuperIdol = ({ userId }: { userId: string }) => {
 
   return (
     <div className="fixed right-4 bottom-4 z-50">
-      <button
-        onClick={handlePlayClick}
-        className="group bg-secondary-bg/80 text-primary-text/80 hover:bg-secondary-bg hover:text-primary-text cursor-pointer rounded-full p-3 shadow-lg backdrop-blur-sm transition-all duration-300"
+      <Tooltip
         title="Lin is a super idol"
+        arrow
+        placement="top"
+        slotProps={{
+          tooltip: {
+            sx: {
+              backgroundColor: "var(--color-secondary-bg)",
+              color: "var(--color-primary-text)",
+              "& .MuiTooltip-arrow": { color: "var(--color-secondary-bg)" },
+            },
+          },
+        }}
       >
-        <Icon
-          icon="material-symbols:music-note"
-          className="text-xl opacity-60 transition-opacity duration-300 group-hover:opacity-100"
-          inline={true}
-        />
-      </button>
+        <button
+          onClick={handlePlayClick}
+          className="group bg-secondary-bg/80 text-primary-text/80 hover:bg-secondary-bg hover:text-primary-text cursor-pointer rounded-full p-3 shadow-lg backdrop-blur-sm transition-all duration-300"
+        >
+          <Icon
+            icon="material-symbols:music-note"
+            className="text-xl opacity-60 transition-opacity duration-300 group-hover:opacity-100"
+            inline={true}
+          />
+        </button>
+      </Tooltip>
     </div>
   );
 };
@@ -1035,6 +1093,9 @@ export default function UserProfileClient({
             setFollowingCount((prev) => prev + 1);
           }
         }}
+        onCountUpdate={(count) => {
+          setFollowerCount(count);
+        }}
         userData={user}
       />
       <FollowingModal
@@ -1049,6 +1110,9 @@ export default function UserProfileClient({
           } else {
             setFollowingCount((prev) => Math.max(0, prev - 1));
           }
+        }}
+        onCountUpdate={(count) => {
+          setFollowingCount(count);
         }}
         userData={user}
       />

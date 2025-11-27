@@ -665,10 +665,43 @@ export async function fetchUsersBatch(userIds: string[]) {
       throw new Error("Failed to fetch users batch");
     }
 
-    const userDataArray = await response.json();
+    const responseData = await response.json();
+
+    // Handle different response formats:
+    // 1. Array of users (normal case)
+    // 2. Object with error message but still contains users
+    // 3. Object with users array
+    let userDataArray: UserData[] = [];
+
+    if (Array.isArray(responseData)) {
+      userDataArray = responseData;
+    } else if (responseData && typeof responseData === "object") {
+      // Check if it's an object with an array of users
+      if (Array.isArray(responseData.users)) {
+        userDataArray = responseData.users;
+      } else if (Array.isArray(responseData.data)) {
+        userDataArray = responseData.data;
+      } else {
+        // If it's an object with user IDs as keys, convert to array
+        const users = Object.values(responseData).filter(
+          (item): item is UserData =>
+            item !== null &&
+            typeof item === "object" &&
+            "id" in item &&
+            typeof (item as { id: unknown }).id === "string",
+        ) as UserData[];
+        if (users.length > 0) {
+          userDataArray = users;
+        }
+      }
+    }
+
+    // Build user map from array, handling partial failures gracefully
     const userMap = userDataArray.reduce(
       (acc: Record<string, UserData>, user: UserData) => {
-        acc[user.id] = user;
+        if (user && user.id) {
+          acc[user.id] = user;
+        }
         return acc;
       },
       {},

@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Dialog, CircularProgress, Button } from "@mui/material";
 import { XMarkIcon, MagnifyingGlassIcon } from "@heroicons/react/24/outline";
-import { PUBLIC_API_URL } from "@/utils/api";
 import { UserAvatar } from "@/utils/avatar";
 import Link from "next/link";
 import { toast } from "react-hot-toast";
@@ -11,6 +10,7 @@ interface Following {
   user_id: string;
   following_id: string;
   created_at: string;
+  user: User;
 }
 
 interface User {
@@ -32,6 +32,7 @@ interface FollowingModalProps {
   isOwnProfile: boolean;
   currentUserId: string | null;
   onFollowChange?: (isFollowing: boolean) => void;
+  onCountUpdate?: (count: number) => void;
   userData: User;
 }
 
@@ -42,6 +43,7 @@ const FollowingModal: React.FC<FollowingModalProps> = ({
   isOwnProfile,
   currentUserId,
   onFollowChange,
+  onCountUpdate,
   userData,
 }) => {
   const [following, setFollowing] = useState<Following[]>([]);
@@ -57,7 +59,6 @@ const FollowingModal: React.FC<FollowingModalProps> = ({
   const [loadingFollow, setLoadingFollow] = useState<{
     [key: string]: boolean;
   }>({});
-  const [isInitialLoad, setIsInitialLoad] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
@@ -77,16 +78,18 @@ const FollowingModal: React.FC<FollowingModalProps> = ({
         }
 
         const response = await fetch(
-          `${PUBLIC_API_URL}/users/following/get?user=${userId}`,
+          `/api/users/following/get?user=${userId}`,
           {
             headers: {
               "User-Agent": "JailbreakChangelogs-Following/1.0",
             },
+            cache: "no-store",
           },
         );
 
         if (response.status === 404) {
           setFollowing([]);
+          setFollowingDetails({});
           onClose();
           return;
         }
@@ -99,83 +102,62 @@ const FollowingModal: React.FC<FollowingModalProps> = ({
 
         if (!Array.isArray(data) || data.length === 0) {
           setFollowing([]);
+          setFollowingDetails({});
           onClose();
           return;
         }
 
         setFollowing(data);
 
+        // Update the following count in the parent component with fresh data
+        if (onCountUpdate) {
+          onCountUpdate(data.length);
+        }
+
         // Initialize following status for all users in the list
         const initialFollowingStatus = data.reduce(
           (acc, followingItem) => {
-            acc[followingItem.following_id] = true;
+            if (followingItem.following_id) {
+              acc[followingItem.following_id] = true;
+            }
             return acc;
           },
           {} as { [key: string]: boolean },
         );
         setFollowingStatus(initialFollowingStatus);
 
-        // Fetch details for each following
-        const followingIds = data.map(
-          (followingItem: Following) => followingItem.following_id,
-        );
-        const uniqueFollowingIds = [...new Set(followingIds)];
-
-        // Filter out the current user's own ID since we already have that data
-        const idsToFetch = uniqueFollowingIds.filter(
-          (id) => id !== userData.id,
-        );
-
-        try {
-          if (idsToFetch.length > 0) {
-            const userResponse = await fetch(
-              `${PUBLIC_API_URL}/users/get/batch?ids=${idsToFetch.join(",")}&nocache=true`,
-              {
-                headers: {
-                  "User-Agent": "JailbreakChangelogs-Following/1.0",
-                },
-              },
-            );
-            if (userResponse.ok) {
-              const userDataArray = await userResponse.json();
-              const detailsMap = userDataArray.reduce(
-                (acc: Record<string, User>, userData: User) => {
-                  acc[userData.id] = userData;
-                  return acc;
-                },
-                {},
-              );
-
-              // Add current user's data if they're in the following list
-              if (followingIds.includes(userData.id)) {
-                detailsMap[userData.id] = userData;
-              }
-
-              setFollowingDetails(detailsMap);
-            }
-          } else if (followingIds.includes(userData.id)) {
-            // Only current user in following list
-            setFollowingDetails({ [userData.id]: userData });
-          } else {
-            setFollowingDetails({});
+        // User data is now included in the API response, so we can use it directly
+        const detailsMap: Record<string, User> = {};
+        data.forEach((followingItem: Following) => {
+          if (followingItem.user && followingItem.user.id) {
+            detailsMap[followingItem.following_id] = {
+              id: followingItem.user.id,
+              username: followingItem.user.username,
+              avatar: followingItem.user.avatar,
+              global_name: followingItem.user.global_name,
+              usernumber: followingItem.user.usernumber || 0,
+              accent_color: followingItem.user.accent_color || "None",
+              custom_avatar: followingItem.user.custom_avatar,
+              settings: followingItem.user.settings,
+              premiumtype: followingItem.user.premiumtype,
+            };
           }
-        } catch (err) {
-          console.error("Error fetching following details:", err);
-          setFollowingDetails({});
-        }
+        });
+
+        setFollowingDetails(detailsMap);
       } catch (err) {
         console.error("Error fetching following:", err);
         setError("Failed to load following");
       } finally {
         setLoading(false);
-        setIsInitialLoad(false);
       }
     };
 
-    if (isInitialLoad) {
+    // Fetch following every time the modal opens
+    if (isOpen) {
       fetchFollowing();
     }
-  }, [isOpen, userId, onClose, isOwnProfile, userData, isInitialLoad]);
+  }, [isOpen, userId, onClose, isOwnProfile, userData, onCountUpdate]);
 
   const handleFollowToggle = async (followingId: string) => {
     if (!currentUserId || loadingFollow[followingId]) return;
@@ -217,7 +199,7 @@ const FollowingModal: React.FC<FollowingModalProps> = ({
       );
 
       // Refresh following list after successful follow/unfollow
-      setIsInitialLoad(true);
+      // The useEffect will handle the refetch when isOpen changes
     } catch (error) {
       toast.error(
         error instanceof Error

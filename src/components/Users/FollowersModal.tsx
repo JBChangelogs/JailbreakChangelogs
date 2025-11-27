@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Dialog, CircularProgress } from "@mui/material";
 import { XMarkIcon, MagnifyingGlassIcon } from "@heroicons/react/24/outline";
-import { PUBLIC_API_URL } from "@/utils/api";
 import { UserAvatar } from "@/utils/avatar";
 import Link from "next/link";
 import { toast } from "react-hot-toast";
@@ -11,6 +10,7 @@ interface Follower {
   user_id: string;
   follower_id: string;
   created_at: string;
+  user: User;
 }
 
 interface Following {
@@ -38,6 +38,7 @@ interface FollowersModalProps {
   isOwnProfile: boolean;
   currentUserId: string | null;
   onFollowChange?: (type: "add" | "remove") => void;
+  onCountUpdate?: (count: number) => void;
   userData: User;
 }
 
@@ -48,6 +49,7 @@ const FollowersModal: React.FC<FollowersModalProps> = ({
   isOwnProfile,
   currentUserId,
   onFollowChange,
+  onCountUpdate,
   userData,
 }) => {
   const [followers, setFollowers] = useState<Follower[]>([]);
@@ -64,7 +66,6 @@ const FollowersModal: React.FC<FollowersModalProps> = ({
     [key: string]: boolean;
   }>({});
   const [isPrivate, setIsPrivate] = useState(false);
-  const [isInitialLoad, setIsInitialLoad] = useState(true);
 
   useEffect(() => {
     const fetchFollowers = async () => {
@@ -83,16 +84,18 @@ const FollowersModal: React.FC<FollowersModalProps> = ({
         }
 
         const response = await fetch(
-          `${PUBLIC_API_URL}/users/followers/get?user=${userId}`,
+          `/api/users/followers/get?user=${userId}`,
           {
             headers: {
               "User-Agent": "JailbreakChangelogs-Followers/1.0",
             },
+            cache: "no-store",
           },
         );
 
         if (response.status === 404) {
           setFollowers([]);
+          setFollowerDetails({});
           onClose();
           return;
         }
@@ -105,93 +108,77 @@ const FollowersModal: React.FC<FollowersModalProps> = ({
 
         if (!Array.isArray(data) || data.length === 0) {
           setFollowers([]);
+          setFollowerDetails({});
           onClose();
           return;
         }
 
         setFollowers(data);
 
-        // Fetch details for each follower
-        const followerIds = data.map(
-          (follower: Follower) => follower.follower_id,
-        );
-        const uniqueFollowerIds = [...new Set(followerIds)];
-
-        // Filter out the current user's own ID since we already have that data
-        const idsToFetch = uniqueFollowerIds.filter((id) => id !== userData.id);
-
-        try {
-          if (idsToFetch.length > 0) {
-            const userResponse = await fetch(
-              `${PUBLIC_API_URL}/users/get/batch?ids=${idsToFetch.join(",")}&nocache=true`,
-              {
-                headers: {
-                  "User-Agent": "JailbreakChangelogs-Followers/1.0",
-                },
-              },
-            );
-            if (userResponse.ok) {
-              const userDataArray = await userResponse.json();
-              const detailsMap = userDataArray.reduce(
-                (acc: Record<string, User>, userData: User) => {
-                  acc[userData.id] = userData;
-                  return acc;
-                },
-                {},
-              );
-
-              // Add current user's data if they're in the followers list
-              if (followerIds.includes(userData.id)) {
-                detailsMap[userData.id] = userData;
-              }
-
-              setFollowerDetails(detailsMap);
-            }
-          } else if (followerIds.includes(userData.id)) {
-            // Only current user in followers list
-            setFollowerDetails({ [userData.id]: userData });
-          } else {
-            setFollowerDetails({});
-          }
-        } catch (err) {
-          console.error("Error fetching follower details:", err);
-          setFollowerDetails({});
+        // Update the follower count in the parent component with fresh data
+        if (onCountUpdate) {
+          onCountUpdate(data.length);
         }
+
+        // User data is now included in the API response, so we can use it directly
+        const detailsMap: Record<string, User> = {};
+        data.forEach((follower: Follower) => {
+          if (follower.user && follower.user.id) {
+            detailsMap[follower.follower_id] = {
+              id: follower.user.id,
+              username: follower.user.username,
+              avatar: follower.user.avatar,
+              global_name: follower.user.global_name,
+              usernumber: follower.user.usernumber || 0,
+              accent_color: follower.user.accent_color || "None",
+              custom_avatar: follower.user.custom_avatar,
+              settings: follower.user.settings,
+              premiumtype: follower.user.premiumtype,
+            };
+          }
+        });
+
+        setFollowerDetails(detailsMap);
       } catch (err) {
         console.error("Error fetching followers:", err);
         setError("Failed to load followers");
       } finally {
         setLoading(false);
-        setIsInitialLoad(false);
       }
     };
 
-    if (isInitialLoad) {
+    // Fetch followers every time the modal opens
+    if (isOpen) {
       fetchFollowers();
     }
-  }, [isOpen, userId, onClose, isOwnProfile, userData, isInitialLoad]);
+  }, [isOpen, userId, onClose, isOwnProfile, userData, onCountUpdate]);
 
   useEffect(() => {
     const fetchFollowingStatus = async () => {
       if (!isOpen || !currentUserId) return;
 
       try {
+        // Use API route instead of direct API call
+        // Call this every time the modal opens to get fresh following status
         const response = await fetch(
-          `${PUBLIC_API_URL}/users/following/get?user=${currentUserId}`,
+          `/api/users/following/get?user=${currentUserId}`,
           {
             headers: {
               "User-Agent": "JailbreakChangelogs-Followers/1.0",
             },
+            cache: "no-store",
           },
         );
+
         if (!response.ok) return;
 
         const followingData = await response.json();
         if (!Array.isArray(followingData)) return;
-
         const statusMap = followingData.reduce(
           (acc: { [key: string]: boolean }, follow: Following) => {
-            acc[follow.following_id] = true;
+            if (follow.following_id) {
+              acc[follow.following_id] = true;
+            }
             return acc;
           },
           {},
@@ -203,7 +190,10 @@ const FollowersModal: React.FC<FollowersModalProps> = ({
       }
     };
 
-    fetchFollowingStatus();
+    // Fetch following status every time the modal opens
+    if (isOpen) {
+      fetchFollowingStatus();
+    }
   }, [isOpen, currentUserId]);
 
   const handleFollow = async (followerId: string) => {
@@ -231,7 +221,8 @@ const FollowersModal: React.FC<FollowersModalProps> = ({
       toast.success("Successfully followed user");
 
       // Refresh followers list after successful follow
-      setIsInitialLoad(true);
+      // Trigger a refetch by toggling isOpen or calling fetchFollowers directly
+      // The useEffect will handle the refetch when isOpen changes
     } catch (err) {
       console.error("Error following user:", err);
       toast.error("Failed to follow user");
