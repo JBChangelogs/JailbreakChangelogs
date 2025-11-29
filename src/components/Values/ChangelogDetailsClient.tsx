@@ -212,6 +212,8 @@ export default function ChangelogDetailsClient({
     if (st === "notes") return key === "notes" || key === "note";
     if (st === "demand") return key === "demand";
     if (st === "trend") return key === "trend";
+    if (st === "name") return key === "name";
+    if (st === "price") return key === "price";
     return false;
   };
 
@@ -241,6 +243,8 @@ export default function ChangelogDetailsClient({
       if (key === "description") return "Description";
       if (key === "demand") return "Demand";
       if (key === "trend") return "Trend";
+      if (key === "name") return "Name";
+      if (key === "price") return "Price";
     }
 
     return "Value";
@@ -967,39 +971,10 @@ export default function ChangelogDetailsClient({
                     </div>
 
                     {/* Footer */}
-                    <div className="border-secondary-text mt-4 flex items-center gap-2 border-t pt-4">
-                      <div className="relative h-6 w-6 flex-shrink-0 overflow-hidden rounded-full">
-                        <DefaultAvatar />
-                        {userData[change.changed_by_id]?.avatar &&
-                          userData[change.changed_by_id]?.avatar !== "None" && (
-                            <Image
-                              src={`http://proxy.jailbreakchangelogs.xyz/?destination=${encodeURIComponent(`https://cdn.discordapp.com/avatars/${change.changed_by_id}/${userData[change.changed_by_id].avatar}?size=64`)}`}
-                              alt={change.changed_by}
-                              fill
-                              className="object-cover"
-                              onError={(e) => {
-                                (
-                                  e as unknown as { currentTarget: HTMLElement }
-                                ).currentTarget.style.display = "none";
-                              }}
-                            />
-                          )}
-                      </div>
-                      <div className="flex flex-col">
-                        <span className="text-primary-text text-sm font-medium">
-                          Changed by{" "}
-                          <Link
-                            href={`/users/${change.changed_by_id}`}
-                            prefetch={false}
-                            className="text-link hover:text-link-hover hover:underline"
-                          >
-                            {change.changed_by}
-                          </Link>
-                        </span>
-                        <span className="text-secondary-text text-xs">
-                          on {formatMessageDate(change.created_at * 1000)}
-                        </span>
-                      </div>
+                    <div className="border-secondary-text mt-4 border-t pt-4">
+                      <span className="text-secondary-text text-sm">
+                        Changed on {formatMessageDate(change.created_at * 1000)}
+                      </span>
                     </div>
                   </div>
                 ))}

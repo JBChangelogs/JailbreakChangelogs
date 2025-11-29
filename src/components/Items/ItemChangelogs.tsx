@@ -170,6 +170,8 @@ const doesSuggestionTypeApplyToKey = (
   if (st === "notes") return key === "notes" || key === "note";
   if (st === "demand") return key === "demand";
   if (st === "trend") return key === "trend";
+  if (st === "name") return key === "name";
+  if (st === "price") return key === "price";
   return false;
 };
 
@@ -199,6 +201,8 @@ const formatSuggestionTypeLabel = (
     if (key === "description") return "Description";
     if (key === "demand") return "Demand";
     if (key === "trend") return "Trend";
+    if (key === "name") return "Name";
+    if (key === "price") return "Price";
   }
 
   return "Value";
@@ -206,7 +210,6 @@ const formatSuggestionTypeLabel = (
 
 export default function ItemChangelogs({
   initialChanges,
-  initialUserMap,
 }: ItemChangelogsProps) {
   "use memo";
   const changes: Change[] = initialChanges ?? [];
@@ -220,7 +223,6 @@ export default function ItemChangelogs({
   const [expandedReasons, setExpandedReasons] = useState<Set<number>>(
     new Set(),
   );
-  const userMap = initialUserMap || {};
 
   const toggleSortOrder = () => {
     setSortOrder((prev) => (prev === "newest" ? "oldest" : "newest"));
@@ -613,18 +615,16 @@ export default function ItemChangelogs({
                   }}
                 >
                   <div className="border-border-primary hover:border-border-focus bg-secondary-bg overflow-hidden rounded-lg border p-4 m-2 transition-colors">
-                    <div className="mb-2 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
-                      <div className="flex items-center gap-2">
-                        {change.suggestion_data ? (
-                          <>
-                            <span className="border-primary-text text-primary-text flex items-center rounded-full border bg-transparent px-1.5 py-0.5 text-[10px] sm:px-2 sm:py-1 sm:text-xs">
-                              Suggestion #{change.suggestion_data.id}
-                            </span>
-                          </>
-                        ) : null}
+                    {change.suggestion_data && (
+                      <div className="mb-2 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+                        <div className="flex items-center gap-2">
+                          <span className="border-primary-text text-primary-text flex items-center rounded-full border bg-transparent px-1.5 py-0.5 text-[10px] sm:px-2 sm:py-1 sm:text-xs">
+                            Suggestion #{change.suggestion_data.id}
+                          </span>
+                        </div>
+                        <div className="flex flex-col items-end gap-1"></div>
                       </div>
-                      <div className="flex flex-col items-end gap-1"></div>
-                    </div>
+                    )}
 
                     {change.suggestion_data && (
                       <>
@@ -770,7 +770,9 @@ export default function ItemChangelogs({
                       </>
                     )}
 
-                    <div className="mt-6 space-y-6">
+                    <div
+                      className={`${change.suggestion_data ? "mt-6" : "mt-0"} space-y-6`}
+                    >
                       {Object.entries(change.changes.old).map(
                         ([key, oldValue]) => {
                           if (key === "last_updated") return null;
@@ -954,39 +956,10 @@ export default function ItemChangelogs({
                         },
                       )}
                     </div>
-                    <div className="border-secondary-text mt-4 flex items-center gap-2 border-t pt-4">
-                      <div className="relative h-6 w-6 flex-shrink-0 overflow-hidden rounded-full">
-                        <DefaultAvatar />
-                        {userMap[change.changed_by_id]?.avatar &&
-                          userMap[change.changed_by_id]?.avatar !== "None" && (
-                            <Image
-                              src={`http://proxy.jailbreakchangelogs.xyz/?destination=${encodeURIComponent(`https://cdn.discordapp.com/avatars/${change.changed_by_id}/${userMap[change.changed_by_id].avatar}?size=64`)}`}
-                              alt={change.changed_by}
-                              fill
-                              className="object-cover"
-                              onError={(e) => {
-                                (
-                                  e as unknown as { currentTarget: HTMLElement }
-                                ).currentTarget.style.display = "none";
-                              }}
-                            />
-                          )}
-                      </div>
-                      <div className="flex flex-col">
-                        <span className="text-primary-text text-sm font-medium">
-                          Changed by{" "}
-                          <Link
-                            href={`/users/${change.changed_by_id}`}
-                            prefetch={false}
-                            className="text-link hover:text-link-hover hover:underline"
-                          >
-                            {change.changed_by}
-                          </Link>
-                        </span>
-                        <span className="text-secondary-text text-xs">
-                          on {formatCustomDate(change.created_at * 1000)}
-                        </span>
-                      </div>
+                    <div className="border-secondary-text mt-4 border-t pt-4">
+                      <span className="text-secondary-text text-sm">
+                        Changed on {formatCustomDate(change.created_at * 1000)}
+                      </span>
                     </div>
                   </div>
                 </div>
