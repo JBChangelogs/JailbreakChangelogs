@@ -8,7 +8,11 @@ import { TradeAdCard } from "./TradeAdCard";
 import { TradeAdTabs } from "./TradeAdTabs";
 import { Pagination, Button } from "@mui/material";
 import { Masonry } from "@mui/lab";
-import { ArrowDownIcon, ArrowUpIcon } from "@heroicons/react/24/outline";
+import {
+  ArrowDownIcon,
+  ArrowUpIcon,
+  XMarkIcon,
+} from "@heroicons/react/24/outline";
 import { deleteTradeAd } from "@/utils/trading";
 import toast from "react-hot-toast";
 import { TradeAdForm } from "./TradeAdForm";
@@ -39,6 +43,7 @@ export default function TradeAds({
   const [sortOrder, setSortOrder] = useState<"newest" | "oldest">("newest");
   const [selectedTradeAd, setSelectedTradeAd] = useState<TradeAd | null>(null);
   const [showOfferConfirm, setShowOfferConfirm] = useState<number | null>(null);
+  const [searchQuery, setSearchQuery] = useState<string>("");
   const itemsPerPage = 9;
 
   // Get current user ID from auth state
@@ -360,8 +365,39 @@ export default function TradeAds({
   );
 
   // Determine which ads to show based on active tab
-  const displayTradeAds =
+  const baseDisplayTradeAds =
     activeTab === "supporter" ? supporterTradeAds : sortedTradeAds;
+
+  // Helper function to filter trade ads by search query
+  const filterTradeAdsBySearch = (
+    trades: (TradeAd & { user: UserData | null })[],
+  ) => {
+    if (!searchQuery.trim()) return trades;
+
+    const query = searchQuery.toLowerCase().trim();
+
+    return trades.filter((trade) => {
+      // Check offering items
+      const offeringMatches = trade.offering.some((item) => {
+        const itemName = (item.data?.name || item.name || "").toLowerCase();
+        return itemName.includes(query);
+      });
+
+      // Check requesting items
+      const requestingMatches = trade.requesting.some((item) => {
+        const itemName = (item.data?.name || item.name || "").toLowerCase();
+        return itemName.includes(query);
+      });
+
+      return offeringMatches || requestingMatches;
+    });
+  };
+
+  // Filter by search query
+  const displayTradeAds = filterTradeAdsBySearch(baseDisplayTradeAds);
+
+  // Filter user trade ads by search query
+  const filteredUserTradeAds = filterTradeAdsBySearch(userTradeAds);
 
   // Calculate pagination
   const totalPages = Math.ceil(displayTradeAds.length / itemsPerPage);
@@ -376,6 +412,43 @@ export default function TradeAds({
         onTabChange={handleTabChange}
         hasTradeAds={userTradeAds.length > 0}
       />
+
+      {/* Search Input - Show for view, supporter, and myads tabs */}
+      {(activeTab === "view" ||
+        activeTab === "supporter" ||
+        activeTab === "myads") && (
+        <div className="mt-6">
+          <div className="relative flex items-center">
+            <input
+              type="text"
+              placeholder="Search for items in trade ads (e.g., Torpedo)"
+              value={searchQuery}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setPage(1); // Reset to first page when searching
+              }}
+              className="text-primary-text border-border-primary bg-secondary-bg placeholder-secondary-text focus:border-button-info w-full rounded-lg border py-3 px-4 pr-16 transition-all duration-300 focus:outline-none"
+            />
+            {/* Right side controls container */}
+            <div className="absolute right-3 top-1/2 flex -translate-y-1/2 items-center gap-2">
+              {/* Clear button - only show when there's text */}
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSearchQuery("");
+                    setPage(1);
+                  }}
+                  className="hover:text-primary-text text-secondary-text cursor-pointer transition-colors"
+                  aria-label="Clear search"
+                >
+                  <XMarkIcon className="h-5 w-5" />
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Tab Content */}
       <div
@@ -404,38 +477,50 @@ export default function TradeAds({
                 {sortOrder === "newest" ? "Newest First" : "Oldest First"}
               </button>
             </div>
-            <Masonry
-              columns={{ xs: 1, sm: 2, md: 2, lg: 3 }}
-              spacing={2}
-              sx={{ width: "auto", margin: 0 }}
-            >
-              {currentPageItems.map((trade) => {
-                const enrichedTrade: TradeAd = {
-                  ...trade,
-                  offering: trade.offering.map((it) => ({
-                    ...it,
-                    demand: getDemandForItem(it) || it.demand,
-                    trend: getTrendForItem(it) || it.trend,
-                  })),
-                  requesting: trade.requesting.map((it) => ({
-                    ...it,
-                    demand: getDemandForItem(it) || it.demand,
-                    trend: getTrendForItem(it) || it.trend,
-                  })),
-                };
-                return (
-                  <TradeAdCard
-                    key={trade.id}
-                    trade={enrichedTrade}
-                    onMakeOffer={() => handleOfferClick(trade.id)}
-                    offerStatus={offerStatuses[trade.id]}
-                    currentUserId={currentUserId}
-                    onDelete={() => handleDeleteTrade(trade.id)}
-                    onEdit={() => handleEditTrade(trade)}
-                  />
-                );
-              })}
-            </Masonry>
+            {displayTradeAds.length === 0 && searchQuery.trim() ? (
+              <div className="mb-8 rounded-lg border border-border-primary p-6 text-center">
+                <h3 className="text-secondary-text mb-4 text-lg font-medium">
+                  No Trade Ads Match Your Search
+                </h3>
+                <p className="text-secondary-text">
+                  No trade ads found containing &quot;{searchQuery}&quot;. Try
+                  adjusting your search query.
+                </p>
+              </div>
+            ) : (
+              <Masonry
+                columns={{ xs: 1, sm: 2, md: 2, lg: 3 }}
+                spacing={2}
+                sx={{ width: "auto", margin: 0 }}
+              >
+                {currentPageItems.map((trade) => {
+                  const enrichedTrade: TradeAd = {
+                    ...trade,
+                    offering: trade.offering.map((it) => ({
+                      ...it,
+                      demand: getDemandForItem(it) || it.demand,
+                      trend: getTrendForItem(it) || it.trend,
+                    })),
+                    requesting: trade.requesting.map((it) => ({
+                      ...it,
+                      demand: getDemandForItem(it) || it.demand,
+                      trend: getTrendForItem(it) || it.trend,
+                    })),
+                  };
+                  return (
+                    <TradeAdCard
+                      key={trade.id}
+                      trade={enrichedTrade}
+                      onMakeOffer={() => handleOfferClick(trade.id)}
+                      offerStatus={offerStatuses[trade.id]}
+                      currentUserId={currentUserId}
+                      onDelete={() => handleDeleteTrade(trade.id)}
+                      onEdit={() => handleEditTrade(trade)}
+                    />
+                  );
+                })}
+              </Masonry>
+            )}
             {totalPages > 1 && (
               <div className="mt-8 mb-8 flex justify-center">
                 <Pagination
@@ -631,8 +716,10 @@ export default function TradeAds({
               <>
                 <div className="mb-4 flex items-center justify-between">
                   <p className="text-secondary-text">
-                    Showing {userTradeAds.length}{" "}
-                    {userTradeAds.length === 1 ? "trade ad" : "trade ads"}
+                    Showing {filteredUserTradeAds.length}{" "}
+                    {filteredUserTradeAds.length === 1
+                      ? "trade ad"
+                      : "trade ads"}
                   </p>
                   <button
                     onClick={toggleSortOrder}
@@ -646,34 +733,46 @@ export default function TradeAds({
                     {sortOrder === "newest" ? "Newest First" : "Oldest First"}
                   </button>
                 </div>
-                {userTradeAds.length === 0 ? (
-                  <div className="mb-8 rounded-lg border border-border-primary p-6 text-center">
-                    <h3 className="text-tertiary-text mb-4 text-lg font-medium">
-                      No Trade Ads Yet
-                    </h3>
-                    <p className="text-tertiary-text/70 mb-8">
-                      You haven&apos;t created any trade ads yet.
-                    </p>
-                    <Button
-                      variant="contained"
-                      onClick={() => handleTabChange("create")}
-                      sx={{
-                        backgroundColor: "var(--color-button-info)",
-                        "&:hover": {
-                          backgroundColor: "var(--color-button-info-hover)",
-                        },
-                      }}
-                    >
-                      Create Your First Trade Ad
-                    </Button>
-                  </div>
+                {filteredUserTradeAds.length === 0 ? (
+                  userTradeAds.length === 0 ? (
+                    <div className="mb-8 rounded-lg border border-border-primary p-6 text-center">
+                      <h3 className="text-tertiary-text mb-4 text-lg font-medium">
+                        No Trade Ads Yet
+                      </h3>
+                      <p className="text-tertiary-text/70 mb-8">
+                        You haven&apos;t created any trade ads yet.
+                      </p>
+                      <Button
+                        variant="contained"
+                        onClick={() => handleTabChange("create")}
+                        sx={{
+                          backgroundColor: "var(--color-button-info)",
+                          "&:hover": {
+                            backgroundColor: "var(--color-button-info-hover)",
+                          },
+                        }}
+                      >
+                        Create Your First Trade Ad
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="mb-8 rounded-lg border border-border-primary p-6 text-center">
+                      <h3 className="text-tertiary-text mb-4 text-lg font-medium">
+                        No Trade Ads Match Your Search
+                      </h3>
+                      <p className="text-tertiary-text/70">
+                        No trade ads found containing &quot;{searchQuery}&quot;.
+                        Try adjusting your search query.
+                      </p>
+                    </div>
+                  )
                 ) : (
                   <Masonry
                     columns={{ xs: 1, sm: 2, md: 2, lg: 3 }}
                     spacing={2}
                     sx={{ width: "auto", margin: 0 }}
                   >
-                    {userTradeAds.map((trade) => {
+                    {filteredUserTradeAds.map((trade) => {
                       const enrichedTrade: TradeAd = {
                         ...trade,
                         offering: trade.offering.map((it) => ({

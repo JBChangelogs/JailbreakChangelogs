@@ -1,5 +1,6 @@
 import React from "react";
 import Link from "next/link";
+import { Icon } from "@iconify/react";
 
 const TradingDescription: React.FC = () => {
   return (
@@ -25,8 +26,9 @@ const TradingDescription: React.FC = () => {
               href="https://discord.jailbreakchangelogs.xyz"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-button-info hover:text-button-info-hover font-semibold underline transition-colors"
+              className="text-primary-text hover:opacity-80 inline-flex items-center gap-1 font-semibold underline transition-opacity"
             >
+              <Icon icon="akar-icons:link-out" className="h-4 w-4" />
               Discord #trades
             </a>{" "}
             channel for more visibility.
@@ -34,7 +36,7 @@ const TradingDescription: React.FC = () => {
             Supporters have their trade ads stand out more in the Discord.{" "}
             <Link
               href="/supporting"
-              className="hover:text-button-info underline transition-colors"
+              className="text-primary-text hover:opacity-80 font-semibold underline transition-opacity"
             >
               Learn more
             </Link>

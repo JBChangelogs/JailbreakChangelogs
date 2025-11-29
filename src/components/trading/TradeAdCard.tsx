@@ -38,7 +38,7 @@ const getStatusColor = (status: string) => {
     case "Pending":
       return "bg-button-info/10 text-primary-text border-button-info/20";
     case "Completed":
-      return "bg-status-success/10 text-status-success border-status-success/20";
+      return "bg-status-success/10 text-primary-text border-status-success/20";
     case "Expired":
       return "bg-status-error/10 text-status-error border-status-error/20";
     default:

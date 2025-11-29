@@ -215,7 +215,7 @@ export default function TradeAdsTab({
               ad.status === "Pending"
                 ? "bg-button-info/10 text-primary-text border-button-info/20"
                 : ad.status === "Completed"
-                  ? "bg-status-success/10 text-status-success border-status-success/20"
+                  ? "bg-status-success/10 text-primary-text border-status-success/20"
                   : ad.status === "Expired"
                     ? "bg-status-error/10 text-status-error border-status-error/20"
                     : "bg-secondary-text/10 text-secondary-text border-secondary-text/20"
