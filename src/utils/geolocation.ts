@@ -47,24 +47,26 @@ const REGULATED_COUNTRIES = new Set([
 ]);
 
 // US states with comprehensive consumer privacy laws where we default to opt-in
+// Note: Google receives GPC signals directly and triggers RDP mode for ad requests
+// in states with universal opt-out mechanism provisions (e.g., DE, OR as of Nov 17, 2025)
 const US_OPT_IN_STATES = new Set([
   "CA", // California (CCPA/CPRA)
-  "CO", // Colorado (CPA)
-  "CT", // Connecticut (CTDPA)
-  "DE", // Delaware (DPDPA)
-  "IN", // Indiana (ICDPA)
+  "CO", // Colorado (CPA) - universal opt-out mechanism
+  "CT", // Connecticut (CTDPA) - universal opt-out mechanism
+  "DE", // Delaware (DPDPA) - universal opt-out mechanism (effective Nov 17, 2025)
+  "IN", // Indiana (ICDPA) - comprehensive privacy law (effective Jan 1, 2026)
   "IA", // Iowa (ICDPA)
-  "KY", // Kentucky (KCDPA)
-  "MD", // Maryland (MODPA)
-  "MN", // Minnesota (MCDPA)
-  "MT", // Montana (MCDPA)
-  "NH", // New Hampshire (NHPA)
-  "NE", // Nebraska (NDPA)
-  "NJ", // New Jersey (NJDPA)
-  "OR", // Oregon (OCPA)
-  "RI", // Rhode Island
+  "KY", // Kentucky (KCDPA) - comprehensive privacy law (effective Jan 1, 2026)
+  "MD", // Maryland (MODPA) - universal opt-out mechanism
+  "MN", // Minnesota (MCDPA) - universal opt-out mechanism
+  "MT", // Montana (MCDPA) - universal opt-out mechanism
+  "NH", // New Hampshire (NHPA) - universal opt-out mechanism
+  "NE", // Nebraska (NDPA) - universal opt-out mechanism
+  "NJ", // New Jersey (NJDPA) - universal opt-out mechanism
+  "OR", // Oregon (OCPA) - universal opt-out mechanism (effective Nov 17, 2025)
+  "RI", // Rhode Island (Data Transparency) - comprehensive privacy law (effective Jan 1, 2026)
   "TN", // Tennessee (TIPA)
-  "TX", // Texas (TDPSA)
+  "TX", // Texas (TDPSA) - universal opt-out mechanism
   "UT", // Utah (UCPA)
   "VA", // Virginia (VCDPA)
 ]);
