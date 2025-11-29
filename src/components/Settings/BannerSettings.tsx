@@ -1,9 +1,9 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import { Box, TextField, Button, Typography, Chip } from "@mui/material";
+import { Box, TextField, Button, Typography } from "@mui/material";
 import dynamic from "next/dynamic";
+import Image from "next/image";
 
 const Tooltip = dynamic(() => import("@mui/material/Tooltip"), { ssr: false });
-import { TrophyIcon } from "@heroicons/react/24/solid";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import { UserData } from "@/types/auth";
 import { updateBanner } from "@/services/settingsService";
@@ -22,6 +22,8 @@ export const BannerSettings = ({
   userData,
   onBannerUpdate,
 }: BannerSettingsProps) => {
+  const BADGE_BASE_URL =
+    "https://assets.jailbreakchangelogs.xyz/assets/website_icons";
   const [customBannerUrl, setCustomBannerUrl] = useState<string>("");
   const [bannerError, setBannerError] = useState<string | null>(null);
   const [isValidBanner, setIsValidBanner] = useState(false);
@@ -227,44 +229,31 @@ export const BannerSettings = ({
             Custom Banner URL
           </Typography>
           <Tooltip
-            title="Supporter 2 Feature"
+            title="Supporter Tier II"
             placement="top"
             arrow
             slotProps={{
               tooltip: {
                 sx: {
-                  backgroundColor: "var(--color-tertiary-bg)",
+                  backgroundColor: "var(--color-secondary-bg)",
                   color: "var(--color-primary-text)",
                   fontSize: "0.75rem",
                   padding: "8px 12px",
                   borderRadius: "8px",
                   boxShadow: "var(--color-card-shadow)",
                   "& .MuiTooltip-arrow": {
-                    color: "var(--color-tertiary-bg)",
+                    color: "var(--color-secondary-bg)",
                   },
                 },
               },
             }}
           >
-            <Chip
-              icon={
-                <TrophyIcon
-                  className="h-4 w-4"
-                  style={{ color: "var(--color-primary-text)" }}
-                />
-              }
-              label="Supporter Tier 2"
-              size="small"
-              variant="outlined"
-              sx={{
-                borderColor: "var(--color-primary-text)",
-                color: "var(--color-primary-text)",
-                fontSize: "0.75rem",
-                backgroundColor: "transparent",
-                "& .MuiChip-label": {
-                  fontWeight: 600,
-                },
-              }}
+            <Image
+              src={`${BADGE_BASE_URL}/jbcl_supporter_2.svg`}
+              alt="Supporter Tier II"
+              width={24}
+              height={24}
+              className="cursor-pointer hover:opacity-90 object-contain"
             />
           </Tooltip>
         </Box>

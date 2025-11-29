@@ -222,6 +222,16 @@ export default function Breadcrumb({ userData, loading }: BreadcrumbProps) {
         }
       }
 
+      // Special handling for settings route
+      if (pathSegments[0] === "settings") {
+        if (index === 0) {
+          return {
+            label: "Settings",
+            href: "/settings",
+          };
+        }
+      }
+
       return {
         label: segment.charAt(0).toUpperCase() + segment.slice(1),
         href: `/${pathSegments.slice(0, index + 1).join("/")}`,

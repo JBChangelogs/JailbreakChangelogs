@@ -14,14 +14,19 @@ export const useSettings = (
     requiredLimit?: string | number;
   }) => void,
 ) => {
-  const getInitialSettings = () => {
-    return userData?.settings || null;
-  };
+  // Calculate loading directly from userData (no Effect needed)
+  const loading = !userData;
 
-  const [settings, setSettings] = useState<UserSettings | null>(
-    getInitialSettings,
-  );
-  const [loading] = useState(!userData);
+  // Derive settings from userData during render (React's recommended approach)
+  const userDataSettings = userData?.settings || null;
+
+  // Use state only for optimistic updates during changes
+  // Start with userData settings, but allow local overrides
+  const [optimisticSettings, setOptimisticSettings] =
+    useState<UserSettings | null>(null);
+
+  // Use optimistic settings if available, otherwise use userData settings
+  const settings = optimisticSettings || userDataSettings;
 
   const handleSettingChange = async (
     name: keyof UserSettings,
@@ -56,8 +61,8 @@ export const useSettings = (
 
     try {
       // Update local state immediately for better UX
-      const newSettings = { ...settings, [name]: value };
-      setSettings(newSettings);
+      const newSettings = { ...settings, [name]: value } as UserSettings;
+      setOptimisticSettings(newSettings);
 
       // Update local storage
       const updatedUser = {
@@ -106,8 +111,8 @@ export const useSettings = (
         error instanceof Error ? error.message : "Failed to update settings";
       toast.error(errorMessage);
 
-      // Revert local state on error
-      setSettings(settings);
+      // Revert local state on error - clear optimistic update
+      setOptimisticSettings(null);
       const revertedUser = {
         ...userData,
         settings,

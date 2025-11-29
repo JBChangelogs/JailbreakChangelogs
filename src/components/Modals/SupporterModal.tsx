@@ -1,12 +1,8 @@
 import React from "react";
 import { Dialog, DialogPanel, DialogTitle } from "@headlessui/react";
-import {
-  XMarkIcon,
-  TrophyIcon,
-  SparklesIcon,
-} from "@heroicons/react/24/outline";
-import { Icon } from "../ui/IconWrapper";
+import { XMarkIcon, SparklesIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
+import Image from "next/image";
 import { getAllowedFileExtensions } from "@/config/settings";
 
 interface SupporterModalProps {
@@ -25,6 +21,7 @@ const SUPPORTER_TIERS = [
     price: "$0",
     features: ["Post Comments up to 200 characters"],
     color: "border-gray-600",
+    tierNumber: 0,
   },
   {
     name: "Supporter I",
@@ -32,7 +29,7 @@ const SUPPORTER_TIERS = [
     priceAlt: "or $1 on Ko-fi",
     features: ["Post Comments up to 400 characters"],
     color: "border-[#CD7F32]",
-    badgeColor: "from-[#CD7F32] to-[#B87333]",
+    tierNumber: 1,
   },
   {
     name: "Supporter II",
@@ -44,8 +41,8 @@ const SUPPORTER_TIERS = [
       `Upload and Use Custom Banners (${getAllowedFileExtensions()})`,
     ],
     color: "border-[#C0C0C0]",
-    badgeColor: "from-[#C0C0C0] to-[#A9A9A9]",
     recommended: true,
+    tierNumber: 2,
   },
   {
     name: "Supporter III",
@@ -57,7 +54,7 @@ const SUPPORTER_TIERS = [
       "On-Demand Inventory Refresh",
     ],
     color: "border-[#FFD700]",
-    badgeColor: "from-[#FFD700] to-[#DAA520]",
+    tierNumber: 3,
   },
 ];
 
@@ -127,6 +124,8 @@ export default function SupporterModal({
   currentLimit,
   requiredLimit,
 }: SupporterModalProps) {
+  const BADGE_BASE_URL =
+    "https://assets.jailbreakchangelogs.xyz/assets/website_icons";
   const featureInfo = getFeatureDescription(
     feature,
     currentLimit,
@@ -215,13 +214,16 @@ export default function SupporterModal({
                         <h4 className="text-primary-text text-lg font-semibold">
                           {recommendedTier.name}
                         </h4>
-                        {recommendedTier.badgeColor && (
-                          <div
-                            className={`inline-flex h-5 w-5 items-center justify-center rounded-full bg-gradient-to-r ${recommendedTier.badgeColor}`}
-                          >
-                            <TrophyIcon className="h-3 w-3 text-black" />
-                          </div>
-                        )}
+                        {recommendedTier.name !== "Free" &&
+                          recommendedTier.tierNumber && (
+                            <Image
+                              src={`${BADGE_BASE_URL}/jbcl_supporter_${recommendedTier.tierNumber}.svg`}
+                              alt={recommendedTier.name}
+                              width={24}
+                              height={24}
+                              className="object-contain"
+                            />
+                          )}
                       </div>
                       <div className="mb-3">
                         {(() => {
@@ -318,16 +320,9 @@ export default function SupporterModal({
 
             {/* Footer Note */}
             <div className="border-border-primary bg-tertiary-bg mt-4 rounded-lg border p-3">
-              <p className="flex items-center justify-center gap-1 text-center text-xs">
-                <Icon
-                  icon="emojione:light-bulb"
-                  className="text-sm text-yellow-500"
-                />
-                <strong className="text-primary-text">Helpful tip:</strong>{" "}
-                <span className="text-secondary-text">
-                  All supporter purchases are one-time only and non-refundable!
-                  Once you redeem your code, you keep the perks forever.
-                </span>
+              <p className="text-center text-xs text-secondary-text">
+                All supporter purchases are one-time only and non-refundable!
+                Once you redeem your code, you keep the perks forever.
               </p>
             </div>
           </div>

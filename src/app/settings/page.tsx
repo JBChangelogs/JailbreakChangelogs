@@ -25,6 +25,7 @@ import { useAuthContext } from "@/contexts/AuthContext";
 import SupporterModal from "@/components/Modals/SupporterModal";
 import { useSupporterModal } from "@/hooks/useSupporterModal";
 import { safeSetJSON } from "@/utils/safeStorage";
+import Breadcrumb from "@/components/Layout/Breadcrumb";
 
 export default function SettingsPage() {
   const { user, isLoading } = useAuthContext();
@@ -216,12 +217,15 @@ export default function SettingsPage() {
 
   return (
     <Container maxWidth="md" sx={{ minHeight: "100vh", py: 4 }}>
+      <Box sx={{ mt: -2, mb: 0 }}>
+        <Breadcrumb />
+      </Box>
       <Typography
         variant="h4"
         component="h1"
         gutterBottom
         sx={{
-          mt: 2,
+          mt: 0.5,
           color: "var(--color-primary-text)",
           display: "flex",
           alignItems: "center",
