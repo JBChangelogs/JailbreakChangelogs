@@ -2,11 +2,11 @@
 
 import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { useDebounce } from "@/hooks/useDebounce";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { useQuery } from "@tanstack/react-query";
 import { fetchLeaderboardUserData } from "@/app/leaderboard/actions";
-import CopyButton from "@/app/inventories/CopyButton";
 import { MagnifyingGlassIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { DefaultAvatar } from "@/utils/avatar";
 
@@ -338,10 +338,13 @@ export default function MostScannedLeaderboardClient({
                               scans
                             </div>
                           </div>
-                          <CopyButton
-                            text={user.user_id}
-                            className="mt-1 flex-shrink-0"
-                          />
+                          <Link
+                            href={`/inventories/${user.user_id}`}
+                            prefetch={false}
+                            className="text-form-button-text bg-button-info hover:bg-button-info-hover active:bg-button-info-active focus:ring-border-focus cursor-pointer rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors duration-200 focus:ring-2 focus:outline-none flex-shrink-0 mt-1"
+                          >
+                            View Inventory
+                          </Link>
                         </div>
                       </div>
                     </div>

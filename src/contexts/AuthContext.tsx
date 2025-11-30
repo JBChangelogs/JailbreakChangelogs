@@ -51,7 +51,9 @@ interface AuthContextType extends AuthState {
   setShowLoginModal: (show: boolean) => void;
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+export const AuthContext = createContext<AuthContextType | undefined>(
+  undefined,
+);
 
 interface AuthProviderProps {
   children: ReactNode;
@@ -381,6 +383,14 @@ export function useAuthContext(): AuthContextType {
     throw new Error("useAuthContext must be used within an AuthProvider");
   }
   return context;
+}
+
+/**
+ * Safe version of useAuthContext that returns undefined when context is not available.
+ * Useful for components that may render during SSR before AuthProvider is available.
+ */
+export function useSafeAuthContext(): AuthContextType | undefined {
+  return useContext(AuthContext);
 }
 
 // Hook for components that only need to check if user is authenticated

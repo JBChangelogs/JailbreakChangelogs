@@ -1,7 +1,7 @@
 "use client";
 
-import { ReactNode } from "react";
-import { useAuthContext } from "@/contexts/AuthContext";
+import { ReactNode, useMemo } from "react";
+import { useSafeAuthContext } from "@/contexts/AuthContext";
 import InventoryAdSection from "@/components/Ads/InventoryAdSection";
 
 interface PremiumAwareLayoutProps {
@@ -13,11 +13,18 @@ export default function PremiumAwareLayout({
   children,
   showMobileAd = true,
 }: PremiumAwareLayoutProps) {
-  const { user } = useAuthContext();
+  // Safely access auth context - returns undefined if not available (e.g., during SSR)
+  const authContext = useSafeAuthContext();
+  const user = authContext?.user;
   const currentUserPremiumType = user?.premiumtype || 0;
+
   // Show ads for non-premium users (premium type 0) or invalid premium types (> 3)
-  const isNonPremium =
-    currentUserPremiumType === 0 || currentUserPremiumType > 3;
+  // Defaults to true (show ads) when context is undefined (SSR or before hydration)
+  const isNonPremium = useMemo(() => {
+    // If context is not available, default to showing ads (safe default)
+    if (!authContext) return true;
+    return currentUserPremiumType === 0 || currentUserPremiumType > 3;
+  }, [authContext, currentUserPremiumType]);
 
   return (
     <>

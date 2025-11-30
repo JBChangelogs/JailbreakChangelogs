@@ -10,6 +10,7 @@ import { type RobloxUser, type RobloxAvatar } from "@/types";
 import { useOptimizedRealTimeRelativeDate } from "@/hooks/useSharedTimer";
 import { formatCustomDate } from "@/utils/timestamp";
 import Image from "next/image";
+import Link from "next/link";
 import { DefaultAvatar } from "@/utils/avatar";
 import RetryErrorDisplay from "./RetryErrorDisplay";
 import { Icon } from "@iconify/react";
@@ -253,10 +254,9 @@ export default function ConnectedBotsPolling() {
                           return <DefaultAvatar />;
                         })()}
                       </div>
-                      <a
-                        href={`https://www.roblox.com/users/${queueInfo.last_dequeue!.user_id}/profile`}
-                        target="_blank"
-                        rel="noopener noreferrer"
+                      <Link
+                        href={`/inventories/${queueInfo.last_dequeue!.user_id}`}
+                        prefetch={false}
                         className="text-primary-text hover:text-link-hover font-bold transition-colors"
                       >
                         {lastProcessedRobloxData?.usersData?.[
@@ -266,7 +266,7 @@ export default function ConnectedBotsPolling() {
                             queueInfo.last_dequeue!.user_id
                           ]?.displayName ||
                           queueInfo.last_dequeue!.user_id}
-                      </a>
+                      </Link>
                     </div>
                     {(() => {
                       const botId = queueInfo.last_dequeue!.data.bot_id;
