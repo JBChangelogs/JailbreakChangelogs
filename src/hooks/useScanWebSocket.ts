@@ -160,10 +160,12 @@ export function useScanWebSocket(userId: string): UseScanWebSocketReturn {
             console.log("[SCAN WS] Received:", data);
           }
 
+          // If attempt exceeds total_attempts, use attempt as the max to show accurate progress
           if (data.error && data.attempt && data.total_attempts) {
             setStatus("scanning");
+            const maxAttempts = Math.max(data.attempt, data.total_attempts, 15);
             setMessage(
-              `${data.error} - Retrying (${data.attempt}/${data.total_attempts})`,
+              `${data.error} - Retrying (${data.attempt}/${maxAttempts})`,
             );
             setProgress(5);
             return;

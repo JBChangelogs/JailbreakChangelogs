@@ -15,7 +15,6 @@ import {
   handleImageError,
 } from "@/utils/images";
 import { getCategoryIcon, getCategoryColor } from "@/utils/categoryIcons";
-import { VerifiedBadgeIcon } from "@/components/Icons/VerifiedBadgeIcon";
 
 const Tooltip = dynamic(() => import("@mui/material/Tooltip"), { ssr: false });
 
@@ -26,9 +25,7 @@ const bangers = localFont({
 interface DupeItemCardProps {
   item: DupeFinderItem;
   itemData: Item;
-  getUserDisplay: (userId: string) => string;
   getUserAvatar: (userId: string) => string;
-  getHasVerifiedBadge?: (userId: string) => boolean;
   getDupedValueForItem: (itemData: Item, dupeItem: DupeFinderItem) => number;
   onCardClick: (item: DupeFinderItem) => void;
   duplicateNumber?: number;
@@ -38,9 +35,7 @@ interface DupeItemCardProps {
 export default function DupeItemCard({
   item,
   itemData,
-  getUserDisplay,
   // getUserAvatar,
-  getHasVerifiedBadge,
   getDupedValueForItem,
   onCardClick,
   duplicateNumber,
@@ -200,6 +195,35 @@ export default function DupeItemCard({
           </Tooltip>
         </div>
         <div>
+          <div className="text-secondary-text text-sm">MONTHLY TRADED</div>
+          <Tooltip
+            title={
+              itemData.metadata?.TimesTraded
+                ? itemData.metadata.TimesTraded.toLocaleString()
+                : "N/A"
+            }
+            placement="top"
+            arrow
+            slotProps={{
+              tooltip: {
+                sx: {
+                  backgroundColor: "var(--color-secondary-bg)",
+                  color: "var(--color-primary-text)",
+                  "& .MuiTooltip-arrow": {
+                    color: "var(--color-secondary-bg)",
+                  },
+                },
+              },
+            }}
+          >
+            <div className="text-primary-text cursor-help text-xl font-bold">
+              {itemData.metadata?.TimesTraded
+                ? formatNumber(itemData.metadata.TimesTraded)
+                : "N/A"}
+            </div>
+          </Tooltip>
+        </div>
+        <div>
           <div className="text-secondary-text text-sm">DUPED VALUE</div>
           <Tooltip
             title={dupedValue > 0 ? `$${dupedValue.toLocaleString()}` : "N/A"}
@@ -229,26 +253,6 @@ export default function DupeItemCard({
               </span>
             </div>
           </Tooltip>
-        </div>
-        <div>
-          <div className="text-secondary-text text-sm">CURRENT OWNER</div>
-          <div className="text-xl font-bold">
-            <a
-              href={`https://www.roblox.com/users/${item.latest_owner}/profile`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-link hover:text-link-hover text-center break-words transition-colors hover:underline"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <span className="inline-flex items-center gap-2">
-                {getUserDisplay(item.latest_owner)}
-                {getHasVerifiedBadge &&
-                  getHasVerifiedBadge(item.latest_owner) && (
-                    <VerifiedBadgeIcon className="h-4 w-4" />
-                  )}
-              </span>
-            </a>
-          </div>
         </div>
         <div>
           <div className="text-secondary-text text-sm">LOGGED ON</div>

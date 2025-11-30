@@ -19,6 +19,9 @@ interface NetworthLeaderboardEntry {
   money?: number;
   inventory_value?: number;
   percentages?: Record<string, number>;
+  duplicates_count?: number;
+  duplicates_value?: number | null;
+  duplicates_percentages?: Record<string, number> | null;
 }
 
 interface NetworthLeaderboardClientProps {
@@ -115,7 +118,7 @@ export default function NetworthLeaderboardClient({
       return (
         userDisplay.toLowerCase().includes(searchLower) ||
         username.toLowerCase().includes(searchLower) ||
-        user.user_id.includes(debouncedSearchTerm)
+        user.user_id.toLowerCase().includes(searchLower)
       );
     });
   })();
@@ -378,6 +381,9 @@ export default function NetworthLeaderboardClient({
           percentages={selectedUser.percentages || {}}
           money={selectedUser.money}
           inventoryValue={selectedUser.inventory_value}
+          duplicatesCount={selectedUser.duplicates_count}
+          duplicatesValue={selectedUser.duplicates_value}
+          duplicatesPercentages={selectedUser.duplicates_percentages}
         />
       )}
     </>

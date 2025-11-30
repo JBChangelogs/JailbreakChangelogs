@@ -63,9 +63,13 @@ interface UserStatsSectionProps {
   currentData: InventoryData | null;
   currentSeason: Season | null;
   totalCashValue: number;
+  totalNetworth: number;
   totalDupedValue: number;
   isLoadingValues: boolean;
   userId: string;
+  hasDupedValue?: boolean;
+  totalItemsCount: number;
+  duplicatesCount?: number;
 }
 
 // Helper functions
@@ -123,9 +127,13 @@ export default function UserStatsSection({
   currentData,
   currentSeason,
   totalCashValue,
+  totalNetworth,
   totalDupedValue,
   isLoadingValues,
   userId,
+  hasDupedValue = false,
+  totalItemsCount,
+  duplicatesCount,
 }: UserStatsSectionProps) {
   const [isScanHistoryModalOpen, setIsScanHistoryModalOpen] = useState(false);
   const [scanHistory, setScanHistory] = useState<
@@ -185,9 +193,7 @@ export default function UserStatsSection({
         <div className="text-center">
           <p className="text-secondary-text text-sm">Total Items</p>
           <Tooltip
-            title={(
-              currentData.item_count + (currentData.dupe_count || 0)
-            ).toLocaleString()}
+            title={totalItemsCount.toLocaleString()}
             placement="top"
             arrow
             slotProps={{
@@ -208,9 +214,7 @@ export default function UserStatsSection({
             }}
           >
             <p className="text-primary-text cursor-help text-2xl font-bold">
-              {formatNumber(
-                currentData.item_count + (currentData.dupe_count || 0),
-              )}
+              {formatNumber(totalItemsCount)}
             </p>
           </Tooltip>
         </div>
@@ -297,12 +301,12 @@ export default function UserStatsSection({
             </p>
           </Tooltip>
         </div>
-        {/* Total Duped Items - Only show if dupe_count > 0 */}
-        {(currentData.dupe_count ?? 0) > 0 && (
+        {/* Total Duped Items - Only show if duplicatesCount > 0 */}
+        {duplicatesCount !== undefined && duplicatesCount > 0 && (
           <div className="text-center">
             <p className="text-secondary-text text-sm">Duped Items</p>
             <Tooltip
-              title={(currentData.dupe_count ?? 0).toLocaleString()}
+              title={duplicatesCount.toLocaleString()}
               placement="top"
               arrow
               slotProps={{
@@ -323,7 +327,7 @@ export default function UserStatsSection({
               }}
             >
               <p className="text-primary-text cursor-help text-2xl font-bold">
-                {formatNumber(currentData.dupe_count ?? 0)}
+                {formatNumber(duplicatesCount)}
               </p>
             </Tooltip>
           </div>
@@ -406,7 +410,7 @@ export default function UserStatsSection({
           )}
         </div>
 
-        {/* Total Networth = Inventory Value + Money */}
+        {/* Total Networth */}
         <div className="border-border-primary bg-primary-bg rounded-lg border p-4 text-center">
           <div className="text-secondary-text mb-2 text-sm">Total Networth</div>
           {isLoadingValues ? (
@@ -415,7 +419,7 @@ export default function UserStatsSection({
             </div>
           ) : (
             <Tooltip
-              title={`$${(totalCashValue + currentData.money).toLocaleString()}`}
+              title={`$${totalNetworth.toLocaleString()}`}
               placement="top"
               arrow
               slotProps={{
@@ -435,52 +439,53 @@ export default function UserStatsSection({
               }}
             >
               <div className="text-primary-text cursor-help text-2xl font-bold">
-                {formatPreciseMoney(totalCashValue + currentData.money)}
+                {formatPreciseMoney(totalNetworth)}
               </div>
             </Tooltip>
           )}
         </div>
 
-        {/* Total Duped Value - Only show if user has duplicates */}
-        {currentData &&
-          currentData.duplicates &&
-          currentData.duplicates.length > 0 && (
-            <div className="border-border-primary bg-primary-bg rounded-lg border p-4 text-center">
-              <div className="text-secondary-text mb-2 text-sm">
-                Total Duped Value
+        {/* Total Duped Value - Only show if user has duplicates or backend has duped value */}
+        {(hasDupedValue ||
+          (currentData &&
+            currentData.duplicates &&
+            currentData.duplicates.length > 0)) && (
+          <div className="border-border-primary bg-primary-bg rounded-lg border p-4 text-center">
+            <div className="text-secondary-text mb-2 text-sm">
+              Total Duped Value
+            </div>
+            {isLoadingValues ? (
+              <div className="text-secondary-text animate-pulse text-2xl font-bold">
+                Loading...
               </div>
-              {isLoadingValues ? (
-                <div className="text-secondary-text animate-pulse text-2xl font-bold">
-                  Loading...
-                </div>
-              ) : (
-                <Tooltip
-                  title={`$${totalDupedValue.toLocaleString()}`}
-                  placement="top"
-                  arrow
-                  slotProps={{
-                    tooltip: {
-                      sx: {
-                        backgroundColor: "var(--color-secondary-bg)",
-                        color: "var(--color-primary-text)",
-                        fontSize: "0.75rem",
-                        padding: "8px 12px",
-                        borderRadius: "8px",
-                        boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
-                        "& .MuiTooltip-arrow": {
-                          color: "var(--color-secondary-bg)",
-                        },
+            ) : (
+              <Tooltip
+                title={`$${totalDupedValue.toLocaleString()}`}
+                placement="top"
+                arrow
+                slotProps={{
+                  tooltip: {
+                    sx: {
+                      backgroundColor: "var(--color-secondary-bg)",
+                      color: "var(--color-primary-text)",
+                      fontSize: "0.75rem",
+                      padding: "8px 12px",
+                      borderRadius: "8px",
+                      boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
+                      "& .MuiTooltip-arrow": {
+                        color: "var(--color-secondary-bg)",
                       },
                     },
-                  }}
-                >
-                  <div className="text-primary-text cursor-help text-2xl font-bold">
-                    {formatPreciseMoney(totalDupedValue)}
-                  </div>
-                </Tooltip>
-              )}
-            </div>
-          )}
+                  },
+                }}
+              >
+                <div className="text-primary-text cursor-help text-2xl font-bold">
+                  {formatPreciseMoney(totalDupedValue)}
+                </div>
+              </Tooltip>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Gamepasses */}

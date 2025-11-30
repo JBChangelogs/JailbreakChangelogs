@@ -7,9 +7,7 @@ import { DupeFinderItem, Item } from "@/types";
 
 interface DupeItemsGridProps {
   filteredItems: DupeFinderItem[];
-  getUserDisplay: (userId: string) => string;
   getUserAvatar: (userId: string) => string;
-  getHasVerifiedBadge?: (userId: string) => boolean;
   getDupedValueForItem: (itemData: Item, dupeItem: DupeFinderItem) => number;
   onCardClick: (item: DupeFinderItem) => void;
   isLoading?: boolean;
@@ -20,9 +18,7 @@ interface DupeItemsGridProps {
 
 export default function DupeItemsGrid({
   filteredItems,
-  getUserDisplay,
   getUserAvatar,
-  getHasVerifiedBadge,
   getDupedValueForItem,
   onCardClick,
   isLoading = false,
@@ -149,9 +145,7 @@ export default function DupeItemsGrid({
                       key={item.id}
                       item={item}
                       itemData={itemData}
-                      getUserDisplay={getUserDisplay}
                       getUserAvatar={getUserAvatar}
-                      getHasVerifiedBadge={getHasVerifiedBadge}
                       getDupedValueForItem={getDupedValueForItem}
                       onCardClick={onCardClick}
                       duplicateNumber={duplicateNumber}

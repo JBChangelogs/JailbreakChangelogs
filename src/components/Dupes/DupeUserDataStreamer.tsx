@@ -34,24 +34,18 @@ async function DupeUserDataFetcher({
   items,
 }: DupeUserDataStreamerProps) {
   // Extract user IDs from dupe finder data
+  // Only extracts main user ID (current owners no longer displayed)
   const userIds = UserDataService.extractUserIdsFromDupeData(
     dupeData,
     robloxId,
   );
 
-  // Apply frequency-based prioritization for large dupe searches
-  const MAX_USERS_TO_FETCH = 1000;
-  const finalUserIds = UserDataService.prioritizeUsersByFrequency(
-    userIds,
-    dupeData as unknown as Array<Record<string, unknown>>,
-    "latest_owner",
-    MAX_USERS_TO_FETCH,
-    "DUPE_FINDER",
-  );
+  // No need for frequency-based prioritization since we only fetch main user
+  const finalUserIds = userIds;
 
   // Fetch user data using the shared service
   const userDataResult = await UserDataService.fetchUserData(finalUserIds, {
-    maxUsers: MAX_USERS_TO_FETCH,
+    maxUsers: 1, // Only fetching main user
     includeUserConnection: true,
     includeDupeData: false,
     context: "DUPE_FINDER",

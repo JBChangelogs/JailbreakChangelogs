@@ -48,7 +48,7 @@ export default function NetworthLeaderboardSearch({
       <input
         ref={searchInputRef}
         type="text"
-        placeholder="Search players by name or username..."
+        placeholder="Search players by name, username, or Roblox ID..."
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
         className={`text-primary-text border-border-primary hover:border-border-focus bg-secondary-bg placeholder-secondary-text focus:border-button-info w-full rounded-lg border px-4 py-2 pr-10 pl-10 transition-all duration-300 focus:outline-none ${

@@ -1626,6 +1626,12 @@ export interface NetworthLeaderboardEntry {
   user_id: string;
   networth: number;
   inventory_count: number;
+  money?: number;
+  inventory_value?: number;
+  percentages?: Record<string, number>;
+  duplicates_count?: number;
+  duplicates_value?: number | null;
+  duplicates_percentages?: Record<string, number> | null;
 }
 
 export interface SeasonLeaderboardEntry {
@@ -1765,7 +1771,10 @@ export interface UserNetworthData {
   inventory_count: number;
   money?: number;
   inventory_value?: number;
+  duplicates_count?: number;
+  duplicates_value?: number | null;
   percentages?: Record<string, number>;
+  duplicates_percentages?: Record<string, number> | null;
 }
 
 export async function fetchUserNetworth(

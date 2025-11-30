@@ -187,6 +187,9 @@ export default function UserNetworthDisplay() {
         percentages={latestData.percentages || {}}
         money={latestData.money}
         inventoryValue={latestData.inventory_value}
+        duplicatesCount={latestData.duplicates_count}
+        duplicatesValue={latestData.duplicates_value}
+        duplicatesPercentages={latestData.duplicates_percentages}
       />
     </div>
   );

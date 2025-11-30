@@ -13,6 +13,7 @@ import { logError } from "@/services/logger";
 import toast from "react-hot-toast";
 import UserProfileSection from "./UserProfileSection";
 import UserStatsSection from "./UserStatsSection";
+import { UserNetworthData } from "@/utils/api";
 
 interface UserStatsProps {
   initialData: InventoryData;
@@ -23,17 +24,8 @@ interface UserStatsProps {
   itemsData: Item[];
   dupedItems: InventoryItem[];
   onRefresh: (newData: InventoryData) => Promise<void>;
+  initialNetworthData?: UserNetworthData[];
 }
-
-// Helper function to parse cash value strings for totals (returns 0 for N/A)
-const parseCashValueForTotal = (value: string | null): number => {
-  if (value === null || value === "N/A") return 0;
-  const num = parseFloat(value.replace(/[^0-9.]/g, ""));
-  if (value.toLowerCase().includes("k")) return num * 1000;
-  if (value.toLowerCase().includes("m")) return num * 1000000;
-  if (value.toLowerCase().includes("b")) return num * 1000000000;
-  return num;
-};
 
 export default function UserStats({
   initialData,
@@ -41,11 +33,12 @@ export default function UserStats({
   robloxAvatars,
   userConnectionData,
   currentSeason,
-  itemsData,
   onRefresh,
+  initialNetworthData = [],
 }: UserStatsProps) {
   const [totalCashValue, setTotalCashValue] = useState<number>(0);
   const [totalDupedValue, setTotalDupedValue] = useState<number>(0);
+  const [totalNetworth, setTotalNetworth] = useState<number>(0);
   const [isLoadingValues, setIsLoadingValues] = useState<boolean>(true);
   const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
 
@@ -86,59 +79,43 @@ export default function UserStats({
     [robloxUsers],
   );
 
-  // Calculate cash value and duped value
+  // Use networth data from backend only - no fallback calculations
   useEffect(() => {
-    const calculateValues = () => {
+    const setValues = () => {
       try {
-        let totalCash = 0;
-        let totalDuped = 0;
-        const itemMap = new Map(itemsData.map((item) => [item.id, item]));
+        // Get the latest networth data (highest snapshot_time)
+        const latestNetworthData =
+          initialNetworthData && initialNetworthData.length > 0
+            ? initialNetworthData.reduce((latest, current) =>
+                current.snapshot_time > latest.snapshot_time ? current : latest,
+              )
+            : null;
 
-        // Calculate cash value from regular inventory items
-        initialData.data.forEach((inventoryItem) => {
-          const itemData = itemMap.get(inventoryItem.item_id);
-          if (itemData) {
-            const cashValue = parseCashValueForTotal(itemData.cash_value);
-            if (!isNaN(cashValue) && cashValue > 0) {
-              totalCash += cashValue;
-            }
-          }
-        });
-
-        // Include duplicates in total cash value calculation
-        if (initialData.duplicates && initialData.duplicates.length > 0) {
-          initialData.duplicates.forEach((inventoryItem) => {
-            const itemData = itemMap.get(inventoryItem.item_id);
-            if (itemData) {
-              const cashValue = parseCashValueForTotal(itemData.cash_value);
-              if (!isNaN(cashValue) && cashValue > 0) {
-                totalCash += cashValue;
-              }
-
-              // Calculate duped value for duplicated items
-              // Only use duped_value if it exists in the API response
-              const dupedValue = parseCashValueForTotal(itemData.duped_value);
-              if (!isNaN(dupedValue) && dupedValue > 0) {
-                totalDuped += dupedValue;
-              }
-            }
-          });
+        if (latestNetworthData) {
+          // Use backend calculated values only
+          setTotalNetworth(latestNetworthData.networth || 0);
+          setTotalCashValue(latestNetworthData.inventory_value || 0);
+          // duplicates_value: null means no duplicates (use 0), undefined means not available (use 0)
+          setTotalDupedValue(latestNetworthData.duplicates_value ?? 0);
+        } else {
+          // No networth data available - set to 0 (no fallback calculation)
+          setTotalNetworth(0);
+          setTotalCashValue(0);
+          setTotalDupedValue(0);
         }
-
-        setTotalCashValue(totalCash);
-        setTotalDupedValue(totalDuped);
       } catch (error) {
-        logError("Error calculating values", error, {
+        logError("Error setting values from networth data", error, {
           component: "UserStats",
-          action: "calculateTotalValues",
+          action: "setValuesFromNetworth",
         });
         setTotalCashValue(0);
         setTotalDupedValue(0);
+        setTotalNetworth(0);
       }
     };
 
-    calculateValues();
-  }, [initialData.data, initialData.duplicates, itemsData]);
+    setValues();
+  }, [initialNetworthData]);
 
   // Handle refresh
   const handleRefresh = async () => {
@@ -216,9 +193,22 @@ export default function UserStats({
         currentData={initialData}
         currentSeason={currentSeason}
         totalCashValue={totalCashValue}
+        totalNetworth={totalNetworth}
         totalDupedValue={totalDupedValue}
         isLoadingValues={isLoadingValues}
         userId={initialData.user_id}
+        hasDupedValue={
+          initialNetworthData &&
+          initialNetworthData.length > 0 &&
+          initialNetworthData.some(
+            (data) =>
+              data.duplicates_value !== undefined &&
+              data.duplicates_value !== null &&
+              data.duplicates_value > 0,
+          )
+        }
+        totalItemsCount={initialData.item_count + (initialData.dupe_count || 0)}
+        duplicatesCount={initialData.dupe_count}
       />
     </div>
   );

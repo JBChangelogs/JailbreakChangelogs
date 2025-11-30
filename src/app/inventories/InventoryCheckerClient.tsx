@@ -37,6 +37,7 @@ import { CommentData, UserNetworthData, MoneyHistory } from "@/utils/api";
 import { UserData } from "@/types/auth";
 import MoneyHistoryChart from "@/components/Inventory/MoneyHistoryChart";
 import NetworthHistoryChart from "@/components/Inventory/NetworthHistoryChart";
+import InventoryBreakdown from "@/components/Inventory/InventoryBreakdown";
 
 const ChangelogComments = dynamic(
   () => import("@/components/PageComments/ChangelogComments"),
@@ -202,6 +203,16 @@ export default function InventoryCheckerClient({
     currentData && currentData.duplicates && currentData.duplicates.length > 0,
   );
 
+  // Check if we have breakdown data (networth data with percentages)
+  const hasBreakdownData = Boolean(
+    robloxId &&
+      initialNetworthData &&
+      initialNetworthData.length > 0 &&
+      initialNetworthData.some(
+        (data) => data.percentages && Object.keys(data.percentages).length > 0,
+      ),
+  );
+
   // Hash navigation
   useEffect(() => {
     const handleHashChange = () => {
@@ -232,15 +243,35 @@ export default function InventoryCheckerClient({
                 ? 3
                 : 2;
         setActiveTab(networthTab);
-      } else if (hash === "comments" && hasComments) {
-        const commentsTab =
+      } else if (hash === "breakdown" && hasBreakdownData) {
+        const breakdownTab =
           hasDuplicates && hasDupedItems
             ? 5
             : hasDuplicates && !hasDupedItems
               ? 4
               : !hasDuplicates && hasDupedItems
                 ? 4
-                : 3;
+                : !hasDuplicates && !hasDupedItems
+                  ? 3
+                  : 2;
+        setActiveTab(breakdownTab);
+      } else if (hash === "comments" && hasComments) {
+        const commentsTab =
+          hasDuplicates && hasDupedItems && hasBreakdownData
+            ? 6
+            : hasDuplicates && hasDupedItems && !hasBreakdownData
+              ? 5
+              : hasDuplicates && !hasDupedItems && hasBreakdownData
+                ? 5
+                : hasDuplicates && !hasDupedItems && !hasBreakdownData
+                  ? 4
+                  : !hasDuplicates && hasDupedItems && hasBreakdownData
+                    ? 5
+                    : !hasDuplicates && hasDupedItems && !hasBreakdownData
+                      ? 4
+                      : !hasDuplicates && !hasDupedItems && hasBreakdownData
+                        ? 4
+                        : 3;
         setActiveTab(commentsTab);
       } else {
         setActiveTab(0);
@@ -253,7 +284,7 @@ export default function InventoryCheckerClient({
     // Listen for hash changes
     window.addEventListener("hashchange", handleHashChange);
     return () => window.removeEventListener("hashchange", handleHashChange);
-  }, [robloxId, hasDuplicates, hasDupedItems]);
+  }, [robloxId, hasDuplicates, hasDupedItems, hasBreakdownData]);
 
   // Derive active tab from robloxId to avoid setState in effect
   const effectiveActiveTab = !robloxId && activeTab === 1 ? 0 : activeTab;
@@ -427,10 +458,30 @@ export default function InventoryCheckerClient({
     ) {
       window.location.hash = "networth";
     } else if (
-      (hasDuplicates && hasDupedItems && newValue === 5) ||
-      (hasDuplicates && !hasDupedItems && newValue === 4) ||
-      (!hasDuplicates && hasDupedItems && newValue === 4) ||
-      (!hasDuplicates && !hasDupedItems && newValue === 3)
+      (hasDuplicates && hasDupedItems && hasBreakdownData && newValue === 5) ||
+      (hasDuplicates && !hasDupedItems && hasBreakdownData && newValue === 4) ||
+      (!hasDuplicates && hasDupedItems && hasBreakdownData && newValue === 4) ||
+      (!hasDuplicates && !hasDupedItems && hasBreakdownData && newValue === 3)
+    ) {
+      window.location.hash = "breakdown";
+    } else if (
+      (hasDuplicates && hasDupedItems && hasBreakdownData && newValue === 6) ||
+      (hasDuplicates && hasDupedItems && !hasBreakdownData && newValue === 5) ||
+      (hasDuplicates && !hasDupedItems && hasBreakdownData && newValue === 5) ||
+      (hasDuplicates &&
+        !hasDupedItems &&
+        !hasBreakdownData &&
+        newValue === 4) ||
+      (!hasDuplicates && hasDupedItems && hasBreakdownData && newValue === 5) ||
+      (!hasDuplicates &&
+        hasDupedItems &&
+        !hasBreakdownData &&
+        newValue === 4) ||
+      (!hasDuplicates &&
+        !hasDupedItems &&
+        hasBreakdownData &&
+        newValue === 4) ||
+      (!hasDuplicates && !hasDupedItems && !hasBreakdownData && newValue === 3)
     ) {
       window.location.hash = "comments";
     }
@@ -867,6 +918,7 @@ export default function InventoryCheckerClient({
               dupedItems={dupedItems}
               onRefresh={handleDataRefresh}
               currentSeason={currentSeason}
+              initialNetworthData={initialNetworthData}
             />
 
             {/* Tabbed Interface */}
@@ -879,6 +931,7 @@ export default function InventoryCheckerClient({
                 hasComments={Boolean(robloxId)}
                 hasDuplicates={hasDuplicates}
                 hasDupedItems={hasDupedItems}
+                hasBreakdown={hasBreakdownData}
                 robloxId={robloxId}
               />
 
@@ -963,15 +1016,58 @@ export default function InventoryCheckerClient({
 
                 {((hasDuplicates &&
                   hasDupedItems &&
+                  hasBreakdownData &&
                   effectiveActiveTab === 5) ||
                   (hasDuplicates &&
                     !hasDupedItems &&
+                    hasBreakdownData &&
                     effectiveActiveTab === 4) ||
                   (!hasDuplicates &&
                     hasDupedItems &&
+                    hasBreakdownData &&
                     effectiveActiveTab === 4) ||
                   (!hasDuplicates &&
                     !hasDupedItems &&
+                    hasBreakdownData &&
+                    effectiveActiveTab === 3)) &&
+                  robloxId && (
+                    <InventoryBreakdown
+                      networthData={initialNetworthData}
+                      username={getUserDisplay(robloxId)}
+                    />
+                  )}
+
+                {((hasDuplicates &&
+                  hasDupedItems &&
+                  hasBreakdownData &&
+                  effectiveActiveTab === 6) ||
+                  (hasDuplicates &&
+                    hasDupedItems &&
+                    !hasBreakdownData &&
+                    effectiveActiveTab === 5) ||
+                  (hasDuplicates &&
+                    !hasDupedItems &&
+                    hasBreakdownData &&
+                    effectiveActiveTab === 5) ||
+                  (hasDuplicates &&
+                    !hasDupedItems &&
+                    !hasBreakdownData &&
+                    effectiveActiveTab === 4) ||
+                  (!hasDuplicates &&
+                    hasDupedItems &&
+                    hasBreakdownData &&
+                    effectiveActiveTab === 5) ||
+                  (!hasDuplicates &&
+                    hasDupedItems &&
+                    !hasBreakdownData &&
+                    effectiveActiveTab === 4) ||
+                  (!hasDuplicates &&
+                    !hasDupedItems &&
+                    hasBreakdownData &&
+                    effectiveActiveTab === 4) ||
+                  (!hasDuplicates &&
+                    !hasDupedItems &&
+                    !hasBreakdownData &&
                     effectiveActiveTab === 3)) &&
                   robloxId && (
                     <ChangelogComments
@@ -1018,6 +1114,7 @@ function InventoryOverflowTabs({
   hasComments,
   hasDuplicates,
   hasDupedItems,
+  hasBreakdown,
   robloxId,
 }: {
   value: number;
@@ -1025,6 +1122,7 @@ function InventoryOverflowTabs({
   hasComments: boolean;
   hasDuplicates: boolean;
   hasDupedItems: boolean;
+  hasBreakdown: boolean;
   robloxId?: string;
 }) {
   const labels = [
@@ -1033,6 +1131,7 @@ function InventoryOverflowTabs({
     ...(hasDupedItems ? ["Duplicate Items"] : []),
     ...(robloxId ? ["Money Graph"] : []),
     ...(robloxId ? ["Networth Graph"] : []),
+    ...(hasBreakdown ? ["Inventory Breakdown"] : []),
     ...(hasComments ? ["Comments"] : []),
   ];
 

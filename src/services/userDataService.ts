@@ -293,7 +293,7 @@ export class UserDataService {
 
   /**
    * Extracts user IDs from dupe finder data (for DupeUserDataStreamer)
-   * Only extracts main user ID and current owners, not trade history users
+   * Only extracts main user ID (current owners no longer displayed in cards)
    */
   static extractUserIdsFromDupeData(
     dupeData: DupeFinderResponse,
@@ -304,17 +304,8 @@ export class UserDataService {
     // Add the main user ID
     userIdsToFetch.add(robloxId);
 
-    if (dupeData && Array.isArray(dupeData)) {
-      // Add all current owner IDs from the dupe finder results
-      dupeData.forEach((item) => {
-        if (item.latest_owner && /^\d+$/.test(item.latest_owner)) {
-          userIdsToFetch.add(item.latest_owner);
-        }
-      });
-
-      // Note: Trade history user IDs are no longer fetched to avoid showing avatars
-      // in ownership history modals. Only current owners are fetched.
-    }
+    // Note: Current owner IDs are no longer fetched since owner field was removed
+    // from dupe finder cards. Only main user ID is needed now.
 
     return Array.from(userIdsToFetch);
   }

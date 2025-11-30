@@ -104,27 +104,15 @@ export default function DupeFinderResults({
   );
 
   // Extract all unique user IDs from dupe data
+  // Only extract main user ID and original owners (no longer fetching current owners)
   const allUserIds = useMemo(() => {
     const userIds = new Set<string>();
 
     // Add main user
     userIds.add(robloxId);
 
-    // Add all current owners and original owners
+    // Add original owners only (for modals/history)
     mergedDupeData.forEach((item) => {
-      // Get current owner from info array
-      const currentOwnerInfo = item.info?.find(
-        (info) => info.title === "Current Owner",
-      );
-      if (currentOwnerInfo?.value && /^\d+$/.test(currentOwnerInfo.value)) {
-        userIds.add(currentOwnerInfo.value);
-      }
-
-      // Also check latest_owner field directly (primary source for current owner)
-      if (item.latest_owner && /^\d+$/.test(String(item.latest_owner))) {
-        userIds.add(String(item.latest_owner));
-      }
-
       // Get original owner from info array
       const originalOwnerInfo = item.info?.find(
         (info) => info.title === "Original Owner",
@@ -395,9 +383,7 @@ export default function DupeFinderResults({
 
         <DupeItemsGrid
           filteredItems={filteredAndSortedItems}
-          getUserDisplay={getUserDisplay}
           getUserAvatar={getUserAvatar}
-          getHasVerifiedBadge={getHasVerifiedBadge}
           getDupedValueForItem={getDupedValueForItem}
           onCardClick={handleCardClick}
           itemCounts={itemCounts}
