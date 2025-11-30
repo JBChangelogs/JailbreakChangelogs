@@ -9,6 +9,7 @@ import XpProgressBar from "./XpProgressBar";
 import dynamic from "next/dynamic";
 import Image from "next/image";
 import ScanHistoryModal from "../Modals/ScanHistoryModal";
+import { Icon } from "../ui/IconWrapper";
 
 const Tooltip = dynamic(() => import("@mui/material/Tooltip"), { ssr: false });
 const gamepassData = {
@@ -375,8 +376,35 @@ export default function UserStatsSection({
       >
         {/* Inventory Value */}
         <div className="border-border-primary bg-primary-bg rounded-lg border p-4 text-center">
-          <div className="text-secondary-text mb-2 text-sm">
+          <div className="text-secondary-text mb-2 flex items-center justify-center gap-1.5 text-sm">
             Total Inventory Value
+            <Tooltip
+              title="Only counts clean items' cash value. Does not include cash value of duped items."
+              placement="top"
+              arrow
+              slotProps={{
+                tooltip: {
+                  sx: {
+                    backgroundColor: "var(--color-secondary-bg)",
+                    color: "var(--color-primary-text)",
+                    fontSize: "0.75rem",
+                    padding: "8px 12px",
+                    borderRadius: "8px",
+                    boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
+                    maxWidth: "250px",
+                    "& .MuiTooltip-arrow": {
+                      color: "var(--color-secondary-bg)",
+                    },
+                  },
+                },
+              }}
+            >
+              <Icon
+                icon="material-symbols:info-outline"
+                className="text-secondary-text cursor-help h-4 w-4"
+                inline={true}
+              />
+            </Tooltip>
           </div>
           {isLoadingValues ? (
             <div className="text-secondary-text animate-pulse text-2xl font-bold">
@@ -412,7 +440,36 @@ export default function UserStatsSection({
 
         {/* Total Networth */}
         <div className="border-border-primary bg-primary-bg rounded-lg border p-4 text-center">
-          <div className="text-secondary-text mb-2 text-sm">Total Networth</div>
+          <div className="text-secondary-text mb-2 flex items-center justify-center gap-1.5 text-sm">
+            Total Networth
+            <Tooltip
+              title="Includes total cash value of all items, including duped items' cash value."
+              placement="top"
+              arrow
+              slotProps={{
+                tooltip: {
+                  sx: {
+                    backgroundColor: "var(--color-secondary-bg)",
+                    color: "var(--color-primary-text)",
+                    fontSize: "0.75rem",
+                    padding: "8px 12px",
+                    borderRadius: "8px",
+                    boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
+                    maxWidth: "250px",
+                    "& .MuiTooltip-arrow": {
+                      color: "var(--color-secondary-bg)",
+                    },
+                  },
+                },
+              }}
+            >
+              <Icon
+                icon="material-symbols:info-outline"
+                className="text-secondary-text cursor-help h-4 w-4"
+                inline={true}
+              />
+            </Tooltip>
+          </div>
           {isLoadingValues ? (
             <div className="text-secondary-text animate-pulse text-2xl font-bold">
               Loading...
@@ -451,8 +508,35 @@ export default function UserStatsSection({
             currentData.duplicates &&
             currentData.duplicates.length > 0)) && (
           <div className="border-border-primary bg-primary-bg rounded-lg border p-4 text-center">
-            <div className="text-secondary-text mb-2 text-sm">
+            <div className="text-secondary-text mb-2 flex items-center justify-center gap-1.5 text-sm">
               Total Duped Value
+              <Tooltip
+                title="Collective duped value of all duped items in your inventory."
+                placement="top"
+                arrow
+                slotProps={{
+                  tooltip: {
+                    sx: {
+                      backgroundColor: "var(--color-secondary-bg)",
+                      color: "var(--color-primary-text)",
+                      fontSize: "0.75rem",
+                      padding: "8px 12px",
+                      borderRadius: "8px",
+                      boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
+                      maxWidth: "250px",
+                      "& .MuiTooltip-arrow": {
+                        color: "var(--color-secondary-bg)",
+                      },
+                    },
+                  },
+                }}
+              >
+                <Icon
+                  icon="material-symbols:info-outline"
+                  className="text-secondary-text cursor-help h-4 w-4"
+                  inline={true}
+                />
+              </Tooltip>
             </div>
             {isLoadingValues ? (
               <div className="text-secondary-text animate-pulse text-2xl font-bold">
