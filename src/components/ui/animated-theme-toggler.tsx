@@ -6,8 +6,7 @@ import { cn } from "@/lib/utils";
 import { useTheme } from "@/contexts/ThemeContext";
 import { safeLocalStorage } from "@/utils/safeStorage";
 
-interface AnimatedThemeTogglerProps
-  extends React.ComponentPropsWithoutRef<"label"> {
+interface AnimatedThemeTogglerProps extends React.ComponentPropsWithoutRef<"label"> {
   duration?: number;
 }
 

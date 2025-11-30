@@ -206,11 +206,11 @@ export default function InventoryCheckerClient({
   // Check if we have breakdown data (networth data with percentages)
   const hasBreakdownData = Boolean(
     robloxId &&
-      initialNetworthData &&
-      initialNetworthData.length > 0 &&
-      initialNetworthData.some(
-        (data) => data.percentages && Object.keys(data.percentages).length > 0,
-      ),
+    initialNetworthData &&
+    initialNetworthData.length > 0 &&
+    initialNetworthData.some(
+      (data) => data.percentages && Object.keys(data.percentages).length > 0,
+    ),
   );
 
   // Hash navigation

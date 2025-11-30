@@ -160,63 +160,61 @@ export async function GET(request: Request) {
 
       // Return a banned user OG image
       return new ImageResponse(
-        (
+        <div
+          style={{
+            width: "1200px",
+            height: "630px",
+            position: "relative",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            background: "linear-gradient(135deg, #16161a 0%, #242629 100%)",
+            padding: "40px",
+          }}
+        >
           <div
             style={{
-              width: "1200px",
-              height: "630px",
-              position: "relative",
               display: "flex",
               flexDirection: "column",
               alignItems: "center",
               justifyContent: "center",
-              background: "linear-gradient(135deg, #16161a 0%, #242629 100%)",
-              padding: "40px",
+              color: "white",
+              textAlign: "center",
+              padding: "32px 48px",
+              borderRadius: "16px",
+              backgroundColor: "rgba(237, 79, 79, 0.1)",
+              border: "2px solid rgba(237, 79, 79, 0.3)",
+              maxWidth: "800px",
             }}
           >
             <div
               style={{
                 display: "flex",
-                flexDirection: "column",
                 alignItems: "center",
                 justifyContent: "center",
-                color: "white",
-                textAlign: "center",
-                padding: "32px 48px",
-                borderRadius: "16px",
-                backgroundColor: "rgba(237, 79, 79, 0.1)",
-                border: "2px solid rgba(237, 79, 79, 0.3)",
-                maxWidth: "800px",
+                fontSize: 64,
+                fontFamily: "LuckiestGuy",
+                color: "#ed4f4f",
+                marginBottom: "16px",
               }}
             >
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontSize: 64,
-                  fontFamily: "LuckiestGuy",
-                  color: "#ed4f4f",
-                  marginBottom: "16px",
-                }}
-              >
-                <b>User Banned</b>
-              </div>
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontSize: 24,
-                  color: "#94a1b2",
-                  lineHeight: "1.5",
-                }}
-              >
-                {bannedMessage}
-              </div>
+              <b>User Banned</b>
+            </div>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontSize: 24,
+                color: "#94a1b2",
+                lineHeight: "1.5",
+              }}
+            >
+              {bannedMessage}
             </div>
           </div>
-        ),
+        </div>,
         {
           width: 1200,
           height: 630,
@@ -322,212 +320,209 @@ export async function GET(request: Request) {
   }
 
   return new ImageResponse(
-    (
-      <div
+    <div
+      style={{
+        width: "1200px",
+        height: "630px",
+        position: "relative",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "flex-start",
+        paddingTop: "15px",
+      }}
+    >
+      {/* Banner Background Image */}
+      <img
+        src={bannerUrl}
+        width={1200}
+        height={630}
         style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
           width: "1200px",
           height: "630px",
-          position: "relative",
+          objectFit: "cover",
+        }}
+        alt="Banner background"
+      />
+      {/* User Avatar Section */}
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          width: "250px",
+          height: "250px",
+          borderRadius: avatarShape === "square" ? "4px" : "50%",
+          overflow: "hidden",
+          backgroundColor: "#0f1012",
+        }}
+      >
+        {useDefaultAvatar ? (
+          // Default avatar SVG for users without custom avatars
+          <svg
+            width="250"
+            height="250"
+            viewBox="0 0 250 250"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <circle cx="125" cy="125" r="125" fill="#0f1012" />
+            <circle cx="125" cy="100" r="37.5" fill="#fffffe" />
+            <path
+              d="M125 150C162.5 150 193.75 181.25 193.75 218.75H56.25C56.25 181.25 87.5 150 125 150Z"
+              fill="#fffffe"
+            />
+          </svg>
+        ) : (
+          // User's custom avatar image
+          <img
+            src={avatarUrl}
+            alt="User avatar"
+            style={{
+              width: "100%",
+              height: "100%",
+              borderRadius: avatarShape === "square" ? "4px" : "50%",
+              objectFit: "cover",
+            }}
+          />
+        )}
+      </div>
+
+      {/* User Information Section */}
+      <div
+        style={{
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
-          justifyContent: "flex-start",
-          paddingTop: "15px",
+          justifyContent: "center",
+          color: "white",
+          textAlign: "center",
+          padding: "16px 24px",
+          borderRadius: "12px",
+          backgroundColor: "rgba(15, 16, 18, 0.8)",
+          border: "1px solid rgba(255, 255, 255, 0.1)",
+          minWidth: "400px",
+          marginTop: "20px",
         }}
       >
-        {/* Banner Background Image */}
-        <img
-          src={bannerUrl}
-          width={1200}
-          height={630}
-          style={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            width: "1200px",
-            height: "630px",
-            objectFit: "cover",
-          }}
-          alt="Banner background"
-        />
-        {/* User Avatar Section */}
         <div
           style={{
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            width: "250px",
-            height: "250px",
-            borderRadius: avatarShape === "square" ? "4px" : "50%",
-            overflow: "hidden",
-            backgroundColor: "#0f1012",
+            fontSize: 48,
+            fontFamily: "LuckiestGuy",
           }}
         >
-          {useDefaultAvatar ? (
-            // Default avatar SVG for users without custom avatars
-            <svg
-              width="250"
-              height="250"
-              viewBox="0 0 250 250"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <circle cx="125" cy="125" r="125" fill="#0f1012" />
-              <circle cx="125" cy="100" r="37.5" fill="#fffffe" />
-              <path
-                d="M125 150C162.5 150 193.75 181.25 193.75 218.75H56.25C56.25 181.25 87.5 150 125 150Z"
-                fill="#fffffe"
-              />
-            </svg>
-          ) : (
-            // User's custom avatar image
-            <img
-              src={avatarUrl}
-              alt="User avatar"
-              style={{
-                width: "100%",
-                height: "100%",
-                borderRadius: avatarShape === "square" ? "4px" : "50%",
-                objectFit: "cover",
-              }}
-            />
-          )}
+          <b>
+            {user.global_name && user.global_name !== "None"
+              ? user.global_name
+              : user.username}
+          </b>
         </div>
-
-        {/* User Information Section */}
         <div
           style={{
             display: "flex",
-            flexDirection: "column",
             alignItems: "center",
             justifyContent: "center",
-            color: "white",
-            textAlign: "center",
-            padding: "16px 24px",
-            borderRadius: "12px",
-            backgroundColor: "rgba(15, 16, 18, 0.8)",
-            border: "1px solid rgba(255, 255, 255, 0.1)",
-            minWidth: "400px",
-            marginTop: "20px",
+            fontSize: 36,
+            color: "#94a1b2",
           }}
         >
+          @{user.username}
+        </div>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            fontSize: 24,
+            color: "#72757e",
+          }}
+        >
+          User #{userNumber}
+        </div>
+        {premiumTier && (
           <div
             style={{
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              fontSize: 48,
+              marginTop: "8px",
+              padding: "4px 12px",
+              borderRadius: "20px",
+              backgroundColor: premiumTier.color,
+              color: premiumTier.name === "Supporter 3" ? "#000000" : "#ffffff",
+              fontSize: 18,
               fontFamily: "LuckiestGuy",
+              fontWeight: "bold",
+              textShadow:
+                premiumTier.name === "Supporter 3"
+                  ? "none"
+                  : "1px 1px 2px rgba(0, 0, 0, 0.8)",
             }}
           >
-            <b>
-              {user.global_name && user.global_name !== "None"
-                ? user.global_name
-                : user.username}
-            </b>
+            {premiumTier.name}
           </div>
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontSize: 36,
-              color: "#94a1b2",
-            }}
-          >
-            @{user.username}
-          </div>
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontSize: 24,
-              color: "#72757e",
-            }}
-          >
-            User #{userNumber}
-          </div>
-          {premiumTier && (
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                marginTop: "8px",
-                padding: "4px 12px",
-                borderRadius: "20px",
-                backgroundColor: premiumTier.color,
-                color:
-                  premiumTier.name === "Supporter 3" ? "#000000" : "#ffffff",
-                fontSize: 18,
-                fontFamily: "LuckiestGuy",
-                fontWeight: "bold",
-                textShadow:
-                  premiumTier.name === "Supporter 3"
-                    ? "none"
-                    : "1px 1px 2px rgba(0, 0, 0, 0.8)",
-              }}
-            >
-              {premiumTier.name}
-            </div>
-          )}
-        </div>
+        )}
+      </div>
 
-        {/* Call-to-Action Section - Promotes the website */}
+      {/* Call-to-Action Section - Promotes the website */}
+      <div
+        style={{
+          position: "absolute",
+          bottom: 0,
+          left: 0,
+          right: 0,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          backgroundColor: "rgba(15, 16, 18, 0.9)",
+          backdropFilter: "blur(10px)",
+          padding: "20px",
+          borderTop: "1px solid rgba(255, 255, 255, 0.1)",
+        }}
+      >
         <div
           style={{
-            position: "absolute",
-            bottom: 0,
-            left: 0,
-            right: 0,
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
             justifyContent: "center",
-            backgroundColor: "rgba(15, 16, 18, 0.9)",
-            backdropFilter: "blur(10px)",
-            padding: "20px",
-            borderTop: "1px solid rgba(255, 255, 255, 0.1)",
+            textAlign: "center",
           }}
         >
-          <div
+          <h2
             style={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              justifyContent: "center",
-              textAlign: "center",
+              fontSize: 28,
+              fontFamily: "LuckiestGuy",
+              color: "white",
+              margin: "0 0 8px 0",
+              textShadow: "2px 2px 4px rgba(0, 0, 0, 0.8)",
             }}
           >
-            <h2
-              style={{
-                fontSize: 28,
-                fontFamily: "LuckiestGuy",
-                color: "white",
-                margin: "0 0 8px 0",
-                textShadow: "2px 2px 4px rgba(0, 0, 0, 0.8)",
-              }}
-            >
-              Ready to stay updated?
-            </h2>
-            <p
-              style={{
-                fontSize: 18,
-                color: "#94a1b2",
-                margin: "0 0 16px 0",
-                textShadow: "1px 1px 2px rgba(0, 0, 0, 0.8)",
-              }}
-            >
-              Visit{" "}
-              <span style={{ color: "#2462cd", fontWeight: "bold" }}>
-                jailbreakchangelogs.xyz
-              </span>
-            </p>
-          </div>
+            Ready to stay updated?
+          </h2>
+          <p
+            style={{
+              fontSize: 18,
+              color: "#94a1b2",
+              margin: "0 0 16px 0",
+              textShadow: "1px 1px 2px rgba(0, 0, 0, 0.8)",
+            }}
+          >
+            Visit{" "}
+            <span style={{ color: "#2462cd", fontWeight: "bold" }}>
+              jailbreakchangelogs.xyz
+            </span>
+          </p>
         </div>
       </div>
-    ),
+    </div>,
     {
       width: 1200,
       height: 630,
