@@ -6,6 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useBatchUserData } from "@/hooks/useBatchUserData";
 import { ItemHoarder } from "@/utils/api";
 import Image from "next/image";
+import Link from "next/link";
 import { DefaultAvatar } from "@/utils/avatar";
 import { MagnifyingGlassIcon, XMarkIcon } from "@heroicons/react/24/outline";
 
@@ -121,9 +122,11 @@ export default function HoardersTab({ itemName, itemType }: HoardersTabProps) {
       const user = robloxUsers[hoarder.user_id];
       const displayName = user?.displayName || user?.name || "";
       const username = user?.name || "";
+      const userId = hoarder.user_id || "";
       return (
         displayName.toLowerCase().includes(searchLower) ||
-        username.toLowerCase().includes(searchLower)
+        username.toLowerCase().includes(searchLower) ||
+        userId.toLowerCase().includes(searchLower)
       );
     });
   }, [hoarders, searchTerm, robloxUsers]);
@@ -342,14 +345,13 @@ export default function HoardersTab({ itemName, itemType }: HoardersTabProps) {
                       </div>
                     </div>
                     <div className="flex flex-col gap-1 min-w-0 flex-1">
-                      <a
-                        href={`https://www.roblox.com/users/${hoarder.user_id}/profile`}
-                        target="_blank"
-                        rel="noopener noreferrer"
+                      <Link
+                        href={`/inventories/${hoarder.user_id}`}
+                        prefetch={false}
                         className="text-primary-text hover:text-link-hover text-sm sm:text-lg font-bold transition-colors hover:underline truncate"
                       >
                         {displayName}
-                      </a>
+                      </Link>
                       <span className="text-secondary-text text-xs sm:text-sm truncate">
                         @{username}
                       </span>
