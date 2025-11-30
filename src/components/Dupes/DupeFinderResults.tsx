@@ -191,11 +191,55 @@ export default function DupeFinderResults({
       const itemData = itemsData.find((data) => data.id === item.item_id);
       if (!itemData) return false;
 
-      const matchesSearch =
-        searchTerm === "" ||
-        itemData.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        itemData.type.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.categoryTitle.toLowerCase().includes(searchTerm.toLowerCase());
+      let matchesSearch = searchTerm === "";
+
+      if (searchTerm.trim()) {
+        const normalize = (str: string) =>
+          str.toLowerCase().replace(/[^a-z0-9]/g, "");
+        const tokenize = (str: string) =>
+          str.toLowerCase().match(/[a-z0-9]+/g) || [];
+        const splitAlphaNum = (str: string) => {
+          return (str.match(/[a-z]+|[0-9]+/gi) || []).map((s) =>
+            s.toLowerCase(),
+          );
+        };
+
+        const searchNormalized = normalize(searchTerm);
+        const searchTokens = tokenize(searchTerm);
+        const searchAlphaNum = splitAlphaNum(searchTerm);
+
+        function isTokenSubsequence(
+          searchTokens: string[],
+          nameTokens: string[],
+        ) {
+          let i = 0,
+            j = 0;
+          while (i < searchTokens.length && j < nameTokens.length) {
+            if (nameTokens[j].includes(searchTokens[i])) {
+              i++;
+            }
+            j++;
+          }
+          return i === searchTokens.length;
+        }
+
+        const nameNormalized = normalize(itemData.name);
+        const typeNormalized = normalize(itemData.type);
+        const categoryNormalized = normalize(item.categoryTitle);
+        const nameTokens = tokenize(itemData.name);
+        const nameAlphaNum = splitAlphaNum(itemData.name);
+        const categoryTokens = tokenize(item.categoryTitle);
+        const categoryAlphaNum = splitAlphaNum(item.categoryTitle);
+
+        matchesSearch =
+          nameNormalized.includes(searchNormalized) ||
+          typeNormalized.includes(searchNormalized) ||
+          categoryNormalized.includes(searchNormalized) ||
+          isTokenSubsequence(searchTokens, nameTokens) ||
+          isTokenSubsequence(searchAlphaNum, nameAlphaNum) ||
+          isTokenSubsequence(searchTokens, categoryTokens) ||
+          isTokenSubsequence(searchAlphaNum, categoryAlphaNum);
+      }
 
       const matchesCategory =
         selectedCategories.length === 0 ||

@@ -175,10 +175,49 @@ export default function OGFinderResults({
     if (!initialData?.results) return [];
 
     return initialData.results.filter((item) => {
-      const matchesSearch =
-        searchTerm === "" ||
-        item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.categoryTitle.toLowerCase().includes(searchTerm.toLowerCase());
+      let matchesSearch = searchTerm === "";
+
+      if (searchTerm.trim()) {
+        const normalize = (str: string) =>
+          str.toLowerCase().replace(/[^a-z0-9]/g, "");
+        const tokenize = (str: string) =>
+          str.toLowerCase().match(/[a-z0-9]+/g) || [];
+        const splitAlphaNum = (str: string) => {
+          return (str.match(/[a-z]+|[0-9]+/gi) || []).map((s) =>
+            s.toLowerCase(),
+          );
+        };
+
+        const searchNormalized = normalize(searchTerm);
+        const searchTokens = tokenize(searchTerm);
+        const searchAlphaNum = splitAlphaNum(searchTerm);
+
+        function isTokenSubsequence(
+          searchTokens: string[],
+          nameTokens: string[],
+        ) {
+          let i = 0,
+            j = 0;
+          while (i < searchTokens.length && j < nameTokens.length) {
+            if (nameTokens[j].includes(searchTokens[i])) {
+              i++;
+            }
+            j++;
+          }
+          return i === searchTokens.length;
+        }
+
+        const titleNormalized = normalize(item.title);
+        const categoryNormalized = normalize(item.categoryTitle);
+        const titleTokens = tokenize(item.title);
+        const titleAlphaNum = splitAlphaNum(item.title);
+
+        matchesSearch =
+          titleNormalized.includes(searchNormalized) ||
+          categoryNormalized.includes(searchNormalized) ||
+          isTokenSubsequence(searchTokens, titleTokens) ||
+          isTokenSubsequence(searchAlphaNum, titleAlphaNum);
+      }
 
       const matchesCategory =
         selectedCategories.length === 0 ||

@@ -106,12 +106,18 @@ export default function DuplicatesTab({
   };
 
   // Combine data from both inventory.data and inventory.duplicates (if it exists)
+  // Track which items come from duplicates array for visual indication
   const combinedInventoryData = useMemo(() => {
-    const combined = [...initialData.data];
-    if (initialData.duplicates && initialData.duplicates.length > 0) {
-      combined.push(...initialData.duplicates);
-    }
-    return combined;
+    const regularItems = initialData.data || [];
+    const duplicateItems = initialData.duplicates || [];
+    const combined = [...regularItems, ...duplicateItems];
+
+    // Mark items from duplicates array
+    const duplicateItemIds = new Set(duplicateItems.map((item) => item.id));
+    return combined.map((item) => ({
+      ...item,
+      _isDupedItem: duplicateItemIds.has(item.id),
+    }));
   }, [initialData.data, initialData.duplicates]);
 
   // Merge combined inventory data with live metadata from item/list endpoint
@@ -218,10 +224,44 @@ export default function DuplicatesTab({
     if (!leaderboardSearch.trim()) {
       return multiCopyStats.allDuplicateItems;
     }
-    const searchLower = leaderboardSearch.toLowerCase();
-    return multiCopyStats.allDuplicateItems.filter((item) =>
-      item.title.toLowerCase().includes(searchLower),
-    );
+
+    const normalize = (str: string) =>
+      str.toLowerCase().replace(/[^a-z0-9]/g, "");
+    const tokenize = (str: string) =>
+      str.toLowerCase().match(/[a-z0-9]+/g) || [];
+    const splitAlphaNum = (str: string) => {
+      return (str.match(/[a-z]+|[0-9]+/gi) || []).map((s) => s.toLowerCase());
+    };
+
+    const searchNormalized = normalize(leaderboardSearch);
+    const searchTokens = tokenize(leaderboardSearch);
+    const searchAlphaNum = splitAlphaNum(leaderboardSearch);
+
+    function isTokenSubsequence(searchTokens: string[], nameTokens: string[]) {
+      let i = 0,
+        j = 0;
+      while (i < searchTokens.length && j < nameTokens.length) {
+        if (nameTokens[j].includes(searchTokens[i])) {
+          i++;
+        }
+        j++;
+      }
+      return i === searchTokens.length;
+    }
+
+    return multiCopyStats.allDuplicateItems.filter((item) => {
+      const titleNormalized = normalize(item.title);
+      const categoryNormalized = normalize(item.category);
+      const titleTokens = tokenize(item.title);
+      const titleAlphaNum = splitAlphaNum(item.title);
+
+      return (
+        titleNormalized.includes(searchNormalized) ||
+        categoryNormalized.includes(searchNormalized) ||
+        isTokenSubsequence(searchTokens, titleTokens) ||
+        isTokenSubsequence(searchAlphaNum, titleAlphaNum)
+      );
+    });
   }, [multiCopyStats.allDuplicateItems, leaderboardSearch]);
 
   // TanStack Virtual setup for performance with large duplicate datasets
@@ -259,10 +299,57 @@ export default function DuplicatesTab({
 
     // Filter by search term
     if (searchTerm.trim()) {
-      const searchLower = searchTerm.toLowerCase();
-      filtered = filtered.filter((item) =>
-        item.title.toLowerCase().includes(searchLower),
-      );
+      const normalize = (str: string) =>
+        str.toLowerCase().replace(/[^a-z0-9]/g, "");
+      const tokenize = (str: string) =>
+        str.toLowerCase().match(/[a-z0-9]+/g) || [];
+      const splitAlphaNum = (str: string) => {
+        return (str.match(/[a-z]+|[0-9]+/gi) || []).map((s) => s.toLowerCase());
+      };
+
+      const searchNormalized = normalize(searchTerm);
+      const searchTokens = tokenize(searchTerm);
+      const searchAlphaNum = splitAlphaNum(searchTerm);
+
+      function isTokenSubsequence(
+        searchTokens: string[],
+        nameTokens: string[],
+      ) {
+        let i = 0,
+          j = 0;
+        while (i < searchTokens.length && j < nameTokens.length) {
+          if (nameTokens[j].includes(searchTokens[i])) {
+            i++;
+          }
+          j++;
+        }
+        return i === searchTokens.length;
+      }
+
+      filtered = filtered.filter((item) => {
+        const itemData = itemsData.find((data) => data.id === item.item_id);
+        if (!itemData) return false;
+
+        const titleNormalized = normalize(item.title);
+        const categoryNormalized = normalize(item.categoryTitle);
+        const nameNormalized = normalize(itemData.name);
+        const typeNormalized = normalize(itemData.type);
+        const titleTokens = tokenize(item.title);
+        const titleAlphaNum = splitAlphaNum(item.title);
+        const nameTokens = tokenize(itemData.name);
+        const nameAlphaNum = splitAlphaNum(itemData.name);
+
+        return (
+          titleNormalized.includes(searchNormalized) ||
+          categoryNormalized.includes(searchNormalized) ||
+          nameNormalized.includes(searchNormalized) ||
+          typeNormalized.includes(searchNormalized) ||
+          isTokenSubsequence(searchTokens, titleTokens) ||
+          isTokenSubsequence(searchAlphaNum, titleAlphaNum) ||
+          isTokenSubsequence(searchTokens, nameTokens) ||
+          isTokenSubsequence(searchAlphaNum, nameAlphaNum)
+        );
+      });
     }
 
     // Filter by category
@@ -580,6 +667,9 @@ export default function DuplicatesTab({
             return {
               item,
               itemData: itemDataWithVariants,
+              isDupedItem:
+                (item as InventoryItem & { _isDupedItem?: boolean })
+                  ._isDupedItem || false,
             };
           })}
           getUserDisplay={getUserDisplay}

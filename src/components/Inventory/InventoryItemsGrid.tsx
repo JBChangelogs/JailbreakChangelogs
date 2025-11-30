@@ -10,6 +10,7 @@ interface InventoryItemsGridProps {
   filteredItems: Array<{
     item: InventoryItem;
     itemData: Item;
+    isDupedItem?: boolean;
   }>;
   getUserDisplay: (userId: string) => string;
   getUserAvatar: (userId: string) => string;
@@ -47,7 +48,9 @@ export default function InventoryItemsGrid({
 
   const itemsPerRow = getItemsPerRow();
   const rows = useMemo(() => {
-    const rowArray: Array<{ item: InventoryItem; itemData: Item }>[] = [];
+    const rowArray: Array<
+      Array<{ item: InventoryItem; itemData: Item; isDupedItem?: boolean }>
+    > = [];
     for (let i = 0; i < filteredItems.length; i += itemsPerRow) {
       rowArray.push(filteredItems.slice(i, i + itemsPerRow));
     }
@@ -136,7 +139,7 @@ export default function InventoryItemsGrid({
                   gridTemplateColumns: `repeat(${itemsPerRow}, 1fr)`,
                 }}
               >
-                {rowItems.map(({ item, itemData }) => {
+                {rowItems.map(({ item, itemData, isDupedItem }) => {
                   const itemKey = `${item.categoryTitle}-${item.title}`;
                   const duplicateCount = itemCounts.get(itemKey) || 1;
                   const uniqueKey = `${item.id}-${item.timesTraded}-${item.uniqueCirculation}`;
@@ -183,6 +186,7 @@ export default function InventoryItemsGrid({
                       duplicateOrder={duplicateOrder}
                       userId={userId}
                       variant={variant}
+                      isDupedItem={isDupedItem}
                     />
                   );
                 })}

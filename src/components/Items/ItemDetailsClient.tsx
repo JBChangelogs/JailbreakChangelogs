@@ -61,6 +61,7 @@ const ChangelogComments = dynamic(
 );
 
 import SimilarItems from "@/components/Items/SimilarItems";
+import HoardersTab from "@/components/Items/HoardersTab";
 
 import { fetchUserFavorites, CommentData } from "@/utils/api";
 import {
@@ -111,6 +112,7 @@ const ItemDetailsTabs = React.memo(
       "Charts",
       "Changes",
       "Dupes",
+      "Hoarders",
       "Similar Items",
       "Comments",
     ];
@@ -217,15 +219,17 @@ export default function ItemDetailsClient({
   useEffect(() => {
     // Hash navigation
     if (window.location.hash === "#comments") {
-      setTimeout(() => setActiveTab(5), 0);
+      setTimeout(() => setActiveTab(6), 0);
     } else if (window.location.hash === "#charts") {
       setTimeout(() => setActiveTab(1), 0);
     } else if (window.location.hash === "#changes") {
       setTimeout(() => setActiveTab(2), 0);
     } else if (window.location.hash === "#dupes") {
       setTimeout(() => setActiveTab(3), 0);
-    } else if (window.location.hash === "#similar") {
+    } else if (window.location.hash === "#hoarders") {
       setTimeout(() => setActiveTab(4), 0);
+    } else if (window.location.hash === "#similar") {
+      setTimeout(() => setActiveTab(5), 0);
     } else {
       setTimeout(() => setActiveTab(0), 0);
     }
@@ -362,8 +366,10 @@ export default function ItemDetailsClient({
     } else if (newValue === 3) {
       window.location.hash = "dupes";
     } else if (newValue === 4) {
-      window.location.hash = "similar";
+      window.location.hash = "hoarders";
     } else if (newValue === 5) {
+      window.location.hash = "similar";
+    } else if (newValue === 6) {
       window.location.hash = "comments";
     }
   };
@@ -1079,8 +1085,8 @@ export default function ItemDetailsClient({
                                 key={index}
                                 className="hover:bg-secondary-bg hover:border-border-primary flex items-center justify-between rounded-lg border border-transparent px-4 py-3 transition-colors"
                               >
-                                <div className="flex items-center gap-4">
-                                  <span className="text-tertiary-text min-w-[80px] text-sm font-semibold tracking-wide uppercase">
+                                <div className="flex items-center min-w-0 flex-1">
+                                  <span className="text-tertiary-text min-w-[80px] text-sm font-semibold tracking-wide uppercase shrink-0 mr-1">
                                     #
                                     {(dupedOwnersPage - 1) * ITEMS_PER_PAGE +
                                       index +
@@ -1091,12 +1097,12 @@ export default function ItemDetailsClient({
                                       href={`https://www.roblox.com/users/${owner.user_id}/profile`}
                                       target="_blank"
                                       rel="noopener noreferrer"
-                                      className="text-primary-text hover:text-link-hover text-lg font-bold transition-colors hover:underline"
+                                      className="text-primary-text hover:text-link-hover text-sm sm:text-lg font-bold transition-colors hover:underline truncate min-w-0"
                                     >
                                       {owner.owner}
                                     </a>
                                   ) : (
-                                    <span className="text-primary-text text-lg font-bold">
+                                    <span className="text-primary-text text-sm sm:text-lg font-bold truncate min-w-0">
                                       {owner.owner}
                                     </span>
                                   )}
@@ -1160,6 +1166,12 @@ export default function ItemDetailsClient({
 
               {activeTab === 4 && (
                 <div className="space-y-6">
+                  <HoardersTab itemName={item.name} itemType={item.type} />
+                </div>
+              )}
+
+              {activeTab === 5 && (
+                <div className="space-y-6">
                   <SimilarItems
                     currentItem={currentItem}
                     similarItemsPromise={similarItemsPromise}
@@ -1167,7 +1179,7 @@ export default function ItemDetailsClient({
                 </div>
               )}
 
-              {activeTab === 5 && item && (
+              {activeTab === 6 && item && (
                 <ChangelogComments
                   changelogId={item.id}
                   changelogTitle={item.name}

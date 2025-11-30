@@ -40,6 +40,7 @@ interface InventoryItemCardProps {
   duplicateOrder?: number;
   userId: string;
   variant?: string;
+  isDupedItem?: boolean;
 }
 
 export default function InventoryItemCard({
@@ -53,6 +54,7 @@ export default function InventoryItemCard({
   duplicateOrder = 1,
   userId,
   variant,
+  isDupedItem = false,
 }: InventoryItemCardProps) {
   const isOriginalOwner = item.isOriginalOwner;
   const originalOwnerInfo = item.info.find(
@@ -64,9 +66,11 @@ export default function InventoryItemCard({
   return (
     <div
       className={`text-primary-text hover:shadow-card-shadow relative flex min-h-[400px] cursor-pointer flex-col rounded-lg p-3 transition-all duration-200 ${
-        isOriginalOwner
-          ? "border border-[#FFD700] bg-[#FFD700]/10 hover:border-[#FFD700]"
-          : "border-border-primary bg-primary-bg hover:border-border-focus border"
+        isDupedItem
+          ? "border border-button-danger bg-button-danger/10 hover:border-button-danger"
+          : isOriginalOwner
+            ? "border border-[#FFD700] bg-[#FFD700]/10 hover:border-[#FFD700]"
+            : "border-border-primary bg-primary-bg hover:border-border-focus border"
       }`}
       onClick={() => onCardClick(item)}
     >
@@ -110,6 +114,11 @@ export default function InventoryItemCard({
             })()}
             {item.categoryTitle}
           </span>
+          {isDupedItem && (
+            <span className="bg-button-danger text-form-button-text flex items-center gap-1 rounded-full border border-button-danger px-2 py-0.5 text-xs font-medium">
+              Duped
+            </span>
+          )}
         </div>
       </div>
 

@@ -48,9 +48,22 @@ export default function InventoryItems({
   // This ensures fields like timesTraded and uniqueCirculation
   // reflect the latest state from metadata, not stale snapshots
   // Also include duplicates from the API response
+  // Track which items come from duplicates array for visual indication
   const mergedInventoryData = useMemo(() => {
-    const allItems = [...initialData.data, ...(initialData.duplicates || [])];
-    return mergeInventoryArrayWithMetadata(allItems, propItemsData || []);
+    const regularItems = initialData.data || [];
+    const duplicateItems = initialData.duplicates || [];
+    const allItems = [...regularItems, ...duplicateItems];
+    const merged = mergeInventoryArrayWithMetadata(
+      allItems,
+      propItemsData || [],
+    );
+
+    // Mark items from duplicates array
+    const duplicateItemIds = new Set(duplicateItems.map((item) => item.id));
+    return merged.map((item) => ({
+      ...item,
+      _isDupedItem: duplicateItemIds.has(item.id),
+    }));
   }, [initialData.data, initialData.duplicates, propItemsData]);
 
   // Get variant-specific values (e.g., different hyperchrome colors by year)
@@ -254,12 +267,49 @@ export default function InventoryItems({
           return false;
         }
         if (searchTerm) {
-          const searchLower = searchTerm.toLowerCase();
-          if (
-            !itemData.name.toLowerCase().includes(searchLower) &&
-            !itemData.type.toLowerCase().includes(searchLower) &&
-            !itemData.creator.toLowerCase().includes(searchLower)
+          const normalize = (str: string) =>
+            str.toLowerCase().replace(/[^a-z0-9]/g, "");
+          const tokenize = (str: string) =>
+            str.toLowerCase().match(/[a-z0-9]+/g) || [];
+          const splitAlphaNum = (str: string) => {
+            return (str.match(/[a-z]+|[0-9]+/gi) || []).map((s) =>
+              s.toLowerCase(),
+            );
+          };
+
+          const searchNormalized = normalize(searchTerm);
+          const searchTokens = tokenize(searchTerm);
+          const searchAlphaNum = splitAlphaNum(searchTerm);
+
+          function isTokenSubsequence(
+            searchTokens: string[],
+            nameTokens: string[],
           ) {
+            let i = 0,
+              j = 0;
+            while (i < searchTokens.length && j < nameTokens.length) {
+              if (nameTokens[j].includes(searchTokens[i])) {
+                i++;
+              }
+              j++;
+            }
+            return i === searchTokens.length;
+          }
+
+          const nameNormalized = normalize(itemData.name);
+          const typeNormalized = normalize(itemData.type);
+          const creatorNormalized = normalize(itemData.creator || "");
+          const nameTokens = tokenize(itemData.name);
+          const nameAlphaNum = splitAlphaNum(itemData.name);
+
+          const matches =
+            nameNormalized.includes(searchNormalized) ||
+            typeNormalized.includes(searchNormalized) ||
+            creatorNormalized.includes(searchNormalized) ||
+            isTokenSubsequence(searchTokens, nameTokens) ||
+            isTokenSubsequence(searchAlphaNum, nameAlphaNum);
+
+          if (!matches) {
             return false;
           }
         }
@@ -357,12 +407,49 @@ export default function InventoryItems({
 
       // Search filter
       if (searchTerm) {
-        const searchLower = searchTerm.toLowerCase();
-        if (
-          !itemData.name.toLowerCase().includes(searchLower) &&
-          !itemData.type.toLowerCase().includes(searchLower) &&
-          !itemData.creator.toLowerCase().includes(searchLower)
+        const normalize = (str: string) =>
+          str.toLowerCase().replace(/[^a-z0-9]/g, "");
+        const tokenize = (str: string) =>
+          str.toLowerCase().match(/[a-z0-9]+/g) || [];
+        const splitAlphaNum = (str: string) => {
+          return (str.match(/[a-z]+|[0-9]+/gi) || []).map((s) =>
+            s.toLowerCase(),
+          );
+        };
+
+        const searchNormalized = normalize(searchTerm);
+        const searchTokens = tokenize(searchTerm);
+        const searchAlphaNum = splitAlphaNum(searchTerm);
+
+        function isTokenSubsequence(
+          searchTokens: string[],
+          nameTokens: string[],
         ) {
+          let i = 0,
+            j = 0;
+          while (i < searchTokens.length && j < nameTokens.length) {
+            if (nameTokens[j].includes(searchTokens[i])) {
+              i++;
+            }
+            j++;
+          }
+          return i === searchTokens.length;
+        }
+
+        const nameNormalized = normalize(itemData.name);
+        const typeNormalized = normalize(itemData.type);
+        const creatorNormalized = normalize(itemData.creator || "");
+        const nameTokens = tokenize(itemData.name);
+        const nameAlphaNum = splitAlphaNum(itemData.name);
+
+        const matches =
+          nameNormalized.includes(searchNormalized) ||
+          typeNormalized.includes(searchNormalized) ||
+          creatorNormalized.includes(searchNormalized) ||
+          isTokenSubsequence(searchTokens, nameTokens) ||
+          isTokenSubsequence(searchAlphaNum, nameAlphaNum);
+
+        if (!matches) {
           return false;
         }
       }
@@ -432,6 +519,9 @@ export default function InventoryItems({
       return {
         item,
         itemData: itemDataWithVariants,
+        isDupedItem:
+          (item as InventoryItem & { _isDupedItem?: boolean })._isDupedItem ||
+          false,
       };
     });
 
