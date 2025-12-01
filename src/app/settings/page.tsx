@@ -83,6 +83,10 @@ export default function SettingsPage() {
       const updatedUser: UserData = {
         ...userData,
         custom_banner: newBannerUrl,
+        settings: {
+          ...userData.settings,
+          banner_discord: 0, // Set to use custom banner
+        },
       };
       safeSetJSON("user", updatedUser);
       window.dispatchEvent(
@@ -96,6 +100,10 @@ export default function SettingsPage() {
       const updatedUser: UserData = {
         ...userData,
         custom_avatar: newAvatarUrl,
+        settings: {
+          ...userData.settings,
+          avatar_discord: 0, // Set to use custom avatar
+        },
       };
       safeSetJSON("user", updatedUser);
       window.dispatchEvent(
@@ -460,6 +468,35 @@ export default function SettingsPage() {
                       }}
                     >
                       Imgur
+                    </Button>
+                    <Button
+                      variant="contained"
+                      size="medium"
+                      startIcon={<OpenInNew />}
+                      onClick={() =>
+                        window.open(
+                          "https://vgy.me/",
+                          "_blank",
+                          "noopener,noreferrer",
+                        )
+                      }
+                      sx={{
+                        backgroundColor: "var(--color-button-info)",
+                        color: "var(--color-form-button-text)",
+                        fontWeight: 600,
+                        borderRadius: 2,
+                        px: 2,
+                        py: 1,
+                        boxShadow: "var(--color-card-shadow)",
+                        "&:hover": {
+                          backgroundColor: "var(--color-button-info-hover)",
+                          boxShadow: "var(--color-card-shadow)",
+                          transform: "translateY(-1px)",
+                        },
+                        transition: "all 0.2s ease-in-out",
+                      }}
+                    >
+                      vgy.me
                     </Button>
                   </Box>
                 </>

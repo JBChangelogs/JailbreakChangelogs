@@ -1,6 +1,10 @@
 import { NextResponse } from "next/server";
 import { UPLOAD_CONFIG, getAllowedFileExtensions } from "@/config/settings";
 
+// Increase route timeout for large file uploads (5 minutes)
+// vgy.me can take over a minute to process large files
+export const maxDuration = 300;
+
 /**
  * Validates file content using magic bytes (file signatures)
  * This is the most reliable method to detect actual file types
@@ -251,17 +255,11 @@ export async function POST(request: Request) {
       hasUserkey: !!userkey,
     });
 
-    // Upload with timeout protection
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 30000);
-
+    // Upload to vgy.me - let the server handle timeout
     const response = await fetch("https://vgy.me/upload", {
       method: "POST",
       body: vgyFormData,
-      signal: controller.signal,
     });
-
-    clearTimeout(timeoutId);
 
     if (!response.ok) {
       const errorText = await response.text();
@@ -298,11 +296,24 @@ export async function POST(request: Request) {
         );
       }
 
-      // Check if the error response is an HTML error page (like Cloudflare 502 page)
+      if (response.status === 524) {
+        return NextResponse.json(
+          {
+            message:
+              "vgy.me server timed out processing your upload. The file may be too large or the server is overloaded. Please try again later or use a direct image URL from another service.",
+          },
+          { status: 503 },
+        );
+      }
+
+      // Check if the error response is an HTML error page (like Cloudflare error pages)
       if (
         errorText.includes("<!DOCTYPE html>") ||
         errorText.includes("502: Bad gateway") ||
-        errorText.includes("Bad gateway")
+        errorText.includes("Bad gateway") ||
+        errorText.includes("524: A timeout occurred") ||
+        errorText.includes("A timeout occurred") ||
+        errorText.includes("Error code 524")
       ) {
         return NextResponse.json(
           {
@@ -364,13 +375,6 @@ export async function POST(request: Request) {
     });
 
     // Handle specific error types
-    if (error instanceof Error && error.name === "AbortError") {
-      return NextResponse.json(
-        { message: "Upload timeout - please try again" },
-        { status: 408 },
-      );
-    }
-
     if (error instanceof Error && error.message.includes("fetch")) {
       return NextResponse.json(
         {

@@ -6,7 +6,7 @@ import Image from "next/image";
 const Tooltip = dynamic(() => import("@mui/material/Tooltip"), { ssr: false });
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import { UserData } from "@/types/auth";
-import { updateBanner } from "@/services/settingsService";
+import { updateBanner, updateSettings } from "@/services/settingsService";
 import toast from "react-hot-toast";
 import { useSupporterModal } from "@/hooks/useSupporterModal";
 import SupporterModal from "../Modals/SupporterModal";
@@ -92,9 +92,11 @@ export const BannerSettings = ({
   }, []);
 
   useEffect(() => {
-    if (userData?.custom_banner) {
+    if (userData?.custom_banner && userData.custom_banner !== "N/A") {
       setCustomBannerUrl(userData.custom_banner);
       validateBannerUrl(userData.custom_banner);
+    } else {
+      setCustomBannerUrl("");
     }
   }, [userData, validateBannerUrl]);
 
@@ -137,6 +139,15 @@ export const BannerSettings = ({
     setIsUploading(true);
     setBannerError(null);
 
+    // Show loading toast
+    const loadingToast = toast.loading(
+      "Uploading your image to the server...",
+      {
+        duration: Infinity,
+        position: "bottom-right",
+      },
+    );
+
     try {
       const formData = new FormData();
       formData.append("file", file);
@@ -155,6 +166,13 @@ export const BannerSettings = ({
             "File upload is not available. Please use a direct image URL from ImgBB, PostImg, or other image hosting services.",
           );
         }
+        // Handle timeout errors specifically
+        if (response.status === 408) {
+          throw new Error(
+            result.message ||
+              "Upload timeout - the file is too large or the connection is too slow. Please try a smaller file or use a direct image URL.",
+          );
+        }
         throw new Error(result.message || "Upload failed");
       }
 
@@ -162,9 +180,18 @@ export const BannerSettings = ({
       setCustomBannerUrl(result.imageUrl);
       validateBannerUrl(result.imageUrl);
 
+      // Dismiss loading toast
+      toast.dismiss(loadingToast);
+
       // Auto-save the banner immediately
       try {
         await updateBanner(result.imageUrl);
+        // Also update settings to use custom banner instead of Discord
+        // Include all current settings when updating
+        await updateSettings({
+          ...userData.settings,
+          banner_discord: 0,
+        });
         onBannerUpdate(result.imageUrl);
         toast.success("Banner updated successfully!", {
           duration: 3000,
@@ -178,6 +205,9 @@ export const BannerSettings = ({
         );
       }
     } catch (error) {
+      // Dismiss loading toast on error
+      toast.dismiss(loadingToast);
+
       console.error("Error uploading file:", error);
       const errorMessage =
         error instanceof Error ? error.message : "Failed to upload file";
@@ -204,8 +234,13 @@ export const BannerSettings = ({
     if (!isValidBanner) return;
 
     try {
-      // Update the banner URL
+      // Update the banner URL and settings to use custom banner instead of Discord
       const newBannerUrl = await updateBanner(customBannerUrl);
+      // Include all current settings when updating
+      await updateSettings({
+        ...userData.settings,
+        banner_discord: 0,
+      });
       onBannerUpdate(newBannerUrl);
       toast.success("Custom banner updated successfully");
     } catch (error) {
@@ -295,7 +330,7 @@ export const BannerSettings = ({
               size="small"
               placeholder={
                 userData?.premiumtype && userData.premiumtype >= 2
-                  ? "https://example.com/your-banner.jpg"
+                  ? "Your custom banner URL here"
                   : "Suppoter 2 feature - Upgrade to unlock"
               }
               value={customBannerUrl}
@@ -318,11 +353,19 @@ export const BannerSettings = ({
                 },
                 "& .MuiInputBase-input": {
                   color: "var(--color-primary-text)",
+                  "&::placeholder": {
+                    color: "var(--color-tertiary-text)",
+                    opacity: 1,
+                  },
                 },
                 "& .MuiInputBase-input.Mui-disabled": {
                   color: "var(--color-primary-text) !important",
                   WebkitTextFillColor: "var(--color-primary-text) !important",
                   cursor: "not-allowed",
+                  "&::placeholder": {
+                    color: "var(--color-tertiary-text) !important",
+                    opacity: 1,
+                  },
                 },
                 "& .MuiFormHelperText-root": {
                   marginTop: "4px",
