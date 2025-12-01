@@ -30,7 +30,7 @@ import { getDefaultConsent } from "@/utils/serverConsent";
 
 const inter = Inter({ subsets: ["latin"] });
 export const viewport: Viewport = {
-  themeColor: "#2462CD",
+  themeColor: "#FA2E26",
 };
 
 export async function generateMetadata(): Promise<Metadata> {

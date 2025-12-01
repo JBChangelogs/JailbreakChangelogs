@@ -516,7 +516,7 @@ export async function GET(request: Request) {
             }}
           >
             Visit{" "}
-            <span style={{ color: "#2462cd", fontWeight: "bold" }}>
+            <span style={{ color: "#FA2E26", fontWeight: "bold" }}>
               jailbreakchangelogs.xyz
             </span>
           </p>
