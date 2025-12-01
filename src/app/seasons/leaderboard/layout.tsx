@@ -16,23 +16,12 @@ export async function generateMetadata(): Promise<Metadata> {
       type: "website",
       siteName: "Jailbreak Changelogs",
       url: "https://jailbreakchangelogs.xyz/seasons/leaderboard",
-      images: [
-        {
-          url: "https://assets.jailbreakchangelogs.xyz/assets/logos/JBCL_Long_Light_Background.png",
-          width: 1200,
-          height: 630,
-          alt: "Jailbreak Changelogs Season Leaderboard",
-        },
-      ],
     },
     twitter: {
       card: "summary_large_image",
       title: "Season Leaderboard - Jailbreak Changelogs",
       description:
         "View the top 25 players in the current Roblox Jailbreak season ranked by their total experience and see who's leading the seaso",
-      images: [
-        "https://assets.jailbreakchangelogs.xyz/assets/logos/JBCL_Long_Light_Background.png",
-      ],
     },
     keywords: [
       "jailbreak",

@@ -10,14 +10,6 @@ export const metadata = {
     title: "User Search - Find Community Members",
     description:
       "Search for users on Jailbreak Changelogs and manage your own profile. Engage with the community through comments and track your contributions!.",
-    images: [
-      {
-        url: "https://assets.jailbreakchangelogs.xyz/assets/logos/JBCL_Long_Light_Background.png",
-        width: 1200,
-        height: 630,
-        alt: "Jailbreak Changelogs Banner",
-      },
-    ],
     type: "website",
     siteName: "Jailbreak Changelogs",
     url: "https://jailbreakchangelogs.xyz/users",
@@ -27,9 +19,6 @@ export const metadata = {
     title: "User Search - Find Community Members",
     description:
       "Search for users on Jailbreak Changelogs and manage your own profile. Engage with the community through comments and track your contributions!",
-    images: [
-      "https://assets.jailbreakchangelogs.xyz/assets/logos/JBCL_Long_Light_Background.png",
-    ],
   },
 };
 

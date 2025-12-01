@@ -12,14 +12,6 @@ export const metadata: Metadata = {
     title: "Jailbreak Seasons | Complete Season Archives",
     description:
       "Explore every season of Roblox Jailbreak! Each season brings exciting limited-time rewards, exclusive vehicles, and unique customization items.",
-    images: [
-      {
-        url: "https://assets.jailbreakchangelogs.xyz/assets/logos/JBCL_Long_Light_Background.png",
-        width: 1200,
-        height: 630,
-        alt: "Jailbreak Seasons Archives",
-      },
-    ],
     siteName: "Jailbreak Changelogs",
     url: "https://jailbreakchangelogs.xyz/seasons",
   },
@@ -28,9 +20,6 @@ export const metadata: Metadata = {
     title: "Jailbreak Seasons | Complete Season Archives",
     description:
       "Explore every season of Roblox Jailbreak! Each season brings exciting limited-time rewards, exclusive vehicles, and unique customization items.",
-    images: [
-      "https://assets.jailbreakchangelogs.xyz/assets/logos/JBCL_Long_Light_Background.png",
-    ],
   },
 };
 

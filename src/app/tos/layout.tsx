@@ -14,23 +14,12 @@ export const metadata: Metadata = {
       "Read the Terms of Service for Jailbreak Changelogs. Learn about the rules, guidelines, and legal agreements that govern your use of our services.",
     type: "website",
     url: "https://jailbreakchangelogs.xyz/tos",
-    images: [
-      {
-        url: "https://assets.jailbreakchangelogs.xyz/assets/logos/JBCL_Long_Light_Background.png",
-        width: 1200,
-        height: 630,
-        alt: "Jailbreak Changelogs Banner",
-      },
-    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "Terms of Service",
     description:
       "Read the Terms of Service for Jailbreak Changelogs. Learn about the rules, guidelines, and legal agreements that govern your use of our services.",
-    images: [
-      "https://assets.jailbreakchangelogs.xyz/assets/logos/JBCL_Long_Light_Background.png",
-    ],
   },
 };
 

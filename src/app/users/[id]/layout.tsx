@@ -175,23 +175,12 @@ export async function generateMetadata({
         type: "website",
         url: `/users/${userId}`,
         siteName: "Jailbreak Changelogs",
-        images: [
-          {
-            url: "https://assets.jailbreakchangelogs.xyz/assets/logos/JBCL_Long_Light_Background.png",
-            width: 1200,
-            height: 630,
-            alt: "Jailbreak Changelogs Logo",
-          },
-        ],
       },
       twitter: {
         card: "summary_large_image",
         title: "User Not Found | Changelogs",
         description:
           "This user profile could not be found on Jailbreak Changelogs.",
-        images: [
-          "https://assets.jailbreakchangelogs.xyz/assets/logos/JBCL_Long_Light_Background.png",
-        ],
       },
     };
   }

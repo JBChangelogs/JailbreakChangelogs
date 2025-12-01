@@ -22,23 +22,12 @@ export async function generateMetadata(): Promise<Metadata> {
       type: "website",
       siteName: "Jailbreak Changelogs",
       url: "https://jailbreakchangelogs.xyz/leaderboard/money",
-      images: [
-        {
-          url: "https://assets.jailbreakchangelogs.xyz/assets/logos/JBCL_Long_Light_Background.png",
-          width: 1200,
-          height: 630,
-          alt: "Jailbreak Changelogs Money Leaderboard",
-        },
-      ],
     },
     twitter: {
       card: "summary_large_image",
       title: "Money Leaderboard - Jailbreak Changelogs",
       description:
         "View the top players in Roblox Jailbreak ranked by their total money. See who has the most cash, find your rank, and track the wealthiest players in the game.",
-      images: [
-        "https://assets.jailbreakchangelogs.xyz/assets/logos/JBCL_Long_Light_Background.png",
-      ],
     },
     keywords: [
       "jailbreak",

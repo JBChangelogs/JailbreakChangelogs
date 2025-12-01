@@ -12,22 +12,11 @@ export const defaultMetadata: Metadata = {
     type: "website",
     siteName: "Jailbreak Changelogs",
     url: "/changelogs",
-    images: [
-      {
-        url: "https://assets.jailbreakchangelogs.xyz/assets/logos/JBCL_Long_Light_Background.png",
-        width: 1200,
-        height: 630,
-        alt: "Jailbreak Changelogs Banner",
-      },
-    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "Jailbreak Changelogs & Update History",
     description:
       "Track every update, feature release, and game modification in Jailbreak's history. Browse through our comprehensive collection of Roblox Jailbreak changelogs.",
-    images: [
-      "https://assets.jailbreakchangelogs.xyz/assets/logos/JBCL_Long_Light_Background.png",
-    ],
   },
 };
