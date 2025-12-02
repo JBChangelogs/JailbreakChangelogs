@@ -426,6 +426,8 @@ export default function ValuesClient({
               setRangeValue([0, MAX_VALUE_RANGE]);
               setAppliedMinValue(0);
               setAppliedMaxValue(MAX_VALUE_RANGE);
+              safeLocalStorage.setItem("valuesFilterSort", "name-all-items");
+              safeLocalStorage.setItem("valuesValueSort", "cash-desc");
             }}
             filterSort={filterSort}
             valueSort={valueSort}
