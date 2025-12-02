@@ -90,6 +90,7 @@ export default function InventoryCheckerClient({
   const [selectedItem, setSelectedItem] = useState<InventoryItem | null>(null);
   const [showHistoryModal, setShowHistoryModal] = useState(false);
   const forceShowErrorHandledRef = useRef<boolean>(false);
+  const lastShownErrorRef = useRef<string | null>(null);
   const [robloxUsers, setRobloxUsers] = useState<Record<string, RobloxUser>>(
     initialRobloxUsers || {},
   );
@@ -294,6 +295,17 @@ export default function InventoryCheckerClient({
   const isLoading =
     (internalIsLoading && !initialData && !error) || externalIsLoading || false;
 
+  // Destructure scanWebSocket properties before useEffect to satisfy exhaustive-deps
+  const {
+    status: scanStatus,
+    message: scanMessage,
+    error: scanError,
+    progress: scanProgress,
+    expiresAt: scanExpiresAt,
+    forceShowError: scanForceShowError,
+    resetForceShowError: scanResetForceShowError,
+  } = scanWebSocket;
+
   // Handle scan status updates (for error state scanning)
   useEffect(() => {
     if (!isOwnInventory) {
@@ -308,58 +320,55 @@ export default function InventoryCheckerClient({
       return;
     }
 
-    if (scanWebSocket.status === "connecting") {
+    if (scanStatus === "connecting") {
+      lastShownErrorRef.current = null;
       showScanLoadingToast("Connecting to scan service...");
     }
 
-    if (scanWebSocket.status === "scanning") {
-      if (
-        scanWebSocket.message &&
-        scanWebSocket.message.includes("User found")
-      ) {
+    if (scanStatus === "scanning") {
+      if (scanMessage && scanMessage.includes("User found")) {
         updateScanLoadingToast("User found in game!");
-      } else if (
-        scanWebSocket.message &&
-        scanWebSocket.message.includes("Bot joined server")
-      ) {
+      } else if (scanMessage && scanMessage.includes("Bot joined server")) {
         updateScanLoadingToast("Bot joined server, scanning...");
-      } else if (scanWebSocket.message) {
-        updateScanLoadingToast(`Scanning: ${scanWebSocket.message}`);
-      } else if (scanWebSocket.progress !== undefined) {
-        updateScanLoadingToast(`Scanning... ${scanWebSocket.progress}%`);
+      } else if (scanMessage) {
+        updateScanLoadingToast(`Scanning: ${scanMessage}`);
+      } else if (scanProgress !== undefined) {
+        updateScanLoadingToast(`Scanning... ${scanProgress}%`);
       }
     }
 
     if (
-      scanWebSocket.status === "completed" &&
-      scanWebSocket.message &&
-      scanWebSocket.message.includes("Added to queue")
+      scanStatus === "completed" &&
+      scanMessage &&
+      scanMessage.includes("Added to queue")
     ) {
+      lastShownErrorRef.current = null;
       dismissScanLoadingToast();
-      showScanSuccessToast(scanWebSocket.message);
+      showScanSuccessToast(scanMessage);
     }
 
-    if (scanWebSocket.status === "error") {
+    if (scanStatus === "error") {
       dismissScanLoadingToast();
 
-      if (
-        scanWebSocket.error &&
-        scanWebSocket.error.includes("No bots available")
-      ) {
+      // Prevent showing the same error multiple times
+      const currentError = scanError || "";
+      if (lastShownErrorRef.current === currentError) {
+        return;
+      }
+      lastShownErrorRef.current = currentError;
+
+      if (scanError && scanError.includes("No bots available")) {
         showScanErrorToast(
           "No scan bots are currently online. Please try again later.",
         );
       } else if (
-        scanWebSocket.message &&
-        scanWebSocket.message.includes("User not found in game")
+        scanMessage &&
+        scanMessage.includes("User not found in game")
       ) {
         showScanErrorToast(
           "User not found in game. Please join a trade server and try again.",
         );
-      } else if (
-        scanWebSocket.error &&
-        scanWebSocket.error.includes("high enough supporter")
-      ) {
+      } else if (scanError && scanError.includes("high enough supporter")) {
         showScanErrorToast("You need to be Supporter III to use this feature.");
         const tierNames = [
           "Free",
@@ -375,16 +384,13 @@ export default function InventoryCheckerClient({
           currentLimit: tierNames[userTier],
           requiredLimit: tierNames[3],
         });
-      } else if (
-        scanWebSocket.error &&
-        scanWebSocket.error.includes("recent scan")
-      ) {
+      } else if (scanError && scanError.includes("recent scan")) {
         let message =
           "You have a recent scan. Please wait before requesting another scan.";
 
-        if (scanWebSocket.expiresAt) {
+        if (scanExpiresAt) {
           const now = Math.floor(Date.now() / 1000);
-          const remainingSeconds = scanWebSocket.expiresAt - now;
+          const remainingSeconds = scanExpiresAt - now;
 
           if (remainingSeconds > 0) {
             let timeText;
@@ -405,28 +411,37 @@ export default function InventoryCheckerClient({
         setTimeout(() => {
           showScanErrorToast(message);
         }, 100);
-      } else if (scanWebSocket.error) {
-        showScanErrorToast(scanWebSocket.error);
+      } else if (scanError) {
+        showScanErrorToast(scanError);
       }
     }
 
     // Handle forceShowError flag for disabled WebSocket scanning
-    if (
-      scanWebSocket.forceShowError &&
-      scanWebSocket.error &&
-      !forceShowErrorHandledRef.current
-    ) {
-      console.log("[INVENTORY] Force showing error:", scanWebSocket.error);
-      showScanErrorToast(scanWebSocket.error);
-      scanWebSocket.resetForceShowError(); // Reset the flag
+    if (scanForceShowError && scanError && !forceShowErrorHandledRef.current) {
+      console.log("[INVENTORY] Force showing error:", scanError);
+      showScanErrorToast(scanError);
+      scanResetForceShowError(); // Reset the flag
       forceShowErrorHandledRef.current = true; // Mark as handled
     }
 
     // Reset the handled flag when forceShowError becomes false
-    if (!scanWebSocket.forceShowError) {
+    if (!scanForceShowError) {
       forceShowErrorHandledRef.current = false;
     }
-  }, [scanWebSocket, isOwnInventory, error, initialData, openModal, user]);
+  }, [
+    scanStatus,
+    scanMessage,
+    scanError,
+    scanProgress,
+    scanExpiresAt,
+    scanForceShowError,
+    scanResetForceShowError,
+    isOwnInventory,
+    error,
+    initialData,
+    openModal,
+    user?.premiumtype,
+  ]);
 
   // Function to handle tab changes
   const handleTabChange = (_: React.SyntheticEvent, newValue: number) => {
