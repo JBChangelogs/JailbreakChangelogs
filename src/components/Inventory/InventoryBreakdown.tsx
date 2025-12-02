@@ -1,6 +1,6 @@
 "use client";
 
-import { getCategoryColor } from "@/utils/categoryIcons";
+import { getCategoryColor, getCategoryIcon } from "@/utils/categoryIcons";
 import { UserNetworthData } from "@/utils/api";
 import dynamic from "next/dynamic";
 
@@ -36,6 +36,41 @@ export default function InventoryBreakdown({
     const truncated = Math.floor(percentage * 100) / 100;
     return truncated.toFixed(2);
   };
+
+  // Calculate category values using percentages and inventory_value
+  const calculateCategoryValues = (): Record<string, number> => {
+    if (!latestData?.percentages || !latestData.inventory_value) return {};
+
+    const categoryValues: Record<string, number> = {};
+    const totalInventoryValue = latestData.inventory_value;
+
+    Object.entries(latestData.percentages).forEach(([category, percentage]) => {
+      categoryValues[category] = (percentage / 100) * totalInventoryValue;
+    });
+
+    return categoryValues;
+  };
+
+  const categoryValues = calculateCategoryValues();
+
+  // Calculate duplicate category values
+  const calculateDuplicateCategoryValues = (): Record<string, number> => {
+    if (!latestData?.duplicates_percentages || !latestData.duplicates_value)
+      return {};
+
+    const duplicateCategoryValues: Record<string, number> = {};
+
+    Object.entries(latestData.duplicates_percentages).forEach(
+      ([category, percentage]) => {
+        duplicateCategoryValues[category] =
+          (percentage / 100) * latestData.duplicates_value!;
+      },
+    );
+
+    return duplicateCategoryValues;
+  };
+
+  const duplicateCategoryValues = calculateDuplicateCategoryValues();
 
   if (!latestData || !latestData.percentages) {
     return (
@@ -141,27 +176,44 @@ export default function InventoryBreakdown({
             <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
               {Object.entries(percentages)
                 .sort(([, a], [, b]) => b - a)
-                .map(([category, percentage]) => (
-                  <div
-                    key={category}
-                    className="bg-secondary-bg border-border-primary flex items-center justify-between gap-2 rounded border p-2 text-sm"
-                  >
-                    <div className="flex items-center gap-2">
-                      <div
-                        className="h-3 w-3 flex-shrink-0 rounded-sm"
-                        style={{
-                          backgroundColor: getCategoryColor(category),
-                        }}
-                      />
-                      <span className="text-primary-text font-medium">
-                        {category}
-                      </span>
+                .map(([category, percentage]) => {
+                  const categoryIcon = getCategoryIcon(category);
+                  return (
+                    <div
+                      key={category}
+                      className="bg-secondary-bg border-border-primary flex items-center justify-between gap-2 rounded border p-2 text-sm"
+                    >
+                      <div className="flex items-center gap-2">
+                        {categoryIcon ? (
+                          <categoryIcon.Icon
+                            className="h-4 w-4 shrink-0"
+                            style={{ color: getCategoryColor(category) }}
+                          />
+                        ) : (
+                          <div
+                            className="h-3 w-3 shrink-0 rounded-sm"
+                            style={{
+                              backgroundColor: getCategoryColor(category),
+                            }}
+                          />
+                        )}
+                        <span className="text-primary-text font-medium">
+                          {category}
+                        </span>
+                      </div>
+                      <div className="flex flex-col items-end gap-0.5">
+                        <span className="text-secondary-text font-semibold">
+                          {formatPercentage(percentage)}%
+                        </span>
+                        {categoryValues[category] !== undefined && (
+                          <span className="text-button-success text-xs font-medium">
+                            ${formatNetworth(categoryValues[category])}
+                          </span>
+                        )}
+                      </div>
                     </div>
-                    <span className="text-secondary-text font-semibold">
-                      {formatPercentage(percentage)}%
-                    </span>
-                  </div>
-                ))}
+                  );
+                })}
             </div>
           </>
         ) : (
@@ -241,27 +293,44 @@ export default function InventoryBreakdown({
             <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
               {Object.entries(duplicatesPercentages)
                 .sort(([, a], [, b]) => b - a)
-                .map(([category, percentage]) => (
-                  <div
-                    key={category}
-                    className="bg-secondary-bg border-border-primary flex items-center justify-between gap-2 rounded border p-2 text-sm"
-                  >
-                    <div className="flex items-center gap-2">
-                      <div
-                        className="h-3 w-3 flex-shrink-0 rounded-sm"
-                        style={{
-                          backgroundColor: getCategoryColor(category),
-                        }}
-                      />
-                      <span className="text-primary-text font-medium">
-                        {category}
-                      </span>
+                .map(([category, percentage]) => {
+                  const categoryIcon = getCategoryIcon(category);
+                  return (
+                    <div
+                      key={category}
+                      className="bg-secondary-bg border-border-primary flex items-center justify-between gap-2 rounded border p-2 text-sm"
+                    >
+                      <div className="flex items-center gap-2">
+                        {categoryIcon ? (
+                          <categoryIcon.Icon
+                            className="h-4 w-4 shrink-0"
+                            style={{ color: getCategoryColor(category) }}
+                          />
+                        ) : (
+                          <div
+                            className="h-3 w-3 shrink-0 rounded-sm"
+                            style={{
+                              backgroundColor: getCategoryColor(category),
+                            }}
+                          />
+                        )}
+                        <span className="text-primary-text font-medium">
+                          {category}
+                        </span>
+                      </div>
+                      <div className="flex flex-col items-end gap-0.5">
+                        <span className="text-secondary-text font-semibold">
+                          {formatPercentage(percentage)}%
+                        </span>
+                        {duplicateCategoryValues[category] !== undefined && (
+                          <span className="text-button-success text-xs font-medium">
+                            ${formatNetworth(duplicateCategoryValues[category])}
+                          </span>
+                        )}
+                      </div>
                     </div>
-                    <span className="text-secondary-text font-semibold">
-                      {formatPercentage(percentage)}%
-                    </span>
-                  </div>
-                ))}
+                  );
+                })}
             </div>
           </div>
         )}

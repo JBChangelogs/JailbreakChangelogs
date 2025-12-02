@@ -1,7 +1,7 @@
 "use client";
 
 import { Dialog, DialogPanel } from "@headlessui/react";
-import { getCategoryColor } from "@/utils/categoryIcons";
+import { getCategoryColor, getCategoryIcon } from "@/utils/categoryIcons";
 import dynamic from "next/dynamic";
 
 const Tooltip = dynamic(() => import("@mui/material/Tooltip"), { ssr: false });
@@ -47,6 +47,36 @@ export default function InventoryBreakdownModal({
     const truncated = Math.floor(percentage * 100) / 100;
     return truncated.toFixed(2);
   };
+
+  // Calculate category values using percentages and inventory_value
+  const calculateCategoryValues = (): Record<string, number> => {
+    if (!percentages || !inventoryValue) return {};
+
+    const categoryValues: Record<string, number> = {};
+
+    Object.entries(percentages).forEach(([category, percentage]) => {
+      categoryValues[category] = (percentage / 100) * inventoryValue;
+    });
+
+    return categoryValues;
+  };
+
+  const categoryValues = calculateCategoryValues();
+
+  // Calculate duplicate category values
+  const calculateDuplicateCategoryValues = (): Record<string, number> => {
+    if (!duplicatesPercentages || !duplicatesValue) return {};
+
+    const categoryValues: Record<string, number> = {};
+
+    Object.entries(duplicatesPercentages).forEach(([category, percentage]) => {
+      categoryValues[category] = (percentage / 100) * duplicatesValue;
+    });
+
+    return categoryValues;
+  };
+
+  const duplicateCategoryValues = calculateDuplicateCategoryValues();
 
   return (
     <Dialog open={isOpen} onClose={() => {}} className="relative z-50">
@@ -171,27 +201,44 @@ export default function InventoryBreakdownModal({
                   <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                     {Object.entries(percentages)
                       .sort(([, a], [, b]) => b - a)
-                      .map(([category, percentage]) => (
-                        <div
-                          key={category}
-                          className="bg-primary-bg border-border-primary flex items-center justify-between gap-2 rounded border p-2 text-sm"
-                        >
-                          <div className="flex items-center gap-2">
-                            <div
-                              className="h-3 w-3 flex-shrink-0 rounded-sm"
-                              style={{
-                                backgroundColor: getCategoryColor(category),
-                              }}
-                            />
-                            <span className="text-primary-text font-medium">
-                              {category}
-                            </span>
+                      .map(([category, percentage]) => {
+                        const categoryIcon = getCategoryIcon(category);
+                        return (
+                          <div
+                            key={category}
+                            className="bg-primary-bg border-border-primary flex items-center justify-between gap-2 rounded border p-2 text-sm"
+                          >
+                            <div className="flex items-center gap-2">
+                              {categoryIcon ? (
+                                <categoryIcon.Icon
+                                  className="h-4 w-4 shrink-0"
+                                  style={{ color: getCategoryColor(category) }}
+                                />
+                              ) : (
+                                <div
+                                  className="h-3 w-3 shrink-0 rounded-sm"
+                                  style={{
+                                    backgroundColor: getCategoryColor(category),
+                                  }}
+                                />
+                              )}
+                              <span className="text-primary-text font-medium">
+                                {category}
+                              </span>
+                            </div>
+                            <div className="flex flex-col items-end gap-0.5">
+                              <span className="text-secondary-text font-semibold">
+                                {formatPercentage(percentage)}%
+                              </span>
+                              {categoryValues[category] !== undefined && (
+                                <span className="text-button-success text-xs font-medium">
+                                  ${formatNetworth(categoryValues[category])}
+                                </span>
+                              )}
+                            </div>
                           </div>
-                          <span className="text-secondary-text font-semibold">
-                            {formatPercentage(percentage)}%
-                          </span>
-                        </div>
-                      ))}
+                        );
+                      })}
                   </div>
                 </>
               ) : (
@@ -271,27 +318,48 @@ export default function InventoryBreakdownModal({
                   <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                     {Object.entries(duplicatesPercentages)
                       .sort(([, a], [, b]) => b - a)
-                      .map(([category, percentage]) => (
-                        <div
-                          key={category}
-                          className="bg-primary-bg border-border-primary flex items-center justify-between gap-2 rounded border p-2 text-sm"
-                        >
-                          <div className="flex items-center gap-2">
-                            <div
-                              className="h-3 w-3 flex-shrink-0 rounded-sm"
-                              style={{
-                                backgroundColor: getCategoryColor(category),
-                              }}
-                            />
-                            <span className="text-primary-text font-medium">
-                              {category}
-                            </span>
+                      .map(([category, percentage]) => {
+                        const categoryIcon = getCategoryIcon(category);
+                        return (
+                          <div
+                            key={category}
+                            className="bg-primary-bg border-border-primary flex items-center justify-between gap-2 rounded border p-2 text-sm"
+                          >
+                            <div className="flex items-center gap-2">
+                              {categoryIcon ? (
+                                <categoryIcon.Icon
+                                  className="h-4 w-4 shrink-0"
+                                  style={{ color: getCategoryColor(category) }}
+                                />
+                              ) : (
+                                <div
+                                  className="h-3 w-3 shrink-0 rounded-sm"
+                                  style={{
+                                    backgroundColor: getCategoryColor(category),
+                                  }}
+                                />
+                              )}
+                              <span className="text-primary-text font-medium">
+                                {category}
+                              </span>
+                            </div>
+                            <div className="flex flex-col items-end gap-0.5">
+                              <span className="text-secondary-text font-semibold">
+                                {formatPercentage(percentage)}%
+                              </span>
+                              {duplicateCategoryValues[category] !==
+                                undefined && (
+                                <span className="text-button-success text-xs font-medium">
+                                  $
+                                  {formatNetworth(
+                                    duplicateCategoryValues[category],
+                                  )}
+                                </span>
+                              )}
+                            </div>
                           </div>
-                          <span className="text-secondary-text font-semibold">
-                            {formatPercentage(percentage)}%
-                          </span>
-                        </div>
-                      ))}
+                        );
+                      })}
                   </div>
                 </div>
               )}
