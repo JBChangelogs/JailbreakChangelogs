@@ -306,7 +306,8 @@ export default function HoardersTab({ itemName, itemType }: HoardersTabProps) {
           >
             {virtualizer.getVirtualItems().map((virtualItem) => {
               const hoarder = filteredHoarders[virtualItem.index];
-              const rank = virtualItem.index + 1;
+              const rank =
+                hoarders.findIndex((h) => h.user_id === hoarder.user_id) + 1;
               const displayName = getUserDisplay(hoarder.user_id);
               const username = getUserName(hoarder.user_id);
               const avatar = getUserAvatar(hoarder.user_id);
