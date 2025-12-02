@@ -3,19 +3,19 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { safeLocalStorage } from "@/utils/safeStorage";
 
-type Theme = "light" | "dark";
+type Theme = "light" | "dark" | "christmas";
 
 interface ThemeContextType {
   theme: Theme;
   setTheme: (theme: Theme) => void;
-  resolvedTheme: "light" | "dark";
+  resolvedTheme: "light" | "dark" | "christmas";
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const getInitialTheme = (): Theme => {
-    if (typeof window === "undefined") return "dark";
+    if (typeof window === "undefined") return "christmas";
 
     const savedTheme = safeLocalStorage.getItem("theme");
 
@@ -26,11 +26,14 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       const migratedTheme = prefersDark ? "dark" : "light";
       safeLocalStorage.setItem("theme", migratedTheme);
       return migratedTheme;
-    } else if (savedTheme && ["light", "dark"].includes(savedTheme)) {
+    } else if (
+      savedTheme &&
+      ["light", "dark", "christmas"].includes(savedTheme)
+    ) {
       return savedTheme as Theme;
     }
 
-    return "dark";
+    return "christmas";
   };
 
   const [theme, setTheme] = useState<Theme>(getInitialTheme);
@@ -38,7 +41,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const root = document.documentElement;
-    root.classList.remove("light", "dark");
+    root.classList.remove("light", "dark", "christmas");
     root.classList.add(theme);
     safeLocalStorage.setItem("theme", theme);
   }, [theme]);

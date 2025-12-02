@@ -480,6 +480,274 @@
   ); /* Hero overlay - Light mode (lighter) */
 }
 
+/* CHRISTMAS THEME - Applied when .christmas class is present */
+.christmas {
+  /* Background Colors - Christmas theme (dark green base) */
+  --color-primary-bg: hsl(
+    142,
+    35%,
+    8%
+  ); /* Main page background - Dark forest green */
+  --color-secondary-bg: hsl(
+    142,
+    30%,
+    12%
+  ); /* Card background - Slightly lighter green */
+  --color-tertiary-bg: hsl(
+    142,
+    25%,
+    16%
+  ); /* Elevated surfaces - Medium green */
+  --color-quaternary-bg: hsl(
+    142,
+    20%,
+    20%
+  ); /* Subtle backgrounds - Lighter green */
+  --color-surface-bg: hsl(142, 35%, 10%); /* Surface backgrounds - Dark green */
+  --color-overlay-bg: hsl(
+    142,
+    40%,
+    6%,
+    0.8
+  ); /* Overlay backgrounds - Very dark green */
+  --color-newsletter-bg: hsl(60, 100%, 100%); /* Light sections */
+
+  /* Text Colors - Christmas theme */
+  --color-primary-text: hsl(45, 100%, 95%); /* Main headings - Cream/white */
+  --color-secondary-text: hsl(142, 15%, 75%); /* Body text - Light green-gray */
+  --color-tertiary-text: hsl(
+    142,
+    12%,
+    60%
+  ); /* Muted text - Medium green-gray */
+  --color-quaternary-text: hsl(
+    142,
+    10%,
+    45%
+  ); /* Disabled text - Dark green-gray */
+  --color-card-headline: hsl(45, 100%, 95%); /* Headings within cards - Cream */
+  --color-card-paragraph: hsl(
+    142,
+    15%,
+    75%
+  ); /* Text within cards - Light green-gray */
+
+  /* Border and Separator Colors - Christmas theme */
+  --color-border-primary: hsl(
+    0,
+    70%,
+    40%
+  ); /* Primary borders - Christmas red */
+  --color-border-secondary: hsl(142, 25%, 20%); /* Secondary borders - Green */
+  --color-border-tertiary: hsl(
+    142,
+    20%,
+    15%
+  ); /* Tertiary borders - Dark green */
+  --color-border-focus: hsl(0, 85%, 50%); /* Focus borders - Bright red */
+  --color-border-error: hsl(0, 81%, 62%); /* Error borders - Red */
+
+  /* Card Elements - Christmas theme */
+  --color-card-tag-bg: hsl(
+    0,
+    70%,
+    45%
+  ); /* Tag/chip backgrounds - Christmas red */
+  --color-card-tag-text: hsl(45, 100%, 95%); /* Text on tags/chips - Cream */
+  --color-card-highlight: hsl(45, 100%, 95%); /* Highlighted elements - Cream */
+  --color-card-shadow: hsl(0, 0%, 0%, 0.3); /* Card shadows - Dark */
+
+  /* Interactive Elements - Christmas theme */
+  --color-link: hsl(0, 75%, 55%); /* Primary links - Christmas red */
+  --color-link-hover: hsl(0, 80%, 50%); /* Link hover states - Brighter red */
+  --color-link-active: hsl(0, 85%, 45%); /* Link active states - Darker red */
+  --color-link-visited: hsl(142, 12%, 60%); /* Visited links - Green-gray */
+
+  /* Button Colors - Christmas theme */
+  --color-button-info: hsl(0, 70%, 45%); /* Primary buttons - Christmas red */
+  --color-button-info-hover: hsl(
+    0,
+    75%,
+    40%
+  ); /* Button hover states - Darker red */
+  --color-button-info-active: hsl(
+    0,
+    80%,
+    35%
+  ); /* Button active states - Even darker */
+  --color-button-info-disabled: hsl(
+    142,
+    10%,
+    25%
+  ); /* Disabled buttons - Dark green */
+  --color-button-success: hsl(142, 60%, 40%); /* Success actions - Green */
+  --color-button-success-hover: hsl(
+    142,
+    65%,
+    35%
+  ); /* Success hover - Darker green */
+  --color-button-danger: hsl(0, 81%, 62%); /* Error/destructive actions - Red */
+  --color-button-danger-hover: hsl(0, 75%, 55%); /* Danger hover - Darker red */
+  --color-button-secondary: hsl(
+    142,
+    20%,
+    20%
+  ); /* Secondary buttons - Green-gray */
+  --color-button-secondary-hover: hsl(
+    142,
+    25%,
+    25%
+  ); /* Secondary hover - Lighter */
+  --color-form-button: hsl(
+    0,
+    70%,
+    45%
+  ); /* Form submit buttons - Christmas red */
+  --color-form-button-text: hsl(
+    45,
+    100%,
+    95%
+  ); /* Text on form buttons - Cream */
+
+  /* Form Elements - Christmas theme */
+  --color-form-input: hsl(
+    142,
+    35%,
+    10%
+  ); /* Input field backgrounds - Dark green */
+  --color-form-input-focus: hsl(
+    142,
+    30%,
+    14%
+  ); /* Input focus backgrounds - Lighter green */
+  --color-form-input-disabled: hsl(
+    142,
+    20%,
+    15%
+  ); /* Disabled input backgrounds - Dark green */
+  --color-form-label: hsl(45, 100%, 95%); /* Form labels - Cream */
+  --color-form-placeholder: hsl(
+    142,
+    10%,
+    45%
+  ); /* Placeholder text - Green-gray */
+  --color-form-error: hsl(0, 81%, 62%); /* Error text - Red */
+  --color-form-success: hsl(142, 60%, 40%); /* Success text - Green */
+
+  /* Status Colors - Christmas theme */
+  --color-status-success: hsl(142, 60%, 35%); /* Success states - Green */
+  --color-status-success-vibrant: hsl(
+    142,
+    70%,
+    45%
+  ); /* Vibrant green for online presence */
+  --color-status-warning: hsl(45, 85%, 55%); /* Warning states - Gold */
+  --color-status-error: hsl(0, 81%, 55%); /* Error states - Red */
+  --color-status-info: hsl(0, 70%, 50%); /* Info states - Christmas red */
+  --color-status-neutral: hsl(142, 10%, 45%); /* Neutral states - Green-gray */
+
+  /* Additional Utility Colors - Christmas theme */
+  --color-highlight: hsl(0, 75%, 50%); /* Accent color for highlights - Red */
+  --color-secondary: hsl(142, 50%, 35%); /* Secondary accent color - Green */
+  --color-tertiary: hsl(45, 85%, 55%); /* Tertiary accent color - Gold */
+  --color-stroke: hsl(0, 0%, 0%); /* Primary stroke color - Black */
+
+  /* Warning Colors - Christmas theme */
+  --color-warning: hsl(45, 85%, 55%); /* Orange/Gold for Double XP alerts */
+  --color-warning-light: hsl(45, 90%, 60%); /* Yellow/Gold for 2 weeks left */
+  --color-warning-dark: hsl(45, 80%, 50%); /* Darker warning - Darker gold */
+
+  /* Badge Colors - Christmas theme (keeping same gradients but with Christmas feel) */
+  --color-badge-owner: linear-gradient(
+    to right,
+    hsl(270, 100%, 50%),
+    hsl(240, 100%, 50%)
+  ); /* Purple to indigo gradient */
+  --color-badge-tester: hsl(270, 100%, 60%); /* Purple */
+  --color-badge-vtm: linear-gradient(
+    to right,
+    hsl(142, 100%, 30%),
+    hsl(142, 100%, 25%)
+  ); /* Emerald gradient - More green */
+  --color-badge-vt: hsl(220, 100%, 50%); /* Blue */
+  --color-badge-partner: hsl(0, 75%, 50%); /* Orange/Red - Christmas red */
+  --color-badge-contributor: linear-gradient(
+    to right,
+    hsl(180, 100%, 30%),
+    hsl(180, 100%, 25%)
+  ); /* Teal gradient */
+  --color-badge-developer: linear-gradient(
+    to right,
+    hsl(142, 100%, 40%),
+    hsl(142, 100%, 35%)
+  ); /* Green gradient - Christmas green */
+  --color-badge-designer: linear-gradient(
+    to right,
+    hsl(0, 85%, 55%),
+    hsl(0, 90%, 50%)
+  ); /* Red gradient - Christmas red */
+  --color-badge-early-adopter: linear-gradient(
+    to right,
+    hsl(45, 100%, 50%),
+    hsl(45, 100%, 45%)
+  ); /* Gold gradient - Christmas gold */
+  --color-badge-premium-bronze: linear-gradient(
+    to right,
+    hsl(30, 100%, 50%),
+    hsl(30, 100%, 45%)
+  ); /* Bronze gradient */
+  --color-badge-premium-silver: linear-gradient(
+    to right,
+    hsl(0, 0%, 75%),
+    hsl(0, 0%, 65%)
+  ); /* Silver gradient */
+  --color-badge-premium-gold: linear-gradient(
+    to right,
+    hsl(45, 100%, 50%),
+    hsl(45, 100%, 45%)
+  ); /* Gold gradient - Christmas gold */
+
+  /* Supporter Border Colors - Christmas theme (same as dark) */
+  --color-supporter-bronze-border: #cd7f32; /* Bronze border for Supporter 1 */
+  --color-supporter-silver-border: #c0c0c0; /* Silver border for Supporter 2 */
+  --color-supporter-gold-border: #ffd700; /* Gold border for Supporter 3 */
+
+  /* Supporter Card Backgrounds - Christmas theme */
+  --color-supporter-bronze-bg: hsl(
+    30,
+    25%,
+    15%
+  ); /* Subtle bronze tint for Supporter 1 */
+  --color-supporter-silver-bg: hsl(
+    142,
+    20%,
+    15%
+  ); /* Subtle green tint for Supporter 2 */
+  --color-supporter-gold-bg: hsl(
+    45,
+    30%,
+    15%
+  ); /* Subtle gold tint for Supporter 3 */
+
+  /* Opacity Variations - Christmas theme */
+  --color-overlay-light: hsl(
+    142,
+    40%,
+    6%,
+    0.5
+  ); /* Light overlay - Dark green */
+  --color-overlay-medium: hsl(
+    142,
+    40%,
+    6%,
+    0.7
+  ); /* Medium overlay - Dark green */
+  --color-overlay-dark: hsl(142, 40%, 6%, 0.9); /* Dark overlay - Dark green */
+
+  /* Hero Overlays - Christmas theme */
+  --color-hero-overlay: hsl(0, 0%, 0%, 0.7); /* Hero overlay - Dark */
+}
+
 @layer base {
   * {
     outline-color: hsla(
