@@ -457,9 +457,6 @@ export const NavbarModern = ({ className }: { className?: string }) => {
                 )}
               </div>
             </HoveredLink>
-            <HoveredLink href="/dupes/calculator" setActive={setActive}>
-              Dupe Calculator
-            </HoveredLink>
             <HoveredLink href="/trading" setActive={setActive}>
               Trade Ads
             </HoveredLink>

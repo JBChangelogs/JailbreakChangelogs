@@ -188,7 +188,6 @@ JailbreakChangelogs' preferences for AI/LLM access, training, and content usage:
 
 The following areas require authentication and are not accessible to bots:
 - `/api/*` - All API endpoints (authentication required)
-- `/dupes/calculator` - Dupe detection calculator (premium feature)
 - `/*?page=` - Paginated content (use direct page URLs instead)
 - `/*?filter=` - Filtered content (use direct filter URLs instead)
 

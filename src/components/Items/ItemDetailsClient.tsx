@@ -2,9 +2,7 @@
 
 import { useEffect, useState, useRef } from "react";
 import Image from "next/image";
-import Link from "next/link";
-
-import { ThemeProvider, Pagination } from "@mui/material";
+import { ThemeProvider } from "@mui/material";
 import React from "react";
 import dynamic from "next/dynamic";
 
@@ -12,12 +10,7 @@ const Tooltip = dynamic(() => import("@mui/material/Tooltip"), { ssr: false });
 import { darkTheme } from "@/theme/darkTheme";
 
 import { PlayIcon, PauseIcon } from "@heroicons/react/24/solid";
-import {
-  ChevronDownIcon,
-  ChevronUpIcon,
-  MagnifyingGlassIcon,
-  XMarkIcon,
-} from "@heroicons/react/24/outline";
+import { ChevronDownIcon, ChevronUpIcon } from "@heroicons/react/24/outline";
 import { InformationCircleIcon } from "@heroicons/react/24/outline";
 
 import toast from "react-hot-toast";
@@ -62,6 +55,7 @@ const ChangelogComments = dynamic(
 
 import SimilarItems from "@/components/Items/SimilarItems";
 import HoardersTab from "@/components/Items/HoardersTab";
+import DupesTab from "@/components/Items/DupesTab";
 
 import { fetchUserFavorites, CommentData } from "@/utils/api";
 import {
@@ -79,7 +73,7 @@ import { useOptimizedRealTimeRelativeDate } from "@/hooks/useSharedTimer";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { CategoryIconBadge } from "@/utils/categoryIcons";
 import { convertUrlsToLinks } from "@/utils/urlConverter";
-import { ItemDetails, DupedOwner } from "@/types";
+import { ItemDetails } from "@/types";
 import DisplayAd from "@/components/Ads/DisplayAd";
 import AdRemovalNotice from "@/components/Ads/AdRemovalNotice";
 import { getCurrentUserPremiumType } from "@/contexts/AuthContext";
@@ -162,8 +156,6 @@ export default function ItemDetailsClient({
   const [visibleLength, setVisibleLength] = useState(500);
   const [activeTab, setActiveTab] = useState(0);
   const [activeChartTab, setActiveChartTab] = useState(0);
-  const [dupedOwnersPage, setDupedOwnersPage] = useState(1);
-  const [ownerSearchTerm, setOwnerSearchTerm] = useState("");
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const [currentUserPremiumType, setCurrentUserPremiumType] =
@@ -176,8 +168,6 @@ export default function ItemDetailsClient({
     (selectedVariant || item)?.last_updated,
     `item-detail-${(selectedVariant || item)?.id}-${selectedVariant?.id || "parent"}`,
   );
-
-  const ITEMS_PER_PAGE = 12;
 
   useEffect(() => {
     // Get current user's premium type
@@ -904,263 +894,7 @@ export default function ItemDetailsClient({
 
               {activeTab === 3 && (
                 <div className="space-y-6">
-                  {!currentItem.duped_owners ||
-                  !Array.isArray(currentItem.duped_owners) ||
-                  currentItem.duped_owners.length === 0 ? (
-                    <div className="bg-secondary-bg rounded-lg p-8 text-center">
-                      <div className="border-button-info/30 bg-button-info/20 mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full border">
-                        <svg
-                          className="text-button-info h-8 w-8"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
-                          />
-                        </svg>
-                      </div>
-                      <h3 className="text-primary-text mb-2 text-xl font-semibold">
-                        No Duped Owners Found
-                      </h3>
-                      <p className="text-secondary-text mx-auto max-w-md text-sm leading-relaxed">
-                        No duped versions of this item have been manually
-                        reported.
-                      </p>
-                      <div className="bg-button-info/10 mx-auto mt-4 max-w-md rounded-lg p-4">
-                        <p className="text-secondary-text text-center text-sm leading-relaxed">
-                          This tab shows manually reported duped owners. For
-                          comprehensive dupe detection, use our automated system
-                          below.
-                        </p>
-                      </div>
-                      <div className="mt-6">
-                        <Link href="/dupes">
-                          <button className="bg-button-info text-form-button-text hover:bg-button-info-hover border-border-primary hover:border-border-focus cursor-pointer rounded-lg border px-6 py-3 text-sm font-semibold normal-case">
-                            Search for Dupes
-                          </button>
-                        </Link>
-                      </div>
-                    </div>
-                  ) : (
-                    <>
-                      {/* Owners Grid */}
-                      <div className="space-y-4">
-                        <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
-                          <h3 className="text-primary-text text-2xl font-bold">
-                            Duped Owners List
-                          </h3>
-                          <div className="text-tertiary-text text-sm font-semibold tracking-wide uppercase">
-                            {(() => {
-                              const filteredOwners =
-                                currentItem.duped_owners.filter((owner) =>
-                                  owner.owner
-                                    .toLowerCase()
-                                    .includes(ownerSearchTerm.toLowerCase()),
-                                );
-                              const totalFilteredPages = Math.ceil(
-                                filteredOwners.length / ITEMS_PER_PAGE,
-                              );
-                              const currentFilteredPage = Math.min(
-                                dupedOwnersPage,
-                                totalFilteredPages || 1,
-                              );
-                              const startIndex =
-                                (currentFilteredPage - 1) * ITEMS_PER_PAGE;
-                              const endIndex = startIndex + ITEMS_PER_PAGE;
-                              const currentPageCount = Math.min(
-                                endIndex - startIndex,
-                                filteredOwners.length - startIndex,
-                              );
-
-                              return `Showing ${currentPageCount} of ${filteredOwners.length}`;
-                            })()}
-                          </div>
-                        </div>
-
-                        {/* Search Form */}
-                        <div className="relative">
-                          <input
-                            type="text"
-                            placeholder="Search owners..."
-                            value={ownerSearchTerm}
-                            onChange={(e) => {
-                              setOwnerSearchTerm(e.target.value);
-                              setDupedOwnersPage(1); // Reset to first page when searching
-                            }}
-                            className="text-primary-text border-border-primary bg-secondary-bg placeholder-tertiary-text focus:border-border-focus w-full rounded-lg border px-4 py-3 pr-10 pl-10 font-medium transition-all duration-300 focus:outline-none"
-                          />
-                          <MagnifyingGlassIcon className="text-tertiary-text absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2" />
-                          {ownerSearchTerm && (
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setOwnerSearchTerm("");
-                                setDupedOwnersPage(1);
-                              }}
-                              className="text-tertiary-text hover:text-primary-text absolute top-1/2 right-3 h-5 w-5 -translate-y-1/2 cursor-pointer transition-colors"
-                              aria-label="Clear search"
-                            >
-                              <XMarkIcon />
-                            </button>
-                          )}
-                        </div>
-
-                        {/* Dupe Finder Info */}
-                        <div className="bg-button-info/10 border-border-primary rounded-lg border p-5">
-                          <p className="text-tertiary-text text-center text-sm leading-relaxed font-medium">
-                            This tab shows manually reported duped owners. For
-                            comprehensive dupe detection, use our automated
-                            system below.
-                          </p>
-                          <div className="mt-4 text-center">
-                            <Link href="/dupes">
-                              <button className="bg-button-info text-form-button-text hover:bg-button-info-hover border-border-primary cursor-pointer rounded-lg border px-6 py-3 text-sm font-semibold normal-case transition-colors">
-                                Search for Dupes
-                              </button>
-                            </Link>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="bg-secondary-bg border-border-primary space-y-2 rounded-lg border p-4">
-                        {(() => {
-                          // Filter owners based on search term
-                          const filteredOwners =
-                            currentItem.duped_owners.filter((owner) =>
-                              owner.owner
-                                .toLowerCase()
-                                .includes(ownerSearchTerm.toLowerCase()),
-                            );
-
-                          if (ownerSearchTerm && filteredOwners.length === 0) {
-                            const MAX_QUERY_DISPLAY_LENGTH = 50;
-                            const displayQuery =
-                              ownerSearchTerm.length > MAX_QUERY_DISPLAY_LENGTH
-                                ? `${ownerSearchTerm.substring(0, MAX_QUERY_DISPLAY_LENGTH)}...`
-                                : ownerSearchTerm;
-
-                            return (
-                              <div className="py-8 text-center">
-                                <div className="text-secondary-text text-sm break-words">
-                                  No duped owners found matching &quot;
-                                  {displayQuery}&quot;
-                                </div>
-                                <button
-                                  onClick={() => {
-                                    setOwnerSearchTerm("");
-                                    setDupedOwnersPage(1);
-                                  }}
-                                  className="bg-button-info text-primary-text hover:bg-button-info-hover border-border-primary mt-2 rounded-lg border px-4 py-2 text-sm font-medium transition-colors hover:cursor-pointer"
-                                >
-                                  Clear search
-                                </button>
-                              </div>
-                            );
-                          }
-
-                          // Calculate pagination for filtered results
-                          const totalFilteredPages = Math.ceil(
-                            filteredOwners.length / ITEMS_PER_PAGE,
-                          );
-                          const currentFilteredPage = Math.min(
-                            dupedOwnersPage,
-                            totalFilteredPages || 1,
-                          );
-
-                          // Get current page of filtered results
-                          const startIndex =
-                            (currentFilteredPage - 1) * ITEMS_PER_PAGE;
-                          const endIndex = startIndex + ITEMS_PER_PAGE;
-                          const currentPageOwners = filteredOwners.slice(
-                            startIndex,
-                            endIndex,
-                          );
-
-                          return currentPageOwners.map(
-                            (owner: DupedOwner, index: number) => (
-                              <div
-                                key={index}
-                                className="hover:bg-secondary-bg hover:border-border-primary flex items-center justify-between rounded-lg border border-transparent px-4 py-3 transition-colors"
-                              >
-                                <div className="flex items-center min-w-0 flex-1">
-                                  <span className="text-tertiary-text min-w-[80px] text-sm font-semibold tracking-wide uppercase shrink-0 mr-1">
-                                    #
-                                    {(dupedOwnersPage - 1) * ITEMS_PER_PAGE +
-                                      index +
-                                      1}
-                                  </span>
-                                  {owner.user_id ? (
-                                    <a
-                                      href={`https://www.roblox.com/users/${owner.user_id}/profile`}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      className="text-primary-text hover:text-link-hover text-sm sm:text-lg font-bold transition-colors hover:underline truncate min-w-0"
-                                    >
-                                      {owner.owner}
-                                    </a>
-                                  ) : (
-                                    <span className="text-primary-text text-sm sm:text-lg font-bold truncate min-w-0">
-                                      {owner.owner}
-                                    </span>
-                                  )}
-                                </div>
-                              </div>
-                            ),
-                          );
-                        })()}
-
-                        {(() => {
-                          // Filter owners based on search term for pagination
-                          const filteredOwners =
-                            currentItem.duped_owners.filter((owner) =>
-                              owner.owner
-                                .toLowerCase()
-                                .includes(ownerSearchTerm.toLowerCase()),
-                            );
-
-                          return (
-                            filteredOwners.length > ITEMS_PER_PAGE && (
-                              <div className="mt-4 flex justify-center sm:mt-6">
-                                <Pagination
-                                  count={Math.ceil(
-                                    filteredOwners.length / ITEMS_PER_PAGE,
-                                  )}
-                                  page={dupedOwnersPage}
-                                  onChange={(_, page) =>
-                                    setDupedOwnersPage(page)
-                                  }
-                                  sx={{
-                                    "& .MuiPaginationItem-root": {
-                                      color: "var(--color-primary-text)",
-                                      "&.Mui-selected": {
-                                        backgroundColor:
-                                          "var(--color-button-info)",
-                                        color: "var(--color-form-button-text)",
-                                        "&:hover": {
-                                          backgroundColor:
-                                            "var(--color-button-info-hover)",
-                                        },
-                                      },
-                                      "&:hover": {
-                                        backgroundColor:
-                                          "var(--color-quaternary-bg)",
-                                      },
-                                    },
-                                    "& .MuiPaginationItem-icon": {
-                                      color: "var(--color-primary-text)",
-                                    },
-                                  }}
-                                />
-                              </div>
-                            )
-                          );
-                        })()}
-                      </div>
-                    </>
-                  )}
+                  <DupesTab itemId={item.id} />
                 </div>
               )}
 

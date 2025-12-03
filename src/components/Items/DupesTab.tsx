@@ -3,77 +3,64 @@
 import { useRef, useEffect, useMemo, useState } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { useQuery } from "@tanstack/react-query";
-import { useBatchUserData } from "@/hooks/useBatchUserData";
-import { ItemHoarder } from "@/utils/api";
 import Image from "next/image";
-import Link from "next/link";
 import { MagnifyingGlassIcon, XMarkIcon } from "@heroicons/react/24/outline";
 
-interface HoardersTabProps {
-  itemName: string;
-  itemType: string;
+interface DupedUser {
+  hasVerifiedBadge: boolean;
+  id: number;
+  name: string;
+  displayName: string;
+  avatar: string;
 }
 
-export default function HoardersTab({ itemName, itemType }: HoardersTabProps) {
+interface DupesTabProps {
+  itemId: number;
+}
+
+export default function DupesTab({ itemId }: DupesTabProps) {
   const parentRef = useRef<HTMLDivElement>(null);
   const [searchTerm, setSearchTerm] = useState("");
 
-  // Fetch hoarders client-side
+  // Fetch dupes client-side
   const {
-    data: hoarders = [],
-    isLoading: isLoadingHoarders,
-    error: hoardersError,
+    data: dupedUsers = [],
+    isLoading: isLoadingDupes,
+    error: dupesError,
   } = useQuery({
-    queryKey: ["item-hoarders", itemName, itemType],
+    queryKey: ["item-dupes", itemId],
     queryFn: async () => {
       const response = await fetch(
-        `/api/items/hoarders?name=${encodeURIComponent(itemName)}&type=${encodeURIComponent(itemType)}`,
+        `${process.env.NEXT_PUBLIC_INVENTORY_API_URL}/item/duplicates?id=${itemId}`,
       );
       if (!response.ok) {
-        throw new Error("Failed to fetch hoarders");
+        throw new Error("Failed to fetch dupes");
       }
-      return response.json() as Promise<ItemHoarder[]>;
+      return response.json() as Promise<DupedUser[]>;
     },
   });
 
-  // Get user IDs from all hoarders (for fetching data)
-  const userIds = useMemo(
-    () => hoarders.map((h) => h.user_id).filter(Boolean),
-    [hoarders],
-  );
-
-  // Fetch user data
-  const { robloxUsers } = useBatchUserData(userIds, {
-    enabled: userIds.length > 0,
-  });
-
-  // Filter hoarders based on search
-  const filteredHoarders = useMemo(() => {
+  // Filter dupes based on search
+  const filteredDupes = useMemo(() => {
     if (!searchTerm.trim()) {
-      return hoarders;
+      return dupedUsers;
     }
     const searchLower = searchTerm.toLowerCase();
-    return hoarders.filter((hoarder) => {
-      const user = robloxUsers[hoarder.user_id];
-      const displayName = user?.displayName || user?.name || "";
-      const username = user?.name || "";
-      const userId = hoarder.user_id || "";
+    return dupedUsers.filter((user) => {
+      const displayName = user.displayName || "";
+      const username = user.name || "";
+      const userId = String(user.id);
       return (
         displayName.toLowerCase().includes(searchLower) ||
         username.toLowerCase().includes(searchLower) ||
-        userId.toLowerCase().includes(searchLower)
+        userId.includes(searchLower)
       );
     });
-  }, [hoarders, searchTerm, robloxUsers]);
-
-  // Generate avatar URL
-  const getUserAvatar = (userId: string) => {
-    return `${process.env.NEXT_PUBLIC_INVENTORY_API_URL}/proxy/users/${userId}/avatar-headshot`;
-  };
+  }, [dupedUsers, searchTerm]);
 
   // TanStack Virtual setup for list
   const virtualizer = useVirtualizer({
-    count: filteredHoarders.length,
+    count: filteredDupes.length,
     getScrollElement: () => parentRef.current,
     estimateSize: () => 100,
     overscan: 5,
@@ -91,32 +78,32 @@ export default function HoardersTab({ itemName, itemType }: HoardersTabProps) {
   }, []);
 
   // Loading state
-  if (isLoadingHoarders) {
+  if (isLoadingDupes) {
     return (
       <div className="bg-secondary-bg rounded-lg p-8 text-center">
         <div className="text-secondary-text animate-pulse text-lg font-semibold">
-          Loading hoarders...
+          Loading dupers...
         </div>
       </div>
     );
   }
 
   // Error state
-  if (hoardersError) {
+  if (dupesError) {
     return (
       <div className="bg-secondary-bg rounded-lg p-8 text-center">
         <h3 className="text-primary-text mb-2 text-xl font-semibold">
-          Error Loading Hoarders
+          Error Loading Dupers
         </h3>
         <p className="text-secondary-text mx-auto max-w-md text-sm leading-relaxed">
-          Failed to load hoarders data. Please try again later.
+          Failed to load dupers data. Please try again later.
         </p>
       </div>
     );
   }
 
-  // Empty state (no hoarders)
-  if (hoarders.length === 0) {
+  // Empty state (no dupes)
+  if (dupedUsers.length === 0) {
     return (
       <div className="bg-secondary-bg rounded-lg p-8 text-center">
         <div className="border-button-info/30 bg-button-info/20 mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full border">
@@ -130,38 +117,25 @@ export default function HoardersTab({ itemName, itemType }: HoardersTabProps) {
               strokeLinecap="round"
               strokeLinejoin="round"
               strokeWidth={2}
-              d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
+              d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
             />
           </svg>
         </div>
         <h3 className="text-primary-text mb-2 text-xl font-semibold">
-          No Hoarders Found
+          No Dupers Found
         </h3>
         <p className="text-secondary-text mx-auto max-w-md text-sm leading-relaxed">
-          No users with multiple copies of this item have been tracked yet.
+          No duped versions of this item have been detected.
         </p>
       </div>
     );
   }
 
-  const getUserDisplay = (userId: string): string => {
-    const user = robloxUsers[userId];
-    if (!user) return userId;
-    return user.displayName || user.name || userId;
-  };
-
-  const getUserName = (userId: string): string => {
-    const user = robloxUsers[userId];
-    if (!user) return userId;
-    // If no username, use display name as fallback
-    return user.name || user.displayName || userId;
-  };
-
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
         <h3 className="text-primary-text text-2xl font-bold">
-          Hoarders ({hoarders.length})
+          Dupers ({dupedUsers.length})
         </h3>
       </div>
 
@@ -169,7 +143,7 @@ export default function HoardersTab({ itemName, itemType }: HoardersTabProps) {
       <div className="relative">
         <input
           type="text"
-          placeholder="Search hoarders..."
+          placeholder="Search by name or ID..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           className="text-primary-text border-border-primary bg-secondary-bg placeholder-tertiary-text focus:border-border-focus w-full rounded-lg border px-4 py-3 pr-10 pl-10 font-medium transition-all duration-300 focus:outline-none"
@@ -188,7 +162,7 @@ export default function HoardersTab({ itemName, itemType }: HoardersTabProps) {
       </div>
 
       {/* Empty State for Search */}
-      {filteredHoarders.length === 0 && searchTerm.trim() && (
+      {filteredDupes.length === 0 && searchTerm.trim() && (
         <div className="bg-secondary-bg rounded-lg p-8 text-center">
           <div className="border-button-info/30 bg-button-info/20 mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full border">
             <MagnifyingGlassIcon className="text-button-info h-8 w-8" />
@@ -197,7 +171,7 @@ export default function HoardersTab({ itemName, itemType }: HoardersTabProps) {
             No Results Found
           </h3>
           <p className="text-secondary-text mx-auto max-w-md text-sm leading-relaxed">
-            No hoarders found matching &quot;{searchTerm}&quot;
+            No dupers found matching &quot;{searchTerm}&quot;
           </p>
           <button
             onClick={() => setSearchTerm("")}
@@ -209,7 +183,7 @@ export default function HoardersTab({ itemName, itemType }: HoardersTabProps) {
       )}
 
       {/* Virtualized List Container */}
-      {filteredHoarders.length > 0 && (
+      {filteredDupes.length > 0 && (
         <div
           ref={parentRef}
           className="bg-secondary-bg scrollbar-thin scrollbar-track-transparent scrollbar-thumb-border-primary hover:scrollbar-thumb-border-focus max-h-[600px] overflow-y-auto rounded-lg pr-2"
@@ -226,16 +200,12 @@ export default function HoardersTab({ itemName, itemType }: HoardersTabProps) {
             }}
           >
             {virtualizer.getVirtualItems().map((virtualItem) => {
-              const hoarder = filteredHoarders[virtualItem.index];
-              const rank =
-                hoarders.findIndex((h) => h.user_id === hoarder.user_id) + 1;
-              const displayName = getUserDisplay(hoarder.user_id);
-              const username = getUserName(hoarder.user_id);
-              const avatar = getUserAvatar(hoarder.user_id);
+              const user = filteredDupes[virtualItem.index];
+              const rank = dupedUsers.findIndex((u) => u.id === user.id) + 1;
 
               return (
                 <div
-                  key={`${hoarder.user_id}-${virtualItem.index}`}
+                  key={`${user.id}-${virtualItem.index}`}
                   style={{
                     position: "absolute",
                     top: 0,
@@ -252,8 +222,8 @@ export default function HoardersTab({ itemName, itemType }: HoardersTabProps) {
                       </span>
                       <div className="relative h-10 w-10 sm:h-12 sm:w-12 shrink-0 overflow-hidden rounded-full bg-tertiary-bg">
                         <Image
-                          src={avatar}
-                          alt={displayName}
+                          src={user.avatar}
+                          alt={user.displayName}
                           width={48}
                           height={48}
                           className="h-full w-full object-cover"
@@ -274,25 +244,18 @@ export default function HoardersTab({ itemName, itemType }: HoardersTabProps) {
                       </div>
                     </div>
                     <div className="flex flex-col gap-1 min-w-0 flex-1">
-                      <Link
-                        href={`/inventories/${hoarder.user_id}`}
-                        prefetch={false}
+                      <a
+                        href={`https://www.roblox.com/users/${user.id}/profile`}
+                        target="_blank"
+                        rel="noopener noreferrer"
                         className="text-primary-text hover:text-link-hover text-sm sm:text-lg font-bold transition-colors hover:underline truncate"
                       >
-                        {displayName}
-                      </Link>
+                        {user.displayName}
+                      </a>
                       <span className="text-secondary-text text-xs sm:text-sm truncate">
-                        @{username}
+                        @{user.name}
                       </span>
                     </div>
-                  </div>
-                  <div className="text-primary-text text-left sm:text-right shrink-0">
-                    <span className="text-base sm:text-lg font-bold">
-                      {hoarder.count.toLocaleString()}
-                    </span>
-                    <span className="text-secondary-text text-xs sm:text-sm ml-1">
-                      copies
-                    </span>
                   </div>
                 </div>
               );

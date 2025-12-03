@@ -714,26 +714,6 @@ export async function fetchUsersBatch(userIds: string[]) {
   }
 }
 
-export async function fetchDupes() {
-  try {
-    const response = await fetch(`${BASE_API_URL}/dupes/list`, {
-      headers: {
-        "User-Agent": "JailbreakChangelogs-DupeFinder/1.0",
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error("Failed to fetch dupes");
-    }
-
-    const data = await response.json();
-    return data;
-  } catch (err) {
-    console.error("[SERVER] Error fetching dupes:", err);
-    return [];
-  }
-}
-
 export async function fetchDupeFinderData(userId: string) {
   try {
     const url = `${INVENTORY_API_URL}/users/dupes?id=${userId}`;

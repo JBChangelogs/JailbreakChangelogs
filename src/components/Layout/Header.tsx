@@ -410,13 +410,6 @@ export default function Header() {
         </Box>
       </Link>
       <Link
-        href="/dupes/calculator"
-        onClick={handleDrawerToggle}
-        className="px-8 py-2 cursor-pointer hover:bg-button-info-hover/10 transition-colors text-primary-text"
-      >
-        Dupe Calculator
-      </Link>
-      <Link
         href="/trading"
         onClick={handleDrawerToggle}
         className="px-8 py-2 cursor-pointer hover:bg-button-info-hover/10 transition-colors text-primary-text"

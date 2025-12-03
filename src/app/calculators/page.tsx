@@ -26,7 +26,7 @@ const calculators = [
       "Calculate item values and trading worth. Compare items, find similar items, and get accurate trade valuations.",
     href: "/values/calculator",
     icon: "material-symbols:calculate",
-    category: "Trading",
+    category: "Inventory",
     features: [
       "Add items to offering/requesting sides",
       "Compare trade values with breakdown",
@@ -42,7 +42,7 @@ const calculators = [
       "Calculate your chances of reaching level 10 in the current season. Plan your XP strategy and optimize your progress.",
     href: "/seasons/will-i-make-it",
     icon: "material-symbols:bar-chart",
-    category: "Seasons",
+    category: "Progression",
     features: [
       "Enter current level and XP progress",
       "Check if you'll reach level 10",
@@ -56,9 +56,9 @@ const calculators = [
     title: "Dupe Calculator",
     description:
       "Search for duplicated items in our database. Check if items have been reported as dupes and verify item authenticity.",
-    href: "/dupes/calculator",
+    href: "/dupes",
     icon: "material-symbols:warning",
-    category: "Security",
+    category: "Inventory",
     features: [
       "Search by owner name",
       "Filter by specific items",
