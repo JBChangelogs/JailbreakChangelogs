@@ -6,12 +6,11 @@ import {
   useRobloxUserDataQuery,
 } from "@/hooks/useRobloxDataQuery";
 import { type ConnectedBot } from "@/utils/api";
-import { type RobloxUser, type RobloxAvatar } from "@/types";
+import { type RobloxUser } from "@/types";
 import { useOptimizedRealTimeRelativeDate } from "@/hooks/useSharedTimer";
 import { formatCustomDate } from "@/utils/timestamp";
 import Image from "next/image";
 import Link from "next/link";
-import { DefaultAvatar } from "@/utils/avatar";
 import RetryErrorDisplay from "./RetryErrorDisplay";
 import { Icon } from "@iconify/react";
 
@@ -212,47 +211,24 @@ export default function ConnectedBotsPolling() {
                     <div className="flex items-center gap-2">
                       <span className="text-secondary-text">Last Updated:</span>
                       <div className="bg-tertiary-bg flex h-6 w-6 items-center justify-center overflow-hidden rounded-full">
-                        {(() => {
-                          const avatarData =
-                            lastProcessedRobloxData?.avatarsData;
-                          if (!avatarData || typeof avatarData !== "object") {
-                            return <DefaultAvatar />;
-                          }
-
-                          const avatar = Object.values(avatarData).find(
-                            (av): av is RobloxAvatar =>
-                              typeof av === "object" &&
-                              av !== null &&
-                              "targetId" in av &&
-                              av.targetId?.toString() ===
-                                queueInfo.last_dequeue!.user_id,
-                          );
-
-                          if (avatar?.imageUrl) {
-                            return (
-                              <Image
-                                src={avatar.imageUrl}
-                                alt="Last processed user avatar"
-                                width={24}
-                                height={24}
-                                className="h-full w-full object-cover"
-                                onError={(e) => {
-                                  e.currentTarget.style.display = "none";
-                                  const parent = e.currentTarget.parentElement;
-                                  if (parent) {
-                                    const fallback =
-                                      document.createElement("div");
-                                    fallback.className =
-                                      "flex h-full w-full items-center justify-center";
-                                    parent.appendChild(fallback);
-                                  }
-                                }}
-                              />
-                            );
-                          }
-
-                          return <DefaultAvatar />;
-                        })()}
+                        <Image
+                          src={`${process.env.NEXT_PUBLIC_INVENTORY_API_URL}/proxy/users/${queueInfo.last_dequeue!.user_id}/avatar-headshot`}
+                          alt="Last processed user avatar"
+                          width={24}
+                          height={24}
+                          className="h-full w-full object-cover"
+                          onError={(e) => {
+                            e.currentTarget.style.display = "none";
+                            const parent = e.currentTarget.parentElement;
+                            if (parent && !parent.querySelector("svg")) {
+                              const fallback = document.createElement("div");
+                              fallback.className =
+                                "flex h-full w-full items-center justify-center";
+                              fallback.innerHTML = `<svg class="h-4 w-4 text-tertiary-text" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" /></svg>`;
+                              parent.appendChild(fallback);
+                            }
+                          }}
+                        />
                       </div>
                       <Link
                         href={`/inventories/${queueInfo.last_dequeue!.user_id}`}
@@ -315,7 +291,6 @@ export default function ConnectedBotsPolling() {
                   key={bot.id}
                   bot={bot}
                   usersData={botRobloxData?.usersData || null}
-                  avatarsData={botRobloxData?.avatarsData || {}}
                 />
               ))}
             </div>
@@ -329,11 +304,9 @@ export default function ConnectedBotsPolling() {
 function BotStatusCard({
   bot,
   usersData,
-  avatarsData,
 }: {
   bot: ConnectedBot;
   usersData: Record<string, RobloxUser> | null;
-  avatarsData: Record<string, RobloxAvatar>;
 }) {
   const userData = usersData?.[bot.id];
   const displayName =
@@ -347,45 +320,32 @@ function BotStatusCard({
 
   const fullDate = formatCustomDate(bot.last_heartbeat);
 
-  const avatarData =
-    avatarsData && typeof avatarsData === "object"
-      ? Object.values(avatarsData).find(
-          (avatar: RobloxAvatar) =>
-            typeof avatar === "object" &&
-            avatar !== null &&
-            "targetId" in avatar &&
-            avatar.targetId?.toString() === bot.id,
-        )
-      : null;
-
-  const avatarUrl = avatarData?.imageUrl || null;
+  // Generate avatar URL directly
+  const avatarUrl = `${process.env.NEXT_PUBLIC_INVENTORY_API_URL}/proxy/users/${bot.id}/avatar-headshot`;
 
   return (
     <div className="border-border-primary bg-primary-bg rounded-lg border p-3">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-3">
           <div className="bg-tertiary-bg flex h-8 w-8 items-center justify-center overflow-hidden rounded-full">
-            {avatarUrl ? (
-              <Image
-                src={avatarUrl}
-                alt={`${displayName} avatar`}
-                width={32}
-                height={32}
-                className="h-full w-full object-cover"
-                onError={(e) => {
-                  e.currentTarget.style.display = "none";
-                  const parent = e.currentTarget.parentElement;
-                  if (parent) {
-                    const fallback = document.createElement("div");
-                    fallback.className =
-                      "flex h-full w-full items-center justify-center";
-                    parent.appendChild(fallback);
-                  }
-                }}
-              />
-            ) : (
-              <DefaultAvatar />
-            )}
+            <Image
+              src={avatarUrl}
+              alt={`${displayName} avatar`}
+              width={32}
+              height={32}
+              className="h-full w-full object-cover"
+              onError={(e) => {
+                e.currentTarget.style.display = "none";
+                const parent = e.currentTarget.parentElement;
+                if (parent && !parent.querySelector("svg")) {
+                  const fallback = document.createElement("div");
+                  fallback.className =
+                    "flex h-full w-full items-center justify-center";
+                  fallback.innerHTML = `<svg class="h-5 w-5 text-tertiary-text" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" /></svg>`;
+                  parent.appendChild(fallback);
+                }
+              }}
+            />
           </div>
 
           <div>

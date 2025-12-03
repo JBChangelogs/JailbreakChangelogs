@@ -58,19 +58,15 @@ export default function NetworthLeaderboardClient({
       }
 
       let allUserData: Record<string, unknown> = {};
-      let allAvatarData: Record<string, string> = {};
 
       for (const batch of batches) {
         const result = await fetchLeaderboardUserData(batch);
         if (result.userData && typeof result.userData === "object") {
           allUserData = { ...allUserData, ...result.userData };
         }
-        if (result.avatarData && typeof result.avatarData === "object") {
-          allAvatarData = { ...allAvatarData, ...result.avatarData };
-        }
       }
 
-      return { userData: allUserData, avatarData: allAvatarData };
+      return { userData: allUserData };
     },
     enabled: userIds.length > 0,
   });
@@ -91,16 +87,10 @@ export default function NetworthLeaderboardClient({
       return {};
     })();
 
-  const avatarDataMap: Record<string, string> = (() => {
-    if (
-      fetchedUserData &&
-      "avatarData" in fetchedUserData &&
-      typeof fetchedUserData.avatarData === "object"
-    ) {
-      return fetchedUserData.avatarData as Record<string, string>;
-    }
-    return {};
-  })();
+  // Generate avatar URL directly
+  const getUserAvatar = (userId: string) => {
+    return `${process.env.NEXT_PUBLIC_INVENTORY_API_URL}/proxy/users/${userId}/avatar-headshot`;
+  };
 
   // Filter leaderboard based on debounced search term
   const filteredLeaderboard = (() => {
@@ -227,7 +217,7 @@ export default function NetworthLeaderboardClient({
                       userData?.name ||
                       `User ${user.user_id}`;
                     const username = userData?.name || user.user_id;
-                    const avatarUrl = avatarDataMap[user.user_id];
+                    const avatarUrl = getUserAvatar(user.user_id);
 
                     return (
                       <div

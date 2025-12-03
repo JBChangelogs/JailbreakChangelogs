@@ -50,7 +50,6 @@ function OGUserDataLoadingFallback({
       initialData={ogData}
       robloxId={robloxId}
       robloxUsers={{}}
-      robloxAvatars={{}}
       userConnectionData={null}
     />
   );
@@ -87,7 +86,6 @@ async function OGUserDataFetcher({
       initialData={ogData}
       robloxId={robloxId}
       robloxUsers={userDataResult.robloxUsers}
-      robloxAvatars={userDataResult.robloxAvatars}
       userConnectionData={null}
     />
   );

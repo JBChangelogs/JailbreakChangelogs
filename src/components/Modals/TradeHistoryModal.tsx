@@ -12,13 +12,6 @@ interface TradeHistoryEntry {
   TradeTime: number;
 }
 
-interface AvatarData {
-  targetId: number;
-  state: string;
-  imageUrl?: string;
-  version: string;
-}
-
 interface UserData {
   id: number;
   name: string;
@@ -55,64 +48,6 @@ export default function TradeHistoryModal({
 
     return Array.from(userIds);
   }, [item]);
-
-  const [tradeHistoryAvatars, setTradeHistoryAvatars] = useState<
-    Record<string, string>
-  >({});
-
-  useEffect(() => {
-    if (!isOpen || tradeHistoryUserIds.length === 0) {
-      return;
-    }
-
-    const fetchAvatars = async () => {
-      try {
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_INVENTORY_API_URL}/proxy/users/avatar-headshot?userIds=${tradeHistoryUserIds.join(",")}`,
-          {
-            headers: {
-              "User-Agent": "JailbreakChangelogs-InventoryChecker/1.0",
-              "X-Source":
-                process.env.NEXT_PUBLIC_INVENTORY_API_SOURCE_HEADER ?? "",
-            },
-          },
-        );
-
-        if (!response.ok) {
-          return;
-        }
-
-        const avatarData = await response.json();
-        const processedAvatars: Record<string, string> = {};
-
-        Object.values(avatarData).forEach((avatar) => {
-          if (
-            avatar &&
-            typeof avatar === "object" &&
-            "targetId" in avatar &&
-            "state" in avatar &&
-            "imageUrl" in avatar
-          ) {
-            const typedAvatar = avatar as AvatarData;
-            if (
-              typedAvatar.targetId &&
-              typedAvatar.state === "Completed" &&
-              typedAvatar.imageUrl
-            ) {
-              processedAvatars[typedAvatar.targetId.toString()] =
-                typedAvatar.imageUrl;
-            }
-          }
-        });
-
-        setTradeHistoryAvatars(processedAvatars);
-      } catch (error) {
-        console.error("Failed to fetch avatars:", error);
-      }
-    };
-
-    fetchAvatars();
-  }, [isOpen, tradeHistoryUserIds]);
 
   const [tradeHistoryUsers, setTradeHistoryUsers] = useState<
     Record<
@@ -202,22 +137,8 @@ export default function TradeHistoryModal({
   };
 
   const getUserAvatar = (userId: string) => {
-    return tradeHistoryAvatars?.[userId] || "";
+    return `${process.env.NEXT_PUBLIC_INVENTORY_API_URL}/proxy/users/${userId}/avatar-headshot`;
   };
-
-  const DefaultAvatar = () => (
-    <svg
-      className="h-6 w-6 text-tertiary-text"
-      fill="currentColor"
-      viewBox="0 0 20 20"
-    >
-      <path
-        fillRule="evenodd"
-        d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
-        clipRule="evenodd"
-      />
-    </svg>
-  );
 
   if (!item) return null;
 
@@ -298,19 +219,28 @@ export default function TradeHistoryModal({
                       >
                         <div className="flex items-center gap-3 min-w-0 flex-1">
                           <div className="flex-shrink-0">
-                            {getUserAvatar(userId) ? (
+                            <div className="relative h-10 w-10 rounded-full bg-tertiary-bg overflow-hidden">
                               <Image
-                                src={getUserAvatar(userId)!}
+                                src={getUserAvatar(userId)}
                                 alt="User Avatar"
                                 width={40}
                                 height={40}
-                                className="rounded-full bg-tertiary-bg"
+                                className="rounded-full"
+                                onError={(e) => {
+                                  const target = e.target as HTMLImageElement;
+                                  target.style.display = "none";
+                                  const parent = target.parentElement;
+                                  if (parent && !parent.querySelector("svg")) {
+                                    const defaultAvatar =
+                                      document.createElement("div");
+                                    defaultAvatar.className =
+                                      "flex h-full w-full items-center justify-center";
+                                    defaultAvatar.innerHTML = `<svg class="h-6 w-6 text-tertiary-text" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" /></svg>`;
+                                    parent.appendChild(defaultAvatar);
+                                  }
+                                }}
                               />
-                            ) : (
-                              <div className="bg-tertiary-bg flex h-10 w-10 items-center justify-center rounded-full">
-                                <DefaultAvatar />
-                              </div>
-                            )}
+                            </div>
                           </div>
                           <div className="min-w-0 flex-1">
                             <a

@@ -7,7 +7,6 @@ import { useBatchUserData } from "@/hooks/useBatchUserData";
 import { ItemHoarder } from "@/utils/api";
 import Image from "next/image";
 import Link from "next/link";
-import { DefaultAvatar } from "@/utils/avatar";
 import { MagnifyingGlassIcon, XMarkIcon } from "@heroicons/react/24/outline";
 
 interface HoardersTabProps {
@@ -15,72 +14,8 @@ interface HoardersTabProps {
   itemType: string;
 }
 
-// Client-side avatar fetcher
-async function fetchAvatarsClient(
-  userIds: string[],
-): Promise<Record<string, string>> {
-  if (userIds.length === 0) return {};
-
-  try {
-    const CHUNK_SIZE = 500;
-    const chunks: string[][] = [];
-    for (let i = 0; i < userIds.length; i += CHUNK_SIZE) {
-      chunks.push(userIds.slice(i, i + CHUNK_SIZE));
-    }
-
-    const allAvatars: Record<string, string> = {};
-
-    await Promise.all(
-      chunks.map(async (chunk) => {
-        try {
-          const url = `${process.env.NEXT_PUBLIC_INVENTORY_API_URL}/proxy/users/avatar-headshot?userIds=${chunk.join(",")}`;
-          const response = await fetch(url, {
-            headers: {
-              "User-Agent": "JailbreakChangelogs-ItemDetails/1.0",
-              "X-Source":
-                process.env.NEXT_PUBLIC_INVENTORY_API_SOURCE_HEADER ?? "",
-            },
-          });
-
-          if (!response.ok) return;
-
-          const data = await response.json();
-          if (data && typeof data === "object") {
-            Object.entries(data).forEach(
-              ([userId, avatarData]: [string, unknown]) => {
-                const avatar = avatarData as {
-                  targetId: number;
-                  state: string;
-                  imageUrl?: string;
-                  version: string;
-                };
-                if (
-                  avatar &&
-                  avatar.targetId &&
-                  avatar.state === "Completed" &&
-                  avatar.imageUrl
-                ) {
-                  allAvatars[userId] = avatar.imageUrl;
-                }
-              },
-            );
-          }
-        } catch (error) {
-          console.error("Failed to fetch avatar chunk:", error);
-        }
-      }),
-    );
-
-    return allAvatars;
-  } catch (error) {
-    console.error("Failed to fetch avatars:", error);
-    return {};
-  }
-}
-
 export default function HoardersTab({ itemName, itemType }: HoardersTabProps) {
   const parentRef = useRef<HTMLDivElement>(null);
-  const [avatars, setAvatars] = useState<Record<string, string>>({});
   const [searchTerm, setSearchTerm] = useState("");
 
   // Fetch hoarders client-side
@@ -131,22 +66,10 @@ export default function HoardersTab({ itemName, itemType }: HoardersTabProps) {
     });
   }, [hoarders, searchTerm, robloxUsers]);
 
-  // Fetch avatars
-  const userIdsString = userIds.join(",");
-  useEffect(() => {
-    if (userIds.length === 0) return;
-
-    let cancelled = false;
-    fetchAvatarsClient(userIds).then((avatarData) => {
-      if (!cancelled) {
-        setAvatars(avatarData);
-      }
-    });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [userIds, userIdsString]);
+  // Generate avatar URL
+  const getUserAvatar = (userId: string) => {
+    return `${process.env.NEXT_PUBLIC_INVENTORY_API_URL}/proxy/users/${userId}/avatar-headshot`;
+  };
 
   // TanStack Virtual setup for list
   const virtualizer = useVirtualizer({
@@ -232,10 +155,6 @@ export default function HoardersTab({ itemName, itemType }: HoardersTabProps) {
     if (!user) return userId;
     // If no username, use display name as fallback
     return user.name || user.displayName || userId;
-  };
-
-  const getUserAvatar = (userId: string): string | null => {
-    return avatars[userId] || null;
   };
 
   return (
@@ -329,20 +248,27 @@ export default function HoardersTab({ itemName, itemType }: HoardersTabProps) {
                       <span className="text-tertiary-text text-xs sm:text-sm font-semibold tracking-wide uppercase">
                         #{rank}
                       </span>
-                      <div className="relative h-10 w-10 sm:h-12 sm:w-12 shrink-0 overflow-hidden rounded-full bg-primary-bg">
-                        {avatar ? (
-                          <Image
-                            src={avatar}
-                            alt={displayName}
-                            width={48}
-                            height={48}
-                            className="h-full w-full object-cover"
-                          />
-                        ) : (
-                          <div className="flex h-full w-full items-center justify-center">
-                            <DefaultAvatar />
-                          </div>
-                        )}
+                      <div className="relative h-10 w-10 sm:h-12 sm:w-12 shrink-0 overflow-hidden rounded-full bg-tertiary-bg">
+                        <Image
+                          src={avatar}
+                          alt={displayName}
+                          width={48}
+                          height={48}
+                          className="h-full w-full object-cover"
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            target.style.display = "none";
+                            const parent = target.parentElement;
+                            if (parent && !parent.querySelector("svg")) {
+                              const defaultAvatar =
+                                document.createElement("div");
+                              defaultAvatar.className =
+                                "flex h-full w-full items-center justify-center";
+                              defaultAvatar.innerHTML = `<svg class="h-6 w-6 text-tertiary-text" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" /></svg>`;
+                              parent.appendChild(defaultAvatar);
+                            }
+                          }}
+                        />
                       </div>
                     </div>
                     <div className="flex flex-col gap-1 min-w-0 flex-1">

@@ -14,18 +14,6 @@ export interface RobloxUsersResponse {
   [userId: string]: RobloxUserData;
 }
 
-// Avatar Data API Response Types
-export interface RobloxAvatarData {
-  targetId: number;
-  state: string;
-  imageUrl: string;
-  version: string;
-}
-
-export interface RobloxAvatarsResponse {
-  [userId: string]: RobloxAvatarData;
-}
-
 // User Connection Data API Response Types
 export interface UserConnectionItem {
   requestedUsername: string;

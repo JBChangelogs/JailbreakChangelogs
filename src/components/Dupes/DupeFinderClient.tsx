@@ -17,7 +17,6 @@ interface DupeFinderClientProps {
   initialData?: DupeFinderItem[];
   robloxId?: string;
   robloxUsers?: Record<string, RobloxUser>;
-  robloxAvatars?: Record<string, string>;
   userConnectionData?: UserConnectionData | null;
   error?: string;
   isLoading?: boolean;
@@ -29,7 +28,6 @@ export default function DupeFinderClient({
   initialData,
   robloxId,
   robloxUsers: initialRobloxUsers,
-  robloxAvatars: initialRobloxAvatars,
   userConnectionData,
   error,
   isLoading: externalIsLoading,
@@ -38,7 +36,6 @@ export default function DupeFinderClient({
 }: DupeFinderClientProps) {
   // Transform data during render instead of using useEffect
   const localRobloxUsers = initialRobloxUsers || {};
-  const localRobloxAvatars = initialRobloxAvatars || {};
 
   // Derive loading state from props instead of managing in effects
   const isLoading = externalIsLoading && !initialData && !error;
@@ -55,7 +52,6 @@ export default function DupeFinderClient({
           initialData={initialData}
           robloxId={robloxId || ""}
           robloxUsers={localRobloxUsers}
-          robloxAvatars={localRobloxAvatars}
           userConnectionData={userConnectionData || null}
           items={items}
         />

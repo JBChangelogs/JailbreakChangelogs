@@ -4,9 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { useDebounce } from "@/hooks/useDebounce";
 import { useVirtualizer } from "@tanstack/react-virtual";
-import { useQuery } from "@tanstack/react-query";
 import { DefaultAvatar } from "@/utils/avatar";
-import { fetchRobloxAvatars } from "@/utils/api";
 import { formatMessageDate } from "@/utils/timestamp";
 import { Season } from "@/types/seasons";
 import XpProgressBar from "@/components/Inventory/XpProgressBar";
@@ -38,37 +36,10 @@ export default function SeasonLeaderboardClient({
   const parentRef = useRef<HTMLDivElement>(null);
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
 
-  // Extract user IDs from leaderboard data
-  const userIds = initialLeaderboard.map((user) => user.id.toString());
-
-  // Use TanStack Query for fetching avatars with caching
-  const { data: fetchedAvatarData } = useQuery({
-    queryKey: ["seasonLeaderboardAvatars", userIds.sort()],
-    queryFn: async () => {
-      const avatarData = await fetchRobloxAvatars(userIds);
-
-      // Process avatar data to extract imageUrl strings
-      const processedAvatarData: Record<string, string> = {};
-      if (avatarData && typeof avatarData === "object") {
-        Object.values(avatarData).forEach((avatar) => {
-          const avatarObj = avatar as {
-            targetId?: number;
-            imageUrl?: string;
-          };
-          if (avatarObj && avatarObj.targetId && avatarObj.imageUrl) {
-            processedAvatarData[avatarObj.targetId.toString()] =
-              avatarObj.imageUrl;
-          }
-        });
-      }
-
-      return processedAvatarData;
-    },
-    enabled: userIds.length > 0,
-  });
-
-  // Avatar data map
-  const avatarDataMap: Record<string, string> = fetchedAvatarData || {};
+  // Generate avatar URL from user ID
+  const getUserAvatar = (userId: number) => {
+    return `${process.env.NEXT_PUBLIC_INVENTORY_API_URL}/proxy/users/${userId}/avatar-headshot`;
+  };
 
   // Filter leaderboard based on debounced search term
   const filteredLeaderboard = (() => {
@@ -195,8 +166,8 @@ export default function SeasonLeaderboardClient({
                     );
                     const originalRank = originalIndex + 1;
 
-                    // Get avatar URL from cached data
-                    const avatarUrl = avatarDataMap[user.id.toString()];
+                    // Get avatar URL directly
+                    const avatarUrl = getUserAvatar(user.id);
 
                     return (
                       <div

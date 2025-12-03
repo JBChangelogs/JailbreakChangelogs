@@ -46,7 +46,6 @@ interface OGFinderResultsProps {
   initialData: OGSearchData | null;
   robloxId: string;
   robloxUsers: Record<string, RobloxUser>;
-  robloxAvatars: Record<string, string>;
   userConnectionData: UserConnectionData | null;
   error?: string;
   items?: Item[];
@@ -56,7 +55,6 @@ export default function OGFinderResults({
   initialData,
   robloxId,
   robloxUsers,
-  robloxAvatars,
   userConnectionData,
   error,
   items = [],
@@ -141,7 +139,7 @@ export default function OGFinderResults({
   };
 
   const getUserAvatar = (userId: string) => {
-    return robloxAvatars[userId] || "";
+    return `${process.env.NEXT_PUBLIC_INVENTORY_API_URL}/proxy/users/${userId}/avatar-headshot`;
   };
 
   const getHasVerifiedBadge = (userId: string) => {

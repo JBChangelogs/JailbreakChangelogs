@@ -18,7 +18,6 @@ interface DuplicatesTabProps {
     duplicates?: InventoryItem[];
   };
   robloxUsers: Record<string, RobloxUser>;
-  robloxAvatars: Record<string, string>;
   onItemClick: (item: InventoryItem) => void;
   itemsData: Item[];
 }
@@ -38,7 +37,6 @@ type SortOrder =
 export default function DuplicatesTab({
   initialData,
   robloxUsers,
-  robloxAvatars,
   onItemClick,
   itemsData,
 }: DuplicatesTabProps) {
@@ -57,7 +55,7 @@ export default function DuplicatesTab({
   };
 
   const getUserAvatar = (userId: string) => {
-    return robloxAvatars[userId] || "";
+    return `${process.env.NEXT_PUBLIC_INVENTORY_API_URL}/proxy/users/${userId}/avatar-headshot`;
   };
 
   const getHasVerifiedBadge = (userId: string) => {

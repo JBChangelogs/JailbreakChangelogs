@@ -20,7 +20,6 @@ function DupeUserDataLoadingFallback({
       initialData={dupeData}
       robloxId={robloxId}
       robloxUsers={{}}
-      robloxAvatars={{}}
       userConnectionData={null}
       items={items}
     />
@@ -56,7 +55,6 @@ async function DupeUserDataFetcher({
       initialData={dupeData}
       robloxId={robloxId}
       robloxUsers={userDataResult.robloxUsers}
-      robloxAvatars={userDataResult.robloxAvatars}
       userConnectionData={userDataResult.userConnectionData || null}
       items={items}
     />

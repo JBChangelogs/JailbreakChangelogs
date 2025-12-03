@@ -11,7 +11,6 @@ import { mergeInventoryArrayWithMetadata } from "@/utils/inventoryMerge";
 interface InventoryItemsProps {
   initialData: InventoryData;
   robloxUsers: Record<string, RobloxUser>;
-  robloxAvatars: Record<string, string>;
   onItemClick: (item: InventoryItem) => void;
   itemsData?: Item[];
   isOwnInventory?: boolean;
@@ -20,7 +19,6 @@ interface InventoryItemsProps {
 export default function InventoryItems({
   initialData,
   robloxUsers,
-  robloxAvatars,
   onItemClick,
   itemsData: propItemsData,
 }: InventoryItemsProps) {
@@ -183,7 +181,6 @@ export default function InventoryItems({
   };
 
   const currentItemsData = useMemo(() => propItemsData || [], [propItemsData]);
-  const currentRobloxAvatars = robloxAvatars;
 
   const getUserDisplay = (userId: string) => {
     const user = robloxUsers[userId];
@@ -192,7 +189,7 @@ export default function InventoryItems({
   };
 
   const getUserAvatar = (userId: string) => {
-    return currentRobloxAvatars[userId] || "";
+    return `${process.env.NEXT_PUBLIC_INVENTORY_API_URL}/proxy/users/${userId}/avatar-headshot`;
   };
 
   const getHasVerifiedBadge = (userId: string) => {

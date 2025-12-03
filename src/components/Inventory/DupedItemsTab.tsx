@@ -11,7 +11,6 @@ import { Icon } from "../ui/IconWrapper";
 interface DupedItemsTabProps {
   duplicates: InventoryItem[];
   robloxUsers: Record<string, RobloxUser>;
-  robloxAvatars: Record<string, string>;
   onItemClick: (item: InventoryItem) => void;
   itemsData?: Item[];
   userId: string;
@@ -30,7 +29,6 @@ type SortOrder =
 export default function DupedItemsTab({
   duplicates,
   robloxUsers,
-  robloxAvatars,
   onItemClick,
   itemsData: propItemsData,
   userId,
@@ -56,7 +54,7 @@ export default function DupedItemsTab({
   };
 
   const getUserAvatar = (userId: string) => {
-    return robloxAvatars[userId] || "";
+    return `${process.env.NEXT_PUBLIC_INVENTORY_API_URL}/proxy/users/${userId}/avatar-headshot`;
   };
 
   const getHasVerifiedBadge = (userId: string) => {

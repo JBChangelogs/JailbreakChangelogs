@@ -45,7 +45,6 @@ interface OGFinderClientProps {
   robloxId?: string;
   originalSearchTerm?: string;
   robloxUsers?: Record<string, RobloxUser>;
-  robloxAvatars?: Record<string, string>;
   error?: string;
   isLoading?: boolean;
 }

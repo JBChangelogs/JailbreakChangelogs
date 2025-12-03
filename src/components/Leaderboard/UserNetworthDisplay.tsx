@@ -4,11 +4,7 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useAuthContext } from "@/contexts/AuthContext";
-import {
-  fetchUserNetworth,
-  UserNetworthData,
-  fetchRobloxAvatars,
-} from "@/utils/api";
+import { fetchUserNetworth, UserNetworthData } from "@/utils/api";
 import { formatFullDate } from "@/utils/timestamp";
 import InventoryBreakdownModal from "../Modals/InventoryBreakdownModal";
 
@@ -18,7 +14,10 @@ export default function UserNetworthDisplay() {
     null,
   );
   const [isLoading, setIsLoading] = useState(false);
-  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  // Avatar URL is now generated directly from user ID
+  const avatarUrl = user?.roblox_id
+    ? `${process.env.NEXT_PUBLIC_INVENTORY_API_URL}/proxy/users/${user.roblox_id}/avatar-headshot`
+    : null;
   const [isBreakdownModalOpen, setIsBreakdownModalOpen] = useState(false);
 
   useEffect(() => {
@@ -29,22 +28,8 @@ export default function UserNetworthDisplay() {
 
       setIsLoading(true);
       try {
-        const [data, avatarData] = await Promise.all([
-          fetchUserNetworth(user.roblox_id),
-          fetchRobloxAvatars([user.roblox_id.toString()]),
-        ]);
-
+        const data = await fetchUserNetworth(user.roblox_id);
         setUserNetworth(data);
-
-        if (avatarData && typeof avatarData === "object") {
-          const avatarEntry = Object.values(avatarData).find(
-            (avatar: { targetId?: number; imageUrl?: string }) =>
-              avatar && avatar.targetId && avatar.imageUrl,
-          );
-          if (avatarEntry) {
-            setAvatarUrl(avatarEntry.imageUrl);
-          }
-        }
       } catch (error) {
         console.error("Error fetching user networth:", error);
         setUserNetworth([]);

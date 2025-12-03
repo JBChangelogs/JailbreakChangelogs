@@ -47,7 +47,7 @@ export default function InventoryItemCard({
   item,
   itemData,
   getUserDisplay,
-  // getUserAvatar,
+  getUserAvatar,
   getHasVerifiedBadge,
   onCardClick,
   duplicateCount = 1,
@@ -284,25 +284,50 @@ export default function InventoryItemCard({
             {isMissingItem ? (
               <span className="text-primary-text text-xl font-bold">???</span>
             ) : originalOwnerInfo ? (
-              <a
-                href={`https://www.roblox.com/users/${isOriginalOwner ? userId : originalOwnerInfo.value}/profile`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-link hover:text-link-hover text-center break-words transition-colors hover:underline"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <span className="inline-flex items-center gap-2">
-                  {isOriginalOwner
-                    ? getUserDisplay(userId)
-                    : getUserDisplay(originalOwnerInfo.value)}
-                  {getHasVerifiedBadge &&
-                    (isOriginalOwner
-                      ? getHasVerifiedBadge(userId)
-                      : getHasVerifiedBadge(originalOwnerInfo.value)) && (
-                      <VerifiedBadgeIcon className="h-4 w-4" />
+              <div className="flex items-center justify-center gap-2">
+                <div className="relative h-8 w-8 rounded-full bg-tertiary-bg overflow-hidden flex-shrink-0">
+                  <Image
+                    src={getUserAvatar(
+                      isOriginalOwner ? userId : originalOwnerInfo.value,
                     )}
-                </span>
-              </a>
+                    alt="Owner Avatar"
+                    width={32}
+                    height={32}
+                    className="rounded-full"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.style.display = "none";
+                      const parent = target.parentElement;
+                      if (parent && !parent.querySelector("svg")) {
+                        const defaultAvatar = document.createElement("div");
+                        defaultAvatar.className =
+                          "flex h-full w-full items-center justify-center";
+                        defaultAvatar.innerHTML = `<svg class="h-5 w-5 text-tertiary-text" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" /></svg>`;
+                        parent.appendChild(defaultAvatar);
+                      }
+                    }}
+                  />
+                </div>
+                <a
+                  href={`https://www.roblox.com/users/${isOriginalOwner ? userId : originalOwnerInfo.value}/profile`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-link hover:text-link-hover text-center break-words transition-colors hover:underline"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <span className="inline-flex items-center gap-2">
+                    {isOriginalOwner
+                      ? getUserDisplay(userId)
+                      : getUserDisplay(originalOwnerInfo.value)}
+                    {getHasVerifiedBadge &&
+                      (isOriginalOwner
+                        ? getHasVerifiedBadge(userId)
+                        : getHasVerifiedBadge(originalOwnerInfo.value)) && (
+                        <VerifiedBadgeIcon className="h-4 w-4" />
+                      )}
+                  </span>
+                </a>
+              </div>
             ) : (
               <span className="text-secondary-text text-sm">Unknown</span>
             )}

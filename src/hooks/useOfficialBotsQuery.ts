@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { fetchOfficialScanBots, fetchRobloxAvatars } from "@/utils/api";
+import { fetchOfficialScanBots } from "@/utils/api";
 
 export function useOfficialBotsQuery() {
   return useQuery({
@@ -13,15 +13,10 @@ export function useOfficialBotsQuery() {
         const bName = (b.username || "").toLowerCase();
         return aName.localeCompare(bName);
       });
-      const botIds = sortedBots.map((b) => String(b.userId));
-
-      // Fetch avatar data for bots
-      const botAvatarData =
-        botIds.length > 0 ? await fetchRobloxAvatars(botIds) : {};
-
+      // Avatars are now handled client-side with direct URLs
       return {
         bots: sortedBots,
-        avatarData: botAvatarData,
+        avatarData: {}, // Empty - avatars now use direct URLs
       };
     },
   });

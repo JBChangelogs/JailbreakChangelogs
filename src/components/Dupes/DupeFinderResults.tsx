@@ -65,7 +65,6 @@ interface DupeFinderResultsProps {
   initialData: DupeFinderItem[];
   robloxId: string;
   robloxUsers: Record<string, RobloxUser>;
-  robloxAvatars: Record<string, string>;
   userConnectionData: UserConnectionData | null;
   items: Item[]; // Items data passed from server
 }
@@ -74,7 +73,6 @@ export default function DupeFinderResults({
   initialData,
   robloxId,
   robloxUsers,
-  robloxAvatars,
   userConnectionData,
   items,
 }: DupeFinderResultsProps) {
@@ -147,7 +145,7 @@ export default function DupeFinderResults({
   };
 
   const getUserAvatar = (userId: string) => {
-    return robloxAvatars[userId] || "";
+    return `${process.env.NEXT_PUBLIC_INVENTORY_API_URL}/proxy/users/${userId}/avatar-headshot`;
   };
 
   const getHasVerifiedBadge = (userId: string) => {

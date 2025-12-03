@@ -51,7 +51,6 @@ interface InventoryCheckerClientProps {
   robloxId?: string;
   originalSearchTerm?: string;
   robloxUsers?: Record<string, RobloxUser>;
-  robloxAvatars?: Record<string, string>;
   userConnectionData?: UserConnectionData | null;
   initialDupeData?: unknown;
   currentSeason?: Season | null;
@@ -70,7 +69,6 @@ export default function InventoryCheckerClient({
   robloxId,
   originalSearchTerm,
   robloxUsers: initialRobloxUsers,
-  robloxAvatars: initialRobloxAvatars,
   userConnectionData,
   initialDupeData,
   currentSeason = null,
@@ -94,9 +92,7 @@ export default function InventoryCheckerClient({
   const [robloxUsers, setRobloxUsers] = useState<Record<string, RobloxUser>>(
     initialRobloxUsers || {},
   );
-  const [robloxAvatars, setRobloxAvatars] = useState(
-    initialRobloxAvatars || {},
-  );
+
   const [itemsData] = useState<Item[]>(items);
   const [refreshedData, setRefreshedData] = useState<InventoryData | null>(
     null,
@@ -553,11 +549,6 @@ export default function InventoryCheckerClient({
             setRobloxUsers((prev) => ({ ...prev, ...result.userData }));
           }
 
-          // Update state with new avatar data
-          if (result.avatarData && typeof result.avatarData === "object") {
-            setRobloxAvatars((prev) => ({ ...prev, ...result.avatarData }));
-          }
-
           console.log(
             `[INVENTORY] Successfully loaded batch ${Math.floor(i / BATCH_SIZE) + 1}`,
           );
@@ -585,7 +576,7 @@ export default function InventoryCheckerClient({
     const timeoutId = setTimeout(loadRemainingUsers, 3000);
 
     return () => clearTimeout(timeoutId);
-  }, [remainingUserIds, setRobloxUsers, setRobloxAvatars]);
+  }, [remainingUserIds, setRobloxUsers]);
 
   // Items data is now passed as props from server-side, no need to fetch
 
@@ -927,7 +918,6 @@ export default function InventoryCheckerClient({
             <UserStats
               initialData={currentData}
               robloxUsers={robloxUsers}
-              robloxAvatars={robloxAvatars}
               userConnectionData={userConnectionData || null}
               itemsData={itemsData}
               dupedItems={dupedItems}
@@ -956,7 +946,6 @@ export default function InventoryCheckerClient({
                   <InventoryItems
                     initialData={currentData}
                     robloxUsers={mergedRobloxUsers}
-                    robloxAvatars={robloxAvatars}
                     onItemClick={handleItemClick}
                     itemsData={itemsData}
                     isOwnInventory={isOwnInventory}
@@ -971,7 +960,6 @@ export default function InventoryCheckerClient({
                       duplicates: currentData.duplicates,
                     }}
                     robloxUsers={mergedRobloxUsers}
-                    robloxAvatars={robloxAvatars}
                     onItemClick={handleItemClick}
                     itemsData={itemsData}
                   />
@@ -984,7 +972,6 @@ export default function InventoryCheckerClient({
                     <DupedItemsTab
                       duplicates={currentData.duplicates}
                       robloxUsers={mergedRobloxUsers}
-                      robloxAvatars={robloxAvatars}
                       onItemClick={handleItemClick}
                       itemsData={itemsData}
                       userId={currentData.user_id}

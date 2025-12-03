@@ -4,7 +4,6 @@ import { useOfficialBotsQuery } from "@/hooks/useOfficialBotsQuery";
 import { Icon } from "./IconWrapper";
 import Image from "next/image";
 import CopyButton from "@/app/inventories/CopyButton";
-import { DefaultAvatar } from "@/utils/avatar";
 
 // Skeleton loader for official bots section
 function OfficialBotsSkeleton() {
@@ -87,7 +86,7 @@ function OfficialBotsContent() {
     return null;
   }
 
-  const { bots: sortedBots, avatarData: botAvatarData } = data;
+  const { bots: sortedBots } = data;
 
   return (
     <div className="mt-8">
@@ -108,21 +107,8 @@ function OfficialBotsContent() {
               bot.displayName || bot.username || `Bot ${botId}`;
             const username = bot.username || botId;
 
-            // Get bot avatar data
-            const botAvatar =
-              botAvatarData && typeof botAvatarData === "object"
-                ? Object.values(botAvatarData).find(
-                    (
-                      avatar,
-                    ): avatar is { targetId?: number; imageUrl?: string } =>
-                      typeof avatar === "object" &&
-                      avatar !== null &&
-                      "targetId" in avatar &&
-                      avatar.targetId?.toString() === botId,
-                  )
-                : null;
-
-            const avatarUrl = botAvatar?.imageUrl || null;
+            // Generate avatar URL directly
+            const avatarUrl = `${process.env.NEXT_PUBLIC_INVENTORY_API_URL}/proxy/users/${botId}/avatar-headshot`;
 
             return (
               <div
@@ -140,29 +126,24 @@ function OfficialBotsContent() {
 
                   {/* Bot Avatar */}
                   <div className="bg-tertiary-bg h-10 w-10 flex-shrink-0 overflow-hidden rounded-full">
-                    {avatarUrl ? (
-                      <Image
-                        src={avatarUrl}
-                        alt={`${displayName}'s avatar`}
-                        width={40}
-                        height={40}
-                        className="h-full w-full object-cover"
-                        onError={(e) => {
-                          e.currentTarget.style.display = "none";
-                          const parent = e.currentTarget.parentElement;
-                          if (parent) {
-                            const fallback = document.createElement("div");
-                            fallback.className =
-                              "flex h-full w-full items-center justify-center";
-                            parent.appendChild(fallback);
-                          }
-                        }}
-                      />
-                    ) : (
-                      <div className="flex h-full w-full items-center justify-center">
-                        <DefaultAvatar />
-                      </div>
-                    )}
+                    <Image
+                      src={avatarUrl}
+                      alt={`${displayName}'s avatar`}
+                      width={40}
+                      height={40}
+                      className="h-full w-full object-cover"
+                      onError={(e) => {
+                        e.currentTarget.style.display = "none";
+                        const parent = e.currentTarget.parentElement;
+                        if (parent && !parent.querySelector("svg")) {
+                          const fallback = document.createElement("div");
+                          fallback.className =
+                            "flex h-full w-full items-center justify-center";
+                          fallback.innerHTML = `<svg class="h-6 w-6 text-tertiary-text" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" /></svg>`;
+                          parent.appendChild(fallback);
+                        }
+                      }}
+                    />
                   </div>
                 </div>
 

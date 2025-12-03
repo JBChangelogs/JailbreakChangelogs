@@ -4,7 +4,6 @@ import {
   fetchConnectedBots,
   fetchQueueInfo,
   fetchRobloxUsersBatch,
-  fetchRobloxAvatars,
 } from "@/utils/api";
 
 export async function pollBotsData() {
@@ -37,25 +36,21 @@ export async function fetchRobloxDataForBots(botIds: string[]) {
         success: true,
         data: {
           usersData: null,
-          avatarsData: {},
         },
       };
     }
 
-    const [fetchedUsersData, fetchedAvatarsData] = await Promise.all([
-      fetchRobloxUsersBatch(botIds).catch(() => null),
-      fetchRobloxAvatars(botIds).catch(() => ({})),
-    ]);
+    const fetchedUsersData = await fetchRobloxUsersBatch(botIds).catch(
+      () => null,
+    );
 
     const usersData =
       fetchedUsersData && "data" in fetchedUsersData ? null : fetchedUsersData;
-    const avatarsData = fetchedAvatarsData || {};
 
     return {
       success: true,
       data: {
         usersData,
-        avatarsData,
       },
     };
   } catch (error) {
@@ -74,25 +69,21 @@ export async function fetchRobloxDataForUser(userId: string) {
         success: true,
         data: {
           usersData: null,
-          avatarsData: {},
         },
       };
     }
 
-    const [fetchedUsersData, fetchedAvatarsData] = await Promise.all([
-      fetchRobloxUsersBatch([userId]).catch(() => null),
-      fetchRobloxAvatars([userId]).catch(() => ({})),
-    ]);
+    const fetchedUsersData = await fetchRobloxUsersBatch([userId]).catch(
+      () => null,
+    );
 
     const usersData =
       fetchedUsersData && "data" in fetchedUsersData ? null : fetchedUsersData;
-    const avatarsData = fetchedAvatarsData || {};
 
     return {
       success: true,
       data: {
         usersData,
-        avatarsData,
       },
     };
   } catch (error) {

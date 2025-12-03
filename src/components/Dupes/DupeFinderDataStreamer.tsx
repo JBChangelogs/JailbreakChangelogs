@@ -3,7 +3,6 @@ import {
   fetchDupeFinderData,
   fetchRobloxUserByUsername,
   fetchRobloxUsersBatch,
-  fetchRobloxAvatars,
   fetchItems,
 } from "@/utils/api";
 import DupeFinderClient from "./DupeFinderClient";
@@ -123,13 +122,9 @@ async function DupeFinderDataFetcher({ robloxId }: { robloxId: string }) {
     );
   }
 
-  const [mainUserData, mainUserAvatar, items] = await Promise.all([
+  const [mainUserData, items] = await Promise.all([
     fetchRobloxUsersBatch([actualRobloxId]).catch((error) => {
       console.error("Failed to fetch main user data:", error);
-      return {};
-    }),
-    fetchRobloxAvatars([actualRobloxId]).catch((error) => {
-      console.error("Failed to fetch main user avatar:", error);
       return {};
     }),
     fetchItems().catch((error) => {
@@ -140,7 +135,6 @@ async function DupeFinderDataFetcher({ robloxId }: { robloxId: string }) {
 
   // Build the user data objects with just the main user
   const robloxUsers: Record<string, import("@/types").RobloxUser> = {};
-  const robloxAvatars: Record<string, string> = {};
 
   // Add main user data
   if (mainUserData && typeof mainUserData === "object") {
@@ -164,25 +158,7 @@ async function DupeFinderDataFetcher({ robloxId }: { robloxId: string }) {
     });
   }
 
-  // Add main user avatar
-  if (mainUserAvatar && typeof mainUserAvatar === "object") {
-    Object.values(mainUserAvatar).forEach((avatar) => {
-      const avatarData = avatar as {
-        targetId: number;
-        state: string;
-        imageUrl?: string;
-        version: string;
-      };
-      if (
-        avatarData &&
-        avatarData.targetId &&
-        avatarData.state === "Completed" &&
-        avatarData.imageUrl
-      ) {
-        robloxAvatars[avatarData.targetId.toString()] = avatarData.imageUrl;
-      }
-    });
-  }
+  // Avatars are now handled client-side with direct URLs
 
   return (
     <DupeFinderClient
@@ -190,7 +166,6 @@ async function DupeFinderDataFetcher({ robloxId }: { robloxId: string }) {
       initialData={result}
       isUserFound={true}
       robloxUsers={robloxUsers}
-      robloxAvatars={robloxAvatars}
       items={items}
     />
   );

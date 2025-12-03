@@ -3,7 +3,6 @@ import {
   fetchOGSearchData,
   fetchRobloxUserByUsername,
   fetchRobloxUsersBatch,
-  fetchRobloxAvatars,
   fetchUserByRobloxId,
   fetchItems,
 } from "@/utils/api";
@@ -138,7 +137,6 @@ async function OGFinderDataFetcher({ robloxId }: { robloxId: string }) {
             error={`Username "${robloxId}" not found. Please check the spelling and try again.`}
             initialData={null}
             robloxUsers={{}}
-            robloxAvatars={{}}
             userConnectionData={null}
             items={[]}
           />
@@ -162,7 +160,6 @@ async function OGFinderDataFetcher({ robloxId }: { robloxId: string }) {
           error={errorMessage}
           initialData={null}
           robloxUsers={{}}
-          robloxAvatars={{}}
           userConnectionData={null}
           items={[]}
         />
@@ -180,7 +177,6 @@ async function OGFinderDataFetcher({ robloxId }: { robloxId: string }) {
         error={result.message}
         initialData={null}
         robloxUsers={{}}
-        robloxAvatars={{}}
         userConnectionData={null}
         items={[]}
       />
@@ -195,7 +191,6 @@ async function OGFinderDataFetcher({ robloxId }: { robloxId: string }) {
         error="Failed to fetch OG search data. Please try again."
         initialData={null}
         robloxUsers={{}}
-        robloxAvatars={{}}
         userConnectionData={null}
         items={[]}
       />
@@ -238,31 +233,26 @@ async function OGFinderDataFetcher({ robloxId }: { robloxId: string }) {
     }
   }
 
-  // Fetch main user data, avatar, connection data, and items metadata
+  // Fetch main user data, connection data, and items metadata
+  // Avatars are now handled client-side with direct URLs
   // Item owners will be fetched client-side in batches
-  const [mainUserData, mainUserAvatar, userConnectionData, items] =
-    await Promise.all([
-      fetchRobloxUsersBatch([actualRobloxId]).catch((error) => {
-        console.error("Failed to fetch main user data:", error);
-        return {};
-      }),
-      fetchRobloxAvatars([actualRobloxId]).catch((error) => {
-        console.error("Failed to fetch main user avatar:", error);
-        return {};
-      }),
-      fetchUserByRobloxId(actualRobloxId).catch((error) => {
-        console.error("Failed to fetch user connection data:", error);
-        return null;
-      }),
-      fetchItems().catch((error) => {
-        console.error("Failed to fetch items metadata:", error);
-        return [];
-      }),
-    ]);
+  const [mainUserData, userConnectionData, items] = await Promise.all([
+    fetchRobloxUsersBatch([actualRobloxId]).catch((error) => {
+      console.error("Failed to fetch main user data:", error);
+      return {};
+    }),
+    fetchUserByRobloxId(actualRobloxId).catch((error) => {
+      console.error("Failed to fetch user connection data:", error);
+      return null;
+    }),
+    fetchItems().catch((error) => {
+      console.error("Failed to fetch items metadata:", error);
+      return [];
+    }),
+  ]);
 
   // Build the user data objects with just the main user
   const robloxUsers: Record<string, RobloxUser> = {};
-  const robloxAvatars: Record<string, string> = {};
 
   // Add main user data
   if (mainUserData && typeof mainUserData === "object") {
@@ -286,32 +276,11 @@ async function OGFinderDataFetcher({ robloxId }: { robloxId: string }) {
     });
   }
 
-  // Add main user avatar
-  if (mainUserAvatar && typeof mainUserAvatar === "object") {
-    Object.values(mainUserAvatar).forEach((avatar) => {
-      const avatarData = avatar as {
-        targetId: number;
-        state: string;
-        imageUrl?: string;
-        version: string;
-      };
-      if (
-        avatarData &&
-        avatarData.targetId &&
-        avatarData.state === "Completed" &&
-        avatarData.imageUrl
-      ) {
-        robloxAvatars[avatarData.targetId.toString()] = avatarData.imageUrl;
-      }
-    });
-  }
-
   return (
     <OGFinderResults
       initialData={result}
       robloxId={actualRobloxId}
       robloxUsers={robloxUsers}
-      robloxAvatars={robloxAvatars}
       userConnectionData={userConnectionData}
       items={items}
     />

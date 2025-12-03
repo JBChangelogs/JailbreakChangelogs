@@ -18,7 +18,6 @@ import { UserNetworthData } from "@/utils/api";
 interface UserStatsProps {
   initialData: InventoryData;
   robloxUsers: Record<string, RobloxUser>;
-  robloxAvatars: Record<string, string>;
   userConnectionData: UserConnectionData | null;
   currentSeason: Season | null;
   itemsData: Item[];
@@ -30,7 +29,6 @@ interface UserStatsProps {
 export default function UserStats({
   initialData,
   robloxUsers,
-  robloxAvatars,
   userConnectionData,
   currentSeason,
   onRefresh,
@@ -64,12 +62,9 @@ export default function UserStats({
     [robloxUsers],
   );
 
-  const getUserAvatar = useCallback(
-    (userId: string) => {
-      return robloxAvatars[userId] || "";
-    },
-    [robloxAvatars],
-  );
+  const getUserAvatar = useCallback((userId: string) => {
+    return `${process.env.NEXT_PUBLIC_INVENTORY_API_URL}/proxy/users/${userId}/avatar-headshot`;
+  }, []);
 
   const getHasVerifiedBadge = useCallback(
     (userId: string) => {

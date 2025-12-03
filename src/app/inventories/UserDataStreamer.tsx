@@ -36,7 +36,6 @@ function UserDataLoadingFallback({
       initialData={inventoryData}
       robloxId={robloxId}
       robloxUsers={{}}
-      robloxAvatars={{}}
       userConnectionData={null}
       currentSeason={currentSeason}
       initialComments={initialComments}
@@ -92,7 +91,6 @@ async function UserDataFetcher({
       initialData={inventoryData}
       robloxId={robloxId}
       robloxUsers={userDataResult.robloxUsers}
-      robloxAvatars={userDataResult.robloxAvatars}
       userConnectionData={userConnectionData}
       initialDupeData={userDataResult.dupeData}
       currentSeason={currentSeason}

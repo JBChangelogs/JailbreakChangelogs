@@ -1,13 +1,11 @@
 import {
   fetchRobloxUsersBatch,
-  fetchRobloxAvatars,
   fetchUserByRobloxId,
   fetchDupeFinderData,
 } from "@/utils/api";
 import { RobloxUser } from "@/types";
 import {
   RobloxUsersResponse,
-  RobloxAvatarsResponse,
   UserConnectionResponse,
   DupeFinderResponse,
 } from "@/types/userData";
@@ -33,7 +31,6 @@ interface OGSearchData {
 
 export interface UserDataResult {
   robloxUsers: Record<string, RobloxUser>;
-  robloxAvatars: Record<string, string>;
   userConnectionData?: UserConnectionData | null;
   dupeData?: DupeFinderResponse;
 }
@@ -108,13 +105,6 @@ export class UserDataService {
         });
         return {};
       }),
-      fetchRobloxAvatars(finalUserIds).catch((error) => {
-        logError(`Failed to fetch avatar data`, error, {
-          component: context,
-          action: "fetch_avatars",
-        });
-        return {};
-      }),
     ];
 
     // Add optional fetches
@@ -146,8 +136,8 @@ export class UserDataService {
     const results = await Promise.allSettled(fetchPromises);
 
     // Extract successful results, providing defaults for failed ones
-    const [allUserData, allAvatarData, userConnectionData, dupeData] =
-      results.map((result, index) => {
+    const [allUserData, userConnectionData, dupeData] = results.map(
+      (result, index) => {
         if (result.status === "fulfilled") {
           return result.value;
         } else {
@@ -157,20 +147,18 @@ export class UserDataService {
           );
           // Return appropriate defaults based on the promise index
           if (index === 0) return null; // user data
-          if (index === 1) return null; // avatar data
-          if (index === 2) return null; // user connection data
-          if (index === 3) return { error: "Failed to fetch dupe data" }; // dupe data
+          if (index === 1) return null; // user connection data
+          if (index === 2) return { error: "Failed to fetch dupe data" }; // dupe data
           return null;
         }
-      });
+      },
+    );
 
     // Process user data
     const robloxUsers = this.processUserData(allUserData);
-    const robloxAvatars = this.processAvatarData(allAvatarData);
 
     return {
       robloxUsers,
-      robloxAvatars,
       userConnectionData: includeUserConnection
         ? this.processUserConnectionData(userConnectionData)
         : undefined,
@@ -207,37 +195,6 @@ export class UserDataService {
     }
 
     return robloxUsers;
-  }
-
-  /**
-   * Processes raw avatar data into the standardized avatar URL format
-   */
-  private static processAvatarData(
-    allAvatarData: unknown,
-  ): Record<string, string> {
-    const robloxAvatars: Record<string, string> = {};
-
-    if (
-      allAvatarData &&
-      typeof allAvatarData === "object" &&
-      !Array.isArray(allAvatarData)
-    ) {
-      const avatarDataResponse = allAvatarData as RobloxAvatarsResponse;
-      Object.values(avatarDataResponse).forEach((avatarData) => {
-        if (
-          avatarData &&
-          avatarData.targetId &&
-          avatarData.state === "Completed" &&
-          avatarData.imageUrl
-        ) {
-          // Only add completed avatars to the data
-          robloxAvatars[avatarData.targetId.toString()] = avatarData.imageUrl;
-        }
-        // For blocked avatars, don't add them to the data so components can use their own fallback
-      });
-    }
-
-    return robloxAvatars;
   }
 
   /**

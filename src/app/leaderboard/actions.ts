@@ -1,9 +1,6 @@
 "use server";
 
-import {
-  fetchRobloxUsersBatchLeaderboard,
-  fetchRobloxAvatars,
-} from "@/utils/api";
+import { fetchRobloxUsersBatchLeaderboard } from "@/utils/api";
 
 export async function fetchLeaderboardUserData(userIds: string[]) {
   try {
@@ -14,30 +11,12 @@ export async function fetchLeaderboardUserData(userIds: string[]) {
       };
     }
 
-    // Fetch both user data and avatars in parallel
-    const [userDataResult, avatarData] = await Promise.all([
-      fetchRobloxUsersBatchLeaderboard(userIds),
-      fetchRobloxAvatars(userIds),
-    ]);
-
-    // Process avatar data to extract imageUrl strings
-    const processedAvatarData: Record<string, string> = {};
-    if (avatarData && typeof avatarData === "object") {
-      Object.values(avatarData).forEach((avatar) => {
-        const avatarObj = avatar as {
-          targetId?: number;
-          imageUrl?: string;
-        };
-        if (avatarObj && avatarObj.targetId && avatarObj.imageUrl) {
-          processedAvatarData[avatarObj.targetId.toString()] =
-            avatarObj.imageUrl;
-        }
-      });
-    }
+    // Fetch user data (avatars are now handled client-side with direct URLs)
+    const userDataResult = await fetchRobloxUsersBatchLeaderboard(userIds);
 
     return {
       userData: userDataResult || {},
-      avatarData: processedAvatarData,
+      avatarData: {}, // Avatars now use direct URLs client-side
     };
   } catch (error) {
     console.error(
