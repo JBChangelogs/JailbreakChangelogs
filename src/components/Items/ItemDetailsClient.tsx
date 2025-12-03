@@ -14,7 +14,6 @@ import { ChevronDownIcon, ChevronUpIcon } from "@heroicons/react/24/outline";
 import { InformationCircleIcon } from "@heroicons/react/24/outline";
 
 import toast from "react-hot-toast";
-import { Inter } from "next/font/google";
 
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import CreatorLink from "@/components/Items/CreatorLink";
@@ -89,8 +88,6 @@ interface ItemDetailsClientProps {
   initialComments?: CommentData[];
   initialCommentUserMap?: Record<string, UserData>;
 }
-
-const inter = Inter({ subsets: ["latin"], display: "swap" });
 
 // Move ItemDetailsTabs outside to avoid creating components during render
 const ItemDetailsTabs = React.memo(
@@ -583,9 +580,7 @@ export default function ItemDetailsClient({
             {/* Right column - Details */}
             <div className="space-y-6">
               <div>
-                <h2
-                  className={`text-primary-text text-3xl font-bold ${inter.className}`}
-                >
+                <h2 className="text-primary-text text-3xl font-bold">
                   {currentItem.name}
                 </h2>
                 <p className="text-secondary-text mt-2 text-sm">

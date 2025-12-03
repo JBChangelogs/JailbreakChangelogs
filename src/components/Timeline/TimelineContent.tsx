@@ -4,9 +4,6 @@ import Image from "next/image";
 import { motion } from "framer-motion";
 import { Changelog } from "@/utils/api";
 import { ArrowPathIcon } from "@heroicons/react/24/outline";
-import { Inter } from "next/font/google";
-
-const inter = Inter({ subsets: ["latin"], display: "swap" });
 
 interface TimelineContentProps {
   changelogs: Changelog[];
@@ -121,14 +118,10 @@ const TimelineContent: React.FC<TimelineContentProps> = ({ changelogs }) => {
                   }}
                 >
                   <div className="flex flex-col gap-0.5">
-                    <h3
-                      className={`${inter.className} --xl text-primary-text group-hover:text-link-hover font-bold tracking-tighter transition-colors`}
-                    >
+                    <h3 className="text-xl text-primary-text group-hover:text-link-hover font-bold tracking-tighter transition-colors">
                       {changelog.title.split(" / ")[0]}
                     </h3>
-                    <p
-                      className={`${inter.className} text-secondary-text text-sm font-semibold tracking-tight`}
-                    >
+                    <p className="text-secondary-text text-sm font-semibold tracking-tight">
                       {changelog.title.split(" / ")[1]}
                     </p>
                   </div>

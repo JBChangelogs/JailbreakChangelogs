@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
-import { Inter } from "next/font/google";
+import { GeistSans } from "geist/font/sans";
+import { GeistMono } from "geist/font/mono";
 import Script from "next/script";
 import Image from "next/image";
 import "./globals.css";
@@ -28,7 +29,6 @@ import { GoogleAnalytics, GoogleTagManager } from "@next/third-parties/google";
 import QueryProvider from "@/components/QueryProvider";
 import { getDefaultConsent } from "@/utils/serverConsent";
 
-const inter = Inter({ subsets: ["latin"] });
 export const viewport: Viewport = {
   themeColor: "#FA2E26",
 };
@@ -123,7 +123,9 @@ export default async function RootLayout({
             strategy="afterInteractive"
           />
         </head>
-        <body className={`${inter.className} bg-primary-bg`}>
+        <body
+          className={`${GeistSans.variable} ${GeistMono.variable} bg-primary-bg font-sans`}
+        >
           <GoogleTagManager gtmId={process.env.NEXT_PUBLIC_GTM_ID!} />
           <noscript>
             <div className="bg-primary-bg fixed inset-0 z-50 flex items-center justify-center">
@@ -252,7 +254,9 @@ export default async function RootLayout({
           strategy="afterInteractive"
         />
       </head>
-      <body className={`${inter.className} bg-primary-bg`}>
+      <body
+        className={`${GeistSans.variable} ${GeistMono.variable} bg-primary-bg font-sans`}
+      >
         <GoogleTagManager gtmId={process.env.NEXT_PUBLIC_GTM_ID!} />
         <noscript>
           <div className="bg-primary-bg fixed inset-0 z-50 flex items-center justify-center">

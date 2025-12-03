@@ -28,7 +28,6 @@ import {
 } from "@heroicons/react/24/outline";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { UserData } from "@/types/auth";
-import { Inter } from "next/font/google";
 import Link from "next/link";
 import ReportCommentModal from "./ReportCommentModal";
 import LoginModalWrapper from "../Auth/LoginModalWrapper";
@@ -40,8 +39,6 @@ import CommentTimestamp from "./CommentTimestamp";
 import Snackbar from "@mui/material/Snackbar";
 import MuiAlert from "@mui/material/Alert";
 import DOMPurify from "dompurify";
-
-const inter = Inter({ subsets: ["latin"], display: "swap" });
 
 const COMMENT_CHAR_LIMITS = {
   0: 200, // Free tier
@@ -610,9 +607,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
       <div className="border-border-primary bg-secondary-bg rounded-lg border p-2 sm:p-3">
         <div className="flex flex-col gap-4">
           <div>
-            <h2
-              className={`${inter.className} text-primary-text mb-4 text-lg font-bold tracking-tight sm:text-xl`}
-            >
+            <h2 className="text-primary-text mb-4 text-lg font-bold tracking-tight sm:text-xl">
               {type === "changelog" ? (
                 `Comments for Changelog ${changelogId}: ${changelogTitle}`
               ) : type === "season" ? (
@@ -919,7 +914,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                                           <Link
                                             href={`/users/${comment.user_id}`}
                                             prefetch={false}
-                                            className={`${inter.className} text-md text-primary-text group-hover:text-link truncate font-semibold transition-colors duration-200 group-hover:underline`}
+                                            className="text-md text-primary-text group-hover:text-link truncate font-semibold transition-colors duration-200 group-hover:underline"
                                           >
                                             {userData[comment.user_id]
                                               ?.username || comment.author}

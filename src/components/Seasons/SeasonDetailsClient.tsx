@@ -8,15 +8,12 @@ import SeasonNavigation from "@/components/Seasons/SeasonNavigation";
 import ImageGallery from "@/components/Seasons/ImageGallery";
 import ChangelogComments from "@/components/PageComments/ChangelogComments";
 import Link from "next/link";
-import { Inter } from "next/font/google";
 import { formatProfileDate } from "@/utils/timestamp";
 import DisplayAd from "@/components/Ads/DisplayAd";
 import AdRemovalNotice from "@/components/Ads/AdRemovalNotice";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { Season, CommentData } from "@/utils/api";
 import { UserData } from "@/types/auth";
-
-const inter = Inter({ subsets: ["latin"], display: "swap" });
 
 interface SeasonDetailsClientProps {
   seasonList: Season[];
@@ -183,9 +180,7 @@ export default function SeasonDetailsClient({
           <div className="grid grid-cols-1 gap-8 xl:grid-cols-12">
             {/* Content Section - 8/12 columns on desktop, full width on tablet and mobile */}
             <div className="sm:col-span-12 xl:col-span-8">
-              <h1
-                className={`${inter.className} text-primary-text border-secondary-text mb-8 border-b pb-4 text-3xl font-bold tracking-tighter sm:text-5xl`}
-              >
+              <h1 className="text-primary-text border-secondary-text mb-8 border-b pb-4 text-3xl font-bold tracking-tighter sm:text-5xl">
                 Season {season.season} / {season.title}
               </h1>
               <p className="text-secondary-text mb-4">{season.description}</p>
@@ -268,9 +263,7 @@ export default function SeasonDetailsClient({
                 </div>
               </div>
 
-              <h2
-                className={`text-primary-text border-secondary-text mb-4 border-b pb-2 text-2xl font-bold tracking-tight ${inter.className}`}
-              >
+              <h2 className="text-primary-text border-secondary-text mb-4 border-b pb-2 text-2xl font-bold tracking-tight">
                 Season Rewards
               </h2>
               <div className="space-y-4">
