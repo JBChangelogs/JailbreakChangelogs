@@ -45,7 +45,7 @@ export default function NewsTicker() {
               </Link>
               ! Enter in our{" "}
               <a
-                href="https://discord.com/channels/1286064050135896064/1361921979036471476/1443305617241407569"
+                href="https://discord.com/channels/1286064050135896064/1361921979036471476/1445936271137439765"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-blue-400 hover:text-blue-300 underline font-semibold"
