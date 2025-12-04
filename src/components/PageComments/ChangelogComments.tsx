@@ -1,7 +1,14 @@
 "use client";
 
 import { Icon } from "../ui/IconWrapper";
-import React, { useState, useEffect, useCallback, useRef } from "react";
+import React, {
+  useState,
+  useEffect,
+  useCallback,
+  useRef,
+  useMemo,
+  useLayoutEffect,
+} from "react";
 import {
   CircularProgress,
   Button,
@@ -481,15 +488,30 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
     (comment) => !failedUserData.has(comment.user_id),
   );
 
+  // Memoize estimated comment size based on screen width
+  const estimatedSize = useMemo(() => {
+    // Mobile screens may have more wrapping, slightly taller comments
+    // Desktop screens have more horizontal space, comments are typically shorter
+    if (typeof window !== "undefined") {
+      return window.innerWidth < 640 ? 150 : 120;
+    }
+    return 135; // SSR default - middle ground
+  }, []);
+
   // TanStack Virtual setup for performance with large comment datasets
   // Only renders visible items (~10-15 at a time) for 60FPS scrolling
 
   const virtualizer = useVirtualizer({
     count: filteredComments.length,
     getScrollElement: () => parentRef.current,
-    estimateSize: () => 200, // Estimate comment height - let TanStack measure actual content
+    estimateSize: () => estimatedSize,
     overscan: 5, // Render 5 extra items above/below viewport for smooth scrolling
   });
+
+  // Trigger measure when estimated size changes
+  useLayoutEffect(() => {
+    virtualizer.measure();
+  }, [virtualizer, estimatedSize]);
 
   // Recalculate virtualizer when expanded comments change to update heights
   useEffect(() => {

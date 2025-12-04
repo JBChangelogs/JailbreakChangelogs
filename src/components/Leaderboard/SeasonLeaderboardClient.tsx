@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo, useLayoutEffect } from "react";
 import Image from "next/image";
 import { useDebounce } from "@/hooks/useDebounce";
 import { useVirtualizer } from "@tanstack/react-virtual";
@@ -56,13 +56,26 @@ export default function SeasonLeaderboardClient({
     });
   })();
 
+  // Memoize estimated item size based on screen width
+  const estimatedSize = useMemo(() => {
+    if (typeof window !== "undefined") {
+      return window.innerWidth < 640 ? 140 : 120;
+    }
+    return 130; // SSR default - middle ground
+  }, []);
+
   // TanStack Virtual setup for performance with large datasets
   const virtualizer = useVirtualizer({
     count: filteredLeaderboard.length,
     getScrollElement: () => parentRef.current,
-    estimateSize: () => 100,
+    estimateSize: () => estimatedSize,
     overscan: 5,
   });
+
+  // Trigger measure when estimated size changes
+  useLayoutEffect(() => {
+    virtualizer.measure();
+  }, [virtualizer, estimatedSize]);
 
   // Recalculate heights on window resize for responsive behavior
   useEffect(() => {
