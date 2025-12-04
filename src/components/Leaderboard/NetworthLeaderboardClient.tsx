@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo, useLayoutEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useDebounce } from "@/hooks/useDebounce";
@@ -113,14 +113,29 @@ export default function NetworthLeaderboardClient({
     });
   })();
 
+  // Memoize estimated item size based on screen width
+  // Mobile screens (<640px) use flex-col layout, making items taller
+  // Desktop screens use flex-row layout, making items shorter
+  const estimatedSize = useMemo(() => {
+    if (typeof window !== "undefined") {
+      return window.innerWidth < 640 ? 180 : 100;
+    }
+    return 140; // SSR default - middle ground
+  }, []);
+
   // TanStack Virtual setup for performance with large datasets
   // Only renders visible items (~10-15 at a time) for 60FPS scrolling
   const virtualizer = useVirtualizer({
     count: filteredLeaderboard.length,
     getScrollElement: () => parentRef.current,
-    estimateSize: () => 100, // Simple estimate - let TanStack measure actual content
+    estimateSize: () => estimatedSize,
     overscan: 5, // Render 5 extra items above/below viewport for smooth scrolling
   });
+
+  // Trigger measure when estimated size changes (e.g., on mount or screen size category changes)
+  useLayoutEffect(() => {
+    virtualizer.measure();
+  }, [virtualizer, estimatedSize]);
 
   // Recalculate heights on window resize for responsive behavior
   useEffect(() => {

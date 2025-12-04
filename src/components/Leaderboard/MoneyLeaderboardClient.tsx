@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo, useLayoutEffect } from "react";
 import Image from "next/image";
 import { useDebounce } from "@/hooks/useDebounce";
 import { useVirtualizer } from "@tanstack/react-virtual";
@@ -110,14 +110,27 @@ export default function MoneyLeaderboardClient({
     setSearchTerm(term);
   };
 
+  // Memoize estimated item size based on screen width
+  const estimatedSize = useMemo(() => {
+    if (typeof window !== "undefined") {
+      return window.innerWidth < 640 ? 160 : 100;
+    }
+    return 130; // SSR default - middle ground
+  }, []);
+
   // TanStack Virtual setup for performance with large datasets
   // Only renders visible items (~10-15 at a time) for 60FPS scrolling
   const virtualizer = useVirtualizer({
     count: filteredLeaderboard.length,
     getScrollElement: () => parentRef.current,
-    estimateSize: () => 100, // Simple estimate - let TanStack measure actual content
+    estimateSize: () => estimatedSize,
     overscan: 5, // Render 5 extra items above/below viewport for smooth scrolling
   });
+
+  // Trigger measure when estimated size changes
+  useLayoutEffect(() => {
+    virtualizer.measure();
+  }, [virtualizer, estimatedSize]);
 
   // Recalculate heights on window resize for responsive behavior
   useEffect(() => {
