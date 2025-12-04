@@ -31,7 +31,7 @@
     "@mui/lab": "^7.0.0",
     "@mui/material": "^7.3.6",
     "@mui/material-nextjs": "^7.3.6",
-    "@mui/x-date-pickers": "^8.19.0",
+    "@mui/x-date-pickers": "^8.21.0",
     "@next/third-parties": "^16.0.7",
     "@radix-ui/react-dialog": "^1.1.15",
     "@radix-ui/react-popover": "^1.1.15",
