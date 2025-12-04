@@ -35,12 +35,6 @@ export default async function NetworthLeaderboardPage() {
             Top players ranked by their total inventory networth in Roblox
             Jailbreak
           </p>
-          <div className="mt-3 rounded-lg border border-blue-200 bg-blue-50 p-3 dark:border-blue-800 dark:bg-blue-900/20">
-            <p className="text-primary-text text-sm">
-              <span className="font-semibold">Note:</span> Leaderboard updates
-              every 30 minutes.
-            </p>
-          </div>
         </div>
 
         <NetworthLeaderboardClient initialLeaderboard={leaderboard} />

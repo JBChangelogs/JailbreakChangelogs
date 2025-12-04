@@ -825,6 +825,45 @@ export async function fetchItemHoarders(
   }
 }
 
+export interface ItemDupedUser {
+  hasVerifiedBadge: boolean;
+  id: number;
+  name: string;
+  displayName: string;
+  avatar: string;
+}
+
+export async function fetchItemDupes(
+  itemId: number,
+  limit: number = 5000,
+): Promise<ItemDupedUser[]> {
+  try {
+    if (!INVENTORY_API_URL) {
+      throw new Error("Missing INVENTORY_API_URL");
+    }
+    const url = `${INVENTORY_API_URL}/item/duplicates?id=${itemId}&limit=${limit}`;
+    const response = await fetch(url, {
+      headers: {
+        "User-Agent": "JailbreakChangelogs-Inventory/1.0",
+        "X-Source": INVENTORY_API_SOURCE_HEADER,
+      },
+      next: { revalidate: 3600 }, // Revalidate every 1 hour
+    });
+    if (!response.ok) {
+      if (response.status === 404) {
+        return [];
+      }
+      throw new Error(`Failed to fetch item dupes: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return Array.isArray(data) ? data : [];
+  } catch (err) {
+    console.error("[SERVER] Error fetching item dupes:", err);
+    return [];
+  }
+}
+
 export async function fetchLatestSeason() {
   try {
     const response = await fetch(`${BASE_API_URL}/seasons/latest`, {

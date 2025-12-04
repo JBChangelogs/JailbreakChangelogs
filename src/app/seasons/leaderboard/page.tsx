@@ -53,22 +53,6 @@ export default async function SeasonLeaderboardPage() {
                   View Seasons
                 </Link>
               </div>
-
-              {/* Additional helpful info */}
-              <div className="mt-8">
-                <div className="border-button-info bg-button-info/10 rounded-lg border p-3 sm:p-4">
-                  <div className="text-primary-text flex items-start gap-2 text-xs sm:text-sm">
-                    <Icon
-                      icon="emojione:light-bulb"
-                      className="text-button-info flex-shrink-0 text-base sm:text-lg"
-                    />
-                    <span className="font-medium leading-relaxed">
-                      Helpful Tip: The leaderboard updates every hour during
-                      active seasons.
-                    </span>
-                  </div>
-                </div>
-              </div>
             </div>
           </div>
         </div>
@@ -92,12 +76,6 @@ export default async function SeasonLeaderboardPage() {
           <p className="text-secondary-text mt-2">
             Top 25 players ranked by their total xp
           </p>
-          <div className="mt-3 rounded-lg border border-blue-200 bg-blue-50 p-3 dark:border-blue-800 dark:bg-blue-900/20">
-            <p className="text-primary-text text-sm">
-              <span className="font-semibold">Note:</span> Leaderboard updates
-              every 1 hour.
-            </p>
-          </div>
         </div>
 
         <SeasonLeaderboardClient

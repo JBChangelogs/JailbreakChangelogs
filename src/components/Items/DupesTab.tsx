@@ -5,14 +5,7 @@ import { useVirtualizer } from "@tanstack/react-virtual";
 import { useQuery } from "@tanstack/react-query";
 import Image from "next/image";
 import { MagnifyingGlassIcon, XMarkIcon } from "@heroicons/react/24/outline";
-
-interface DupedUser {
-  hasVerifiedBadge: boolean;
-  id: number;
-  name: string;
-  displayName: string;
-  avatar: string;
-}
+import { ItemDupedUser } from "@/utils/api";
 
 interface DupesTabProps {
   itemId: number;
@@ -22,7 +15,7 @@ export default function DupesTab({ itemId }: DupesTabProps) {
   const parentRef = useRef<HTMLDivElement>(null);
   const [searchTerm, setSearchTerm] = useState("");
 
-  // Fetch dupes client-side
+  // Fetch dupes through API route
   const {
     data: dupedUsers = [],
     isLoading: isLoadingDupes,
@@ -30,13 +23,18 @@ export default function DupesTab({ itemId }: DupesTabProps) {
   } = useQuery({
     queryKey: ["item-dupes", itemId],
     queryFn: async () => {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_INVENTORY_API_URL}/item/duplicates?id=${itemId}`,
-      );
+      const response = await fetch(`/api/items/dupes?id=${itemId}`);
       if (!response.ok) {
+        // If we get a 200 with empty array, return empty array instead of error
+        if (response.status === 200) {
+          const data = await response.json();
+          if (Array.isArray(data) && data.length === 0) {
+            return [];
+          }
+        }
         throw new Error("Failed to fetch dupes");
       }
-      return response.json() as Promise<DupedUser[]>;
+      return response.json() as Promise<ItemDupedUser[]>;
     },
   });
 
@@ -103,7 +101,7 @@ export default function DupesTab({ itemId }: DupesTabProps) {
   }
 
   // Empty state (no dupes)
-  if (dupedUsers.length === 0) {
+  if (!isLoadingDupes && !dupesError && dupedUsers.length === 0) {
     return (
       <div className="bg-secondary-bg rounded-lg p-8 text-center">
         <div className="border-button-info/30 bg-button-info/20 mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full border">
