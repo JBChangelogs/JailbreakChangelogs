@@ -146,7 +146,7 @@ const ChangelogContent: React.FC<ChangelogContentProps> = ({
         {/* Content Section - 8/12 columns on desktop, full width on tablet and mobile */}
         <div className="sm:col-span-12 xl:col-span-8">
           <div className="mb-8 border-b border-secondary-text pb-4">
-            <h1 className="text-primary-text mb-3 text-3xl font-bold tracking-tighter sm:text-5xl">
+            <h1 className="text-primary-text mb-3 text-3xl font-bold tracking-tight sm:text-5xl">
               {title}
             </h1>
             {(contentInfo.mediaTypes.length > 0 ||
@@ -207,16 +207,13 @@ const ChangelogContent: React.FC<ChangelogContentProps> = ({
             {parsedSections.map((section, sectionIndex) => (
               <div key={sectionIndex} className="mb-8">
                 {section.title && (
-                  <h2 className="text-primary-text mb-4 text-2xl font-bold tracking-tighter sm:text-3xl">
+                  <h2 className="text-primary-text mb-4 text-2xl font-bold tracking-tight sm:text-3xl">
                     {section.title}
                   </h2>
                 )}
                 <ul className="text-secondary-text space-y-2">
                   {section.items.map((item, itemIndex) => (
-                    <li
-                      key={itemIndex}
-                      className={`flex items-start gap-2 ${item.isNested ? "ml-6" : ""}`}
-                    >
+                    <li key={itemIndex} className="flex items-start gap-2">
                       {item.type === "media" ? (
                         <ChangelogMediaEmbed
                           type={item.mediaType}

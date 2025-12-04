@@ -31,7 +31,7 @@ export function parseMarkdown(text: string) {
 
         // Process mentions in text
         const processedText = cleanLine.replace(/@(\w+)/g, (_, username) => {
-          return `<span class="text-link-hover">@${username}</span>`;
+          return `<a href="https://www.roblox.com/users/profile?username=${username}" target="_blank" rel="noopener noreferrer" class="text-link hover:text-link-hover active:text-link-active transition-colors duration-200">@${username}</a>`;
         });
 
         return {
