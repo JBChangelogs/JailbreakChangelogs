@@ -91,7 +91,7 @@ export default async function RootLayout({
 
   if (isMaintenanceMode) {
     return (
-      <html lang="en">
+      <html lang="en" className={`${GeistSans.variable} ${GeistMono.variable}`}>
         <head>
           {/* Google Consent Mode v2 - MUST be before Google Analytics */}
           <Script
@@ -123,9 +123,7 @@ export default async function RootLayout({
             strategy="afterInteractive"
           />
         </head>
-        <body
-          className={`${GeistSans.variable} ${GeistMono.variable} bg-primary-bg font-sans`}
-        >
+        <body className="bg-primary-bg font-sans">
           <GoogleTagManager gtmId={process.env.NEXT_PUBLIC_GTM_ID!} />
           <noscript>
             <div className="bg-primary-bg fixed inset-0 z-50 flex items-center justify-center">
@@ -216,7 +214,7 @@ export default async function RootLayout({
   }
 
   return (
-    <html lang="en">
+    <html lang="en" className={`${GeistSans.variable} ${GeistMono.variable}`}>
       <head>
         {/* Preconnect to external asset domains */}
         <link rel="preconnect" href="https://assets.jailbreakchangelogs.xyz" />
@@ -254,9 +252,7 @@ export default async function RootLayout({
           strategy="afterInteractive"
         />
       </head>
-      <body
-        className={`${GeistSans.variable} ${GeistMono.variable} bg-primary-bg font-sans`}
-      >
+      <body className="bg-primary-bg font-sans">
         <GoogleTagManager gtmId={process.env.NEXT_PUBLIC_GTM_ID!} />
         <noscript>
           <div className="bg-primary-bg fixed inset-0 z-50 flex items-center justify-center">
