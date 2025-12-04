@@ -11,7 +11,7 @@ export default function NewsTicker() {
 
   useEffect(() => {
     // Only run on client after mount - check localStorage
-    const dismissed = safeLocalStorage.getItem("javelin-giveaway-dismissed");
+    const dismissed = safeLocalStorage.getItem("hyperpink5-giveaway-dismissed");
     // eslint-disable-next-line
     setIsVisible(dismissed !== "true");
   }, []);
@@ -19,7 +19,7 @@ export default function NewsTicker() {
   const handleDismiss = () => {
     setIsVisible(false);
     // Store dismissal in localStorage to remember user's choice
-    safeLocalStorage.setItem("javelin-giveaway-dismissed", "true");
+    safeLocalStorage.setItem("hyperpink5-giveaway-dismissed", "true");
   };
 
   if (!shouldShowTicker || isVisible !== true) return null;
@@ -38,10 +38,10 @@ export default function NewsTicker() {
             <span className="text-primary-text text-center text-xs">
               We&apos;re giving out a{" "}
               <Link
-                href="/item/vehicle/Javelin"
+                href="/item/hyperchrome/HyperPink Level 5"
                 className="text-blue-400 hover:text-blue-300 underline font-semibold"
               >
-                Javelin vehicle
+                HyperPink Level 5
               </Link>
               ! Enter in our{" "}
               <a
