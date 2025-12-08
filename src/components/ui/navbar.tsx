@@ -486,9 +486,6 @@ export const NavbarModern = ({ className }: { className?: string }) => {
             <HoveredLink href="/leaderboard/money" setActive={setActive}>
               Money Leaderboard
             </HoveredLink>
-            <HoveredLink href="/inventories/networth" setActive={setActive}>
-              Networth Leaderboard
-            </HoveredLink>
             <HoveredLink href="/servers" setActive={setActive}>
               Private Servers
             </HoveredLink>
