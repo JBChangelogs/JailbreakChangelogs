@@ -1728,32 +1728,6 @@ export async function fetchMoneyLeaderboard(): Promise<
   }
 }
 
-export async function fetchNetworthLeaderboard(): Promise<
-  NetworthLeaderboardEntry[]
-> {
-  try {
-    const response = await fetch(
-      `${INVENTORY_API_URL}/networth/leaderboard?limit=1000`,
-      {
-        headers: {
-          "User-Agent": "JailbreakChangelogs-Inventory/1.0",
-          "X-Source": INVENTORY_API_SOURCE_HEADER,
-        },
-      },
-    );
-
-    if (!response.ok) {
-      throw new Error("Failed to fetch networth leaderboard");
-    }
-
-    const data = await response.json();
-    return data as NetworthLeaderboardEntry[];
-  } catch (err) {
-    console.error("[SERVER] Error fetching networth leaderboard:", err);
-    return [];
-  }
-}
-
 export interface SeasonLeaderboardResponse {
   data: SeasonLeaderboardEntry[];
   updated_at: number;
