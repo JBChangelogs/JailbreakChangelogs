@@ -25,7 +25,6 @@ const ROBBERY_TYPES = [
   { marker_name: "CargoShip", name: "Cargo Ship" },
   { marker_name: "Casino", name: "Casino" },
   { marker_name: "Jewelry", name: "Jewelry" },
-  { marker_name: "Mansion", name: "Mansion" },
   { marker_name: "Museum", name: "Museum" },
   { marker_name: "OilRig", name: "Oil Rig" },
   { marker_name: "PowerPlant", name: "Power Plant" },
