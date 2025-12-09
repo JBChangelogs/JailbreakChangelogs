@@ -40,11 +40,12 @@ export default async function DupeFinderPage() {
   return (
     <div className="container mx-auto px-4 pb-8">
       <Breadcrumb />
+
+      <ExperimentalFeatureBanner className="mb-6" />
+
       <div className="mb-6 flex items-center gap-3">
         <h1 className="text-primary-text text-3xl font-bold">Dupe Finder</h1>
       </div>
-
-      <ExperimentalFeatureBanner className="mb-6" />
 
       <p className="text-secondary-text mb-4">
         Enter a Roblox ID or username to check for any duped items associated

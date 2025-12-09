@@ -35,13 +35,14 @@ export default async function InventoriesPage() {
   return (
     <div className="container mx-auto px-4 pb-8">
       <Breadcrumb />
+
+      <ExperimentalFeatureBanner className="mb-6" />
+
       <div className="mb-6 flex items-center gap-3">
         <h1 className="text-primary-text text-3xl font-bold">
           Inventory Checker
         </h1>
       </div>
-
-      <ExperimentalFeatureBanner className="mb-6" />
 
       <p className="text-primary-text mb-4">
         Enter a username or Roblox ID to check their Jailbreak inventory, or use
