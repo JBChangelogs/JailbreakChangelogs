@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { RobloxUser, Item } from "@/types";
 import { Season } from "@/types/seasons";
 import {
@@ -75,17 +75,17 @@ export default function UserStats({
   );
 
   // Use networth data from backend only - no fallback calculations
+  const latestNetworthData = useMemo(() => {
+    return initialNetworthData && initialNetworthData.length > 0
+      ? initialNetworthData.reduce((latest, current) =>
+          current.snapshot_time > latest.snapshot_time ? current : latest,
+        )
+      : null;
+  }, [initialNetworthData]);
+
   useEffect(() => {
     const setValues = () => {
       try {
-        // Get the latest networth data (highest snapshot_time)
-        const latestNetworthData =
-          initialNetworthData && initialNetworthData.length > 0
-            ? initialNetworthData.reduce((latest, current) =>
-                current.snapshot_time > latest.snapshot_time ? current : latest,
-              )
-            : null;
-
         if (latestNetworthData) {
           // Use backend calculated values only
           setTotalNetworth(latestNetworthData.networth || 0);
@@ -110,7 +110,7 @@ export default function UserStats({
     };
 
     setValues();
-  }, [initialNetworthData]);
+  }, [latestNetworthData]);
 
   // Handle refresh
   const handleRefresh = async () => {
@@ -193,17 +193,13 @@ export default function UserStats({
         isLoadingValues={isLoadingValues}
         userId={initialData.user_id}
         hasDupedValue={
-          initialNetworthData &&
-          initialNetworthData.length > 0 &&
-          initialNetworthData.some(
-            (data) =>
-              data.duplicates_value !== undefined &&
-              data.duplicates_value !== null &&
-              data.duplicates_value > 0,
-          )
+          latestNetworthData
+            ? (latestNetworthData.duplicates_value ?? 0) > 0
+            : false
         }
         totalItemsCount={initialData.item_count + (initialData.dupe_count || 0)}
         duplicatesCount={initialData.dupe_count}
+        robloxUsers={robloxUsers}
       />
     </div>
   );

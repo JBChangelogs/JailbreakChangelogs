@@ -3,8 +3,10 @@
 import React, { useState } from "react";
 import { Season } from "@/types/seasons";
 import { InventoryData } from "@/app/inventories/types";
+import { RobloxUser } from "@/types";
 import { useRealTimeRelativeDate } from "@/hooks/useRealTimeRelativeDate";
 import { formatMessageDate } from "@/utils/timestamp";
+import { useRobloxUserDataQuery } from "@/hooks/useRobloxDataQuery";
 import XpProgressBar from "./XpProgressBar";
 import dynamic from "next/dynamic";
 import Image from "next/image";
@@ -71,6 +73,7 @@ interface UserStatsSectionProps {
   hasDupedValue?: boolean;
   totalItemsCount: number;
   duplicatesCount?: number;
+  robloxUsers?: Record<string, RobloxUser>;
 }
 
 // Helper functions
@@ -135,8 +138,10 @@ export default function UserStatsSection({
   hasDupedValue = false,
   totalItemsCount,
   duplicatesCount,
+  robloxUsers,
 }: UserStatsSectionProps) {
   const [isScanHistoryModalOpen, setIsScanHistoryModalOpen] = useState(false);
+  const [isMetadataExpanded, setIsMetadataExpanded] = useState(false);
   const [scanHistory, setScanHistory] = useState<
     Array<{ scan_id: string; created_at: number }>
   >([]);
@@ -147,6 +152,18 @@ export default function UserStatsSection({
   const updatedRelativeTime = useRealTimeRelativeDate(
     currentData?.updated_at || 0,
   );
+
+  // Fetch bot user data if needed
+  const { data: botRobloxData } = useRobloxUserDataQuery(
+    currentData?.bot_id || null,
+  );
+
+  // Determine bot user (check props first, then fetched data)
+  const botUser = currentData?.bot_id
+    ? robloxUsers?.[currentData.bot_id] ||
+      botRobloxData?.usersData?.[currentData.bot_id] ||
+      null
+    : null;
 
   const fetchScanHistory = async () => {
     setIsLoadingScanHistory(true);
@@ -656,37 +673,136 @@ export default function UserStatsSection({
         </div>
       )}
 
-      {/* Metadata */}
-      <div className="text-secondary-text mt-4 space-y-1 text-sm">
-        <p>
-          <span className="text-primary-text font-semibold">Scan Count:</span>{" "}
-          <span className="text-secondary-text">{currentData.scan_count}</span>
-        </p>
-        <p>
-          <span className="text-primary-text font-semibold">
-            First Scanned:
-          </span>{" "}
-          <span className="text-secondary-text">
-            {formatDate(currentData.created_at)} ({createdRelativeTime})
-          </span>
-        </p>
-        <p>
-          <span className="text-primary-text font-semibold">Last Scanned:</span>{" "}
-          <span className="text-secondary-text">
-            {formatDate(currentData.updated_at)} ({updatedRelativeTime})
-          </span>
-        </p>
-      </div>
-
-      {/* View Scan History Button */}
-      <div className="mt-4">
+      {/* Collapsible Metadata Section */}
+      <div className="border-border-primary bg-primary-bg overflow-hidden rounded-lg border text-sm">
         <button
-          onClick={handleOpenScanHistory}
-          disabled={isLoadingScanHistory}
-          className="bg-button-info text-form-button-text hover:bg-button-info-hover inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors hover:cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
+          onClick={() => setIsMetadataExpanded(!isMetadataExpanded)}
+          className="flex w-full cursor-pointer items-center justify-between px-4 py-3 transition-colors"
         >
-          {isLoadingScanHistory ? "Loading..." : "View Scan History"}
+          <span className="text-primary-text font-medium">Scan Metadata</span>
+          <Icon
+            icon="material-symbols:keyboard-arrow-down"
+            className={`text-secondary-text h-5 w-5 transition-transform duration-200 ${
+              isMetadataExpanded ? "rotate-180" : ""
+            }`}
+          />
         </button>
+
+        <div
+          className={`overflow-hidden transition-[max-height] duration-300 ease-in-out ${
+            isMetadataExpanded ? "max-h-[500px]" : "max-h-0"
+          }`}
+        >
+          <div className="border-border-primary border-t px-4 py-3">
+            <div className="space-y-2">
+              <div className="flex gap-2">
+                <span className="text-secondary-text min-w-[100px]">
+                  Scan Count:
+                </span>
+                <span className="text-primary-text font-medium">
+                  {currentData.scan_count}
+                </span>
+              </div>
+              <div className="flex gap-2">
+                <span className="text-secondary-text min-w-[100px]">
+                  First Scanned:
+                </span>
+                <span className="text-primary-text font-medium">
+                  {formatDate(currentData.created_at)}
+                  <span className="text-secondary-text ml-1 text-xs">
+                    ({createdRelativeTime})
+                  </span>
+                </span>
+              </div>
+              <div className="flex gap-2">
+                <span className="text-secondary-text min-w-[100px]">
+                  Last Scanned:
+                </span>
+                <span className="text-primary-text font-medium">
+                  {formatDate(currentData.updated_at)}
+                  <span className="text-secondary-text ml-1 text-xs">
+                    ({updatedRelativeTime})
+                  </span>
+                </span>
+              </div>
+
+              {/* Bot Info */}
+              {currentData.bot_id && (
+                <div className="flex items-center gap-2">
+                  <span className="text-secondary-text min-w-[100px]">
+                    Scanned By:
+                  </span>
+                  <div className="flex items-center gap-2">
+                    {botUser ? (
+                      <>
+                        <div className="h-6 w-6 overflow-hidden rounded-full bg-gray-200">
+                          <Image
+                            src={`${process.env.NEXT_PUBLIC_INVENTORY_API_URL}/proxy/users/${botUser.id}/avatar-headshot`}
+                            alt={botUser.name}
+                            width={24}
+                            height={24}
+                            className="h-full w-full object-cover"
+                            onError={(e) => {
+                              e.currentTarget.src =
+                                "https://assets.jailbreakchangelogs.xyz/assets/images/placeholder.png";
+                            }}
+                          />
+                        </div>
+                        <a
+                          href={`https://www.roblox.com/users/${botUser.id}/profile`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-primary-text hover:text-link font-medium transition-colors"
+                        >
+                          {botUser.name || botUser.displayName}
+                        </a>
+                      </>
+                    ) : (
+                      <a
+                        href={`https://www.roblox.com/users/${currentData.bot_id}/profile`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-primary-text hover:text-link font-medium transition-colors"
+                      >
+                        Bot {currentData.bot_id}
+                      </a>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Job ID */}
+              {currentData.job_id && (
+                <div className="flex gap-2">
+                  <span className="text-secondary-text min-w-[100px]">
+                    Job ID:
+                  </span>
+                  <Tooltip title={currentData.job_id} placement="top" arrow>
+                    <a
+                      href={`https://tracker.jailbreakchangelogs.xyz/?jobid=${currentData.job_id}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-primary-text hover:text-link max-w-[200px] truncate md:max-w-full cursor-pointer font-mono text-xs font-medium transition-colors"
+                    >
+                      {currentData.job_id}
+                    </a>
+                  </Tooltip>
+                </div>
+              )}
+
+              {/* View Scan History Button */}
+              <div className="pt-2">
+                <button
+                  onClick={handleOpenScanHistory}
+                  disabled={isLoadingScanHistory}
+                  className="bg-button-info text-form-button-text hover:bg-button-info-hover inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors hover:cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {isLoadingScanHistory ? "Loading..." : "View Scan History"}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Scan History Modal */}
