@@ -19,19 +19,29 @@ type TimeSort = "newest" | "oldest";
 
 // Define all robbery types with their marker names
 const ROBBERY_TYPES = [
-  { marker_name: "Bank", name: "Bank" },
-  { marker_name: "Bank2", name: "Crater Bank" },
+  { marker_name: "Bank", name: "Rising City Bank" },
+  { marker_name: "Bank2", name: "Crater City Bank" },
   { marker_name: "CargoPlane", name: "Cargo Plane" },
   { marker_name: "CargoShip", name: "Cargo Ship" },
-  { marker_name: "Casino", name: "Casino" },
-  { marker_name: "Jewelry", name: "Jewelry" },
+  { marker_name: "Casino", name: "Crown Jewel" },
+  { marker_name: "Jewelry", name: "Jewelry Store" },
   { marker_name: "Museum", name: "Museum" },
   { marker_name: "OilRig", name: "Oil Rig" },
   { marker_name: "PowerPlant", name: "Power Plant" },
   { marker_name: "Tomb", name: "Tomb" },
-  { marker_name: "TrainCargo", name: "Train Cargo" },
-  { marker_name: "TrainPassenger", name: "Train Passenger" },
+  { marker_name: "TrainCargo", name: "Cargo Train" },
+  { marker_name: "TrainPassenger", name: "Passenger Train" },
 ].sort((a, b) => a.name.localeCompare(b.name));
+
+// Types to display in tabs (banks combined)
+const ROBBERY_TYPE_TABS = ROBBERY_TYPES.filter(
+  (type) => type.marker_name !== "Bank2",
+)
+  .map((type) => ({
+    ...type,
+    name: type.marker_name === "Bank" ? "Bank" : type.name,
+  }))
+  .sort((a, b) => a.name.localeCompare(b.name));
 
 function RobberyTrackerContent() {
   const { robberies, isConnected, error } = useRobberyTrackerWebSocket();
@@ -47,9 +57,17 @@ function RobberyTrackerContent() {
     // First filter by robbery type
     let filtered = robberies;
     if (activeRobberyType) {
-      filtered = filtered.filter(
-        (robbery) => robbery.marker_name === activeRobberyType,
-      );
+      // Special case: Bank tab shows both Bank and Bank2
+      if (activeRobberyType === "Bank") {
+        filtered = filtered.filter(
+          (robbery) =>
+            robbery.marker_name === "Bank" || robbery.marker_name === "Bank2",
+        );
+      } else {
+        filtered = filtered.filter(
+          (robbery) => robbery.marker_name === activeRobberyType,
+        );
+      }
     }
 
     // Then filter by search query
@@ -255,7 +273,7 @@ function RobberyTrackerContent() {
                 >
                   All Robberies
                 </button>
-                {ROBBERY_TYPES.map((type) => (
+                {ROBBERY_TYPE_TABS.map((type) => (
                   <button
                     key={type.marker_name}
                     role="tab"
@@ -285,7 +303,29 @@ function RobberyTrackerContent() {
                   No robberies found
                 </h3>
                 <p className="text-secondary-text">
-                  Try adjusting your search query
+                  {activeRobberyType && !searchQuery ? (
+                    <>
+                      No{" "}
+                      {
+                        ROBBERY_TYPE_TABS.find(
+                          (t) => t.marker_name === activeRobberyType,
+                        )?.name
+                      }{" "}
+                      robberies logged yet
+                    </>
+                  ) : activeRobberyType && searchQuery ? (
+                    <>
+                      No{" "}
+                      {
+                        ROBBERY_TYPE_TABS.find(
+                          (t) => t.marker_name === activeRobberyType,
+                        )?.name
+                      }{" "}
+                      robberies match your search
+                    </>
+                  ) : (
+                    <>Try adjusting your search query</>
+                  )}
                 </p>
               </div>
             )}

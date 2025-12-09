@@ -85,7 +85,18 @@ export default function RobberyPlayersModal({
           {/* Header */}
           <div className="modal-header text-primary-text flex items-center justify-between px-6 py-4 text-xl font-semibold">
             <span>
-              {players.length} {players.length === 1 ? "Player" : "Players"}
+              {filteredPlayers.length}{" "}
+              {activeTab === "Police"
+                ? filteredPlayers.length === 1
+                  ? "Cop Player"
+                  : "Cop Players"
+                : activeTab === "Criminal"
+                  ? filteredPlayers.length === 1
+                    ? "Criminal Player"
+                    : "Criminal Players"
+                  : filteredPlayers.length === 1
+                    ? "Player"
+                    : "Players"}
             </span>
             <button
               type="button"
