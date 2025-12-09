@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import {
   CheckCircleIcon,
@@ -8,16 +8,19 @@ import {
   ExclamationTriangleIcon,
   ArrowTopRightOnSquareIcon,
   ClipboardDocumentIcon,
+  UsersIcon,
 } from "@heroicons/react/24/outline";
 import { useOptimizedRealTimeRelativeDate } from "@/hooks/useSharedTimer";
 import { RobberyData } from "@/hooks/useRobberyTrackerWebSocket";
 import toast from "react-hot-toast";
+import RobberyPlayersModal from "./RobberyPlayersModal";
 
 interface RobberyCardProps {
   robbery: RobberyData;
 }
 
 export default function RobberyCard({ robbery }: RobberyCardProps) {
+  const [isPlayersModalOpen, setIsPlayersModalOpen] = useState(false);
   const imageUrl = `https://assets.jailbreakchangelogs.xyz/assets/images/robberies/${robbery.marker_name}.webp`;
 
   // Use real-time updating relative timestamp
@@ -89,6 +92,9 @@ export default function RobberyCard({ robbery }: RobberyCardProps) {
     }
   };
 
+  const jobId = robbery.server?.job_id || robbery.job_id;
+  const players = robbery.server?.players || [];
+
   return (
     <div className="bg-secondary-bg border-border-primary hover:border-border-focus flex flex-col overflow-hidden rounded-lg border transition-all duration-200 hover:shadow-lg">
       {/* Image */}
@@ -138,15 +144,28 @@ export default function RobberyCard({ robbery }: RobberyCardProps) {
           </div>
 
           {/* Join Server Button */}
-          <a
-            href={`http://tracker.jailbreakchangelogs.xyz/?jobid=${robbery.job_id}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-form-button-text bg-button-info hover:bg-button-info-hover active:bg-button-info-active focus:ring-border-focus mt-3 flex w-full items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition-colors duration-200 focus:ring-2 focus:outline-none"
-          >
-            <ArrowTopRightOnSquareIcon className="h-4 w-4" />
-            Join Server
-          </a>
+          {jobId && (
+            <a
+              href={`http://tracker.jailbreakchangelogs.xyz/?jobid=${jobId}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-form-button-text bg-button-info hover:bg-button-info-hover active:bg-button-info-active focus:ring-border-focus mt-3 flex w-full items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition-colors duration-200 focus:ring-2 focus:outline-none"
+            >
+              <ArrowTopRightOnSquareIcon className="h-4 w-4" />
+              Join Server
+            </a>
+          )}
+
+          {/* View Players Button */}
+          {players.length > 0 && (
+            <button
+              onClick={() => setIsPlayersModalOpen(true)}
+              className="text-primary-text bg-button-secondary hover:bg-button-secondary-hover active:bg-button-secondary-active focus:ring-border-focus mt-2 flex w-full items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition-colors duration-200 focus:ring-2 focus:outline-none cursor-pointer"
+            >
+              <UsersIcon className="h-4 w-4" />
+              View {players.length} Players
+            </button>
+          )}
         </div>
 
         {/* Footer with Last Update */}
@@ -157,6 +176,15 @@ export default function RobberyCard({ robbery }: RobberyCardProps) {
           </div>
         </div>
       </div>
+
+      {/* Players Modal */}
+      {players.length > 0 && (
+        <RobberyPlayersModal
+          isOpen={isPlayersModalOpen}
+          onClose={() => setIsPlayersModalOpen(false)}
+          players={players}
+        />
+      )}
     </div>
   );
 }

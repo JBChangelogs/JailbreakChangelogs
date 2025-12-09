@@ -17,16 +17,44 @@ import ExperimentalFeatureBanner from "@/components/ui/ExperimentalFeatureBanner
 type NameSort = "a-z" | "z-a";
 type TimeSort = "newest" | "oldest";
 
+// Define all robbery types with their marker names
+const ROBBERY_TYPES = [
+  { marker_name: "Bank", name: "Bank" },
+  { marker_name: "Bank2", name: "Crater Bank" },
+  { marker_name: "CargoPlane", name: "Cargo Plane" },
+  { marker_name: "CargoShip", name: "Cargo Ship" },
+  { marker_name: "Casino", name: "Casino" },
+  { marker_name: "Jewelry", name: "Jewelry" },
+  { marker_name: "Mansion", name: "Mansion" },
+  { marker_name: "Museum", name: "Museum" },
+  { marker_name: "OilRig", name: "Oil Rig" },
+  { marker_name: "PowerPlant", name: "Power Plant" },
+  { marker_name: "Tomb", name: "Tomb" },
+  { marker_name: "TrainCargo", name: "Train Cargo" },
+  { marker_name: "TrainPassenger", name: "Train Passenger" },
+].sort((a, b) => a.name.localeCompare(b.name));
+
 function RobberyTrackerContent() {
   const { robberies, isConnected, error } = useRobberyTrackerWebSocket();
   const [searchQuery, setSearchQuery] = useState("");
   const [nameSort, setNameSort] = useState<NameSort>("a-z");
   const [timeSort, setTimeSort] = useState<TimeSort>("newest");
+  const [activeRobberyType, setActiveRobberyType] = useState<string | null>(
+    null,
+  );
 
   // Filter and sort robberies
   const filteredRobberies = useMemo(() => {
-    // First filter by search query
-    const filtered = robberies.filter((robbery) =>
+    // First filter by robbery type
+    let filtered = robberies;
+    if (activeRobberyType) {
+      filtered = filtered.filter(
+        (robbery) => robbery.marker_name === activeRobberyType,
+      );
+    }
+
+    // Then filter by search query
+    filtered = filtered.filter((robbery) =>
       robbery.name.toLowerCase().includes(searchQuery.toLowerCase()),
     );
 
@@ -47,7 +75,7 @@ function RobberyTrackerContent() {
 
       return timeComparison;
     });
-  }, [robberies, searchQuery, nameSort, timeSort]);
+  }, [robberies, searchQuery, nameSort, timeSort, activeRobberyType]);
 
   // Calculate robbery statistics
   const robberyStats = useMemo(() => {
@@ -216,10 +244,39 @@ function RobberyTrackerContent() {
                 </div>
               </div>
             )}
+
+            {/* Robbery Type Tabs */}
+            <div className="mb-6 overflow-x-auto">
+              <div role="tablist" className="tabs min-w-max flex flex-wrap">
+                <button
+                  role="tab"
+                  aria-selected={activeRobberyType === null}
+                  onClick={() => setActiveRobberyType(null)}
+                  className={`tab ${activeRobberyType === null ? "tab-active" : ""}`}
+                >
+                  All Robberies
+                </button>
+                {ROBBERY_TYPES.map((type) => (
+                  <button
+                    key={type.marker_name}
+                    role="tab"
+                    aria-selected={activeRobberyType === type.marker_name}
+                    onClick={() => setActiveRobberyType(type.marker_name)}
+                    className={`tab ${activeRobberyType === type.marker_name ? "tab-active" : ""}`}
+                  >
+                    {type.name}
+                  </button>
+                ))}
+              </div>
+            </div>
+
             {filteredRobberies.length > 0 ? (
               <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                 {filteredRobberies.map((robbery) => (
-                  <RobberyCard key={robbery.marker_name} robbery={robbery} />
+                  <RobberyCard
+                    key={`${robbery.marker_name}-${robbery.server?.job_id || robbery.job_id}-${robbery.timestamp}`}
+                    robbery={robbery}
+                  />
                 ))}
               </div>
             ) : (

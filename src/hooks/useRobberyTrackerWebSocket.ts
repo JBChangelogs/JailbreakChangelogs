@@ -19,6 +19,22 @@ export interface RobberyData {
   job_id: string;
   server_time: number;
   timestamp: number;
+  server?: {
+    job_id: string;
+    server_time: number;
+    timestamp: number;
+    bot_id: number;
+    players: {
+      user_id: string;
+      username: string | null;
+      team: string;
+      level: number;
+      has_season_pass: boolean;
+      money: number;
+      xp: number;
+      gamepasses: string[];
+    }[];
+  };
 }
 
 interface UseRobberyTrackerWebSocketReturn {
