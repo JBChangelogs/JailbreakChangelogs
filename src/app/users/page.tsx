@@ -1,4 +1,3 @@
-import { UserGroupIcon } from "@heroicons/react/24/outline";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import UserSearch from "@/components/Users/UserSearch";
 import { Suspense } from "react";
@@ -11,10 +10,7 @@ export default function UsersPage() {
         <Breadcrumb />
 
         <div className="mb-2 flex items-center gap-2">
-          <UserGroupIcon className="text-secondary-text h-6 w-6" />
-          <h1 className="text-secondary-text text-2xl font-bold">
-            User Search
-          </h1>
+          <h1 className="text-primary-text text-2xl font-bold">User Search</h1>
         </div>
         <p className="text-secondary-text mb-6 text-sm">
           Find users by their username or display name

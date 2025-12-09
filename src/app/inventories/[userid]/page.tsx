@@ -59,12 +59,14 @@ export default async function InventoryCheckerPage({
   return (
     <div className="container mx-auto px-4 pb-8">
       <Breadcrumb />
+
+      <ExperimentalFeatureBanner className="mb-6" />
+
       <div className="mb-6 flex items-center gap-3">
         <h1 className="text-primary-text text-3xl font-bold">
           Inventory Checker
         </h1>
       </div>
-      <ExperimentalFeatureBanner className="mb-6" />
 
       <PremiumAwareLayout>
         <Suspense

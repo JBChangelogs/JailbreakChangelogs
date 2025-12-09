@@ -20,7 +20,7 @@ const ChangelogHeader: React.FC<ChangelogHeaderProps> = ({ changelogs }) => {
   return (
     <div className="bg-secondary-bg border-border-primary mb-8 rounded-lg border p-6">
       <div className="mb-4">
-        <h2 className="text-secondary-text text-2xl font-semibold">
+        <h2 className="text-primary-text text-2xl font-semibold">
           Roblox Jailbreak Changelogs & Update History
         </h2>
       </div>

@@ -1,5 +1,6 @@
 import React, { Suspense } from "react";
 import TradingDescription from "@/components/trading/TradingDescription";
+import DiscordTradeAdBanner from "@/components/trading/DiscordTradeAdBanner";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import TradeAds from "@/components/trading/TradeAds";
 import { fetchTradeAds, fetchUsersBatch, fetchItems } from "@/utils/api";
@@ -12,6 +13,9 @@ export default function TradingPage() {
   return (
     <main className="container mx-auto px-4 sm:px-6 lg:px-8">
       <Breadcrumb />
+
+      <DiscordTradeAdBanner className="mb-6" />
+
       <TradingDescription />
       <Suspense fallback={<Loading />}>
         <TradeAdsWrapper />
