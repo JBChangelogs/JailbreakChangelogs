@@ -15,6 +15,7 @@ export interface RobberyData {
   progress: number | null;
   metadata: {
     casino_code?: string;
+    plane_time?: number;
   } | null;
   job_id: string;
   server_time: number;
@@ -166,6 +167,8 @@ export function useRobberyTrackerWebSocket(): UseRobberyTrackerWebSocketReturn {
       reconnectTimeoutRef.current = null;
     }
     setIsConnected(false);
+    // Clear robberies to prevent showing stale data on reconnect
+    setRobberies([]);
   }, []);
 
   // Refs for state tracking without re-renders
@@ -179,7 +182,7 @@ export function useRobberyTrackerWebSocket(): UseRobberyTrackerWebSocketReturn {
 
   // Handle idle and visibility
   useEffect(() => {
-    const IDLE_TIMEOUT = 5 * 60 * 1000; // 5 minutes
+    const IDLE_TIMEOUT = 15 * 60 * 1000; // 15 minutes
 
     const resetIdleTimer = () => {
       if (idleTimeoutRef.current) {
@@ -201,23 +204,58 @@ export function useRobberyTrackerWebSocket(): UseRobberyTrackerWebSocketReturn {
       }, IDLE_TIMEOUT);
     };
 
+    // Handle page visibility changes
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        console.log("[ROBBERY TRACKER WS] Tab hidden - disconnecting");
+        isVisibleRef.current = false;
+        disconnect();
+        // Clear idle timer when tab is hidden
+        if (idleTimeoutRef.current) {
+          clearTimeout(idleTimeoutRef.current);
+          idleTimeoutRef.current = null;
+        }
+      } else {
+        console.log("[ROBBERY TRACKER WS] Tab visible - reconnecting");
+        isVisibleRef.current = true;
+        isIdleRef.current = false;
+        connect();
+        // Restart idle timer when tab becomes visible
+        resetIdleTimer();
+      }
+    };
+
     // Initial timer setup
     resetIdleTimer();
 
-    // Activity listeners
+    // Activity listeners (only reset timer if tab is visible)
+    const resetIdleTimerIfVisible = () => {
+      if (!document.hidden) {
+        resetIdleTimer();
+      }
+    };
+
     const events = ["mousedown", "keydown", "touchstart", "scroll"];
-    events.forEach((event) => document.addEventListener(event, resetIdleTimer));
+    events.forEach((event) =>
+      document.addEventListener(event, resetIdleTimerIfVisible),
+    );
+
+    // Add visibility change listener
+    document.addEventListener("visibilitychange", handleVisibilityChange);
 
     // Connect initially (wrapped to avoid synchronous state update warning)
     const initialConnectTimer = setTimeout(() => {
-      connect();
+      if (!document.hidden) {
+        connect();
+      }
     }, 0);
 
     return () => {
       clearTimeout(initialConnectTimer);
       events.forEach((event) =>
-        document.removeEventListener(event, resetIdleTimer),
+        document.removeEventListener(event, resetIdleTimerIfVisible),
       );
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
       if (idleTimeoutRef.current) {
         clearTimeout(idleTimeoutRef.current);
       }

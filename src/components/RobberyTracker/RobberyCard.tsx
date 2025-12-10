@@ -21,13 +21,25 @@ interface RobberyCardProps {
 
 export default function RobberyCard({ robbery }: RobberyCardProps) {
   const [isPlayersModalOpen, setIsPlayersModalOpen] = useState(false);
+  const [planeCountdown, setPlaneCountdown] = useState<string | null>(null);
   const imageUrl = `https://assets.jailbreakchangelogs.xyz/assets/images/robberies/${robbery.marker_name}.webp`;
+
+  // Create unique ID for timer subscription (same pattern as card key)
+  const jobId = robbery.server?.job_id || robbery.job_id;
+  const timerId = `robbery-${robbery.marker_name}-${jobId}-${robbery.timestamp}`;
 
   // Use real-time updating relative timestamp
   const relativeTime = useOptimizedRealTimeRelativeDate(
     robbery.timestamp,
-    `robbery-${robbery.marker_name}`,
+    timerId,
   );
+
+  // Check if this is a train with high progress
+  const isTrainNearClose =
+    (robbery.marker_name === "TrainPassenger" ||
+      robbery.marker_name === "TrainCargo") &&
+    robbery.progress !== null &&
+    robbery.progress > 0.6;
 
   useEffect(() => {
     if (!relativeTime) {
@@ -37,6 +49,53 @@ export default function RobberyCard({ robbery }: RobberyCardProps) {
       );
     }
   }, [relativeTime, robbery.marker_name, robbery.timestamp]);
+
+  // Handle cargo plane countdown
+  useEffect(() => {
+    if (robbery.marker_name === "CargoPlane" && robbery.metadata?.plane_time) {
+      const planeTime = robbery.metadata.plane_time;
+
+      const updateCountdown = () => {
+        const now = Math.floor(Date.now() / 1000);
+        const diff = planeTime - now;
+
+        if (diff > 0) {
+          // Plane hasn't flown off yet - show countdown
+          const hours = Math.floor(diff / 3600);
+          const minutes = Math.floor((diff % 3600) / 60);
+          const seconds = diff % 60;
+
+          if (hours > 0) {
+            setPlaneCountdown(`${hours}h ${minutes}m ${seconds}s`);
+          } else if (minutes > 0) {
+            setPlaneCountdown(`${minutes}m ${seconds}s`);
+          } else {
+            setPlaneCountdown(`${seconds}s`);
+          }
+        } else {
+          // Plane has flown off - show relative time
+          const absoluteDiff = Math.abs(diff);
+          const hours = Math.floor(absoluteDiff / 3600);
+          const minutes = Math.floor((absoluteDiff % 3600) / 60);
+          const seconds = absoluteDiff % 60;
+
+          if (hours > 0) {
+            setPlaneCountdown(`Took off ${hours}h ${minutes}m ago`);
+          } else if (minutes > 0) {
+            setPlaneCountdown(`Took off ${minutes}m ${seconds}s ago`);
+          } else {
+            setPlaneCountdown(`Took off ${seconds}s ago`);
+          }
+        }
+      };
+
+      // Update immediately and then every second
+      updateCountdown();
+      const interval = setInterval(updateCountdown, 1000);
+
+      return () => clearInterval(interval);
+    }
+  }, [robbery.marker_name, robbery.metadata]);
 
   // Format server time as 12-hour clock with AM/PM (e.g., 2.24 -> 02:14 AM, 20.56 -> 08:34 PM)
   const formatServerTime = (serverTime: number) => {
@@ -92,7 +151,6 @@ export default function RobberyCard({ robbery }: RobberyCardProps) {
     }
   };
 
-  const jobId = robbery.server?.job_id || robbery.job_id;
   const players = robbery.server?.players || [];
 
   return (
@@ -118,6 +176,16 @@ export default function RobberyCard({ robbery }: RobberyCardProps) {
           {getStatusBadge()}
         </div>
 
+        {/* Train Warning Badge */}
+        {isTrainNearClose && (
+          <div className="mb-3 flex items-center gap-1.5 rounded-lg bg-status-warning/20 px-3 py-2 border border-status-warning/30">
+            <ExclamationTriangleIcon className="h-4 w-4 text-status-warning" />
+            <span className="text-sm font-medium text-primary-text">
+              Robbery closing soon!
+            </span>
+          </div>
+        )}
+
         {/* Details */}
         <div className="text-secondary-text space-y-2 text-sm">
           {robbery.metadata?.casino_code && (
@@ -135,6 +203,20 @@ export default function RobberyCard({ robbery }: RobberyCardProps) {
               </button>
             </div>
           )}
+
+          {/* Cargo Plane Countdown */}
+          {robbery.marker_name === "CargoPlane" &&
+            robbery.metadata?.plane_time &&
+            planeCountdown && (
+              <div className="flex items-center justify-between">
+                <span className="text-secondary-text">Plane Status:</span>
+                <span className="font-mono text-primary-text font-semibold">
+                  {planeCountdown.includes("Took off")
+                    ? planeCountdown
+                    : `Flying off in ${planeCountdown}`}
+                </span>
+              </div>
+            )}
 
           <div className="flex items-center justify-between">
             <span className="text-secondary-text">Server Time:</span>
