@@ -113,14 +113,20 @@ export default async function RootLayout({
           />
           {/* Google Analytics */}
           <GoogleAnalytics gaId="G-729QSV9S7B" />
-          {/* Google AdSense - loaded once at app level */}
-          {/* Using afterInteractive strategy ensures script loads before ads are rendered */}
-          {/* This prevents ads from failing to load on first page visit */}
+          {/* Nitro Pay Ads */}
+          <Script
+            id="nitropay-init"
+            strategy="afterInteractive"
+            data-cfasync="false"
+            dangerouslySetInnerHTML={{
+              __html: `window.nitroAds=window.nitroAds||{createAd:function(){return new Promise(e=>{window.nitroAds.queue.push(["createAd",arguments,e])})},addUserToken:function(){window.nitroAds.queue.push(["addUserToken",arguments])},queue:[]};`,
+            }}
+          />
           <Script
             async
-            src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-${process.env.NEXT_PUBLIC_GOOGLE_ADS_CLIENT}`}
-            crossOrigin="anonymous"
+            src="https://s.nitropay.com/ads-2263.js"
             strategy="afterInteractive"
+            data-cfasync="false"
           />
         </head>
         <body className="bg-primary-bg font-sans">
@@ -242,14 +248,20 @@ export default async function RootLayout({
         />
         {/* Google Analytics */}
         <GoogleAnalytics gaId="G-729QSV9S7B" />
-        {/* Google AdSense - loaded once at app level */}
-        {/* Using afterInteractive strategy ensures script loads before ads are rendered */}
-        {/* This prevents ads from failing to load on first page visit */}
+        {/* Nitro Pay Ads */}
+        <Script
+          id="nitropay-init"
+          strategy="afterInteractive"
+          data-cfasync="false"
+          dangerouslySetInnerHTML={{
+            __html: `window.nitroAds=window.nitroAds||{createAd:function(){return new Promise(e=>{window.nitroAds.queue.push(["createAd",arguments,e])})},addUserToken:function(){window.nitroAds.queue.push(["addUserToken",arguments])},queue:[]};`,
+          }}
+        />
         <Script
           async
-          src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-${process.env.NEXT_PUBLIC_GOOGLE_ADS_CLIENT}`}
-          crossOrigin="anonymous"
+          src="https://s.nitropay.com/ads-2263.js"
           strategy="afterInteractive"
+          data-cfasync="false"
         />
       </head>
       <body className="bg-primary-bg font-sans">
