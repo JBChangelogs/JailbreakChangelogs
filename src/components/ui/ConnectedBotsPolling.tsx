@@ -26,24 +26,8 @@ export default function ConnectedBotsPolling() {
   const botsData = pollingData?.botsData;
   const queueInfo = pollingData?.queueInfo;
 
-  // Merge bots and recent_heartbeats to show all active/recent bots
-  const mergedBots = (() => {
-    if (!botsData) return [];
-
-    const botMap = new Map<string, ConnectedBot>();
-
-    // Add recent heartbeats first
-    if (botsData.recent_heartbeats) {
-      botsData.recent_heartbeats.forEach((bot) => botMap.set(bot.id, bot));
-    }
-
-    // Add currently connected bots (they might be more up to date)
-    if (botsData.bots) {
-      botsData.bots.forEach((bot) => botMap.set(bot.id, bot));
-    }
-
-    return Array.from(botMap.values());
-  })();
+  // Only show bots from recent heartbeats
+  const mergedBots = botsData?.recent_heartbeats || [];
 
   // Get bot IDs for fetching Roblox data
   const botIds = (() => {
@@ -67,20 +51,13 @@ export default function ConnectedBotsPolling() {
     "last-scanned",
   );
 
-  // Show all bots and sort alphabetically by display name
+  // Show all bots and sort by most recent heartbeat first
   const allBots = (() => {
     if (mergedBots.length === 0) return [];
 
     return [...mergedBots].sort((a, b) => {
-      const nameA =
-        botRobloxData?.usersData?.[a.id]?.displayName ||
-        botRobloxData?.usersData?.[a.id]?.name ||
-        a.id;
-      const nameB =
-        botRobloxData?.usersData?.[b.id]?.displayName ||
-        botRobloxData?.usersData?.[b.id]?.name ||
-        b.id;
-      return nameA.localeCompare(nameB);
+      // Sort by most recent heartbeat (descending)
+      return b.last_heartbeat - a.last_heartbeat;
     });
   })();
 
