@@ -2,11 +2,22 @@
 
 import Link from "next/link";
 import dynamic from "next/dynamic";
-import { Suspense } from "react";
+import { Suspense, useEffect } from "react";
 import { Icon } from "../ui/IconWrapper";
 import VersionInfo from "@/components/Layout/VersionInfo";
 import ReportIssueButton from "@/components/ReportIssue/ReportIssueButton";
 const Tooltip = dynamic(() => import("@mui/material/Tooltip"));
+
+// Extend Window interface for CMP API (GDPR)
+declare global {
+  interface Window {
+    __cmp?: (command: string) => void;
+    __tcfapi?: unknown;
+    nitroAds?: {
+      loaded?: boolean;
+    };
+  }
+}
 
 interface FooterProps {
   githubUrl: string;
@@ -19,6 +30,25 @@ interface FooterProps {
 }
 
 export default function Footer({ githubUrl, versionInfo }: FooterProps) {
+  useEffect(() => {
+    // Show GDPR consent button only for EU users
+    const showGDPRButton = () => {
+      const consentBox = document.getElementById("gdpr-consent-box");
+      if (consentBox && window.__tcfapi) {
+        consentBox.style.display = "";
+      }
+    };
+
+    if (window.nitroAds?.loaded) {
+      showGDPRButton();
+    } else {
+      document.addEventListener("nitroAds.loaded", showGDPRButton);
+      return () => {
+        document.removeEventListener("nitroAds.loaded", showGDPRButton);
+      };
+    }
+  }, []);
+
   return (
     <footer className="w-full bg-secondary-bg border-border-primary border-t py-8 pb-0">
       <div className="w-full px-4">
@@ -98,6 +128,18 @@ export default function Footer({ githubUrl, versionInfo }: FooterProps) {
               >
                 Cookies
               </button>
+              <div id="gdpr-consent-box" style={{ display: "none" }}>
+                <button
+                  onClick={() => {
+                    if (window.__cmp) {
+                      window.__cmp("showModal");
+                    }
+                  }}
+                  className="text-link hover:text-link-hover active:text-link-active transition-colors duration-200 cursor-pointer bg-none border-none p-0 text-left text-sm"
+                >
+                  Update consent preferences
+                </button>
+              </div>
               <a
                 href="mailto:support@jailbreakchangelogs.xyz"
                 className="text-link hover:text-link-hover active:text-link-active transition-colors duration-200 block"
