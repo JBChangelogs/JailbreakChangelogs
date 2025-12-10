@@ -835,3 +835,30 @@
   border-bottom-color: var(--color-status-info);
   border-bottom-width: 2px;
 }
+
+/* Nitro Pay GDPR Consent Button Styling */
+#ncmp-consent-link button {
+  color: var(--color-link) !important;
+  background: none !important;
+  border: none !important;
+  padding: 0 !important;
+  font-size: 0.875rem !important; /* text-sm */
+  line-height: 1.25rem !important;
+  text-align: left !important;
+  cursor: pointer !important;
+  transition-property: color !important;
+  transition-duration: 200ms !important;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1) !important;
+  display: block !important;
+  font-family: inherit !important;
+  text-decoration: none !important;
+}
+
+#ncmp-consent-link button:hover {
+  color: var(--color-link-hover) !important;
+  background: none !important;
+}
+
+#ncmp-consent-link button:active {
+  color: var(--color-link-active) !important;
+}
