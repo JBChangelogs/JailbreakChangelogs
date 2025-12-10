@@ -1,9 +1,30 @@
+"use client";
+
 import Link from "next/link";
+import { useEffect } from "react";
 
 import { Icon } from "../components/ui/IconWrapper";
 import HeroBackgroundCarousel from "@/components/Home/HeroBackgroundCarousel";
 
+// Extend Window interface for USP API (CCPA)
+declare global {
+  interface Window {
+    __uspapi?: (
+      command: string,
+      version: number,
+      callback?: () => void,
+    ) => void;
+  }
+}
+
 export default function Home() {
+  useEffect(() => {
+    // Trigger CCPA link rendering for SPAs
+    if (typeof window !== "undefined" && window.__uspapi) {
+      window.__uspapi("addLink", 1);
+    }
+  }, []);
+
   return (
     <main className="bg-primary-bg min-h-screen">
       {/* Hero Section */}
@@ -575,6 +596,13 @@ export default function Home() {
               </div>
             </Link>
           </div>
+        </div>
+      </section>
+
+      {/* CCPA Compliance */}
+      <section className="bg-secondary-bg/30 py-8">
+        <div className="container mx-auto px-4 text-center">
+          <span data-ccpa-link="1"></span>
         </div>
       </section>
     </main>
