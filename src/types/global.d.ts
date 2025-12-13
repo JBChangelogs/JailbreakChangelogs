@@ -11,6 +11,13 @@ declare global {
       config?: Record<string, unknown>,
     ) => void;
     dataLayer?: unknown[];
+
+    nitroAds?: {
+      loaded?: boolean;
+      queue?: unknown[];
+      createAd?: (id: string, options: Record<string, unknown>) => unknown;
+      addUserToken?: (...args: unknown[]) => void;
+    };
   }
 }
 

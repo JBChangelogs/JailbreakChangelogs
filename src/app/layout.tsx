@@ -19,6 +19,8 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { ConsentProviderWrapper } from "@/components/Providers/ConsentProviderWrapper";
 import ConsentBannerWrapper from "@/components/Consent/ConsentBannerWrapper";
 import CookieSettingsButton from "@/components/Consent/CookieSettingsButton";
+import NitroAnchorCloseSupporterModal from "@/components/Ads/NitroAnchorCloseSupporterModal";
+import NitroBottomAnchor from "@/components/Ads/NitroBottomAnchor";
 import {
   checkMaintenanceMode,
   getMaintenanceMetadata,
@@ -127,6 +129,7 @@ export default async function RootLayout({
             src="https://s.nitropay.com/ads-2263.js"
             strategy="afterInteractive"
             data-cfasync="false"
+            data-demo={process.env.NODE_ENV !== "production" ? "true" : "false"}
           />
         </head>
         <body className="bg-primary-bg font-sans">
@@ -177,6 +180,8 @@ export default async function RootLayout({
                       <OfflineDetector />
                       <AuthCheck />
                       <AuthProvider>
+                        <NitroBottomAnchor />
+                        <NitroAnchorCloseSupporterModal />
                         <SurveyProvider>
                           <div className="flex min-h-screen flex-col">
                             <Suspense
@@ -262,6 +267,7 @@ export default async function RootLayout({
           src="https://s.nitropay.com/ads-2263.js"
           strategy="afterInteractive"
           data-cfasync="false"
+          data-demo={process.env.NODE_ENV !== "production" ? "true" : "false"}
         />
       </head>
       <body className="bg-primary-bg font-sans">
@@ -361,6 +367,8 @@ export default async function RootLayout({
                   <OfflineDetector />
                   <AuthCheck />
                   <AuthProvider>
+                    <NitroBottomAnchor />
+                    <NitroAnchorCloseSupporterModal />
                     <SurveyProvider>
                       <div className="flex min-h-screen flex-col">
                         <Suspense

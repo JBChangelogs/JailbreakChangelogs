@@ -13,9 +13,6 @@ declare global {
   interface Window {
     __cmp?: (command: string) => void;
     __tcfapi?: unknown;
-    nitroAds?: {
-      loaded?: boolean;
-    };
   }
 }
 

@@ -64,6 +64,14 @@ const getFeatureDescription = (
   requiredLimit?: string | number,
 ) => {
   switch (feature) {
+    case "hide_ads":
+      return {
+        title: "Hide Ads",
+        description:
+          "You're trying to hide ads. Hiding ads is a supporter perk. Upgrade to Supporter I or higher to remove advertisements and support the site.",
+        current: `Current tier: ${currentLimit ?? "Free"}`,
+        required: `Required: ${requiredLimit ?? "Supporter I"}`,
+      };
     case "comment_length":
       const requiredText = `${requiredLimit} characters`;
 
