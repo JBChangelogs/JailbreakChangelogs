@@ -21,6 +21,7 @@ import ConsentBannerWrapper from "@/components/Consent/ConsentBannerWrapper";
 import CookieSettingsButton from "@/components/Consent/CookieSettingsButton";
 import NitroAnchorCloseSupporterModal from "@/components/Ads/NitroAnchorCloseSupporterModal";
 import NitroBottomAnchor from "@/components/Ads/NitroBottomAnchor";
+import NitroVideoPlayer from "@/components/Ads/NitroVideoPlayer";
 import {
   checkMaintenanceMode,
   getMaintenanceMetadata,
@@ -181,6 +182,7 @@ export default async function RootLayout({
                       <AuthCheck />
                       <AuthProvider>
                         <NitroBottomAnchor />
+                        <NitroVideoPlayer />
                         <NitroAnchorCloseSupporterModal />
                         <SurveyProvider>
                           <div className="flex min-h-screen flex-col">
@@ -368,6 +370,7 @@ export default async function RootLayout({
                   <AuthCheck />
                   <AuthProvider>
                     <NitroBottomAnchor />
+                    <NitroVideoPlayer />
                     <NitroAnchorCloseSupporterModal />
                     <SurveyProvider>
                       <div className="flex min-h-screen flex-col">
