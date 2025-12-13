@@ -55,7 +55,7 @@
     "geist": "^1.5.1",
     "lucide-react": "^0.555.0",
     "motion": "^12.23.25",
-    "next": "^16.0.7",
+    "next": "16.0.10",
     "nextjs-toploader": "^3.9.17",
     "react": "^19.2.1",
     "react-chartjs-2": "^5.3.1",
