@@ -17,9 +17,6 @@ import HyperchromeCalculatorModal from "@/components/Hyperchrome/HyperchromeCalc
 import ValuesSearchControls from "./ValuesSearchControls";
 import ValuesItemsGrid from "./ValuesItemsGrid";
 import ValuesErrorBoundary from "./ValuesErrorBoundary";
-import DisplayAd from "@/components/Ads/DisplayAd";
-import AdRemovalNotice from "@/components/Ads/AdRemovalNotice";
-import { getCurrentUserPremiumType } from "@/contexts/AuthContext";
 import { safeLocalStorage } from "@/utils/safeStorage";
 
 interface ValuesClientProps {
@@ -120,10 +117,6 @@ export default function ValuesClient({
     if (typeof window === "undefined") return false;
     return window.location.hash === "#hyper-pity-calc";
   });
-  const [currentUserPremiumType, setCurrentUserPremiumType] = useState<number>(
-    () => getCurrentUserPremiumType(),
-  );
-  const premiumStatusLoaded = useState(true);
 
   const handleRandomItem = async () => {
     try {
@@ -218,17 +211,6 @@ export default function ValuesClient({
       );
     }
   };
-
-  useEffect(() => {
-    const handleAuthChange = () => {
-      setCurrentUserPremiumType(getCurrentUserPremiumType());
-    };
-
-    window.addEventListener("authStateChanged", handleAuthChange);
-    return () => {
-      window.removeEventListener("authStateChanged", handleAuthChange);
-    };
-  }, []);
 
   useEffect(() => {
     const updateSortedItems = async () => {
@@ -377,30 +359,8 @@ export default function ValuesClient({
         searchSectionRef={searchSectionRef}
       />
 
-      {premiumStatusLoaded && currentUserPremiumType === 0 && (
-        <div className="lg:hidden">
-          <div className="flex flex-col items-center">
-            <span className="text-secondary-text mb-2 block text-center text-xs">
-              ADVERTISEMENT
-            </span>
-            <div className="sidebar-ad-container">
-              <DisplayAd
-                adSlot="8162235433"
-                adFormat="auto"
-                style={{ display: "block", width: "100%", height: "100%" }}
-              />
-            </div>
-            <AdRemovalNotice className="mt-2" />
-          </div>
-        </div>
-      )}
-
-      <div
-        className={`grid gap-8 ${premiumStatusLoaded && currentUserPremiumType === 0 ? "grid-cols-1 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6" : "grid-cols-1"}`}
-      >
-        <div
-          className={`space-y-6 ${premiumStatusLoaded && currentUserPremiumType === 0 ? "lg:col-span-3 xl:col-span-4 2xl:col-span-5" : ""}`}
-        >
+      <div className="grid gap-8 grid-cols-1">
+        <div className="space-y-6">
           <ValuesItemsGrid
             items={sortedItems}
             favorites={favorites}
@@ -434,30 +394,6 @@ export default function ValuesClient({
             debouncedSearchTerm={debouncedSearchTerm}
           />
         </div>
-
-        {premiumStatusLoaded && currentUserPremiumType === 0 && (
-          <div className="pl-2 lg:col-span-1 xl:col-span-1 2xl:col-span-1">
-            <div className="sticky top-20">
-              <div className="flex flex-col items-center">
-                <span className="text-secondary-text mb-2 block w-full text-center text-xs">
-                  ADVERTISEMENT
-                </span>
-                <div className="sidebar-ad-container">
-                  <DisplayAd
-                    adSlot="8162235433"
-                    adFormat="auto"
-                    style={{
-                      display: "block",
-                      width: "100%",
-                      height: "100%",
-                    }}
-                  />
-                </div>
-                <AdRemovalNotice className="mt-2" />
-              </div>
-            </div>
-          </div>
-        )}
       </div>
     </ValuesErrorBoundary>
   );

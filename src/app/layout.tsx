@@ -130,7 +130,8 @@ export default async function RootLayout({
             src="https://s.nitropay.com/ads-2263.js"
             strategy="afterInteractive"
             data-cfasync="false"
-            data-demo="false"
+            // data-demo="true"
+            // data-log-level="debug"
           />
         </head>
         <body className="bg-primary-bg font-sans">
@@ -185,7 +186,10 @@ export default async function RootLayout({
                         <NitroVideoPlayer />
                         <NitroAnchorCloseSupporterModal />
                         <SurveyProvider>
-                          <div className="flex min-h-screen flex-col">
+                          <div
+                            id="main-layout"
+                            className="flex min-h-screen flex-col"
+                          >
                             <Suspense
                               fallback={
                                 <div className="border-secondary-text bg-secondary-bg h-16 border-b" />
@@ -276,7 +280,8 @@ export default async function RootLayout({
           src="https://s.nitropay.com/ads-2263.js"
           strategy="afterInteractive"
           data-cfasync="false"
-          data-demo="false"
+          // data-demo="true"
+          // data-log-level="debug"
         />
       </head>
       <body className="bg-primary-bg font-sans">

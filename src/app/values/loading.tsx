@@ -165,37 +165,12 @@ export default function Loading() {
           />
         </div>
 
-        {/* Items grid skeleton with sidebar layout */}
-        <div className="mb-8 grid grid-cols-1 gap-8 xl:grid-cols-12">
-          {/* Items Grid - 8/12 columns on desktop, full width on tablet and mobile */}
-          <div className="xl:col-span-8">
-            <div className="grid grid-cols-1 gap-4 min-[375px]:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {[...Array(24)].map((_, i) => (
-                <ItemCardSkeleton key={i} />
-              ))}
-            </div>
-          </div>
-
-          {/* Sidebar - 4/12 columns on desktop, hidden on tablet and mobile */}
-          <div className="hidden xl:col-span-4 xl:block">
-            <div className="sticky top-24">
-              <div className="flex flex-col items-center">
-                <Skeleton
-                  variant="text"
-                  width={100}
-                  height={16}
-                  className="bg-secondary-bg mb-2"
-                />
-                <div className="border-border-primary hover:border-border-focus bg-secondary-bg rounded-lg border p-4">
-                  <Skeleton
-                    variant="rounded"
-                    width={160}
-                    height={600}
-                    className="bg-secondary-bg"
-                  />
-                </div>
-              </div>
-            </div>
+        {/* Items grid skeleton */}
+        <div className="mb-8">
+          <div className="grid grid-cols-1 gap-4 min-[375px]:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {[...Array(24)].map((_, i) => (
+              <ItemCardSkeleton key={i} />
+            ))}
           </div>
         </div>
 
