@@ -14,12 +14,28 @@ export default function NitroVideoPlayer() {
     const isSupporter = tier >= 1 && tier <= 3;
 
     if (isSupporter) {
-      const el = document.getElementById(VIDEO_PLAYER_ID);
-      if (el) {
-        el.remove();
-      }
+      const removeAd = () => {
+        const el = document.getElementById(VIDEO_PLAYER_ID);
+        if (el) {
+          el.remove();
+        }
+      };
+
+      removeAd();
+
+      const observer = new MutationObserver(() => {
+        removeAd();
+      });
+
+      observer.observe(document.body, {
+        childList: true,
+        subtree: true,
+      });
+
       createdRef.current = false;
-      return;
+      return () => {
+        observer.disconnect();
+      };
     }
 
     if (createdRef.current) return;

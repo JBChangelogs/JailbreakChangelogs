@@ -33,12 +33,9 @@ export default function NitroAnchorCloseSupporterModal() {
       if (!isLikelyNitroAnchorCloseClick(e.target)) return;
 
       // Block Nitro's close action for non-supporters.
-      // Use stopImmediatePropagation early because Nitro may bind handlers on the same target.
-      (
-        e as Event & { stopImmediatePropagation?: () => void }
-      ).stopImmediatePropagation?.();
-      e.preventDefault?.();
-      e.stopPropagation?.();
+      e.preventDefault();
+      e.stopPropagation();
+      e.stopImmediatePropagation();
 
       openModal({
         feature: "hide_ads",

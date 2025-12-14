@@ -148,7 +148,7 @@ export default function SupporterModal({
       />
 
       <div className="fixed inset-0 flex items-center justify-center p-4">
-        <DialogPanel className="modal-container bg-secondary-bg border-button-info mx-auto w-full max-w-2xl overflow-hidden rounded-lg border shadow-lg">
+        <DialogPanel className="modal-container bg-secondary-bg border-button-info mx-auto flex max-h-[60vh] sm:max-h-[75vh] w-full max-w-2xl flex-col overflow-hidden rounded-lg border shadow-lg">
           {/* Header */}
           <div className="modal-header border-border-primary flex items-center justify-between border-b p-6">
             <div className="flex items-center gap-3">
@@ -173,7 +173,13 @@ export default function SupporterModal({
           </div>
 
           {/* Content */}
-          <div className="modal-content p-6">
+          <div
+            className="modal-content scrollbar-thin scrollbar-track-transparent scrollbar-thumb-border-primary hover:scrollbar-thumb-border-focus overflow-y-auto p-6"
+            style={{
+              scrollbarWidth: "thin",
+              scrollbarColor: "var(--color-border-primary) transparent",
+            }}
+          >
             <div className="mb-6">
               <p className="text-primary-text mb-4">
                 {featureInfo.description}
