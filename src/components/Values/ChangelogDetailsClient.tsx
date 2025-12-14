@@ -20,9 +20,6 @@ import { formatMessageDate } from "@/utils/timestamp";
 import { formatFullValue } from "@/utils/values";
 import ReactMarkdown from "react-markdown";
 import { MagnifyingGlassIcon, XMarkIcon } from "@heroicons/react/24/outline";
-import DisplayAd from "@/components/Ads/DisplayAd";
-import AdRemovalNotice from "@/components/Ads/AdRemovalNotice";
-import { getCurrentUserPremiumType } from "@/contexts/AuthContext";
 import ChangelogDetailsHeader from "./ChangelogDetailsHeader";
 import { Icon } from "../ui/IconWrapper";
 
@@ -150,7 +147,6 @@ interface UserData {
   settings?: {
     avatar_discord: number;
   };
-  premiumtype?: number;
 }
 
 interface ChangelogDetailsClientProps {
@@ -249,8 +245,6 @@ export default function ChangelogDetailsClient({
 
     return "Value";
   };
-
-  const currentUserPremiumType = getCurrentUserPremiumType();
 
   // Filter changes based on search query, selected type, and suggestion type
   const filteredChanges = changelog.change_data
@@ -402,36 +396,6 @@ export default function ChangelogDetailsClient({
 
   return (
     <ThemeProvider theme={darkTheme}>
-      <style jsx>{`
-        .sidebar-ad-container {
-          width: 320px;
-          height: 100px;
-          border-radius: 8px;
-          overflow: hidden;
-          transition: all 0.3s ease;
-        }
-
-        @media (min-width: 500px) {
-          .sidebar-ad-container {
-            width: 336px;
-            height: 280px;
-          }
-        }
-
-        @media (min-width: 768px) {
-          .sidebar-ad-container {
-            width: 300px;
-            height: 250px;
-          }
-        }
-
-        @media (min-width: 1024px) {
-          .sidebar-ad-container {
-            width: 300px;
-            height: 600px;
-          }
-        }
-      `}</style>
       <div className="space-y-6">
         {/* Header */}
         <div>
@@ -510,25 +474,6 @@ export default function ChangelogDetailsClient({
             </div>
           </div>
 
-          {/* Mobile Sidebar - Show below filter on mobile */}
-          {currentUserPremiumType === 0 && (
-            <div className="lg:hidden">
-              <div className="flex flex-col items-center">
-                <span className="text-secondary-text mb-2 block text-center text-xs">
-                  ADVERTISEMENT
-                </span>
-                <div className="sidebar-ad-container">
-                  <DisplayAd
-                    adSlot="8162235433"
-                    adFormat="auto"
-                    style={{ display: "block", width: "100%", height: "100%" }}
-                  />
-                </div>
-                <AdRemovalNotice className="mt-2" />
-              </div>
-            </div>
-          )}
-
           <div className="mb-2">
             <p className="text-secondary-text">
               {searchQuery
@@ -538,14 +483,9 @@ export default function ChangelogDetailsClient({
           </div>
         </div>
 
-        {/* Main Content with Sidebar Layout */}
-        <div
-          className={`grid gap-6 ${currentUserPremiumType === 0 ? "grid-cols-1 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6" : "grid-cols-1"}`}
-        >
-          {/* Main Content - Takes up full width for premium users, responsive for non-premium */}
-          <div
-            className={`space-y-6 ${currentUserPremiumType === 0 ? "lg:col-span-3 xl:col-span-4 2xl:col-span-5" : ""}`}
-          >
+        {/* Main Content */}
+        <div className="grid gap-6 grid-cols-1">
+          <div className="space-y-6">
             {/* Top Pagination */}
             {totalPages > 1 && (
               <div className="flex justify-center">
@@ -1037,31 +977,6 @@ export default function ChangelogDetailsClient({
               </div>
             )}
           </div>
-
-          {/* Sidebar - Responsive width, only show for non-premium users */}
-          {currentUserPremiumType === 0 && (
-            <div className="lg:col-span-1 xl:col-span-1 2xl:col-span-1">
-              <div className="sticky top-20">
-                <div className="flex flex-col items-center">
-                  <span className="text-secondary-text mb-2 block text-center text-xs">
-                    ADVERTISEMENT
-                  </span>
-                  <div className="sidebar-ad-container">
-                    <DisplayAd
-                      adSlot="8162235433"
-                      adFormat="auto"
-                      style={{
-                        display: "block",
-                        width: "100%",
-                        height: "100%",
-                      }}
-                    />
-                  </div>
-                  <AdRemovalNotice className="mt-2" />
-                </div>
-              </div>
-            </div>
-          )}
         </div>
 
         {/* Voters Dialog */}

@@ -73,9 +73,6 @@ import { useAuthContext } from "@/contexts/AuthContext";
 import { CategoryIconBadge } from "@/utils/categoryIcons";
 import { convertUrlsToLinks } from "@/utils/urlConverter";
 import { ItemDetails } from "@/types";
-import DisplayAd from "@/components/Ads/DisplayAd";
-import AdRemovalNotice from "@/components/Ads/AdRemovalNotice";
-import { getCurrentUserPremiumType } from "@/contexts/AuthContext";
 import type { UserData } from "@/types/auth";
 import { Icon } from "@/components/ui/IconWrapper";
 
@@ -155,9 +152,6 @@ export default function ItemDetailsClient({
   const [activeChartTab, setActiveChartTab] = useState(0);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
-  const [currentUserPremiumType, setCurrentUserPremiumType] =
-    useState<number>(0);
-  const [premiumStatusLoaded, setPremiumStatusLoaded] = useState(false);
   const { isAuthenticated, user } = useAuthContext();
 
   // Use optimized real-time relative date for last updated timestamp
@@ -165,24 +159,6 @@ export default function ItemDetailsClient({
     (selectedVariant || item)?.last_updated,
     `item-detail-${(selectedVariant || item)?.id}-${selectedVariant?.id || "parent"}`,
   );
-
-  useEffect(() => {
-    // Get current user's premium type
-    setTimeout(() => {
-      setCurrentUserPremiumType(getCurrentUserPremiumType());
-      setPremiumStatusLoaded(true);
-    }, 0);
-
-    // Listen for auth changes
-    const handleAuthChange = () => {
-      setCurrentUserPremiumType(getCurrentUserPremiumType());
-    };
-
-    window.addEventListener("authStateChanged", handleAuthChange);
-    return () => {
-      window.removeEventListener("authStateChanged", handleAuthChange);
-    };
-  }, []);
 
   useEffect(() => {
     if (item?.type && isDriftItem(item.type) && videoRef.current) {
@@ -497,34 +473,6 @@ export default function ItemDetailsClient({
                   </button>
                 )}
               </div>
-
-              {/* Ad above the 'Don't agree with the value?' card - show for non-premium users (premium types 1-3 are valid) */}
-              {premiumStatusLoaded &&
-                (currentUserPremiumType === 0 ||
-                  currentUserPremiumType > 3) && (
-                  <div className="my-6 flex w-full justify-center">
-                    <div className="flex w-full max-w-[480px] flex-col items-center lg:w-[480px]">
-                      <span className="text-secondary-text mb-2 block text-center text-xs">
-                        ADVERTISEMENT
-                      </span>
-                      <div
-                        className="relative w-full overflow-hidden rounded-lg transition-all duration-300"
-                        style={{ minHeight: "250px" }}
-                      >
-                        <DisplayAd
-                          adSlot="7368028510"
-                          adFormat="auto"
-                          style={{
-                            display: "block",
-                            width: "100%",
-                            height: "100%",
-                          }}
-                        />
-                      </div>
-                      <AdRemovalNotice className="mt-2" />
-                    </div>
-                  </div>
-                )}
 
               <div
                 className="bg-secondary-bg mt-4 rounded-lg p-4 shadow-lg"

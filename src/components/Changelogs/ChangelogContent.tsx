@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import Image from "next/image";
 import {
   ArrowRightIcon,
@@ -9,10 +9,8 @@ import {
   extractContentInfo,
   getBadgeColor,
 } from "@/utils/changelogs";
-import { getCurrentUserPremiumType } from "@/contexts/AuthContext";
 import { CommentData } from "@/utils/api";
 import { UserData } from "@/types/auth";
-import AdRemovalNotice from "../Ads/AdRemovalNotice";
 import dynamic from "next/dynamic";
 import ChangelogSummary from "./ChangelogSummary";
 import { isFeatureEnabled } from "@/utils/featureFlags";
@@ -38,11 +36,6 @@ const ChangelogQuickNav = dynamic(() => import("./ChangelogQuickNav"), {
   ssr: true,
 });
 
-const DisplayAd = dynamic(() => import("../Ads/DisplayAd"), {
-  loading: () => <div className="bg-secondary-bg h-48 animate-pulse rounded" />,
-  ssr: false,
-});
-
 interface ChangelogContentProps {
   title: string;
   sections: string;
@@ -66,9 +59,6 @@ const ChangelogContent: React.FC<ChangelogContentProps> = ({
 }) => {
   const [imageAspectRatio, setImageAspectRatio] =
     useState<string>("aspect-[4/3]");
-  const [currentUserPremiumType, setCurrentUserPremiumType] = useState<number>(
-    () => getCurrentUserPremiumType(),
-  );
 
   const currentIndex = changelogList.findIndex((c) => c.id === changelogId);
   const prevChangelog =
@@ -83,18 +73,6 @@ const ChangelogContent: React.FC<ChangelogContentProps> = ({
 
   // Extract content info for badges
   const contentInfo = extractContentInfo(sections);
-
-  useEffect(() => {
-    // Listen for auth changes
-    const handleAuthChange = () => {
-      setCurrentUserPremiumType(getCurrentUserPremiumType());
-    };
-
-    window.addEventListener("authStateChanged", handleAuthChange);
-    return () => {
-      window.removeEventListener("authStateChanged", handleAuthChange);
-    };
-  }, []);
 
   const handleImageLoad = (event: React.SyntheticEvent<HTMLImageElement>) => {
     const img = event.currentTarget;
@@ -112,36 +90,6 @@ const ChangelogContent: React.FC<ChangelogContentProps> = ({
 
   return (
     <>
-      <style jsx>{`
-        .sidebar-ad-container-changelog {
-          width: 320px;
-          height: 100px;
-          border-radius: 8px;
-          overflow: hidden;
-          transition: all 0.3s ease;
-        }
-
-        @media (min-width: 500px) {
-          .sidebar-ad-container-changelog {
-            width: 336px;
-            height: 280px;
-          }
-        }
-
-        @media (min-width: 768px) {
-          .sidebar-ad-container-changelog {
-            width: 300px;
-            height: 250px;
-          }
-        }
-
-        @media (min-width: 1024px) {
-          .sidebar-ad-container-changelog {
-            width: 300px;
-            height: 600px;
-          }
-        }
-      `}</style>
       <div className="grid grid-cols-1 gap-8 xl:grid-cols-12">
         {/* Content Section - 8/12 columns on desktop, full width on tablet and mobile */}
         <div className="sm:col-span-12 xl:col-span-8">
@@ -264,21 +212,6 @@ const ChangelogContent: React.FC<ChangelogContentProps> = ({
 
           {/* Comments Section */}
           <div>
-            {currentUserPremiumType === 0 && (
-              <div className="my-8 flex flex-col items-center">
-                <span className="text-secondary-text mb-2 block text-center text-xs">
-                  ADVERTISEMENT
-                </span>
-                <div className="sidebar-ad-container-changelog">
-                  <DisplayAd
-                    adSlot="4408799044"
-                    adFormat="auto"
-                    style={{ display: "block", width: "100%", height: "100%" }}
-                  />
-                </div>
-                <AdRemovalNotice className="mt-2" />
-              </div>
-            )}
             <ChangelogComments
               changelogId={changelogId}
               changelogTitle={title}

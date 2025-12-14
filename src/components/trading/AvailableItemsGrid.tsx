@@ -28,10 +28,7 @@ import { Icon } from "../ui/IconWrapper";
 import Image from "next/image";
 import Link from "next/link";
 import { FilterSort, ValueSort } from "@/types";
-import DisplayAd from "@/components/Ads/DisplayAd";
-import AdRemovalNotice from "@/components/Ads/AdRemovalNotice";
 import { useDebounce } from "@/hooks/useDebounce";
-import { getCurrentUserPremiumType } from "@/contexts/AuthContext";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import FloatingDropdown from "@/components/common/FloatingDropdown";
 import { DraggableItemCard } from "@/components/dnd/DraggableItemCard";
@@ -85,10 +82,6 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
   const [filterSort, setFilterSort] = useState<FilterSort>("name-all-items");
   const [valueSort, setValueSort] = useState<ValueSort>("cash-desc");
 
-  const [currentUserPremiumType, setCurrentUserPremiumType] =
-    useState<number>(0);
-  const [premiumStatusLoaded, setPremiumStatusLoaded] = useState(false);
-
   const debouncedSearchQuery = useDebounce(searchQuery, 300);
   const MAX_QUERY_DISPLAY_LENGTH = 120;
   const displayDebouncedSearchQuery =
@@ -120,20 +113,6 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
         "showTradeAdError",
         handleShowError as EventListener,
       );
-    };
-  }, []);
-
-  useEffect(() => {
-    setCurrentUserPremiumType(getCurrentUserPremiumType());
-    setPremiumStatusLoaded(true);
-
-    const handleAuthChange = () => {
-      setCurrentUserPremiumType(getCurrentUserPremiumType());
-    };
-
-    window.addEventListener("authStateChanged", handleAuthChange);
-    return () => {
-      window.removeEventListener("authStateChanged", handleAuthChange);
     };
   }, []);
 
@@ -368,56 +347,8 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
 
   return (
     <>
-      <style jsx>{`
-        .responsive-ad-container {
-          width: 320px;
-          height: 100px;
-          border: 1px solid
-            var(--color-border-border-primary hover: border-border-focus);
-          background-color: var(--color-primary-bg);
-          border-radius: 8px;
-          overflow: hidden;
-          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-          transition: all 0.3s ease;
-        }
-
-        @media (min-width: 500px) {
-          .responsive-ad-container {
-            width: 468px;
-            height: 60px;
-          }
-        }
-
-        @media (min-width: 800px) {
-          .responsive-ad-container {
-            width: 728px;
-            height: 90px;
-          }
-        }
-      `}</style>
       <div className="space-y-4" data-component="available-items-grid">
         <div className="border-border-primary hover:border-border-focus hover:shadow-card-shadow bg-secondary-bg rounded-lg border p-1 pt-4 transition-colors duration-200 sm:p-2">
-          {/* Ad Placement: Above the grid, only for non-premium users (premium types 1-3 are valid) */}
-          {premiumStatusLoaded &&
-            (currentUserPremiumType === 0 || currentUserPremiumType > 3) && (
-              <div className="mb-6 flex w-full flex-col items-center">
-                <span className="text-secondary-text mb-2 block text-center text-xs">
-                  ADVERTISEMENT
-                </span>
-                <div
-                  className="responsive-ad-container"
-                  style={{ background: "transparent", border: "none" }}
-                >
-                  <DisplayAd
-                    adSlot="4222990422"
-                    adFormat="auto"
-                    style={{ display: "block", width: "100%", height: "100%" }}
-                  />
-                </div>
-                <AdRemovalNotice className="mt-2" />
-              </div>
-            )}
-
           <div className="mb-4 grid grid-cols-1 gap-4 lg:grid-cols-3">
             {/* Search - Takes up full width on mobile, 1/3 on desktop */}
             <div className="relative lg:col-span-1">

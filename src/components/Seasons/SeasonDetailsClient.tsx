@@ -9,9 +9,6 @@ import ImageGallery from "@/components/Seasons/ImageGallery";
 import ChangelogComments from "@/components/PageComments/ChangelogComments";
 import Link from "next/link";
 import { formatProfileDate } from "@/utils/timestamp";
-import DisplayAd from "@/components/Ads/DisplayAd";
-import AdRemovalNotice from "@/components/Ads/AdRemovalNotice";
-import { useAuthContext } from "@/contexts/AuthContext";
 import { Season, CommentData } from "@/utils/api";
 import { UserData } from "@/types/auth";
 
@@ -32,15 +29,11 @@ export default function SeasonDetailsClient({
   initialUserMap = {},
 }: SeasonDetailsClientProps) {
   const router = useRouter();
-  const { user } = useAuthContext();
 
   // Use state to manage the current season
   const [currentSeasonState, setCurrentSeasonState] = useState(currentSeason);
 
   const season = currentSeasonState;
-
-  // Derive premium type from auth context instead of using state
-  const currentUserPremiumType = user?.premiumtype || 0;
 
   // Get filtered season list for navigation
   const filteredSeasonList = seasonList
@@ -117,51 +110,6 @@ export default function SeasonDetailsClient({
 
   return (
     <>
-      <style jsx>{`
-        .sidebar-ad-container-season {
-          width: 100%;
-          max-width: 320px;
-          height: 100px;
-          min-width: 250px;
-          border: 1px solid
-            var(--color-border-border-primary hover: border-border-focus);
-          border-radius: 8px;
-          overflow: hidden;
-          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-          transition: all 0.3s ease;
-          display: block;
-        }
-
-        @media (min-width: 500px) {
-          .sidebar-ad-container-season {
-            width: 100%;
-            max-width: 336px;
-            height: 280px;
-            min-width: 250px;
-            display: block;
-          }
-        }
-
-        @media (min-width: 768px) {
-          .sidebar-ad-container-season {
-            width: 100%;
-            max-width: 300px;
-            height: 250px;
-            min-width: 250px;
-            display: block;
-          }
-        }
-
-        @media (min-width: 1024px) {
-          .sidebar-ad-container-season {
-            width: 100%;
-            max-width: 300px;
-            height: 600px;
-            min-width: 300px;
-            display: block;
-          }
-        }
-      `}</style>
       <main className="min-h-screen">
         <div className="container mx-auto mb-8 px-4 sm:px-6">
           <Breadcrumb />
@@ -334,25 +282,6 @@ export default function SeasonDetailsClient({
             {/* Right side - Image Gallery and Comments */}
             <div className="space-y-8 sm:col-span-12 xl:col-span-4">
               <ImageGallery rewards={season.rewards} />
-              {currentUserPremiumType === 0 && (
-                <div className="my-8 flex flex-col items-center">
-                  <span className="text-secondary-text mb-2 block text-center text-xs">
-                    ADVERTISEMENT
-                  </span>
-                  <div className="sidebar-ad-container-season">
-                    <DisplayAd
-                      adSlot="2909908750"
-                      adFormat="auto"
-                      style={{
-                        display: "block",
-                        width: "100%",
-                        height: "100%",
-                      }}
-                    />
-                  </div>
-                  <AdRemovalNotice className="mt-2" />
-                </div>
-              )}
               <ChangelogComments
                 changelogId={season.season}
                 changelogTitle={season.title}
