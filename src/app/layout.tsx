@@ -20,6 +20,7 @@ import { ConsentProviderWrapper } from "@/components/Providers/ConsentProviderWr
 import ConsentBannerWrapper from "@/components/Consent/ConsentBannerWrapper";
 import CookieSettingsButton from "@/components/Consent/CookieSettingsButton";
 import NitroAnchorCloseSupporterModal from "@/components/Ads/NitroAnchorCloseSupporterModal";
+import NitroVideoPlayerCloseSupporterModal from "@/components/Ads/NitroVideoPlayerCloseSupporterModal";
 import NitroBottomAnchor from "@/components/Ads/NitroBottomAnchor";
 import NitroVideoPlayer from "@/components/Ads/NitroVideoPlayer";
 import {
@@ -185,6 +186,7 @@ export default async function RootLayout({
                         <NitroBottomAnchor />
                         <NitroVideoPlayer />
                         <NitroAnchorCloseSupporterModal />
+                        <NitroVideoPlayerCloseSupporterModal />
                         <SurveyProvider>
                           <div
                             id="main-layout"
@@ -384,6 +386,7 @@ export default async function RootLayout({
                     <NitroBottomAnchor />
                     <NitroVideoPlayer />
                     <NitroAnchorCloseSupporterModal />
+                    <NitroVideoPlayerCloseSupporterModal />
                     <SurveyProvider>
                       <div className="flex min-h-screen flex-col">
                         <Suspense

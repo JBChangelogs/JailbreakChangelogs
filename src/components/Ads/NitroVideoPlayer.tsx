@@ -15,7 +15,10 @@ export default function NitroVideoPlayer() {
 
     if (isSupporter) {
       const el = document.getElementById(VIDEO_PLAYER_ID);
-      if (el) el.style.display = "none";
+      if (el) {
+        el.remove();
+      }
+      createdRef.current = false;
       return;
     }
 

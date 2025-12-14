@@ -15,7 +15,10 @@ export default function NitroBottomAnchor() {
 
     if (isSupporter) {
       const el = document.getElementById(ANCHOR_ID);
-      if (el) el.style.display = "none";
+      if (el) {
+        el.remove();
+      }
+      createdRef.current = false;
       return;
     }
 
