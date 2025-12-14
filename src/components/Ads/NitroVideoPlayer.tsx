@@ -45,11 +45,27 @@ export default function NitroVideoPlayer() {
     createdRef.current = true;
 
     Promise.resolve(
-      window.nitroAds.createAd(VIDEO_PLAYER_ID, {
-        format: "floating",
-        mediaQuery:
-          "(min-width: 1025px), (min-width: 768px) and (max-width: 1024px), (min-width: 320px) and (max-width: 767px)",
-      }),
+      (function ensureContainerAndCreate() {
+        // Ensure a container element exists for the video player format
+        let el = document.getElementById(VIDEO_PLAYER_ID);
+        if (!el) {
+          el = document.createElement("div");
+          el.id = VIDEO_PLAYER_ID;
+          document.body.appendChild(el);
+        }
+
+        return window.nitroAds.createAd(VIDEO_PLAYER_ID, {
+          format: "video-nc",
+          mediaQuery:
+            "(min-width: 1025px), (min-width: 768px) and (max-width: 1024px), (min-width: 320px) and (max-width: 767px)",
+          video: {
+            initialDelay: 3,
+            // Encourage full UI on mobile and avoid sticky minimized state across views
+            mobile: "full",
+            persistMinimizeTime: 0,
+          },
+        });
+      })(),
     ).catch(() => {
       createdRef.current = false;
     });

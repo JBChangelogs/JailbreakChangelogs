@@ -132,8 +132,8 @@ export default async function RootLayout({
             src="https://s.nitropay.com/ads-2263.js"
             strategy="afterInteractive"
             data-cfasync="false"
+            data-log-level="silent"
             // data-demo="true"
-            // data-log-level="debug"
           />
         </head>
         <body className="bg-primary-bg font-sans">
@@ -288,8 +288,8 @@ export default async function RootLayout({
           src="https://s.nitropay.com/ads-2263.js"
           strategy="afterInteractive"
           data-cfasync="false"
+          data-log-level="silent"
           // data-demo="true"
-          // data-log-level="debug"
         />
       </head>
       <body className="bg-primary-bg font-sans">
