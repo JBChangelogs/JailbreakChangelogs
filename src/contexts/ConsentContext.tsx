@@ -69,13 +69,11 @@ export function ConsentProvider({
 
   // Derive state from consentState instead of maintaining separate state
   const consentGiven = state.consentState
-    ? state.consentState.analytics_storage === "granted" ||
-      state.consentState.ad_storage === "granted"
+    ? state.consentState.analytics_storage === "granted"
     : false;
 
   const consentDenied = state.consentState
-    ? state.consentState.analytics_storage === "denied" &&
-      state.consentState.ad_storage === "denied"
+    ? state.consentState.analytics_storage === "denied"
     : false;
 
   // Show banner only if user hasn't made a choice yet AND is in a regulated region
@@ -84,9 +82,6 @@ export function ConsentProvider({
   const handleAcceptConsent = async () => {
     const consentConfig: Partial<ConsentConfig> = {
       analytics_storage: "granted",
-      ad_storage: "granted",
-      ad_user_data: "granted",
-      ad_personalization: "granted",
     };
     grantAllConsent();
     await storeConsent(consentConfig);
@@ -100,9 +95,6 @@ export function ConsentProvider({
   const handleRejectConsent = async () => {
     const consentConfig: Partial<ConsentConfig> = {
       analytics_storage: "denied",
-      ad_storage: "denied",
-      ad_user_data: "denied",
-      ad_personalization: "denied",
     };
     denyAllConsent();
     await storeConsent(consentConfig);

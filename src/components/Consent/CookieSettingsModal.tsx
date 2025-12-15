@@ -19,9 +19,6 @@ export default function CookieSettingsModal({
   const { updateConsent } = useConsent();
   const [settings, setSettings] = useState<Partial<ConsentConfig>>({
     analytics_storage: "granted",
-    ad_storage: "granted",
-    ad_user_data: "granted",
-    ad_personalization: "granted",
   });
 
   // Load current consent from cookie on mount
@@ -99,60 +96,6 @@ export default function CookieSettingsModal({
                 type="checkbox"
                 checked={settings.analytics_storage === "granted"}
                 onChange={() => handleToggle("analytics_storage")}
-                className="flex-shrink-0 cursor-pointer w-4 h-4 mt-1"
-              />
-            </div>
-
-            {/* Ad Storage */}
-            <div className="flex items-start justify-between py-2 border-b border-border-primary gap-3">
-              <div className="flex-1 min-w-0">
-                <label className="text-primary-text text-sm font-medium cursor-pointer block">
-                  Ad Storage
-                </label>
-                <p className="text-secondary-text text-xs mt-0.5 leading-tight">
-                  Stores information for advertising purposes
-                </p>
-              </div>
-              <input
-                type="checkbox"
-                checked={settings.ad_storage === "granted"}
-                onChange={() => handleToggle("ad_storage")}
-                className="flex-shrink-0 cursor-pointer w-4 h-4 mt-1"
-              />
-            </div>
-
-            {/* Ad User Data */}
-            <div className="flex items-start justify-between py-2 border-b border-border-primary gap-3">
-              <div className="flex-1 min-w-0">
-                <label className="text-primary-text text-sm font-medium cursor-pointer block">
-                  Ad User Data
-                </label>
-                <p className="text-secondary-text text-xs mt-0.5 leading-tight">
-                  Allows personalized advertising based on your data
-                </p>
-              </div>
-              <input
-                type="checkbox"
-                checked={settings.ad_user_data === "granted"}
-                onChange={() => handleToggle("ad_user_data")}
-                className="flex-shrink-0 cursor-pointer w-4 h-4 mt-1"
-              />
-            </div>
-
-            {/* Ad Personalization */}
-            <div className="flex items-start justify-between py-2 gap-3">
-              <div className="flex-1 min-w-0">
-                <label className="text-primary-text text-sm font-medium cursor-pointer block">
-                  Ad Personalization
-                </label>
-                <p className="text-secondary-text text-xs mt-0.5 leading-tight">
-                  Enables personalized ads based on your interests
-                </p>
-              </div>
-              <input
-                type="checkbox"
-                checked={settings.ad_personalization === "granted"}
-                onChange={() => handleToggle("ad_personalization")}
                 className="flex-shrink-0 cursor-pointer w-4 h-4 mt-1"
               />
             </div>

@@ -24,7 +24,7 @@ export default function PrivacyPage() {
           </h1>
         </div>
         <p className="text-primary-text mb-6 text-sm">
-          Last updated: December 11th, 2025
+          Last updated: December 15th, 2025
         </p>
 
         <div className="border-border-primary hover:border-border-focus bg-secondary-bg rounded-lg border p-6 transition-colors">
@@ -75,8 +75,8 @@ export default function PrivacyPage() {
               <Typography className="text-secondary-text mb-4">
                 We use cookies and similar technologies to enhance your
                 experience on our website. This includes cookies from Microsoft
-                Clarity for analytics and Google services for advertising and
-                analytics purposes.
+                Clarity for analytics and Google services for analytics
+                purposes.
               </Typography>
               <Typography className="text-secondary-text mb-4">
                 <strong>Your Cookie Preferences:</strong> We respect your
@@ -103,74 +103,7 @@ export default function PrivacyPage() {
                     site and identify areas for improvement.
                   </Typography>
                 </div>
-
-                <div>
-                  <h3 className="text-primary-text font-semibold mb-2">
-                    Ad Storage
-                  </h3>
-                  <Typography className="text-secondary-text text-sm mb-2">
-                    <strong>What it does:</strong> Stores information for
-                    advertising purposes
-                  </Typography>
-                  <Typography className="text-secondary-text text-sm mb-2">
-                    <strong>Cookies used:</strong> Google Ads cookies (NID, IDE,
-                    ANID)
-                  </Typography>
-                  <Typography className="text-secondary-text text-sm">
-                    <strong>Purpose:</strong> Allows Google to store and
-                    remember your browsing behavior across websites. Without
-                    this, Google cannot track you for ad targeting purposes.
-                  </Typography>
-                </div>
-
-                <div>
-                  <h3 className="text-primary-text font-semibold mb-2">
-                    Ad User Data
-                  </h3>
-                  <Typography className="text-secondary-text text-sm mb-2">
-                    <strong>What it does:</strong> Allows personalized
-                    advertising based on your data
-                  </Typography>
-                  <Typography className="text-secondary-text text-sm mb-2">
-                    <strong>Cookies used:</strong> Google Ads conversion
-                    tracking, audience data
-                  </Typography>
-                  <Typography className="text-secondary-text text-sm">
-                    <strong>Purpose:</strong> Sends your interests and browsing
-                    history to Google&apos;s ad network. This enables Google to
-                    build a profile of your interests (e.g., &quot;gaming
-                    enthusiast&quot;, &quot;tech interested&quot;) to show you
-                    more relevant ads.
-                  </Typography>
-                </div>
-
-                <div>
-                  <h3 className="text-primary-text font-semibold mb-2">
-                    Ad Personalization
-                  </h3>
-                  <Typography className="text-secondary-text text-sm mb-2">
-                    <strong>What it does:</strong> Enables personalized ads
-                    based on your interests
-                  </Typography>
-                  <Typography className="text-secondary-text text-sm mb-2">
-                    <strong>Cookies used:</strong> Google Ads personalization
-                    signals
-                  </Typography>
-                  <Typography className="text-secondary-text text-sm">
-                    <strong>Purpose:</strong> Uses the data collected above to
-                    show you ads tailored to your interests. Without this, you
-                    see generic, non-personalized ads. With this enabled, you
-                    see ads more relevant to you.
-                  </Typography>
-                </div>
               </div>
-
-              <Typography className="text-secondary-text mb-4">
-                <strong>How they work together:</strong> All four settings must
-                be enabled for personalized advertising to work. If any one is
-                disabled, ad personalization is limited and you&apos;ll see
-                generic ads instead.
-              </Typography>
 
               <Typography className="text-secondary-text mb-4">
                 <strong>Your Consent Preferences:</strong> We respect your

@@ -10,9 +10,6 @@ export type ConsentStatus = "granted" | "denied";
 
 export interface ConsentConfig {
   analytics_storage: ConsentStatus;
-  ad_storage: ConsentStatus;
-  ad_user_data: ConsentStatus;
-  ad_personalization: ConsentStatus;
 }
 
 /**
@@ -34,9 +31,6 @@ export function updateGCMConsent(config: Partial<ConsentConfig>): void {
 export function grantAllConsent(): void {
   updateGCMConsent({
     analytics_storage: "granted",
-    ad_storage: "granted",
-    ad_user_data: "granted",
-    ad_personalization: "granted",
   });
 }
 
@@ -46,9 +40,6 @@ export function grantAllConsent(): void {
 export function denyAllConsent(): void {
   updateGCMConsent({
     analytics_storage: "denied",
-    ad_storage: "denied",
-    ad_user_data: "denied",
-    ad_personalization: "denied",
   });
 }
 

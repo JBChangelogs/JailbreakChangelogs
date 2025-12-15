@@ -137,18 +137,12 @@ export async function getDefaultConsentByRegion(): Promise<
   if (isRegulated) {
     // Regulated regions (GDPR-like and designated US states): Opt-in model (default DENIED)
     return {
-      ad_user_data: "denied",
-      ad_personalization: "denied",
-      ad_storage: "denied",
       analytics_storage: "denied",
     };
   }
 
   // Others: Opt-out model (default GRANTED)
   return {
-    ad_user_data: "granted",
-    ad_personalization: "granted",
-    ad_storage: "granted",
     analytics_storage: "granted",
   };
 }

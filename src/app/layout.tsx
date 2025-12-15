@@ -112,9 +112,6 @@ export default async function RootLayout({
                 window.dataLayer = window.dataLayer || [];
                 function gtag(){dataLayer.push(arguments);}
                 gtag('consent', 'default', {
-                  'ad_user_data': '${defaultConsent.ad_user_data}',
-                  'ad_personalization': '${defaultConsent.ad_personalization}',
-                  'ad_storage': '${defaultConsent.ad_storage}',
                   'analytics_storage': '${defaultConsent.analytics_storage}',
                   'wait_for_update': 500
                 });
@@ -271,9 +268,6 @@ export default async function RootLayout({
               window.dataLayer = window.dataLayer || [];
               function gtag(){dataLayer.push(arguments);}
               gtag('consent', 'default', {
-                'ad_user_data': '${defaultConsent.ad_user_data}',
-                'ad_personalization': '${defaultConsent.ad_personalization}',
-                'ad_storage': '${defaultConsent.ad_storage}',
                 'analytics_storage': '${defaultConsent.analytics_storage}',
                 'wait_for_update': 500
               });
