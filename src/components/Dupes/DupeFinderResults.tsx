@@ -426,11 +426,13 @@ export default function DupeFinderResults({
         <DupeItemsGrid
           filteredItems={filteredAndSortedItems}
           getUserAvatar={getUserAvatar}
+          getUsername={getUsername}
           getDupedValueForItem={getDupedValueForItem}
           onCardClick={handleCardClick}
           itemCounts={itemCounts}
           duplicateOrders={duplicateOrders}
           itemsData={itemsData}
+          robloxId={robloxId}
         />
       </div>
 

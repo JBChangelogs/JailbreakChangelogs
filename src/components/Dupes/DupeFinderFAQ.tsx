@@ -37,8 +37,22 @@ const faqs = [
   },
   {
     question: "Can I report incorrect detections or missed dupes?",
-    answer:
-      "No, unlike the old dupe calculator, you cannot manually report incorrect detections or missed dupes with this new system. The detection is fully automated based on our collected data to maintain accuracy and integrity.",
+    answer: (
+      <>
+        Yes. While the detection is still fully automated based on our collected
+        data, if you believe an item is incorrectly flagged you can report the
+        false dupe by opening a support ticket in our{" "}
+        <a
+          href="https://discord.com/channels/1286064050135896064/1392693026865811518"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-primary-text hover:opacity-80 inline-flex items-center gap-1 font-semibold underline transition-opacity"
+        >
+          Discord support channel
+        </a>
+        .
+      </>
+    ),
   },
   {
     question: "Why can't I find some users or items?",

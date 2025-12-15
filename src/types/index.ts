@@ -239,6 +239,7 @@ export interface DupeFinderItem {
   latest_owner: string;
   logged_at: number;
   tradePopularMetric: number;
+  dupe_ratio: number | null;
   level: number | null;
   history: DupeFinderHistoryEntry[];
   timesTraded: number;

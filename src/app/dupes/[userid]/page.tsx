@@ -1,5 +1,7 @@
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
+import Link from "next/link";
+import { Icon } from "@iconify/react";
 import DupeFinderDataStreamer from "@/components/Dupes/DupeFinderDataStreamer";
 import DupeFinderFAQ from "@/components/Dupes/DupeFinderFAQ";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
@@ -61,6 +63,20 @@ export default async function DupeFinderPage({ params }: DupeFinderPageProps) {
         Enter a Roblox ID or username to check for any duped items associated
         with that name.
       </p>
+      <div className="border-border-primary bg-button-info/10 mb-6 rounded-lg border p-4 text-sm text-primary-text">
+        If you believe an item is incorrectly flagged, you can report the false
+        dupe by opening a support ticket in our{" "}
+        <Link
+          href="https://discord.com/channels/1286064050135896064/1392693026865811518"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-primary-text hover:opacity-80 inline-flex items-center gap-1 font-semibold underline transition-opacity"
+        >
+          <Icon icon="akar-icons:link-out" className="h-4 w-4" />
+          Discord support channel
+        </Link>
+        .
+      </div>
 
       <PremiumAwareLayout>
         <Suspense

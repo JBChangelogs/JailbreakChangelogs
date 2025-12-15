@@ -26,20 +26,24 @@ interface DupeItemCardProps {
   item: DupeFinderItem;
   itemData: Item;
   getUserAvatar: (userId: string) => string;
+  getUsername: (userId: string) => string;
   getDupedValueForItem: (itemData: Item, dupeItem: DupeFinderItem) => number;
   onCardClick: (item: DupeFinderItem) => void;
   duplicateNumber?: number;
   isDuplicate?: boolean;
+  robloxId: string;
 }
 
 export default function DupeItemCard({
   item,
   itemData,
-  // getUserAvatar,
+  getUserAvatar,
+  getUsername,
   getDupedValueForItem,
   onCardClick,
   duplicateNumber,
   isDuplicate = false,
+  robloxId,
 }: DupeItemCardProps) {
   const dupedValue = getDupedValueForItem(itemData, item);
 
@@ -255,6 +259,43 @@ export default function DupeItemCard({
           </Tooltip>
         </div>
         <div>
+          <div className="text-secondary-text text-sm">ORIGINAL OWNER</div>
+          <div className="text-xl font-bold">
+            <div className="flex items-center justify-center gap-2">
+              <div className="relative h-8 w-8 rounded-full bg-tertiary-bg overflow-hidden flex-shrink-0">
+                <Image
+                  src={getUserAvatar(robloxId)}
+                  alt="Original Owner Avatar"
+                  width={32}
+                  height={32}
+                  className="rounded-full"
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    target.style.display = "none";
+                    const parent = target.parentElement;
+                    if (parent && !parent.querySelector("svg")) {
+                      const defaultAvatar = document.createElement("div");
+                      defaultAvatar.className =
+                        "flex h-full w-full items-center justify-center";
+                      defaultAvatar.innerHTML = `<svg class="h-5 w-5 text-tertiary-text" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" /></svg>`;
+                      parent.appendChild(defaultAvatar);
+                    }
+                  }}
+                />
+              </div>
+              <a
+                href={`https://www.roblox.com/users/${robloxId}/profile`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-link hover:text-link-hover text-center break-words transition-colors hover:underline"
+                onClick={(e) => e.stopPropagation()}
+              >
+                {getUsername(robloxId)}
+              </a>
+            </div>
+          </div>
+        </div>
+        <div>
           <div className="text-secondary-text text-sm">LOGGED ON</div>
           <Tooltip
             title={new Date(item.logged_at * 1000).toLocaleString()}
@@ -278,6 +319,31 @@ export default function DupeItemCard({
           </Tooltip>
         </div>
       </div>
+
+      {/* Season and Level badges - centered like other cards */}
+      <div className="border-secondary-text mt-3 flex min-h-[40px] items-center justify-center gap-2 border-t pt-3">
+        {item.season && (
+          <div className="border-button-info bg-button-info flex h-8 w-8 items-center justify-center rounded-full border shadow-lg">
+            <span className="text-form-button-text text-xs font-bold">
+              S{item.season}
+            </span>
+          </div>
+        )}
+        {item.level && (
+          <div className="border-status-success bg-status-success flex h-8 w-8 items-center justify-center rounded-full border shadow-lg">
+            <span className="text-form-button-text text-xs font-bold">
+              L{item.level}
+            </span>
+          </div>
+        )}
+      </div>
+
+      {/* Very muted dev-only dupe ratio, bottom-right */}
+      {item.dupe_ratio !== null && item.dupe_ratio !== undefined && (
+        <span className="text-tertiary-text font-mono text-[11px] opacity-70 absolute bottom-3 right-3">
+          {item.dupe_ratio.toFixed(2)}
+        </span>
+      )}
     </div>
   );
 }

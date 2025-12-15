@@ -26,7 +26,7 @@ interface OGItem {
 
 interface OGItemsGridProps {
   filteredItems: OGItem[];
-  getUserDisplay: (userId: string) => string;
+  getUsername: (userId: string) => string;
   getUserAvatar: (userId: string) => string;
   getHasVerifiedBadge: (userId: string) => boolean;
   onCardClick: (item: OGItem) => void;
@@ -38,7 +38,7 @@ interface OGItemsGridProps {
 
 export default function OGItemsGrid({
   filteredItems,
-  getUserDisplay,
+  getUsername,
   getUserAvatar,
   getHasVerifiedBadge,
   onCardClick,
@@ -174,7 +174,7 @@ export default function OGItemsGrid({
                       key={`${item.id}-${item.user_id}-${item.timesTraded}-${item.uniqueCirculation}-${index}`}
                       item={item}
                       itemData={itemData}
-                      getUserDisplay={getUserDisplay}
+                      getUsername={getUsername}
                       getUserAvatar={getUserAvatar}
                       getHasVerifiedBadge={getHasVerifiedBadge}
                       onCardClick={onCardClick}

@@ -198,14 +198,12 @@ export default function ConnectedBotsPolling() {
                   </span>
                 </div>
                 {queueInfo.processed_counter && queueInfo.running_since && (
-                  <div className="flex items-center gap-2 text-sm">
+                  <div className="text-sm text-secondary-text">
                     <span className="text-primary-text font-bold">
                       {queueInfo.processed_counter.total.toLocaleString()}
-                    </span>
-                    <span className="text-secondary-text">
-                      users scanned since startup (
-                      {formatCustomDate(queueInfo.running_since * 1000)})
-                    </span>
+                    </span>{" "}
+                    users scanned since startup (
+                    {formatCustomDate(queueInfo.running_since * 1000)})
                   </div>
                 )}
                 {queueInfo.last_dequeue ? (

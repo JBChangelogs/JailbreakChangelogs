@@ -8,23 +8,27 @@ import { DupeFinderItem, Item } from "@/types";
 interface DupeItemsGridProps {
   filteredItems: DupeFinderItem[];
   getUserAvatar: (userId: string) => string;
+  getUsername: (userId: string) => string;
   getDupedValueForItem: (itemData: Item, dupeItem: DupeFinderItem) => number;
   onCardClick: (item: DupeFinderItem) => void;
   isLoading?: boolean;
   itemCounts: Map<string, number>;
   duplicateOrders: Map<string, number>;
   itemsData: Item[];
+  robloxId: string;
 }
 
 export default function DupeItemsGrid({
   filteredItems,
   getUserAvatar,
+  getUsername,
   getDupedValueForItem,
   onCardClick,
   isLoading = false,
   itemCounts,
   duplicateOrders,
   itemsData,
+  robloxId,
 }: DupeItemsGridProps) {
   const parentRef = useRef<HTMLDivElement>(null);
 
@@ -146,10 +150,12 @@ export default function DupeItemsGrid({
                       item={item}
                       itemData={itemData}
                       getUserAvatar={getUserAvatar}
+                      getUsername={getUsername}
                       getDupedValueForItem={getDupedValueForItem}
                       onCardClick={onCardClick}
                       duplicateNumber={duplicateNumber}
                       isDuplicate={isDuplicate}
+                      robloxId={robloxId}
                     />
                   );
                 })}

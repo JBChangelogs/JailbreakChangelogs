@@ -60,7 +60,7 @@ interface OGItem {
 interface OGItemCardProps {
   item: OGItem;
   itemData?: Item;
-  getUserDisplay: (userId: string) => string;
+  getUsername: (userId: string) => string;
   getUserAvatar: (userId: string) => string;
   getHasVerifiedBadge?: (userId: string) => boolean;
   onCardClick: (item: OGItem) => void;
@@ -71,7 +71,7 @@ interface OGItemCardProps {
 export default function OGItemCard({
   item,
   itemData,
-  getUserDisplay,
+  getUsername,
   getUserAvatar,
   getHasVerifiedBadge,
   onCardClick,
@@ -329,7 +329,7 @@ export default function OGItemCard({
                 onClick={(e) => e.stopPropagation()}
               >
                 <span className="inline-flex items-center gap-2">
-                  {getUserDisplay(item.user_id)}
+                  {getUsername(item.user_id)}
                   {getHasVerifiedBadge && getHasVerifiedBadge(item.user_id) && (
                     <VerifiedBadgeIcon className="h-4 w-4" />
                   )}

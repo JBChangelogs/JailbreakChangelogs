@@ -486,7 +486,7 @@ export default function OGFinderResults({
 
             <OGItemsGrid
               filteredItems={filteredAndSortedItems}
-              getUserDisplay={getUserDisplay}
+              getUsername={getUsername}
               getUserAvatar={getUserAvatar}
               getHasVerifiedBadge={getHasVerifiedBadge}
               onCardClick={handleCardClick}
