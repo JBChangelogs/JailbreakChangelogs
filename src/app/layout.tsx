@@ -23,7 +23,6 @@ import NitroAnchorCloseSupporterModal from "@/components/Ads/NitroAnchorCloseSup
 import NitroVideoPlayerCloseSupporterModal from "@/components/Ads/NitroVideoPlayerCloseSupporterModal";
 import NitroBottomAnchor from "@/components/Ads/NitroBottomAnchor";
 import NitroVideoPlayer from "@/components/Ads/NitroVideoPlayer";
-import NitroAdsNavigationHandler from "@/components/Layout/NitroAdsNavigationHandler";
 import {
   checkMaintenanceMode,
   getMaintenanceMetadata,
@@ -140,6 +139,7 @@ export default async function RootLayout({
                 src="https://s.nitropay.com/ads-2263.js"
                 strategy="afterInteractive"
                 data-cfasync="false"
+                data-spa="auto"
                 data-log-level="silent"
                 data-demo={
                   process.env.NODE_ENV === "development" ? "true" : undefined
@@ -196,9 +196,6 @@ export default async function RootLayout({
                       <OfflineDetector />
                       <AuthCheck />
                       <AuthProvider>
-                        <Suspense>
-                          <NitroAdsNavigationHandler />
-                        </Suspense>
                         <NitroBottomAnchor />
                         <NitroVideoPlayer />
                         <NitroAnchorCloseSupporterModal />
@@ -305,6 +302,7 @@ export default async function RootLayout({
               src="https://s.nitropay.com/ads-2263.js"
               strategy="afterInteractive"
               data-cfasync="false"
+              data-spa="auto"
               data-log-level="silent"
               data-demo={
                 process.env.NODE_ENV === "development" ? "true" : undefined
@@ -410,9 +408,6 @@ export default async function RootLayout({
                   <OfflineDetector />
                   <AuthCheck />
                   <AuthProvider>
-                    <Suspense>
-                      <NitroAdsNavigationHandler />
-                    </Suspense>
                     <NitroBottomAnchor />
                     <NitroVideoPlayer />
                     <NitroAnchorCloseSupporterModal />
