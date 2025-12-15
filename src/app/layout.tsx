@@ -142,7 +142,7 @@ export default async function RootLayout({
                 strategy="afterInteractive"
                 data-cfasync="false"
                 data-log-level="silent"
-                data-demo="true"
+                // data-demo="true"
               />
             </>
           )}
@@ -306,7 +306,7 @@ export default async function RootLayout({
               strategy="afterInteractive"
               data-cfasync="false"
               data-log-level="silent"
-              data-demo="true"
+              // data-demo="true"
             />
           </>
         )}
