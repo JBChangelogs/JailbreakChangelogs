@@ -55,15 +55,15 @@ export default function NitroVideoPlayer() {
         }
 
         return window.nitroAds.createAd(VIDEO_PLAYER_ID, {
-          format: "video-nc",
+          format: "floating",
+          report: {
+            enabled: true,
+            icon: true,
+            wording: "Report Ad",
+            position: "top-left",
+          },
           mediaQuery:
             "(min-width: 1025px), (min-width: 768px) and (max-width: 1024px), (min-width: 320px) and (max-width: 767px)",
-          video: {
-            initialDelay: 3,
-            // Encourage full UI on mobile and avoid sticky minimized state across views
-            mobile: "full",
-            persistMinimizeTime: 0,
-          },
         });
       })(),
     ).catch(() => {

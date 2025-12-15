@@ -30,6 +30,7 @@ import { DndContext, DragEndEvent, DragStartEvent } from "@dnd-kit/core";
 import { DroppableZone } from "@/components/dnd/DroppableZone";
 import { CustomDragOverlay } from "@/components/dnd/DragOverlay";
 import toast from "react-hot-toast";
+import NitroCalculatorAd from "@/components/Ads/NitroCalculatorAd";
 
 /**
  * Parses numeric strings like "1.2m", "450k", "12,345", or "N/A".
@@ -1673,6 +1674,9 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
             </DroppableZone>
           </div>
         </div>
+
+        {/* Ad Section */}
+        <NitroCalculatorAd className="mb-8 flex justify-center" />
 
         {/* Tabs */}
         <div className="overflow-x-auto">
