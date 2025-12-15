@@ -21,6 +21,7 @@ import ItemValues from "@/components/Items/ItemValues";
 import ItemVariantDropdown from "@/components/Items/ItemVariantDropdown";
 import { Change as ItemChange } from "@/components/Items/ItemChangelogs";
 import { getCategoryColor } from "@/utils/categoryIcons";
+import NitroItemsVideoPlayer from "@/components/Ads/NitroItemsVideoPlayer";
 
 const ItemValueChart = dynamic(
   () => import("@/components/Items/ItemValueChart"),
@@ -472,6 +473,10 @@ export default function ItemDetailsClient({
                     )}
                   </button>
                 )}
+              </div>
+
+              <div className="mt-4 flex justify-center">
+                <NitroItemsVideoPlayer className="min-h-[180px] w-full max-w-xs sm:max-w-sm md:max-w-md" />
               </div>
 
               <div

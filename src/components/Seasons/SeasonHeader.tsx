@@ -1,5 +1,6 @@
 import React from "react";
 import SeasonCountdown from "./SeasonCountdown";
+import NitroSeasonVideoPlayer from "@/components/Ads/NitroSeasonVideoPlayer";
 
 interface Reward {
   id: number;
@@ -36,18 +37,21 @@ const SeasonHeader: React.FC<SeasonHeaderProps> = ({
           Roblox Jailbreak Season Archives
         </h2>
       </div>
-      <p className="text-secondary-text mb-4">
-        Explore every season of Roblox Jailbreak! Each season brings exciting
-        limited-time rewards, exclusive vehicles, and unique customization
-        items. Level up, earn XP, and unlock special prizes during these
-        time-limited events.
-      </p>
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-start">
+        <div className="flex-1 space-y-4">
+          <p className="text-secondary-text">
+            Explore every season of Roblox Jailbreak! Each season brings
+            exciting limited-time rewards, exclusive vehicles, and unique
+            customization items. Level up, earn XP, and unlock special prizes
+            during these time-limited events.
+          </p>
 
-      <div className="mb-8">
-        <SeasonCountdown
-          currentSeason={currentSeason}
-          nextSeason={nextSeason}
-        />
+          <SeasonCountdown
+            currentSeason={currentSeason}
+            nextSeason={nextSeason}
+          />
+        </div>
+        <NitroSeasonVideoPlayer className="min-h-[210px] w-full max-w-xs sm:max-w-sm self-center lg:self-start" />
       </div>
     </div>
   );
