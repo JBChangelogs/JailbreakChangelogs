@@ -4,6 +4,7 @@ import React from "react";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import ServerHeader from "@/components/Servers/ServerHeader";
 import ServerList from "@/components/Servers/ServerList";
+import VIPServerNotice from "@/components/ui/VIPServerNotice";
 import { ArrowUpIcon } from "@heroicons/react/24/outline";
 
 type SortOption =
@@ -37,6 +38,7 @@ export default function ServersPage() {
     <main className="text-primary-text min-h-screen">
       <div className="container mx-auto mb-8">
         <Breadcrumb />
+        <VIPServerNotice className="mb-6" />
         <ServerHeader />
         <ServerList sortOption={sortOption} onSortChange={setSortOption} />
       </div>

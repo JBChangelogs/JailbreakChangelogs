@@ -1,26 +1,22 @@
 "use client";
 
 import React from "react";
-import SupportersSection from "@/components/Support/SupportersSection";
 import ModernPricingSection from "@/components/Support/ModernPricingSection";
 import SupportersBanner from "@/components/Support/SupportersBanner";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
-import { Supporter } from "@/utils/api";
 
 interface SupportingClientProps {
-  supporters: Supporter[];
+  children: React.ReactNode;
 }
 
-export default function SupportingClient({
-  supporters,
-}: SupportingClientProps) {
+export default function SupportingClient({ children }: SupportingClientProps) {
   return (
     <div className="min-h-screen pb-8">
       <div className="container mx-auto px-4 sm:px-6">
         <Breadcrumb />
       </div>
       <ModernPricingSection />
-      <SupportersSection supporters={supporters} />
+      {children}
       <SupportersBanner targetId="supporters-section" />
     </div>
   );
