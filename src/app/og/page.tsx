@@ -12,6 +12,7 @@ import { checkOGFinderMaintenanceMode } from "@/utils/maintenance";
 import FeatureMaintenance from "@/theme/FeatureMaintenance";
 import { Suspense } from "react";
 import PremiumAwareLayout from "@/components/Layout/PremiumAwareLayout";
+import NitroLiveScansAd from "@/components/Ads/NitroLiveScansAd";
 
 export const dynamic = "force-dynamic";
 
@@ -43,6 +44,7 @@ export default async function OGFinderPage() {
       <PremiumAwareLayout>
         <OGFinderClient />
 
+        <NitroLiveScansAd className="mb-6" />
         <Suspense fallback={<StatsSkeleton />}>
           <StatsPolling />
         </Suspense>

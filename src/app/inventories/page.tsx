@@ -13,6 +13,7 @@ import { checkInventoryMaintenanceMode } from "@/utils/maintenance";
 import FeatureMaintenance from "@/theme/FeatureMaintenance";
 import MostScannedLeaderboardClient from "@/components/Inventory/MostScannedLeaderboardClient";
 import PremiumAwareLayout from "@/components/Layout/PremiumAwareLayout";
+import NitroLiveScansAd from "@/components/Ads/NitroLiveScansAd";
 
 export const dynamic = "force-dynamic";
 
@@ -55,6 +56,7 @@ export default async function InventoriesPage() {
       <PremiumAwareLayout>
         <InventoryCheckerClient />
 
+        <NitroLiveScansAd className="mb-6" />
         <Suspense fallback={<StatsSkeleton />}>
           <StatsPolling />
         </Suspense>

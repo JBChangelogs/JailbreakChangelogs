@@ -1945,6 +1945,10 @@ export interface QueueInfo {
   queue_length: number;
   worker_count: number;
   current_delay: number;
+  running_since: number;
+  processed_counter: {
+    total: number;
+  };
   last_dequeue: {
     user_id: string;
     data: {
