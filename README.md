@@ -6,6 +6,7 @@
 [![Dependabot Updates](https://github.com/JBChangelogs/JailbreakChangelogs/actions/workflows/dependabot/dependabot-updates/badge.svg?branch=main)](https://github.com/JBChangelogs/JailbreakChangelogs/actions/workflows/dependabot/dependabot-updates)
 [![CodeQL](https://github.com/JBChangelogs/JailbreakChangelogs/actions/workflows/github-code-scanning/codeql/badge.svg?branch=main)](https://github.com/JBChangelogs/JailbreakChangelogs/actions/workflows/github-code-scanning/codeql)
 [![Type Check](https://github.com/JBChangelogs/JailbreakChangelogs/actions/workflows/type-check.yml/badge.svg?branch=main)](https://github.com/JBChangelogs/JailbreakChangelogs/actions/workflows/type-check.yml)
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/JBChangelogs/JailbreakChangelogs)
 
 > [!CAUTION]
 > The only websites associated with this repository are the [main website](https://jailbreakchangelogs.xyz/) and the [testing website](https://testing.jailbreakchangelogs.xyz). We have no other affiliated websites or domains. Any other websites or platforms claiming to represent or provide content for this repo are not controlled by us.
