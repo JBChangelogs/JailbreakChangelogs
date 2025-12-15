@@ -142,7 +142,9 @@ export default async function RootLayout({
                 strategy="afterInteractive"
                 data-cfasync="false"
                 data-log-level="silent"
-                // data-demo="true"
+                data-demo={
+                  process.env.NODE_ENV === "development" ? "true" : undefined
+                }
               />
             </>
           )}
@@ -306,7 +308,9 @@ export default async function RootLayout({
               strategy="afterInteractive"
               data-cfasync="false"
               data-log-level="silent"
-              // data-demo="true"
+              data-demo={
+                process.env.NODE_ENV === "development" ? "true" : undefined
+              }
             />
           </>
         )}
