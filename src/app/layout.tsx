@@ -120,6 +120,19 @@ export default async function RootLayout({
           />
           {/* Google Analytics */}
           <GoogleAnalytics gaId="G-729QSV9S7B" />
+          {/* Microsoft Clarity - Placed in head per official documentation */}
+          <Script
+            id="microsoft-clarity-analytics"
+            dangerouslySetInnerHTML={{
+              __html: `
+                (function(c,l,a,r,i,t,y){
+                  c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+                  t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+                  y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+                })(window, document, "clarity", "script", "${process.env.NEXT_PUBLIC_CLARITY_PROJECT}");
+              `,
+            }}
+          />
           {/* Nitro Pay Ads - Only load if user is NOT a supporter */}
           {!isSupporter && (
             <>
@@ -224,18 +237,6 @@ export default async function RootLayout({
               <ConsentBannerWrapper />
             </ConsentProviderWrapper>
           </AppRouterCacheProvider>
-          <Script
-            id="microsoft-clarity-analytics"
-            dangerouslySetInnerHTML={{
-              __html: `
-                (function(c,l,a,r,i,t,y){
-                  c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
-                  t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
-                  y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
-                })(window, document, "clarity", "script", "${process.env.NEXT_PUBLIC_CLARITY_PROJECT}");
-              `,
-            }}
-          />
           {/* ABP Recovery Prompt - Only load if user is NOT a supporter */}
           {!isSupporter && (
             <Script
@@ -276,6 +277,19 @@ export default async function RootLayout({
         />
         {/* Google Analytics */}
         <GoogleAnalytics gaId="G-729QSV9S7B" />
+        {/* Microsoft Clarity - Placed in head per official documentation */}
+        <Script
+          id="microsoft-clarity-analytics"
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function(c,l,a,r,i,t,y){
+                c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+                t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+                y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+              })(window, document, "clarity", "script", "${process.env.NEXT_PUBLIC_CLARITY_PROJECT}");
+            `,
+          }}
+        />
         {/* Nitro Pay Ads - Only load if user is NOT a supporter */}
         {!isSupporter && (
           <>
@@ -425,18 +439,6 @@ export default async function RootLayout({
             <ConsentBannerWrapper />
           </ConsentProviderWrapper>
         </AppRouterCacheProvider>
-        <Script
-          id="microsoft-clarity-analytics"
-          dangerouslySetInnerHTML={{
-            __html: `
-              (function(c,l,a,r,i,t,y){
-                c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
-                t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
-                y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
-              })(window, document, "clarity", "script", "${process.env.NEXT_PUBLIC_CLARITY_PROJECT}");
-            `,
-          }}
-        />
         {/* ABP Recovery Prompt - Only load if user is NOT a supporter */}
         {!isSupporter && (
           <Script
