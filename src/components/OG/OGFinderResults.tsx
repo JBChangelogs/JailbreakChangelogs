@@ -504,6 +504,7 @@ export default function OGFinderResults({
           isOpen={showHistoryModal}
           onClose={closeHistoryModal}
           item={selectedItem}
+          username={robloxId ? getUsername(robloxId) : undefined}
         />
       )}
     </div>

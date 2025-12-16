@@ -522,6 +522,14 @@ export default function InventoryCheckerClient({
     [robloxUsers, initialRobloxUsers],
   );
 
+  const getUsername = useCallback(
+    (userId: string) => {
+      const user = robloxUsers[userId] || initialRobloxUsers?.[userId];
+      return user?.name || userId;
+    },
+    [robloxUsers, initialRobloxUsers],
+  );
+
   // Background loading for remaining original owners (after initial 1000)
   useEffect(() => {
     if (remainingUserIds.length === 0) return;
@@ -1090,6 +1098,7 @@ export default function InventoryCheckerClient({
                 isOpen={showHistoryModal}
                 onClose={closeHistoryModal}
                 item={selectedItem}
+                username={robloxId ? getUsername(robloxId) : undefined}
               />
             )}
           </>

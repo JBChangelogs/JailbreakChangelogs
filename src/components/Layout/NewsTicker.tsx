@@ -11,7 +11,9 @@ export default function NewsTicker() {
 
   useEffect(() => {
     // Only run on client after mount - check localStorage
-    const dismissed = safeLocalStorage.getItem("hyperpink5-giveaway-dismissed");
+    const dismissed = safeLocalStorage.getItem(
+      "robbery-tracker-announcement-dismissed",
+    );
     // eslint-disable-next-line
     setIsVisible(dismissed !== "true");
   }, []);
@@ -19,40 +21,31 @@ export default function NewsTicker() {
   const handleDismiss = () => {
     setIsVisible(false);
     // Store dismissal in localStorage to remember user's choice
-    safeLocalStorage.setItem("hyperpink5-giveaway-dismissed", "true");
+    safeLocalStorage.setItem("robbery-tracker-announcement-dismissed", "true");
   };
 
   if (!shouldShowTicker || isVisible !== true) return null;
 
   return (
-    <div className="from-blue-500/20 to-purple-500/20 bg-gradient-to-r backdrop-blur-lg">
+    <div className="from-purple-500/20 to-pink-500/20 bg-gradient-to-r backdrop-blur-lg">
       <div className="container mx-auto px-4 py-2">
         <div className="relative flex flex-col items-center justify-center gap-2 pr-8 lg:flex-row lg:gap-3 lg:pr-12">
           <div className="flex items-center gap-2">
-            <span className="text-blue-400 text-xs font-semibold">
-              🎉 ACTIVE GIVEAWAY
+            <span className="text-purple-400 text-xs font-semibold">
+              🚨 NEW FEATURE
             </span>
           </div>
 
           <div className="flex items-center gap-2">
             <span className="text-primary-text text-center text-xs">
-              We&apos;re giving out a{" "}
+              Track live robberies in real-time! Check out the new{" "}
               <Link
-                href="/item/hyperchrome/HyperPink Level 5"
-                className="text-blue-400 hover:text-blue-300 underline font-semibold"
+                href="/robberies"
+                className="text-purple-400 hover:text-purple-300 underline font-semibold"
               >
-                HyperPink Level 5
-              </Link>
-              ! Enter in our{" "}
-              <a
-                href="https://discord.com/channels/1286064050135896064/1361921979036471476/1445936271137439765"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-400 hover:text-blue-300 underline font-semibold"
-              >
-                Discord #giveaway channel
-              </a>
-              !
+                Robbery Tracker
+              </Link>{" "}
+              now in beta!
             </span>
           </div>
 

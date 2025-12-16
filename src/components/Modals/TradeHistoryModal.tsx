@@ -29,12 +29,14 @@ interface TradeHistoryModalProps {
   isOpen: boolean;
   onClose: () => void;
   item: Item | null;
+  username?: string;
 }
 
 export default function TradeHistoryModal({
   isOpen,
   onClose,
   item,
+  username,
 }: TradeHistoryModalProps) {
   const tradeHistoryUserIds = useMemo(() => {
     if (!item?.history || !Array.isArray(item.history)) {
@@ -155,7 +157,9 @@ export default function TradeHistoryModal({
             <div className="flex items-start justify-between gap-4 sm:items-center">
               <div className="min-w-0 flex-1">
                 <DialogTitle className="text-primary-text text-lg font-semibold sm:text-xl">
-                  {item.title}&apos;s Ownership History
+                  {username
+                    ? `${username}'s ${item.title} ownership history`
+                    : `${item.title}'s Ownership History`}
                 </DialogTitle>
                 {item.categoryTitle && (
                   <span

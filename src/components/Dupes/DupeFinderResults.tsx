@@ -442,6 +442,7 @@ export default function DupeFinderResults({
           isOpen={showHistoryModal}
           onClose={closeHistoryModal}
           item={selectedItem}
+          username={robloxId ? getUsername(robloxId) : undefined}
         />
       )}
     </div>
