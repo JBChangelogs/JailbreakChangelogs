@@ -469,25 +469,23 @@ export default function Header() {
         Money Leaderboard
       </Link>
       <Link
+        href="/robberies"
+        onClick={handleDrawerToggle}
+        className="px-8 py-2 cursor-pointer hover:bg-button-info-hover/10 transition-colors text-primary-text"
+      >
+        <Box className="flex flex-wrap items-center gap-1">
+          <span>Robbery Tracker</span>
+          <span className="bg-button-info text-form-button-text rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase">
+            Beta
+          </span>
+        </Box>
+      </Link>
+      <Link
         href="/servers"
         onClick={handleDrawerToggle}
         className="px-8 py-2 cursor-pointer hover:bg-button-info-hover/10 transition-colors text-primary-text"
       >
         Private Servers
-      </Link>
-      <Link
-        href="/bot"
-        onClick={handleDrawerToggle}
-        className="px-8 py-2 cursor-pointer hover:bg-button-info-hover/10 transition-colors text-primary-text"
-      >
-        Discord Bot
-      </Link>
-      <Link
-        href="/faq"
-        onClick={handleDrawerToggle}
-        className="px-8 py-2 cursor-pointer hover:bg-button-info-hover/10 transition-colors text-primary-text"
-      >
-        FAQ
       </Link>
       <Link
         href="/contributors"

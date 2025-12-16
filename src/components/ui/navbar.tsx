@@ -486,14 +486,14 @@ export const NavbarModern = ({ className }: { className?: string }) => {
             <HoveredLink href="/leaderboard/money" setActive={setActive}>
               Money Leaderboard
             </HoveredLink>
+            <HoveredLink href="/robberies" setActive={setActive}>
+              <div className="flex items-center gap-2">
+                <span>Robbery Tracker</span>
+                <Badge variant="new">Beta</Badge>
+              </div>
+            </HoveredLink>
             <HoveredLink href="/servers" setActive={setActive}>
               Private Servers
-            </HoveredLink>
-            <HoveredLink href="/bot" setActive={setActive}>
-              Discord Bot
-            </HoveredLink>
-            <HoveredLink href="/faq" setActive={setActive}>
-              FAQ
             </HoveredLink>
             <HoveredLink href="/contributors" setActive={setActive}>
               Meet the team
