@@ -19,6 +19,7 @@ import ValuesItemsGrid from "./ValuesItemsGrid";
 import ValuesErrorBoundary from "./ValuesErrorBoundary";
 import { safeLocalStorage } from "@/utils/safeStorage";
 import NitroValuesVideoPlayer from "@/components/Ads/NitroValuesVideoPlayer";
+import NitroValuesRailAd from "@/components/Ads/NitroValuesRailAd";
 
 interface ValuesClientProps {
   itemsPromise: Promise<Item[]>;
@@ -230,6 +231,7 @@ export default function ValuesClient({
 
   return (
     <ValuesErrorBoundary>
+      <NitroValuesRailAd />
       <style jsx>{`
         .sidebar-ad-container {
           width: 320px;

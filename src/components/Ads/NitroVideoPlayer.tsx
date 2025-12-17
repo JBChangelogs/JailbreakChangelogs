@@ -88,6 +88,9 @@ export default function NitroVideoPlayer() {
         },
         mediaQuery:
           "(min-width: 1025px), (min-width: 768px) and (max-width: 1024px), (min-width: 320px) and (max-width: 767px)",
+        video: {
+          mobile: "compact",
+        },
       })
       .catch(() => {
         createdRef.current = false;
