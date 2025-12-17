@@ -10,7 +10,7 @@ interface AdBlockRecoveryProps {
 const AdBlockRecovery = ({ isSupporter }: AdBlockRecoveryProps) => {
   const pathname = usePathname();
 
-  if (isSupporter || pathname === "/supporting") {
+  if (isSupporter || pathname === "/supporting" || pathname === "/redeem") {
     return null;
   }
 
