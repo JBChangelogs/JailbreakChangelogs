@@ -171,7 +171,9 @@ export default function ItemValues({
           <span
             className={`${getTrendColor(trend || "N/A")} inline-block rounded-lg px-3 py-2 text-lg font-bold`}
           >
-            {!trend || trend === "Unknown" ? "Unknown" : trend}
+            {!trend || trend === "Unknown" || trend === "N/A"
+              ? "Unknown"
+              : trend}
           </span>
         </div>
       </div>

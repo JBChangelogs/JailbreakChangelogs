@@ -708,8 +708,8 @@ export async function fetchUsersBatch(userIds: string[]) {
     );
 
     return userMap;
-  } catch (err) {
-    console.error("[SERVER] Error fetching users batch:", err);
+  } catch {
+    // Silently fail to prevent Railway log spam - return empty user map
     return {};
   }
 }

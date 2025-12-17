@@ -241,9 +241,20 @@ export default function ChangelogDetailsClient({
       if (key === "trend") return "Trend";
       if (key === "name") return "Name";
       if (key === "price") return "Price";
+      if (key === "is_seasonal") return "Seasonal Status";
+      if (key === "is_limited") return "Limited Status";
+      if (key === "tradable") return "Tradability";
+      if (key === "health") return "Health";
+      if (key === "type") return "Type";
+
+      // For any other field, format the key name nicely
+      return key
+        .split("_")
+        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(" ");
     }
 
-    return "Value";
+    return "Field";
   };
 
   // Filter changes based on search query, selected type, and suggestion type

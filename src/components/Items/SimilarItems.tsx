@@ -47,33 +47,37 @@ const SimilarItems = ({
     (item1: ItemDetails, item2: ItemDetails): number => {
       let score = 0;
 
-      // Value range similarity (50%)
+      // Tradability matching (40%) - Critical for proper comparison
+      const isTradable1 = item1.tradable === 1 || item1.tradable === true;
+      const isTradable2 = item2.tradable === 1 || item2.tradable === true;
+
+      if (isTradable1 === isTradable2) {
+        score += 0.4; // Both tradable or both non-tradable
+      } else {
+        // Heavy penalty for tradability mismatch - different categories entirely
+        score -= 0.3;
+      }
+
+      // Value range similarity (30%) - Adjusted weight
       const value1 = parseValue(item1.cash_value);
       const value2 = parseValue(item2.cash_value);
 
-      if (value1 > 0 && value2 > 0) {
+      // Handle N/A values properly
+      if (item1.cash_value === "N/A" && item2.cash_value === "N/A") {
+        score += 0.3; // Both have N/A values - perfect match
+      } else if (value1 > 0 && value2 > 0) {
         const ratio = Math.min(value1, value2) / Math.max(value1, value2);
         if (ratio >= 0.9)
-          score += 0.5; // Within 10%
+          score += 0.3; // Within 10%
         else if (ratio >= 0.7)
-          score += 0.3; // Within 30%
+          score += 0.2; // Within 30%
         else if (ratio >= 0.5) score += 0.1; // Within 50%
-      }
-
-      // Demand level similarity (30%)
-      const demand1Index = demandOrder.indexOf(
-        item1.demand as (typeof demandOrder)[number],
-      );
-      const demand2Index = demandOrder.indexOf(
-        item2.demand as (typeof demandOrder)[number],
-      );
-      if (demand1Index !== -1 && demand2Index !== -1) {
-        const demandDiff = Math.abs(demand1Index - demand2Index);
-        if (demandDiff === 0)
-          score += 0.3; // Exact match
-        else if (demandDiff === 1)
-          score += 0.2; // One level difference
-        else if (demandDiff === 2) score += 0.1; // Two levels difference
+      } else if (
+        (item1.cash_value === "N/A") !==
+        (item2.cash_value === "N/A")
+      ) {
+        // One has N/A, other has value - penalty for mismatch
+        score -= 0.1;
       }
 
       // Limited/Seasonal status similarity (20%)
@@ -88,7 +92,27 @@ const SimilarItems = ({
         score += 0.2;
       }
 
-      return score;
+      // Demand level similarity (10%) - Reduced weight since many items have N/A
+      const demand1Index = demandOrder.indexOf(
+        item1.demand as (typeof demandOrder)[number],
+      );
+      const demand2Index = demandOrder.indexOf(
+        item2.demand as (typeof demandOrder)[number],
+      );
+
+      if (item1.demand === "N/A" && item2.demand === "N/A") {
+        score += 0.1; // Both have N/A demand
+      } else if (demand1Index !== -1 && demand2Index !== -1) {
+        const demandDiff = Math.abs(demand1Index - demand2Index);
+        if (demandDiff === 0)
+          score += 0.1; // Exact match
+        else if (demandDiff === 1) score += 0.05; // One level difference
+      } else if ((item1.demand === "N/A") !== (item2.demand === "N/A")) {
+        // One has N/A, other has demand - slight penalty
+        score -= 0.05;
+      }
+
+      return Math.max(0, score); // Ensure score doesn't go negative
     },
     [],
   );
