@@ -41,15 +41,6 @@ export default function RobberyCard({ robbery }: RobberyCardProps) {
     robbery.progress !== null &&
     robbery.progress > 0.6;
 
-  useEffect(() => {
-    if (!relativeTime) {
-      console.log(
-        `[RobberyCard] No relative time for ${robbery.marker_name}. Timestamp:`,
-        robbery.timestamp,
-      );
-    }
-  }, [relativeTime, robbery.marker_name, robbery.timestamp]);
-
   // Handle cargo plane countdown
   useEffect(() => {
     if (robbery.marker_name === "CargoPlane" && robbery.metadata?.plane_time) {
