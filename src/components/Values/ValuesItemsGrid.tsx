@@ -1,10 +1,11 @@
 "use client";
 
-import { useRef } from "react";
-import { useVirtualizer } from "@tanstack/react-virtual";
+import { useState } from "react";
+import { Pagination } from "@mui/material";
 import ItemCard from "@/components/Items/ItemCard";
 import { Item } from "@/types";
 import { getEffectiveCashValue } from "@/utils/values";
+import NitroGridAd from "@/components/Ads/NitroGridAd";
 import React from "react";
 
 interface ValuesItemsGridProps {
@@ -34,7 +35,8 @@ export default function ValuesItemsGrid({
   valueSort,
   debouncedSearchTerm,
 }: ValuesItemsGridProps) {
-  const parentRef = useRef<HTMLDivElement>(null);
+  const [page, setPage] = useState(1);
+  const itemsPerPage = 24;
 
   const getFilterDisplayName = (filterSort: string): string => {
     const filterMap: Record<string, string> = {
@@ -62,6 +64,32 @@ export default function ValuesItemsGrid({
     );
   };
 
+  // State derivation to reset page when filters change
+  const [prevFilters, setPrevFilters] = useState({
+    filterSort,
+    valueSort,
+    debouncedSearchTerm,
+    appliedMinValue,
+    appliedMaxValue,
+  });
+
+  if (
+    prevFilters.filterSort !== filterSort ||
+    prevFilters.valueSort !== valueSort ||
+    prevFilters.debouncedSearchTerm !== debouncedSearchTerm ||
+    prevFilters.appliedMinValue !== appliedMinValue ||
+    prevFilters.appliedMaxValue !== appliedMaxValue
+  ) {
+    setPrevFilters({
+      filterSort,
+      valueSort,
+      debouncedSearchTerm,
+      appliedMinValue,
+      appliedMaxValue,
+    });
+    setPage(1);
+  }
+
   const parseNumericValue = (value: string | null): number => {
     if (!value || value === "N/A") return -1;
     const lower = value.toLowerCase();
@@ -83,33 +111,19 @@ export default function ValuesItemsGrid({
           return cash >= appliedMinValue && cash <= appliedMaxValue;
         });
 
-  // Organize items into rows for grid virtualization
-  // Each row contains multiple items based on screen size
-  const getItemsPerRow = () => {
-    if (typeof window === "undefined") return 4; // Default for SSR
-    const width = window.innerWidth;
-    if (width < 375) return 1;
-    if (width < 768) return 2;
-    if (width < 1024) return 2;
-    if (width < 1280) return 2;
-    return 4;
+  const totalPages = Math.ceil(rangeFilteredItems.length / itemsPerPage);
+  const displayedItems = rangeFilteredItems.slice(
+    (page - 1) * itemsPerPage,
+    page * itemsPerPage,
+  );
+
+  const handlePageChange = (
+    event: React.ChangeEvent<unknown>,
+    value: number,
+  ) => {
+    setPage(value);
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
-
-  const itemsPerRow = getItemsPerRow();
-  const rows: Item[][] = [];
-  for (let i = 0; i < rangeFilteredItems.length; i += itemsPerRow) {
-    rows.push(rangeFilteredItems.slice(i, i + itemsPerRow));
-  }
-
-  // TanStack Virtual setup for performance with large item datasets
-  // Only renders visible rows (~10-15 at a time) for 60FPS scrolling
-  // eslint-disable-next-line react-hooks/incompatible-library
-  const virtualizer = useVirtualizer({
-    count: rows.length,
-    getScrollElement: () => parentRef.current,
-    estimateSize: () => 300, // Simple estimate - let TanStack measure actual content
-    overscan: 2, // Render 2 extra rows above/below viewport for smooth scrolling
-  });
 
   const getNoItemsMessage = () => {
     const hasCategoryFilter = filterSort !== "name-all-items";
@@ -175,25 +189,58 @@ export default function ValuesItemsGrid({
       <div className="mb-4 flex flex-col gap-4">
         <p className="text-secondary-text">
           {debouncedSearchTerm
-            ? `Found ${rangeFilteredItems.length} ${rangeFilteredItems.length === 1 ? "item" : "items"} matching "${debouncedSearchTerm}"${filterSort !== "name-all-items" ? ` in ${getFilterDisplayName(filterSort)}` : ""}`
-            : `Total ${filterSort !== "name-all-items" ? getFilterDisplayName(filterSort) : "Items"}: ${rangeFilteredItems.length}`}
+            ? `Found ${rangeFilteredItems.length} ${
+                rangeFilteredItems.length === 1 ? "item" : "items"
+              } matching "${debouncedSearchTerm}"${
+                filterSort !== "name-all-items"
+                  ? ` in ${getFilterDisplayName(filterSort)}`
+                  : ""
+              }`
+            : `Total ${
+                filterSort !== "name-all-items"
+                  ? getFilterDisplayName(filterSort)
+                  : "Items"
+              }: ${rangeFilteredItems.length}`}
         </p>
+        {totalPages > 1 && (
+          <div className="flex justify-center">
+            <Pagination
+              count={totalPages}
+              page={page}
+              onChange={handlePageChange}
+              sx={{
+                "& .MuiPaginationItem-root": {
+                  color: "var(--color-primary-text)",
+                  "&.Mui-selected": {
+                    backgroundColor: "var(--color-button-info)",
+                    color: "var(--color-form-button-text)",
+                    "&:hover": {
+                      backgroundColor: "var(--color-button-info-hover)",
+                    },
+                  },
+                  "&:hover": {
+                    backgroundColor: "var(--color-quaternary-bg)",
+                  },
+                },
+                "& .MuiPaginationItem-icon": {
+                  color: "var(--color-primary-text)",
+                },
+              }}
+            />
+          </div>
+        )}
       </div>
 
-      {/* Virtualized items container with fixed height for performance */}
-      <div
-        ref={parentRef}
-        className="scrollbar-thin scrollbar-track-transparent scrollbar-thumb-border-primary hover:scrollbar-thumb-border-focus mb-8 h-[60rem] overflow-y-auto"
-        style={{
-          scrollbarWidth: "thin",
-          scrollbarColor: "var(--color-border-primary) transparent",
-        }}
-      >
-        {rangeFilteredItems.length === 0 ? (
-          <div className="bg-secondary-bg border-border-primary hover:border-border-focus rounded-lg border p-8 text-center">
+      <div className="mb-8 grid grid-cols-1 gap-4 min-[375px]:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        {displayedItems.length === 0 ? (
+          <div className="bg-secondary-bg border-border-primary hover:border-border-focus col-span-full mb-4 rounded-lg border p-8 text-center">
             <p className="text-secondary-text text-lg">
               {rangeFilteredItems.length === 0 && items.length > 0
-                ? `No items found in the selected value range (${appliedMinValue.toLocaleString()} - ${appliedMaxValue >= MAX_VALUE_RANGE ? `${MAX_VALUE_RANGE.toLocaleString()}+` : appliedMaxValue.toLocaleString()})`
+                ? `No items found in the selected value range (${appliedMinValue.toLocaleString()} - ${
+                    appliedMaxValue >= MAX_VALUE_RANGE
+                      ? `${MAX_VALUE_RANGE.toLocaleString()}+`
+                      : appliedMaxValue.toLocaleString()
+                  })`
                 : getNoItemsMessage()}
             </p>
             {rangeFilteredItems.length === 0 && items.length > 0 && (
@@ -212,56 +259,52 @@ export default function ValuesItemsGrid({
             </button>
           </div>
         ) : (
-          <div
-            style={{
-              height: `${virtualizer.getTotalSize()}px`,
-              width: "100%",
-              position: "relative",
-            }}
-          >
-            {virtualizer.getVirtualItems().map((virtualRow) => {
-              const rowItems = rows[virtualRow.index];
-              const rowIndex = virtualRow.index;
-
-              return (
-                <div
-                  key={`row-${rowIndex}`}
-                  data-index={virtualRow.index}
-                  ref={virtualizer.measureElement}
-                  style={{
-                    position: "absolute",
-                    top: 0,
-                    left: 0,
-                    width: "100%",
-                    transform: `translateY(${virtualRow.start}px)`,
-                  }}
-                >
-                  <div
-                    className="mb-4 grid gap-4"
-                    style={{
-                      gridTemplateColumns: `repeat(${itemsPerRow}, 1fr)`,
-                    }}
-                  >
-                    {rowItems.map((item: Item) => {
-                      return (
-                        <React.Fragment key={item.id}>
-                          <ItemCard
-                            item={item}
-                            isFavorited={favorites.includes(item.id)}
-                            onFavoriteChange={(fav) => {
-                              onFavoriteChange(item.id, fav);
-                            }}
-                          />
-                        </React.Fragment>
-                      );
-                    })}
-                  </div>
+          displayedItems.map((item, index) => (
+            <React.Fragment key={item.id}>
+              <ItemCard
+                item={item}
+                isFavorited={favorites.includes(item.id)}
+                onFavoriteChange={(fav) => {
+                  onFavoriteChange(item.id, fav);
+                }}
+              />
+              {(index + 1) % 6 === 0 && (
+                <div className="col-span-full flex justify-center py-4">
+                  <NitroGridAd adId={`np-value-grid-${index}`} />
                 </div>
-              );
-            })}
-          </div>
+              )}
+            </React.Fragment>
+          ))
         )}
       </div>
+
+      {totalPages > 1 && (
+        <div className="mt-8 flex justify-center">
+          <Pagination
+            count={totalPages}
+            page={page}
+            onChange={handlePageChange}
+            sx={{
+              "& .MuiPaginationItem-root": {
+                color: "var(--color-primary-text)",
+                "&.Mui-selected": {
+                  backgroundColor: "var(--color-button-info)",
+                  color: "var(--color-form-button-text)",
+                  "&:hover": {
+                    backgroundColor: "var(--color-button-info-hover)",
+                  },
+                },
+                "&:hover": {
+                  backgroundColor: "var(--color-quaternary-bg)",
+                },
+              },
+              "& .MuiPaginationItem-icon": {
+                color: "var(--color-primary-text)",
+              },
+            }}
+          />
+        </div>
+      )}
     </>
   );
 }
