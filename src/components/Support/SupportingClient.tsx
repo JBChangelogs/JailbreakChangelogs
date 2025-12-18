@@ -14,6 +14,17 @@ export default function SupportingClient({ children }: SupportingClientProps) {
     <div className="min-h-screen pb-8">
       <div className="container mx-auto px-4 sm:px-6">
         <Breadcrumb />
+        <div className="border-border-primary bg-button-info/10 mt-4 flex items-start gap-4 rounded-lg border p-4 shadow-sm">
+          <div className="relative z-10">
+            <span className="text-primary-text text-base font-bold">
+              Update
+            </span>
+            <div className="text-secondary-text mt-1">
+              As of December 18th 2025, Supporter Tier 1 no longer includes the
+              Hide Ads perk.
+            </div>
+          </div>
+        </div>
       </div>
       <ModernPricingSection />
       {children}

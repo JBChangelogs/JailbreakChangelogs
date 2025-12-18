@@ -4,20 +4,16 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { INVENTORY_WS_URL } from "@/utils/api";
 
 /**
- * WebSocket hook for tracking robbery status
- * Connects to /tracker endpoint and receives real-time robbery updates
+ * WebSocket hook for tracking airdrop status
+ * Connects to /tracker?type=airdrops endpoint and receives real-time airdrop updates
  */
 
-export interface RobberyData {
-  marker_name: string;
-  name: string;
-  status: number;
-  progress: number | null;
-  metadata: {
-    casino_code?: string;
-    plane_time?: number;
-  } | null;
-  job_id: string;
+export interface AirdropData {
+  location: "CactusValley" | "Dunes";
+  color: "Brown" | "Blue" | "Red";
+  x: number;
+  z: number;
+  gone_at: number;
   server_time: number;
   timestamp: number;
   server?: {
@@ -38,16 +34,16 @@ export interface RobberyData {
   };
 }
 
-interface UseRobberyTrackerWebSocketReturn {
-  robberies: RobberyData[];
+interface UseRobberyTrackerAirdropsWebSocketReturn {
+  airdrops: AirdropData[];
   isConnected: boolean;
   error: string | undefined;
 }
 
-export function useRobberyTrackerWebSocket(
+export function useRobberyTrackerAirdropsWebSocket(
   enabled: boolean = true,
-): UseRobberyTrackerWebSocketReturn {
-  const [robberies, setRobberies] = useState<RobberyData[]>([]);
+): UseRobberyTrackerAirdropsWebSocketReturn {
+  const [airdrops, setAirdrops] = useState<AirdropData[]>([]);
   const [isConnected, setIsConnected] = useState(false);
   const [error, setError] = useState<string | undefined>();
 
@@ -77,14 +73,14 @@ export function useRobberyTrackerWebSocket(
     }
 
     try {
-      const wsUrl = `${INVENTORY_WS_URL}/tracker`;
-      console.log("[ROBBERY TRACKER WS] Connecting to:", wsUrl);
+      const wsUrl = `${INVENTORY_WS_URL}/tracker?type=airdrops`;
+      console.log("[AIRDROP TRACKER WS] Connecting to:", wsUrl);
 
       const ws = new WebSocket(wsUrl);
       wsRef.current = ws;
 
       ws.addEventListener("open", () => {
-        console.log("[ROBBERY TRACKER WS] Connected");
+        console.log("[AIRDROP TRACKER WS] Connected");
         setIsConnected(true);
         setError(undefined);
         reconnectAttemptsRef.current = 0;
@@ -95,7 +91,7 @@ export function useRobberyTrackerWebSocket(
             try {
               wsRef.current.send(JSON.stringify({ action: "ping" }));
             } catch (err) {
-              console.error("[ROBBERY TRACKER WS] Ping send failed:", err);
+              console.error("[AIRDROP TRACKER WS] Ping send failed:", err);
             }
           }
         }, 30000); // Ping every 30 seconds
@@ -104,18 +100,18 @@ export function useRobberyTrackerWebSocket(
       ws.addEventListener("message", (event) => {
         try {
           const data = JSON.parse(event.data);
-          // Action map handling
-          if (data.action === "recent_robberies" && data.data) {
-            setRobberies(data.data);
+          // Action map handling for airdrops
+          if (data.action === "recent_airdrops" && data.data) {
+            setAirdrops(data.data);
           }
         } catch (err) {
-          console.error("[ROBBERY TRACKER WS] Parse error:", err);
+          console.error("[AIRDROP TRACKER WS] Parse error:", err);
           setError("Failed to parse server response");
         }
       });
 
       ws.addEventListener("close", (event) => {
-        console.log("[ROBBERY TRACKER WS] Closed:", event.code, event.reason);
+        console.log("[AIRDROP TRACKER WS] Closed:", event.code, event.reason);
         setIsConnected(false);
 
         if (pingIntervalRef.current) {
@@ -136,7 +132,7 @@ export function useRobberyTrackerWebSocket(
             reconnectAttemptsRef.current++;
             const delay = getReconnectDelay(reconnectAttemptsRef.current);
             console.log(
-              `[ROBBERY TRACKER WS] Reconnecting in ${delay}ms... (${reconnectAttemptsRef.current}/${maxAttempts})`,
+              `[AIRDROP TRACKER WS] Reconnecting in ${delay}ms... (${reconnectAttemptsRef.current}/${maxAttempts})`,
             );
 
             reconnectTimeoutRef.current = setTimeout(() => {
@@ -151,19 +147,19 @@ export function useRobberyTrackerWebSocket(
       });
 
       ws.addEventListener("error", (err) => {
-        console.error("[ROBBERY TRACKER WS] Error:", err);
+        console.error("[AIRDROP TRACKER WS] Error:", err);
         setError("Connection error");
         setIsConnected(false);
       });
     } catch (err) {
-      console.error("[ROBBERY TRACKER WS] Connection error:", err);
+      console.error("[AIRDROP TRACKER WS] Connection error:", err);
       setError("Connection error");
     }
   }, [enabled]);
 
   const disconnect = useCallback(() => {
     if (wsRef.current) {
-      console.log("[ROBBERY TRACKER WS] Disconnecting (Idle/Hidden/Unmount)");
+      console.log("[AIRDROP TRACKER WS] Disconnecting (Idle/Hidden/Unmount)");
       wsRef.current.close(1000, "Client disconnect");
       wsRef.current = null;
     }
@@ -176,8 +172,8 @@ export function useRobberyTrackerWebSocket(
       reconnectTimeoutRef.current = null;
     }
     setIsConnected(false);
-    // Clear robberies to prevent showing stale data on reconnect
-    setRobberies([]);
+    // Clear airdrops to prevent showing stale data on reconnect
+    setAirdrops([]);
   }, []);
 
   // Refs for state tracking without re-renders
@@ -205,13 +201,13 @@ export function useRobberyTrackerWebSocket(
       // If user was idle, they are now active
       if (isIdleRef.current) {
         isIdleRef.current = false;
-        console.log("[ROBBERY TRACKER WS] User active - reconnecting");
+        console.log("[AIRDROP TRACKER WS] User active - reconnecting");
         connect();
       }
 
       // Set new timeout
       idleTimeoutRef.current = setTimeout(() => {
-        console.log("[ROBBERY TRACKER WS] User idle - disconnecting");
+        console.log("[AIRDROP TRACKER WS] User idle - disconnecting");
         isIdleRef.current = true;
         disconnect();
       }, IDLE_TIMEOUT);
@@ -220,7 +216,7 @@ export function useRobberyTrackerWebSocket(
     // Handle page visibility changes
     const handleVisibilityChange = () => {
       if (document.hidden) {
-        console.log("[ROBBERY TRACKER WS] Tab hidden - disconnecting");
+        console.log("[AIRDROP TRACKER WS] Tab hidden - disconnecting");
         isVisibleRef.current = false;
         disconnect();
         // Clear idle timer when tab is hidden
@@ -229,7 +225,7 @@ export function useRobberyTrackerWebSocket(
           idleTimeoutRef.current = null;
         }
       } else {
-        console.log("[ROBBERY TRACKER WS] Tab visible - reconnecting");
+        console.log("[AIRDROP TRACKER WS] Tab visible - reconnecting");
         isVisibleRef.current = true;
         isIdleRef.current = false;
         connect();
@@ -277,7 +273,7 @@ export function useRobberyTrackerWebSocket(
   }, [connect, disconnect, enabled]);
 
   return {
-    robberies,
+    airdrops,
     isConnected,
     error,
   };

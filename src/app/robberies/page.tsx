@@ -1,8 +1,11 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
+import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import { useRobberyTrackerWebSocket } from "@/hooks/useRobberyTrackerWebSocket";
+import { useRobberyTrackerMansionsWebSocket } from "@/hooks/useRobberyTrackerMansionsWebSocket";
+import { useRobberyTrackerAirdropsWebSocket } from "@/hooks/useRobberyTrackerAirdropsWebSocket";
 import {
   ClockIcon,
   ExclamationTriangleIcon,
@@ -10,6 +13,7 @@ import {
   XMarkIcon,
 } from "@heroicons/react/24/outline";
 import RobberyCard from "@/components/RobberyTracker/RobberyCard";
+import AirdropCard from "@/components/RobberyTracker/AirdropCard";
 import RobberyTrackerAuthWrapper from "@/components/RobberyTracker/RobberyTrackerAuthWrapper";
 import { Icon } from "@iconify/react";
 import ExperimentalFeatureBanner from "@/components/ui/ExperimentalFeatureBanner";
@@ -45,20 +49,78 @@ const ROBBERY_TYPE_TABS = ROBBERY_TYPES.filter(
   .sort((a, b) => a.name.localeCompare(b.name));
 
 function RobberyTrackerContent() {
-  const { robberies, isConnected, error } = useRobberyTrackerWebSocket();
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
+
+  const activeView = useMemo(() => {
+    if (searchParams.has("mansions")) return "mansions";
+    if (searchParams.has("airdrops")) return "airdrops";
+    return "robberies";
+  }, [searchParams]);
+
+  const handleViewChange = (view: "robberies" | "mansions" | "airdrops") => {
+    let query = "";
+    if (view === "mansions") query = "?mansions";
+    else if (view === "airdrops") query = "?airdrops";
+    router.push(`${pathname}${query}`);
+  };
+
+  // Connect to WebSocket endpoints conditionally based on active view
+  const {
+    robberies,
+    isConnected: robberiesConnected,
+    error: robberiesError,
+  } = useRobberyTrackerWebSocket(activeView === "robberies");
+
+  const {
+    mansions,
+    isConnected: mansionsConnected,
+    error: mansionsError,
+  } = useRobberyTrackerMansionsWebSocket(activeView === "mansions");
+
+  const {
+    airdrops,
+    isConnected: airdropsConnected,
+    error: airdropsError,
+  } = useRobberyTrackerAirdropsWebSocket(activeView === "airdrops");
+
+  // Determine active connection status and data presence
+  const isConnected =
+    activeView === "robberies"
+      ? robberiesConnected
+      : activeView === "mansions"
+        ? mansionsConnected
+        : airdropsConnected;
+
+  const error =
+    activeView === "robberies"
+      ? robberiesError
+      : activeView === "mansions"
+        ? mansionsError
+        : airdropsError;
+
+  const hasData =
+    activeView === "robberies"
+      ? robberies.length > 0
+      : activeView === "mansions"
+        ? mansions.length > 0
+        : airdrops.length > 0;
   const [searchQuery, setSearchQuery] = useState("");
   const [nameSort, setNameSort] = useState<NameSort>("a-z");
   const [timeSort, setTimeSort] = useState<TimeSort>("newest");
   const [activeRobberyType, setActiveRobberyType] = useState<string | null>(
     null,
   );
+  const [activeAirdropLocation, setActiveAirdropLocation] = useState<
+    "all" | "CactusValley" | "Dunes"
+  >("all");
 
   // Filter and sort robberies
   const filteredRobberies = useMemo(() => {
-    // First filter by robbery type
+    // specific filtering for robberies
     let filtered = robberies;
     if (activeRobberyType) {
-      // Special case: Bank tab shows both Bank and Bank2
       if (activeRobberyType === "Bank") {
         filtered = filtered.filter(
           (robbery) =>
@@ -71,37 +133,99 @@ function RobberyTrackerContent() {
       }
     }
 
-    // Then filter by search query
-    filtered = filtered.filter((robbery) =>
-      robbery.name.toLowerCase().includes(searchQuery.toLowerCase()),
-    );
+    // Apply search query
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter((robbery) =>
+        robbery.name.toLowerCase().includes(query),
+      );
+    }
 
-    // Then sort based on selected sort options
     return filtered.sort((a, b) => {
-      // Primary sort: by timestamp
-      const timeComparison =
-        timeSort === "newest"
-          ? b.timestamp - a.timestamp
-          : a.timestamp - b.timestamp;
-
-      // Secondary sort: by name (if timestamps are equal)
-      if (timeComparison === 0) {
-        return nameSort === "a-z"
-          ? a.name.localeCompare(b.name)
-          : b.name.localeCompare(a.name);
+      // Sort by status first (Open -> In Progress -> Closed)
+      if (a.status !== b.status) {
+        return a.status - b.status;
       }
-
-      return timeComparison;
+      if (timeSort === "newest") {
+        return b.timestamp - a.timestamp;
+      }
+      return a.timestamp - b.timestamp;
     });
-  }, [robberies, searchQuery, nameSort, timeSort, activeRobberyType]);
+  }, [robberies, activeRobberyType, searchQuery, timeSort]);
+
+  // Filter and sort Mansions (simpler as no type filtering)
+  const filteredMansions = useMemo(() => {
+    let filtered = mansions;
+
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter((robbery) =>
+        robbery.name.toLowerCase().includes(query),
+      );
+    }
+
+    return filtered.sort((a, b) => {
+      if (a.status !== b.status) return a.status - b.status;
+      if (timeSort === "newest") return b.timestamp - a.timestamp;
+      return a.timestamp - b.timestamp;
+    });
+  }, [mansions, searchQuery, timeSort]);
 
   // Calculate robbery statistics
   const robberyStats = useMemo(() => {
-    const total = filteredRobberies.length;
-    const open = filteredRobberies.filter((r) => r.status === 1).length;
-    const inProgress = filteredRobberies.filter((r) => r.status === 2).length;
-    return { total, open, inProgress };
-  }, [filteredRobberies]);
+    return {
+      total: robberies.length,
+      open: robberies.filter((r) => r.status === 1).length,
+      inProgress: robberies.filter((r) => r.status === 2).length,
+    };
+  }, [robberies]);
+
+  // Calculate mansion statistics
+  const mansionStats = useMemo(() => {
+    return {
+      total: mansions.length,
+      open: mansions.filter((r) => r.status === 1).length,
+      ready: mansions.filter((r) => r.status === 2).length,
+    };
+  }, [mansions]);
+
+  // Filter airdrops by location
+  const filteredAirdrops = useMemo(() => {
+    let filtered = airdrops;
+
+    // Filter by location
+    if (activeAirdropLocation !== "all") {
+      filtered = filtered.filter(
+        (airdrop) => airdrop.location === activeAirdropLocation,
+      );
+    }
+
+    // Apply search query
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter(
+        (airdrop) =>
+          airdrop.location.toLowerCase().includes(query) ||
+          airdrop.color.toLowerCase().includes(query),
+      );
+    }
+
+    // Sort by timestamp
+    return filtered.sort((a, b) =>
+      timeSort === "newest"
+        ? b.timestamp - a.timestamp
+        : a.timestamp - b.timestamp,
+    );
+  }, [airdrops, activeAirdropLocation, searchQuery, timeSort]);
+
+  // Calculate airdrop statistics
+  const airdropStats = useMemo(() => {
+    const total = filteredAirdrops.length;
+    const easy = filteredAirdrops.filter((a) => a.color === "Brown").length;
+    const medium = filteredAirdrops.filter((a) => a.color === "Blue").length;
+    const hard = filteredAirdrops.filter((a) => a.color === "Red").length;
+    return { total, easy, medium, hard };
+  }, [filteredAirdrops]);
 
   return (
     <main className="text-primary-text min-h-screen">
@@ -181,30 +305,88 @@ function RobberyTrackerContent() {
 
         {/* Status Bar */}
         <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          {/* Robbery Statistics */}
-          {robberyStats.total > 0 && (
-            <div className="flex flex-wrap items-center gap-3 text-sm">
-              <span className="text-primary-text font-semibold">
-                {robberyStats.total}{" "}
-                {robberyStats.total === 1 ? "Robbery" : "Robberies"}
-              </span>
-              <div className="flex items-center gap-2 text-xs">
-                {robberyStats.open > 0 && (
-                  <span className="text-secondary-text">
-                    {robberyStats.open} Open
+          {/* Statistics - Conditional based on view */}
+          {/* Statistics - Conditional based on view */}
+          {activeView === "robberies"
+            ? robberyStats.total > 0 && (
+                <div className="flex flex-wrap items-center gap-3 text-sm">
+                  <span className="text-primary-text font-semibold">
+                    {robberyStats.total}{" "}
+                    {robberyStats.total === 1 ? "Robbery" : "Robberies"}
                   </span>
+                  <div className="flex items-center gap-2 text-xs">
+                    {robberyStats.open > 0 && (
+                      <span className="text-secondary-text">
+                        {robberyStats.open} Open
+                      </span>
+                    )}
+                    {robberyStats.open > 0 && robberyStats.inProgress > 0 && (
+                      <span className="text-tertiary-text">•</span>
+                    )}
+                    {robberyStats.inProgress > 0 && (
+                      <span className="text-secondary-text">
+                        {robberyStats.inProgress} In Progress
+                      </span>
+                    )}
+                  </div>
+                </div>
+              )
+            : activeView === "mansions"
+              ? mansionStats.total > 0 && (
+                  <div className="flex flex-wrap items-center gap-3 text-sm">
+                    <span className="text-primary-text font-semibold">
+                      {mansionStats.total}{" "}
+                      {mansionStats.total === 1 ? "Mansion" : "Mansions"}
+                    </span>
+                    <div className="flex items-center gap-2 text-xs">
+                      {mansionStats.open > 0 && (
+                        <span className="text-secondary-text">
+                          {mansionStats.open} Open
+                        </span>
+                      )}
+                      {mansionStats.open > 0 && mansionStats.ready > 0 && (
+                        <span className="text-tertiary-text">•</span>
+                      )}
+                      {mansionStats.ready > 0 && (
+                        <span className="text-secondary-text">
+                          {mansionStats.ready} Ready to Open
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                )
+              : airdropStats.total > 0 && (
+                  <div className="flex flex-wrap items-center gap-3 text-sm">
+                    <span className="text-primary-text font-semibold">
+                      {airdropStats.total}{" "}
+                      {airdropStats.total === 1 ? "Airdrop" : "Airdrops"}
+                    </span>
+                    <div className="flex items-center gap-2 text-xs">
+                      {airdropStats.easy > 0 && (
+                        <span className="text-secondary-text">
+                          {airdropStats.easy} Easy
+                        </span>
+                      )}
+                      {airdropStats.easy > 0 && airdropStats.medium > 0 && (
+                        <span className="text-tertiary-text">•</span>
+                      )}
+                      {airdropStats.medium > 0 && (
+                        <span className="text-secondary-text">
+                          {airdropStats.medium} Medium
+                        </span>
+                      )}
+                      {(airdropStats.easy > 0 || airdropStats.medium > 0) &&
+                        airdropStats.hard > 0 && (
+                          <span className="text-tertiary-text">•</span>
+                        )}
+                      {airdropStats.hard > 0 && (
+                        <span className="text-secondary-text">
+                          {airdropStats.hard} Hard
+                        </span>
+                      )}
+                    </div>
+                  </div>
                 )}
-                {robberyStats.open > 0 && robberyStats.inProgress > 0 && (
-                  <span className="text-tertiary-text">•</span>
-                )}
-                {robberyStats.inProgress > 0 && (
-                  <span className="text-secondary-text">
-                    {robberyStats.inProgress} In Progress
-                  </span>
-                )}
-              </div>
-            </div>
-          )}
 
           {/* Connection Status */}
           <div className="flex items-center gap-2">
@@ -230,8 +412,8 @@ function RobberyTrackerContent() {
           </div>
         )}
 
-        {/* Loading State - only show when no robberies and no error */}
-        {!isConnected && !error && robberies.length === 0 && (
+        {/* Loading State - only show when no data and no error */}
+        {!isConnected && !error && !hasData && (
           <div className="flex items-center justify-center py-20">
             <div className="text-center">
               <div className="mb-4 inline-block h-12 w-12 animate-spin rounded-full border-4 border-primary-border border-t-primary-accent" />
@@ -242,114 +424,283 @@ function RobberyTrackerContent() {
           </div>
         )}
 
-        {/* Robberies Grid - show if we have data, even if disconnected */}
-        {robberies.length > 0 && (
-          <>
-            {/* Show stale data warning if disconnected */}
-            {!isConnected && (
-              <div className="mb-4 rounded-lg border border-border-primary bg-button-info/10 p-4 shadow-sm">
-                <div className="flex items-start gap-3">
-                  <ClockIcon className="h-5 w-5 text-primary-text mt-0.5" />
-                  <div>
-                    <span className="text-primary-text text-base font-bold">
-                      Connection Lost
-                    </span>
-                    <p className="text-secondary-text mt-1 text-sm">
-                      Showing last known data. Connection will resume
-                      automatically.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Robbery Type Tabs */}
-            <div className="mb-6 overflow-x-auto">
-              <div role="tablist" className="tabs min-w-max flex flex-wrap">
-                <button
-                  role="tab"
-                  aria-selected={activeRobberyType === null}
-                  onClick={() => setActiveRobberyType(null)}
-                  className={`tab ${activeRobberyType === null ? "tab-active" : ""}`}
-                >
-                  All Robberies
-                </button>
-                {ROBBERY_TYPE_TABS.map((type) => (
-                  <button
-                    key={type.marker_name}
-                    role="tab"
-                    aria-selected={activeRobberyType === type.marker_name}
-                    onClick={() => setActiveRobberyType(type.marker_name)}
-                    className={`tab ${activeRobberyType === type.marker_name ? "tab-active" : ""}`}
-                  >
-                    {type.name}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {filteredRobberies.length > 0 ? (
-              <Masonry
-                columns={{ xs: 1, sm: 2, md: 2, lg: 3, xl: 4 }}
-                spacing={3}
-                sx={{ width: "auto", margin: 0 }}
-              >
-                {filteredRobberies.map((robbery) => (
-                  <RobberyCard
-                    key={`${robbery.marker_name}-${robbery.server?.job_id || robbery.job_id}-${robbery.timestamp}`}
-                    robbery={robbery}
-                  />
-                ))}
-              </Masonry>
-            ) : (
-              <div className="flex flex-col items-center justify-center py-12 text-center">
-                <MagnifyingGlassIcon className="text-tertiary-text h-12 w-12 mb-4" />
-                <h3 className="text-primary-text text-lg font-medium">
-                  No robberies found
-                </h3>
-                <p className="text-secondary-text">
-                  {activeRobberyType && !searchQuery ? (
-                    <>
-                      No{" "}
-                      {
-                        ROBBERY_TYPE_TABS.find(
-                          (t) => t.marker_name === activeRobberyType,
-                        )?.name
-                      }{" "}
-                      robberies logged yet
-                    </>
-                  ) : activeRobberyType && searchQuery ? (
-                    <>
-                      No{" "}
-                      {
-                        ROBBERY_TYPE_TABS.find(
-                          (t) => t.marker_name === activeRobberyType,
-                        )?.name
-                      }{" "}
-                      robberies match your search
-                    </>
-                  ) : (
-                    <>Try adjusting your search query</>
-                  )}
+        {/* Show stale data warning if disconnected */}
+        {!isConnected && hasData && (
+          <div className="mb-4 rounded-lg border border-border-primary bg-button-info/10 p-4 shadow-sm">
+            <div className="flex items-start gap-3">
+              <ClockIcon className="h-5 w-5 text-primary-text mt-0.5" />
+              <div>
+                <span className="text-primary-text text-base font-bold">
+                  Connection Lost
+                </span>
+                <p className="text-secondary-text mt-1 text-sm">
+                  Showing last known data. Connection will resume automatically.
                 </p>
               </div>
-            )}
-          </>
-        )}
-
-        {/* Empty State - only when connected with no data and no error */}
-        {isConnected && robberies.length === 0 && !error && (
-          <div className="flex items-center justify-center py-20">
-            <div className="text-center">
-              <ClockIcon className="mx-auto mb-4 h-16 w-16 text-tertiary-text" />
-              <h3 className="text-secondary-text mb-2 text-lg font-medium">
-                No robberies tracked yet
-              </h3>
-              <p className="text-tertiary-text text-sm">
-                Waiting for robbery data...
-              </p>
             </div>
           </div>
+        )}
+
+        {/* Main View Toggle */}
+        <div className="mb-6 overflow-x-auto">
+          <div role="tablist" className="tabs tabs-boxed bg-tertiary-bg p-1">
+            <button
+              role="tab"
+              aria-selected={activeView === "robberies"}
+              onClick={() => handleViewChange("robberies")}
+              className={`tab ${activeView === "robberies" ? "tab-active" : ""}`}
+            >
+              Robberies
+            </button>
+            <button
+              role="tab"
+              aria-selected={activeView === "mansions"}
+              onClick={() => handleViewChange("mansions")}
+              className={`tab ${activeView === "mansions" ? "tab-active" : ""}`}
+            >
+              Mansions
+            </button>
+            <button
+              role="tab"
+              aria-selected={activeView === "airdrops"}
+              onClick={() => handleViewChange("airdrops")}
+              className={`tab ${activeView === "airdrops" ? "tab-active" : ""}`}
+            >
+              Airdrops
+            </button>
+          </div>
+        </div>
+
+        {hasData ? (
+          <>
+            {/* Conditional Rendering Based on View */}
+            {activeView === "robberies" ? (
+              <>
+                {/* Robbery Type Tabs */}
+                <div className="mb-6 overflow-x-auto">
+                  <div role="tablist" className="tabs min-w-max flex flex-wrap">
+                    <button
+                      role="tab"
+                      aria-selected={activeRobberyType === null}
+                      onClick={() => setActiveRobberyType(null)}
+                      className={`tab ${activeRobberyType === null ? "tab-active" : ""}`}
+                    >
+                      All Robberies
+                    </button>
+                    {ROBBERY_TYPE_TABS.map((type) => (
+                      <button
+                        key={type.marker_name}
+                        role="tab"
+                        aria-selected={activeRobberyType === type.marker_name}
+                        onClick={() => setActiveRobberyType(type.marker_name)}
+                        className={`tab ${activeRobberyType === type.marker_name ? "tab-active" : ""}`}
+                      >
+                        {type.name}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Robberies Grid */}
+                {filteredRobberies.length > 0 ? (
+                  <Masonry
+                    columns={{ xs: 1, sm: 2, md: 2, lg: 3, xl: 4 }}
+                    spacing={3}
+                    sx={{ width: "auto", margin: 0 }}
+                  >
+                    {filteredRobberies.map((robbery) => (
+                      <RobberyCard
+                        key={`${robbery.marker_name}-${robbery.server?.job_id || robbery.job_id}-${robbery.timestamp}`}
+                        robbery={robbery}
+                      />
+                    ))}
+                  </Masonry>
+                ) : (
+                  <div className="flex flex-col items-center justify-center py-12 text-center">
+                    <MagnifyingGlassIcon className="text-tertiary-text h-12 w-12 mb-4" />
+                    <h3 className="text-primary-text text-lg font-medium">
+                      No robberies found
+                    </h3>
+                    <p className="text-secondary-text">
+                      {activeRobberyType && !searchQuery ? (
+                        <>
+                          No{" "}
+                          {
+                            ROBBERY_TYPE_TABS.find(
+                              (t) => t.marker_name === activeRobberyType,
+                            )?.name
+                          }{" "}
+                          robberies logged yet
+                        </>
+                      ) : activeRobberyType && searchQuery ? (
+                        <>
+                          No{" "}
+                          {
+                            ROBBERY_TYPE_TABS.find(
+                              (t) => t.marker_name === activeRobberyType,
+                            )?.name
+                          }{" "}
+                          robberies match your search
+                        </>
+                      ) : (
+                        <>Try adjusting your search query</>
+                      )}
+                    </p>
+                  </div>
+                )}
+              </>
+            ) : activeView === "mansions" ? (
+              <>
+                {/* Mansions Grid */}
+                {filteredMansions.length > 0 ? (
+                  <Masonry
+                    columns={{ xs: 1, sm: 2, md: 2, lg: 3, xl: 4 }}
+                    spacing={3}
+                    sx={{ width: "auto", margin: 0 }}
+                  >
+                    {filteredMansions.map((robbery) => (
+                      <RobberyCard
+                        key={`${robbery.marker_name}-${robbery.server?.job_id || robbery.job_id}-${robbery.timestamp}`}
+                        robbery={robbery}
+                      />
+                    ))}
+                  </Masonry>
+                ) : (
+                  <div className="flex flex-col items-center justify-center py-12 text-center">
+                    <MagnifyingGlassIcon className="text-tertiary-text h-12 w-12 mb-4" />
+                    <h3 className="text-primary-text text-lg font-medium">
+                      No mansions found
+                    </h3>
+                    <p className="text-secondary-text">
+                      {searchQuery
+                        ? "No mansions match your search"
+                        : "No mansions logged yet"}
+                    </p>
+                  </div>
+                )}
+              </>
+            ) : (
+              <>
+                {/* Airdrop Location Tabs */}
+                <div className="mb-6 overflow-x-auto">
+                  <div role="tablist" className="tabs min-w-max flex flex-wrap">
+                    <button
+                      role="tab"
+                      aria-selected={activeAirdropLocation === "all"}
+                      onClick={() => setActiveAirdropLocation("all")}
+                      className={`tab ${activeAirdropLocation === "all" ? "tab-active" : ""}`}
+                    >
+                      All Locations
+                    </button>
+                    <button
+                      role="tab"
+                      aria-selected={activeAirdropLocation === "CactusValley"}
+                      onClick={() => setActiveAirdropLocation("CactusValley")}
+                      className={`tab ${activeAirdropLocation === "CactusValley" ? "tab-active" : ""}`}
+                    >
+                      Cactus Valley
+                    </button>
+                    <button
+                      role="tab"
+                      aria-selected={activeAirdropLocation === "Dunes"}
+                      onClick={() => setActiveAirdropLocation("Dunes")}
+                      className={`tab ${activeAirdropLocation === "Dunes" ? "tab-active" : ""}`}
+                    >
+                      Dunes
+                    </button>
+                  </div>
+                </div>
+
+                {/* Airdrop Statistics */}
+                {airdropStats.total > 0 && (
+                  <div className="mb-4 flex flex-wrap items-center gap-3 text-sm">
+                    <span className="text-primary-text font-semibold">
+                      {airdropStats.total}{" "}
+                      {airdropStats.total === 1 ? "Airdrop" : "Airdrops"}
+                    </span>
+                    <div className="flex items-center gap-2 text-xs">
+                      {airdropStats.easy > 0 && (
+                        <span className="text-secondary-text">
+                          {airdropStats.easy} Easy
+                        </span>
+                      )}
+                      {airdropStats.easy > 0 && airdropStats.medium > 0 && (
+                        <span className="text-tertiary-text">•</span>
+                      )}
+                      {airdropStats.medium > 0 && (
+                        <span className="text-secondary-text">
+                          {airdropStats.medium} Medium
+                        </span>
+                      )}
+                      {(airdropStats.easy > 0 || airdropStats.medium > 0) &&
+                        airdropStats.hard > 0 && (
+                          <span className="text-tertiary-text">•</span>
+                        )}
+                      {airdropStats.hard > 0 && (
+                        <span className="text-secondary-text">
+                          {airdropStats.hard} Hard
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Airdrops Grid */}
+                {filteredAirdrops.length > 0 ? (
+                  <Masonry
+                    columns={{ xs: 1, sm: 2, md: 2, lg: 3, xl: 4 }}
+                    spacing={3}
+                    sx={{ width: "auto", margin: 0 }}
+                  >
+                    {filteredAirdrops.map((airdrop, index) => (
+                      <AirdropCard
+                        key={`${airdrop.location}-${airdrop.color}-${airdrop.server?.job_id || index}-${airdrop.timestamp}`}
+                        airdrop={airdrop}
+                      />
+                    ))}
+                  </Masonry>
+                ) : (
+                  <div className="flex flex-col items-center justify-center py-12 text-center">
+                    <MagnifyingGlassIcon className="text-tertiary-text h-12 w-12 mb-4" />
+                    <h3 className="text-primary-text text-lg font-medium">
+                      No airdrops found
+                    </h3>
+                    <p className="text-secondary-text">
+                      {activeAirdropLocation !== "all"
+                        ? `No airdrops in ${activeAirdropLocation.replace(/([A-Z])/g, " $1").trim()} right now`
+                        : "No airdrops tracked yet"}
+                    </p>
+                  </div>
+                )}
+              </>
+            )}
+          </>
+        ) : (
+          /* Empty State - only when connected with no data and no error */
+          isConnected &&
+          !error && (
+            <div className="flex items-center justify-center py-20">
+              <div className="text-center">
+                <ClockIcon className="mx-auto mb-4 h-16 w-16 text-tertiary-text" />
+                <h3 className="text-secondary-text mb-2 text-lg font-medium">
+                  {activeView === "robberies"
+                    ? "No robberies tracked yet"
+                    : activeView === "mansions"
+                      ? "No mansions tracked yet"
+                      : "No airdrops tracked yet"}
+                </h3>
+                <p className="text-tertiary-text text-sm">
+                  Waiting for{" "}
+                  {activeView === "robberies"
+                    ? "robbery"
+                    : activeView === "mansions"
+                      ? "mansion"
+                      : "airdrop"}{" "}
+                  data...
+                </p>
+              </div>
+            </div>
+          )
         )}
       </div>
     </main>

@@ -112,6 +112,32 @@ export default function RobberyCard({ robbery }: RobberyCardProps) {
 
   // Get status badge
   const getStatusBadge = () => {
+    // Special handling for Mansion robberies
+    if (robbery.marker_name === "Mansion") {
+      switch (robbery.status) {
+        case 1:
+          return (
+            <div className="flex items-center gap-1.5 rounded-full bg-status-success/20 px-3 py-1 text-primary-text">
+              <span className="text-sm font-medium">Open</span>
+            </div>
+          );
+        case 2:
+          return (
+            <div className="flex items-center gap-1.5 rounded-full bg-button-info/20 px-3 py-1 text-primary-text">
+              <span className="text-sm font-medium">Ready to Open</span>
+            </div>
+          );
+        default:
+          return (
+            <div className="flex items-center gap-1.5 rounded-full bg-gray-500/20 px-3 py-1 text-gray-400">
+              <ExclamationTriangleIcon className="h-4 w-4" />
+              <span className="text-sm font-medium">Unknown</span>
+            </div>
+          );
+      }
+    }
+
+    // Default handling for other robberies
     switch (robbery.status) {
       case 1:
         return (
