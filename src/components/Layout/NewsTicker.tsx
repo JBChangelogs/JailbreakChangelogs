@@ -12,7 +12,7 @@ export default function NewsTicker() {
   useEffect(() => {
     // Only run on client after mount - check localStorage
     const dismissed = safeLocalStorage.getItem(
-      "robbery-tracker-announcement-dismissed",
+      "robbery-tracker-public-announcement-dismissed",
     );
     // eslint-disable-next-line
     setIsVisible(dismissed !== "true");
@@ -21,7 +21,10 @@ export default function NewsTicker() {
   const handleDismiss = () => {
     setIsVisible(false);
     // Store dismissal in localStorage to remember user's choice
-    safeLocalStorage.setItem("robbery-tracker-announcement-dismissed", "true");
+    safeLocalStorage.setItem(
+      "robbery-tracker-public-announcement-dismissed",
+      "true",
+    );
   };
 
   if (!shouldShowTicker || isVisible !== true) return null;
@@ -38,14 +41,14 @@ export default function NewsTicker() {
 
           <div className="flex items-center gap-2">
             <span className="text-primary-text text-center text-xs">
-              Track live robberies in real-time! Check out the new{" "}
+              Track live robberies in real-time! The{" "}
               <Link
                 href="/robberies"
                 className="text-purple-400 hover:text-purple-300 underline font-semibold"
               >
                 Robbery Tracker
               </Link>{" "}
-              now in beta!
+              is now open for all!
             </span>
           </div>
 

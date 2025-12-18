@@ -191,7 +191,7 @@ export function useRobberyTrackerAirdropsWebSocket(
       return;
     }
 
-    const IDLE_TIMEOUT = 15 * 60 * 1000; // 15 minutes
+    const IDLE_TIMEOUT = 3 * 60 * 1000; // 3 minutes
 
     const resetIdleTimer = () => {
       if (idleTimeoutRef.current) {
