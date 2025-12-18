@@ -10,7 +10,15 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Robbery LIVE Tracker | Jailbreak Changelogs",
     description:
-      "Track live status of robberies, mansions, and airdrops in Roblox Jailbreak. Get real-time updates on open stores and upcoming events.",
+      "Track live status of robberies, mansions, and airdrops in Roblox Jailbreak. Get real-time updates on robberies, mansions, and airdrops.",
+    images: [
+      {
+        url: "https://assets.jailbreakchangelogs.xyz/assets/logos/JBCL_Short_Christmas_Background.png",
+        width: 1200,
+        height: 630,
+        alt: "Jailbreak Changelogs Banner",
+      },
+    ],
     type: "website",
     siteName: "Jailbreak Changelogs",
     url: "https://jailbreakchangelogs.xyz/robberies",
@@ -19,7 +27,10 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Robbery LIVE Tracker | Jailbreak Changelogs",
     description:
-      "Track live status of robberies, mansions, and airdrops in Roblox Jailbreak. Get real-time updates on open stores and upcoming events.",
+      "Track live status of robberies, mansions, and airdrops in Roblox Jailbreak. Get real-time updates on robberies, mansions, and airdrops.",
+    images: [
+      "https://assets.jailbreakchangelogs.xyz/assets/logos/JBCL_Short_Christmas_Background.png",
+    ],
   },
 };
 
