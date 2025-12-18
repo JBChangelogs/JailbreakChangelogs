@@ -44,12 +44,12 @@ export default async function OGFinderPage() {
       <PremiumAwareLayout>
         <OGFinderClient />
 
-        <NitroLiveScansAd className="mb-6" />
         <Suspense fallback={<StatsSkeleton />}>
           <StatsPolling />
         </Suspense>
 
         <ConnectedBotsPolling />
+        <NitroLiveScansAd />
 
         <OfficialBotsSection />
 

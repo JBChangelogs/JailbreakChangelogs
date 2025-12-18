@@ -1,9 +1,11 @@
 "use client";
 
-import { useRef, useMemo } from "react";
-import { useVirtualizer } from "@tanstack/react-virtual";
+import { useState } from "react";
+import { Pagination } from "@mui/material";
 import DupeItemCard from "./DupeItemCard";
 import { DupeFinderItem, Item } from "@/types";
+import NitroGridAd from "@/components/Ads/NitroGridAd";
+import React from "react";
 
 interface DupeItemsGridProps {
   filteredItems: DupeFinderItem[];
@@ -30,37 +32,22 @@ export default function DupeItemsGrid({
   itemsData,
   robloxId,
 }: DupeItemsGridProps) {
-  const parentRef = useRef<HTMLDivElement>(null);
+  const [page, setPage] = useState(1);
+  const itemsPerPage = 16;
 
-  // Organize items into rows for grid virtualization
-  // Each row contains multiple items based on screen size
-  const getItemsPerRow = () => {
-    if (typeof window === "undefined") return 4; // Default for SSR
-    const width = window.innerWidth;
-    if (width < 768) return 1;
-    if (width < 1024) return 2;
-    if (width < 1280) return 2;
-    return 4;
+  const totalPages = Math.ceil(filteredItems.length / itemsPerPage);
+  const displayedItems = filteredItems.slice(
+    (page - 1) * itemsPerPage,
+    page * itemsPerPage,
+  );
+
+  const handlePageChange = (
+    event: React.ChangeEvent<unknown>,
+    value: number,
+  ) => {
+    setPage(value);
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
-
-  const itemsPerRow = getItemsPerRow();
-  const rows = useMemo(() => {
-    const rowArray: DupeFinderItem[][] = [];
-    for (let i = 0; i < filteredItems.length; i += itemsPerRow) {
-      rowArray.push(filteredItems.slice(i, i + itemsPerRow));
-    }
-    return rowArray;
-  }, [filteredItems, itemsPerRow]);
-
-  // TanStack Virtual setup for performance with large item datasets
-  // Only renders visible rows (~10-15 at a time) for 60FPS scrolling
-  // eslint-disable-next-line react-hooks/incompatible-library
-  const virtualizer = useVirtualizer({
-    count: rows.length,
-    getScrollElement: () => parentRef.current,
-    estimateSize: () => 300, // Estimate height for each row
-    overscan: 2, // Render 2 extra rows above/below viewport for smooth scrolling
-  });
 
   if (isLoading) {
     return (
@@ -94,76 +81,96 @@ export default function DupeItemsGrid({
   }
 
   return (
-    <div
-      ref={parentRef}
-      className="scrollbar-thin scrollbar-track-transparent scrollbar-thumb-border-primary hover:scrollbar-thumb-border-focus h-[60rem] overflow-auto" // Fixed height container for virtualization with custom scrollbar
-      style={{
-        scrollbarWidth: "thin",
-        scrollbarColor: "var(--color-border-primary) transparent",
-      }}
-    >
-      <div
-        style={{
-          height: `${virtualizer.getTotalSize()}px`,
-          width: "100%",
-          position: "relative",
-        }}
-      >
-        {virtualizer.getVirtualItems().map((virtualRow) => {
-          const rowItems = rows[virtualRow.index];
-          const rowIndex = virtualRow.index;
+    <>
+      {totalPages > 1 && (
+        <div className="mb-4 flex justify-center">
+          <Pagination
+            count={totalPages}
+            page={page}
+            onChange={handlePageChange}
+            sx={{
+              "& .MuiPaginationItem-root": {
+                color: "var(--color-primary-text)",
+                "&.Mui-selected": {
+                  backgroundColor: "var(--color-button-info)",
+                  color: "var(--color-form-button-text)",
+                  "&:hover": {
+                    backgroundColor: "var(--color-button-info-hover)",
+                  },
+                },
+                "&:hover": {
+                  backgroundColor: "var(--color-quaternary-bg)",
+                },
+              },
+              "& .MuiPaginationItem-icon": {
+                color: "var(--color-primary-text)",
+              },
+            }}
+          />
+        </div>
+      )}
+
+      <div className="mb-8 grid grid-cols-1 gap-4 min-[375px]:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4">
+        {displayedItems.map((item, index) => {
+          const itemData = itemsData.find((data) => data.id === item.item_id);
+          if (!itemData) return null;
+
+          const itemKey = `${item.categoryTitle}-${item.title}`;
+          const isDuplicate = (itemCounts.get(itemKey) || 0) > 1;
+          const duplicateNumber = isDuplicate
+            ? duplicateOrders.get(item.id)
+            : undefined;
 
           return (
-            <div
-              key={`row-${rowIndex}`}
-              data-index={virtualRow.index}
-              ref={virtualizer.measureElement}
-              style={{
-                position: "absolute",
-                top: 0,
-                left: 0,
-                width: "100%",
-                transform: `translateY(${virtualRow.start}px)`,
-              }}
-            >
-              <div
-                className="mb-4 grid gap-4"
-                style={{
-                  gridTemplateColumns: `repeat(${itemsPerRow}, 1fr)`,
-                }}
-              >
-                {rowItems.map((item) => {
-                  const itemData = itemsData.find(
-                    (data) => data.id === item.item_id,
-                  );
-                  if (!itemData) return null;
-
-                  const itemKey = `${item.categoryTitle}-${item.title}`;
-                  const isDuplicate = (itemCounts.get(itemKey) || 0) > 1;
-                  const duplicateNumber = isDuplicate
-                    ? duplicateOrders.get(item.id)
-                    : undefined;
-
-                  return (
-                    <DupeItemCard
-                      key={item.id}
-                      item={item}
-                      itemData={itemData}
-                      getUserAvatar={getUserAvatar}
-                      getUsername={getUsername}
-                      getDupedValueForItem={getDupedValueForItem}
-                      onCardClick={onCardClick}
-                      duplicateNumber={duplicateNumber}
-                      isDuplicate={isDuplicate}
-                      robloxId={robloxId}
-                    />
-                  );
-                })}
-              </div>
-            </div>
+            <React.Fragment key={item.id}>
+              <DupeItemCard
+                item={item}
+                itemData={itemData}
+                getUserAvatar={getUserAvatar}
+                getUsername={getUsername}
+                getDupedValueForItem={getDupedValueForItem}
+                onCardClick={onCardClick}
+                duplicateNumber={duplicateNumber}
+                isDuplicate={isDuplicate}
+                robloxId={robloxId}
+              />
+              {(index + 1) % 4 === 0 && (
+                <div className="col-span-full md:hidden flex justify-center py-4">
+                  <NitroGridAd adId={`np-dupe-grid-${page}-${index}`} />
+                </div>
+              )}
+            </React.Fragment>
           );
         })}
       </div>
-    </div>
+
+      {totalPages > 1 && (
+        <div className="mt-8 flex justify-center">
+          <Pagination
+            count={totalPages}
+            page={page}
+            onChange={handlePageChange}
+            sx={{
+              "& .MuiPaginationItem-root": {
+                color: "var(--color-primary-text)",
+                "&.Mui-selected": {
+                  backgroundColor: "var(--color-button-info)",
+                  color: "var(--color-form-button-text)",
+                  "&:hover": {
+                    backgroundColor: "var(--color-button-info-hover)",
+                  },
+                },
+                "&:hover": {
+                  backgroundColor: "var(--color-quaternary-bg)",
+                },
+              },
+              "& .MuiPaginationItem-icon": {
+                color: "var(--color-primary-text)",
+              },
+            }}
+          />
+        </div>
+      )}
+    </>
   );
 }

@@ -14,6 +14,7 @@ import { Suspense } from "react";
 import PremiumAwareLayout from "@/components/Layout/PremiumAwareLayout";
 import { fetchMostDuplicatedItems } from "@/utils/api";
 import NitroLiveScansAd from "@/components/Ads/NitroLiveScansAd";
+import NitroDupesRailAd from "@/components/Ads/NitroDupesRailAd";
 
 export const dynamic = "force-dynamic";
 
@@ -56,12 +57,13 @@ export default async function DupeFinderPage() {
       <PremiumAwareLayout>
         <DupeFinderClient />
 
-        <NitroLiveScansAd className="mb-6" />
+        <NitroDupesRailAd />
         <Suspense fallback={<StatsSkeleton />}>
           <StatsPolling />
         </Suspense>
 
         <MostDuplicatedItems items={mostDuplicatedItems} />
+        <NitroLiveScansAd />
 
         <ConnectedBotsPolling />
 

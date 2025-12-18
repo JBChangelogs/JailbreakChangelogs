@@ -4,10 +4,10 @@ import { useEffect, useRef } from "react";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { registerAdInstance, removeAdReference } from "@/utils/nitroAds";
 
-const AD_ID_SMALL = "np-rail-left-values";
-const AD_ID_WIDE = "np-rail-left-values-wide";
+const AD_ID_SMALL = "np-rail-left-inventories";
+const AD_ID_WIDE = "np-rail-left-inventories-wide";
 
-export default function NitroValuesRailAd() {
+export default function NitroInventoriesRailAd() {
   const { user } = useAuthContext();
   const createdRef = useRef(false);
 
@@ -48,7 +48,7 @@ export default function NitroValuesRailAd() {
 
     // Small Rail Ad (1080p screens)
     // Fits 160x600
-    // Range: 1900px to 2149px (approx cutoff for 300px rail)
+    // Range: 1900px to 2149px
     Promise.resolve(
       window.nitroAds.createAd(AD_ID_SMALL, {
         format: "rail",
