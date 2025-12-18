@@ -3,17 +3,28 @@
 import { useEffect, useRef } from "react";
 import { useAuthContext } from "@/contexts/AuthContext";
 
+type NitroAdConfig = {
+  sizes: string[][];
+  report: {
+    enabled: boolean;
+    icon: boolean;
+    wording: string;
+    position: string;
+  };
+  mediaQuery: string;
+};
+
 type NitroAdsWithRemove = {
-  createAd?: (id: string, config: typeof LIVE_SCANS_CONFIG) => Promise<void>;
+  createAd?: (id: string, config: NitroAdConfig) => Promise<void>;
   removeAd?: (id: string) => void;
 };
 
-const SLOT_ID = "np-live-scans";
+const SLOT_ID_MOBILE = "np-live-scans-mobile";
+const SLOT_ID_TABLET = "np-live-scans-tablet";
+const SLOT_ID_DESKTOP = "np-live-scans-desktop";
 
-const LIVE_SCANS_CONFIG = {
+const MOBILE_CONFIG = {
   sizes: [
-    ["728", "90"],
-    ["970", "90"],
     ["320", "50"],
     ["320", "100"],
   ],
@@ -23,8 +34,38 @@ const LIVE_SCANS_CONFIG = {
     wording: "Report Ad",
     position: "top-right",
   },
-  mediaQuery:
-    "(min-width: 1025px), (min-width: 768px) and (max-width: 1024px), (min-width: 320px) and (max-width: 767px)",
+  mediaQuery: "(max-width: 767px)",
+};
+
+const TABLET_CONFIG = {
+  sizes: [
+    ["728", "90"],
+    ["320", "50"],
+    ["320", "100"],
+  ],
+  report: {
+    enabled: true,
+    icon: true,
+    wording: "Report Ad",
+    position: "top-right",
+  },
+  mediaQuery: "(min-width: 768px) and (max-width: 1023px)",
+};
+
+const DESKTOP_CONFIG = {
+  sizes: [
+    ["970", "90"],
+    ["728", "90"],
+    ["320", "50"],
+    ["320", "100"],
+  ],
+  report: {
+    enabled: true,
+    icon: true,
+    wording: "Report Ad",
+    position: "top-right",
+  },
+  mediaQuery: "(min-width: 1024px)",
 };
 
 interface Props {
@@ -33,20 +74,28 @@ interface Props {
 
 export default function NitroLiveScansAd({ className }: Props) {
   const { user } = useAuthContext();
-  const containerRef = useRef<HTMLDivElement | null>(null);
+  const containerRefMobile = useRef<HTMLDivElement | null>(null);
+  const containerRefTablet = useRef<HTMLDivElement | null>(null);
+  const containerRefDesktop = useRef<HTMLDivElement | null>(null);
   const createdRef = useRef(false);
   const tier = user?.premiumtype ?? 0;
   const isSupporter = tier >= 2 && tier <= 3;
 
   useEffect(() => {
-    const clearContainer = () => {
-      if (containerRef.current) {
-        containerRef.current.replaceChildren();
+    const clearContainers = () => {
+      if (containerRefMobile.current) {
+        containerRefMobile.current.replaceChildren();
+      }
+      if (containerRefTablet.current) {
+        containerRefTablet.current.replaceChildren();
+      }
+      if (containerRefDesktop.current) {
+        containerRefDesktop.current.replaceChildren();
       }
     };
 
     if (isSupporter) {
-      clearContainer();
+      clearContainers();
       createdRef.current = false;
       return;
     }
@@ -57,17 +106,29 @@ export default function NitroLiveScansAd({ className }: Props) {
       | NitroAdsWithRemove
       | undefined;
     if (!nitroAds?.createAd) return;
-    if (!containerRef.current) return;
+    if (
+      !containerRefMobile.current ||
+      !containerRefTablet.current ||
+      !containerRefDesktop.current
+    )
+      return;
 
     createdRef.current = true;
 
-    nitroAds.createAd(SLOT_ID, LIVE_SCANS_CONFIG).catch(() => {
-      createdRef.current = false;
-    });
+    // Mobile config
+    nitroAds.createAd(SLOT_ID_MOBILE, MOBILE_CONFIG).catch(() => {});
+
+    // Tablet config
+    nitroAds.createAd(SLOT_ID_TABLET, TABLET_CONFIG).catch(() => {});
+
+    // Desktop config
+    nitroAds.createAd(SLOT_ID_DESKTOP, DESKTOP_CONFIG).catch(() => {});
 
     return () => {
-      nitroAds?.removeAd?.(SLOT_ID);
-      clearContainer();
+      nitroAds?.removeAd?.(SLOT_ID_MOBILE);
+      nitroAds?.removeAd?.(SLOT_ID_TABLET);
+      nitroAds?.removeAd?.(SLOT_ID_DESKTOP);
+      clearContainers();
       createdRef.current = false;
     };
   }, [isSupporter]);
@@ -76,5 +137,23 @@ export default function NitroLiveScansAd({ className }: Props) {
     return null;
   }
 
-  return <div id={SLOT_ID} ref={containerRef} className={className} />;
+  return (
+    <div className={className}>
+      <div
+        id={SLOT_ID_MOBILE}
+        ref={containerRefMobile}
+        className="block md:hidden"
+      />
+      <div
+        id={SLOT_ID_TABLET}
+        ref={containerRefTablet}
+        className="hidden md:block lg:hidden"
+      />
+      <div
+        id={SLOT_ID_DESKTOP}
+        ref={containerRefDesktop}
+        className="hidden lg:block"
+      />
+    </div>
+  );
 }
