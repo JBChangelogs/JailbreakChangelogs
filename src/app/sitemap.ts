@@ -120,6 +120,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.8,
       changeFrequency: "daily" as const,
     },
+    {
+      url: `${BASE_URL}/robberies`,
+      lastModified: new Date().toISOString(),
+      priority: 0.7,
+      changeFrequency: "daily" as const,
+    },
     ...(isFeatureEnabled("INVENTORY_CALCULATOR")
       ? [
           {
