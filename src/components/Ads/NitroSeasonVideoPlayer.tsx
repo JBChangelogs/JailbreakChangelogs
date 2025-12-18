@@ -22,6 +22,7 @@ const SEASON_CONFIG = {
     "(min-width: 1025px), (min-width: 768px) and (max-width: 1024px), (min-width: 320px) and (max-width: 767px)",
   video: {
     initialDelay: 2,
+    mobile: "compact",
   },
 };
 
@@ -74,5 +75,13 @@ export default function NitroSeasonVideoPlayer({ className }: Props) {
     return null;
   }
 
-  return <div id={SLOT_ID} ref={containerRef} className={className} />;
+  // Apply min-height to prevent CLS
+  return (
+    <div
+      id={SLOT_ID}
+      ref={containerRef}
+      className={className}
+      style={{ minHeight: "250px" }}
+    />
+  );
 }

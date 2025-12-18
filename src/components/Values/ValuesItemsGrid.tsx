@@ -269,7 +269,7 @@ export default function ValuesItemsGrid({
                 }}
               />
               {(index + 1) % 6 === 0 && (
-                <div className="col-span-full flex justify-center py-4">
+                <div className="col-span-full md:hidden flex justify-center py-4">
                   <NitroGridAd adId={`np-value-grid-${index}`} />
                 </div>
               )}

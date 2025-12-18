@@ -65,5 +65,11 @@ export default function NitroGridAd({ adId, className }: NitroGridAdProps) {
   }
 
   // Hide on desktop since the ad is configured for mobile only (max-width: 767px)
-  return <div id={adId} className={`flex justify-center ${className}`} />;
+  // Apply min-height 250px to reserve space for the tallest ad unit (300x250)
+  return (
+    <div
+      id={adId}
+      className={`flex justify-center min-h-[250px] ${className}`}
+    />
+  );
 }
