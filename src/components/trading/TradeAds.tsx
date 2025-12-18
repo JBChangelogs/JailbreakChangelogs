@@ -6,7 +6,8 @@ import { UserData } from "@/types/auth";
 import { TradeItem } from "@/types/trading";
 import { TradeAdCard } from "./TradeAdCard";
 import { TradeAdTabs } from "./TradeAdTabs";
-import { Pagination, Button } from "@mui/material";
+import { Button } from "@mui/material";
+import { Pagination } from "@/components/ui/Pagination";
 import { Masonry } from "@mui/lab";
 import {
   ArrowDownIcon,
@@ -285,7 +286,7 @@ export default function TradeAds({
         >
           {activeTab === "view" && (
             <div className="mb-8 rounded-lg border p-6 text-center">
-              <h3 className="text-tertiary-text mb-4 text-lg font-medium">
+              <h3 className="mb-4 text-lg font-medium text-tertiary-text">
                 No Trade Ads Available
               </h3>
               <p className="text-tertiary-text/70 mb-8">
@@ -427,7 +428,7 @@ export default function TradeAds({
                 setSearchQuery(e.target.value);
                 setPage(1); // Reset to first page when searching
               }}
-              className="text-primary-text border-border-primary bg-secondary-bg placeholder-secondary-text focus:border-button-info w-full rounded-lg border py-3 px-4 pr-16 transition-all duration-300 focus:outline-none"
+              className="w-full rounded-lg border border-border-primary bg-secondary-bg px-4 py-3 pr-16 text-primary-text placeholder-secondary-text transition-all duration-300 focus:border-button-info focus:outline-none"
             />
             {/* Right side controls container */}
             <div className="absolute right-3 top-1/2 flex -translate-y-1/2 items-center gap-2">
@@ -439,7 +440,7 @@ export default function TradeAds({
                     setSearchQuery("");
                     setPage(1);
                   }}
-                  className="hover:text-primary-text text-secondary-text cursor-pointer transition-colors"
+                  className="cursor-pointer text-secondary-text transition-colors hover:text-primary-text"
                   aria-label="Clear search"
                 >
                   <XMarkIcon className="h-5 w-5" />
@@ -467,7 +468,7 @@ export default function TradeAds({
               </p>
               <button
                 onClick={toggleSortOrder}
-                className="border-border-primary hover:border-border-focus bg-button-info text-form-button-text hover:bg-button-info-hover flex cursor-pointer items-center gap-1 rounded-lg border px-3 py-1.5 text-sm transition-colors"
+                className="flex cursor-pointer items-center gap-1 rounded-lg border border-border-primary bg-button-info px-3 py-1.5 text-sm text-form-button-text transition-colors hover:border-border-focus hover:bg-button-info-hover"
               >
                 {sortOrder === "newest" ? (
                   <ArrowDownIcon className="h-4 w-4" />
@@ -479,7 +480,7 @@ export default function TradeAds({
             </div>
             {displayTradeAds.length === 0 && searchQuery.trim() ? (
               <div className="mb-8 rounded-lg border border-border-primary p-6 text-center">
-                <h3 className="text-secondary-text mb-4 text-lg font-medium">
+                <h3 className="mb-4 text-lg font-medium text-secondary-text">
                   No Trade Ads Match Your Search
                 </h3>
                 <p className="text-secondary-text">
@@ -522,29 +523,11 @@ export default function TradeAds({
               </Masonry>
             )}
             {totalPages > 1 && (
-              <div className="mt-8 mb-8 flex justify-center">
+              <div className="mb-8 mt-8 flex justify-center">
                 <Pagination
                   count={totalPages}
                   page={page}
                   onChange={handlePageChange}
-                  sx={{
-                    "& .MuiPaginationItem-root": {
-                      color: "var(--color-primary-text)",
-                      "&.Mui-selected": {
-                        backgroundColor: "var(--color-button-info)",
-                        color: "var(--color-form-button-text)",
-                        "&:hover": {
-                          backgroundColor: "var(--color-button-info-hover)",
-                        },
-                      },
-                      "&:hover": {
-                        backgroundColor: "var(--color-quaternary-bg)",
-                      },
-                    },
-                    "& .MuiPaginationItem-icon": {
-                      color: "var(--color-primary-text)",
-                    },
-                  }}
                 />
               </div>
             )}
@@ -571,7 +554,7 @@ export default function TradeAds({
               </p>
               <button
                 onClick={toggleSortOrder}
-                className="border-border-primary hover:border-border-focus bg-button-info text-form-button-text hover:bg-button-info-hover flex cursor-pointer items-center gap-1 rounded-lg border px-3 py-1.5 text-sm transition-colors"
+                className="flex cursor-pointer items-center gap-1 rounded-lg border border-border-primary bg-button-info px-3 py-1.5 text-sm text-form-button-text transition-colors hover:border-border-focus hover:bg-button-info-hover"
               >
                 {sortOrder === "newest" ? (
                   <ArrowDownIcon className="h-4 w-4" />
@@ -583,7 +566,7 @@ export default function TradeAds({
             </div>
             {displayTradeAds.length === 0 ? (
               <div className="mb-8 rounded-lg border border-border-primary p-6 text-center">
-                <h3 className="text-tertiary-text mb-4 text-lg font-medium">
+                <h3 className="mb-4 text-lg font-medium text-tertiary-text">
                   No Supporter Trade Ads Available
                 </h3>
                 <p className="text-tertiary-text/70 mb-8">
@@ -637,29 +620,11 @@ export default function TradeAds({
                   })}
                 </Masonry>
                 {totalPages > 1 && (
-                  <div className="mt-8 mb-8 flex justify-center">
+                  <div className="mb-8 mt-8 flex justify-center">
                     <Pagination
                       count={totalPages}
                       page={page}
                       onChange={handlePageChange}
-                      sx={{
-                        "& .MuiPaginationItem-root": {
-                          color: "var(--color-primary-text)",
-                          "&.Mui-selected": {
-                            backgroundColor: "var(--color-button-info)",
-                            color: "var(--color-form-button-text)",
-                            "&:hover": {
-                              backgroundColor: "var(--color-button-info-hover)",
-                            },
-                          },
-                          "&:hover": {
-                            backgroundColor: "var(--color-quaternary-bg)",
-                          },
-                        },
-                        "& .MuiPaginationItem-icon": {
-                          color: "var(--color-primary-text)",
-                        },
-                      }}
                     />
                   </div>
                 )}
@@ -723,7 +688,7 @@ export default function TradeAds({
                   </p>
                   <button
                     onClick={toggleSortOrder}
-                    className="border-border-primary hover:border-border-focus bg-button-info text-form-button-text hover:bg-button-info-hover flex cursor-pointer items-center gap-1 rounded-lg border px-3 py-1.5 text-sm transition-colors"
+                    className="flex cursor-pointer items-center gap-1 rounded-lg border border-border-primary bg-button-info px-3 py-1.5 text-sm text-form-button-text transition-colors hover:border-border-focus hover:bg-button-info-hover"
                   >
                     {sortOrder === "newest" ? (
                       <ArrowDownIcon className="h-4 w-4" />
@@ -736,7 +701,7 @@ export default function TradeAds({
                 {filteredUserTradeAds.length === 0 ? (
                   userTradeAds.length === 0 ? (
                     <div className="mb-8 rounded-lg border border-border-primary p-6 text-center">
-                      <h3 className="text-tertiary-text mb-4 text-lg font-medium">
+                      <h3 className="mb-4 text-lg font-medium text-tertiary-text">
                         No Trade Ads Yet
                       </h3>
                       <p className="text-tertiary-text/70 mb-8">
@@ -757,7 +722,7 @@ export default function TradeAds({
                     </div>
                   ) : (
                     <div className="mb-8 rounded-lg border border-border-primary p-6 text-center">
-                      <h3 className="text-tertiary-text mb-4 text-lg font-medium">
+                      <h3 className="mb-4 text-lg font-medium text-tertiary-text">
                         No Trade Ads Match Your Search
                       </h3>
                       <p className="text-tertiary-text/70">

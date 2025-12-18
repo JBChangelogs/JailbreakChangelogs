@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Pagination, Chip, useMediaQuery } from "@mui/material";
+import { Chip, useMediaQuery } from "@mui/material";
+import { Pagination } from "@/components/ui/Pagination";
 import { Dialog } from "@headlessui/react";
 import { Masonry } from "@mui/lab";
 import { ThemeProvider } from "@mui/material/styles";
@@ -388,7 +389,6 @@ export default function ChangelogDetailsClient({
     value: number,
   ) => {
     setPage(value);
-    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const clearSearch = () => {
@@ -422,13 +422,13 @@ export default function ChangelogDetailsClient({
               placeholder="Search changes..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="text-primary-text border-border-primary hover:border-border-focus bg-secondary-bg placeholder-secondary-text focus:border-button-info w-full rounded-lg border px-4 py-2 pr-10 pl-10 transition-all duration-300 focus:outline-none"
+              className="w-full rounded-lg border border-border-primary bg-secondary-bg px-4 py-2 pl-10 pr-10 text-primary-text placeholder-secondary-text transition-all duration-300 hover:border-border-focus focus:border-button-info focus:outline-none"
             />
-            <MagnifyingGlassIcon className="text-secondary-text absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2" />
+            <MagnifyingGlassIcon className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-secondary-text" />
             {searchQuery && (
               <button
                 onClick={clearSearch}
-                className="hover:text-primary-text text-secondary-text absolute top-1/2 right-3 h-5 w-5 -translate-y-1/2 cursor-pointer"
+                className="absolute right-3 top-1/2 h-5 w-5 -translate-y-1/2 cursor-pointer text-secondary-text hover:text-primary-text"
                 aria-label="Clear search"
               >
                 <XMarkIcon />
@@ -441,12 +441,12 @@ export default function ChangelogDetailsClient({
             {/* Item Type Filter */}
             <div className="w-full lg:w-1/2">
               <div className="mb-2">
-                <h3 className="text-secondary-text text-sm font-medium">
+                <h3 className="text-sm font-medium text-secondary-text">
                   Filter by item type:
                 </h3>
               </div>
               <select
-                className="select w-full bg-secondary-bg text-primary-text font-inter"
+                className="select font-inter w-full bg-secondary-bg text-primary-text"
                 value={selectedType}
                 onChange={(e) => setSelectedType(e.target.value)}
               >
@@ -462,12 +462,12 @@ export default function ChangelogDetailsClient({
             {/* Suggestion Type Filter */}
             <div className="w-full lg:w-1/2">
               <div className="mb-2">
-                <h3 className="text-secondary-text text-sm font-medium">
+                <h3 className="text-sm font-medium text-secondary-text">
                   Filter by suggestion type:
                 </h3>
               </div>
               <select
-                className="select w-full bg-secondary-bg text-primary-text font-inter"
+                className="select font-inter w-full bg-secondary-bg text-primary-text"
                 value={selectedSuggestionType}
                 onChange={(e) => setSelectedSuggestionType(e.target.value)}
               >
@@ -495,7 +495,7 @@ export default function ChangelogDetailsClient({
         </div>
 
         {/* Main Content */}
-        <div className="grid gap-6 grid-cols-1">
+        <div className="grid grid-cols-1 gap-6">
           <div className="space-y-6">
             {/* Top Pagination */}
             {totalPages > 1 && (
@@ -504,24 +504,6 @@ export default function ChangelogDetailsClient({
                   count={totalPages}
                   page={page}
                   onChange={handlePageChange}
-                  sx={{
-                    "& .MuiPaginationItem-root": {
-                      color: "var(--color-primary-text)",
-                      "&.Mui-selected": {
-                        backgroundColor: "var(--color-button-info)",
-                        color: "var(--color-form-button-text)",
-                        "&:hover": {
-                          backgroundColor: "var(--color-button-info-hover)",
-                        },
-                      },
-                      "&:hover": {
-                        backgroundColor: "var(--color-quaternary-bg)",
-                      },
-                    },
-                    "& .MuiPaginationItem-icon": {
-                      color: "var(--color-primary-text)",
-                    },
-                  }}
                 />
               </div>
             )}
@@ -536,13 +518,13 @@ export default function ChangelogDetailsClient({
                 {paginatedChanges.map((change) => (
                   <div
                     key={change.change_id}
-                    className="border-border-primary hover:border-border-focus bg-secondary-bg overflow-hidden rounded-lg border p-4 transition-colors"
+                    className="overflow-hidden rounded-lg border border-border-primary bg-secondary-bg p-4 transition-colors hover:border-border-focus"
                   >
                     {/* Suggestion # Pill */}
                     {change.suggestion && (
                       <div className="mb-2 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
                         <div className="flex items-center gap-2">
-                          <span className="border-primary-text text-primary-text flex items-center rounded-full border bg-transparent px-1.5 py-0.5 text-[10px] sm:px-2 sm:py-1 sm:text-xs">
+                          <span className="flex items-center rounded-full border border-primary-text bg-transparent px-1.5 py-0.5 text-[10px] text-primary-text sm:px-2 sm:py-1 sm:text-xs">
                             Suggestion #{change.suggestion.id}
                           </span>
                         </div>
@@ -551,7 +533,7 @@ export default function ChangelogDetailsClient({
 
                     {/* Item Header */}
                     <div className="mb-4 flex flex-wrap items-center gap-3">
-                      <div className="bg-tertiary-bg relative h-16 w-16 overflow-hidden rounded-lg">
+                      <div className="relative h-16 w-16 overflow-hidden rounded-lg bg-tertiary-bg">
                         {isVideoItem(change.item.name) ? (
                           <video
                             src={getVideoPath(
@@ -597,7 +579,7 @@ export default function ChangelogDetailsClient({
                           <Link
                             href={`/item/${change.item.type}/${encodeURIComponent(change.item.name)}`}
                             prefetch={false}
-                            className="text-primary-text hover:text-link block font-semibold break-words whitespace-normal transition-colors lg:pr-24"
+                            className="block whitespace-normal break-words font-semibold text-primary-text transition-colors hover:text-link lg:pr-24"
                           >
                             {change.item.name}
                           </Link>
@@ -626,9 +608,9 @@ export default function ChangelogDetailsClient({
 
                     {/* Suggestion Data - Show First if Exists */}
                     {change.suggestion && (
-                      <div className="bg-primary-bg border-border-primary hover:shadow-card-shadow mt-2 rounded-lg border p-5 shadow-lg transition-all duration-200">
+                      <div className="mt-2 rounded-lg border border-border-primary bg-primary-bg p-5 shadow-lg transition-all duration-200 hover:shadow-card-shadow">
                         <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                          <div className="flex items-center gap-3 min-w-0">
+                          <div className="flex min-w-0 items-center gap-3">
                             {change.suggestion.metadata?.avatar_hash && (
                               <div className="relative h-8 w-8 flex-shrink-0 overflow-hidden rounded-full">
                                 <DefaultAvatar />
@@ -647,22 +629,22 @@ export default function ChangelogDetailsClient({
                                 />
                               </div>
                             )}
-                            <div className="flex flex-col min-w-0">
-                              <span className="text-tertiary-text text-xs font-semibold tracking-wide uppercase">
+                            <div className="flex min-w-0 flex-col">
+                              <span className="text-xs font-semibold uppercase tracking-wide text-tertiary-text">
                                 Suggested by
                               </span>
                               <a
                                 href={`https://discord.com/users/${change.suggestion.user_id}`}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="text-link hover:text-link-hover text-lg font-bold transition-colors hover:underline break-words"
+                                className="break-words text-lg font-bold text-link transition-colors hover:text-link-hover hover:underline"
                               >
                                 {change.suggestion.suggestor_name}
                               </a>
                             </div>
                           </div>
-                          <div className="flex items-center justify-center flex-shrink-0">
-                            <div className="border-border-primary flex items-center justify-center overflow-hidden rounded-lg border">
+                          <div className="flex flex-shrink-0 items-center justify-center">
+                            <div className="flex items-center justify-center overflow-hidden rounded-lg border border-border-primary">
                               <button
                                 type="button"
                                 onClick={() => {
@@ -692,10 +674,10 @@ export default function ChangelogDetailsClient({
                                 className="bg-button-success/10 hover:bg-button-success/20 flex cursor-pointer items-center justify-center gap-2 px-3 py-2 transition-colors focus:outline-none"
                                 aria-label="View voters"
                               >
-                                <span className="text-button-success text-lg font-bold">
+                                <span className="text-lg font-bold text-button-success">
                                   ↑
                                 </span>
-                                <span className="text-button-success text-lg font-bold">
+                                <span className="text-lg font-bold text-button-success">
                                   {change.suggestion.vote_data.upvotes}
                                 </span>
                               </button>
@@ -728,17 +710,17 @@ export default function ChangelogDetailsClient({
                                 className="bg-button-danger/10 hover:bg-button-danger/20 flex cursor-pointer items-center justify-center gap-2 px-3 py-2 transition-colors focus:outline-none"
                                 aria-label="View voters"
                               >
-                                <span className="text-button-danger text-lg font-bold">
+                                <span className="text-lg font-bold text-button-danger">
                                   ↓
                                 </span>
-                                <span className="text-button-danger text-lg font-bold">
+                                <span className="text-lg font-bold text-button-danger">
                                   {change.suggestion.vote_data.downvotes}
                                 </span>
                               </button>
                             </div>
                           </div>
                         </div>
-                        <div className="text-secondary-text mb-4 text-sm leading-relaxed font-medium">
+                        <div className="mb-4 text-sm font-medium leading-relaxed text-secondary-text">
                           <ReactMarkdown
                             components={{
                               strong: (props) => (
@@ -753,7 +735,7 @@ export default function ChangelogDetailsClient({
                           </ReactMarkdown>
                         </div>
 
-                        <div className="text-tertiary-text text-xs font-semibold tracking-wide uppercase">
+                        <div className="text-xs font-semibold uppercase tracking-wide text-tertiary-text">
                           Suggested on{" "}
                           {formatMessageDate(
                             change.suggestion.created_at * 1000,
@@ -814,8 +796,8 @@ export default function ChangelogDetailsClient({
                             <div key={key}>
                               <div className="flex items-start gap-2 overflow-hidden">
                                 <div className="min-w-0 flex-1">
-                                  <div className="text-primary-text mb-3 text-lg font-bold capitalize">
-                                    <span className="border-primary-text text-primary-text mb-2 inline-flex items-center rounded-full border bg-transparent px-1.5 py-0.5 text-[10px] sm:px-2 sm:py-1 sm:text-xs">
+                                  <div className="mb-3 text-lg font-bold capitalize text-primary-text">
+                                    <span className="mb-2 inline-flex items-center rounded-full border border-primary-text bg-transparent px-1.5 py-0.5 text-[10px] text-primary-text sm:px-2 sm:py-1 sm:text-xs">
                                       {formatSuggestionTypeLabel(
                                         change.suggestion?.metadata
                                           ?.suggestion_type,
@@ -825,10 +807,10 @@ export default function ChangelogDetailsClient({
                                   </div>
                                   <div className="grid grid-cols-2 gap-6">
                                     <div className="min-w-0">
-                                      <div className="text-tertiary-text mb-2 flex items-center gap-2 text-xs font-semibold tracking-wide uppercase">
+                                      <div className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-tertiary-text">
                                         <Icon
                                           icon="mdi:minus-circle"
-                                          className="text-button-danger h-4 w-4"
+                                          className="h-4 w-4 text-button-danger"
                                           inline={true}
                                         />
                                         {`OLD ${formatSuggestionTypeLabel(
@@ -838,7 +820,7 @@ export default function ChangelogDetailsClient({
                                         ).toUpperCase()}`}
                                       </div>
                                       <div
-                                        className="text-secondary-text overflow-hidden text-lg font-bold break-words line-through"
+                                        className="overflow-hidden break-words text-lg font-bold text-secondary-text line-through"
                                         style={{
                                           wordBreak: "normal",
                                           overflowWrap: "anywhere",
@@ -858,7 +840,7 @@ export default function ChangelogDetailsClient({
                                                 href={`https://www.roblox.com/users/${formatted.robloxId}/profile`}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
-                                                className="text-link hover:text-link-hover transition-colors hover:underline"
+                                                className="text-link transition-colors hover:text-link-hover hover:underline"
                                               >
                                                 {formatted.display}
                                               </a>
@@ -869,10 +851,10 @@ export default function ChangelogDetailsClient({
                                       </div>
                                     </div>
                                     <div className="min-w-0">
-                                      <div className="text-tertiary-text mb-2 flex items-center gap-2 text-xs font-semibold tracking-wide uppercase">
+                                      <div className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-tertiary-text">
                                         <Icon
                                           icon="mdi:plus-circle"
-                                          className="text-button-success h-4 w-4"
+                                          className="h-4 w-4 text-button-success"
                                           inline={true}
                                         />
                                         {`NEW ${formatSuggestionTypeLabel(
@@ -882,7 +864,7 @@ export default function ChangelogDetailsClient({
                                         ).toUpperCase()}`}
                                       </div>
                                       <div
-                                        className="text-primary-text overflow-hidden text-lg font-bold break-words"
+                                        className="overflow-hidden break-words text-lg font-bold text-primary-text"
                                         style={{
                                           wordBreak: "normal",
                                           overflowWrap: "anywhere",
@@ -902,7 +884,7 @@ export default function ChangelogDetailsClient({
                                                 href={`https://www.roblox.com/users/${formatted.robloxId}/profile`}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
-                                                className="text-link hover:text-link-hover transition-colors hover:underline"
+                                                className="text-link transition-colors hover:text-link-hover hover:underline"
                                               >
                                                 {formatted.display}
                                               </a>
@@ -922,8 +904,8 @@ export default function ChangelogDetailsClient({
                     </div>
 
                     {/* Footer */}
-                    <div className="border-secondary-text mt-4 border-t pt-4">
-                      <span className="text-secondary-text text-sm">
+                    <div className="mt-4 border-t border-secondary-text pt-4">
+                      <span className="text-sm text-secondary-text">
                         Changed on {formatMessageDate(change.created_at * 1000)}
                       </span>
                     </div>
@@ -931,9 +913,9 @@ export default function ChangelogDetailsClient({
                 ))}
               </Masonry>
             ) : (
-              <div className="text-primary-text py-8 text-center">
+              <div className="py-8 text-center text-primary-text">
                 <p className="mb-2 text-lg font-medium">No changes found</p>
-                <p className="text-secondary-text text-sm">
+                <p className="text-sm text-secondary-text">
                   {searchQuery && `No changes match "${displayQuery}"`}
                   {searchQuery &&
                     (selectedType || selectedSuggestionType) &&
@@ -951,7 +933,7 @@ export default function ChangelogDetailsClient({
                 {(searchQuery || selectedType || selectedSuggestionType) && (
                   <button
                     onClick={clearSearch}
-                    className="bg-button-info text-form-button-text hover:bg-button-info-hover mt-3 rounded-lg px-4 py-2 transition-colors duration-200 cursor-pointer"
+                    className="mt-3 cursor-pointer rounded-lg bg-button-info px-4 py-2 text-form-button-text transition-colors duration-200 hover:bg-button-info-hover"
                   >
                     Clear filters
                   </button>
@@ -966,24 +948,6 @@ export default function ChangelogDetailsClient({
                   count={totalPages}
                   page={page}
                   onChange={handlePageChange}
-                  sx={{
-                    "& .MuiPaginationItem-root": {
-                      color: "var(--color-primary-text)",
-                      "&.Mui-selected": {
-                        backgroundColor: "var(--color-button-info)",
-                        color: "var(--color-form-button-text)",
-                        "&:hover": {
-                          backgroundColor: "var(--color-button-info-hover)",
-                        },
-                      },
-                      "&:hover": {
-                        backgroundColor: "var(--color-quaternary-bg)",
-                      },
-                    },
-                    "& .MuiPaginationItem-icon": {
-                      color: "var(--color-primary-text)",
-                    },
-                  }}
                 />
               </div>
             )}
@@ -1002,24 +966,24 @@ export default function ChangelogDetailsClient({
           />
 
           <div className="fixed inset-0 flex items-center justify-center p-4">
-            <div className="modal-container bg-secondary-bg border-button-info w-full max-w-[480px] min-w-[320px] rounded-lg border shadow-lg">
-              <div className="modal-header text-primary-text flex items-center justify-between px-6 py-4 text-2xl font-bold">
+            <div className="modal-container w-full min-w-[320px] max-w-[480px] rounded-lg border border-button-info bg-secondary-bg shadow-lg">
+              <div className="modal-header flex items-center justify-between px-6 py-4 text-2xl font-bold text-primary-text">
                 <span>Voters</span>
                 <button
                   onClick={() => setVotersOpen(false)}
-                  className="text-primary-text hover:text-primary-text cursor-pointer transition-colors"
+                  className="cursor-pointer text-primary-text transition-colors hover:text-primary-text"
                 >
                   <XMarkIcon className="h-5 w-5" />
                 </button>
               </div>
 
-              <div className="modal-content px-6 pt-3 pb-6">
-                <div className="bg-primary-bg border-border-primary mb-4 flex rounded-lg border">
+              <div className="modal-content px-6 pb-6 pt-3">
+                <div className="mb-4 flex rounded-lg border border-border-primary bg-primary-bg">
                   <button
                     onClick={() => setVotersTab("up")}
                     className={`flex-1 cursor-pointer rounded-l-lg py-3 text-sm font-semibold transition-colors ${
                       votersTab === "up"
-                        ? "text-primary-text bg-button-success/30 border-button-success border-b-2"
+                        ? "bg-button-success/30 border-b-2 border-button-success text-primary-text"
                         : "text-tertiary-text hover:text-primary-text"
                     }`}
                   >
@@ -1034,7 +998,7 @@ export default function ChangelogDetailsClient({
                     onClick={() => setVotersTab("down")}
                     className={`flex-1 cursor-pointer rounded-r-lg py-3 text-sm font-semibold transition-colors ${
                       votersTab === "down"
-                        ? "text-primary-text bg-button-danger/20 border-button-danger border-b-2"
+                        ? "bg-button-danger/20 border-b-2 border-button-danger text-primary-text"
                         : "text-tertiary-text hover:text-primary-text"
                     }`}
                   >
@@ -1052,7 +1016,7 @@ export default function ChangelogDetailsClient({
                     ? activeVoters?.up || []
                     : activeVoters?.down || []
                   ).length === 0 ? (
-                    <div className="text-secondary-text py-8 text-center">
+                    <div className="py-8 text-center text-secondary-text">
                       <div className="mb-2 text-lg font-semibold">
                         {(votersTab === "up"
                           ? activeVoters?.upCount || 0
@@ -1079,9 +1043,9 @@ export default function ChangelogDetailsClient({
                     ).map((voter: VoteRecord) => (
                       <div
                         key={voter.id}
-                        className="bg-primary-bg border-border-primary hover:border-border-focus flex items-center gap-4 rounded-lg border px-4 py-3 transition-colors"
+                        className="flex items-center gap-4 rounded-lg border border-border-primary bg-primary-bg px-4 py-3 transition-colors hover:border-border-focus"
                       >
-                        <div className="ring-border-primary relative h-10 w-10 flex-shrink-0 overflow-hidden rounded-full ring-2">
+                        <div className="relative h-10 w-10 flex-shrink-0 overflow-hidden rounded-full ring-2 ring-border-primary">
                           <DefaultAvatar />
                           {voter.avatar_hash && (
                             <Image
@@ -1098,17 +1062,17 @@ export default function ChangelogDetailsClient({
                           )}
                         </div>
                         <div className="min-w-0 flex-1">
-                          <div className="text-primary-text mb-1 text-base font-bold">
+                          <div className="mb-1 text-base font-bold text-primary-text">
                             <a
                               href={`https://discord.com/users/${voter.id}`}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="text-link hover:text-link-hover transition-colors hover:underline"
+                              className="text-link transition-colors hover:text-link-hover hover:underline"
                             >
                               {voter.name.replace(/(.+)\1/, "$1")}
                             </a>
                           </div>
-                          <div className="text-tertiary-text text-sm font-medium">
+                          <div className="text-sm font-medium text-tertiary-text">
                             {new Date(
                               voter.timestamp * 1000,
                             ).toLocaleDateString("en-US", {

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Pagination } from "@mui/material";
+import { Pagination } from "@/components/ui/Pagination";
 import ItemCard from "@/components/Items/ItemCard";
 import { Item } from "@/types";
 import { getEffectiveCashValue } from "@/utils/values";
@@ -122,7 +122,6 @@ export default function ValuesItemsGrid({
     value: number,
   ) => {
     setPage(value);
-    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const getNoItemsMessage = () => {
@@ -208,24 +207,6 @@ export default function ValuesItemsGrid({
               count={totalPages}
               page={page}
               onChange={handlePageChange}
-              sx={{
-                "& .MuiPaginationItem-root": {
-                  color: "var(--color-primary-text)",
-                  "&.Mui-selected": {
-                    backgroundColor: "var(--color-button-info)",
-                    color: "var(--color-form-button-text)",
-                    "&:hover": {
-                      backgroundColor: "var(--color-button-info-hover)",
-                    },
-                  },
-                  "&:hover": {
-                    backgroundColor: "var(--color-quaternary-bg)",
-                  },
-                },
-                "& .MuiPaginationItem-icon": {
-                  color: "var(--color-primary-text)",
-                },
-              }}
             />
           </div>
         )}
@@ -233,8 +214,8 @@ export default function ValuesItemsGrid({
 
       <div className="mb-8 grid grid-cols-1 gap-4 min-[375px]:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {displayedItems.length === 0 ? (
-          <div className="bg-secondary-bg border-border-primary hover:border-border-focus col-span-full mb-4 rounded-lg border p-8 text-center">
-            <p className="text-secondary-text text-lg">
+          <div className="col-span-full mb-4 rounded-lg border border-border-primary bg-secondary-bg p-8 text-center hover:border-border-focus">
+            <p className="text-lg text-secondary-text">
               {rangeFilteredItems.length === 0 && items.length > 0
                 ? `No items found in the selected value range (${appliedMinValue.toLocaleString()} - ${
                     appliedMaxValue >= MAX_VALUE_RANGE
@@ -246,14 +227,14 @@ export default function ValuesItemsGrid({
             {rangeFilteredItems.length === 0 && items.length > 0 && (
               <button
                 onClick={onResetValueRange}
-                className="text-form-button-text border-border-primary hover:border-border-focus bg-button-info hover:bg-button-info-hover mt-4 mr-3 rounded-lg border px-6 py-2 focus:outline-none cursor-pointer"
+                className="mr-3 mt-4 cursor-pointer rounded-lg border border-border-primary bg-button-info px-6 py-2 text-form-button-text hover:border-border-focus hover:bg-button-info-hover focus:outline-none"
               >
                 Reset Value Range
               </button>
             )}
             <button
               onClick={onClearAllFilters}
-              className="text-form-button-text border-border-primary hover:border-border-focus bg-button-info hover:bg-button-info-hover mt-4 rounded-lg border px-6 py-2 focus:outline-none cursor-pointer"
+              className="mt-4 cursor-pointer rounded-lg border border-border-primary bg-button-info px-6 py-2 text-form-button-text hover:border-border-focus hover:bg-button-info-hover focus:outline-none"
             >
               Clear All Filters
             </button>
@@ -269,7 +250,7 @@ export default function ValuesItemsGrid({
                 }}
               />
               {(index + 1) % 6 === 0 && (
-                <div className="col-span-full md:hidden flex justify-center py-4">
+                <div className="col-span-full flex justify-center py-4 md:hidden">
                   <NitroGridAd adId={`np-value-grid-${index}`} />
                 </div>
               )}
@@ -284,24 +265,6 @@ export default function ValuesItemsGrid({
             count={totalPages}
             page={page}
             onChange={handlePageChange}
-            sx={{
-              "& .MuiPaginationItem-root": {
-                color: "var(--color-primary-text)",
-                "&.Mui-selected": {
-                  backgroundColor: "var(--color-button-info)",
-                  color: "var(--color-form-button-text)",
-                  "&:hover": {
-                    backgroundColor: "var(--color-button-info-hover)",
-                  },
-                },
-                "&:hover": {
-                  backgroundColor: "var(--color-quaternary-bg)",
-                },
-              },
-              "& .MuiPaginationItem-icon": {
-                color: "var(--color-primary-text)",
-              },
-            }}
           />
         </div>
       )}

@@ -3,14 +3,8 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import {
-  AppBar,
-  Toolbar,
-  Box,
-  Typography,
-  Tooltip,
-  Pagination,
-} from "@mui/material";
+import { AppBar, Toolbar, Box, Typography, Tooltip } from "@mui/material";
+import { Pagination } from "@/components/ui/Pagination";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import dynamic from "next/dynamic";
 import { useState, useCallback, useEffect } from "react";
@@ -40,7 +34,7 @@ const AnimatedThemeToggler = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="border-border-primary bg-secondary-bg text-secondary-text hover:text-primary-text hover:bg-quaternary-bg flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg border transition-all duration-200 hover:scale-105 active:scale-95">
+      <div className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg border border-border-primary bg-secondary-bg text-secondary-text transition-all duration-200 hover:scale-105 hover:bg-quaternary-bg hover:text-primary-text active:scale-95">
         <div className="h-5 w-5" />
       </div>
     ),
@@ -74,8 +68,8 @@ const UnreadNotificationBadge = ({ count }: { count: number }) => {
 
   return (
     <span
-      className={`absolute top-0 right-0 flex items-center justify-center rounded-full bg-red-500 text-[10px] font-semibold text-white z-10 translate-x-1/4 -translate-y-1/2 ${
-        isDoubleDigit || count > 99 ? "h-4 px-1 min-w-[16px]" : "h-4 w-4"
+      className={`absolute right-0 top-0 z-10 flex -translate-y-1/2 translate-x-1/4 items-center justify-center rounded-full bg-red-500 text-[10px] font-semibold text-white ${
+        isDoubleDigit || count > 99 ? "h-4 min-w-[16px] px-1" : "h-4 w-4"
       }`}
     >
       {displayCount}
@@ -99,7 +93,7 @@ const NotificationTimestamp = ({
     : timestampString;
 
   return (
-    <p className="text-secondary-text text-xs mt-1 text-right">
+    <p className="mt-1 text-right text-xs text-secondary-text">
       <span>{absoluteTime}</span>
     </p>
   );
@@ -229,13 +223,13 @@ export default function Header() {
   };
 
   const drawer = (
-    <div className="flex flex-col h-full">
+    <div className="flex h-full flex-col">
       {userData ? (
         <>
           <Link
             href={`/users/${userData?.id}`}
             onClick={handleDrawerToggle}
-            className="flex items-center gap-3 min-w-0 w-full pr-8 px-4 py-3 border-b border-border-secondary cursor-pointer hover:bg-button-info-hover/10 transition-colors"
+            className="hover:bg-button-info-hover/10 flex w-full min-w-0 cursor-pointer items-center gap-3 border-b border-border-secondary px-4 py-3 pr-8 transition-colors"
           >
             <UserAvatar
               userId={userData.id}
@@ -248,10 +242,10 @@ export default function Header() {
               premiumType={userData.premiumtype}
             />
             <div className="min-w-0 flex-1">
-              <div className="text-primary-text font-semibold truncate max-w-[120px]">
+              <div className="max-w-[120px] truncate font-semibold text-primary-text">
                 {userData.global_name || userData.username}
               </div>
-              <div className="text-secondary-text text-sm">
+              <div className="text-sm text-secondary-text">
                 @{userData.username}
               </div>
             </div>
@@ -264,7 +258,7 @@ export default function Header() {
                 const event = new CustomEvent("setLoginTab", { detail: 1 });
                 window.dispatchEvent(event);
               }}
-              className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-button-info-hover/10 transition-colors"
+              className="hover:bg-button-info-hover/10 flex cursor-pointer items-center gap-3 px-4 py-3 transition-colors"
             >
               <RobloxIcon className="h-5 w-5 text-primary-text" />
               <span className="text-primary-text">Connect Roblox</span>
@@ -273,22 +267,22 @@ export default function Header() {
           <Link
             href="/settings"
             onClick={handleDrawerToggle}
-            className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-button-info-hover/10 transition-colors"
+            className="hover:bg-button-info-hover/10 flex cursor-pointer items-center gap-3 px-4 py-3 transition-colors"
           >
             <Icon
               icon="material-symbols:settings"
-              className="text-primary-text h-5 w-5"
+              className="h-5 w-5 text-primary-text"
               inline={true}
             />
             <span className="text-primary-text">Settings</span>
           </Link>
           <div
             onClick={handleLogout}
-            className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-button-info-hover/10 transition-colors"
+            className="hover:bg-button-info-hover/10 flex cursor-pointer items-center gap-3 px-4 py-3 transition-colors"
           >
             <Icon
               icon="material-symbols:logout"
-              className="text-button-danger h-5 w-5"
+              className="h-5 w-5 text-button-danger"
               inline={true}
             />
             <span className="text-button-danger">Logout</span>
@@ -301,7 +295,7 @@ export default function Header() {
               setShowLoginModal(true);
               handleDrawerToggle();
             }}
-            className="bg-button-info hover:bg-button-info-hover text-form-button-text cursor-pointer rounded-lg px-4 py-2 font-semibold transition-colors"
+            className="cursor-pointer rounded-lg bg-button-info px-4 py-2 font-semibold text-form-button-text transition-colors hover:bg-button-info-hover"
           >
             Login
           </button>
@@ -309,7 +303,7 @@ export default function Header() {
       )}
 
       <div className="px-4 py-2">
-        <Typography className="text-secondary-text text-sm font-semibold tracking-wider uppercase">
+        <Typography className="text-sm font-semibold uppercase tracking-wider text-secondary-text">
           Game & Updates
         </Typography>
       </div>
@@ -317,21 +311,21 @@ export default function Header() {
       <Link
         href="/changelogs"
         onClick={handleDrawerToggle}
-        className="px-8 py-2 cursor-pointer hover:bg-button-info-hover/10 transition-colors text-primary-text"
+        className="hover:bg-button-info-hover/10 cursor-pointer px-8 py-2 text-primary-text transition-colors"
       >
         Changelogs
       </Link>
       <Link
         href="/seasons"
         onClick={handleDrawerToggle}
-        className="px-8 py-2 cursor-pointer hover:bg-button-info-hover/10 transition-colors text-primary-text"
+        className="hover:bg-button-info-hover/10 cursor-pointer px-8 py-2 text-primary-text transition-colors"
       >
         Browse Seasons
       </Link>
       <Link
         href="/seasons/leaderboard"
         onClick={handleDrawerToggle}
-        className="px-8 py-2 cursor-pointer hover:bg-button-info-hover/10 transition-colors text-primary-text"
+        className="hover:bg-button-info-hover/10 cursor-pointer px-8 py-2 text-primary-text transition-colors"
       >
         <Box className="flex flex-wrap items-center gap-1">
           <span>Season Leaderboard</span>
@@ -340,7 +334,7 @@ export default function Header() {
       <Link
         href="/seasons/will-i-make-it"
         onClick={handleDrawerToggle}
-        className="px-8 py-2 cursor-pointer hover:bg-button-info-hover/10 transition-colors text-primary-text"
+        className="hover:bg-button-info-hover/10 cursor-pointer px-8 py-2 text-primary-text transition-colors"
       >
         <Box className="flex flex-wrap items-center gap-1">
           <span>Will I Make It</span>
@@ -349,61 +343,61 @@ export default function Header() {
       <Link
         href="/seasons/contracts"
         onClick={handleDrawerToggle}
-        className="px-8 py-2 cursor-pointer hover:bg-button-info-hover/10 transition-colors text-primary-text"
+        className="hover:bg-button-info-hover/10 cursor-pointer px-8 py-2 text-primary-text transition-colors"
       >
         <Box className="flex flex-wrap items-center gap-1">
           <span>Weekly Contracts</span>
         </Box>
       </Link>
       <div className="px-4 py-2">
-        <Typography className="text-secondary-text text-sm font-semibold tracking-wider uppercase">
+        <Typography className="text-sm font-semibold uppercase tracking-wider text-secondary-text">
           Calculators
         </Typography>
       </div>
       <Link
         href="/calculators"
         onClick={handleDrawerToggle}
-        className="px-8 py-2 cursor-pointer hover:bg-button-info-hover/10 transition-colors text-primary-text"
+        className="hover:bg-button-info-hover/10 cursor-pointer px-8 py-2 text-primary-text transition-colors"
       >
         All Calculators
       </Link>
       <div className="px-4 py-2">
-        <Typography className="text-secondary-text text-sm font-semibold tracking-wider uppercase">
+        <Typography className="text-sm font-semibold uppercase tracking-wider text-secondary-text">
           Values
         </Typography>
       </div>
       <Link
         href="/values"
         onClick={handleDrawerToggle}
-        className="px-8 py-2 cursor-pointer hover:bg-button-info-hover/10 transition-colors text-primary-text"
+        className="hover:bg-button-info-hover/10 cursor-pointer px-8 py-2 text-primary-text transition-colors"
       >
         Value List
       </Link>
       <Link
         href="/values/changelogs"
         onClick={handleDrawerToggle}
-        className="px-8 py-2 cursor-pointer hover:bg-button-info-hover/10 transition-colors text-primary-text"
+        className="hover:bg-button-info-hover/10 cursor-pointer px-8 py-2 text-primary-text transition-colors"
       >
         Value Changelogs
       </Link>
       <Link
         href="/values/calculator"
         onClick={handleDrawerToggle}
-        className="px-8 py-2 cursor-pointer hover:bg-button-info-hover/10 transition-colors text-primary-text"
+        className="hover:bg-button-info-hover/10 cursor-pointer px-8 py-2 text-primary-text transition-colors"
       >
         Value Calculator
       </Link>
       <Link
         href="/dupes"
         onClick={handleDrawerToggle}
-        className="px-8 py-2 cursor-pointer hover:bg-button-info-hover/10 transition-colors text-primary-text"
+        className="hover:bg-button-info-hover/10 cursor-pointer px-8 py-2 text-primary-text transition-colors"
       >
         <Box className="flex flex-wrap items-center gap-1">
           <span>Dupe Finder</span>
           {isFeatureEnabled("DUPE_FINDER") ? (
             <></>
           ) : (
-            <span className="bg-button-info text-form-button-text rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase">
+            <span className="rounded bg-button-info px-1.5 py-0.5 text-[10px] font-semibold uppercase text-form-button-text">
               Coming Soon
             </span>
           )}
@@ -412,21 +406,21 @@ export default function Header() {
       <Link
         href="/trading"
         onClick={handleDrawerToggle}
-        className="px-8 py-2 cursor-pointer hover:bg-button-info-hover/10 transition-colors text-primary-text"
+        className="hover:bg-button-info-hover/10 cursor-pointer px-8 py-2 text-primary-text transition-colors"
       >
         Trade Ads
       </Link>
       <Link
         href="/inventories"
         onClick={handleDrawerToggle}
-        className="px-8 py-2 cursor-pointer hover:bg-button-info-hover/10 transition-colors text-primary-text group"
+        className="hover:bg-button-info-hover/10 group cursor-pointer px-8 py-2 text-primary-text transition-colors"
       >
         <Box className="flex flex-wrap items-center gap-1">
           <span>Inventory Checker</span>
           {isFeatureEnabled("INVENTORY_CALCULATOR") ? (
             <></>
           ) : (
-            <span className="bg-button-info text-form-button-text rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase">
+            <span className="rounded bg-button-info px-1.5 py-0.5 text-[10px] font-semibold uppercase text-form-button-text">
               Coming Soon
             </span>
           )}
@@ -435,21 +429,21 @@ export default function Header() {
       <Link
         href="/og"
         onClick={handleDrawerToggle}
-        className="px-8 py-2 cursor-pointer hover:bg-button-info-hover/10 transition-colors text-primary-text"
+        className="hover:bg-button-info-hover/10 cursor-pointer px-8 py-2 text-primary-text transition-colors"
       >
         <Box className="flex flex-wrap items-center gap-1">
           <span>OG Finder</span>
           {isFeatureEnabled("OG_FINDER") ? (
             <></>
           ) : (
-            <span className="bg-button-info text-form-button-text rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase">
+            <span className="rounded bg-button-info px-1.5 py-0.5 text-[10px] font-semibold uppercase text-form-button-text">
               Coming Soon
             </span>
           )}
         </Box>
       </Link>
       <div className="px-4 py-2">
-        <Typography className="text-secondary-text text-sm font-semibold tracking-wider uppercase">
+        <Typography className="text-sm font-semibold uppercase tracking-wider text-secondary-text">
           Community
         </Typography>
       </div>
@@ -457,25 +451,25 @@ export default function Header() {
         href="/users"
         prefetch={false}
         onClick={handleDrawerToggle}
-        className="px-8 py-2 cursor-pointer hover:bg-button-info-hover/10 transition-colors text-primary-text"
+        className="hover:bg-button-info-hover/10 cursor-pointer px-8 py-2 text-primary-text transition-colors"
       >
         User Search
       </Link>
       <Link
         href="/leaderboard/money"
         onClick={handleDrawerToggle}
-        className="px-8 py-2 cursor-pointer hover:bg-button-info-hover/10 transition-colors text-primary-text"
+        className="hover:bg-button-info-hover/10 cursor-pointer px-8 py-2 text-primary-text transition-colors"
       >
         Money Leaderboard
       </Link>
       <Link
         href="/robberies"
         onClick={handleDrawerToggle}
-        className="px-8 py-2 cursor-pointer hover:bg-button-info-hover/10 transition-colors text-primary-text"
+        className="hover:bg-button-info-hover/10 cursor-pointer px-8 py-2 text-primary-text transition-colors"
       >
         <Box className="flex flex-wrap items-center gap-1">
           <span>Robbery Tracker</span>
-          <span className="bg-button-info text-form-button-text rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase">
+          <span className="rounded bg-button-info px-1.5 py-0.5 text-[10px] font-semibold uppercase text-form-button-text">
             Beta
           </span>
         </Box>
@@ -483,26 +477,26 @@ export default function Header() {
       <Link
         href="/servers"
         onClick={handleDrawerToggle}
-        className="px-8 py-2 cursor-pointer hover:bg-button-info-hover/10 transition-colors text-primary-text"
+        className="hover:bg-button-info-hover/10 cursor-pointer px-8 py-2 text-primary-text transition-colors"
       >
         Private Servers
       </Link>
       <Link
         href="/contributors"
         onClick={handleDrawerToggle}
-        className="px-8 py-2 cursor-pointer hover:bg-button-info-hover/10 transition-colors text-primary-text"
+        className="hover:bg-button-info-hover/10 cursor-pointer px-8 py-2 text-primary-text transition-colors"
       >
         Meet the team
       </Link>
       <Link
         href="/testimonials"
         onClick={handleDrawerToggle}
-        className="px-8 py-2 cursor-pointer hover:bg-button-info-hover/10 transition-colors text-primary-text"
+        className="hover:bg-button-info-hover/10 cursor-pointer px-8 py-2 text-primary-text transition-colors"
       >
         Testimonials
       </Link>
 
-      <div className="border-t border-border-primary my-4" />
+      <div className="my-4 border-t border-border-primary" />
     </div>
   );
 
@@ -527,7 +521,7 @@ export default function Header() {
               position="static"
               color="transparent"
               elevation={0}
-              className="bg-primary-bg/75 border-border-primary border-b backdrop-blur-lg"
+              className="bg-primary-bg/75 border-b border-border-primary backdrop-blur-lg"
             >
               <Toolbar className="flex items-center justify-between">
                 <Box className="flex items-center">
@@ -543,7 +537,7 @@ export default function Header() {
                       height={48}
                       quality={90}
                       priority
-                      className="h-9 sm:h-12 w-auto"
+                      className="h-9 w-auto sm:h-12"
                     />
                   </Link>
                 </Box>
@@ -571,7 +565,7 @@ export default function Header() {
                   >
                     <PopoverTrigger asChild>
                       <button
-                        className="relative flex items-center justify-center cursor-pointer transition-all duration-200 hover:scale-105 active:scale-95 p-1"
+                        className="relative flex cursor-pointer items-center justify-center p-1 transition-all duration-200 hover:scale-105 active:scale-95"
                         aria-label="Notifications"
                       >
                         <Icon
@@ -591,9 +585,9 @@ export default function Header() {
                       className="w-[calc(100vw-1rem)] max-w-md p-0"
                     >
                       {/* Header */}
-                      <div className="border-border-secondary border-b px-4 py-3">
+                      <div className="border-b border-border-secondary px-4 py-3">
                         <div className="flex items-center justify-between">
-                          <h3 className="text-primary-text font-semibold">
+                          <h3 className="font-semibold text-primary-text">
                             {notifications
                               ? `${notifications.total} ${notificationTab === "unread" ? "Unread " : ""}Notification${notifications.total !== 1 ? "s" : ""}`
                               : `0 ${notificationTab === "unread" ? "Unread " : ""}Notifications`}
@@ -646,7 +640,7 @@ export default function Header() {
                                     );
                                   }
                                 }}
-                                className="text-secondary-text hover:text-red-500 transition-colors cursor-pointer"
+                                className="cursor-pointer text-secondary-text transition-colors hover:text-red-500"
                               >
                                 <Icon
                                   icon="si:bin-fill"
@@ -661,7 +655,7 @@ export default function Header() {
 
                       {/* Tabs */}
                       {isAuthenticated && (
-                        <div className="border-border-secondary border-b px-2">
+                        <div className="border-b border-border-secondary px-2">
                           <div role="tablist" className="tabs flex w-full">
                             <button
                               role="tab"
@@ -700,15 +694,15 @@ export default function Header() {
                       {/* Content */}
                       <div className="max-h-96 overflow-y-auto">
                         {isLoadingNotifications ? (
-                          <div className="flex flex-col items-center justify-center py-8 px-4 min-h-[200px]">
+                          <div className="flex min-h-[200px] flex-col items-center justify-center px-4 py-8">
                             <div className="loading loading-spinner loading-md text-primary-text"></div>
-                            <p className="text-secondary-text text-sm text-center mt-3">
+                            <p className="mt-3 text-center text-sm text-secondary-text">
                               Loading notifications...
                             </p>
                           </div>
                         ) : !isAuthenticated ? (
-                          <div className="flex flex-col items-center justify-center py-8 px-4">
-                            <p className="text-secondary-text text-sm text-center">
+                          <div className="flex flex-col items-center justify-center px-4 py-8">
+                            <p className="text-center text-sm text-secondary-text">
                               You must be logged in to view notifications
                             </p>
                           </div>
@@ -756,11 +750,11 @@ export default function Header() {
                                 return (
                                   <div
                                     key={notif.id}
-                                    className="border-border-secondary hover:bg-secondary-bg block px-4 py-3 border-b last:border-b-0 transition-colors"
+                                    className="block border-b border-border-secondary px-4 py-3 transition-colors last:border-b-0 hover:bg-secondary-bg"
                                   >
                                     <div className="flex-1">
                                       <div className="flex items-start justify-between gap-2">
-                                        <p className="text-primary-text text-sm font-semibold flex-1">
+                                        <p className="flex-1 text-sm font-semibold text-primary-text">
                                           {notif.title}
                                         </p>
                                         {notificationTab === "unread" && (
@@ -826,7 +820,7 @@ export default function Header() {
                                                   fetchUnreadCount();
                                                 }
                                               }}
-                                              className={`flex-shrink-0 rounded-full p-1 transition-all cursor-pointer ${
+                                              className={`flex-shrink-0 cursor-pointer rounded-full p-1 transition-all ${
                                                 markedAsSeen.has(notif.id)
                                                   ? "bg-green-500/20 text-green-500"
                                                   : "bg-secondary-bg text-secondary-text hover:bg-tertiary-bg hover:text-primary-text"
@@ -842,7 +836,7 @@ export default function Header() {
                                           </Tooltip>
                                         )}
                                       </div>
-                                      <p className="text-secondary-text text-xs mt-1">
+                                      <p className="mt-1 text-xs text-secondary-text">
                                         {notif.description}
                                       </p>
                                       {urlInfo.isWhitelisted ? (
@@ -851,7 +845,7 @@ export default function Header() {
                                           <Link
                                             href={urlInfo.relativePath}
                                             prefetch={false}
-                                            className="border-border-primary hover:border-border-focus bg-button-info text-form-button-text hover:bg-button-info-hover inline-flex items-center gap-1 rounded-lg border px-3 py-1.5 text-xs transition-colors mt-2"
+                                            className="mt-2 inline-flex items-center gap-1 rounded-lg border border-border-primary bg-button-info px-3 py-1.5 text-xs text-form-button-text transition-colors hover:border-border-focus hover:bg-button-info-hover"
                                           >
                                             View
                                           </Link>
@@ -860,13 +854,13 @@ export default function Header() {
                                             href={urlInfo.href}
                                             target="_blank"
                                             rel="noopener noreferrer"
-                                            className="border-border-primary hover:border-border-focus bg-button-info text-form-button-text hover:bg-button-info-hover inline-flex items-center gap-1 rounded-lg border px-3 py-1.5 text-xs transition-colors mt-2"
+                                            className="mt-2 inline-flex items-center gap-1 rounded-lg border border-border-primary bg-button-info px-3 py-1.5 text-xs text-form-button-text transition-colors hover:border-border-focus hover:bg-button-info-hover"
                                           >
                                             View
                                           </a>
                                         ) : null
                                       ) : (
-                                        <p className="text-secondary-text text-xs mt-1 break-all">
+                                        <p className="mt-1 break-all text-xs text-secondary-text">
                                           {notif.link}
                                         </p>
                                       )}
@@ -879,7 +873,7 @@ export default function Header() {
                               })}
                             </div>
                             {notifications.total_pages > 1 && (
-                              <div className="border-border-secondary flex justify-center border-t py-3">
+                              <div className="flex justify-center border-t border-border-secondary py-3">
                                 <Pagination
                                   count={notifications.total_pages}
                                   page={notificationPage}
@@ -891,40 +885,18 @@ export default function Header() {
                                       fetchUnreadWithDebounce(value, 5);
                                     }
                                   }}
-                                  size="small"
-                                  sx={{
-                                    "& .MuiPaginationItem-root": {
-                                      color: "var(--color-primary-text)",
-                                      "&.Mui-selected": {
-                                        backgroundColor:
-                                          "var(--color-button-info)",
-                                        color: "var(--color-form-button-text)",
-                                        "&:hover": {
-                                          backgroundColor:
-                                            "var(--color-button-info-hover)",
-                                        },
-                                      },
-                                      "&:hover": {
-                                        backgroundColor:
-                                          "var(--color-quaternary-bg)",
-                                      },
-                                    },
-                                    "& .MuiPaginationItem-icon": {
-                                      color: "var(--color-primary-text)",
-                                    },
-                                  }}
                                 />
                               </div>
                             )}
                           </>
                         ) : (
-                          <div className="flex flex-col items-center justify-center py-8 px-4 min-h-[200px]">
+                          <div className="flex min-h-[200px] flex-col items-center justify-center px-4 py-8">
                             <Icon
                               icon="mingcute:notification-line"
-                              className="text-secondary-text h-12 w-12 mb-3"
+                              className="mb-3 h-12 w-12 text-secondary-text"
                               inline={true}
                             />
-                            <p className="text-secondary-text text-sm text-center">
+                            <p className="text-center text-sm text-secondary-text">
                               No new notifications
                             </p>
                           </div>
@@ -937,7 +909,7 @@ export default function Header() {
                     className="flex items-center justify-center"
                   >
                     <button
-                      className="flex items-center justify-center cursor-pointer transition-all duration-200 hover:scale-105 active:scale-95"
+                      className="flex cursor-pointer items-center justify-center transition-all duration-200 hover:scale-105 active:scale-95"
                       aria-label="Support us"
                     >
                       <Image
@@ -954,7 +926,7 @@ export default function Header() {
                   </div>
                   <button
                     onClick={handleDrawerToggle}
-                    className="flex items-center justify-center cursor-pointer transition-all duration-200 hover:scale-105 active:scale-95"
+                    className="flex cursor-pointer items-center justify-center transition-all duration-200 hover:scale-105 active:scale-95"
                     aria-label="toggle menu"
                   >
                     <svg
@@ -974,7 +946,7 @@ export default function Header() {
           <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
             <SheetContent
               side="right"
-              className="w-60 p-0 overflow-y-auto z-[1450]"
+              className="z-[1450] w-60 overflow-y-auto p-0"
             >
               {drawer}
             </SheetContent>

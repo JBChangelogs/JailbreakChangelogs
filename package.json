@@ -7,6 +7,7 @@
     "build": "next build",
     "build:analyze": "ANALYZE=true next build",
     "build:perf": "node scripts/build-performance.js",
+    "analyze": "next experimental-analyze",
     "start": "next start",
     "lint": "eslint .",
     "type-check": "tsc --noEmit",

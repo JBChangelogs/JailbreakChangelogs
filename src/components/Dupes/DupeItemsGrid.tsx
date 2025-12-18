@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Pagination } from "@mui/material";
+import { Pagination } from "@/components/ui/Pagination";
 import DupeItemCard from "./DupeItemCard";
 import { DupeFinderItem, Item } from "@/types";
 import NitroGridAd from "@/components/Ads/NitroGridAd";
@@ -46,7 +46,6 @@ export default function DupeItemsGrid({
     value: number,
   ) => {
     setPage(value);
-    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   if (isLoading) {
@@ -54,13 +53,13 @@ export default function DupeItemsGrid({
       <div className="space-y-4">
         {Array.from({ length: 6 }).map((_, index) => (
           <div key={index} className="animate-pulse">
-            <div className="border-border-primary bg-secondary-bg rounded-lg border p-4">
+            <div className="rounded-lg border border-border-primary bg-secondary-bg p-4">
               <div className="flex items-start gap-4">
-                <div className="bg-surface-bg h-16 w-16 rounded-lg"></div>
+                <div className="h-16 w-16 rounded-lg bg-surface-bg"></div>
                 <div className="flex-1 space-y-2">
-                  <div className="bg-surface-bg h-4 w-3/4 rounded"></div>
-                  <div className="bg-surface-bg h-3 w-1/2 rounded"></div>
-                  <div className="bg-surface-bg h-3 w-1/3 rounded"></div>
+                  <div className="h-4 w-3/4 rounded bg-surface-bg"></div>
+                  <div className="h-3 w-1/2 rounded bg-surface-bg"></div>
+                  <div className="h-3 w-1/3 rounded bg-surface-bg"></div>
                 </div>
               </div>
             </div>
@@ -88,24 +87,6 @@ export default function DupeItemsGrid({
             count={totalPages}
             page={page}
             onChange={handlePageChange}
-            sx={{
-              "& .MuiPaginationItem-root": {
-                color: "var(--color-primary-text)",
-                "&.Mui-selected": {
-                  backgroundColor: "var(--color-button-info)",
-                  color: "var(--color-form-button-text)",
-                  "&:hover": {
-                    backgroundColor: "var(--color-button-info-hover)",
-                  },
-                },
-                "&:hover": {
-                  backgroundColor: "var(--color-quaternary-bg)",
-                },
-              },
-              "& .MuiPaginationItem-icon": {
-                color: "var(--color-primary-text)",
-              },
-            }}
           />
         </div>
       )}
@@ -135,7 +116,7 @@ export default function DupeItemsGrid({
                 robloxId={robloxId}
               />
               {(index + 1) % 4 === 0 && (
-                <div className="col-span-full md:hidden flex justify-center py-4">
+                <div className="col-span-full flex justify-center py-4 md:hidden">
                   <NitroGridAd adId={`np-dupe-grid-${page}-${index}`} />
                 </div>
               )}
@@ -150,24 +131,6 @@ export default function DupeItemsGrid({
             count={totalPages}
             page={page}
             onChange={handlePageChange}
-            sx={{
-              "& .MuiPaginationItem-root": {
-                color: "var(--color-primary-text)",
-                "&.Mui-selected": {
-                  backgroundColor: "var(--color-button-info)",
-                  color: "var(--color-form-button-text)",
-                  "&:hover": {
-                    backgroundColor: "var(--color-button-info-hover)",
-                  },
-                },
-                "&:hover": {
-                  backgroundColor: "var(--color-quaternary-bg)",
-                },
-              },
-              "& .MuiPaginationItem-icon": {
-                color: "var(--color-primary-text)",
-              },
-            }}
           />
         </div>
       )}

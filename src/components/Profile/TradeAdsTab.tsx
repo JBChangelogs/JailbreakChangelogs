@@ -1,14 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import {
-  CircularProgress,
-  Box,
-  Pagination,
-  Chip,
-  Skeleton,
-  Tooltip,
-} from "@mui/material";
+import { CircularProgress, Box, Chip, Skeleton, Tooltip } from "@mui/material";
+import { Pagination } from "@/components/ui/Pagination";
 import { useOptimizedRealTimeRelativeDate } from "@/hooks/useSharedTimer";
 import { formatCustomDate } from "@/utils/timestamp";
 import Image from "next/image";
@@ -105,7 +99,7 @@ export default function TradeAdsTab({
     return (
       <div
         key={itemData.id}
-        className="bg-primary-bg border-border-primary hover:border-border-focus rounded-lg border p-3 shadow-sm transition-colors"
+        className="rounded-lg border border-border-primary bg-primary-bg p-3 shadow-sm transition-colors hover:border-border-focus"
       >
         <div className="mb-2 flex items-center">
           <div className="relative mr-3 h-16 w-16 flex-shrink-0 overflow-hidden rounded-md md:h-[4.5rem] md:w-32">
@@ -147,13 +141,13 @@ export default function TradeAdsTab({
               ) : (
                 <Link
                   href={itemUrl}
-                  className="text-primary-text hover:text-button-info font-medium transition-colors"
+                  className="font-medium text-primary-text transition-colors hover:text-button-info"
                 >
                   {displayName}
                 </Link>
               )}
             </div>
-            <div className="text-secondary-text text-xs">
+            <div className="text-xs text-secondary-text">
               <div className="mb-1">
                 {isLoadingAdditionalData ? (
                   <Skeleton variant="rounded" width={80} height={20} />
@@ -198,14 +192,14 @@ export default function TradeAdsTab({
     return (
       <div
         key={ad.id}
-        className="border-border-primary bg-secondary-bg/30 mb-6 rounded-lg border p-5 shadow-sm"
+        className="bg-secondary-bg/30 mb-6 rounded-lg border border-border-primary p-5 shadow-sm"
       >
         <div className="mb-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <SwapHorizIcon className="text-button-info h-6 w-6" />
+            <SwapHorizIcon className="h-6 w-6 text-button-info" />
             <Link
               href={`/trading/ad/${ad.id}`}
-              className="text-primary-text hover:text-button-info text-xl font-bold transition-colors"
+              className="text-xl font-bold text-primary-text transition-colors hover:text-button-info"
             >
               Trade Ad #{ad.id}
             </Link>
@@ -213,12 +207,12 @@ export default function TradeAdsTab({
           <div
             className={`rounded-full border px-3 py-1 text-sm font-medium ${
               ad.status === "Pending"
-                ? "bg-button-info/10 text-primary-text border-button-info/20"
+                ? "bg-button-info/10 border-button-info/20 text-primary-text"
                 : ad.status === "Completed"
-                  ? "bg-status-success/10 text-primary-text border-status-success/20"
+                  ? "bg-status-success/10 border-status-success/20 text-primary-text"
                   : ad.status === "Expired"
-                    ? "bg-status-error/10 text-status-error border-status-error/20"
-                    : "bg-secondary-text/10 text-secondary-text border-secondary-text/20"
+                    ? "bg-status-error/10 border-status-error/20 text-status-error"
+                    : "bg-secondary-text/10 border-secondary-text/20 text-secondary-text"
             }`}
           >
             {ad.status}
@@ -228,30 +222,30 @@ export default function TradeAdsTab({
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
           {/* Offering Section */}
           <div className="border-status-success/20 bg-status-success/10 rounded-lg border p-4">
-            <h3 className="text-status-success mb-4 text-lg font-bold">
+            <h3 className="mb-4 text-lg font-bold text-status-success">
               Offering
             </h3>
             {ad.offering.length > 0 ? (
               renderTradeItem(ad.offering[0], ad.offering.length)
             ) : (
-              <p className="text-secondary-text italic">No items offered</p>
+              <p className="italic text-secondary-text">No items offered</p>
             )}
           </div>
 
           {/* Requesting Section */}
           <div className="border-status-error/20 bg-status-error/10 rounded-lg border p-4">
-            <h3 className="text-status-error mb-4 text-lg font-bold">
+            <h3 className="mb-4 text-lg font-bold text-status-error">
               Requesting
             </h3>
             {ad.requesting.length > 0 ? (
               renderTradeItem(ad.requesting[0], ad.requesting.length)
             ) : (
-              <p className="text-secondary-text italic">No items requested</p>
+              <p className="italic text-secondary-text">No items requested</p>
             )}
           </div>
         </div>
 
-        <div className="border-border-primary text-secondary-text mt-6 flex flex-wrap items-center gap-2 border-t pt-4 text-sm">
+        <div className="mt-6 flex flex-wrap items-center gap-2 border-t border-border-primary pt-4 text-sm text-secondary-text">
           <Tooltip
             title={formatCustomDate(ad.created_at)}
             placement="top"
@@ -322,10 +316,10 @@ export default function TradeAdsTab({
   if (error) {
     return (
       <div className="space-y-6">
-        <div className="border-border-primary rounded-lg border p-4">
+        <div className="rounded-lg border border-border-primary p-4">
           <div className="mb-3 flex items-center gap-2">
             <SwapHorizIcon className="text-button-info" />
-            <h2 className="text-primary-text text-lg font-semibold">
+            <h2 className="text-lg font-semibold text-primary-text">
               Trade Ads
             </h2>
           </div>
@@ -337,18 +331,18 @@ export default function TradeAdsTab({
 
   return (
     <div className="space-y-6">
-      <div className="border-border-primary rounded-lg border p-4">
+      <div className="rounded-lg border border-border-primary p-4">
         <div className="mb-3 flex items-center gap-2">
           <SwapHorizIcon className="text-button-info" />
-          <h2 className="text-primary-text text-lg font-semibold">
+          <h2 className="text-lg font-semibold text-primary-text">
             Trade Ads [{tradeAds.length}]
           </h2>
         </div>
 
         {tradeAds.length === 0 ? (
           <div className="p-8 text-center">
-            <SwapHorizIcon className="text-button-info mx-auto mb-4 h-12 w-12" />
-            <h3 className="text-primary-text mb-2 text-xl font-semibold">
+            <SwapHorizIcon className="mx-auto mb-4 h-12 w-12 text-button-info" />
+            <h3 className="mb-2 text-xl font-semibold text-primary-text">
               {isOwnProfile
                 ? "You have not posted any trade ads."
                 : "No trade ads available."}
@@ -356,7 +350,7 @@ export default function TradeAdsTab({
             {isOwnProfile && (
               <Link
                 href="/trading"
-                className="text-form-button-text border-button-info bg-button-info hover:bg-button-info-hover mt-4 inline-block rounded-lg border px-4 py-2 text-sm font-semibold transition-colors"
+                className="mt-4 inline-block rounded-lg border border-button-info bg-button-info px-4 py-2 text-sm font-semibold text-form-button-text transition-colors hover:bg-button-info-hover"
               >
                 Create Trade Ad
               </Link>
@@ -377,25 +371,6 @@ export default function TradeAdsTab({
                   count={Math.ceil(tradeAds.length / adsPerPage)}
                   page={currentPage}
                   onChange={handlePageChange}
-                  color="primary"
-                  sx={{
-                    "& .MuiPaginationItem-root": {
-                      color: "var(--color-primary-text)",
-                      "&.Mui-selected": {
-                        backgroundColor: "var(--color-button-info)",
-                        color: "var(--color-form-button-text)",
-                        "&:hover": {
-                          backgroundColor: "var(--color-button-info-hover)",
-                        },
-                      },
-                      "&:hover": {
-                        backgroundColor: "var(--color-quaternary-bg)",
-                      },
-                    },
-                    "& .MuiPaginationItem-icon": {
-                      color: "var(--color-primary-text)",
-                    },
-                  }}
                 />
               </div>
             )}

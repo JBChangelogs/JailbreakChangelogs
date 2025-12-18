@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { CircularProgress, Box, Pagination, Chip } from "@mui/material";
+import { CircularProgress, Box, Chip } from "@mui/material";
+import { Pagination } from "@/components/ui/Pagination";
 import Comment from "../ProfileComments/Comments";
 import CommentIcon from "@mui/icons-material/Comment";
 import { ArrowUpIcon, ArrowDownIcon } from "@heroicons/react/24/outline";
@@ -171,10 +172,10 @@ export default function CommentsTab({
   if (error) {
     return (
       <div className="space-y-6">
-        <div className="border-border-primary rounded-lg border p-4">
+        <div className="rounded-lg border border-border-primary p-4">
           <div className="mb-3 flex items-center gap-2">
             <CommentIcon className="text-button-info" />
-            <h2 className="text-primary-text text-lg font-semibold">
+            <h2 className="text-lg font-semibold text-primary-text">
               Recent Comments [{comments.length}]
             </h2>
           </div>
@@ -187,14 +188,14 @@ export default function CommentsTab({
   if (shouldHideComments) {
     return (
       <div className="space-y-6">
-        <div className="border-border-primary rounded-lg border p-4">
+        <div className="rounded-lg border border-border-primary p-4">
           <div className="mb-3 flex items-center gap-2">
             <CommentIcon className="text-button-info" />
-            <h2 className="text-primary-text text-lg font-semibold">
+            <h2 className="text-lg font-semibold text-primary-text">
               Recent Comments
             </h2>
           </div>
-          <div className="text-primary-text flex items-center gap-2">
+          <div className="flex items-center gap-2 text-primary-text">
             <svg
               className="h-5 w-5"
               fill="none"
@@ -217,11 +218,11 @@ export default function CommentsTab({
 
   return (
     <div className="space-y-6" id="comments-section">
-      <div className="border-border-primary rounded-lg border p-4">
+      <div className="rounded-lg border border-border-primary p-4">
         <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-2">
             <CommentIcon className="text-button-info" />
-            <h2 className="text-primary-text text-lg font-semibold">
+            <h2 className="text-lg font-semibold text-primary-text">
               Recent{" "}
               {activeFilter
                 ? `${activeFilter.charAt(0).toUpperCase() + activeFilter.slice(1)} `
@@ -233,7 +234,7 @@ export default function CommentsTab({
             onClick={() =>
               setSortOrder((prev) => (prev === "newest" ? "oldest" : "newest"))
             }
-            className="border-border-primary hover:border-border-focus bg-button-info text-form-button-text hover:bg-button-info-hover flex cursor-pointer items-center gap-1 rounded-lg border px-3 py-1.5 text-sm transition-colors"
+            className="flex cursor-pointer items-center gap-1 rounded-lg border border-border-primary bg-button-info px-3 py-1.5 text-sm text-form-button-text transition-colors hover:border-border-focus hover:bg-button-info-hover"
           >
             {sortOrder === "newest" ? (
               <ArrowDownIcon className="h-4 w-4" />
@@ -245,7 +246,7 @@ export default function CommentsTab({
         </div>
 
         {comments.length === 0 ? (
-          <p className="text-primary-text italic">No comments yet</p>
+          <p className="italic text-primary-text">No comments yet</p>
         ) : (
           <>
             {/* Filter chips */}
@@ -327,7 +328,7 @@ export default function CommentsTab({
 
             <div className="space-y-4">
               {currentComments.length === 0 ? (
-                <p className="text-primary-text italic">
+                <p className="italic text-primary-text">
                   {activeFilter
                     ? `No ${activeFilter === "item" ? "item" : activeFilter} comments yet`
                     : "No comments yet"}
@@ -364,25 +365,6 @@ export default function CommentsTab({
                   count={Math.ceil(filteredComments.length / commentsPerPage)}
                   page={currentPage}
                   onChange={handlePageChange}
-                  color="primary"
-                  sx={{
-                    "& .MuiPaginationItem-root": {
-                      color: "var(--color-primary-text)",
-                      "&.Mui-selected": {
-                        backgroundColor: "var(--color-button-info)",
-                        color: "var(--color-form-button-text)",
-                        "&:hover": {
-                          backgroundColor: "var(--color-button-info-hover)",
-                        },
-                      },
-                      "&:hover": {
-                        backgroundColor: "var(--color-quaternary-bg)",
-                      },
-                    },
-                    "& .MuiPaginationItem-icon": {
-                      color: "var(--color-primary-text)",
-                    },
-                  }}
                 />
               </div>
             )}
