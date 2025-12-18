@@ -27,6 +27,8 @@ const MOBILE_CONFIG = {
   sizes: [
     ["320", "50"],
     ["320", "100"],
+    ["336", "280"],
+    ["300", "250"],
   ],
   report: {
     enabled: true,
@@ -42,6 +44,7 @@ const TABLET_CONFIG = {
     ["728", "90"],
     ["320", "50"],
     ["320", "100"],
+    ["300", "250"],
   ],
   report: {
     enabled: true,
