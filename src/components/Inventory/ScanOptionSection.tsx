@@ -82,7 +82,7 @@ export default function ScanOptionSection({
               !ENABLE_WS_SCAN ? (
                 <button
                   disabled
-                  className="bg-button-info-disabled text-form-button-text border-button-info-disabled inline-flex cursor-not-allowed items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium"
+                  className="border-button-info-disabled bg-button-info-disabled text-form-button-text inline-flex cursor-not-allowed items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium"
                 >
                   <svg
                     className="h-4 w-4"

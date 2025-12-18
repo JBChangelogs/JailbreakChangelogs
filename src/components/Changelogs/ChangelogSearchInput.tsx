@@ -42,7 +42,7 @@ const ChangelogSearchInput: React.FC<ChangelogSearchInputProps> = ({
           setTimeout(() => onSearchFocus(false), 200);
         }}
         placeholder={placeholder}
-        className="text-secondary-text border-border-primary hover:border-border-focus bg-secondary-bg placeholder-secondary-text focus:border-button-info w-full rounded-lg border px-4 py-2 pr-10 pl-10 focus:outline-none"
+        className="border-border-primary bg-secondary-bg text-secondary-text placeholder-secondary-text hover:border-border-focus focus:border-button-info w-full rounded-lg border px-4 py-2 pr-10 pl-10 focus:outline-none"
       />
       <div className="absolute top-1/2 left-3 -translate-y-1/2">
         <MagnifyingGlassIcon className="text-primary-text h-5 w-5" />
@@ -52,7 +52,7 @@ const ChangelogSearchInput: React.FC<ChangelogSearchInputProps> = ({
           onClick={() => {
             onSearchChange("");
           }}
-          className="hover:text-secondary-text text-primary-text absolute top-1/2 right-3 -translate-y-1/2 cursor-pointer"
+          className="text-primary-text hover:text-secondary-text absolute top-1/2 right-3 -translate-y-1/2 cursor-pointer"
           aria-label="Clear search"
         >
           <XMarkIcon className="h-5 w-5" />
@@ -65,7 +65,7 @@ const ChangelogSearchInput: React.FC<ChangelogSearchInputProps> = ({
           <div className="flex flex-col gap-1">
             <button
               onClick={() => onSearchChange("has:video ")}
-              className="border-border-primary hover:border-border-focus bg-secondary-bg hover:bg-primary-bg flex cursor-pointer items-center gap-2 rounded border px-3 py-2 text-left transition-colors"
+              className="border-border-primary bg-secondary-bg hover:border-border-focus hover:bg-primary-bg flex cursor-pointer items-center gap-2 rounded border px-3 py-2 text-left transition-colors"
             >
               <span
                 className={`rounded-full px-2 py-0.5 text-xs ${getBadgeColor("video")} text-white`}
@@ -76,7 +76,7 @@ const ChangelogSearchInput: React.FC<ChangelogSearchInputProps> = ({
             </button>
             <button
               onClick={() => onSearchChange("has:audio ")}
-              className="border-border-primary hover:border-border-focus bg-secondary-bg hover:bg-primary-bg flex cursor-pointer items-center gap-2 rounded border px-3 py-2 text-left transition-colors"
+              className="border-border-primary bg-secondary-bg hover:border-border-focus hover:bg-primary-bg flex cursor-pointer items-center gap-2 rounded border px-3 py-2 text-left transition-colors"
             >
               <span
                 className={`rounded-full px-2 py-0.5 text-xs ${getBadgeColor("audio")} text-white`}
@@ -87,7 +87,7 @@ const ChangelogSearchInput: React.FC<ChangelogSearchInputProps> = ({
             </button>
             <button
               onClick={() => onSearchChange("has:image ")}
-              className="border-border-primary hover:border-border-focus bg-secondary-bg hover:bg-primary-bg flex cursor-pointer items-center gap-2 rounded border px-3 py-2 text-left transition-colors"
+              className="border-border-primary bg-secondary-bg hover:border-border-focus hover:bg-primary-bg flex cursor-pointer items-center gap-2 rounded border px-3 py-2 text-left transition-colors"
             >
               <span
                 className={`rounded-full px-2 py-0.5 text-xs ${getBadgeColor("image")} text-white`}
@@ -98,7 +98,7 @@ const ChangelogSearchInput: React.FC<ChangelogSearchInputProps> = ({
             </button>
             <button
               onClick={() => onSearchChange("has:mentions ")}
-              className="border-border-primary hover:border-border-focus bg-secondary-bg hover:bg-primary-bg flex cursor-pointer items-center gap-2 rounded border px-3 py-2 text-left transition-colors"
+              className="border-border-primary bg-secondary-bg hover:border-border-focus hover:bg-primary-bg flex cursor-pointer items-center gap-2 rounded border px-3 py-2 text-left transition-colors"
             >
               <span
                 className={`rounded-full px-2 py-0.5 text-xs ${getBadgeColor("mentions")} text-white`}
@@ -176,7 +176,7 @@ const ChangelogSearchInput: React.FC<ChangelogSearchInputProps> = ({
         </div>
       ) : (
         searchQuery && (
-          <div className="text-secondary-text border-tertiary-bg bg-secondary-bg absolute z-10 mt-1 w-full rounded-lg border p-4 text-center">
+          <div className="border-tertiary-bg bg-secondary-bg text-secondary-text absolute z-10 mt-1 w-full rounded-lg border p-4 text-center">
             No results found
           </div>
         )

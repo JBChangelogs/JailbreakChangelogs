@@ -39,7 +39,7 @@ export default function TimelineClient({ changelogs }: TimelineClientProps) {
       {showBackToTop && (
         <button
           onClick={scrollToTop}
-          className="text-primary-text bg-button-info hover:bg-button-info-hover fixed right-8 bottom-8 z-[2000] rounded-full p-3 shadow-lg focus:outline-none"
+          className="bg-button-info text-primary-text hover:bg-button-info-hover fixed right-8 bottom-8 z-[2000] rounded-full p-3 shadow-lg focus:outline-none"
           aria-label="Back to top"
         >
           <ArrowUpIcon className="h-6 w-6" />

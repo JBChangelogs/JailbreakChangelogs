@@ -115,7 +115,7 @@ export default function FeatureMaintenance({
                 href="https://x.com/JBChangelogs"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-secondary-text hover:text-link-hover hover:bg-quaternary-bg rounded-full p-3 transition-colors duration-200"
+                className="text-secondary-text hover:bg-quaternary-bg hover:text-link-hover rounded-full p-3 transition-colors duration-200"
                 aria-label="Twitter/X"
               >
                 <Icon
@@ -128,7 +128,7 @@ export default function FeatureMaintenance({
                 href="https://discord.jailbreakchangelogs.xyz"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-secondary-text hover:text-link-hover hover:bg-quaternary-bg rounded-full p-3 transition-colors duration-200"
+                className="text-secondary-text hover:bg-quaternary-bg hover:text-link-hover rounded-full p-3 transition-colors duration-200"
                 aria-label="Discord"
               >
                 <Icon
@@ -141,7 +141,7 @@ export default function FeatureMaintenance({
                 href="https://www.roblox.com/communities/35348206/Jailbreak-Changelogs#!/about"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-secondary-text hover:text-link-hover hover:bg-quaternary-bg rounded-full p-3 transition-colors duration-200"
+                className="text-secondary-text hover:bg-quaternary-bg hover:text-link-hover rounded-full p-3 transition-colors duration-200"
                 aria-label="Roblox Group"
               >
                 <Icon

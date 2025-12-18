@@ -262,7 +262,7 @@ export default function DupeItemCard({
           <div className="text-secondary-text text-sm">ORIGINAL OWNER</div>
           <div className="text-xl font-bold">
             <div className="flex items-center justify-center gap-2">
-              <div className="relative h-8 w-8 rounded-full bg-tertiary-bg overflow-hidden flex-shrink-0">
+              <div className="bg-tertiary-bg relative h-8 w-8 flex-shrink-0 overflow-hidden rounded-full">
                 <Image
                   src={getUserAvatar(robloxId)}
                   alt="Original Owner Avatar"
@@ -340,7 +340,7 @@ export default function DupeItemCard({
 
       {/* Very muted dev-only dupe ratio, bottom-right */}
       {item.dupe_ratio !== null && item.dupe_ratio !== undefined && (
-        <span className="text-tertiary-text font-mono text-[11px] opacity-70 absolute bottom-3 right-3">
+        <span className="text-tertiary-text absolute right-3 bottom-3 font-mono text-[11px] opacity-70">
           {item.dupe_ratio.toFixed(2)}
         </span>
       )}

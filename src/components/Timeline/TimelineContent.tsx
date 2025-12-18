@@ -118,7 +118,7 @@ const TimelineContent: React.FC<TimelineContentProps> = ({ changelogs }) => {
                   }}
                 >
                   <div className="flex flex-col gap-0.5">
-                    <h3 className="text-xl text-primary-text group-hover:text-link-hover font-bold tracking-tight transition-colors">
+                    <h3 className="text-primary-text group-hover:text-link-hover text-xl font-bold tracking-tight transition-colors">
                       {changelog.title.split(" / ")[0]}
                     </h3>
                     <p className="text-secondary-text text-sm font-semibold tracking-tight">

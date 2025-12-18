@@ -114,7 +114,7 @@ export default function SeasonLeaderboardClient({
               placeholder="Search players by name or ID..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="text-primary-text border-border-primary hover:border-border-focus bg-secondary-bg placeholder-secondary-text focus:border-button-info w-full rounded-lg border px-4 py-2 pr-10 pl-10 transition-all duration-300 focus:outline-none"
+              className="border-border-primary bg-secondary-bg text-primary-text placeholder-secondary-text hover:border-border-focus focus:border-button-info w-full rounded-lg border px-4 py-2 pr-10 pl-10 transition-all duration-300 focus:outline-none"
             />
             <svg
               className="text-secondary-text absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2"
@@ -132,7 +132,7 @@ export default function SeasonLeaderboardClient({
             {searchTerm && (
               <button
                 onClick={() => setSearchTerm("")}
-                className="hover:text-primary-text text-secondary-text absolute top-1/2 right-3 h-5 w-5 -translate-y-1/2 cursor-pointer"
+                className="text-secondary-text hover:text-primary-text absolute top-1/2 right-3 h-5 w-5 -translate-y-1/2 cursor-pointer"
                 aria-label="Clear search"
               >
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -148,7 +148,7 @@ export default function SeasonLeaderboardClient({
           </div>
 
           {/* Virtualized leaderboard container */}
-          <div className="bg-secondary-bg border-border-primary hover:border-border-focus hover:shadow-card-shadow rounded-lg border p-4 transition-colors duration-200 hover:shadow-lg">
+          <div className="border-border-primary bg-secondary-bg hover:border-border-focus hover:shadow-card-shadow rounded-lg border p-4 transition-colors duration-200 hover:shadow-lg">
             <div
               ref={parentRef}
               className="scrollbar-thin scrollbar-track-transparent scrollbar-thumb-border-primary hover:scrollbar-thumb-border-focus h-[48rem] overflow-y-auto pr-2"
@@ -199,7 +199,7 @@ export default function SeasonLeaderboardClient({
                           className={`mb-4 rounded-lg border p-3 transition-colors ${
                             originalRank <= 3
                               ? ""
-                              : "border-border-primary hover:border-border-focus bg-primary-bg"
+                              : "border-border-primary bg-primary-bg hover:border-border-focus"
                           }`}
                           style={{
                             ...(originalRank === 1 && {
@@ -293,7 +293,7 @@ export default function SeasonLeaderboardClient({
           </div>
         </div>
       ) : (
-        <div className="bg-secondary-bg border-border-primary hover:border-border-focus hover:shadow-card-shadow rounded-lg border p-8 text-center transition-colors duration-200 hover:shadow-lg">
+        <div className="border-border-primary bg-secondary-bg hover:border-border-focus hover:shadow-card-shadow rounded-lg border p-8 text-center transition-colors duration-200 hover:shadow-lg">
           <p className="text-secondary-text">
             No season leaderboard data available at this time.
           </p>

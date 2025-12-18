@@ -21,7 +21,7 @@ export default function NotFound() {
           <div className="mt-6 flex flex-col items-center gap-3 sm:flex-row">
             <button
               onClick={() => window.history.back()}
-              className="text-primary-text bg-primary-bg hover:bg-secondary-bg flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg px-6 py-3 transition-colors sm:w-auto"
+              className="bg-primary-bg text-primary-text hover:bg-secondary-bg flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg px-6 py-3 transition-colors sm:w-auto"
             >
               <ArrowLeftIcon className="h-5 w-5" />
               <span>Go back</span>

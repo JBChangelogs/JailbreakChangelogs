@@ -148,7 +148,7 @@ export default function SupporterModal({
       />
 
       <div className="fixed inset-0 flex items-center justify-center p-4">
-        <DialogPanel className="modal-container bg-secondary-bg border-button-info mx-auto flex max-h-[60vh] sm:max-h-[75vh] w-full max-w-2xl flex-col overflow-hidden rounded-lg border shadow-lg">
+        <DialogPanel className="modal-container border-button-info bg-secondary-bg mx-auto flex max-h-[60vh] w-full max-w-2xl flex-col overflow-hidden rounded-lg border shadow-lg sm:max-h-[75vh]">
           {/* Header */}
           <div className="modal-header border-border-primary flex items-center justify-between border-b p-6">
             <div className="flex items-center gap-3">
@@ -215,7 +215,7 @@ export default function SupporterModal({
                       key={recommendedTier.name}
                       className={`relative rounded-lg border-2 ${recommendedTier.color} bg-tertiary-bg p-4 ${
                         recommendedTier.recommended
-                          ? "ring-opacity-50 ring-button-info ring-2"
+                          ? "ring-button-info ring-opacity-50 ring-2"
                           : ""
                       }`}
                     >
@@ -326,7 +326,7 @@ export default function SupporterModal({
               </Link>
               <button
                 onClick={onClose}
-                className="text-secondary-text hover:text-primary-text border-border-primary bg-tertiary-bg hover:bg-primary-bg cursor-pointer rounded-lg border px-6 py-3 transition-colors"
+                className="border-border-primary bg-tertiary-bg text-secondary-text hover:bg-primary-bg hover:text-primary-text cursor-pointer rounded-lg border px-6 py-3 transition-colors"
               >
                 Maybe Later
               </button>
@@ -334,7 +334,7 @@ export default function SupporterModal({
 
             {/* Footer Note */}
             <div className="border-border-primary bg-tertiary-bg mt-4 rounded-lg border p-3">
-              <p className="text-center text-xs text-secondary-text">
+              <p className="text-secondary-text text-center text-xs">
                 All supporter purchases are one-time only and non-refundable!
                 Once you redeem your code, you keep the perks forever.
               </p>

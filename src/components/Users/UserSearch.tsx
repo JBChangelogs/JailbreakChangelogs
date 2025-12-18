@@ -154,19 +154,19 @@ export default function UserSearch() {
             value={searchQuery}
             onChange={handleInputChange}
             placeholder="Search by ID or username..."
-            className="w-full rounded-lg border border-border-primary bg-secondary-bg px-4 py-3 pr-16 text-primary-text placeholder-secondary-text transition-all duration-300 focus:border-button-info focus:outline-none"
+            className="border-border-primary bg-secondary-bg text-primary-text placeholder-secondary-text focus:border-button-info w-full rounded-lg border px-4 py-3 pr-16 transition-all duration-300 focus:outline-none"
             disabled={isLoading}
             required
           />
 
           {/* Right side controls container */}
-          <div className="absolute right-3 top-1/2 flex -translate-y-1/2 items-center gap-2">
+          <div className="absolute top-1/2 right-3 flex -translate-y-1/2 items-center gap-2">
             {/* Clear button - only show when there's text */}
             {searchQuery && (
               <button
                 type="button"
                 onClick={handleClearSearch}
-                className="cursor-pointer text-secondary-text transition-colors hover:text-primary-text"
+                className="text-secondary-text hover:text-primary-text cursor-pointer transition-colors"
                 aria-label="Clear search"
               >
                 <XMarkIcon className="h-5 w-5" />
@@ -175,7 +175,7 @@ export default function UserSearch() {
 
             {/* Vertical divider - only show when there's text to clear */}
             {searchQuery && (
-              <div className="h-6 border-l border-primary-text opacity-30"></div>
+              <div className="border-primary-text h-6 border-l opacity-30"></div>
             )}
 
             {/* Search button */}
@@ -184,10 +184,10 @@ export default function UserSearch() {
               disabled={isLoading || !searchQuery.trim()}
               className={`flex h-8 w-8 items-center justify-center rounded-md transition-all duration-200 ${
                 isLoading
-                  ? "cursor-progress text-secondary-text"
+                  ? "text-secondary-text cursor-progress"
                   : !searchQuery.trim()
-                    ? "cursor-not-allowed text-secondary-text opacity-50"
-                    : "hover:bg-button-info/10 cursor-pointer text-button-info"
+                    ? "text-secondary-text cursor-not-allowed opacity-50"
+                    : "hover:bg-button-info/10 text-button-info cursor-pointer"
               }`}
               aria-label="Search"
             >
@@ -221,7 +221,7 @@ export default function UserSearch() {
       </Form>
 
       <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
-        <div className="flex items-center gap-2 text-sm text-secondary-text">
+        <div className="text-secondary-text flex items-center gap-2 text-sm">
           <span>
             {(() => {
               const MAX_QUERY_DISPLAY = 32;
@@ -246,8 +246,8 @@ export default function UserSearch() {
           </>
         ) : users.length === 0 ? (
           <div className="col-span-full py-8 text-center">
-            <p className="text-lg text-secondary-text">No users found</p>
-            <p className="mt-2 text-sm text-primary-text">
+            <p className="text-secondary-text text-lg">No users found</p>
+            <p className="text-primary-text mt-2 text-sm">
               {(() => {
                 const MAX_QUERY_DISPLAY = 32;
                 const displayQuery =
@@ -310,12 +310,12 @@ export default function UserSearch() {
                 <Link
                   href={`/users/${user.id}`}
                   prefetch={false}
-                  className={`${getBorderClass()} group relative block rounded-lg border bg-secondary-bg p-4 shadow-md transition-colors hover:border-border-focus`}
+                  className={`${getBorderClass()} group bg-secondary-bg hover:border-border-focus relative block rounded-lg border p-4 shadow-md transition-colors`}
                 >
                   {user.settings?.hide_presence !== 1 &&
                     user.presence?.status === "Online" && (
                       <div
-                        className="absolute right-2 top-2 z-10 h-3 w-3 rounded-full border-2"
+                        className="absolute top-2 right-2 z-10 h-3 w-3 rounded-full border-2"
                         style={{
                           backgroundColor:
                             "var(--color-status-success-vibrant)",

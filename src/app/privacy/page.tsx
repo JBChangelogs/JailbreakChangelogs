@@ -27,7 +27,7 @@ export default function PrivacyPage() {
           Last updated: December 15th, 2025
         </p>
 
-        <div className="border-border-primary hover:border-border-focus bg-secondary-bg rounded-lg border p-6 transition-colors">
+        <div className="border-border-primary bg-secondary-bg hover:border-border-focus rounded-lg border p-6 transition-colors">
           <Typography className="text-primary-text">
             This Privacy Policy outlines our commitment to protecting your
             privacy. We prioritize transparency and do not collect any personal
@@ -84,16 +84,16 @@ export default function PrivacyPage() {
                 cookies we use:
               </Typography>
 
-              <div className="bg-tertiary-bg rounded-lg p-4 mb-4 space-y-4">
+              <div className="bg-tertiary-bg mb-4 space-y-4 rounded-lg p-4">
                 <div>
-                  <h3 className="text-primary-text font-semibold mb-2">
+                  <h3 className="text-primary-text mb-2 font-semibold">
                     Analytics Storage
                   </h3>
-                  <Typography className="text-secondary-text text-sm mb-2">
+                  <Typography className="text-secondary-text mb-2 text-sm">
                     <strong>What it does:</strong> Allows us to analyze website
                     usage and improve your experience
                   </Typography>
-                  <Typography className="text-secondary-text text-sm mb-2">
+                  <Typography className="text-secondary-text mb-2 text-sm">
                     <strong>Cookies used:</strong> Google Analytics (_ga, _gid,
                     _gat), Microsoft Clarity (_clid)
                   </Typography>
@@ -110,7 +110,7 @@ export default function PrivacyPage() {
                 privacy choices. You have full control over which types of
                 cookies we use:
               </Typography>
-              <ul className="text-secondary-text list-inside list-disc space-y-1 mb-4">
+              <ul className="text-secondary-text mb-4 list-inside list-disc space-y-1">
                 <li>
                   <strong>
                     In regulated regions (EU, Brazil, Australia, Canada):
@@ -233,7 +233,7 @@ export default function PrivacyPage() {
                 Under the CCPA, among other rights, California consumers have
                 the right to:
               </Typography>
-              <ul className="text-secondary-text list-inside list-disc space-y-1 mb-4">
+              <ul className="text-secondary-text mb-4 list-inside list-disc space-y-1">
                 <li>
                   Request that a business that collects a consumer&apos;s
                   personal data disclose the categories and specific pieces of
@@ -267,7 +267,7 @@ export default function PrivacyPage() {
                 We would like to make sure you are fully aware of all of your
                 data protection rights. Every user is entitled to the following:
               </Typography>
-              <ul className="text-secondary-text list-inside list-disc space-y-1 mb-4">
+              <ul className="text-secondary-text mb-4 list-inside list-disc space-y-1">
                 <li>
                   <strong>The right to access</strong> – You have the right to
                   request copies of your personal data. We may charge you a

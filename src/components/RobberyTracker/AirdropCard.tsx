@@ -110,19 +110,19 @@ export default function AirdropCard({ airdrop }: AirdropCardProps) {
     switch (airdrop.color) {
       case "Brown":
         return (
-          <div className="flex items-center gap-1.5 rounded-full bg-amber-700/20 px-3 py-1 text-primary-text">
+          <div className="text-primary-text flex items-center gap-1.5 rounded-full bg-amber-700/20 px-3 py-1">
             <span className="text-sm font-medium">Easy</span>
           </div>
         );
       case "Blue":
         return (
-          <div className="flex items-center gap-1.5 rounded-full bg-blue-500/20 px-3 py-1 text-primary-text">
+          <div className="text-primary-text flex items-center gap-1.5 rounded-full bg-blue-500/20 px-3 py-1">
             <span className="text-sm font-medium">Medium</span>
           </div>
         );
       case "Red":
         return (
-          <div className="flex items-center gap-1.5 rounded-full bg-red-500/20 px-3 py-1 text-primary-text">
+          <div className="text-primary-text flex items-center gap-1.5 rounded-full bg-red-500/20 px-3 py-1">
             <span className="text-sm font-medium">Hard</span>
           </div>
         );
@@ -135,9 +135,9 @@ export default function AirdropCard({ airdrop }: AirdropCardProps) {
   const mapImageUrl = `${INVENTORY_API_URL}/map/airdrop?x=${airdrop.x}&z=${airdrop.z}`;
 
   return (
-    <div className="bg-secondary-bg border-border-primary hover:border-border-focus flex flex-col overflow-hidden rounded-lg border transition-all duration-200 hover:shadow-lg">
+    <div className="border-border-primary bg-secondary-bg hover:border-border-focus flex flex-col overflow-hidden rounded-lg border transition-all duration-200 hover:shadow-lg">
       {/* Image */}
-      <div className="relative aspect-video w-full shrink-0 overflow-hidden bg-secondary-background">
+      <div className="bg-secondary-background relative aspect-video w-full shrink-0 overflow-hidden">
         <Image
           src={imageUrl}
           alt={`${airdrop.color} Airdrop at ${airdrop.location}`}
@@ -166,7 +166,7 @@ export default function AirdropCard({ airdrop }: AirdropCardProps) {
           {despawnCountdown && (
             <div className="flex items-center justify-between">
               <span className="text-secondary-text">Status:</span>
-              <span className="font-mono text-primary-text font-semibold">
+              <span className="text-primary-text font-mono font-semibold">
                 {despawnCountdown.includes("Despawned")
                   ? despawnCountdown
                   : `Despawns in ${despawnCountdown}`}
@@ -184,7 +184,7 @@ export default function AirdropCard({ airdrop }: AirdropCardProps) {
           {/* View Map Button */}
           <button
             onClick={() => setIsMapModalOpen(true)}
-            className="text-form-button-text bg-button-secondary hover:bg-button-secondary-hover active:bg-button-secondary-active focus:ring-border-focus mt-2 flex w-full items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition-colors duration-200 focus:ring-2 focus:outline-none cursor-pointer"
+            className="active:bg-button-secondary-active bg-button-secondary text-form-button-text hover:bg-button-secondary-hover focus:ring-border-focus mt-2 flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition-colors duration-200 focus:ring-2 focus:outline-none"
           >
             <MapPinIcon className="h-4 w-4" />
             View Location
@@ -196,7 +196,7 @@ export default function AirdropCard({ airdrop }: AirdropCardProps) {
               href={`http://tracker.jailbreakchangelogs.xyz/?jobid=${jobId}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-form-button-text bg-button-info hover:bg-button-info-hover active:bg-button-info-active focus:ring-border-focus mt-2 flex w-full items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition-colors duration-200 focus:ring-2 focus:outline-none"
+              className="bg-button-info text-form-button-text hover:bg-button-info-hover focus:ring-border-focus active:bg-button-info-active mt-2 flex w-full items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition-colors duration-200 focus:ring-2 focus:outline-none"
             >
               <ArrowTopRightOnSquareIcon className="h-4 w-4" />
               Join Server
@@ -207,7 +207,7 @@ export default function AirdropCard({ airdrop }: AirdropCardProps) {
           {players.length > 0 && (
             <button
               onClick={() => setIsPlayersModalOpen(true)}
-              className="text-primary-text bg-button-secondary hover:bg-button-secondary-hover active:bg-button-secondary-active focus:ring-border-focus mt-2 flex w-full items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition-colors duration-200 focus:ring-2 focus:outline-none cursor-pointer"
+              className="active:bg-button-secondary-active bg-button-secondary text-primary-text hover:bg-button-secondary-hover focus:ring-border-focus mt-2 flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition-colors duration-200 focus:ring-2 focus:outline-none"
             >
               <UsersIcon className="h-4 w-4" />
               View {players.length} Players
@@ -216,9 +216,9 @@ export default function AirdropCard({ airdrop }: AirdropCardProps) {
         </div>
 
         {/* Footer with Last Update */}
-        <div className="mt-4 border-t border-border-primary pt-3">
-          <div className="flex items-center justify-center gap-1.5 text-xs font-medium text-primary-text">
-            <ClockIcon className="h-3.5 w-3.5 text-tertiary-text" />
+        <div className="border-border-primary mt-4 border-t pt-3">
+          <div className="text-primary-text flex items-center justify-center gap-1.5 text-xs font-medium">
+            <ClockIcon className="text-tertiary-text h-3.5 w-3.5" />
             <span>Last update: {relativeTime || "Just now"}</span>
           </div>
         </div>

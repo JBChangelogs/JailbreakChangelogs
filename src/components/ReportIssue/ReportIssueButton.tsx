@@ -27,7 +27,7 @@ export default function ReportIssueButton() {
     <>
       <button
         onClick={handleOpenModal}
-        className="text-link hover:text-link-hover active:text-link-active transition-colors duration-200 cursor-pointer bg-none border-none p-0 text-left"
+        className="text-link hover:text-link-hover active:text-link-active cursor-pointer border-none bg-none p-0 text-left transition-colors duration-200"
       >
         Report an Issue
       </button>

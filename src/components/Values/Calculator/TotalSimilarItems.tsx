@@ -130,13 +130,13 @@ export const TotalSimilarItems: React.FC<TotalSimilarItemsProps> = ({
           </div>
           <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto sm:justify-end">
             {enableDemandSort && (
-              <div className="bg-primary-bg border-primary/10 flex w-full flex-col overflow-hidden rounded-lg border sm:w-auto sm:flex-row">
+              <div className="border-primary/10 bg-primary-bg flex w-full flex-col overflow-hidden rounded-lg border sm:w-auto sm:flex-row">
                 <button
                   onClick={() => setSortMode("diff")}
                   className={`cursor-pointer px-4 py-2 text-sm font-medium transition-all duration-200 ${
                     sortMode === "diff"
                       ? "bg-button-info text-form-button-text shadow-sm"
-                      : "text-secondary-text hover:bg-primary/10 hover:text-primary-text"
+                      : "hover:bg-primary/10 text-secondary-text hover:text-primary-text"
                   }`}
                 >
                   Closest
@@ -146,7 +146,7 @@ export const TotalSimilarItems: React.FC<TotalSimilarItemsProps> = ({
                   className={`cursor-pointer px-4 py-2 text-sm font-medium transition-all duration-200 ${
                     sortMode === "demand-desc"
                       ? "bg-button-info text-form-button-text shadow-sm"
-                      : "text-secondary-text hover:bg-primary/10 hover:text-primary-text"
+                      : "hover:bg-primary/10 text-secondary-text hover:text-primary-text"
                   }`}
                 >
                   Demand ↓
@@ -156,7 +156,7 @@ export const TotalSimilarItems: React.FC<TotalSimilarItemsProps> = ({
                   className={`cursor-pointer px-4 py-2 text-sm font-medium transition-all duration-200 ${
                     sortMode === "demand-asc"
                       ? "bg-button-info text-form-button-text shadow-sm"
-                      : "text-secondary-text hover:bg-primary/10 hover:text-primary-text"
+                      : "hover:bg-primary/10 text-secondary-text hover:text-primary-text"
                   }`}
                 >
                   Demand ↑

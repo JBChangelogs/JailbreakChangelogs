@@ -46,7 +46,7 @@ export default function SeasonContractsClient({
     <div className="space-y-12">
       {formatUpdatedAt && (
         <div className="text-center">
-          <span className="bg-secondary-bg text-secondary-text border-border-primary inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm backdrop-blur-sm">
+          <span className="border-border-primary bg-secondary-bg text-secondary-text inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm backdrop-blur-sm">
             Last updated: {formatUpdatedAt}
           </span>
         </div>
@@ -87,7 +87,7 @@ export default function SeasonContractsClient({
             {grouped[team].map((c, idx) => (
               <div
                 key={`${team}-${c.name}-${idx}`}
-                className="group hover:shadow-3xl border-border-primary hover:border-border-focus relative flex flex-col overflow-hidden rounded-2xl border shadow-2xl transition-all duration-300 hover:scale-105"
+                className="hover:shadow-3xl group border-border-primary hover:border-border-focus relative flex flex-col overflow-hidden rounded-2xl border shadow-2xl transition-all duration-300 hover:scale-105"
               >
                 {/* Season Pass Corner Badge */}
                 {c.reqseasonpass && (
@@ -122,7 +122,7 @@ export default function SeasonContractsClient({
 
                     {/* Special Note */}
                     {c.name === "AccumArrestBounty" && (
-                      <div className="border-button-info bg-button-info/10 mb-4 rounded-lg border p-3">
+                      <div className="bg-button-info/10 border-button-info mb-4 rounded-lg border p-3">
                         <div className="text-primary-text flex items-center gap-2 text-sm">
                           <span className="font-medium">Note:</span>
                           <span>
@@ -137,7 +137,7 @@ export default function SeasonContractsClient({
                     <div className="mt-auto">
                       <div className="relative">
                         <div className="bg-primary-bg absolute inset-0 rounded-xl opacity-50 blur-sm"></div>
-                        <div className="border-border-primary hover:border-border-focus bg-primary-bg relative rounded-xl border px-4 py-3 shadow-lg">
+                        <div className="border-border-primary bg-primary-bg hover:border-border-focus relative rounded-xl border px-4 py-3 shadow-lg">
                           <div
                             className={`text-primary-text text-2xl uppercase ${bangers.className} text-center`}
                           >

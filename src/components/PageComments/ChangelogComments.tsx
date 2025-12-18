@@ -660,8 +660,8 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                 rows={3}
                 className={`w-full resize-y rounded border p-3 text-sm focus:outline-none ${
                   !isLoggedIn
-                    ? "bg-primary-bg border-secondary-bg text-primary-text placeholder-secondary-text cursor-not-allowed"
-                    : "bg-form-input border-border-primary hover:border-border-focus text-primary-text focus:border-button-info placeholder-secondary-text"
+                    ? "border-secondary-bg bg-primary-bg text-primary-text placeholder-secondary-text cursor-not-allowed"
+                    : "border-border-primary bg-form-input text-primary-text placeholder-secondary-text hover:border-border-focus focus:border-button-info"
                 }`}
                 autoCorrect="off"
                 autoComplete="off"
@@ -677,7 +677,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
             <div className="mt-2 flex items-center justify-between">
               <button
                 onClick={toggleSortOrder}
-                className="border-border-primary hover:border-border-focus bg-button-info text-form-button-text hover:bg-button-info-hover flex items-center gap-1 rounded-lg border px-4 py-2 text-sm transition-colors"
+                className="border-border-primary bg-button-info text-form-button-text hover:border-border-focus hover:bg-button-info-hover flex items-center gap-1 rounded-lg border px-4 py-2 text-sm transition-colors"
               >
                 {sortOrder === "newest" ? (
                   <ArrowDownIcon className="h-4 w-4" />
@@ -701,10 +701,10 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                 }
                 className={`flex items-center gap-2 rounded-md border px-4 py-2 text-sm font-medium transition-colors ${
                   isSubmittingComment
-                    ? "bg-button-info-disabled text-form-button-text border-button-info-disabled cursor-progress"
+                    ? "border-button-info-disabled bg-button-info-disabled text-form-button-text cursor-progress"
                     : isLoggedIn && !newComment.trim()
-                      ? "bg-button-secondary text-secondary-text border-button-secondary cursor-not-allowed"
-                      : "bg-button-info text-form-button-text border-button-info hover:bg-button-info-hover cursor-pointer"
+                      ? "border-button-secondary bg-button-secondary text-secondary-text cursor-not-allowed"
+                      : "border-button-info bg-button-info text-form-button-text hover:bg-button-info-hover cursor-pointer"
                 }`}
               >
                 {isLoggedIn ? (
@@ -825,14 +825,14 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                           <div className="flex items-center justify-between pb-2">
                             <div className="flex items-center gap-3">
                               {loadingUserData[comment.user_id] ? (
-                                <div className="bg-tertiary-bg ring-border-focus/20 flex h-10 w-10 items-center justify-center rounded-full ring-2">
+                                <div className="ring-border-focus/20 bg-tertiary-bg flex h-10 w-10 items-center justify-center rounded-full ring-2">
                                   <CircularProgress
                                     size={20}
                                     className="text-border-focus"
                                   />
                                 </div>
                               ) : hideRecent ? (
-                                <div className="border-border-primary bg-primary-bg ring-tertiary-text/20 flex h-10 w-10 items-center justify-center rounded-full border ring-2">
+                                <div className="ring-tertiary-text/20 border-border-primary bg-primary-bg flex h-10 w-10 items-center justify-center rounded-full border ring-2">
                                   <svg
                                     className="text-secondary-text h-5 w-5"
                                     fill="none"
@@ -1006,8 +1006,8 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                                       getCharLimit(
                                         currentUserPremiumType as keyof typeof COMMENT_CHAR_LIMITS,
                                       )
-                                        ? "bg-form-input border-button-danger text-primary-text focus:border-button-danger"
-                                        : "bg-form-input border-border-primary hover:border-border-focus text-primary-text focus:border-button-info"
+                                        ? "border-button-danger bg-form-input text-primary-text focus:border-button-danger"
+                                        : "border-border-primary bg-form-input text-primary-text hover:border-border-focus focus:border-button-info"
                                     }`}
                                     autoCorrect="off"
                                     autoComplete="off"
@@ -1174,7 +1174,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                                 <MenuItem
                                   key="delete"
                                   onClick={handleDeleteClick}
-                                  className="text-button-danger hover:bg-button-danger/10"
+                                  className="hover:bg-button-danger/10 text-button-danger"
                                 >
                                   <TrashIcon className="text-button-danger mr-3 h-4 w-4" />
                                   Delete Comment
@@ -1261,7 +1261,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
           elevation={6}
           variant="filled"
           severity="success"
-          className="bg-secondary-bg text-primary-text border-border-focus border font-medium"
+          className="border-border-focus bg-secondary-bg text-primary-text border font-medium"
         >
           {postSnackbarMsg}
         </MuiAlert>
@@ -1278,7 +1278,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
           elevation={6}
           variant="filled"
           severity="error"
-          className="bg-secondary-bg text-primary-text border-border-error border font-medium"
+          className="border-border-error bg-secondary-bg text-primary-text border font-medium"
         >
           {postErrorSnackbarMsg}
         </MuiAlert>
@@ -1295,7 +1295,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
           elevation={6}
           variant="filled"
           severity="success"
-          className="bg-secondary-bg text-primary-text border-border-focus border font-medium"
+          className="border-border-focus bg-secondary-bg text-primary-text border font-medium"
         >
           {editSnackbarMsg}
         </MuiAlert>
@@ -1312,7 +1312,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
           elevation={6}
           variant="filled"
           severity="error"
-          className="bg-secondary-bg text-primary-text border-border-error border font-medium"
+          className="border-border-error bg-secondary-bg text-primary-text border font-medium"
         >
           {globalErrorSnackbarMsg}
         </MuiAlert>
@@ -1329,7 +1329,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
           elevation={6}
           variant="filled"
           severity="info"
-          className="bg-secondary-bg text-primary-text border-border-focus border font-medium"
+          className="border-border-focus bg-secondary-bg text-primary-text border font-medium"
         >
           {infoSnackbarMsg}
         </MuiAlert>

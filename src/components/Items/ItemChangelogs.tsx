@@ -352,7 +352,7 @@ export default function ItemChangelogs({
           <Link href="/changelogs">
             <Button
               variant="contained"
-              className="bg-button-info text-form-button-text hover:bg-button-info-hover border-border-primary hover:border-border-focus rounded-lg border px-6 py-3 text-sm font-semibold normal-case"
+              className="border-border-primary bg-button-info text-form-button-text hover:border-border-focus hover:bg-button-info-hover rounded-lg border px-6 py-3 text-sm font-semibold normal-case"
             >
               View All Changelogs
             </Button>
@@ -375,7 +375,7 @@ export default function ItemChangelogs({
         />
 
         <div className="fixed inset-0 flex items-center justify-center p-4">
-          <DialogPanel className="modal-container bg-secondary-bg border-button-info w-full max-w-[480px] min-w-[320px] rounded-lg border shadow-lg">
+          <DialogPanel className="modal-container border-button-info bg-secondary-bg w-full max-w-[480px] min-w-[320px] rounded-lg border shadow-lg">
             <div className="modal-header text-primary-text flex items-center justify-between px-6 py-4 text-2xl font-bold">
               <span>Voters</span>
               <button
@@ -387,12 +387,12 @@ export default function ItemChangelogs({
             </div>
 
             <div className="modal-content px-6 pt-3 pb-6">
-              <div className="bg-primary-bg border-border-primary mb-4 flex rounded-lg border">
+              <div className="border-border-primary bg-primary-bg mb-4 flex rounded-lg border">
                 <button
                   onClick={() => setVotersTab("up")}
                   className={`flex-1 cursor-pointer rounded-l-lg py-3 text-sm font-semibold transition-colors ${
                     votersTab === "up"
-                      ? "text-primary-text bg-button-success/30 border-button-success border-b-2"
+                      ? "bg-button-success/30 border-button-success text-primary-text border-b-2"
                       : "text-tertiary-text hover:text-primary-text"
                   }`}
                 >
@@ -407,7 +407,7 @@ export default function ItemChangelogs({
                   onClick={() => setVotersTab("down")}
                   className={`flex-1 cursor-pointer rounded-r-lg py-3 text-sm font-semibold transition-colors ${
                     votersTab === "down"
-                      ? "text-primary-text bg-button-danger/20 border-button-danger border-b-2"
+                      ? "bg-button-danger/20 border-button-danger text-primary-text border-b-2"
                       : "text-tertiary-text hover:text-primary-text"
                   }`}
                 >
@@ -452,7 +452,7 @@ export default function ItemChangelogs({
                   ).map((voter: VoteRecord) => (
                     <div
                       key={voter.id}
-                      className="bg-primary-bg border-border-primary hover:border-border-focus flex items-center gap-4 rounded-lg border px-4 py-3 transition-colors"
+                      className="border-border-primary bg-primary-bg hover:border-border-focus flex items-center gap-4 rounded-lg border px-4 py-3 transition-colors"
                     >
                       <div className="ring-border-primary relative h-10 w-10 flex-shrink-0 overflow-hidden rounded-full ring-2">
                         <DefaultAvatar />
@@ -504,7 +504,7 @@ export default function ItemChangelogs({
       </Dialog>
 
       {/* Central Changelogs Information Banner */}
-      <div className="border-border-primary hover:border-border-focus bg-secondary-bg mb-6 rounded-lg border p-6 shadow-lg">
+      <div className="border-border-primary bg-secondary-bg hover:border-border-focus mb-6 rounded-lg border p-6 shadow-lg">
         <div className="flex items-start gap-4">
           <div className="flex-1">
             <h3 className="text-primary-text mb-2 text-lg font-semibold">
@@ -538,7 +538,7 @@ export default function ItemChangelogs({
         </div>
       </div>
 
-      <div className="border-border-primary hover:border-border-focus bg-secondary-bg mb-4 rounded-lg border p-3">
+      <div className="border-border-primary bg-secondary-bg hover:border-border-focus mb-4 rounded-lg border p-3">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex flex-wrap items-center gap-2">
             <span className="border-primary-text text-primary-text flex items-center rounded-full border bg-transparent px-1.5 py-0.5 text-[10px] sm:px-2 sm:py-1 sm:text-xs">
@@ -553,7 +553,7 @@ export default function ItemChangelogs({
           </div>
           <button
             onClick={toggleSortOrder}
-            className="hover:bg-button-info-hover border-border-primary hover:border-border-focus bg-button-info text-form-button-text flex w-full items-center justify-center gap-1 rounded-lg border px-3 py-1.5 text-sm transition-colors sm:w-auto"
+            className="border-border-primary bg-button-info text-form-button-text hover:border-border-focus hover:bg-button-info-hover flex w-full items-center justify-center gap-1 rounded-lg border px-3 py-1.5 text-sm transition-colors sm:w-auto"
           >
             {sortOrder === "newest" ? (
               <ArrowDownIcon className="h-4 w-4" />
@@ -625,7 +625,7 @@ export default function ItemChangelogs({
                     transform: `translateY(${virtualItem.start}px)`,
                   }}
                 >
-                  <div className="border-border-primary hover:border-border-focus bg-secondary-bg overflow-hidden rounded-lg border p-4 m-2 transition-colors">
+                  <div className="border-border-primary bg-secondary-bg hover:border-border-focus m-2 overflow-hidden rounded-lg border p-4 transition-colors">
                     {change.suggestion_data && (
                       <div className="mb-2 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
                         <div className="flex items-center gap-2">
@@ -639,7 +639,7 @@ export default function ItemChangelogs({
 
                     {change.suggestion_data && (
                       <>
-                        <div className="bg-primary-bg border-border-primary hover:shadow-card-shadow mt-2 rounded-lg border p-5 shadow-lg transition-all duration-200">
+                        <div className="border-border-primary bg-primary-bg hover:shadow-card-shadow mt-2 rounded-lg border p-5 shadow-lg transition-all duration-200">
                           <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                             <div className="flex items-center gap-3">
                               {change.suggestion_data.metadata?.avatar_hash && (

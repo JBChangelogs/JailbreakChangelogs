@@ -269,7 +269,7 @@ export default function ValuesClient({
         />
       </Suspense>
 
-      <div className="bg-secondary-bg border-border-primary mb-8 rounded-lg border p-6">
+      <div className="border-border-primary bg-secondary-bg mb-8 rounded-lg border p-6">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-start">
           <div className="flex-1">
             <div className="mb-4 flex items-center justify-between">
@@ -296,7 +296,7 @@ export default function ValuesClient({
             <div className="mb-4 flex flex-wrap gap-2">
               <button
                 onClick={handleRandomItem}
-                className="border-border-primary hover:border-border-focus bg-button-info text-form-button-text hover:bg-button-info-hover flex cursor-pointer items-center gap-1.5 rounded-lg border px-4 py-2 focus:outline-none sm:gap-2 sm:px-6 sm:py-3"
+                className="border-border-primary bg-button-info text-form-button-text hover:border-border-focus hover:bg-button-info-hover flex cursor-pointer items-center gap-1.5 rounded-lg border px-4 py-2 focus:outline-none sm:gap-2 sm:px-6 sm:py-3"
               >
                 <Icon
                   icon="material-symbols:auto-awesome"
@@ -307,7 +307,7 @@ export default function ValuesClient({
               </button>
               <button
                 onClick={handleOpenHcModal}
-                className="border-border-primary hover:border-border-focus bg-button-info text-form-button-text hover:bg-button-info-hover flex cursor-pointer items-center gap-1.5 rounded-lg border px-4 py-2 focus:outline-none sm:gap-2 sm:px-6 sm:py-3"
+                className="border-border-primary bg-button-info text-form-button-text hover:border-border-focus hover:bg-button-info-hover flex cursor-pointer items-center gap-1.5 rounded-lg border px-4 py-2 focus:outline-none sm:gap-2 sm:px-6 sm:py-3"
               >
                 <span className="text-sm sm:text-base">
                   Hyperchrome Pity Calculator
@@ -322,7 +322,7 @@ export default function ValuesClient({
             )}
           </div>
 
-          <NitroValuesVideoPlayer className="min-h-[210px] w-full max-w-xs sm:max-w-sm self-center lg:self-start" />
+          <NitroValuesVideoPlayer className="min-h-[210px] w-full max-w-xs self-center sm:max-w-sm lg:self-start" />
         </div>
 
         <CategoryIcons
@@ -369,7 +369,7 @@ export default function ValuesClient({
         searchSectionRef={searchSectionRef}
       />
 
-      <div className="grid gap-8 grid-cols-1">
+      <div className="grid grid-cols-1 gap-8">
         <div className="space-y-6">
           <ValuesItemsGrid
             items={sortedItems}

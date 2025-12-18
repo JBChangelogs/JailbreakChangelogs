@@ -348,7 +348,7 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
   return (
     <>
       <div className="space-y-4" data-component="available-items-grid">
-        <div className="border-border-primary hover:border-border-focus hover:shadow-card-shadow bg-secondary-bg rounded-lg border p-1 pt-4 transition-colors duration-200 sm:p-2">
+        <div className="border-border-primary bg-secondary-bg hover:border-border-focus hover:shadow-card-shadow rounded-lg border p-1 pt-4 transition-colors duration-200 sm:p-2">
           <div className="mb-4 grid grid-cols-1 gap-4 lg:grid-cols-3">
             {/* Search - Takes up full width on mobile, 1/3 on desktop */}
             <div className="relative lg:col-span-1">
@@ -359,7 +359,7 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
                   placeholder="Search items by name or type..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="text-primary-text border-border-primary hover:border-border-focus bg-primary-bg placeholder-secondary-text focus:border-button-info hover:bg-primary-bg min-h-[56px] w-full rounded-lg border px-4 py-3 pr-10 pl-10 transition-all duration-300 focus:outline-none"
+                  className="border-border-primary bg-primary-bg text-primary-text placeholder-secondary-text hover:border-border-focus hover:bg-primary-bg focus:border-button-info min-h-[56px] w-full rounded-lg border px-4 py-3 pr-10 pl-10 transition-all duration-300 focus:outline-none"
                 />
                 {searchQuery && (
                   <button
@@ -384,7 +384,7 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
             {/* Dropdowns - Side by side on desktop */}
             <div className="flex gap-4 lg:col-span-2">
               <select
-                className="select w-full bg-primary-bg text-primary-text h-[56px] min-h-[56px] font-inter"
+                className="select font-inter bg-primary-bg text-primary-text h-[56px] min-h-[56px] w-full"
                 value={filterSort}
                 onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
                   setFilterSort(e.target.value as FilterSort);
@@ -411,7 +411,7 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
               </select>
 
               <select
-                className="select w-full bg-primary-bg text-primary-text h-[56px] min-h-[56px] font-inter"
+                className="select font-inter bg-primary-bg text-primary-text h-[56px] min-h-[56px] w-full"
                 value={valueSort}
                 onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
                   setValueSort(e.target.value as ValueSort);
@@ -455,7 +455,7 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
           </div>
 
           {/* Helpful tip about drag and drop */}
-          <div className="text-center mb-4">
+          <div className="mb-4 text-center">
             <div className="text-secondary-text hidden flex-col items-center justify-center gap-1 text-xs lg:flex">
               <div className="flex items-center gap-1">
                 <Icon
@@ -474,7 +474,7 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
               </div>
               <div className="flex items-center gap-2">
                 <span>Or use keyboard shortcuts on item names:</span>
-                <kbd className="kbd kbd-sm bg-tertiary-bg text-primary-text border-border-primary">
+                <kbd className="kbd kbd-sm border-border-primary bg-tertiary-bg text-primary-text">
                   Shift
                 </kbd>
                 <span>+ Click for</span>
@@ -482,7 +482,7 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
                   Offering
                 </span>
                 <span>•</span>
-                <kbd className="kbd kbd-sm bg-tertiary-bg text-primary-text border-border-primary">
+                <kbd className="kbd kbd-sm border-border-primary bg-tertiary-bg text-primary-text">
                   Ctrl
                 </kbd>
                 <span>+ Click for</span>
@@ -515,7 +515,7 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
                     setFilterSort("name-all-items");
                     setValueSort("cash-desc");
                   }}
-                  className="text-secondary-text border-border-primary hover:border-border-focus bg-button-info hover:bg-button-info-hover mt-4 rounded-lg border px-6 py-2 focus:outline-none cursor-pointer"
+                  className="border-border-primary bg-button-info text-secondary-text hover:border-border-focus hover:bg-button-info-hover mt-4 cursor-pointer rounded-lg border px-6 py-2 focus:outline-none"
                 >
                   Clear All Filters
                 </button>
@@ -618,7 +618,7 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
                                   <Link
                                     href={`/item/${encodeURIComponent(item.type.toLowerCase())}/${encodeURIComponent(item.name)}`}
                                     prefetch={false}
-                                    className="text-primary-text hover:text-link max-w-full text-sm font-semibold transition-colors cursor-pointer"
+                                    className="text-primary-text hover:text-link max-w-full cursor-pointer text-sm font-semibold transition-colors"
                                     onClick={(e) => {
                                       if (item.tradable !== 1) return;
 

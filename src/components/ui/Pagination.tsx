@@ -76,8 +76,8 @@ export const Pagination = ({
         onClick={() => handlePageChange(page - 1)}
         disabled={page === 1}
         className={cn(
-          "flex h-8 w-8 items-center justify-center rounded-full text-primary-text transition-colors",
-          "cursor-pointer hover:bg-quaternary-bg disabled:opacity-50 disabled:hover:bg-transparent",
+          "text-primary-text flex h-8 w-8 items-center justify-center rounded-full transition-colors",
+          "hover:bg-quaternary-bg cursor-pointer disabled:opacity-50 disabled:hover:bg-transparent",
         )}
         aria-label="Previous page"
       >
@@ -121,8 +121,8 @@ export const Pagination = ({
         onClick={() => handlePageChange(page + 1)}
         disabled={page === count}
         className={cn(
-          "flex h-8 w-8 items-center justify-center rounded-full text-primary-text transition-colors",
-          "cursor-pointer hover:bg-quaternary-bg disabled:opacity-50 disabled:hover:bg-transparent",
+          "text-primary-text flex h-8 w-8 items-center justify-center rounded-full transition-colors",
+          "hover:bg-quaternary-bg cursor-pointer disabled:opacity-50 disabled:hover:bg-transparent",
         )}
         aria-label="Next page"
       >

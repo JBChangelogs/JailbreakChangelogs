@@ -87,7 +87,7 @@ export default function CategoryIcons({
   return (
     <div className="mb-8">
       <h3 className="text-primary-text mb-6 text-2xl font-bold">Categories</h3>
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 max-h-96 overflow-y-auto scrollbar-thin scrollbar-track-transparent scrollbar-thumb-border-primary hover:scrollbar-thumb-border-focus">
+      <div className="scrollbar-thin scrollbar-track-transparent scrollbar-thumb-border-primary hover:scrollbar-thumb-border-focus grid max-h-96 grid-cols-1 gap-4 overflow-y-auto sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
         {categories.map((category) => {
           const isSelected = selectedFilter === category.id;
           return (
@@ -96,9 +96,9 @@ export default function CategoryIcons({
               onClick={
                 category.onClick || (() => handleCategoryClick(category.id))
               }
-              className={`border-2 flex cursor-pointer items-center gap-3 rounded-lg p-3 transition-all sm:p-4 ${
+              className={`flex cursor-pointer items-center gap-3 rounded-lg border-2 p-3 transition-all sm:p-4 ${
                 isSelected
-                  ? "ring-border-focus bg-primary-bg ring-2"
+                  ? "bg-primary-bg ring-border-focus ring-2"
                   : "bg-primary-bg"
               }`}
               style={

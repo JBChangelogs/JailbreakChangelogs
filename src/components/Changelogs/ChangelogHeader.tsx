@@ -19,7 +19,7 @@ const ChangelogHeader: React.FC<ChangelogHeaderProps> = ({ changelogs }) => {
   const [isStatsExpanded, setIsStatsExpanded] = useState(false);
 
   return (
-    <div className="bg-secondary-bg border-border-primary mb-8 rounded-lg border p-6">
+    <div className="border-border-primary bg-secondary-bg mb-8 rounded-lg border p-6">
       <div className="mb-4">
         <h2 className="text-primary-text text-2xl font-semibold">
           Roblox Jailbreak Changelogs & Update History
@@ -39,7 +39,7 @@ const ChangelogHeader: React.FC<ChangelogHeaderProps> = ({ changelogs }) => {
             <div>
               <button
                 onClick={() => setIsStatsExpanded(!isStatsExpanded)}
-                className="hover:bg-primary-bg border-border-primary hover:border-border-focus bg-primary-bg flex w-full cursor-pointer items-center justify-between rounded-lg border p-4 transition-colors"
+                className="border-border-primary bg-primary-bg hover:border-border-focus hover:bg-primary-bg flex w-full cursor-pointer items-center justify-between rounded-lg border p-4 transition-colors"
               >
                 <h3 className="text-primary-text text-lg font-semibold">
                   View Update Statistics
@@ -52,7 +52,7 @@ const ChangelogHeader: React.FC<ChangelogHeaderProps> = ({ changelogs }) => {
               </button>
 
               {isStatsExpanded && (
-                <div className="bg-primary-bg border-border-primary mt-2 rounded-lg border p-4">
+                <div className="border-border-primary bg-primary-bg mt-2 rounded-lg border p-4">
                   <div className="text-secondary-text space-y-1 text-sm">
                     {yearStats.map(({ year, count }) => (
                       <p key={year}>
@@ -84,7 +84,7 @@ const ChangelogHeader: React.FC<ChangelogHeaderProps> = ({ changelogs }) => {
           )}
         </div>
 
-        <NitroChangelogVideoPlayer className="min-h-[210px] w-full max-w-xs sm:max-w-sm self-center lg:self-start" />
+        <NitroChangelogVideoPlayer className="min-h-[210px] w-full max-w-xs self-center sm:max-w-sm lg:self-start" />
       </div>
     </div>
   );

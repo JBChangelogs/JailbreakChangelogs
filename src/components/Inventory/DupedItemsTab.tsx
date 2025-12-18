@@ -244,7 +244,7 @@ export default function DupedItemsTab({
 
   if (filteredAndSortedItems.length === 0 && !searchTerm && !selectedCategory) {
     return (
-      <div className="bg-secondary-bg border-border-primary rounded-lg border p-8 text-center">
+      <div className="border-border-primary bg-secondary-bg rounded-lg border p-8 text-center">
         <p className="text-secondary-text">
           No duplicate items found in this inventory.
         </p>
@@ -264,13 +264,13 @@ export default function DupedItemsTab({
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             maxLength={MAX_SEARCH_LENGTH}
-            className="text-primary-text border-border-primary bg-secondary-bg placeholder-secondary-text focus:border-button-info min-h-[56px] w-full rounded-lg border px-4 py-3 pr-10 pl-10 transition-all duration-300 focus:outline-none"
+            className="border-border-primary bg-secondary-bg text-primary-text placeholder-secondary-text focus:border-button-info min-h-[56px] w-full rounded-lg border px-4 py-3 pr-10 pl-10 transition-all duration-300 focus:outline-none"
           />
           <MagnifyingGlassIcon className="text-secondary-text absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2" />
           {searchTerm && (
             <button
               onClick={() => setSearchTerm("")}
-              className="hover:text-primary-text text-secondary-text absolute top-1/2 right-3 h-5 w-5 -translate-y-1/2 cursor-pointer"
+              className="text-secondary-text hover:text-primary-text absolute top-1/2 right-3 h-5 w-5 -translate-y-1/2 cursor-pointer"
               aria-label="Clear search"
             >
               <XMarkIcon />
@@ -281,7 +281,7 @@ export default function DupedItemsTab({
         {/* Category Filter */}
         <div className="w-full sm:w-1/3">
           <select
-            className="select w-full bg-secondary-bg text-primary-text min-h-[56px]"
+            className="select bg-secondary-bg text-primary-text min-h-[56px] w-full"
             value={selectedCategory}
             onChange={(e) => setSelectedCategory(e.target.value)}
           >
@@ -297,7 +297,7 @@ export default function DupedItemsTab({
         {/* Sort Filter */}
         <div className="w-full sm:w-1/3">
           <select
-            className="select w-full bg-secondary-bg text-primary-text min-h-[56px]"
+            className="select bg-secondary-bg text-primary-text min-h-[56px] w-full"
             value={sortOrder}
             onChange={(e) => setSortOrder(e.target.value as SortOrder)}
           >
@@ -329,7 +329,7 @@ export default function DupedItemsTab({
 
       {/* Helpful Tip */}
       {filteredAndSortedItems.length > 0 && (
-        <div className="border-button-info bg-button-info/10 mb-4 rounded-lg border p-3">
+        <div className="bg-button-info/10 border-button-info mb-4 rounded-lg border p-3">
           <div className="text-primary-text flex items-start gap-2 text-sm">
             <Icon
               icon="emojione:light-bulb"

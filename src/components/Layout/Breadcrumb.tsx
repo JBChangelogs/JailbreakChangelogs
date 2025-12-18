@@ -366,13 +366,13 @@ export default function Breadcrumb({ userData, loading }: BreadcrumbProps) {
                   />
                 </svg>
                 {isLast ? (
-                  <span className="text-secondary-text ml-1 text-sm font-medium md:ml-2 truncate">
+                  <span className="text-secondary-text ml-1 truncate text-sm font-medium md:ml-2">
                     {item.label}
                   </span>
                 ) : (
                   <Link
                     href={item.href}
-                    className="text-secondary-text hover:text-link-hover ml-1 text-sm font-medium md:ml-2 truncate"
+                    className="text-secondary-text hover:text-link-hover ml-1 truncate text-sm font-medium md:ml-2"
                   >
                     {item.label}
                   </Link>

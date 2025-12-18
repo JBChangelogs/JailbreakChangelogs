@@ -64,14 +64,14 @@ export default async function DupeFinderPage({ params }: DupeFinderPageProps) {
         Enter a Roblox ID or username to check for any duped items associated
         with that name.
       </p>
-      <div className="border-border-primary bg-button-info/10 mb-6 rounded-lg border p-4 text-sm text-primary-text">
+      <div className="bg-button-info/10 border-border-primary text-primary-text mb-6 rounded-lg border p-4 text-sm">
         If you believe an item is incorrectly flagged, you can report the false
         dupe by opening a support ticket in our{" "}
         <Link
           href="https://discord.com/channels/1286064050135896064/1392693026865811518"
           target="_blank"
           rel="noopener noreferrer"
-          className="text-primary-text hover:opacity-80 inline-flex items-center gap-1 font-semibold underline transition-opacity"
+          className="text-primary-text inline-flex items-center gap-1 font-semibold underline transition-opacity hover:opacity-80"
         >
           <Icon icon="akar-icons:link-out" className="h-4 w-4" />
           Discord support channel

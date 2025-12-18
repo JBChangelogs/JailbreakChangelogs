@@ -46,7 +46,7 @@ const faqs = [
           href="https://discord.com/channels/1286064050135896064/1392693026865811518"
           target="_blank"
           rel="noopener noreferrer"
-          className="text-primary-text hover:opacity-80 inline-flex items-center gap-1 font-semibold underline transition-opacity"
+          className="text-primary-text inline-flex items-center gap-1 font-semibold underline transition-opacity hover:opacity-80"
         >
           Discord support channel
         </a>

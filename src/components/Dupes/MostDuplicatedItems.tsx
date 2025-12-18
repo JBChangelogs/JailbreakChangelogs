@@ -43,7 +43,7 @@ export default function MostDuplicatedItems({
 
   return (
     <div className="mt-6">
-      <div className="bg-secondary-bg border-border-primary shadow-card-shadow mb-6 rounded-lg border p-6">
+      <div className="border-border-primary bg-secondary-bg shadow-card-shadow mb-6 rounded-lg border p-6">
         <h2 className="text-primary-text mb-4 text-xl font-semibold">
           Top 10 Most Tracked Item Duplicates
         </h2>
@@ -80,22 +80,22 @@ export default function MostDuplicatedItems({
                       width: "100%",
                       transform: `translateY(${virtualItem.start}px)`,
                     }}
-                    className="bg-tertiary-bg border-border-primary flex items-center justify-between rounded-lg border p-3"
+                    className="border-border-primary bg-tertiary-bg flex items-center justify-between rounded-lg border p-3"
                   >
-                    <div className="flex items-center gap-3 flex-1 min-w-0">
-                      <span className="text-primary-text font-bold text-sm w-6 shrink-0">
+                    <div className="flex min-w-0 flex-1 items-center gap-3">
+                      <span className="text-primary-text w-6 shrink-0 text-sm font-bold">
                         #{rank}
                       </span>
-                      <div className="flex flex-col gap-1 min-w-0">
+                      <div className="flex min-w-0 flex-col gap-1">
                         <Link
                           href={`/item/${encodeURIComponent(item.type.toLowerCase())}/${encodeURIComponent(item.name)}`}
                           prefetch={false}
-                          className="text-primary-text hover:text-link font-semibold text-sm truncate transition-colors"
+                          className="text-primary-text hover:text-link truncate text-sm font-semibold transition-colors"
                         >
                           {item.name}
                         </Link>
                         <span
-                          className="text-primary-text flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-medium w-fit"
+                          className="text-primary-text flex w-fit items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-medium"
                           style={{
                             borderColor: categoryColor,
                             backgroundColor: categoryColor + "20",
@@ -116,7 +116,7 @@ export default function MostDuplicatedItems({
                         </span>
                       </div>
                     </div>
-                    <span className="text-primary-text font-bold text-sm whitespace-nowrap ml-2">
+                    <span className="text-primary-text ml-2 text-sm font-bold whitespace-nowrap">
                       {item.count}x
                     </span>
                   </div>

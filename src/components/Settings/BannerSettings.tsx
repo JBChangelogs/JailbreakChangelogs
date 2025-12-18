@@ -288,7 +288,7 @@ export const BannerSettings = ({
               alt="Supporter Tier II"
               width={24}
               height={24}
-              className="cursor-pointer hover:opacity-90 object-contain"
+              className="cursor-pointer object-contain hover:opacity-90"
             />
           </Tooltip>
         </Box>

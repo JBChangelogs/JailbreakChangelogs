@@ -409,7 +409,7 @@ export default function DupeFinderResults({
 
         {/* Helpful Tip - Only show when there are results */}
         {sortedData.length > 0 && (
-          <div className="border-button-info bg-button-info/10 mb-4 rounded-lg border p-3">
+          <div className="bg-button-info/10 border-button-info mb-4 rounded-lg border p-3">
             <div className="text-primary-text flex items-start gap-2 text-sm">
               <Icon
                 icon="emojione:light-bulb"

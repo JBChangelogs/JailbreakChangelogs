@@ -25,7 +25,7 @@ export default function VersionInfo({
   }, [date]);
 
   return (
-    <div className="text-secondary-text text-xs leading-relaxed space-y-1">
+    <div className="text-secondary-text space-y-1 text-xs leading-relaxed">
       <p>
         Version:{" "}
         <a

@@ -23,7 +23,7 @@ const SeasonNavigation: React.FC<SeasonNavigationProps> = ({
     <div className="mb-8 grid grid-cols-1 gap-4">
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <select
-          className="select w-full bg-secondary-bg text-primary-text"
+          className="select bg-secondary-bg text-primary-text w-full"
           value={selectedId}
           onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
             onSeasonSelect(e.target.value)
@@ -58,7 +58,7 @@ const SeasonNavigation: React.FC<SeasonNavigationProps> = ({
         ) : (
           <button
             onClick={() => toast.error("Already on the current season")}
-            className="bg-button-info text-form-button-text hover:bg-button-info-hover flex cursor-not-allowed items-center gap-2 rounded px-4 py-2 transition-colors opacity-50"
+            className="bg-button-info text-form-button-text hover:bg-button-info-hover flex cursor-not-allowed items-center gap-2 rounded px-4 py-2 opacity-50 transition-colors"
             aria-disabled="true"
           >
             <Icon icon="heroicons:clock" className="h-4 w-4" inline={true} />

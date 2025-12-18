@@ -180,7 +180,7 @@ export default function TradingGuides({
       {/* Collapsible Header */}
       <button
         onClick={() => setIsExpanded(!isExpanded)}
-        className="hover:bg-primary-bg border-border-primary hover:border-border-focus bg-primary-bg mb-4 flex w-full cursor-pointer items-center justify-between rounded-lg border p-4 transition-colors"
+        className="border-border-primary bg-primary-bg hover:border-border-focus hover:bg-primary-bg mb-4 flex w-full cursor-pointer items-center justify-between rounded-lg border p-4 transition-colors"
       >
         <div className="flex items-center gap-3">
           <h3 className="text-primary-text text-xl font-semibold">
@@ -226,7 +226,7 @@ export default function TradingGuides({
                 <button
                   key={demand}
                   onClick={() => handleDemandClick(demand)}
-                  className={`border-2 bg-primary-bg flex cursor-pointer items-center gap-3 rounded-lg px-4 py-2 transition-all focus:outline-none ${
+                  className={`bg-primary-bg flex cursor-pointer items-center gap-3 rounded-lg border-2 px-4 py-2 transition-all focus:outline-none ${
                     valueSort === getDemandValue(demand) ? "ring-2" : ""
                   }`}
                   style={
@@ -280,7 +280,7 @@ export default function TradingGuides({
                 >
                   <button
                     onClick={() => handleTrendClick(trend)}
-                    className={`border-2 bg-primary-bg flex cursor-pointer items-center gap-3 rounded-lg px-4 py-2 transition-all focus:outline-none ${
+                    className={`bg-primary-bg flex cursor-pointer items-center gap-3 rounded-lg border-2 px-4 py-2 transition-all focus:outline-none ${
                       valueSort === getTrendValue(trend) ? "ring-2" : ""
                     }`}
                     style={

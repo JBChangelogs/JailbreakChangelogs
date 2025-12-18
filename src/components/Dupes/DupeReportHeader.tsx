@@ -9,7 +9,7 @@ const DupeReportHeader: React.FC = () => {
           Roblox Jailbreak Dupe Calculator
         </h1>
       </div>
-      <div className="border-button-info bg-button-info/10 mb-2 flex items-start gap-4 rounded-lg border p-4 shadow-sm">
+      <div className="bg-button-info/10 border-button-info mb-2 flex items-start gap-4 rounded-lg border p-4 shadow-sm">
         <div className="relative z-10">
           <span className="text-primary-text text-base font-bold">
             Important Notice

@@ -339,7 +339,7 @@ export default function ContributorsClient({
 
         {/* Filter Buttons */}
         <div className="mb-8 flex items-center justify-center">
-          <div className="border-button-info bg-secondary-bg scrollbar-hide flex items-center overflow-x-auto rounded-xl border p-1">
+          <div className="scrollbar-hide border-button-info bg-secondary-bg flex items-center overflow-x-auto rounded-xl border p-1">
             <div className="flex min-w-max items-center">
               {filters.map((filter) => (
                 <button
@@ -348,7 +348,7 @@ export default function ContributorsClient({
                   className={`flex-shrink-0 cursor-pointer rounded-xl px-3 py-2 text-xs font-medium whitespace-nowrap capitalize transition-colors duration-300 md:px-6 md:py-3 md:text-sm ${
                     activeFilter === filter.key
                       ? "bg-button-info text-form-button-text"
-                      : "text-secondary-text hover:text-primary-text hover:bg-quaternary-bg"
+                      : "text-secondary-text hover:bg-quaternary-bg hover:text-primary-text"
                   }`}
                 >
                   {filter.label}

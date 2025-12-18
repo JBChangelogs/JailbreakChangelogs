@@ -418,7 +418,7 @@ export default function UserStatsSection({
             >
               <Icon
                 icon="material-symbols:info-outline"
-                className="text-secondary-text cursor-help h-4 w-4"
+                className="text-secondary-text h-4 w-4 cursor-help"
                 inline={true}
               />
             </Tooltip>
@@ -482,7 +482,7 @@ export default function UserStatsSection({
             >
               <Icon
                 icon="material-symbols:info-outline"
-                className="text-secondary-text cursor-help h-4 w-4"
+                className="text-secondary-text h-4 w-4 cursor-help"
                 inline={true}
               />
             </Tooltip>
@@ -550,7 +550,7 @@ export default function UserStatsSection({
               >
                 <Icon
                   icon="material-symbols:info-outline"
-                  className="text-secondary-text cursor-help h-4 w-4"
+                  className="text-secondary-text h-4 w-4 cursor-help"
                   inline={true}
                 />
               </Tooltip>
@@ -622,7 +622,7 @@ export default function UserStatsSection({
                 if (!gamepassInfo) return null;
 
                 const GamepassContent = () => (
-                  <div className="group border-border-primary bg-primary-bg hover:border-primary/50 hover:bg-primary/5 flex items-center gap-3 rounded-lg border px-3 py-2 text-sm transition-all duration-200">
+                  <div className="hover:border-primary/50 hover:bg-primary/5 group border-border-primary bg-primary-bg flex items-center gap-3 rounded-lg border px-3 py-2 text-sm transition-all duration-200">
                     <div className="relative h-8 w-8 shrink-0">
                       <Image
                         src={`https://assets.jailbreakchangelogs.xyz/assets/images/gamepasses/${gamepassInfo.image}.webp`}
@@ -633,7 +633,7 @@ export default function UserStatsSection({
                         onError={handleImageError}
                       />
                     </div>
-                    <span className="text-primary-text group-hover:text-primary text-sm font-medium transition-colors">
+                    <span className="group-hover:text-primary text-primary-text text-sm font-medium transition-colors">
                       {gamepassInfo.displayName}
                     </span>
                     {gamepassInfo.link && (
@@ -782,7 +782,7 @@ export default function UserStatsSection({
                       href={`https://tracker.jailbreakchangelogs.xyz/?jobid=${currentData.job_id}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-primary-text hover:text-link max-w-[200px] truncate md:max-w-full cursor-pointer font-mono text-xs font-medium transition-colors"
+                      className="text-primary-text hover:text-link max-w-[200px] cursor-pointer truncate font-mono text-xs font-medium transition-colors md:max-w-full"
                     >
                       {currentData.job_id}
                     </a>

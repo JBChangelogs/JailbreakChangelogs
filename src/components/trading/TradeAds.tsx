@@ -286,7 +286,7 @@ export default function TradeAds({
         >
           {activeTab === "view" && (
             <div className="mb-8 rounded-lg border p-6 text-center">
-              <h3 className="mb-4 text-lg font-medium text-tertiary-text">
+              <h3 className="text-tertiary-text mb-4 text-lg font-medium">
                 No Trade Ads Available
               </h3>
               <p className="text-tertiary-text/70 mb-8">
@@ -428,10 +428,10 @@ export default function TradeAds({
                 setSearchQuery(e.target.value);
                 setPage(1); // Reset to first page when searching
               }}
-              className="w-full rounded-lg border border-border-primary bg-secondary-bg px-4 py-3 pr-16 text-primary-text placeholder-secondary-text transition-all duration-300 focus:border-button-info focus:outline-none"
+              className="border-border-primary bg-secondary-bg text-primary-text placeholder-secondary-text focus:border-button-info w-full rounded-lg border px-4 py-3 pr-16 transition-all duration-300 focus:outline-none"
             />
             {/* Right side controls container */}
-            <div className="absolute right-3 top-1/2 flex -translate-y-1/2 items-center gap-2">
+            <div className="absolute top-1/2 right-3 flex -translate-y-1/2 items-center gap-2">
               {/* Clear button - only show when there's text */}
               {searchQuery && (
                 <button
@@ -440,7 +440,7 @@ export default function TradeAds({
                     setSearchQuery("");
                     setPage(1);
                   }}
-                  className="cursor-pointer text-secondary-text transition-colors hover:text-primary-text"
+                  className="text-secondary-text hover:text-primary-text cursor-pointer transition-colors"
                   aria-label="Clear search"
                 >
                   <XMarkIcon className="h-5 w-5" />
@@ -468,7 +468,7 @@ export default function TradeAds({
               </p>
               <button
                 onClick={toggleSortOrder}
-                className="flex cursor-pointer items-center gap-1 rounded-lg border border-border-primary bg-button-info px-3 py-1.5 text-sm text-form-button-text transition-colors hover:border-border-focus hover:bg-button-info-hover"
+                className="border-border-primary bg-button-info text-form-button-text hover:border-border-focus hover:bg-button-info-hover flex cursor-pointer items-center gap-1 rounded-lg border px-3 py-1.5 text-sm transition-colors"
               >
                 {sortOrder === "newest" ? (
                   <ArrowDownIcon className="h-4 w-4" />
@@ -479,8 +479,8 @@ export default function TradeAds({
               </button>
             </div>
             {displayTradeAds.length === 0 && searchQuery.trim() ? (
-              <div className="mb-8 rounded-lg border border-border-primary p-6 text-center">
-                <h3 className="mb-4 text-lg font-medium text-secondary-text">
+              <div className="border-border-primary mb-8 rounded-lg border p-6 text-center">
+                <h3 className="text-secondary-text mb-4 text-lg font-medium">
                   No Trade Ads Match Your Search
                 </h3>
                 <p className="text-secondary-text">
@@ -523,7 +523,7 @@ export default function TradeAds({
               </Masonry>
             )}
             {totalPages > 1 && (
-              <div className="mb-8 mt-8 flex justify-center">
+              <div className="mt-8 mb-8 flex justify-center">
                 <Pagination
                   count={totalPages}
                   page={page}
@@ -554,7 +554,7 @@ export default function TradeAds({
               </p>
               <button
                 onClick={toggleSortOrder}
-                className="flex cursor-pointer items-center gap-1 rounded-lg border border-border-primary bg-button-info px-3 py-1.5 text-sm text-form-button-text transition-colors hover:border-border-focus hover:bg-button-info-hover"
+                className="border-border-primary bg-button-info text-form-button-text hover:border-border-focus hover:bg-button-info-hover flex cursor-pointer items-center gap-1 rounded-lg border px-3 py-1.5 text-sm transition-colors"
               >
                 {sortOrder === "newest" ? (
                   <ArrowDownIcon className="h-4 w-4" />
@@ -565,8 +565,8 @@ export default function TradeAds({
               </button>
             </div>
             {displayTradeAds.length === 0 ? (
-              <div className="mb-8 rounded-lg border border-border-primary p-6 text-center">
-                <h3 className="mb-4 text-lg font-medium text-tertiary-text">
+              <div className="border-border-primary mb-8 rounded-lg border p-6 text-center">
+                <h3 className="text-tertiary-text mb-4 text-lg font-medium">
                   No Supporter Trade Ads Available
                 </h3>
                 <p className="text-tertiary-text/70 mb-8">
@@ -620,7 +620,7 @@ export default function TradeAds({
                   })}
                 </Masonry>
                 {totalPages > 1 && (
-                  <div className="mb-8 mt-8 flex justify-center">
+                  <div className="mt-8 mb-8 flex justify-center">
                     <Pagination
                       count={totalPages}
                       page={page}
@@ -688,7 +688,7 @@ export default function TradeAds({
                   </p>
                   <button
                     onClick={toggleSortOrder}
-                    className="flex cursor-pointer items-center gap-1 rounded-lg border border-border-primary bg-button-info px-3 py-1.5 text-sm text-form-button-text transition-colors hover:border-border-focus hover:bg-button-info-hover"
+                    className="border-border-primary bg-button-info text-form-button-text hover:border-border-focus hover:bg-button-info-hover flex cursor-pointer items-center gap-1 rounded-lg border px-3 py-1.5 text-sm transition-colors"
                   >
                     {sortOrder === "newest" ? (
                       <ArrowDownIcon className="h-4 w-4" />
@@ -700,8 +700,8 @@ export default function TradeAds({
                 </div>
                 {filteredUserTradeAds.length === 0 ? (
                   userTradeAds.length === 0 ? (
-                    <div className="mb-8 rounded-lg border border-border-primary p-6 text-center">
-                      <h3 className="mb-4 text-lg font-medium text-tertiary-text">
+                    <div className="border-border-primary mb-8 rounded-lg border p-6 text-center">
+                      <h3 className="text-tertiary-text mb-4 text-lg font-medium">
                         No Trade Ads Yet
                       </h3>
                       <p className="text-tertiary-text/70 mb-8">
@@ -721,8 +721,8 @@ export default function TradeAds({
                       </Button>
                     </div>
                   ) : (
-                    <div className="mb-8 rounded-lg border border-border-primary p-6 text-center">
-                      <h3 className="mb-4 text-lg font-medium text-tertiary-text">
+                    <div className="border-border-primary mb-8 rounded-lg border p-6 text-center">
+                      <h3 className="text-tertiary-text mb-4 text-lg font-medium">
                         No Trade Ads Match Your Search
                       </h3>
                       <p className="text-tertiary-text/70">

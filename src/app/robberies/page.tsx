@@ -238,7 +238,7 @@ function RobberyTrackerContent() {
 
         {/* Header */}
         <div className="mb-6">
-          <h1 className="text-3xl font-bold mb-2">Robbery Tracker</h1>
+          <h1 className="mb-2 text-3xl font-bold">Robbery Tracker</h1>
           <p className="text-secondary-text mb-6">
             Real-time tracking of active and completed robberies
           </p>
@@ -256,12 +256,12 @@ function RobberyTrackerContent() {
                   placeholder="Search robberies..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="text-primary-text border-border-primary hover:border-border-focus bg-secondary-bg placeholder-secondary-text w-full rounded-lg border px-4 py-4 pr-10 pl-10 transition-all focus:border-button-info focus:outline-none"
+                  className="border-border-primary bg-secondary-bg text-primary-text placeholder-secondary-text hover:border-border-focus focus:border-button-info w-full rounded-lg border px-4 py-4 pr-10 pl-10 transition-all focus:outline-none"
                 />
                 {searchQuery && (
                   <button
                     onClick={() => setSearchQuery("")}
-                    className="hover:text-primary-text text-secondary-text absolute top-1/2 right-3 -translate-y-1/2"
+                    className="text-secondary-text hover:text-primary-text absolute top-1/2 right-3 -translate-y-1/2"
                     aria-label="Clear search"
                   >
                     <XMarkIcon className="h-5 w-5" />
@@ -275,7 +275,7 @@ function RobberyTrackerContent() {
               {/* Name Sort Dropdown */}
               <div className="w-full lg:w-1/2">
                 <select
-                  className="select w-full bg-secondary-bg text-primary-text h-[56px] min-h-[56px] font-inter"
+                  className="select font-inter bg-secondary-bg text-primary-text h-[56px] min-h-[56px] w-full"
                   value={nameSort}
                   onChange={(e) => setNameSort(e.target.value as NameSort)}
                 >
@@ -290,7 +290,7 @@ function RobberyTrackerContent() {
               {/* Time Sort Dropdown */}
               <div className="w-full lg:w-1/2">
                 <select
-                  className="select w-full bg-secondary-bg text-primary-text h-[56px] min-h-[56px] font-inter"
+                  className="select font-inter bg-secondary-bg text-primary-text h-[56px] min-h-[56px] w-full"
                   value={timeSort}
                   onChange={(e) => setTimeSort(e.target.value as TimeSort)}
                 >
@@ -436,9 +436,9 @@ function RobberyTrackerContent() {
 
         {/* Error Display */}
         {error && (
-          <div className="mb-6 rounded-lg border border-status-error/50 bg-status-error/10 p-4">
+          <div className="border-status-error/50 bg-status-error/10 mb-6 rounded-lg border p-4">
             <div className="flex items-center gap-2">
-              <ExclamationTriangleIcon className="h-5 w-5 text-status-error" />
+              <ExclamationTriangleIcon className="text-status-error h-5 w-5" />
               <p className="text-status-error">{error}</p>
             </div>
           </div>
@@ -448,7 +448,7 @@ function RobberyTrackerContent() {
         {!isConnected && !error && !hasData && (
           <div className="flex items-center justify-center py-20">
             <div className="text-center">
-              <div className="mb-4 inline-block h-12 w-12 animate-spin rounded-full border-4 border-primary-border border-t-primary-accent" />
+              <div className="border-primary-border border-t-primary-accent mb-4 inline-block h-12 w-12 animate-spin rounded-full border-4" />
               <p className="text-secondary-text">
                 Connecting to robbery tracker...
               </p>
@@ -458,9 +458,9 @@ function RobberyTrackerContent() {
 
         {/* Show stale data warning if disconnected */}
         {!isConnected && hasData && (
-          <div className="mb-4 rounded-lg border border-border-primary bg-button-info/10 p-4 shadow-sm">
+          <div className="bg-button-info/10 border-border-primary mb-4 rounded-lg border p-4 shadow-sm">
             <div className="flex items-start gap-3">
-              <ClockIcon className="h-5 w-5 text-primary-text mt-0.5" />
+              <ClockIcon className="text-primary-text mt-0.5 h-5 w-5" />
               <div>
                 <span className="text-primary-text text-base font-bold">
                   Connection Lost
@@ -480,7 +480,7 @@ function RobberyTrackerContent() {
               <>
                 {/* Robbery Type Tabs */}
                 <div className="mb-6 overflow-x-auto">
-                  <div role="tablist" className="tabs min-w-max flex flex-wrap">
+                  <div role="tablist" className="tabs flex min-w-max flex-wrap">
                     <button
                       role="tab"
                       aria-selected={activeRobberyType === null}
@@ -519,7 +519,7 @@ function RobberyTrackerContent() {
                   </Masonry>
                 ) : (
                   <div className="flex flex-col items-center justify-center py-12 text-center">
-                    <MagnifyingGlassIcon className="text-tertiary-text h-12 w-12 mb-4" />
+                    <MagnifyingGlassIcon className="text-tertiary-text mb-4 h-12 w-12" />
                     <h3 className="text-primary-text text-lg font-medium">
                       No robberies found
                     </h3>
@@ -569,7 +569,7 @@ function RobberyTrackerContent() {
                   </Masonry>
                 ) : (
                   <div className="flex flex-col items-center justify-center py-12 text-center">
-                    <MagnifyingGlassIcon className="text-tertiary-text h-12 w-12 mb-4" />
+                    <MagnifyingGlassIcon className="text-tertiary-text mb-4 h-12 w-12" />
                     <h3 className="text-primary-text text-lg font-medium">
                       No mansions found
                     </h3>
@@ -585,7 +585,7 @@ function RobberyTrackerContent() {
               <>
                 {/* Airdrop Location Tabs */}
                 <div className="mb-6 overflow-x-auto">
-                  <div role="tablist" className="tabs min-w-max flex flex-wrap">
+                  <div role="tablist" className="tabs flex min-w-max flex-wrap">
                     <button
                       role="tab"
                       aria-selected={activeAirdropLocation === "all"}
@@ -663,7 +663,7 @@ function RobberyTrackerContent() {
                   </Masonry>
                 ) : (
                   <div className="flex flex-col items-center justify-center py-12 text-center">
-                    <MagnifyingGlassIcon className="text-tertiary-text h-12 w-12 mb-4" />
+                    <MagnifyingGlassIcon className="text-tertiary-text mb-4 h-12 w-12" />
                     <h3 className="text-primary-text text-lg font-medium">
                       No airdrops found
                     </h3>
@@ -683,7 +683,7 @@ function RobberyTrackerContent() {
           !error && (
             <div className="flex items-center justify-center py-20">
               <div className="text-center">
-                <ClockIcon className="mx-auto mb-4 h-16 w-16 text-tertiary-text" />
+                <ClockIcon className="text-tertiary-text mx-auto mb-4 h-16 w-16" />
                 <h3 className="text-secondary-text mb-2 text-lg font-medium">
                   {activeView === "robberies"
                     ? "No robberies tracked yet"

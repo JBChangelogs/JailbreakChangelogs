@@ -193,7 +193,7 @@ export default function FavoritesTab({
         href={itemUrl}
         className="group block"
       >
-        <Box className="rounded-lg border border-border-primary bg-primary-bg p-3 shadow-sm transition-colors hover:border-border-focus">
+        <Box className="border-border-primary bg-primary-bg hover:border-border-focus rounded-lg border p-3 shadow-sm transition-colors">
           <div className="mb-2 flex items-center">
             <div className="relative mr-3 h-16 w-16 flex-shrink-0 overflow-hidden rounded-md md:h-[4.5rem] md:w-32">
               {isVideo ? (
@@ -238,12 +238,12 @@ export default function FavoritesTab({
                 {isLoadingItem ? (
                   <Skeleton variant="text" width="80%" height={20} />
                 ) : (
-                  <span className="font-medium text-primary-text transition-colors group-hover:text-button-info">
+                  <span className="text-primary-text group-hover:text-button-info font-medium transition-colors">
                     {itemName}
                   </span>
                 )}
               </div>
-              <div className="text-xs text-secondary-text">
+              <div className="text-secondary-text text-xs">
                 {itemType && (
                   <div className="mb-1">
                     {isLoadingItem ? (
@@ -298,7 +298,7 @@ export default function FavoritesTab({
                 },
               }}
             >
-              <span className="cursor-help text-secondary-text">
+              <span className="text-secondary-text cursor-help">
                 Favorited {formatRelativeDate(favorite.created_at)}
               </span>
             </Tooltip>
@@ -311,11 +311,11 @@ export default function FavoritesTab({
   if (loading) {
     return (
       <div className="space-y-6">
-        <div className="rounded-lg border border-border-primary p-4">
+        <div className="border-border-primary rounded-lg border p-4">
           <div className="mb-3 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <StarIcon className="text-button-info" />
-              <h2 className="text-lg font-semibold text-primary-text">
+              <h2 className="text-primary-text text-lg font-semibold">
                 Favorited Items
               </h2>
             </div>
@@ -335,7 +335,7 @@ export default function FavoritesTab({
                     <div className="flex items-start justify-between">
                       <Skeleton variant="text" width={120} height={24} />
                     </div>
-                    <div className="text-xs text-secondary-text">
+                    <div className="text-secondary-text text-xs">
                       <div className="mb-1">
                         <Skeleton variant="rounded" width={80} height={20} />
                       </div>
@@ -354,10 +354,10 @@ export default function FavoritesTab({
   if (error) {
     return (
       <div className="space-y-6">
-        <div className="rounded-lg border border-border-primary p-4">
+        <div className="border-border-primary rounded-lg border p-4">
           <div className="mb-3 flex items-center gap-2">
             <StarIcon className="text-button-info" />
-            <h2 className="text-lg font-semibold text-primary-text">
+            <h2 className="text-primary-text text-lg font-semibold">
               Favorited Items [{favorites.length}]
             </h2>
           </div>
@@ -370,14 +370,14 @@ export default function FavoritesTab({
   if (shouldHideFavorites) {
     return (
       <div className="space-y-6">
-        <div className="rounded-lg border border-border-primary p-4">
+        <div className="border-border-primary rounded-lg border p-4">
           <div className="mb-3 flex items-center gap-2">
             <StarIcon className="text-button-info" />
-            <h2 className="text-lg font-semibold text-primary-text">
+            <h2 className="text-primary-text text-lg font-semibold">
               Favorited Items
             </h2>
           </div>
-          <div className="flex items-center gap-2 text-primary-text">
+          <div className="text-primary-text flex items-center gap-2">
             <svg
               className="h-5 w-5"
               fill="none"
@@ -400,11 +400,11 @@ export default function FavoritesTab({
 
   return (
     <div className="space-y-6" id="favorites-section">
-      <div className="rounded-lg border border-border-primary p-4">
+      <div className="border-border-primary rounded-lg border p-4">
         <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-2">
             <StarIcon className="text-button-info" />
-            <h2 className="text-lg font-semibold text-primary-text">
+            <h2 className="text-primary-text text-lg font-semibold">
               Favorited Items [{favorites.length}]
             </h2>
           </div>
@@ -412,7 +412,7 @@ export default function FavoritesTab({
             onClick={() =>
               setSortOrder((prev) => (prev === "newest" ? "oldest" : "newest"))
             }
-            className="flex cursor-pointer items-center gap-1 rounded-lg border border-border-primary bg-button-info px-3 py-1.5 text-sm text-form-button-text transition-colors hover:border-border-focus hover:bg-button-info-hover"
+            className="border-border-primary bg-button-info text-form-button-text hover:border-border-focus hover:bg-button-info-hover flex cursor-pointer items-center gap-1 rounded-lg border px-3 py-1.5 text-sm transition-colors"
           >
             {sortOrder === "newest" ? (
               <ArrowDownIcon className="h-4 w-4" />
@@ -424,7 +424,7 @@ export default function FavoritesTab({
         </div>
 
         {favorites.length === 0 ? (
-          <p className="italic text-primary-text">No favorites yet</p>
+          <p className="text-primary-text italic">No favorites yet</p>
         ) : (
           <>
             <div className="mb-4 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">

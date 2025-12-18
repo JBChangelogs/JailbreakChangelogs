@@ -117,7 +117,7 @@ export const RobloxConnection = ({ userData }: RobloxConnectionProps) => {
       {userData.roblox_username ? (
         <button
           onClick={handleOpen}
-          className="bg-button-info hover:bg-button-info-hover text-form-button-text cursor-pointer rounded-md px-4 py-2 font-medium transition-colors"
+          className="bg-button-info text-form-button-text hover:bg-button-info-hover cursor-pointer rounded-md px-4 py-2 font-medium transition-colors"
         >
           Disconnect Roblox
         </button>
@@ -127,7 +127,7 @@ export const RobloxConnection = ({ userData }: RobloxConnectionProps) => {
             setLoginModalOpen(true);
             window.dispatchEvent(new CustomEvent("setLoginTab", { detail: 1 }));
           }}
-          className="bg-button-info hover:bg-button-info-hover text-form-button-text inline-flex items-center gap-2 rounded-md px-4 py-2 font-medium transition-colors"
+          className="bg-button-info text-form-button-text hover:bg-button-info-hover inline-flex items-center gap-2 rounded-md px-4 py-2 font-medium transition-colors"
         >
           <svg
             className="h-5 w-5"
@@ -158,7 +158,7 @@ export const RobloxConnection = ({ userData }: RobloxConnectionProps) => {
         />
 
         <div className="fixed inset-0 flex items-center justify-center p-4">
-          <DialogPanel className="modal-container bg-secondary-bg border-button-info w-full max-w-[500px] min-w-[320px] rounded-lg border shadow-lg">
+          <DialogPanel className="modal-container border-button-info bg-secondary-bg w-full max-w-[500px] min-w-[320px] rounded-lg border shadow-lg">
             <div className="modal-header text-button-danger px-6 py-4 text-xl font-semibold">
               Disconnect Roblox Account
             </div>

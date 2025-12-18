@@ -72,7 +72,7 @@ export default function BotPage() {
             {/* Achievement Banner */}
             <div className="mx-auto mb-8 max-w-2xl">
               <div className="from-tertiary via-tertiary to-tertiary relative overflow-hidden rounded-xl bg-gradient-to-r p-1">
-                <div className="bg-secondary-bg border-border-primary rounded-lg border p-4">
+                <div className="border-border-primary bg-secondary-bg rounded-lg border p-4">
                   <div className="flex flex-col items-center gap-3 text-center md:flex-row md:justify-center">
                     <div className="flex items-center gap-2">
                       <div>
@@ -109,7 +109,7 @@ export default function BotPage() {
               href="https://discord.com/discovery/applications/1281308669299920907"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-form-button-text bg-button-info hover:bg-button-info-hover active:bg-button-info-active focus:ring-border-focus inline-block rounded-lg px-8 py-3 text-lg font-semibold transition-colors duration-200 focus:ring-2 focus:outline-none"
+              className="bg-button-info text-form-button-text hover:bg-button-info-hover focus:ring-border-focus active:bg-button-info-active inline-block rounded-lg px-8 py-3 text-lg font-semibold transition-colors duration-200 focus:ring-2 focus:outline-none"
             >
               Invite to Your Server
             </a>
@@ -125,7 +125,7 @@ export default function BotPage() {
           </h2>
           <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
             {/* Feature 1 - Inventory Commands */}
-            <div className="bg-secondary-bg border-border-primary hover:border-border-focus hover:shadow-card-shadow rounded-lg border p-6 transition-colors duration-200 hover:shadow-lg">
+            <div className="border-border-primary bg-secondary-bg hover:border-border-focus hover:shadow-card-shadow rounded-lg border p-6 transition-colors duration-200 hover:shadow-lg">
               <div className="mb-4 flex items-center gap-2">
                 <Icon
                   icon="mdi:console"
@@ -144,7 +144,7 @@ export default function BotPage() {
             </div>
 
             {/* Feature 2 - OG Finder */}
-            <div className="bg-secondary-bg border-border-primary hover:border-border-focus hover:shadow-card-shadow rounded-lg border p-6 transition-colors duration-200 hover:shadow-lg">
+            <div className="border-border-primary bg-secondary-bg hover:border-border-focus hover:shadow-card-shadow rounded-lg border p-6 transition-colors duration-200 hover:shadow-lg">
               <div className="mb-4 flex items-center gap-2">
                 <Icon
                   icon="mdi:lightning-bolt"
@@ -163,7 +163,7 @@ export default function BotPage() {
             </div>
 
             {/* Feature 3 - Dupe Detection */}
-            <div className="bg-secondary-bg border-border-primary hover:border-border-focus hover:shadow-card-shadow rounded-lg border p-6 transition-colors duration-200 hover:shadow-lg">
+            <div className="border-border-primary bg-secondary-bg hover:border-border-focus hover:shadow-card-shadow rounded-lg border p-6 transition-colors duration-200 hover:shadow-lg">
               <div className="mb-4 flex items-center gap-2">
                 <Icon
                   icon="mdi:swap-horizontal"
@@ -181,7 +181,7 @@ export default function BotPage() {
             </div>
 
             {/* Feature 4 - Season Tracking */}
-            <div className="bg-secondary-bg border-border-primary hover:border-border-focus hover:shadow-card-shadow rounded-lg border p-6 transition-colors duration-200 hover:shadow-lg">
+            <div className="border-border-primary bg-secondary-bg hover:border-border-focus hover:shadow-card-shadow rounded-lg border p-6 transition-colors duration-200 hover:shadow-lg">
               <div className="mb-4 flex items-center gap-2">
                 <Icon
                   icon="mdi:calendar"
@@ -199,7 +199,7 @@ export default function BotPage() {
             </div>
 
             {/* Feature 5 - Changelog History */}
-            <div className="bg-secondary-bg border-border-primary hover:border-border-focus hover:shadow-card-shadow rounded-lg border p-6 transition-colors duration-200 hover:shadow-lg">
+            <div className="border-border-primary bg-secondary-bg hover:border-border-focus hover:shadow-card-shadow rounded-lg border p-6 transition-colors duration-200 hover:shadow-lg">
               <div className="mb-4 flex items-center gap-2">
                 <Icon
                   icon="mdi:file-document"
@@ -217,7 +217,7 @@ export default function BotPage() {
             </div>
 
             {/* Feature 6 - Trade Features */}
-            <div className="bg-secondary-bg border-border-primary hover:border-border-focus hover:shadow-card-shadow rounded-lg border p-6 transition-colors duration-200 hover:shadow-lg">
+            <div className="border-border-primary bg-secondary-bg hover:border-border-focus hover:shadow-card-shadow rounded-lg border p-6 transition-colors duration-200 hover:shadow-lg">
               <div className="mb-4 flex items-center gap-2">
                 <Icon
                   icon="mdi:chat"

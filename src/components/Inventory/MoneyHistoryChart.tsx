@@ -294,7 +294,7 @@ const MoneyHistoryChart = ({ initialData = [] }: MoneyHistoryChartProps) => {
             <div className="text-primary-text text-xs font-semibold tracking-wide uppercase">
               Chart Update Schedule
             </div>
-            <div className="text-secondary-text text-xs mt-1">
+            <div className="text-secondary-text mt-1 text-xs">
               Charts update with each inventory scan
             </div>
           </div>

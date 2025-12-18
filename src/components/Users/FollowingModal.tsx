@@ -252,7 +252,7 @@ const FollowingModal: React.FC<FollowingModalProps> = ({
       />
 
       <div className="fixed inset-0 flex items-center justify-center p-4">
-        <div className="modal-container bg-primary-bg border-button-info w-full max-w-[480px] min-w-[320px] rounded-lg border shadow-lg">
+        <div className="modal-container border-button-info bg-primary-bg w-full max-w-[480px] min-w-[320px] rounded-lg border shadow-lg">
           <div className="modal-header text-primary-text flex items-center justify-between px-6 py-4 text-xl font-semibold">
             <span>Following ({following.length})</span>
             <button
@@ -281,13 +281,13 @@ const FollowingModal: React.FC<FollowingModalProps> = ({
                       placeholder="Search following..."
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      className="text-primary-text border-border-primary hover:border-border-focus bg-secondary-bg placeholder-secondary-text focus:border-button-info w-full rounded-lg border px-4 py-2 pr-10 pl-10 transition-all duration-300 focus:outline-none"
+                      className="border-border-primary bg-secondary-bg text-primary-text placeholder-secondary-text hover:border-border-focus focus:border-button-info w-full rounded-lg border px-4 py-2 pr-10 pl-10 transition-all duration-300 focus:outline-none"
                     />
                     <MagnifyingGlassIcon className="text-secondary-text absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2" />
                     {searchQuery && (
                       <button
                         onClick={() => setSearchQuery("")}
-                        className="hover:text-primary-text text-secondary-text absolute top-1/2 right-3 h-5 w-5 -translate-y-1/2 cursor-pointer"
+                        className="text-secondary-text hover:text-primary-text absolute top-1/2 right-3 h-5 w-5 -translate-y-1/2 cursor-pointer"
                         aria-label="Clear search"
                       >
                         <XMarkIcon />

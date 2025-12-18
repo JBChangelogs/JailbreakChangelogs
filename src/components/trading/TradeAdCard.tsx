@@ -188,7 +188,7 @@ export const TradeAdCard: React.FC<TradeAdCardProps> = ({
                   offerStatus?.loading
                     ? "text-secondary-text cursor-not-allowed"
                     : offerStatus?.success
-                      ? "bg-status-success text-form-button-text hover:bg-status-success/80"
+                      ? "hover:bg-status-success/80 bg-status-success text-form-button-text"
                       : "bg-button-info text-form-button-text hover:bg-button-info-hover"
                 }`}
               >
@@ -253,7 +253,7 @@ export const TradeAdCard: React.FC<TradeAdCardProps> = ({
                 className={`flex items-center gap-1 rounded-lg px-3 py-1 text-sm transition-colors ${
                   isDeleting
                     ? "bg-status-error/50 text-form-button-text cursor-not-allowed"
-                    : "bg-status-error text-form-button-text hover:bg-status-error/80 cursor-pointer"
+                    : "hover:bg-status-error/80 bg-status-error text-form-button-text cursor-pointer"
                 }`}
               >
                 <TrashIcon className="h-4 w-4" />

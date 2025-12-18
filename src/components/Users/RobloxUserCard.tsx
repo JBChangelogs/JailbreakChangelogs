@@ -92,7 +92,7 @@ export default function RobloxUserCard({ user }: RobloxUserCardProps) {
                 alt={`Supporter Type ${user.premiumtype}`}
                 width={16}
                 height={16}
-                className="cursor-pointer hover:opacity-90 object-contain"
+                className="cursor-pointer object-contain hover:opacity-90"
               />
             </Tooltip>
           ) : null}
@@ -122,7 +122,7 @@ export default function RobloxUserCard({ user }: RobloxUserCardProps) {
                 alt="Early Adopter"
                 width={16}
                 height={16}
-                className="cursor-pointer hover:opacity-90 object-contain"
+                className="cursor-pointer object-contain hover:opacity-90"
               />
             </Tooltip>
           ) : null}

@@ -9,7 +9,7 @@ export default function SecurityNotice({
 }: SecurityNoticeProps) {
   return (
     <div
-      className={`border-border-primary bg-button-info/10 mb-2 flex items-start gap-4 rounded-lg border p-4 shadow-sm ${className}`}
+      className={`bg-button-info/10 border-border-primary mb-2 flex items-start gap-4 rounded-lg border p-4 shadow-sm ${className}`}
     >
       <div className="relative z-10">
         <span className="text-primary-text text-base font-bold">

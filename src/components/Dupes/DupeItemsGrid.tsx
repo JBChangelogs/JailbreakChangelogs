@@ -53,13 +53,13 @@ export default function DupeItemsGrid({
       <div className="space-y-4">
         {Array.from({ length: 6 }).map((_, index) => (
           <div key={index} className="animate-pulse">
-            <div className="rounded-lg border border-border-primary bg-secondary-bg p-4">
+            <div className="border-border-primary bg-secondary-bg rounded-lg border p-4">
               <div className="flex items-start gap-4">
-                <div className="h-16 w-16 rounded-lg bg-surface-bg"></div>
+                <div className="bg-surface-bg h-16 w-16 rounded-lg"></div>
                 <div className="flex-1 space-y-2">
-                  <div className="h-4 w-3/4 rounded bg-surface-bg"></div>
-                  <div className="h-3 w-1/2 rounded bg-surface-bg"></div>
-                  <div className="h-3 w-1/3 rounded bg-surface-bg"></div>
+                  <div className="bg-surface-bg h-4 w-3/4 rounded"></div>
+                  <div className="bg-surface-bg h-3 w-1/2 rounded"></div>
+                  <div className="bg-surface-bg h-3 w-1/3 rounded"></div>
                 </div>
               </div>
             </div>

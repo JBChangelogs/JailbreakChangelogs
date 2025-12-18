@@ -30,10 +30,10 @@ export default async function SeasonContractsPage() {
           <Breadcrumb />
 
           <div className="flex min-h-[60vh] items-center justify-center">
-            <div className="bg-secondary-bg border-border-primary rounded-lg border p-12 text-center max-w-2xl">
+            <div className="border-border-primary bg-secondary-bg max-w-2xl rounded-lg border p-12 text-center">
               {/* Icon */}
               <div className="mb-8">
-                <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-button-info/20 border border-button-info/30">
+                <div className="bg-button-info/20 border-button-info/30 mx-auto flex h-20 w-20 items-center justify-center rounded-full border">
                   <Icon
                     icon="line-md:calendar"
                     className="text-button-info h-10 w-10"
@@ -67,13 +67,13 @@ export default async function SeasonContractsPage() {
 
               {/* Additional helpful info */}
               <div className="mt-8">
-                <div className="border-button-info bg-button-info/10 rounded-lg border p-3 sm:p-4">
+                <div className="bg-button-info/10 border-button-info rounded-lg border p-3 sm:p-4">
                   <div className="text-primary-text flex items-start gap-2 text-xs sm:text-sm">
                     <Icon
                       icon="emojione:light-bulb"
                       className="text-button-info flex-shrink-0 text-base sm:text-lg"
                     />
-                    <span className="font-medium leading-relaxed">
+                    <span className="leading-relaxed font-medium">
                       Helpful Tip: New seasons typically start shortly after the
                       previous one ends.
                     </span>
@@ -99,10 +99,10 @@ export default async function SeasonContractsPage() {
 
           {/* Enhanced Empty State */}
           <div className="flex min-h-[60vh] items-center justify-center">
-            <div className="bg-secondary-bg border-border-primary rounded-lg border p-12 text-center max-w-2xl">
+            <div className="border-border-primary bg-secondary-bg max-w-2xl rounded-lg border p-12 text-center">
               {/* Icon */}
               <div className="mb-8">
-                <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-button-info/20 border border-button-info/30">
+                <div className="bg-button-info/20 border-button-info/30 mx-auto flex h-20 w-20 items-center justify-center rounded-full border">
                   <Icon
                     icon="line-md:document"
                     className="text-button-info h-10 w-10"
@@ -133,13 +133,13 @@ export default async function SeasonContractsPage() {
 
               {/* Additional helpful info */}
               <div className="mt-8">
-                <div className="border-button-info bg-button-info/10 rounded-lg border p-3 sm:p-4">
+                <div className="bg-button-info/10 border-button-info rounded-lg border p-3 sm:p-4">
                   <div className="text-primary-text flex items-start gap-2 text-xs sm:text-sm">
                     <Icon
                       icon="emojione:light-bulb"
                       className="text-button-info flex-shrink-0 text-base sm:text-lg"
                     />
-                    <span className="font-medium leading-relaxed">
+                    <span className="leading-relaxed font-medium">
                       Helpful Tip: Contracts are updated weekly during active
                       seasons.
                     </span>

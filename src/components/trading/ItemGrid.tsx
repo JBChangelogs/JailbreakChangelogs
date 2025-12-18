@@ -240,7 +240,7 @@ export const ItemGrid: React.FC<ItemGridProps> = ({
                           />
                         )}
                         {item.count > 1 && (
-                          <div className="border-button-info bg-button-info/90 text-form-button-text absolute top-1 right-1 rounded-full border px-1.5 py-0.5 text-xs z-5">
+                          <div className="bg-button-info/90 border-button-info text-form-button-text absolute top-1 right-1 z-5 rounded-full border px-1.5 py-0.5 text-xs">
                             ×{item.count}
                           </div>
                         )}
@@ -252,7 +252,7 @@ export const ItemGrid: React.FC<ItemGridProps> = ({
                               e.stopPropagation();
                               onRemove(item.id, item.sub_name);
                             }}
-                            className="text-form-button-text absolute top-1 left-1 z-10 flex h-6 w-6 items-center justify-center rounded-full bg-red-600/90 transition-colors hover:bg-red-700 cursor-pointer"
+                            className="text-form-button-text absolute top-1 left-1 z-10 flex h-6 w-6 cursor-pointer items-center justify-center rounded-full bg-red-600/90 transition-colors hover:bg-red-700"
                             aria-label="Remove item"
                           >
                             <svg

@@ -21,7 +21,7 @@ const ChangelogQuickNav: React.FC<ChangelogQuickNavProps> = ({
             onChangelogSelect(prevChangelog.id.toString());
             window.scrollTo({ top: 0, behavior: "smooth" });
           }}
-          className="text-secondary-text group border-link hover:border-link-hover hover:text-link-hover flex w-full cursor-pointer items-center gap-2 rounded-lg border bg-transparent p-4 transition-colors sm:w-auto"
+          className="group border-link text-secondary-text hover:border-link-hover hover:text-link-hover flex w-full cursor-pointer items-center gap-2 rounded-lg border bg-transparent p-4 transition-colors sm:w-auto"
         >
           <ChevronLeftIcon className="text-link group-hover:text-link-hover h-5 w-5" />
           <div className="flex flex-col items-start">
@@ -56,7 +56,7 @@ const ChangelogQuickNav: React.FC<ChangelogQuickNavProps> = ({
             onChangelogSelect(nextChangelog.id.toString());
             window.scrollTo({ top: 0, behavior: "smooth" });
           }}
-          className="text-secondary-text group border-link hover:border-link-hover hover:text-link-hover flex w-full cursor-pointer items-center gap-2 rounded-lg border bg-transparent p-4 text-right transition-colors sm:w-auto"
+          className="group border-link text-secondary-text hover:border-link-hover hover:text-link-hover flex w-full cursor-pointer items-center gap-2 rounded-lg border bg-transparent p-4 text-right transition-colors sm:w-auto"
         >
           <div className="flex flex-col items-end">
             <span className="text-primary-text text-sm">Next</span>

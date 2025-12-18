@@ -53,12 +53,12 @@ function OGFinderLoadingFallback({ robloxId }: { robloxId: string }) {
             value={robloxId}
             readOnly
             placeholder="Search by ID or username..."
-            className="text-primary-text border-border-primary bg-secondary-bg placeholder-secondary-text focus:border-button-info w-full rounded-lg border py-3 px-4 pr-16 transition-all duration-300 focus:outline-none"
+            className="border-border-primary bg-secondary-bg text-primary-text placeholder-secondary-text focus:border-button-info w-full rounded-lg border px-4 py-3 pr-16 transition-all duration-300 focus:outline-none"
             disabled
           />
 
           {/* Right side controls container */}
-          <div className="absolute right-3 top-1/2 flex -translate-y-1/2 items-center gap-2">
+          <div className="absolute top-1/2 right-3 flex -translate-y-1/2 items-center gap-2">
             {/* Search button with spinner */}
             <button
               type="button"

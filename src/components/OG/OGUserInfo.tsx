@@ -37,7 +37,7 @@ export default function OGUserInfo({
 
       {/* Roblox User Profile */}
       <div className="border-border-primary bg-primary-bg mb-6 flex flex-col gap-4 rounded-lg border p-4 sm:flex-row sm:items-center">
-        <div className="relative h-16 w-16 flex-shrink-0 rounded-full bg-tertiary-bg overflow-hidden">
+        <div className="bg-tertiary-bg relative h-16 w-16 flex-shrink-0 overflow-hidden rounded-full">
           <Image
             src={getUserAvatar(robloxId)}
             alt="Roblox Avatar"
@@ -99,7 +99,7 @@ export default function OGUserInfo({
                   href={`https://discord.com/users/${userConnectionData.id}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-primary-text border-primary-text hover:bg-quaternary-bg inline-flex items-center gap-1 rounded-full border bg-transparent px-2 py-0.5 text-xs transition-colors"
+                  className="border-primary-text text-primary-text hover:bg-quaternary-bg inline-flex items-center gap-1 rounded-full border bg-transparent px-2 py-0.5 text-xs transition-colors"
                 >
                   <DiscordIcon className="h-3 w-3" />
                   <span className="text-xs font-medium">Discord</span>
@@ -132,7 +132,7 @@ export default function OGUserInfo({
                 href={`https://www.roblox.com/users/${robloxId}/profile`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-primary-text border-primary-text hover:bg-quaternary-bg inline-flex items-center gap-1 rounded-full border bg-transparent px-2 py-0.5 text-xs transition-colors"
+                className="border-primary-text text-primary-text hover:bg-quaternary-bg inline-flex items-center gap-1 rounded-full border bg-transparent px-2 py-0.5 text-xs transition-colors"
               >
                 <RobloxIcon className="h-3 w-3" />
                 <span className="text-xs font-medium">Roblox</span>
@@ -164,7 +164,7 @@ export default function OGUserInfo({
                 <Link
                   href={`/users/${userConnectionData.id}`}
                   prefetch={false}
-                  className="text-primary-text border-primary-text hover:bg-quaternary-bg inline-flex items-center gap-1 rounded-full border bg-transparent px-2 py-0.5 text-xs transition-colors"
+                  className="border-primary-text text-primary-text hover:bg-quaternary-bg inline-flex items-center gap-1 rounded-full border bg-transparent px-2 py-0.5 text-xs transition-colors"
                 >
                   <Image
                     src="https://assets.jailbreakchangelogs.xyz/assets/logos/JBCL_Short_Transparent.webp"

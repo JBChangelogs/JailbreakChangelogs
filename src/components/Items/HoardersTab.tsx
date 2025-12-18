@@ -172,7 +172,7 @@ export default function HoardersTab({ itemName, itemType }: HoardersTabProps) {
           placeholder="Search hoarders..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="text-primary-text border-border-primary bg-secondary-bg placeholder-tertiary-text focus:border-border-focus w-full rounded-lg border px-4 py-3 pr-10 pl-10 font-medium transition-all duration-300 focus:outline-none"
+          className="border-border-primary bg-secondary-bg text-primary-text placeholder-tertiary-text focus:border-border-focus w-full rounded-lg border px-4 py-3 pr-10 pl-10 font-medium transition-all duration-300 focus:outline-none"
         />
         <MagnifyingGlassIcon className="text-tertiary-text absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2" />
         {searchTerm && (
@@ -201,7 +201,7 @@ export default function HoardersTab({ itemName, itemType }: HoardersTabProps) {
           </p>
           <button
             onClick={() => setSearchTerm("")}
-            className="bg-button-info text-primary-text hover:bg-button-info-hover border-border-primary mt-4 rounded-lg border px-4 py-2 text-sm font-medium transition-colors hover:cursor-pointer"
+            className="border-border-primary bg-button-info text-primary-text hover:bg-button-info-hover mt-4 rounded-lg border px-4 py-2 text-sm font-medium transition-colors hover:cursor-pointer"
           >
             Clear search
           </button>
@@ -212,7 +212,7 @@ export default function HoardersTab({ itemName, itemType }: HoardersTabProps) {
       {filteredHoarders.length > 0 && (
         <div
           ref={parentRef}
-          className="bg-secondary-bg scrollbar-thin scrollbar-track-transparent scrollbar-thumb-border-primary hover:scrollbar-thumb-border-focus max-h-[600px] overflow-y-auto rounded-lg pr-2"
+          className="scrollbar-thin scrollbar-track-transparent scrollbar-thumb-border-primary hover:scrollbar-thumb-border-focus bg-secondary-bg max-h-[600px] overflow-y-auto rounded-lg pr-2"
           style={{
             scrollbarWidth: "thin",
             scrollbarColor: "var(--color-border-primary) transparent",
@@ -243,14 +243,14 @@ export default function HoardersTab({ itemName, itemType }: HoardersTabProps) {
                     width: "100%",
                     transform: `translateY(${virtualItem.start}px)`,
                   }}
-                  className="flex flex-col sm:flex-row sm:items-center sm:justify-between rounded-lg border border-transparent px-4 py-3 gap-2 sm:gap-0"
+                  className="flex flex-col gap-2 rounded-lg border border-transparent px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-0"
                 >
-                  <div className="flex items-center gap-2 sm:gap-4 min-w-0 flex-1">
-                    <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-                      <span className="text-tertiary-text text-xs sm:text-sm font-semibold tracking-wide uppercase">
+                  <div className="flex min-w-0 flex-1 items-center gap-2 sm:gap-4">
+                    <div className="flex shrink-0 items-center gap-2 sm:gap-3">
+                      <span className="text-tertiary-text text-xs font-semibold tracking-wide uppercase sm:text-sm">
                         #{rank}
                       </span>
-                      <div className="relative h-10 w-10 sm:h-12 sm:w-12 shrink-0 overflow-hidden rounded-full bg-tertiary-bg">
+                      <div className="bg-tertiary-bg relative h-10 w-10 shrink-0 overflow-hidden rounded-full sm:h-12 sm:w-12">
                         <Image
                           src={avatar}
                           alt={displayName}
@@ -273,24 +273,24 @@ export default function HoardersTab({ itemName, itemType }: HoardersTabProps) {
                         />
                       </div>
                     </div>
-                    <div className="flex flex-col gap-1 min-w-0 flex-1">
+                    <div className="flex min-w-0 flex-1 flex-col gap-1">
                       <Link
                         href={`/inventories/${hoarder.user_id}`}
                         prefetch={false}
-                        className="text-primary-text hover:text-link-hover text-sm sm:text-lg font-bold transition-colors hover:underline truncate"
+                        className="text-primary-text hover:text-link-hover truncate text-sm font-bold transition-colors hover:underline sm:text-lg"
                       >
                         {displayName}
                       </Link>
-                      <span className="text-secondary-text text-xs sm:text-sm truncate">
+                      <span className="text-secondary-text truncate text-xs sm:text-sm">
                         @{username}
                       </span>
                     </div>
                   </div>
-                  <div className="text-primary-text text-left sm:text-right shrink-0">
-                    <span className="text-base sm:text-lg font-bold">
+                  <div className="text-primary-text shrink-0 text-left sm:text-right">
+                    <span className="text-base font-bold sm:text-lg">
                       {hoarder.count.toLocaleString()}
                     </span>
-                    <span className="text-secondary-text text-xs sm:text-sm ml-1">
+                    <span className="text-secondary-text ml-1 text-xs sm:text-sm">
                       copies
                     </span>
                   </div>

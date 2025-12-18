@@ -67,7 +67,7 @@ export default function InventoryItemCard({
     <div
       className={`text-primary-text hover:shadow-card-shadow relative flex min-h-[400px] cursor-pointer flex-col rounded-lg p-3 transition-all duration-200 ${
         isDupedItem
-          ? "border border-button-danger bg-button-danger/10 hover:border-button-danger"
+          ? "bg-button-danger/10 border-button-danger hover:border-button-danger border"
           : isOriginalOwner
             ? "border border-[#FFD700] bg-[#FFD700]/10 hover:border-[#FFD700]"
             : "border-border-primary bg-primary-bg hover:border-border-focus border"
@@ -115,7 +115,7 @@ export default function InventoryItemCard({
             {item.categoryTitle}
           </span>
           {isDupedItem && (
-            <span className="bg-button-danger text-form-button-text flex items-center gap-1 rounded-full border border-button-danger px-2 py-0.5 text-xs font-medium">
+            <span className="border-button-danger bg-button-danger text-form-button-text flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-medium">
               Duped
             </span>
           )}
@@ -285,7 +285,7 @@ export default function InventoryItemCard({
               <span className="text-primary-text text-xl font-bold">???</span>
             ) : originalOwnerInfo ? (
               <div className="flex items-center justify-center gap-2">
-                <div className="relative h-8 w-8 rounded-full bg-tertiary-bg overflow-hidden flex-shrink-0">
+                <div className="bg-tertiary-bg relative h-8 w-8 flex-shrink-0 overflow-hidden rounded-full">
                   <Image
                     src={getUserAvatar(
                       isOriginalOwner ? userId : originalOwnerInfo.value,

@@ -161,8 +161,8 @@ export default function ConnectedBotsPolling() {
           Connected Bots
         </h2>
         <div className="flex items-center gap-2">
-          <Icon icon="fluent:live-24-filled" className="text-red-500 h-4 w-4" />
-          <span className="text-red-500 text-xs font-medium tracking-wide uppercase">
+          <Icon icon="fluent:live-24-filled" className="h-4 w-4 text-red-500" />
+          <span className="text-xs font-medium tracking-wide text-red-500 uppercase">
             LIVE
           </span>
         </div>
@@ -198,7 +198,7 @@ export default function ConnectedBotsPolling() {
                   </span>
                 </div>
                 {queueInfo.processed_counter && queueInfo.running_since && (
-                  <div className="text-sm text-secondary-text">
+                  <div className="text-secondary-text text-sm">
                     <span className="text-primary-text font-bold">
                       {queueInfo.processed_counter.total.toLocaleString()}
                     </span>{" "}

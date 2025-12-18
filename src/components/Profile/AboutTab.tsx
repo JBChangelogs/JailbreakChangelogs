@@ -170,7 +170,7 @@ export default function AboutTab({
                 value={newBio}
                 onChange={handleBioChange}
                 placeholder="Write something about yourself..."
-                className="bg-form-input border-border-primary hover:border-border-focus text-primary-text focus:border-button-info min-h-[120px] w-full resize-y rounded border p-3 text-sm focus:outline-none"
+                className="border-border-primary bg-form-input text-primary-text hover:border-border-focus focus:border-button-info min-h-[120px] w-full resize-y rounded border p-3 text-sm focus:outline-none"
                 maxLength={MAX_BIO_LENGTH}
                 style={{ wordWrap: "break-word", overflowWrap: "break-word" }}
               />

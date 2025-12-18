@@ -60,14 +60,14 @@ export default function Home() {
                 href="roblox://experiences/start?placeId=606849621"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-form-button-text bg-button-info hover:bg-button-info-hover active:bg-button-info-active focus:ring-border-focus rounded-lg px-8 py-3 text-lg font-semibold transition-colors duration-200 focus:ring-2 focus:outline-none"
+                className="bg-button-info text-form-button-text hover:bg-button-info-hover focus:ring-border-focus active:bg-button-info-active rounded-lg px-8 py-3 text-lg font-semibold transition-colors duration-200 focus:ring-2 focus:outline-none"
               >
                 Play Jailbreak Now
               </a>
               <Link
                 href="/testimonials"
                 prefetch={false}
-                className="text-form-button-text border-form-button-text hover:bg-button-info-hover rounded-lg border-2 px-8 py-3 text-lg font-semibold transition-colors duration-200"
+                className="border-form-button-text text-form-button-text hover:bg-button-info-hover rounded-lg border-2 px-8 py-3 text-lg font-semibold transition-colors duration-200"
               >
                 Read Testimonials
               </Link>
@@ -91,7 +91,7 @@ export default function Home() {
             <Link
               href="/values"
               prefetch={false}
-              className="bg-secondary-bg border-border-primary hover:border-border-focus group flex items-center gap-4 rounded-xl border p-6 transition-all duration-200 hover:shadow-lg"
+              className="group border-border-primary bg-secondary-bg hover:border-border-focus flex items-center gap-4 rounded-xl border p-6 transition-all duration-200 hover:shadow-lg"
             >
               <div className="bg-button-info/10 flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-lg">
                 <Icon
@@ -118,7 +118,7 @@ export default function Home() {
             <Link
               href="/trading"
               prefetch={false}
-              className="bg-secondary-bg border-border-primary hover:border-border-focus group flex items-center gap-4 rounded-xl border p-6 transition-all duration-200 hover:shadow-lg"
+              className="group border-border-primary bg-secondary-bg hover:border-border-focus flex items-center gap-4 rounded-xl border p-6 transition-all duration-200 hover:shadow-lg"
             >
               <div className="bg-button-info/10 flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-lg">
                 <Icon
@@ -145,7 +145,7 @@ export default function Home() {
             <Link
               href="/calculators"
               prefetch={false}
-              className="bg-secondary-bg border-border-primary hover:border-border-focus group flex items-center gap-4 rounded-xl border p-6 transition-all duration-200 hover:shadow-lg"
+              className="group border-border-primary bg-secondary-bg hover:border-border-focus flex items-center gap-4 rounded-xl border p-6 transition-all duration-200 hover:shadow-lg"
             >
               <div className="bg-button-info/10 flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-lg">
                 <Icon
@@ -172,7 +172,7 @@ export default function Home() {
             <Link
               href="/dupes"
               prefetch={false}
-              className="bg-secondary-bg border-border-primary hover:border-border-focus group flex items-center gap-4 rounded-xl border p-6 transition-all duration-200 hover:shadow-lg"
+              className="group border-border-primary bg-secondary-bg hover:border-border-focus flex items-center gap-4 rounded-xl border p-6 transition-all duration-200 hover:shadow-lg"
             >
               <div className="bg-button-info/10 flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-lg">
                 <Icon
@@ -216,10 +216,10 @@ export default function Home() {
             <Link
               href="/changelogs"
               prefetch={false}
-              className="group bg-secondary-bg border-border-primary hover:border-border-focus hover:shadow-card-shadow relative block overflow-hidden rounded-xl border p-8 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
+              className="group border-border-primary bg-secondary-bg hover:border-border-focus hover:shadow-card-shadow relative block overflow-hidden rounded-xl border p-8 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
             >
               <div className="mb-4 flex items-center gap-3">
-                <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-button-info/10">
+                <div className="bg-button-info/10 flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg">
                   <Icon
                     icon="mdi:book-open-page-variant"
                     className="text-link h-6 w-6"
@@ -248,10 +248,10 @@ export default function Home() {
             <Link
               href="/seasons"
               prefetch={false}
-              className="group bg-secondary-bg border-border-primary hover:border-border-focus hover:shadow-card-shadow relative block overflow-hidden rounded-xl border p-8 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
+              className="group border-border-primary bg-secondary-bg hover:border-border-focus hover:shadow-card-shadow relative block overflow-hidden rounded-xl border p-8 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
             >
               <div className="mb-4 flex items-center gap-3">
-                <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-button-info/10">
+                <div className="bg-button-info/10 flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg">
                   <Icon
                     icon="mdi:trophy"
                     className="text-link h-6 w-6"
@@ -280,10 +280,10 @@ export default function Home() {
             <Link
               href="/values"
               prefetch={false}
-              className="group bg-secondary-bg border-border-primary hover:border-border-focus hover:shadow-card-shadow relative block overflow-hidden rounded-xl border p-8 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
+              className="group border-border-primary bg-secondary-bg hover:border-border-focus hover:shadow-card-shadow relative block overflow-hidden rounded-xl border p-8 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
             >
               <div className="mb-4 flex items-center gap-3">
-                <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-button-info/10">
+                <div className="bg-button-info/10 flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg">
                   <Icon
                     icon="mdi:chart-line"
                     className="text-link h-6 w-6"
@@ -312,10 +312,10 @@ export default function Home() {
             <Link
               href="/trading"
               prefetch={false}
-              className="group bg-secondary-bg border-border-primary hover:border-border-focus hover:shadow-card-shadow relative block overflow-hidden rounded-xl border p-8 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
+              className="group border-border-primary bg-secondary-bg hover:border-border-focus hover:shadow-card-shadow relative block overflow-hidden rounded-xl border p-8 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
             >
               <div className="mb-4 flex items-center gap-3">
-                <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-button-info/10">
+                <div className="bg-button-info/10 flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg">
                   <Icon
                     icon="mdi:swap-horizontal"
                     className="text-link h-6 w-6"
@@ -344,10 +344,10 @@ export default function Home() {
             <Link
               href="/inventories"
               prefetch={false}
-              className="group bg-secondary-bg border-border-primary hover:border-border-focus hover:shadow-card-shadow relative block overflow-hidden rounded-xl border p-8 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
+              className="group border-border-primary bg-secondary-bg hover:border-border-focus hover:shadow-card-shadow relative block overflow-hidden rounded-xl border p-8 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
             >
               <div className="mb-4 flex items-center gap-3">
-                <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-button-info/10">
+                <div className="bg-button-info/10 flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg">
                   <Icon
                     icon="mdi:package-variant"
                     className="text-link h-6 w-6"
@@ -376,10 +376,10 @@ export default function Home() {
             <Link
               href="/dupes"
               prefetch={false}
-              className="group bg-secondary-bg border-border-primary hover:border-border-focus hover:shadow-card-shadow relative block overflow-hidden rounded-xl border p-8 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
+              className="group border-border-primary bg-secondary-bg hover:border-border-focus hover:shadow-card-shadow relative block overflow-hidden rounded-xl border p-8 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
             >
               <div className="mb-4 flex items-center gap-3">
-                <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-button-info/10">
+                <div className="bg-button-info/10 flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg">
                   <Icon
                     icon="mdi:shield-alert"
                     className="text-link h-6 w-6"
@@ -408,10 +408,10 @@ export default function Home() {
             <Link
               href="/og"
               prefetch={false}
-              className="group bg-secondary-bg border-border-primary hover:border-border-focus hover:shadow-card-shadow relative block overflow-hidden rounded-xl border p-8 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
+              className="group border-border-primary bg-secondary-bg hover:border-border-focus hover:shadow-card-shadow relative block overflow-hidden rounded-xl border p-8 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
             >
               <div className="mb-4 flex items-center gap-3">
-                <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-button-info/10">
+                <div className="bg-button-info/10 flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg">
                   <Icon
                     icon="mdi:crown"
                     className="text-link h-6 w-6"
@@ -440,10 +440,10 @@ export default function Home() {
             <Link
               href="/leaderboard/money"
               prefetch={false}
-              className="group bg-secondary-bg border-border-primary hover:border-border-focus hover:shadow-card-shadow relative block overflow-hidden rounded-xl border p-8 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
+              className="group border-border-primary bg-secondary-bg hover:border-border-focus hover:shadow-card-shadow relative block overflow-hidden rounded-xl border p-8 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
             >
               <div className="mb-4 flex items-center gap-3">
-                <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-button-info/10">
+                <div className="bg-button-info/10 flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg">
                   <Icon
                     icon="mdi:podium"
                     className="text-link h-6 w-6"
@@ -472,10 +472,10 @@ export default function Home() {
             <Link
               href="/calculators"
               prefetch={false}
-              className="group bg-secondary-bg border-border-primary hover:border-border-focus hover:shadow-card-shadow relative block overflow-hidden rounded-xl border p-8 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
+              className="group border-border-primary bg-secondary-bg hover:border-border-focus hover:shadow-card-shadow relative block overflow-hidden rounded-xl border p-8 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
             >
               <div className="mb-4 flex items-center gap-3">
-                <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-button-info/10">
+                <div className="bg-button-info/10 flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg">
                   <Icon
                     icon="mdi:calculator"
                     className="text-link h-6 w-6"
@@ -504,10 +504,10 @@ export default function Home() {
             <Link
               href="/servers"
               prefetch={false}
-              className="group bg-secondary-bg border-border-primary hover:border-border-focus hover:shadow-card-shadow relative block overflow-hidden rounded-xl border p-8 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
+              className="group border-border-primary bg-secondary-bg hover:border-border-focus hover:shadow-card-shadow relative block overflow-hidden rounded-xl border p-8 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
             >
               <div className="mb-4 flex items-center gap-3">
-                <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-button-info/10">
+                <div className="bg-button-info/10 flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg">
                   <Icon
                     icon="mdi:server-network"
                     className="text-link h-6 w-6"
@@ -536,10 +536,10 @@ export default function Home() {
             <Link
               href="/users"
               prefetch={false}
-              className="group bg-secondary-bg border-border-primary hover:border-border-focus hover:shadow-card-shadow relative block overflow-hidden rounded-xl border p-8 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
+              className="group border-border-primary bg-secondary-bg hover:border-border-focus hover:shadow-card-shadow relative block overflow-hidden rounded-xl border p-8 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
             >
               <div className="mb-4 flex items-center gap-3">
-                <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-button-info/10">
+                <div className="bg-button-info/10 flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg">
                   <Icon
                     icon="mdi:account-group"
                     className="text-link h-6 w-6"
@@ -568,10 +568,10 @@ export default function Home() {
             <Link
               href="/bot"
               prefetch={false}
-              className="group bg-secondary-bg border-border-primary hover:border-border-focus hover:shadow-card-shadow relative block overflow-hidden rounded-xl border p-8 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
+              className="group border-border-primary bg-secondary-bg hover:border-border-focus hover:shadow-card-shadow relative block overflow-hidden rounded-xl border p-8 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
             >
               <div className="mb-4 flex items-center gap-3">
-                <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-button-info/10">
+                <div className="bg-button-info/10 flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg">
                   <Icon
                     icon="mdi:robot"
                     className="text-link h-6 w-6"

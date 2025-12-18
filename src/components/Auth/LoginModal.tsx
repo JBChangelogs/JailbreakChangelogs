@@ -344,7 +344,7 @@ function LoginModalInner({ open, onClose }: LoginModalProps) {
                           href="/tos"
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="hover:text-link-hover text-link underline"
+                          className="text-link hover:text-link-hover underline"
                         >
                           Terms of Service
                         </a>{" "}
@@ -353,7 +353,7 @@ function LoginModalInner({ open, onClose }: LoginModalProps) {
                           href="/privacy"
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="hover:text-link-hover text-link underline"
+                          className="text-link hover:text-link-hover underline"
                         >
                           Privacy Policy
                         </a>
@@ -385,7 +385,7 @@ function LoginModalInner({ open, onClose }: LoginModalProps) {
 
                           window.location.href = oauthRedirect;
                         }}
-                        className={`bg-button-info text-form-button-text hover:bg-button-info-hover hover:shadow-button-info/25 flex w-full cursor-pointer items-center justify-center gap-2 rounded-md px-4 py-3 font-medium shadow-lg transition-all duration-200`}
+                        className={`hover:shadow-button-info/25 bg-button-info text-form-button-text hover:bg-button-info-hover flex w-full cursor-pointer items-center justify-center gap-2 rounded-md px-4 py-3 font-medium shadow-lg transition-all duration-200`}
                       >
                         {campaign
                           ? "Login to Support Campaign"
@@ -436,7 +436,7 @@ function LoginModalInner({ open, onClose }: LoginModalProps) {
                             href="/tos"
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="hover:text-link-hover text-link underline"
+                            className="text-link hover:text-link-hover underline"
                           >
                             Terms of Service
                           </a>{" "}
@@ -445,7 +445,7 @@ function LoginModalInner({ open, onClose }: LoginModalProps) {
                             href="/privacy"
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="hover:text-link-hover text-link underline"
+                            className="text-link hover:text-link-hover underline"
                           >
                             Privacy Policy
                           </a>
@@ -479,7 +479,7 @@ function LoginModalInner({ open, onClose }: LoginModalProps) {
                               setIsRedirecting(false);
                             }
                           }}
-                          className={`bg-button-info text-form-button-text hover:bg-button-info-hover hover:shadow-button-info/25 flex w-full cursor-pointer items-center justify-center gap-2 rounded-md px-4 py-3 font-medium shadow-lg transition-all duration-200`}
+                          className={`hover:shadow-button-info/25 bg-button-info text-form-button-text hover:bg-button-info-hover flex w-full cursor-pointer items-center justify-center gap-2 rounded-md px-4 py-3 font-medium shadow-lg transition-all duration-200`}
                         >
                           Continue with Roblox
                         </motion.button>

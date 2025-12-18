@@ -219,11 +219,11 @@ export default function TradeHistoryModal({
                     return (
                       <div
                         key={`${userId}-${owner.TradeTime}-${index}`}
-                        className="border-border-primary bg-primary-bg flex flex-col sm:flex-row sm:items-center gap-3 rounded-lg border p-3"
+                        className="border-border-primary bg-primary-bg flex flex-col gap-3 rounded-lg border p-3 sm:flex-row sm:items-center"
                       >
-                        <div className="flex items-center gap-3 min-w-0 flex-1">
+                        <div className="flex min-w-0 flex-1 items-center gap-3">
                           <div className="flex-shrink-0">
-                            <div className="relative h-10 w-10 rounded-full bg-tertiary-bg overflow-hidden">
+                            <div className="bg-tertiary-bg relative h-10 w-10 overflow-hidden rounded-full">
                               <Image
                                 src={getUserAvatar(userId)}
                                 alt="User Avatar"
@@ -265,7 +265,7 @@ export default function TradeHistoryModal({
                             </a>
                           </div>
                         </div>
-                        <div className="text-tertiary-text text-xs sm:text-sm sm:text-right sm:flex-shrink-0">
+                        <div className="text-tertiary-text text-xs sm:flex-shrink-0 sm:text-right sm:text-sm">
                           {new Date(owner.TradeTime * 1000).toLocaleDateString(
                             "en-US",
                             {

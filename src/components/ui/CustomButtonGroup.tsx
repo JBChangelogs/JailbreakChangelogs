@@ -20,7 +20,7 @@ export const CustomButtonGroup: React.FC<CustomButtonGroupProps> = ({
   return (
     <div
       role="group"
-      className={`inline-flex rounded-lg border border-border-primary w-fit ${className}`}
+      className={`border-border-primary inline-flex w-fit rounded-lg border ${className}`}
     >
       {children}
     </div>

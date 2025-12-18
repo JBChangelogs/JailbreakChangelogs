@@ -411,7 +411,7 @@ const ServerList: React.FC<{
           {[1, 2, 3, 4, 5, 6].map((i) => (
             <div
               key={i}
-              className="border-border-primary hover:border-border-focus bg-secondary-bg rounded-lg border p-4 sm:p-6"
+              className="border-border-primary bg-secondary-bg hover:border-border-focus rounded-lg border p-4 sm:p-6"
             >
               <div className="mb-4 flex flex-col gap-3">
                 <div className="flex items-center space-x-2">
@@ -475,7 +475,7 @@ const ServerList: React.FC<{
                   />
                 </div>
 
-                <div className="border-border-primary hover:border-border-focus bg-primary-bg rounded-lg border p-3 sm:p-4">
+                <div className="border-border-primary bg-primary-bg hover:border-border-focus rounded-lg border p-3 sm:p-4">
                   <Skeleton
                     variant="text"
                     width={100}
@@ -513,7 +513,7 @@ const ServerList: React.FC<{
 
   if (error) {
     return (
-      <div className="border-button-danger bg-button-danger/10 text-button-danger rounded-lg border p-4">
+      <div className="bg-button-danger/10 border-button-danger text-button-danger rounded-lg border p-4">
         {error}
       </div>
     );
@@ -521,7 +521,7 @@ const ServerList: React.FC<{
 
   if (sortedServers.length === 0) {
     return (
-      <div className="border-border-primary hover:border-border-focus bg-secondary-bg rounded-lg border p-8 text-center">
+      <div className="border-border-primary bg-secondary-bg hover:border-border-focus rounded-lg border p-8 text-center">
         <Icon
           icon="heroicons-outline:shield-check"
           className="text-button-info mx-auto mb-4 h-12 w-12"
@@ -554,7 +554,7 @@ const ServerList: React.FC<{
           <div className="flex items-center gap-2">
             <div className="w-64 sm:w-80">
               <select
-                className="select w-full bg-secondary-bg text-primary-text"
+                className="select bg-secondary-bg text-primary-text w-full"
                 value={sortOption}
                 onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
                   if (onSortChange) {
@@ -575,7 +575,7 @@ const ServerList: React.FC<{
           </div>
           <button
             onClick={handleAddServer}
-            className="text-form-button-text border-button-info bg-button-info hover:bg-button-info-hover inline-flex cursor-pointer items-center rounded-lg border px-3 py-2 whitespace-nowrap transition-colors"
+            className="border-button-info bg-button-info text-form-button-text hover:bg-button-info-hover inline-flex cursor-pointer items-center rounded-lg border px-3 py-2 whitespace-nowrap transition-colors"
           >
             <Icon
               icon="heroicons:plus-circle"
@@ -713,7 +713,7 @@ const ServerList: React.FC<{
                               <>
                                 <button
                                   onClick={() => handleCopyLink(server.link)}
-                                  className="text-form-button-text border-button-info bg-button-info hover:bg-button-info-hover cursor-pointer rounded-lg border px-2 py-1 text-sm transition-colors sm:px-3"
+                                  className="border-button-info bg-button-info text-form-button-text hover:bg-button-info-hover cursor-pointer rounded-lg border px-2 py-1 text-sm transition-colors sm:px-3"
                                   aria-label="Copy Server Link"
                                 >
                                   <Icon
@@ -723,7 +723,7 @@ const ServerList: React.FC<{
                                 </button>
                                 <button
                                   onClick={() => handleEditServer(server)}
-                                  className="text-form-button-text border-button-info bg-button-info hover:bg-button-info-hover cursor-pointer rounded-lg border px-2 py-1 text-sm transition-colors sm:px-3"
+                                  className="border-button-info bg-button-info text-form-button-text hover:bg-button-info-hover cursor-pointer rounded-lg border px-2 py-1 text-sm transition-colors sm:px-3"
                                   aria-label="Edit Server"
                                 >
                                   <Icon
@@ -745,7 +745,7 @@ const ServerList: React.FC<{
                                   href={server.link}
                                   target="_blank"
                                   rel="noopener noreferrer"
-                                  className="text-form-button-text border-button-info bg-button-info hover:bg-button-info-hover cursor-pointer rounded-lg border px-2 py-1 text-sm transition-colors sm:px-3"
+                                  className="border-button-info bg-button-info text-form-button-text hover:bg-button-info-hover cursor-pointer rounded-lg border px-2 py-1 text-sm transition-colors sm:px-3"
                                 >
                                   Join Server
                                 </a>
@@ -754,7 +754,7 @@ const ServerList: React.FC<{
                               <>
                                 <button
                                   onClick={() => handleCopyLink(server.link)}
-                                  className="text-form-button-text border-button-info bg-button-info hover:bg-button-info-hover cursor-pointer rounded-lg border px-2 py-1 text-sm transition-colors sm:px-3"
+                                  className="border-button-info bg-button-info text-form-button-text hover:bg-button-info-hover cursor-pointer rounded-lg border px-2 py-1 text-sm transition-colors sm:px-3"
                                   aria-label="Copy Server Link"
                                 >
                                   <Icon
@@ -766,7 +766,7 @@ const ServerList: React.FC<{
                                   href={server.link}
                                   target="_blank"
                                   rel="noopener noreferrer"
-                                  className="text-form-button-text border-button-info bg-button-info hover:bg-button-info-hover cursor-pointer rounded-lg border px-2 py-1 text-sm transition-colors sm:px-3"
+                                  className="border-button-info bg-button-info text-form-button-text hover:bg-button-info-hover cursor-pointer rounded-lg border px-2 py-1 text-sm transition-colors sm:px-3"
                                 >
                                   Join Server
                                 </a>
@@ -862,7 +862,7 @@ const ServerList: React.FC<{
                             </div>
                           </div>
 
-                          <div className="border-border-primary hover:border-border-focus bg-primary-bg rounded-lg border p-3 sm:p-4">
+                          <div className="border-border-primary bg-primary-bg hover:border-border-focus rounded-lg border p-3 sm:p-4">
                             <h3 className="text-primary-text mb-2 text-sm font-semibold">
                               Server Rules
                             </h3>

@@ -7,7 +7,7 @@ export default function Loading() {
         <Breadcrumb loading={true} />
 
         {/* Timeline Header Skeleton */}
-        <div className="border-border-primary hover:border-border-focus bg-secondary-bg mb-8 rounded-lg border p-6">
+        <div className="border-border-primary bg-secondary-bg hover:border-border-focus mb-8 rounded-lg border p-6">
           <div className="bg-secondary-bg mb-4 h-8 w-80 animate-pulse rounded"></div>
           <div className="bg-secondary-bg mb-4 h-4 w-full animate-pulse rounded"></div>
           <div className="bg-secondary-bg mb-4 h-4 w-3/4 animate-pulse rounded"></div>
@@ -37,7 +37,7 @@ export default function Loading() {
                 <div
                   className={`relative z-10 ml-8 w-full md:ml-0 md:w-[calc(45%-2rem)]`}
                 >
-                  <div className="border-border-primary hover:border-border-focus bg-secondary-bg overflow-hidden rounded-lg border">
+                  <div className="border-border-primary bg-secondary-bg hover:border-border-focus overflow-hidden rounded-lg border">
                     {/* Image skeleton */}
                     <div className="bg-secondary-bg relative aspect-video w-full animate-pulse"></div>
 

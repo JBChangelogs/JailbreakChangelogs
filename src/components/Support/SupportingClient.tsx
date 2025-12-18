@@ -14,7 +14,7 @@ export default function SupportingClient({ children }: SupportingClientProps) {
     <div className="min-h-screen pb-8">
       <div className="container mx-auto px-4 sm:px-6">
         <Breadcrumb />
-        <div className="border-border-primary bg-button-info/10 mt-4 flex items-start gap-4 rounded-lg border p-4 shadow-sm">
+        <div className="bg-button-info/10 border-border-primary mt-4 flex items-start gap-4 rounded-lg border p-4 shadow-sm">
           <div className="relative z-10">
             <span className="text-primary-text text-base font-bold">
               Update

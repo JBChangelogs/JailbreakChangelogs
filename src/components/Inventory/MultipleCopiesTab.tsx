@@ -413,7 +413,7 @@ export default function DuplicatesTab({
 
   if (multiCopyStats.uniqueItemsWithCopies === 0) {
     return (
-      <div className="bg-secondary-bg border-border-primary rounded-lg border p-8 text-center">
+      <div className="border-border-primary bg-secondary-bg rounded-lg border p-8 text-center">
         <p className="text-secondary-text">
           No items with multiple copies found in this inventory.
         </p>
@@ -424,7 +424,7 @@ export default function DuplicatesTab({
   return (
     <div>
       {/* Stats Summary */}
-      <div className="bg-secondary-bg border-border-primary shadow-card-shadow mb-6 rounded-lg border p-6">
+      <div className="border-border-primary bg-secondary-bg shadow-card-shadow mb-6 rounded-lg border p-6">
         <h2 className="text-primary-text mb-4 text-xl font-semibold">
           Top Items by Copies
         </h2>
@@ -437,13 +437,13 @@ export default function DuplicatesTab({
             value={leaderboardSearch}
             onChange={(e) => setLeaderboardSearch(e.target.value)}
             maxLength={MAX_SEARCH_LENGTH}
-            className="text-primary-text border-border-primary bg-tertiary-bg placeholder-secondary-text focus:border-button-info min-h-[48px] w-full rounded-lg border px-4 py-2 pr-10 pl-10 transition-all duration-300 focus:outline-none"
+            className="border-border-primary bg-tertiary-bg text-primary-text placeholder-secondary-text focus:border-button-info min-h-[48px] w-full rounded-lg border px-4 py-2 pr-10 pl-10 transition-all duration-300 focus:outline-none"
           />
           <MagnifyingGlassIcon className="text-secondary-text absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2" />
           {leaderboardSearch && (
             <button
               onClick={() => setLeaderboardSearch("")}
-              className="hover:text-primary-text text-secondary-text absolute top-1/2 right-3 h-5 w-5 -translate-y-1/2 cursor-pointer"
+              className="text-secondary-text hover:text-primary-text absolute top-1/2 right-3 h-5 w-5 -translate-y-1/2 cursor-pointer"
               aria-label="Clear search"
             >
               <XMarkIcon />
@@ -493,22 +493,22 @@ export default function DuplicatesTab({
                         width: "100%",
                         transform: `translateY(${virtualItem.start}px)`,
                       }}
-                      className="bg-tertiary-bg border-border-primary flex items-center justify-between rounded-lg border p-3"
+                      className="border-border-primary bg-tertiary-bg flex items-center justify-between rounded-lg border p-3"
                     >
-                      <div className="flex items-center gap-3 flex-1 min-w-0">
-                        <span className="text-primary-text font-bold text-sm w-6 shrink-0">
+                      <div className="flex min-w-0 flex-1 items-center gap-3">
+                        <span className="text-primary-text w-6 shrink-0 text-sm font-bold">
                           #{rank}
                         </span>
-                        <div className="flex flex-col gap-1 min-w-0">
+                        <div className="flex min-w-0 flex-col gap-1">
                           <Link
                             href={`/item/${encodeURIComponent(item.category.toLowerCase())}/${encodeURIComponent(item.title)}`}
                             prefetch={false}
-                            className="text-primary-text hover:text-link font-semibold text-sm truncate transition-colors"
+                            className="text-primary-text hover:text-link truncate text-sm font-semibold transition-colors"
                           >
                             {item.title}
                           </Link>
                           <span
-                            className="text-primary-text flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-medium w-fit"
+                            className="text-primary-text flex w-fit items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-medium"
                             style={{
                               borderColor: getCategoryColor(item.category),
                               backgroundColor:
@@ -532,7 +532,7 @@ export default function DuplicatesTab({
                           </span>
                         </div>
                       </div>
-                      <span className="text-primary-text font-bold text-sm whitespace-nowrap ml-2">
+                      <span className="text-primary-text ml-2 text-sm font-bold whitespace-nowrap">
                         {item.count}x
                       </span>
                     </div>
@@ -544,7 +544,7 @@ export default function DuplicatesTab({
 
         {/* No results message for leaderboard search */}
         {leaderboardSearch && filteredLeaderboardItems.length === 0 && (
-          <div className="bg-tertiary-bg border-border-primary rounded-lg border p-4 text-center">
+          <div className="border-border-primary bg-tertiary-bg rounded-lg border p-4 text-center">
             <p className="text-secondary-text text-sm">
               No items found matching &quot;{leaderboardSearch}&quot;
             </p>
@@ -562,13 +562,13 @@ export default function DuplicatesTab({
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             maxLength={MAX_SEARCH_LENGTH}
-            className="text-primary-text border-border-primary bg-secondary-bg placeholder-secondary-text focus:border-button-info min-h-[56px] w-full rounded-lg border px-4 py-3 pr-10 pl-10 transition-all duration-300 focus:outline-none"
+            className="border-border-primary bg-secondary-bg text-primary-text placeholder-secondary-text focus:border-button-info min-h-[56px] w-full rounded-lg border px-4 py-3 pr-10 pl-10 transition-all duration-300 focus:outline-none"
           />
           <MagnifyingGlassIcon className="text-secondary-text absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2" />
           {searchTerm && (
             <button
               onClick={() => setSearchTerm("")}
-              className="hover:text-primary-text text-secondary-text absolute top-1/2 right-3 h-5 w-5 -translate-y-1/2 cursor-pointer"
+              className="text-secondary-text hover:text-primary-text absolute top-1/2 right-3 h-5 w-5 -translate-y-1/2 cursor-pointer"
               aria-label="Clear search"
             >
               <XMarkIcon />
@@ -579,7 +579,7 @@ export default function DuplicatesTab({
         {/* Category Filter */}
         <div className="w-full sm:w-1/3">
           <select
-            className="select w-full bg-secondary-bg text-primary-text min-h-[56px]"
+            className="select bg-secondary-bg text-primary-text min-h-[56px] w-full"
             value={selectedCategory}
             onChange={(e) => setSelectedCategory(e.target.value)}
           >
@@ -595,7 +595,7 @@ export default function DuplicatesTab({
         {/* Sort Filter */}
         <div className="w-full sm:w-1/3">
           <select
-            className="select w-full bg-secondary-bg text-primary-text min-h-[56px]"
+            className="select bg-secondary-bg text-primary-text min-h-[56px] w-full"
             value={sortOrder}
             onChange={(e) => setSortOrder(e.target.value as SortOrder)}
           >
@@ -630,7 +630,7 @@ export default function DuplicatesTab({
 
       {/* Helpful Tip */}
       {filteredAndSortedItems.length > 0 && (
-        <div className="border-button-info bg-button-info/10 mb-4 rounded-lg border p-3">
+        <div className="bg-button-info/10 border-button-info mb-4 rounded-lg border p-3">
           <div className="text-primary-text flex items-start gap-2 text-sm">
             <Icon
               icon="emojione:light-bulb"

@@ -307,7 +307,7 @@ export const UserBadges = ({
               alt="Owner"
               width={badgeSize}
               height={badgeSize}
-              className="cursor-pointer hover:opacity-90 object-contain"
+              className="cursor-pointer object-contain hover:opacity-90"
               onClick={handleOwnerBadgeClick}
             />
           </Tooltip>
@@ -336,7 +336,7 @@ export const UserBadges = ({
               alt="Tester"
               width={badgeSize}
               height={badgeSize}
-              className="cursor-pointer hover:opacity-90 object-contain"
+              className="cursor-pointer object-contain hover:opacity-90"
               onClick={handleTesterBadgeClick}
             />
           </Tooltip>
@@ -365,7 +365,7 @@ export const UserBadges = ({
               alt="Value Team Manager"
               width={badgeSize}
               height={badgeSize}
-              className="cursor-pointer hover:opacity-90 object-contain"
+              className="cursor-pointer object-contain hover:opacity-90"
               onClick={handleVTMBadgeClick}
             />
           </Tooltip>
@@ -394,7 +394,7 @@ export const UserBadges = ({
               alt="Value Team Member"
               width={badgeSize}
               height={badgeSize}
-              className="cursor-pointer hover:opacity-90 object-contain"
+              className="cursor-pointer object-contain hover:opacity-90"
               onClick={handleVTBadgeClick}
             />
           </Tooltip>
@@ -423,7 +423,7 @@ export const UserBadges = ({
               alt="Partner"
               width={badgeSize}
               height={badgeSize}
-              className="cursor-pointer hover:opacity-90 object-contain"
+              className="cursor-pointer object-contain hover:opacity-90"
               onClick={handlePartnerBadgeClick}
             />
           </Tooltip>
@@ -452,7 +452,7 @@ export const UserBadges = ({
               alt="Contributor"
               width={badgeSize}
               height={badgeSize}
-              className="cursor-pointer hover:opacity-90 object-contain"
+              className="cursor-pointer object-contain hover:opacity-90"
               onClick={handleContributorBadgeClick}
             />
           </Tooltip>
@@ -481,7 +481,7 @@ export const UserBadges = ({
               alt="Developer"
               width={badgeSize}
               height={badgeSize}
-              className="cursor-pointer hover:opacity-90 object-contain"
+              className="cursor-pointer object-contain hover:opacity-90"
               onClick={handleDeveloperBadgeClick}
             />
           </Tooltip>
@@ -510,7 +510,7 @@ export const UserBadges = ({
               alt="Designer"
               width={badgeSize}
               height={badgeSize}
-              className="cursor-pointer hover:opacity-90 object-contain"
+              className="cursor-pointer object-contain hover:opacity-90"
               onClick={handleDesignerBadgeClick}
             />
           </Tooltip>
@@ -539,7 +539,7 @@ export const UserBadges = ({
               alt="Badimo"
               width={badimoSize}
               height={badimoSize}
-              className="object-contain cursor-pointer hover:opacity-90"
+              className="cursor-pointer object-contain hover:opacity-90"
               onClick={handleBadimoBadgeClick}
             />
           </Tooltip>
@@ -587,7 +587,7 @@ export const UserBadges = ({
           alt={`Supporter Type ${premiumType}`}
           width={badgeSize}
           height={badgeSize}
-          className="cursor-pointer hover:opacity-90 object-contain"
+          className="cursor-pointer object-contain hover:opacity-90"
           onClick={handlePremiumBadgeClick}
         />
       </Tooltip>,
@@ -618,7 +618,7 @@ export const UserBadges = ({
           alt="Early Adopter"
           width={badgeSize}
           height={badgeSize}
-          className="cursor-pointer hover:opacity-90 object-contain"
+          className="cursor-pointer object-contain hover:opacity-90"
           onClick={handleEarlyAdopterBadgeClick}
         />
       </Tooltip>,
@@ -636,7 +636,7 @@ export const UserBadges = ({
       primary_guild.identity_guild_id === "1286064050135896064";
     const badgeContent = (
       <div
-        className="bg-primary-bg border-border-primary text-primary-text inline-flex cursor-help items-center gap-1 rounded-md border px-2.5 py-1"
+        className="border-border-primary bg-primary-bg text-primary-text inline-flex cursor-help items-center gap-1 rounded-md border px-2.5 py-1"
         style={{ minWidth: 0 }}
       >
         <Image

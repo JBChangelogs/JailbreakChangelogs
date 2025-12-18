@@ -9,7 +9,7 @@ export default function VIPServerNotice({
 }: VIPServerNoticeProps) {
   return (
     <div
-      className={`border-button-info bg-button-info/10 mb-2 flex items-start gap-4 rounded-lg border p-4 shadow-sm ${className}`}
+      className={`bg-button-info/10 border-button-info mb-2 flex items-start gap-4 rounded-lg border p-4 shadow-sm ${className}`}
     >
       <div className="relative z-10">
         <span className="text-primary-text text-base font-bold">
@@ -32,7 +32,7 @@ export default function VIPServerNotice({
             href="https://www.roblox.com/my/account#!/privacy"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-primary-text hover:opacity-80 inline-flex items-center gap-1 font-semibold underline transition-opacity"
+            className="text-primary-text inline-flex items-center gap-1 font-semibold underline transition-opacity hover:opacity-80"
           >
             <Icon icon="akar-icons:link-out" className="h-4 w-4" />
             Roblox Privacy Settings

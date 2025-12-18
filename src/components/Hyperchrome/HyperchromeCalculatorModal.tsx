@@ -45,7 +45,7 @@ export default function HyperchromeCalculatorModal({
       />
 
       <div className="fixed inset-0 flex items-center justify-center p-4">
-        <DialogPanel className="modal-container bg-secondary-bg border-button-info flex max-h-[70vh] w-full max-w-[480px] min-w-[320px] flex-col rounded-lg border shadow-lg">
+        <DialogPanel className="modal-container border-button-info bg-secondary-bg flex max-h-[70vh] w-full max-w-[480px] min-w-[320px] flex-col rounded-lg border shadow-lg">
           <div className="modal-header text-primary-text flex flex-shrink-0 items-center justify-between px-6 py-4 text-xl font-semibold">
             <span>Hyperchrome Pity Calculator</span>
             <button
@@ -84,7 +84,7 @@ export default function HyperchromeCalculatorModal({
                   id="level"
                   min={0}
                   max={4}
-                  className="bg-form-input border-border-primary hover:border-border-focus text-primary-text focus:border-button-info w-full rounded border p-3 text-sm focus:outline-none"
+                  className="border-border-primary bg-form-input text-primary-text hover:border-border-focus focus:border-button-info w-full rounded border p-3 text-sm focus:outline-none"
                   placeholder="Enter your hyperchrome level (0-4)"
                   value={level}
                   onChange={(e) => {
@@ -111,7 +111,7 @@ export default function HyperchromeCalculatorModal({
                   id="pity"
                   min={0}
                   max={100}
-                  className="bg-form-input border-border-primary hover:border-border-focus text-primary-text focus:border-button-info w-full rounded border p-3 text-sm focus:outline-none"
+                  className="border-border-primary bg-form-input text-primary-text hover:border-border-focus focus:border-button-info w-full rounded border p-3 text-sm focus:outline-none"
                   placeholder="Enter your current pity percentage (0-100)"
                   value={pity}
                   onChange={(e) => {
@@ -127,7 +127,7 @@ export default function HyperchromeCalculatorModal({
 
             {hasCalculated && step === 2 && (
               <div className="mb-4">
-                <div className="border-border-primary hover:border-border-focus bg-primary-bg rounded-lg border p-4">
+                <div className="border-border-primary bg-primary-bg hover:border-border-focus rounded-lg border p-4">
                   <div className="text-secondary-text mb-3 text-sm font-medium tracking-wider uppercase">
                     Result
                   </div>
@@ -149,7 +149,7 @@ export default function HyperchromeCalculatorModal({
                     </div>
                   </div>
 
-                  <div className="bg-secondary-bg border-warning/20 mb-3 rounded-lg border p-3">
+                  <div className="border-warning/20 bg-secondary-bg mb-3 rounded-lg border p-3">
                     <div className="flex items-start gap-2">
                       <Icon
                         icon="emojione:light-bulb"
@@ -175,7 +175,7 @@ export default function HyperchromeCalculatorModal({
             )}
             {hasCalculated && step === 2 && (
               <div className="mb-4">
-                <div className="border-border-primary hover:border-border-focus bg-primary-bg rounded-lg border p-4">
+                <div className="border-border-primary bg-primary-bg hover:border-border-focus rounded-lg border p-4">
                   <div className="text-secondary-text mb-3 text-sm font-medium tracking-wider uppercase">
                     Alternative Level Calculations
                   </div>

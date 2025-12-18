@@ -12,7 +12,7 @@ export default function MoneyLeaderboardLoading() {
 
       <div className="mt-8">
         <div className="mb-4 h-6 w-48 animate-pulse rounded" />
-        <div className="border-border-primary hover:border-border-focus bg-secondary-bg rounded-lg border p-4 shadow-sm">
+        <div className="border-border-primary bg-secondary-bg hover:border-border-focus rounded-lg border p-4 shadow-sm">
           <div className="max-h-[48rem] space-y-3 overflow-y-auto pr-2">
             {Array.from({ length: 15 }).map((_, index) => (
               <div

@@ -60,14 +60,14 @@ export const UserDetailsTooltip: React.FC<UserDetailsTooltipProps> = ({
             {/* Connection Badges */}
             <div className="flex items-center gap-2">
               {/* Discord Connection */}
-              <span className="text-primary-text border-primary-text inline-flex items-center gap-1 rounded-full border bg-transparent px-2 py-0.5 text-xs">
+              <span className="border-primary-text text-primary-text inline-flex items-center gap-1 rounded-full border bg-transparent px-2 py-0.5 text-xs">
                 <DiscordIcon className="h-3 w-3" />
                 Discord
               </span>
 
               {/* Roblox Connection */}
               {user.roblox_id && (
-                <span className="text-primary-text border-primary-text inline-flex items-center gap-1 rounded-full border bg-transparent px-2 py-0.5 text-xs">
+                <span className="border-primary-text text-primary-text inline-flex items-center gap-1 rounded-full border bg-transparent px-2 py-0.5 text-xs">
                   <RobloxIcon className="h-3 w-3" />
                   Roblox
                 </span>

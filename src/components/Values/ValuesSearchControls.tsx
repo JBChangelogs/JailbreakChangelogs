@@ -12,7 +12,7 @@ import { safeLocalStorage } from "@/utils/safeStorage";
 const Slider = dynamic(() => import("@mui/material/Slider"), {
   ssr: false,
   loading: () => (
-    <div className="border-border-primary hover:border-border-focus bg-secondary-bg mt-1 h-8 w-full animate-pulse rounded-md border"></div>
+    <div className="border-border-primary bg-secondary-bg hover:border-border-focus mt-1 h-8 w-full animate-pulse rounded-md border"></div>
   ),
 });
 
@@ -128,11 +128,11 @@ export default function ValuesSearchControls({
                   placeholder={`Search ${getFilterDisplayName(filterSort)}...`}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className={`text-primary-text border-border-primary hover:border-border-focus bg-secondary-bg placeholder-secondary-text w-full rounded-lg border px-4 py-4 pr-10 pl-10 transition-all duration-300 focus:outline-none ${
+                  className={`border-border-primary bg-secondary-bg text-primary-text placeholder-secondary-text hover:border-border-focus w-full rounded-lg border px-4 py-4 pr-10 pl-10 transition-all duration-300 focus:outline-none ${
                     isSearchHighlighted
-                      ? "border-button-info bg-button-info/10 shadow-button-info/20 shadow-lg"
+                      ? "bg-button-info/10 shadow-button-info/20 border-button-info shadow-lg"
                       : isItemIdSearch
-                        ? "border-button-info bg-button-info/10 shadow-button-info/20 shadow-lg"
+                        ? "bg-button-info/10 shadow-button-info/20 border-button-info shadow-lg"
                         : "focus:border-button-info"
                   }`}
                 />
@@ -140,7 +140,7 @@ export default function ValuesSearchControls({
                 {searchTerm && (
                   <button
                     onClick={() => setSearchTerm("")}
-                    className="hover:text-primary-text text-secondary-text absolute top-1/2 right-3 h-5 w-5 -translate-y-1/2 cursor-pointer"
+                    className="text-secondary-text hover:text-primary-text absolute top-1/2 right-3 h-5 w-5 -translate-y-1/2 cursor-pointer"
                     aria-label="Clear search"
                   >
                     <XMarkIcon />
@@ -154,7 +154,7 @@ export default function ValuesSearchControls({
               {/* Filter dropdown */}
               <div className="w-full lg:w-1/2">
                 <select
-                  className="select w-full bg-secondary-bg text-primary-text h-[56px] min-h-[56px] font-inter"
+                  className="select font-inter bg-secondary-bg text-primary-text h-[56px] min-h-[56px] w-full"
                   value={filterSort}
                   onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
                     const newValue = e.target.value as FilterSort;
@@ -193,7 +193,7 @@ export default function ValuesSearchControls({
               {/* Sort dropdown */}
               <div className="w-full lg:w-1/2">
                 <select
-                  className="select w-full bg-secondary-bg text-primary-text h-[56px] min-h-[56px] font-inter"
+                  className="select font-inter bg-secondary-bg text-primary-text h-[56px] min-h-[56px] w-full"
                   value={valueSort}
                   onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
                     const newValue = e.target.value as ValueSort;
@@ -280,7 +280,7 @@ export default function ValuesSearchControls({
 
           {/* Value range slider */}
           <div className="w-full">
-            <div className="border-border-primary hover:border-border-focus bg-secondary-bg rounded-lg border px-3 py-2">
+            <div className="border-border-primary bg-secondary-bg hover:border-border-focus rounded-lg border px-3 py-2">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <span className="text-secondary-text text-xs">
@@ -352,11 +352,11 @@ export default function ValuesSearchControls({
               className="text-sm text-yellow-500"
             />
             Helpful tip: Press{" "}
-            <kbd className="kbd kbd-sm bg-tertiary-bg text-primary-text border-border-primary">
+            <kbd className="kbd kbd-sm border-border-primary bg-tertiary-bg text-primary-text">
               Ctrl
             </kbd>
             {" + "}
-            <kbd className="kbd kbd-sm bg-tertiary-bg text-primary-text border-border-primary">
+            <kbd className="kbd kbd-sm border-border-primary bg-tertiary-bg text-primary-text">
               F
             </kbd>{" "}
             to quickly focus the search

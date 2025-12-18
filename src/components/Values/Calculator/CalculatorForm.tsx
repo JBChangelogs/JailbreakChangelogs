@@ -200,7 +200,7 @@ const CalculatorItemGrid: React.FC<{
 
     return (
       <div
-        className={`border-border-primary hover:border-border-focus bg-secondary-bg hover:bg-secondary-bg/80 cursor-pointer rounded-lg border-2 border-dashed p-6 text-center transition-colors ${borderColor}`}
+        className={`hover:bg-secondary-bg/80 border-border-primary bg-secondary-bg hover:border-border-focus cursor-pointer rounded-lg border-2 border-dashed p-6 text-center transition-colors ${borderColor}`}
         onClick={handleClick}
         role="button"
         tabIndex={0}
@@ -354,7 +354,7 @@ const CalculatorItemGrid: React.FC<{
             onClick={closeActionModal}
           />
           <div className="fixed inset-0 flex items-center justify-center p-4">
-            <div className="modal-container bg-secondary-bg border-button-info mx-auto w-full max-w-sm rounded-lg border p-6 shadow-lg">
+            <div className="modal-container border-button-info bg-secondary-bg mx-auto w-full max-w-sm rounded-lg border p-6 shadow-lg">
               <h2 className="text-primary-text mb-4 text-xl font-semibold">
                 {actionItem
                   ? actionItem.sub_name
@@ -376,7 +376,7 @@ const CalculatorItemGrid: React.FC<{
                       {actionItem.type}
                     </span>
                     {actionItem.count && actionItem.count > 1 && (
-                      <span className="border-button-info bg-button-info/10 text-form-button-text inline-flex items-center rounded-full border px-2 py-0.5 text-xs">
+                      <span className="bg-button-info/10 border-button-info text-form-button-text inline-flex items-center rounded-full border px-2 py-0.5 text-xs">
                         Quantity ×{actionItem.count}
                       </span>
                     )}
@@ -402,7 +402,7 @@ const CalculatorItemGrid: React.FC<{
                           <div
                             className={`border-secondary flex h-4 w-4 items-center justify-center rounded border ${
                               getSelectedValueType(actionItem) === "cash"
-                                ? "bg-button-info border-button-info"
+                                ? "border-button-info bg-button-info"
                                 : "bg-transparent"
                             }`}
                           >
@@ -446,7 +446,7 @@ const CalculatorItemGrid: React.FC<{
                             <div
                               className={`border-secondary flex h-4 w-4 items-center justify-center rounded border ${
                                 getSelectedValueType(actionItem) === "duped"
-                                  ? "bg-button-info border-button-info"
+                                  ? "border-button-info bg-button-info"
                                   : "bg-transparent"
                               }`}
                             >
@@ -609,7 +609,7 @@ const CalculatorValueComparison: React.FC<{
   }
 
   return (
-    <div className="bg-secondary-bg border-border-primary hover:border-border-focus hover:shadow-card-shadow overflow-x-auto rounded-lg border p-8 transition-colors duration-200 hover:shadow-lg">
+    <div className="border-border-primary bg-secondary-bg hover:border-border-focus hover:shadow-card-shadow overflow-x-auto rounded-lg border p-8 transition-colors duration-200 hover:shadow-lg">
       {/* Header */}
       <div className="mb-8">
         <h3 className="text-primary-text mb-2 text-2xl font-bold">
@@ -1355,7 +1355,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
               onClick={() => setShowClearConfirmModal(false)}
             />
             <div className="fixed inset-0 flex items-center justify-center p-4">
-              <div className="modal-container bg-secondary-bg border-button-info mx-auto w-full max-w-sm rounded-lg border p-6 shadow-lg">
+              <div className="modal-container border-button-info bg-secondary-bg mx-auto w-full max-w-sm rounded-lg border p-6 shadow-lg">
                 <div className="modal-header text-primary-text mb-2 text-xl font-semibold">
                   Clear Calculator?
                 </div>
@@ -1384,7 +1384,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
                       }
                       setShowClearConfirmModal(false);
                     }}
-                    className="border-button-success bg-button-success/10 text-button-success hover:bg-button-success/20 w-full rounded-md border px-4 py-2 text-sm font-medium transition-colors hover:cursor-pointer"
+                    className="bg-button-success/10 hover:bg-button-success/20 border-button-success text-button-success w-full rounded-md border px-4 py-2 text-sm font-medium transition-colors hover:cursor-pointer"
                   >
                     Clear Offering
                   </button>
@@ -1407,7 +1407,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
                       }
                       setShowClearConfirmModal(false);
                     }}
-                    className="border-button-danger bg-button-danger/10 text-button-danger hover:bg-button-danger/20 w-full rounded-md border px-4 py-2 text-sm font-medium transition-colors hover:cursor-pointer"
+                    className="bg-button-danger/10 hover:bg-button-danger/20 border-button-danger text-button-danger w-full rounded-md border px-4 py-2 text-sm font-medium transition-colors hover:cursor-pointer"
                   >
                     Clear Requesting
                   </button>
@@ -1481,7 +1481,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
               <Button
                 variant="contained"
                 onClick={handleClearSides}
-                className="bg-status-error text-form-button-text hover:bg-status-error-hover"
+                className="hover:bg-status-error-hover bg-status-error text-form-button-text"
               >
                 <TrashIcon className="mr-1 h-5 w-5" />
                 Clear
@@ -1497,7 +1497,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
                 className="text-sm text-yellow-500"
               />
               Helpful tip: Hold{" "}
-              <kbd className="kbd kbd-sm bg-tertiary-bg text-primary-text border-border-primary">
+              <kbd className="kbd kbd-sm border-border-primary bg-tertiary-bg text-primary-text">
                 Shift
               </kbd>{" "}
               while clicking Clear to clear both sides instantly without
@@ -1540,7 +1540,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
                     variant="outlined"
                     onClick={() => handleMirrorItems("offering")}
                     size="small"
-                    className="border-status-success text-primary-text bg-status-success/15 hover:border-status-success hover:bg-status-success/25"
+                    className="bg-status-success/15 hover:bg-status-success/25 border-status-success text-primary-text hover:border-status-success"
                   >
                     <ArrowsRightLeftIcon className="mr-1 h-4 w-4" />
                     Mirror
@@ -1592,7 +1592,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
             {/* Requesting Items */}
             <DroppableZone
               id="requesting-drop-zone"
-              className="bg-secondary-bg border-status-error flex-1 rounded-lg border p-4 transition-colors"
+              className="border-status-error bg-secondary-bg flex-1 rounded-lg border p-4 transition-colors"
               activeClassName="border-status-error/80 bg-status-error/5 ring-2 ring-status-error/50"
             >
               <div className="mb-4 flex items-center justify-between">
@@ -1624,7 +1624,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
                     variant="outlined"
                     onClick={() => handleMirrorItems("requesting")}
                     size="small"
-                    className="text-primary-text border-status-error bg-status-error/15 hover:border-status-error-hover hover:bg-status-error/25"
+                    className="bg-status-error/15 hover:border-status-error-hover hover:bg-status-error/25 border-status-error text-primary-text"
                   >
                     <ArrowsRightLeftIcon className="mr-1 h-4 w-4" />
                     Mirror
@@ -1767,7 +1767,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
             <div className="mb-8">
               {/* Similar Items Near Total - Selector and Results */}
               {offeringItems.length === 0 && requestingItems.length === 0 ? (
-                <div className="border-border-primary hover:border-border-focus bg-secondary-bg rounded-lg border p-4">
+                <div className="border-border-primary bg-secondary-bg hover:border-border-focus rounded-lg border p-4">
                   <EmptyState
                     message={
                       'Go to the "Browse Items" tab to select items and see similar items near your total.'
@@ -1797,13 +1797,13 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
                       </div>
                     )}
                   <div className="mb-4 flex justify-center sm:justify-start">
-                    <div className="border-border-primary hover:border-border-focus bg-secondary-bg inline-flex gap-1 rounded-lg border p-2">
+                    <div className="border-border-primary bg-secondary-bg hover:border-border-focus inline-flex gap-1 rounded-lg border p-2">
                       <button
                         onClick={() => setTotalBasis("offering")}
                         className={`cursor-pointer rounded-md px-3 py-1 text-sm font-medium ${
                           totalBasis === "offering"
                             ? "bg-status-success text-form-button-text"
-                            : "text-secondary-text hover:bg-secondary-bg/80 hover:text-primary-foreground"
+                            : "hover:bg-secondary-bg/80 hover:text-primary-foreground text-secondary-text"
                         }`}
                       >
                         Offering Total
@@ -1813,7 +1813,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
                         className={`cursor-pointer rounded-md px-3 py-1 text-sm font-medium ${
                           totalBasis === "requesting"
                             ? "bg-status-error text-form-button-text"
-                            : "text-secondary-text hover:bg-secondary-bg/80 hover:text-primary-foreground"
+                            : "hover:bg-secondary-bg/80 hover:text-primary-foreground text-secondary-text"
                         }`}
                       >
                         Requesting Total
@@ -1901,7 +1901,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
                         </div>
 
                         {/* Range controls */}
-                        <div className="bg-secondary-bg border-border-primary hover:border-border-focus hover:shadow-card-shadow mb-4 rounded-lg border p-4 transition-colors duration-200 hover:shadow-lg">
+                        <div className="border-border-primary bg-secondary-bg hover:border-border-focus hover:shadow-card-shadow mb-4 rounded-lg border p-4 transition-colors duration-200 hover:shadow-lg">
                           <div className="flex flex-col gap-3">
                             <div className="flex items-center justify-between gap-3">
                               <div className="flex items-center gap-2">

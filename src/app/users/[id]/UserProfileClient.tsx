@@ -154,7 +154,7 @@ const LinSuperIdol = ({ userId }: { userId: string }) => {
       >
         <button
           onClick={handlePlayClick}
-          className="group bg-secondary-bg/80 text-primary-text/80 hover:bg-secondary-bg hover:text-primary-text cursor-pointer rounded-full p-3 shadow-lg backdrop-blur-sm transition-all duration-300"
+          className="bg-secondary-bg/80 text-primary-text/80 group hover:bg-secondary-bg hover:text-primary-text cursor-pointer rounded-full p-3 shadow-lg backdrop-blur-sm transition-all duration-300"
         >
           <Icon
             icon="material-symbols:music-note"
@@ -579,7 +579,7 @@ export default function UserProfileClient({
       <main className="min-h-screen pb-8">
         <div className="container mx-auto">
           <Breadcrumb userData={user} />
-          <div className="bg-secondary-bg border-border-primary overflow-hidden rounded-lg border shadow-md">
+          <div className="border-border-primary bg-secondary-bg overflow-hidden rounded-lg border shadow-md">
             <div className="p-8">
               <div className="flex flex-col items-center justify-center space-y-6">
                 <div className="relative -mt-6">
@@ -649,7 +649,7 @@ export default function UserProfileClient({
       <LinSuperIdol userId={userId} />
       <div className="container mx-auto max-w-7xl">
         <Breadcrumb userData={user} />
-        <div className="bg-secondary-bg border-border-primary overflow-hidden rounded-lg border shadow-md">
+        <div className="border-border-primary bg-secondary-bg overflow-hidden rounded-lg border shadow-md">
           {/* Banner Section */}
           <Banner
             userId={user.id}
@@ -884,7 +884,7 @@ export default function UserProfileClient({
                               href={`https://discord.com/users/${user.id}`}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="text-primary-text border-primary-text inline-flex items-center gap-1 rounded-full border bg-transparent px-2 py-0.5 text-xs"
+                              className="border-primary-text text-primary-text inline-flex items-center gap-1 rounded-full border bg-transparent px-2 py-0.5 text-xs"
                             >
                               <DiscordIcon className="text-border-focus h-4 w-4 flex-shrink-0" />
                               <span className="text-sm font-medium">
@@ -920,7 +920,7 @@ export default function UserProfileClient({
                                 href={`https://www.roblox.com/users/${user.roblox_id}/profile`}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="text-primary-text border-primary-text inline-flex items-center gap-1 rounded-full border bg-transparent px-2 py-0.5 text-xs"
+                                className="border-primary-text text-primary-text inline-flex items-center gap-1 rounded-full border bg-transparent px-2 py-0.5 text-xs"
                               >
                                 <RobloxIcon className="h-4 w-4 flex-shrink-0" />
                                 <span className="text-sm font-medium">

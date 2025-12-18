@@ -85,7 +85,7 @@ export default function OGItemCard({
     <div
       className={`border-border-primary text-primary-text hover:shadow-card-shadow relative flex min-h-[400px] cursor-pointer flex-col rounded-lg border p-3 transition-all duration-200 ${
         isOriginalOwner
-          ? "border-status-success bg-status-success/10 hover:border-status-success"
+          ? "bg-status-success/10 border-status-success hover:border-status-success"
           : "bg-primary-bg hover:border-border-focus"
       }`}
       onClick={() => onCardClick(item)}
@@ -300,7 +300,7 @@ export default function OGItemCard({
           <div className="text-secondary-text text-sm">CURRENT OWNER</div>
           <div className="text-xl font-bold">
             <div className="flex items-center justify-center gap-2">
-              <div className="relative h-8 w-8 rounded-full bg-tertiary-bg overflow-hidden flex-shrink-0">
+              <div className="bg-tertiary-bg relative h-8 w-8 flex-shrink-0 overflow-hidden rounded-full">
                 <Image
                   src={getUserAvatar(item.user_id)}
                   alt="Owner Avatar"

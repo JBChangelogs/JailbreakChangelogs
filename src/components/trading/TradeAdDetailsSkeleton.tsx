@@ -86,7 +86,7 @@ export const TradeAdDetailsSkeleton: React.FC = () => {
         </div>
 
         {/* Tabs */}
-        <div className="border-border-primary hover:border-border-focus bg-secondary-bg mb-6 rounded-lg border">
+        <div className="border-border-primary bg-secondary-bg hover:border-border-focus mb-6 rounded-lg border">
           <div className="px-6 py-4">
             <div className="flex space-x-8">
               <Skeleton variant="text" width={60} height={40} />

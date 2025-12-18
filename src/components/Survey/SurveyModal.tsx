@@ -80,7 +80,7 @@ const SurveyModal: React.FC<SurveyModalProps> = ({ open, onClose, survey }) => {
       />
 
       <div
-        className="modal-container bg-secondary-bg border-button-info relative w-full max-w-[480px] min-w-[320px] rounded-lg border shadow-lg"
+        className="modal-container border-button-info bg-secondary-bg relative w-full max-w-[480px] min-w-[320px] rounded-lg border shadow-lg"
         onClick={(e: React.MouseEvent) => e.stopPropagation()}
       >
         <div className="modal-header text-primary-text px-6 py-4 text-xl font-semibold">
@@ -101,7 +101,7 @@ const SurveyModal: React.FC<SurveyModalProps> = ({ open, onClose, survey }) => {
                 id="answer"
                 value={answer}
                 onChange={(e) => setAnswer(e.target.value)}
-                className="bg-form-input border-border-primary hover:border-border-focus text-primary-text focus:border-button-info min-h-[120px] w-full resize-y rounded border p-3 text-sm focus:outline-none"
+                className="border-border-primary bg-form-input text-primary-text hover:border-border-focus focus:border-button-info min-h-[120px] w-full resize-y rounded border p-3 text-sm focus:outline-none"
                 rows={4}
                 placeholder="Type your answer here..."
                 required

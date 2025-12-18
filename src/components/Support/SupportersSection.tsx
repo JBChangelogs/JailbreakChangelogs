@@ -57,7 +57,7 @@ export default function SupportersSection({
   const renderSupporterCard = (supporter: Supporter) => (
     <div
       key={supporter.id}
-      className="bg-secondary-bg border-border-primary hover:border-border-focus hover:shadow-card-shadow flex-shrink-0 rounded-xl border p-6 shadow-md transition-all duration-200"
+      className="border-border-primary bg-secondary-bg hover:border-border-focus hover:shadow-card-shadow flex-shrink-0 rounded-xl border p-6 shadow-md transition-all duration-200"
       style={{ width: "280px" }}
     >
       <div className="flex flex-col items-center space-y-4">
@@ -114,10 +114,10 @@ export default function SupportersSection({
 
         {/* Mobile: Scrollable Container */}
         <div className="relative lg:hidden">
-          <div className="pointer-events-none absolute left-0 top-0 z-10 h-full w-8 bg-gradient-to-r from-primary-bg to-transparent"></div>
-          <div className="pointer-events-none absolute right-0 top-0 z-10 h-full w-8 bg-gradient-to-l from-primary-bg to-transparent"></div>
+          <div className="from-primary-bg pointer-events-none absolute top-0 left-0 z-10 h-full w-8 bg-gradient-to-r to-transparent"></div>
+          <div className="from-primary-bg pointer-events-none absolute top-0 right-0 z-10 h-full w-8 bg-gradient-to-l to-transparent"></div>
 
-          <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide snap-x snap-mandatory">
+          <div className="scrollbar-hide flex snap-x snap-mandatory gap-4 overflow-x-auto pb-4">
             {tierSupporters.map((supporter) => (
               <div key={supporter.id} className="snap-center">
                 {renderSupporterCard(supporter)}
@@ -128,8 +128,8 @@ export default function SupportersSection({
 
         {/* Desktop: Auto-scrolling Carousel */}
         <div className="relative hidden lg:block">
-          <div className="pointer-events-none absolute left-0 top-0 z-10 h-full w-20 bg-gradient-to-r from-primary-bg to-transparent"></div>
-          <div className="pointer-events-none absolute right-0 top-0 z-10 h-full w-20 bg-gradient-to-l from-primary-bg to-transparent"></div>
+          <div className="from-primary-bg pointer-events-none absolute top-0 left-0 z-10 h-full w-20 bg-gradient-to-r to-transparent"></div>
+          <div className="from-primary-bg pointer-events-none absolute top-0 right-0 z-10 h-full w-20 bg-gradient-to-l to-transparent"></div>
 
           <SupporterCarousel speed={0.5}>
             {tierSupporters.map((supporter) => (

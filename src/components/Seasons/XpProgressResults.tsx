@@ -12,7 +12,7 @@ export default function XpProgressResults({
   xpNeeded,
 }: XpProgressResultsProps) {
   return (
-    <div className="border-border-primary hover:border-border-focus bg-secondary-bg rounded-lg border p-4">
+    <div className="border-border-primary bg-secondary-bg hover:border-border-focus rounded-lg border p-4">
       <h3 className="text-muted mb-3 text-xl font-semibold">
         📊 Current Progress
       </h3>

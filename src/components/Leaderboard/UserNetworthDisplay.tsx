@@ -47,7 +47,7 @@ export default function UserNetworthDisplay() {
 
   if (isLoading) {
     return (
-      <div className="border-border-primary hover:border-border-focus bg-secondary-bg mb-6 rounded-lg border p-4">
+      <div className="border-border-primary bg-secondary-bg hover:border-border-focus mb-6 rounded-lg border p-4">
         <div className="flex items-center justify-between">
           <div>
             <h3 className="text-primary-text text-lg font-semibold">
@@ -94,7 +94,7 @@ export default function UserNetworthDisplay() {
       </div>
 
       <div
-        className="mb-0 cursor-pointer rounded-lg border p-3 transition-all duration-200 hover:shadow-lg bg-secondary-bg border-border-primary hover:border-border-focus"
+        className="border-border-primary bg-secondary-bg hover:border-border-focus mb-0 cursor-pointer rounded-lg border p-3 transition-all duration-200 hover:shadow-lg"
         onClick={() => setIsBreakdownModalOpen(true)}
         role="button"
         tabIndex={0}
@@ -153,7 +153,7 @@ export default function UserNetworthDisplay() {
                 latestData.inventory_value !== undefined ||
                 latestData.percentages) && (
                 <div className="mt-1 flex justify-center sm:justify-end">
-                  <div className="text-form-button-text bg-button-info hover:bg-button-info-hover active:bg-button-info-active focus:ring-border-focus cursor-pointer rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors duration-200 focus:ring-2 focus:outline-none">
+                  <div className="bg-button-info text-form-button-text hover:bg-button-info-hover focus:ring-border-focus active:bg-button-info-active cursor-pointer rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors duration-200 focus:ring-2 focus:outline-none">
                     Click to view breakdown
                   </div>
                 </div>

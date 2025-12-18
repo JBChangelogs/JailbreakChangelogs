@@ -376,7 +376,7 @@ export default function ItemDetailsClient({
                 <div className="absolute top-4 left-4 z-10">
                   <button
                     onClick={handleFavoriteClick}
-                    className="border-border-primary hover:border-border-focus bg-secondary-bg/80 hover:bg-secondary-bg flex cursor-pointer items-center gap-1.5 rounded-full border px-2 py-1.5 transition-opacity"
+                    className="bg-secondary-bg/80 border-border-primary hover:border-border-focus hover:bg-secondary-bg flex cursor-pointer items-center gap-1.5 rounded-full border px-2 py-1.5 transition-opacity"
                     title={
                       isFavorited ? "Remove from favorites" : "Add to favorites"
                     }
@@ -390,7 +390,7 @@ export default function ItemDetailsClient({
                     ) : (
                       <Icon
                         icon="mdi:heart-outline"
-                        className="h-5 w-5 text-primary-text"
+                        className="text-primary-text h-5 w-5"
                       />
                     )}
                     {favoriteCount > 0 && (
@@ -774,7 +774,7 @@ export default function ItemDetailsClient({
                         <div className="text-primary-text text-xs font-semibold tracking-wide uppercase">
                           Chart Update Schedule
                         </div>
-                        <div className="text-secondary-text text-xs mt-1">
+                        <div className="text-secondary-text mt-1 text-xs">
                           Charts update daily at{" "}
                           {(() => {
                             // Create 6 PM Eastern Time and convert to user's local timezone

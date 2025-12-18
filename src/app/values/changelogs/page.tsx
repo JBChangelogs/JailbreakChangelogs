@@ -142,7 +142,7 @@ export default function ValuesChangelogPage() {
               {[...Array(10)].map((_, i) => (
                 <div
                   key={i}
-                  className="border-border-primary hover:border-border-focus bg-secondary-bg rounded-lg border p-4"
+                  className="border-border-primary bg-secondary-bg hover:border-border-focus rounded-lg border p-4"
                 >
                   <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
                     <div>
@@ -174,7 +174,7 @@ export default function ValuesChangelogPage() {
                 </p>
                 <button
                   onClick={toggleSortOrder}
-                  className="border-border-primary hover:border-border-focus bg-button-info text-form-button-text hover:bg-button-info-hover flex cursor-pointer items-center gap-1 rounded-lg border px-3 py-1.5 text-sm transition-colors"
+                  className="border-border-primary bg-button-info text-form-button-text hover:border-border-focus hover:bg-button-info-hover flex cursor-pointer items-center gap-1 rounded-lg border px-3 py-1.5 text-sm transition-colors"
                 >
                   {sortOrder === "newest" ? (
                     <ArrowDownIcon className="h-4 w-4" />
@@ -186,7 +186,7 @@ export default function ValuesChangelogPage() {
               </div>
 
               {/* Virtualized changelogs container */}
-              <div className="bg-secondary-bg border-border-primary rounded-lg border">
+              <div className="border-border-primary bg-secondary-bg rounded-lg border">
                 <div
                   ref={parentRef}
                   className="scrollbar-thin scrollbar-track-transparent scrollbar-thumb-border-primary hover:scrollbar-thumb-border-focus h-[60rem] overflow-y-auto"
@@ -249,7 +249,7 @@ export default function ValuesChangelogPage() {
                                     <div
                                       className={`rounded-lg border p-4 transition-all duration-200 hover:translate-y-[-2px] hover:shadow-lg ${
                                         isLatest
-                                          ? "border-button-info from-button-info/10 to-button-info-hover/10 shadow-button-info/20 bg-gradient-to-r shadow-lg"
+                                          ? "from-button-info/10 to-button-info-hover/10 shadow-button-info/20 border-button-info bg-gradient-to-r shadow-lg"
                                           : "border-border-primary bg-primary-bg hover:border-border-focus"
                                       }`}
                                     >

@@ -47,7 +47,7 @@ const PrivateServersTab: React.FC<PrivateServersTabProps> = ({
         {isOwnProfile && (
           <Link
             href="/servers"
-            className="text-form-button-text border-button-info bg-button-info hover:bg-button-info-hover mt-4 inline-block rounded-lg border px-4 py-2 text-sm font-semibold transition-colors"
+            className="border-button-info bg-button-info text-form-button-text hover:bg-button-info-hover mt-4 inline-block rounded-lg border px-4 py-2 text-sm font-semibold transition-colors"
           >
             Add Private Server
           </Link>
@@ -69,7 +69,7 @@ const PrivateServersTab: React.FC<PrivateServersTabProps> = ({
           {servers.map((server, index) => (
             <div
               key={server.id}
-              className="bg-primary-bg border-border-primary hover:border-border-focus rounded-lg border p-4 transition-colors sm:p-6"
+              className="border-border-primary bg-primary-bg hover:border-border-focus rounded-lg border p-4 transition-colors sm:p-6"
             >
               <div className="mb-4 flex flex-col gap-3">
                 <div className="flex items-center space-x-2">
@@ -79,7 +79,7 @@ const PrivateServersTab: React.FC<PrivateServersTabProps> = ({
                 <div className="flex flex-wrap gap-2">
                   <button
                     onClick={() => handleCopyLink(server.link)}
-                    className="text-form-button-text border-button-info bg-button-info hover:bg-button-info-hover cursor-pointer rounded-lg border px-2 py-1 text-sm transition-colors sm:px-3"
+                    className="border-button-info bg-button-info text-form-button-text hover:bg-button-info-hover cursor-pointer rounded-lg border px-2 py-1 text-sm transition-colors sm:px-3"
                     aria-label="Copy Server Link"
                   >
                     <ClipboardIcon className="h-4 w-4" />
@@ -88,7 +88,7 @@ const PrivateServersTab: React.FC<PrivateServersTabProps> = ({
                     href={server.link}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-form-button-text border-button-info bg-button-info hover:bg-button-info-hover rounded-lg border px-2 py-1 text-sm transition-colors sm:px-3"
+                    className="border-button-info bg-button-info text-form-button-text hover:bg-button-info-hover rounded-lg border px-2 py-1 text-sm transition-colors sm:px-3"
                   >
                     Join Server
                   </a>

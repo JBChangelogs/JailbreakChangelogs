@@ -51,7 +51,7 @@ export default function UserRankDisplay() {
 
   if (isLoading) {
     return (
-      <div className="border-border-primary hover:border-border-focus bg-secondary-bg mb-6 rounded-lg border p-4">
+      <div className="border-border-primary bg-secondary-bg hover:border-border-focus mb-6 rounded-lg border p-4">
         <div className="flex items-center justify-between">
           <div>
             <h3 className="text-primary-text text-lg font-semibold">
@@ -85,7 +85,7 @@ export default function UserRankDisplay() {
           {formatRelativeDate(userRank.updated_at)})
         </span>
       </div>
-      <div className="border-border-primary hover:border-border-focus bg-secondary-bg rounded-lg border p-3 shadow-sm sm:p-4">
+      <div className="border-border-primary bg-secondary-bg hover:border-border-focus rounded-lg border p-3 shadow-sm sm:p-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2 sm:space-x-3">
             <div className="text-primary-text flex h-7 min-w-[2.5rem] items-center justify-center rounded-full px-1 text-xs font-bold sm:h-8 sm:min-w-[3rem] sm:px-2">

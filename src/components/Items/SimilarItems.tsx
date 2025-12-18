@@ -285,7 +285,7 @@ const SimilarItems = ({
   ]);
 
   return (
-    <div className="bg-secondary-bg border-border-primary hover:shadow-card-shadow space-y-6 rounded-lg border p-6 shadow-lg transition-all duration-200">
+    <div className="border-border-primary bg-secondary-bg hover:shadow-card-shadow space-y-6 rounded-lg border p-6 shadow-lg transition-all duration-200">
       {/* Header Section */}
       <div className="space-y-4">
         <div className="flex items-center gap-3">
@@ -300,7 +300,7 @@ const SimilarItems = ({
         </div>
 
         <select
-          className="select w-full bg-primary-bg text-primary-text min-h-[56px]"
+          className="select bg-primary-bg text-primary-text min-h-[56px] w-full"
           value={sortBy}
           onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
             setSortBy(e.target.value as SortCriteria)
@@ -318,7 +318,7 @@ const SimilarItems = ({
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-3">
           {[...Array(6)].map((_, i) => (
             <div key={i} className="animate-pulse">
-              <div className="border-border-primary hover:border-border-focus bg-secondary-bg mb-3 aspect-video rounded-lg border"></div>
+              <div className="border-border-primary bg-secondary-bg hover:border-border-focus mb-3 aspect-video rounded-lg border"></div>
               <div className="bg-secondary-bg mb-2 h-4 w-3/4 rounded"></div>
               <div className="bg-secondary-bg h-4 w-1/2 rounded"></div>
             </div>
@@ -359,7 +359,7 @@ const SimilarItems = ({
               className="group block"
               prefetch={false}
             >
-              <div className="border-border-primary hover:border-border-focus bg-primary-bg relative overflow-hidden rounded-lg border transition-all duration-300">
+              <div className="border-border-primary bg-primary-bg hover:border-border-focus relative overflow-hidden rounded-lg border transition-all duration-300">
                 {/* Media Section */}
                 <div className="relative aspect-video w-full overflow-hidden">
                   {isVideoItem(item.name) ? (

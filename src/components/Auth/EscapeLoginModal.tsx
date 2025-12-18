@@ -34,7 +34,7 @@ export default function EscapeLoginModal() {
       />
 
       <div className="fixed inset-0 flex items-center justify-center p-4">
-        <DialogPanel className="modal-container bg-secondary-bg border-button-info w-full max-w-[480px] min-w-[320px] rounded-lg border shadow-lg">
+        <DialogPanel className="modal-container border-button-info bg-secondary-bg w-full max-w-[480px] min-w-[320px] rounded-lg border shadow-lg">
           <div className="modal-header text-primary-text px-6 py-4 text-xl font-semibold">
             Login with Token
           </div>
@@ -53,7 +53,7 @@ export default function EscapeLoginModal() {
                   id="token"
                   value={token}
                   onChange={(e) => setToken(e.target.value)}
-                  className="bg-form-input border-border-primary hover:border-border-focus text-primary-text focus:border-button-info w-full cursor-pointer rounded border p-3 text-sm focus:outline-none"
+                  className="border-border-primary bg-form-input text-primary-text hover:border-border-focus focus:border-button-info w-full cursor-pointer rounded border p-3 text-sm focus:outline-none"
                   placeholder="Enter your authentication token"
                   required
                 />

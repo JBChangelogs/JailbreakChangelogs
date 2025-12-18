@@ -93,7 +93,7 @@ const ChangelogContent: React.FC<ChangelogContentProps> = ({
       <div className="grid grid-cols-1 gap-8 xl:grid-cols-12">
         {/* Content Section - 8/12 columns on desktop, full width on tablet and mobile */}
         <div className="sm:col-span-12 xl:col-span-8">
-          <div className="mb-8 border-b border-secondary-text pb-4">
+          <div className="border-secondary-text mb-8 border-b pb-4">
             <h1 className="text-primary-text mb-3 text-3xl font-bold tracking-tight sm:text-5xl">
               {title}
             </h1>

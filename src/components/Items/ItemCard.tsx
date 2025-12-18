@@ -292,7 +292,7 @@ export default function ItemCard({
   return (
     <div className="w-full">
       <div
-        className={`group border-border-primary hover:border-border-focus bg-secondary-bg relative overflow-hidden rounded-lg border-2 transition-all duration-300 hover:shadow-lg`}
+        className={`group border-border-primary bg-secondary-bg hover:border-border-focus relative overflow-hidden rounded-lg border-2 transition-all duration-300 hover:shadow-lg`}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
         onClick={handleCardClick}
@@ -321,7 +321,7 @@ export default function ItemCard({
           </div>
           <button
             onClick={handleFavoriteClick}
-            className={`border-border-primary hover:border-border-focus bg-secondary-bg/80 absolute top-2 left-2 z-10 cursor-pointer rounded-full border p-1.5 transition-opacity ${
+            className={`bg-secondary-bg/80 border-border-primary hover:border-border-focus absolute top-2 left-2 z-10 cursor-pointer rounded-full border p-1.5 transition-opacity ${
               isHovered ? "opacity-100" : "opacity-0"
             } hover:bg-secondary-bg`}
             title={isFavorited ? "Remove from favorites" : "Add to favorites"}
@@ -335,7 +335,7 @@ export default function ItemCard({
             ) : (
               <Icon
                 icon="mdi:heart-outline"
-                className="h-4 w-4 sm:h-5 sm:w-5 text-primary-text"
+                className="text-primary-text h-4 w-4 sm:h-5 sm:w-5"
               />
             )}
           </button>
@@ -645,7 +645,7 @@ export default function ItemCard({
               )}
             </div>
 
-            <div className="text-secondary-text border-secondary-text mt-auto border-t pt-1 text-[10px] sm:pt-2 sm:text-xs">
+            <div className="border-secondary-text text-secondary-text mt-auto border-t pt-1 text-[10px] sm:pt-2 sm:text-xs">
               {currentItemData.last_updated ? (
                 <Tooltip
                   title={formatCustomDate(currentItemData.last_updated)}

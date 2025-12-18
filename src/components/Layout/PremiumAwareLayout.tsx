@@ -10,7 +10,7 @@ export default function PremiumAwareLayout({
   children,
 }: PremiumAwareLayoutProps) {
   return (
-    <div className="grid gap-8 grid-cols-1">
+    <div className="grid grid-cols-1 gap-8">
       <div className="space-y-6">{children}</div>
     </div>
   );

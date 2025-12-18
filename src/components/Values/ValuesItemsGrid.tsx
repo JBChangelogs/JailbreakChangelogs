@@ -214,8 +214,8 @@ export default function ValuesItemsGrid({
 
       <div className="mb-8 grid grid-cols-1 gap-4 min-[375px]:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {displayedItems.length === 0 ? (
-          <div className="col-span-full mb-4 rounded-lg border border-border-primary bg-secondary-bg p-8 text-center hover:border-border-focus">
-            <p className="text-lg text-secondary-text">
+          <div className="border-border-primary bg-secondary-bg hover:border-border-focus col-span-full mb-4 rounded-lg border p-8 text-center">
+            <p className="text-secondary-text text-lg">
               {rangeFilteredItems.length === 0 && items.length > 0
                 ? `No items found in the selected value range (${appliedMinValue.toLocaleString()} - ${
                     appliedMaxValue >= MAX_VALUE_RANGE
@@ -227,14 +227,14 @@ export default function ValuesItemsGrid({
             {rangeFilteredItems.length === 0 && items.length > 0 && (
               <button
                 onClick={onResetValueRange}
-                className="mr-3 mt-4 cursor-pointer rounded-lg border border-border-primary bg-button-info px-6 py-2 text-form-button-text hover:border-border-focus hover:bg-button-info-hover focus:outline-none"
+                className="border-border-primary bg-button-info text-form-button-text hover:border-border-focus hover:bg-button-info-hover mt-4 mr-3 cursor-pointer rounded-lg border px-6 py-2 focus:outline-none"
               >
                 Reset Value Range
               </button>
             )}
             <button
               onClick={onClearAllFilters}
-              className="mt-4 cursor-pointer rounded-lg border border-border-primary bg-button-info px-6 py-2 text-form-button-text hover:border-border-focus hover:bg-button-info-hover focus:outline-none"
+              className="border-border-primary bg-button-info text-form-button-text hover:border-border-focus hover:bg-button-info-hover mt-4 cursor-pointer rounded-lg border px-6 py-2 focus:outline-none"
             >
               Clear All Filters
             </button>

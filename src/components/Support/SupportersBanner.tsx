@@ -58,7 +58,7 @@ export default function SupportersBanner({ targetId }: SupportersBannerProps) {
     <div className="fixed bottom-4 left-1/2 z-50 -translate-x-1/2 transform sm:bottom-6">
       <button
         onClick={scrollToSupporters}
-        className="bg-button-info hover:bg-button-info-hover active:bg-button-info-active text-form-button-text flex cursor-pointer items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold shadow-lg transition-all duration-200 hover:shadow-xl sm:gap-2 sm:px-6 sm:py-3 sm:text-base"
+        className="bg-button-info text-form-button-text hover:bg-button-info-hover active:bg-button-info-active flex cursor-pointer items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold shadow-lg transition-all duration-200 hover:shadow-xl sm:gap-2 sm:px-6 sm:py-3 sm:text-base"
         aria-label="View our supporters"
       >
         <span>View Our Supporters</span>

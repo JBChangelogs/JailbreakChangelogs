@@ -139,7 +139,7 @@ export default function ChangelogSummary({
   // Show message for short content
   if (content.length <= 300) {
     return (
-      <div className="bg-secondary-bg border-border-focus hover:border-border-focus hover:shadow-card-shadow mb-6 rounded-lg border p-4 transition-colors duration-200 hover:shadow-lg">
+      <div className="border-border-focus bg-secondary-bg hover:border-border-focus hover:shadow-card-shadow mb-6 rounded-lg border p-4 transition-colors duration-200 hover:shadow-lg">
         <div className="flex items-center gap-2">
           <Icon icon="solar:magic-stick-3-bold" className="text-link h-5 w-5" />
           <span className="text-primary-text font-medium">AI Summary</span>
@@ -155,7 +155,7 @@ export default function ChangelogSummary({
   // Show loading state
   if (loading) {
     return (
-      <div className="bg-secondary-bg border-border-focus hover:border-border-focus hover:shadow-card-shadow mb-6 rounded-lg border p-4 transition-colors duration-200 hover:shadow-lg">
+      <div className="border-border-focus bg-secondary-bg hover:border-border-focus hover:shadow-card-shadow mb-6 rounded-lg border p-4 transition-colors duration-200 hover:shadow-lg">
         <div className="mb-2 flex items-center gap-2">
           <Icon
             icon="solar:magic-stick-3-bold"
@@ -179,7 +179,7 @@ export default function ChangelogSummary({
   // Show error state with retry button
   if (error) {
     return (
-      <div className="bg-secondary-bg border-border-focus hover:border-border-focus hover:shadow-card-shadow mb-6 rounded-lg border p-4 transition-colors duration-200 hover:shadow-lg">
+      <div className="border-border-focus bg-secondary-bg hover:border-border-focus hover:shadow-card-shadow mb-6 rounded-lg border p-4 transition-colors duration-200 hover:shadow-lg">
         <div className="mb-2 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Icon
@@ -205,7 +205,7 @@ export default function ChangelogSummary({
   // Show generated summary
   if (hasGenerated && summary) {
     return (
-      <div className="bg-secondary-bg border-border-focus hover:border-border-focus hover:shadow-card-shadow mb-6 rounded-lg border p-4 transition-colors duration-200 hover:shadow-lg">
+      <div className="border-border-focus bg-secondary-bg hover:border-border-focus hover:shadow-card-shadow mb-6 rounded-lg border p-4 transition-colors duration-200 hover:shadow-lg">
         <div
           className="scrollbar-thin scrollbar-track-transparent scrollbar-thumb-border-primary hover:scrollbar-thumb-border-focus max-h-80 overflow-y-auto pr-2"
           style={{
@@ -253,7 +253,7 @@ export default function ChangelogSummary({
               {tags.map((tag, index) => (
                 <span
                   key={index}
-                  className="text-primary-text border-border hover:text-link flex cursor-pointer items-center gap-1 rounded-full border px-2 py-1 text-xs transition-colors"
+                  className="border-border text-primary-text hover:text-link flex cursor-pointer items-center gap-1 rounded-full border px-2 py-1 text-xs transition-colors"
                   title={`${tag.category} (${Math.round(tag.relevance * 100)}% relevant)`}
                 >
                   <Icon icon="solar:tag-bold" className="h-3 w-3" />
@@ -269,7 +269,7 @@ export default function ChangelogSummary({
 
   // Show generate button (default state)
   return (
-    <div className="bg-secondary-bg border-border-focus hover:border-border-focus hover:shadow-card-shadow mb-6 rounded-lg border p-4 transition-colors duration-200 hover:shadow-lg">
+    <div className="border-border-focus bg-secondary-bg hover:border-border-focus hover:shadow-card-shadow mb-6 rounded-lg border p-4 transition-colors duration-200 hover:shadow-lg">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-2">
           <Icon icon="solar:magic-stick-3-bold" className="text-link h-5 w-5" />
@@ -277,7 +277,7 @@ export default function ChangelogSummary({
         </div>
         <button
           onClick={generateSummary}
-          className="bg-button-info text-form-button-text hover:bg-button-info-hover flex cursor-pointer items-center justify-center gap-2 rounded px-4 py-2 transition-colors sm:w-auto w-full"
+          className="bg-button-info text-form-button-text hover:bg-button-info-hover flex w-full cursor-pointer items-center justify-center gap-2 rounded px-4 py-2 transition-colors sm:w-auto"
         >
           <Icon icon="solar:magic-stick-3-bold" className="h-4 w-4" />
           Generate Summary

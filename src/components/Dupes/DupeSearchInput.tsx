@@ -46,19 +46,19 @@ export default function DupeSearchInput({
           value={searchId}
           onChange={(e) => setSearchId(e.target.value)}
           placeholder={placeholder}
-          className="text-primary-text border-border-primary bg-secondary-bg placeholder-secondary-text focus:border-button-info w-full rounded-lg border py-3 px-4 pr-16 transition-all duration-300 focus:outline-none"
+          className="border-border-primary bg-secondary-bg text-primary-text placeholder-secondary-text focus:border-button-info w-full rounded-lg border px-4 py-3 pr-16 transition-all duration-300 focus:outline-none"
           disabled={isCurrentlyLoading}
           required
         />
 
         {/* Right side controls container */}
-        <div className="absolute right-3 top-1/2 flex -translate-y-1/2 items-center gap-2">
+        <div className="absolute top-1/2 right-3 flex -translate-y-1/2 items-center gap-2">
           {/* Clear button - only show when there's text */}
           {searchId && (
             <button
               type="button"
               onClick={() => setSearchId("")}
-              className="hover:text-primary-text text-secondary-text cursor-pointer transition-colors"
+              className="text-secondary-text hover:text-primary-text cursor-pointer transition-colors"
               aria-label="Clear search"
             >
               <XMarkIcon className="h-5 w-5" />
@@ -79,7 +79,7 @@ export default function DupeSearchInput({
                 ? "text-secondary-text cursor-progress"
                 : !searchId.trim()
                   ? "text-secondary-text cursor-not-allowed opacity-50"
-                  : "text-button-info hover:bg-button-info/10 cursor-pointer"
+                  : "hover:bg-button-info/10 text-button-info cursor-pointer"
             }`}
             aria-label="Search"
           >

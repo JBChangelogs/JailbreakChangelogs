@@ -9,7 +9,7 @@ export default function CookieConsentBanner() {
   if (!showBanner) return null;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-40 bg-secondary-bg border-t border-border-primary shadow-lg">
+    <div className="border-border-primary bg-secondary-bg fixed right-0 bottom-0 left-0 z-40 border-t shadow-lg">
       <div className="w-full px-4 py-4 sm:px-6 lg:px-8">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex-1">
@@ -29,10 +29,10 @@ export default function CookieConsentBanner() {
             </p>
           </div>
 
-          <div className="flex flex-shrink-0 flex-col gap-2 sm:flex-row sm:gap-3 mt-4 sm:mt-0">
+          <div className="mt-4 flex flex-shrink-0 flex-col gap-2 sm:mt-0 sm:flex-row sm:gap-3">
             <button
               onClick={rejectConsent}
-              className="cursor-pointer px-4 py-2 text-sm font-medium text-white bg-button-info hover:bg-button-info-hover rounded-lg transition-colors order-2 sm:order-1"
+              className="bg-button-info hover:bg-button-info-hover order-2 cursor-pointer rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors sm:order-1"
               aria-label="Reject all cookies"
             >
               Reject All
@@ -42,14 +42,14 @@ export default function CookieConsentBanner() {
                 const event = new CustomEvent("openCookieSettings");
                 window.dispatchEvent(event);
               }}
-              className="cursor-pointer px-4 py-2 text-sm font-medium text-primary-text bg-tertiary-bg hover:bg-quaternary-bg border border-border-primary rounded-lg transition-colors order-1 sm:order-2"
+              className="border-border-primary bg-tertiary-bg text-primary-text hover:bg-quaternary-bg order-1 cursor-pointer rounded-lg border px-4 py-2 text-sm font-medium transition-colors sm:order-2"
               aria-label="Customise cookies"
             >
               Customise
             </button>
             <button
               onClick={acceptConsent}
-              className="cursor-pointer px-4 py-2 text-sm font-medium text-white bg-button-info hover:bg-button-info-hover rounded-lg transition-colors order-3"
+              className="bg-button-info hover:bg-button-info-hover order-3 cursor-pointer rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors"
               aria-label="Accept all cookies"
             >
               Accept All

@@ -207,10 +207,10 @@ export default function UserProfileSection({
             alt="Roblox Avatar"
             width={64}
             height={64}
-            className="flex-shrink-0 rounded-full bg-tertiary-bg"
+            className="bg-tertiary-bg flex-shrink-0 rounded-full"
           />
         ) : (
-          <div className="bg-tertiary-bg flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-full text-tertiary-bg">
+          <div className="bg-tertiary-bg text-tertiary-bg flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-full">
             <DefaultAvatar />
           </div>
         )}
@@ -258,7 +258,7 @@ export default function UserProfileSection({
                   href={`https://discord.com/users/${userConnectionData.id}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-primary-text border-primary-text hover:bg-quaternary-bg inline-flex items-center gap-1 rounded-full border bg-transparent px-2 py-0.5 text-xs transition-colors"
+                  className="border-primary-text text-primary-text hover:bg-quaternary-bg inline-flex items-center gap-1 rounded-full border bg-transparent px-2 py-0.5 text-xs transition-colors"
                 >
                   <DiscordIcon className="text-button-info h-3 w-3 flex-shrink-0" />
                   <span className="text-xs font-medium">Discord</span>
@@ -292,7 +292,7 @@ export default function UserProfileSection({
                 href={`https://www.roblox.com/users/${userId}/profile`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-primary-text border-primary-text hover:bg-quaternary-bg inline-flex items-center gap-1 rounded-full border bg-transparent px-2 py-0.5 text-xs transition-colors"
+                className="border-primary-text text-primary-text hover:bg-quaternary-bg inline-flex items-center gap-1 rounded-full border bg-transparent px-2 py-0.5 text-xs transition-colors"
               >
                 <RobloxIcon className="text-button-info h-3 w-3 flex-shrink-0" />
                 <span className="text-xs font-medium">Roblox</span>
@@ -325,7 +325,7 @@ export default function UserProfileSection({
                 <Link
                   href={`/users/${userConnectionData.id}`}
                   prefetch={false}
-                  className="text-primary-text border-primary-text hover:bg-quaternary-bg inline-flex items-center gap-1 rounded-full border bg-transparent px-2 py-0.5 text-xs transition-colors"
+                  className="border-primary-text text-primary-text hover:bg-quaternary-bg inline-flex items-center gap-1 rounded-full border bg-transparent px-2 py-0.5 text-xs transition-colors"
                 >
                   <Image
                     src="https://assets.jailbreakchangelogs.xyz/assets/logos/JBCL_Short_Transparent.webp"
@@ -358,7 +358,7 @@ export default function UserProfileSection({
                 !ENABLE_WS_SCAN ||
                 scanWebSocket.status === "scanning" ||
                 scanWebSocket.status === "connecting"
-                  ? `bg-button-info-disabled text-form-button-text border-button-info-disabled ${
+                  ? `border-button-info-disabled bg-button-info-disabled text-form-button-text ${
                       !ENABLE_WS_SCAN ? "cursor-not-allowed" : "cursor-progress"
                     }`
                   : "bg-button-info text-form-button-text hover:bg-button-info-hover cursor-pointer"
@@ -481,9 +481,9 @@ export default function UserProfileSection({
               disabled={isRefreshing || isDataFresh()}
               className={`inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
                 isRefreshing
-                  ? "bg-button-info-disabled text-form-button-text border-button-info-disabled cursor-progress"
+                  ? "border-button-info-disabled bg-button-info-disabled text-form-button-text cursor-progress"
                   : isDataFresh()
-                    ? "bg-button-secondary text-secondary-text border-button-secondary cursor-not-allowed"
+                    ? "border-button-secondary bg-button-secondary text-secondary-text cursor-not-allowed"
                     : "bg-button-info text-form-button-text hover:bg-button-info-hover cursor-pointer"
               }`}
             >

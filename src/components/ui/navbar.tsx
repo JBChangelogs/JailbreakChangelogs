@@ -33,7 +33,7 @@ const AnimatedThemeToggler = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg border border-border-primary bg-secondary-bg text-secondary-text transition-all duration-200 hover:scale-105 hover:bg-quaternary-bg hover:text-primary-text active:scale-95">
+      <div className="border-border-primary bg-secondary-bg text-secondary-text hover:bg-quaternary-bg hover:text-primary-text flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg border transition-all duration-200 hover:scale-105 active:scale-95">
         <div className="h-5 w-5" />
       </div>
     ),
@@ -69,7 +69,7 @@ export const MenuItem = ({
   return (
     <div onMouseEnter={() => setActive(item)} className="relative">
       <motion.span
-        className={`flex cursor-pointer items-center gap-1 rounded-lg py-1 pl-3 pr-2 transition-colors duration-200 ${
+        className={`flex cursor-pointer items-center gap-1 rounded-lg py-1 pr-2 pl-3 transition-colors duration-200 ${
           active === item
             ? "bg-button-info text-form-button-text"
             : "text-primary-text hover:bg-button-info-hover hover:text-form-button-text active:bg-button-info-active"
@@ -106,14 +106,14 @@ export const MenuItem = ({
         >
           {active === item && (
             <div
-              className="z-1300 absolute left-1/2 mt-0 min-w-[260px] -translate-x-1/2 rounded-2xl"
+              className="absolute left-1/2 z-1300 mt-0 min-w-[260px] -translate-x-1/2 rounded-2xl"
               style={{ top: "100%" }}
             >
               <motion.div
                 transition={menuTransition}
                 layoutId="active"
                 layout
-                className="overflow-hidden rounded-2xl border border-border-primary bg-secondary-bg backdrop-blur-sm"
+                className="border-border-primary bg-secondary-bg overflow-hidden rounded-2xl border backdrop-blur-sm"
               >
                 <motion.div layout className="flex flex-col gap-1 px-2 py-3">
                   {children}
@@ -146,7 +146,7 @@ export const HoveredLink = ({
     <motion.div whileHover={{ scale: 1.02 }} transition={{ duration: 0.2 }}>
       <Link
         href={href}
-        className={`block rounded-lg px-4 py-2 text-base font-bold text-primary-text transition-colors hover:bg-button-info-hover hover:text-form-button-text ${className}`}
+        className={`text-primary-text hover:bg-button-info-hover hover:text-form-button-text block rounded-lg px-4 py-2 text-base font-bold transition-colors ${className}`}
         onClick={() => setActive?.(null)}
         {...rest}
       >
@@ -176,7 +176,7 @@ export const NavLink = ({
     >
       <Link
         href={href}
-        className={`rounded-lg px-3 py-1 font-bold text-primary-text transition-colors duration-200 hover:bg-button-info-hover hover:text-form-button-text active:bg-button-info-active active:text-form-button-text ${className}`}
+        className={`text-primary-text hover:bg-button-info-hover hover:text-form-button-text active:bg-button-info-active active:text-form-button-text rounded-lg px-3 py-1 font-bold transition-colors duration-200 ${className}`}
       >
         {children}
       </Link>
@@ -207,7 +207,7 @@ const UnreadNotificationBadge = ({ count }: { count: number }) => {
   const displayCount = count > 99 ? "99+" : count.toString();
 
   return (
-    <span className="absolute -right-1 -top-1 flex h-5 min-w-[20px] items-center justify-center rounded-full bg-red-500 px-1.5 py-0.5 text-xs font-semibold text-white">
+    <span className="absolute -top-1 -right-1 flex h-5 min-w-[20px] items-center justify-center rounded-full bg-red-500 px-1.5 py-0.5 text-xs font-semibold text-white">
       {displayCount}
     </span>
   );
@@ -232,7 +232,7 @@ const NotificationTimestamp = ({
   );
 
   return (
-    <p className="mt-1 text-right text-xs text-secondary-text">
+    <p className="text-secondary-text mt-1 text-right text-xs">
       <Tooltip
         title={
           hasValidNumber ? formatCustomDate(timestampNumber) : timestampString
@@ -375,7 +375,7 @@ export const NavbarModern = ({ className }: { className?: string }) => {
   return (
     <div
       className={cn(
-        "bg-primary-bg/75 border-b border-border-primary backdrop-blur-lg",
+        "bg-primary-bg/75 border-border-primary border-b backdrop-blur-lg",
         className,
       )}
     >
@@ -545,7 +545,7 @@ export const NavbarModern = ({ className }: { className?: string }) => {
               }}
             >
               <PopoverTrigger asChild>
-                <button className="relative flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg border border-border-primary bg-secondary-bg text-secondary-text transition-colors duration-200 hover:bg-quaternary-bg hover:text-primary-text">
+                <button className="border-border-primary bg-secondary-bg text-secondary-text hover:bg-quaternary-bg hover:text-primary-text relative flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg border transition-colors duration-200">
                   <Icon
                     icon="mingcute:notification-line"
                     className="h-5 w-5"
@@ -560,9 +560,9 @@ export const NavbarModern = ({ className }: { className?: string }) => {
 
             <PopoverContent align="end" className="w-80 p-0">
               {/* Header */}
-              <div className="border-b border-border-secondary px-4 py-3">
+              <div className="border-border-secondary border-b px-4 py-3">
                 <div className="flex items-center justify-between">
-                  <h3 className="font-semibold text-primary-text">
+                  <h3 className="text-primary-text font-semibold">
                     {notifications
                       ? `${notifications.total} ${notificationTab === "unread" ? "Unread " : ""}Notification${notifications.total !== 1 ? "s" : ""}`
                       : `0 ${notificationTab === "unread" ? "Unread " : ""}Notifications`}
@@ -615,7 +615,7 @@ export const NavbarModern = ({ className }: { className?: string }) => {
                             );
                           }
                         }}
-                        className="cursor-pointer text-secondary-text transition-colors hover:text-red-500"
+                        className="text-secondary-text cursor-pointer transition-colors hover:text-red-500"
                       >
                         <Icon
                           icon="si:bin-fill"
@@ -630,7 +630,7 @@ export const NavbarModern = ({ className }: { className?: string }) => {
 
               {/* Tabs */}
               {isAuthenticated && (
-                <div className="border-b border-border-secondary px-2">
+                <div className="border-border-secondary border-b px-2">
                   <div role="tablist" className="tabs flex w-full">
                     <button
                       role="tab"
@@ -671,13 +671,13 @@ export const NavbarModern = ({ className }: { className?: string }) => {
                 {isLoadingNotifications ? (
                   <div className="flex min-h-[200px] flex-col items-center justify-center px-4 py-8">
                     <div className="loading loading-spinner loading-md text-primary-text"></div>
-                    <p className="mt-3 text-center text-sm text-secondary-text">
+                    <p className="text-secondary-text mt-3 text-center text-sm">
                       Loading notifications...
                     </p>
                   </div>
                 ) : !isAuthenticated ? (
                   <div className="flex flex-col items-center justify-center px-4 py-8">
-                    <p className="text-center text-sm text-secondary-text">
+                    <p className="text-secondary-text text-center text-sm">
                       You must be logged in to view notifications
                     </p>
                   </div>
@@ -722,10 +722,10 @@ export const NavbarModern = ({ className }: { className?: string }) => {
                         return (
                           <div
                             key={notif.id}
-                            className="block border-b border-border-secondary px-4 py-3 transition-colors last:border-b-0 hover:bg-secondary-bg"
+                            className="border-border-secondary hover:bg-secondary-bg block border-b px-4 py-3 transition-colors last:border-b-0"
                           >
                             <div className="flex items-start justify-between gap-2">
-                              <p className="flex-1 text-sm font-semibold text-primary-text">
+                              <p className="text-primary-text flex-1 text-sm font-semibold">
                                 {notif.title}
                               </p>
                               {notificationTab === "unread" && (
@@ -799,7 +799,7 @@ export const NavbarModern = ({ className }: { className?: string }) => {
                                 </Tooltip>
                               )}
                             </div>
-                            <p className="mt-1 text-xs text-secondary-text">
+                            <p className="text-secondary-text mt-1 text-xs">
                               {notif.description}
                             </p>
                             {urlInfo.isWhitelisted ? (
@@ -808,7 +808,7 @@ export const NavbarModern = ({ className }: { className?: string }) => {
                                 <Link
                                   href={urlInfo.relativePath}
                                   prefetch={false}
-                                  className="mt-2 inline-flex items-center gap-1 rounded-lg border border-border-primary bg-button-info px-3 py-1.5 text-xs text-form-button-text transition-colors hover:border-border-focus hover:bg-button-info-hover"
+                                  className="border-border-primary bg-button-info text-form-button-text hover:border-border-focus hover:bg-button-info-hover mt-2 inline-flex items-center gap-1 rounded-lg border px-3 py-1.5 text-xs transition-colors"
                                 >
                                   View
                                 </Link>
@@ -817,13 +817,13 @@ export const NavbarModern = ({ className }: { className?: string }) => {
                                   href={urlInfo.href}
                                   target="_blank"
                                   rel="noopener noreferrer"
-                                  className="mt-2 inline-flex items-center gap-1 rounded-lg border border-border-primary bg-button-info px-3 py-1.5 text-xs text-form-button-text transition-colors hover:border-border-focus hover:bg-button-info-hover"
+                                  className="border-border-primary bg-button-info text-form-button-text hover:border-border-focus hover:bg-button-info-hover mt-2 inline-flex items-center gap-1 rounded-lg border px-3 py-1.5 text-xs transition-colors"
                                 >
                                   View
                                 </a>
                               ) : null
                             ) : (
-                              <p className="mt-1 break-all text-xs text-secondary-text">
+                              <p className="text-secondary-text mt-1 text-xs break-all">
                                 {notif.link}
                               </p>
                             )}
@@ -836,7 +836,7 @@ export const NavbarModern = ({ className }: { className?: string }) => {
                       })}
                     </div>
                     {notifications.total_pages > 1 && (
-                      <div className="flex justify-center border-t border-border-secondary py-3">
+                      <div className="border-border-secondary flex justify-center border-t py-3">
                         <Pagination
                           count={notifications.total_pages}
                           page={notificationPage}
@@ -856,10 +856,10 @@ export const NavbarModern = ({ className }: { className?: string }) => {
                   <div className="flex min-h-[200px] flex-col items-center justify-center px-4 py-8">
                     <Icon
                       icon="mingcute:notification-line"
-                      className="mb-3 h-12 w-12 text-secondary-text"
+                      className="text-secondary-text mb-3 h-12 w-12"
                       inline={true}
                     />
-                    <p className="text-center text-sm text-secondary-text">
+                    <p className="text-secondary-text text-center text-sm">
                       No new notifications
                     </p>
                   </div>
@@ -886,7 +886,7 @@ export const NavbarModern = ({ className }: { className?: string }) => {
             }}
           >
             <Link href="/supporting">
-              <button className="cursor-pointer p-2 text-tertiary-text transition-colors hover:text-primary-text">
+              <button className="text-tertiary-text hover:text-primary-text cursor-pointer p-2 transition-colors">
                 <Image
                   src="https://assets.jailbreakchangelogs.xyz/assets/images/kofi_assets/kofi_symbol.svg"
                   alt="Ko-fi"
@@ -906,7 +906,7 @@ export const NavbarModern = ({ className }: { className?: string }) => {
             // Show login button during SSR and initial hydration to prevent mismatch
             <button
               onClick={() => setShowLoginModal(true)}
-              className="cursor-pointer rounded-lg bg-button-info px-4 py-2 font-semibold text-form-button-text transition-colors hover:bg-button-info-hover"
+              className="bg-button-info text-form-button-text hover:bg-button-info-hover cursor-pointer rounded-lg px-4 py-2 font-semibold transition-colors"
             >
               Login
             </button>
@@ -932,7 +932,7 @@ export const NavbarModern = ({ className }: { className?: string }) => {
               <AnimatePresence>
                 {userMenuOpen && (
                   <motion.div
-                    className="z-1300 absolute right-0 mt-0 w-64 rounded-lg border border-border-primary bg-secondary-bg py-2 shadow-lg backdrop-blur-sm"
+                    className="border-border-primary bg-secondary-bg absolute right-0 z-1300 mt-0 w-64 rounded-lg border py-2 shadow-lg backdrop-blur-sm"
                     initial={{ opacity: 0, scale: 0.85, y: 10 }}
                     animate={{ opacity: 1, scale: 1, y: 0 }}
                     exit={{ opacity: 0, scale: 0.85, y: 10 }}
@@ -941,7 +941,7 @@ export const NavbarModern = ({ className }: { className?: string }) => {
                     {/* User info */}
                     <Link
                       href={`/users/${userData.id}`}
-                      className="hover:bg-button-info-hover/10 block border-b border-border-secondary px-4 py-3 transition-colors"
+                      className="hover:bg-button-info-hover/10 border-border-secondary block border-b px-4 py-3 transition-colors"
                     >
                       <div className="flex items-center gap-3">
                         <UserAvatar
@@ -955,10 +955,10 @@ export const NavbarModern = ({ className }: { className?: string }) => {
                           premiumType={userData.premiumtype}
                         />
                         <div>
-                          <div className="font-semibold text-primary-text transition-colors hover:text-link">
+                          <div className="text-primary-text hover:text-link font-semibold transition-colors">
                             {userData.global_name || userData.username}
                           </div>
-                          <div className="text-sm text-secondary-text">
+                          <div className="text-secondary-text text-sm">
                             @{userData.username}
                           </div>
                         </div>
@@ -969,7 +969,7 @@ export const NavbarModern = ({ className }: { className?: string }) => {
                     <div className="py-1">
                       {!userData.roblox_id && (
                         <button
-                          className="flex w-full items-center gap-3 px-4 py-2 text-left text-sm text-primary-text transition-colors hover:bg-button-info-hover hover:text-form-button-text"
+                          className="text-primary-text hover:bg-button-info-hover hover:text-form-button-text flex w-full items-center gap-3 px-4 py-2 text-left text-sm transition-colors"
                           onClick={() => {
                             setShowLoginModal(true);
                             const event = new CustomEvent("setLoginTab", {
@@ -985,7 +985,7 @@ export const NavbarModern = ({ className }: { className?: string }) => {
 
                       <Link
                         href="/settings"
-                        className="flex items-center gap-3 px-4 py-2 text-sm text-primary-text transition-colors hover:bg-button-info-hover hover:text-form-button-text"
+                        className="text-primary-text hover:bg-button-info-hover hover:text-form-button-text flex items-center gap-3 px-4 py-2 text-sm transition-colors"
                       >
                         <Icon
                           icon="material-symbols:settings"
@@ -996,7 +996,7 @@ export const NavbarModern = ({ className }: { className?: string }) => {
                       </Link>
 
                       <button
-                        className="hover:bg-button-danger/10 flex w-full cursor-pointer items-center gap-3 px-4 py-2 text-left text-sm text-button-danger transition-colors hover:text-button-danger"
+                        className="hover:bg-button-danger/10 text-button-danger hover:text-button-danger flex w-full cursor-pointer items-center gap-3 px-4 py-2 text-left text-sm transition-colors"
                         onClick={handleLogout}
                       >
                         <Icon
@@ -1014,7 +1014,7 @@ export const NavbarModern = ({ className }: { className?: string }) => {
           ) : (
             <button
               onClick={() => setShowLoginModal(true)}
-              className="cursor-pointer rounded-lg bg-button-info px-4 py-2 font-semibold text-form-button-text transition-colors hover:bg-button-info-hover"
+              className="bg-button-info text-form-button-text hover:bg-button-info-hover cursor-pointer rounded-lg px-4 py-2 font-semibold transition-colors"
             >
               Login
             </button>

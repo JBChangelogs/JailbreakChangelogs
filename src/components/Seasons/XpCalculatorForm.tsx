@@ -91,7 +91,7 @@ export default function XpCalculatorForm({
 
   const maxXpForCurrentLevel = getMaxXpForLevel(currentLevel);
   return (
-    <div className="border-border-primary hover:border-border-focus bg-secondary-bg mb-8 rounded-lg border p-6">
+    <div className="border-border-primary bg-secondary-bg hover:border-border-focus mb-8 rounded-lg border p-6">
       <h2 className="text-primary-text mb-6 text-2xl font-semibold">
         🎯 XP Progress Calculator
       </h2>
@@ -106,7 +106,7 @@ export default function XpCalculatorForm({
           className="mx-auto w-full max-w-sm"
           priority
         />
-        <p className="text-secondary-text mt-2 flex items-center justify-center gap-2 text-sm text-center">
+        <p className="text-secondary-text mt-2 flex items-center justify-center gap-2 text-center text-sm">
           Use this image as a reference to find your current level and XP
           progress
         </p>
@@ -118,7 +118,7 @@ export default function XpCalculatorForm({
             Current Level
           </label>
           <select
-            className="select w-full bg-primary-bg text-primary-text h-[56px] min-h-[56px]"
+            className="select bg-primary-bg text-primary-text h-[56px] min-h-[56px] w-full"
             value={currentLevel}
             onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
               const newLevel = parseInt(e.target.value);
@@ -171,7 +171,7 @@ export default function XpCalculatorForm({
         </div>
       </div>
 
-      <div className="mb-6 rounded-lg border border-border-primary bg-primary-bg p-4">
+      <div className="border-border-primary bg-primary-bg mb-6 rounded-lg border p-4">
         <p className="text-secondary-text mb-3 text-xs">
           These options apply to the entire remaining season.
         </p>
@@ -212,8 +212,8 @@ export default function XpCalculatorForm({
           disabled={!currentLevel || (!includeDailyXp && !includeContracts)}
           className={`flex items-center justify-center gap-2 rounded-md border px-4 py-2 text-sm font-medium transition-colors ${
             !currentLevel || (!includeDailyXp && !includeContracts)
-              ? "bg-button-secondary text-secondary-text border-button-secondary cursor-not-allowed"
-              : "bg-button-info text-form-button-text border-button-info hover:bg-button-info-hover cursor-pointer"
+              ? "border-button-secondary bg-button-secondary text-secondary-text cursor-not-allowed"
+              : "border-button-info bg-button-info text-form-button-text hover:bg-button-info-hover cursor-pointer"
           }`}
         >
           Will I Make It?

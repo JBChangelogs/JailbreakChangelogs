@@ -16,9 +16,9 @@ export default function RailwayBadge() {
   // Prevent hydration mismatch by not rendering until mounted
   if (!mounted) {
     return (
-      <div className="flex items-center gap-2 text-secondary-text text-base">
+      <div className="text-secondary-text flex items-center gap-2 text-base">
         <span>Built on</span>
-        <div className="h-6 w-28 bg-secondary-bg animate-pulse rounded" />
+        <div className="bg-secondary-bg h-6 w-28 animate-pulse rounded" />
       </div>
     );
   }
@@ -33,7 +33,7 @@ export default function RailwayBadge() {
       href="https://railway.com/"
       target="_blank"
       rel="noopener noreferrer"
-      className="flex items-center text-base transition-colors duration-200 group"
+      className="group flex items-center text-base transition-colors duration-200"
     >
       <span className="text-secondary-text group-hover:text-primary-text transition-colors duration-200">
         Built on

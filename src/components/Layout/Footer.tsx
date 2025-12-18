@@ -47,7 +47,7 @@ export default function Footer({ githubUrl, versionInfo }: FooterProps) {
   }, []);
 
   return (
-    <footer className="w-full bg-secondary-bg border-border-primary border-t py-8 pb-0">
+    <footer className="border-border-primary bg-secondary-bg w-full border-t py-8 pb-0">
       <div className="w-full px-4">
         <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
           {/* Resources */}
@@ -58,25 +58,25 @@ export default function Footer({ githubUrl, versionInfo }: FooterProps) {
                 href="https://jailbreak.fandom.com/wiki/Jailbreak_Wiki:Home"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-link hover:text-link-hover active:text-link-active transition-colors duration-200 block"
+                className="text-link hover:text-link-hover active:text-link-active block transition-colors duration-200"
               >
                 Jailbreak Wiki
               </a>
               <Link
                 href="/faq"
-                className="text-link hover:text-link-hover active:text-link-active transition-colors duration-200 block"
+                className="text-link hover:text-link-hover active:text-link-active block transition-colors duration-200"
               >
                 FAQ
               </Link>
               <Link
                 href="/redeem"
-                className="text-link hover:text-link-hover active:text-link-active transition-colors duration-200 block"
+                className="text-link hover:text-link-hover active:text-link-active block transition-colors duration-200"
               >
                 Redeem Code
               </Link>
               <Link
                 href="/bot"
-                className="text-link hover:text-link-hover active:text-link-active transition-colors duration-200 block"
+                className="text-link hover:text-link-hover active:text-link-active block transition-colors duration-200"
               >
                 Discord Bot
               </Link>
@@ -84,7 +84,7 @@ export default function Footer({ githubUrl, versionInfo }: FooterProps) {
                 href="https://status.jailbreakchangelogs.xyz"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-link hover:text-link-hover active:text-link-active transition-colors duration-200 block"
+                className="text-link hover:text-link-hover active:text-link-active block transition-colors duration-200"
               >
                 Uptime Status
               </a>
@@ -106,13 +106,13 @@ export default function Footer({ githubUrl, versionInfo }: FooterProps) {
             <div className="space-y-2 text-sm">
               <Link
                 href="/privacy"
-                className="text-link hover:text-link-hover active:text-link-active transition-colors duration-200 block"
+                className="text-link hover:text-link-hover active:text-link-active block transition-colors duration-200"
               >
                 Privacy Policy
               </Link>
               <Link
                 href="/tos"
-                className="text-link hover:text-link-hover active:text-link-active transition-colors duration-200 block"
+                className="text-link hover:text-link-hover active:text-link-active block transition-colors duration-200"
               >
                 Terms of Service
               </Link>
@@ -121,7 +121,7 @@ export default function Footer({ githubUrl, versionInfo }: FooterProps) {
                   const event = new CustomEvent("openCookieSettings");
                   window.dispatchEvent(event);
                 }}
-                className="text-link hover:text-link-hover active:text-link-active transition-colors duration-200 cursor-pointer bg-none border-none p-0 text-left"
+                className="text-link hover:text-link-hover active:text-link-active cursor-pointer border-none bg-none p-0 text-left transition-colors duration-200"
               >
                 Cookies
               </button>
@@ -132,14 +132,14 @@ export default function Footer({ githubUrl, versionInfo }: FooterProps) {
                       window.__cmp("showModal");
                     }
                   }}
-                  className="text-link hover:text-link-hover active:text-link-active transition-colors duration-200 cursor-pointer bg-none border-none p-0 text-left text-sm"
+                  className="text-link hover:text-link-hover active:text-link-active cursor-pointer border-none bg-none p-0 text-left text-sm transition-colors duration-200"
                 >
                   Update consent preferences
                 </button>
               </div>
               <a
                 href="mailto:support@jailbreakchangelogs.xyz"
-                className="text-link hover:text-link-hover active:text-link-active transition-colors duration-200 block"
+                className="text-link hover:text-link-hover active:text-link-active block transition-colors duration-200"
               >
                 Contact Us
               </a>
@@ -187,7 +187,7 @@ export default function Footer({ githubUrl, versionInfo }: FooterProps) {
           </div>
         </div>
 
-        <div className="mt-12 pt-8 border-t border-border-primary flex flex-wrap gap-3">
+        <div className="border-border-primary mt-12 flex flex-wrap gap-3 border-t pt-8">
           <Tooltip
             title="Follow us on X (Twitter)"
             arrow
@@ -206,7 +206,7 @@ export default function Footer({ githubUrl, versionInfo }: FooterProps) {
               href="https://x.com/JBChangelogs"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-link hover:text-link-hover hover:bg-quaternary-bg rounded-full p-2 transition-colors duration-200"
+              className="text-link hover:bg-quaternary-bg hover:text-link-hover rounded-full p-2 transition-colors duration-200"
               aria-label="Twitter/X"
             >
               <Icon
@@ -234,7 +234,7 @@ export default function Footer({ githubUrl, versionInfo }: FooterProps) {
               href="https://discord.jailbreakchangelogs.xyz"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-link hover:text-link-hover hover:bg-quaternary-bg rounded-full p-2 transition-colors duration-200"
+              className="text-link hover:bg-quaternary-bg hover:text-link-hover rounded-full p-2 transition-colors duration-200"
               aria-label="Discord"
             >
               <Icon
@@ -262,7 +262,7 @@ export default function Footer({ githubUrl, versionInfo }: FooterProps) {
               href="https://www.roblox.com/communities/35348206/Jailbreak-Changelogs#!/about"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-link hover:text-link-hover hover:bg-quaternary-bg rounded-full p-2 transition-colors duration-200"
+              className="text-link hover:bg-quaternary-bg hover:text-link-hover rounded-full p-2 transition-colors duration-200"
               aria-label="Roblox Group"
             >
               <Icon
@@ -290,7 +290,7 @@ export default function Footer({ githubUrl, versionInfo }: FooterProps) {
               href="https://bsky.app/profile/jbchangelogs.bsky.social"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-link hover:text-link-hover hover:bg-quaternary-bg rounded-full p-2 transition-colors duration-200"
+              className="text-link hover:bg-quaternary-bg hover:text-link-hover rounded-full p-2 transition-colors duration-200"
               aria-label="Bluesky"
             >
               <Icon
@@ -316,7 +316,7 @@ export default function Footer({ githubUrl, versionInfo }: FooterProps) {
           >
             <a
               href="/supporting"
-              className="text-link hover:text-link-hover hover:bg-quaternary-bg rounded-full p-2 transition-colors duration-200"
+              className="text-link hover:bg-quaternary-bg hover:text-link-hover rounded-full p-2 transition-colors duration-200"
               aria-label="Support Us"
             >
               <Icon
@@ -344,7 +344,7 @@ export default function Footer({ githubUrl, versionInfo }: FooterProps) {
               href={githubUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-link hover:text-link-hover hover:bg-quaternary-bg rounded-full p-2 transition-colors duration-200"
+              className="text-link hover:bg-quaternary-bg hover:text-link-hover rounded-full p-2 transition-colors duration-200"
               aria-label="View on GitHub"
             >
               <Icon
@@ -372,7 +372,7 @@ export default function Footer({ githubUrl, versionInfo }: FooterProps) {
               href="https://www.youtube.com/@JailbreakChangelogs"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-link hover:text-link-hover hover:bg-quaternary-bg rounded-full p-2 transition-colors duration-200"
+              className="text-link hover:bg-quaternary-bg hover:text-link-hover rounded-full p-2 transition-colors duration-200"
               aria-label="YouTube"
             >
               <Icon

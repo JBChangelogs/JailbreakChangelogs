@@ -30,11 +30,11 @@ export default function NewsTicker() {
   if (!shouldShowTicker || isVisible !== true) return null;
 
   return (
-    <div className="from-purple-500/20 to-pink-500/20 bg-gradient-to-r backdrop-blur-lg">
+    <div className="bg-gradient-to-r from-purple-500/20 to-pink-500/20 backdrop-blur-lg">
       <div className="container mx-auto px-4 py-2">
         <div className="relative flex flex-col items-center justify-center gap-2 pr-8 lg:flex-row lg:gap-3 lg:pr-12">
           <div className="flex items-center gap-2">
-            <span className="text-purple-400 text-xs font-semibold">
+            <span className="text-xs font-semibold text-purple-400">
               🚨 NEW FEATURE
             </span>
           </div>
@@ -44,7 +44,7 @@ export default function NewsTicker() {
               Track live robberies in real-time! The{" "}
               <Link
                 href="/robberies"
-                className="text-purple-400 hover:text-purple-300 underline font-semibold"
+                className="font-semibold text-purple-400 underline hover:text-purple-300"
               >
                 Robbery Tracker
               </Link>{" "}

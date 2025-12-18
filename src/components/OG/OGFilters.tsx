@@ -83,13 +83,13 @@ export default function OGFilters({
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             maxLength={MAX_SEARCH_LENGTH}
-            className="text-primary-text border-border-primary bg-primary-bg placeholder-secondary-text focus:border-button-info min-h-[56px] w-full rounded-lg border px-4 py-3 pr-10 pl-10 transition-all duration-300 focus:outline-none"
+            className="border-border-primary bg-primary-bg text-primary-text placeholder-secondary-text focus:border-button-info min-h-[56px] w-full rounded-lg border px-4 py-3 pr-10 pl-10 transition-all duration-300 focus:outline-none"
           />
           <MagnifyingGlassIcon className="text-secondary-text absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2" />
           {searchTerm && (
             <button
               onClick={() => setSearchTerm("")}
-              className="hover:text-primary-text text-secondary-text absolute top-1/2 right-3 h-5 w-5 -translate-y-1/2 cursor-pointer"
+              className="text-secondary-text hover:text-primary-text absolute top-1/2 right-3 h-5 w-5 -translate-y-1/2 cursor-pointer"
               aria-label="Clear search"
             >
               <XMarkIcon />
@@ -100,7 +100,7 @@ export default function OGFilters({
         {/* Category Filter */}
         <div className="w-full sm:w-1/3">
           <select
-            className="select w-full bg-primary-bg text-primary-text min-h-[56px]"
+            className="select bg-primary-bg text-primary-text min-h-[56px] w-full"
             value={selectedCategories.length > 0 ? selectedCategories[0] : ""}
             onChange={(e) => {
               if (e.target.value === "") {
@@ -122,7 +122,7 @@ export default function OGFilters({
         {/* Sort Filter */}
         <div className="w-full sm:w-1/3">
           <select
-            className="select w-full bg-primary-bg text-primary-text min-h-[56px]"
+            className="select bg-primary-bg text-primary-text min-h-[56px] w-full"
             value={sortOrder}
             onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
               setSortOrder(e.target.value)

@@ -26,7 +26,7 @@ function ScanEntry({
   const relativeTime = useRealTimeRelativeDate(scan.created_at);
 
   return (
-    <div className="bg-form-input border-border-primary rounded border p-4">
+    <div className="border-border-primary bg-form-input rounded border p-4">
       <div>
         <h3 className="text-primary-text font-medium">Scan #{scanNumber}</h3>
         <p className="text-secondary-text text-sm">
@@ -53,7 +53,7 @@ export default function ScanHistoryModal({
       />
 
       <div className="fixed inset-0 flex items-center justify-center p-4">
-        <DialogPanel className="modal-container bg-secondary-bg border-button-info flex max-h-[60vh] w-full max-w-[480px] min-w-[320px] flex-col rounded-lg border shadow-lg">
+        <DialogPanel className="modal-container border-button-info bg-secondary-bg flex max-h-[60vh] w-full max-w-[480px] min-w-[320px] flex-col rounded-lg border shadow-lg">
           <div className="modal-header text-primary-text flex flex-shrink-0 items-center justify-between px-6 py-4 text-xl font-semibold">
             <DialogTitle className="text-primary-text text-xl font-semibold">
               Scan History
@@ -69,7 +69,7 @@ export default function ScanHistoryModal({
           <div className="modal-content flex-1 overflow-y-auto p-6">
             {/* Notice for users with 1000+ scan history entries */}
             {scanHistory.length >= 1000 && (
-              <div className="border-button-info bg-button-info/10 mb-4 rounded-lg border p-4">
+              <div className="bg-button-info/10 border-button-info mb-4 rounded-lg border p-4">
                 <div className="text-primary-text mb-2 flex items-center gap-2 text-sm">
                   <span className="font-medium">Data Limitation</span>
                 </div>

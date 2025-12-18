@@ -42,7 +42,7 @@ function OfficialBotsSkeleton() {
             </div>
           ))}
         </div>
-        <div className="border-border-primary bg-button-info/10 mt-4 rounded-lg border p-4 shadow-sm">
+        <div className="bg-button-info/10 border-border-primary mt-4 rounded-lg border p-4 shadow-sm">
           <div className="relative z-10">
             <span className="text-primary-text text-base font-bold">
               Security Notice
@@ -169,7 +169,7 @@ function OfficialBotsContent() {
             );
           })}
         </div>
-        <div className="border-border-primary bg-button-info/10 mt-4 rounded-lg border p-4 shadow-sm">
+        <div className="bg-button-info/10 border-border-primary mt-4 rounded-lg border p-4 shadow-sm">
           <div className="relative z-10">
             <span className="text-primary-text text-base font-bold">
               Security Notice

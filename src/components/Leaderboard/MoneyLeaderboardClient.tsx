@@ -166,7 +166,7 @@ export default function MoneyLeaderboardClient({
           <MoneyLeaderboardSearch onSearch={handleSearch} />
 
           {/* Virtualized leaderboard container with fixed height for performance */}
-          <div className="bg-secondary-bg border-border-primary hover:border-border-focus hover:shadow-card-shadow mt-6 rounded-lg border p-4 transition-colors duration-200 hover:shadow-lg">
+          <div className="border-border-primary bg-secondary-bg hover:border-border-focus hover:shadow-card-shadow mt-6 rounded-lg border p-4 transition-colors duration-200 hover:shadow-lg">
             <div
               ref={parentRef}
               className="scrollbar-thin scrollbar-track-transparent scrollbar-thumb-border-primary hover:scrollbar-thumb-border-focus h-[48rem] overflow-y-auto pr-2"
@@ -222,7 +222,7 @@ export default function MoneyLeaderboardClient({
                           className={`mb-4 rounded-lg border p-3 transition-colors ${
                             originalRank <= 3
                               ? ""
-                              : "border-border-primary hover:border-border-focus bg-primary-bg"
+                              : "border-border-primary bg-primary-bg hover:border-border-focus"
                           }`}
                           style={{
                             ...(originalRank === 1 && {
@@ -321,7 +321,7 @@ export default function MoneyLeaderboardClient({
           </div>
         </div>
       ) : (
-        <div className="bg-secondary-bg border-border-primary hover:border-border-focus hover:shadow-card-shadow rounded-lg border p-8 text-center transition-colors duration-200 hover:shadow-lg">
+        <div className="border-border-primary bg-secondary-bg hover:border-border-focus hover:shadow-card-shadow rounded-lg border p-8 text-center transition-colors duration-200 hover:shadow-lg">
           <p className="text-secondary-text">
             No money leaderboard data available at this time.
           </p>

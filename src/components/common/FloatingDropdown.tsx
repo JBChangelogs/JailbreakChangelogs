@@ -87,14 +87,14 @@ export default function FloatingDropdown({
       <button
         ref={refs.setReference}
         {...getReferenceProps({ onClick: handleClick })}
-        className={`flex items-center justify-between w-full px-3 py-2 rounded-lg border transition-colors ${
+        className={`flex w-full items-center justify-between rounded-lg border px-3 py-2 transition-colors ${
           buttonClassName ||
-          "bg-secondary-bg text-primary-text border-border-primary hover:border-border-focus text-xs sm:text-sm cursor-pointer"
+          "border-border-primary bg-secondary-bg text-primary-text hover:border-border-focus cursor-pointer text-xs sm:text-sm"
         }`}
       >
         <span className="truncate">{displayLabel}</span>
         <ChevronDownIcon
-          className={`h-4 w-4 ml-2 flex-shrink-0 transition-transform ${
+          className={`ml-2 h-4 w-4 flex-shrink-0 transition-transform ${
             isOpen ? "rotate-180" : ""
           }`}
         />
@@ -108,7 +108,7 @@ export default function FloatingDropdown({
             ref={refs.setFloating}
             style={floatingStyles}
             {...getFloatingProps()}
-            className={`z-50 rounded-lg border bg-secondary-bg shadow-lg ${
+            className={`bg-secondary-bg z-50 rounded-lg border shadow-lg ${
               menuClassName || "border-border-primary"
             }`}
           >
@@ -117,7 +117,7 @@ export default function FloatingDropdown({
                 <button
                   key={option.value}
                   onClick={() => handleSelect(option.value)}
-                  className={`w-full px-3 py-2 text-left text-xs sm:text-sm transition-colors ${
+                  className={`w-full px-3 py-2 text-left text-xs transition-colors sm:text-sm ${
                     value === option.value
                       ? "bg-button-info text-form-button-text"
                       : "text-primary-text hover:bg-primary-bg"

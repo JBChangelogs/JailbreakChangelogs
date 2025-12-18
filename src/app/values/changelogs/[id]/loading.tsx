@@ -8,7 +8,7 @@ export default function Loading() {
           {/* Header Skeleton with Side-by-Side Layout */}
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
             {/* Changelog Info Skeleton - Takes up 2/3 of the space */}
-            <div className="border-border-primary hover:border-border-focus bg-secondary-bg rounded-lg border p-6 lg:col-span-2">
+            <div className="border-border-primary bg-secondary-bg hover:border-border-focus rounded-lg border p-6 lg:col-span-2">
               <Skeleton
                 variant="text"
                 width="60%"

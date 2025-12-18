@@ -171,13 +171,13 @@ export default function MostScannedLeaderboardClient({
               placeholder="Search by username or ID..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="text-primary-text border-border-primary hover:border-border-focus bg-secondary-bg placeholder-secondary-text focus:border-button-info w-full rounded-lg border px-4 py-2 pr-10 pl-10 transition-all duration-300 focus:outline-none"
+              className="border-border-primary bg-secondary-bg text-primary-text placeholder-secondary-text hover:border-border-focus focus:border-button-info w-full rounded-lg border px-4 py-2 pr-10 pl-10 transition-all duration-300 focus:outline-none"
             />
             <MagnifyingGlassIcon className="text-secondary-text absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2" />
             {searchTerm && (
               <button
                 onClick={() => setSearchTerm("")}
-                className="hover:text-primary-text text-secondary-text absolute top-1/2 right-3 h-5 w-5 -translate-y-1/2 cursor-pointer"
+                className="text-secondary-text hover:text-primary-text absolute top-1/2 right-3 h-5 w-5 -translate-y-1/2 cursor-pointer"
                 aria-label="Clear search"
               >
                 <XMarkIcon />
@@ -319,11 +319,11 @@ export default function MostScannedLeaderboardClient({
                               href={`https://www.roblox.com/users/${user.user_id}/profile`}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="text-primary-text hover:text-link-hover break-words font-medium transition-colors"
+                              className="text-primary-text hover:text-link-hover font-medium break-words transition-colors"
                             >
                               {displayName}
                             </a>
-                            <div className="text-secondary-text break-words text-sm">
+                            <div className="text-secondary-text text-sm break-words">
                               @{username} • {user.upsert_count.toLocaleString()}{" "}
                               scans
                             </div>
@@ -331,7 +331,7 @@ export default function MostScannedLeaderboardClient({
                           <Link
                             href={`/inventories/${user.user_id}`}
                             prefetch={false}
-                            className="text-form-button-text bg-button-info hover:bg-button-info-hover active:bg-button-info-active focus:ring-border-focus cursor-pointer rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors duration-200 focus:ring-2 focus:outline-none flex-shrink-0 mt-1"
+                            className="bg-button-info text-form-button-text hover:bg-button-info-hover focus:ring-border-focus active:bg-button-info-active mt-1 flex-shrink-0 cursor-pointer rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors duration-200 focus:ring-2 focus:outline-none"
                           >
                             View Inventory
                           </Link>

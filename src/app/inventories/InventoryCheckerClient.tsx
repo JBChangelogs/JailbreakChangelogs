@@ -713,7 +713,7 @@ export default function InventoryCheckerClient({
                             !ENABLE_WS_SCAN ||
                             scanWebSocket.status === "scanning" ||
                             scanWebSocket.status === "connecting"
-                              ? `bg-button-info-disabled text-form-button-text border-button-info-disabled ${
+                              ? `border-button-info-disabled bg-button-info-disabled text-form-button-text ${
                                   !ENABLE_WS_SCAN
                                     ? "cursor-not-allowed"
                                     : "cursor-progress"
@@ -878,7 +878,7 @@ export default function InventoryCheckerClient({
                   {isAuthenticated && user?.roblox_id ? (
                     <Link
                       href={`/inventories/${user.roblox_id}`}
-                      className="bg-button-info text-form-button-text hover:bg-button-info-hover inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 mt-2 text-xs font-medium transition-colors"
+                      className="bg-button-info text-form-button-text hover:bg-button-info-hover mt-2 inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors"
                     >
                       View My Inventory
                     </Link>
@@ -893,7 +893,7 @@ export default function InventoryCheckerClient({
                           });
                           window.dispatchEvent(event);
                         }}
-                        className="text-button-info hover:text-button-info-hover font-semibold underline transition-colors cursor-pointer"
+                        className="text-button-info hover:text-button-info-hover cursor-pointer font-semibold underline transition-colors"
                       >
                         Connect your Roblox account
                       </button>{" "}
@@ -906,7 +906,7 @@ export default function InventoryCheckerClient({
                         onClick={() => {
                           setLoginModalOpen(true);
                         }}
-                        className="text-button-info hover:text-button-info-hover font-semibold underline transition-colors cursor-pointer"
+                        className="text-button-info hover:text-button-info-hover cursor-pointer font-semibold underline transition-colors"
                       >
                         Login and connect Roblox
                       </button>{" "}

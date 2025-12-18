@@ -172,10 +172,10 @@ export default function CommentsTab({
   if (error) {
     return (
       <div className="space-y-6">
-        <div className="rounded-lg border border-border-primary p-4">
+        <div className="border-border-primary rounded-lg border p-4">
           <div className="mb-3 flex items-center gap-2">
             <CommentIcon className="text-button-info" />
-            <h2 className="text-lg font-semibold text-primary-text">
+            <h2 className="text-primary-text text-lg font-semibold">
               Recent Comments [{comments.length}]
             </h2>
           </div>
@@ -188,14 +188,14 @@ export default function CommentsTab({
   if (shouldHideComments) {
     return (
       <div className="space-y-6">
-        <div className="rounded-lg border border-border-primary p-4">
+        <div className="border-border-primary rounded-lg border p-4">
           <div className="mb-3 flex items-center gap-2">
             <CommentIcon className="text-button-info" />
-            <h2 className="text-lg font-semibold text-primary-text">
+            <h2 className="text-primary-text text-lg font-semibold">
               Recent Comments
             </h2>
           </div>
-          <div className="flex items-center gap-2 text-primary-text">
+          <div className="text-primary-text flex items-center gap-2">
             <svg
               className="h-5 w-5"
               fill="none"
@@ -218,11 +218,11 @@ export default function CommentsTab({
 
   return (
     <div className="space-y-6" id="comments-section">
-      <div className="rounded-lg border border-border-primary p-4">
+      <div className="border-border-primary rounded-lg border p-4">
         <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-2">
             <CommentIcon className="text-button-info" />
-            <h2 className="text-lg font-semibold text-primary-text">
+            <h2 className="text-primary-text text-lg font-semibold">
               Recent{" "}
               {activeFilter
                 ? `${activeFilter.charAt(0).toUpperCase() + activeFilter.slice(1)} `
@@ -234,7 +234,7 @@ export default function CommentsTab({
             onClick={() =>
               setSortOrder((prev) => (prev === "newest" ? "oldest" : "newest"))
             }
-            className="flex cursor-pointer items-center gap-1 rounded-lg border border-border-primary bg-button-info px-3 py-1.5 text-sm text-form-button-text transition-colors hover:border-border-focus hover:bg-button-info-hover"
+            className="border-border-primary bg-button-info text-form-button-text hover:border-border-focus hover:bg-button-info-hover flex cursor-pointer items-center gap-1 rounded-lg border px-3 py-1.5 text-sm transition-colors"
           >
             {sortOrder === "newest" ? (
               <ArrowDownIcon className="h-4 w-4" />
@@ -246,7 +246,7 @@ export default function CommentsTab({
         </div>
 
         {comments.length === 0 ? (
-          <p className="italic text-primary-text">No comments yet</p>
+          <p className="text-primary-text italic">No comments yet</p>
         ) : (
           <>
             {/* Filter chips */}
@@ -328,7 +328,7 @@ export default function CommentsTab({
 
             <div className="space-y-4">
               {currentComments.length === 0 ? (
-                <p className="italic text-primary-text">
+                <p className="text-primary-text italic">
                   {activeFilter
                     ? `No ${activeFilter === "item" ? "item" : activeFilter} comments yet`
                     : "No comments yet"}

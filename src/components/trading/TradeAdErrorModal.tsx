@@ -22,7 +22,7 @@ export const TradeAdErrorModal: React.FC<TradeAdErrorModalProps> = ({
       />
 
       <div className="fixed inset-0 flex items-center justify-center p-4">
-        <DialogPanel className="modal-container bg-secondary-bg border-button-info w-full max-w-[480px] min-w-[320px] rounded-lg border shadow-lg">
+        <DialogPanel className="modal-container border-button-info bg-secondary-bg w-full max-w-[480px] min-w-[320px] rounded-lg border shadow-lg">
           <div className="modal-header text-primary-text px-6 py-4 text-xl font-semibold">
             Trade Ad Validation Errors
           </div>
@@ -40,7 +40,7 @@ export const TradeAdErrorModal: React.FC<TradeAdErrorModalProps> = ({
           <div className="modal-footer flex justify-end gap-2 px-6 py-4">
             <button
               onClick={onClose}
-              className="text-primary-text border-border-primary hover:border-border-focus bg-button-info hover:bg-button-info-hover rounded-lg border px-4 py-2 text-sm font-medium focus:outline-none"
+              className="border-border-primary bg-button-info text-primary-text hover:border-border-focus hover:bg-button-info-hover rounded-lg border px-4 py-2 text-sm font-medium focus:outline-none"
             >
               Close
             </button>

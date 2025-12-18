@@ -10,7 +10,7 @@ export default function ComingSoon() {
       <div className="absolute inset-0 z-[1] bg-[url('https://assets.jailbreakchangelogs.xyz/assets/backgrounds/vignette.png')] bg-cover bg-center bg-no-repeat" />
 
       <div className="relative z-[2] mx-auto max-w-md px-4 text-center">
-        <div className="border-border-primary bg-secondary-bg/90 shadow-card-shadow rounded-2xl border px-8 py-8 backdrop-blur-xl">
+        <div className="bg-secondary-bg/90 border-border-primary shadow-card-shadow rounded-2xl border px-8 py-8 backdrop-blur-xl">
           <div className="mb-8">
             <div className="mb-4 flex justify-center">
               <svg

@@ -50,7 +50,7 @@ export default function CopyButton({ text, className = "" }: CopyButtonProps) {
           elevation={6}
           variant="filled"
           severity="success"
-          className="bg-secondary-bg text-primary-text border-border-focus border font-medium"
+          className="border-border-focus bg-secondary-bg text-primary-text border font-medium"
         >
           Roblox ID copied to clipboard!
         </MuiAlert>

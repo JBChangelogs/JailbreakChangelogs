@@ -87,7 +87,7 @@ const ItemSelectionModal: React.FC<ItemSelectionModalProps> = ({
               placeholder="Search items..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="text-primary-text border-border-primary bg-secondary-bg placeholder-secondary-text focus:border-button-info w-full rounded-lg border py-2 pr-4 pl-10 focus:outline-none"
+              className="border-border-primary bg-secondary-bg text-primary-text placeholder-secondary-text focus:border-button-info w-full rounded-lg border py-2 pr-4 pl-10 focus:outline-none"
             />
           </div>
 
@@ -107,7 +107,7 @@ const ItemSelectionModal: React.FC<ItemSelectionModalProps> = ({
                       onItemSelect(item);
                       onClose();
                     }}
-                    className="group hover:bg-quaternary-bg border-border-primary bg-tertiary-bg flex w-full items-center justify-between rounded-lg border p-2 text-left transition-colors"
+                    className="group border-border-primary bg-tertiary-bg hover:bg-quaternary-bg flex w-full items-center justify-between rounded-lg border p-2 text-left transition-colors"
                   >
                     <span className="text-secondary-text group-hover:text-primary-text truncate transition-colors">
                       {item.name}

@@ -213,7 +213,7 @@ export default function RedeemPage() {
                   id="code"
                   value={code}
                   onChange={(e) => setCode(e.target.value)}
-                  className={`bg-secondary-bg border-border-primary hover:border-border-focus text-primary-text w-full rounded-lg border px-6 py-3 text-lg transition-colors focus:ring-2 focus:outline-none ${
+                  className={`border-border-primary bg-secondary-bg text-primary-text hover:border-border-focus w-full rounded-lg border px-6 py-3 text-lg transition-colors focus:ring-2 focus:outline-none ${
                     message?.type === "error"
                       ? "border-button-danger focus:ring-button-danger"
                       : "focus:border-button-info focus:ring-button-info"
@@ -279,7 +279,7 @@ export default function RedeemPage() {
                 disabled={isLoading || !code.trim()}
                 className={`w-full rounded-lg px-6 py-4 text-lg font-semibold transition-colors ${
                   isLoading || !code.trim()
-                    ? "bg-button-info-disabled text-form-button-text border-button-info-disabled cursor-not-allowed"
+                    ? "border-button-info-disabled bg-button-info-disabled text-form-button-text cursor-not-allowed"
                     : "bg-button-info text-form-button-text hover:bg-button-info-hover hover:cursor-pointer"
                 }`}
               >
@@ -404,7 +404,7 @@ export default function RedeemPage() {
               </li>
             </ol>
 
-            <div className="border-border-primary bg-button-info/10 mt-8 rounded border p-4 shadow-sm">
+            <div className="bg-button-info/10 border-border-primary mt-8 rounded border p-4 shadow-sm">
               <div className="mb-2 flex items-start gap-4">
                 <div className="relative z-10">
                   <span className="text-primary-text text-base font-bold">
@@ -460,7 +460,7 @@ export default function RedeemPage() {
         />
 
         <div className="fixed inset-0 flex items-center justify-center p-4">
-          <DialogPanel className="modal-container bg-secondary-bg border-button-info mx-auto w-full max-w-md rounded-lg border p-4 shadow-lg sm:p-6">
+          <DialogPanel className="modal-container border-button-info bg-secondary-bg mx-auto w-full max-w-md rounded-lg border p-4 shadow-lg sm:p-6">
             <div className="mb-4">
               <DialogTitle className="text-primary-text text-xl font-semibold">
                 Confirm Code Redemption
@@ -482,7 +482,7 @@ export default function RedeemPage() {
             <div className="flex flex-col gap-3 sm:flex-row">
               <button
                 onClick={() => setShowConfirmModal(false)}
-                className="text-secondary-text hover:text-primary-text border-border-primary hover:bg-tertiary-bg w-full rounded-lg border px-4 py-2 transition-colors hover:cursor-pointer sm:flex-1"
+                className="border-border-primary text-secondary-text hover:bg-tertiary-bg hover:text-primary-text w-full rounded-lg border px-4 py-2 transition-colors hover:cursor-pointer sm:flex-1"
               >
                 Cancel
               </button>
@@ -508,7 +508,7 @@ export default function RedeemPage() {
         />
 
         <div className="fixed inset-0 flex items-center justify-center p-4">
-          <DialogPanel className="modal-container bg-secondary-bg border-button-info mx-auto w-full max-w-lg rounded-lg border p-4 shadow-lg sm:p-8">
+          <DialogPanel className="modal-container border-button-info bg-secondary-bg mx-auto w-full max-w-lg rounded-lg border p-4 shadow-lg sm:p-8">
             <div className="absolute inset-0 overflow-hidden rounded-lg">
               <div
                 className="absolute -top-4 left-1/4 h-2 w-2 animate-bounce rounded-full bg-yellow-400"

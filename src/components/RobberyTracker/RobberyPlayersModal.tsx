@@ -81,7 +81,7 @@ export default function RobberyPlayersModal({
       />
 
       <div className="fixed inset-0 flex items-center justify-center p-4">
-        <DialogPanel className="modal-container bg-secondary-bg border-button-info flex max-h-[80vh] w-full max-w-[600px] min-w-[320px] flex-col overflow-hidden rounded-lg border shadow-lg">
+        <DialogPanel className="modal-container border-button-info bg-secondary-bg flex max-h-[80vh] w-full max-w-[600px] min-w-[320px] flex-col overflow-hidden rounded-lg border shadow-lg">
           {/* Header */}
           <div className="modal-header text-primary-text flex items-center justify-between px-6 py-4 text-xl font-semibold">
             <span>
@@ -158,7 +158,7 @@ export default function RobberyPlayersModal({
                 {filteredPlayers.map((player) => (
                   <div
                     key={player.user_id}
-                    className="bg-primary-bg border-border-primary flex items-center gap-3 rounded-lg border p-3"
+                    className="border-border-primary bg-primary-bg flex items-center gap-3 rounded-lg border p-3"
                   >
                     {/* Avatar */}
                     <div className="bg-tertiary-bg h-10 w-10 shrink-0 overflow-hidden rounded-full">
@@ -193,8 +193,8 @@ export default function RobberyPlayersModal({
                         <span
                           className={`rounded px-1.5 py-0.5 text-xs font-medium ${
                             player.team === "Police"
-                              ? "bg-blue-500/20 text-primary-text border-blue-500/30 border"
-                              : "bg-red-500/20 text-primary-text border-red-500/30 border"
+                              ? "text-primary-text border border-blue-500/30 bg-blue-500/20"
+                              : "text-primary-text border border-red-500/30 bg-red-500/20"
                           }`}
                         >
                           {player.team === "Police" ? "Police" : "Criminal"}

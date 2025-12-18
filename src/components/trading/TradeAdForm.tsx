@@ -561,7 +561,7 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
 
   if (!isAuthenticated) {
     return (
-      <div className="border-border-primary hover:border-border-focus bg-secondary-bg mb-8 rounded-lg border p-6 text-center transition-colors">
+      <div className="border-border-primary bg-secondary-bg hover:border-border-focus mb-8 rounded-lg border p-6 text-center transition-colors">
         <h3 className="text-secondary-text mb-4 text-lg font-medium">
           Create Trade Ads
         </h3>
@@ -611,7 +611,7 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
                 onClick={() => setShowClearConfirmModal(false)}
               />
               <div className="fixed inset-0 flex items-center justify-center p-4">
-                <div className="modal-container bg-secondary-bg border-button-info mx-auto w-full max-w-sm rounded-lg border p-6 shadow-lg">
+                <div className="modal-container border-button-info bg-secondary-bg mx-auto w-full max-w-sm rounded-lg border p-6 shadow-lg">
                   <div className="modal-header text-primary-text mb-2 text-xl font-semibold">
                     Clear Trade Ad?
                   </div>
@@ -631,7 +631,7 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
                         }
                         setShowClearConfirmModal(false);
                       }}
-                      className="border-button-success bg-button-success/10 text-button-success hover:bg-button-success/20 w-full rounded-md border px-4 py-2 text-sm font-medium transition-colors hover:cursor-pointer"
+                      className="bg-button-success/10 hover:bg-button-success/20 border-button-success text-button-success w-full rounded-md border px-4 py-2 text-sm font-medium transition-colors hover:cursor-pointer"
                     >
                       Clear Offering
                     </button>
@@ -645,7 +645,7 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
                         }
                         setShowClearConfirmModal(false);
                       }}
-                      className="border-button-danger bg-button-danger/10 text-button-danger hover:bg-button-danger/20 w-full rounded-md border px-4 py-2 text-sm font-medium transition-colors hover:cursor-pointer"
+                      className="bg-button-danger/10 hover:bg-button-danger/20 border-button-danger text-button-danger w-full rounded-md border px-4 py-2 text-sm font-medium transition-colors hover:cursor-pointer"
                     >
                       Clear Requesting
                     </button>
@@ -683,7 +683,7 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
 
           {/* Expiration Time Selection */}
           {!editMode && (
-            <div className="border-border-primary bg-button-info/10 mb-2 flex items-start gap-4 rounded-lg border p-4 shadow-sm">
+            <div className="bg-button-info/10 border-border-primary mb-2 flex items-start gap-4 rounded-lg border p-4 shadow-sm">
               <div className="relative z-10">
                 <span className="text-primary-text text-base font-bold">
                   Trade Ad Expiration
@@ -701,7 +701,7 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
                 </div>
                 <div className="mt-3">
                   <select
-                    className="select w-full bg-secondary-bg text-primary-text h-[56px] min-h-[56px]"
+                    className="select bg-secondary-bg text-primary-text h-[56px] min-h-[56px] w-full"
                     value={expirationHours || ""}
                     onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
                       const value = e.target.value;
@@ -732,7 +732,7 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
                 Trade Status
               </h3>
               <select
-                className="select w-full bg-secondary-bg text-primary-text h-[56px] min-h-[56px]"
+                className="select bg-secondary-bg text-primary-text h-[56px] min-h-[56px] w-full"
                 value={selectedTradeAd?.status || tradeAd.status}
                 onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
                   const status = e.target.value;
@@ -793,7 +793,7 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
               <Button
                 variant="contained"
                 onClick={handleClearSides}
-                className="bg-status-error text-form-button-text hover:bg-status-error-hover"
+                className="hover:bg-status-error-hover bg-status-error text-form-button-text"
               >
                 <TrashIcon className="mr-1 h-5 w-5" />
                 Clear
@@ -809,7 +809,7 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
                 className="text-sm text-yellow-500"
               />
               Helpful tip: Hold{" "}
-              <kbd className="kbd kbd-sm bg-tertiary-bg text-primary-text border-border-primary">
+              <kbd className="kbd kbd-sm border-border-primary bg-tertiary-bg text-primary-text">
                 Shift
               </kbd>{" "}
               while clicking Clear to clear both sides instantly without
@@ -851,7 +851,7 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
                     variant="outlined"
                     onClick={() => handleMirrorItems("offering")}
                     size="small"
-                    className="border-status-success text-primary-text bg-status-success/15 hover:border-status-success hover:bg-status-success/25"
+                    className="bg-status-success/15 hover:bg-status-success/25 border-status-success text-primary-text hover:border-status-success"
                   >
                     <ArrowsRightLeftIcon className="mr-1 h-4 w-4" />
                     Mirror
@@ -885,7 +885,7 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
             {/* Requesting Items */}
             <DroppableZone
               id="requesting-drop-zone"
-              className="bg-secondary-bg border-status-error flex-1 rounded-lg border p-4 transition-colors"
+              className="border-status-error bg-secondary-bg flex-1 rounded-lg border p-4 transition-colors"
               activeClassName="border-status-error/80 bg-status-error/5 ring-2 ring-status-error/50"
             >
               <div className="mb-4 flex items-center justify-between">
@@ -917,7 +917,7 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
                     variant="outlined"
                     onClick={() => handleMirrorItems("requesting")}
                     size="small"
-                    className="border-status-error text-primary-text bg-status-error/15 hover:border-status-error hover:bg-status-error/25"
+                    className="bg-status-error/15 hover:bg-status-error/25 border-status-error text-primary-text hover:border-status-error"
                   >
                     <ArrowsRightLeftIcon className="mr-1 h-4 w-4" />
                     Mirror
@@ -972,8 +972,8 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
                 !editMode &&
                 offeringItems.length === 0 &&
                 requestingItems.length === 0
-                  ? "bg-button-secondary text-secondary-text border-button-secondary cursor-not-allowed"
-                  : "bg-button-secondary text-secondary-text border-button-secondary hover:bg-button-secondary-hover cursor-pointer"
+                  ? "border-button-secondary bg-button-secondary text-secondary-text cursor-not-allowed"
+                  : "border-button-secondary bg-button-secondary text-secondary-text hover:bg-button-secondary-hover cursor-pointer"
               }`}
             >
               {editMode ? "Cancel" : "Clear Trade Ad"}
@@ -991,8 +991,8 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
               disabled={submitting}
               className={`flex items-center gap-2 rounded-md border px-4 py-2 text-sm font-medium transition-colors ${
                 submitting
-                  ? "bg-button-info-disabled text-form-button-text border-button-info-disabled cursor-progress"
-                  : "bg-button-info text-form-button-text border-button-info hover:bg-button-info-hover cursor-pointer"
+                  ? "border-button-info-disabled bg-button-info-disabled text-form-button-text cursor-progress"
+                  : "border-button-info bg-button-info text-form-button-text hover:bg-button-info-hover cursor-pointer"
               }`}
             >
               {submitting

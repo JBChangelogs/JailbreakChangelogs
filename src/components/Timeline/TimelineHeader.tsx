@@ -20,7 +20,7 @@ const TimelineHeader: React.FC<TimelineHeaderProps> = ({ changelogs }) => {
   const [isStatsExpanded, setIsStatsExpanded] = useState(false);
 
   return (
-    <div className="bg-secondary-bg border-border-primary mb-8 rounded-lg border p-6">
+    <div className="border-border-primary bg-secondary-bg mb-8 rounded-lg border p-6">
       <h2 className="text-secondary-text mb-4 text-2xl font-semibold">
         Roblox Jailbreak Timeline
       </h2>
@@ -34,7 +34,7 @@ const TimelineHeader: React.FC<TimelineHeaderProps> = ({ changelogs }) => {
         <div className="mb-4">
           <button
             onClick={() => setIsStatsExpanded(!isStatsExpanded)}
-            className="hover:bg-primary-bg border-border-primary hover:border-border-focus bg-primary-bg flex w-full cursor-pointer items-center justify-between rounded-lg border p-4 transition-colors"
+            className="border-border-primary bg-primary-bg hover:border-border-focus hover:bg-primary-bg flex w-full cursor-pointer items-center justify-between rounded-lg border p-4 transition-colors"
           >
             <h3 className="text-primary-text text-lg font-semibold">
               View Update Statistics
@@ -47,7 +47,7 @@ const TimelineHeader: React.FC<TimelineHeaderProps> = ({ changelogs }) => {
           </button>
 
           {isStatsExpanded && (
-            <div className="bg-primary-bg border-border-primary mt-2 rounded-lg border p-4">
+            <div className="border-border-primary bg-primary-bg mt-2 rounded-lg border p-4">
               <div className="text-secondary-text space-y-1 text-sm">
                 {yearStats.map(({ year, count }) => (
                   <p key={year}>

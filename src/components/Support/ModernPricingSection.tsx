@@ -155,10 +155,10 @@ export default function ModernPricingSection() {
               Support Jailbreak Changelogs
             </h2>
             <p className="text-secondary-text mt-4 text-base sm:text-lg">
-              <span className="relative inline-block font-bold text-button-info">
+              <span className="text-button-info relative inline-block font-bold">
                 One-time purchase
                 <svg
-                  className="absolute left-0 -bottom-1 hidden w-full sm:block"
+                  className="absolute -bottom-1 left-0 hidden w-full sm:block"
                   viewBox="0 0 120 8"
                   preserveAspectRatio="none"
                   xmlns="http://www.w3.org/2000/svg"
@@ -183,7 +183,7 @@ export default function ModernPricingSection() {
                 className={`w-1/2 cursor-pointer rounded-lg px-3 py-1 transition-colors focus:outline-none sm:mx-0.5 sm:w-auto ${
                   !isYearly
                     ? "bg-button-info text-white"
-                    : "text-secondary-text bg-secondary-bg hover:bg-quaternary-bg"
+                    : "bg-secondary-bg text-secondary-text hover:bg-quaternary-bg"
                 }`}
               >
                 Ko-fi
@@ -193,7 +193,7 @@ export default function ModernPricingSection() {
                 className={`w-1/2 cursor-pointer rounded-lg px-3 py-1 transition-colors focus:outline-none sm:mx-0.5 sm:w-auto ${
                   isYearly
                     ? "bg-button-info text-white"
-                    : "text-secondary-text bg-secondary-bg hover:bg-quaternary-bg"
+                    : "bg-secondary-bg text-secondary-text hover:bg-quaternary-bg"
                 }`}
               >
                 Roblox
@@ -208,8 +208,8 @@ export default function ModernPricingSection() {
               key={tier.name}
               className={`hover:bg-quaternary-bg transform rounded-lg px-6 py-4 transition-all duration-500 ${
                 tier.recommended
-                  ? "bg-secondary-bg border-button-info border-2"
-                  : "bg-secondary-bg border-border-primary border"
+                  ? "border-button-info bg-secondary-bg border-2"
+                  : "border-border-primary bg-secondary-bg border"
               } ${
                 highlightedTier === tier.tierNumber
                   ? "ring-warning ring-opacity-75 scale-110 ring-4"
@@ -246,7 +246,7 @@ export default function ModernPricingSection() {
                           alt="Robux"
                           width={24}
                           height={24}
-                          className="h-6 w-6 object-contain flex-shrink-0"
+                          className="h-6 w-6 flex-shrink-0 object-contain"
                         />
                         <span>0R$</span>
                       </>
@@ -265,7 +265,7 @@ export default function ModernPricingSection() {
                       alt="Robux"
                       width={24}
                       height={24}
-                      className="h-6 w-6 object-contain flex-shrink-0"
+                      className="h-6 w-6 flex-shrink-0 object-contain"
                     />
                     <span>{tier.priceAlt.split(" ")[1]}</span>
                     <span className="text-secondary-text text-base font-normal">
@@ -333,7 +333,7 @@ export default function ModernPricingSection() {
                   {isYearly ? "Support with Robux" : "Support with Ko-fi"}
                 </button>
               ) : (
-                <div className="text-primary-text bg-primary-bg border-border-primary mt-10 w-full rounded-md border px-4 py-2 text-center font-medium tracking-wide capitalize">
+                <div className="border-border-primary bg-primary-bg text-primary-text mt-10 w-full rounded-md border px-4 py-2 text-center font-medium tracking-wide capitalize">
                   Already included
                 </div>
               )}
@@ -408,7 +408,7 @@ export default function ModernPricingSection() {
 
         {/* Support Methods */}
         <div className="support-methods-section mt-12 grid gap-8 md:grid-cols-3">
-          <div className="bg-secondary-bg border-border-primary flex flex-col items-center justify-center rounded-lg border p-6 text-center">
+          <div className="border-border-primary bg-secondary-bg flex flex-col items-center justify-center rounded-lg border p-6 text-center">
             <h3 className="text-primary-text mb-4 text-lg font-semibold">
               Ko-fi Donations
             </h3>
@@ -431,7 +431,7 @@ export default function ModernPricingSection() {
             </a>
           </div>
 
-          <div className="bg-secondary-bg border-border-primary flex flex-col items-center justify-center rounded-lg border p-6 text-center">
+          <div className="border-border-primary bg-secondary-bg flex flex-col items-center justify-center rounded-lg border p-6 text-center">
             <h3 className="text-primary-text mb-4 text-lg font-semibold">
               Roblox Donations
             </h3>
@@ -454,12 +454,12 @@ export default function ModernPricingSection() {
             </a>
           </div>
 
-          <div className="bg-secondary-bg border-border-primary rounded-lg border p-6 text-center">
+          <div className="border-border-primary bg-secondary-bg rounded-lg border p-6 text-center">
             <h3 className="text-primary-text mb-4 text-lg font-semibold">
               Crypto Donations
             </h3>
             <div className="space-y-4">
-              <div className="bg-surface-bg border-border-primary rounded-lg border p-4">
+              <div className="border-border-primary bg-surface-bg rounded-lg border p-4">
                 <div className="text-primary-text mb-2 flex items-center justify-center gap-2">
                   <Icon
                     icon="logos:bitcoin"
@@ -495,7 +495,7 @@ export default function ModernPricingSection() {
                 </div>
               </div>
 
-              <div className="bg-surface-bg border-border-primary rounded-lg border p-4">
+              <div className="border-border-primary bg-surface-bg rounded-lg border p-4">
                 <div className="text-primary-text mb-2 flex items-center justify-center gap-2">
                   <Icon
                     icon="logos:ethereum"
@@ -531,7 +531,7 @@ export default function ModernPricingSection() {
                 </div>
               </div>
 
-              <div className="bg-surface-bg border-border-primary rounded-lg border p-4">
+              <div className="border-border-primary bg-surface-bg rounded-lg border p-4">
                 <div className="text-primary-text mb-2 flex items-center justify-center gap-2">
                   <Icon
                     icon="token-branded:ltc"
@@ -571,7 +571,7 @@ export default function ModernPricingSection() {
         </div>
 
         {/* Long-term Sponsor Section */}
-        <div className="bg-secondary-bg border-border-primary mt-4 rounded-lg border p-4">
+        <div className="border-border-primary bg-secondary-bg mt-4 rounded-lg border p-4">
           <div className="text-center">
             <h3 className="text-primary-text mb-2 text-lg font-semibold">
               Want to become a long-term sponsor?
