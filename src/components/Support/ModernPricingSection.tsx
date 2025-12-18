@@ -35,7 +35,6 @@ const supporterTiers: SupporterTier[] = [
     priceAlt: "or 100R$ on Roblox",
     features: [
       "**All Free tier benefits**",
-      "Hide all advertisements",
       "Post Comments up to 400 characters",
       "Trade Ad Duration: +6 Hours (12 Hours total)",
       "Custom Supporter Badge",
@@ -52,6 +51,7 @@ const supporterTiers: SupporterTier[] = [
     priceAlt: "or 200R$ on Roblox",
     features: [
       "**All Supporter I benefits**",
+      "Hide all advertisements",
       "Post Comments up to 800 characters",
       "Trade Ad Duration: +12 Hours (24 Hours total)",
       `Upload and Use Custom Banners (${getAllowedFileExtensions()})`,

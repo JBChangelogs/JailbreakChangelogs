@@ -98,7 +98,7 @@ export default async function RootLayout({
   // Check if user is a supporter before loading Nitro script
   const user = await getCurrentUser();
   const isSupporter =
-    user?.premiumtype && user.premiumtype >= 1 && user.premiumtype <= 3;
+    user?.premiumtype && user.premiumtype >= 2 && user.premiumtype <= 3;
 
   if (isMaintenanceMode) {
     return (

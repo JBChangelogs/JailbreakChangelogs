@@ -18,7 +18,7 @@ export default function NitroVideoPlayer() {
 
   useEffect(() => {
     const tier = user?.premiumtype ?? 0;
-    const isSupporter = tier >= 1 && tier <= 3;
+    const isSupporter = tier >= 2 && tier <= 3;
 
     // Pages that have their own dedicated video-nc players.
     // On these routes, Nitro has requested that the floating player

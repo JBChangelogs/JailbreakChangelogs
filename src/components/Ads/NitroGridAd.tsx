@@ -13,7 +13,7 @@ export default function NitroGridAd({ adId, className }: NitroGridAdProps) {
   const createdRef = useRef(false);
 
   const tier = user?.premiumtype ?? 0;
-  const isSupporter = tier >= 1 && tier <= 3;
+  const isSupporter = tier >= 2 && tier <= 3;
 
   useEffect(() => {
     if (isSupporter) {

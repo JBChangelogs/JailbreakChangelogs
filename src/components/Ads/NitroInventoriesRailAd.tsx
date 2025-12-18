@@ -13,7 +13,7 @@ export default function NitroInventoriesRailAd() {
 
   useEffect(() => {
     const tier = user?.premiumtype ?? 0;
-    const isSupporter = tier >= 1 && tier <= 3;
+    const isSupporter = tier >= 2 && tier <= 3;
 
     if (isSupporter) {
       const removeAds = () => {
