@@ -183,6 +183,7 @@ const NetworthHistoryChart = ({
         borderWidth: 4,
         fill: true,
         tension: 0.5,
+        cubicInterpolationMode: "monotone",
         pointRadius: 0,
         pointHoverRadius: 6,
         pointHoverBackgroundColor: "#fffffe",

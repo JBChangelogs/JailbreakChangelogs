@@ -172,6 +172,7 @@ const MoneyHistoryChart = ({ initialData = [] }: MoneyHistoryChartProps) => {
         backgroundColor: "rgba(16, 185, 129, 0.2)",
         borderWidth: 4,
         fill: true,
+        cubicInterpolationMode: "monotone",
         tension: 0.5,
         pointRadius: 0,
         pointHoverRadius: 6,
