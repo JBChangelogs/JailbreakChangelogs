@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { useAuthContext } from "@/contexts/AuthContext";
 import Link from "next/link";
 import Image from "next/image";
@@ -12,20 +12,31 @@ import { Dialog, DialogPanel, DialogTitle } from "@headlessui/react";
 
 export default function RedeemPage() {
   const [code, setCode] = useState("");
+  const [isValidating, setIsValidating] = useState(false);
+  const [validationResult, setValidationResult] = useState<{
+    valid: boolean;
+    premiumtype: number;
+    redeemed: boolean;
+  } | null>(null);
+  const validateTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [showCelebrationModal, setShowCelebrationModal] = useState(false);
-  const [, setRedeemedTier] = useState<string | null>(null);
+
+  const [redeemedResult, setRedeemedResult] = useState<{
+    premiumtype: number;
+    message: string;
+  } | null>(null);
   const [message, setMessage] = useState<{
     text: string;
     type: "success" | "error";
   } | null>(null);
-  const { isAuthenticated } = useAuthContext();
+  const { isAuthenticated, user } = useAuthContext();
 
-  // Confetti function with random colors
-  const triggerConfetti = () => {
-    // Generate random colors for confetti
-    const colorPalette = [
+  // Confetti function with custom colors
+  const triggerConfetti = (customColors?: string[]) => {
+    // Default random colors if none provided
+    const defaultPalette = [
       "#FF6B6B",
       "#4ECDC4",
       "#45B7D1",
@@ -36,16 +47,13 @@ export default function RedeemPage() {
       "#F7DC6F",
       "#BB8FCE",
       "#85C1E9",
-      "#F8C471",
-      "#82E0AA",
-      "#F1948A",
-      "#85C1E9",
-      "#D7BDE2",
     ];
 
-    const shuffled = [...colorPalette].sort(() => 0.5 - Math.random());
-    const colors = shuffled.slice(0, 2);
+    const colors =
+      customColors ||
+      defaultPalette.sort(() => 0.5 - Math.random()).slice(0, 2);
     const end = Date.now() + 5 * 1000;
+
     const frame = () => {
       if (Date.now() > end) return;
 
@@ -57,7 +65,7 @@ export default function RedeemPage() {
         origin: { x: 0, y: 0.5 },
         colors: colors,
         scalar: 2,
-        zIndex: 1300, // Higher than header's z-index of 1200
+        zIndex: 1300,
       });
       confetti({
         particleCount: 2,
@@ -67,7 +75,7 @@ export default function RedeemPage() {
         origin: { x: 1, y: 0.5 },
         colors: colors,
         scalar: 2,
-        zIndex: 1300, // Higher than header's z-index of 1200
+        zIndex: 1300,
       });
 
       requestAnimationFrame(frame);
@@ -75,6 +83,8 @@ export default function RedeemPage() {
 
     frame();
   };
+
+  const lastValidatedCodeRef = useRef<string>("");
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -85,6 +95,62 @@ export default function RedeemPage() {
       }
     }
   }, []);
+
+  const validateCode = useCallback((codeToValidate: string) => {
+    lastValidatedCodeRef.current = codeToValidate;
+
+    if (validateTimeoutRef.current) {
+      clearTimeout(validateTimeoutRef.current);
+    }
+
+    if (!codeToValidate.trim()) {
+      setValidationResult(null);
+      setIsValidating(false);
+      setMessage(null);
+      return;
+    }
+
+    setIsValidating(true);
+
+    validateTimeoutRef.current = setTimeout(async () => {
+      // Create a local variable to capture the code being validated in this closure
+      const currentCode = codeToValidate;
+
+      try {
+        const res = await fetch(
+          `/api/codes/validate?code=${encodeURIComponent(currentCode)}`,
+          { cache: "no-store" },
+        );
+
+        // If the code has changed since this request started, discard the result
+        if (lastValidatedCodeRef.current !== currentCode) {
+          return;
+        }
+
+        if (res.ok) {
+          const data = await res.json();
+          setValidationResult(data);
+        } else {
+          // Should not happen often with the API fix (404 returns 200 with valid:false)
+          // But if it does (e.g. 500 error), treat as invalid validation attempt
+          setValidationResult(null);
+        }
+      } catch (err) {
+        console.error("Validation error:", err);
+        if (lastValidatedCodeRef.current === currentCode) {
+          setValidationResult(null);
+        }
+      } finally {
+        if (lastValidatedCodeRef.current === currentCode) {
+          setIsValidating(false);
+        }
+      }
+    }, 500);
+  }, []);
+
+  useEffect(() => {
+    validateCode(code);
+  }, [code, validateCode]);
 
   const handleRedeem = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -119,9 +185,21 @@ export default function RedeemPage() {
       });
 
       if (response.ok) {
-        setRedeemedTier("Supporter");
+        const data = await response.json();
+        setRedeemedResult({
+          premiumtype: data.premiumtype,
+          message: data.message || "Code redeemed successfully",
+        });
+
         setShowCelebrationModal(true);
-        triggerConfetti();
+
+        // Determine confetti colors based on tier
+        let confettiColors = ["#ffffff", "#4ECDC4"]; // Default
+        if (data.premiumtype === 1) confettiColors = ["#ffffff", "#cd7f32"]; // Bronze
+        if (data.premiumtype === 2) confettiColors = ["#ffffff", "#c0c0c0"]; // Silver
+        if (data.premiumtype === 3) confettiColors = ["#ffffff", "#ffd700"]; // Gold
+
+        triggerConfetti(confettiColors);
 
         if (typeof window !== "undefined") {
           const urlParams = new URLSearchParams(window.location.search);
@@ -221,7 +299,84 @@ export default function RedeemPage() {
                   placeholder="Enter your code here"
                   disabled={isLoading}
                 />
-                {message && (
+                {/* Validation Feedback */}
+                {isValidating && (
+                  <div className="text-button-info mt-2 flex items-center text-sm">
+                    <svg
+                      className="text-button-info mr-2 -ml-1 h-4 w-4 animate-spin"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      ></path>
+                    </svg>
+                    Validating code...
+                  </div>
+                )}
+
+                {!isValidating && validationResult && (
+                  <div
+                    className={`mt-2 flex items-center space-x-2 text-sm ${
+                      !validationResult.valid || validationResult.redeemed
+                        ? "text-button-danger"
+                        : "text-button-info"
+                    }`}
+                  >
+                    {!validationResult.valid || validationResult.redeemed ? (
+                      <>
+                        <svg
+                          className="h-4 w-4"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth="2"
+                            d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                          />
+                        </svg>
+                        <span>
+                          {!validationResult.valid
+                            ? "This code is invalid."
+                            : "This code has already been redeemed."}
+                        </span>
+                      </>
+                    ) : (
+                      <>
+                        <svg
+                          className="h-4 w-4"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth="2"
+                            d="M5 13l4 4L19 7"
+                          />
+                        </svg>
+                        <span>Valid code! Ready to redeem.</span>
+                      </>
+                    )}
+                  </div>
+                )}
+
+                {message && !isValidating && (
                   <div
                     className={`flex items-center space-x-2 text-sm ${
                       message.type === "success"
@@ -276,9 +431,19 @@ export default function RedeemPage() {
 
               <button
                 type="submit"
-                disabled={isLoading || !code.trim()}
+                disabled={
+                  isLoading ||
+                  !code.trim() ||
+                  isValidating ||
+                  (validationResult !== null &&
+                    (!validationResult.valid || validationResult.redeemed))
+                }
                 className={`w-full rounded-lg px-6 py-4 text-lg font-semibold transition-colors ${
-                  isLoading || !code.trim()
+                  isLoading ||
+                  !code.trim() ||
+                  isValidating ||
+                  (validationResult !== null &&
+                    (!validationResult.valid || validationResult.redeemed))
                     ? "border-button-info-disabled bg-button-info-disabled text-form-button-text cursor-not-allowed"
                     : "bg-button-info text-form-button-text hover:bg-button-info-hover hover:cursor-pointer"
                 }`}
@@ -465,9 +630,34 @@ export default function RedeemPage() {
               <DialogTitle className="text-primary-text text-xl font-semibold">
                 Confirm Code Redemption
               </DialogTitle>
-              <p className="text-secondary-text mt-2 text-sm">
-                Are you sure you want to redeem this code?
-              </p>
+              {user &&
+              validationResult &&
+              user.premiumtype > validationResult.premiumtype ? (
+                <div className="bg-button-danger/10 border-button-danger mt-4 rounded-lg border p-3">
+                  <p className="text-button-danger mb-1 text-sm font-bold">
+                    Warning: Downgrade Detected
+                  </p>
+                  <p className="text-secondary-text text-sm">
+                    You are currently{" "}
+                    <span className="text-primary-text font-bold">
+                      Tier {user.premiumtype}
+                    </span>
+                    . Redeeming this code (Tier {validationResult.premiumtype})
+                    will{" "}
+                    <span className="text-primary-text font-bold">
+                      replace your current benefits
+                    </span>{" "}
+                    and you will be downgraded.
+                  </p>
+                  <p className="text-secondary-text mt-2 text-sm font-bold">
+                    Are you sure you want to proceed?
+                  </p>
+                </div>
+              ) : (
+                <p className="text-secondary-text mt-2 text-sm">
+                  Are you sure you want to redeem this code?
+                </p>
+              )}
             </div>
 
             <div className="border-border-primary bg-tertiary-bg mb-6 rounded-lg border p-3">
@@ -477,6 +667,14 @@ export default function RedeemPage() {
                   {code}
                 </code>
               </p>
+              {validationResult && validationResult.premiumtype > 0 && (
+                <p className="text-secondary-text mt-1 text-sm">
+                  <span className="font-medium">Tier:</span>{" "}
+                  <span className="text-primary-text">
+                    Tier {validationResult.premiumtype}
+                  </span>
+                </p>
+              )}
             </div>
 
             <div className="flex flex-col gap-3 sm:flex-row">
@@ -488,9 +686,13 @@ export default function RedeemPage() {
               </button>
               <button
                 onClick={confirmRedeem}
-                className="bg-button-info text-form-button-text hover:bg-button-info-hover w-full rounded-lg px-4 py-2 transition-colors hover:cursor-pointer sm:flex-1"
+                className={`${user && validationResult && user.premiumtype > validationResult.premiumtype ? "bg-button-danger hover:bg-red-600" : "bg-button-info hover:bg-button-info-hover"} text-form-button-text w-full rounded-lg px-4 py-2 transition-colors hover:cursor-pointer sm:flex-1`}
               >
-                Redeem Code
+                {user &&
+                validationResult &&
+                user.premiumtype > validationResult.premiumtype
+                  ? "Confirm Downgrade"
+                  : "Redeem Code"}
               </button>
             </div>
           </DialogPanel>
@@ -533,8 +735,20 @@ export default function RedeemPage() {
             </div>
 
             <div className="relative text-center">
-              <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-r from-green-500 to-emerald-500">
-                <TrophyIcon className="h-10 w-10 text-white" />
+              <div className="bg-secondary-bg/50 border-border-primary mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full border">
+                {redeemedResult &&
+                redeemedResult.premiumtype >= 1 &&
+                redeemedResult.premiumtype <= 3 ? (
+                  <Image
+                    src={`https://assets.jailbreakchangelogs.xyz/assets/website_icons/jbcl_supporter_${redeemedResult.premiumtype}.svg`}
+                    alt={`Supporter Tier ${redeemedResult.premiumtype}`}
+                    width={48}
+                    height={48}
+                    className="object-contain"
+                  />
+                ) : (
+                  <TrophyIcon className="h-10 w-10 text-yellow-500" />
+                )}
               </div>
 
               <DialogTitle className="text-primary-text mb-4 text-3xl font-bold">
@@ -542,8 +756,13 @@ export default function RedeemPage() {
               </DialogTitle>
 
               <p className="text-secondary-text mb-4 text-lg">
-                Your supporter code has been successfully redeemed! You now have
-                access to your new benefits.
+                The code has been successfully redeemed! You have received{" "}
+                <span className="text-primary-text font-bold">
+                  {redeemedResult
+                    ? `Supporter Tier ${redeemedResult.premiumtype}`
+                    : "Supporter"}
+                </span>
+                .
               </p>
 
               <p className="text-primary-text mb-6 text-base font-bold">
@@ -552,10 +771,10 @@ export default function RedeemPage() {
 
               <div className="flex flex-col gap-3 sm:flex-row">
                 <Link
-                  href="/supporting"
-                  className="bg-button-info text-form-button-text hover:bg-button-info-hover w-full rounded-lg px-4 py-2 transition-colors sm:flex-1"
+                  href={`/supporting${redeemedResult ? `?tier=${redeemedResult.premiumtype}` : ""}`}
+                  className="bg-button-info text-form-button-text hover:bg-button-info-hover w-full rounded-lg px-4 py-2 text-center transition-colors sm:flex-1"
                 >
-                  View All Benefits
+                  View Your New Benefits
                 </Link>
                 <Link
                   href="/"
