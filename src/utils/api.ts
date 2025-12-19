@@ -1274,6 +1274,31 @@ export async function fetchInventoryData(
                   compressionEnabled: connectionQuality.compressionEnabled,
                 });
 
+                // Sort items by latest trade time (newest first) to match default client sort
+                if (parsed && parsed.data && Array.isArray(parsed.data)) {
+                  interface InventoryItemSortable {
+                    history?: { TradeTime: number }[];
+                  }
+                  parsed.data.sort(
+                    (a: InventoryItemSortable, b: InventoryItemSortable) => {
+                      const getLatestTime = (item: InventoryItemSortable) => {
+                        if (
+                          item.history &&
+                          Array.isArray(item.history) &&
+                          item.history.length > 0
+                        ) {
+                          const times = item.history.map(
+                            (h: { TradeTime: number }) => h.TradeTime || 0,
+                          );
+                          return Math.max(...times);
+                        }
+                        return 0;
+                      };
+                      return getLatestTime(b) - getLatestTime(a);
+                    },
+                  );
+                }
+
                 resolve(parsed);
               } catch (e) {
                 console.error(`[WS] Parse error for user ${robloxId}:`, e);

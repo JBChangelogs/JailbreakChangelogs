@@ -529,33 +529,34 @@ export default function InventoryItems({
           return a.item.title.localeCompare(b.item.title);
         case "alpha-desc":
           return b.item.title.localeCompare(a.item.title);
-        case "created-asc":
-          const aCreatedAsc = a.item.info.find(
-            (info) => info.title === "Created At",
-          )?.value;
-          const bCreatedAsc = b.item.info.find(
-            (info) => info.title === "Created At",
-          )?.value;
-          if (aCreatedAsc && bCreatedAsc) {
-            return (
-              new Date(aCreatedAsc).getTime() - new Date(bCreatedAsc).getTime()
-            );
-          }
-          return 0;
-        case "created-desc":
-          const aCreatedDesc = a.item.info.find(
-            (info) => info.title === "Created At",
-          )?.value;
-          const bCreatedDesc = b.item.info.find(
-            (info) => info.title === "Created At",
-          )?.value;
-          if (aCreatedDesc && bCreatedDesc) {
-            return (
-              new Date(bCreatedDesc).getTime() -
-              new Date(aCreatedDesc).getTime()
-            );
-          }
-          return 0;
+        case "created-asc": {
+          const getLatestTime = (item: InventoryItem) => {
+            // Check history details
+            if (item.history && item.history.length > 0) {
+              // History TradeTime is in seconds
+              const maxHistoryTime = Math.max(
+                ...item.history.map((h) => h.TradeTime),
+              );
+              return maxHistoryTime * 1000;
+            }
+            return 0;
+          };
+          return getLatestTime(a.item) - getLatestTime(b.item);
+        }
+        case "created-desc": {
+          const getLatestTime = (item: InventoryItem) => {
+            // Check history details
+            if (item.history && item.history.length > 0) {
+              // History TradeTime is in seconds
+              const maxHistoryTime = Math.max(
+                ...item.history.map((h) => h.TradeTime),
+              );
+              return maxHistoryTime * 1000;
+            }
+            return 0;
+          };
+          return getLatestTime(b.item) - getLatestTime(a.item);
+        }
         case "cash-desc":
           const aCashDesc = parseNumericValue(a.itemData?.cash_value);
           const bCashDesc = parseNumericValue(b.itemData?.cash_value);

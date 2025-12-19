@@ -39,7 +39,7 @@ export async function GET(request: Request) {
     let data;
     try {
       data = JSON.parse(text);
-    } catch (e) {
+    } catch {
       // Ignore parse errors, data will be undefined
     }
 
