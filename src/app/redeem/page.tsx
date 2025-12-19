@@ -663,9 +663,7 @@ export default function RedeemPage() {
             <div className="border-border-primary bg-tertiary-bg mb-6 rounded-lg border p-3">
               <p className="text-secondary-text text-sm">
                 <span className="font-medium">Code:</span>{" "}
-                <code className="text-primary-text block max-w-full truncate">
-                  {code}
-                </code>
+                <code className="text-primary-text break-all">{code}</code>
               </p>
               {validationResult && validationResult.premiumtype > 0 && (
                 <p className="text-secondary-text mt-1 text-sm">
