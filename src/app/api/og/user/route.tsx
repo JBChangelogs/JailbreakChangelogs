@@ -49,7 +49,7 @@ async function isImageAccessible(url: string): Promise<boolean> {
 
 // Pre-defined background images for users without custom banners
 // These are served from our CDN and provide consistent branding
-const BACKGROUND_COUNT = 34;
+const BACKGROUND_COUNT = 39;
 const BACKGROUNDS = Array.from(
   { length: BACKGROUND_COUNT },
   (_, i) =>
