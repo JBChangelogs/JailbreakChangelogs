@@ -21,6 +21,35 @@ const faqs = [
       "Enter a Roblox ID or username in the search box above. The system will search through our collected data to identify any items associated with that user that appear to be duplicated based on our detection methods.",
   },
   {
+    question: "How do we detect dupes?",
+    answer: (
+      <>
+        Items marked as{" "}
+        <span className="text-primary-text font-semibold">duped</span> are
+        flagged because our system detects multiple active copies of the same
+        item across different owners. Other sites rely on manual reports, while
+        our list is generated automatically by our bots hopping servers and
+        comparing inventories. This means we often identify more dupes than
+        other sources. An item may appear{" "}
+        <span className="text-primary-text font-semibold">clean</span> at first
+        if only one copy is visible. Later, when another copy surfaces in
+        trading, our system updates and marks it as{" "}
+        <span className="text-primary-text font-semibold">duped</span>. That’s
+        why some items can change status over time. If you believe your item has
+        been falsely flagged as a dupe, please report it by opening a support
+        ticket{" "}
+        <a
+          href="https://discord.com/channels/1286064050135896064/1392693026865811518"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-primary-text font-semibold underline hover:opacity-80"
+        >
+          here
+        </a>
+      </>
+    ),
+  },
+  {
     question: "How much data do you have?",
     answer:
       "We've logged over 8 million items and counting! Our comprehensive database continues to grow daily as we scan inventories across the Jailbreak community, providing the most extensive dupe detection available.",
