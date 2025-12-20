@@ -6,6 +6,7 @@ import ItemCard from "@/components/Items/ItemCard";
 import { Item } from "@/types";
 import { getEffectiveCashValue } from "@/utils/values";
 import NitroGridAd from "@/components/Ads/NitroGridAd";
+import NitroValuesTopAd from "@/components/Ads/NitroValuesTopAd";
 import React from "react";
 
 interface ValuesItemsGridProps {
@@ -201,6 +202,9 @@ export default function ValuesItemsGrid({
                   : "Items"
               }: ${rangeFilteredItems.length}`}
         </p>
+
+        <NitroValuesTopAd />
+
         {totalPages > 1 && (
           <div className="flex justify-center">
             <Pagination

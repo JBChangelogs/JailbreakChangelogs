@@ -5,6 +5,7 @@ import { useEffect } from "react";
 
 import { Icon } from "../components/ui/IconWrapper";
 import HeroBackgroundCarousel from "@/components/Home/HeroBackgroundCarousel";
+import NitroHomepageAd from "@/components/Ads/NitroHomepageAd";
 
 // Extend Window interface for USP API (CCPA)
 declare global {
@@ -72,6 +73,10 @@ export default function Home() {
                 Read Testimonials
               </Link>
             </div>
+
+            <div className="mt-12 flex justify-center">
+              <NitroHomepageAd />
+            </div>
           </div>
         </div>
       </section>
@@ -93,7 +98,7 @@ export default function Home() {
               prefetch={false}
               className="group border-border-primary bg-secondary-bg hover:border-border-focus flex items-center gap-4 rounded-xl border p-6 transition-all duration-200 hover:shadow-lg"
             >
-              <div className="bg-button-info/10 flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-lg">
+              <div className="bg-button-info/10 flex h-14 w-14 shrink-0 items-center justify-center rounded-lg">
                 <Icon
                   icon="mdi:chart-line"
                   className="text-link h-7 w-7"
@@ -120,7 +125,7 @@ export default function Home() {
               prefetch={false}
               className="group border-border-primary bg-secondary-bg hover:border-border-focus flex items-center gap-4 rounded-xl border p-6 transition-all duration-200 hover:shadow-lg"
             >
-              <div className="bg-button-info/10 flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-lg">
+              <div className="bg-button-info/10 flex h-14 w-14 shrink-0 items-center justify-center rounded-lg">
                 <Icon
                   icon="mdi:swap-horizontal"
                   className="text-link h-7 w-7"
@@ -147,7 +152,7 @@ export default function Home() {
               prefetch={false}
               className="group border-border-primary bg-secondary-bg hover:border-border-focus flex items-center gap-4 rounded-xl border p-6 transition-all duration-200 hover:shadow-lg"
             >
-              <div className="bg-button-info/10 flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-lg">
+              <div className="bg-button-info/10 flex h-14 w-14 shrink-0 items-center justify-center rounded-lg">
                 <Icon
                   icon="mdi:calculator"
                   className="text-link h-7 w-7"
@@ -174,7 +179,7 @@ export default function Home() {
               prefetch={false}
               className="group border-border-primary bg-secondary-bg hover:border-border-focus flex items-center gap-4 rounded-xl border p-6 transition-all duration-200 hover:shadow-lg"
             >
-              <div className="bg-button-info/10 flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-lg">
+              <div className="bg-button-info/10 flex h-14 w-14 shrink-0 items-center justify-center rounded-lg">
                 <Icon
                   icon="mdi:shield-alert"
                   className="text-link h-7 w-7"
@@ -219,7 +224,7 @@ export default function Home() {
               className="group border-border-primary bg-secondary-bg hover:border-border-focus hover:shadow-card-shadow relative block overflow-hidden rounded-xl border p-8 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
             >
               <div className="mb-4 flex items-center gap-3">
-                <div className="bg-button-info/10 flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg">
+                <div className="bg-button-info/10 flex h-10 w-10 shrink-0 items-center justify-center rounded-lg">
                   <Icon
                     icon="mdi:book-open-page-variant"
                     className="text-link h-6 w-6"
@@ -251,7 +256,7 @@ export default function Home() {
               className="group border-border-primary bg-secondary-bg hover:border-border-focus hover:shadow-card-shadow relative block overflow-hidden rounded-xl border p-8 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
             >
               <div className="mb-4 flex items-center gap-3">
-                <div className="bg-button-info/10 flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg">
+                <div className="bg-button-info/10 flex h-10 w-10 shrink-0 items-center justify-center rounded-lg">
                   <Icon
                     icon="mdi:trophy"
                     className="text-link h-6 w-6"
@@ -283,7 +288,7 @@ export default function Home() {
               className="group border-border-primary bg-secondary-bg hover:border-border-focus hover:shadow-card-shadow relative block overflow-hidden rounded-xl border p-8 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
             >
               <div className="mb-4 flex items-center gap-3">
-                <div className="bg-button-info/10 flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg">
+                <div className="bg-button-info/10 flex h-10 w-10 shrink-0 items-center justify-center rounded-lg">
                   <Icon
                     icon="mdi:chart-line"
                     className="text-link h-6 w-6"
@@ -315,7 +320,7 @@ export default function Home() {
               className="group border-border-primary bg-secondary-bg hover:border-border-focus hover:shadow-card-shadow relative block overflow-hidden rounded-xl border p-8 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
             >
               <div className="mb-4 flex items-center gap-3">
-                <div className="bg-button-info/10 flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg">
+                <div className="bg-button-info/10 flex h-10 w-10 shrink-0 items-center justify-center rounded-lg">
                   <Icon
                     icon="mdi:swap-horizontal"
                     className="text-link h-6 w-6"
@@ -347,7 +352,7 @@ export default function Home() {
               className="group border-border-primary bg-secondary-bg hover:border-border-focus hover:shadow-card-shadow relative block overflow-hidden rounded-xl border p-8 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
             >
               <div className="mb-4 flex items-center gap-3">
-                <div className="bg-button-info/10 flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg">
+                <div className="bg-button-info/10 flex h-10 w-10 shrink-0 items-center justify-center rounded-lg">
                   <Icon
                     icon="mdi:package-variant"
                     className="text-link h-6 w-6"
@@ -379,7 +384,7 @@ export default function Home() {
               className="group border-border-primary bg-secondary-bg hover:border-border-focus hover:shadow-card-shadow relative block overflow-hidden rounded-xl border p-8 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
             >
               <div className="mb-4 flex items-center gap-3">
-                <div className="bg-button-info/10 flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg">
+                <div className="bg-button-info/10 flex h-10 w-10 shrink-0 items-center justify-center rounded-lg">
                   <Icon
                     icon="mdi:shield-alert"
                     className="text-link h-6 w-6"
@@ -411,7 +416,7 @@ export default function Home() {
               className="group border-border-primary bg-secondary-bg hover:border-border-focus hover:shadow-card-shadow relative block overflow-hidden rounded-xl border p-8 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
             >
               <div className="mb-4 flex items-center gap-3">
-                <div className="bg-button-info/10 flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg">
+                <div className="bg-button-info/10 flex h-10 w-10 shrink-0 items-center justify-center rounded-lg">
                   <Icon
                     icon="mdi:crown"
                     className="text-link h-6 w-6"
@@ -443,7 +448,7 @@ export default function Home() {
               className="group border-border-primary bg-secondary-bg hover:border-border-focus hover:shadow-card-shadow relative block overflow-hidden rounded-xl border p-8 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
             >
               <div className="mb-4 flex items-center gap-3">
-                <div className="bg-button-info/10 flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg">
+                <div className="bg-button-info/10 flex h-10 w-10 shrink-0 items-center justify-center rounded-lg">
                   <Icon
                     icon="mdi:podium"
                     className="text-link h-6 w-6"
@@ -475,7 +480,7 @@ export default function Home() {
               className="group border-border-primary bg-secondary-bg hover:border-border-focus hover:shadow-card-shadow relative block overflow-hidden rounded-xl border p-8 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
             >
               <div className="mb-4 flex items-center gap-3">
-                <div className="bg-button-info/10 flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg">
+                <div className="bg-button-info/10 flex h-10 w-10 shrink-0 items-center justify-center rounded-lg">
                   <Icon
                     icon="mdi:calculator"
                     className="text-link h-6 w-6"
@@ -507,7 +512,7 @@ export default function Home() {
               className="group border-border-primary bg-secondary-bg hover:border-border-focus hover:shadow-card-shadow relative block overflow-hidden rounded-xl border p-8 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
             >
               <div className="mb-4 flex items-center gap-3">
-                <div className="bg-button-info/10 flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg">
+                <div className="bg-button-info/10 flex h-10 w-10 shrink-0 items-center justify-center rounded-lg">
                   <Icon
                     icon="mdi:server-network"
                     className="text-link h-6 w-6"
@@ -539,7 +544,7 @@ export default function Home() {
               className="group border-border-primary bg-secondary-bg hover:border-border-focus hover:shadow-card-shadow relative block overflow-hidden rounded-xl border p-8 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
             >
               <div className="mb-4 flex items-center gap-3">
-                <div className="bg-button-info/10 flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg">
+                <div className="bg-button-info/10 flex h-10 w-10 shrink-0 items-center justify-center rounded-lg">
                   <Icon
                     icon="mdi:account-group"
                     className="text-link h-6 w-6"
@@ -571,7 +576,7 @@ export default function Home() {
               className="group border-border-primary bg-secondary-bg hover:border-border-focus hover:shadow-card-shadow relative block overflow-hidden rounded-xl border p-8 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
             >
               <div className="mb-4 flex items-center gap-3">
-                <div className="bg-button-info/10 flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg">
+                <div className="bg-button-info/10 flex h-10 w-10 shrink-0 items-center justify-center rounded-lg">
                   <Icon
                     icon="mdi:robot"
                     className="text-link h-6 w-6"

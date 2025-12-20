@@ -4,17 +4,16 @@ import { useEffect, useRef } from "react";
 import { useAuthContext } from "@/contexts/AuthContext";
 
 type NitroAdsWithRemove = {
-  createAd?: (id: string, config: typeof CALCULATOR_CONFIG) => Promise<void>;
+  createAd?: (id: string, config: typeof CONFIG) => Promise<void>;
   removeAd?: (id: string) => void;
 };
 
-const SLOT_ID = "np-value-calc";
+const SLOT_ID = "np-values-top";
 
-const CALCULATOR_CONFIG = {
+const CONFIG = {
   sizes: [
-    ["970", "250"],
-    ["970", "90"],
     ["728", "90"],
+    ["970", "90"],
     ["320", "50"],
     ["320", "100"],
   ],
@@ -24,19 +23,19 @@ const CALCULATOR_CONFIG = {
     wording: "Report Ad",
     position: "top-right",
   },
-  mediaQuery:
-    "(min-width: 1025px), (min-width: 768px) and (max-width: 1024px), (min-width: 320px) and (max-width: 767px)",
+  mediaQuery: "(min-width: 1025px)",
 };
 
 interface Props {
   className?: string;
 }
 
-export default function NitroCalculatorAd({ className }: Props) {
+export default function NitroValuesTopAd({ className }: Props) {
   const { user } = useAuthContext();
   const containerRef = useRef<HTMLDivElement | null>(null);
   const createdRef = useRef(false);
   const tier = user?.premiumtype ?? 0;
+  // Tier 1 (Supporter) still sees ads, Tier 2 & 3 (Server Booster & Partner) do not
   const isSupporter = tier >= 2 && tier <= 3;
 
   useEffect(() => {
@@ -62,7 +61,7 @@ export default function NitroCalculatorAd({ className }: Props) {
 
     createdRef.current = true;
 
-    nitroAds.createAd(SLOT_ID, CALCULATOR_CONFIG).catch(() => {
+    nitroAds.createAd(SLOT_ID, CONFIG).catch(() => {
       createdRef.current = false;
     });
 
@@ -77,5 +76,17 @@ export default function NitroCalculatorAd({ className }: Props) {
     return null;
   }
 
-  return <div id={SLOT_ID} ref={containerRef} className={className} />;
+  // Only render on desktop (lg breakpoint is 1024px usually, but we generally hide div if empty)
+  // We can use a utility class to hide it on smaller screens to prevent layout shift or empty space
+  // Tailwind 'lg' is usually 1024px. The media query is min-width: 1025px.
+  // We'll use 'hidden lg:flex' roughly, but since 1025 is specific, we might just let the ad script handle the showing/hiding logic or use custom CSS/Tailwind arbitrary value if needed.
+  // For safety/smoothness, let's just center it.
+
+  return (
+    <div
+      id={SLOT_ID}
+      ref={containerRef}
+      className={`flex justify-center ${className || ""}`}
+    />
+  );
 }

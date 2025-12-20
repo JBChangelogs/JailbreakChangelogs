@@ -19,9 +19,9 @@ type NitroAdsWithRemove = {
   removeAd?: (id: string) => void;
 };
 
-const SLOT_ID_MOBILE = "np-live-scans-mobile";
-const SLOT_ID_TABLET = "np-live-scans-tablet";
-const SLOT_ID_DESKTOP = "np-live-scans-desktop";
+const SLOT_ID_MOBILE = "np-homepage-mobile";
+const SLOT_ID_TABLET = "np-homepage-tablet";
+const SLOT_ID_DESKTOP = "np-homepage-desktop";
 
 const MOBILE_CONFIG = {
   sizes: [
@@ -76,7 +76,7 @@ interface Props {
   className?: string;
 }
 
-export default function NitroLiveScansAd({ className }: Props) {
+export default function NitroHomepageAd({ className }: Props) {
   const { user } = useAuthContext();
   const containerRefMobile = useRef<HTMLDivElement | null>(null);
   const containerRefTablet = useRef<HTMLDivElement | null>(null);
@@ -142,7 +142,7 @@ export default function NitroLiveScansAd({ className }: Props) {
   }
 
   return (
-    <div className={className}>
+    <div className={`flex justify-center ${className || ""}`}>
       <div
         id={SLOT_ID_MOBILE}
         ref={containerRefMobile}
