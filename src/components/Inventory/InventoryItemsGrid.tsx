@@ -95,7 +95,7 @@ export default function InventoryItemsGrid({
       )}
 
       <div className="mb-8 grid grid-cols-1 gap-4 min-[375px]:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4">
-        {displayedItems.map(({ item, itemData, isDupedItem }, index) => {
+        {displayedItems.map(({ item, itemData, isDupedItem }) => {
           const itemKey = `${item.categoryTitle}-${item.title}`;
           const duplicateCount = itemCounts.get(itemKey) || 1;
           const uniqueKey = `${item.id}-${item.timesTraded}-${item.uniqueCirculation}`;
