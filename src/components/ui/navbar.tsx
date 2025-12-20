@@ -689,16 +689,20 @@ export const NavbarModern = ({ className }: { className?: string }) => {
                         const urlInfo = (() => {
                           try {
                             const url = new URL(notif.link);
-                            const isJailbreakChangelogs =
-                              url.hostname === "jailbreakchangelogs.xyz" ||
-                              url.hostname.endsWith(".jailbreakchangelogs.xyz");
+                            // Only treat the main domain (without subdomain) as internal
+                            const isMainDomain =
+                              url.hostname === "jailbreakchangelogs.xyz";
+                            const isSubdomain = url.hostname.endsWith(
+                              ".jailbreakchangelogs.xyz",
+                            );
                             const isWhitelisted =
-                              isJailbreakChangelogs ||
+                              isMainDomain ||
+                              isSubdomain ||
                               url.hostname === "google.com" ||
                               url.hostname.endsWith(".google.com");
 
-                            if (isJailbreakChangelogs) {
-                              // Extract relative path (pathname + search + hash)
+                            if (isMainDomain) {
+                              // Extract relative path for main domain only
                               const relativePath =
                                 url.pathname + url.search + url.hash;
                               return {
@@ -707,6 +711,7 @@ export const NavbarModern = ({ className }: { className?: string }) => {
                                 relativePath,
                               };
                             } else if (isWhitelisted) {
+                              // Treat subdomains and other whitelisted domains as external
                               return {
                                 isWhitelisted: true,
                                 isJailbreakChangelogs: false,
