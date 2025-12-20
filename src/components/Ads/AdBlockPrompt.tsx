@@ -191,8 +191,9 @@ const AdBlockPrompt = () => {
               src="https://assets.jailbreakchangelogs.xyz/assets/logos/JBCL_Long_Transparent_Christmas.png"
               alt="JBCL Logo"
               width={600}
-              height={50}
-              className="mx-auto max-h-[50px] max-w-full"
+              height={100}
+              unoptimized
+              className="mx-auto h-auto w-full max-w-[300px]"
             />
           </div>
 
