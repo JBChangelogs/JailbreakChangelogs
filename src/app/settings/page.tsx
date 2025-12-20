@@ -21,6 +21,7 @@ import { AvatarSettings } from "@/components/Settings/AvatarSettings";
 import { OpenInNew, Settings as SettingsIcon } from "@mui/icons-material";
 import { DeleteAccount } from "@/components/Settings/DeleteAccount";
 import { RobloxConnection } from "@/components/Settings/RobloxConnection";
+import { ExportInventoryData } from "@/components/Settings/ExportInventoryData";
 import { useAuthContext } from "@/contexts/AuthContext";
 import SupporterModal from "@/components/Modals/SupporterModal";
 import { useSupporterModal } from "@/hooks/useSupporterModal";
@@ -529,6 +530,8 @@ export default function SettingsPage() {
         <Divider sx={{ mb: 2 }} />
         <RobloxConnection userData={userData} />
       </Paper>
+
+      <ExportInventoryData />
 
       <Paper
         elevation={1}
