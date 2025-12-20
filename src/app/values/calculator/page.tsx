@@ -4,14 +4,12 @@ import CalculatorDescription from "@/components/Values/Calculator/CalculatorDesc
 import { CalculatorForm } from "@/components/Values/Calculator/CalculatorForm";
 import { fetchItems } from "@/utils/api";
 import Loading from "./loading";
-import NitroCalculatorRailAd from "@/components/Ads/NitroCalculatorRailAd";
 
 export const revalidate = 120; // Revalidate every 2 minutes
 
 export default function CalculatorPage() {
   return (
     <main className="container mx-auto">
-      <NitroCalculatorRailAd />
       <Breadcrumb />
       <CalculatorDescription />
       <Suspense fallback={<Loading />}>

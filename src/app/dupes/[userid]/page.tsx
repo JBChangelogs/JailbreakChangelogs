@@ -11,7 +11,6 @@ import { isFeatureEnabled } from "@/utils/featureFlags";
 import { checkDupeFinderMaintenanceMode } from "@/utils/maintenance";
 import FeatureMaintenance from "@/theme/FeatureMaintenance";
 import PremiumAwareLayout from "@/components/Layout/PremiumAwareLayout";
-import NitroDupeDetailRailAd from "@/components/Ads/NitroDupeDetailRailAd";
 
 export const dynamic = "force-dynamic";
 
@@ -80,7 +79,6 @@ export default async function DupeFinderPage({ params }: DupeFinderPageProps) {
       </div>
 
       <PremiumAwareLayout>
-        <NitroDupeDetailRailAd />
         <Suspense
           fallback={
             <div className="border-border-primary bg-secondary-bg shadow-card-shadow rounded-lg border p-6">

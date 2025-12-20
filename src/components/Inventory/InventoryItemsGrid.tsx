@@ -5,7 +5,7 @@ import { Pagination } from "@/components/ui/Pagination";
 import InventoryItemCard from "./InventoryItemCard";
 import { Item } from "@/types";
 import { InventoryItem } from "@/app/inventories/types";
-import NitroGridAd from "@/components/Ads/NitroGridAd";
+
 import React from "react";
 
 interface InventoryItemsGridProps {
@@ -144,11 +144,6 @@ export default function InventoryItemsGrid({
                 variant={variant}
                 isDupedItem={isDupedItem}
               />
-              {(index + 1) % 4 === 0 && (
-                <div className="col-span-full flex justify-center py-4 md:hidden">
-                  <NitroGridAd adId={`np-inventory-grid-${page}-${index}`} />
-                </div>
-              )}
             </React.Fragment>
           );
         })}

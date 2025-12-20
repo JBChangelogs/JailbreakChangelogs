@@ -17,7 +17,7 @@ import AirdropCard from "@/components/RobberyTracker/AirdropCard";
 import RobberyTrackerAuthWrapper from "@/components/RobberyTracker/RobberyTrackerAuthWrapper";
 import { Icon } from "@iconify/react";
 import ExperimentalFeatureBanner from "@/components/ui/ExperimentalFeatureBanner";
-import NitroRobberiesRailAd from "@/components/Ads/NitroRobberiesRailAd";
+
 import { Masonry } from "@mui/lab";
 
 type NameSort = "a-z" | "z-a";
@@ -230,7 +230,6 @@ function RobberyTrackerContent() {
 
   return (
     <main className="text-primary-text min-h-screen">
-      <NitroRobberiesRailAd />
       <div className="container mx-auto mb-8 px-4">
         <Breadcrumb />
 

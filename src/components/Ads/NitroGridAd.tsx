@@ -10,6 +10,7 @@ interface NitroGridAdProps {
 
 export default function NitroGridAd({ adId, className }: NitroGridAdProps) {
   const { user } = useAuthContext();
+  const containerRef = useRef<HTMLDivElement>(null);
   const createdRef = useRef(false);
 
   const tier = user?.premiumtype ?? 0;
@@ -25,33 +26,48 @@ export default function NitroGridAd({ adId, className }: NitroGridAdProps) {
 
     if (createdRef.current) return;
     if (typeof window === "undefined") return;
-    if (!window.nitroAds?.createAd) return;
 
-    createdRef.current = true;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            // Element is in view, create the ad
+            if (!createdRef.current && window.nitroAds?.createAd) {
+              createdRef.current = true;
+              window.nitroAds
+                .createAd(adId, {
+                  sizes: [
+                    ["320", "50"],
+                    ["320", "100"],
+                    ["300", "250"],
+                  ],
+                  report: {
+                    enabled: true,
+                    icon: true,
+                    wording: "Report Ad",
+                    position: "top-right",
+                  },
+                  mediaQuery: "(min-width: 320px) and (max-width: 767px)",
+                })
+                .catch(() => {
+                  createdRef.current = false;
+                });
+            }
+            // Stop observing once triggered
+            observer.disconnect();
+          }
+        });
+      },
+      { rootMargin: "200px" }, // Start loading 200px before it comes into view
+    );
 
-    window.nitroAds
-      .createAd(adId, {
-        sizes: [
-          ["320", "50"],
-          ["320", "100"],
-          ["300", "250"],
-        ],
-        report: {
-          enabled: true,
-          icon: true,
-          wording: "Report Ad",
-          position: "top-right",
-        },
-        mediaQuery: "(min-width: 320px) and (max-width: 767px)",
-      })
-      .catch(() => {
-        createdRef.current = false;
-      });
+    if (containerRef.current) {
+      observer.observe(containerRef.current);
+    }
 
     return () => {
-      // Cleanup: Remove the ad when component unmounts (e.g. pagination change)
-      // This is important because we reuse IDs (e.g. np-value-grid-5) on the next page
-      // Use type assertion to silence TS if removeAd is missing from global definition
+      observer.disconnect();
+      // Cleanup: Remove the ad when component unmounts
       const ads = window.nitroAds as unknown as {
         removeAd?: (id: string) => void;
       };
@@ -69,6 +85,7 @@ export default function NitroGridAd({ adId, className }: NitroGridAdProps) {
   return (
     <div
       id={adId}
+      ref={containerRef}
       className={`flex min-h-[250px] justify-center ${className}`}
     />
   );

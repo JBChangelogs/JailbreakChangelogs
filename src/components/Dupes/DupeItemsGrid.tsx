@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Pagination } from "@/components/ui/Pagination";
 import DupeItemCard from "./DupeItemCard";
 import { DupeFinderItem, Item } from "@/types";
-import NitroGridAd from "@/components/Ads/NitroGridAd";
+
 import React from "react";
 
 interface DupeItemsGridProps {
@@ -115,11 +115,6 @@ export default function DupeItemsGrid({
                 isDuplicate={isDuplicate}
                 robloxId={robloxId}
               />
-              {(index + 1) % 4 === 0 && (
-                <div className="col-span-full flex justify-center py-4 md:hidden">
-                  <NitroGridAd adId={`np-dupe-grid-${page}-${index}`} />
-                </div>
-              )}
             </React.Fragment>
           );
         })}

@@ -253,9 +253,11 @@ export default function ValuesItemsGrid({
                   onFavoriteChange(item.id, fav);
                 }}
               />
-              {(index + 1) % 6 === 0 && (
+              {(index + 1) % 4 === 0 && (
                 <div className="col-span-full flex justify-center py-4 md:hidden">
-                  <NitroGridAd adId={`np-value-grid-${index}`} />
+                  <NitroGridAd
+                    adId={`np-value-grid-${Math.floor((index + 1) / 4)}`}
+                  />
                 </div>
               )}
             </React.Fragment>

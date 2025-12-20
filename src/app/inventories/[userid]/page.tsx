@@ -10,7 +10,6 @@ import { fetchComments } from "@/utils/api";
 import { checkInventoryMaintenanceMode } from "@/utils/maintenance";
 import FeatureMaintenance from "@/theme/FeatureMaintenance";
 import PremiumAwareLayout from "@/components/Layout/PremiumAwareLayout";
-import NitroInventoryDetailRailAd from "@/components/Ads/NitroInventoryDetailRailAd";
 
 export const dynamic = "force-dynamic";
 
@@ -70,7 +69,6 @@ export default async function InventoryCheckerPage({
       </div>
 
       <PremiumAwareLayout>
-        <NitroInventoryDetailRailAd />
         <Suspense
           fallback={
             <InventoryCheckerClient robloxId={userid} isLoading={true} />

@@ -4,7 +4,7 @@ import { useState, useMemo } from "react";
 import { Pagination } from "@/components/ui/Pagination";
 import OGItemCard from "./OGItemCard";
 import { Item } from "@/types";
-import NitroGridAd from "@/components/Ads/NitroGridAd";
+
 import React from "react";
 
 interface OGItem {
@@ -142,11 +142,6 @@ export default function OGItemsGrid({
                 duplicateCount={duplicateCount}
                 duplicateOrder={duplicateOrder}
               />
-              {(index + 1) % 4 === 0 && (
-                <div className="col-span-full flex justify-center py-4 md:hidden">
-                  <NitroGridAd adId={`np-og-grid-${page}-${index}`} />
-                </div>
-              )}
             </React.Fragment>
           );
         })}
