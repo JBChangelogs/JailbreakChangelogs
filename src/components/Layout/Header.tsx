@@ -59,6 +59,7 @@ import {
   NotificationHistory,
 } from "@/utils/api";
 import { formatCompactDateTime } from "@/utils/timestamp";
+import { parseNotificationUrl } from "@/utils/notificationUrl";
 
 const UnreadNotificationBadge = ({ count }: { count: number }) => {
   if (count === 0) return null;
@@ -711,41 +712,9 @@ export default function Header() {
                             <div className="py-2">
                               {notifications.items.map((notif) => {
                                 // Check if link domain is whitelisted and extract URL info
-                                const urlInfo = (() => {
-                                  try {
-                                    const url = new URL(notif.link);
-                                    const isJailbreakChangelogs =
-                                      url.hostname ===
-                                        "jailbreakchangelogs.xyz" ||
-                                      url.hostname.endsWith(
-                                        ".jailbreakchangelogs.xyz",
-                                      );
-                                    const isWhitelisted =
-                                      isJailbreakChangelogs ||
-                                      url.hostname === "google.com" ||
-                                      url.hostname.endsWith(".google.com");
-
-                                    if (isJailbreakChangelogs) {
-                                      // Extract relative path (pathname + search + hash)
-                                      const relativePath =
-                                        url.pathname + url.search + url.hash;
-                                      return {
-                                        isWhitelisted: true,
-                                        isJailbreakChangelogs: true,
-                                        relativePath,
-                                      };
-                                    } else if (isWhitelisted) {
-                                      return {
-                                        isWhitelisted: true,
-                                        isJailbreakChangelogs: false,
-                                        href: notif.link,
-                                      };
-                                    }
-                                    return { isWhitelisted: false };
-                                  } catch {
-                                    return { isWhitelisted: false };
-                                  }
-                                })();
+                                const urlInfo = parseNotificationUrl(
+                                  notif.link,
+                                );
 
                                 return (
                                   <div

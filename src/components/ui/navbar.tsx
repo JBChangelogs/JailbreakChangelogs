@@ -24,6 +24,7 @@ import {
 import { formatCustomDate } from "@/utils/timestamp";
 import { useOptimizedRealTimeRelativeDate } from "@/hooks/useSharedTimer";
 import toast from "react-hot-toast";
+import { parseNotificationUrl } from "@/utils/notificationUrl";
 
 const AnimatedThemeToggler = dynamic(
   () =>
@@ -686,43 +687,7 @@ export const NavbarModern = ({ className }: { className?: string }) => {
                     <div className="py-2">
                       {notifications.items.map((notif) => {
                         // Check if link domain is whitelisted and extract URL info
-                        const urlInfo = (() => {
-                          try {
-                            const url = new URL(notif.link);
-                            // Only treat the main domain (without subdomain) as internal
-                            const isMainDomain =
-                              url.hostname === "jailbreakchangelogs.xyz";
-                            const isSubdomain = url.hostname.endsWith(
-                              ".jailbreakchangelogs.xyz",
-                            );
-                            const isWhitelisted =
-                              isMainDomain ||
-                              isSubdomain ||
-                              url.hostname === "google.com" ||
-                              url.hostname.endsWith(".google.com");
-
-                            if (isMainDomain) {
-                              // Extract relative path for main domain only
-                              const relativePath =
-                                url.pathname + url.search + url.hash;
-                              return {
-                                isWhitelisted: true,
-                                isJailbreakChangelogs: true,
-                                relativePath,
-                              };
-                            } else if (isWhitelisted) {
-                              // Treat subdomains and other whitelisted domains as external
-                              return {
-                                isWhitelisted: true,
-                                isJailbreakChangelogs: false,
-                                href: notif.link,
-                              };
-                            }
-                            return { isWhitelisted: false };
-                          } catch {
-                            return { isWhitelisted: false };
-                          }
-                        })();
+                        const urlInfo = parseNotificationUrl(notif.link);
 
                         return (
                           <div
