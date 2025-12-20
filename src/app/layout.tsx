@@ -7,7 +7,7 @@ import "./globals.css";
 import Header from "@/components/Layout/Header";
 import MaintenanceBypass from "@/components/Layout/MaintenanceBypass";
 import Footer from "@/components/Layout/Footer";
-import OfflineDetector from "@/components/OfflineDetector";
+
 import { Toaster } from "react-hot-toast";
 import NextTopLoader from "nextjs-toploader";
 import AuthCheck from "@/components/Auth/AuthCheck";
@@ -253,7 +253,7 @@ export default async function RootLayout({
                         shadow="0 0 10px var(--color-button-info),0 0 5px var(--color-button-info)"
                         zIndex={1600}
                       />
-                      <OfflineDetector />
+
                       <AuthCheck />
                       <AuthProvider>
                         <NitroBottomAnchor />
@@ -454,7 +454,7 @@ export default async function RootLayout({
                     shadow="0 0 10px var(--color-button-info),0 0 5px var(--color-button-info)"
                     zIndex={1600}
                   />
-                  <OfflineDetector />
+
                   <AuthCheck />
                   <AuthProvider>
                     <NitroBottomAnchor />

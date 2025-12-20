@@ -50,7 +50,7 @@ export default function NitroBottomAnchor() {
         format: "anchor-v2",
         anchor: "bottom",
         anchorBgColor: "rgb(0 0 0 / 0%)",
-        anchorClose: true,
+        anchorClose: false,
         anchorPersistClose: false,
         anchorStickyOffset: 0,
         report: {

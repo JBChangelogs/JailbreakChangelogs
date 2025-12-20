@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Alert } from "@mui/material";
+
 import WifiOffRoundedIcon from "@mui/icons-material/WifiOffRounded";
 
 export default function OfflineDetector() {
@@ -36,34 +36,20 @@ export default function OfflineDetector() {
     };
   }, []);
 
+  if (!isOffline) return null;
+
   return (
-    <Alert
-      severity="warning"
-      icon={<WifiOffRoundedIcon />}
-      sx={{
-        width: "100%",
-        bgcolor: "#B45309",
-        color: "#FFFFFF",
-        "& .MuiAlert-icon": {
-          color: "#FFFFFF",
-          marginRight: 1,
-          marginLeft: 0,
-        },
-        position: "fixed",
-        top: "64px",
-        left: 0,
-        right: 0,
-        zIndex: 9999,
-        display: isOffline ? "flex" : "none",
-        borderRadius: 0,
-        justifyContent: "center",
-        "& .MuiAlert-message": {
-          textAlign: "center",
-          width: "auto",
-        },
-      }}
-    >
-      You are currently offline. Check your internet connection.
-    </Alert>
+    <div className="w-full bg-[#B45309] text-white backdrop-blur-lg">
+      <div className="container mx-auto px-4 py-2">
+        <div className="relative flex flex-col items-center justify-center gap-2 lg:flex-row lg:gap-3">
+          <div className="flex items-center gap-2">
+            <WifiOffRoundedIcon className="h-4 w-4" />
+            <span className="text-center text-xs font-semibold text-white">
+              You are currently offline. Check your internet connection.
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }

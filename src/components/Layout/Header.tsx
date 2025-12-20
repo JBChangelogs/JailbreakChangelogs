@@ -43,6 +43,7 @@ const AnimatedThemeToggler = dynamic(
 import { NavbarModern } from "@/components/ui/navbar";
 import ServiceAvailabilityTicker from "./ServiceAvailabilityTicker";
 import NewsTicker from "./NewsTicker";
+import OfflineDetector from "../OfflineDetector";
 
 import { Icon } from "../ui/IconWrapper";
 import {
@@ -505,6 +506,7 @@ export default function Header() {
     <>
       {/* Desktop navbar - hidden on mobile/tablet via CSS */}
       <div className="sticky top-0 z-1300 hidden xl:block">
+        <OfflineDetector />
         <ServiceAvailabilityTicker />
         <NewsTicker />
         <div className="relative z-10">
@@ -513,8 +515,9 @@ export default function Header() {
       </div>
 
       {/* Mobile header - hidden on desktop via CSS */}
-      <div className="sticky top-0 z-[1400] block xl:hidden">
+      <div className="sticky top-0 z-1400 block xl:hidden">
         <>
+          <OfflineDetector />
           <ServiceAvailabilityTicker />
           <NewsTicker />
           <div className="relative z-10">
@@ -789,7 +792,7 @@ export default function Header() {
                                                   fetchUnreadCount();
                                                 }
                                               }}
-                                              className={`flex-shrink-0 cursor-pointer rounded-full p-1 transition-all ${
+                                              className={`shrink-0 cursor-pointer rounded-full p-1 transition-all ${
                                                 markedAsSeen.has(notif.id)
                                                   ? "bg-green-500/20 text-green-500"
                                                   : "bg-secondary-bg text-secondary-text hover:bg-tertiary-bg hover:text-primary-text"
@@ -915,7 +918,7 @@ export default function Header() {
           <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
             <SheetContent
               side="right"
-              className="z-[1450] w-60 overflow-y-auto p-0"
+              className="z-1450 w-60 overflow-y-auto p-0"
             >
               {drawer}
             </SheetContent>
