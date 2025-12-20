@@ -24,6 +24,7 @@ import NitroVideoPlayerCloseSupporterModal from "@/components/Ads/NitroVideoPlay
 import NitroBottomAnchor from "@/components/Ads/NitroBottomAnchor";
 import NitroVideoPlayer from "@/components/Ads/NitroVideoPlayer";
 import AdBlockRecovery from "@/components/Ads/AdBlockRecovery";
+import AdBlockPrompt from "@/components/Ads/AdBlockPrompt";
 import {
   checkMaintenanceMode,
   getMaintenanceMetadata,
@@ -288,8 +289,10 @@ export default async function RootLayout({
               <ConsentBannerWrapper />
             </ConsentProviderWrapper>
           </AppRouterCacheProvider>
-          {/* ABP Recovery Prompt - Only load if user is NOT a supporter */}
+          {/* Ad Block Detection Script - Only load if user is NOT a supporter */}
           <AdBlockRecovery isSupporter={!!isSupporter} />
+          {/* Ad Block Prompt UI - Only shown to non-supporters when ad blocking is detected */}
+          <AdBlockPrompt />
         </body>
       </html>
     );
@@ -483,8 +486,10 @@ export default async function RootLayout({
             <ConsentBannerWrapper />
           </ConsentProviderWrapper>
         </AppRouterCacheProvider>
-        {/* ABP Recovery Prompt - Only load if user is NOT a supporter */}
+        {/* Ad Block Detection Script - Only load if user is NOT a supporter */}
         <AdBlockRecovery isSupporter={!!isSupporter} />
+        {/* Ad Block Prompt UI - Only shown to non-supporters when ad blocking is detected */}
+        <AdBlockPrompt />
       </body>
     </html>
   );
