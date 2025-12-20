@@ -126,7 +126,17 @@ export default function NitroHomepageAd({ className }: Props) {
     nitroAds.createAd(SLOT_ID_TABLET, TABLET_CONFIG).catch(() => {});
 
     // Desktop config
-    nitroAds.createAd(SLOT_ID_DESKTOP, DESKTOP_CONFIG).catch(() => {});
+    let desktopConfig = DESKTOP_CONFIG;
+    // If the window height is less than 800px, remove the 970x250 ad size to prevent it from touching the bottom anchor ad
+    if (window.innerHeight < 800) {
+      desktopConfig = {
+        ...DESKTOP_CONFIG,
+        sizes: DESKTOP_CONFIG.sizes.filter(
+          (size) => !(size[0] === "970" && size[1] === "250"),
+        ),
+      };
+    }
+    nitroAds.createAd(SLOT_ID_DESKTOP, desktopConfig).catch(() => {});
 
     return () => {
       nitroAds?.removeAd?.(SLOT_ID_MOBILE);
