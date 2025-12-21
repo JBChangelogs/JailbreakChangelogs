@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect, useMemo } from "react";
 import Link from "next/link";
 import { useVirtualizer } from "@tanstack/react-virtual";
-import { MagnifyingGlassIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import { Icon } from "@/components/ui/IconWrapper";
 import InventoryItemsGrid from "./InventoryItemsGrid";
 import { Item, RobloxUser } from "@/types";
 import { InventoryItem } from "@/app/inventories/types";
@@ -439,14 +439,17 @@ export default function DuplicatesTab({
             maxLength={MAX_SEARCH_LENGTH}
             className="border-border-primary bg-tertiary-bg text-primary-text placeholder-secondary-text focus:border-button-info min-h-[48px] w-full rounded-lg border px-4 py-2 pr-10 pl-10 transition-all duration-300 focus:outline-none"
           />
-          <MagnifyingGlassIcon className="text-secondary-text absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2" />
+          <Icon
+            icon="heroicons:magnifying-glass"
+            className="text-secondary-text absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2"
+          />
           {leaderboardSearch && (
             <button
               onClick={() => setLeaderboardSearch("")}
               className="text-secondary-text hover:text-primary-text absolute top-1/2 right-3 h-5 w-5 -translate-y-1/2 cursor-pointer"
               aria-label="Clear search"
             >
-              <XMarkIcon />
+              <Icon icon="heroicons:x-mark" />
             </button>
           )}
         </div>
@@ -564,14 +567,17 @@ export default function DuplicatesTab({
             maxLength={MAX_SEARCH_LENGTH}
             className="border-border-primary bg-secondary-bg text-primary-text placeholder-secondary-text focus:border-button-info min-h-[56px] w-full rounded-lg border px-4 py-3 pr-10 pl-10 transition-all duration-300 focus:outline-none"
           />
-          <MagnifyingGlassIcon className="text-secondary-text absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2" />
+          <Icon
+            icon="heroicons:magnifying-glass"
+            className="text-secondary-text absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2"
+          />
           {searchTerm && (
             <button
               onClick={() => setSearchTerm("")}
               className="text-secondary-text hover:text-primary-text absolute top-1/2 right-3 h-5 w-5 -translate-y-1/2 cursor-pointer"
               aria-label="Clear search"
             >
-              <XMarkIcon />
+              <Icon icon="heroicons:x-mark" />
             </button>
           )}
         </div>

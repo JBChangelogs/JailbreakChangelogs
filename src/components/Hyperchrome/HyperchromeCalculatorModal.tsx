@@ -3,7 +3,6 @@
 import { useCallback, useState } from "react";
 import { Dialog, DialogPanel } from "@headlessui/react";
 import { Icon } from "../ui/IconWrapper";
-import { XMarkIcon } from "@heroicons/react/24/outline";
 import {
   calculateRobberiesToLevelUp,
   calculateAllLevelPercentages,
@@ -53,7 +52,7 @@ export default function HyperchromeCalculatorModal({
               onClick={handleClose}
               className="text-secondary-text hover:text-primary-text cursor-pointer rounded-md p-1 hover:bg-white/10"
             >
-              <XMarkIcon className="h-5 w-5" />
+              <Icon icon="heroicons:x-mark" className="h-5 w-5" />
             </button>
           </div>
 

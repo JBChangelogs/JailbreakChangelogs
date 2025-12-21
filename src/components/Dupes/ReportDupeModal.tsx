@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { XMarkIcon } from "@heroicons/react/24/outline";
+import { Icon } from "@/components/ui/IconWrapper";
 import Image from "next/image";
 import { getItemImagePath, handleImageError } from "@/utils/images";
 import { getCategoryColor } from "@/utils/categoryIcons";
@@ -144,7 +144,7 @@ const ReportDupeModal: React.FC<ReportDupeModalProps> = ({
             onClick={onClose}
             className="text-muted hover:text-primary-text cursor-pointer transition-colors"
           >
-            <XMarkIcon className="h-6 w-6" />
+            <Icon icon="heroicons:x-mark" className="h-6 w-6" />
           </button>
         </div>
 
@@ -238,7 +238,7 @@ const ReportDupeModal: React.FC<ReportDupeModalProps> = ({
                       onClick={() => removeProofUrl(index)}
                       className="text-status-danger hover:text-status-danger-hover absolute top-1/2 right-3 -translate-y-1/2 cursor-pointer"
                     >
-                      <XMarkIcon className="h-5 w-5" />
+                      <Icon icon="heroicons:x-mark" className="h-5 w-5" />
                     </button>
                   )}
                 </div>

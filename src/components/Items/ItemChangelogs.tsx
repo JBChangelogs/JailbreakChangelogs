@@ -6,10 +6,10 @@ import { Dialog, DialogPanel } from "@headlessui/react";
 import {
   ArrowUpIcon,
   ArrowDownIcon,
-  XMarkIcon,
   ChevronDownIcon,
   ChevronUpIcon,
 } from "@heroicons/react/24/outline";
+import { Icon } from "@/components/ui/IconWrapper";
 import Link from "next/link";
 import ReactMarkdown from "react-markdown";
 import { formatFullValue } from "@/utils/values";
@@ -266,7 +266,7 @@ export default function ItemChangelogs({
     0,
   );
 
-  // eslint-disable-next-line react-hooks/incompatible-library
+   
   const virtualizer = useVirtualizer({
     count: displayableChanges.length,
     getScrollElement: () => parentRef.current,
@@ -382,7 +382,7 @@ export default function ItemChangelogs({
                 onClick={() => setVotersOpen(false)}
                 className="text-primary-text hover:text-primary-text cursor-pointer transition-colors"
               >
-                <XMarkIcon className="h-5 w-5" />
+                <Icon icon="heroicons:x-mark" className="h-5 w-5" />
               </button>
             </div>
 

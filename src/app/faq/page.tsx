@@ -8,7 +8,7 @@ import {
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
-import { QuestionMarkCircleIcon } from "@heroicons/react/24/outline";
+import { Icon } from "@/components/ui/IconWrapper";
 
 const faqs = [
   {
@@ -132,7 +132,10 @@ export default function FAQPage() {
       <div className="relative mx-auto max-w-4xl">
         <Breadcrumb />
         <div className="mb-2 flex items-center gap-2">
-          <QuestionMarkCircleIcon className="text-secondary-text h-6 w-6" />
+          <Icon
+            icon="heroicons-outline:question-mark-circle"
+            className="text-secondary-text h-6 w-6"
+          />
           <h1 className="text-primary-text text-2xl font-bold">
             Frequently Asked Questions
           </h1>

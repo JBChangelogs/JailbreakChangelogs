@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
-import { MagnifyingGlassIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import { Icon } from "@/components/ui/IconWrapper";
 import { Pagination } from "@/components/ui/Pagination";
 import Link from "next/link";
 import Form from "next/form";
@@ -169,7 +169,7 @@ export default function UserSearch() {
                 className="text-secondary-text hover:text-primary-text cursor-pointer transition-colors"
                 aria-label="Clear search"
               >
-                <XMarkIcon className="h-5 w-5" />
+                <Icon icon="heroicons:x-mark" className="h-5 w-5" />
               </button>
             )}
 
@@ -213,7 +213,7 @@ export default function UserSearch() {
                   ></path>
                 </svg>
               ) : (
-                <MagnifyingGlassIcon className="h-5 w-5" />
+                <Icon icon="heroicons:magnifying-glass" className="h-5 w-5" />
               )}
             </button>
           </div>

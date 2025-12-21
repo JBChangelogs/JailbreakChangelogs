@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { XMarkIcon, MagnifyingGlassIcon } from "@heroicons/react/24/outline";
+import { Icon } from "@/components/ui/IconWrapper";
 import { getCategoryColor } from "@/utils/categoryIcons";
 
 interface Item {
@@ -75,13 +75,16 @@ const ItemSelectionModal: React.FC<ItemSelectionModalProps> = ({
             onClick={onClose}
             className="text-muted hover:text-primary-text cursor-pointer transition-colors"
           >
-            <XMarkIcon className="h-6 w-6" />
+            <Icon icon="heroicons:x-mark" className="h-6 w-6" />
           </button>
         </div>
 
         <div className="p-4">
           <div className="relative mb-4">
-            <MagnifyingGlassIcon className="text-muted absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2" />
+            <Icon
+              icon="heroicons:magnifying-glass"
+              className="text-muted absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2"
+            />
             <input
               type="text"
               placeholder="Search items..."

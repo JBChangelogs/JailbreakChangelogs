@@ -1,5 +1,5 @@
 import React from "react";
-import { MagnifyingGlassIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import { Icon } from "@/components/ui/IconWrapper";
 import { getBadgeColor, highlightText } from "@/utils/changelogs";
 
 interface SearchResult {
@@ -45,7 +45,10 @@ const ChangelogSearchInput: React.FC<ChangelogSearchInputProps> = ({
         className="border-border-primary bg-secondary-bg text-secondary-text placeholder-secondary-text hover:border-border-focus focus:border-button-info w-full rounded-lg border px-4 py-2 pr-10 pl-10 focus:outline-none"
       />
       <div className="absolute top-1/2 left-3 -translate-y-1/2">
-        <MagnifyingGlassIcon className="text-primary-text h-5 w-5" />
+        <Icon
+          icon="heroicons:magnifying-glass"
+          className="text-primary-text h-5 w-5"
+        />
       </div>
       {searchQuery && (
         <button
@@ -55,7 +58,7 @@ const ChangelogSearchInput: React.FC<ChangelogSearchInputProps> = ({
           className="text-primary-text hover:text-secondary-text absolute top-1/2 right-3 -translate-y-1/2 cursor-pointer"
           aria-label="Clear search"
         >
-          <XMarkIcon className="h-5 w-5" />
+          <Icon icon="heroicons:x-mark" className="h-5 w-5" />
         </button>
       )}
 

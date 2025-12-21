@@ -6,16 +6,11 @@ import Breadcrumb from "@/components/Layout/Breadcrumb";
 import { useRobberyTrackerWebSocket } from "@/hooks/useRobberyTrackerWebSocket";
 import { useRobberyTrackerMansionsWebSocket } from "@/hooks/useRobberyTrackerMansionsWebSocket";
 import { useRobberyTrackerAirdropsWebSocket } from "@/hooks/useRobberyTrackerAirdropsWebSocket";
-import {
-  ClockIcon,
-  ExclamationTriangleIcon,
-  MagnifyingGlassIcon,
-  XMarkIcon,
-} from "@heroicons/react/24/outline";
+import { ClockIcon } from "@heroicons/react/24/outline";
+import { Icon } from "@/components/ui/IconWrapper";
 import RobberyCard from "@/components/RobberyTracker/RobberyCard";
 import AirdropCard from "@/components/RobberyTracker/AirdropCard";
 import RobberyTrackerAuthWrapper from "@/components/RobberyTracker/RobberyTrackerAuthWrapper";
-import { Icon } from "@iconify/react";
 import ExperimentalFeatureBanner from "@/components/ui/ExperimentalFeatureBanner";
 
 import { Masonry } from "@mui/lab";
@@ -248,7 +243,10 @@ function RobberyTrackerContent() {
             <div className="w-full lg:w-1/3">
               <div className="relative">
                 <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                  <MagnifyingGlassIcon className="text-secondary-text h-5 w-5" />
+                  <Icon
+                    icon="heroicons:magnifying-glass"
+                    className="text-secondary-text h-5 w-5"
+                  />
                 </div>
                 <input
                   type="text"
@@ -263,7 +261,7 @@ function RobberyTrackerContent() {
                     className="text-secondary-text hover:text-primary-text absolute top-1/2 right-3 -translate-y-1/2"
                     aria-label="Clear search"
                   >
-                    <XMarkIcon className="h-5 w-5" />
+                    <Icon icon="heroicons:x-mark" className="h-5 w-5" />
                   </button>
                 )}
               </div>
@@ -437,7 +435,10 @@ function RobberyTrackerContent() {
         {error && (
           <div className="border-status-error/50 bg-status-error/10 mb-6 rounded-lg border p-4">
             <div className="flex items-center gap-2">
-              <ExclamationTriangleIcon className="text-status-error h-5 w-5" />
+              <Icon
+                icon="heroicons:exclamation-triangle"
+                className="text-status-error h-5 w-5"
+              />
               <p className="text-status-error">{error}</p>
             </div>
           </div>
@@ -518,7 +519,10 @@ function RobberyTrackerContent() {
                   </Masonry>
                 ) : (
                   <div className="flex flex-col items-center justify-center py-12 text-center">
-                    <MagnifyingGlassIcon className="text-tertiary-text mb-4 h-12 w-12" />
+                    <Icon
+                      icon="heroicons:magnifying-glass"
+                      className="text-tertiary-text mb-4 h-12 w-12"
+                    />
                     <h3 className="text-primary-text text-lg font-medium">
                       No robberies found
                     </h3>
@@ -568,7 +572,10 @@ function RobberyTrackerContent() {
                   </Masonry>
                 ) : (
                   <div className="flex flex-col items-center justify-center py-12 text-center">
-                    <MagnifyingGlassIcon className="text-tertiary-text mb-4 h-12 w-12" />
+                    <Icon
+                      icon="heroicons:magnifying-glass"
+                      className="text-tertiary-text mb-4 h-12 w-12"
+                    />
                     <h3 className="text-primary-text text-lg font-medium">
                       No mansions found
                     </h3>
@@ -662,7 +669,10 @@ function RobberyTrackerContent() {
                   </Masonry>
                 ) : (
                   <div className="flex flex-col items-center justify-center py-12 text-center">
-                    <MagnifyingGlassIcon className="text-tertiary-text mb-4 h-12 w-12" />
+                    <Icon
+                      icon="heroicons:magnifying-glass"
+                      className="text-tertiary-text mb-4 h-12 w-12"
+                    />
                     <h3 className="text-primary-text text-lg font-medium">
                       No airdrops found
                     </h3>

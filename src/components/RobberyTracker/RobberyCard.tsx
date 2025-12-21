@@ -5,11 +5,11 @@ import Image from "next/image";
 import {
   CheckCircleIcon,
   ClockIcon,
-  ExclamationTriangleIcon,
   ArrowTopRightOnSquareIcon,
   ClipboardDocumentIcon,
   UsersIcon,
 } from "@heroicons/react/24/outline";
+import { Icon } from "@/components/ui/IconWrapper";
 import { useOptimizedRealTimeRelativeDate } from "@/hooks/useSharedTimer";
 import { RobberyData } from "@/hooks/useRobberyTrackerWebSocket";
 import toast from "react-hot-toast";
@@ -130,7 +130,7 @@ export default function RobberyCard({ robbery }: RobberyCardProps) {
         default:
           return (
             <div className="flex items-center gap-1.5 rounded-full bg-gray-500/20 px-3 py-1 text-gray-400">
-              <ExclamationTriangleIcon className="h-4 w-4" />
+              <Icon icon="heroicons:exclamation-triangle" className="h-4 w-4" />
               <span className="text-sm font-medium">Unknown</span>
             </div>
           );
@@ -161,7 +161,7 @@ export default function RobberyCard({ robbery }: RobberyCardProps) {
       default:
         return (
           <div className="flex items-center gap-1.5 rounded-full bg-gray-500/20 px-3 py-1 text-gray-400">
-            <ExclamationTriangleIcon className="h-4 w-4" />
+            <Icon icon="heroicons:exclamation-triangle" className="h-4 w-4" />
             <span className="text-sm font-medium">Unknown</span>
           </div>
         );
@@ -196,7 +196,10 @@ export default function RobberyCard({ robbery }: RobberyCardProps) {
         {/* Train Warning Badge */}
         {isTrainNearClose && (
           <div className="bg-status-warning/20 border-status-warning/30 mb-3 flex items-center gap-1.5 rounded-lg border px-3 py-2">
-            <ExclamationTriangleIcon className="text-status-warning h-4 w-4" />
+            <Icon
+              icon="heroicons:exclamation-triangle"
+              className="text-status-warning h-4 w-4"
+            />
             <span className="text-primary-text text-sm font-medium">
               Robbery closing soon!
             </span>

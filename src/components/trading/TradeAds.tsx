@@ -9,11 +9,8 @@ import { TradeAdTabs } from "./TradeAdTabs";
 import { Button } from "@mui/material";
 import { Pagination } from "@/components/ui/Pagination";
 import { Masonry } from "@mui/lab";
-import {
-  ArrowDownIcon,
-  ArrowUpIcon,
-  XMarkIcon,
-} from "@heroicons/react/24/outline";
+import { ArrowDownIcon, ArrowUpIcon } from "@heroicons/react/24/outline";
+import { Icon } from "@/components/ui/IconWrapper";
 import { deleteTradeAd } from "@/utils/trading";
 import toast from "react-hot-toast";
 import { TradeAdForm } from "./TradeAdForm";
@@ -443,7 +440,7 @@ export default function TradeAds({
                   className="text-secondary-text hover:text-primary-text cursor-pointer transition-colors"
                   aria-label="Clear search"
                 >
-                  <XMarkIcon className="h-5 w-5" />
+                  <Icon icon="heroicons:x-mark" className="h-5 w-5" />
                 </button>
               )}
             </div>

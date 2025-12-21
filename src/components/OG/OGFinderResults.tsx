@@ -9,7 +9,6 @@ import { useBatchUserData } from "@/hooks/useBatchUserData";
 import OGFinderFAQ from "./OGFinderFAQ";
 import SearchForm from "./SearchForm";
 import TradeHistoryModal from "@/components/Modals/TradeHistoryModal";
-import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
 import { Icon } from "../ui/IconWrapper";
 import { logError } from "@/services/logger";
 import OGUserInfo from "./OGUserInfo";
@@ -402,7 +401,10 @@ export default function OGFinderResults({
           <div className="text-center">
             <div className="mb-4 flex justify-center">
               <div className="bg-status-error/10 rounded-full p-3">
-                <ExclamationTriangleIcon className="text-status-error h-8 w-8" />
+                <Icon
+                  icon="heroicons:exclamation-triangle"
+                  className="text-status-error h-8 w-8"
+                />
               </div>
             </div>
             <h3 className="text-status-error mb-2 text-lg font-semibold">
@@ -421,7 +423,10 @@ export default function OGFinderResults({
               <div className="text-center">
                 <div className="mb-4 flex justify-center">
                   <div className="bg-status-error/10 rounded-full p-3">
-                    <ExclamationTriangleIcon className="text-status-error h-8 w-8" />
+                    <Icon
+                      icon="heroicons:exclamation-triangle"
+                      className="text-status-error h-8 w-8"
+                    />
                   </div>
                 </div>
                 <h3 className="text-status-error mb-2 text-lg font-semibold">

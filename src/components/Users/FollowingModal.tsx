@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Dialog, CircularProgress, Button } from "@mui/material";
-import { XMarkIcon, MagnifyingGlassIcon } from "@heroicons/react/24/outline";
+import { Icon } from "@/components/ui/IconWrapper";
 import { UserAvatar } from "@/utils/avatar";
 import Link from "next/link";
 import { toast } from "react-hot-toast";
@@ -259,7 +259,7 @@ const FollowingModal: React.FC<FollowingModalProps> = ({
               onClick={onClose}
               className="text-primary-text hover:text-primary-text transition-colors"
             >
-              <XMarkIcon className="h-5 w-5" />
+              <Icon icon="heroicons:x-mark" className="h-5 w-5" />
             </button>
           </div>
 
@@ -283,14 +283,17 @@ const FollowingModal: React.FC<FollowingModalProps> = ({
                       onChange={(e) => setSearchQuery(e.target.value)}
                       className="border-border-primary bg-secondary-bg text-primary-text placeholder-secondary-text hover:border-border-focus focus:border-button-info w-full rounded-lg border px-4 py-2 pr-10 pl-10 transition-all duration-300 focus:outline-none"
                     />
-                    <MagnifyingGlassIcon className="text-secondary-text absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2" />
+                    <Icon
+                      icon="heroicons:magnifying-glass"
+                      className="text-secondary-text absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2"
+                    />
                     {searchQuery && (
                       <button
                         onClick={() => setSearchQuery("")}
                         className="text-secondary-text hover:text-primary-text absolute top-1/2 right-3 h-5 w-5 -translate-y-1/2 cursor-pointer"
                         aria-label="Clear search"
                       >
-                        <XMarkIcon />
+                        <Icon icon="heroicons:x-mark" />
                       </button>
                     )}
                   </div>

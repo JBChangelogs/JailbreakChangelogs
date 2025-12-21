@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { XMarkIcon } from "@heroicons/react/24/outline";
+import { Icon } from "@/components/ui/IconWrapper";
 
 interface SurveyBannerProps {
   onAccept: () => void;
@@ -37,7 +37,7 @@ const SurveyBanner: React.FC<SurveyBannerProps> = ({ onAccept, onDismiss }) => {
             className="hover:text-form-button-text/80 text-form-button-text cursor-pointer p-2 transition-colors"
             aria-label="Dismiss"
           >
-            <XMarkIcon className="h-5 w-5 text-current" />
+            <Icon icon="heroicons:x-mark" className="h-5 w-5 text-current" />
           </button>
         </div>
       </div>

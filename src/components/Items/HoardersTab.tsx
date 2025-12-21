@@ -7,7 +7,7 @@ import { useBatchUserData } from "@/hooks/useBatchUserData";
 import { ItemHoarder } from "@/utils/api";
 import Image from "next/image";
 import Link from "next/link";
-import { MagnifyingGlassIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import { Icon } from "@/components/ui/IconWrapper";
 
 interface HoardersTabProps {
   itemName: string;
@@ -174,7 +174,10 @@ export default function HoardersTab({ itemName, itemType }: HoardersTabProps) {
           onChange={(e) => setSearchTerm(e.target.value)}
           className="border-border-primary bg-secondary-bg text-primary-text placeholder-tertiary-text focus:border-border-focus w-full rounded-lg border px-4 py-3 pr-10 pl-10 font-medium transition-all duration-300 focus:outline-none"
         />
-        <MagnifyingGlassIcon className="text-tertiary-text absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2" />
+        <Icon
+          icon="heroicons:magnifying-glass"
+          className="text-tertiary-text absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2"
+        />
         {searchTerm && (
           <button
             type="button"
@@ -182,7 +185,7 @@ export default function HoardersTab({ itemName, itemType }: HoardersTabProps) {
             className="text-tertiary-text hover:text-primary-text absolute top-1/2 right-3 h-5 w-5 -translate-y-1/2 cursor-pointer transition-colors"
             aria-label="Clear search"
           >
-            <XMarkIcon />
+            <Icon icon="heroicons:x-mark" />
           </button>
         )}
       </div>
@@ -191,7 +194,10 @@ export default function HoardersTab({ itemName, itemType }: HoardersTabProps) {
       {filteredHoarders.length === 0 && searchTerm.trim() && (
         <div className="bg-secondary-bg rounded-lg p-8 text-center">
           <div className="border-button-info/30 bg-button-info/20 mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full border">
-            <MagnifyingGlassIcon className="text-button-info h-8 w-8" />
+            <Icon
+              icon="heroicons:magnifying-glass"
+              className="text-button-info h-8 w-8"
+            />
           </div>
           <h3 className="text-primary-text mb-2 text-xl font-semibold">
             No Results Found

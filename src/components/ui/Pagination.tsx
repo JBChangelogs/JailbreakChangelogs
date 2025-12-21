@@ -1,5 +1,5 @@
 import React from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { Icon } from "@iconify/react";
 import { cn } from "@/lib/utils";
 
 interface PaginationProps {
@@ -81,7 +81,7 @@ export const Pagination = ({
         )}
         aria-label="Previous page"
       >
-        <ChevronLeft className="h-5 w-5" />
+        <Icon icon="material-symbols:chevron-left" className="h-5 w-5" />
       </button>
 
       <ul className="flex items-center gap-1">
@@ -103,7 +103,7 @@ export const Pagination = ({
               <button
                 onClick={() => handlePageChange(pageNumber as number)}
                 className={cn(
-                  "flex h-8 min-w-[2rem] cursor-pointer items-center justify-center rounded-full px-3 text-sm font-medium transition-colors",
+                  "flex h-8 min-w-8 cursor-pointer items-center justify-center rounded-full px-3 text-sm font-medium transition-colors",
                   isSelected
                     ? "bg-button-info text-form-button-text hover:bg-button-info-hover"
                     : "text-primary-text hover:bg-quaternary-bg",
@@ -126,7 +126,7 @@ export const Pagination = ({
         )}
         aria-label="Next page"
       >
-        <ChevronRight className="h-5 w-5" />
+        <Icon icon="material-symbols:chevron-right" className="h-5 w-5" />
       </button>
     </nav>
   );

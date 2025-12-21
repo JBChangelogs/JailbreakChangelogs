@@ -1,7 +1,7 @@
 "use client";
 
 import { Dialog, DialogPanel, DialogTitle } from "@headlessui/react";
-import { XMarkIcon } from "@heroicons/react/24/outline";
+import { Icon } from "@/components/ui/IconWrapper";
 import { useRealTimeRelativeDate } from "@/hooks/useRealTimeRelativeDate";
 import { formatMessageDate } from "@/utils/timestamp";
 
@@ -62,7 +62,7 @@ export default function ScanHistoryModal({
               onClick={onClose}
               className="text-secondary-text hover:text-primary-text cursor-pointer rounded-full p-1 transition-colors"
             >
-              <XMarkIcon className="h-6 w-6" />
+              <Icon icon="heroicons:x-mark" className="h-6 w-6" />
             </button>
           </div>
 

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowLeftIcon, HomeIcon } from "@heroicons/react/24/outline";
+import { Icon } from "@/components/ui/IconWrapper";
 
 export default function NotFound() {
   return (
@@ -23,7 +23,7 @@ export default function NotFound() {
               onClick={() => window.history.back()}
               className="bg-primary-bg text-primary-text hover:bg-secondary-bg flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg px-6 py-3 transition-colors sm:w-auto"
             >
-              <ArrowLeftIcon className="h-5 w-5" />
+              <Icon icon="heroicons-outline:arrow-left" className="h-5 w-5" />
               <span>Go back</span>
             </button>
 
@@ -31,7 +31,7 @@ export default function NotFound() {
               href="/"
               className="bg-button-info text-form-button-text hover:bg-button-info-hover flex w-full items-center justify-center gap-2 rounded-lg px-6 py-3 font-medium transition-colors sm:w-auto"
             >
-              <HomeIcon className="h-5 w-5" />
+              <Icon icon="heroicons-outline:home" className="h-5 w-5" />
               Take me home
             </Link>
           </div>

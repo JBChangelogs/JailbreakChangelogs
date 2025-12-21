@@ -4,7 +4,7 @@ import { Dialog, DialogPanel } from "@headlessui/react";
 import { useState, useMemo } from "react";
 import Image from "next/image";
 import { useRobloxBotsDataQuery } from "@/hooks/useRobloxDataQuery";
-import { XMarkIcon } from "@heroicons/react/24/outline";
+import { Icon } from "@/components/ui/IconWrapper";
 import { DefaultAvatar } from "@/utils/avatar";
 
 interface Player {
@@ -104,7 +104,7 @@ export default function RobberyPlayersModal({
               className="text-secondary-text hover:text-primary-text cursor-pointer p-1 transition-colors"
               aria-label="Close modal"
             >
-              <XMarkIcon className="h-6 w-6" />
+              <Icon icon="heroicons:x-mark" className="h-6 w-6" />
             </button>
           </div>
 

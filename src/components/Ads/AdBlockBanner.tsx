@@ -1,6 +1,6 @@
 "use client";
 
-import { XMarkIcon } from "@heroicons/react/24/outline";
+import { Icon } from "@/components/ui/IconWrapper";
 import Link from "next/link";
 
 interface AdBlockBannerProps {
@@ -52,7 +52,7 @@ const AdBlockBanner = ({ onDismiss }: AdBlockBannerProps) => {
             className="text-secondary-text hover:text-primary-text cursor-pointer rounded-lg p-1.5 transition-colors"
             aria-label="Dismiss"
           >
-            <XMarkIcon className="h-5 w-5" />
+            <Icon icon="heroicons:x-mark" className="h-5 w-5" />
           </button>
         </div>
       </div>

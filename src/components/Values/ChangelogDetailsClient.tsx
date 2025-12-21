@@ -20,7 +20,6 @@ import { getCategoryColor } from "@/utils/categoryIcons";
 import { formatMessageDate } from "@/utils/timestamp";
 import { formatFullValue } from "@/utils/values";
 import ReactMarkdown from "react-markdown";
-import { MagnifyingGlassIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import ChangelogDetailsHeader from "./ChangelogDetailsHeader";
 import { Icon } from "../ui/IconWrapper";
 
@@ -424,14 +423,17 @@ export default function ChangelogDetailsClient({
               onChange={(e) => setSearchQuery(e.target.value)}
               className="border-border-primary bg-secondary-bg text-primary-text placeholder-secondary-text hover:border-border-focus focus:border-button-info w-full rounded-lg border px-4 py-2 pr-10 pl-10 transition-all duration-300 focus:outline-none"
             />
-            <MagnifyingGlassIcon className="text-secondary-text absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2" />
+            <Icon
+              icon="heroicons:magnifying-glass"
+              className="text-secondary-text absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2"
+            />
             {searchQuery && (
               <button
                 onClick={clearSearch}
                 className="text-secondary-text hover:text-primary-text absolute top-1/2 right-3 h-5 w-5 -translate-y-1/2 cursor-pointer"
                 aria-label="Clear search"
               >
-                <XMarkIcon />
+                <Icon icon="heroicons:x-mark" />
               </button>
             )}
           </div>
@@ -973,7 +975,7 @@ export default function ChangelogDetailsClient({
                   onClick={() => setVotersOpen(false)}
                   className="text-primary-text hover:text-primary-text cursor-pointer transition-colors"
                 >
-                  <XMarkIcon className="h-5 w-5" />
+                  <Icon icon="heroicons:x-mark" className="h-5 w-5" />
                 </button>
               </div>
 

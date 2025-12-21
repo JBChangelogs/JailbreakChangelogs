@@ -1,7 +1,7 @@
 "use client";
 
 import { Dialog, DialogPanel, DialogTitle } from "@headlessui/react";
-import { XMarkIcon } from "@heroicons/react/24/outline";
+import { Icon } from "@/components/ui/IconWrapper";
 import { useRouter } from "next/navigation";
 
 interface ItemActionModalProps {
@@ -66,7 +66,7 @@ export default function ItemActionModal({
                 onClick={onClose}
                 className="text-secondary-text hover:text-primary-text cursor-pointer rounded-full p-1"
               >
-                <XMarkIcon className="h-6 w-6" />
+                <Icon icon="heroicons:x-mark" className="h-6 w-6" />
               </button>
             </div>
           </div>

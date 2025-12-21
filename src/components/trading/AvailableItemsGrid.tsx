@@ -21,7 +21,6 @@ import {
 } from "@/utils/images";
 import { sortByCashValue, sortByDemand, formatFullValue } from "@/utils/values";
 import { getDemandColor, getTrendColor } from "@/utils/badgeColors";
-import { MagnifyingGlassIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { CategoryIconBadge, getCategoryColor } from "@/utils/categoryIcons";
 import { TradeAdErrorModal } from "./TradeAdErrorModal";
 import { Icon } from "../ui/IconWrapper";
@@ -353,7 +352,10 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
             {/* Search - Takes up full width on mobile, 1/3 on desktop */}
             <div className="relative lg:col-span-1">
               <div className="relative">
-                <MagnifyingGlassIcon className="text-secondary-text absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2" />
+                <Icon
+                  icon="heroicons:magnifying-glass"
+                  className="text-secondary-text absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2"
+                />
                 <input
                   type="text"
                   placeholder="Search items by name or type..."
@@ -367,7 +369,7 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
                     className="text-secondary-text hover:text-primary-text absolute top-1/2 right-3 h-5 w-5 -translate-y-1/2 cursor-pointer"
                     aria-label="Clear search"
                   >
-                    <XMarkIcon />
+                    <Icon icon="heroicons:x-mark" />
                   </button>
                 )}
               </div>

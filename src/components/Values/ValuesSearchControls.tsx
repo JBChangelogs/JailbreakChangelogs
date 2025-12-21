@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { MagnifyingGlassIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { Icon } from "../ui/IconWrapper";
 import { FilterSort, ValueSort } from "@/types";
 import dynamic from "next/dynamic";
@@ -136,14 +135,17 @@ export default function ValuesSearchControls({
                         : "focus:border-button-info"
                   }`}
                 />
-                <MagnifyingGlassIcon className="text-secondary-text absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2" />
+                <Icon
+                  icon="heroicons:magnifying-glass"
+                  className="text-secondary-text absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2"
+                />
                 {searchTerm && (
                   <button
                     onClick={() => setSearchTerm("")}
                     className="text-secondary-text hover:text-primary-text absolute top-1/2 right-3 h-5 w-5 -translate-y-1/2 cursor-pointer"
                     aria-label="Clear search"
                   >
-                    <XMarkIcon />
+                    <Icon icon="heroicons:x-mark" />
                   </button>
                 )}
               </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
+import { Icon } from "@/components/ui/IconWrapper";
 import { DupeFinderItem } from "@/types";
 
 interface DupeStatsProps {
@@ -119,7 +119,7 @@ export default function DupeStats({
           </div>
           {duplicateStats.totalDuplicates > 0 && (
             <div className="flex items-center gap-2 text-yellow-400">
-              <ExclamationTriangleIcon className="h-5 w-5" />
+              <Icon icon="heroicons:exclamation-triangle" className="h-5 w-5" />
               <span className="text-sm font-medium">Duplicates Found</span>
             </div>
           )}
@@ -130,7 +130,10 @@ export default function DupeStats({
       {duplicateStats.totalDuplicates > 0 && (
         <div className="mt-4 rounded-lg border border-yellow-500/20 bg-yellow-900/20 p-4">
           <div className="flex items-start gap-3">
-            <ExclamationTriangleIcon className="mt-0.5 h-5 w-5 flex-shrink-0 text-yellow-400" />
+            <Icon
+              icon="heroicons:exclamation-triangle"
+              className="mt-0.5 h-5 w-5 flex-shrink-0 text-yellow-400"
+            />
             <div>
               <h3 className="font-medium text-yellow-400">
                 Duplicates Detected

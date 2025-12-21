@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { MagnifyingGlassIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import { Icon } from "@/components/ui/IconWrapper";
 import { useDebounce } from "@/hooks/useDebounce";
 
 interface NetworthLeaderboardSearchProps {
@@ -57,14 +57,17 @@ export default function NetworthLeaderboardSearch({
             : ""
         }`}
       />
-      <MagnifyingGlassIcon className="text-secondary-text absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2" />
+      <Icon
+        icon="heroicons:magnifying-glass"
+        className="text-secondary-text absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2"
+      />
       {searchTerm && (
         <button
           onClick={() => setSearchTerm("")}
           className="text-secondary-text hover:text-primary-text absolute top-1/2 right-3 h-5 w-5 -translate-y-1/2 cursor-pointer"
           aria-label="Clear search"
         >
-          <XMarkIcon />
+          <Icon icon="heroicons:x-mark" />
         </button>
       )}
     </div>

@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
+import { Icon } from "@/components/ui/IconWrapper";
 import { ThemeProvider } from "@mui/material";
 import React from "react";
 import { fetchMissingRobloxData } from "./actions";
@@ -661,7 +661,10 @@ export default function InventoryCheckerClient({
             <div className="text-center">
               <div className="mb-4 flex justify-center">
                 <div className="bg-status-error/10 rounded-full p-3">
-                  <ExclamationTriangleIcon className="text-status-error h-8 w-8" />
+                  <Icon
+                    icon="heroicons:exclamation-triangle"
+                    className="text-status-error h-8 w-8"
+                  />
                 </div>
               </div>
               <h3 className="text-status-error mb-2 text-lg font-semibold">

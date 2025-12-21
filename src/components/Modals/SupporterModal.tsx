@@ -1,6 +1,7 @@
 import React from "react";
 import { Dialog, DialogPanel, DialogTitle } from "@headlessui/react";
-import { XMarkIcon, SparklesIcon } from "@heroicons/react/24/outline";
+import { SparklesIcon } from "@heroicons/react/24/outline";
+import { Icon } from "@/components/ui/IconWrapper";
 import Link from "next/link";
 import Image from "next/image";
 import { getAllowedFileExtensions } from "@/config/settings";
@@ -168,7 +169,7 @@ export default function SupporterModal({
               onClick={onClose}
               className="text-secondary-text cursor-pointer rounded-lg p-2 transition-colors"
             >
-              <XMarkIcon className="h-5 w-5" />
+              <Icon icon="heroicons:x-mark" className="h-5 w-5" />
             </button>
           </div>
 

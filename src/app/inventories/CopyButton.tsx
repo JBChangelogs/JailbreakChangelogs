@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ClipboardIcon, CheckIcon } from "@heroicons/react/24/outline";
+import { Icon } from "@/components/ui/IconWrapper";
 import Snackbar from "@mui/material/Snackbar";
 import MuiAlert from "@mui/material/Alert";
 
@@ -33,9 +33,15 @@ export default function CopyButton({ text, className = "" }: CopyButtonProps) {
         title="Copy Roblox ID"
       >
         {copied ? (
-          <CheckIcon className="text-status-success h-4 w-4" />
+          <Icon
+            icon="heroicons-outline:check"
+            className="text-status-success h-4 w-4"
+          />
         ) : (
-          <ClipboardIcon className="text-tertiary-text hover:text-secondary-text h-4 w-4" />
+          <Icon
+            icon="heroicons-outline:clipboard"
+            className="text-tertiary-text hover:text-secondary-text h-4 w-4"
+          />
         )}
       </button>
 

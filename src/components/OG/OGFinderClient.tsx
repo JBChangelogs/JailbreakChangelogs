@@ -7,11 +7,8 @@ import { useAuthContext } from "@/contexts/AuthContext";
 import { useUsernameToId } from "@/hooks/useUsernameToId";
 import toast from "react-hot-toast";
 import OGFinderDataStreamer from "./OGFinderDataStreamer";
-import {
-  MagnifyingGlassIcon,
-  ExclamationTriangleIcon,
-  XMarkIcon,
-} from "@heroicons/react/24/outline";
+import {} from "@heroicons/react/24/outline";
+import { Icon } from "@/components/ui/IconWrapper";
 
 interface OGSearchData {
   results: Array<{
@@ -111,7 +108,7 @@ export default function OGFinderClient({
                 className="text-secondary-text hover:text-primary-text cursor-pointer transition-colors"
                 aria-label="Clear search"
               >
-                <XMarkIcon className="h-5 w-5" />
+                <Icon icon="heroicons:x-mark" className="h-5 w-5" />
               </button>
             )}
 
@@ -155,7 +152,7 @@ export default function OGFinderClient({
                   ></path>
                 </svg>
               ) : (
-                <MagnifyingGlassIcon className="h-5 w-5" />
+                <Icon icon="heroicons:magnifying-glass" className="h-5 w-5" />
               )}
             </button>
           </div>
@@ -171,7 +168,10 @@ export default function OGFinderClient({
           <div className="text-center">
             <div className="mb-4 flex justify-center">
               <div className="bg-status-error/10 rounded-full p-3">
-                <ExclamationTriangleIcon className="text-status-error h-8 w-8" />
+                <Icon
+                  icon="heroicons:exclamation-triangle"
+                  className="text-status-error h-8 w-8"
+                />
               </div>
             </div>
             <h3 className="text-status-error mb-2 text-lg font-semibold">

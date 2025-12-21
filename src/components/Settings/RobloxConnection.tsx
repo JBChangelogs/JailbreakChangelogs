@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Dialog, DialogPanel } from "@headlessui/react";
-import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
+import { Icon } from "@/components/ui/IconWrapper";
 import toast from "react-hot-toast";
 import LoginModalWrapper from "../Auth/LoginModalWrapper";
 import { safeGetJSON, safeSetJSON } from "@/utils/safeStorage";
@@ -170,19 +170,28 @@ export const RobloxConnection = ({ userData }: RobloxConnectionProps) => {
 
               <div className="space-y-3">
                 <div className="flex items-start gap-3">
-                  <ExclamationTriangleIcon className="text-button-danger mt-0.5 h-5 w-5 flex-shrink-0" />
+                  <Icon
+                    icon="heroicons:exclamation-triangle"
+                    className="text-button-danger mt-0.5 h-5 w-5 flex-shrink-0"
+                  />
                   <p className="text-primary-text text-sm">
                     Remove your Roblox profile from your account
                   </p>
                 </div>
                 <div className="flex items-start gap-3">
-                  <ExclamationTriangleIcon className="text-button-danger mt-0.5 h-5 w-5 flex-shrink-0" />
+                  <Icon
+                    icon="heroicons:exclamation-triangle"
+                    className="text-button-danger mt-0.5 h-5 w-5 flex-shrink-0"
+                  />
                   <p className="text-primary-text text-sm">
                     Disable trading features and delete all existing trade ads
                   </p>
                 </div>
                 <div className="flex items-start gap-3">
-                  <ExclamationTriangleIcon className="text-button-danger mt-0.5 h-5 w-5 flex-shrink-0" />
+                  <Icon
+                    icon="heroicons:exclamation-triangle"
+                    className="text-button-danger mt-0.5 h-5 w-5 flex-shrink-0"
+                  />
                   <p className="text-primary-text text-sm">
                     Require re-authentication to use Trading features again
                   </p>

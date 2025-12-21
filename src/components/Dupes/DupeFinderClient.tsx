@@ -1,6 +1,6 @@
 "use client";
 
-import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
+import { Icon } from "@/components/ui/IconWrapper";
 import DupeFinderResults from "./DupeFinderResults";
 import DupeSearchInput from "./DupeSearchInput";
 import type { DupeFinderItem, RobloxUser, Item } from "@/types";
@@ -63,7 +63,10 @@ export default function DupeFinderClient({
           <div className="text-center">
             <div className="mb-4 flex justify-center">
               <div className="bg-status-error/10 rounded-full p-3">
-                <ExclamationTriangleIcon className="text-status-error h-8 w-8" />
+                <Icon
+                  icon="heroicons:exclamation-triangle"
+                  className="text-status-error h-8 w-8"
+                />
               </div>
             </div>
             <h3 className="text-status-error mb-2 text-lg font-semibold">

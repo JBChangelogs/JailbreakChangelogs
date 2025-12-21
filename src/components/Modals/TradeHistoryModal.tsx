@@ -2,7 +2,7 @@
 
 import { useMemo, useState, useEffect } from "react";
 import { Dialog, DialogTitle } from "@headlessui/react";
-import { XMarkIcon } from "@heroicons/react/24/outline";
+import { Icon } from "@/components/ui/IconWrapper";
 import Image from "next/image";
 import { getCategoryColor } from "@/utils/categoryIcons";
 import { VerifiedBadgeIcon } from "@/components/Icons/VerifiedBadgeIcon";
@@ -178,7 +178,7 @@ export default function TradeHistoryModal({
                 onClick={onClose}
                 className="text-secondary-text hover:text-primary-text cursor-pointer rounded-full p-1 transition-colors"
               >
-                <XMarkIcon className="h-6 w-6" />
+                <Icon icon="heroicons:x-mark" className="h-6 w-6" />
               </button>
             </div>
           </div>
