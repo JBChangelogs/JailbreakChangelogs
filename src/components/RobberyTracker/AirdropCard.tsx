@@ -2,12 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
-import {
-  ClockIcon,
-  ArrowTopRightOnSquareIcon,
-  UsersIcon,
-  MapPinIcon,
-} from "@heroicons/react/24/outline";
+import { Icon } from "@/components/ui/IconWrapper";
 import { motion, AnimatePresence } from "motion/react";
 import { useOptimizedRealTimeRelativeDate } from "@/hooks/useSharedTimer";
 import { AirdropData } from "@/hooks/useRobberyTrackerAirdropsWebSocket";
@@ -186,7 +181,7 @@ export default function AirdropCard({ airdrop }: AirdropCardProps) {
             onClick={() => setIsMapModalOpen(true)}
             className="active:bg-button-secondary-active bg-button-secondary text-form-button-text hover:bg-button-secondary-hover focus:ring-border-focus mt-2 flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition-colors duration-200 focus:ring-2 focus:outline-none"
           >
-            <MapPinIcon className="h-4 w-4" />
+            <Icon icon="heroicons:map-pin" className="h-4 w-4" />
             View Location
           </button>
 
@@ -198,7 +193,10 @@ export default function AirdropCard({ airdrop }: AirdropCardProps) {
               rel="noopener noreferrer"
               className="bg-button-info text-form-button-text hover:bg-button-info-hover focus:ring-border-focus active:bg-button-info-active mt-2 flex w-full items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition-colors duration-200 focus:ring-2 focus:outline-none"
             >
-              <ArrowTopRightOnSquareIcon className="h-4 w-4" />
+              <Icon
+                icon="heroicons:arrow-top-right-on-square"
+                className="h-4 w-4"
+              />
               Join Server
             </a>
           )}
@@ -209,7 +207,7 @@ export default function AirdropCard({ airdrop }: AirdropCardProps) {
               onClick={() => setIsPlayersModalOpen(true)}
               className="active:bg-button-secondary-active bg-button-secondary text-primary-text hover:bg-button-secondary-hover focus:ring-border-focus mt-2 flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition-colors duration-200 focus:ring-2 focus:outline-none"
             >
-              <UsersIcon className="h-4 w-4" />
+              <Icon icon="heroicons-outline:users" className="h-4 w-4" />
               View {players.length} Players
             </button>
           )}
@@ -218,7 +216,7 @@ export default function AirdropCard({ airdrop }: AirdropCardProps) {
         {/* Footer with Last Update */}
         <div className="border-border-primary mt-4 border-t pt-3">
           <div className="text-primary-text flex items-center justify-center gap-1.5 text-xs font-medium">
-            <ClockIcon className="text-tertiary-text h-3.5 w-3.5" />
+            <Icon icon="mdi:clock" className="text-tertiary-text h-3.5 w-3.5" />
             <span>Last update: {relativeTime || "Just now"}</span>
           </div>
         </div>

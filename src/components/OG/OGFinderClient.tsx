@@ -7,7 +7,6 @@ import { useAuthContext } from "@/contexts/AuthContext";
 import { useUsernameToId } from "@/hooks/useUsernameToId";
 import toast from "react-hot-toast";
 import OGFinderDataStreamer from "./OGFinderDataStreamer";
-import {} from "@heroicons/react/24/outline";
 import { Icon } from "@/components/ui/IconWrapper";
 
 interface OGSearchData {

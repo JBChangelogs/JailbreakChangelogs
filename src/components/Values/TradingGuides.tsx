@@ -6,7 +6,7 @@ import dynamic from "next/dynamic";
 import { YouTubeEmbed } from "@next/third-parties/google";
 
 const Tooltip = dynamic(() => import("@mui/material/Tooltip"), { ssr: false });
-import { ChevronDownIcon, ChevronUpIcon } from "@heroicons/react/24/outline";
+import { Icon } from "@/components/ui/IconWrapper";
 import { demandOrder, trendOrder } from "@/utils/values";
 import { ValueSort } from "@/types";
 
@@ -193,9 +193,17 @@ export default function TradingGuides({
           )}
         </div>
         {isExpanded ? (
-          <ChevronUpIcon className="text-secondary-text h-5 w-5" />
+          <Icon
+            icon="heroicons-outline:chevron-up"
+            className="text-secondary-text h-5 w-5"
+            inline={true}
+          />
         ) : (
-          <ChevronDownIcon className="text-secondary-text h-5 w-5" />
+          <Icon
+            icon="heroicons-outline:chevron-down"
+            className="text-secondary-text h-5 w-5"
+            inline={true}
+          />
         )}
       </button>
 

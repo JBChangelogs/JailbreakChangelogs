@@ -1,8 +1,7 @@
 import React from "react";
-import { ClockIcon } from "@heroicons/react/24/outline";
 import { toast } from "react-hot-toast";
 import Link from "next/link";
-import { ClockIcon as ClockIconSolid } from "@heroicons/react/24/solid";
+import { Icon } from "@/components/ui/IconWrapper";
 import ChangelogSearchInput from "./ChangelogSearchInput";
 
 interface SearchResult {
@@ -101,7 +100,7 @@ const ChangelogFilter: React.FC<ChangelogFilterProps> = ({
               selectedId
             }
           >
-            <ClockIcon className="h-4 w-4" />
+            <Icon icon="mdi:clock" className="h-4 w-4" />
             <span>Go to Latest Update</span>
           </button>
         )}
@@ -111,7 +110,7 @@ const ChangelogFilter: React.FC<ChangelogFilterProps> = ({
           href="/changelogs/timeline"
           className="bg-button-info text-form-button-text hover:bg-button-info-hover flex cursor-pointer items-center gap-2 rounded px-4 py-2 transition-colors"
         >
-          <ClockIconSolid className="h-4 w-4" />
+          <Icon icon="heroicons-solid:clock" className="h-4 w-4" />
           <span>View Timeline</span>
         </Link>
       </div>

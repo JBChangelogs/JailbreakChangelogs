@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { ChevronDownIcon } from "@heroicons/react/24/solid";
+import { Icon } from "@/components/ui/IconWrapper";
 
 interface SupportersBannerProps {
   targetId: string;
@@ -62,7 +62,11 @@ export default function SupportersBanner({ targetId }: SupportersBannerProps) {
         aria-label="View our supporters"
       >
         <span>View Our Supporters</span>
-        <ChevronDownIcon className="h-4 w-4 animate-bounce sm:h-5 sm:w-5" />
+        <Icon
+          icon="heroicons-outline:chevron-down"
+          className="h-4 w-4 animate-bounce sm:h-5 sm:w-5"
+          inline={true}
+        />
       </button>
     </div>
   );

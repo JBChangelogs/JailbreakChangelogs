@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { CommentData } from "@/utils/api";
 import { UserData } from "@/types/auth";
 import { DiscordIcon } from "@/components/Icons/DiscordIcon";
-import { ChatBubbleLeftIcon, TrashIcon } from "@heroicons/react/24/outline";
+import { Icon } from "@/components/ui/IconWrapper";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import ChangelogComments from "@/components/PageComments/ChangelogComments";
 import { deleteTradeAd } from "@/utils/trading";
@@ -228,7 +228,10 @@ export default function TradeDetailsClient({
                                     : "bg-button-info text-form-button-text hover:bg-button-info-hover"
                               }`}
                             >
-                              <ChatBubbleLeftIcon className="h-4 w-4" />
+                              <Icon
+                                icon="heroicons:chat-bubble-left"
+                                className="h-4 w-4"
+                              />
                               {offerStatus.loading
                                 ? "Making Offer..."
                                 : offerStatus.success
@@ -246,7 +249,10 @@ export default function TradeDetailsClient({
                                 : "hover:bg-status-error/80 bg-status-error text-form-button-text cursor-pointer"
                             }`}
                           >
-                            <TrashIcon className="h-4 w-4" />
+                            <Icon
+                              icon="heroicons-outline:trash"
+                              className="h-4 w-4"
+                            />
                             {isDeleting ? "Deleting..." : "Delete"}
                           </button>
                         )}

@@ -12,7 +12,6 @@ import Link from "next/link";
 import { useSupporterModal } from "@/hooks/useSupporterModal";
 import SupporterModal from "../Modals/SupporterModal";
 import LoginModalWrapper from "../Auth/LoginModalWrapper";
-import { ArrowsRightLeftIcon, TrashIcon } from "@heroicons/react/24/outline";
 import { Icon } from "../ui/IconWrapper";
 import {
   safeLocalStorage,
@@ -770,7 +769,10 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
                 onClick={handleSwapSides}
                 className="bg-button-info text-form-button-text hover:bg-button-info-hover"
               >
-                <ArrowsRightLeftIcon className="mr-1 h-5 w-5" />
+                <Icon
+                  icon="heroicons:arrows-right-left"
+                  className="mr-1 h-5 w-5"
+                />
                 Swap Sides
               </Button>
             </Tooltip>
@@ -795,7 +797,7 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
                 onClick={handleClearSides}
                 className="hover:bg-status-error-hover bg-status-error text-form-button-text"
               >
-                <TrashIcon className="mr-1 h-5 w-5" />
+                <Icon icon="heroicons-outline:trash" className="mr-1 h-5 w-5" />
                 Clear
               </Button>
             </Tooltip>
@@ -853,7 +855,10 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
                     size="small"
                     className="bg-status-success/15 hover:bg-status-success/25 border-status-success text-primary-text hover:border-status-success"
                   >
-                    <ArrowsRightLeftIcon className="mr-1 h-4 w-4" />
+                    <Icon
+                      icon="heroicons:arrows-right-left"
+                      className="mr-1 h-4 w-4"
+                    />
                     Mirror
                   </Button>
                 </Tooltip>
@@ -919,7 +924,10 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
                     size="small"
                     className="bg-status-error/15 hover:bg-status-error/25 border-status-error text-primary-text hover:border-status-error"
                   >
-                    <ArrowsRightLeftIcon className="mr-1 h-4 w-4" />
+                    <Icon
+                      icon="heroicons:arrows-right-left"
+                      className="mr-1 h-4 w-4"
+                    />
                     Mirror
                   </Button>
                 </Tooltip>

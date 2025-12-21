@@ -2,11 +2,7 @@ import React, { useState } from "react";
 import SearchIcon from "@mui/icons-material/Search";
 import { DiscordIcon } from "@/components/Icons/DiscordIcon";
 import Link from "next/link";
-import {
-  ChatBubbleLeftIcon,
-  TrashIcon,
-  PencilIcon,
-} from "@heroicons/react/24/outline";
+import { Icon } from "@/components/ui/IconWrapper";
 import { TradeAd } from "@/types/trading";
 import { ItemGrid } from "./ItemGrid";
 import RobloxTradeUser from "./RobloxTradeUser";
@@ -192,7 +188,7 @@ export const TradeAdCard: React.FC<TradeAdCardProps> = ({
                       : "bg-button-info text-form-button-text hover:bg-button-info-hover"
                 }`}
               >
-                <ChatBubbleLeftIcon className="h-5 w-5" />
+                <Icon icon="heroicons:chat-bubble-left" className="h-5 w-5" />
                 {offerStatus?.loading
                   ? "Making Offer..."
                   : offerStatus?.success
@@ -240,7 +236,7 @@ export const TradeAdCard: React.FC<TradeAdCardProps> = ({
                 }}
                 className="bg-button-info text-form-button-text hover:bg-button-info-hover flex cursor-pointer items-center gap-1 rounded-lg px-3 py-1 text-sm transition-colors"
               >
-                <PencilIcon className="h-4 w-4" />
+                <Icon icon="heroicons-outline:pencil" className="h-4 w-4" />
                 Edit
               </button>
               <button
@@ -256,7 +252,7 @@ export const TradeAdCard: React.FC<TradeAdCardProps> = ({
                     : "hover:bg-status-error/80 bg-status-error text-form-button-text cursor-pointer"
                 }`}
               >
-                <TrashIcon className="h-4 w-4" />
+                <Icon icon="heroicons-outline:trash" className="h-4 w-4" />
                 {isDeleting ? "Deleting..." : "Delete"}
               </button>
             </div>

@@ -4,11 +4,6 @@ import React, { useState, useEffect } from "react";
 import { TradeItem } from "@/types/trading";
 import { Button, Slider } from "@mui/material";
 import { AvailableItemsGrid } from "../../trading/AvailableItemsGrid";
-import {
-  ArrowsRightLeftIcon,
-  TrashIcon,
-  EllipsisVerticalIcon,
-} from "@heroicons/react/24/outline";
 import dynamic from "next/dynamic";
 
 const Tooltip = dynamic(() => import("@mui/material/Tooltip"), { ssr: false });
@@ -321,7 +316,10 @@ const CalculatorItemGrid: React.FC<{
                           }}
                           className="text-form-button-text absolute right-1 bottom-1 rounded-full border border-white/10 bg-black/50 p-1 hover:bg-black/60"
                         >
-                          <EllipsisVerticalIcon className="h-4 w-4" />
+                          <Icon
+                            icon="heroicons:ellipsis-vertical"
+                            className="h-4 w-4"
+                          />
                         </button>
                         {item.count > 1 && (
                           <div className="border-primary bg-primary/90 text-primary-foreground absolute top-1 right-1 rounded-full border px-1.5 py-0.5 text-xs">
@@ -1458,7 +1456,10 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
                 onClick={handleSwapSides}
                 className="bg-button-info text-form-button-text hover:bg-button-info-hover"
               >
-                <ArrowsRightLeftIcon className="mr-1 h-5 w-5" />
+                <Icon
+                  icon="heroicons:arrows-right-left"
+                  className="mr-1 h-5 w-5"
+                />
                 Swap Sides
               </Button>
             </Tooltip>
@@ -1483,7 +1484,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
                 onClick={handleClearSides}
                 className="hover:bg-status-error-hover bg-status-error text-form-button-text"
               >
-                <TrashIcon className="mr-1 h-5 w-5" />
+                <Icon icon="heroicons-outline:trash" className="mr-1 h-5 w-5" />
                 Clear
               </Button>
             </Tooltip>
@@ -1542,7 +1543,10 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
                     size="small"
                     className="bg-status-success/15 hover:bg-status-success/25 border-status-success text-primary-text hover:border-status-success"
                   >
-                    <ArrowsRightLeftIcon className="mr-1 h-4 w-4" />
+                    <Icon
+                      icon="heroicons:arrows-right-left"
+                      className="mr-1 h-4 w-4"
+                    />
                     Mirror
                   </Button>
                 </Tooltip>
@@ -1626,7 +1630,10 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
                     size="small"
                     className="bg-status-error/15 hover:border-status-error-hover hover:bg-status-error/25 border-status-error text-primary-text"
                   >
-                    <ArrowsRightLeftIcon className="mr-1 h-4 w-4" />
+                    <Icon
+                      icon="heroicons:arrows-right-left"
+                      className="mr-1 h-4 w-4"
+                    />
                     Mirror
                   </Button>
                 </Tooltip>

@@ -2,7 +2,7 @@
 
 import { Typography } from "@mui/material";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
-import { ShieldCheckIcon } from "@heroicons/react/24/outline";
+import { Icon } from "@/components/ui/IconWrapper";
 
 export default function PrivacyPage() {
   return (
@@ -18,7 +18,10 @@ export default function PrivacyPage() {
       <div className="relative mx-auto max-w-4xl">
         <Breadcrumb />
         <div className="mb-2 flex items-center gap-2">
-          <ShieldCheckIcon className="text-secondary-text h-6 w-6" />
+          <Icon
+            icon="heroicons-outline:shield-check"
+            className="text-secondary-text h-6 w-6"
+          />
           <h1 className="text-primary-text text-2xl font-bold">
             Privacy Policy
           </h1>

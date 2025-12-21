@@ -1,9 +1,6 @@
 import React, { useState } from "react";
 import Image from "next/image";
-import {
-  ArrowRightIcon,
-  ArrowTurnDownRightIcon,
-} from "@heroicons/react/24/outline";
+import { Icon } from "@/components/ui/IconWrapper";
 import {
   parseMarkdown,
   extractContentInfo,
@@ -170,9 +167,15 @@ const ChangelogContent: React.FC<ChangelogContentProps> = ({
                       ) : (
                         <>
                           {item.isNested ? (
-                            <ArrowTurnDownRightIcon className="text-secondary-text mt-1 h-6 w-6 flex-shrink-0 sm:h-5 sm:w-5" />
+                            <Icon
+                              icon="heroicons:arrow-turn-down-right"
+                              className="text-secondary-text mt-1 h-6 w-6 flex-shrink-0 sm:h-5 sm:w-5"
+                            />
                           ) : (
-                            <ArrowRightIcon className="text-secondary-text mt-1 h-6 w-6 flex-shrink-0 sm:h-5 sm:w-5" />
+                            <Icon
+                              icon="heroicons-outline:arrow-right"
+                              className="text-secondary-text mt-1 h-6 w-6 flex-shrink-0 sm:h-5 sm:w-5"
+                            />
                           )}
                           <span
                             dangerouslySetInnerHTML={{ __html: item.text }}

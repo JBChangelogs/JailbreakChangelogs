@@ -3,12 +3,6 @@ import { convertUrlsToLinks } from "@/utils/urlConverter";
 import { Button } from "@mui/material";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { Dialog, DialogPanel } from "@headlessui/react";
-import {
-  ArrowUpIcon,
-  ArrowDownIcon,
-  ChevronDownIcon,
-  ChevronUpIcon,
-} from "@heroicons/react/24/outline";
 import { Icon } from "@/components/ui/IconWrapper";
 import Link from "next/link";
 import ReactMarkdown from "react-markdown";
@@ -17,7 +11,6 @@ import { formatCustomDate } from "@/utils/timestamp";
 import Image from "next/image";
 import { DefaultAvatar } from "@/utils/avatar";
 import type { UserData } from "@/types/auth";
-import { Icon } from "../ui/IconWrapper";
 
 type ItemChangeValue = string | number | boolean | null;
 
@@ -266,7 +259,6 @@ export default function ItemChangelogs({
     0,
   );
 
-   
   const virtualizer = useVirtualizer({
     count: displayableChanges.length,
     getScrollElement: () => parentRef.current,
@@ -556,9 +548,17 @@ export default function ItemChangelogs({
             className="border-border-primary bg-button-info text-form-button-text hover:border-border-focus hover:bg-button-info-hover flex w-full items-center justify-center gap-1 rounded-lg border px-3 py-1.5 text-sm transition-colors sm:w-auto"
           >
             {sortOrder === "newest" ? (
-              <ArrowDownIcon className="h-4 w-4" />
+              <Icon
+                icon="heroicons-outline:arrow-down"
+                className="h-4 w-4"
+                inline={true}
+              />
             ) : (
-              <ArrowUpIcon className="h-4 w-4" />
+              <Icon
+                icon="heroicons-outline:arrow-up"
+                className="h-4 w-4"
+                inline={true}
+              />
             )}
             {sortOrder === "newest" ? "Newest First" : "Oldest First"}
           </button>
@@ -579,7 +579,11 @@ export default function ItemChangelogs({
             <div className="relative mb-6">
               <div className="from-border-focus/20 to-button-info-hover/20 absolute inset-0 rounded-full bg-gradient-to-r blur-xl"></div>
               <div className="border-border-focus/30 bg-secondary-bg relative rounded-full border p-4">
-                <ArrowDownIcon className="text-border-focus h-8 w-8 sm:h-10 sm:w-10" />
+                <Icon
+                  icon="heroicons-outline:arrow-down"
+                  className="text-border-focus h-8 w-8 sm:h-10 sm:w-10"
+                  inline={true}
+                />
               </div>
             </div>
             <h3 className="text-primary-text mb-2 text-lg font-semibold sm:text-xl">
@@ -754,12 +758,20 @@ export default function ItemChangelogs({
                                       >
                                         {isExpanded ? (
                                           <>
-                                            <ChevronUpIcon className="h-4 w-4" />
+                                            <Icon
+                                              icon="heroicons-outline:chevron-up"
+                                              className="h-4 w-4"
+                                              inline={true}
+                                            />
                                             Show Less
                                           </>
                                         ) : (
                                           <>
-                                            <ChevronDownIcon className="h-4 w-4" />
+                                            <Icon
+                                              icon="heroicons-outline:chevron-down"
+                                              className="h-4 w-4"
+                                              inline={true}
+                                            />
                                             Read More
                                           </>
                                         )}

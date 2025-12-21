@@ -5,7 +5,7 @@ import { useAuthContext } from "@/contexts/AuthContext";
 import Link from "next/link";
 import Image from "next/image";
 import { RobloxIcon } from "@/components/Icons/RobloxIcon";
-import { TrophyIcon } from "@heroicons/react/24/solid";
+import { Icon } from "@/components/ui/IconWrapper";
 import confetti from "canvas-confetti";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import { Dialog, DialogPanel, DialogTitle } from "@headlessui/react";
@@ -745,7 +745,10 @@ export default function RedeemPage() {
                     className="object-contain"
                   />
                 ) : (
-                  <TrophyIcon className="h-10 w-10 text-yellow-500" />
+                  <Icon
+                    icon="heroicons:trophy-solid"
+                    className="h-10 w-10 text-yellow-500"
+                  />
                 )}
               </div>
 

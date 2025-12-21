@@ -3,7 +3,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { Changelog } from "@/utils/api";
-import { ArrowPathIcon } from "@heroicons/react/24/outline";
+import { Icon } from "@/components/ui/IconWrapper";
 
 interface TimelineContentProps {
   changelogs: Changelog[];
@@ -98,7 +98,10 @@ const TimelineContent: React.FC<TimelineContentProps> = ({ changelogs }) => {
                 {changelog.image_url && (
                   <div className="relative aspect-video w-full">
                     <div className="bg-primary-bg absolute inset-0 flex items-center justify-center">
-                      <ArrowPathIcon className="text-link h-6 w-6 animate-spin" />
+                      <Icon
+                        icon="heroicons:arrow-path"
+                        className="text-link h-6 w-6 animate-spin"
+                      />
                     </div>
                     <Image
                       src={`https://assets.jailbreakchangelogs.xyz${changelog.image_url}`}

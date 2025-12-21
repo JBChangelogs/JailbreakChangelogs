@@ -13,7 +13,7 @@ import {
   shift,
   autoUpdate,
 } from "@floating-ui/react";
-import { ChevronDownIcon } from "@heroicons/react/24/outline";
+import { Icon } from "@/components/ui/IconWrapper";
 
 interface FloatingDropdownOption {
   value: string;
@@ -93,10 +93,12 @@ export default function FloatingDropdown({
         }`}
       >
         <span className="truncate">{displayLabel}</span>
-        <ChevronDownIcon
+        <Icon
+          icon="heroicons-outline:chevron-down"
           className={`ml-2 h-4 w-4 flex-shrink-0 transition-transform ${
             isOpen ? "rotate-180" : ""
           }`}
+          inline={true}
         />
       </button>
 

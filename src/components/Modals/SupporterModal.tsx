@@ -1,6 +1,5 @@
 import React from "react";
 import { Dialog, DialogPanel, DialogTitle } from "@headlessui/react";
-import { SparklesIcon } from "@heroicons/react/24/outline";
 import { Icon } from "@/components/ui/IconWrapper";
 import Link from "next/link";
 import Image from "next/image";
@@ -154,7 +153,10 @@ export default function SupporterModal({
           <div className="modal-header border-border-primary flex items-center justify-between border-b p-6">
             <div className="flex items-center gap-3">
               <div className="bg-button-info rounded-lg p-2">
-                <SparklesIcon className="text-form-button-text h-6 w-6" />
+                <Icon
+                  icon="heroicons-outline:sparkles"
+                  className="text-form-button-text h-6 w-6"
+                />
               </div>
               <div>
                 <DialogTitle className="text-primary-text text-xl font-semibold">

@@ -9,9 +9,7 @@ import dynamic from "next/dynamic";
 const Tooltip = dynamic(() => import("@mui/material/Tooltip"), { ssr: false });
 import { darkTheme } from "@/theme/darkTheme";
 
-import { PlayIcon, PauseIcon } from "@heroicons/react/24/solid";
-import { ChevronDownIcon, ChevronUpIcon } from "@heroicons/react/24/outline";
-import { InformationCircleIcon } from "@heroicons/react/24/outline";
+import { Icon } from "@/components/ui/IconWrapper";
 
 import toast from "react-hot-toast";
 
@@ -75,7 +73,6 @@ import { CategoryIconBadge } from "@/utils/categoryIcons";
 import { convertUrlsToLinks } from "@/utils/urlConverter";
 import { ItemDetails } from "@/types";
 import type { UserData } from "@/types/auth";
-import { Icon } from "@/components/ui/IconWrapper";
 
 interface ItemDetailsClientProps {
   item: ItemDetails;
@@ -467,9 +464,15 @@ export default function ItemDetailsClient({
                     }`}
                   >
                     {isPlaying ? (
-                      <PauseIcon className="text-primary-text h-12 w-12 transition-transform" />
+                      <Icon
+                        icon="heroicons:pause"
+                        className="text-primary-text h-12 w-12 transition-transform"
+                      />
                     ) : (
-                      <PlayIcon className="text-primary-text h-12 w-12 transition-transform" />
+                      <Icon
+                        icon="heroicons:play-solid"
+                        className="text-primary-text h-12 w-12 transition-transform"
+                      />
                     )}
                   </button>
                 )}
@@ -641,7 +644,10 @@ export default function ItemDetailsClient({
                                   }}
                                 >
                                   <span className="text-tertiary-text hover:text-primary-text cursor-help">
-                                    <InformationCircleIcon className="h-4 w-4" />
+                                    <Icon
+                                      icon="heroicons-outline:information-circle"
+                                      className="h-4 w-4"
+                                    />
                                   </span>
                                 </Tooltip>
                               </div>
@@ -704,7 +710,11 @@ export default function ItemDetailsClient({
                                 }
                                 className="text-button-info hover:text-button-info-hover ml-1 inline-flex cursor-pointer items-center gap-1 text-sm font-medium transition-colors hover:underline"
                               >
-                                <ChevronDownIcon className="h-4 w-4" />
+                                <Icon
+                                  icon="heroicons-outline:chevron-down"
+                                  className="h-4 w-4"
+                                  inline={true}
+                                />
                                 Read More
                               </button>
                             </>
@@ -721,7 +731,11 @@ export default function ItemDetailsClient({
                               }
                               className="text-button-info hover:text-button-info-hover mt-2 flex cursor-pointer items-center gap-1 text-sm font-medium transition-colors hover:underline"
                             >
-                              <ChevronUpIcon className="h-4 w-4" />
+                              <Icon
+                                icon="heroicons-outline:chevron-up"
+                                className="h-4 w-4"
+                                inline={true}
+                              />
                               Show Less
                             </button>
                           )}

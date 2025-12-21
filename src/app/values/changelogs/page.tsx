@@ -9,7 +9,7 @@ import ValuesChangelogHeader from "@/components/Values/ValuesChangelogHeader";
 import { PUBLIC_API_URL } from "@/utils/api";
 import Link from "next/link";
 import { formatMessageDate } from "@/utils/timestamp";
-import { ArrowDownIcon, ArrowUpIcon } from "@heroicons/react/24/outline";
+import { Icon } from "@/components/ui/IconWrapper";
 import { useVirtualizer } from "@tanstack/react-virtual";
 
 interface ChangeData {
@@ -177,9 +177,17 @@ export default function ValuesChangelogPage() {
                   className="border-border-primary bg-button-info text-form-button-text hover:border-border-focus hover:bg-button-info-hover flex cursor-pointer items-center gap-1 rounded-lg border px-3 py-1.5 text-sm transition-colors"
                 >
                   {sortOrder === "newest" ? (
-                    <ArrowDownIcon className="h-4 w-4" />
+                    <Icon
+                      icon="heroicons-outline:arrow-down"
+                      className="h-4 w-4"
+                      inline={true}
+                    />
                   ) : (
-                    <ArrowUpIcon className="h-4 w-4" />
+                    <Icon
+                      icon="heroicons-outline:arrow-up"
+                      className="h-4 w-4"
+                      inline={true}
+                    />
                   )}
                   {sortOrder === "newest" ? "Newest First" : "Oldest First"}
                 </button>
@@ -200,7 +208,11 @@ export default function ValuesChangelogPage() {
                       <div className="relative mb-6">
                         <div className="from-border-focus/20 to-button-info-hover/20 absolute inset-0 rounded-full bg-gradient-to-r blur-xl"></div>
                         <div className="border-border-focus/30 bg-secondary-bg relative rounded-full border p-4">
-                          <ArrowDownIcon className="text-border-focus h-8 w-8 sm:h-10 sm:w-10" />
+                          <Icon
+                            icon="heroicons-outline:arrow-down"
+                            className="text-border-focus h-8 w-8 sm:h-10 sm:w-10"
+                            inline={true}
+                          />
                         </div>
                       </div>
                       <h3 className="text-primary-text mb-2 text-lg font-semibold sm:text-xl">

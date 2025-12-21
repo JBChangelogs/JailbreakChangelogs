@@ -25,7 +25,6 @@
     "@floating-ui/dom": "^1.7.4",
     "@floating-ui/react": "^0.27.16",
     "@headlessui/react": "^2.2.9",
-    "@heroicons/react": "^2.2.0",
     "@iconify/react": "^6.0.2",
     "@iconify/types": "^2.0.0",
     "@mui/icons-material": "^7.3.6",

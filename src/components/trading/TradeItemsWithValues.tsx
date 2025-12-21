@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { TradeItem } from "@/types/trading";
 import Link from "next/link";
-import { ChevronDownIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
+import { Icon } from "@/components/ui/IconWrapper";
 import { getCategoryColor } from "@/utils/categoryIcons";
 import { getDemandColor, getTrendColor } from "@/utils/badgeColors";
 
@@ -151,9 +151,16 @@ const ItemRow: React.FC<ItemRowProps> = ({ item, side, isFirst = false }) => {
             aria-label={isExpanded ? "Collapse details" : "Expand details"}
           >
             {isExpanded ? (
-              <ChevronDownIcon className="h-4 w-4" />
+              <Icon
+                icon="heroicons-outline:chevron-down"
+                className="h-4 w-4"
+                inline={true}
+              />
             ) : (
-              <ChevronRightIcon className="h-4 w-4" />
+              <Icon
+                icon="heroicons-outline:chevron-right"
+                className="h-4 w-4"
+              />
             )}
           </button>
         </div>

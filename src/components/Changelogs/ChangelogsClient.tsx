@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { use } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowUpIcon } from "@heroicons/react/24/outline";
+import { Icon } from "@/components/ui/IconWrapper";
 import toast from "react-hot-toast";
 import { Changelog } from "@/utils/api";
 import Image from "next/image";
@@ -127,7 +127,11 @@ export default function ChangelogsClient({
             className="bg-button-info text-primary-text hover:bg-button-info-hover rounded-full p-3 shadow-lg transition-all duration-200 hover:scale-110"
             aria-label="Back to top"
           >
-            <ArrowUpIcon className="h-6 w-6" />
+            <Icon
+              icon="heroicons-outline:arrow-up"
+              className="h-6 w-6"
+              inline={true}
+            />
           </button>
         </div>
       )}

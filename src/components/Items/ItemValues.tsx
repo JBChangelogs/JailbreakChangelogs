@@ -1,5 +1,4 @@
-import React from "react";
-import { BanknotesIcon } from "@heroicons/react/24/outline";
+import { Icon } from "@/components/ui/IconWrapper";
 import Image from "next/image";
 import { formatFullValue, formatPrice, getValueChange } from "@/utils/values";
 import { getDemandColor, getTrendColor } from "@/utils/badgeColors";
@@ -36,7 +35,10 @@ export default function ItemValues({
     <div className="border-border-primary bg-secondary-bg hover:shadow-card-shadow mb-8 space-y-6 rounded-lg border p-6 shadow-lg transition-all duration-200">
       <div className="flex items-center gap-3">
         <div className="bg-button-info/20 flex h-10 w-10 items-center justify-center rounded-lg">
-          <BanknotesIcon className="text-button-info h-6 w-6" />
+          <Icon
+            icon="heroicons:banknotes"
+            className="text-button-info h-6 w-6"
+          />
         </div>
         <h3 className="text-primary-text text-2xl font-bold">Item Values</h3>
       </div>
@@ -124,7 +126,10 @@ export default function ItemValues({
               ) : (
                 !isUSDPrice &&
                 price.toLowerCase() !== "free" && (
-                  <BanknotesIcon className="text-primary-text h-6 w-6" />
+                  <Icon
+                    icon="heroicons:banknotes"
+                    className="text-primary-text h-6 w-6"
+                  />
                 )
               ))}
             <p className="text-primary-text text-3xl font-bold">

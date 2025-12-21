@@ -8,7 +8,6 @@ import { UserAvatar } from "@/utils/avatar";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import { Button, Skeleton } from "@mui/material";
 import { Icon } from "../../../components/ui/IconWrapper";
-import UserPlusIcon from "@heroicons/react/24/outline/UserPlusIcon";
 import { Banner } from "@/components/Profile/Banner";
 import { UserSettings, FollowingData } from "@/types/auth";
 import { toast } from "react-hot-toast";
@@ -981,7 +980,12 @@ export default function UserProfileClient({
                         <span>
                           <Button
                             variant="contained"
-                            startIcon={<UserPlusIcon className="h-5 w-5" />}
+                            startIcon={
+                              <Icon
+                                icon="heroicons:user-plus"
+                                className="h-5 w-5"
+                              />
+                            }
                             onClick={handleFollow}
                             disabled={isLoadingFollow}
                             sx={{
@@ -1031,7 +1035,12 @@ export default function UserProfileClient({
                         <span>
                           <Button
                             variant="contained"
-                            startIcon={<UserPlusIcon className="h-5 w-5" />}
+                            startIcon={
+                              <Icon
+                                icon="heroicons:user-plus"
+                                className="h-5 w-5"
+                              />
+                            }
                             onClick={() =>
                               toast.error(
                                 "You need to be logged in to follow users",

@@ -19,8 +19,6 @@ import { useOptimizedRealTimeRelativeDate } from "@/hooks/useSharedTimer";
 import { formatFullValue, getValueChange } from "@/utils/values";
 import { getDemandColor, getTrendColor } from "@/utils/badgeColors";
 import { useEffect, useRef, useState } from "react";
-import { PlayIcon } from "@heroicons/react/24/solid";
-import { PauseIcon } from "@heroicons/react/24/solid";
 import SubItemsDropdown from "./SubItemsDropdown";
 import toast from "react-hot-toast";
 import { useIsAuthenticated } from "@/contexts/AuthContext";
@@ -356,9 +354,15 @@ export default function ItemCard({
                 }`}
               >
                 {isPlaying ? (
-                  <PauseIcon className="text-primary-text h-8 w-8 transition-transform sm:h-12 sm:w-12" />
+                  <Icon
+                    icon="heroicons:pause"
+                    className="text-primary-text h-8 w-8 transition-transform sm:h-12 sm:w-12"
+                  />
                 ) : (
-                  <PlayIcon className="text-primary-text h-8 w-8 transition-transform sm:h-12 sm:w-12" />
+                  <Icon
+                    icon="heroicons:play-solid"
+                    className="text-primary-text h-8 w-8 transition-transform sm:h-12 sm:w-12"
+                  />
                 )}
               </button>
             </div>

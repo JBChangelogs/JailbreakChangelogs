@@ -9,7 +9,6 @@ import { TradeAdTabs } from "./TradeAdTabs";
 import { Button } from "@mui/material";
 import { Pagination } from "@/components/ui/Pagination";
 import { Masonry } from "@mui/lab";
-import { ArrowDownIcon, ArrowUpIcon } from "@heroicons/react/24/outline";
 import { Icon } from "@/components/ui/IconWrapper";
 import { deleteTradeAd } from "@/utils/trading";
 import toast from "react-hot-toast";
@@ -468,9 +467,17 @@ export default function TradeAds({
                 className="border-border-primary bg-button-info text-form-button-text hover:border-border-focus hover:bg-button-info-hover flex cursor-pointer items-center gap-1 rounded-lg border px-3 py-1.5 text-sm transition-colors"
               >
                 {sortOrder === "newest" ? (
-                  <ArrowDownIcon className="h-4 w-4" />
+                  <Icon
+                    icon="heroicons-outline:arrow-down"
+                    className="h-4 w-4"
+                    inline={true}
+                  />
                 ) : (
-                  <ArrowUpIcon className="h-4 w-4" />
+                  <Icon
+                    icon="heroicons-outline:arrow-up"
+                    className="h-4 w-4"
+                    inline={true}
+                  />
                 )}
                 {sortOrder === "newest" ? "Newest First" : "Oldest First"}
               </button>
@@ -554,9 +561,17 @@ export default function TradeAds({
                 className="border-border-primary bg-button-info text-form-button-text hover:border-border-focus hover:bg-button-info-hover flex cursor-pointer items-center gap-1 rounded-lg border px-3 py-1.5 text-sm transition-colors"
               >
                 {sortOrder === "newest" ? (
-                  <ArrowDownIcon className="h-4 w-4" />
+                  <Icon
+                    icon="heroicons-outline:arrow-down"
+                    className="h-4 w-4"
+                    inline={true}
+                  />
                 ) : (
-                  <ArrowUpIcon className="h-4 w-4" />
+                  <Icon
+                    icon="heroicons-outline:arrow-up"
+                    className="h-4 w-4"
+                    inline={true}
+                  />
                 )}
                 {sortOrder === "newest" ? "Newest First" : "Oldest First"}
               </button>
@@ -688,9 +703,17 @@ export default function TradeAds({
                     className="border-border-primary bg-button-info text-form-button-text hover:border-border-focus hover:bg-button-info-hover flex cursor-pointer items-center gap-1 rounded-lg border px-3 py-1.5 text-sm transition-colors"
                   >
                     {sortOrder === "newest" ? (
-                      <ArrowDownIcon className="h-4 w-4" />
+                      <Icon
+                        icon="heroicons-outline:arrow-down"
+                        className="h-4 w-4"
+                        inline={true}
+                      />
                     ) : (
-                      <ArrowUpIcon className="h-4 w-4" />
+                      <Icon
+                        icon="heroicons-outline:arrow-up"
+                        className="h-4 w-4"
+                        inline={true}
+                      />
                     )}
                     {sortOrder === "newest" ? "Newest First" : "Oldest First"}
                   </button>

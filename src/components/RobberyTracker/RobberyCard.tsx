@@ -2,13 +2,6 @@
 
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
-import {
-  CheckCircleIcon,
-  ClockIcon,
-  ArrowTopRightOnSquareIcon,
-  ClipboardDocumentIcon,
-  UsersIcon,
-} from "@heroicons/react/24/outline";
 import { Icon } from "@/components/ui/IconWrapper";
 import { useOptimizedRealTimeRelativeDate } from "@/hooks/useSharedTimer";
 import { RobberyData } from "@/hooks/useRobberyTrackerWebSocket";
@@ -154,7 +147,7 @@ export default function RobberyCard({ robbery }: RobberyCardProps) {
       case 3:
         return (
           <div className="flex items-center gap-1.5 rounded-full bg-gray-500/20 px-3 py-1 text-gray-400">
-            <CheckCircleIcon className="h-4 w-4" />
+            <Icon icon="heroicons-outline:check-circle" className="h-4 w-4" />
             <span className="text-sm font-medium">Completed</span>
           </div>
         );
@@ -219,7 +212,10 @@ export default function RobberyCard({ robbery }: RobberyCardProps) {
                 title="Click to copy code"
               >
                 {robbery.metadata.casino_code}
-                <ClipboardDocumentIcon className="h-4 w-4 opacity-50 transition-opacity group-hover:opacity-100" />
+                <Icon
+                  icon="heroicons:clipboard-document"
+                  className="h-4 w-4 opacity-50 transition-opacity group-hover:opacity-100"
+                />
               </button>
             </div>
           )}
@@ -253,7 +249,10 @@ export default function RobberyCard({ robbery }: RobberyCardProps) {
               rel="noopener noreferrer"
               className="bg-button-info text-form-button-text hover:bg-button-info-hover focus:ring-border-focus active:bg-button-info-active mt-3 flex w-full items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition-colors duration-200 focus:ring-2 focus:outline-none"
             >
-              <ArrowTopRightOnSquareIcon className="h-4 w-4" />
+              <Icon
+                icon="heroicons:arrow-top-right-on-square"
+                className="h-4 w-4"
+              />
               Join Server
             </a>
           )}
@@ -264,7 +263,7 @@ export default function RobberyCard({ robbery }: RobberyCardProps) {
               onClick={() => setIsPlayersModalOpen(true)}
               className="active:bg-button-secondary-active bg-button-secondary text-primary-text hover:bg-button-secondary-hover focus:ring-border-focus mt-2 flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition-colors duration-200 focus:ring-2 focus:outline-none"
             >
-              <UsersIcon className="h-4 w-4" />
+              <Icon icon="heroicons-outline:users" className="h-4 w-4" />
               View {players.length} Players
             </button>
           )}
@@ -273,7 +272,7 @@ export default function RobberyCard({ robbery }: RobberyCardProps) {
         {/* Footer with Last Update */}
         <div className="border-border-primary mt-4 border-t pt-3">
           <div className="text-primary-text flex items-center justify-center gap-1.5 text-xs font-medium">
-            <ClockIcon className="text-tertiary-text h-3.5 w-3.5" />
+            <Icon icon="mdi:clock" className="text-tertiary-text h-3.5 w-3.5" />
             <span>Last update: {relativeTime || "Just now"}</span>
           </div>
         </div>

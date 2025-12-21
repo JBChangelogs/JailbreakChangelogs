@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { HomeIcon } from "@heroicons/react/24/outline";
+import { Icon } from "./IconWrapper";
 
 export default function ComingSoon() {
   return (
@@ -108,7 +108,7 @@ export default function ComingSoon() {
               href="/"
               className="bg-button-info text-form-button-text hover:bg-button-info-hover flex w-full items-center justify-center gap-2 rounded-lg px-6 py-3 font-medium transition-colors"
             >
-              <HomeIcon className="h-5 w-5" />
+              <Icon icon="heroicons-outline:home" className="h-5 w-5" />
               Go Home
             </Link>
           </div>

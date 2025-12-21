@@ -24,15 +24,6 @@ import {
   fetchUsersBatchAction,
 } from "@/app/api/comments/actions";
 import { UserAvatar } from "@/utils/avatar";
-import {
-  PencilIcon,
-  TrashIcon,
-  ArrowUpIcon,
-  ArrowDownIcon,
-  EllipsisHorizontalIcon,
-  ChatBubbleLeftIcon,
-  FlagIcon,
-} from "@heroicons/react/24/outline";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { UserData } from "@/types/auth";
 import Link from "next/link";
@@ -680,9 +671,17 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                 className="border-border-primary bg-button-info text-form-button-text hover:border-border-focus hover:bg-button-info-hover flex items-center gap-1 rounded-lg border px-4 py-2 text-sm transition-colors"
               >
                 {sortOrder === "newest" ? (
-                  <ArrowDownIcon className="h-4 w-4" />
+                  <Icon
+                    icon="heroicons-outline:arrow-down"
+                    className="h-4 w-4"
+                    inline={true}
+                  />
                 ) : (
-                  <ArrowUpIcon className="h-4 w-4" />
+                  <Icon
+                    icon="heroicons-outline:arrow-up"
+                    className="h-4 w-4"
+                    inline={true}
+                  />
                 )}
                 {sortOrder === "newest" ? "Newest First" : "Oldest First"}
               </button>
@@ -761,7 +760,10 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
               <div className="relative mb-6">
                 <div className="from-border-focus/20 to-button-info-hover/20 absolute inset-0 rounded-full bg-gradient-to-r blur-xl"></div>
                 <div className="border-border-focus/30 bg-secondary-bg relative rounded-full border p-4">
-                  <ChatBubbleLeftIcon className="text-border-focus h-8 w-8 sm:h-10 sm:w-10" />
+                  <Icon
+                    icon="heroicons:chat-bubble-left"
+                    className="text-border-focus h-8 w-8 sm:h-10 sm:w-10"
+                  />
                 </div>
               </div>
               <h3 className="text-primary-text mb-2 text-lg font-semibold sm:text-xl">
@@ -985,7 +987,10 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                                 onClick={(e) => handleMenuOpen(e, comment.id)}
                                 className={`text-primary-text hover:bg-quaternary-bg rounded-lg p-2 opacity-100 transition-all duration-200 lg:opacity-0 lg:group-hover:opacity-100 ${Boolean(menuAnchorEl) && selectedCommentId === comment.id ? "opacity-100" : ""}`}
                               >
-                                <EllipsisHorizontalIcon className="h-4 w-4" />
+                                <Icon
+                                  icon="heroicons:ellipsis-horizontal"
+                                  className="h-4 w-4"
+                                />
                               </IconButton>
                             </div>
                           </div>
@@ -1167,7 +1172,10 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                                     key="edit"
                                     onClick={handleEditClick}
                                   >
-                                    <PencilIcon className="mr-3 h-4 w-4" />
+                                    <Icon
+                                      icon="heroicons-outline:pencil"
+                                      className="mr-3 h-4 w-4"
+                                    />
                                     Edit Comment
                                   </MenuItem>
                                 ),
@@ -1176,13 +1184,19 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                                   onClick={handleDeleteClick}
                                   className="hover:bg-button-danger/10 text-button-danger"
                                 >
-                                  <TrashIcon className="text-button-danger mr-3 h-4 w-4" />
+                                  <Icon
+                                    icon="heroicons-outline:trash"
+                                    className="text-button-danger mr-3 h-4 w-4"
+                                  />
                                   Delete Comment
                                 </MenuItem>,
                               ].filter(Boolean)
                             ) : (
                               <MenuItem onClick={handleReportClick}>
-                                <FlagIcon className="mr-3 h-4 w-4" />
+                                <Icon
+                                  icon="heroicons-outline:flag"
+                                  className="mr-3 h-4 w-4"
+                                />
                                 Report Comment
                               </MenuItem>
                             )}

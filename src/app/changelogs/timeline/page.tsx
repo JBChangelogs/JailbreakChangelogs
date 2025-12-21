@@ -1,4 +1,3 @@
-import React from "react";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import TimelineClient from "@/components/Timeline/TimelineClient";
 import { fetchChangelogList } from "@/utils/api";

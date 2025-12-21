@@ -5,7 +5,7 @@ import Breadcrumb from "@/components/Layout/Breadcrumb";
 import ServerHeader from "@/components/Servers/ServerHeader";
 import ServerList from "@/components/Servers/ServerList";
 import VIPServerNotice from "@/components/ui/VIPServerNotice";
-import { ArrowUpIcon } from "@heroicons/react/24/outline";
+import { Icon } from "@/components/ui/IconWrapper";
 
 type SortOption =
   | "date_added_asc"
@@ -49,7 +49,11 @@ export default function ServersPage() {
           className="bg-button-info text-form-button-text hover:bg-button-info-hover fixed right-8 bottom-8 z-[2000] rounded-full p-3 shadow-lg focus:outline-none"
           aria-label="Back to top"
         >
-          <ArrowUpIcon className="h-6 w-6" />
+          <Icon
+            icon="heroicons-outline:arrow-up"
+            className="h-6 w-6"
+            inline={true}
+          />
         </button>
       )}
     </main>

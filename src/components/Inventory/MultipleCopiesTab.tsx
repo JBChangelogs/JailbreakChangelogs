@@ -8,7 +8,6 @@ import InventoryItemsGrid from "./InventoryItemsGrid";
 import { Item, RobloxUser } from "@/types";
 import { InventoryItem } from "@/app/inventories/types";
 import { mergeInventoryArrayWithMetadata } from "@/utils/inventoryMerge";
-import { Icon } from "../ui/IconWrapper";
 import { getCategoryIcon, getCategoryColor } from "@/utils/categoryIcons";
 
 interface DuplicatesTabProps {

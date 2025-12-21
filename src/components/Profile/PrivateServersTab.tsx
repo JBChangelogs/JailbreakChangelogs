@@ -1,9 +1,5 @@
 import React from "react";
-import {
-  ShieldCheckIcon,
-  ClockIcon,
-  ClipboardIcon,
-} from "@heroicons/react/24/outline";
+import { Icon } from "@/components/ui/IconWrapper";
 import { formatProfileDate } from "@/utils/timestamp";
 import Link from "next/link";
 import toast from "react-hot-toast";
@@ -38,7 +34,10 @@ const PrivateServersTab: React.FC<PrivateServersTabProps> = ({
   if (!servers || servers.length === 0) {
     return (
       <div className="border-border-primary rounded-lg border p-8 text-center">
-        <ShieldCheckIcon className="text-button-info mx-auto mb-4 h-12 w-12" />
+        <Icon
+          icon="heroicons-outline:shield-check"
+          className="text-button-info mx-auto mb-4 h-12 w-12"
+        />
         <h3 className="text-primary-text mb-2 text-xl font-semibold">
           {isOwnProfile
             ? "You have not submitted any private servers."
@@ -60,7 +59,10 @@ const PrivateServersTab: React.FC<PrivateServersTabProps> = ({
     <div className="space-y-6">
       <div className="border-border-primary rounded-lg border p-4">
         <div className="mb-3 flex items-center gap-2">
-          <ShieldCheckIcon className="text-button-info h-5 w-5" />
+          <Icon
+            icon="heroicons-outline:shield-check"
+            className="text-button-info h-5 w-5"
+          />
           <h2 className="text-primary-text text-lg font-semibold">
             Private Servers [{servers.length}]
           </h2>
@@ -73,7 +75,10 @@ const PrivateServersTab: React.FC<PrivateServersTabProps> = ({
             >
               <div className="mb-4 flex flex-col gap-3">
                 <div className="flex items-center space-x-2">
-                  <ShieldCheckIcon className="text-button-info h-5 w-5" />
+                  <Icon
+                    icon="heroicons-outline:shield-check"
+                    className="text-button-info h-5 w-5"
+                  />
                   <span className="text-primary-text">Server #{index + 1}</span>
                 </div>
                 <div className="flex flex-wrap gap-2">
@@ -82,7 +87,10 @@ const PrivateServersTab: React.FC<PrivateServersTabProps> = ({
                     className="border-button-info bg-button-info text-form-button-text hover:bg-button-info-hover cursor-pointer rounded-lg border px-2 py-1 text-sm transition-colors sm:px-3"
                     aria-label="Copy Server Link"
                   >
-                    <ClipboardIcon className="h-4 w-4" />
+                    <Icon
+                      icon="heroicons-outline:clipboard"
+                      className="h-4 w-4"
+                    />
                   </button>
                   <a
                     href={server.link}
@@ -96,7 +104,10 @@ const PrivateServersTab: React.FC<PrivateServersTabProps> = ({
               </div>
               <div className="space-y-3 sm:space-y-4">
                 <div className="flex items-center space-x-2">
-                  <ClockIcon className="text-secondary-text h-5 w-5 flex-shrink-0" />
+                  <Icon
+                    icon="mdi:clock"
+                    className="text-secondary-text h-5 w-5 flex-shrink-0"
+                  />
                   <span className="text-secondary-text text-sm sm:text-base">
                     Created: {formatProfileDate(server.created_at)} • Expires:{" "}
                     {server.expires === "Never"

@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { ThemeProvider } from "@mui/material";
 import { darkTheme } from "@/theme/darkTheme";
-import { ArrowUpIcon } from "@heroicons/react/24/outline";
+import { Icon } from "@/components/ui/IconWrapper";
 import TimelineHeader from "./TimelineHeader";
 import TimelineContent from "./TimelineContent";
 import { Changelog } from "@/utils/api";
@@ -42,7 +42,11 @@ export default function TimelineClient({ changelogs }: TimelineClientProps) {
           className="bg-button-info text-primary-text hover:bg-button-info-hover fixed right-8 bottom-8 z-[2000] rounded-full p-3 shadow-lg focus:outline-none"
           aria-label="Back to top"
         >
-          <ArrowUpIcon className="h-6 w-6" />
+          <Icon
+            icon="heroicons-outline:arrow-up"
+            className="h-6 w-6"
+            inline={true}
+          />
         </button>
       )}
     </ThemeProvider>

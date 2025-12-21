@@ -2,7 +2,7 @@
 
 import { Typography } from "@mui/material";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
-import { DocumentTextIcon } from "@heroicons/react/24/outline";
+import { Icon } from "@/components/ui/IconWrapper";
 import Link from "next/link";
 
 export default function TermsOfServicePage() {
@@ -19,7 +19,10 @@ export default function TermsOfServicePage() {
       <div className="relative mx-auto max-w-4xl">
         <Breadcrumb />
         <div className="mb-2 flex items-center gap-2">
-          <DocumentTextIcon className="text-secondary-text h-6 w-6" />
+          <Icon
+            icon="heroicons-outline:document-text"
+            className="text-secondary-text h-6 w-6"
+          />
           <h1 className="text-primary-text text-2xl font-bold">
             Terms of Service
           </h1>

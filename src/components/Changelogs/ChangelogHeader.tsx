@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { Changelog } from "@/utils/api";
-import { ChevronDownIcon, ChevronUpIcon } from "@heroicons/react/24/outline";
+import { Icon } from "@/components/ui/IconWrapper";
 import {
   getYearStatistics,
   isCurrentYear,
@@ -45,9 +45,17 @@ const ChangelogHeader: React.FC<ChangelogHeaderProps> = ({ changelogs }) => {
                   View Update Statistics
                 </h3>
                 {isStatsExpanded ? (
-                  <ChevronUpIcon className="text-secondary-text h-5 w-5" />
+                  <Icon
+                    icon="heroicons-outline:chevron-up"
+                    className="text-secondary-text h-5 w-5"
+                    inline={true}
+                  />
                 ) : (
-                  <ChevronDownIcon className="text-secondary-text h-5 w-5" />
+                  <Icon
+                    icon="heroicons-outline:chevron-down"
+                    className="text-secondary-text h-5 w-5"
+                    inline={true}
+                  />
                 )}
               </button>
 

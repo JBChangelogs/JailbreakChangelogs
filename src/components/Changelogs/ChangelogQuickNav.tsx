@@ -1,6 +1,6 @@
 import React from "react";
-import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
 import { Tooltip } from "@mui/material";
+import { Icon } from "@/components/ui/IconWrapper";
 
 interface ChangelogQuickNavProps {
   prevChangelog: { id: number; title: string } | null;
@@ -23,7 +23,10 @@ const ChangelogQuickNav: React.FC<ChangelogQuickNavProps> = ({
           }}
           className="group border-link text-secondary-text hover:border-link-hover hover:text-link-hover flex w-full cursor-pointer items-center gap-2 rounded-lg border bg-transparent p-4 transition-colors sm:w-auto"
         >
-          <ChevronLeftIcon className="text-link group-hover:text-link-hover h-5 w-5" />
+          <Icon
+            icon="heroicons-outline:chevron-left"
+            className="text-link group-hover:text-link-hover h-5 w-5"
+          />
           <div className="flex flex-col items-start">
             <span className="text-primary-text text-sm">Previous</span>
             <Tooltip
@@ -81,7 +84,10 @@ const ChangelogQuickNav: React.FC<ChangelogQuickNavProps> = ({
               </span>
             </Tooltip>
           </div>
-          <ChevronRightIcon className="text-link group-hover:text-link-hover h-5 w-5" />
+          <Icon
+            icon="heroicons-outline:chevron-right"
+            className="text-link group-hover:text-link-hover h-5 w-5"
+          />
         </button>
       )}
     </div>

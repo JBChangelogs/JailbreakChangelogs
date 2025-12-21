@@ -6,7 +6,6 @@ import Breadcrumb from "@/components/Layout/Breadcrumb";
 import { useRobberyTrackerWebSocket } from "@/hooks/useRobberyTrackerWebSocket";
 import { useRobberyTrackerMansionsWebSocket } from "@/hooks/useRobberyTrackerMansionsWebSocket";
 import { useRobberyTrackerAirdropsWebSocket } from "@/hooks/useRobberyTrackerAirdropsWebSocket";
-import { ClockIcon } from "@heroicons/react/24/outline";
 import { Icon } from "@/components/ui/IconWrapper";
 import RobberyCard from "@/components/RobberyTracker/RobberyCard";
 import AirdropCard from "@/components/RobberyTracker/AirdropCard";
@@ -460,7 +459,10 @@ function RobberyTrackerContent() {
         {!isConnected && hasData && (
           <div className="bg-button-info/10 border-border-primary mb-4 rounded-lg border p-4 shadow-sm">
             <div className="flex items-start gap-3">
-              <ClockIcon className="text-primary-text mt-0.5 h-5 w-5" />
+              <Icon
+                icon="mdi:clock"
+                className="text-primary-text mt-0.5 h-5 w-5"
+              />
               <div>
                 <span className="text-primary-text text-base font-bold">
                   Connection Lost
@@ -692,7 +694,10 @@ function RobberyTrackerContent() {
           !error && (
             <div className="flex items-center justify-center py-20">
               <div className="text-center">
-                <ClockIcon className="text-tertiary-text mx-auto mb-4 h-16 w-16" />
+                <Icon
+                  icon="mdi:clock"
+                  className="text-tertiary-text mx-auto mb-4 h-16 w-16"
+                />
                 <h3 className="text-secondary-text mb-2 text-lg font-medium">
                   {activeView === "robberies"
                     ? "No robberies tracked yet"
