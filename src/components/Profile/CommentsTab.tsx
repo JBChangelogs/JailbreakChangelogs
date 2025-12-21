@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import { CircularProgress, Box, Chip } from "@mui/material";
 import { Pagination } from "@/components/ui/Pagination";
 import Comment from "../ProfileComments/Comments";
-import CommentIcon from "@mui/icons-material/Comment";
 import { Icon } from "@/components/ui/IconWrapper";
 import { fetchCommentDetails } from "@/app/users/[id]/actions";
 
@@ -174,7 +173,10 @@ export default function CommentsTab({
       <div className="space-y-6">
         <div className="border-border-primary rounded-lg border p-4">
           <div className="mb-3 flex items-center gap-2">
-            <CommentIcon className="text-button-info" />
+            <Icon
+              icon="material-symbols:comment"
+              className="text-button-info"
+            />
             <h2 className="text-primary-text text-lg font-semibold">
               Recent Comments [{comments.length}]
             </h2>
@@ -190,7 +192,10 @@ export default function CommentsTab({
       <div className="space-y-6">
         <div className="border-border-primary rounded-lg border p-4">
           <div className="mb-3 flex items-center gap-2">
-            <CommentIcon className="text-button-info" />
+            <Icon
+              icon="material-symbols:comment"
+              className="text-button-info"
+            />
             <h2 className="text-primary-text text-lg font-semibold">
               Recent Comments
             </h2>
@@ -221,7 +226,10 @@ export default function CommentsTab({
       <div className="border-border-primary rounded-lg border p-4">
         <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-2">
-            <CommentIcon className="text-button-info" />
+            <Icon
+              icon="material-symbols:comment"
+              className="text-button-info"
+            />
             <h2 className="text-primary-text text-lg font-semibold">
               Recent{" "}
               {activeFilter

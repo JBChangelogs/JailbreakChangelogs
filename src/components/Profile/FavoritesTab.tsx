@@ -5,7 +5,6 @@ import { Box, Chip, Skeleton, Divider } from "@mui/material";
 import { Pagination } from "@/components/ui/Pagination";
 
 import { Tooltip } from "@mui/material";
-import StarIcon from "@mui/icons-material/Star";
 import { Icon } from "@/components/ui/IconWrapper";
 import Image from "next/image";
 import Link from "next/link";
@@ -314,7 +313,7 @@ export default function FavoritesTab({
         <div className="border-border-primary rounded-lg border p-4">
           <div className="mb-3 flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <StarIcon className="text-button-info" />
+              <Icon icon="mdi:heart" className="text-button-info" />
               <h2 className="text-primary-text text-lg font-semibold">
                 Favorited Items
               </h2>
@@ -356,7 +355,7 @@ export default function FavoritesTab({
       <div className="space-y-6">
         <div className="border-border-primary rounded-lg border p-4">
           <div className="mb-3 flex items-center gap-2">
-            <StarIcon className="text-button-info" />
+            <Icon icon="mdi:heart" className="text-button-info" />
             <h2 className="text-primary-text text-lg font-semibold">
               Favorited Items [{favorites.length}]
             </h2>
@@ -372,7 +371,7 @@ export default function FavoritesTab({
       <div className="space-y-6">
         <div className="border-border-primary rounded-lg border p-4">
           <div className="mb-3 flex items-center gap-2">
-            <StarIcon className="text-button-info" />
+            <Icon icon="mdi:heart" className="text-button-info" />
             <h2 className="text-primary-text text-lg font-semibold">
               Favorited Items
             </h2>
@@ -403,7 +402,7 @@ export default function FavoritesTab({
       <div className="border-border-primary rounded-lg border p-4">
         <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-2">
-            <StarIcon className="text-button-info" />
+            <Icon icon="mdi:heart" className="text-button-info" />
             <h2 className="text-primary-text text-lg font-semibold">
               Favorited Items [{favorites.length}]
             </h2>

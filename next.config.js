@@ -8,11 +8,7 @@ const nextConfig = {
   },
   experimental: {
     webpackMemoryOptimizations: true,
-    optimizePackageImports: [
-      "@mui/material",
-      "@mui/icons-material",
-      "react-icons",
-    ],
+    optimizePackageImports: ["@mui/material"],
   },
   turbopack: {
     rules: {

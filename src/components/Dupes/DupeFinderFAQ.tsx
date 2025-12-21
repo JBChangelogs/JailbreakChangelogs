@@ -7,7 +7,7 @@ import {
   AccordionDetails,
   Typography,
 } from "@mui/material";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import { Icon } from "@/components/ui/IconWrapper";
 
 const faqs = [
   {
@@ -125,7 +125,11 @@ const DupeFinderFAQ: React.FC = () => {
           >
             <AccordionSummary
               expandIcon={
-                <ExpandMoreIcon sx={{ color: "var(--color-secondary-text)" }} />
+                <Icon
+                  icon="heroicons-outline:chevron-down"
+                  className="h-6 w-6"
+                  style={{ color: "var(--color-secondary-text)" }}
+                />
               }
               sx={{
                 "& .MuiAccordionSummary-content": {

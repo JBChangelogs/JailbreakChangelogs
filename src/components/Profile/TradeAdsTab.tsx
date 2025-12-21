@@ -14,7 +14,7 @@ import {
   getVideoPath,
 } from "@/utils/images";
 import { getCategoryColor } from "@/utils/categoryIcons";
-import SwapHorizIcon from "@mui/icons-material/SwapHoriz";
+import { Icon } from "@/components/ui/IconWrapper";
 
 interface TradeItem {
   id: number;
@@ -196,7 +196,10 @@ export default function TradeAdsTab({
       >
         <div className="mb-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <SwapHorizIcon className="text-button-info h-6 w-6" />
+            <Icon
+              icon="heroicons:arrows-right-left"
+              className="text-button-info h-6 w-6"
+            />
             <Link
               href={`/trading/ad/${ad.id}`}
               className="text-primary-text hover:text-button-info text-xl font-bold transition-colors"
@@ -318,7 +321,10 @@ export default function TradeAdsTab({
       <div className="space-y-6">
         <div className="border-border-primary rounded-lg border p-4">
           <div className="mb-3 flex items-center gap-2">
-            <SwapHorizIcon className="text-button-info" />
+            <Icon
+              icon="heroicons:arrows-right-left"
+              className="text-button-info"
+            />
             <h2 className="text-primary-text text-lg font-semibold">
               Trade Ads
             </h2>
@@ -333,7 +339,10 @@ export default function TradeAdsTab({
     <div className="space-y-6">
       <div className="border-border-primary rounded-lg border p-4">
         <div className="mb-3 flex items-center gap-2">
-          <SwapHorizIcon className="text-button-info" />
+          <Icon
+            icon="heroicons:arrows-right-left"
+            className="text-button-info"
+          />
           <h2 className="text-primary-text text-lg font-semibold">
             Trade Ads [{tradeAds.length}]
           </h2>
@@ -341,7 +350,10 @@ export default function TradeAdsTab({
 
         {tradeAds.length === 0 ? (
           <div className="p-8 text-center">
-            <SwapHorizIcon className="text-button-info mx-auto mb-4 h-12 w-12" />
+            <Icon
+              icon="heroicons:arrows-right-left"
+              className="text-button-info mx-auto mb-4 h-12 w-12"
+            />
             <h3 className="text-primary-text mb-2 text-xl font-semibold">
               {isOwnProfile
                 ? "You have not posted any trade ads."

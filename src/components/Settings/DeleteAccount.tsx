@@ -12,7 +12,7 @@ import {
 import { useRouter } from "next/navigation";
 import { deleteAccount } from "@/services/settingsService";
 import { useAuthContext } from "@/contexts/AuthContext";
-import WarningIcon from "@mui/icons-material/Warning";
+import { Icon } from "@/components/ui/IconWrapper";
 import toast from "react-hot-toast";
 
 export const DeleteAccount = () => {
@@ -144,7 +144,11 @@ export const DeleteAccount = () => {
             py: 2,
           }}
         >
-          <WarningIcon sx={{ color: "var(--color-button-danger)" }} />
+          <Icon
+            icon="heroicons:exclamation-triangle"
+            className="h-6 w-6"
+            style={{ color: "var(--color-button-danger)" }}
+          />
           Delete Account
         </DialogTitle>
         <DialogContent
@@ -172,12 +176,10 @@ export const DeleteAccount = () => {
             </>
           ) : (
             <Box sx={{ textAlign: "center", py: 2 }}>
-              <WarningIcon
-                sx={{
-                  fontSize: 48,
-                  color: "var(--color-button-danger)",
-                  mb: 2,
-                }}
+              <Icon
+                icon="heroicons:exclamation-triangle"
+                className="mb-2 h-12 w-12"
+                style={{ color: "var(--color-button-danger)" }}
               />
               <Typography
                 variant="h6"

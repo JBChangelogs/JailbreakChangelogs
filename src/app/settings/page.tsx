@@ -18,7 +18,7 @@ import { useSettings } from "@/hooks/useSettings";
 import { SettingToggle } from "@/components/Settings/SettingToggle";
 import { BannerSettings } from "@/components/Settings/BannerSettings";
 import { AvatarSettings } from "@/components/Settings/AvatarSettings";
-import { OpenInNew, Settings as SettingsIcon } from "@mui/icons-material";
+import { Icon } from "@/components/ui/IconWrapper";
 import { DeleteAccount } from "@/components/Settings/DeleteAccount";
 import { RobloxConnection } from "@/components/Settings/RobloxConnection";
 import { ExportInventoryData } from "@/components/Settings/ExportInventoryData";
@@ -241,11 +241,10 @@ export default function SettingsPage() {
           gap: 1,
         }}
       >
-        <SettingsIcon
-          sx={{
-            fontSize: "2rem",
-            color: "var(--color-primary-text) !important",
-          }}
+        <Icon
+          icon="material-symbols:settings"
+          className="h-8 w-8"
+          style={{ color: "var(--color-primary-text)" }}
         />
         Settings
       </Typography>
@@ -357,7 +356,9 @@ export default function SettingsPage() {
                     <Button
                       variant="contained"
                       size="medium"
-                      startIcon={<OpenInNew />}
+                      startIcon={
+                        <Icon icon="akar-icons:link-out" className="h-5 w-5" />
+                      }
                       onClick={() =>
                         window.open(
                           "https://imgbb.com/",
@@ -386,7 +387,9 @@ export default function SettingsPage() {
                     <Button
                       variant="contained"
                       size="medium"
-                      startIcon={<OpenInNew />}
+                      startIcon={
+                        <Icon icon="akar-icons:link-out" className="h-5 w-5" />
+                      }
                       onClick={() =>
                         window.open(
                           "https://postimages.org/",
@@ -415,7 +418,9 @@ export default function SettingsPage() {
                     <Button
                       variant="contained"
                       size="medium"
-                      startIcon={<OpenInNew />}
+                      startIcon={
+                        <Icon icon="akar-icons:link-out" className="h-5 w-5" />
+                      }
                       onClick={() =>
                         window.open(
                           "https://tenor.com/",
@@ -444,7 +449,9 @@ export default function SettingsPage() {
                     <Button
                       variant="contained"
                       size="medium"
-                      startIcon={<OpenInNew />}
+                      startIcon={
+                        <Icon icon="akar-icons:link-out" className="h-5 w-5" />
+                      }
                       onClick={() =>
                         window.open(
                           "https://imgur.com/",
@@ -473,7 +480,9 @@ export default function SettingsPage() {
                     <Button
                       variant="contained"
                       size="medium"
-                      startIcon={<OpenInNew />}
+                      startIcon={
+                        <Icon icon="akar-icons:link-out" className="h-5 w-5" />
+                      }
                       onClick={() =>
                         window.open(
                           "https://vgy.me/",

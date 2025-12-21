@@ -4,7 +4,7 @@ import dynamic from "next/dynamic";
 import Image from "next/image";
 
 const Tooltip = dynamic(() => import("@mui/material/Tooltip"), { ssr: false });
-import CloudUploadIcon from "@mui/icons-material/CloudUpload";
+import { Icon } from "@/components/ui/IconWrapper";
 import { UserData } from "@/types/auth";
 import { updateBanner, updateSettings } from "@/services/settingsService";
 import toast from "react-hot-toast";
@@ -386,7 +386,12 @@ export const BannerSettings = ({
               variant="contained"
               size="small"
               component="label"
-              startIcon={<CloudUploadIcon />}
+              startIcon={
+                <Icon
+                  icon="material-symbols:cloud-upload"
+                  className="h-5 w-5"
+                />
+              }
               disabled={
                 !userData?.premiumtype ||
                 userData.premiumtype < 2 ||

@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import SearchIcon from "@mui/icons-material/Search";
 import { DiscordIcon } from "@/components/Icons/DiscordIcon";
 import Link from "next/link";
 import { Icon } from "@/components/ui/IconWrapper";
@@ -202,7 +201,7 @@ export const TradeAdCard: React.FC<TradeAdCardProps> = ({
               role="button"
               tabIndex={0}
             >
-              <SearchIcon sx={{ fontSize: 20 }} />
+              <Icon icon="heroicons:magnifying-glass" className="h-5 w-5" />
               View Details
             </Link>
           </div>

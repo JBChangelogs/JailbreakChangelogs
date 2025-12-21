@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Paper, Typography, Box, Button } from "@mui/material";
-import { Download as DownloadIcon } from "@mui/icons-material";
+import { Icon } from "@/components/ui/IconWrapper";
 import toast from "react-hot-toast";
 
 export const ExportInventoryData = () => {
@@ -73,7 +73,9 @@ export const ExportInventoryData = () => {
 
       <Button
         variant="contained"
-        startIcon={<DownloadIcon />}
+        startIcon={
+          <Icon icon="heroicons-outline:download" className="h-5 w-5" />
+        }
         onClick={handleExport}
         disabled={loading}
         sx={{

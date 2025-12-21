@@ -8,7 +8,6 @@ const Tooltip = dynamic(() => import("@mui/material/Tooltip"), {
   ssr: false,
 });
 import { Icon } from "../ui/IconWrapper";
-import EditIcon from "@mui/icons-material/Edit";
 import { formatCustomDate } from "@/utils/timestamp";
 import { useRealTimeRelativeDate } from "@/hooks/useRealTimeRelativeDate";
 import { toast } from "react-hot-toast";
@@ -157,7 +156,10 @@ export default function AboutTab({
                   padding: "4px",
                 }}
               >
-                <EditIcon className="text-button-info h-5 w-5" />
+                <Icon
+                  icon="heroicons:pencil"
+                  className="text-button-info h-5 w-5"
+                />
               </Button>
             </Tooltip>
           )}

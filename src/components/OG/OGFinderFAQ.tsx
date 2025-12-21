@@ -17,9 +17,7 @@ const AccordionDetails = dynamic(
 const Typography = dynamic(() => import("@mui/material/Typography"), {
   ssr: false,
 });
-const ExpandMoreIcon = dynamic(() => import("@mui/icons-material/ExpandMore"), {
-  ssr: false,
-});
+import { Icon } from "@/components/ui/IconWrapper";
 
 const faqs = [
   {
@@ -84,7 +82,11 @@ const OGFinderFAQ: React.FC = () => {
           >
             <AccordionSummary
               expandIcon={
-                <ExpandMoreIcon sx={{ color: "var(--color-secondary-text)" }} />
+                <Icon
+                  icon="heroicons-outline:chevron-down"
+                  className="h-6 w-6"
+                  style={{ color: "var(--color-secondary-text)" }}
+                />
               }
               sx={{
                 "& .MuiAccordionSummary-content": {

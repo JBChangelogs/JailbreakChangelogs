@@ -52,7 +52,7 @@ const ChangelogHeader: React.FC<ChangelogHeaderProps> = ({ changelogs }) => {
                   />
                 ) : (
                   <Icon
-                    icon="heroicons-outline:chevron-down"
+                    icon="@mui/icons-material"
                     className="text-secondary-text h-5 w-5"
                     inline={true}
                   />

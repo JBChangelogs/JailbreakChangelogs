@@ -6,7 +6,6 @@ import {
   AccordionDetails,
   Typography,
 } from "@mui/material";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import { Icon } from "@/components/ui/IconWrapper";
 
@@ -173,7 +172,11 @@ export default function FAQPage() {
             >
               <AccordionSummary
                 expandIcon={
-                  <ExpandMoreIcon sx={{ color: "var(--color-primary-text)" }} />
+                  <Icon
+                    icon="heroicons-outline:chevron-down"
+                    className="h-6 w-6"
+                    style={{ color: "var(--color-primary-text)" }}
+                  />
                 }
                 sx={{
                   "& .MuiAccordionSummary-content": {
