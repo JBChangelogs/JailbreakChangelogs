@@ -25,6 +25,10 @@ interface ChangelogGroup {
     suggestion?: {
       suggestor_name: string;
       user_id: number | string;
+      metadata?: {
+        avatar?: string;
+        avatar_hash?: string;
+      };
     };
   }>;
   created_at: number;
@@ -37,24 +41,35 @@ interface ChangelogDetailsHeaderProps {
 
 const ChangelogDetailsHeader: React.FC<ChangelogDetailsHeaderProps> = ({
   changelog,
-  userData,
 }) => {
-  // Get unique contributors with their Discord IDs
+  // Get unique contributors with their Discord IDs and avatar URLs
   // Only include people who made suggestions, not people who made changes
-  const allContributors = new Map<string, string>();
+  const allContributors = new Map<
+    string,
+    { name: string; avatarUrl?: string }
+  >();
 
   changelog.change_data.forEach((change) => {
-    // Only include people who made suggestions
     if (change.suggestion?.suggestor_name && change.suggestion.user_id) {
       const userId = String(change.suggestion.user_id);
-      // Use Discord ID as the key to avoid duplicates
-      allContributors.set(userId, change.suggestion.suggestor_name);
+      const existing = allContributors.get(userId);
+
+      // Add if new, or update if we found an avatar and they didn't have one
+      if (
+        !existing ||
+        (!existing.avatarUrl && change.suggestion.metadata?.avatar)
+      ) {
+        allContributors.set(userId, {
+          name: change.suggestion.suggestor_name,
+          avatarUrl: change.suggestion.metadata?.avatar,
+        });
+      }
     }
   });
 
   const sortedContributors = Array.from(allContributors.entries()).sort(
-    ([, nameA], [, nameB]) =>
-      nameA.toLowerCase().localeCompare(nameB.toLowerCase()),
+    ([, dataA], [, dataB]) =>
+      dataA.name.toLowerCase().localeCompare(dataB.name.toLowerCase()),
   );
 
   return (
@@ -73,24 +88,23 @@ const ChangelogDetailsHeader: React.FC<ChangelogDetailsHeaderProps> = ({
           Contributors ({sortedContributors.length}):
         </h3>
         <div className="flex flex-wrap gap-2">
-          {sortedContributors.map(([discordId, contributorName], index) => (
+          {sortedContributors.map(([discordId, contributorData], index) => (
             <span key={discordId} className="flex items-center gap-1">
               <div className="relative h-6 w-6 flex-shrink-0 overflow-hidden rounded-full">
                 <DefaultAvatar />
-                {userData[discordId]?.avatar &&
-                  userData[discordId]?.avatar !== "None" && (
-                    <Image
-                      src={`http://proxy.jailbreakchangelogs.xyz/?destination=${encodeURIComponent(`https://cdn.discordapp.com/avatars/${discordId}/${userData[discordId].avatar}?size=64`)}`}
-                      alt={contributorName}
-                      fill
-                      className="object-cover"
-                      onError={(e) => {
-                        (
-                          e as unknown as { currentTarget: HTMLElement }
-                        ).currentTarget.style.display = "none";
-                      }}
-                    />
-                  )}
+                {contributorData.avatarUrl && (
+                  <Image
+                    src={contributorData.avatarUrl}
+                    alt={contributorData.name}
+                    fill
+                    className="object-cover"
+                    onError={(e) => {
+                      (
+                        e as unknown as { currentTarget: HTMLElement }
+                      ).currentTarget.style.display = "none";
+                    }}
+                  />
+                )}
               </div>
               <a
                 href={`https://discord.com/users/${discordId}`}
@@ -98,7 +112,7 @@ const ChangelogDetailsHeader: React.FC<ChangelogDetailsHeaderProps> = ({
                 rel="noopener noreferrer"
                 className="text-link hover:text-link-hover text-sm hover:underline"
               >
-                {contributorName}
+                {contributorData.name}
               </a>
               {index < sortedContributors.length - 1 && (
                 <span className="text-secondary-text text-sm">,</span>

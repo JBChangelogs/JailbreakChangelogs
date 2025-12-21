@@ -5,57 +5,37 @@ export default function Loading() {
     <main className="mb-8 min-h-screen">
       <div className="container mx-auto px-4">
         <div className="space-y-6">
-          {/* Header Skeleton with Side-by-Side Layout */}
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-            {/* Changelog Info Skeleton - Takes up 2/3 of the space */}
-            <div className="border-border-primary bg-secondary-bg hover:border-border-focus rounded-lg border p-6 lg:col-span-2">
+          {/* Header Skeleton */}
+          <div className="border-border-primary bg-secondary-bg hover:border-border-focus rounded-lg border p-6">
+            <Skeleton
+              variant="text"
+              width="60%"
+              height={40}
+              className="bg-secondary-bg"
+            />
+            <Skeleton
+              variant="text"
+              width="40%"
+              height={24}
+              className="bg-secondary-bg mt-2"
+            />
+            <div className="mt-4">
               <Skeleton
                 variant="text"
-                width="60%"
-                height={40}
+                width="20%"
+                height={20}
                 className="bg-secondary-bg"
               />
-              <Skeleton
-                variant="text"
-                width="40%"
-                height={24}
-                className="bg-secondary-bg mt-2"
-              />
-              <div className="mt-4">
-                <Skeleton
-                  variant="text"
-                  width="20%"
-                  height={20}
-                  className="bg-secondary-bg"
-                />
-                <div className="mt-2 flex flex-wrap gap-2">
-                  {[45, 65, 50, 80, 55, 70, 60, 75].map((width, i) => (
-                    <Skeleton
-                      key={i}
-                      variant="text"
-                      width={width}
-                      height={16}
-                      className="bg-secondary-bg"
-                    />
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* Ad Skeleton - Takes up 1/3 of the space */}
-            <div className="lg:col-span-1">
-              <div
-                className="bg-secondary-bg h-full rounded-lg border"
-                style={{ minHeight: "250px" }}
-              >
-                <div className="p-4">
+              <div className="mt-2 flex flex-wrap gap-2">
+                {[45, 65, 50, 80, 55, 70, 60, 75].map((width, i) => (
                   <Skeleton
-                    variant="rectangular"
-                    width="100%"
-                    height="100%"
-                    className="bg-secondary-bg rounded"
+                    key={i}
+                    variant="text"
+                    width={width}
+                    height={16}
+                    className="bg-secondary-bg"
                   />
-                </div>
+                ))}
               </div>
             </div>
           </div>

@@ -598,14 +598,14 @@ export default function ItemDetailsClient({
                   Object.keys(currentItem.metadata).length > 0 && (
                     <div className="mt-3">
                       <div className="border-button-info/30 bg-button-info/10 rounded-md border px-2 py-2">
-                        <div className="text-button-info text-xs font-semibold tracking-wide uppercase">
+                        <div className="text-primary-text text-xs font-semibold tracking-wide uppercase">
                           Official Trading Metrics
                         </div>
                         <div className="text-secondary-text text-xs">
                           by Badimo •{" "}
                           {currentItem.metadata.LastUpdated
                             ? `updated ${formatCustomDate(currentItem.metadata.LastUpdated)}`
-                            : "last 30 days"}
+                            : "unknown date"}
                         </div>
                         <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-3">
                           {typeof currentItem.metadata.TimesTraded ===

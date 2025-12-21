@@ -166,9 +166,29 @@ export default function ChangelogDetailsClient({
   const [votersOpen, setVotersOpen] = useState(false);
   const [votersTab, setVotersTab] = useState<"up" | "down">("up");
   const [activeVoters, setActiveVoters] = useState<VoteLists | null>(null);
+  const [expandedChanges, setExpandedChanges] = useState<Set<string>>(
+    new Set(),
+  );
   const itemsPerPage = 12;
   const isAtLeast1024 = useMediaQuery("(min-width:1024px)");
   const isAtLeast1440 = useMediaQuery("(min-width:1440px)");
+
+  const toggleChangeExpand = (
+    changeId: number,
+    key: string,
+    side: "old" | "new",
+  ) => {
+    const expandKey = `${changeId}-${key}-${side}`;
+    setExpandedChanges((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(expandKey)) {
+        newSet.delete(expandKey);
+      } else {
+        newSet.add(expandKey);
+      }
+      return newSet;
+    });
+  };
 
   // Format boolean-like values (1/0) to True/False
   const formatBooleanLikeValue = (value: unknown): string => {
@@ -730,10 +750,20 @@ export default function ChangelogDetailsClient({
                               ),
                             }}
                           >
-                            {change.suggestion.data.reason?.replace(
-                              /(Common Trades?:?)/gi,
-                              "**$1**",
-                            )}
+                            {(() => {
+                              const reason =
+                                change.suggestion.data.reason || "";
+                              // Replace Common Trades with bold
+                              const withBold = reason.replace(
+                                /(Common Trades?:?)/gi,
+                                "**$1**",
+                              );
+                              // Convert single newlines to double newlines, preserving existing double newlines
+                              return withBold
+                                .split(/\n\n+/)
+                                .map((part) => part.replace(/\n/g, "\n\n"))
+                                .join("\n\n");
+                            })()}
                           </ReactMarkdown>
                         </div>
 
@@ -821,36 +851,86 @@ export default function ChangelogDetailsClient({
                                           key,
                                         ).toUpperCase()}`}
                                       </div>
-                                      <div
-                                        className="text-secondary-text overflow-hidden text-lg font-bold break-words line-through"
-                                        style={{
-                                          wordBreak: "normal",
-                                          overflowWrap: "anywhere",
-                                        }}
-                                      >
-                                        {(() => {
-                                          const formatted = formatValue(
-                                            key,
-                                            oldValue,
-                                          );
-                                          if (
-                                            formatted.isCreator &&
-                                            formatted.robloxId
-                                          ) {
-                                            return (
-                                              <a
-                                                href={`https://www.roblox.com/users/${formatted.robloxId}/profile`}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="text-link hover:text-link-hover transition-colors hover:underline"
+                                      {(() => {
+                                        const formatted = formatValue(
+                                          key,
+                                          oldValue,
+                                        );
+                                        const displayValue = formatted.display;
+                                        const MAX_VISIBLE_CHARS = 200;
+                                        const isLong =
+                                          displayValue.length >
+                                          MAX_VISIBLE_CHARS;
+                                        const expandKey = `${change.change_id}-${key}-old`;
+                                        const isExpanded =
+                                          expandedChanges.has(expandKey);
+                                        const shouldTruncate =
+                                          isLong && !isExpanded;
+                                        const visibleContent = shouldTruncate
+                                          ? displayValue.slice(
+                                              0,
+                                              MAX_VISIBLE_CHARS,
+                                            ) + "..."
+                                          : displayValue;
+
+                                        return (
+                                          <>
+                                            <div
+                                              className="text-secondary-text overflow-hidden text-lg font-bold break-words line-through"
+                                              style={{
+                                                wordBreak: "normal",
+                                                overflowWrap: "anywhere",
+                                              }}
+                                            >
+                                              {formatted.isCreator &&
+                                              formatted.robloxId ? (
+                                                <a
+                                                  href={`https://www.roblox.com/users/${formatted.robloxId}/profile`}
+                                                  target="_blank"
+                                                  rel="noopener noreferrer"
+                                                  className="text-link hover:text-link-hover transition-colors hover:underline"
+                                                >
+                                                  {visibleContent}
+                                                </a>
+                                              ) : (
+                                                visibleContent
+                                              )}
+                                            </div>
+                                            {isLong && (
+                                              <button
+                                                onClick={() =>
+                                                  toggleChangeExpand(
+                                                    change.change_id,
+                                                    key,
+                                                    "old",
+                                                  )
+                                                }
+                                                className="text-link hover:text-link-hover mt-2 flex cursor-pointer items-center gap-1 text-sm font-medium transition-colors duration-200 hover:underline"
                                               >
-                                                {formatted.display}
-                                              </a>
-                                            );
-                                          }
-                                          return formatted.display;
-                                        })()}
-                                      </div>
+                                                {isExpanded ? (
+                                                  <>
+                                                    <Icon
+                                                      icon="mdi:chevron-up"
+                                                      className="h-4 w-4"
+                                                      inline={true}
+                                                    />
+                                                    Show less
+                                                  </>
+                                                ) : (
+                                                  <>
+                                                    <Icon
+                                                      icon="mdi:chevron-down"
+                                                      className="h-4 w-4"
+                                                      inline={true}
+                                                    />
+                                                    Read more
+                                                  </>
+                                                )}
+                                              </button>
+                                            )}
+                                          </>
+                                        );
+                                      })()}
                                     </div>
                                     <div className="min-w-0">
                                       <div className="text-tertiary-text mb-2 flex items-center gap-2 text-xs font-semibold tracking-wide uppercase">
@@ -865,36 +945,86 @@ export default function ChangelogDetailsClient({
                                           key,
                                         ).toUpperCase()}`}
                                       </div>
-                                      <div
-                                        className="text-primary-text overflow-hidden text-lg font-bold break-words"
-                                        style={{
-                                          wordBreak: "normal",
-                                          overflowWrap: "anywhere",
-                                        }}
-                                      >
-                                        {(() => {
-                                          const formatted = formatValue(
-                                            key,
-                                            newValue,
-                                          );
-                                          if (
-                                            formatted.isCreator &&
-                                            formatted.robloxId
-                                          ) {
-                                            return (
-                                              <a
-                                                href={`https://www.roblox.com/users/${formatted.robloxId}/profile`}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="text-link hover:text-link-hover transition-colors hover:underline"
+                                      {(() => {
+                                        const formatted = formatValue(
+                                          key,
+                                          newValue,
+                                        );
+                                        const displayValue = formatted.display;
+                                        const MAX_VISIBLE_CHARS = 200;
+                                        const isLong =
+                                          displayValue.length >
+                                          MAX_VISIBLE_CHARS;
+                                        const expandKey = `${change.change_id}-${key}-new`;
+                                        const isExpanded =
+                                          expandedChanges.has(expandKey);
+                                        const shouldTruncate =
+                                          isLong && !isExpanded;
+                                        const visibleContent = shouldTruncate
+                                          ? displayValue.slice(
+                                              0,
+                                              MAX_VISIBLE_CHARS,
+                                            ) + "..."
+                                          : displayValue;
+
+                                        return (
+                                          <>
+                                            <div
+                                              className="text-primary-text overflow-hidden text-lg font-bold break-words"
+                                              style={{
+                                                wordBreak: "normal",
+                                                overflowWrap: "anywhere",
+                                              }}
+                                            >
+                                              {formatted.isCreator &&
+                                              formatted.robloxId ? (
+                                                <a
+                                                  href={`https://www.roblox.com/users/${formatted.robloxId}/profile`}
+                                                  target="_blank"
+                                                  rel="noopener noreferrer"
+                                                  className="text-link hover:text-link-hover transition-colors hover:underline"
+                                                >
+                                                  {visibleContent}
+                                                </a>
+                                              ) : (
+                                                visibleContent
+                                              )}
+                                            </div>
+                                            {isLong && (
+                                              <button
+                                                onClick={() =>
+                                                  toggleChangeExpand(
+                                                    change.change_id,
+                                                    key,
+                                                    "new",
+                                                  )
+                                                }
+                                                className="text-link hover:text-link-hover mt-2 flex cursor-pointer items-center gap-1 text-sm font-medium transition-colors duration-200 hover:underline"
                                               >
-                                                {formatted.display}
-                                              </a>
-                                            );
-                                          }
-                                          return formatted.display;
-                                        })()}
-                                      </div>
+                                                {isExpanded ? (
+                                                  <>
+                                                    <Icon
+                                                      icon="mdi:chevron-up"
+                                                      className="h-4 w-4"
+                                                      inline={true}
+                                                    />
+                                                    Show less
+                                                  </>
+                                                ) : (
+                                                  <>
+                                                    <Icon
+                                                      icon="mdi:chevron-down"
+                                                      className="h-4 w-4"
+                                                      inline={true}
+                                                    />
+                                                    Read more
+                                                  </>
+                                                )}
+                                              </button>
+                                            )}
+                                          </>
+                                        );
+                                      })()}
                                     </div>
                                   </div>
                                 </div>

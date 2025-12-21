@@ -226,6 +226,26 @@ export default function ItemChangelogs({
   const [expandedReasons, setExpandedReasons] = useState<Set<number>>(
     new Set(),
   );
+  const [expandedChanges, setExpandedChanges] = useState<Set<string>>(
+    new Set(),
+  );
+
+  const toggleChangeExpand = (
+    changeId: number,
+    key: string,
+    side: "old" | "new",
+  ) => {
+    const expandKey = `${changeId}-${key}-${side}`;
+    setExpandedChanges((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(expandKey)) {
+        newSet.delete(expandKey);
+      } else {
+        newSet.add(expandKey);
+      }
+      return newSet;
+    });
+  };
 
   const toggleSortOrder = () => {
     setSortOrder((prev) => (prev === "newest" ? "oldest" : "newest"));
@@ -744,10 +764,23 @@ export default function ItemChangelogs({
                                         ),
                                       }}
                                     >
-                                      {(isExpanded ? reason : text).replace(
-                                        /(Common Trades?:?)/gi,
-                                        "**$1**",
-                                      )}
+                                      {(() => {
+                                        const reasonText = isExpanded
+                                          ? reason
+                                          : text;
+                                        // Replace Common Trades with bold
+                                        const withBold = reasonText.replace(
+                                          /(Common Trades?:?)/gi,
+                                          "**$1**",
+                                        );
+                                        // Convert single newlines to double newlines, preserving existing double newlines
+                                        return withBold
+                                          .split(/\n\n+/)
+                                          .map((part) =>
+                                            part.replace(/\n/g, "\n\n"),
+                                          )
+                                          .join("\n\n");
+                                      })()}
                                     </ReactMarkdown>
                                     {isTruncated && (
                                       <button
@@ -872,48 +905,102 @@ export default function ItemChangelogs({
                                           key,
                                         ).toUpperCase()}`}
                                       </div>
-                                      <div
-                                        className="text-secondary-text overflow-hidden text-lg font-bold break-words line-through"
-                                        style={{
-                                          wordBreak: "normal",
-                                          overflowWrap: "anywhere",
-                                        }}
-                                      >
-                                        {(() => {
-                                          const formatted = formatValue(
-                                            key,
-                                            oldValue,
-                                          );
-                                          if (formatted.isCreator) {
-                                            if (formatted.isBadimo) {
-                                              return (
-                                                <a
-                                                  href="https://www.roblox.com/communities/3059674/Badimo#!/about"
-                                                  target="_blank"
-                                                  rel="noopener noreferrer"
-                                                  className="text-link hover:text-link-hover transition-colors hover:underline"
-                                                >
-                                                  {formatted.display}
-                                                </a>
-                                              );
-                                            } else if (formatted.robloxId) {
-                                              return (
-                                                <a
-                                                  href={`https://www.roblox.com/users/${formatted.robloxId}/profile`}
-                                                  target="_blank"
-                                                  rel="noopener noreferrer"
-                                                  className="text-link hover:text-link-hover transition-colors hover:underline"
-                                                >
-                                                  {formatted.display}
-                                                </a>
-                                              );
-                                            }
-                                          }
-                                          return convertUrlsToLinks(
-                                            formatted.display,
-                                          );
-                                        })()}
-                                      </div>
+                                      {(() => {
+                                        const formatted = formatValue(
+                                          key,
+                                          oldValue,
+                                        );
+                                        const displayValue = formatted.display;
+                                        const MAX_VISIBLE_CHARS = 200;
+                                        const isLong =
+                                          displayValue.length >
+                                          MAX_VISIBLE_CHARS;
+                                        const expandKey = `${change.change_id}-${key}-old`;
+                                        const isExpanded =
+                                          expandedChanges.has(expandKey);
+                                        const shouldTruncate =
+                                          isLong && !isExpanded;
+                                        const visibleContent = shouldTruncate
+                                          ? displayValue.slice(
+                                              0,
+                                              MAX_VISIBLE_CHARS,
+                                            ) + "..."
+                                          : displayValue;
+
+                                        return (
+                                          <>
+                                            <div
+                                              className="text-secondary-text overflow-hidden text-lg font-bold break-words line-through"
+                                              style={{
+                                                wordBreak: "normal",
+                                                overflowWrap: "anywhere",
+                                              }}
+                                            >
+                                              {formatted.isCreator ? (
+                                                formatted.isBadimo ? (
+                                                  <a
+                                                    href="https://www.roblox.com/communities/3059674/Badimo#!/about"
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="text-link hover:text-link-hover transition-colors hover:underline"
+                                                  >
+                                                    {visibleContent}
+                                                  </a>
+                                                ) : formatted.robloxId ? (
+                                                  <a
+                                                    href={`https://www.roblox.com/users/${formatted.robloxId}/profile`}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="text-link hover:text-link-hover transition-colors hover:underline"
+                                                  >
+                                                    {visibleContent}
+                                                  </a>
+                                                ) : (
+                                                  convertUrlsToLinks(
+                                                    visibleContent,
+                                                  )
+                                                )
+                                              ) : (
+                                                convertUrlsToLinks(
+                                                  visibleContent,
+                                                )
+                                              )}
+                                            </div>
+                                            {isLong && (
+                                              <button
+                                                onClick={() =>
+                                                  toggleChangeExpand(
+                                                    change.change_id,
+                                                    key,
+                                                    "old",
+                                                  )
+                                                }
+                                                className="text-link hover:text-link-hover mt-2 flex cursor-pointer items-center gap-1 text-sm font-medium transition-colors duration-200 hover:underline"
+                                              >
+                                                {isExpanded ? (
+                                                  <>
+                                                    <Icon
+                                                      icon="mdi:chevron-up"
+                                                      className="h-4 w-4"
+                                                      inline={true}
+                                                    />
+                                                    Show less
+                                                  </>
+                                                ) : (
+                                                  <>
+                                                    <Icon
+                                                      icon="mdi:chevron-down"
+                                                      className="h-4 w-4"
+                                                      inline={true}
+                                                    />
+                                                    Read more
+                                                  </>
+                                                )}
+                                              </button>
+                                            )}
+                                          </>
+                                        );
+                                      })()}
                                     </div>
                                     <div className="min-w-0">
                                       <div className="text-tertiary-text mb-2 flex items-center gap-2 text-xs font-semibold tracking-wide uppercase">
@@ -928,48 +1015,102 @@ export default function ItemChangelogs({
                                           key,
                                         ).toUpperCase()}`}
                                       </div>
-                                      <div
-                                        className="text-primary-text overflow-hidden text-lg font-bold break-words"
-                                        style={{
-                                          wordBreak: "normal",
-                                          overflowWrap: "anywhere",
-                                        }}
-                                      >
-                                        {(() => {
-                                          const formatted = formatValue(
-                                            key,
-                                            newValue,
-                                          );
-                                          if (formatted.isCreator) {
-                                            if (formatted.isBadimo) {
-                                              return (
-                                                <a
-                                                  href="https://www.roblox.com/communities/3059674/Badimo#!/about"
-                                                  target="_blank"
-                                                  rel="noopener noreferrer"
-                                                  className="text-link hover:text-link-hover transition-colors hover:underline"
-                                                >
-                                                  {formatted.display}
-                                                </a>
-                                              );
-                                            } else if (formatted.robloxId) {
-                                              return (
-                                                <a
-                                                  href={`https://www.roblox.com/users/${formatted.robloxId}/profile`}
-                                                  target="_blank"
-                                                  rel="noopener noreferrer"
-                                                  className="text-link hover:text-link-hover transition-colors hover:underline"
-                                                >
-                                                  {formatted.display}
-                                                </a>
-                                              );
-                                            }
-                                          }
-                                          return convertUrlsToLinks(
-                                            formatted.display,
-                                          );
-                                        })()}
-                                      </div>
+                                      {(() => {
+                                        const formatted = formatValue(
+                                          key,
+                                          newValue,
+                                        );
+                                        const displayValue = formatted.display;
+                                        const MAX_VISIBLE_CHARS = 200;
+                                        const isLong =
+                                          displayValue.length >
+                                          MAX_VISIBLE_CHARS;
+                                        const expandKey = `${change.change_id}-${key}-new`;
+                                        const isExpanded =
+                                          expandedChanges.has(expandKey);
+                                        const shouldTruncate =
+                                          isLong && !isExpanded;
+                                        const visibleContent = shouldTruncate
+                                          ? displayValue.slice(
+                                              0,
+                                              MAX_VISIBLE_CHARS,
+                                            ) + "..."
+                                          : displayValue;
+
+                                        return (
+                                          <>
+                                            <div
+                                              className="text-primary-text overflow-hidden text-lg font-bold break-words"
+                                              style={{
+                                                wordBreak: "normal",
+                                                overflowWrap: "anywhere",
+                                              }}
+                                            >
+                                              {formatted.isCreator ? (
+                                                formatted.isBadimo ? (
+                                                  <a
+                                                    href="https://www.roblox.com/communities/3059674/Badimo#!/about"
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="text-link hover:text-link-hover transition-colors hover:underline"
+                                                  >
+                                                    {visibleContent}
+                                                  </a>
+                                                ) : formatted.robloxId ? (
+                                                  <a
+                                                    href={`https://www.roblox.com/users/${formatted.robloxId}/profile`}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="text-link hover:text-link-hover transition-colors hover:underline"
+                                                  >
+                                                    {visibleContent}
+                                                  </a>
+                                                ) : (
+                                                  convertUrlsToLinks(
+                                                    visibleContent,
+                                                  )
+                                                )
+                                              ) : (
+                                                convertUrlsToLinks(
+                                                  visibleContent,
+                                                )
+                                              )}
+                                            </div>
+                                            {isLong && (
+                                              <button
+                                                onClick={() =>
+                                                  toggleChangeExpand(
+                                                    change.change_id,
+                                                    key,
+                                                    "new",
+                                                  )
+                                                }
+                                                className="text-link hover:text-link-hover mt-2 flex cursor-pointer items-center gap-1 text-sm font-medium transition-colors duration-200 hover:underline"
+                                              >
+                                                {isExpanded ? (
+                                                  <>
+                                                    <Icon
+                                                      icon="mdi:chevron-up"
+                                                      className="h-4 w-4"
+                                                      inline={true}
+                                                    />
+                                                    Show less
+                                                  </>
+                                                ) : (
+                                                  <>
+                                                    <Icon
+                                                      icon="mdi:chevron-down"
+                                                      className="h-4 w-4"
+                                                      inline={true}
+                                                    />
+                                                    Read more
+                                                  </>
+                                                )}
+                                              </button>
+                                            )}
+                                          </>
+                                        );
+                                      })()}
                                     </div>
                                   </div>
                                 </div>
