@@ -714,7 +714,14 @@ export default function UserProfileClient({
                             Last seen: Hidden
                           </p>
                         ) : user.presence?.status === "Online" ? (
-                          <p className="text-secondary-text text-sm">Online</p>
+                          <p
+                            className="text-sm"
+                            style={{
+                              color: "var(--color-status-success-vibrant)",
+                            }}
+                          >
+                            Online
+                          </p>
                         ) : user.last_seen === null ? (
                           <div className="mt-2 mb-2 rounded-lg p-4">
                             <p className="text-secondary-text mb-1 text-sm font-medium">

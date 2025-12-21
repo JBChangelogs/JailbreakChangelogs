@@ -12,7 +12,7 @@ interface BannerProps {
 }
 
 // Move static data outside component
-const BACKGROUND_COUNT = 39;
+const BACKGROUND_COUNT = 42;
 const BACKGROUNDS = Array.from(
   { length: BACKGROUND_COUNT },
   (_, i) =>

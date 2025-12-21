@@ -217,3 +217,9 @@ export const formatCompactDateTime = (timestamp: string | number): string => {
 
   return `${month}/${day}/${year} ${hours12}:${minutes.toString().padStart(2, "0")} ${period}`;
 };
+
+/**
+ * Returns the current Unix timestamp in seconds
+ * @returns Current timestamp in seconds
+ */
+export const getCurrentTimestamp = (): number => Math.floor(Date.now() / 1000);

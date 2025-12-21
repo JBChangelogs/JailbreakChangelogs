@@ -215,7 +215,6 @@ const formatSuggestionTypeLabel = (
 export default function ItemChangelogs({
   initialChanges,
 }: ItemChangelogsProps) {
-  "use memo";
   const changes: Change[] = initialChanges ?? [];
   const loading = false;
   const error: string | null = null;
@@ -259,6 +258,7 @@ export default function ItemChangelogs({
     0,
   );
 
+  // eslint-disable-next-line react-hooks/incompatible-library
   const virtualizer = useVirtualizer({
     count: displayableChanges.length,
     getScrollElement: () => parentRef.current,

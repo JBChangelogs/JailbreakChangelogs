@@ -4,6 +4,8 @@ import SeasonLeaderboardClient from "@/components/Leaderboard/SeasonLeaderboardC
 import Link from "next/link";
 import { Icon } from "@iconify/react";
 
+import SeasonHeader from "@/components/Leaderboard/SeasonLeaderboardHeader";
+
 export const revalidate = 300; // Revalidate every 5 minutes
 
 export default async function SeasonLeaderboardPage() {
@@ -66,13 +68,8 @@ export default async function SeasonLeaderboardPage() {
         <Breadcrumb />
 
         <div className="mb-8">
-          <div className="flex items-center gap-3">
-            <h1 className="text-primary-text text-3xl font-bold">
-              {latestSeason
-                ? `Season ${latestSeason.season} / ${latestSeason.title} Season Leaderboard`
-                : "Season Leaderboard"}
-            </h1>
-          </div>
+          <SeasonHeader latestSeason={latestSeason} />
+
           <p className="text-secondary-text mt-2">
             Top 25 players ranked by their total xp
           </p>

@@ -96,7 +96,7 @@ export default function Breadcrumb({ userData, loading }: BreadcrumbProps) {
           };
         }
         return {
-          label: `Season ${segment}`,
+          label: `Season ${segment.charAt(0).toUpperCase() + segment.slice(1)}`,
           href: `/${pathSegments.slice(0, index + 1).join("/")}`,
         };
       }

@@ -98,14 +98,8 @@ export default function SeasonLeaderboardClient({
   return (
     <>
       {initialLeaderboard && initialLeaderboard.length > 0 ? (
-        <div className="mt-8">
+        <div>
           {/* Last Updated */}
-          {updatedAt && updatedAt > 0 && (
-            <p className="text-secondary-text mb-4 text-sm">
-              <span className="font-semibold">Last Updated:</span>{" "}
-              {formatMessageDate(updatedAt)}
-            </p>
-          )}
 
           {/* Search Input */}
           <div className="relative mb-6">
@@ -291,6 +285,14 @@ export default function SeasonLeaderboardClient({
               )}
             </div>
           </div>
+
+          {/* Last Updated */}
+          {updatedAt && updatedAt > 0 && (
+            <p className="text-secondary-text mt-4 text-right text-sm">
+              <span className="font-semibold">Last Updated:</span>{" "}
+              {formatMessageDate(updatedAt)}
+            </p>
+          )}
         </div>
       ) : (
         <div className="border-border-primary bg-secondary-bg hover:border-border-focus hover:shadow-card-shadow rounded-lg border p-8 text-center transition-colors duration-200 hover:shadow-lg">

@@ -10,7 +10,7 @@ import { notFound, redirect } from "next/navigation";
 
 export const revalidate = 120; // Revalidate every 2 minutes
 
-const LATEST_SEASON = 29;
+const LATEST_SEASON = 30;
 
 interface Props {
   params: Promise<{
