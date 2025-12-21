@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Icon } from "@/components/ui/IconWrapper";
 
 export default function OfflineDetector() {
   // Start with false (online) to avoid false offline messages
@@ -42,10 +41,6 @@ export default function OfflineDetector() {
       <div className="container mx-auto px-4 py-2">
         <div className="relative flex flex-col items-center justify-center gap-2 lg:flex-row lg:gap-3">
           <div className="flex items-center gap-2">
-            <Icon
-              icon="material-symbols:wifi-off-rounded"
-              className="h-4 w-4"
-            />
             <span className="text-center text-xs font-semibold text-white">
               You are currently offline. Check your internet connection.
             </span>
