@@ -4,7 +4,7 @@ import { fetchChangelog, fetchItemById, BASE_API_URL } from "@/utils/api";
 
 async function fetchSeason(id: string) {
   try {
-    const response = await fetch(`${BASE_API_URL}/seasons/get?id=${id}`);
+    const response = await fetch(`${BASE_API_URL}/seasons/get?season=${id}`);
 
     if (!response.ok) {
       return null;

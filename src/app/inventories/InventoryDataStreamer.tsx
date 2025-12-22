@@ -7,7 +7,9 @@ import {
   fetchItems,
   fetchUserNetworth,
   fetchUserMoneyHistory,
+  fetchSeason,
 } from "@/utils/api";
+import seasonDates from "@/utils/seasonDates.json";
 import { CommentData } from "@/utils/api";
 import { UserData } from "@/types/auth";
 import InventoryCheckerClient from "./InventoryCheckerClient";
@@ -123,6 +125,51 @@ async function InventoryDataFetcher({
     );
   }
 
+  // Determine correct season based on scan date
+  let activeSeason = currentSeason;
+
+  // TypeScript check to ensure result is InventoryData
+  const inventoryData = result as unknown as { updated_at: number };
+
+  if (inventoryData.updated_at && currentSeason) {
+    const updatedAt = inventoryData.updated_at;
+
+    // Find matching season in seasonDates
+    // If updatedAt is greater than current season start, use current season (default)
+    if (updatedAt < currentSeason.start_date) {
+      const matchedSeason = seasonDates.find(
+        (s) => updatedAt >= s.start_date && updatedAt <= s.end_date,
+      );
+
+      if (matchedSeason && matchedSeason.season !== currentSeason.season) {
+        try {
+          const historicalSeason = await fetchSeason(
+            matchedSeason.season.toString(),
+          );
+
+          if (historicalSeason) {
+            // Handle xp_data potentially being a string
+            let parsedXpData = historicalSeason.xp_data;
+            if (typeof parsedXpData === "string") {
+              try {
+                parsedXpData = JSON.parse(parsedXpData);
+              } catch (e) {
+                console.error("Failed to parse xp_data string", e);
+              }
+            }
+
+            activeSeason = {
+              ...historicalSeason,
+              xp_data: parsedXpData,
+            } as unknown as typeof currentSeason;
+          }
+        } catch (e) {
+          console.error("Failed to fetch historical season", e);
+        }
+      }
+    }
+  }
+
   return (
     <Suspense
       fallback={
@@ -140,7 +187,7 @@ async function InventoryDataFetcher({
       <UserDataStreamer
         robloxId={actualRobloxId}
         inventoryData={result}
-        currentSeason={currentSeason}
+        currentSeason={activeSeason}
         initialComments={initialComments}
         initialCommentUserMap={initialCommentUserMap}
         items={items}

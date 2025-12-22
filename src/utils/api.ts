@@ -945,7 +945,7 @@ export async function fetchSeasonsList() {
 
 export async function fetchSeason(id: string) {
   try {
-    const response = await fetch(`${BASE_API_URL}/seasons/get?id=${id}`, {
+    const response = await fetch(`${BASE_API_URL}/seasons/get?season=${id}`, {
       headers: {
         "User-Agent": "JailbreakChangelogs-Seasons/1.0",
       },
