@@ -109,7 +109,7 @@ export default function TestimonialsSection() {
               className="border-border-primary bg-secondary-bg hover:border-border-focus hover:shadow-card-shadow flex flex-col rounded-xl border p-6 shadow-md transition-all duration-200"
             >
               <div className="mb-4 flex items-start gap-4">
-                <div className="flex-shrink-0">
+                <div className="shrink-0">
                   <Image
                     src={`${TESTIMONIALS_BASE_URL}/${testimonial.name}.webp`}
                     alt={testimonial.name}

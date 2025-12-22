@@ -746,7 +746,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
           {isRefreshingComments ? (
             <div className="flex flex-col items-center justify-center py-12 text-center sm:py-16">
               <div className="relative mb-6">
-                <div className="from-border-focus/20 to-button-info-hover/20 absolute inset-0 rounded-full bg-gradient-to-r blur-xl"></div>
+                <div className="from-border-focus/20 to-button-info-hover/20 absolute inset-0 rounded-full bg-linear-to-r blur-xl"></div>
                 <div className="border-border-focus/30 bg-secondary-bg relative rounded-full border p-4">
                   <CircularProgress size={32} className="text-border-focus" />
                 </div>
@@ -758,7 +758,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
           ) : filteredComments.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12 text-center sm:py-16">
               <div className="relative mb-6">
-                <div className="from-border-focus/20 to-button-info-hover/20 absolute inset-0 rounded-full bg-gradient-to-r blur-xl"></div>
+                <div className="from-border-focus/20 to-button-info-hover/20 absolute inset-0 rounded-full bg-linear-to-r blur-xl"></div>
                 <div className="border-border-focus/30 bg-secondary-bg relative rounded-full border p-4">
                   <Icon
                     icon="heroicons:chat-bubble-left"
@@ -964,7 +964,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                                       {type === "trade" &&
                                         trade &&
                                         comment.user_id === trade.author && (
-                                          <span className="from-button-info to-button-info-hover text-card-tag-text rounded-full bg-gradient-to-r px-2 py-0.5 text-xs font-medium shadow-sm">
+                                          <span className="from-button-info to-button-info-hover text-card-tag-text rounded-full bg-linear-to-r px-2 py-0.5 text-xs font-medium shadow-sm">
                                             OP
                                           </span>
                                         )}
@@ -1104,7 +1104,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                                         return (
                                           <>
                                             <p
-                                              className="text-primary-text text-sm leading-relaxed break-words whitespace-pre-wrap"
+                                              className="text-primary-text text-sm leading-relaxed wrap-break-word whitespace-pre-wrap"
                                               dangerouslySetInnerHTML={{
                                                 __html: sanitizeHTML(
                                                   convertUrlsToLinksHTML(

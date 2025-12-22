@@ -11,7 +11,7 @@ export default function Loading() {
           <div className="text-center">
             <div className="relative inline-block">
               <div className="bg-button-info absolute inset-0 rounded-2xl opacity-30 blur-lg"></div>
-              <div className="from-button-info to-button-info-hover relative rounded-2xl bg-gradient-to-r px-8 py-4 shadow-2xl">
+              <div className="from-button-info to-button-info-hover relative rounded-2xl bg-linear-to-r px-8 py-4 shadow-2xl">
                 <div className="flex items-center justify-center gap-4"></div>
               </div>
             </div>
@@ -55,7 +55,7 @@ export default function Loading() {
           <div className="text-center">
             <div className="relative inline-block">
               <div className="bg-button-info absolute inset-0 rounded-2xl opacity-30 blur-lg"></div>
-              <div className="from-button-info to-button-info-hover relative rounded-2xl bg-gradient-to-r px-8 py-4 shadow-2xl">
+              <div className="from-button-info to-button-info-hover relative rounded-2xl bg-linear-to-r px-8 py-4 shadow-2xl">
                 <div className="flex items-center justify-center gap-4"></div>
               </div>
             </div>

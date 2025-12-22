@@ -71,7 +71,7 @@ export default async function SeasonContractsPage() {
                   <div className="text-primary-text flex items-start gap-2 text-xs sm:text-sm">
                     <Icon
                       icon="emojione:light-bulb"
-                      className="text-button-info flex-shrink-0 text-base sm:text-lg"
+                      className="text-button-info shrink-0 text-base sm:text-lg"
                     />
                     <span className="leading-relaxed font-medium">
                       Helpful Tip: New seasons typically start shortly after the
@@ -137,7 +137,7 @@ export default async function SeasonContractsPage() {
                   <div className="text-primary-text flex items-start gap-2 text-xs sm:text-sm">
                     <Icon
                       icon="emojione:light-bulb"
-                      className="text-button-info flex-shrink-0 text-base sm:text-lg"
+                      className="text-button-info shrink-0 text-base sm:text-lg"
                     />
                     <span className="leading-relaxed font-medium">
                       Helpful Tip: Contracts are updated weekly during active

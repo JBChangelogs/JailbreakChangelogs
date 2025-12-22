@@ -54,7 +54,7 @@ export default function ScanHistoryModal({
 
       <div className="fixed inset-0 flex items-center justify-center p-4">
         <DialogPanel className="modal-container border-button-info bg-secondary-bg flex max-h-[60vh] w-full max-w-[480px] min-w-[320px] flex-col rounded-lg border shadow-lg">
-          <div className="modal-header text-primary-text flex flex-shrink-0 items-center justify-between px-6 py-4 text-xl font-semibold">
+          <div className="modal-header text-primary-text flex shrink-0 items-center justify-between px-6 py-4 text-xl font-semibold">
             <DialogTitle className="text-primary-text text-xl font-semibold">
               Scan History
             </DialogTitle>

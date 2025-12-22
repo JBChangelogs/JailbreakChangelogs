@@ -693,7 +693,7 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
                                   {item.tradable === 1 && (
                                     <>
                                       <div className="text-secondary-text space-y-1 text-xs">
-                                        <div className="flex items-center justify-between rounded-lg bg-gradient-to-r p-1.5">
+                                        <div className="flex items-center justify-between rounded-lg bg-linear-to-r p-1.5">
                                           <span className="text-secondary-text text-xs font-medium whitespace-nowrap">
                                             Cash
                                           </span>
@@ -744,7 +744,7 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
                                                 })()}
                                           </span>
                                         </div>
-                                        <div className="flex items-center justify-between rounded-lg bg-gradient-to-r p-1.5">
+                                        <div className="flex items-center justify-between rounded-lg bg-linear-to-r p-1.5">
                                           <span className="text-secondary-text text-xs font-medium whitespace-nowrap">
                                             Duped
                                           </span>
@@ -795,7 +795,7 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
                                                 })()}
                                           </span>
                                         </div>
-                                        <div className="flex items-center justify-between rounded-lg bg-gradient-to-r p-1.5">
+                                        <div className="flex items-center justify-between rounded-lg bg-linear-to-r p-1.5">
                                           <span className="text-secondary-text text-xs font-medium whitespace-nowrap">
                                             Demand
                                           </span>
@@ -819,7 +819,7 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
                                             );
                                           })()}
                                         </div>
-                                        <div className="flex items-center justify-between rounded-lg bg-gradient-to-r p-1.5">
+                                        <div className="flex items-center justify-between rounded-lg bg-linear-to-r p-1.5">
                                           <span className="text-secondary-text text-xs font-medium whitespace-nowrap">
                                             Trend
                                           </span>

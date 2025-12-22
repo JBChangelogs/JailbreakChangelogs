@@ -218,7 +218,7 @@ export default function AboutTab({
                     : lines;
                 return (
                   <>
-                    <p className="text-primary-text break-words whitespace-pre-wrap">
+                    <p className="text-primary-text wrap-break-word whitespace-pre-wrap">
                       {convertUrlsToLinks(visibleLines.join("\n"))}
                     </p>
                     {shouldTruncate && (

@@ -206,7 +206,7 @@ export default function ValuesChangelogPage() {
                   {sortedChangelogs.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-16 text-center">
                       <div className="relative mb-6">
-                        <div className="from-border-focus/20 to-button-info-hover/20 absolute inset-0 rounded-full bg-gradient-to-r blur-xl"></div>
+                        <div className="from-border-focus/20 to-button-info-hover/20 absolute inset-0 rounded-full bg-linear-to-r blur-xl"></div>
                         <div className="border-border-focus/30 bg-secondary-bg relative rounded-full border p-4">
                           <Icon
                             icon="heroicons-outline:arrow-down"
@@ -261,7 +261,7 @@ export default function ValuesChangelogPage() {
                                     <div
                                       className={`rounded-lg border p-4 transition-all duration-200 hover:translate-y-[-2px] hover:shadow-lg ${
                                         isLatest
-                                          ? "from-button-info/10 to-button-info-hover/10 shadow-button-info/20 border-button-info bg-gradient-to-r shadow-lg"
+                                          ? "from-button-info/10 to-button-info-hover/10 shadow-button-info/20 border-button-info bg-linear-to-r shadow-lg"
                                           : "border-border-primary bg-primary-bg hover:border-border-focus"
                                       }`}
                                     >

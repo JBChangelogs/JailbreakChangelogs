@@ -68,10 +68,10 @@ export default function CookieSettingsModal({
 
       <div className="fixed inset-0 flex items-center justify-center p-4">
         <DialogPanel className="modal-container border-button-info bg-secondary-bg flex max-h-[min(85vh,600px)] w-full max-w-[480px] min-w-[320px] flex-col rounded-lg border shadow-lg">
-          <div className="modal-header text-primary-text flex flex-shrink-0 items-center gap-2 px-3 py-2 text-base font-semibold sm:px-6 sm:py-3 sm:text-lg">
+          <div className="modal-header text-primary-text flex shrink-0 items-center gap-2 px-3 py-2 text-base font-semibold sm:px-6 sm:py-3 sm:text-lg">
             <Icon
               icon="material-symbols:cookie-outline-rounded"
-              className="h-5 w-5 flex-shrink-0 sm:h-6 sm:w-6"
+              className="h-5 w-5 shrink-0 sm:h-6 sm:w-6"
             />
             <span className="truncate">Cookie Settings</span>
           </div>
@@ -96,12 +96,12 @@ export default function CookieSettingsModal({
                 type="checkbox"
                 checked={settings.analytics_storage === "granted"}
                 onChange={() => handleToggle("analytics_storage")}
-                className="mt-1 h-4 w-4 flex-shrink-0 cursor-pointer"
+                className="mt-1 h-4 w-4 shrink-0 cursor-pointer"
               />
             </div>
           </div>
 
-          <div className="modal-footer border-border-primary flex flex-shrink-0 flex-col-reverse justify-end gap-2 border-t px-3 py-2 sm:flex-row sm:px-6 sm:py-3">
+          <div className="modal-footer border-border-primary flex shrink-0 flex-col-reverse justify-end gap-2 border-t px-3 py-2 sm:flex-row sm:px-6 sm:py-3">
             <button
               onClick={onClose}
               className="text-secondary-text hover:text-primary-text w-full cursor-pointer rounded border-none bg-transparent px-3 py-1.5 text-xs sm:w-auto sm:px-4 sm:py-2 sm:text-sm"

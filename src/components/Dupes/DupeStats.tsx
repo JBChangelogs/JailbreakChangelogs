@@ -132,7 +132,7 @@ export default function DupeStats({
           <div className="flex items-start gap-3">
             <Icon
               icon="heroicons:exclamation-triangle"
-              className="mt-0.5 h-5 w-5 flex-shrink-0 text-yellow-400"
+              className="mt-0.5 h-5 w-5 shrink-0 text-yellow-400"
             />
             <div>
               <h3 className="font-medium text-yellow-400">

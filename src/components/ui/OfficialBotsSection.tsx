@@ -125,7 +125,7 @@ function OfficialBotsContent() {
                   </div>
 
                   {/* Bot Avatar */}
-                  <div className="bg-tertiary-bg h-10 w-10 flex-shrink-0 overflow-hidden rounded-full">
+                  <div className="bg-tertiary-bg h-10 w-10 shrink-0 overflow-hidden rounded-full">
                     <Image
                       src={avatarUrl}
                       alt={`${displayName}'s avatar`}
@@ -154,15 +154,15 @@ function OfficialBotsContent() {
                         href={`https://www.roblox.com/users/${botId}/profile`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-primary-text hover:text-link-hover font-medium break-words transition-colors"
+                        className="text-primary-text hover:text-link-hover font-medium wrap-break-word transition-colors"
                       >
                         {displayName}
                       </a>
-                      <div className="text-secondary-text text-sm break-words">
+                      <div className="text-secondary-text text-sm wrap-break-word">
                         @{username}
                       </div>
                     </div>
-                    <CopyButton text={botId} className="mt-1 flex-shrink-0" />
+                    <CopyButton text={botId} className="mt-1 shrink-0" />
                   </div>
                 </div>
               </div>

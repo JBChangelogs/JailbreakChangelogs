@@ -46,11 +46,6 @@ export default function ConnectedBotsPolling() {
   const { data: lastProcessedRobloxData } =
     useRobloxUserDataQuery(lastProcessedUserId);
 
-  const lastScannedRelativeTime = useOptimizedRealTimeRelativeDate(
-    queueInfo?.last_dequeue?.data?.last_updated || 0,
-    "last-scanned",
-  );
-
   // Show all bots and sort by most recent heartbeat first
   const allBots = (() => {
     if (mergedBots.length === 0) return [];
@@ -263,15 +258,11 @@ export default function ConnectedBotsPolling() {
                             >
                               {botDisplayName}
                             </a>
-                            ) • {lastScannedRelativeTime}
+                            )
                           </span>
                         );
                       }
-                      return (
-                        <span className="text-xs text-gray-400">
-                          • {lastScannedRelativeTime}
-                        </span>
-                      );
+                      return null;
                     })()}
                   </div>
                 ) : (

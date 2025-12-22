@@ -466,7 +466,7 @@ export default function ItemChangelogs({
                       key={voter.id}
                       className="border-border-primary bg-primary-bg hover:border-border-focus flex items-center gap-4 rounded-lg border px-4 py-3 transition-colors"
                     >
-                      <div className="ring-border-primary relative h-10 w-10 flex-shrink-0 overflow-hidden rounded-full ring-2">
+                      <div className="ring-border-primary relative h-10 w-10 shrink-0 overflow-hidden rounded-full ring-2">
                         <DefaultAvatar />
                         {voter.avatar && (
                           <Image
@@ -597,7 +597,7 @@ export default function ItemChangelogs({
         {displayableChanges.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 text-center">
             <div className="relative mb-6">
-              <div className="from-border-focus/20 to-button-info-hover/20 absolute inset-0 rounded-full bg-gradient-to-r blur-xl"></div>
+              <div className="from-border-focus/20 to-button-info-hover/20 absolute inset-0 rounded-full bg-linear-to-r blur-xl"></div>
               <div className="border-border-focus/30 bg-secondary-bg relative rounded-full border p-4">
                 <Icon
                   icon="heroicons-outline:arrow-down"
@@ -667,7 +667,7 @@ export default function ItemChangelogs({
                           <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                             <div className="flex items-center gap-3">
                               {change.suggestion_data.metadata?.avatar_hash && (
-                                <div className="relative h-8 w-8 flex-shrink-0 overflow-hidden rounded-full">
+                                <div className="relative h-8 w-8 shrink-0 overflow-hidden rounded-full">
                                   <DefaultAvatar />
                                   <Image
                                     src={`http://proxy.jailbreakchangelogs.xyz/?destination=${encodeURIComponent(`https://cdn.discordapp.com/avatars/${change.suggestion_data.user_id}/${change.suggestion_data.metadata.avatar_hash}?size=128`)}`}
@@ -930,7 +930,7 @@ export default function ItemChangelogs({
                                         return (
                                           <>
                                             <div
-                                              className="text-secondary-text overflow-hidden text-lg font-bold break-words line-through"
+                                              className="text-secondary-text overflow-hidden text-lg font-bold wrap-break-word line-through"
                                               style={{
                                                 wordBreak: "normal",
                                                 overflowWrap: "anywhere",
@@ -1040,7 +1040,7 @@ export default function ItemChangelogs({
                                         return (
                                           <>
                                             <div
-                                              className="text-primary-text overflow-hidden text-lg font-bold break-words"
+                                              className="text-primary-text overflow-hidden text-lg font-bold wrap-break-word"
                                               style={{
                                                 wordBreak: "normal",
                                                 overflowWrap: "anywhere",

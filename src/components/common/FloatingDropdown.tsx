@@ -95,7 +95,7 @@ export default function FloatingDropdown({
         <span className="truncate">{displayLabel}</span>
         <Icon
           icon="heroicons-outline:chevron-down"
-          className={`ml-2 h-4 w-4 flex-shrink-0 transition-transform ${
+          className={`ml-2 h-4 w-4 shrink-0 transition-transform ${
             isOpen ? "rotate-180" : ""
           }`}
           inline={true}

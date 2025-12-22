@@ -486,7 +486,7 @@ export default function RedeemPage() {
             </h2>
             <ol className="text-secondary-text space-y-6">
               <li className="flex flex-col sm:flex-row sm:items-start">
-                <span className="bg-button-info text-form-button-text mb-2 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full font-semibold sm:mr-4 sm:mb-0">
+                <span className="bg-button-info text-form-button-text mb-2 flex h-8 w-8 shrink-0 items-center justify-center rounded-full font-semibold sm:mr-4 sm:mb-0">
                   1
                 </span>
                 <div className="text-lg">
@@ -538,7 +538,7 @@ export default function RedeemPage() {
                 </div>
               </li>
               <li className="flex flex-col sm:flex-row sm:items-start">
-                <span className="bg-button-info text-form-button-text mb-2 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full font-semibold sm:mr-4 sm:mb-0">
+                <span className="bg-button-info text-form-button-text mb-2 flex h-8 w-8 shrink-0 items-center justify-center rounded-full font-semibold sm:mr-4 sm:mb-0">
                   2
                 </span>
                 <div className="text-lg">
@@ -559,7 +559,7 @@ export default function RedeemPage() {
                 </div>
               </li>
               <li className="flex flex-col sm:flex-row sm:items-start">
-                <span className="bg-button-info text-form-button-text mb-2 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full font-semibold sm:mr-4 sm:mb-0">
+                <span className="bg-button-info text-form-button-text mb-2 flex h-8 w-8 shrink-0 items-center justify-center rounded-full font-semibold sm:mr-4 sm:mb-0">
                   3
                 </span>
                 <span className="text-lg">

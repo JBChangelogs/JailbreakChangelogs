@@ -102,7 +102,7 @@ export default function TradeAdsTab({
         className="border-border-primary bg-primary-bg hover:border-border-focus rounded-lg border p-3 shadow-sm transition-colors"
       >
         <div className="mb-2 flex items-center">
-          <div className="relative mr-3 h-16 w-16 flex-shrink-0 overflow-hidden rounded-md md:h-[4.5rem] md:w-32">
+          <div className="relative mr-3 h-16 w-16 shrink-0 overflow-hidden rounded-md md:h-[4.5rem] md:w-32">
             {isVideo ? (
               <video
                 src={getVideoPath(itemData.type, itemData.name)}

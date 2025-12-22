@@ -45,7 +45,7 @@ export default function HyperchromeCalculatorModal({
 
       <div className="fixed inset-0 flex items-center justify-center p-4">
         <DialogPanel className="modal-container border-button-info bg-secondary-bg flex max-h-[70vh] w-full max-w-[480px] min-w-[320px] flex-col rounded-lg border shadow-lg">
-          <div className="modal-header text-primary-text flex flex-shrink-0 items-center justify-between px-6 py-4 text-xl font-semibold">
+          <div className="modal-header text-primary-text flex shrink-0 items-center justify-between px-6 py-4 text-xl font-semibold">
             <span>Hyperchrome Pity Calculator</span>
             <button
               aria-label="Close"
@@ -230,7 +230,7 @@ export default function HyperchromeCalculatorModal({
             )}
           </div>
 
-          <div className="modal-footer flex flex-shrink-0 justify-end gap-2 px-6 py-4">
+          <div className="modal-footer flex shrink-0 justify-end gap-2 px-6 py-4">
             {step > 1 && (
               <button
                 type="button"

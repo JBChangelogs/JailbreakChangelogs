@@ -207,17 +207,17 @@ export default function UserProfileSection({
             alt="Roblox Avatar"
             width={64}
             height={64}
-            className="bg-tertiary-bg flex-shrink-0 rounded-full"
+            className="bg-tertiary-bg shrink-0 rounded-full"
           />
         ) : (
-          <div className="bg-tertiary-bg text-tertiary-bg flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-full">
+          <div className="bg-tertiary-bg text-tertiary-bg flex h-16 w-16 shrink-0 items-center justify-center rounded-full">
             <DefaultAvatar />
           </div>
         )}
 
         {/* User Info */}
         <div className="min-w-0 flex-1">
-          <h3 className="text-primary-text text-lg font-bold break-words">
+          <h3 className="text-primary-text text-lg font-bold wrap-break-word">
             <span className="inline-flex items-center gap-2">
               {getUserDisplay(userId)}
               {getHasVerifiedBadge(userId) && (
@@ -225,7 +225,7 @@ export default function UserProfileSection({
               )}
             </span>
           </h3>
-          <p className="text-primary-text text-sm break-words">
+          <p className="text-primary-text text-sm wrap-break-word">
             @{getUsername(userId)}
           </p>
 
@@ -260,7 +260,7 @@ export default function UserProfileSection({
                   rel="noopener noreferrer"
                   className="border-primary-text text-primary-text hover:bg-quaternary-bg inline-flex items-center gap-1 rounded-full border bg-transparent px-2 py-0.5 text-xs transition-colors"
                 >
-                  <DiscordIcon className="text-button-info h-3 w-3 flex-shrink-0" />
+                  <DiscordIcon className="text-button-info h-3 w-3 shrink-0" />
                   <span className="text-xs font-medium">Discord</span>
                 </a>
               </Tooltip>
@@ -294,7 +294,7 @@ export default function UserProfileSection({
                 rel="noopener noreferrer"
                 className="border-primary-text text-primary-text hover:bg-quaternary-bg inline-flex items-center gap-1 rounded-full border bg-transparent px-2 py-0.5 text-xs transition-colors"
               >
-                <RobloxIcon className="text-button-info h-3 w-3 flex-shrink-0" />
+                <RobloxIcon className="text-button-info h-3 w-3 shrink-0" />
                 <span className="text-xs font-medium">Roblox</span>
               </a>
             </Tooltip>
@@ -332,7 +332,7 @@ export default function UserProfileSection({
                     alt="JBCL Logo"
                     width={16}
                     height={16}
-                    className="h-3 w-3 flex-shrink-0"
+                    className="h-3 w-3 shrink-0"
                   />
                   <span className="text-xs font-medium">Website</span>
                 </Link>
@@ -344,7 +344,7 @@ export default function UserProfileSection({
 
       {/* Scan Button or Login Prompt */}
       {isOwnInventory ? (
-        <div className="mt-4 space-y-3 xl:mt-0 xl:flex-shrink-0">
+        <div className="mt-4 space-y-3 xl:mt-0 xl:shrink-0">
           {/* Action Buttons */}
           <div className="flex flex-col gap-3 lg:flex-row lg:gap-3">
             <button
@@ -567,10 +567,10 @@ export default function UserProfileSection({
         </div>
       ) : (
         /* Show login prompt for potential profile owner */
-        <div>
+        <div className="mt-4 flex flex-col gap-3 xl:mt-0 xl:shrink-0">
           <div className="border-border-primary bg-secondary-bg shadow-card-shadow rounded-lg border p-4">
             <div className="flex items-start gap-3">
-              <div className="flex-shrink-0">
+              <div className="shrink-0">
                 <svg
                   className="text-button-info mt-0.5 h-5 w-5"
                   fill="none"

@@ -58,19 +58,19 @@ export default function SeasonContractsClient({
           <div className="text-center">
             <div className="relative inline-block">
               <div className="bg-button-info absolute inset-0 rounded-2xl opacity-30 blur-lg"></div>
-              <div className="from-button-info to-button-info-hover relative rounded-2xl bg-gradient-to-r px-8 py-4 shadow-2xl">
+              <div className="from-button-info to-button-info-hover relative rounded-2xl bg-linear-to-r px-8 py-4 shadow-2xl">
                 <div className="flex items-center justify-center gap-4">
                   {/* Team Icon */}
                   {team === "Criminal" ? (
                     <Icon
                       icon="ri:criminal-fill"
-                      className="text-form-button-text h-8 w-8 flex-shrink-0 sm:h-10 sm:w-10"
+                      className="text-form-button-text h-8 w-8 shrink-0 sm:h-10 sm:w-10"
                       inline={true}
                     />
                   ) : (
                     <Icon
                       icon="game-icons:police-officer-head"
-                      className="text-form-button-text h-8 w-8 flex-shrink-0 sm:h-10 sm:w-10"
+                      className="text-form-button-text h-8 w-8 shrink-0 sm:h-10 sm:w-10"
                       inline={true}
                     />
                   )}

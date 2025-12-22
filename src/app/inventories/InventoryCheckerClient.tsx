@@ -672,7 +672,9 @@ export default function InventoryCheckerClient({
                   ? "Server Error"
                   : "Unable to Load Inventory"}
               </h3>
-              <p className="text-secondary-text mb-4 break-words">{error}</p>
+              <p className="text-secondary-text mb-4 wrap-break-word">
+                {error}
+              </p>
 
               {/* Show scan option for profile owner or login prompt for others */}
               {isOwnInventory ? (

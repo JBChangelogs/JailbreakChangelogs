@@ -24,7 +24,13 @@ const OGFinderDescription: React.FC = () => {
 
       {/* View My OGs Button for authenticated users */}
       {isAuthenticated && user?.roblox_id && (
-        <div className="mt-4">
+        <div className="mt-4 flex gap-2">
+          <Link
+            href={`/inventories/${user.roblox_id}`}
+            className="bg-button-info text-form-button-text hover:bg-button-info-hover inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors"
+          >
+            Check Inventory
+          </Link>
           <Link
             href={`/og/${user.roblox_id}`}
             className="bg-button-info text-form-button-text hover:bg-button-info-hover inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors"

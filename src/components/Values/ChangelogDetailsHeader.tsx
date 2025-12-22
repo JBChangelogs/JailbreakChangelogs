@@ -90,7 +90,7 @@ const ChangelogDetailsHeader: React.FC<ChangelogDetailsHeaderProps> = ({
         <div className="flex flex-wrap gap-2">
           {sortedContributors.map(([discordId, contributorData], index) => (
             <span key={discordId} className="flex items-center gap-1">
-              <div className="relative h-6 w-6 flex-shrink-0 overflow-hidden rounded-full">
+              <div className="relative h-6 w-6 shrink-0 overflow-hidden rounded-full">
                 <DefaultAvatar />
                 {contributorData.avatarUrl && (
                   <Image

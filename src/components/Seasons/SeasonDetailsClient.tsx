@@ -146,7 +146,7 @@ export default function SeasonDetailsClient({
                         level and see if you can complete the season on time.
                       </p>
                     </div>
-                    <div className="flex-shrink-0">
+                    <div className="shrink-0">
                       <Link
                         href="/seasons/will-i-make-it"
                         className="bg-button-info text-form-button-text hover:bg-button-info-hover inline-block w-full rounded-lg px-6 py-3 text-center font-semibold transition-colors lg:w-auto"
@@ -170,7 +170,7 @@ export default function SeasonDetailsClient({
                         View your weekly contracts and their xp rewards.
                       </p>
                     </div>
-                    <div className="flex-shrink-0">
+                    <div className="shrink-0">
                       <Link
                         href="/seasons/contracts"
                         className="bg-button-info text-form-button-text hover:bg-button-info-hover inline-block w-full rounded-lg px-6 py-3 text-center font-semibold transition-colors lg:w-auto"

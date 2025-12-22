@@ -9,7 +9,7 @@ export default function ServiceAvailabilityTicker() {
   if (!shouldShowTicker) return null;
 
   return (
-    <div className="from-status-warning/20 to-status-warning/10 bg-gradient-to-r backdrop-blur-lg">
+    <div className="from-status-warning/20 to-status-warning/10 bg-linear-to-r backdrop-blur-lg">
       <div className="container mx-auto px-4 py-2">
         <div className="relative flex flex-col items-center justify-center gap-2 lg:flex-row lg:gap-3">
           <div className="flex items-center gap-2">

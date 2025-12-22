@@ -39,7 +39,7 @@ export default function DupeUserInfo({
 
       {/* Roblox User Profile */}
       <div className="border-border-primary bg-primary-bg mb-6 flex flex-col gap-4 rounded-lg border p-4 sm:flex-row sm:items-center">
-        <div className="bg-tertiary-bg relative h-16 w-16 flex-shrink-0 overflow-hidden rounded-full">
+        <div className="bg-tertiary-bg relative h-16 w-16 shrink-0 overflow-hidden rounded-full">
           <Image
             src={getUserAvatar(robloxId)}
             alt="Roblox Avatar"
@@ -61,7 +61,7 @@ export default function DupeUserInfo({
           />
         </div>
         <div className="min-w-0 flex-1">
-          <h3 className="text-primary-text text-lg font-bold break-words">
+          <h3 className="text-primary-text text-lg font-bold wrap-break-word">
             <span className="inline-flex items-center gap-2">
               {getUserDisplay(robloxId)}
               {getHasVerifiedBadge(robloxId) && (
@@ -69,7 +69,7 @@ export default function DupeUserInfo({
               )}
             </span>
           </h3>
-          <p className="text-primary-text text-sm break-words opacity-75">
+          <p className="text-primary-text text-sm wrap-break-word opacity-75">
             @{getUsername(robloxId)}
           </p>
 
@@ -161,7 +161,7 @@ export default function DupeUserInfo({
                     alt="JBCL Logo"
                     width={12}
                     height={12}
-                    className="h-3 w-3 flex-shrink-0"
+                    className="h-3 w-3 shrink-0"
                   />
                   Website
                 </Link>

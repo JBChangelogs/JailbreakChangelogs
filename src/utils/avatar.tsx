@@ -180,7 +180,7 @@ export const UserAvatar = ({
         premiumType={premiumType}
       >
         <div
-          className={`relative ${finalShape === "circle" ? "rounded-full" : finalShape === "square" && premiumType === 3 ? "rounded-sm" : finalShape === "square" ? "rounded-lg" : "rounded-full"} bg-primary-bg flex-shrink-0 overflow-hidden`}
+          className={`relative ${finalShape === "circle" ? "rounded-full" : finalShape === "square" && premiumType === 3 ? "rounded-sm" : finalShape === "square" ? "rounded-lg" : "rounded-full"} bg-primary-bg shrink-0 overflow-hidden`}
           style={{
             width: size * 4,
             height: size * 4,
@@ -205,7 +205,7 @@ export const UserAvatar = ({
       premiumType={premiumType}
     >
       <div
-        className={`relative ${finalShape === "circle" ? "rounded-full" : finalShape === "square" && premiumType === 3 ? "rounded-sm" : finalShape === "square" ? "rounded-lg" : "rounded-full"} bg-primary-bg flex-shrink-0 overflow-hidden`}
+        className={`relative ${finalShape === "circle" ? "rounded-full" : finalShape === "square" && premiumType === 3 ? "rounded-sm" : finalShape === "square" ? "rounded-lg" : "rounded-full"} bg-primary-bg shrink-0 overflow-hidden`}
         style={{
           width: size * 4,
           height: size * 4,

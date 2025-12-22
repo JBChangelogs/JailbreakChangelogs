@@ -169,12 +169,12 @@ const ChangelogContent: React.FC<ChangelogContentProps> = ({
                           {item.isNested ? (
                             <Icon
                               icon="heroicons:arrow-turn-down-right"
-                              className="text-secondary-text mt-1 h-6 w-6 flex-shrink-0 sm:h-5 sm:w-5"
+                              className="text-secondary-text mt-1 h-6 w-6 shrink-0 sm:h-5 sm:w-5"
                             />
                           ) : (
                             <Icon
                               icon="heroicons-outline:arrow-right"
-                              className="text-secondary-text mt-1 h-6 w-6 flex-shrink-0 sm:h-5 sm:w-5"
+                              className="text-secondary-text mt-1 h-6 w-6 shrink-0 sm:h-5 sm:w-5"
                             />
                           )}
                           <span

@@ -160,7 +160,7 @@ export const RobloxConnection = ({ userData }: RobloxConnectionProps) => {
                 <div className="flex items-start gap-3">
                   <Icon
                     icon="heroicons:exclamation-triangle"
-                    className="text-button-danger mt-0.5 h-5 w-5 flex-shrink-0"
+                    className="text-button-danger mt-0.5 h-5 w-5 shrink-0"
                   />
                   <p className="text-primary-text text-sm">
                     Remove your Roblox profile from your account
@@ -169,7 +169,7 @@ export const RobloxConnection = ({ userData }: RobloxConnectionProps) => {
                 <div className="flex items-start gap-3">
                   <Icon
                     icon="heroicons:exclamation-triangle"
-                    className="text-button-danger mt-0.5 h-5 w-5 flex-shrink-0"
+                    className="text-button-danger mt-0.5 h-5 w-5 shrink-0"
                   />
                   <p className="text-primary-text text-sm">
                     Disable trading features and delete all existing trade ads
@@ -178,7 +178,7 @@ export const RobloxConnection = ({ userData }: RobloxConnectionProps) => {
                 <div className="flex items-start gap-3">
                   <Icon
                     icon="heroicons:exclamation-triangle"
-                    className="text-button-danger mt-0.5 h-5 w-5 flex-shrink-0"
+                    className="text-button-danger mt-0.5 h-5 w-5 shrink-0"
                   />
                   <p className="text-primary-text text-sm">
                     Require re-authentication to use Trading features again

@@ -37,7 +37,7 @@ export default function OGUserInfo({
 
       {/* Roblox User Profile */}
       <div className="border-border-primary bg-primary-bg mb-6 flex flex-col gap-4 rounded-lg border p-4 sm:flex-row sm:items-center">
-        <div className="bg-tertiary-bg relative h-16 w-16 flex-shrink-0 overflow-hidden rounded-full">
+        <div className="bg-tertiary-bg relative h-16 w-16 shrink-0 overflow-hidden rounded-full">
           <Image
             src={getUserAvatar(robloxId)}
             alt="Roblox Avatar"
@@ -59,7 +59,7 @@ export default function OGUserInfo({
           />
         </div>
         <div className="min-w-0 flex-1">
-          <h3 className="text-primary-text text-lg font-bold break-words">
+          <h3 className="text-primary-text text-lg font-bold wrap-break-word">
             <span className="inline-flex items-center gap-2">
               {getUserDisplay(robloxId)}
               {getHasVerifiedBadge(robloxId) && (
@@ -67,7 +67,7 @@ export default function OGUserInfo({
               )}
             </span>
           </h3>
-          <p className="text-primary-text text-sm break-words opacity-75">
+          <p className="text-primary-text text-sm wrap-break-word opacity-75">
             @{getUsername(robloxId)}
           </p>
 
@@ -171,7 +171,7 @@ export default function OGUserInfo({
                     alt="JBCL Logo"
                     width={16}
                     height={16}
-                    className="h-3 w-3 flex-shrink-0"
+                    className="h-3 w-3 shrink-0"
                   />
                   <span className="text-xs font-medium">Website Profile</span>
                 </Link>
@@ -179,13 +179,16 @@ export default function OGUserInfo({
             )}
           </div>
         </div>
-      </div>
 
-      {/* Original Items Found */}
-      <div className="mt-4 text-center">
-        <div className="text-secondary-text text-sm">Original Items Found</div>
-        <div className="text-primary-text text-2xl font-bold">
-          {(originalItemsCount || 0).toLocaleString()}
+        {/* Action Buttons & Stats */}
+        <div className="mt-4 flex flex-col items-center gap-4 sm:mt-0 sm:ml-auto sm:flex-col sm:items-end">
+          {/* Original Items Found */}
+          <div className="text-center sm:text-right">
+            <div className="text-secondary-text text-sm">original items</div>
+            <div className="text-primary-text text-2xl font-bold">
+              {(originalItemsCount || 0).toLocaleString()}
+            </div>
+          </div>
         </div>
       </div>
     </div>

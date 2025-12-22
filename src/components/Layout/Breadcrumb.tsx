@@ -313,7 +313,7 @@ export default function Breadcrumb({ userData, loading }: BreadcrumbProps) {
                   {isLast ? (
                     <span className="text-secondary-text flex items-center text-sm font-medium">
                       <svg
-                        className="mr-2.5 h-3 w-3 flex-shrink-0"
+                        className="mr-2.5 h-3 w-3 shrink-0"
                         aria-hidden="true"
                         xmlns="http://www.w3.org/2000/svg"
                         fill="currentColor"
@@ -329,7 +329,7 @@ export default function Breadcrumb({ userData, loading }: BreadcrumbProps) {
                       className="text-secondary-text hover:text-link-hover flex items-center text-sm font-medium"
                     >
                       <svg
-                        className="mr-2.5 h-3 w-3 flex-shrink-0"
+                        className="mr-2.5 h-3 w-3 shrink-0"
                         aria-hidden="true"
                         xmlns="http://www.w3.org/2000/svg"
                         fill="currentColor"
@@ -351,7 +351,7 @@ export default function Breadcrumb({ userData, loading }: BreadcrumbProps) {
                 aria-current={isLast ? "page" : undefined}
               >
                 <svg
-                  className="text-secondary-text h-3 w-3 flex-shrink-0"
+                  className="text-secondary-text h-3 w-3 shrink-0"
                   aria-hidden="true"
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"

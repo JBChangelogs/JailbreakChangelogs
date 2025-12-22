@@ -152,7 +152,7 @@ const ReportDupeModal: React.FC<ReportDupeModalProps> = ({
           <div className="mb-6">
             <h3 className="text-muted mb-4 text-center">Reporting dupe for:</h3>
             <div className="flex flex-col items-center space-y-2">
-              <div className="flex-shrink-0">
+              <div className="shrink-0">
                 <Image
                   src={getItemImagePath(itemType, itemName, true)}
                   alt={itemName}

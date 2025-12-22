@@ -83,7 +83,7 @@ export const MenuItem = ({
         <motion.div
           animate={{ rotate: active === item ? 180 : 0 }}
           transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
-          className="flex-shrink-0"
+          className="shrink-0"
         >
           <svg
             className={`text-lg ${

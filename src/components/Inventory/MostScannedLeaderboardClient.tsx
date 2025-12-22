@@ -287,7 +287,7 @@ export default function MostScannedLeaderboardClient({
                         </div>
 
                         {/* Avatar */}
-                        <div className="bg-tertiary-bg h-10 w-10 flex-shrink-0 overflow-hidden rounded-full">
+                        <div className="bg-tertiary-bg h-10 w-10 shrink-0 overflow-hidden rounded-full">
                           {avatarUrl ? (
                             <Image
                               src={avatarUrl}
@@ -322,11 +322,11 @@ export default function MostScannedLeaderboardClient({
                               href={`https://www.roblox.com/users/${user.user_id}/profile`}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="text-primary-text hover:text-link-hover font-medium break-words transition-colors"
+                              className="text-primary-text hover:text-link-hover font-medium wrap-break-word transition-colors"
                             >
                               {displayName}
                             </a>
-                            <div className="text-secondary-text text-sm break-words">
+                            <div className="text-secondary-text text-sm wrap-break-word">
                               @{username} • {user.upsert_count.toLocaleString()}{" "}
                               scans
                             </div>
@@ -334,7 +334,7 @@ export default function MostScannedLeaderboardClient({
                           <Link
                             href={`/inventories/${user.user_id}`}
                             prefetch={false}
-                            className="bg-button-info text-form-button-text hover:bg-button-info-hover focus:ring-border-focus active:bg-button-info-active mt-1 flex-shrink-0 cursor-pointer rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors duration-200 focus:ring-2 focus:outline-none"
+                            className="bg-button-info text-form-button-text hover:bg-button-info-hover focus:ring-border-focus active:bg-button-info-active mt-1 shrink-0 cursor-pointer rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors duration-200 focus:ring-2 focus:outline-none"
                           >
                             View Inventory
                           </Link>

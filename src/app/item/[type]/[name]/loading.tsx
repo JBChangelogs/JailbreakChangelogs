@@ -13,7 +13,7 @@ export default function Loading() {
         {/* Header section skeleton */}
         <div className="mb-8 flex flex-col gap-6 md:flex-row">
           {/* Image/Video skeleton */}
-          <div className="flex-shrink-0">
+          <div className="shrink-0">
             <Skeleton
               variant="rounded"
               width={320}

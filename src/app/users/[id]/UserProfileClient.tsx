@@ -892,7 +892,7 @@ export default function UserProfileClient({
                               rel="noopener noreferrer"
                               className="border-primary-text text-primary-text inline-flex items-center gap-1 rounded-full border bg-transparent px-2 py-0.5 text-xs"
                             >
-                              <DiscordIcon className="text-border-focus h-4 w-4 flex-shrink-0" />
+                              <DiscordIcon className="text-border-focus h-4 w-4 shrink-0" />
                               <span className="text-sm font-medium">
                                 Discord
                               </span>
@@ -928,7 +928,7 @@ export default function UserProfileClient({
                                 rel="noopener noreferrer"
                                 className="border-primary-text text-primary-text inline-flex items-center gap-1 rounded-full border bg-transparent px-2 py-0.5 text-xs"
                               >
-                                <RobloxIcon className="h-4 w-4 flex-shrink-0" />
+                                <RobloxIcon className="h-4 w-4 shrink-0" />
                                 <span className="text-sm font-medium">
                                   Roblox
                                 </span>

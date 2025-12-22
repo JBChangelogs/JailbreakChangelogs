@@ -246,7 +246,7 @@ export default function ModernPricingSection() {
                           alt="Robux"
                           width={24}
                           height={24}
-                          className="h-6 w-6 flex-shrink-0 object-contain"
+                          className="h-6 w-6 shrink-0 object-contain"
                         />
                         <span>0R$</span>
                       </>
@@ -265,7 +265,7 @@ export default function ModernPricingSection() {
                       alt="Robux"
                       width={24}
                       height={24}
-                      className="h-6 w-6 flex-shrink-0 object-contain"
+                      className="h-6 w-6 shrink-0 object-contain"
                     />
                     <span>{tier.priceAlt.split(" ")[1]}</span>
                     <span className="text-secondary-text text-base font-normal">
@@ -295,7 +295,7 @@ export default function ModernPricingSection() {
                   <div key={featureIndex} className="flex items-center">
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
-                      className="text-button-info h-5 w-5 flex-shrink-0"
+                      className="text-button-info h-5 w-5 shrink-0"
                       viewBox="0 0 20 20"
                       fill="currentColor"
                     >

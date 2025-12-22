@@ -35,7 +35,7 @@ export default function RobloxTradeUser({
 
   return (
     <div className="flex items-center space-x-3">
-      <div className="flex-shrink-0">
+      <div className="shrink-0">
         {!imageError && user.roblox_avatar ? (
           <div className="bg-tertiary-bg relative h-10 w-10 overflow-hidden rounded-full">
             <Image

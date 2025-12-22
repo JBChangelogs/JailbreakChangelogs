@@ -254,7 +254,7 @@ export default function ContributorsClient({
         className="flex flex-col items-center"
       >
         <div
-          className="relative flex-shrink-0 overflow-hidden rounded-full"
+          className="relative shrink-0 overflow-hidden rounded-full"
           style={{
             width: 128,
             height: 128,
@@ -297,7 +297,7 @@ export default function ContributorsClient({
         className="flex flex-col items-center"
       >
         <div
-          className="relative flex-shrink-0 overflow-hidden rounded-full"
+          className="relative shrink-0 overflow-hidden rounded-full"
           style={{
             width: 128,
             height: 128,
@@ -345,7 +345,7 @@ export default function ContributorsClient({
                 <button
                   key={filter.key}
                   onClick={() => setActiveFilter(filter.key)}
-                  className={`flex-shrink-0 cursor-pointer rounded-xl px-3 py-2 text-xs font-medium whitespace-nowrap capitalize transition-colors duration-300 md:px-6 md:py-3 md:text-sm ${
+                  className={`shrink-0 cursor-pointer rounded-xl px-3 py-2 text-xs font-medium whitespace-nowrap capitalize transition-colors duration-300 md:px-6 md:py-3 md:text-sm ${
                     activeFilter === filter.key
                       ? "bg-button-info text-form-button-text"
                       : "text-secondary-text hover:bg-quaternary-bg hover:text-primary-text"

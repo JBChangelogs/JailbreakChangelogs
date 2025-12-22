@@ -99,7 +99,7 @@ const ItemRow: React.FC<ItemRowProps> = ({ item, side, isFirst = false }) => {
       <div className="flex items-center justify-between">
         <div className="flex flex-1 items-center gap-3">
           <div
-            className={`h-2 w-2 flex-shrink-0 rounded-full ${
+            className={`h-2 w-2 shrink-0 rounded-full ${
               side === "offering" ? "bg-status-success" : "bg-status-error"
             }`}
           ></div>

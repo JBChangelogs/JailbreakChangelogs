@@ -779,7 +779,7 @@ const ServerList: React.FC<{
                           <div className="flex items-center space-x-2">
                             <Icon
                               icon="heroicons:user-solid"
-                              className="text-secondary-text h-5 w-5 flex-shrink-0"
+                              className="text-secondary-text h-5 w-5 shrink-0"
                             />
                             <span className="text-secondary-text flex items-center gap-1 text-sm sm:text-base">
                               Owner:{" "}
@@ -867,7 +867,7 @@ const ServerList: React.FC<{
                               Server Rules
                             </h3>
                             <p
-                              className="text-secondary-text text-xs break-words whitespace-pre-wrap sm:text-sm"
+                              className="text-secondary-text text-xs wrap-break-word whitespace-pre-wrap sm:text-sm"
                               dangerouslySetInnerHTML={{
                                 __html:
                                   server.rules === "N/A"

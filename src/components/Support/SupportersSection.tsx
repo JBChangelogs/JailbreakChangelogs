@@ -57,7 +57,7 @@ export default function SupportersSection({
   const renderSupporterCard = (supporter: Supporter) => (
     <div
       key={supporter.id}
-      className="border-border-primary bg-secondary-bg hover:border-border-focus hover:shadow-card-shadow flex-shrink-0 rounded-xl border p-6 shadow-md transition-all duration-200"
+      className="border-border-primary bg-secondary-bg hover:border-border-focus hover:shadow-card-shadow shrink-0 rounded-xl border p-6 shadow-md transition-all duration-200"
       style={{ width: "280px" }}
     >
       <div className="flex flex-col items-center space-y-4">
@@ -114,7 +114,7 @@ export default function SupportersSection({
 
         {/* Mobile: Scrollable Container */}
         <div className="relative lg:hidden">
-          <div className="from-primary-bg pointer-events-none absolute top-0 left-0 z-10 h-full w-8 bg-gradient-to-r to-transparent"></div>
+          <div className="from-primary-bg pointer-events-none absolute top-0 left-0 z-10 h-full w-8 bg-linear-to-r to-transparent"></div>
           <div className="from-primary-bg pointer-events-none absolute top-0 right-0 z-10 h-full w-8 bg-gradient-to-l to-transparent"></div>
 
           <div className="scrollbar-hide flex snap-x snap-mandatory gap-4 overflow-x-auto pb-4">
@@ -128,7 +128,7 @@ export default function SupportersSection({
 
         {/* Desktop: Auto-scrolling Carousel */}
         <div className="relative hidden lg:block">
-          <div className="from-primary-bg pointer-events-none absolute top-0 left-0 z-10 h-full w-20 bg-gradient-to-r to-transparent"></div>
+          <div className="from-primary-bg pointer-events-none absolute top-0 left-0 z-10 h-full w-20 bg-linear-to-r to-transparent"></div>
           <div className="from-primary-bg pointer-events-none absolute top-0 right-0 z-10 h-full w-20 bg-gradient-to-l to-transparent"></div>
 
           <SupporterCarousel speed={0.5}>
@@ -161,17 +161,17 @@ export default function SupportersSection({
         {renderTierSection(
           tier3Supporters,
           "Supporter III",
-          "bg-gradient-to-r from-[#FFD700] to-[#DAA520]",
+          "bg-linear-to-r from-[#FFD700] to-[#DAA520]",
         )}
         {renderTierSection(
           tier2Supporters,
           "Supporter II",
-          "bg-gradient-to-r from-[#C0C0C0] to-[#A9A9A9]",
+          "bg-linear-to-r from-[#C0C0C0] to-[#A9A9A9]",
         )}
         {renderTierSection(
           tier1Supporters,
           "Supporter I",
-          "bg-gradient-to-r from-[#CD7F32] to-[#B87333]",
+          "bg-linear-to-r from-[#CD7F32] to-[#B87333]",
         )}
       </div>
     </div>

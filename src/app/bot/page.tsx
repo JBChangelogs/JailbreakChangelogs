@@ -71,7 +71,7 @@ export default function BotPage() {
 
             {/* Achievement Banner */}
             <div className="mx-auto mb-8 max-w-2xl">
-              <div className="from-tertiary via-tertiary to-tertiary relative overflow-hidden rounded-xl bg-gradient-to-r p-1">
+              <div className="from-tertiary via-tertiary to-tertiary relative overflow-hidden rounded-xl bg-linear-to-r p-1">
                 <div className="border-border-primary bg-secondary-bg rounded-lg border p-4">
                   <div className="flex flex-col items-center gap-3 text-center md:flex-row md:justify-center">
                     <div className="flex items-center gap-2">

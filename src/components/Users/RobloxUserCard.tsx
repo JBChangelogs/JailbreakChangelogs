@@ -33,7 +33,7 @@ export default function RobloxUserCard({ user }: RobloxUserCardProps) {
   return (
     <div className="flex items-center space-x-3">
       {!avatarError && user.roblox_avatar ? (
-        <div className="bg-tertiary-bg relative h-12 w-12 flex-shrink-0 overflow-hidden rounded-full">
+        <div className="bg-tertiary-bg relative h-12 w-12 shrink-0 overflow-hidden rounded-full">
           {isLoading && (
             <div className="absolute inset-0 flex items-center justify-center">
               <CircularProgress
@@ -55,7 +55,7 @@ export default function RobloxUserCard({ user }: RobloxUserCardProps) {
           </div>
         </div>
       ) : (
-        <div className="bg-tertiary-bg flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full">
+        <div className="bg-tertiary-bg flex h-12 w-12 shrink-0 items-center justify-center rounded-full">
           <RobloxIcon className="text-primary-text h-6 w-6" />
         </div>
       )}

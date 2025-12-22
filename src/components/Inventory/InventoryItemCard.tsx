@@ -84,7 +84,7 @@ export default function InventoryItemCard({
       {/* Title */}
       <div className="mb-4 text-left">
         <h2
-          className={`${bangers.className} text-primary-text mb-1 text-2xl tracking-wide break-words`}
+          className={`${bangers.className} text-primary-text mb-1 text-2xl tracking-wide wrap-break-word`}
         >
           <Link
             href={`/item/${encodeURIComponent(item.categoryTitle.toLowerCase())}/${encodeURIComponent(item.title)}${variant ? `?variant=${variant}` : ""}`}
@@ -285,7 +285,7 @@ export default function InventoryItemCard({
               <span className="text-primary-text text-xl font-bold">???</span>
             ) : originalOwnerInfo ? (
               <div className="flex items-center justify-center gap-2">
-                <div className="bg-tertiary-bg relative h-8 w-8 flex-shrink-0 overflow-hidden rounded-full">
+                <div className="bg-tertiary-bg relative h-8 w-8 shrink-0 overflow-hidden rounded-full">
                   <Image
                     src={getUserAvatar(
                       isOriginalOwner ? userId : originalOwnerInfo.value,
@@ -312,7 +312,7 @@ export default function InventoryItemCard({
                   href={`https://www.roblox.com/users/${isOriginalOwner ? userId : originalOwnerInfo.value}/profile`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-link hover:text-link-hover text-center break-words transition-colors hover:underline"
+                  className="text-link hover:text-link-hover text-center wrap-break-word transition-colors hover:underline"
                   onClick={(e) => e.stopPropagation()}
                 >
                   <span className="inline-flex items-center gap-2">

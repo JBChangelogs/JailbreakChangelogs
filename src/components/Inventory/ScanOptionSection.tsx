@@ -26,7 +26,7 @@ export default function ScanOptionSection({
         className={`flex items-start gap-3 ${isOwnInventory ? "justify-center" : ""}`}
       >
         {!isOwnInventory && (
-          <div className="flex-shrink-0">
+          <div className="shrink-0">
             <svg
               className="text-button-info mt-0.5 h-5 w-5"
               fill="none"
@@ -72,12 +72,20 @@ export default function ScanOptionSection({
                 Learn More
               </Link>
             ) : user?.roblox_id && !isOwnInventory ? (
-              <Link
-                href={`/inventories/${user.roblox_id}`}
-                className="bg-button-info text-form-button-text hover:bg-button-info-hover inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors"
-              >
-                View My Inventory
-              </Link>
+              <div className="flex gap-2">
+                <Link
+                  href={`/inventories/${user.roblox_id}`}
+                  className="bg-button-info text-form-button-text hover:bg-button-info-hover inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors"
+                >
+                  View My Inventory
+                </Link>
+                <Link
+                  href={`/og/${user.roblox_id}`}
+                  className="bg-button-info text-form-button-text hover:bg-button-info-hover inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors"
+                >
+                  View My OG items
+                </Link>
+              </div>
             ) : user?.roblox_id && isOwnInventory ? (
               !ENABLE_WS_SCAN ? (
                 <button

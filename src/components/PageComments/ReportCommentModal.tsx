@@ -71,7 +71,7 @@ const ReportCommentModal: React.FC<ReportCommentModalProps> = ({
                 <div className="text-secondary-text mb-1 text-xs tracking-wider uppercase">
                   Comment Content
                 </div>
-                <div className="text-primary-text text-sm break-words whitespace-pre-wrap">
+                <div className="text-primary-text text-sm wrap-break-word whitespace-pre-wrap">
                   {commentContent}
                 </div>
               </div>

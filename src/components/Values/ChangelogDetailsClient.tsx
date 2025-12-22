@@ -601,7 +601,7 @@ export default function ChangelogDetailsClient({
                           <Link
                             href={`/item/${change.item.type}/${encodeURIComponent(change.item.name)}`}
                             prefetch={false}
-                            className="text-primary-text hover:text-link block font-semibold break-words whitespace-normal transition-colors lg:pr-24"
+                            className="text-primary-text hover:text-link block font-semibold wrap-break-word whitespace-normal transition-colors lg:pr-24"
                           >
                             {change.item.name}
                           </Link>
@@ -634,7 +634,7 @@ export default function ChangelogDetailsClient({
                         <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                           <div className="flex min-w-0 items-center gap-3">
                             {change.suggestion.metadata?.avatar_hash && (
-                              <div className="relative h-8 w-8 flex-shrink-0 overflow-hidden rounded-full">
+                              <div className="relative h-8 w-8 shrink-0 overflow-hidden rounded-full">
                                 <DefaultAvatar />
                                 <Image
                                   src={`http://proxy.jailbreakchangelogs.xyz/?destination=${encodeURIComponent(`https://cdn.discordapp.com/avatars/${change.suggestion.user_id}/${change.suggestion.metadata.avatar_hash}?size=128`)}`}
@@ -659,13 +659,13 @@ export default function ChangelogDetailsClient({
                                 href={`https://discord.com/users/${change.suggestion.user_id}`}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="text-link hover:text-link-hover text-lg font-bold break-words transition-colors hover:underline"
+                                className="text-link hover:text-link-hover text-lg font-bold wrap-break-word transition-colors hover:underline"
                               >
                                 {change.suggestion.suggestor_name}
                               </a>
                             </div>
                           </div>
-                          <div className="flex flex-shrink-0 items-center justify-center">
+                          <div className="flex shrink-0 items-center justify-center">
                             <div className="border-border-primary flex items-center justify-center overflow-hidden rounded-lg border">
                               <button
                                 type="button"
@@ -876,7 +876,7 @@ export default function ChangelogDetailsClient({
                                         return (
                                           <>
                                             <div
-                                              className="text-secondary-text overflow-hidden text-lg font-bold break-words line-through"
+                                              className="text-secondary-text overflow-hidden text-lg font-bold wrap-break-word line-through"
                                               style={{
                                                 wordBreak: "normal",
                                                 overflowWrap: "anywhere",
@@ -970,7 +970,7 @@ export default function ChangelogDetailsClient({
                                         return (
                                           <>
                                             <div
-                                              className="text-primary-text overflow-hidden text-lg font-bold break-words"
+                                              className="text-primary-text overflow-hidden text-lg font-bold wrap-break-word"
                                               style={{
                                                 wordBreak: "normal",
                                                 overflowWrap: "anywhere",
@@ -1177,7 +1177,7 @@ export default function ChangelogDetailsClient({
                         key={voter.id}
                         className="border-border-primary bg-primary-bg hover:border-border-focus flex items-center gap-4 rounded-lg border px-4 py-3 transition-colors"
                       >
-                        <div className="ring-border-primary relative h-10 w-10 flex-shrink-0 overflow-hidden rounded-full ring-2">
+                        <div className="ring-border-primary relative h-10 w-10 shrink-0 overflow-hidden rounded-full ring-2">
                           <DefaultAvatar />
                           {voter.avatar_hash && (
                             <Image

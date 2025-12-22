@@ -910,7 +910,7 @@ const CalculatorValueComparison: React.FC<{
 
       {/* Overall Difference */}
       <div className="mt-8">
-        <div className="from-primary/3 to-primary/5 rounded-xl bg-gradient-to-r p-6">
+        <div className="from-primary/3 to-primary/5 rounded-xl bg-linear-to-r p-6">
           <h4 className="text-primary-text mb-4 text-lg font-semibold">
             Overall Difference
           </h4>

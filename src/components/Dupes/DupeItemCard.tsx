@@ -79,7 +79,7 @@ export default function DupeItemCard({
       {/* Title */}
       <div className="mb-4 text-left">
         <h2
-          className={`${bangers.className} text-primary-text mb-1 text-2xl tracking-wide break-words`}
+          className={`${bangers.className} text-primary-text mb-1 text-2xl tracking-wide wrap-break-word`}
         >
           <Link
             href={`/item/${encodeURIComponent(item.categoryTitle.toLowerCase())}/${encodeURIComponent(item.title)}`}
@@ -262,7 +262,7 @@ export default function DupeItemCard({
           <div className="text-secondary-text text-sm">ORIGINAL OWNER</div>
           <div className="text-xl font-bold">
             <div className="flex items-center justify-center gap-2">
-              <div className="bg-tertiary-bg relative h-8 w-8 flex-shrink-0 overflow-hidden rounded-full">
+              <div className="bg-tertiary-bg relative h-8 w-8 shrink-0 overflow-hidden rounded-full">
                 <Image
                   src={getUserAvatar(robloxId)}
                   alt="Original Owner Avatar"
@@ -287,7 +287,7 @@ export default function DupeItemCard({
                 href={`https://www.roblox.com/users/${robloxId}/profile`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-link hover:text-link-hover text-center break-words transition-colors hover:underline"
+                className="text-link hover:text-link-hover text-center wrap-break-word transition-colors hover:underline"
                 onClick={(e) => e.stopPropagation()}
               >
                 {getUsername(robloxId)}

@@ -65,7 +65,7 @@ export default function Comment({
   const renderThumbnail = () => {
     if (item_type.toLowerCase() === "changelog") {
       return (
-        <div className="relative mr-3 h-16 w-16 flex-shrink-0 overflow-hidden rounded-md md:h-[4.5rem] md:w-32">
+        <div className="relative mr-3 h-16 w-16 shrink-0 overflow-hidden rounded-md md:h-[4.5rem] md:w-32">
           <Image
             src={`https://assets.jailbreakchangelogs.xyz/assets/images/changelogs/${item_id}.webp`}
             alt={`Changelog ${item_id}`}
@@ -79,7 +79,7 @@ export default function Comment({
 
     if (item_type.toLowerCase() === "season") {
       return (
-        <div className="relative mr-3 h-16 w-16 flex-shrink-0 overflow-hidden rounded-md md:h-[4.5rem] md:w-32">
+        <div className="relative mr-3 h-16 w-16 shrink-0 overflow-hidden rounded-md md:h-[4.5rem] md:w-32">
           <Image
             src={`https://assets.jailbreakchangelogs.xyz/assets/images/seasons/${item_id}/10.webp`}
             alt={`Season ${item_id}`}
@@ -93,7 +93,7 @@ export default function Comment({
 
     if (item_type.toLowerCase() === "trade") {
       return (
-        <div className="relative mr-3 h-16 w-16 flex-shrink-0 overflow-hidden rounded-md md:h-[4.5rem] md:w-32">
+        <div className="relative mr-3 h-16 w-16 shrink-0 overflow-hidden rounded-md md:h-[4.5rem] md:w-32">
           <Image
             src="https://assets.jailbreakchangelogs.xyz/assets/logos/collab/JBCL_X_TC_Logo_Long_Light_Background.webp"
             alt="Trade Ad"
@@ -107,7 +107,7 @@ export default function Comment({
 
     if (item_type.toLowerCase() === "inventory") {
       return (
-        <div className="relative mr-3 h-16 w-16 flex-shrink-0 overflow-hidden rounded-md md:h-[4.5rem] md:w-32">
+        <div className="relative mr-3 h-16 w-16 shrink-0 overflow-hidden rounded-md md:h-[4.5rem] md:w-32">
           <Image
             src={`https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${item_id}&size=150x150&format=Png&isCircular=false`}
             alt={`User ${item_id}'s inventory`}
@@ -148,7 +148,7 @@ export default function Comment({
       // Special case for video items
       if (isVideoItem(itemDetails.name)) {
         return (
-          <div className="relative mr-3 h-16 w-16 flex-shrink-0 overflow-hidden rounded-md md:h-[4.5rem] md:w-32">
+          <div className="relative mr-3 h-16 w-16 shrink-0 overflow-hidden rounded-md md:h-[4.5rem] md:w-32">
             <video
               src={getVideoPath(itemDetails.type, itemDetails.name)}
               autoPlay
@@ -176,7 +176,7 @@ export default function Comment({
       }
 
       return (
-        <div className="relative mr-3 h-16 w-16 flex-shrink-0 overflow-hidden rounded-md md:h-[4.5rem] md:w-32">
+        <div className="relative mr-3 h-16 w-16 shrink-0 overflow-hidden rounded-md md:h-[4.5rem] md:w-32">
           <Image
             src={imagePath}
             alt={`${item_type} ${itemDetails.name}`}
@@ -191,7 +191,7 @@ export default function Comment({
     // Show loading placeholder while fetching item details
     if (isLoading) {
       return (
-        <div className="relative mr-3 h-16 w-16 flex-shrink-0 animate-pulse overflow-hidden rounded-md md:h-[4.5rem] md:w-32"></div>
+        <div className="relative mr-3 h-16 w-16 shrink-0 animate-pulse overflow-hidden rounded-md md:h-[4.5rem] md:w-32"></div>
       );
     }
 
@@ -312,7 +312,7 @@ export default function Comment({
             {/* Comment Content Third */}
             <Typography
               variant="body2"
-              className="text-secondary-text break-words whitespace-pre-wrap"
+              className="text-secondary-text wrap-break-word whitespace-pre-wrap"
               sx={{
                 overflowWrap: "break-word",
                 wordBreak: "break-word",

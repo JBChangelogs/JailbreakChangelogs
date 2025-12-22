@@ -106,7 +106,7 @@ const PrivateServersTab: React.FC<PrivateServersTabProps> = ({
                 <div className="flex items-center space-x-2">
                   <Icon
                     icon="mdi:clock"
-                    className="text-secondary-text h-5 w-5 flex-shrink-0"
+                    className="text-secondary-text h-5 w-5 shrink-0"
                   />
                   <span className="text-secondary-text text-sm sm:text-base">
                     Created: {formatProfileDate(server.created_at)} • Expires:{" "}
@@ -119,7 +119,7 @@ const PrivateServersTab: React.FC<PrivateServersTabProps> = ({
                   <h3 className="text-primary-text mb-2 text-sm font-semibold">
                     Server Rules
                   </h3>
-                  <p className="text-primary-text text-xs break-words whitespace-pre-wrap sm:text-sm">
+                  <p className="text-primary-text text-xs wrap-break-word whitespace-pre-wrap sm:text-sm">
                     {server.rules === "N/A"
                       ? "No Rules set by owner"
                       : server.rules}

@@ -107,7 +107,7 @@ export default function OGItemCard({
       {/* Title */}
       <div className="mb-4 text-left">
         <h2
-          className={`${bangers.className} text-primary-text mb-1 text-2xl tracking-wide break-words`}
+          className={`${bangers.className} text-primary-text mb-1 text-2xl tracking-wide wrap-break-word`}
         >
           <Link
             href={`/item/${encodeURIComponent(item.categoryTitle.toLowerCase())}/${encodeURIComponent(item.title)}`}
@@ -300,7 +300,7 @@ export default function OGItemCard({
           <div className="text-secondary-text text-sm">CURRENT OWNER</div>
           <div className="text-xl font-bold">
             <div className="flex items-center justify-center gap-2">
-              <div className="bg-tertiary-bg relative h-8 w-8 flex-shrink-0 overflow-hidden rounded-full">
+              <div className="bg-tertiary-bg relative h-8 w-8 shrink-0 overflow-hidden rounded-full">
                 <Image
                   src={getUserAvatar(item.user_id)}
                   alt="Owner Avatar"
@@ -325,7 +325,7 @@ export default function OGItemCard({
                 href={`https://www.roblox.com/users/${item.user_id}/profile`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-link hover:text-link-hover text-center break-words transition-colors hover:underline"
+                className="text-link hover:text-link-hover text-center wrap-break-word transition-colors hover:underline"
                 onClick={(e) => e.stopPropagation()}
               >
                 <span className="inline-flex items-center gap-2">

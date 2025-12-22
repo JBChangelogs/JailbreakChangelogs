@@ -413,7 +413,7 @@ export default function DupeFinderResults({
             <div className="text-primary-text flex items-start gap-2 text-sm">
               <Icon
                 icon="emojione:light-bulb"
-                className="text-button-info flex-shrink-0 text-lg"
+                className="text-button-info shrink-0 text-lg"
               />
               <span className="font-medium">
                 Helpful Tip: Click on any item card to view its ownership
