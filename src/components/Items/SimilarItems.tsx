@@ -177,12 +177,7 @@ const SimilarItems = ({
       let score = 0;
 
       // Check if both items have trends
-      if (
-        !item1.trend ||
-        !item2.trend ||
-        item1.trend === "N/A" ||
-        item2.trend === "N/A"
-      ) {
+      if (!item1.trend || !item2.trend) {
         return 0;
       }
 
@@ -465,7 +460,7 @@ const SimilarItems = ({
                     </div>
 
                     {/* Trend */}
-                    {item.trend && item.trend !== "N/A" && (
+                    {item.trend && (
                       <div className="bg-secondary-bg flex items-center justify-between rounded-lg p-1.5">
                         <span className="text-secondary-text text-[10px] font-medium">
                           Trend
@@ -473,7 +468,7 @@ const SimilarItems = ({
                         <span
                           className={`${getTrendColor(item.trend)} rounded-lg px-1.5 py-0.5 text-[9px] font-bold whitespace-nowrap`}
                         >
-                          {item.trend}
+                          {item.trend === "N/A" ? "Unknown" : item.trend}
                         </span>
                       </div>
                     )}
