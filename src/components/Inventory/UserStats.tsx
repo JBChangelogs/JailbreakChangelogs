@@ -112,8 +112,8 @@ export default function UserStats({
     setValues();
   }, [latestNetworthData]);
 
-  // Handle refresh
-  const handleRefresh = async () => {
+  // Handle refresh with Turnstile token
+  const handleRefresh = async (turnstileToken: string) => {
     setIsRefreshing(true);
     try {
       // Make API call to refresh inventory data
@@ -122,20 +122,27 @@ export default function UserStats({
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ robloxId: initialData.user_id }),
+        body: JSON.stringify({
+          robloxId: initialData.user_id,
+          turnstileToken,
+        }),
       });
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(
-          errorData.message || "Failed to refresh inventory data",
-        );
+        throw new Error(errorData.error || "Failed to refresh inventory data");
       }
 
       const refreshedData = await response.json();
 
       // Update the parent component with new data
       await onRefresh(refreshedData);
+
+      // Show success message
+      toast.success("Inventory data refreshed successfully!", {
+        duration: 3000,
+        position: "bottom-right",
+      });
     } catch (error) {
       logError("Error refreshing data", error, {
         component: "UserStats",

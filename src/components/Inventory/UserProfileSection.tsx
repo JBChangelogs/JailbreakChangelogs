@@ -13,6 +13,8 @@ import { useAuthContext } from "@/contexts/AuthContext";
 import { useScanWebSocket } from "@/hooks/useScanWebSocket";
 import { useSupporterModal } from "@/hooks/useSupporterModal";
 import SupporterModal from "@/components/Modals/SupporterModal";
+import RefreshInventoryModal from "@/components/Modals/RefreshInventoryModal";
+import ScanInventoryModal from "@/components/Modals/ScanInventoryModal";
 import { ENABLE_WS_SCAN } from "@/utils/api";
 import {
   showScanLoadingToast,
@@ -33,7 +35,7 @@ interface UserProfileSectionProps {
   getHasVerifiedBadge: (userId: string) => boolean;
   currentData: InventoryData;
   isRefreshing: boolean;
-  onRefresh: () => void;
+  onRefresh: (turnstileToken: string) => void;
 }
 
 export default function UserProfileSection({
@@ -54,6 +56,8 @@ export default function UserProfileSection({
   const [currentTime, setCurrentTime] = useState(() =>
     Math.floor(Date.now() / 1000),
   );
+  const [showRefreshModal, setShowRefreshModal] = useState(false);
+  const [showScanModal, setShowScanModal] = useState(false);
 
   // Check if current user is viewing their own inventory
   const isOwnInventory =
@@ -65,9 +69,45 @@ export default function UserProfileSection({
     return dataAge < 300; // 5 minutes
   };
 
-  const handleRefresh = () => {
-    if (isRefreshing) return;
-    onRefresh();
+  const handleRefreshClick = () => {
+    if (isRefreshing || isDataFresh()) return;
+    setShowRefreshModal(true);
+  };
+
+  const handleRefreshWithToken = (turnstileToken: string) => {
+    onRefresh(turnstileToken);
+    setShowRefreshModal(false);
+  };
+
+  const handleCloseModal = () => {
+    if (!isRefreshing) {
+      setShowRefreshModal(false);
+    }
+  };
+
+  const handleScanClick = () => {
+    if (
+      !ENABLE_WS_SCAN ||
+      scanWebSocket.status === "scanning" ||
+      scanWebSocket.status === "connecting"
+    ) {
+      return;
+    }
+    setShowScanModal(true);
+  };
+
+  const handleScanWithToken = (turnstileToken: string) => {
+    scanWebSocket.startScan(turnstileToken);
+    setShowScanModal(false);
+  };
+
+  const handleCloseScanModal = () => {
+    if (
+      scanWebSocket.status !== "scanning" &&
+      scanWebSocket.status !== "connecting"
+    ) {
+      setShowScanModal(false);
+    }
   };
 
   useEffect(() => {
@@ -348,7 +388,7 @@ export default function UserProfileSection({
           {/* Action Buttons */}
           <div className="flex flex-col gap-3 lg:flex-row lg:gap-3">
             <button
-              onClick={scanWebSocket.startScan}
+              onClick={handleScanClick}
               disabled={
                 !ENABLE_WS_SCAN ||
                 scanWebSocket.status === "scanning" ||
@@ -477,7 +517,7 @@ export default function UserProfileSection({
 
             {/* Refresh Button */}
             <button
-              onClick={handleRefresh}
+              onClick={handleRefreshClick}
               disabled={isRefreshing || isDataFresh()}
               className={`inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
                 isRefreshing
@@ -647,6 +687,25 @@ export default function UserProfileSection({
         requiredTier={modalState.requiredTier || 1}
         currentLimit={modalState.currentLimit}
         requiredLimit={modalState.requiredLimit}
+      />
+
+      {/* Refresh Inventory Modal with Turnstile */}
+      <RefreshInventoryModal
+        isOpen={showRefreshModal}
+        onClose={handleCloseModal}
+        onSuccess={handleRefreshWithToken}
+        isRefreshing={isRefreshing}
+      />
+
+      {/* Scan Inventory Modal with Turnstile */}
+      <ScanInventoryModal
+        isOpen={showScanModal}
+        onClose={handleCloseScanModal}
+        onSuccess={handleScanWithToken}
+        isScanning={
+          scanWebSocket.status === "scanning" ||
+          scanWebSocket.status === "connecting"
+        }
       />
     </div>
   );

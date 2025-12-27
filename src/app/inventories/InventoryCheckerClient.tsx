@@ -24,6 +24,7 @@ import TradeHistoryModal from "@/components/Modals/TradeHistoryModal";
 import { useScanWebSocket } from "@/hooks/useScanWebSocket";
 import { useSupporterModal } from "@/hooks/useSupporterModal";
 import SupporterModal from "@/components/Modals/SupporterModal";
+import ScanInventoryModal from "@/components/Modals/ScanInventoryModal";
 import LoginModalWrapper from "@/components/Auth/LoginModalWrapper";
 import {
   showScanLoadingToast,
@@ -109,6 +110,7 @@ export default function InventoryCheckerClient({
   const scanWebSocket = useScanWebSocket(robloxId || "");
   const { modalState, openModal, closeModal } = useSupporterModal();
   const [loginModalOpen, setLoginModalOpen] = useState(false);
+  const [showScanModal, setShowScanModal] = useState(false);
 
   // Check if current user is viewing their own inventory
   const isOwnInventory = isAuthenticated && user?.roblox_id === robloxId;
@@ -707,7 +709,14 @@ export default function InventoryCheckerClient({
                               "[INVENTORY] Current scan error:",
                               scanWebSocket.error,
                             );
-                            scanWebSocket.startScan();
+                            // Show Turnstile modal before scan
+                            if (
+                              ENABLE_WS_SCAN &&
+                              scanWebSocket.status !== "scanning" &&
+                              scanWebSocket.status !== "connecting"
+                            ) {
+                              setShowScanModal(true);
+                            }
                           }}
                           disabled={
                             !ENABLE_WS_SCAN ||
@@ -1118,6 +1127,27 @@ export default function InventoryCheckerClient({
           requiredTier={modalState.requiredTier || 3}
           currentLimit={modalState.currentLimit}
           requiredLimit={modalState.requiredLimit}
+        />
+
+        {/* Scan Inventory Modal with Turnstile */}
+        <ScanInventoryModal
+          isOpen={showScanModal}
+          onClose={() => {
+            if (
+              scanWebSocket.status !== "scanning" &&
+              scanWebSocket.status !== "connecting"
+            ) {
+              setShowScanModal(false);
+            }
+          }}
+          onSuccess={(turnstileToken) => {
+            scanWebSocket.startScan(turnstileToken);
+            setShowScanModal(false);
+          }}
+          isScanning={
+            scanWebSocket.status === "scanning" ||
+            scanWebSocket.status === "connecting"
+          }
         />
       </div>
     </ThemeProvider>

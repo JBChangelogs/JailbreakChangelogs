@@ -29,7 +29,7 @@ interface UseScanWebSocketReturn {
   error: string | undefined;
   expiresAt: number | undefined;
   isConnected: boolean;
-  startScan: () => void;
+  startScan: (turnstileToken?: string) => void;
   stopScan: () => void;
   forceShowError: boolean;
   resetForceShowError: () => void;
@@ -43,6 +43,7 @@ export function useScanWebSocket(userId: string): UseScanWebSocketReturn {
   const [expiresAt, setExpiresAt] = useState<number | undefined>();
   const [isConnected, setIsConnected] = useState(false);
   const [forceShowError, setForceShowError] = useState(false);
+  const [turnstileToken, setTurnstileToken] = useState<string | undefined>();
 
   useEffect(() => {
     console.log("[SCAN WS] Status changed to:", status);
@@ -84,7 +85,11 @@ export function useScanWebSocket(userId: string): UseScanWebSocketReturn {
     setError(undefined);
 
     try {
-      const wsUrl = `${INVENTORY_WS_URL}/scan?user_id=${userId}`;
+      // Include Turnstile token in WebSocket URL if available
+      let wsUrl = `${INVENTORY_WS_URL}/scan?user_id=${userId}`;
+      if (turnstileToken) {
+        wsUrl += `&turnstile_token=${encodeURIComponent(turnstileToken)}`;
+      }
 
       const ws = new WebSocket(wsUrl);
 
@@ -441,35 +446,44 @@ export function useScanWebSocket(userId: string): UseScanWebSocketReturn {
       setError("Failed to connect to scan service");
       setStatus("error");
     }
-  }, [userId, status]);
+  }, [userId, status, turnstileToken]);
 
   useEffect(() => {
     connectRef.current = connect;
   }, [connect]);
 
-  const startScan = useCallback(() => {
-    console.log("[SCAN WS] startScan called with userId:", userId);
-    console.log("[SCAN WS] Current status:", status);
-    console.log("[SCAN WS] ENABLE_WS_SCAN:", ENABLE_WS_SCAN);
+  const startScan = useCallback(
+    (token?: string) => {
+      console.log("[SCAN WS] startScan called with userId:", userId);
+      console.log("[SCAN WS] Turnstile token provided:", !!token);
+      console.log("[SCAN WS] Current status:", status);
+      console.log("[SCAN WS] ENABLE_WS_SCAN:", ENABLE_WS_SCAN);
 
-    if (!userId) {
-      console.log("[SCAN WS] No userId provided, setting error");
-      setError("No user ID provided");
-      setStatus("error");
-      return;
-    }
+      if (!userId) {
+        console.log("[SCAN WS] No userId provided, setting error");
+        setError("No user ID provided");
+        setStatus("error");
+        return;
+      }
 
-    if (!ENABLE_WS_SCAN) {
-      console.log("[SCAN WS] WebSocket scanning disabled, setting error");
-      setError("Inventory scanning is temporarily disabled");
-      setStatus("error");
-      setForceShowError(true); // Force error display on next render
-      return;
-    }
+      if (!ENABLE_WS_SCAN) {
+        console.log("[SCAN WS] WebSocket scanning disabled, setting error");
+        setError("Inventory scanning is temporarily disabled");
+        setStatus("error");
+        setForceShowError(true); // Force error display on next render
+        return;
+      }
 
-    console.log("[SCAN WS] Starting scan connection...");
-    connect();
-  }, [userId, connect, status]);
+      // Store the token for use in connection
+      if (token) {
+        setTurnstileToken(token);
+      }
+
+      console.log("[SCAN WS] Starting scan connection...");
+      connect();
+    },
+    [userId, connect, status],
+  );
 
   const stopScan = useCallback(() => {
     if (wsRef.current) {

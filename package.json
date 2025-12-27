@@ -27,6 +27,7 @@
     "@headlessui/react": "^2.2.9",
     "@iconify/react": "^6.0.2",
     "@iconify/types": "^2.0.0",
+    "@marsidev/react-turnstile": "^1.4.0",
     "@mui/lab": "^7.0.0",
     "@mui/material": "^7.3.6",
     "@mui/material-nextjs": "^7.3.6",
