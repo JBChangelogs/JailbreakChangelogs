@@ -44,7 +44,7 @@ export default function ScanInventoryModal({
           </p>
           <button
             onClick={onClose}
-            className="bg-button-secondary text-secondary-text hover:bg-button-secondary-hover w-full rounded-lg px-4 py-2 text-sm font-medium transition-colors"
+            className="bg-button-secondary text-secondary-text hover:bg-button-secondary-hover w-full cursor-pointer rounded-lg px-4 py-2 text-sm font-medium transition-colors"
           >
             Close
           </button>
