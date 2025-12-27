@@ -20,9 +20,9 @@ export default function ServiceAvailabilityTicker() {
 
           <div className="flex items-center gap-2">
             <span className="text-primary-text text-center text-xs">
-              <strong>Service degradation:</strong> We are experiencing some
-              isues and are working to fix them. Certain pages and functionality
-              may be slower than usual.
+              <strong>Service degradation:</strong> On-demand inventory scans
+              have been disabled for the next 72 hours as we investigate a
+              performance issue.
             </span>
           </div>
         </div>
