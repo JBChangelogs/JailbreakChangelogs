@@ -19,6 +19,7 @@ interface DupeUserInfoProps {
   getHasVerifiedBadge: (userId: string) => boolean;
   dupeItemsCount: number;
   totalDupedValue: number;
+  hideStats?: boolean;
 }
 
 export default function DupeUserInfo({
@@ -30,6 +31,7 @@ export default function DupeUserInfo({
   getHasVerifiedBadge,
   dupeItemsCount,
   totalDupedValue,
+  hideStats = false,
 }: DupeUserInfoProps) {
   return (
     <div className="border-border-primary bg-secondary-bg shadow-card-shadow rounded-lg border p-6">
@@ -172,70 +174,72 @@ export default function DupeUserInfo({
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-        <div className="border-border-primary bg-primary-bg rounded-lg border p-4 text-center">
-          <div className="text-secondary-text mb-2 text-sm">
-            Dupe Items Found
-          </div>
-          <Tooltip
-            title={`${dupeItemsCount.toLocaleString()}`}
-            placement="top"
-            arrow
-            slotProps={{
-              tooltip: {
-                sx: {
-                  backgroundColor: "var(--color-secondary-bg)",
-                  color: "var(--color-primary-text)",
-                  "& .MuiTooltip-arrow": {
-                    color: "var(--color-secondary-bg)",
+      {!hideStats && (
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <div className="border-border-primary bg-primary-bg rounded-lg border p-4 text-center">
+            <div className="text-secondary-text mb-2 text-sm">
+              Dupe Items Found
+            </div>
+            <Tooltip
+              title={`${dupeItemsCount.toLocaleString()}`}
+              placement="top"
+              arrow
+              slotProps={{
+                tooltip: {
+                  sx: {
+                    backgroundColor: "var(--color-secondary-bg)",
+                    color: "var(--color-primary-text)",
+                    "& .MuiTooltip-arrow": {
+                      color: "var(--color-secondary-bg)",
+                    },
                   },
                 },
-              },
-            }}
-          >
-            <div className="text-primary-text cursor-help text-2xl font-bold">
-              {dupeItemsCount.toLocaleString()}
-            </div>
-          </Tooltip>
-        </div>
-        <div className="border-border-primary bg-primary-bg rounded-lg border p-4 text-center">
-          <div className="text-secondary-text mb-2 text-sm">
-            Total Duped Value
+              }}
+            >
+              <div className="text-primary-text cursor-help text-2xl font-bold">
+                {dupeItemsCount.toLocaleString()}
+              </div>
+            </Tooltip>
           </div>
-          <Tooltip
-            title={`$${totalDupedValue.toLocaleString()}`}
-            placement="top"
-            arrow
-            slotProps={{
-              tooltip: {
-                sx: {
-                  backgroundColor: "var(--color-secondary-bg)",
-                  color: "var(--color-primary-text)",
-                  "& .MuiTooltip-arrow": {
-                    color: "var(--color-secondary-bg)",
+          <div className="border-border-primary bg-primary-bg rounded-lg border p-4 text-center">
+            <div className="text-secondary-text mb-2 text-sm">
+              Total Duped Value
+            </div>
+            <Tooltip
+              title={`$${totalDupedValue.toLocaleString()}`}
+              placement="top"
+              arrow
+              slotProps={{
+                tooltip: {
+                  sx: {
+                    backgroundColor: "var(--color-secondary-bg)",
+                    color: "var(--color-primary-text)",
+                    "& .MuiTooltip-arrow": {
+                      color: "var(--color-secondary-bg)",
+                    },
                   },
                 },
-              },
-            }}
-          >
-            <div className="text-primary-text cursor-help text-2xl font-bold">
-              <span className="sm:hidden">
-                $
-                {totalDupedValue >= 1000000000
-                  ? `${(totalDupedValue / 1000000000).toFixed(1)}B`
-                  : totalDupedValue >= 1000000
-                    ? `${(totalDupedValue / 1000000).toFixed(1)}M`
-                    : totalDupedValue >= 1000
-                      ? `${(totalDupedValue / 1000).toFixed(1)}K`
-                      : totalDupedValue.toLocaleString()}
-              </span>
-              <span className="hidden sm:inline">
-                ${totalDupedValue.toLocaleString()}
-              </span>
-            </div>
-          </Tooltip>
+              }}
+            >
+              <div className="text-primary-text cursor-help text-2xl font-bold">
+                <span className="sm:hidden">
+                  $
+                  {totalDupedValue >= 1000000000
+                    ? `${(totalDupedValue / 1000000000).toFixed(1)}B`
+                    : totalDupedValue >= 1000000
+                      ? `${(totalDupedValue / 1000000).toFixed(1)}M`
+                      : totalDupedValue >= 1000
+                        ? `${(totalDupedValue / 1000).toFixed(1)}K`
+                        : totalDupedValue.toLocaleString()}
+                </span>
+                <span className="hidden sm:inline">
+                  ${totalDupedValue.toLocaleString()}
+                </span>
+              </div>
+            </Tooltip>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

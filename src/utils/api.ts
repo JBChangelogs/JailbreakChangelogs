@@ -59,7 +59,12 @@ export interface NotificationHistory {
   size: number;
 }
 
-import { Item, ItemDetails, RobloxUser } from "@/types";
+import {
+  Item,
+  ItemDetails,
+  RobloxUser,
+  DuplicateVariantsResponse,
+} from "@/types";
 import { UserData } from "@/types/auth";
 
 export const BASE_API_URL =
@@ -789,6 +794,35 @@ export async function fetchMostDuplicatedItems(): Promise<DuplicatedItem[]> {
   } catch (err) {
     console.error("[SERVER] Error fetching most duplicated items:", err);
     return [];
+  }
+}
+
+export async function fetchDuplicateVariants(
+  id: string,
+): Promise<DuplicateVariantsResponse | null> {
+  try {
+    const url = `${INVENTORY_API_URL}/item/duplicates/variants?id=${encodeURIComponent(id)}`;
+    const response = await fetch(url, {
+      headers: {
+        "User-Agent": "JailbreakChangelogs-Inventory/1.0",
+        "X-Source": INVENTORY_API_SOURCE_HEADER,
+      },
+      cache: "no-store",
+    });
+
+    if (response.status === 404) {
+      return null;
+    }
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch duplicate variants: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (err) {
+    console.error("[SERVER] Error fetching duplicate variants:", err);
+    return null;
   }
 }
 

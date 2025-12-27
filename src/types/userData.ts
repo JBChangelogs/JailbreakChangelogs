@@ -30,7 +30,7 @@ export interface UserConnectionResponse {
 // Dupe Finder Data API Response Types
 export interface DupeFinderItem {
   item_id: number;
-  latest_owner: string;
+  latest_owner?: string;
   logged_at: number;
   tradePopularMetric: number;
   level: number | null;

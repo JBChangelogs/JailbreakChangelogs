@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState, useEffect } from "react";
+import { usePathname } from "next/navigation";
 import { Dialog, DialogTitle } from "@headlessui/react";
 import { Icon } from "@/components/ui/IconWrapper";
 import Image from "next/image";
@@ -23,6 +24,7 @@ interface Item {
   title: string;
   categoryTitle?: string;
   history?: TradeHistoryEntry[] | string;
+  id?: string;
 }
 
 interface TradeHistoryModalProps {
@@ -38,6 +40,8 @@ export default function TradeHistoryModal({
   item,
   username,
 }: TradeHistoryModalProps) {
+  const pathname = usePathname();
+
   const tradeHistoryUserIds = useMemo(() => {
     if (!item?.history || !Array.isArray(item.history)) {
       return [];
@@ -154,29 +158,43 @@ export default function TradeHistoryModal({
       <div className="fixed inset-0 flex items-center justify-center p-4">
         <div className="border-border-primary bg-secondary-bg mx-auto max-h-[80vh] w-full max-w-4xl overflow-hidden rounded-lg border">
           <div className="border-border-primary border-b p-4 sm:p-6">
-            <div className="flex items-start justify-between gap-4 sm:items-center">
+            <div className="flex items-start justify-between gap-4">
               <div className="min-w-0 flex-1">
                 <DialogTitle className="text-primary-text text-lg font-semibold sm:text-xl">
                   {username
                     ? `${username}'s ${item.title} ownership history`
                     : `${item.title}'s Ownership History`}
                 </DialogTitle>
-                {item.categoryTitle && (
-                  <span
-                    className="text-primary-text mt-2 flex w-fit items-center rounded-full border px-2 py-0.5 text-xs font-medium"
-                    style={{
-                      borderColor: getCategoryColor(item.categoryTitle),
-                      backgroundColor:
-                        getCategoryColor(item.categoryTitle) + "20",
-                    }}
-                  >
-                    {item.categoryTitle}
-                  </span>
-                )}
+                <div className="mt-2 flex flex-wrap items-center gap-2">
+                  {item.categoryTitle && (
+                    <span
+                      className="text-primary-text flex w-fit items-center rounded-full border px-2 py-0.5 text-xs font-medium"
+                      style={{
+                        borderColor: getCategoryColor(item.categoryTitle),
+                        backgroundColor:
+                          getCategoryColor(item.categoryTitle) + "20",
+                      }}
+                    >
+                      {item.categoryTitle}
+                    </span>
+                  )}
+                  {item.id && pathname?.startsWith("/dupes") && (
+                    <a
+                      href={`/dupes/compare?id=${encodeURIComponent(item.id)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="bg-button-info text-form-button-text hover:bg-button-info-hover rounded-md px-3 py-1 text-xs font-medium transition-colors"
+                    >
+                      Compare Variants
+                    </a>
+                  )}
+                </div>
               </div>
+
               <button
                 onClick={onClose}
                 className="text-secondary-text hover:text-primary-text cursor-pointer rounded-full p-1 transition-colors"
+                aria-label="Close modal"
               >
                 <Icon icon="heroicons:x-mark" className="h-6 w-6" />
               </button>

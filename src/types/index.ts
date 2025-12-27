@@ -147,6 +147,11 @@ export interface RobloxAvatar {
   imageUrl: string;
 }
 
+export interface ItemHoarder {
+  user_id: string;
+  count: number;
+}
+
 export interface ItemsResponse {
   items: Item[];
   total: number;
@@ -236,10 +241,11 @@ export interface DupeFinderInfo {
 
 export interface DupeFinderItem {
   item_id: number;
-  latest_owner: string;
+  latest_owner?: string;
+  user_id?: string;
   logged_at: number;
   tradePopularMetric: number;
-  dupe_ratio: number | null;
+  dupe_ratio?: number | null;
   level: number | null;
   history: DupeFinderHistoryEntry[];
   timesTraded: number;
@@ -250,4 +256,10 @@ export interface DupeFinderItem {
   season: number | null;
   title: string;
   isOriginalOwner: boolean;
+  scan_id?: string;
+}
+
+export interface DuplicateVariantsResponse {
+  og: DupeFinderItem;
+  duplicate: DupeFinderItem;
 }

@@ -32,6 +32,10 @@ interface DupeItemCardProps {
   duplicateNumber?: number;
   isDuplicate?: boolean;
   robloxId: string;
+  ownerLabel?: string;
+  bgClass?: string;
+  hideDupeRatio?: boolean;
+  isDupedItem?: boolean;
 }
 
 export default function DupeItemCard({
@@ -44,6 +48,10 @@ export default function DupeItemCard({
   duplicateNumber,
   isDuplicate = false,
   robloxId,
+  ownerLabel = "ORIGINAL OWNER",
+  bgClass = "bg-primary-bg",
+  hideDupeRatio = false,
+  isDupedItem = false,
 }: DupeItemCardProps) {
   const dupedValue = getDupedValueForItem(itemData, item);
 
@@ -63,7 +71,11 @@ export default function DupeItemCard({
 
   return (
     <div
-      className="border-border-primary bg-primary-bg text-primary-text hover:border-border-focus hover:shadow-card-shadow relative flex min-h-[400px] cursor-pointer flex-col rounded-lg border p-3 transition-all duration-200"
+      className={`text-primary-text hover:shadow-card-shadow relative flex cursor-pointer flex-col rounded-lg p-3 transition-all duration-200 ${
+        isDupedItem
+          ? "bg-button-danger/10 border-button-danger hover:border-button-danger border"
+          : `${bgClass} border-border-primary hover:border-border-focus border`
+      }`}
       onClick={() => onCardClick(item)}
     >
       {/* Duplicate Indicator */}
@@ -109,6 +121,11 @@ export default function DupeItemCard({
             })()}
             {item.categoryTitle}
           </span>
+          {isDupedItem && (
+            <span className="border-button-danger bg-button-danger text-form-button-text flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-medium">
+              Duped
+            </span>
+          )}
         </div>
       </div>
 
@@ -194,7 +211,11 @@ export default function DupeItemCard({
             }}
           >
             <div className="text-primary-text cursor-help text-xl font-bold">
-              {formatNumber(item.uniqueCirculation)}
+              {itemData?.metadata?.UniqueCirculation
+                ? formatNumber(itemData.metadata.UniqueCirculation)
+                : item.uniqueCirculation
+                  ? formatNumber(item.uniqueCirculation)
+                  : "N/A"}
             </div>
           </Tooltip>
         </div>
@@ -202,7 +223,7 @@ export default function DupeItemCard({
           <div className="text-secondary-text text-sm">MONTHLY TRADED</div>
           <Tooltip
             title={
-              itemData.metadata?.TimesTraded
+              itemData?.metadata?.TimesTraded
                 ? itemData.metadata.TimesTraded.toLocaleString()
                 : "N/A"
             }
@@ -221,7 +242,7 @@ export default function DupeItemCard({
             }}
           >
             <div className="text-primary-text cursor-help text-xl font-bold">
-              {itemData.metadata?.TimesTraded
+              {itemData?.metadata?.TimesTraded
                 ? formatNumber(itemData.metadata.TimesTraded)
                 : "N/A"}
             </div>
@@ -259,7 +280,7 @@ export default function DupeItemCard({
           </Tooltip>
         </div>
         <div>
-          <div className="text-secondary-text text-sm">ORIGINAL OWNER</div>
+          <div className="text-secondary-text text-sm">{ownerLabel}</div>
           <div className="text-xl font-bold">
             <div className="flex items-center justify-center gap-2">
               <div className="bg-tertiary-bg relative h-8 w-8 shrink-0 overflow-hidden rounded-full">
@@ -339,11 +360,13 @@ export default function DupeItemCard({
       </div>
 
       {/* Very muted dev-only dupe ratio, bottom-right */}
-      {item.dupe_ratio !== null && item.dupe_ratio !== undefined && (
-        <span className="text-tertiary-text absolute right-3 bottom-3 font-mono text-[11px] opacity-70">
-          {item.dupe_ratio.toFixed(2)}
-        </span>
-      )}
+      {!hideDupeRatio &&
+        item.dupe_ratio !== null &&
+        item.dupe_ratio !== undefined && (
+          <span className="text-tertiary-text absolute right-3 bottom-3 font-mono text-[11px] opacity-70">
+            {item.dupe_ratio.toFixed(2)}
+          </span>
+        )}
     </div>
   );
 }

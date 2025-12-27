@@ -3,7 +3,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { DupeFinderItem, RobloxUser, Item } from "@/types";
 import { UserConnectionData } from "@/app/inventories/types";
-import { parseCurrencyValue } from "@/utils/currency";
 import { useBatchUserData } from "@/hooks/useBatchUserData";
 import TradeHistoryModal from "@/components/Modals/TradeHistoryModal";
 import { Icon } from "../ui/IconWrapper";
@@ -13,53 +12,7 @@ import DupeFilters from "./DupeFilters";
 import DupeItemsGrid from "./DupeItemsGrid";
 import DupeSearchInput from "./DupeSearchInput";
 import { mergeDupeFinderArrayWithMetadata } from "@/utils/inventoryMerge";
-
-// Move pure function outside component to avoid dependency issues
-const getDupedValueForItem = (
-  itemData: Item,
-  dupeItem: DupeFinderItem,
-): number => {
-  let dupedValue = parseCurrencyValue(itemData.duped_value);
-
-  if ((isNaN(dupedValue) || dupedValue <= 0) && itemData.children) {
-    const createdAtInfo = dupeItem.info.find(
-      (info) => info.title === "Created At",
-    );
-    const createdYear = createdAtInfo
-      ? new Date(createdAtInfo.value).getFullYear().toString()
-      : null;
-
-    const matchingChild = createdYear
-      ? itemData.children.find(
-          (child) =>
-            child.sub_name === createdYear &&
-            child.data &&
-            child.data.duped_value &&
-            child.data.duped_value !== "N/A" &&
-            child.data.duped_value !== null,
-        )
-      : null;
-
-    if (matchingChild) {
-      dupedValue = parseCurrencyValue(matchingChild.data.duped_value);
-    } else {
-      // If no matching year found, fall back to first child with valid duped value
-      const childWithDupedValue = itemData.children.find(
-        (child) =>
-          child.data &&
-          child.data.duped_value &&
-          child.data.duped_value !== "N/A" &&
-          child.data.duped_value !== null,
-      );
-
-      if (childWithDupedValue) {
-        dupedValue = parseCurrencyValue(childWithDupedValue.data.duped_value);
-      }
-    }
-  }
-
-  return isNaN(dupedValue) ? 0 : dupedValue;
-};
+import { getDupedValueForItem } from "@/utils/dupeUtils";
 
 interface DupeFinderResultsProps {
   initialData: DupeFinderItem[];
@@ -417,7 +370,7 @@ export default function DupeFinderResults({
               />
               <span className="font-medium">
                 Helpful Tip: Click on any item card to view its ownership
-                history.
+                history and compare variants.
               </span>
             </div>
           </div>
