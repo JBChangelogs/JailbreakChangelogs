@@ -137,12 +137,6 @@ export default function UserStats({
 
       // Update the parent component with new data
       await onRefresh(refreshedData);
-
-      // Show success message
-      toast.success("Inventory data refreshed successfully!", {
-        duration: 3000,
-        position: "bottom-right",
-      });
     } catch (error) {
       logError("Error refreshing data", error, {
         component: "UserStats",
