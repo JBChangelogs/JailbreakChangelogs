@@ -505,9 +505,11 @@ export default function Header() {
   return (
     <>
       {/* Desktop navbar - hidden on mobile/tablet via CSS */}
+      <ServiceAvailabilityTicker />
+
+      {/* Desktop navbar - hidden on mobile/tablet via CSS */}
       <div className="sticky top-0 z-1300 hidden xl:block">
         <OfflineDetector />
-        <ServiceAvailabilityTicker />
         <NewsTicker />
         <div className="relative z-10">
           <NavbarModern />
@@ -518,7 +520,6 @@ export default function Header() {
       <div className="sticky top-0 z-1400 block xl:hidden">
         <>
           <OfflineDetector />
-          <ServiceAvailabilityTicker />
           <NewsTicker />
           <div className="relative z-10">
             <AppBar
