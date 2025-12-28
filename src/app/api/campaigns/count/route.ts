@@ -4,7 +4,13 @@ import { BASE_API_URL } from "@/utils/api";
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { campaign, token } = body;
+    const { campaign } = body;
+    let { token } = body;
+
+    // If token is not provided in body, try to get it from cookies
+    if (!token) {
+      token = request.cookies.get("token")?.value;
+    }
 
     if (!campaign || !token) {
       return NextResponse.json(
@@ -30,8 +36,25 @@ export async function POST(request: NextRequest) {
         response.status,
         response.statusText,
       );
+
+      // Try to get detailed error message from upstream
+      let errorMessage = "Failed to count campaign visit";
+      try {
+        const errorData = await response.json();
+        if (errorData.message) {
+          errorMessage = errorData.message;
+        } else if (errorData.error) {
+          errorMessage = errorData.error;
+        } else if (typeof errorData === "string") {
+          // In case the body is just the error message string
+          errorMessage = errorData;
+        }
+      } catch {
+        // Ignore JSON parse error, use default message
+      }
+
       return NextResponse.json(
-        { error: "Failed to count campaign visit" },
+        { error: errorMessage },
         { status: response.status },
       );
     }
