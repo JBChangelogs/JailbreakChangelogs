@@ -261,14 +261,46 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   // Separate effect for campaign detection
   useEffect(() => {
-    if (
-      typeof window !== "undefined" &&
-      !authState.isAuthenticated &&
-      !authState.isLoading
-    ) {
-      const urlParams = new URLSearchParams(window.location.search);
-      const campaign = urlParams.get("campaign");
-      if (campaign) {
+    if (typeof window === "undefined" || authState.isLoading) {
+      return;
+    }
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const campaign = urlParams.get("campaign");
+
+    if (campaign) {
+      if (authState.isAuthenticated) {
+        // User is logged in, try to count the visit
+        countCampaignVisit(campaign)
+          .then(() => {
+            toast.success("Campaign visit recorded!", {
+              duration: 3000,
+              position: "bottom-right",
+            });
+          })
+          .catch((err) => {
+            console.error("Campaign visit error:", err);
+            // If error indicates user is already in campaign, show toast
+            // The backend returns "User already in campaign" (status 400)
+            if (
+              err.message &&
+              (err.message.includes("already") ||
+                err.message.includes("Already"))
+            ) {
+              toast.error("You are already participating in this campaign", {
+                duration: 3000,
+                position: "bottom-right",
+              });
+            }
+          })
+          .finally(() => {
+            // Clear the param
+            const currentUrl = new URL(window.location.href);
+            currentUrl.searchParams.delete("campaign");
+            window.history.replaceState({}, "", currentUrl.toString());
+          });
+      } else {
+        // User not logged in
         storeCampaign(campaign);
         setShowLoginModal(true);
       }
@@ -294,11 +326,15 @@ export function AuthProvider({ children }: AuthProviderProps) {
         // Check for campaign and count visit after successful login
         const campaign = getStoredCampaign();
         if (campaign) {
-          await countCampaignVisit(campaign, token);
-          toast.success("Campaign visit recorded!", {
-            duration: 3000,
-            position: "bottom-right",
-          });
+          try {
+            await countCampaignVisit(campaign, token);
+            toast.success("Campaign visit recorded!", {
+              duration: 3000,
+              position: "bottom-right",
+            });
+          } catch (e) {
+            console.error("Campaign visit error during login:", e);
+          }
           clearStoredCampaign();
         }
       } else {

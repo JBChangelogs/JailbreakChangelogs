@@ -15,25 +15,29 @@ export function clearStoredCampaign(): void {
 
 export async function countCampaignVisit(
   campaign: string,
-  token: string,
+  token?: string,
 ): Promise<void> {
-  try {
-    const response = await fetch("/api/campaigns/count", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        campaign,
-        token,
-      }),
-    });
+  const response = await fetch("/api/campaigns/count", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      campaign,
+      token,
+    }),
+  });
 
-    if (!response.ok) {
-      throw new Error("Failed to count campaign visit");
+  if (!response.ok) {
+    let errorMessage = "Failed to count campaign visit";
+    try {
+      const data = await response.json();
+      if (data.error) {
+        errorMessage = data.error;
+      }
+    } catch {
+      // Ignore parse error
     }
-  } catch (error) {
-    console.error("Error counting campaign visit:", error);
-    // Don't show error to user as this is a background operation
+    throw new Error(errorMessage);
   }
 }
