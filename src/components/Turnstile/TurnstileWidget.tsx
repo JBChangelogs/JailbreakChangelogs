@@ -2,13 +2,14 @@
 
 import { Turnstile, TurnstileInstance } from "@marsidev/react-turnstile";
 import { useRef, useCallback, useEffect } from "react";
+import { TurnstileAction } from "@/utils/turnstile";
 
 interface TurnstileWidgetProps {
   siteKey: string;
   onSuccess: (token: string) => void;
   onError?: () => void;
   onExpire?: () => void;
-  action?: string;
+  action?: TurnstileAction;
   theme?: "light" | "dark" | "auto";
   size?: "normal" | "compact";
   className?: string;

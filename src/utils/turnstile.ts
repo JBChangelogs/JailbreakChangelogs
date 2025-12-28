@@ -11,8 +11,10 @@ export interface TurnstileValidationResponse {
   cdata?: string;
 }
 
+export type TurnstileAction = "inventory_refresh" | "inventory_scan";
+
 export interface TurnstileValidationOptions {
-  expectedAction?: string;
+  expectedAction?: TurnstileAction;
   expectedHostname?: string;
   idempotencyKey?: string;
 }
