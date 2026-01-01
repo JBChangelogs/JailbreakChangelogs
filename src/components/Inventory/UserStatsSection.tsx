@@ -189,7 +189,7 @@ export default function UserStatsSection({
     setIsLoadingScanHistory(true);
     try {
       const response = await fetch(
-        `/api/inventories/scan-history?id=${userId}`,
+        `/api/inventories/scan-history?id=${encodeURIComponent(userId)}`,
       );
       if (!response.ok) {
         throw new Error("Failed to fetch scan history");
@@ -218,7 +218,7 @@ export default function UserStatsSection({
     setQueueError(null);
     try {
       const response = await fetch(
-        `${INVENTORY_API_URL}/queue/position/${userId}`,
+        `/api/inventories/queue/position?id=${encodeURIComponent(userId)}`,
       );
       if (response.status === 404) {
         const data = await response.json();
