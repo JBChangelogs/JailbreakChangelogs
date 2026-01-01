@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { getMDXComponents } from "@/mdx-components";
+import { siteConfig } from "@/lib/site";
 
 interface PageProps {
   params: Promise<{
@@ -90,9 +91,17 @@ export default async function ChangelogEntryPage({ params }: PageProps) {
                 )}
               </time>
               {page.data.version && (
-                <span className="bg-status-info/10 text-status-info rounded-full px-3 py-1 text-sm font-medium">
+                <a
+                  href={
+                    (page.data.commitUrl as string) ||
+                    `${siteConfig.links.github}/commit/${page.data.version}`
+                  }
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="bg-status-info/10 text-status-info hover:bg-status-info/20 rounded-full px-3 py-1 text-sm font-medium transition-colors"
+                >
                   v{page.data.version as string}
-                </span>
+                </a>
               )}
             </div>
 

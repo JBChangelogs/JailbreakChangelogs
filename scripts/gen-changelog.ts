@@ -115,9 +115,11 @@ async function main() {
     // Post-process to inject the correct version and title
     let content = await readFile(filename, "utf-8");
 
-    // Get the commit message of the HEAD commit for the title
+    // Get the commit message of the HEAD commit for the title, strip conventional commit prefix and capitalize
     const commitMsg = (await $`git log -1 --format=%s HEAD`.text())
       .trim()
+      .replace(/^[a-z]+(\(.*\))?!?: /i, "")
+      .replace(/^\w/, (c) => c.toUpperCase())
       .replace(/"/g, '\\"');
 
     // Replace version: "..." with actual hash
@@ -126,6 +128,10 @@ async function main() {
     content = content.replace(
       /^description:\s*".*?"/m,
       `description: "Changelog for ${headHash}"`,
+    );
+    content = content.replace(
+      /^commitUrl:\s*".*?"/m,
+      `commitUrl: "https://github.com/JBChangelogs/JailbreakChangelogs/commit/${headHash}"`,
     );
 
     await writeFile(filename, content);

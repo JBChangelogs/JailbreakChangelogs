@@ -7,13 +7,14 @@ title: "{% if version %}{{ version }}{% else %}Unreleased{% endif %}"
 description: "Changelog for {% if version %}{{ version }}{% else %}Unreleased{% endif %} changes"
 date: "{% if timestamp %}{{ timestamp | date(format="%Y-%m-%d") }}{% else %}{{ now() | date(format="%Y-%m-%d") }}{% endif %}"
 version: "{% if version %}{{ version }}{% else %}HEAD{% endif %}"
+commitUrl: "https://github.com/JBChangelogs/JailbreakChangelogs/commit/{% if version %}{{ version }}{% else %}HEAD{% endif %}"
 ---
 
 {% for group, commits in commits | group_by(attribute="group") %}
 ### {{ group | striptags | trim | upper_first }}
 
 {% for commit in commits %}
-- {% if commit.scope %}**{{ commit.scope }}**: {% endif %}{{ commit.message | upper_first }} ([{{ commit.id | truncate(length=7, end="") }}]({{ commit.id }}))
+- {% if commit.scope %}**{{ commit.scope }}**: {% endif %}{{ commit.message | upper_first }} ([{{ commit.id | truncate(length=7, end="") }}](https://github.com/JBChangelogs/JailbreakChangelogs/commit/{{ commit.id }}))
 {% endfor %}
 {% endfor %}
 """

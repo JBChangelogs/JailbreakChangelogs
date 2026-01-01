@@ -17,6 +17,7 @@ export const { docs, meta } = defineDocs({
     schema: frontmatterSchema.extend({
       date: z.string(),
       version: z.string().optional(),
+      commitUrl: z.string().optional(),
     }),
   },
 });
