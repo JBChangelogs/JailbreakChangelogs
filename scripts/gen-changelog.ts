@@ -1,7 +1,7 @@
 import { $ } from "bun";
 import { readdir, readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
-import { existsSync } from "node:fs";
+import { existsSync, mkdirSync } from "node:fs";
 
 const CONTENT_DIR = "dev-changelog/content";
 
@@ -43,10 +43,6 @@ async function getLatestDocumentedCommit(): Promise<string | null> {
 
     for (const hash of lines) {
       const trimmedHash = hash.trim();
-      // documentedVersions might have short or long hashes
-      // git log %h is short. If documented is long, we might miss match.
-      // Let's assume consistent usage or partial checks.
-      // Easiest is to check if any documented version starts with this hash or vice versa
 
       for (const ver of documentedVersions) {
         if (
@@ -65,6 +61,11 @@ async function getLatestDocumentedCommit(): Promise<string | null> {
 
 async function main() {
   try {
+    // Ensure content directory exists
+    if (!existsSync(CONTENT_DIR)) {
+      mkdirSync(CONTENT_DIR, { recursive: true });
+    }
+
     const headHash = (await $`git rev-parse --short HEAD`.text()).trim();
     const startHash = await getLatestDocumentedCommit();
 
@@ -78,7 +79,24 @@ async function main() {
       range = `${startHash}..HEAD`;
     } else {
       console.log("⚠️  No previous changelogs found with version hashes.");
-      console.log("   Generating changelog for entire history.");
+
+      // FALLBACK: To avoid generating the entire history, we default to the last 24 hours of commits
+      // or just the last commit if it's the very first run.
+      // Ideally, the user should have manually created a baseline, but we want to be helpful.
+      // Let's grab just the commits from the last 24 hours?
+      // Or safer: just the "HEAD" commit for the first run so we don't spam 4000 lines.
+      console.log(
+        "   First run detected. Generating changelog for the latest commit only to avoid spamming history.",
+      );
+
+      // Using HEAD~1..HEAD to get just the last commit
+      // Check if there is a parent first to avoid error on init repo (unlikely here but good practice)
+      try {
+        await $`git rev-parse HEAD~1`;
+        range = "HEAD~1..HEAD";
+      } catch {
+        range = ""; // Single commit repo, full history is fine
+      }
     }
 
     const date = new Date().toISOString().split("T")[0]; // YYYY-MM-DD
@@ -87,11 +105,6 @@ async function main() {
     console.log(
       `📝 Generating changelog for ${range || "all history"} -> ${filename}`,
     );
-
-    // Generate with git-cliff
-    // We intentionally don't set --unreleased because we are creating a "release" file snapshot
-    // But git-cliff behavior without tags depends on how we call it.
-    // Specifying the range explicitly is the key.
 
     if (range) {
       await $`bunx git-cliff ${range} --output ${filename}`;
