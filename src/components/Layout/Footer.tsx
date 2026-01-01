@@ -80,6 +80,12 @@ export default function Footer({ githubUrl, versionInfo }: FooterProps) {
               >
                 Discord Bot
               </Link>
+              <Link
+                href="/dev/changelogs"
+                className="text-link hover:text-link-hover active:text-link-active block transition-colors duration-200"
+              >
+                Dev Changelogs
+              </Link>
               <a
                 href="https://status.jailbreakchangelogs.xyz"
                 target="_blank"
