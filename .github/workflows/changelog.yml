@@ -1,0 +1,49 @@
+name: Generate Changelog
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  changelog:
+    name: Generate Changelog
+    runs-on: ubuntu-latest
+    # Skip if the commit was made by this workflow to prevent loops,
+    # though the commit message [skip ci] should handle this too.
+    if: "!contains(github.event.head_commit.message, '[skip ci]')"
+
+    steps:
+      - name: Checkout Source
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Required for git-cliff to access history
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+
+      - name: Generate Changelog
+        run: bun run changelog
+
+      - name: Commit & Push Changes
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+
+          # Add the generated files
+          git add dev-changelog/content
+
+          # Only commit if there are changes
+          if ! git diff --staged --quiet; then
+            echo "Changes detected, committing..."
+            # [skip ci] prevents this commit from triggering the workflow again
+            git commit -m "chore(changelog): auto-generate changelog [skip ci]"
+            git push
+          else
+            echo "No changes to commit."
+          fi
