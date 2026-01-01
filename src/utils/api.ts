@@ -1211,319 +1211,71 @@ export async function fetchComments(
   }
 }
 
-export async function fetchInventoryData(
-  robloxId: string,
-  timeoutMs: number = 30000,
-  maxRetries: number = 3,
-) {
-  let lastError: Error | null = null;
+export async function fetchInventoryData(robloxId: string) {
+  try {
+    const response = await fetch(`${INVENTORY_API_URL}/user?id=${robloxId}`, {
+      headers: {
+        "User-Agent": "JailbreakChangelogs-InventoryChecker/1.0",
+        "X-Source": INVENTORY_API_SOURCE_HEADER,
+      },
+    });
 
-  for (let attempt = 0; attempt <= maxRetries; attempt++) {
-    try {
-      const wsResult = await (async () => {
-        try {
-          return await new Promise((resolve) => {
-            const socket = new WebSocket(`${INVENTORY_WS_URL}/socket`);
-
-            let settled = false;
-            const connectionQuality = {
-              compressionEnabled: false,
-              messagesReceived: 0,
-              connectionStartTime: Date.now(),
-            };
-            const timeout = setTimeout(() => {
-              if (settled) return;
-              settled = true;
-              try {
-                socket.close();
-              } catch {}
-              console.warn(
-                `[WS] Timeout after ${timeoutMs / 1000}s waiting for data for user ${robloxId}`,
-              );
-              resolve({
-                error: "timeout",
-                message: `WebSocket request timed out after ${timeoutMs / 1000} seconds. Please try again.`,
-              });
-            }, timeoutMs);
-
-            socket.addEventListener("open", () => {
-              try {
-                connectionQuality.compressionEnabled =
-                  socket.extensions?.includes("permessage-deflate") || false;
-                connectionQuality.connectionStartTime = Date.now();
-
-                console.log(
-                  `[WS] Connected for user ${robloxId}, compression: ${connectionQuality.compressionEnabled}`,
-                );
-
-                const requestData = JSON.stringify({
-                  action: "get_data",
-                  user_id: robloxId,
-                });
-                socket.send(requestData);
-              } catch (e) {
-                // If send fails, resolve with error and close
-                if (!settled) {
-                  settled = true;
-                  clearTimeout(timeout);
-                  try {
-                    socket.close();
-                  } catch {}
-                  console.error(`[WS] Send failed for user ${robloxId}:`, e);
-                  resolve({
-                    error: "ws_send_error",
-                    message: "Failed to send WebSocket request.",
-                  });
-                }
-              }
-            });
-
-            socket.addEventListener("message", (event) => {
-              if (settled) return;
-              settled = true;
-              clearTimeout(timeout);
-
-              connectionQuality.messagesReceived++;
-
-              try {
-                const messageData = event.data;
-                const isCompressed = event.data instanceof ArrayBuffer;
-
-                let parsed;
-                if (isCompressed) {
-                  const decoder = new TextDecoder();
-                  parsed = JSON.parse(decoder.decode(messageData));
-                  console.log(
-                    `[WS] Received compressed data for user ${robloxId}`,
-                  );
-                } else {
-                  parsed = JSON.parse(messageData);
-                }
-
-                const duration =
-                  Date.now() - connectionQuality.connectionStartTime;
-                console.log(`[WS] Connection quality for user ${robloxId}:`, {
-                  duration: `${duration}ms`,
-                  messagesReceived: connectionQuality.messagesReceived,
-                  compressionEnabled: connectionQuality.compressionEnabled,
-                });
-
-                // Sort items by latest trade time (newest first) to match default client sort
-                if (parsed && parsed.data && Array.isArray(parsed.data)) {
-                  interface InventoryItemSortable {
-                    history?: { TradeTime: number }[];
-                  }
-                  parsed.data.sort(
-                    (a: InventoryItemSortable, b: InventoryItemSortable) => {
-                      const getLatestTime = (item: InventoryItemSortable) => {
-                        if (
-                          item.history &&
-                          Array.isArray(item.history) &&
-                          item.history.length > 0
-                        ) {
-                          const times = item.history.map(
-                            (h: { TradeTime: number }) => h.TradeTime || 0,
-                          );
-                          return Math.max(...times);
-                        }
-                        return 0;
-                      };
-                      return getLatestTime(b) - getLatestTime(a);
-                    },
-                  );
-                }
-
-                resolve(parsed);
-              } catch (e) {
-                console.error(`[WS] Parse error for user ${robloxId}:`, e);
-                resolve({
-                  error: "ws_parse_error",
-                  message: "Invalid response from WebSocket server.",
-                });
-              } finally {
-                try {
-                  socket.close();
-                } catch {}
-              }
-            });
-
-            socket.addEventListener("error", () => {
-              if (settled) return;
-              settled = true;
-              clearTimeout(timeout);
-              try {
-                socket.close();
-              } catch {}
-              const errorMessage = "WebSocket connection error";
-              // Only log 502 errors briefly, skip verbose timeout errors
-              if (errorMessage.includes("502")) {
-                console.error(
-                  `[WS] Connection error for user ${robloxId}: ${errorMessage}`,
-                );
-              }
-
-              // Check if it's a 404 error (service unavailable)
-              if (
-                errorMessage.includes("404") ||
-                errorMessage.includes("Unexpected server response: 404")
-              ) {
-                resolve({
-                  error: "service_unavailable",
-                  message:
-                    "Inventory service is currently unavailable. Please try again later.",
-                });
-              } else {
-                resolve({
-                  error: "ws_error",
-                  message: "WebSocket connection error.",
-                });
-              }
-            });
-
-            socket.addEventListener("close", () => {
-              if (settled) return;
-              settled = true;
-              clearTimeout(timeout);
-              resolve({
-                error: "ws_closed",
-                message: "WebSocket connection closed unexpectedly.",
-              });
-            });
-          });
-        } catch (err) {
-          console.error(
-            `[WS] Failed to create WebSocket for user ${robloxId}:`,
-            err,
-          );
-          return {
-            error: "ws_init_error",
-            message: "Failed to initialize WebSocket connection.",
-          };
-        }
-      })();
-
-      if (
-        wsResult &&
-        typeof wsResult === "object" &&
-        "action" in wsResult &&
-        "data" in wsResult
-      ) {
-        const envelope = wsResult as { action?: string; data?: unknown };
-        const payload = envelope.data;
-
-        // Some responses come back as ["Inventory not found.", 404]
-        if (Array.isArray(payload)) {
-          const [errorMessage, statusCode] = payload as unknown[];
-          const isErrorTuple =
-            typeof errorMessage === "string" && typeof statusCode === "number";
-          if (isErrorTuple) {
-            // Don't retry on 404 - user not found
-            return { error: "not_found", message: errorMessage } as const;
-          }
-          return payload[0] ?? null;
-        }
-
-        // If payload is a string error message, normalize it
-        if (typeof payload === "string") {
-          return { error: "ws_error", message: payload };
-        }
-
-        return payload ?? null;
-      }
-
-      // Check if the result indicates a retryable error
-      if (wsResult && typeof wsResult === "object" && "error" in wsResult) {
-        const errorResult = wsResult as { error: string; message: string };
-
-        // Don't retry on certain error types
-        if (
-          errorResult.error === "not_found" ||
-          errorResult.error === "ws_parse_error" ||
-          errorResult.error === "ws_closed" ||
-          errorResult.error === "service_unavailable"
-        ) {
-          return errorResult;
-        }
-
-        // For retryable errors, throw to trigger retry
-        if (
-          errorResult.error === "timeout" ||
-          errorResult.error === "ws_error" ||
-          errorResult.error === "ws_init_error" ||
-          errorResult.error === "ws_send_error"
-        ) {
-          throw new Error(
-            `WebSocket error: ${errorResult.error} - ${errorResult.message}`,
-          );
-        }
-
-        return errorResult;
-      }
-
-      return wsResult;
-    } catch (err) {
-      lastError = err as Error;
-
-      // Don't retry on the last attempt
-      if (attempt === maxRetries) {
-        break;
-      }
-
-      // Check if it's a retryable error
-      if (
-        err instanceof Error &&
-        (err.message.includes("WebSocket error") ||
-          err.message.includes("timeout") ||
-          err.message.includes("connection") ||
-          err.message.includes("network"))
-      ) {
-        // Only log retry attempts for the first failure, skip verbose retry logs
-        if (attempt === 0) {
-          console.warn(`[SERVER] Inventory data request failed, retrying...`);
-        }
-
-        // Exponential backoff: wait 1s, 2s, 4s between retries
-        const delayMs = Math.pow(2, attempt) * 1000;
-        await new Promise((resolve) => setTimeout(resolve, delayMs));
-        continue;
-      }
-
-      // For other errors, don't retry
+    if (!response.ok) {
       console.error(
-        "[SERVER] Non-retryable error fetching inventory data:",
-        err,
+        `[SERVER] Inventory API returned ${response.status} for ID: ${robloxId}`,
       );
-      break;
+
+      if (response.status === 404) {
+        return {
+          error: "not_found",
+          message: "Inventory not found for this user.",
+        };
+      }
+
+      throw new Error(`Failed to fetch inventory data: ${response.status}`);
     }
-  }
 
-  // All retries failed
-  console.error("[SERVER] All retry attempts failed for inventory data");
+    const data = await response.json();
 
-  if (lastError instanceof Error && lastError.message.includes("timeout")) {
+    // Sort items by latest trade time (newest first) to match default client sort
+    if (data && data.data && Array.isArray(data.data)) {
+      interface InventoryItemSortable {
+        history?: { TradeTime: number }[];
+      }
+      data.data.sort((a: InventoryItemSortable, b: InventoryItemSortable) => {
+        const getLatestTime = (item: InventoryItemSortable) => {
+          if (
+            item.history &&
+            Array.isArray(item.history) &&
+            item.history.length > 0
+          ) {
+            const times = item.history.map(
+              (h: { TradeTime: number }) => h.TradeTime || 0,
+            );
+            return Math.max(...times);
+          }
+          return 0;
+        };
+        return getLatestTime(b) - getLatestTime(a);
+      });
+    }
+
+    return data;
+  } catch (err) {
+    console.error("[SERVER] Error fetching inventory data:", err);
+
+    if (err instanceof Error) {
+      return {
+        error: "fetch_error",
+        message: `Failed to fetch inventory data: ${err.message}`,
+      };
+    }
+
     return {
-      error: "timeout",
-      message: `Request timed out after ${timeoutMs}ms and ${maxRetries} retries. The user's data may be too large to process quickly.`,
+      error: "fetch_error",
+      message: "Failed to fetch inventory data. Please try again.",
     };
   }
-
-  // Check if it's a WebSocket service error (404, service unavailable)
-  if (
-    lastError instanceof Error &&
-    lastError.message.includes("WebSocket error: ws_error")
-  ) {
-    return {
-      error: "service_unavailable",
-      message:
-        "Inventory service is currently unavailable. Please try again later.",
-    };
-  }
-
-  return {
-    error: "network_error",
-    message:
-      "Failed to fetch inventory data after multiple attempts. Please check your connection and try again.",
-  };
 }
 
 export async function fetchRobloxUsersBatch(userIds: string[]) {
