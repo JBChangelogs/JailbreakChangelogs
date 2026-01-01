@@ -120,18 +120,26 @@ async function main() {
       .trim()
       .replace(/^[a-z]+(\(.*\))?!?: /i, "")
       .replace(/^\w/, (c) => c.toUpperCase())
+      .replace(/\\/g, "\\\\")
       .replace(/"/g, '\\"');
 
     // Replace version: "..." with actual hash
-    content = content.replace(/^version:\s*".*?"/m, `version: "${headHash}"`);
-    content = content.replace(/^title:\s*".*?"/m, `title: "${commitMsg}"`);
+    content = content.replace(
+      /^version:\s*".*?"/m,
+      () => `version: "${headHash}"`,
+    );
+    content = content.replace(
+      /^title:\s*".*?"/m,
+      () => `title: "${commitMsg}"`,
+    );
     content = content.replace(
       /^description:\s*".*?"/m,
-      `description: "Changelog for ${headHash}"`,
+      () => `description: "Changelog for ${headHash}"`,
     );
     content = content.replace(
       /^commitUrl:\s*".*?"/m,
-      `commitUrl: "https://github.com/JBChangelogs/JailbreakChangelogs/commit/${headHash}"`,
+      () =>
+        `commitUrl: "https://github.com/JBChangelogs/JailbreakChangelogs/commit/${headHash}"`,
     );
 
     await writeFile(filename, content);
