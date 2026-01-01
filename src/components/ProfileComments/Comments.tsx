@@ -262,6 +262,7 @@ export default function Comment({
                 ? `/inventories/${item_id}`
                 : `/item/${item_type.toLowerCase()}/${itemDetails?.name}`
       }
+      prefetch={false}
       className="group block"
     >
       <Box className="border-border-primary bg-primary-bg hover:border-border-focus rounded-lg border p-3 shadow-sm transition-colors">

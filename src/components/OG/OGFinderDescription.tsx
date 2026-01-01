@@ -27,6 +27,7 @@ const OGFinderDescription: React.FC = () => {
         <div className="mt-4 flex gap-2">
           <Link
             href={`/inventories/${user.roblox_id}`}
+            prefetch={false}
             className="bg-button-info text-form-button-text hover:bg-button-info-hover inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors"
           >
             Check Inventory

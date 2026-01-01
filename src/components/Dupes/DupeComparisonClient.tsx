@@ -71,6 +71,7 @@ function VariantColumn({
           </div>
           <Link
             href={item.user_id ? `/inventories/${item.user_id}` : "#"}
+            prefetch={false}
             className="group flex items-center gap-2"
           >
             <div className="bg-tertiary-bg border-border-primary relative h-10 w-10 shrink-0 overflow-hidden rounded-full border transition-colors">
