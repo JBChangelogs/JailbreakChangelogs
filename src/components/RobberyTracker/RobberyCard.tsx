@@ -172,7 +172,6 @@ export default function RobberyCard({ robbery }: RobberyCardProps) {
           alt={robbery.name}
           fill
           className="object-cover"
-          unoptimized
         />
       </div>
 

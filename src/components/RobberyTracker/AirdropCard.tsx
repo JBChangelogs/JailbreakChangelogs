@@ -138,7 +138,6 @@ export default function AirdropCard({ airdrop }: AirdropCardProps) {
           alt={`${airdrop.color} Airdrop at ${airdrop.location}`}
           fill
           className="object-cover"
-          unoptimized
         />
       </div>
 
@@ -258,7 +257,6 @@ export default function AirdropCard({ airdrop }: AirdropCardProps) {
                   width={1200}
                   height={800}
                   className="h-auto max-h-[80vh] w-auto max-w-full rounded-lg shadow-2xl"
-                  unoptimized
                 />
               </div>
 
