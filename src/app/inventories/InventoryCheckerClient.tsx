@@ -34,7 +34,13 @@ import {
   showScanErrorToast,
 } from "@/utils/scanToasts";
 import dynamic from "next/dynamic";
-import { CommentData, UserNetworthData, MoneyHistory } from "@/utils/api";
+import {
+  CommentData,
+  UserNetworthData,
+  MoneyHistory,
+  fetchUserNetworth,
+  fetchUserMoneyHistory,
+} from "@/utils/api";
 import { UserData } from "@/types/auth";
 import MoneyHistoryChart from "@/components/Inventory/MoneyHistoryChart";
 import NetworthHistoryChart from "@/components/Inventory/NetworthHistoryChart";
@@ -97,6 +103,11 @@ export default function InventoryCheckerClient({
   const [itemsData] = useState<Item[]>(items);
   const [refreshedData, setRefreshedData] = useState<InventoryData | null>(
     null,
+  );
+  const [networthData, setNetworthData] =
+    useState<UserNetworthData[]>(initialNetworthData);
+  const [moneyHistoryData, setMoneyHistoryData] = useState<MoneyHistory[]>(
+    initialMoneyHistoryData,
   );
   const [activeTab, setActiveTab] = useState(0);
   const dupedItems =
@@ -183,6 +194,21 @@ export default function InventoryCheckerClient({
   // Function to handle data refresh
   const handleDataRefresh = async (newData: InventoryData) => {
     setRefreshedData(newData);
+
+    // Also fetch updated graph data
+    if (robloxId) {
+      try {
+        const [newNetworthData, newMoneyHistoryData] = await Promise.all([
+          fetchUserNetworth(robloxId),
+          fetchUserMoneyHistory(robloxId),
+        ]);
+        setNetworthData(newNetworthData);
+        setMoneyHistoryData(newMoneyHistoryData);
+      } catch (error) {
+        console.error("Error fetching graph data after refresh:", error);
+        // Don't show error to user, just log it
+      }
+    }
   };
 
   // Calculate if there are duplicates (needed for hash navigation)
@@ -205,9 +231,9 @@ export default function InventoryCheckerClient({
   // Check if we have breakdown data (networth data with percentages)
   const hasBreakdownData = Boolean(
     robloxId &&
-    initialNetworthData &&
-    initialNetworthData.length > 0 &&
-    initialNetworthData.some(
+    networthData &&
+    networthData.length > 0 &&
+    networthData.some(
       (data) => data.percentages && Object.keys(data.percentages).length > 0,
     ),
   );
@@ -945,7 +971,7 @@ export default function InventoryCheckerClient({
               dupedItems={dupedItems}
               onRefresh={handleDataRefresh}
               currentSeason={currentSeason}
-              initialNetworthData={initialNetworthData}
+              initialNetworthData={networthData}
             />
 
             {/* Tabbed Interface */}
@@ -1015,7 +1041,7 @@ export default function InventoryCheckerClient({
                   robloxId && (
                     <MoneyHistoryChart
                       userId={robloxId}
-                      initialData={initialMoneyHistoryData}
+                      initialData={moneyHistoryData}
                     />
                   )}
 
@@ -1034,7 +1060,7 @@ export default function InventoryCheckerClient({
                   robloxId && (
                     <NetworthHistoryChart
                       userId={robloxId}
-                      initialData={initialNetworthData}
+                      initialData={networthData}
                     />
                   )}
 
@@ -1056,7 +1082,7 @@ export default function InventoryCheckerClient({
                     effectiveActiveTab === 3)) &&
                   robloxId && (
                     <InventoryBreakdown
-                      networthData={initialNetworthData}
+                      networthData={networthData}
                       username={getUserDisplay(robloxId)}
                     />
                   )}

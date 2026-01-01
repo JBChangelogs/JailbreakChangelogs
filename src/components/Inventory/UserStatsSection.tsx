@@ -1,12 +1,13 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { Season } from "@/types/seasons";
 import { InventoryData } from "@/app/inventories/types";
 import { RobloxUser } from "@/types";
 import { useRealTimeRelativeDate } from "@/hooks/useRealTimeRelativeDate";
 import { formatMessageDate } from "@/utils/timestamp";
 import { useRobloxUserDataQuery } from "@/hooks/useRobloxDataQuery";
+import { INVENTORY_API_URL } from "@/utils/api";
 import XpProgressBar from "./XpProgressBar";
 import dynamic from "next/dynamic";
 import Image from "next/image";
@@ -127,6 +128,18 @@ const formatDate = (timestamp: number) => {
   return formatMessageDate(timestamp);
 };
 
+const formatDelay = (seconds: number) => {
+  if (seconds < 60) {
+    return `${Math.round(seconds)}s`;
+  }
+  const minutes = Math.floor(seconds / 60);
+  const remainingSeconds = Math.round(seconds % 60);
+  if (remainingSeconds === 0) {
+    return `${minutes}m`;
+  }
+  return `${minutes}m ${remainingSeconds}s`;
+};
+
 export default function UserStatsSection({
   currentData,
   currentSeason,
@@ -146,6 +159,13 @@ export default function UserStatsSection({
     Array<{ scan_id: string; created_at: number }>
   >([]);
   const [isLoadingScanHistory, setIsLoadingScanHistory] = useState(false);
+  const [queuePosition, setQueuePosition] = useState<{
+    position: number;
+    delay: number;
+  } | null>(null);
+  const [isLoadingQueuePosition, setIsLoadingQueuePosition] = useState(false);
+  const [queueError, setQueueError] = useState<string | null>(null);
+  const hasFetchedQueuePosition = useRef(false);
   const createdRelativeTime = useRealTimeRelativeDate(
     currentData?.created_at || 0,
   );
@@ -190,6 +210,50 @@ export default function UserStatsSection({
       fetchScanHistory();
     }
   };
+
+  const fetchQueuePosition = useCallback(async () => {
+    if (!INVENTORY_API_URL || !userId) return;
+
+    setIsLoadingQueuePosition(true);
+    setQueueError(null);
+    try {
+      const response = await fetch(
+        `${INVENTORY_API_URL}/queue/position/${userId}`,
+      );
+      if (response.status === 404) {
+        const data = await response.json();
+        setQueueError(data.error || "User not found in queue");
+        setQueuePosition(null);
+      } else if (response.ok) {
+        const data = await response.json();
+        setQueuePosition({
+          position: data.position,
+          delay: data.delay,
+        });
+        setQueueError(null);
+      } else {
+        throw new Error(`Failed to fetch queue position: ${response.status}`);
+      }
+    } catch (error) {
+      console.error("Error fetching queue position:", error);
+      setQueueError("Failed to fetch queue position");
+      setQueuePosition(null);
+    } finally {
+      setIsLoadingQueuePosition(false);
+    }
+  }, [userId]);
+
+  // Fetch queue position when metadata dropdown opens
+  useEffect(() => {
+    if (isMetadataExpanded && !hasFetchedQueuePosition.current) {
+      hasFetchedQueuePosition.current = true;
+      fetchQueuePosition();
+    }
+    // Reset the ref when dropdown closes so it can fetch again next time
+    if (!isMetadataExpanded) {
+      hasFetchedQueuePosition.current = false;
+    }
+  }, [isMetadataExpanded, fetchQueuePosition]);
 
   if (!currentData) {
     return (
@@ -738,7 +802,11 @@ export default function UserStatsSection({
                         <div className="h-6 w-6 overflow-hidden rounded-full bg-gray-200">
                           <Image
                             src={`${process.env.NEXT_PUBLIC_INVENTORY_API_URL}/proxy/users/${botUser.id}/avatar-headshot`}
-                            alt={botUser.name}
+                            alt={
+                              botUser.name ||
+                              botUser.displayName ||
+                              `Bot ${botUser.id} avatar`
+                            }
                             width={24}
                             height={24}
                             className="h-full w-full object-cover"
@@ -789,6 +857,33 @@ export default function UserStatsSection({
                   </Tooltip>
                 </div>
               )}
+
+              {/* Queue Position */}
+              <div className="flex gap-2">
+                <span className="text-secondary-text min-w-[100px]">
+                  Queue Position:
+                </span>
+                <div className="text-primary-text font-medium">
+                  {isLoadingQueuePosition ? (
+                    <span className="text-secondary-text text-xs">
+                      Loading...
+                    </span>
+                  ) : queueError ? (
+                    <span className="text-secondary-text text-xs">
+                      Not in queue
+                    </span>
+                  ) : queuePosition ? (
+                    <span className="text-xs">
+                      #{queuePosition.position.toLocaleString()} (
+                      {formatDelay(queuePosition.delay)})
+                    </span>
+                  ) : (
+                    <span className="text-secondary-text text-xs">
+                      Not in queue
+                    </span>
+                  )}
+                </div>
+              </div>
 
               {/* View Scan History Button */}
               <div className="pt-2">

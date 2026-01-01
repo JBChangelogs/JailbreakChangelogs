@@ -41,8 +41,13 @@ interface MoneyHistoryChartProps {
 }
 
 const MoneyHistoryChart = ({ initialData = [] }: MoneyHistoryChartProps) => {
-  const [history] = useState<MoneyHistory[]>(initialData);
+  const [history, setHistory] = useState<MoneyHistory[]>(initialData);
   const [loading] = useState(false);
+
+  // Update history when initialData changes
+  useEffect(() => {
+    setHistory(initialData);
+  }, [initialData]);
   const chartRef = useRef<ChartJS<"line">>(null);
   const { theme } = useTheme();
 

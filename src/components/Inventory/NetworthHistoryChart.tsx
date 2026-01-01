@@ -48,8 +48,17 @@ const NetworthHistoryChart = ({
     (item) => item.snapshot_time && item.networth !== undefined,
   );
 
-  const [history] = useState<UserNetworthData[]>(filteredInitialData);
+  const [history, setHistory] =
+    useState<UserNetworthData[]>(filteredInitialData);
   const [loading] = useState(false);
+
+  // Update history when initialData changes
+  useEffect(() => {
+    const filtered = initialData.filter(
+      (item) => item.snapshot_time && item.networth !== undefined,
+    );
+    setHistory(filtered);
+  }, [initialData]);
   const chartRef = useRef<ChartJS<"line">>(null);
   const { theme } = useTheme();
 
