@@ -1,0 +1,7 @@
+dev-changelog/content/**
+.next/**
+out/**
+build/**
+dist/**
+.source/**
+node_modules/**
