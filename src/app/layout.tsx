@@ -285,14 +285,14 @@ export default async function RootLayout({
                     </MaintenanceBypass>
                   </QueryProvider>
                 </ThemeProvider>
+                {/* Ad Block Prompt UI - Only shown to non-supporters when ad blocking is detected */}
+                <AdBlockPrompt />
               </CustomThemeProvider>
               <ConsentBannerWrapper />
             </ConsentProviderWrapper>
           </AppRouterCacheProvider>
           {/* Ad Block Detection Script - Only load if user is NOT a supporter */}
           <AdBlockRecovery isSupporter={!!isSupporter} />
-          {/* Ad Block Prompt UI - Only shown to non-supporters when ad blocking is detected */}
-          <AdBlockPrompt />
         </body>
       </html>
     );
@@ -482,14 +482,14 @@ export default async function RootLayout({
                   </AuthProvider>
                 </QueryProvider>
               </ThemeProvider>
+              {/* Ad Block Prompt UI - Only shown to non-supporters when ad blocking is detected */}
+              <AdBlockPrompt />
             </CustomThemeProvider>
             <ConsentBannerWrapper />
           </ConsentProviderWrapper>
         </AppRouterCacheProvider>
         {/* Ad Block Detection Script - Only load if user is NOT a supporter */}
         <AdBlockRecovery isSupporter={!!isSupporter} />
-        {/* Ad Block Prompt UI - Only shown to non-supporters when ad blocking is detected */}
-        <AdBlockPrompt />
       </body>
     </html>
   );
