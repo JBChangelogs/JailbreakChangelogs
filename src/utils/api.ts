@@ -881,7 +881,7 @@ export async function fetchItemDupes(
         "User-Agent": "JailbreakChangelogs-Inventory/1.0",
         "X-Source": INVENTORY_API_SOURCE_HEADER,
       },
-      next: { revalidate: 3600 }, // Revalidate every 1 hour
+      cache: "no-store",
     });
     if (!response.ok) {
       if (response.status === 404) {
