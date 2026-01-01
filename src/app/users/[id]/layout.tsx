@@ -3,7 +3,7 @@ import { fetchUserByIdForMetadata } from "@/utils/api";
 import { getMaintenanceMetadata } from "@/utils/maintenance";
 
 function formatAccentColor(color: number | string | null | undefined): string {
-  if (!color || color === "None" || color === "0") return "#FA2E26";
+  if (!color || color === "None" || color === "0") return "#2462cd";
 
   if (typeof color === "string") {
     return `#${color.substring(0, 6)}`;
@@ -13,7 +13,7 @@ function formatAccentColor(color: number | string | null | undefined): string {
     return `#${color.toString().substring(0, 6)}`;
   }
 
-  return "#FA2E26";
+  return "#2462cd";
 }
 
 export async function generateViewport({

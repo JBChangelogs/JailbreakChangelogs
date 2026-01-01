@@ -37,7 +37,7 @@ import { getDefaultConsent } from "@/utils/serverConsent";
 import { getCurrentUser } from "@/utils/serverSession";
 
 export const viewport: Viewport = {
-  themeColor: "#FA2E26",
+  themeColor: "#2462cd",
 };
 
 export async function generateMetadata(): Promise<Metadata> {
