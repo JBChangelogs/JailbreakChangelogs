@@ -386,10 +386,10 @@ export default function Footer({ githubUrl, versionInfo }: FooterProps) {
 
         <div className="pt-8 pb-8">
           <p className="text-secondary-text text-xs leading-relaxed">
-            &copy; {new Date().getFullYear()} Jailbreak Changelogs LLC.
-            Jailbreak Changelogs, JBCL, and any associated logos are trademarks,
-            service marks, and/or registered trademarks of Jailbreak Changelogs
-            LLC.
+            &copy; 2024 -&nbsp;{new Date().getFullYear()} Jailbreak Changelogs
+            LLC. Jailbreak Changelogs, JBCL, and any associated logos are
+            trademarks, service marks, and/or registered trademarks of Jailbreak
+            Changelogs LLC.
           </p>
         </div>
       </div>
