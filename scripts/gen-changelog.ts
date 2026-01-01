@@ -113,7 +113,7 @@ async function main() {
     }
 
     // Post-process to inject the correct version and title
-    let content = await readFile(filename, "utf-8");
+    let content = (await readFile(filename, "utf-8")).trim();
 
     // Get the commit message of the HEAD commit for the title, strip conventional commit prefix and capitalize
     const commitMsg = (await $`git log -1 --format=%s HEAD`.text())

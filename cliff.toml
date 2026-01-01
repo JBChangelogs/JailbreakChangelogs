@@ -1,8 +1,7 @@
 [changelog]
 # A Tera template to be rendered for each release in the changelog.
 header = ""
-body = """
----
+body = """---
 title: "{% if version %}{{ version }}{% else %}Unreleased{% endif %}"
 description: "Changelog for {% if version %}{{ version }}{% else %}Unreleased{% endif %} changes"
 date: "{% if timestamp %}{{ timestamp | date(format="%Y-%m-%d") }}{% else %}{{ now() | date(format="%Y-%m-%d") }}{% endif %}"
