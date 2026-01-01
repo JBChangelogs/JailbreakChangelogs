@@ -3,40 +3,36 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { safeLocalStorage } from "@/utils/safeStorage";
 
-type Theme = "light" | "dark" | "christmas";
+type Theme = "light" | "dark";
 
 interface ThemeContextType {
   theme: Theme;
   setTheme: (theme: Theme) => void;
-  resolvedTheme: "light" | "dark" | "christmas";
+  resolvedTheme: "light" | "dark";
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const getInitialTheme = (): Theme => {
-    if (typeof window === "undefined") return "christmas";
+    if (typeof window === "undefined") return "dark";
 
     const savedTheme = safeLocalStorage.getItem("theme");
     const hasBeenMigrated = safeLocalStorage.getItem(
-      "theme-christmas-migration",
+      "theme-christmas-removal-migration",
     );
 
-    // One-time migration: if user has a theme set but hasn't been migrated yet,
-    // switch them to Christmas theme
-    if (
-      !hasBeenMigrated &&
-      savedTheme &&
-      ["light", "dark"].includes(savedTheme)
-    ) {
-      safeLocalStorage.setItem("theme-christmas-migration", "done");
-      safeLocalStorage.setItem("theme", "christmas");
-      return "christmas";
+    // One-time migration: if user has Christmas theme but hasn't been migrated yet,
+    // switch them to dark theme
+    if (!hasBeenMigrated && savedTheme === "christmas") {
+      safeLocalStorage.setItem("theme-christmas-removal-migration", "done");
+      safeLocalStorage.setItem("theme", "dark");
+      return "dark";
     }
 
-    // Mark migration as done for users who already had Christmas theme or no theme
+    // Mark migration as done for users who already had light/dark theme or no theme
     if (!hasBeenMigrated) {
-      safeLocalStorage.setItem("theme-christmas-migration", "done");
+      safeLocalStorage.setItem("theme-christmas-removal-migration", "done");
     }
 
     if (savedTheme === "system") {
@@ -46,14 +42,11 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       const migratedTheme = prefersDark ? "dark" : "light";
       safeLocalStorage.setItem("theme", migratedTheme);
       return migratedTheme;
-    } else if (
-      savedTheme &&
-      ["light", "dark", "christmas"].includes(savedTheme)
-    ) {
+    } else if (savedTheme && ["light", "dark"].includes(savedTheme)) {
       return savedTheme as Theme;
     }
 
-    return "christmas";
+    return "dark";
   };
 
   const [theme, setTheme] = useState<Theme>(getInitialTheme);
@@ -61,7 +54,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const root = document.documentElement;
-    root.classList.remove("light", "dark", "christmas");
+    root.classList.remove("light", "dark");
     root.classList.add(theme);
     safeLocalStorage.setItem("theme", theme);
   }, [theme]);

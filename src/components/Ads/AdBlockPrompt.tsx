@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import Image from "next/image";
 import AdBlockBanner from "./AdBlockBanner";
+import { useTheme } from "@/contexts/ThemeContext";
 
 // Progressive ad block detection strategy:
 // 1. Show banner on every page (dismissible)
@@ -20,6 +21,7 @@ const AdBlockPrompt = () => {
   const [showModal, setShowModal] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
+  const { resolvedTheme } = useTheme();
 
   // Check if modal was dismissed this session
   const isModalDismissed = () => {
@@ -188,7 +190,7 @@ const AdBlockPrompt = () => {
           {/* Logo */}
           <div className="mb-4 md:mb-6">
             <Image
-              src="https://assets.jailbreakchangelogs.xyz/assets/logos/JBCL_Long_Transparent_Christmas.png"
+              src={`https://assets.jailbreakchangelogs.xyz/assets/logos/JBCL_Long_Transparent_${resolvedTheme === "dark" ? "Dark" : "Light"}.webp`}
               alt="JBCL Logo"
               width={600}
               height={100}
