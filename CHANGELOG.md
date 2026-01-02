@@ -1,5 +1,10 @@
 # Changelog
 
+## <small>0.1.2 (2026-01-02)</small>
+
+- chore: remove fumadocs dependencies and related configurations ([e23e955](https://github.com/JBChangelogs/JailbreakChangelogs/commit/e23e955))
+- fix: update changelog links and improve entry rendering ([893e8e4](https://github.com/JBChangelogs/JailbreakChangelogs/commit/893e8e4))
+
 ## <small>0.1.1 (2026-01-02)</small>
 
 - chore: update .env.example with GITHUB_TOKEN and remove deprecated changelog scripts ([bb3e60b](https://github.com/JBChangelogs/JailbreakChangelogs/commit/bb3e60b))
