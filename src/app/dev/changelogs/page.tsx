@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { siteConfig } from "@/lib/site";
 import { getCachedChangelogEntries } from "@/lib/changelog-parser";
+import { ChangelogDate } from "@/components/Changelogs/ChangelogDate";
 
 export const metadata: Metadata = {
   title: `Development Changelog | ${siteConfig.name}`,
@@ -25,6 +26,10 @@ export default async function DevChangelogPage() {
       description: entry.description,
       date: entry.date,
       version: entry.version !== "Unreleased" ? entry.version : undefined,
+      authorLogin: entry.authorLogin,
+      authorAvatarUrl: entry.authorAvatarUrl,
+      isPrerelease: entry.isPrerelease,
+      isDraft: entry.isDraft,
     },
   }));
 
@@ -106,24 +111,45 @@ export default async function DevChangelogPage() {
                         </p>
                       </div>
                       <div className="flex flex-col items-end gap-2">
-                        <time className="text-secondary-text text-sm">
-                          {new Date(
-                            page.data.date as string,
-                          ).toLocaleDateString("en-US", {
-                            year: "numeric",
-                            month: "long",
-                            day: "numeric",
-                          })}
-                        </time>
-                        {page.data.version && (
-                          <a
-                            href={`${siteConfig.links.github}/releases/tag/v${page.data.version}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="bg-status-info/10 text-status-info hover:bg-status-info/20 rounded-full px-3 py-1 text-sm font-medium transition-colors"
-                          >
-                            v{page.data.version as string}
-                          </a>
+                        <ChangelogDate
+                          date={page.data.date as string}
+                          className="text-secondary-text text-sm"
+                        />
+                        <div className="flex flex-wrap items-center justify-end gap-2">
+                          {page.data.version && (
+                            <a
+                              href={`${siteConfig.links.github}/releases/tag/v${page.data.version}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="bg-status-info/10 text-status-info hover:bg-status-info/20 rounded-full px-3 py-1 text-sm font-medium transition-colors"
+                            >
+                              v{page.data.version as string}
+                            </a>
+                          )}
+                          {page.data.isPrerelease && (
+                            <span className="bg-status-warning/10 text-status-warning rounded-full px-2 py-1 text-xs font-medium">
+                              Pre-release
+                            </span>
+                          )}
+                          {page.data.isDraft && (
+                            <span className="bg-secondary-text/10 text-secondary-text rounded-full px-2 py-1 text-xs font-medium">
+                              Draft
+                            </span>
+                          )}
+                        </div>
+                        {page.data.authorLogin && (
+                          <div className="flex items-center gap-2">
+                            {page.data.authorAvatarUrl && (
+                              <img
+                                src={page.data.authorAvatarUrl as string}
+                                alt={page.data.authorLogin as string}
+                                className="h-5 w-5 rounded-full"
+                              />
+                            )}
+                            <span className="text-secondary-text text-xs">
+                              @{page.data.authorLogin as string}
+                            </span>
+                          </div>
                         )}
                       </div>
                     </div>

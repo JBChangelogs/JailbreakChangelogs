@@ -107,7 +107,59 @@ export default async function ChangelogEntryPage({ params }: PageProps) {
                   v{entry.version}
                 </a>
               )}
+              {entry.isPrerelease && (
+                <span className="bg-status-warning/10 text-status-warning rounded-full px-3 py-1 text-sm font-medium">
+                  Pre-release
+                </span>
+              )}
+              {entry.isDraft && (
+                <span className="bg-secondary-text/10 text-secondary-text rounded-full px-3 py-1 text-sm font-medium">
+                  Draft
+                </span>
+              )}
             </div>
+
+            {/* Author and GitHub link */}
+            {(entry.authorLogin || entry.htmlUrl) && (
+              <div className="mt-4 flex flex-wrap items-center gap-4">
+                {entry.authorLogin && (
+                  <div className="flex items-center gap-2">
+                    {entry.authorAvatarUrl && (
+                      <img
+                        src={entry.authorAvatarUrl}
+                        alt={entry.authorLogin}
+                        className="h-6 w-6 rounded-full"
+                      />
+                    )}
+                    <span className="text-secondary-text text-sm">
+                      by{" "}
+                      <a
+                        href={`https://github.com/${entry.authorLogin}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-link hover:text-link-hover transition-colors"
+                      >
+                        @{entry.authorLogin}
+                      </a>
+                    </span>
+                  </div>
+                )}
+                {entry.htmlUrl && (
+                  <a
+                    href={entry.htmlUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-link hover:text-link-hover inline-flex items-center gap-1 text-sm transition-colors"
+                  >
+                    <Icon
+                      icon="heroicons-outline:external-link"
+                      className="h-4 w-4"
+                    />
+                    View on GitHub
+                  </a>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </div>
