@@ -16,7 +16,7 @@
     "format:check": "prettier . --check",
     "changelog:legacy": "bun scripts/gen-changelog.ts",
     "generate:changelog": "conventional-changelog -p conventionalcommits -i CHANGELOG.md -s -r 0",
-    "release": "release-it",
+    "release": "bun --env-file=.env.local --bun release-it",
     "prepare": "husky"
   },
   "dependencies": {
@@ -104,23 +104,5 @@
     ],
     "**/*": "prettier --write --ignore-unknown"
   },
-  "browserslist": "> 1%",
-  "release-it": {
-    "git": {
-      "commitMessage": "chore: release v${version}",
-      "tagName": "v${version}"
-    },
-    "npm": {
-      "publish": false
-    },
-    "github": {
-      "release": true
-    },
-    "plugins": {
-      "@release-it/conventional-changelog": {
-        "infile": "CHANGELOG.md",
-        "preset": "conventionalcommits"
-      }
-    }
-  }
+  "browserslist": "> 1%"
 }
