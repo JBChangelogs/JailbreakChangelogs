@@ -1,5 +1,9 @@
 # Changelog
 
+## <small>0.1.1 (2026-01-02)</small>
+
+- chore: update .env.example with GITHUB_TOKEN and remove deprecated changelog scripts ([bb3e60b](https://github.com/JBChangelogs/JailbreakChangelogs/commit/bb3e60b))
+
 ## 0.1.0 (2026-01-02)
 
 - chore: add 'testing' branch to type-check workflow for improved CI coverage ([1d6863e](https://github.com/JBChangelogs/JailbreakChangelogs/commit/1d6863e))
