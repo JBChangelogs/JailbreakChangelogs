@@ -1,5 +1,10 @@
 # Changelog
 
+## <small>0.1.3 (2026-01-02)</small>
+
+- fix: enhance HTML tag handling in changelog parser for better version extraction ([b8fd8ad](https://github.com/JBChangelogs/JailbreakChangelogs/commit/b8fd8ad))
+- refactor: implement cached changelog entries for improved performance and reliability ([91f831b](https://github.com/JBChangelogs/JailbreakChangelogs/commit/91f831b))
+
 ## <small>0.1.2 (2026-01-02)</small>
 
 - chore: remove fumadocs dependencies and related configurations ([e23e955](https://github.com/JBChangelogs/JailbreakChangelogs/commit/e23e955))
