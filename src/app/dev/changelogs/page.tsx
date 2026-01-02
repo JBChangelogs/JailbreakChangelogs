@@ -1,9 +1,9 @@
-import { source } from "@/lib/changelog-source";
-
 import type { Metadata } from "next";
 import Link from "next/link";
-
 import { siteConfig } from "@/lib/site";
+// import { readFile } from "node:fs/promises";
+import { join } from "node:path";
+import { parseChangelog } from "@/lib/changelog-parser";
 
 export const metadata: Metadata = {
   title: `Development Changelog | ${siteConfig.name}`,
@@ -14,14 +14,35 @@ export const metadata: Metadata = {
 };
 
 export default async function DevChangelogPage() {
-  // Get all pages and sort by date (newest first)
-  const pages = source.getPages();
+  // Read CHANGELOG.md
+  let sortedPages: {
+    url: string;
+    data: {
+      title: string;
+      description?: string;
+      date: string;
+      version?: string;
+      commitUrl?: string;
+    };
+  }[] = [];
+  try {
+    const content = await Bun.file(join(process.cwd(), "CHANGELOG.md")).text();
+    const entries = parseChangelog(content);
 
-  const sortedPages = [...(pages || [])].sort((a, b) => {
-    const dateA = new Date(a.data.date as string);
-    const dateB = new Date(b.data.date as string);
-    return dateB.getTime() - dateA.getTime();
-  });
+    // Sort logic (parser returns top-down which is usually newest-first, but ensure it)
+    sortedPages = entries.map((entry) => ({
+      url: `/dev/changelogs/${entry.slug}`,
+      data: {
+        title: entry.title || entry.version,
+        description: entry.description,
+        date: entry.date,
+        version: entry.version !== "Unreleased" ? entry.version : undefined,
+      },
+    }));
+  } catch {
+    // Fallback if no file exists
+    sortedPages = [];
+  }
 
   return (
     <div className="bg-primary-bg min-h-screen">
