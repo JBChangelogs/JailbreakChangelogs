@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
 import { siteConfig } from "@/lib/site";
 import { getCachedChangelogEntries } from "@/lib/changelog-parser";
 import { ChangelogDate } from "@/components/Changelogs/ChangelogDate";
@@ -158,9 +159,11 @@ export default async function DevChangelogPage() {
                               {page.data.authorLogin && (
                                 <div className="flex items-center gap-2">
                                   {page.data.authorAvatarUrl && (
-                                    <img
+                                    <Image
                                       src={page.data.authorAvatarUrl as string}
                                       alt={page.data.authorLogin as string}
+                                      width={20}
+                                      height={20}
                                       className="h-5 w-5 rounded-full"
                                     />
                                   )}
@@ -201,7 +204,7 @@ export default async function DevChangelogPage() {
             </div>
 
             {/* Bottom Fade Gradient to indicate scroll capability */}
-            <div className="from-primary-bg pointer-events-none absolute bottom-0 left-0 h-24 w-full bg-gradient-to-t to-transparent" />
+            <div className="from-primary-bg pointer-events-none absolute bottom-0 left-0 h-24 w-full bg-linear-to-t to-transparent" />
           </div>
         )}
       </div>

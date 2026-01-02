@@ -65,6 +65,11 @@ const nextConfig = {
         hostname: "tr.rbxcdn.com",
         pathname: "/**/AvatarFullBody/**",
       },
+      {
+        protocol: "https",
+        hostname: "avatars.githubusercontent.com",
+        pathname: "/**",
+      },
     ],
   },
   async rewrites() {

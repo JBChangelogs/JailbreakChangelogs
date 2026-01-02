@@ -1,8 +1,8 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
 import dynamic from "next/dynamic";
-import { siteConfig } from "@/lib/site";
 import { ChangelogDate } from "@/components/Changelogs/ChangelogDate";
 import {
   getCachedChangelogEntries,
@@ -128,9 +128,11 @@ export default async function ChangelogEntryPage({ params }: PageProps) {
                 {entry.authorLogin && (
                   <div className="flex items-center gap-2">
                     {entry.authorAvatarUrl && (
-                      <img
+                      <Image
                         src={entry.authorAvatarUrl}
                         alt={entry.authorLogin}
+                        width={24}
+                        height={24}
                         className="h-6 w-6 rounded-full"
                       />
                     )}
