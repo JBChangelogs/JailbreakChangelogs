@@ -39,7 +39,9 @@ export default async function DevChangelogPage() {
         version: entry.version !== "Unreleased" ? entry.version : undefined,
       },
     }));
-  } catch {
+  } catch (e) {
+    console.error("Error reading CHANGELOG.md:", e);
+    console.log("CWD:", process.cwd());
     // Fallback if no file exists
     sortedPages = [];
   }

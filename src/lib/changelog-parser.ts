@@ -20,7 +20,7 @@ export function parseChangelog(markdown: string): ChangelogEntry[] {
   // ## [Unreleased]
   // ## (2024-01-01)
   const versionRegex =
-    /^## +\[?([^\]\n]+)\]? *(?:-|\() *(\d{4}-\d{2}-\d{2})?\)?/;
+    /^## +\[?([^\]\n]*?)\]? *(?:-|\() *(\d{4}-\d{2}-\d{2})?\)?/;
 
   for (const line of lines) {
     const match = line.match(versionRegex);
