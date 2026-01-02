@@ -4,7 +4,7 @@ header = ""
 body = """---
 title: "{% if version %}{{ version }}{% else %}Unreleased{% endif %}"
 description: "Changelog for {% if version %}{{ version }}{% else %}Unreleased{% endif %} changes"
-date: "{% if timestamp %}{{ timestamp | date(format="%Y-%m-%d") }}{% else %}{{ now() | date(format="%Y-%m-%d") }}{% endif %}"
+date: "{% if timestamp %}{{ timestamp | date(format="%Y-%m-%dT%H:%M:%S") }}{% else %}{{ now() | date(format="%Y-%m-%dT%H:%M:%S") }}{% endif %}"
 version: "{% if version %}{{ version }}{% else %}HEAD{% endif %}"
 commitUrl: "https://github.com/JBChangelogs/JailbreakChangelogs/commit/{% if version %}{{ version }}{% else %}HEAD{% endif %}"
 ---

@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { getMDXComponents } from "@/mdx-components";
 import { siteConfig } from "@/lib/site";
+import { ChangelogDate } from "@/components/Changelogs/ChangelogDate";
 
 interface PageProps {
   params: Promise<{
@@ -53,7 +54,7 @@ export default async function ChangelogEntryPage({ params }: PageProps) {
         <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
           <Link
             href="/dev/changelogs"
-            className="text-button-info hover:text-button-info/80 mb-4 inline-flex items-center text-sm font-medium transition-colors"
+            className="text-secondary-text hover:text-link-hover mb-4 inline-flex items-center text-sm font-medium transition-colors"
           >
             <svg
               className="mr-1 h-4 w-4"
@@ -68,28 +69,19 @@ export default async function ChangelogEntryPage({ params }: PageProps) {
                 d="M15 19l-7-7 7-7"
               />
             </svg>
-            Back to Changelog
+            Back to Changelogs
           </Link>
 
           <div className="mt-4">
             <h1 className="text-primary-text mb-4 text-3xl font-bold sm:text-4xl">
               {page.data.title}
             </h1>
-            <p className="text-secondary-text mb-4 text-lg">
-              {page.data.description}
-            </p>
 
             <div className="flex flex-wrap items-center gap-4">
-              <time className="text-secondary-text text-sm">
-                {new Date(page.data.date as string).toLocaleDateString(
-                  "en-US",
-                  {
-                    year: "numeric",
-                    month: "long",
-                    day: "numeric",
-                  },
-                )}
-              </time>
+              <ChangelogDate
+                date={page.data.date as string}
+                className="text-secondary-text text-sm"
+              />
               {page.data.version && (
                 <a
                   href={
@@ -111,7 +103,7 @@ export default async function ChangelogEntryPage({ params }: PageProps) {
       </div>
 
       {/* Content */}
-      <article className="mx-auto max-w-4xl px-4 py-12 sm:px-6 lg:px-8">
+      <article className="mx-auto max-w-4xl px-4 py-6 sm:px-6 lg:px-8">
         <div className="changelog-prose">
           <MDXContent components={getMDXComponents()} />
         </div>

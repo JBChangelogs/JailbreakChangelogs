@@ -25,7 +25,7 @@ export function useBatchUserData(
   userIds: string[],
   options: UseBatchUserDataOptions = {},
 ): UseBatchUserDataResult {
-  const { batchSize = 100, enabled = true } = options;
+  const { enabled = true } = options;
 
   // Create stable key for userIds to detect changes
   const userIdsKey = useMemo(() => userIds.join(","), [userIds]);
