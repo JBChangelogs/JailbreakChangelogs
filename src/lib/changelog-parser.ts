@@ -1,3 +1,5 @@
+import { cache } from "react";
+
 export interface ChangelogEntry {
   version: string;
   date: string; // ISO 8601 timestamp (UTC) - converted to user's timezone on client
@@ -57,94 +59,96 @@ function stripHtmlTags(text: string): string {
  * Fetches changelog entries from GitHub Releases API
  * Uses Next.js fetch cache with 10 minute revalidation
  */
-export async function getCachedChangelogEntries(): Promise<ChangelogEntry[]> {
-  try {
-    const headers: HeadersInit = {
-      Accept: "application/vnd.github+json",
-      "X-GitHub-Api-Version": "2022-11-28",
-    };
+export const getCachedChangelogEntries = cache(
+  async (): Promise<ChangelogEntry[]> => {
+    try {
+      const headers: HeadersInit = {
+        Accept: "application/vnd.github+json",
+        "X-GitHub-Api-Version": "2022-11-28",
+      };
 
-    if (process.env.GITHUB_TOKEN) {
-      headers["Authorization"] = `Bearer ${process.env.GITHUB_TOKEN}`;
-    }
+      if (process.env.GITHUB_TOKEN) {
+        headers["Authorization"] = `Bearer ${process.env.GITHUB_TOKEN}`;
+      }
 
-    const baseUrl = process.env.GITHUB_API_RELEASES_URL!;
-    const url = baseUrl.includes("?")
-      ? `${baseUrl}&per_page=100`
-      : `${baseUrl}?per_page=100`;
+      const baseUrl = process.env.GITHUB_API_RELEASES_URL!;
+      const url = baseUrl.includes("?")
+        ? `${baseUrl}&per_page=100`
+        : `${baseUrl}?per_page=100`;
 
-    const response = await fetch(url, {
-      headers,
-      next: { revalidate: 600 }, // 10 minutes
-    });
+      const response = await fetch(url, {
+        headers,
+        next: { revalidate: 600 }, // 10 minutes
+      });
 
-    if (!response.ok) {
-      console.error(
-        `Error fetching releases: ${response.status} ${response.statusText}`,
-      );
+      if (!response.ok) {
+        console.error(
+          `Error fetching releases: ${response.status} ${response.statusText}`,
+        );
+        return [];
+      }
+
+      const releases: GithubRelease[] = await response.json();
+
+      return releases.map(mapGithubReleaseToEntry);
+    } catch (error) {
+      console.error("Error fetching changelogs from GitHub:", error);
       return [];
     }
-
-    const releases: GithubRelease[] = await response.json();
-
-    return releases.map(mapGithubReleaseToEntry);
-  } catch (error) {
-    console.error("Error fetching changelogs from GitHub:", error);
-    return [];
-  }
-}
+  },
+);
 
 /**
  * Fetches a single changelog entry from GitHub Releases API by its slug (version/tag).
  * Following the "Get a release" API pattern but using the tag-based variant to preserve human-readable URLs.
  */
-export async function getChangelogEntryBySlug(
-  slug: string,
-): Promise<ChangelogEntry | null> {
-  try {
-    const headers: HeadersInit = {
-      Accept: "application/vnd.github+json",
-      "X-GitHub-Api-Version": "2022-11-28",
-    };
+export const getChangelogEntryBySlug = cache(
+  async (slug: string): Promise<ChangelogEntry | null> => {
+    try {
+      const headers: HeadersInit = {
+        Accept: "application/vnd.github+json",
+        "X-GitHub-Api-Version": "2022-11-28",
+      };
 
-    if (process.env.GITHUB_TOKEN) {
-      headers["Authorization"] = `Bearer ${process.env.GITHUB_TOKEN}`;
-    }
-
-    // Try both the slug as is, and with a 'v' prefix if it's missing (GitHub uses v1.0.0 usually)
-    // We'll first check the list or just try the tag endpoint.
-    // The tag endpoint is /repos/{owner}/{repo}/releases/tags/{tag}
-    const baseUrl = process.env.GITHUB_API_RELEASES_URL!;
-    const tag = slug.startsWith("v") ? slug : `v${slug}`;
-    const url = `${baseUrl}/tags/${tag}`;
-
-    const response = await fetch(url, {
-      headers,
-      next: { revalidate: 600 },
-    });
-
-    if (!response.ok) {
-      // If v-tag fails, try without v-tag as some repos don't use it
-      if (response.status === 404 && tag.startsWith("v")) {
-        const altUrl = `${baseUrl}/tags/${slug}`;
-        const altResponse = await fetch(altUrl, {
-          headers,
-          next: { revalidate: 600 },
-        });
-        if (altResponse.ok) {
-          return mapGithubReleaseToEntry(await altResponse.json());
-        }
+      if (process.env.GITHUB_TOKEN) {
+        headers["Authorization"] = `Bearer ${process.env.GITHUB_TOKEN}`;
       }
+
+      // Try both the slug as is, and with a 'v' prefix if it's missing (GitHub uses v1.0.0 usually)
+      // We'll first check the list or just try the tag endpoint.
+      // The tag endpoint is /repos/{owner}/{repo}/releases/tags/{tag}
+      const baseUrl = process.env.GITHUB_API_RELEASES_URL!;
+      const tag = slug.startsWith("v") ? slug : `v${slug}`;
+      const url = `${baseUrl}/tags/${tag}`;
+
+      const response = await fetch(url, {
+        headers,
+        next: { revalidate: 600 },
+      });
+
+      if (!response.ok) {
+        // If v-tag fails, try without v-tag as some repos don't use it
+        if (response.status === 404 && tag.startsWith("v")) {
+          const altUrl = `${baseUrl}/tags/${slug}`;
+          const altResponse = await fetch(altUrl, {
+            headers,
+            next: { revalidate: 600 },
+          });
+          if (altResponse.ok) {
+            return mapGithubReleaseToEntry(await altResponse.json());
+          }
+        }
+        return null;
+      }
+
+      const release: GithubRelease = await response.json();
+      return mapGithubReleaseToEntry(release);
+    } catch (error) {
+      console.error(`Error fetching single release ${slug}:`, error);
       return null;
     }
-
-    const release: GithubRelease = await response.json();
-    return mapGithubReleaseToEntry(release);
-  } catch (error) {
-    console.error(`Error fetching single release ${slug}:`, error);
-    return null;
-  }
-}
+  },
+);
 
 function mapGithubReleaseToEntry(release: GithubRelease): ChangelogEntry {
   const version = release.tag_name.replace(/^v/, "");
