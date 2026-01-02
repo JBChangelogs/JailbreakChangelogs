@@ -59,6 +59,64 @@ async function getLatestDocumentedCommit(): Promise<string | null> {
   return null;
 }
 
+async function generateChangelogForCommit(hash: string) {
+  const date = new Date().toISOString().split("T")[0]; // YYYY-MM-DD
+  const filename = join(CONTENT_DIR, `${date}-${hash}.mdx`);
+
+  let range = "";
+  try {
+    // Check if parent exists
+    await $`git rev-parse --quiet --verify ${hash}~1`;
+    range = `${hash}~1..${hash}`;
+  } catch {
+    // No parent, this is the initial commit (or a shallow clone root)
+    // We leave range empty to let git-cliff default to "everything up to this point"
+    // which for the initial commit is just that commit.
+    range = "";
+  }
+
+  console.log(
+    `📝 Generating changelog for ${hash} (${range || "initial"}) -> ${filename}`,
+  );
+
+  if (range) {
+    await $`bunx git-cliff ${range} --output ${filename}`;
+  } else {
+    // If we are processing the very first commit, full history is correct.
+    // Note: If this runs in a large repo with NO changelogs on first run, we limit to HEAD elsewhere
+    // so this else block hits only if we are effectively processing a root commit.
+    await $`bunx git-cliff --output ${filename}`;
+  }
+
+  // Post-process to inject the correct version and title
+  let content = (await readFile(filename, "utf-8")).trim();
+
+  // Get the commit message of the specific commit
+  const commitMsgRaw = (await $`git log -1 --format=%s ${hash}`.text()).trim();
+
+  const commitMsg = commitMsgRaw
+    .replace(/^[a-z]+(\(.*\))?!?: /i, "")
+    .replace(/^\w/, (c) => c.toUpperCase())
+    .replace(/\\/g, "\\\\")
+    .replace(/"/g, '\\"');
+
+  // Replace version: "..." with actual hash
+  content = content.replace(/^version:\s*".*?"/m, () => `version: "${hash}"`);
+  content = content.replace(/^title:\s*".*?"/m, () => `title: "${commitMsg}"`);
+  content = content.replace(
+    /^description:\s*".*?"/m,
+    () => `description: "Changelog for ${hash}"`,
+  );
+  content = content.replace(
+    /^commitUrl:\s*".*?"/m,
+    () =>
+      `commitUrl: "https://github.com/JBChangelogs/JailbreakChangelogs/commit/${hash}"`,
+  );
+
+  await writeFile(filename, content);
+  console.log(`✅ Created: ${filename}`);
+}
+
 async function main() {
   try {
     // Ensure content directory exists
@@ -69,82 +127,40 @@ async function main() {
     const headHash = (await $`git rev-parse --short HEAD`.text()).trim();
     const startHash = await getLatestDocumentedCommit();
 
-    let range = "";
+    let commitsToProcess: string[] = [];
+
     if (startHash) {
       if (startHash === headHash) {
         console.log("✨ No new commits since the last changelog.");
         return;
       }
       console.log(`🔍 Last documented version: ${startHash}`);
-      range = `${startHash}..HEAD`;
+
+      // Get all commits from startHash (exclusive) to HEAD (inclusive)
+      // --reverse ensures we process them in chronological order
+      const logOutput =
+        await $`git log --format="%h" --reverse ${startHash}..HEAD`.text();
+      commitsToProcess = logOutput
+        .trim()
+        .split("\n")
+        .filter((line) => line.length > 0);
+
+      console.log(
+        `🚀 Found ${commitsToProcess.length} new commits to document.`,
+      );
     } else {
       console.log("⚠️  No previous changelogs found with version hashes.");
-
-      // FALLBACK: To avoid generating the entire history, we default to the last 24 hours of commits
-      // or just the last commit if it's the very first run.
-      // Ideally, the user should have manually created a baseline, but we want to be helpful.
-      // Let's grab just the commits from the last 24 hours?
-      // Or safer: just the "HEAD" commit for the first run so we don't spam 4000 lines.
       console.log(
         "   First run detected. Generating changelog for the latest commit only to avoid spamming history.",
       );
 
-      // Using HEAD~1..HEAD to get just the last commit
-      // Check if there is a parent first to avoid error on init repo (unlikely here but good practice)
-      try {
-        await $`git rev-parse HEAD~1`;
-        range = "HEAD~1..HEAD";
-      } catch {
-        range = ""; // Single commit repo, full history is fine
-      }
+      // Default to just the current HEAD for safety on first run
+      commitsToProcess = [headHash];
     }
 
-    const date = new Date().toISOString().split("T")[0]; // YYYY-MM-DD
-    const filename = join(CONTENT_DIR, `${date}-${headHash}.mdx`);
-
-    console.log(
-      `📝 Generating changelog for ${range || "all history"} -> ${filename}`,
-    );
-
-    if (range) {
-      await $`bunx git-cliff ${range} --output ${filename}`;
-    } else {
-      await $`bunx git-cliff --output ${filename}`; // Full history
+    for (const hash of commitsToProcess) {
+      await generateChangelogForCommit(hash);
     }
-
-    // Post-process to inject the correct version and title
-    let content = (await readFile(filename, "utf-8")).trim();
-
-    // Get the commit message of the HEAD commit for the title, strip conventional commit prefix and capitalize
-    const commitMsg = (await $`git log -1 --format=%s HEAD`.text())
-      .trim()
-      .replace(/^[a-z]+(\(.*\))?!?: /i, "")
-      .replace(/^\w/, (c) => c.toUpperCase())
-      .replace(/\\/g, "\\\\")
-      .replace(/"/g, '\\"');
-
-    // Replace version: "..." with actual hash
-    content = content.replace(
-      /^version:\s*".*?"/m,
-      () => `version: "${headHash}"`,
-    );
-    content = content.replace(
-      /^title:\s*".*?"/m,
-      () => `title: "${commitMsg}"`,
-    );
-    content = content.replace(
-      /^description:\s*".*?"/m,
-      () => `description: "Changelog for ${headHash}"`,
-    );
-    content = content.replace(
-      /^commitUrl:\s*".*?"/m,
-      () =>
-        `commitUrl: "https://github.com/JBChangelogs/JailbreakChangelogs/commit/${headHash}"`,
-    );
-
-    await writeFile(filename, content);
-
-    console.log(`✅ Changelog created: ${filename}`);
   } catch (error) {
     console.error("❌ Failed:", error);
     process.exit(1);
