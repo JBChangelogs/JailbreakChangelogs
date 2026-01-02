@@ -3,9 +3,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { siteConfig } from "@/lib/site";
 import { ChangelogDate } from "@/components/Changelogs/ChangelogDate";
-// import { readFile } from "node:fs/promises";
-import { join } from "node:path";
-import { parseChangelog } from "@/lib/changelog-parser";
+import { getCachedChangelogEntries } from "@/lib/changelog-parser";
 import ReactMarkdown from "react-markdown";
 import { Icon } from "@/components/ui/IconWrapper";
 
@@ -17,25 +15,18 @@ interface PageProps {
 
 async function getChangelogEntry(slugArray: string[]) {
   const slug = slugArray.join("/");
-  try {
-    const content = await Bun.file(join(process.cwd(), "CHANGELOG.md")).text();
-    const entries = parseChangelog(content);
-    return entries.find((e) => e.slug === slug);
-  } catch {
-    return null;
-  }
+  const entries = await getCachedChangelogEntries();
+  return entries.find((e) => e.slug === slug) || null;
 }
 
+// Revalidate every 5 minutes
+export const revalidate = 300;
+
 export async function generateStaticParams() {
-  try {
-    const content = await Bun.file(join(process.cwd(), "CHANGELOG.md")).text();
-    const entries = parseChangelog(content);
-    return entries.map((entry) => ({
-      slug: [entry.slug],
-    }));
-  } catch {
-    return [];
-  }
+  const entries = await getCachedChangelogEntries();
+  return entries.map((entry) => ({
+    slug: [entry.slug],
+  }));
 }
 
 export async function generateMetadata({

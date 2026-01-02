@@ -1,3 +1,7 @@
+import { unstable_cache } from "next/cache";
+import { readFile } from "node:fs/promises";
+import { join } from "node:path";
+
 export interface ChangelogEntry {
   version: string;
   date: string;
@@ -62,3 +66,25 @@ export function parseChangelog(markdown: string): ChangelogEntry[] {
 
   return entries;
 }
+
+// Cached function to read and parse changelog
+// Revalidates every 5 minutes to pick up new releases
+export const getCachedChangelogEntries = unstable_cache(
+  async (): Promise<ChangelogEntry[]> => {
+    try {
+      const content = await readFile(
+        join(process.cwd(), "CHANGELOG.md"),
+        "utf-8",
+      );
+      return parseChangelog(content);
+    } catch (error) {
+      console.error("Error reading CHANGELOG.md:", error);
+      return [];
+    }
+  },
+  ["changelog-entries"],
+  {
+    revalidate: 300, // 5 minutes
+    tags: ["changelog"],
+  },
+);

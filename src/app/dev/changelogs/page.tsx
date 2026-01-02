@@ -1,9 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { siteConfig } from "@/lib/site";
-// import { readFile } from "node:fs/promises";
-import { join } from "node:path";
-import { parseChangelog } from "@/lib/changelog-parser";
+import { getCachedChangelogEntries } from "@/lib/changelog-parser";
 
 export const metadata: Metadata = {
   title: `Development Changelog | ${siteConfig.name}`,
@@ -13,38 +11,22 @@ export const metadata: Metadata = {
   },
 };
 
-export default async function DevChangelogPage() {
-  // Read CHANGELOG.md
-  let sortedPages: {
-    url: string;
-    data: {
-      title: string;
-      description?: string;
-      date: string;
-      version?: string;
-      commitUrl?: string;
-    };
-  }[] = [];
-  try {
-    const content = await Bun.file(join(process.cwd(), "CHANGELOG.md")).text();
-    const entries = parseChangelog(content);
+// Revalidate every 5 minutes
+export const revalidate = 300;
 
-    // Sort logic (parser returns top-down which is usually newest-first, but ensure it)
-    sortedPages = entries.map((entry) => ({
-      url: `/dev/changelogs/${entry.slug}`,
-      data: {
-        title: entry.title || entry.version,
-        description: entry.description,
-        date: entry.date,
-        version: entry.version !== "Unreleased" ? entry.version : undefined,
-      },
-    }));
-  } catch (e) {
-    console.error("Error reading CHANGELOG.md:", e);
-    console.log("CWD:", process.cwd());
-    // Fallback if no file exists
-    sortedPages = [];
-  }
+export default async function DevChangelogPage() {
+  // Read CHANGELOG.md (cached)
+  const entries = await getCachedChangelogEntries();
+
+  const sortedPages = entries.map((entry) => ({
+    url: `/dev/changelogs/${entry.slug}`,
+    data: {
+      title: entry.title || entry.version,
+      description: entry.description,
+      date: entry.date,
+      version: entry.version !== "Unreleased" ? entry.version : undefined,
+    },
+  }));
 
   return (
     <div className="bg-primary-bg min-h-screen">
