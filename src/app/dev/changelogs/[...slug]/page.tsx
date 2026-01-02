@@ -1,11 +1,20 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { siteConfig } from "@/lib/site";
 import { ChangelogDate } from "@/components/Changelogs/ChangelogDate";
-import { getCachedChangelogEntries } from "@/lib/changelog-parser";
+import {
+  getCachedChangelogEntries,
+  getChangelogEntryBySlug,
+} from "@/lib/changelog-parser";
 import ReactMarkdown from "react-markdown";
+import rehypeRaw from "rehype-raw";
+import rehypeSanitize from "rehype-sanitize";
+import remarkGfm from "remark-gfm";
 import { Icon } from "@/components/ui/IconWrapper";
+
+const Tooltip = dynamic(() => import("@mui/material/Tooltip"));
 
 interface PageProps {
   params: Promise<{
@@ -15,8 +24,7 @@ interface PageProps {
 
 async function getChangelogEntry(slugArray: string[]) {
   const slug = slugArray.join("/");
-  const entries = await getCachedChangelogEntries();
-  return entries.find((e) => e.slug === slug) || null;
+  return await getChangelogEntryBySlug(slug);
 }
 
 // Revalidate every 10 minutes
@@ -98,14 +106,9 @@ export default async function ChangelogEntryPage({ params }: PageProps) {
                 className="text-secondary-text text-sm"
               />
               {entry.version && entry.version !== "Unreleased" && (
-                <a
-                  href={`${siteConfig.links.github}/releases/tag/v${entry.version}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="bg-status-info/10 text-status-info hover:bg-status-info/20 rounded-full px-3 py-1 text-sm font-medium transition-colors"
-                >
+                <span className="bg-status-info/10 text-status-info rounded-full px-3 py-1 text-sm font-medium">
                   v{entry.version}
-                </a>
+                </span>
               )}
               {entry.isPrerelease && (
                 <span className="bg-status-warning/10 text-status-warning rounded-full px-3 py-1 text-sm font-medium">
@@ -145,18 +148,82 @@ export default async function ChangelogEntryPage({ params }: PageProps) {
                   </div>
                 )}
                 {entry.htmlUrl && (
-                  <a
-                    href={entry.htmlUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-link hover:text-link-hover inline-flex items-center gap-1 text-sm transition-colors"
-                  >
-                    <Icon
-                      icon="heroicons-outline:external-link"
-                      className="h-4 w-4"
-                    />
-                    View on GitHub
-                  </a>
+                  <div className="flex flex-wrap items-center gap-4">
+                    <a
+                      href={entry.htmlUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-link hover:text-link-hover inline-flex items-center gap-1 text-sm transition-colors"
+                    >
+                      <Icon
+                        icon="heroicons-outline:external-link"
+                        className="h-4 w-4"
+                      />
+                      View on GitHub
+                    </a>
+
+                    {entry.zipballUrl && (
+                      <Tooltip
+                        title="Download Source Code (ZIP)"
+                        arrow
+                        placement="top"
+                        slotProps={{
+                          tooltip: {
+                            sx: {
+                              backgroundColor: "var(--color-secondary-bg)",
+                              color: "var(--color-primary-text)",
+                              "& .MuiTooltip-arrow": {
+                                color: "var(--color-secondary-bg)",
+                              },
+                            },
+                          },
+                        }}
+                      >
+                        <a
+                          href={entry.zipballUrl}
+                          className="text-secondary-text hover:text-primary-text inline-flex items-center gap-1 text-sm transition-colors"
+                          aria-label="Download Source Code (ZIP)"
+                        >
+                          <Icon
+                            icon="heroicons-outline:document-download"
+                            className="h-4 w-4"
+                          />
+                          Source (ZIP)
+                        </a>
+                      </Tooltip>
+                    )}
+
+                    {entry.tarballUrl && (
+                      <Tooltip
+                        title="Download Source Code (TAR)"
+                        arrow
+                        placement="top"
+                        slotProps={{
+                          tooltip: {
+                            sx: {
+                              backgroundColor: "var(--color-secondary-bg)",
+                              color: "var(--color-primary-text)",
+                              "& .MuiTooltip-arrow": {
+                                color: "var(--color-secondary-bg)",
+                              },
+                            },
+                          },
+                        }}
+                      >
+                        <a
+                          href={entry.tarballUrl}
+                          className="text-secondary-text hover:text-primary-text inline-flex items-center gap-1 text-sm transition-colors"
+                          aria-label="Download Source Code (TAR)"
+                        >
+                          <Icon
+                            icon="heroicons-outline:document-download"
+                            className="h-4 w-4"
+                          />
+                          Source (TAR)
+                        </a>
+                      </Tooltip>
+                    )}
+                  </div>
                 )}
               </div>
             )}
@@ -168,6 +235,8 @@ export default async function ChangelogEntryPage({ params }: PageProps) {
       <article className="mx-auto max-w-4xl px-4 py-6 sm:px-6 lg:px-8">
         <div className="changelog-prose prose prose-invert max-w-none">
           <ReactMarkdown
+            remarkPlugins={[remarkGfm]}
+            rehypePlugins={[rehypeRaw, rehypeSanitize]}
             components={{
               li: ({ children, className, ...props }) => {
                 return (
@@ -183,6 +252,19 @@ export default async function ChangelogEntryPage({ params }: PageProps) {
                   </li>
                 );
               },
+              // Style details and summary which are common in GitHub releases
+              details: ({ className, ...props }) => (
+                <details
+                  {...props}
+                  className={`bg-secondary-bg/50 border-border-primary my-4 rounded-lg border p-4 ${className || ""}`}
+                />
+              ),
+              summary: ({ className, ...props }) => (
+                <summary
+                  {...props}
+                  className={`text-primary-text cursor-pointer font-medium hover:opacity-80 ${className || ""}`}
+                />
+              ),
             }}
           >
             {entry.content}

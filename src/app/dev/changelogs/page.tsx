@@ -79,107 +79,129 @@ export default async function DevChangelogPage() {
           </div>
         ) : (
           <div className="relative">
-            {/* Timeline line */}
-            <div
-              className="border-border-primary absolute top-0 left-0 hidden h-full border-l-2 md:block"
-              style={{ left: "1.5rem" }}
-            />
+            {/* Scrollable Container with max height and custom scrollbar */}
+            <div className="scrollbar-thin scrollbar-track-secondary-bg scrollbar-thumb-button-info/20 hover:scrollbar-thumb-button-info/40 max-h-[1000px] overflow-y-auto pr-4 transition-colors">
+              <div className="relative">
+                {/* Timeline line */}
+                <div
+                  className="border-border-primary absolute top-0 left-0 hidden h-full border-l-2 md:block"
+                  style={{ left: "1.5rem" }}
+                />
 
-            {/* Changelog entries */}
-            <div className="space-y-12">
-              {sortedPages.map((page) => (
-                <article key={page.url} className="relative pl-0 md:pl-16">
-                  {/* Timeline dot */}
-                  <div className="absolute top-2 left-2 hidden h-8 w-8 md:block">
-                    <div className="bg-button-info border-primary-bg flex h-full w-full items-center justify-center rounded-full border-4">
-                      <div className="bg-primary-bg h-2 w-2 rounded-full" />
-                    </div>
-                  </div>
-
-                  {/* Content card */}
-                  <div className="bg-secondary-bg border-border-primary hover:border-button-info rounded-lg border p-6 shadow-lg transition-all duration-200 hover:shadow-xl">
-                    {/* Header */}
-                    <div className="mb-4 flex flex-wrap items-start justify-between gap-4">
-                      <div className="flex-1">
-                        <Link href={page.url} className="group">
-                          <h2 className="text-primary-text group-hover:text-button-info mb-2 text-2xl font-bold transition-colors">
-                            {page.data.title}
-                          </h2>
-                        </Link>
-                        <p className="text-secondary-text">
-                          {page.data.description}
-                        </p>
-                      </div>
-                      <div className="flex flex-col items-end gap-2">
-                        <ChangelogDate
-                          date={page.data.date as string}
-                          className="text-secondary-text text-sm"
-                        />
-                        <div className="flex flex-wrap items-center justify-end gap-2">
-                          {page.data.version && (
-                            <a
-                              href={`${siteConfig.links.github}/releases/tag/v${page.data.version}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="bg-status-info/10 text-status-info hover:bg-status-info/20 rounded-full px-3 py-1 text-sm font-medium transition-colors"
-                            >
-                              v{page.data.version as string}
-                            </a>
-                          )}
-                          {page.data.isPrerelease && (
-                            <span className="bg-status-warning/10 text-status-warning rounded-full px-2 py-1 text-xs font-medium">
-                              Pre-release
-                            </span>
-                          )}
-                          {page.data.isDraft && (
-                            <span className="bg-secondary-text/10 text-secondary-text rounded-full px-2 py-1 text-xs font-medium">
-                              Draft
-                            </span>
-                          )}
-                        </div>
-                        {page.data.authorLogin && (
-                          <div className="flex items-center gap-2">
-                            {page.data.authorAvatarUrl && (
-                              <img
-                                src={page.data.authorAvatarUrl as string}
-                                alt={page.data.authorLogin as string}
-                                className="h-5 w-5 rounded-full"
-                              />
-                            )}
-                            <span className="text-secondary-text text-xs">
-                              @{page.data.authorLogin as string}
-                            </span>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Tags */}
-
-                    {/* Read more link */}
-                    <Link
-                      href={page.url}
-                      className="text-button-info hover:text-button-info/80 inline-flex items-center text-sm font-medium transition-colors"
-                    >
-                      Read full changelog
-                      <svg
-                        className="ml-1 h-4 w-4"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
+                {/* Changelog entries */}
+                <div className="space-y-12 pb-12">
+                  {sortedPages.map((page, index) => {
+                    const isLatest = index === 0;
+                    return (
+                      <article
+                        key={page.url}
+                        className="relative pl-0 md:pl-16"
                       >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M9 5l7 7-7 7"
-                        />
-                      </svg>
-                    </Link>
-                  </div>
-                </article>
-              ))}
+                        {/* Timeline dot */}
+                        <div className="absolute top-2 left-2 hidden h-8 w-8 md:block">
+                          <div
+                            className={`border-primary-bg flex h-full w-full items-center justify-center rounded-full border-4 ${isLatest ? "bg-button-info animate-pulse" : "bg-button-info"}`}
+                          >
+                            <div className="bg-primary-bg h-2 w-2 rounded-full" />
+                          </div>
+                        </div>
+
+                        {/* Content card */}
+                        <div
+                          className={`rounded-lg border p-6 shadow-lg transition-all duration-200 hover:shadow-xl ${
+                            isLatest
+                              ? "from-button-info/10 to-button-info-hover/10 shadow-button-info/20 border-button-info bg-linear-to-r"
+                              : "bg-secondary-bg border-border-primary hover:border-button-info"
+                          }`}
+                        >
+                          {/* Header */}
+                          <div className="mb-4 flex flex-wrap items-start justify-between gap-4">
+                            <div className="flex-1">
+                              <Link href={page.url} className="group">
+                                <div className="flex items-center gap-2">
+                                  <h2 className="text-primary-text group-hover:text-button-info mb-2 text-2xl font-bold transition-colors">
+                                    {page.data.title}
+                                  </h2>
+                                  {isLatest && (
+                                    <span className="bg-button-info text-form-button-text mb-2 rounded-full px-2 py-0.5 text-xs font-medium tracking-wider uppercase">
+                                      Latest
+                                    </span>
+                                  )}
+                                </div>
+                              </Link>
+                              <p className="text-secondary-text">
+                                {page.data.description}
+                              </p>
+                            </div>
+                            <div className="flex flex-col items-end gap-2">
+                              <ChangelogDate
+                                date={page.data.date as string}
+                                className="text-secondary-text text-sm"
+                              />
+                              <div className="flex flex-wrap items-center justify-end gap-2">
+                                {page.data.version && (
+                                  <span className="bg-status-info/10 text-status-info rounded-full px-3 py-1 text-sm font-medium transition-colors">
+                                    v{page.data.version as string}
+                                  </span>
+                                )}
+                                {page.data.isPrerelease && (
+                                  <span className="bg-status-warning/10 text-status-warning rounded-full px-2 py-1 text-xs font-medium">
+                                    Pre-release
+                                  </span>
+                                )}
+                                {page.data.isDraft && (
+                                  <span className="bg-secondary-text/10 text-secondary-text rounded-full px-2 py-1 text-xs font-medium">
+                                    Draft
+                                  </span>
+                                )}
+                              </div>
+                              {page.data.authorLogin && (
+                                <div className="flex items-center gap-2">
+                                  {page.data.authorAvatarUrl && (
+                                    <img
+                                      src={page.data.authorAvatarUrl as string}
+                                      alt={page.data.authorLogin as string}
+                                      className="h-5 w-5 rounded-full"
+                                    />
+                                  )}
+                                  <span className="text-secondary-text text-xs">
+                                    @{page.data.authorLogin as string}
+                                  </span>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Read more link */}
+                          <Link
+                            href={page.url}
+                            className="text-button-info hover:text-button-info/80 inline-flex items-center text-sm font-medium transition-colors"
+                          >
+                            Read full changelog
+                            <svg
+                              className="ml-1 h-4 w-4"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M9 5l7 7-7 7"
+                              />
+                            </svg>
+                          </Link>
+                        </div>
+                      </article>
+                    );
+                  })}
+                </div>
+              </div>
             </div>
+
+            {/* Bottom Fade Gradient to indicate scroll capability */}
+            <div className="from-primary-bg pointer-events-none absolute bottom-0 left-0 h-24 w-full bg-gradient-to-t to-transparent" />
           </div>
         )}
       </div>
