@@ -130,12 +130,15 @@ const formatDate = (timestamp: number) => {
 
 const formatDelay = (seconds: number) => {
   if (seconds < 60) {
-    return `${Math.round(seconds)}s`;
+    return `${Math.ceil(seconds)}s`;
   }
   const minutes = Math.floor(seconds / 60);
-  const remainingSeconds = Math.round(seconds % 60);
+  const remainingSeconds = Math.ceil(seconds % 60);
   if (remainingSeconds === 0) {
     return `${minutes}m`;
+  }
+  if (remainingSeconds === 60) {
+    return `${minutes + 1}m`;
   }
   return `${minutes}m ${remainingSeconds}s`;
 };
@@ -859,11 +862,11 @@ export default function UserStatsSection({
               )}
 
               {/* Queue Position */}
-              <div className="flex gap-2">
+              <div className="flex items-center gap-2">
                 <span className="text-secondary-text min-w-[100px]">
                   Queue Position:
                 </span>
-                <div className="text-primary-text font-medium">
+                <div className="text-primary-text flex items-center gap-2 font-medium">
                   {isLoadingQueuePosition ? (
                     <span className="text-secondary-text text-xs">
                       Loading...
@@ -882,6 +885,38 @@ export default function UserStatsSection({
                       Not in queue
                     </span>
                   )}
+                  <Tooltip
+                    title="Refresh position"
+                    placement="top"
+                    arrow
+                    slotProps={{
+                      tooltip: {
+                        sx: {
+                          backgroundColor: "var(--color-secondary-bg)",
+                          color: "var(--color-primary-text)",
+                          fontSize: "0.75rem",
+                          padding: "8px 12px",
+                          borderRadius: "8px",
+
+                          boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
+                          "& .MuiTooltip-arrow": {
+                            color: "var(--color-secondary-bg)",
+                          },
+                        },
+                      },
+                    }}
+                  >
+                    <button
+                      onClick={() => fetchQueuePosition()}
+                      disabled={isLoadingQueuePosition}
+                      className="text-secondary-text hover:text-primary-text cursor-pointer rounded p-0.5 transition-colors hover:bg-white/10 disabled:opacity-50"
+                    >
+                      <Icon
+                        icon="material-symbols:refresh"
+                        className={`h-4 w-4 ${isLoadingQueuePosition ? "animate-spin" : ""}`}
+                      />
+                    </button>
+                  </Tooltip>
                 </div>
               </div>
 
