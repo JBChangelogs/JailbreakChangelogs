@@ -38,8 +38,16 @@ export function parseChangelog(markdown: string): ChangelogEntry[] {
 
       // Start new entry
       // Strip HTML tags from version (e.g., "<small>0.1.1</small>" -> "0.1.1")
+      // Use recursive replacement to handle nested or malformed tags
       const rawVersion = match[1] || "Unreleased";
-      const version = rawVersion.replace(/<[^>]*>/g, "").trim();
+      let version = rawVersion;
+      let previousVersion: string;
+      // Keep removing HTML tags until no more are found (handles nested/malformed tags)
+      do {
+        previousVersion = version;
+        version = version.replace(/<[^>]*>/g, "");
+      } while (version !== previousVersion);
+      version = version.trim();
       const date = match[2] || new Date().toISOString().split("T")[0];
       const slug = version === "Unreleased" ? "unreleased" : version;
 
