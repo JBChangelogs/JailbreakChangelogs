@@ -39,14 +39,11 @@ export function useBatchUserData(
 
   const hasFetchedRef = useRef(false);
 
-  // Split user IDs into batches
+  // Fetch all user IDs in a single batch for V2 API
   const batches = useMemo(() => {
-    const result: string[][] = [];
-    for (let i = 0; i < userIds.length; i += batchSize) {
-      result.push(userIds.slice(i, i + batchSize));
-    }
-    return result;
-  }, [userIds, batchSize]);
+    // V2 API supports fetching all users at once
+    return [userIds];
+  }, [userIds]);
 
   const totalBatches = batches.length;
 
@@ -61,7 +58,7 @@ export function useBatchUserData(
     hasFetchedRef.current = false;
   }
 
-  // Fetch ALL batches in parallel
+  // Fetch ALL batches in parallel (now just one)
   useEffect(() => {
     if (!enabled || totalBatches === 0 || hasFetchedRef.current) {
       return;
@@ -70,9 +67,9 @@ export function useBatchUserData(
     hasFetchedRef.current = true;
     let completedBatches = 0;
 
-    // Fire off all batch requests to proxy
+    // Fire off request to proxy (now single batch)
     batches.forEach((batch, batchIndex) => {
-      const proxyUrl = `${process.env.NEXT_PUBLIC_INVENTORY_API_URL}/proxy/users?userIds=${batch.join(",")}`;
+      const proxyUrl = `${process.env.NEXT_PUBLIC_INVENTORY_API_URL}/proxy/users/v2?userIds=${batch.join(",")}`;
 
       fetch(proxyUrl, {
         headers: {
