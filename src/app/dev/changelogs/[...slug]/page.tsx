@@ -19,8 +19,8 @@ async function getChangelogEntry(slugArray: string[]) {
   return entries.find((e) => e.slug === slug) || null;
 }
 
-// Revalidate every 5 minutes
-export const revalidate = 300;
+// Revalidate every 10 minutes
+export const revalidate = 600;
 
 export async function generateStaticParams() {
   const entries = await getCachedChangelogEntries();

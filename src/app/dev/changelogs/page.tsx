@@ -11,11 +11,11 @@ export const metadata: Metadata = {
   },
 };
 
-// Revalidate every 5 minutes
-export const revalidate = 300;
+// Revalidate every 10 minutes
+export const revalidate = 600;
 
 export default async function DevChangelogPage() {
-  // Read CHANGELOG.md (cached)
+  // Fetch changelogs from GitHub Releases API (cached)
   const entries = await getCachedChangelogEntries();
 
   const sortedPages = entries.map((entry) => ({

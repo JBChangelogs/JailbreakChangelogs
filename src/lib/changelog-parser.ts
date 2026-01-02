@@ -1,7 +1,3 @@
-import { unstable_cache } from "next/cache";
-import { readFile } from "node:fs/promises";
-import { join } from "node:path";
-
 export interface ChangelogEntry {
   version: string;
   date: string;
@@ -11,88 +7,89 @@ export interface ChangelogEntry {
   slug: string; // ID for the URL
 }
 
-export function parseChangelog(markdown: string): ChangelogEntry[] {
-  const entries: ChangelogEntry[] = [];
-  const lines = markdown.split("\n");
-
-  let currentEntry: Partial<ChangelogEntry> | null = null;
-  let currentContent: string[] = [];
-
-  // Regex to match headers like:
-  // ## [1.0.0] - 2024-01-01
-  // ## 1.0.0 (2024-01-01)
-  // ## [Unreleased]
-  // ## (2024-01-01)
-  const versionRegex =
-    /^## +\[?([^\]\n]*?)\]? *(?:-|\() *(\d{4}-\d{2}-\d{2})?\)?/;
-
-  for (const line of lines) {
-    const match = line.match(versionRegex);
-
-    if (match) {
-      // If we have an existing entry, save it
-      if (currentEntry) {
-        currentEntry.content = currentContent.join("\n").trim();
-        entries.push(currentEntry as ChangelogEntry);
-      }
-
-      // Start new entry
-      // Strip HTML tags from version (e.g., "<small>0.1.1</small>" -> "0.1.1")
-      // Use recursive replacement to handle nested or malformed tags
-      const rawVersion = match[1] || "Unreleased";
-      let version = rawVersion;
-      let previousVersion: string;
-      // Keep removing HTML tags until no more are found (handles nested/malformed tags)
-      do {
-        previousVersion = version;
-        version = version.replace(/<[^>]*>/g, "");
-      } while (version !== previousVersion);
-      version = version.trim();
-      const date = match[2] || new Date().toISOString().split("T")[0];
-      const slug = version === "Unreleased" ? "unreleased" : version;
-
-      currentEntry = {
-        version,
-        date,
-        slug,
-        title: version === "Unreleased" ? "Unreleased Changes" : `v${version}`,
-        description: `Changelog for version ${version}`,
-      };
-      currentContent = [];
-    } else if (currentEntry) {
-      // If we are matching a "header" that didn't match the regex but starts with ##, be careful.
-      // But usually conventional changelog uses ## for Versions and ### for Types.
-      currentContent.push(line);
-    }
-  }
-
-  // Push last entry
-  if (currentEntry) {
-    currentEntry.content = currentContent.join("\n").trim();
-    entries.push(currentEntry as ChangelogEntry);
-  }
-
-  return entries;
+interface GithubRelease {
+  tag_name: string;
+  name: string;
+  body: string;
+  published_at: string;
+  html_url: string;
 }
 
-// Cached function to read and parse changelog
-// Revalidates every 5 minutes to pick up new releases
-export const getCachedChangelogEntries = unstable_cache(
-  async (): Promise<ChangelogEntry[]> => {
-    try {
-      const content = await readFile(
-        join(process.cwd(), "CHANGELOG.md"),
-        "utf-8",
+/**
+ * Strip HTML tags from a string.
+ * Uses recursive replacement to handle nested or malformed tags.
+ */
+function stripHtmlTags(text: string): string {
+  let cleaned = text;
+  let previous: string;
+
+  // Keep removing HTML tags until no more are found (handles nested/malformed tags)
+  do {
+    previous = cleaned;
+    cleaned = cleaned.replace(/<[^>]*>/g, "");
+  } while (cleaned !== previous);
+
+  return cleaned.trim();
+}
+
+/**
+ * Fetches changelog entries from GitHub Releases API
+ * Uses Next.js fetch cache with 10 minute revalidation
+ */
+export async function getCachedChangelogEntries(): Promise<ChangelogEntry[]> {
+  try {
+    const headers: HeadersInit = {
+      Accept: "application/vnd.github.v3+json",
+    };
+
+    if (process.env.GITHUB_TOKEN) {
+      headers["Authorization"] = `Bearer ${process.env.GITHUB_TOKEN}`;
+    }
+
+    const response = await fetch(
+      "https://api.github.com/repos/JBChangelogs/JailbreakChangelogs/releases",
+      {
+        headers,
+        next: { revalidate: 600 }, // 10 minutes
+      },
+    );
+
+    if (!response.ok) {
+      console.error(
+        `Error fetching releases: ${response.status} ${response.statusText}`,
       );
-      return parseChangelog(content);
-    } catch (error) {
-      console.error("Error reading CHANGELOG.md:", error);
       return [];
     }
-  },
-  ["changelog-entries"],
-  {
-    revalidate: 300, // 5 minutes
-    tags: ["changelog"],
-  },
-);
+
+    const releases: GithubRelease[] = await response.json();
+
+    return releases.map((release) => {
+      // tag_name → version (removes 'v' prefix)
+      const version = release.tag_name.replace(/^v/, "");
+
+      // published_at → date
+      const date = release.published_at.split("T")[0];
+
+      // name → title (strip HTML tags)
+      const rawTitle = release.name || release.tag_name;
+      const title = stripHtmlTags(rawTitle);
+
+      // body → content (strip HTML tags from release notes)
+      const content = stripHtmlTags(release.body);
+
+      const slug = version;
+
+      return {
+        version,
+        date,
+        title,
+        description: `Changelog for version ${version}`,
+        content,
+        slug,
+      };
+    });
+  } catch (error) {
+    console.error("Error fetching changelogs from GitHub:", error);
+    return [];
+  }
+}
