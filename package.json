@@ -14,8 +14,6 @@
     "check": "bun run type-check && bun run lint",
     "format": "prettier . --write",
     "format:check": "prettier . --check",
-    "changelog:legacy": "bun scripts/gen-changelog.ts",
-    "generate:changelog": "conventional-changelog -p conventionalcommits -i CHANGELOG.md -s -r 0",
     "release": "bun --env-file=.env.local --bun release-it",
     "prepare": "husky"
   },
@@ -85,7 +83,6 @@
     "@types/node": "^24.10.4",
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
-    "conventional-changelog-cli": "^5.0.0",
     "daisyui": "^5.5.14",
     "eslint": "^9.39.2",
     "eslint-config-next": "^16.1.1",
