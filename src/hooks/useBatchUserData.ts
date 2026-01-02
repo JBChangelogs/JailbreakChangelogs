@@ -69,13 +69,18 @@ export function useBatchUserData(
 
     // Fire off request to proxy (now single batch)
     batches.forEach((batch, batchIndex) => {
-      const proxyUrl = `${process.env.NEXT_PUBLIC_INVENTORY_API_URL}/proxy/users/v2?userIds=${batch.join(",")}`;
+      const proxyUrl = `${process.env.NEXT_PUBLIC_INVENTORY_API_URL}/proxy/users/v2`;
 
       fetch(proxyUrl, {
+        method: "POST",
         headers: {
+          "Content-Type": "application/json",
           "User-Agent": "JailbreakChangelogs-InventoryChecker/1.0",
           "X-Source": process.env.NEXT_PUBLIC_INVENTORY_API_SOURCE_HEADER ?? "",
         },
+        body: JSON.stringify({
+          userIds: batch.map(Number),
+        }),
       })
         .then((response) => response.json())
         .then((data: Record<string, RobloxUser> | { data: unknown }) => {
