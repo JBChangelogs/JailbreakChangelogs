@@ -33,7 +33,9 @@ export function parseChangelog(markdown: string): ChangelogEntry[] {
       }
 
       // Start new entry
-      const version = match[1] || "Unreleased";
+      // Strip HTML tags from version (e.g., "<small>0.1.1</small>" -> "0.1.1")
+      const rawVersion = match[1] || "Unreleased";
+      const version = rawVersion.replace(/<[^>]*>/g, "").trim();
       const date = match[2] || new Date().toISOString().split("T")[0];
       const slug = version === "Unreleased" ? "unreleased" : version;
 

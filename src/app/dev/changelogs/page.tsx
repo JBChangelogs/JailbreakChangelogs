@@ -135,10 +135,7 @@ export default async function DevChangelogPage() {
                         </time>
                         {page.data.version && (
                           <a
-                            href={
-                              (page.data.commitUrl as string) ||
-                              `${siteConfig.links.github}/commit/${page.data.version}`
-                            }
+                            href={`${siteConfig.links.github}/releases/tag/v${page.data.version}`}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="bg-status-info/10 text-status-info hover:bg-status-info/20 rounded-full px-3 py-1 text-sm font-medium transition-colors"

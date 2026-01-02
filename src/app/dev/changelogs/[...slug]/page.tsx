@@ -7,6 +7,7 @@ import { ChangelogDate } from "@/components/Changelogs/ChangelogDate";
 import { join } from "node:path";
 import { parseChangelog } from "@/lib/changelog-parser";
 import ReactMarkdown from "react-markdown";
+import { Icon } from "@/components/ui/IconWrapper";
 
 interface PageProps {
   params: Promise<{
@@ -107,7 +108,7 @@ export default async function ChangelogEntryPage({ params }: PageProps) {
               />
               {entry.version && entry.version !== "Unreleased" && (
                 <a
-                  href={`${siteConfig.links.github}/commit/${entry.version}`} // This might be wrong if version is a tag, but let's assume tags map to commits or releases
+                  href={`${siteConfig.links.github}/releases/tag/v${entry.version}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="bg-status-info/10 text-status-info hover:bg-status-info/20 rounded-full px-3 py-1 text-sm font-medium transition-colors"
@@ -123,7 +124,26 @@ export default async function ChangelogEntryPage({ params }: PageProps) {
       {/* Content */}
       <article className="mx-auto max-w-4xl px-4 py-6 sm:px-6 lg:px-8">
         <div className="changelog-prose prose prose-invert max-w-none">
-          <ReactMarkdown>{entry.content}</ReactMarkdown>
+          <ReactMarkdown
+            components={{
+              li: ({ children, className, ...props }) => {
+                return (
+                  <li
+                    {...props}
+                    className={`flex items-start gap-2 ${className || ""}`}
+                  >
+                    <Icon
+                      icon="heroicons-outline:arrow-right"
+                      className="text-secondary-text mt-1 h-6 w-6 shrink-0 sm:h-5 sm:w-5"
+                    />
+                    <span className="flex-1">{children}</span>
+                  </li>
+                );
+              },
+            }}
+          >
+            {entry.content}
+          </ReactMarkdown>
         </div>
       </article>
     </div>
