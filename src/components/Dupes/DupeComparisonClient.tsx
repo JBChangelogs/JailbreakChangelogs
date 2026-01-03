@@ -160,28 +160,50 @@ export default function DupeComparisonClient({
   );
 
   // Calculate Split Point
-  // Calculate Split Point (Oldest to Newest)
-  // Calculate Split Point (Oldest to Newest)
+  // Handles truncation issue: when histories exceed 50 entries, the oldest non-original
+  // user gets removed, causing false divergences. This function uses timestamps to align
+  // trades and find the last common trade, working backwards from the newest entries.
   const calculateSplitIndex = (
     history1: { UserId: number; TradeTime: number }[],
     history2: { UserId: number; TradeTime: number }[],
   ) => {
-    if (!history1 || !history2) return -1;
-    // Arrays are Oldest (0) -> Newest (N)
-    let k = 0;
-    const len = Math.min(history1.length, history2.length);
-    while (k < len) {
-      if (
-        history1[k].UserId !== history2[k].UserId
-        // We only check UserId to allow for "Same Owner" history to flow through regardless of minor timestamp mismatch
-        // This pushes the split line AFTER the shared owner sequence.
-      ) {
+    if (
+      !history1 ||
+      !history2 ||
+      history1.length === 0 ||
+      history2.length === 0
+    ) {
+      return -1;
+    }
+
+    if (history1[0].UserId !== history2[0].UserId) {
+      return 0;
+    }
+
+    const timeToIndex1 = new Map<number, number>();
+    const timeToIndex2 = new Map<number, number>();
+
+    history1.forEach((entry, idx) => {
+      timeToIndex1.set(entry.TradeTime, idx);
+    });
+
+    history2.forEach((entry, idx) => {
+      timeToIndex2.set(entry.TradeTime, idx);
+    });
+
+    let lastCommonIndex = 0;
+
+    for (let i = history1.length - 1; i >= 0; i--) {
+      const entry1 = history1[i];
+      const idx2 = timeToIndex2.get(entry1.TradeTime);
+
+      if (idx2 !== undefined && history2[idx2].UserId === entry1.UserId) {
+        lastCommonIndex = i + 1; // Split point is AFTER this trade
         break;
       }
-      k++;
     }
-    // k is the properties index where they diverge (First Different Owner)
-    return k;
+
+    return lastCommonIndex;
   };
 
   const selectedSplitIndex = calculateSplitIndex(
