@@ -193,10 +193,6 @@ export default function TradeHistoryModal({
             {item.id && pathname?.startsWith("/dupes") && (
               <div className="bg-button-info/10 border-button-info mx-4 mt-2 mb-0 flex flex-col items-center justify-between gap-4 rounded-lg border p-3 sm:mx-6 sm:flex-row">
                 <div className="flex items-start gap-2">
-                  <Icon
-                    icon="heroicons:information-circle"
-                    className="text-button-info mt-0.5 h-5 w-5 shrink-0"
-                  />
                   <div className="text-sm">
                     <p className="text-primary-text font-semibold">
                       Think this might be a false dupe?

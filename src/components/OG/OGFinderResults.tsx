@@ -472,6 +472,16 @@ export default function OGFinderResults({
             <h2 className="text-primary-text mb-4 text-xl font-semibold">
               OG Items
             </h2>
+            {/* Item Counter */}
+            <div className="mb-4">
+              <p className="text-secondary-text">
+                {searchTerm || selectedCategories.length > 0
+                  ? `Found ${filteredAndSortedItems.length} ${filteredAndSortedItems.length === 1 ? "item" : "items"}${
+                      searchTerm ? ` matching "${searchTerm}"` : ""
+                    }${selectedCategories.length > 0 ? ` in ${selectedCategories[0]}` : ""}`
+                  : `Total Items: ${filteredAndSortedItems.length}`}
+              </p>
+            </div>
 
             {/* Helpful Tip - Only show when there are results */}
             {sortedData.length > 0 && (
