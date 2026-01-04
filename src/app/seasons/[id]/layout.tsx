@@ -82,7 +82,18 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         title: "Jailbreak Seasons",
         description: "Explore all seasons of Roblox Jailbreak.",
         siteName: "Jailbreak Changelogs",
-        url: `https://jailbreakchangelogs.xyz/seasons/${id}`,
+        url: "https://jailbreakchangelogs.xyz/seasons",
+        images: [
+          "https://assets.jailbreakchangelogs.xyz/assets/logos/embeds/JBCL_Embed_Graphic.png",
+        ],
+      },
+      twitter: {
+        card: "summary_large_image",
+        title: "Jailbreak Seasons",
+        description: "Explore all seasons of Roblox Jailbreak.",
+        images: [
+          "https://assets.jailbreakchangelogs.xyz/assets/logos/embeds/JBCL_Embed_Graphic.png",
+        ],
       },
     };
   }

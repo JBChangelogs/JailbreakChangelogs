@@ -370,7 +370,9 @@ export default function DupeFinderResults({
               />
               <span className="font-medium">
                 Helpful Tip: Click on any item card to view its ownership
-                history and compare variants.
+                history. If you suspect an item is a false dupe, click the
+                &quot;Compare Variants&quot; button inside the ownership history
+                modal.
               </span>
             </div>
           </div>

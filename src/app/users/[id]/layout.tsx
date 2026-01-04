@@ -74,14 +74,25 @@ export async function generateMetadata({
           description:
             "This user profile could not be found on Jailbreak Changelogs.",
           type: "website",
-          url: `/users/${userId}`,
+          url: "https://jailbreakchangelogs.xyz/users",
           siteName: "Jailbreak Changelogs",
+          images: [
+            {
+              url: "https://assets.jailbreakchangelogs.xyz/assets/logos/embeds/JBCL_Embed_Graphic.png",
+              width: 2400,
+              height: 1260,
+              alt: "Jailbreak Changelogs Banner",
+            },
+          ],
         },
         twitter: {
-          card: "summary",
+          card: "summary_large_image",
           title: "User Not Found | Changelogs",
           description:
             "This user profile could not be found on Jailbreak Changelogs.",
+          images: [
+            "https://assets.jailbreakchangelogs.xyz/assets/logos/embeds/JBCL_Embed_Graphic.png",
+          ],
         },
       };
     }
@@ -148,13 +159,24 @@ export async function generateMetadata({
           title: "User Banned | Changelogs",
           description: bannedMessage,
           type: "website",
-          url: `/users/${userId}`,
+          url: "https://jailbreakchangelogs.xyz/users",
           siteName: "Jailbreak Changelogs",
+          images: [
+            {
+              url: "https://assets.jailbreakchangelogs.xyz/assets/logos/embeds/JBCL_Embed_Graphic.png",
+              width: 2400,
+              height: 1260,
+              alt: "Jailbreak Changelogs Banner",
+            },
+          ],
         },
         twitter: {
-          card: "summary",
+          card: "summary_large_image",
           title: "User Banned | Changelogs",
           description: bannedMessage,
+          images: [
+            "https://assets.jailbreakchangelogs.xyz/assets/logos/embeds/JBCL_Embed_Graphic.png",
+          ],
         },
       };
     }
@@ -173,14 +195,25 @@ export async function generateMetadata({
         description:
           "This user profile could not be found on Jailbreak Changelogs.",
         type: "website",
-        url: `/users/${userId}`,
+        url: "https://jailbreakchangelogs.xyz/users",
         siteName: "Jailbreak Changelogs",
+        images: [
+          {
+            url: "https://assets.jailbreakchangelogs.xyz/assets/logos/embeds/JBCL_Embed_Graphic.png",
+            width: 2400,
+            height: 1260,
+            alt: "Jailbreak Changelogs Banner",
+          },
+        ],
       },
       twitter: {
         card: "summary_large_image",
         title: "User Not Found | Changelogs",
         description:
           "This user profile could not be found on Jailbreak Changelogs.",
+        images: [
+          "https://assets.jailbreakchangelogs.xyz/assets/logos/embeds/JBCL_Embed_Graphic.png",
+        ],
       },
     };
   }

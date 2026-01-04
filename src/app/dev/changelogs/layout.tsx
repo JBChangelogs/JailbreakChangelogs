@@ -28,6 +28,7 @@ export const metadata: Metadata = {
     title: "Development Changelog",
     description: siteConfig.description,
     creator: "@jbchangelogs",
+    images: ["/dev/changelogs/opengraph-image"],
   },
 };
 

@@ -53,6 +53,21 @@ export async function generateMetadata({
       alternates: {
         canonical: `/changelogs/${id}`,
       },
+      openGraph: {
+        title: "Changelog Not Found",
+        description: "The requested changelog could not be found.",
+        images: [
+          "https://assets.jailbreakchangelogs.xyz/assets/logos/embeds/JBCL_Embed_Graphic.png",
+        ],
+      },
+      twitter: {
+        card: "summary_large_image",
+        title: "Changelog Not Found",
+        description: "The requested changelog could not be found.",
+        images: [
+          "https://assets.jailbreakchangelogs.xyz/assets/logos/embeds/JBCL_Embed_Graphic.png",
+        ],
+      },
     };
   }
 }

@@ -168,7 +168,27 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         title: "Item Not Found",
         description: "The requested item could not be found.",
         alternates: {
-          canonical: `/item/${itemType}/${itemName}`,
+          canonical: "/values",
+        },
+        openGraph: {
+          title: "Item Not Found",
+          description: "The requested item could not be found.",
+          type: "website",
+          url: "https://jailbreakchangelogs.xyz/values",
+          images: [
+            {
+              url: FALLBACK_IMAGE,
+              width: 2400,
+              height: 1260,
+              alt: "Jailbreak Changelogs Banner",
+            },
+          ],
+        },
+        twitter: {
+          card: "summary_large_image",
+          title: "Item Not Found",
+          description: "The requested item could not be found.",
+          images: [FALLBACK_IMAGE],
         },
       };
     }
@@ -228,13 +248,22 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         title: "Error | Jailbreak Changelogs",
         description: "An error occurred while loading the item details.",
         type: "website",
-        url: `https://jailbreakchangelogs.xyz/item/${itemType}/${itemName}`,
+        url: "https://jailbreakchangelogs.xyz/values",
         siteName: "Jailbreak Changelogs",
+        images: [
+          {
+            url: FALLBACK_IMAGE,
+            width: 2400,
+            height: 1260,
+            alt: "Jailbreak Changelogs Banner",
+          },
+        ],
       },
       twitter: {
-        card: "summary",
+        card: "summary_large_image",
         title: "Error | Jailbreak Changelogs",
         description: "An error occurred while loading the item details.",
+        images: [FALLBACK_IMAGE],
       },
     };
   }

@@ -69,8 +69,16 @@ const faqs = [
     answer: (
       <>
         Yes. While the detection is still fully automated based on our collected
-        data, if you believe an item is incorrectly flagged you can report the
-        false dupe by opening a support ticket in our{" "}
+        data, if you believe an item is incorrectly flagged, you should first
+        use our{" "}
+        <span className="text-primary-text font-semibold">
+          Variant Comparison
+        </span>{" "}
+        tool. This tool, accessible by clicking &quot;Compare&quot; on any item
+        card, allows you to view the ownership history of your item side-by-side
+        with its original variant to see exactly where they diverge. If you
+        still believe it is a false dupe, you can report it by opening a support
+        ticket in our{" "}
         <a
           href="https://discord.com/channels/1286064050135896064/1392693026865811518"
           target="_blank"

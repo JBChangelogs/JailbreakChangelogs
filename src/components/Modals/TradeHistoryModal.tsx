@@ -178,16 +178,6 @@ export default function TradeHistoryModal({
                       {item.categoryTitle}
                     </span>
                   )}
-                  {item.id && pathname?.startsWith("/dupes") && (
-                    <a
-                      href={`/dupes/compare?id=${encodeURIComponent(item.id)}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="bg-button-info text-form-button-text hover:bg-button-info-hover rounded-md px-3 py-1 text-xs font-medium transition-colors"
-                    >
-                      Compare Variants
-                    </a>
-                  )}
                 </div>
               </div>
 
@@ -199,6 +189,34 @@ export default function TradeHistoryModal({
                 <Icon icon="heroicons:x-mark" className="h-6 w-6" />
               </button>
             </div>
+
+            {item.id && pathname?.startsWith("/dupes") && (
+              <div className="bg-button-info/10 border-button-info mx-4 mt-2 mb-0 flex flex-col items-center justify-between gap-4 rounded-lg border p-3 sm:mx-6 sm:flex-row">
+                <div className="flex items-start gap-2">
+                  <Icon
+                    icon="heroicons:information-circle"
+                    className="text-button-info mt-0.5 h-5 w-5 shrink-0"
+                  />
+                  <div className="text-sm">
+                    <p className="text-primary-text font-semibold">
+                      Think this might be a false dupe?
+                    </p>
+                    <p className="text-secondary-text">
+                      Compare this item&apos;s history side-by-side with its
+                      original variant.
+                    </p>
+                  </div>
+                </div>
+                <a
+                  href={`/dupes/compare?id=${encodeURIComponent(item.id)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="bg-button-info text-form-button-text hover:bg-button-info-hover w-full shrink-0 rounded-md px-4 py-2 text-center text-sm font-bold whitespace-nowrap transition-colors sm:w-auto"
+                >
+                  Compare Variants
+                </a>
+              </div>
+            )}
           </div>
 
           <div className="max-h-[60vh] overflow-y-auto p-6">
