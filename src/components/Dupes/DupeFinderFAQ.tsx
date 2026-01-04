@@ -52,12 +52,7 @@ const faqs = [
   {
     question: "How much data do you have?",
     answer:
-      "We've logged over 8 million items and counting! Our comprehensive database continues to grow daily as we scan inventories across the Jailbreak community, providing the most extensive dupe detection available.",
-  },
-  {
-    question: "How does this compare to the dupe calculator (deprecated)?",
-    answer:
-      "Unlike the old dupe calculator, you can't manually report dupes with this new system, making it way more accurate. It's powered by the comprehensive data we have collected, including unknown dupes that don't show up on competitor websites.",
+      "We've logged over 32 million items and counting! Our comprehensive database continues to grow daily as we scan inventories across the Jailbreak community, providing the most extensive dupe detection available.",
   },
   {
     question: "How accurate is the dupe detection?",

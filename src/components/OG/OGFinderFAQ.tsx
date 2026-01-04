@@ -31,9 +31,26 @@ const faqs = [
       "Enter your Roblox ID or username in the search box above. The system will identify all items you originally owned but traded away, displaying who currently has them in their inventory.",
   },
   {
-    question: "Why can't I find some of my items?",
-    answer:
-      "Items may not appear if the current owner has not been scanned by our bots. Our system only tracks items that have been scanned and logged in our database, so unscanned inventories won't show up in results.",
+    question: "Why OG Items May Not Show",
+    answer: (
+      <>
+        Items may not appear in our system if the current owner has not been
+        scanned by our bots. Our database only tracks inventories that have been
+        logged during active scans, so if an item is sitting with someone who
+        rarely plays or has quit, it may never show up.
+        <br />
+        <br />
+        This is especially common with older &quot;OG&quot; items. Once the bots
+        join the owner in trade world, their items (including your OG items if
+        they have them) will be scanned and added to results.
+        <br />
+        <br />
+        ℹ️ This question is asked often — if your OG item isn’t visible, it
+        doesn’t mean it’s gone. It simply means the current owner hasn’t been
+        scanned yet. In rare cases, the user may have been banned from Jailbreak
+        as well.
+      </>
+    ),
   },
   {
     question: "How accurate is this information?",
