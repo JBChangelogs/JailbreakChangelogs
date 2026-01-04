@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useCallback, useMemo } from "react";
 import { RobloxUser, Item } from "@/types";
 import { Season } from "@/types/seasons";
 import {
@@ -9,8 +9,6 @@ import {
   UserConnectionData,
 } from "@/app/inventories/types";
 import { useScanWebSocket } from "@/hooks/useScanWebSocket";
-import { logError } from "@/services/logger";
-import toast from "react-hot-toast";
 import UserProfileSection from "./UserProfileSection";
 import UserStatsSection from "./UserStatsSection";
 import { UserNetworthData } from "@/utils/api";
@@ -22,7 +20,7 @@ interface UserStatsProps {
   currentSeason: Season | null;
   itemsData: Item[];
   dupedItems: InventoryItem[];
-  onRefresh: (newData: InventoryData) => Promise<void>;
+
   initialNetworthData?: UserNetworthData[];
 }
 
@@ -31,15 +29,9 @@ export default function UserStats({
   robloxUsers,
   userConnectionData,
   currentSeason,
-  onRefresh,
+
   initialNetworthData = [],
 }: UserStatsProps) {
-  const [totalCashValue, setTotalCashValue] = useState<number>(0);
-  const [totalDupedValue, setTotalDupedValue] = useState<number>(0);
-  const [totalNetworth, setTotalNetworth] = useState<number>(0);
-  const [isLoadingValues, setIsLoadingValues] = useState<boolean>(true);
-  const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
-
   // WebSocket for real-time updates
   useScanWebSocket(initialData.user_id);
 
@@ -83,85 +75,14 @@ export default function UserStats({
       : null;
   }, [initialNetworthData]);
 
-  useEffect(() => {
-    const setValues = () => {
-      try {
-        if (latestNetworthData) {
-          // Use backend calculated values only
-          setTotalNetworth(latestNetworthData.networth || 0);
-          setTotalCashValue(latestNetworthData.inventory_value || 0);
-          // duplicates_value: null means no duplicates (use 0), undefined means not available (use 0)
-          setTotalDupedValue(latestNetworthData.duplicates_value ?? 0);
-        } else {
-          // No networth data available - set to 0 (no fallback calculation)
-          setTotalNetworth(0);
-          setTotalCashValue(0);
-          setTotalDupedValue(0);
-        }
-      } catch (error) {
-        logError("Error setting values from networth data", error, {
-          component: "UserStats",
-          action: "setValuesFromNetworth",
-        });
-        setTotalCashValue(0);
-        setTotalDupedValue(0);
-        setTotalNetworth(0);
-      }
-    };
-
-    setValues();
-  }, [latestNetworthData]);
-
-  // Handle refresh with Turnstile token
-  const handleRefresh = async (turnstileToken: string) => {
-    setIsRefreshing(true);
-    try {
-      // Make API call to refresh inventory data
-      const response = await fetch("/api/inventories/refresh", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          robloxId: initialData.user_id,
-          turnstileToken,
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to refresh inventory data");
-      }
-
-      const refreshedData = await response.json();
-
-      // Update the parent component with new data
-      await onRefresh(refreshedData);
-    } catch (error) {
-      logError("Error refreshing data", error, {
-        component: "UserStats",
-        action: "handleRefresh",
-      });
-      console.error("Refresh failed:", error);
-
-      // Show error toast to user
-      const errorMessage =
-        error instanceof Error
-          ? error.message
-          : "Failed to refresh inventory data";
-      toast.error(errorMessage, {
-        duration: 5000,
-        position: "bottom-right",
-      });
-    } finally {
-      setIsRefreshing(false);
-    }
-  };
+  const totalNetworth = latestNetworthData?.networth || 0;
+  const totalCashValue = latestNetworthData?.inventory_value || 0;
+  const totalDupedValue = latestNetworthData?.duplicates_value ?? 0;
+  // Since we are deriving values directly from props, they are always available (or 0)
+  // We can treat loading as false since there's no async operation here
+  const isLoadingValues = false;
 
   // Set loading state
-  useEffect(() => {
-    setIsLoadingValues(false);
-  }, [totalCashValue]);
 
   return (
     <div className="border-border-primary bg-secondary-bg shadow-card-shadow rounded-lg border p-6">
@@ -179,8 +100,6 @@ export default function UserStats({
           getUserAvatar={getUserAvatar}
           getHasVerifiedBadge={getHasVerifiedBadge}
           currentData={initialData}
-          isRefreshing={isRefreshing}
-          onRefresh={handleRefresh}
         />
       )}
 

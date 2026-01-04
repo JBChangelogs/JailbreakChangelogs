@@ -51,7 +51,7 @@ const SUPPORTER_TIERS = [
     features: [
       "Post Comments up to 2,000 characters",
       "Square Avatar Border",
-      "On-Demand Inventory Refresh",
+      "On-Demand Inventory Scan",
     ],
     color: "border-[#FFD700]",
     tierNumber: 3,
@@ -105,11 +105,11 @@ const getFeatureDescription = (
         current: `Current tier: ${currentLimit}`,
         required: `Required: ${requiredLimit}`,
       };
-    case "inventory_refresh":
+    case "inventory_scan":
       return {
-        title: "Unlock On-Demand Inventory Refresh",
+        title: "Unlock On-Demand Inventory Scan",
         description:
-          "You're trying to refresh inventory data on-demand, but this feature requires Supporter III. Upgrade to unlock instant inventory refreshes anytime!",
+          "You're trying to scan your inventory on-demand, but this feature requires Supporter III. Upgrade to unlock instant inventory scans anytime!",
         current: `Current tier: ${currentLimit}`,
         required: `Required: ${requiredLimit}`,
       };
@@ -296,10 +296,10 @@ export default function SupporterModal({
                                 {getAllowedFileExtensions()})
                               </span>
                             );
-                          } else if (feature === "inventory_refresh") {
+                          } else if (feature === "inventory_scan") {
                             return (
                               <span className="text-secondary-text block">
-                                On-Demand Inventory Refresh
+                                On-Demand Inventory Scan
                               </span>
                             );
                           } else {

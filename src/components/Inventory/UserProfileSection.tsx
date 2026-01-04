@@ -13,7 +13,7 @@ import { useAuthContext } from "@/contexts/AuthContext";
 import { useScanWebSocket } from "@/hooks/useScanWebSocket";
 import { useSupporterModal } from "@/hooks/useSupporterModal";
 import SupporterModal from "@/components/Modals/SupporterModal";
-import RefreshInventoryModal from "@/components/Modals/RefreshInventoryModal";
+
 import ScanInventoryModal from "@/components/Modals/ScanInventoryModal";
 import { ENABLE_WS_SCAN } from "@/utils/api";
 import {
@@ -34,8 +34,6 @@ interface UserProfileSectionProps {
   getUserAvatar: (userId: string) => string;
   getHasVerifiedBadge: (userId: string) => boolean;
   currentData: InventoryData;
-  isRefreshing: boolean;
-  onRefresh: (turnstileToken: string) => void;
 }
 
 export default function UserProfileSection({
@@ -46,44 +44,17 @@ export default function UserProfileSection({
   getUserAvatar,
   getHasVerifiedBadge,
   currentData,
-  isRefreshing,
-  onRefresh,
 }: UserProfileSectionProps) {
   const { user, isAuthenticated, setShowLoginModal } = useAuthContext();
   const { modalState, openModal, closeModal } = useSupporterModal();
   const scanWebSocket = useScanWebSocket(currentData?.user_id || "");
   const scanCompletedRef = useRef(false);
-  const [currentTime, setCurrentTime] = useState(() =>
-    Math.floor(Date.now() / 1000),
-  );
-  const [showRefreshModal, setShowRefreshModal] = useState(false);
+
   const [showScanModal, setShowScanModal] = useState(false);
 
   // Check if current user is viewing their own inventory
   const isOwnInventory =
     isAuthenticated && user?.roblox_id === currentData?.user_id;
-
-  const isDataFresh = () => {
-    if (!currentData) return false;
-    const dataAge = currentTime - currentData.updated_at;
-    return dataAge < 300; // 5 minutes
-  };
-
-  const handleRefreshClick = () => {
-    if (isRefreshing || isDataFresh()) return;
-    setShowRefreshModal(true);
-  };
-
-  const handleRefreshWithToken = (turnstileToken: string) => {
-    onRefresh(turnstileToken);
-    setShowRefreshModal(false);
-  };
-
-  const handleCloseModal = () => {
-    if (!isRefreshing) {
-      setShowRefreshModal(false);
-    }
-  };
 
   const handleScanClick = () => {
     if (
@@ -109,14 +80,6 @@ export default function UserProfileSection({
       setShowScanModal(false);
     }
   };
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentTime(Math.floor(Date.now() / 1000));
-    }, 60000); // Update every minute
-
-    return () => clearInterval(interval);
-  }, []);
 
   useEffect(() => {
     if (scanWebSocket.status === "connecting") {
@@ -183,7 +146,7 @@ export default function UserProfileSection({
         const currentLimit =
           TIER_NAMES[userTier as keyof typeof TIER_NAMES] || "Unknown";
         openModal({
-          feature: "inventory_refresh",
+          feature: "inventory_scan",
           currentTier: userTier,
           requiredTier: 3,
           currentLimit: currentLimit,
@@ -514,78 +477,6 @@ export default function UserProfileSection({
                 </>
               )}
             </button>
-
-            {/* Refresh Button */}
-            <button
-              onClick={handleRefreshClick}
-              disabled={isRefreshing || isDataFresh()}
-              className={`inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
-                isRefreshing
-                  ? "border-button-info-disabled bg-button-info-disabled text-form-button-text cursor-progress"
-                  : isDataFresh()
-                    ? "border-button-secondary bg-button-secondary text-secondary-text cursor-not-allowed"
-                    : "bg-button-info text-form-button-text hover:bg-button-info-hover cursor-pointer"
-              }`}
-            >
-              {isRefreshing ? (
-                <>
-                  <svg
-                    className="h-4 w-4 animate-spin"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                  >
-                    <circle
-                      className="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                    />
-                    <path
-                      className="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                    />
-                  </svg>
-                  Refreshing...
-                </>
-              ) : isDataFresh() ? (
-                <>
-                  <svg
-                    className="h-4 w-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                    />
-                  </svg>
-                  Recently Updated
-                </>
-              ) : (
-                <>
-                  <svg
-                    className="h-4 w-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-                    />
-                  </svg>
-                  Refresh Data
-                </>
-              )}
-            </button>
           </div>
 
           {/* Progress Bar - Only show when progress is defined */}
@@ -682,19 +573,11 @@ export default function UserProfileSection({
       <SupporterModal
         isOpen={modalState.isOpen}
         onClose={closeModal}
-        feature={modalState.feature || "refresh inventory data"}
+        feature={modalState.feature}
         currentTier={modalState.currentTier || 0}
         requiredTier={modalState.requiredTier || 1}
         currentLimit={modalState.currentLimit}
         requiredLimit={modalState.requiredLimit}
-      />
-
-      {/* Refresh Inventory Modal with Turnstile */}
-      <RefreshInventoryModal
-        isOpen={showRefreshModal}
-        onClose={handleCloseModal}
-        onSuccess={handleRefreshWithToken}
-        isRefreshing={isRefreshing}
       />
 
       {/* Scan Inventory Modal with Turnstile */}

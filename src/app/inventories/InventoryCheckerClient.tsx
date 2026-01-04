@@ -14,7 +14,7 @@ import { useAuthContext } from "@/contexts/AuthContext";
 import { Season } from "@/types/seasons";
 import { useUsernameToId } from "@/hooks/useUsernameToId";
 import { useBatchUserData } from "@/hooks/useBatchUserData";
-import toast from "react-hot-toast";
+
 import SearchForm from "@/components/Inventory/SearchForm";
 import UserStats from "@/components/Inventory/UserStats";
 import InventoryItems from "@/components/Inventory/InventoryItems";
@@ -34,13 +34,7 @@ import {
   showScanErrorToast,
 } from "@/utils/scanToasts";
 import dynamic from "next/dynamic";
-import {
-  CommentData,
-  UserNetworthData,
-  MoneyHistory,
-  fetchUserNetworth,
-  fetchUserMoneyHistory,
-} from "@/utils/api";
+import { CommentData, UserNetworthData, MoneyHistory } from "@/utils/api";
 import { UserData } from "@/types/auth";
 import MoneyHistoryChart from "@/components/Inventory/MoneyHistoryChart";
 import NetworthHistoryChart from "@/components/Inventory/NetworthHistoryChart";
@@ -101,14 +95,9 @@ export default function InventoryCheckerClient({
   );
 
   const [itemsData] = useState<Item[]>(items);
-  const [refreshedData, setRefreshedData] = useState<InventoryData | null>(
-    null,
-  );
-  const [networthData, setNetworthData] =
-    useState<UserNetworthData[]>(initialNetworthData);
-  const [moneyHistoryData, setMoneyHistoryData] = useState<MoneyHistory[]>(
-    initialMoneyHistoryData,
-  );
+
+  const [networthData] = useState<UserNetworthData[]>(initialNetworthData);
+  const [moneyHistoryData] = useState<MoneyHistory[]>(initialMoneyHistoryData);
   const [activeTab, setActiveTab] = useState(0);
   const dupedItems =
     initialDupeData && Array.isArray(initialDupeData) ? initialDupeData : [];
@@ -127,7 +116,7 @@ export default function InventoryCheckerClient({
   const isOwnInventory = isAuthenticated && user?.roblox_id === robloxId;
 
   // Use refreshed data if available, otherwise use initial data
-  const currentData = refreshedData || initialData;
+  const currentData = initialData;
 
   // Extract all user IDs from inventory data for batch fetching
   const allUserIds = useMemo(() => {
@@ -192,24 +181,6 @@ export default function InventoryCheckerClient({
   );
 
   // Function to handle data refresh
-  const handleDataRefresh = async (newData: InventoryData) => {
-    setRefreshedData(newData);
-
-    // Also fetch updated graph data
-    if (robloxId) {
-      try {
-        const [newNetworthData, newMoneyHistoryData] = await Promise.all([
-          fetchUserNetworth(robloxId),
-          fetchUserMoneyHistory(robloxId),
-        ]);
-        setNetworthData(newNetworthData);
-        setMoneyHistoryData(newMoneyHistoryData);
-      } catch (error) {
-        console.error("Error fetching graph data after refresh:", error);
-        // Don't show error to user, just log it
-      }
-    }
-  };
 
   // Calculate if there are duplicates (needed for hash navigation)
   const hasDuplicates = currentData
@@ -402,7 +373,7 @@ export default function InventoryCheckerClient({
         ];
         const userTier = user?.premiumtype || 0;
         openModal({
-          feature: "inventory_refresh",
+          feature: "inventory_scan",
           requiredTier: 3,
           currentTier: userTier,
           currentLimit: tierNames[userTier],
@@ -525,18 +496,6 @@ export default function InventoryCheckerClient({
       window.location.hash = "comments";
     }
   };
-
-  useEffect(() => {
-    if (refreshedData) {
-      toast.success(
-        `Data refreshed successfully! Updated ${refreshedData.item_count} items`,
-        {
-          duration: 4000,
-          position: "bottom-right",
-        },
-      );
-    }
-  }, [refreshedData]);
 
   // Comments are provided server-side via initialComments prop
   // No need for client-side fetching
@@ -970,7 +929,6 @@ export default function InventoryCheckerClient({
               userConnectionData={userConnectionData || null}
               itemsData={itemsData}
               dupedItems={dupedItems}
-              onRefresh={handleDataRefresh}
               currentSeason={currentSeason}
               initialNetworthData={networthData}
             />
@@ -1154,7 +1112,7 @@ export default function InventoryCheckerClient({
         <SupporterModal
           isOpen={modalState.isOpen}
           onClose={closeModal}
-          feature={modalState.feature || "inventory_refresh"}
+          feature={modalState.feature}
           currentTier={modalState.currentTier || user?.premiumtype || 0}
           requiredTier={modalState.requiredTier || 3}
           currentLimit={modalState.currentLimit}
