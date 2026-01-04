@@ -26,9 +26,9 @@ export const metadata = {
       "Regularly updated Roblox Jailbreak values for vehicles, textures, colors, rims, spoilers, hyperchromes, and more. Community driven.",
     images: [
       {
-        url: "https://assets.jailbreakchangelogs.xyz/assets/logos/collab/JBCL_X_TC_Logo_Long_Light_Background.png",
-        width: 1200,
-        height: 630,
+        url: "https://assets.jailbreakchangelogs.xyz/assets/logos/embeds/JBCL_X_TC_Embed_Graphic.png",
+        width: 2400,
+        height: 1260,
         alt: "Jailbreak Values - Most Accurate Trading Values",
       },
     ],
@@ -42,7 +42,7 @@ export const metadata = {
     description:
       "Regularly updated Roblox Jailbreak values for vehicles, textures, colors, rims, spoilers, hyperchromes, and more. Community driven.",
     images: [
-      "https://assets.jailbreakchangelogs.xyz/assets/logos/collab/JBCL_X_TC_Logo_Long_Light_Background.png",
+      "https://assets.jailbreakchangelogs.xyz/assets/logos/embeds/JBCL_X_TC_Embed_Graphic.png",
     ],
   },
 };

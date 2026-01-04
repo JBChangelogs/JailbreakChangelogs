@@ -7,7 +7,7 @@ import { WithContext, FAQPage, BreadcrumbList, ListItem } from "schema-dts";
 import type { ItemDetails } from "@/types/index";
 
 const FALLBACK_IMAGE =
-  "https://assets.jailbreakchangelogs.xyz/assets/logos/collab/JBCL_X_TC_Logo_Long_Light_Background.png";
+  "https://assets.jailbreakchangelogs.xyz/assets/logos/embeds/JBCL_X_TC_Embed_Graphic.png";
 
 interface Props {
   params: Promise<{
@@ -174,6 +174,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     }
     const imageUrl = getItemImagePath(item.type, item.name, false, true);
     const finalImageUrl = imageUrl || FALLBACK_IMAGE;
+    const isFallbackImage = finalImageUrl === FALLBACK_IMAGE;
     return {
       metadataBase: new URL("https://jailbreakchangelogs.xyz"),
       title: `${item.name} (${item.type}) | Roblox Jailbreak`,
@@ -196,8 +197,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         images: [
           {
             url: finalImageUrl,
-            width: 854,
-            height: 480,
+            width: isFallbackImage ? 2400 : 854,
+            height: isFallbackImage ? 1260 : 480,
             alt: `${item.name} (${item.type})`,
           },
         ],
