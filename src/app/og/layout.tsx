@@ -19,6 +19,14 @@ export async function generateMetadata(): Promise<Metadata> {
       title: "OG Finder - Jailbreak Changelogs",
       description:
         "Find original items owned by any player. Discover who originally owned specific items in Jailbreak and track their trade history.",
+      images: [
+        {
+          url: "https://assets.jailbreakchangelogs.xyz/assets/logos/embeds/JBCL_Embed_Graphic.png",
+          width: 2400,
+          height: 1260,
+          alt: "Jailbreak Changelogs Banner",
+        },
+      ],
       type: "website",
       siteName: "Jailbreak Changelogs",
       url: "https://jailbreakchangelogs.xyz/og",
@@ -28,6 +36,9 @@ export async function generateMetadata(): Promise<Metadata> {
       title: "OG Finder - Jailbreak Changelogs",
       description:
         "Find original items owned by any player. Discover who originally owned specific items in Jailbreak and track their trade history.",
+      images: [
+        "https://assets.jailbreakchangelogs.xyz/assets/logos/embeds/JBCL_Embed_Graphic.png",
+      ],
     },
   };
 }

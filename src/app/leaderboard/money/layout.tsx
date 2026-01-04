@@ -19,6 +19,14 @@ export async function generateMetadata(): Promise<Metadata> {
       title: "Money Leaderboard - Jailbreak Changelogs",
       description:
         "View the top players in Roblox Jailbreak ranked by their total money. See who has the most cash, find your rank, and track the wealthiest players in the game.",
+      images: [
+        {
+          url: "https://assets.jailbreakchangelogs.xyz/assets/logos/embeds/JBCL_Embed_Graphic.png",
+          width: 2400,
+          height: 1260,
+          alt: "Jailbreak Changelogs Banner",
+        },
+      ],
       type: "website",
       siteName: "Jailbreak Changelogs",
       url: "https://jailbreakchangelogs.xyz/leaderboard/money",
@@ -28,6 +36,9 @@ export async function generateMetadata(): Promise<Metadata> {
       title: "Money Leaderboard - Jailbreak Changelogs",
       description:
         "View the top players in Roblox Jailbreak ranked by their total money. See who has the most cash, find your rank, and track the wealthiest players in the game.",
+      images: [
+        "https://assets.jailbreakchangelogs.xyz/assets/logos/embeds/JBCL_Embed_Graphic.png",
+      ],
     },
     keywords: [
       "jailbreak",

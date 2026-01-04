@@ -12,7 +12,16 @@ export const metadata: Metadata = {
     title: "Jailbreak Changelogs Privacy Policy",
     description:
       "Learn about how we protect your privacy and handle your data at Jailbreak Changelogs. Our privacy policy outlines our commitment to transparency and data protection.",
+    images: [
+      {
+        url: "https://assets.jailbreakchangelogs.xyz/assets/logos/embeds/JBCL_Embed_Graphic.png",
+        width: 2400,
+        height: 1260,
+        alt: "Jailbreak Changelogs Banner",
+      },
+    ],
     type: "website",
+    siteName: "Jailbreak Changelogs",
     url: "https://jailbreakchangelogs.xyz/privacy",
   },
   twitter: {
@@ -20,6 +29,9 @@ export const metadata: Metadata = {
     title: "Jailbreak Changelogs Privacy Policy",
     description:
       "Learn about how we protect your privacy and handle your data at Jailbreak Changelogs. Our privacy policy outlines our commitment to transparency and data protection.",
+    images: [
+      "https://assets.jailbreakchangelogs.xyz/assets/logos/embeds/JBCL_Embed_Graphic.png",
+    ],
   },
 };
 

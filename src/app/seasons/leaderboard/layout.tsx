@@ -13,6 +13,14 @@ export async function generateMetadata(): Promise<Metadata> {
       title: "Season Leaderboard - Jailbreak Changelogs",
       description:
         "View the top 25 players in the current Roblox Jailbreak season ranked by their total experience and see who's leading the seaso",
+      images: [
+        {
+          url: "https://assets.jailbreakchangelogs.xyz/assets/logos/embeds/JBCL_Embed_Graphic.png",
+          width: 2400,
+          height: 1260,
+          alt: "Jailbreak Changelogs Banner",
+        },
+      ],
       type: "website",
       siteName: "Jailbreak Changelogs",
       url: "https://jailbreakchangelogs.xyz/seasons/leaderboard",
@@ -22,6 +30,9 @@ export async function generateMetadata(): Promise<Metadata> {
       title: "Season Leaderboard - Jailbreak Changelogs",
       description:
         "View the top 25 players in the current Roblox Jailbreak season ranked by their total experience and see who's leading the seaso",
+      images: [
+        "https://assets.jailbreakchangelogs.xyz/assets/logos/embeds/JBCL_Embed_Graphic.png",
+      ],
     },
     keywords: [
       "jailbreak",

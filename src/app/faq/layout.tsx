@@ -12,7 +12,16 @@ export const metadata: Metadata = {
     title: "Jailbreak Changelogs FAQ - Frequently Asked Questions",
     description:
       "Find answers to frequently asked questions about Jailbreak, the Jailbreak Changelogs website, and more.",
+    images: [
+      {
+        url: "https://assets.jailbreakchangelogs.xyz/assets/logos/embeds/JBCL_Embed_Graphic.png",
+        width: 2400,
+        height: 1260,
+        alt: "Jailbreak Changelogs Banner",
+      },
+    ],
     type: "website",
+    siteName: "Jailbreak Changelogs",
     url: "https://jailbreakchangelogs.xyz/faq",
   },
   twitter: {
@@ -20,6 +29,9 @@ export const metadata: Metadata = {
     title: "Jailbreak Changelogs FAQ - Frequently Asked Questions",
     description:
       "Find answers to frequently asked questions about Jailbreak, the Jailbreak Changelogs website, and more.",
+    images: [
+      "https://assets.jailbreakchangelogs.xyz/assets/logos/embeds/JBCL_Embed_Graphic.png",
+    ],
   },
 };
 
