@@ -32,6 +32,7 @@ interface TradeHistoryModalProps {
   onClose: () => void;
   item: Item | null;
   username?: string;
+  isDupeTab?: boolean;
 }
 
 export default function TradeHistoryModal({
@@ -39,6 +40,7 @@ export default function TradeHistoryModal({
   onClose,
   item,
   username,
+  isDupeTab = false,
 }: TradeHistoryModalProps) {
   const pathname = usePathname();
 
@@ -190,7 +192,7 @@ export default function TradeHistoryModal({
               </button>
             </div>
 
-            {item.id && pathname?.startsWith("/dupes") && (
+            {item.id && (pathname?.startsWith("/dupes") || isDupeTab) && (
               <div className="bg-button-info/10 border-button-info mx-4 mt-2 mb-0 flex flex-col items-center justify-between gap-4 rounded-lg border p-3 sm:mx-6 sm:flex-row">
                 <div className="flex items-start gap-2">
                   <div className="text-sm">

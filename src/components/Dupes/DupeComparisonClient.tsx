@@ -379,13 +379,13 @@ export default function DupeComparisonClient({
 
       <div className="mx-auto grid max-w-4xl grid-cols-1 gap-8 md:grid-cols-2">
         <VariantColumn
-          title="Selected Item"
+          title="Item 1"
           item={duplicateItem}
           splitIndex={selectedSplitIndex}
           robloxUsers={robloxUsers}
         />
         <VariantColumn
-          title="Other Variant"
+          title="Item 2"
           item={ogItem}
           splitIndex={variantSplitIndex}
           robloxUsers={robloxUsers}

@@ -1140,6 +1140,11 @@ export default function InventoryCheckerClient({
                 onClose={closeHistoryModal}
                 item={selectedItem}
                 username={robloxId ? getUsername(robloxId) : undefined}
+                isDupeTab={
+                  hasDupedItems &&
+                  ((hasDuplicates && effectiveActiveTab === 2) ||
+                    (!hasDuplicates && effectiveActiveTab === 1))
+                }
               />
             )}
           </>
