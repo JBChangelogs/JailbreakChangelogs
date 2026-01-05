@@ -1300,54 +1300,37 @@ export async function fetchRobloxUsersBatch(userIds: string[]) {
       return { data: [] };
     }
 
-    // Chunk the requests to avoid 414 errors (max 500 IDs per request)
-    const CHUNK_SIZE = 500;
-    const chunks = [];
-    for (let i = 0; i < validUserIds.length; i += CHUNK_SIZE) {
-      chunks.push(validUserIds.slice(i, i + CHUNK_SIZE));
-    }
+    try {
+      const response = await fetch(`${INVENTORY_API_URL}/proxy/users/v2`, {
+        method: "POST",
+        headers: {
+          "User-Agent": "JailbreakChangelogs-InventoryChecker/1.0",
+          "X-Source": INVENTORY_API_SOURCE_HEADER,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ userIds: validUserIds }),
+      });
 
-    const allData = [];
-
-    for (let i = 0; i < chunks.length; i++) {
-      const chunk = chunks[i];
-      try {
-        const response = await fetch(
-          `${INVENTORY_API_URL}/proxy/users?userIds=${chunk.join(",")}`,
-          {
-            headers: {
-              "User-Agent": "JailbreakChangelogs-InventoryChecker/1.0",
-              "X-Source": INVENTORY_API_SOURCE_HEADER,
-            },
-          },
+      if (!response.ok) {
+        console.error(
+          `[SERVER] fetchRobloxUsersBatch: Failed with status ${response.status}`,
         );
-
-        if (!response.ok) {
-          continue;
-        }
-
-        const data = await response.json();
-        if (data && data.data && Array.isArray(data.data)) {
-          allData.push(...data.data);
-        } else if (data && typeof data === "object") {
-          // If the API returns the object directly (not wrapped in data array)
-          allData.push(data);
-        }
-      } catch {
-        continue;
+        return { data: [] };
       }
+
+      const data = await response.json();
+
+      // The API returns an object with user IDs as keys, which is exactly what we need
+      // We don't need to wrap it or merge chunks anymore
+      if (data && typeof data === "object") {
+        return data as Record<string, RobloxUser>;
+      }
+
+      return {};
+    } catch (err) {
+      console.error("[SERVER] fetchRobloxUsersBatch: Network error:", err);
+      return {};
     }
-
-    // The API returns an object with user IDs as keys, so we need to merge all chunks
-    const userDataObject: Record<string, RobloxUser> = {};
-
-    allData.forEach((chunkData) => {
-      if (chunkData && typeof chunkData === "object") {
-        Object.assign(userDataObject, chunkData);
-      }
-    });
-
-    return userDataObject;
   } catch (err) {
     console.error("[SERVER] fetchRobloxUsersBatch: Unexpected error:", err);
     return null;
@@ -1395,15 +1378,15 @@ export async function fetchRobloxUsersBatchLeaderboard(userIds: string[]) {
     }
 
     try {
-      const response = await fetch(
-        `${INVENTORY_API_URL}/proxy/users?userIds=${validUserIds.join(",")}`,
-        {
-          headers: {
-            "User-Agent": "JailbreakChangelogs-Leaderboard/1.0",
-            "X-Source": INVENTORY_API_SOURCE_HEADER,
-          },
+      const response = await fetch(`${INVENTORY_API_URL}/proxy/users/v2`, {
+        method: "POST",
+        headers: {
+          "User-Agent": "JailbreakChangelogs-Leaderboard/1.0",
+          "X-Source": INVENTORY_API_SOURCE_HEADER,
+          "Content-Type": "application/json",
         },
-      );
+        body: JSON.stringify({ userIds: validUserIds }),
+      });
 
       if (!response.ok) {
         console.error(

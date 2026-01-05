@@ -7,17 +7,11 @@ import { Icon } from "@/components/ui/IconWrapper";
 import Image from "next/image";
 import { getCategoryColor } from "@/utils/categoryIcons";
 import { VerifiedBadgeIcon } from "@/components/Icons/VerifiedBadgeIcon";
+import { RobloxUser } from "@/types";
 
 interface TradeHistoryEntry {
   UserId: number;
   TradeTime: number;
-}
-
-interface UserData {
-  id: number;
-  name: string;
-  displayName: string;
-  hasVerifiedBadge: boolean;
 }
 
 interface Item {
@@ -33,6 +27,7 @@ interface TradeHistoryModalProps {
   item: Item | null;
   username?: string;
   isDupeTab?: boolean;
+  usersData?: Record<string, RobloxUser>;
 }
 
 export default function TradeHistoryModal({
@@ -41,6 +36,7 @@ export default function TradeHistoryModal({
   item,
   username,
   isDupeTab = false,
+  usersData,
 }: TradeHistoryModalProps) {
   const pathname = usePathname();
 
@@ -57,28 +53,64 @@ export default function TradeHistoryModal({
     return Array.from(userIds);
   }, [item]);
 
-  const [tradeHistoryUsers, setTradeHistoryUsers] = useState<
+  // Process specific user data from props if available
+  const memoizedUserData = useMemo(() => {
+    if (!usersData) return {};
+
+    const processed: Record<
+      string,
+      { name: string; displayName: string; hasVerifiedBadge: boolean }
+    > = {};
+
+    Object.values(usersData).forEach((user) => {
+      const userIdStr = String(user.id);
+      if (tradeHistoryUserIds.includes(userIdStr)) {
+        processed[userIdStr] = {
+          name: user.name || userIdStr,
+          displayName: user.displayName || user.name || userIdStr,
+          hasVerifiedBadge: Boolean(user.hasVerifiedBadge),
+        };
+      }
+    });
+
+    return processed;
+  }, [usersData, tradeHistoryUserIds]);
+
+  const [fetchedUsers, setFetchedUsers] = useState<
     Record<
       string,
       { name: string; displayName: string; hasVerifiedBadge: boolean }
     >
   >({});
 
+  // Use either the passed data or the fetched data
+  const finalUsers = usersData ? memoizedUserData : fetchedUsers;
+
   useEffect(() => {
-    if (!isOpen || tradeHistoryUserIds.length === 0) {
+    if (!isOpen) return;
+
+    // If we have usersData via props, we don't need to fetch
+    if (usersData) {
+      return;
+    }
+
+    if (tradeHistoryUserIds.length === 0) {
       return;
     }
 
     const fetchUsers = async () => {
       try {
         const response = await fetch(
-          `${process.env.NEXT_PUBLIC_INVENTORY_API_URL}/proxy/users?userIds=${tradeHistoryUserIds.join(",")}`,
+          `${process.env.NEXT_PUBLIC_INVENTORY_API_URL}/proxy/users/v2`,
           {
+            method: "POST",
             headers: {
               "User-Agent": "JailbreakChangelogs-InventoryChecker/1.0",
               "X-Source":
                 process.env.NEXT_PUBLIC_INVENTORY_API_SOURCE_HEADER ?? "",
+              "Content-Type": "application/json",
             },
+            body: JSON.stringify({ userIds: tradeHistoryUserIds }),
           },
         );
 
@@ -94,7 +126,8 @@ export default function TradeHistoryModal({
 
         Object.values(userData).forEach((user) => {
           if (user && typeof user === "object" && "id" in user) {
-            const typedUser = user as UserData;
+            // Cast to partial RobloxUser to access properties safely
+            const typedUser = user as RobloxUser;
             if (typedUser.id) {
               processedUsers[typedUser.id.toString()] = {
                 name: typedUser.name || typedUser.id.toString(),
@@ -108,17 +141,17 @@ export default function TradeHistoryModal({
           }
         });
 
-        setTradeHistoryUsers(processedUsers);
+        setFetchedUsers(processedUsers);
       } catch (error) {
         console.error("Failed to fetch users:", error);
       }
     };
 
     fetchUsers();
-  }, [isOpen, tradeHistoryUserIds]);
+  }, [isOpen, tradeHistoryUserIds, usersData]);
 
   const getDisplayName = (userId: string) => {
-    const cachedUser = tradeHistoryUsers[userId];
+    const cachedUser = finalUsers[userId];
     if (cachedUser) {
       return cachedUser.displayName;
     }
@@ -127,7 +160,7 @@ export default function TradeHistoryModal({
   };
 
   const getUsername = (userId: string) => {
-    const cachedUser = tradeHistoryUsers[userId];
+    const cachedUser = finalUsers[userId];
     if (cachedUser) {
       return cachedUser.name;
     }
@@ -136,7 +169,7 @@ export default function TradeHistoryModal({
   };
 
   const getHasVerifiedBadge = (userId: string) => {
-    const cachedUser = tradeHistoryUsers[userId];
+    const cachedUser = finalUsers[userId];
     if (cachedUser) {
       return cachedUser.hasVerifiedBadge;
     }

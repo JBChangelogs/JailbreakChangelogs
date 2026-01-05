@@ -11,15 +11,18 @@ interface UserData {
   displayName: string;
   hasVerifiedBadge: boolean;
 }
+import { RobloxUser } from "@/types";
 
 interface TradeHistoryListProps {
   history: DupeFinderHistoryEntry[];
   splitIndex?: number;
+  usersData?: Record<string, RobloxUser>;
 }
 
 export default function TradeHistoryList({
   history,
   splitIndex,
+  usersData,
 }: TradeHistoryListProps) {
   const tradeHistoryUserIds = useMemo(() => {
     if (!history || !Array.isArray(history)) {
@@ -34,14 +37,45 @@ export default function TradeHistoryList({
     return Array.from(userIds);
   }, [history]);
 
-  const [tradeHistoryUsers, setTradeHistoryUsers] = useState<
+  // Process specific user data from props if available
+  const memoizedUserData = useMemo(() => {
+    if (!usersData) return {};
+
+    const processed: Record<
+      string,
+      { name: string; displayName: string; hasVerifiedBadge: boolean }
+    > = {};
+
+    Object.values(usersData).forEach((user) => {
+      const userIdStr = String(user.id);
+      if (tradeHistoryUserIds.includes(userIdStr)) {
+        processed[userIdStr] = {
+          name: user.name || userIdStr,
+          displayName: user.displayName || user.name || userIdStr,
+          hasVerifiedBadge: Boolean(user.hasVerifiedBadge),
+        };
+      }
+    });
+
+    return processed;
+  }, [usersData, tradeHistoryUserIds]);
+
+  const [fetchedUsers, setFetchedUsers] = useState<
     Record<
       string,
       { name: string; displayName: string; hasVerifiedBadge: boolean }
     >
   >({});
 
+  // Use either the passed data or the fetched data
+  const finalUsers = usersData ? memoizedUserData : fetchedUsers;
+
   useEffect(() => {
+    // If we have usersData via props, we don't need to fetch
+    if (usersData) {
+      return;
+    }
+
     if (tradeHistoryUserIds.length === 0) {
       return;
     }
@@ -49,13 +83,16 @@ export default function TradeHistoryList({
     const fetchUsers = async () => {
       try {
         const response = await fetch(
-          `${process.env.NEXT_PUBLIC_INVENTORY_API_URL}/proxy/users?userIds=${tradeHistoryUserIds.join(",")}`,
+          `${process.env.NEXT_PUBLIC_INVENTORY_API_URL}/proxy/users/v2`,
           {
+            method: "POST",
             headers: {
               "User-Agent": "JailbreakChangelogs-InventoryChecker/1.0",
               "X-Source":
                 process.env.NEXT_PUBLIC_INVENTORY_API_SOURCE_HEADER ?? "",
+              "Content-Type": "application/json",
             },
+            body: JSON.stringify({ userIds: tradeHistoryUserIds }),
           },
         );
 
@@ -85,17 +122,17 @@ export default function TradeHistoryList({
           }
         });
 
-        setTradeHistoryUsers(processedUsers);
+        setFetchedUsers(processedUsers);
       } catch (error) {
         console.error("Failed to fetch users:", error);
       }
     };
 
     fetchUsers();
-  }, [tradeHistoryUserIds]);
+  }, [tradeHistoryUserIds, usersData]);
 
   const getDisplayName = (userId: string) => {
-    const cachedUser = tradeHistoryUsers[userId];
+    const cachedUser = finalUsers[userId];
     if (cachedUser) {
       return cachedUser.displayName;
     }
@@ -103,7 +140,7 @@ export default function TradeHistoryList({
   };
 
   const getUsername = (userId: string) => {
-    const cachedUser = tradeHistoryUsers[userId];
+    const cachedUser = finalUsers[userId];
     if (cachedUser) {
       return cachedUser.name;
     }
@@ -111,7 +148,7 @@ export default function TradeHistoryList({
   };
 
   const getHasVerifiedBadge = (userId: string) => {
-    const cachedUser = tradeHistoryUsers[userId];
+    const cachedUser = finalUsers[userId];
     if (cachedUser) {
       return cachedUser.hasVerifiedBadge;
     }

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { DupeFinderItem, Item } from "@/types";
+import { DupeFinderItem, Item, RobloxUser } from "@/types";
 import { useBatchUserData } from "@/hooks/useBatchUserData";
 import { getDupedValueForItem } from "@/utils/dupeUtils";
 import TradeHistoryModal from "@/components/Modals/TradeHistoryModal";
@@ -35,6 +35,7 @@ interface VariantColumnProps {
   item: DupeFinderItem;
   splitIndex: number;
   robloxUsers: Record<string, { name?: string; displayName?: string }>;
+  usersData: Record<string, RobloxUser>;
 }
 
 function VariantColumn({
@@ -42,6 +43,7 @@ function VariantColumn({
   item,
   splitIndex,
   robloxUsers,
+  usersData,
 }: VariantColumnProps) {
   const getUserAvatar = (userId: string) => {
     return `${process.env.NEXT_PUBLIC_INVENTORY_API_URL}/proxy/users/${userId}/avatar-headshot`;
@@ -117,6 +119,7 @@ function VariantColumn({
           <TradeHistoryList
             history={item.history || []}
             splitIndex={splitIndex}
+            usersData={usersData}
           />
         </div>
       </div>
@@ -142,6 +145,8 @@ export default function DupeComparisonClient({
     ogItem.user_id,
     duplicateItem.user_id,
     originalOwnerId,
+    ...(ogItem.history?.map((h) => h.UserId.toString()) || []),
+    ...(duplicateItem.history?.map((h) => h.UserId.toString()) || []),
   ].filter(Boolean) as string[];
 
   const { robloxUsers } = useBatchUserData(userIds);
@@ -383,12 +388,14 @@ export default function DupeComparisonClient({
           item={duplicateItem}
           splitIndex={selectedSplitIndex}
           robloxUsers={robloxUsers}
+          usersData={robloxUsers}
         />
         <VariantColumn
           title="Item 2"
           item={ogItem}
           splitIndex={variantSplitIndex}
           robloxUsers={robloxUsers}
+          usersData={robloxUsers}
         />
       </div>
 
@@ -400,6 +407,7 @@ export default function DupeComparisonClient({
           username={
             selectedItem.user_id ? getUsername(selectedItem.user_id) : undefined
           }
+          usersData={robloxUsers}
         />
       )}
     </div>
