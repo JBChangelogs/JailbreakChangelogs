@@ -29,6 +29,7 @@ export async function GET(request: NextRequest) {
         headers: {
           "Content-Type": "application/json",
         },
+        cache: "no-store",
       },
     );
 
@@ -52,7 +53,14 @@ export async function GET(request: NextRequest) {
     }
 
     const data = await response.json();
-    return NextResponse.json(data);
+    return NextResponse.json(data, {
+      headers: {
+        "Cache-Control":
+          "no-store, no-cache, must-revalidate, proxy-revalidate",
+        Pragma: "no-cache",
+        Expires: "0",
+      },
+    });
   } catch (error) {
     console.error("Error fetching queue position:", error);
     return NextResponse.json(

@@ -222,6 +222,7 @@ export default function UserStatsSection({
     try {
       const response = await fetch(
         `/api/inventories/queue/position?id=${encodeURIComponent(userId)}`,
+        { cache: "no-store" },
       );
       if (response.status === 404) {
         const data = await response.json();
