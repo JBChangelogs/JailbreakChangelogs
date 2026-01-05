@@ -1,14 +1,7 @@
 "use client";
 
 import { Icon } from "../ui/IconWrapper";
-import React, {
-  useState,
-  useEffect,
-  useCallback,
-  useRef,
-  useMemo,
-  useLayoutEffect,
-} from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   CircularProgress,
   Button,
@@ -17,7 +10,6 @@ import {
   MenuItem,
   Tooltip,
 } from "@mui/material";
-import { useVirtualizer } from "@tanstack/react-virtual";
 import { CommentData } from "@/utils/api";
 import {
   refreshComments,
@@ -37,6 +29,7 @@ import CommentTimestamp from "./CommentTimestamp";
 import Snackbar from "@mui/material/Snackbar";
 import MuiAlert from "@mui/material/Alert";
 import DOMPurify from "dompurify";
+import { Pagination } from "@/components/ui/Pagination";
 
 const COMMENT_CHAR_LIMITS = {
   0: 200, // Free tier
@@ -153,7 +146,6 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const { isAuthenticated, user } = useAuthContext();
   const [sortOrder, setSortOrder] = useState<"newest" | "oldest">("newest");
-  const parentRef = useRef<HTMLDivElement>(null);
   const [expandedComments, setExpandedComments] = useState<Set<number>>(
     new Set(),
   );
@@ -179,6 +171,9 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
   const [globalErrorSnackbarMsg, setGlobalErrorSnackbarMsg] = useState("");
   const [infoSnackbarOpen, setInfoSnackbarOpen] = useState(false);
   const [infoSnackbarMsg, setInfoSnackbarMsg] = useState("");
+
+  const [page, setPage] = useState(1);
+  const itemsPerPage = 10;
 
   // Supporter modal hook
   const { modalState, closeModal, checkCommentLength } = useSupporterModal();
@@ -299,17 +294,14 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
         : [];
       setComments(commentsArray);
 
-      // Fetch user data for new comments
-      if (commentsArray.length > 0) {
-        const userIds = commentsArray.map((comment) => comment.user_id);
-        fetchUserData(userIds);
-      }
+      // We no longer fetch user data for all comments here.
+      // It is now handled by the useEffect that watches currentComments.
     } catch (err) {
       console.error("Error refreshing comments:", err);
     } finally {
       setIsRefreshingComments(false);
     }
-  }, [changelogId, type, itemType, fetchUserData]);
+  }, [changelogId, type, itemType]);
 
   // Refresh comments when changelogId changes with simple debouncing
   useEffect(() => {
@@ -317,6 +309,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
 
     // Clear comments immediately when changelogId changes
     setComments([]);
+    setPage(1);
 
     const timeoutId = setTimeout(() => {
       refreshCommentsFromServer();
@@ -479,50 +472,38 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
     (comment) => !failedUserData.has(comment.user_id),
   );
 
-  // Memoize estimated comment size based on screen width
-  const estimatedSize = useMemo(() => {
-    // Mobile screens may have more wrapping, slightly taller comments
-    // Desktop screens have more horizontal space, comments are typically shorter
-    if (typeof window !== "undefined") {
-      return window.innerWidth < 640 ? 150 : 120;
+  // Pagination Logic
+  const totalPages = Math.ceil(filteredComments.length / itemsPerPage);
+  const startIndex = (page - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentComments = filteredComments.slice(startIndex, endIndex);
+
+  // Fetch user data for the current page's comments
+  useEffect(() => {
+    if (currentComments.length > 0) {
+      const userIds = currentComments.map((comment) => comment.user_id);
+      // Determine which IDs need fetching
+      const uniqueIds = Array.from(new Set(userIds));
+      const idsToFetch = uniqueIds.filter(
+        (id) =>
+          !userData[id] && !loadingUserData[id] && !failedUserData.has(id),
+      );
+
+      if (idsToFetch.length > 0) {
+        fetchUserData(idsToFetch);
+      }
     }
-    return 135; // SSR default - middle ground
-  }, []);
-
-  // TanStack Virtual setup for performance with large comment datasets
-  // Only renders visible items (~10-15 at a time) for 60FPS scrolling
-
-  const virtualizer = useVirtualizer({
-    count: filteredComments.length,
-    getScrollElement: () => parentRef.current,
-    estimateSize: () => estimatedSize,
-    overscan: 5, // Render 5 extra items above/below viewport for smooth scrolling
-  });
-
-  // Trigger measure when estimated size changes
-  useLayoutEffect(() => {
-    virtualizer.measure();
-  }, [virtualizer, estimatedSize]);
-
-  // Recalculate virtualizer when expanded comments change to update heights
-  useEffect(() => {
-    virtualizer.measure();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [expandedComments]);
-
-  // Recalculate heights on window resize for responsive behavior
-  useEffect(() => {
-    const handleResize = () => {
-      virtualizer.measure();
-    };
-
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [
+    currentComments,
+    userData,
+    loadingUserData,
+    failedUserData,
+    fetchUserData,
+  ]);
 
   const toggleSortOrder = () => {
     setSortOrder((prev) => (prev === "newest" ? "oldest" : "newest"));
+    setPage(1);
   };
 
   const toggleCommentExpand = (commentId: number) => {
@@ -615,12 +596,27 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
     }
   };
 
+  const handlePageChange = (
+    event: React.ChangeEvent<unknown>,
+    value: number,
+  ) => {
+    setPage(value);
+    // Optional: Scroll to top of comments section
+    const commentsHeader = document.querySelector("#comments-header");
+    if (commentsHeader) {
+      commentsHeader.scrollIntoView({ behavior: "smooth" });
+    }
+  };
+
   return (
     <div className="space-y-2 sm:space-y-3">
       <div className="border-border-primary bg-secondary-bg rounded-lg border p-2 sm:p-3">
         <div className="flex flex-col gap-4">
           <div>
-            <h2 className="text-primary-text mb-4 text-lg font-bold tracking-tight sm:text-xl">
+            <h2
+              id="comments-header"
+              className="text-primary-text mb-4 text-lg font-bold tracking-tight sm:text-xl"
+            >
               {type === "changelog" ? (
                 `Comments for Changelog ${changelogId}: ${changelogTitle}`
               ) : type === "season" ? (
@@ -669,6 +665,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
               <button
                 onClick={toggleSortOrder}
                 className="border-border-primary bg-button-info text-form-button-text hover:border-border-focus hover:bg-button-info-hover flex items-center gap-1 rounded-lg border px-4 py-2 text-sm transition-colors"
+                type="button"
               >
                 {sortOrder === "newest" ? (
                   <Icon
@@ -784,59 +781,108 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
               </p>
             </div>
           ) : (
-            <>
-              {/* Virtualized comments container with fixed height for performance */}
-              <div
-                ref={parentRef}
-                className="scrollbar-thin scrollbar-track-transparent scrollbar-thumb-border-primary hover:scrollbar-thumb-border-focus h-[48rem] overflow-y-auto pr-2"
-                style={{
-                  scrollbarWidth: "thin",
-                  scrollbarColor: "var(--color-border-primary) transparent",
-                }}
-              >
-                <div
-                  style={{
-                    height: `${virtualizer.getTotalSize()}px`,
-                    width: "100%",
-                    position: "relative",
-                  }}
-                >
-                  {virtualizer.getVirtualItems().map((virtualItem) => {
-                    const comment = filteredComments[virtualItem.index];
-                    const flags = userData[comment.user_id]?.flags || [];
-                    const premiumType = userData[comment.user_id]?.premiumtype;
-                    const hideRecent =
-                      userData[comment.user_id]?.settings
-                        ?.show_recent_comments === 0 &&
-                      currentUserId !== comment.user_id;
-                    return (
-                      <div
-                        key={comment.id}
-                        data-index={virtualItem.index}
-                        ref={virtualizer.measureElement}
-                        style={{
-                          position: "absolute",
-                          top: 0,
-                          left: 0,
-                          width: "100%",
-                          transform: `translateY(${virtualItem.start}px)`,
-                        }}
-                      >
-                        <div className="group relative p-3">
-                          {/* Header Section */}
-                          <div className="flex items-center justify-between pb-2">
-                            <div className="flex items-center gap-3">
+            <div className="flex flex-col space-y-4">
+              <div className="flex flex-col space-y-4">
+                {currentComments.map((comment) => {
+                  const flags = userData[comment.user_id]?.flags || [];
+                  const premiumType = userData[comment.user_id]?.premiumtype;
+                  const hideRecent =
+                    userData[comment.user_id]?.settings
+                      ?.show_recent_comments === 0 &&
+                    currentUserId !== comment.user_id;
+
+                  const isExpanded = expandedComments.has(comment.id);
+                  const MAX_VISIBLE_LINES = 5;
+                  const MAX_VISIBLE_CHARS = 500;
+                  const lines = comment.content.split(/\r?\n/);
+                  const isLongLine = comment.content.length > MAX_VISIBLE_CHARS;
+                  const shouldTruncate =
+                    lines.length > MAX_VISIBLE_LINES || isLongLine;
+
+                  let visibleContent: string;
+                  if (shouldTruncate && !isExpanded) {
+                    if (lines.length > MAX_VISIBLE_LINES) {
+                      visibleContent = lines
+                        .slice(0, MAX_VISIBLE_LINES)
+                        .join("\n");
+                    } else {
+                      visibleContent =
+                        comment.content.slice(0, MAX_VISIBLE_CHARS) + "...";
+                    }
+                  } else {
+                    visibleContent = comment.content;
+                  }
+
+                  return (
+                    <div
+                      key={comment.id}
+                      className="group border-border-primary bg-primary-bg hover:border-border-focus relative rounded-lg border p-3 transition-colors"
+                    >
+                      {/* Header Section */}
+                      <div className="flex items-center justify-between pb-2">
+                        <div className="flex items-center gap-3">
+                          {loadingUserData[comment.user_id] ? (
+                            <div className="ring-border-focus/20 bg-tertiary-bg flex h-10 w-10 items-center justify-center rounded-full ring-2">
+                              <CircularProgress
+                                size={20}
+                                className="text-border-focus"
+                              />
+                            </div>
+                          ) : hideRecent ? (
+                            <div className="ring-tertiary-text/20 border-border-primary bg-primary-bg flex h-10 w-10 items-center justify-center rounded-full border ring-2">
+                              <svg
+                                className="text-secondary-text h-5 w-5"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                                />
+                              </svg>
+                            </div>
+                          ) : (
+                            <div
+                              className={`group-hover:ring-border-focus/60 group-hover:bg-border-focus/10 ring-2 ring-transparent transition-all duration-200 ${
+                                userData[comment.user_id]?.premiumtype === 3
+                                  ? "rounded-sm"
+                                  : "rounded-full"
+                              }`}
+                            >
+                              <UserAvatar
+                                userId={comment.user_id}
+                                avatarHash={userData[comment.user_id]?.avatar}
+                                username={
+                                  userData[comment.user_id]?.username ||
+                                  comment.author
+                                }
+                                size={10}
+                                custom_avatar={
+                                  userData[comment.user_id]?.custom_avatar
+                                }
+                                showBadge={false}
+                                settings={userData[comment.user_id]?.settings}
+                                premiumType={
+                                  userData[comment.user_id]?.premiumtype
+                                }
+                              />
+                            </div>
+                          )}
+
+                          <div className="flex min-w-0 flex-col">
+                            <div className="flex flex-wrap items-center gap-2">
                               {loadingUserData[comment.user_id] ? (
-                                <div className="ring-border-focus/20 bg-tertiary-bg flex h-10 w-10 items-center justify-center rounded-full ring-2">
-                                  <CircularProgress
-                                    size={20}
-                                    className="text-border-focus"
-                                  />
-                                </div>
+                                <>
+                                  <div className="bg-button-secondary h-5 w-30 animate-pulse rounded" />
+                                  <div className="bg-button-secondary h-4 w-20 animate-pulse rounded" />
+                                </>
                               ) : hideRecent ? (
-                                <div className="ring-tertiary-text/20 border-border-primary bg-primary-bg flex h-10 w-10 items-center justify-center rounded-full border ring-2">
+                                <div className="flex items-center gap-2">
                                   <svg
-                                    className="text-secondary-text h-5 w-5"
+                                    className="text-secondary-text h-4 w-4"
                                     fill="none"
                                     viewBox="0 0 24 24"
                                     stroke="currentColor"
@@ -848,366 +894,268 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                                       d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
                                     />
                                   </svg>
+                                  <span className="text-secondary-text text-sm font-medium">
+                                    Hidden User
+                                  </span>
                                 </div>
                               ) : (
-                                <div
-                                  className={`group-hover:ring-border-focus/60 group-hover:bg-border-focus/10 ring-2 ring-transparent transition-all duration-200 ${
-                                    userData[comment.user_id]?.premiumtype === 3
-                                      ? "rounded-sm"
-                                      : "rounded-full"
-                                  }`}
-                                >
-                                  <UserAvatar
-                                    userId={comment.user_id}
-                                    avatarHash={
-                                      userData[comment.user_id]?.avatar
-                                    }
-                                    username={
-                                      userData[comment.user_id]?.username ||
-                                      comment.author
-                                    }
-                                    size={10}
-                                    custom_avatar={
-                                      userData[comment.user_id]?.custom_avatar
-                                    }
-                                    showBadge={false}
-                                    settings={
-                                      userData[comment.user_id]?.settings
-                                    }
-                                    premiumType={
-                                      userData[comment.user_id]?.premiumtype
-                                    }
-                                  />
-                                </div>
-                              )}
-
-                              <div className="flex min-w-0 flex-col">
-                                <div className="flex flex-wrap items-center gap-2">
-                                  {loadingUserData[comment.user_id] ? (
-                                    <>
-                                      <div className="bg-button-secondary h-5 w-30 animate-pulse rounded" />
-                                      <div className="bg-button-secondary h-4 w-20 animate-pulse rounded" />
-                                    </>
-                                  ) : hideRecent ? (
-                                    <div className="flex items-center gap-2">
-                                      <svg
-                                        className="text-secondary-text h-4 w-4"
-                                        fill="none"
-                                        viewBox="0 0 24 24"
-                                        stroke="currentColor"
-                                      >
-                                        <path
-                                          strokeLinecap="round"
-                                          strokeLinejoin="round"
-                                          strokeWidth={2}
-                                          d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
-                                        />
-                                      </svg>
-                                      <span className="text-secondary-text text-sm font-medium">
-                                        Hidden User
-                                      </span>
-                                    </div>
-                                  ) : (
-                                    <>
-                                      <div className="flex items-center gap-2">
-                                        <Tooltip
-                                          title={
-                                            userData[comment.user_id] && (
-                                              <UserDetailsTooltip
-                                                user={userData[comment.user_id]}
-                                              />
-                                            )
-                                          }
-                                          arrow
-                                          disableTouchListener
-                                          slotProps={{
-                                            tooltip: {
-                                              sx: {
-                                                backgroundColor:
-                                                  "var(--color-secondary-bg)",
-                                                color:
-                                                  "var(--color-primary-text)",
-                                                "& .MuiTooltip-arrow": {
-                                                  color:
-                                                    "var(--color-secondary-bg)",
-                                                },
-                                              },
+                                <>
+                                  <div className="flex items-center gap-2">
+                                    <Tooltip
+                                      title={
+                                        userData[comment.user_id] && (
+                                          <UserDetailsTooltip
+                                            user={userData[comment.user_id]}
+                                          />
+                                        )
+                                      }
+                                      arrow
+                                      disableTouchListener
+                                      slotProps={{
+                                        tooltip: {
+                                          sx: {
+                                            backgroundColor:
+                                              "var(--color-secondary-bg)",
+                                            color: "var(--color-primary-text)",
+                                            "& .MuiTooltip-arrow": {
+                                              color:
+                                                "var(--color-secondary-bg)",
                                             },
-                                          }}
-                                        >
-                                          <Link
-                                            href={`/users/${comment.user_id}`}
-                                            prefetch={false}
-                                            className="text-md text-primary-text group-hover:text-link truncate font-semibold transition-colors duration-200 group-hover:underline"
-                                          >
-                                            {userData[comment.user_id]
-                                              ?.username || comment.author}
-                                          </Link>
-                                        </Tooltip>
+                                          },
+                                        },
+                                      }}
+                                    >
+                                      <Link
+                                        href={`/users/${comment.user_id}`}
+                                        prefetch={false}
+                                        className="text-md text-primary-text group-hover:text-link truncate font-semibold transition-colors duration-200 group-hover:underline"
+                                      >
+                                        {userData[comment.user_id]?.username ||
+                                          comment.author}
+                                      </Link>
+                                    </Tooltip>
 
-                                        {/* User Badges */}
-                                        {!hideRecent &&
-                                          userData[comment.user_id] && (
-                                            <UserBadges
-                                              usernumber={
-                                                userData[comment.user_id]
-                                                  .usernumber
-                                              }
-                                              premiumType={premiumType}
-                                              flags={flags}
-                                              size="md"
-                                            />
-                                          )}
-                                      </div>
-
-                                      {/* Trade OP Badge */}
-                                      {type === "trade" &&
-                                        trade &&
-                                        comment.user_id === trade.author && (
-                                          <span className="from-button-info to-button-info-hover text-card-tag-text rounded-full bg-linear-to-r px-2 py-0.5 text-xs font-medium shadow-sm">
-                                            OP
-                                          </span>
-                                        )}
-                                    </>
-                                  )}
-                                </div>
-
-                                <CommentTimestamp
-                                  date={comment.date}
-                                  editedAt={comment.edited_at}
-                                  commentId={comment.id}
-                                />
-                              </div>
-                            </div>
-
-                            {/* Enhanced Action Menu */}
-                            <div className="flex items-center gap-2">
-                              <IconButton
-                                size="small"
-                                onClick={(e) => handleMenuOpen(e, comment.id)}
-                                className={`text-primary-text hover:bg-quaternary-bg rounded-lg p-2 opacity-100 transition-all duration-200 lg:opacity-0 lg:group-hover:opacity-100 ${Boolean(menuAnchorEl) && selectedCommentId === comment.id ? "opacity-100" : ""}`}
-                              >
-                                <Icon
-                                  icon="heroicons:ellipsis-horizontal"
-                                  className="h-4 w-4"
-                                />
-                              </IconButton>
-                            </div>
-                          </div>
-
-                          {/* Content Section */}
-                          <div>
-                            {editingCommentId === comment.id ? (
-                              <div className="space-y-3">
-                                <div className="space-y-2">
-                                  <textarea
-                                    value={editContent}
-                                    onChange={(e) =>
-                                      setEditContent(e.target.value)
-                                    }
-                                    rows={3}
-                                    className={`w-full resize-y rounded border p-3 text-sm focus:outline-none ${
-                                      editContent.length >
-                                      getCharLimit(
-                                        currentUserPremiumType as keyof typeof COMMENT_CHAR_LIMITS,
-                                      )
-                                        ? "border-button-danger bg-form-input text-primary-text focus:border-button-danger"
-                                        : "border-border-primary bg-form-input text-primary-text hover:border-border-focus focus:border-button-info"
-                                    }`}
-                                    autoCorrect="off"
-                                    autoComplete="off"
-                                    spellCheck="false"
-                                    autoCapitalize="off"
-                                  />
-                                  {editContent.length >
-                                    getCharLimit(
-                                      currentUserPremiumType as keyof typeof COMMENT_CHAR_LIMITS,
-                                    ) && (
-                                    <p className="text-button-danger text-xs">
-                                      Comment is too long. Character limit:{" "}
-                                      {getCharLimit(
-                                        currentUserPremiumType as keyof typeof COMMENT_CHAR_LIMITS,
-                                      )}
-                                    </p>
-                                  )}
-                                </div>
-                                <div className="flex gap-2">
-                                  <Button
-                                    size="small"
-                                    variant="contained"
-                                    onClick={() =>
-                                      handleEditComment(comment.id)
-                                    }
-                                    disabled={!editContent.trim()}
-                                    className="bg-button-info text-form-button-text hover:bg-button-info-hover rounded-md text-sm normal-case"
-                                  >
-                                    Update
-                                  </Button>
-                                  <Button
-                                    size="small"
-                                    variant="outlined"
-                                    onClick={() => {
-                                      setEditingCommentId(null);
-                                      setEditContent("");
-                                    }}
-                                    className="text-secondary-text hover:text-primary-text rounded-md border-none bg-transparent text-sm normal-case"
-                                  >
-                                    Cancel
-                                  </Button>
-                                </div>
-                              </div>
-                            ) : (
-                              <div>
-                                {loadingUserData[comment.user_id] ? (
-                                  <div className="space-y-2">
-                                    <div className="bg-button-secondary h-5 w-full animate-pulse rounded" />
-                                    <div className="bg-button-secondary h-5 w-[90%] animate-pulse rounded" />
-                                    <div className="bg-button-secondary h-5 w-[80%] animate-pulse rounded" />
-                                  </div>
-                                ) : (
-                                  <>
-                                    <div className="prose prose-sm max-w-none">
-                                      {(() => {
-                                        const MAX_VISIBLE_LINES = 5;
-                                        const MAX_VISIBLE_CHARS = 500;
-                                        const lines =
-                                          comment.content.split(/\r?\n/);
-                                        const isLongLine =
-                                          comment.content.length >
-                                          MAX_VISIBLE_CHARS;
-                                        const shouldTruncate =
-                                          lines.length > MAX_VISIBLE_LINES ||
-                                          isLongLine;
-                                        const isExpanded = expandedComments.has(
-                                          comment.id,
-                                        );
-
-                                        let visibleContent: string;
-                                        if (shouldTruncate && !isExpanded) {
-                                          if (
-                                            lines.length > MAX_VISIBLE_LINES
-                                          ) {
-                                            visibleContent = lines
-                                              .slice(0, MAX_VISIBLE_LINES)
-                                              .join("\n");
-                                          } else {
-                                            visibleContent =
-                                              comment.content.slice(
-                                                0,
-                                                MAX_VISIBLE_CHARS,
-                                              ) + "...";
+                                    {/* User Badges */}
+                                    {!hideRecent &&
+                                      userData[comment.user_id] && (
+                                        <UserBadges
+                                          usernumber={
+                                            userData[comment.user_id].usernumber
                                           }
-                                        } else {
-                                          visibleContent = comment.content;
-                                        }
+                                          premiumType={premiumType}
+                                          flags={flags}
+                                          size="md"
+                                        />
+                                      )}
+                                  </div>
 
-                                        return (
-                                          <>
-                                            <p
-                                              className="text-primary-text text-sm leading-relaxed wrap-break-word whitespace-pre-wrap"
-                                              dangerouslySetInnerHTML={{
-                                                __html: sanitizeHTML(
-                                                  convertUrlsToLinksHTML(
-                                                    processMentions(
-                                                      visibleContent,
-                                                    ),
-                                                  ),
-                                                ),
-                                              }}
-                                            />
-                                            {shouldTruncate && (
-                                              <button
-                                                onClick={() =>
-                                                  toggleCommentExpand(
-                                                    comment.id,
-                                                  )
-                                                }
-                                                className="text-link hover:text-link-hover mt-2 flex items-center gap-1 text-sm font-medium transition-colors duration-200 hover:underline"
-                                              >
-                                                {isExpanded ? (
-                                                  <>
-                                                    <Icon
-                                                      icon="mdi:chevron-up"
-                                                      className="h-4 w-4"
-                                                      inline={true}
-                                                    />
-                                                    Show less
-                                                  </>
-                                                ) : (
-                                                  <>
-                                                    <Icon
-                                                      icon="mdi:chevron-down"
-                                                      className="h-4 w-4"
-                                                      inline={true}
-                                                    />
-                                                    Read more
-                                                  </>
-                                                )}
-                                              </button>
-                                            )}
-                                          </>
-                                        );
-                                      })()}
-                                    </div>
-                                  </>
-                                )}
-                              </div>
-                            )}
+                                  {/* Trade OP Badge */}
+                                  {type === "trade" &&
+                                    trade &&
+                                    comment.user_id === trade.author && (
+                                      <span className="from-button-info to-button-info-hover text-card-tag-text rounded-full bg-linear-to-r px-2 py-0.5 text-xs font-medium shadow-sm">
+                                        OP
+                                      </span>
+                                    )}
+                                </>
+                              )}
+                            </div>
+
+                            <CommentTimestamp
+                              date={comment.date}
+                              editedAt={comment.edited_at}
+                              commentId={comment.id}
+                            />
                           </div>
+                        </div>
 
-                          {/* Enhanced Menu */}
-                          <Menu
-                            anchorEl={menuAnchorEl}
-                            open={
-                              Boolean(menuAnchorEl) &&
-                              selectedCommentId === comment.id
-                            }
-                            onClose={handleMenuClose}
+                        {/* Enhanced Action Menu */}
+                        <div className="flex items-center gap-2">
+                          <IconButton
+                            size="small"
+                            onClick={(e) => handleMenuOpen(e, comment.id)}
+                            className={`text-primary-text hover:bg-quaternary-bg rounded-lg p-2 opacity-100 transition-all duration-200 lg:opacity-0 lg:group-hover:opacity-100 ${Boolean(menuAnchorEl) && selectedCommentId === comment.id ? "opacity-100" : ""}`}
                           >
-                            {currentUserId === comment.user_id ? (
-                              [
-                                // Only show edit option if comment is within 1 hour of creation
-                                isCommentEditable(comment.date) && (
-                                  <MenuItem
-                                    key="edit"
-                                    onClick={handleEditClick}
-                                  >
-                                    <Icon
-                                      icon="heroicons-outline:pencil"
-                                      className="mr-3 h-4 w-4"
-                                    />
-                                    Edit Comment
-                                  </MenuItem>
-                                ),
-                                <MenuItem
-                                  key="delete"
-                                  onClick={handleDeleteClick}
-                                  className="hover:bg-button-danger/10 text-button-danger"
-                                >
-                                  <Icon
-                                    icon="heroicons-outline:trash"
-                                    className="text-button-danger mr-3 h-4 w-4"
-                                  />
-                                  Delete Comment
-                                </MenuItem>,
-                              ].filter(Boolean)
-                            ) : (
-                              <MenuItem onClick={handleReportClick}>
-                                <Icon
-                                  icon="heroicons-outline:flag"
-                                  className="mr-3 h-4 w-4"
-                                />
-                                Report Comment
-                              </MenuItem>
-                            )}
-                          </Menu>
+                            <Icon
+                              icon="heroicons:ellipsis-horizontal"
+                              className="h-4 w-4"
+                            />
+                          </IconButton>
                         </div>
                       </div>
-                    );
-                  })}
-                </div>
+
+                      {/* Content Section */}
+                      <div>
+                        {editingCommentId === comment.id ? (
+                          <div className="space-y-3">
+                            <div className="space-y-2">
+                              <textarea
+                                value={editContent}
+                                onChange={(e) => setEditContent(e.target.value)}
+                                rows={3}
+                                className={`w-full resize-y rounded border p-3 text-sm focus:outline-none ${
+                                  editContent.length >
+                                  getCharLimit(
+                                    currentUserPremiumType as keyof typeof COMMENT_CHAR_LIMITS,
+                                  )
+                                    ? "border-button-danger bg-form-input text-primary-text focus:border-button-danger"
+                                    : "border-border-primary bg-form-input text-primary-text hover:border-border-focus focus:border-button-info"
+                                }`}
+                                autoCorrect="off"
+                                autoComplete="off"
+                                spellCheck="false"
+                                autoCapitalize="off"
+                              />
+                              {editContent.length >
+                                getCharLimit(
+                                  currentUserPremiumType as keyof typeof COMMENT_CHAR_LIMITS,
+                                ) && (
+                                <p className="text-button-danger text-xs">
+                                  Comment is too long. Character limit:{" "}
+                                  {getCharLimit(
+                                    currentUserPremiumType as keyof typeof COMMENT_CHAR_LIMITS,
+                                  )}
+                                </p>
+                              )}
+                            </div>
+                            <div className="flex gap-2">
+                              <Button
+                                size="small"
+                                variant="contained"
+                                onClick={() => handleEditComment(comment.id)}
+                                disabled={!editContent.trim()}
+                                className="bg-button-info text-form-button-text hover:bg-button-info-hover rounded-md text-sm normal-case"
+                              >
+                                Update
+                              </Button>
+                              <Button
+                                size="small"
+                                variant="outlined"
+                                onClick={() => {
+                                  setEditingCommentId(null);
+                                  setEditContent("");
+                                }}
+                                className="text-secondary-text hover:text-primary-text rounded-md border-none bg-transparent text-sm normal-case"
+                              >
+                                Cancel
+                              </Button>
+                            </div>
+                          </div>
+                        ) : (
+                          <div>
+                            {loadingUserData[comment.user_id] ? (
+                              <div className="space-y-2">
+                                <div className="bg-button-secondary h-5 w-full animate-pulse rounded" />
+                                <div className="bg-button-secondary h-5 w-[90%] animate-pulse rounded" />
+                                <div className="bg-button-secondary h-5 w-[80%] animate-pulse rounded" />
+                              </div>
+                            ) : (
+                              <>
+                                <div className="prose prose-sm max-w-none">
+                                  <p
+                                    className="text-primary-text text-sm leading-relaxed wrap-break-word whitespace-pre-wrap"
+                                    dangerouslySetInnerHTML={{
+                                      __html: sanitizeHTML(
+                                        convertUrlsToLinksHTML(
+                                          processMentions(visibleContent),
+                                        ),
+                                      ),
+                                    }}
+                                  />
+                                  {shouldTruncate && (
+                                    <button
+                                      onClick={() =>
+                                        toggleCommentExpand(comment.id)
+                                      }
+                                      className="text-link hover:text-link-hover mt-2 flex items-center gap-1 text-sm font-medium transition-colors duration-200 hover:underline"
+                                    >
+                                      {isExpanded ? (
+                                        <>
+                                          <Icon
+                                            icon="mdi:chevron-up"
+                                            className="h-4 w-4"
+                                            inline={true}
+                                          />
+                                          Show less
+                                        </>
+                                      ) : (
+                                        <>
+                                          <Icon
+                                            icon="mdi:chevron-down"
+                                            className="h-4 w-4"
+                                            inline={true}
+                                          />
+                                          Read more
+                                        </>
+                                      )}
+                                    </button>
+                                  )}
+                                </div>
+                              </>
+                            )}
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Enhanced Menu */}
+                      <Menu
+                        anchorEl={menuAnchorEl}
+                        open={
+                          Boolean(menuAnchorEl) &&
+                          selectedCommentId === comment.id
+                        }
+                        onClose={handleMenuClose}
+                      >
+                        {currentUserId === comment.user_id ? (
+                          [
+                            // Only show edit option if comment is within 1 hour of creation
+                            isCommentEditable(comment.date) && (
+                              <MenuItem key="edit" onClick={handleEditClick}>
+                                <Icon
+                                  icon="heroicons-outline:pencil"
+                                  className="mr-3 h-4 w-4"
+                                />
+                                Edit Comment
+                              </MenuItem>
+                            ),
+                            <MenuItem
+                              key="delete"
+                              onClick={handleDeleteClick}
+                              className="hover:bg-button-danger/10 text-button-danger"
+                            >
+                              <Icon
+                                icon="heroicons-outline:trash"
+                                className="text-button-danger mr-3 h-4 w-4"
+                              />
+                              Delete Comment
+                            </MenuItem>,
+                          ].filter(Boolean)
+                        ) : (
+                          <MenuItem onClick={handleReportClick}>
+                            <Icon
+                              icon="heroicons-outline:flag"
+                              className="mr-3 h-4 w-4"
+                            />
+                            Report Comment
+                          </MenuItem>
+                        )}
+                      </Menu>
+                    </div>
+                  );
+                })}
               </div>
-            </>
+
+              {/* Pagination */}
+              {totalPages > 1 && (
+                <div className="mt-6 flex justify-center pb-4">
+                  <Pagination
+                    count={totalPages}
+                    page={page}
+                    onChange={handlePageChange}
+                  />
+                </div>
+              )}
+            </div>
           )}
         </div>
       </div>
