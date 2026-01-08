@@ -16,7 +16,6 @@ import toast from "react-hot-toast";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import CreatorLink from "@/components/Items/CreatorLink";
 import ItemValues from "@/components/Items/ItemValues";
-import ItemVariantDropdown from "@/components/Items/ItemVariantDropdown";
 import { Change as ItemChange } from "@/components/Items/ItemChangelogs";
 import { getCategoryColor } from "@/utils/categoryIcons";
 import NitroItemsVideoPlayer from "@/components/Ads/NitroItemsVideoPlayer";
@@ -142,9 +141,6 @@ export default function ItemDetailsClient({
   const [isHovered, setIsHovered] = useState(false);
   const [isFavorited, setIsFavorited] = useState(false);
   const [favoriteCount, setFavoriteCount] = useState(initialFavoriteCount || 0);
-  const [selectedVariant, setSelectedVariant] = useState<ItemDetails | null>(
-    null,
-  );
   const [visibleLength, setVisibleLength] = useState(500);
   const [activeTab, setActiveTab] = useState(0);
   const [activeChartTab, setActiveChartTab] = useState(0);
@@ -154,8 +150,8 @@ export default function ItemDetailsClient({
 
   // Use optimized real-time relative date for last updated timestamp
   const relativeTime = useOptimizedRealTimeRelativeDate(
-    (selectedVariant || item)?.last_updated,
-    `item-detail-${(selectedVariant || item)?.id}-${selectedVariant?.id || "parent"}`,
+    item?.last_updated,
+    `item-detail-${item?.id}-parent`,
   );
 
   useEffect(() => {
@@ -196,10 +192,6 @@ export default function ItemDetailsClient({
     }
   }, []);
 
-  const handleVariantSelect = (variant: ItemDetails) => {
-    setSelectedVariant(variant);
-  };
-
   useEffect(() => {
     // Check if item is favorited
     const checkFavoriteStatus = async () => {
@@ -231,10 +223,7 @@ export default function ItemDetailsClient({
     }
 
     try {
-      const itemId =
-        selectedVariant && selectedVariant.id !== item?.id
-          ? String(`${item?.id}-${selectedVariant.id}`)
-          : String(item?.id);
+      const itemId = String(item?.id);
 
       const response = await fetch(
         `/api/favorites/${isFavorited ? "remove" : "add"}`,
@@ -335,7 +324,7 @@ export default function ItemDetailsClient({
     }
   };
 
-  const currentItem = selectedVariant || item;
+  const currentItem = item;
 
   return (
     <ThemeProvider theme={darkTheme}>
@@ -351,21 +340,11 @@ export default function ItemDetailsClient({
                 onMouseEnter={() => setIsHovered(true)}
                 onMouseLeave={() => setIsHovered(false)}
               >
-                {item.children && item.children.length > 0 && (
-                  <div className="absolute top-4 right-4 z-10">
-                    <ItemVariantDropdown
-                      item={item}
-                      onVariantSelect={handleVariantSelect}
-                    />
-                  </div>
-                )}
-
                 <div className="absolute top-4 right-4 z-10 flex gap-2">
                   <CategoryIconBadge
                     type={item.type}
                     isLimited={currentItem.is_limited === 1}
                     isSeasonal={currentItem.is_seasonal === 1}
-                    hasChildren={!!item.children?.length}
                     className="h-5 w-5"
                   />
                 </div>
@@ -816,28 +795,14 @@ export default function ItemDetailsClient({
 
                     {/* Chart Content */}
                     <div className="mt-4">
-                      {(() => {
-                        const urlVariant = new URLSearchParams(
-                          window.location.search,
-                        ).get("variant");
-                        const variantId = urlVariant
-                          ? item?.children?.find(
-                              (child) => child.sub_name === urlVariant,
-                            )?.id
-                          : undefined;
-
-                        return (
-                          <ItemValueChart
-                            itemId={String(currentItem.id)}
-                            variantId={variantId}
-                            hideTradingMetrics={
-                              activeChartTab === 0 || currentItem.id === 587
-                            }
-                            showOnlyValueHistory={activeChartTab === 0}
-                            showOnlyTradingMetrics={activeChartTab === 1}
-                          />
-                        );
-                      })()}
+                      <ItemValueChart
+                        itemId={String(currentItem.id)}
+                        hideTradingMetrics={
+                          activeChartTab === 0 || currentItem.id === 587
+                        }
+                        showOnlyValueHistory={activeChartTab === 0}
+                        showOnlyTradingMetrics={activeChartTab === 1}
+                      />
                     </div>
                   </div>
                 </div>

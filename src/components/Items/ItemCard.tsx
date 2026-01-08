@@ -19,10 +19,9 @@ import { useOptimizedRealTimeRelativeDate } from "@/hooks/useSharedTimer";
 import { formatFullValue, getValueChange } from "@/utils/values";
 import { getDemandColor, getTrendColor } from "@/utils/badgeColors";
 import { useEffect, useRef, useState } from "react";
-import SubItemsDropdown from "./SubItemsDropdown";
 import toast from "react-hot-toast";
 import { useIsAuthenticated } from "@/contexts/AuthContext";
-import { usePathname, useSearchParams } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { CategoryIconBadge, getCategoryColor } from "@/utils/categoryIcons";
 import { Icon } from "@/components/ui/IconWrapper";
 
@@ -32,8 +31,6 @@ interface ItemCardProps {
   onFavoriteChange: (isFavorited: boolean) => void;
 }
 
-type SubItem = NonNullable<Item["children"]>[number];
-
 export default function ItemCard({
   item,
   isFavorited,
@@ -41,16 +38,13 @@ export default function ItemCard({
 }: ItemCardProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
-  const [selectedSubItem, setSelectedSubItem] = useState<SubItem | null>(null);
   const [windowWidth, setWindowWidth] = useState(() =>
     typeof window !== "undefined" ? window.innerWidth : 1024,
   );
   const mediaRef = useRef<HTMLDivElement>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
-  const hasInitialized = useRef(false);
   const pathname = usePathname();
-  const searchParams = useSearchParams();
   const isValuesPage = pathname === "/values";
   const isAuthenticated = useIsAuthenticated();
 
@@ -80,43 +74,6 @@ export default function ItemCard({
       return;
     }
   };
-
-  // Derive hasChildren from item data
-  const hasChildren = Boolean(
-    item.children && Array.isArray(item.children) && item.children.length > 0,
-  );
-
-  // Initialize selectedSubItem based on URL and item data
-  useEffect(() => {
-    if (hasChildren && !hasInitialized.current) {
-      // Check for variant in URL
-      const variant = searchParams.get("variant");
-      if (variant) {
-        // Find the sub-item that matches the variant
-        const matchingSubItem = item.children!.find(
-          (child) => child.sub_name === variant,
-        );
-        if (matchingSubItem) {
-          setTimeout(() => setSelectedSubItem(matchingSubItem), 0);
-        } else {
-          // If variant doesn't exist, try to find 2023 variant or use the first child
-          const defaultVariant =
-            item.children!.find((child) => child.sub_name === "2023") ||
-            item.children![0];
-          setTimeout(() => setSelectedSubItem(defaultVariant), 0);
-        }
-      } else {
-        // If no variant in URL, try to find 2023 variant or use the first child
-        const defaultVariant =
-          item.children!.find((child) => child.sub_name === "2023") ||
-          item.children![0];
-        setTimeout(() => setSelectedSubItem(defaultVariant), 0);
-      }
-      hasInitialized.current = true;
-    } else if (!hasChildren) {
-      setTimeout(() => setSelectedSubItem(null), 0);
-    }
-  }, [hasChildren, searchParams, item.children]);
 
   useEffect(() => {
     const currentMediaRef = mediaRef.current;
@@ -271,21 +228,19 @@ export default function ItemCard({
   }, []);
 
   // Get the current item data based on selected sub-item or parent item
-  const currentItemData = selectedSubItem ? selectedSubItem.data : item;
+  const currentItemData = item;
 
   // Use optimized real-time relative date for last updated timestamp
   const relativeTime = useOptimizedRealTimeRelativeDate(
     currentItemData.last_updated,
-    `item-${item.id}-${selectedSubItem?.id || "parent"}`,
+    `item-${item.id}-parent`,
   );
 
   const formatLastUpdated = (timestamp: number | null): string => {
     if (timestamp === null) return "Never";
     return relativeTime;
   };
-  const itemUrl = selectedSubItem
-    ? `/item/${item.type.toLowerCase()}/${item.name}?variant=${selectedSubItem.sub_name}`
-    : `/item/${item.type.toLowerCase()}/${item.name}`;
+  const itemUrl = `/item/${item.type.toLowerCase()}/${item.name}`;
 
   return (
     <div className="w-full">
@@ -295,15 +250,6 @@ export default function ItemCard({
         onMouseLeave={() => setIsHovered(false)}
         onClick={handleCardClick}
       >
-        {hasChildren && item.children && (
-          <div className="absolute top-2 right-2 z-20">
-            <SubItemsDropdown
-              items={item.children}
-              onSelect={setSelectedSubItem}
-              selectedSubItem={selectedSubItem}
-            />
-          </div>
-        )}
         <div
           ref={mediaRef}
           className="aspect-h-1 aspect-w-1 bg-primary-bg relative w-full overflow-hidden rounded-t-lg"
@@ -313,7 +259,6 @@ export default function ItemCard({
               type={item.type}
               isLimited={currentItemData.is_limited === 1}
               isSeasonal={currentItemData.is_seasonal === 1}
-              hasChildren={hasChildren}
               className="h-4 w-4 sm:h-5 sm:w-5"
             />
           </div>
@@ -449,14 +394,12 @@ export default function ItemCard({
               >
                 {item.type}
               </span>
-              {(currentItemData.tradable === 0 ||
-                currentItemData.tradable === false) && (
+              {currentItemData.tradable === 0 && (
                 <span className="border-primary-text text-primary-text hidden items-center rounded-full border bg-transparent px-2 py-0.5 text-xs sm:flex sm:py-1">
                   Non-Tradable
                 </span>
               )}
               {isValuesPage &&
-                !selectedSubItem &&
                 (() => {
                   const cashChange = getValueChange(
                     item.recent_changes,
@@ -551,7 +494,6 @@ export default function ItemCard({
                     Cash Value
                   </span>
                   {isValuesPage &&
-                    !selectedSubItem &&
                     (() => {
                       const cashChange = getValueChange(
                         item.recent_changes,
@@ -586,7 +528,6 @@ export default function ItemCard({
                     Duped Value
                   </span>
                   {isValuesPage &&
-                    !selectedSubItem &&
                     (() => {
                       const dupedChange = getValueChange(
                         item.recent_changes,

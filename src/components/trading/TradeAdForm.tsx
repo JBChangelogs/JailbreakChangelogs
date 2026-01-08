@@ -376,28 +376,8 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          offering: offeringItems
-            .map((item) => {
-              if (item.sub_name) {
-                const child = item.children?.find(
-                  (child) => child.sub_name === item.sub_name,
-                );
-                return child ? `${item.id}-${child.id}` : String(item.id);
-              }
-              return String(item.id);
-            })
-            .join(","),
-          requesting: requestingItems
-            .map((item) => {
-              if (item.sub_name) {
-                const child = item.children?.find(
-                  (child) => child.sub_name === item.sub_name,
-                );
-                return child ? `${item.id}-${child.id}` : String(item.id);
-              }
-              return String(item.id);
-            })
-            .join(","),
+          offering: offeringItems.map((item) => String(item.id)).join(","),
+          requesting: requestingItems.map((item) => String(item.id)).join(","),
           // owner injected by BFF via cookie
           ...(editMode ? {} : { expiration: expirationHours! }),
           ...(editMode && selectedTradeAd

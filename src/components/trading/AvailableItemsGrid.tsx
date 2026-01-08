@@ -29,7 +29,6 @@ import Link from "next/link";
 import { FilterSort, ValueSort } from "@/types";
 import { useDebounce } from "@/hooks/useDebounce";
 import { useVirtualizer } from "@tanstack/react-virtual";
-import FloatingDropdown from "@/components/common/FloatingDropdown";
 import { DraggableItemCard } from "@/components/dnd/DraggableItemCard";
 
 interface AvailableItemsGridProps {
@@ -75,9 +74,7 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
   const [searchQuery, setSearchQuery] = useState("");
   const [showErrorModal, setShowErrorModal] = useState(false);
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
-  const [selectedVariants, setSelectedVariants] = useState<
-    Record<number, string>
-  >({});
+
   const [filterSort, setFilterSort] = useState<FilterSort>("name-all-items");
   const [valueSort, setValueSort] = useState<ValueSort>("cash-desc");
 
@@ -269,74 +266,23 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
     overscan: 5, // Render 5 extra rows above/below viewport for smooth scrolling
   });
 
-  const handleVariantSelect = (itemId: number, variant: string) => {
-    setSelectedVariants((prev) => ({
-      ...prev,
-      [itemId]: variant,
-    }));
-  };
-
   const handleAddItem = (item: TradeItem, side: "offering" | "requesting") => {
-    const selectedVariant = selectedVariants[item.id];
-    let itemToAdd = { ...item, side };
-
-    if (selectedVariant && selectedVariant !== "2025") {
-      // If a specific variant is selected, use its values
-      const selectedChild = item.children?.find(
-        (child) => child.sub_name === selectedVariant,
-      );
-      if (selectedChild) {
-        itemToAdd = {
-          ...item,
-          cash_value: selectedChild.data.cash_value,
-          duped_value: selectedChild.data.duped_value,
-          demand: selectedChild.data.demand,
-          trend: selectedChild.data.trend,
-          sub_name: selectedVariant,
-          base_name: item.name,
-          side,
-        };
-      }
-    } else {
-      // For current year or no variant selected, use parent item values
-      itemToAdd = {
-        ...item,
-        sub_name: undefined,
-        base_name: item.name,
-        side,
-      };
-    }
+    const itemToAdd = {
+      ...item,
+      sub_name: undefined,
+      base_name: item.name,
+      side,
+    };
 
     const addedSuccessfully = onSelect(itemToAdd, side);
     if (addedSuccessfully) {
-      const itemName = itemToAdd.sub_name
-        ? `${itemToAdd.name} (${itemToAdd.sub_name})`
-        : itemToAdd.name;
-      toast.success(`Added ${itemName} to ${side} items`);
+      toast.success(`Added ${itemToAdd.name} to ${side} items`);
     }
   };
 
   // Get the correct item to drag based on selected variant
+  // Get the correct item to drag (no variants supported anymore)
   const getItemForDrag = (item: TradeItem): TradeItem => {
-    const selectedVariant = selectedVariants[item.id];
-    if (selectedVariant && selectedVariant !== "2025") {
-      // If a specific variant is selected, create item with variant data
-      const selectedChild = item.children?.find(
-        (child) => child.sub_name === selectedVariant,
-      );
-      if (selectedChild) {
-        return {
-          ...item,
-          cash_value: selectedChild.data.cash_value,
-          duped_value: selectedChild.data.duped_value,
-          demand: selectedChild.data.demand,
-          trend: selectedChild.data.trend,
-          sub_name: selectedVariant,
-          base_name: item.name,
-        };
-      }
-    }
-    // For current year or no variant selected, return parent item
     return {
       ...item,
       sub_name: undefined,
@@ -498,7 +444,7 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
           {/* Results count */}
           <div
             ref={parentRef}
-            className="scrollbar-thin scrollbar-track-transparent scrollbar-thumb-border-primary hover:scrollbar-thumb-border-focus mb-8 h-[60rem] overflow-y-auto"
+            className="scrollbar-thin scrollbar-track-transparent scrollbar-thumb-border-primary hover:scrollbar-thumb-border-focus mb-8 h-240 overflow-y-auto"
             style={{
               scrollbarWidth: "thin",
               scrollbarColor: "var(--color-border-primary) transparent",
@@ -566,7 +512,7 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
                                   : "cursor-not-allowed opacity-50"
                               }`}
                             >
-                              <div className="relative mb-2 aspect-[4/3] overflow-hidden rounded-md">
+                              <div className="relative mb-2 aspect-4/3 overflow-hidden rounded-md">
                                 {isVideoItem(item.name) ? (
                                   <video
                                     src={getVideoPath(item.type, item.name)}
@@ -609,13 +555,11 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
                                     type={item.type}
                                     isLimited={item.is_limited === 1}
                                     isSeasonal={item.is_seasonal === 1}
-                                    hasChildren={!!item.children?.length}
-                                    showCategoryForVariants={true}
                                     className="h-4 w-4"
                                   />
                                 </div>
                               </div>
-                              <div className="flex flex-grow flex-col p-2">
+                              <div className="flex grow flex-col p-2">
                                 <div className="space-y-1.5">
                                   <Link
                                     href={`/item/${encodeURIComponent(item.type.toLowerCase())}/${encodeURIComponent(item.name)}`}
@@ -669,27 +613,6 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
                                       </span>
                                     )}
                                   </div>
-                                  {item.children &&
-                                    item.children.length > 0 && (
-                                      <FloatingDropdown
-                                        options={[
-                                          { value: "2025", label: "2025" },
-                                          ...item.children.map((child) => ({
-                                            value: child.sub_name,
-                                            label: child.sub_name,
-                                          })),
-                                        ]}
-                                        value={
-                                          selectedVariants[item.id] || "2025"
-                                        }
-                                        onChange={(value) => {
-                                          handleVariantSelect(item.id, value);
-                                        }}
-                                        className="relative"
-                                        buttonClassName="w-full bg-secondary-bg text-primary-text h-[24px] min-h-[24px] text-xs sm:text-sm cursor-pointer border-border-primary hover:border-border-focus"
-                                        stopPropagation={true}
-                                      />
-                                    )}
                                   {item.tradable === 1 && (
                                     <>
                                       <div className="text-secondary-text space-y-1 text-xs">
@@ -698,50 +621,18 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
                                             Cash
                                           </span>
                                           <span className="bg-button-info text-form-button-text rounded-lg px-2 py-0.5 text-xs font-bold shadow-sm">
-                                            {selectedVariants[item.id] &&
-                                            selectedVariants[item.id] !== "2025"
-                                              ? item.children?.find(
-                                                  (child) =>
-                                                    child.sub_name ===
-                                                    selectedVariants[item.id],
-                                                )?.data.cash_value === null ||
-                                                item.children?.find(
-                                                  (child) =>
-                                                    child.sub_name ===
-                                                    selectedVariants[item.id],
-                                                )?.data.cash_value === "N/A"
-                                                ? "N/A"
-                                                : (() => {
-                                                    const value =
-                                                      item.children?.find(
-                                                        (child) =>
-                                                          child.sub_name ===
-                                                          selectedVariants[
-                                                            item.id
-                                                          ],
-                                                      )?.data.cash_value ??
-                                                      null;
-                                                    if (
-                                                      value === null ||
-                                                      value === "N/A"
-                                                    )
-                                                      return "N/A";
-                                                    return windowWidth <= 640
-                                                      ? value
-                                                      : formatFullValue(value);
-                                                  })()
-                                              : (() => {
-                                                  if (
-                                                    item.cash_value === null ||
-                                                    item.cash_value === "N/A"
-                                                  )
-                                                    return "N/A";
-                                                  return windowWidth <= 640
-                                                    ? item.cash_value
-                                                    : formatFullValue(
-                                                        item.cash_value,
-                                                      );
-                                                })()}
+                                            {(() => {
+                                              if (
+                                                item.cash_value === null ||
+                                                item.cash_value === "N/A"
+                                              )
+                                                return "N/A";
+                                              return windowWidth <= 640
+                                                ? item.cash_value
+                                                : formatFullValue(
+                                                    item.cash_value,
+                                                  );
+                                            })()}
                                           </span>
                                         </div>
                                         <div className="flex items-center justify-between rounded-lg bg-linear-to-r p-1.5">
@@ -749,50 +640,18 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
                                             Duped
                                           </span>
                                           <span className="bg-button-info text-form-button-text rounded-lg px-2 py-0.5 text-xs font-bold shadow-sm">
-                                            {selectedVariants[item.id] &&
-                                            selectedVariants[item.id] !== "2025"
-                                              ? item.children?.find(
-                                                  (child) =>
-                                                    child.sub_name ===
-                                                    selectedVariants[item.id],
-                                                )?.data.duped_value === null ||
-                                                item.children?.find(
-                                                  (child) =>
-                                                    child.sub_name ===
-                                                    selectedVariants[item.id],
-                                                )?.data.duped_value === "N/A"
-                                                ? "N/A"
-                                                : (() => {
-                                                    const value =
-                                                      item.children?.find(
-                                                        (child) =>
-                                                          child.sub_name ===
-                                                          selectedVariants[
-                                                            item.id
-                                                          ],
-                                                      )?.data.duped_value ??
-                                                      null;
-                                                    if (
-                                                      value === null ||
-                                                      value === "N/A"
-                                                    )
-                                                      return "N/A";
-                                                    return windowWidth <= 640
-                                                      ? value
-                                                      : formatFullValue(value);
-                                                  })()
-                                              : (() => {
-                                                  if (
-                                                    item.duped_value === null ||
-                                                    item.duped_value === "N/A"
-                                                  )
-                                                    return "N/A";
-                                                  return windowWidth <= 640
-                                                    ? item.duped_value
-                                                    : formatFullValue(
-                                                        item.duped_value,
-                                                      );
-                                                })()}
+                                            {(() => {
+                                              if (
+                                                item.duped_value === null ||
+                                                item.duped_value === "N/A"
+                                              )
+                                                return "N/A";
+                                              return windowWidth <= 640
+                                                ? item.duped_value
+                                                : formatFullValue(
+                                                    item.duped_value,
+                                                  );
+                                            })()}
                                           </span>
                                         </div>
                                         <div className="flex items-center justify-between rounded-lg bg-linear-to-r p-1.5">
@@ -800,16 +659,7 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
                                             Demand
                                           </span>
                                           {(() => {
-                                            const d =
-                                              selectedVariants[item.id] &&
-                                              selectedVariants[item.id] !==
-                                                "2025"
-                                                ? (item.children?.find(
-                                                    (child) =>
-                                                      child.sub_name ===
-                                                      selectedVariants[item.id],
-                                                  )?.data.demand ?? "N/A")
-                                                : (item.demand ?? "N/A");
+                                            const d = item.demand ?? "N/A";
                                             return (
                                               <span
                                                 className={`${getDemandColor(d)} rounded-lg px-2 py-0.5 text-xs font-bold shadow-sm`}
@@ -825,30 +675,11 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
                                           </span>
                                           <span
                                             className={`${getTrendColor(
-                                              selectedVariants[item.id] &&
-                                                selectedVariants[item.id] !==
-                                                  "2025"
-                                                ? item.children?.find(
-                                                    (child) =>
-                                                      child.sub_name ===
-                                                      selectedVariants[item.id],
-                                                  )?.data.trend || "N/A"
-                                                : item.trend || "N/A",
+                                              item.trend || "N/A",
                                             )} rounded-lg px-2 py-0.5 text-xs font-bold shadow-sm`}
                                           >
                                             {(() => {
-                                              const trend =
-                                                selectedVariants[item.id] &&
-                                                selectedVariants[item.id] !==
-                                                  "2025"
-                                                  ? item.children?.find(
-                                                      (child) =>
-                                                        child.sub_name ===
-                                                        selectedVariants[
-                                                          item.id
-                                                        ],
-                                                    )?.data.trend
-                                                  : item.trend;
+                                              const trend = item.trend;
                                               return !trend || trend === "N/A"
                                                 ? "Unknown"
                                                 : trend;

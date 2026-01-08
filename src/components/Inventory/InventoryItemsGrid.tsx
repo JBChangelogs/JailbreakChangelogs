@@ -101,34 +101,6 @@ export default function InventoryItemsGrid({
           const uniqueKey = `${item.id}-${item.timesTraded}-${item.uniqueCirculation}`;
           const duplicateOrder = duplicateOrders.get(uniqueKey) || 1;
 
-          // Get variant year if item has children/variants AND there's a matching child for that year
-          const createdAtInfo = item.info.find(
-            (info) => info.title === "Created At",
-          );
-          const createdYear = createdAtInfo
-            ? new Date(createdAtInfo.value).getFullYear().toString()
-            : null;
-
-          // Only set variant if there's actually a matching child variant for that year
-          let variant: string | undefined = undefined;
-          if (
-            itemData.children &&
-            itemData.children.length > 0 &&
-            createdYear
-          ) {
-            const matchingChild = itemData.children.find(
-              (child) =>
-                child.sub_name === createdYear &&
-                child.data &&
-                child.data.cash_value &&
-                child.data.cash_value !== "N/A" &&
-                child.data.cash_value !== null,
-            );
-            if (matchingChild) {
-              variant = createdYear;
-            }
-          }
-
           return (
             <React.Fragment key={item.id}>
               <InventoryItemCard
@@ -141,7 +113,6 @@ export default function InventoryItemsGrid({
                 duplicateCount={duplicateCount}
                 duplicateOrder={duplicateOrder}
                 userId={userId}
-                variant={variant}
                 isDupedItem={isDupedItem}
               />
             </React.Fragment>

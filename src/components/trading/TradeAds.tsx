@@ -51,11 +51,6 @@ export default function TradeAds({
     if (it.data?.demand) return it.data.demand;
     const match = items.find((base) => base.id === it.id);
     if (!match) return undefined;
-    const subName = it.sub_name as string | undefined;
-    if (subName && Array.isArray(match.children)) {
-      const child = match.children.find((c) => c.sub_name === subName);
-      if (child?.data?.demand) return child.data.demand;
-    }
     return match.demand;
   };
 
@@ -65,12 +60,6 @@ export default function TradeAds({
     if (dataTrend && dataTrend !== "N/A") return dataTrend;
     const match = items.find((base) => base.id === it.id);
     if (!match) return undefined;
-    const subName = it.sub_name as string | undefined;
-    if (subName && Array.isArray(match.children)) {
-      const child = match.children.find((c) => c.sub_name === subName);
-      const childTrend = child?.data?.trend;
-      if (childTrend && childTrend !== "N/A") return childTrend;
-    }
     return match.trend ?? undefined;
   };
 

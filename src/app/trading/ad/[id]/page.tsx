@@ -48,23 +48,14 @@ async function TradeDetailsWrapper({
   };
 
   const items: Item[] = await fetchItems();
-  const findDemand = (id: number, subName?: string): string | undefined => {
+  const findDemand = (id: number): string | undefined => {
     const match = items.find((i) => i.id === id);
     if (!match) return undefined;
-    if (subName && Array.isArray(match.children)) {
-      const child = match.children.find((c) => c.sub_name === subName);
-      if (child?.data?.demand) return child.data.demand;
-    }
     return match.demand;
   };
-  const findTrend = (id: number, subName?: string): string | undefined => {
+  const findTrend = (id: number): string | undefined => {
     const match = items.find((i) => i.id === id);
     if (!match) return undefined;
-    if (subName && Array.isArray(match.children)) {
-      const child = match.children.find((c) => c.sub_name === subName);
-      const childTrend = child?.data?.trend;
-      if (childTrend && childTrend !== "N/A") return childTrend;
-    }
     return match.trend ?? undefined;
   };
 
@@ -72,13 +63,13 @@ async function TradeDetailsWrapper({
     ...tradeWithUser,
     offering: tradeWithUser.offering.map((it: TradeItem) => ({
       ...it,
-      demand: it.demand ?? it.data?.demand ?? findDemand(it.id, it.sub_name),
-      trend: it.trend ?? it.data?.trend ?? findTrend(it.id, it.sub_name),
+      demand: it.demand ?? it.data?.demand ?? findDemand(it.id),
+      trend: it.trend ?? it.data?.trend ?? findTrend(it.id),
     })),
     requesting: tradeWithUser.requesting.map((it: TradeItem) => ({
       ...it,
-      demand: it.demand ?? it.data?.demand ?? findDemand(it.id, it.sub_name),
-      trend: it.trend ?? it.data?.trend ?? findTrend(it.id, it.sub_name),
+      demand: it.demand ?? it.data?.demand ?? findDemand(it.id),
+      trend: it.trend ?? it.data?.trend ?? findTrend(it.id),
     })),
   };
 

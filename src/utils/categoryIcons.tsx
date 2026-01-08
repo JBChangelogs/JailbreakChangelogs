@@ -127,33 +127,27 @@ export const CategoryIconBadge = ({
   type,
   isLimited,
   isSeasonal,
-  hasChildren,
-  showCategoryForVariants = false,
   preferItemType = false,
   className = "h-5 w-5",
 }: {
   type: string;
   isLimited: boolean;
   isSeasonal: boolean;
-  hasChildren: boolean;
-  showCategoryForVariants?: boolean;
   preferItemType?: boolean;
   className?: string;
 }) => {
   // If preferItemType is true, show item type icon first
   if (preferItemType) {
-    if (!hasChildren || showCategoryForVariants) {
-      const categoryIcon = getCategoryIcon(type);
-      if (categoryIcon) {
-        return (
-          <div className="bg-primary-bg/50 rounded-full p-1.5">
-            <categoryIcon.Icon
-              className={`${className}`}
-              style={{ color: getCategoryColor(type) }}
-            />
-          </div>
-        );
-      }
+    const categoryIcon = getCategoryIcon(type);
+    if (categoryIcon) {
+      return (
+        <div className="bg-primary-bg/50 rounded-full p-1.5">
+          <categoryIcon.Icon
+            className={`${className}`}
+            style={{ color: getCategoryColor(type) }}
+          />
+        </div>
+      );
     }
 
     // Fall back to limited/seasonal if no item type icon
@@ -206,19 +200,17 @@ export const CategoryIconBadge = ({
       );
     }
 
-    // Show category icon based on showCategoryForVariants prop
-    if (!hasChildren || showCategoryForVariants) {
-      const categoryIcon = getCategoryIcon(type);
-      if (categoryIcon) {
-        return (
-          <div className="bg-primary-bg/50 rounded-full p-1.5">
-            <categoryIcon.Icon
-              className={`${className}`}
-              style={{ color: getCategoryColor(type) }}
-            />
-          </div>
-        );
-      }
+    // Show category icon
+    const categoryIcon = getCategoryIcon(type);
+    if (categoryIcon) {
+      return (
+        <div className="bg-primary-bg/50 rounded-full p-1.5">
+          <categoryIcon.Icon
+            className={`${className}`}
+            style={{ color: getCategoryColor(type) }}
+          />
+        </div>
+      );
     }
   }
 

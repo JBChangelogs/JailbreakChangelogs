@@ -267,7 +267,6 @@ export default function DupeComparisonClient({
                 type={duplicateItem.categoryTitle}
                 isLimited={sharedItemData.is_limited === 1}
                 isSeasonal={sharedItemData.is_seasonal === 1}
-                hasChildren={false}
                 preferItemType={true} // Shows item type icon if available
                 className="h-5 w-5"
               />
@@ -370,10 +369,7 @@ export default function DupeComparisonClient({
               </div>
               <div className="text-primary-text text-xl font-bold">
                 {(() => {
-                  const val = getDupedValueForItem(
-                    sharedItemData,
-                    duplicateItem,
-                  );
+                  const val = getDupedValueForItem(sharedItemData);
                   return val > 0 ? `$${val.toLocaleString()}` : "N/A";
                 })()}
               </div>

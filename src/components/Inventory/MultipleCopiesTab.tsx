@@ -62,40 +62,12 @@ export default function DuplicatesTab({
     return Boolean(user?.hasVerifiedBadge);
   };
 
-  // Get variant-specific values (e.g., different hyperchrome colors by year)
+  // Get values (removed variant-specific logic)
   const getVariantSpecificValues = (
     item: InventoryItem,
     baseItemData: Item,
   ) => {
-    // Match variant by creation year
-    if (baseItemData.children && baseItemData.children.length > 0) {
-      const createdAtInfo = item.info.find(
-        (info) => info.title === "Created At",
-      );
-      const createdYear = createdAtInfo
-        ? new Date(createdAtInfo.value).getFullYear().toString()
-        : null;
-
-      const matchingChild = createdYear
-        ? baseItemData.children.find(
-            (child) =>
-              child.sub_name === createdYear &&
-              child.data &&
-              child.data.cash_value &&
-              child.data.cash_value !== "N/A" &&
-              child.data.cash_value !== null,
-          )
-        : null;
-
-      if (matchingChild) {
-        return {
-          cash_value: matchingChild.data.cash_value,
-          duped_value: matchingChild.data.duped_value,
-        };
-      }
-    }
-
-    // Use base item values if no variant match
+    // Use base item values
     return {
       cash_value: baseItemData.cash_value,
       duped_value: baseItemData.duped_value,

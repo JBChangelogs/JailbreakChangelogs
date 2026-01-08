@@ -58,7 +58,6 @@ interface ValueHistory {
 
 interface ItemValueChartProps {
   itemId: string;
-  variantId?: number;
   hideTradingMetrics?: boolean;
   showOnlyValueHistory?: boolean;
   showOnlyTradingMetrics?: boolean;
@@ -66,7 +65,6 @@ interface ItemValueChartProps {
 
 const ItemValueChart = ({
   itemId,
-  variantId,
   hideTradingMetrics = false,
   showOnlyValueHistory = false,
   showOnlyTradingMetrics = false,
@@ -87,8 +85,7 @@ const ItemValueChart = ({
     const fetchHistory = async () => {
       setLoading(true);
       try {
-        const historyId = variantId ? `${itemId}-${variantId}` : itemId;
-        const data = await fetchItemHistory(historyId);
+        const data = await fetchItemHistory(itemId);
         if (data !== null) {
           setHistory(data);
         }
@@ -100,7 +97,7 @@ const ItemValueChart = ({
     };
 
     fetchHistory();
-  }, [itemId, variantId]);
+  }, [itemId]);
 
   useEffect(() => {
     // Dynamically import and register zoom plugin on client side

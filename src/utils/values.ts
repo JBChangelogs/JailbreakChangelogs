@@ -88,95 +88,23 @@ export const sortByTrend = (
   return order === "desc" ? bIndex - aIndex : aIndex - bIndex;
 };
 
-// Helper function to get the effective cash value for an item (considering variants)
+// Helper function to get the current cash value for an item
 export const getEffectiveCashValue = (item: Item): string => {
-  // If item has children (variants), use the default variant (2023) if available
-  if (item.children && item.children.length > 0) {
-    // Sort children by sub_name in descending order to find the most recent
-    const sortedChildren = [...item.children].sort((a, b) => {
-      return parseInt(b.sub_name) - parseInt(a.sub_name);
-    });
-
-    // Find the 2023 variant (default) or use the most recent if 2023 doesn't exist
-    const defaultVariant =
-      sortedChildren.find((child) => child.sub_name === "2023") ||
-      sortedChildren[0];
-
-    if (defaultVariant) {
-      return defaultVariant.data.cash_value;
-    }
-  }
-
-  // Fall back to parent item's cash value
   return item.cash_value;
 };
 
-// Helper function to get the effective duped value for an item (considering variants)
+// Helper function to get the current duped value for an item
 export const getEffectiveDupedValue = (item: Item): string => {
-  // If item has children (variants), use the default variant (2023) if available
-  if (item.children && item.children.length > 0) {
-    // Sort children by sub_name in descending order to find the most recent
-    const sortedChildren = [...item.children].sort((a, b) => {
-      return parseInt(b.sub_name) - parseInt(a.sub_name);
-    });
-
-    // Find the 2023 variant (default) or use the most recent if 2023 doesn't exist
-    const defaultVariant =
-      sortedChildren.find((child) => child.sub_name === "2023") ||
-      sortedChildren[0];
-
-    if (defaultVariant) {
-      return defaultVariant.data.duped_value;
-    }
-  }
-
-  // Fall back to parent item's duped value
   return item.duped_value;
 };
 
-// Helper function to get the effective demand for an item (considering variants)
+// Helper function to get the current demand for an item
 export const getEffectiveDemand = (item: Item): string => {
-  // If item has children (variants), use the default variant (2023) if available
-  if (item.children && item.children.length > 0) {
-    // Sort children by sub_name in descending order to find the most recent
-    const sortedChildren = [...item.children].sort((a, b) => {
-      return parseInt(b.sub_name) - parseInt(a.sub_name);
-    });
-
-    // Find the 2023 variant (default) or use the most recent if 2023 doesn't exist
-    const defaultVariant =
-      sortedChildren.find((child) => child.sub_name === "2023") ||
-      sortedChildren[0];
-
-    if (defaultVariant) {
-      return defaultVariant.data.demand;
-    }
-  }
-
-  // Fall back to parent item's demand
   return item.demand;
 };
 
-// Helper function to get the effective trend for an item (considering variants)
+// Helper function to get the current trend for an item
 export const getEffectiveTrend = (item: Item): string | null => {
-  // If item has children (variants), use the default variant (2023) if available
-  if (item.children && item.children.length > 0) {
-    // Sort children by sub_name in descending order to find the most recent
-    const sortedChildren = [...item.children].sort((a, b) => {
-      return parseInt(b.sub_name) - parseInt(a.sub_name);
-    });
-
-    // Find the 2023 variant (default) or use the most recent if 2023 doesn't exist
-    const defaultVariant =
-      sortedChildren.find((child) => child.sub_name === "2023") ||
-      sortedChildren[0];
-
-    if (defaultVariant) {
-      return defaultVariant.data.trend || null;
-    }
-  }
-
-  // Fall back to parent item's trend
   return item.trend;
 };
 

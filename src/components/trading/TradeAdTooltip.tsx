@@ -23,19 +23,15 @@ export const TradeAdTooltip: React.FC<TradeAdTooltipProps> = ({ item }) => {
               type={item.type}
               isLimited={item.is_limited === 1}
               isSeasonal={item.is_seasonal === 1}
-              hasChildren={!!item.children?.length}
-              showCategoryForVariants={true}
               preferItemType={true}
               className="h-5 w-5"
             />
             <Link
-              href={`/item/${item.type.toLowerCase()}/${item.base_name || item.name}${item.sub_name ? `?variant=${item.sub_name}` : ""}`}
+              href={`/item/${item.type.toLowerCase()}/${item.name}`}
               prefetch={false}
               className="link-text hover:text-link-hover truncate text-lg font-semibold transition-colors"
             >
-              {item.base_name && item.sub_name
-                ? `${item.base_name} (${item.sub_name})`
-                : item.name}
+              {item.name}
             </Link>
           </div>
         </div>

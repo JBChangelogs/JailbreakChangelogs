@@ -116,7 +116,7 @@ export default function DupeFinderResults({
         mergedDupeData.forEach((dupeItem) => {
           const itemData = itemMap.get(dupeItem.item_id);
           if (itemData) {
-            const dupedValue = getDupedValueForItem(itemData, dupeItem);
+            const dupedValue = getDupedValueForItem(itemData);
             if (!isNaN(dupedValue) && dupedValue > 0) {
               totalDuped += dupedValue;
             }
@@ -243,23 +243,15 @@ export default function DupeFinderResults({
         case "duped-desc": {
           const aItemData = itemsData.find((data) => data.id === a.item_id);
           const bItemData = itemsData.find((data) => data.id === b.item_id);
-          const aDupedValue = aItemData
-            ? getDupedValueForItem(aItemData, a)
-            : 0;
-          const bDupedValue = bItemData
-            ? getDupedValueForItem(bItemData, b)
-            : 0;
+          const aDupedValue = aItemData ? getDupedValueForItem(aItemData) : 0;
+          const bDupedValue = bItemData ? getDupedValueForItem(bItemData) : 0;
           return bDupedValue - aDupedValue;
         }
         case "duped-asc": {
           const aItemData = itemsData.find((data) => data.id === a.item_id);
           const bItemData = itemsData.find((data) => data.id === b.item_id);
-          const aDupedValue = aItemData
-            ? getDupedValueForItem(aItemData, a)
-            : 0;
-          const bDupedValue = bItemData
-            ? getDupedValueForItem(bItemData, b)
-            : 0;
+          const aDupedValue = aItemData ? getDupedValueForItem(aItemData) : 0;
+          const bDupedValue = bItemData ? getDupedValueForItem(bItemData) : 0;
           return aDupedValue - bDupedValue;
         }
         default:

@@ -64,46 +64,6 @@ export default function InventoryItems({
     }));
   }, [initialData.data, initialData.duplicates, propItemsData]);
 
-  // Get variant-specific values (e.g., different hyperchrome colors by year)
-  const getVariantSpecificValues = (
-    item: InventoryItem,
-    baseItemData: Item,
-  ) => {
-    // Match variant by creation year
-    if (baseItemData.children && baseItemData.children.length > 0) {
-      const createdAtInfo = item.info.find(
-        (info) => info.title === "Created At",
-      );
-      const createdYear = createdAtInfo
-        ? new Date(createdAtInfo.value).getFullYear().toString()
-        : null;
-
-      const matchingChild = createdYear
-        ? baseItemData.children.find(
-            (child) =>
-              child.sub_name === createdYear &&
-              child.data &&
-              child.data.cash_value &&
-              child.data.cash_value !== "N/A" &&
-              child.data.cash_value !== null,
-          )
-        : null;
-
-      if (matchingChild) {
-        return {
-          cash_value: matchingChild.data.cash_value,
-          duped_value: matchingChild.data.duped_value,
-        };
-      }
-    }
-
-    // Use base item values if no variant match
-    return {
-      cash_value: baseItemData.cash_value,
-      duped_value: baseItemData.duped_value,
-    };
-  };
-
   const handleCardClick = (item: InventoryItem) => {
     onItemClick(item);
   };
@@ -504,18 +464,10 @@ export default function InventoryItems({
       const baseItemData = currentItemsData.find(
         (data) => data.id === item.item_id,
       )!;
-      const variantValues = getVariantSpecificValues(item, baseItemData);
-
-      // Create a modified item data object with variant-specific values
-      const itemDataWithVariants = {
-        ...baseItemData,
-        cash_value: variantValues.cash_value,
-        duped_value: variantValues.duped_value,
-      };
 
       return {
         item,
-        itemData: itemDataWithVariants,
+        itemData: baseItemData,
         isDupedItem:
           (item as InventoryItem & { _isDupedItem?: boolean })._isDupedItem ||
           false,

@@ -430,22 +430,8 @@ export async function fetchLastUpdated(items: Item[]) {
       return null;
     }
 
-    // Create an array of all items including sub-items
-    const allItems = items.reduce((acc: Item[], item) => {
-      acc.push(item);
-      if (item.children && Array.isArray(item.children)) {
-        item.children.forEach((child) => {
-          if (child.data) {
-            acc.push({
-              ...item,
-              last_updated: child.data.last_updated,
-              name: child.sub_name,
-            });
-          }
-        });
-      }
-      return acc;
-    }, []);
+    // Create an array of all items
+    const allItems = items;
 
     // Sort all items by last_updated in descending order and get the most recent
     const mostRecentItem = [...allItems].sort((a, b) => {
