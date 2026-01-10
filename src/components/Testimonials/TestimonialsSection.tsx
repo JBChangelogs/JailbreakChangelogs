@@ -53,13 +53,6 @@ const testimonials: Testimonial[] = [
     url: "https://www.youtube.com/@Felicityy-",
   },
   {
-    name: "Cokonya",
-    role: "Jailbreak YouTuber",
-    quote:
-      "I cannot recommend this website enough, JBCL is the #1 all information outlet for JB, Featuring OG trackers to find lost items, Inventory trackers to keep up with your net worth and items, As well as Seasonal tracking like contract logging, Timers for when daily/weekly resets and more! They have it all ranging from values, update logs, seasonal progression, inventory tracking, Leaderboards for value, money, AND on top of all that even have a welcoming discord server you should 100% join, Amazing team behind JBCL and I'm happy to be a contributing partner to it all as it grows!",
-    url: "https://www.youtube.com/@Cokonya",
-  },
-  {
     name: "mrflyingpies",
     role: "Jailbreak YouTuber",
     quote:
@@ -79,13 +72,6 @@ const testimonials: Testimonial[] = [
     quote:
       "JBCL is THE only site I use when checking values or any update changes in the game. It has active people updating the values so you know you're getting the right trades. It also has an inventory value checker, leaderboards, and so much more for the community to interact with than just a list of values. I easily recommend using JBCL over any other site because of how clean and accurate it is.",
     url: "https://www.youtube.com/@ItsSpecter",
-  },
-  {
-    name: "Locked3",
-    role: "Jailbreak YouTuber",
-    quote:
-      "This site has definitely, definitely, at most helped jailbreak and keep the game alive for me, it's a great website, and this has changed the way jailbreak will be forever, it has a bunch of features! Including OG item finder, Dupe list, Values list, duped values list, and much more! Thank You so much JBCL for making me an affiliate i couldn't feel happier at the moment, Thank you.",
-    url: "https://www.youtube.com/@Unversed-loch3",
   },
 ];
 
