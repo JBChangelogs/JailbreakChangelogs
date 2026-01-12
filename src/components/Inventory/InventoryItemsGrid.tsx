@@ -95,14 +95,26 @@ export default function InventoryItemsGrid({
       )}
 
       <div className="mb-8 grid grid-cols-1 gap-4 min-[375px]:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4">
-        {displayedItems.map(({ item, itemData, isDupedItem }) => {
+        {displayedItems.map(({ item, itemData, isDupedItem }, index) => {
           const itemKey = `${item.categoryTitle}-${item.title}`;
           const duplicateCount = itemCounts.get(itemKey) || 1;
           const uniqueKey = `${item.id}-${item.timesTraded}-${item.uniqueCirculation}`;
           const duplicateOrder = duplicateOrders.get(uniqueKey) || 1;
 
+          // Create a unique key that distinguishes between duplicate items
+          // Use scan_id for duplicated items, logged_at for original items, or index as fallback
+          const itemWithExtras = item as InventoryItem & {
+            logged_at?: number;
+            is_original_item?: boolean;
+          };
+          const uniqueItemKey = item.scan_id
+            ? `${item.id}-${item.scan_id}`
+            : itemWithExtras.logged_at
+              ? `${item.id}-${itemWithExtras.logged_at}`
+              : `${item.id}-${index}`;
+
           return (
-            <React.Fragment key={item.id}>
+            <React.Fragment key={uniqueItemKey}>
               <InventoryItemCard
                 item={item}
                 itemData={itemData}

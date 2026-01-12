@@ -335,6 +335,7 @@ export default function DupedItemsTab({
             return {
               item,
               itemData: itemDataWithVariants,
+              isDupedItem: true,
             };
           })}
           getUserDisplay={getUserDisplay}
