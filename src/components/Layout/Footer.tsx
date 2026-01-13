@@ -18,15 +18,9 @@ declare global {
 
 interface FooterProps {
   githubUrl: string;
-  versionInfo: {
-    version: string;
-    date: number;
-    branch: string;
-    commitUrl: string;
-  };
 }
 
-export default function Footer({ githubUrl, versionInfo }: FooterProps) {
+export default function Footer({ githubUrl }: FooterProps) {
   useEffect(() => {
     // Show GDPR consent button only for EU users
     const showGDPRButton = () => {
@@ -183,12 +177,7 @@ export default function Footer({ githubUrl, versionInfo }: FooterProps) {
                   Jalenzz16
                 </Link>
               </p>
-              <VersionInfo
-                version={versionInfo.version}
-                date={versionInfo.date}
-                branch={versionInfo.branch}
-                commitUrl={versionInfo.commitUrl}
-              />
+              <VersionInfo />
             </div>
           </div>
         </div>

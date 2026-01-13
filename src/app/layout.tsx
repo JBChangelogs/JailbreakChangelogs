@@ -29,7 +29,7 @@ import {
   checkMaintenanceMode,
   getMaintenanceMetadata,
 } from "@/utils/maintenance";
-import { getWebsiteVersion, getGitHubUrl } from "@/utils/version";
+import { getGitHubUrl } from "@/utils/version";
 import { Suspense } from "react";
 import { GoogleAnalytics, GoogleTagManager } from "@next/third-parties/google";
 import QueryProvider from "@/components/QueryProvider";
@@ -92,7 +92,6 @@ export default async function RootLayout({
   children: React.ReactNode;
 }) {
   const { isMaintenanceMode } = await checkMaintenanceMode();
-  const versionInfo = await getWebsiteVersion();
   const githubUrl = getGitHubUrl();
   const defaultConsent = await getDefaultConsent();
 
@@ -275,10 +274,7 @@ export default async function RootLayout({
                             <Suspense>
                               <main className="flex-1">{children}</main>
                             </Suspense>
-                            <Footer
-                              githubUrl={githubUrl}
-                              versionInfo={versionInfo}
-                            />
+                            <Footer githubUrl={githubUrl} />
                           </div>
                         </SurveyProvider>
                       </AuthProvider>
@@ -473,10 +469,7 @@ export default async function RootLayout({
                         <Suspense>
                           <main className="flex-1">{children}</main>
                         </Suspense>
-                        <Footer
-                          githubUrl={githubUrl}
-                          versionInfo={versionInfo}
-                        />
+                        <Footer githubUrl={githubUrl} />
                       </div>
                     </SurveyProvider>
                   </AuthProvider>
