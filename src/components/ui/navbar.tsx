@@ -778,7 +778,7 @@ export const NavbarModern = ({ className }: { className?: string }) => {
                                 <Link
                                   href={urlInfo.relativePath}
                                   prefetch={false}
-                                  className="border-border-primary bg-button-info text-form-button-text hover:border-border-focus hover:bg-button-info-hover mt-2 inline-flex items-center gap-1 rounded-lg border px-3 py-1.5 text-xs transition-colors"
+                                  className="border-button-info bg-button-info text-form-button-text hover:bg-button-info-hover mt-2 inline-flex cursor-pointer items-center gap-1 rounded-lg border px-2 py-1 text-sm transition-colors sm:px-3"
                                 >
                                   View
                                 </Link>
@@ -787,7 +787,7 @@ export const NavbarModern = ({ className }: { className?: string }) => {
                                   href={urlInfo.href}
                                   target="_blank"
                                   rel="noopener noreferrer"
-                                  className="border-border-primary bg-button-info text-form-button-text hover:border-border-focus hover:bg-button-info-hover mt-2 inline-flex items-center gap-1 rounded-lg border px-3 py-1.5 text-xs transition-colors"
+                                  className="border-button-info bg-button-info text-form-button-text hover:bg-button-info-hover mt-2 inline-flex cursor-pointer items-center gap-1 rounded-lg border px-2 py-1 text-sm transition-colors sm:px-3"
                                 >
                                   View
                                 </a>

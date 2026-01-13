@@ -1,9 +1,7 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
 import { ThemeProvider } from "@mui/material";
 import { darkTheme } from "@/theme/darkTheme";
-import { Icon } from "@/components/ui/IconWrapper";
 import TimelineHeader from "./TimelineHeader";
 import TimelineContent from "./TimelineContent";
 import { Changelog } from "@/utils/api";
@@ -13,42 +11,10 @@ interface TimelineClientProps {
 }
 
 export default function TimelineClient({ changelogs }: TimelineClientProps) {
-  const [showBackToTop, setShowBackToTop] = useState(false);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      setShowBackToTop(window.scrollY > 300);
-    };
-
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
-  const scrollToTop = () => {
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth",
-    });
-  };
-
   return (
     <ThemeProvider theme={darkTheme}>
       <TimelineHeader changelogs={changelogs} />
       <TimelineContent changelogs={changelogs} />
-
-      {showBackToTop && (
-        <button
-          onClick={scrollToTop}
-          className="bg-button-info text-primary-text hover:bg-button-info-hover fixed right-8 bottom-8 z-[2000] rounded-full p-3 shadow-lg focus:outline-none"
-          aria-label="Back to top"
-        >
-          <Icon
-            icon="heroicons-outline:arrow-up"
-            className="h-6 w-6"
-            inline={true}
-          />
-        </button>
-      )}
     </ThemeProvider>
   );
 }

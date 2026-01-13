@@ -1,9 +1,7 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
 import { use } from "react";
 import { useRouter } from "next/navigation";
-import { Icon } from "@/components/ui/IconWrapper";
 import toast from "react-hot-toast";
 import { Changelog } from "@/utils/api";
 import Image from "next/image";
@@ -20,29 +18,8 @@ export default function ChangelogsClient({
   // Use the use hook to resolve promises
   const changelogList = use(changelogListPromise);
 
-  const [showBackToTop, setShowBackToTop] = useState(false);
-  const backToTopRef = useRef<HTMLDivElement>(null);
-
   // Sort changelogs by newest first
   const sortedChangelogs = [...changelogList].sort((a, b) => b.id - a.id);
-
-  // Handle scroll to show/hide back to top button
-  useEffect(() => {
-    const handleScroll = () => {
-      if (window.scrollY > 300) {
-        setShowBackToTop(true);
-      } else {
-        setShowBackToTop(false);
-      }
-    };
-
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
-  const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  };
 
   const handleLatestChangelog = () => {
     // Find the latest changelog from the already fetched data
@@ -118,23 +95,6 @@ export default function ChangelogsClient({
           </div>
         ))}
       </div>
-
-      {/* Back to top button */}
-      {showBackToTop && (
-        <div ref={backToTopRef} className="fixed right-8 bottom-8 z-50">
-          <button
-            onClick={scrollToTop}
-            className="bg-button-info text-primary-text hover:bg-button-info-hover rounded-full p-3 shadow-lg transition-all duration-200 hover:scale-110"
-            aria-label="Back to top"
-          >
-            <Icon
-              icon="heroicons-outline:arrow-up"
-              className="h-6 w-6"
-              inline={true}
-            />
-          </button>
-        </div>
-      )}
     </div>
   );
 }
