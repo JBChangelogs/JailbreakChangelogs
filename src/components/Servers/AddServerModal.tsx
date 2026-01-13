@@ -209,7 +209,7 @@ const AddServerModal: React.FC<AddServerModalProps> = ({
                   htmlFor="server-link"
                   className="text-primary-text mb-2 block text-sm font-medium"
                 >
-                  Server Link <span className="text-button-danger">*</span>
+                  Server Link<span className="text-button-danger ml-1">*</span>
                 </label>
                 <input
                   id="server-link"
@@ -247,7 +247,7 @@ const AddServerModal: React.FC<AddServerModalProps> = ({
 
               <div>
                 <div className="text-primary-text mb-2 flex items-center text-sm font-medium">
-                  Expires <span className="text-button-danger">*</span>
+                  Expires <span className="text-button-danger ml-1">*</span>
                 </div>
                 <LocalizationProvider dateAdapter={AdapterDateFns}>
                   <DatePicker

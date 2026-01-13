@@ -191,7 +191,7 @@ export default function TradeHistoryModal({
       />
 
       <div className="fixed inset-0 flex items-center justify-center p-4">
-        <div className="border-border-primary bg-secondary-bg mx-auto max-h-[80vh] w-full max-w-4xl overflow-hidden rounded-lg border">
+        <div className="border-border-primary bg-secondary-bg mx-auto flex max-h-[80vh] w-full max-w-4xl flex-col overflow-hidden rounded-lg border">
           <div className="border-border-primary border-b p-4 sm:p-6">
             <div className="flex items-start justify-between gap-4">
               <div className="min-w-0 flex-1">
@@ -200,6 +200,11 @@ export default function TradeHistoryModal({
                     ? `${username}'s ${item.title} ownership history`
                     : `${item.title}'s Ownership History`}
                 </DialogTitle>
+                {tradeHistoryUserIds.length > 0 && (
+                  <p className="text-secondary-text mt-1 text-sm">
+                    History of {tradeHistoryUserIds.length} owners
+                  </p>
+                )}
                 <div className="mt-2 flex flex-wrap items-center gap-2">
                   {item.categoryTitle && (
                     <span
@@ -250,7 +255,7 @@ export default function TradeHistoryModal({
             )}
           </div>
 
-          <div className="max-h-[60vh] overflow-y-auto p-6">
+          <div className="min-h-0 flex-1 overflow-y-auto p-6">
             {(() => {
               if (
                 !item.history ||

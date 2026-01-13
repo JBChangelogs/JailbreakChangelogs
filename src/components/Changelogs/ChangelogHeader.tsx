@@ -1,13 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import { Changelog } from "@/utils/api";
-import { Icon } from "@/components/ui/IconWrapper";
-import {
-  getYearStatistics,
-  isCurrentYear,
-  getCurrentDateString,
-} from "@/utils/changelogStats";
+import UpdateStatisticsCard from "@/components/common/UpdateStatisticsCard";
 import NitroChangelogVideoPlayer from "@/components/Ads/NitroChangelogVideoPlayer";
 
 interface ChangelogHeaderProps {
@@ -15,9 +10,6 @@ interface ChangelogHeaderProps {
 }
 
 const ChangelogHeader: React.FC<ChangelogHeaderProps> = ({ changelogs }) => {
-  const yearStats = changelogs ? getYearStatistics(changelogs) : [];
-  const [isStatsExpanded, setIsStatsExpanded] = useState(false);
-
   return (
     <div className="border-border-primary bg-secondary-bg mb-8 rounded-lg border p-6">
       <div className="mb-4">
@@ -35,61 +27,7 @@ const ChangelogHeader: React.FC<ChangelogHeaderProps> = ({ changelogs }) => {
             by Badimo.
           </p>
 
-          {yearStats.length > 0 && (
-            <div>
-              <button
-                onClick={() => setIsStatsExpanded(!isStatsExpanded)}
-                className="border-border-primary bg-primary-bg hover:border-border-focus hover:bg-primary-bg flex w-full cursor-pointer items-center justify-between rounded-lg border p-4 transition-colors"
-              >
-                <h3 className="text-primary-text text-lg font-semibold">
-                  View Update Statistics
-                </h3>
-                {isStatsExpanded ? (
-                  <Icon
-                    icon="heroicons-outline:chevron-up"
-                    className="text-secondary-text h-5 w-5"
-                    inline={true}
-                  />
-                ) : (
-                  <Icon
-                    icon="@mui/icons-material"
-                    className="text-secondary-text h-5 w-5"
-                    inline={true}
-                  />
-                )}
-              </button>
-
-              {isStatsExpanded && (
-                <div className="border-border-primary bg-primary-bg mt-2 rounded-lg border p-4">
-                  <div className="text-secondary-text space-y-1 text-sm">
-                    {yearStats.map(({ year, count }) => (
-                      <p key={year}>
-                        {isCurrentYear(year) ? (
-                          <>
-                            As of {getCurrentDateString()}, {year}, there are a
-                            total of{" "}
-                            <span className="text-primary-text font-semibold">
-                              {count}
-                            </span>{" "}
-                            {count === 1 ? "update" : "updates"} in {year}.
-                          </>
-                        ) : (
-                          <>
-                            There were a total of{" "}
-                            <span className="text-primary-text font-semibold">
-                              {count}
-                            </span>{" "}
-                            recorded {count === 1 ? "update" : "updates"}
-                            released in {year}.
-                          </>
-                        )}
-                      </p>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
+          <UpdateStatisticsCard changelogs={changelogs} />
         </div>
 
         <NitroChangelogVideoPlayer className="min-h-[210px] w-full max-w-xs self-center sm:max-w-sm lg:self-start" />
