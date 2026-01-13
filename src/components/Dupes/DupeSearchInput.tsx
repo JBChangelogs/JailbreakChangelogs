@@ -4,6 +4,8 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Icon } from "@/components/ui/IconWrapper";
 import { useUsernameToId } from "@/hooks/useUsernameToId";
+import { MaxStreamsError } from "@/utils/api";
+import toast from "react-hot-toast";
 
 interface DupeSearchInputProps {
   initialValue?: string;
@@ -29,9 +31,34 @@ export default function DupeSearchInput({
     if (!input) return;
 
     setIsSearching(true);
-    const isNumeric = /^\d+$/.test(input);
-    const id = isNumeric ? input : await getId(input);
-    router.push(`/dupes/${id ?? input}`);
+    try {
+      const isNumeric = /^\d+$/.test(input);
+      const id = isNumeric ? input : await getId(input);
+      router.push(`/dupes/${id ?? input}`);
+    } catch (error) {
+      console.error("Error searching for user:", error);
+
+      // Check for max streams error - this is a temporary server issue
+      if (error instanceof MaxStreamsError) {
+        toast.error(
+          "Unable to search by username at this time due to a temporary server issue. Please use the user's Roblox ID to search instead.",
+          {
+            duration: 6000,
+            position: "bottom-right",
+          },
+        );
+      } else {
+        toast.error(
+          "Failed to find user. Please check the spelling and try again, or try searching by Roblox ID instead.",
+          {
+            duration: 5000,
+            position: "bottom-right",
+          },
+        );
+      }
+    } finally {
+      setIsSearching(false);
+    }
   };
 
   // Use internal loading state or external loading state

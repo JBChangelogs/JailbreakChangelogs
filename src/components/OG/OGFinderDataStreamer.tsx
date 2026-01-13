@@ -5,6 +5,7 @@ import {
   fetchRobloxUsersBatch,
   fetchUserByRobloxId,
   fetchItems,
+  MaxStreamsError,
 } from "@/utils/api";
 import { RobloxUser } from "@/types";
 import OGFinderResults from "./OGFinderResults";
@@ -145,14 +146,21 @@ async function OGFinderDataFetcher({ robloxId }: { robloxId: string }) {
     } catch (error) {
       console.error("Error fetching user by username:", error);
 
-      // Check if it's a 502 error specifically for the username lookup
-      const isServerError =
-        error instanceof Error &&
-        error.message.includes("Failed to fetch user: 502");
+      let errorMessage: string;
 
-      const errorMessage = isServerError
-        ? `Server error while searching for "${robloxId}". Please try searching by Roblox ID instead, or try again later.`
-        : `Failed to find user "${robloxId}". Please check the spelling and try again, or try searching by Roblox ID instead.`;
+      // Check for max streams error - this is a temporary server issue
+      if (error instanceof MaxStreamsError) {
+        errorMessage = `Unable to search by username at this time due to a temporary server issue. Please use the user's Roblox ID to search instead.`;
+      } else {
+        // Check if it's a 502 error specifically for the username lookup
+        const isServerError =
+          error instanceof Error &&
+          error.message.includes("Failed to fetch user: 502");
+
+        errorMessage = isServerError
+          ? `Server error while searching for "${robloxId}". Please try searching by Roblox ID instead, or try again later.`
+          : `Failed to find user "${robloxId}". Please check the spelling and try again, or try searching by Roblox ID instead.`;
+      }
 
       return (
         <OGFinderResults

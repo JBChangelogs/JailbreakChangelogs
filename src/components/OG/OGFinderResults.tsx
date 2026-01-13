@@ -6,6 +6,8 @@ import { RobloxUser, Item } from "@/types";
 import { useUsernameToId } from "@/hooks/useUsernameToId";
 import { UserConnectionData } from "@/app/inventories/types";
 import { useBatchUserData } from "@/hooks/useBatchUserData";
+import { MaxStreamsError } from "@/utils/api";
+import toast from "react-hot-toast";
 import OGFinderFAQ from "./OGFinderFAQ";
 import SearchForm from "./SearchForm";
 import TradeHistoryModal from "@/components/Modals/TradeHistoryModal";
@@ -162,6 +164,25 @@ export default function OGFinderResults({
         component: "OGFinderResults",
         action: "handleSearch",
       });
+
+      // Check for max streams error - this is a temporary server issue
+      if (error instanceof MaxStreamsError) {
+        toast.error(
+          "Unable to search by username at this time due to a temporary server issue. Please use the user's Roblox ID to search instead.",
+          {
+            duration: 6000,
+            position: "bottom-right",
+          },
+        );
+      } else {
+        toast.error(
+          "Failed to find user. Please check the spelling and try again, or try searching by Roblox ID instead.",
+          {
+            duration: 5000,
+            position: "bottom-right",
+          },
+        );
+      }
     } finally {
       setIsLoading(false);
     }

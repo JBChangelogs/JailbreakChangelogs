@@ -1207,9 +1207,11 @@ export async function fetchInventoryData(robloxId: string) {
     });
 
     if (!response.ok) {
-      console.error(
-        `[SERVER] Inventory API returned ${response.status} for ID: ${robloxId}`,
-      );
+      if (response.status !== 404) {
+        console.error(
+          `[SERVER] Inventory API returned ${response.status} for ID: ${robloxId}`,
+        );
+      }
 
       if (response.status === 404) {
         return {
@@ -1298,9 +1300,9 @@ export async function fetchRobloxUsersBatch(userIds: string[]) {
       });
 
       if (!response.ok) {
-        console.error(
-          `[SERVER] fetchRobloxUsersBatch: Failed with status ${response.status}`,
-        );
+        // console.error(
+        //   `[SERVER] fetchRobloxUsersBatch: Failed with status ${response.status}`,
+        // );
         return { data: [] };
       }
 
@@ -1774,6 +1776,14 @@ export async function fetchQueueInfo(): Promise<QueueInfo | null> {
   }
 }
 
+// Custom error class for max streams error
+export class MaxStreamsError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "MaxStreamsError";
+  }
+}
+
 export async function fetchRobloxUserByUsername(username: string) {
   try {
     const response = await fetch(`${INVENTORY_API_URL}/proxy/users`, {
@@ -1790,10 +1800,56 @@ export async function fetchRobloxUserByUsername(username: string) {
     });
 
     if (!response.ok) {
+      // Try to read the response body to check for specific error messages
+      let errorMessage = `Failed to fetch user: ${response.status}`;
+      let responseText = "";
+
+      try {
+        responseText = await response.text();
+        // Try to parse as JSON if possible
+        try {
+          const errorData = JSON.parse(responseText);
+          if (errorData.error || errorData.message) {
+            errorMessage = errorData.error || errorData.message;
+          } else if (typeof errorData === "string") {
+            errorMessage = errorData;
+          }
+        } catch {
+          // If not JSON, use the text directly
+          if (responseText) {
+            errorMessage = responseText;
+          }
+        }
+      } catch (parseError) {
+        // If we can't read the response, use the status-based error
+        console.error(
+          `[SERVER] fetchRobloxUserByUsername: Failed to parse error response:`,
+          parseError,
+        );
+      }
+
       console.error(
         `[SERVER] fetchRobloxUserByUsername: Failed with status ${response.status} ${response.statusText}`,
+        errorMessage,
       );
-      throw new Error(`Failed to fetch user: ${response.status}`);
+
+      // Check for the specific "Max outbound streams" error
+      // The error can appear in various formats:
+      // - "Request error: Max outbound streams is 100, 100 open"
+      // - "Max outbound streams is 100, 100 open"
+      // - "Max outbound streams"
+      const maxStreamsPattern = /max\s+outbound\s+streams/i;
+      if (
+        response.status === 500 &&
+        (maxStreamsPattern.test(errorMessage) ||
+          maxStreamsPattern.test(responseText))
+      ) {
+        throw new MaxStreamsError(
+          "Max outbound streams is 100, 100 open. Please use Roblox ID instead of username for now.",
+        );
+      }
+
+      throw new Error(errorMessage);
     }
 
     const data = await response.json();

@@ -14,6 +14,8 @@ import { useAuthContext } from "@/contexts/AuthContext";
 import { Season } from "@/types/seasons";
 import { useUsernameToId } from "@/hooks/useUsernameToId";
 import { useBatchUserData } from "@/hooks/useBatchUserData";
+import { MaxStreamsError } from "@/utils/api";
+import toast from "react-hot-toast";
 
 import SearchForm from "@/components/Inventory/SearchForm";
 import UserStats from "@/components/Inventory/UserStats";
@@ -581,9 +583,34 @@ export default function InventoryCheckerClient({
     if (!input) return;
 
     setInternalIsLoading(true);
-    const isNumeric = /^\d+$/.test(input);
-    const id = isNumeric ? input : await getId(input);
-    router.push(`/inventories/${id ?? input}`);
+    try {
+      const isNumeric = /^\d+$/.test(input);
+      const id = isNumeric ? input : await getId(input);
+      router.push(`/inventories/${id ?? input}`);
+    } catch (error) {
+      console.error("Error searching for user:", error);
+
+      // Check for max streams error - this is a temporary server issue
+      if (error instanceof MaxStreamsError) {
+        toast.error(
+          "Unable to search by username at this time due to a temporary server issue. Please use the user's Roblox ID to search instead.",
+          {
+            duration: 6000,
+            position: "bottom-right",
+          },
+        );
+      } else {
+        toast.error(
+          "Failed to find user. Please check the spelling and try again, or try searching by Roblox ID instead.",
+          {
+            duration: 5000,
+            position: "bottom-right",
+          },
+        );
+      }
+    } finally {
+      setInternalIsLoading(false);
+    }
   };
 
   const handleItemClick = (item: InventoryItem) => {

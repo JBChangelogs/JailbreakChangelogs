@@ -6,6 +6,7 @@ import { RobloxUser } from "@/types";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { useUsernameToId } from "@/hooks/useUsernameToId";
 import toast from "react-hot-toast";
+import { MaxStreamsError } from "@/utils/api";
 import OGFinderDataStreamer from "./OGFinderDataStreamer";
 import { Icon } from "@/components/ui/IconWrapper";
 
@@ -76,9 +77,34 @@ export default function OGFinderClient({
     }
 
     setIsSearching(true);
-    const isNumeric = /^\d+$/.test(input);
-    const id = isNumeric ? input : await getId(input);
-    router.push(`/og/${id ?? input}`);
+    try {
+      const isNumeric = /^\d+$/.test(input);
+      const id = isNumeric ? input : await getId(input);
+      router.push(`/og/${id ?? input}`);
+    } catch (error) {
+      console.error("Error searching for user:", error);
+
+      // Check for max streams error - this is a temporary server issue
+      if (error instanceof MaxStreamsError) {
+        toast.error(
+          "Unable to search by username at this time due to a temporary server issue. Please use the user's Roblox ID to search instead.",
+          {
+            duration: 6000,
+            position: "bottom-right",
+          },
+        );
+      } else {
+        toast.error(
+          "Failed to find user. Please check the spelling and try again, or try searching by Roblox ID instead.",
+          {
+            duration: 5000,
+            position: "bottom-right",
+          },
+        );
+      }
+    } finally {
+      setIsSearching(false);
+    }
   };
 
   return (

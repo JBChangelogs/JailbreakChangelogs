@@ -1,7 +1,7 @@
 "use client";
 
 import { useQueryClient } from "@tanstack/react-query";
-import { fetchRobloxUserByUsername } from "@/utils/api";
+import { fetchRobloxUserByUsername, MaxStreamsError } from "@/utils/api";
 
 type RobloxUserLookup = {
   id?: number;
@@ -24,6 +24,14 @@ export function useUsernameToId() {
       queryFn: async () => {
         const result = await fetchRobloxUserByUsername(username);
         return (result as RobloxUserLookup) || null;
+      },
+      retry: (failureCount, error) => {
+        // Don't retry on MaxStreamsError - it's a temporary server issue that won't be fixed by retrying
+        if (error instanceof MaxStreamsError) {
+          return false;
+        }
+        // Default retry behavior for other errors (retry up to 3 times)
+        return failureCount < 3;
       },
     });
 

@@ -171,12 +171,17 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
   const [globalErrorSnackbarMsg, setGlobalErrorSnackbarMsg] = useState("");
   const [infoSnackbarOpen, setInfoSnackbarOpen] = useState(false);
   const [infoSnackbarMsg, setInfoSnackbarMsg] = useState("");
+  const [isClient, setIsClient] = useState(false);
 
   const [page, setPage] = useState(1);
   const itemsPerPage = 10;
 
   // Supporter modal hook
   const { modalState, closeModal, checkCommentLength } = useSupporterModal();
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   useEffect(() => {
     // Check if user is logged in
@@ -1052,16 +1057,23 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                             ) : (
                               <>
                                 <div className="prose prose-sm max-w-none">
-                                  <p
-                                    className="text-primary-text text-sm leading-relaxed wrap-break-word whitespace-pre-wrap"
-                                    dangerouslySetInnerHTML={{
-                                      __html: sanitizeHTML(
-                                        convertUrlsToLinksHTML(
-                                          processMentions(visibleContent),
+                                  {isClient ? (
+                                    <p
+                                      className="text-primary-text text-sm leading-relaxed wrap-break-word whitespace-pre-wrap"
+                                      dangerouslySetInnerHTML={{
+                                        __html: sanitizeHTML(
+                                          convertUrlsToLinksHTML(
+                                            processMentions(visibleContent),
+                                          ),
                                         ),
-                                      ),
-                                    }}
-                                  />
+                                      }}
+                                    />
+                                  ) : (
+                                    <p className="text-primary-text text-sm leading-relaxed wrap-break-word whitespace-pre-wrap">
+                                      {visibleContent}
+                                    </p>
+                                  )}
+
                                   {shouldTruncate && (
                                     <button
                                       onClick={() =>
