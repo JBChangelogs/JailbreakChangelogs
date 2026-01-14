@@ -1278,14 +1278,6 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
     return selectedType === "cash" ? item.cash_value : item.duped_value;
   };
 
-  // Calculate total DemandMultiple for a side (for Badimo Balancing)
-  const calculateDemandMultiple = (items: TradeItem[]): number => {
-    return items.reduce((total, item) => {
-      const demandMultiple = item.metadata?.DemandMultiple ?? 0;
-      return total + demandMultiple;
-    }, 0);
-  };
-
   // Function to update value type for an item
   const updateItemValueType = (
     itemId: number,
@@ -1687,110 +1679,6 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
                 );
               })()}
             </DroppableZone>
-          </div>
-        </div>
-
-        {/* Badimo Balancing - Always Visible */}
-        <div className="mb-6">
-          <div className="border-border-primary bg-secondary-bg rounded-lg border p-4">
-            <div className="mb-3 flex items-center gap-2">
-              <h4 className="text-primary-text text-base font-semibold">
-                Badimo Balancing
-              </h4>
-              <Tooltip
-                title="Shows if your trade is balanced based on Badimo's in-game balancing system. Trades with DemandMultiple ≥5 on both sides are balanced."
-                arrow
-                placement="top"
-                slotProps={{
-                  tooltip: {
-                    sx: {
-                      backgroundColor: "var(--color-secondary-bg)",
-                      color: "var(--color-primary-text)",
-                      border: "1px solid var(--color-stroke)",
-                      maxWidth: "300px",
-                      "& .MuiTooltip-arrow": {
-                        color: "var(--color-secondary-bg)",
-                      },
-                    },
-                  },
-                }}
-              >
-                <div className="text-secondary-text hover:text-primary-text cursor-help">
-                  <Icon
-                    icon="heroicons:information-circle"
-                    className="h-5 w-5"
-                  />
-                </div>
-              </Tooltip>
-            </div>
-
-            {offeringItems.length > 0 && requestingItems.length > 0 ? (
-              (() => {
-                const offeringDM = calculateDemandMultiple(offeringItems);
-                const requestingDM = calculateDemandMultiple(requestingItems);
-                const offeringBalanced = offeringDM >= 5;
-                const requestingBalanced = requestingDM >= 5;
-                const bothBalanced = offeringBalanced && requestingBalanced;
-
-                return (
-                  <>
-                    <div className="mb-3 flex items-center gap-4 text-sm">
-                      <span className="text-secondary-text">
-                        Offering:{" "}
-                        <span className="text-primary-text font-medium">
-                          {offeringDM.toFixed(2)}
-                        </span>
-                      </span>
-                      <span className="text-secondary-text">|</span>
-                      <span className="text-secondary-text">
-                        Requesting:{" "}
-                        <span className="text-primary-text font-medium">
-                          {requestingDM.toFixed(2)}
-                        </span>
-                      </span>
-                    </div>
-
-                    {bothBalanced ? (
-                      <div className="bg-status-success/10 border-status-success flex items-center gap-2 rounded-lg border p-3">
-                        <Icon
-                          icon="heroicons:check-circle"
-                          className="text-status-success h-5 w-5 shrink-0"
-                        />
-                        <span className="text-primary-text text-sm font-medium">
-                          Trade is balanced!
-                        </span>
-                      </div>
-                    ) : (
-                      <div className="bg-status-warning/10 border-status-warning flex flex-col gap-2 rounded-lg border p-3">
-                        <div className="flex items-center gap-2">
-                          <Icon
-                            icon="heroicons:exclamation-triangle"
-                            className="text-status-warning h-5 w-5 shrink-0"
-                          />
-                          <span className="text-primary-text text-sm font-medium">
-                            Trade needs balancing
-                          </span>
-                        </div>
-                        <div className="text-secondary-text ml-7 space-y-1 text-xs">
-                          {!offeringBalanced && (
-                            <p>• The offering side is unbalanced</p>
-                          )}
-                          {!requestingBalanced && (
-                            <p>• The requesting side is unbalanced</p>
-                          )}
-                        </div>
-                      </div>
-                    )}
-                  </>
-                );
-              })()
-            ) : (
-              <div className="bg-secondary-bg/50 border-border-primary rounded-lg border border-dashed p-3">
-                <p className="text-secondary-text text-center text-sm">
-                  Add at least one item to both sides to check balancing
-                </p>
-              </div>
-            )}
           </div>
         </div>
 
