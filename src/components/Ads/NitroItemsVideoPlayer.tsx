@@ -8,22 +8,22 @@ type NitroAdsWithRemove = {
   removeAd?: (id: string) => void;
 };
 
-const SLOT_ID = "np-video-player-items";
+const SLOT_ID = "np-item";
 
 const ITEMS_CONFIG = {
-  format: "video-nc",
+  sizes: [
+    ["300", "250"],
+    ["320", "100"],
+    ["320", "50"],
+  ],
   report: {
     enabled: true,
-    icon: false,
+    icon: true,
     wording: "Report Ad",
-    position: "top-right",
+    position: "bottom-right",
   },
   mediaQuery:
     "(min-width: 1025px), (min-width: 768px) and (max-width: 1024px), (min-width: 320px) and (max-width: 767px)",
-  video: {
-    initialDelay: 2,
-    mobile: "compact",
-  },
 };
 
 interface Props {

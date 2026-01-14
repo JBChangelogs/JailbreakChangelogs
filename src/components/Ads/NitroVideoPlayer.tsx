@@ -23,11 +23,7 @@ export default function NitroVideoPlayer() {
     // Pages that have their own dedicated video-nc players.
     // On these routes, Nitro has requested that the floating player
     // NOT be present at all.
-    const hasDedicatedVideoNcPlayer =
-      pathname === "/values" ||
-      pathname?.startsWith("/item/") ||
-      pathname?.startsWith("/seasons") ||
-      pathname?.startsWith("/changelogs");
+    const hasDedicatedVideoNcPlayer = false;
 
     const shouldSuppressFloatingPlayer =
       isSupporter || hasDedicatedVideoNcPlayer;
