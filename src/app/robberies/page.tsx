@@ -104,8 +104,8 @@ function RobberyTrackerContent() {
   const [searchQuery, setSearchQuery] = useState("");
   const [nameSort, setNameSort] = useState<NameSort>("a-z");
   const [timeSort, setTimeSort] = useState<TimeSort>("newest");
-  const [activeRobberyType, setActiveRobberyType] = useState<string | null>(
-    null,
+  const [selectedRobberyTypes, setSelectedRobberyTypes] = useState<string[]>(
+    [],
   );
   const [activeAirdropLocation, setActiveAirdropLocation] = useState<
     "all" | "CactusValley" | "Dunes"
@@ -115,17 +115,18 @@ function RobberyTrackerContent() {
   const filteredRobberies = useMemo(() => {
     // specific filtering for robberies
     let filtered = robberies;
-    if (activeRobberyType) {
-      if (activeRobberyType === "Bank") {
-        filtered = filtered.filter(
-          (robbery) =>
-            robbery.marker_name === "Bank" || robbery.marker_name === "Bank2",
-        );
-      } else {
-        filtered = filtered.filter(
-          (robbery) => robbery.marker_name === activeRobberyType,
-        );
-      }
+    if (selectedRobberyTypes.length > 0) {
+      filtered = filtered.filter((robbery) => {
+        // Check if any selected type matches this robbery
+        return selectedRobberyTypes.some((selectedType) => {
+          if (selectedType === "Bank") {
+            return (
+              robbery.marker_name === "Bank" || robbery.marker_name === "Bank2"
+            );
+          }
+          return robbery.marker_name === selectedType;
+        });
+      });
     }
 
     // Apply search query
@@ -146,7 +147,7 @@ function RobberyTrackerContent() {
       }
       return a.timestamp - b.timestamp;
     });
-  }, [robberies, activeRobberyType, searchQuery, timeSort]);
+  }, [robberies, selectedRobberyTypes, searchQuery, timeSort]);
 
   // Filter and sort Mansions (simpler as no type filtering)
   const filteredMansions = useMemo(() => {
@@ -480,28 +481,59 @@ function RobberyTrackerContent() {
             {/* Conditional Rendering Based on View */}
             {activeView === "robberies" ? (
               <>
-                {/* Robbery Type Tabs */}
-                <div className="mb-6 overflow-x-auto">
-                  <div role="tablist" className="tabs flex min-w-max flex-wrap">
-                    <button
-                      role="tab"
-                      aria-selected={activeRobberyType === null}
-                      onClick={() => setActiveRobberyType(null)}
-                      className={`tab ${activeRobberyType === null ? "tab-active" : ""}`}
-                    >
-                      All Robberies
-                    </button>
-                    {ROBBERY_TYPE_TABS.map((type) => (
+                {/* Robbery Type Multi-Select */}
+                <div className="mb-6">
+                  <div className="mb-3 flex items-center justify-between">
+                    <p className="text-secondary-text text-sm font-medium">
+                      Filter by Robbery Type{" "}
+                      {selectedRobberyTypes.length > 0 && (
+                        <span className="text-primary-text">
+                          ({selectedRobberyTypes.length} selected)
+                        </span>
+                      )}
+                    </p>
+                    {selectedRobberyTypes.length > 0 && (
                       <button
-                        key={type.marker_name}
-                        role="tab"
-                        aria-selected={activeRobberyType === type.marker_name}
-                        onClick={() => setActiveRobberyType(type.marker_name)}
-                        className={`tab ${activeRobberyType === type.marker_name ? "tab-active" : ""}`}
+                        onClick={() => setSelectedRobberyTypes([])}
+                        className="text-button-info hover:text-button-info-hover cursor-pointer text-sm font-medium transition-colors"
                       >
-                        {type.name}
+                        Clear All
                       </button>
-                    ))}
+                    )}
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {ROBBERY_TYPE_TABS.map((type) => {
+                      const isSelected = selectedRobberyTypes.includes(
+                        type.marker_name,
+                      );
+                      return (
+                        <button
+                          key={type.marker_name}
+                          onClick={() => {
+                            setSelectedRobberyTypes((prev) =>
+                              prev.includes(type.marker_name)
+                                ? prev.filter((t) => t !== type.marker_name)
+                                : [...prev, type.marker_name],
+                            );
+                          }}
+                          className={`bg-secondary-bg text-primary-text hover:border-border-focus flex cursor-pointer items-center gap-2 rounded-lg border px-4 py-2 transition-all ${
+                            isSelected
+                              ? "border-button-info"
+                              : "border-border-primary"
+                          }`}
+                        >
+                          {isSelected && (
+                            <Icon
+                              icon="heroicons:check"
+                              className="text-button-info h-4 w-4"
+                            />
+                          )}
+                          <span className="text-sm font-medium">
+                            {type.name}
+                          </span>
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
 
@@ -529,28 +561,17 @@ function RobberyTrackerContent() {
                       No robberies found
                     </h3>
                     <p className="text-secondary-text">
-                      {activeRobberyType && !searchQuery ? (
+                      {selectedRobberyTypes.length > 0 && !searchQuery ? (
                         <>
-                          No{" "}
-                          {
-                            ROBBERY_TYPE_TABS.find(
-                              (t) => t.marker_name === activeRobberyType,
-                            )?.name
-                          }{" "}
-                          robberies logged yet
+                          No robberies logged yet for the selected type
+                          {selectedRobberyTypes.length > 1 ? "s" : ""}
                         </>
-                      ) : activeRobberyType && searchQuery ? (
-                        <>
-                          No{" "}
-                          {
-                            ROBBERY_TYPE_TABS.find(
-                              (t) => t.marker_name === activeRobberyType,
-                            )?.name
-                          }{" "}
-                          robberies match your search
-                        </>
-                      ) : (
+                      ) : selectedRobberyTypes.length > 0 && searchQuery ? (
+                        <>No robberies match your filters and search</>
+                      ) : searchQuery ? (
                         <>Try adjusting your search query</>
+                      ) : (
+                        <>No robberies tracked yet</>
                       )}
                     </p>
                   </div>
