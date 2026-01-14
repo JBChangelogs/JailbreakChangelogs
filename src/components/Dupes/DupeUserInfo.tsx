@@ -7,7 +7,6 @@ import { UserConnectionData } from "@/app/inventories/types";
 import { DiscordIcon } from "@/components/Icons/DiscordIcon";
 import { RobloxIcon } from "@/components/Icons/RobloxIcon";
 import { VerifiedBadgeIcon } from "@/components/Icons/VerifiedBadgeIcon";
-import NitroDupeFinderAd from "@/components/Ads/NitroDupeFinderAd";
 
 const Tooltip = dynamic(() => import("@mui/material/Tooltip"), { ssr: false });
 
@@ -174,11 +173,6 @@ export default function DupeUserInfo({
               )}
             </div>
           </div>
-        </div>
-
-        {/* Ad Section - Side by side on large screens, wraps on mobile */}
-        <div className="flex shrink-0 items-center justify-center lg:ml-4">
-          <NitroDupeFinderAd />
         </div>
       </div>
 
