@@ -15,7 +15,6 @@ tsconfig.tsbuildinfo
 .idea
 .eslintcache
 .vscode
-.cursor
 .augment
 .windsurf
 

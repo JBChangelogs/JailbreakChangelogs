@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { TradeItem } from "@/types/trading";
 import { Button, Slider } from "@mui/material";
 import { AvailableItemsGrid } from "../../trading/AvailableItemsGrid";
@@ -58,6 +58,26 @@ const formatTotalValue = (total: number): string => {
  * Shared empty-state panel used across tabs.
  * Keep visual style consistent with `CustomConfirmationModal` and other surfaces.
  */
+const groupItems = (items: TradeItem[]) => {
+  const grouped = items.reduce(
+    (acc, item) => {
+      const key = item.sub_name
+        ? `${item.id}-${item.sub_name}`
+        : `${item.id}-base`;
+
+      if (!acc[key]) {
+        acc[key] = { ...item, count: 1 };
+      } else {
+        acc[key].count++;
+      }
+      return acc;
+    },
+    {} as Record<string, TradeItem & { count: number }>,
+  );
+
+  return Object.values(grouped);
+};
+
 const EmptyState: React.FC<{ message: string; onBrowse: () => void }> = ({
   message,
   onBrowse,
@@ -150,26 +170,6 @@ const CalculatorItemGrid: React.FC<{
   };
 
   useLockBodyScroll(actionModalOpen);
-
-  const groupItems = (items: TradeItem[]) => {
-    const grouped = items.reduce(
-      (acc, item) => {
-        const key = item.sub_name
-          ? `${item.id}-${item.sub_name}`
-          : `${item.id}-base`;
-
-        if (!acc[key]) {
-          acc[key] = { ...item, count: 1 };
-        } else {
-          acc[key].count++;
-        }
-        return acc;
-      },
-      {} as Record<string, TradeItem & { count: number }>,
-    );
-
-    return Object.values(grouped);
-  };
 
   if (items.length === 0) {
     const handleClick = () => {
@@ -568,31 +568,8 @@ const CalculatorValueComparison: React.FC<{
     return value.toLocaleString();
   };
 
-  const groupItems = (items: TradeItem[]) => {
-    const grouped = items.reduce(
-      (acc, item) => {
-        const key = `${item.id}-${item.sub_name || "base"}`;
-        if (!acc[key]) {
-          acc[key] = { ...item, count: 1 };
-        } else {
-          acc[key].count++;
-        }
-        return acc;
-      },
-      {} as Record<string, TradeItem & { count: number }>,
-    );
-    return Object.values(grouped);
-  };
-
-  const offeringTotal = groupItems(offering).reduce(
-    (sum, item) => sum + getSelectedValue(item, "offering") * item.count,
-    0,
-  );
-  const requestingTotal = groupItems(requesting).reduce(
-    (sum, item) => sum + getSelectedValue(item, "requesting") * item.count,
-    0,
-  );
-  const difference = offeringTotal - requestingTotal;
+  const groupedOffering = useMemo(() => groupItems(offering), [offering]);
+  const groupedRequesting = useMemo(() => groupItems(requesting), [requesting]);
 
   // Check if there are any items selected
   if (offering.length === 0 && requesting.length === 0) {
@@ -605,6 +582,16 @@ const CalculatorValueComparison: React.FC<{
       />
     );
   }
+
+  const offeringTotal = groupedOffering.reduce(
+    (sum, item) => sum + getSelectedValue(item, "offering") * item.count,
+    0,
+  );
+  const requestingTotal = groupedRequesting.reduce(
+    (sum, item) => sum + getSelectedValue(item, "requesting") * item.count,
+    0,
+  );
+  const difference = offeringTotal - requestingTotal;
 
   return (
     <div className="border-border-primary bg-secondary-bg hover:border-border-focus hover:shadow-card-shadow overflow-x-auto rounded-lg border p-8 transition-colors duration-200 hover:shadow-lg">
@@ -635,12 +622,9 @@ const CalculatorValueComparison: React.FC<{
                   Offering
                 </span>
                 <span className="bg-primary/10 border-primary/20 text-primary-text rounded-full border px-3 py-1 text-xs font-medium">
-                  {groupItems(offering).reduce(
-                    (sum, item) => sum + item.count,
-                    0,
-                  )}{" "}
+                  {groupedOffering.reduce((sum, item) => sum + item.count, 0)}{" "}
                   item
-                  {groupItems(offering).reduce(
+                  {groupedOffering.reduce(
                     (sum, item) => sum + item.count,
                     0,
                   ) !== 1
@@ -653,7 +637,7 @@ const CalculatorValueComparison: React.FC<{
 
           {/* Items Container */}
           <div className="bg-status-success/5 space-y-4 rounded-xl p-6">
-            {groupItems(offering).map((item, index, array) => {
+            {groupedOffering.map((item, index, array) => {
               const selectedType = getSelectedValueType(item, "offering");
               const isDupedSelected = selectedType === "duped";
               const demand = item.demand ?? item.data?.demand ?? "N/A";
@@ -779,12 +763,9 @@ const CalculatorValueComparison: React.FC<{
                   Requesting
                 </span>
                 <span className="bg-primary/10 border-primary/20 text-primary-text rounded-full border px-3 py-1 text-xs font-medium">
-                  {groupItems(requesting).reduce(
-                    (sum, item) => sum + item.count,
-                    0,
-                  )}{" "}
+                  {groupedRequesting.reduce((sum, item) => sum + item.count, 0)}{" "}
                   item
-                  {groupItems(requesting).reduce(
+                  {groupedRequesting.reduce(
                     (sum, item) => sum + item.count,
                     0,
                   ) !== 1
@@ -797,7 +778,7 @@ const CalculatorValueComparison: React.FC<{
 
           {/* Items Container */}
           <div className="bg-status-error/5 space-y-4 rounded-xl p-6">
-            {groupItems(requesting).map((item, index, array) => {
+            {groupedRequesting.map((item, index, array) => {
               const selectedType = getSelectedValueType(item, "requesting");
               const isDupedSelected = selectedType === "duped";
               const demand = item.demand ?? item.data?.demand ?? "N/A";

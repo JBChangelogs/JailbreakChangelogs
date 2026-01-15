@@ -2,6 +2,7 @@ import { Item } from "@/types";
 import Image from "next/image";
 import Link from "next/link";
 import dynamic from "next/dynamic";
+import { useMediaQuery } from "@mui/material";
 
 const Tooltip = dynamic(() => import("@mui/material/Tooltip"), { ssr: false });
 import {
@@ -38,21 +39,13 @@ export default function ItemCard({
 }: ItemCardProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
-  const [windowWidth, setWindowWidth] = useState(() =>
-    typeof window !== "undefined" ? window.innerWidth : 1024,
-  );
+  const isMobile = useMediaQuery("(max-width:640px)");
   const mediaRef = useRef<HTMLDivElement>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const pathname = usePathname();
   const isValuesPage = pathname === "/values";
   const isAuthenticated = useIsAuthenticated();
-
-  useEffect(() => {
-    const handleResize = () => setWindowWidth(window.innerWidth);
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
 
   const handleCardClick = (e: React.MouseEvent) => {
     // Don't navigate if clicking on interactive elements
@@ -415,16 +408,15 @@ export default function ItemCard({
                   if (cashChange && cashChange.difference !== 0) {
                     const isPositive = cashChange.difference > 0;
                     const diff = Math.abs(cashChange.difference);
-                    const formattedDiff =
-                      windowWidth <= 640
-                        ? (() => {
-                            if (diff >= 1000000)
-                              return `${(diff / 1000000).toFixed(diff % 1000000 === 0 ? 0 : 2)}m`;
-                            if (diff >= 1000)
-                              return `${(diff / 1000).toFixed(diff % 1000 === 0 ? 0 : 2)}k`;
-                            return diff.toString();
-                          })()
-                        : diff.toLocaleString();
+                    const formattedDiff = isMobile
+                      ? (() => {
+                          if (diff >= 1000000)
+                            return `${(diff / 1000000).toFixed(diff % 1000000 === 0 ? 0 : 2)}m`;
+                          if (diff >= 1000)
+                            return `${(diff / 1000).toFixed(diff % 1000 === 0 ? 0 : 2)}k`;
+                          return diff.toString();
+                        })()
+                      : diff.toLocaleString();
 
                     badges.push(
                       <Tooltip
@@ -451,16 +443,15 @@ export default function ItemCard({
                   if (dupedChange && dupedChange.difference !== 0) {
                     const isPositive = dupedChange.difference > 0;
                     const diff = Math.abs(dupedChange.difference);
-                    const formattedDiff =
-                      windowWidth <= 640
-                        ? (() => {
-                            if (diff >= 1000000)
-                              return `${(diff / 1000000).toFixed(diff % 1000000 === 0 ? 0 : 2)}m`;
-                            if (diff >= 1000)
-                              return `${(diff / 1000).toFixed(diff % 1000 === 0 ? 0 : 2)}k`;
-                            return diff.toString();
-                          })()
-                        : diff.toLocaleString();
+                    const formattedDiff = isMobile
+                      ? (() => {
+                          if (diff >= 1000000)
+                            return `${(diff / 1000000).toFixed(diff % 1000000 === 0 ? 0 : 2)}m`;
+                          if (diff >= 1000)
+                            return `${(diff / 1000).toFixed(diff % 1000 === 0 ? 0 : 2)}k`;
+                          return diff.toString();
+                        })()
+                      : diff.toLocaleString();
 
                     badges.push(
                       <Tooltip
@@ -516,7 +507,7 @@ export default function ItemCard({
                     })()}
                 </div>
                 <span className="bg-button-info text-form-button-text rounded-lg px-0.5 py-0.5 text-[9px] font-bold shadow-sm min-[401px]:px-2 min-[401px]:py-1 min-[401px]:text-xs min-[480px]:px-3 min-[480px]:py-1.5">
-                  {windowWidth <= 640
+                  {isMobile
                     ? currentItemData.cash_value
                     : formatFullValue(currentItemData.cash_value)}
                 </span>
@@ -550,7 +541,7 @@ export default function ItemCard({
                     })()}
                 </div>
                 <span className="bg-button-info text-form-button-text rounded-lg px-0.5 py-0.5 text-[9px] font-bold shadow-sm min-[401px]:px-2 min-[401px]:py-1 min-[401px]:text-xs min-[480px]:px-3 min-[480px]:py-1.5">
-                  {windowWidth <= 640
+                  {isMobile
                     ? currentItemData.duped_value
                     : formatFullValue(currentItemData.duped_value)}
                 </span>

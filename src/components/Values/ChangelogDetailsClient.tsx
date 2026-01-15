@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Chip, useMediaQuery } from "@mui/material";
 import { Pagination } from "@/components/ui/Pagination";
 import { Dialog } from "@headlessui/react";
@@ -278,108 +278,118 @@ export default function ChangelogDetailsClient({
   };
 
   // Filter changes based on search query, selected type, and suggestion type
-  const filteredChanges = changelog.change_data
-    .filter((change) => {
-      if (searchQuery === "") {
-        const matchesType =
-          selectedType === "All Items" || change.item.type === selectedType;
-        const matchesSuggestionType =
-          selectedSuggestionType === "all" ||
-          selectedSuggestionType === "" ||
-          change.suggestion?.metadata?.suggestion_type ===
-            selectedSuggestionType;
-        return matchesType && matchesSuggestionType;
-      }
+  const filteredChanges = useMemo(
+    () =>
+      changelog.change_data
+        .filter((change) => {
+          if (searchQuery === "") {
+            const matchesType =
+              selectedType === "All Items" || change.item.type === selectedType;
+            const matchesSuggestionType =
+              selectedSuggestionType === "all" ||
+              selectedSuggestionType === "" ||
+              change.suggestion?.metadata?.suggestion_type ===
+                selectedSuggestionType;
+            return matchesType && matchesSuggestionType;
+          }
 
-      const searchLower = searchQuery.trim().toLowerCase();
+          const searchLower = searchQuery.trim().toLowerCase();
 
-      // Search in item name
-      if (change.item.name.toLowerCase().includes(searchLower)) return true;
+          // Search in item name
+          if (change.item.name.toLowerCase().includes(searchLower)) return true;
 
-      // Search in item type
-      if (change.item.type.toLowerCase().includes(searchLower)) return true;
+          // Search in item type
+          if (change.item.type.toLowerCase().includes(searchLower)) return true;
 
-      // Search in changed_by name
-      if (change.changed_by.toLowerCase().includes(searchLower)) return true;
+          // Search in changed_by name
+          if (change.changed_by.toLowerCase().includes(searchLower))
+            return true;
 
-      // Search in reason
-      if (change.reason && change.reason.toLowerCase().includes(searchLower))
-        return true;
+          // Search in reason
+          if (
+            change.reason &&
+            change.reason.toLowerCase().includes(searchLower)
+          )
+            return true;
 
-      // Search in suggestion reason
-      if (
-        change.suggestion?.data.reason &&
-        change.suggestion.data.reason.toLowerCase().includes(searchLower)
-      )
-        return true;
+          // Search in suggestion reason
+          if (
+            change.suggestion?.data.reason &&
+            change.suggestion.data.reason.toLowerCase().includes(searchLower)
+          )
+            return true;
 
-      // Search in suggestion suggestor name
-      if (
-        change.suggestion?.suggestor_name &&
-        change.suggestion.suggestor_name.toLowerCase().includes(searchLower)
-      )
-        return true;
+          // Search in suggestion suggestor name
+          if (
+            change.suggestion?.suggestor_name &&
+            change.suggestion.suggestor_name.toLowerCase().includes(searchLower)
+          )
+            return true;
 
-      // Search in changes (old and new values)
-      const hasValueMatch = Object.entries(change.changes.old).some(
-        ([key, oldValue]) => {
-          if (key === "last_updated") return false;
+          // Search in changes (old and new values)
+          const hasValueMatch = Object.entries(change.changes.old).some(
+            ([key, oldValue]) => {
+              if (key === "last_updated") return false;
 
-          const newValue = change.changes.new[key];
-          if (oldValue === newValue) return false;
+              const newValue = change.changes.new[key];
+              if (oldValue === newValue) return false;
 
-          // Convert values to strings for searching
-          const oldValueStr = String(oldValue || "");
-          const newValueStr = String(newValue || "");
+              // Convert values to strings for searching
+              const oldValueStr = String(oldValue || "");
+              const newValueStr = String(newValue || "");
 
-          return (
-            oldValueStr.toLowerCase().includes(searchLower) ||
-            newValueStr.toLowerCase().includes(searchLower)
+              return (
+                oldValueStr.toLowerCase().includes(searchLower) ||
+                newValueStr.toLowerCase().includes(searchLower)
+              );
+            },
           );
-        },
-      );
 
-      if (hasValueMatch) return true;
+          if (hasValueMatch) return true;
 
-      // Search in suggestion data values
-      if (change.suggestion?.data) {
-        const suggestionData = change.suggestion.data;
-        const suggestionFields = [
-          suggestionData.item_name,
-          suggestionData.current_value,
-          suggestionData.suggested_value,
-          suggestionData.current_cash_value,
-          suggestionData.suggested_cash_value,
-          suggestionData.current_duped_value,
-          suggestionData.suggested_duped_value,
-          suggestionData.current_demand,
-          suggestionData.suggested_demand,
-          suggestionData.current_note,
-          suggestionData.suggested_note,
-          suggestionData.current_trend,
-          suggestionData.suggested_trend,
-          suggestionData.current_notes,
-          suggestionData.suggested_notes,
-        ];
+          // Search in suggestion data values
+          if (change.suggestion?.data) {
+            const suggestionData = change.suggestion.data;
+            const suggestionFields = [
+              suggestionData.item_name,
+              suggestionData.current_value,
+              suggestionData.suggested_value,
+              suggestionData.current_cash_value,
+              suggestionData.suggested_cash_value,
+              suggestionData.current_duped_value,
+              suggestionData.suggested_duped_value,
+              suggestionData.current_demand,
+              suggestionData.suggested_demand,
+              suggestionData.current_note,
+              suggestionData.suggested_note,
+              suggestionData.current_trend,
+              suggestionData.suggested_trend,
+              suggestionData.current_notes,
+              suggestionData.suggested_notes,
+            ];
 
-        const hasSuggestionValueMatch = suggestionFields.some(
-          (field) => field && String(field).toLowerCase().includes(searchLower),
-        );
+            const hasSuggestionValueMatch = suggestionFields.some(
+              (field) =>
+                field && String(field).toLowerCase().includes(searchLower),
+            );
 
-        if (hasSuggestionValueMatch) return true;
-      }
+            if (hasSuggestionValueMatch) return true;
+          }
 
-      return false;
-    })
-    .filter((change) => {
-      const matchesType =
-        selectedType === "All Items" || change.item.type === selectedType;
-      const matchesSuggestionType =
-        selectedSuggestionType === "all" ||
-        selectedSuggestionType === "" ||
-        change.suggestion?.metadata?.suggestion_type === selectedSuggestionType;
-      return matchesType && matchesSuggestionType;
-    });
+          return false;
+        })
+        .filter((change) => {
+          const matchesType =
+            selectedType === "All Items" || change.item.type === selectedType;
+          const matchesSuggestionType =
+            selectedSuggestionType === "all" ||
+            selectedSuggestionType === "" ||
+            change.suggestion?.metadata?.suggestion_type ===
+              selectedSuggestionType;
+          return matchesType && matchesSuggestionType;
+        }),
+    [changelog.change_data, searchQuery, selectedType, selectedSuggestionType],
+  );
 
   // Get unique item types for filter
   const itemTypes = Array.from(

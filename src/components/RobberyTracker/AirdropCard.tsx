@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import { Icon } from "@/components/ui/IconWrapper";
-import { motion, AnimatePresence } from "motion/react";
+import { motion, AnimatePresence } from "framer-motion";
 import { useOptimizedRealTimeRelativeDate } from "@/hooks/useSharedTimer";
 import { AirdropData } from "@/hooks/useRobberyTrackerAirdropsWebSocket";
 import RobberyPlayersModal from "./RobberyPlayersModal";

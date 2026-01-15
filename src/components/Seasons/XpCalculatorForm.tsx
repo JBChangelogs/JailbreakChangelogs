@@ -99,7 +99,7 @@ export default function XpCalculatorForm({
       {/* Example image showing how to get XP values */}
       <div className="mb-6 text-center">
         <ImageModal
-          src="https://assets.jailbreakchangelogs.xyz/assets/images/Season_Exp.png"
+          src="/assets/images/Season_Exp.png"
           alt="Example showing how to find your current level and XP in Roblox Jailbreak"
           width={400}
           height={300}
