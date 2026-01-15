@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useEffect, useMemo, useState } from "react";
+import { useRef, useMemo, useState } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { useQuery } from "@tanstack/react-query";
 import Image from "next/image";
@@ -12,6 +12,7 @@ interface DupesTabProps {
 }
 
 export default function DupesTab({ itemId }: DupesTabProps) {
+  "use no memo";
   const parentRef = useRef<HTMLDivElement>(null);
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -57,23 +58,13 @@ export default function DupesTab({ itemId }: DupesTabProps) {
   }, [dupedUsers, searchTerm]);
 
   // TanStack Virtual setup for list
+  // eslint-disable-next-line react-hooks/incompatible-library
   const virtualizer = useVirtualizer({
     count: filteredDupes.length,
     getScrollElement: () => parentRef.current,
     estimateSize: () => 100,
     overscan: 5,
   });
-
-  // Recalculate heights on window resize
-  useEffect(() => {
-    const handleResize = () => {
-      virtualizer.measure();
-    };
-
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   // Loading state
   if (isLoadingDupes) {
@@ -210,6 +201,8 @@ export default function DupesTab({ itemId }: DupesTabProps) {
               return (
                 <div
                   key={`${user.id}-${virtualItem.index}`}
+                  data-index={virtualItem.index}
+                  ref={virtualizer.measureElement}
                   style={{
                     position: "absolute",
                     top: 0,

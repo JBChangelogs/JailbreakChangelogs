@@ -1,15 +1,3 @@
-function useWindowWidth() {
-  const [width, setWidth] = useState(() =>
-    typeof window !== "undefined" ? window.innerWidth : 1024,
-  );
-  useEffect(() => {
-    const handleResize = () => setWidth(window.innerWidth);
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
-  return width;
-}
-
 import React, { useState, useEffect, useRef } from "react";
 import { TradeItem } from "@/types/trading";
 import toast from "react-hot-toast";
@@ -30,6 +18,7 @@ import { FilterSort, ValueSort } from "@/types";
 import { useDebounce } from "@/hooks/useDebounce";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { DraggableItemCard } from "@/components/dnd/DraggableItemCard";
+import { useMediaQuery } from "@mui/material";
 
 interface AvailableItemsGridProps {
   items: TradeItem[];
@@ -43,7 +32,8 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
   items,
   onSelect,
 }) => {
-  const windowWidth = useWindowWidth();
+  "use no memo";
+  const isMobile = useMediaQuery("(max-width:640px)");
 
   const getFilterDisplayName = (filterSort: string): string => {
     const filterMap: Record<string, string> = {
@@ -240,13 +230,16 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
 
   // Organize items into rows for grid virtualization
   // Each row contains multiple items based on screen size
+  const isXs = useMediaQuery("(max-width:374px)");
+  const isSm = useMediaQuery("(max-width:767px)");
+  const isMd = useMediaQuery("(max-width:1023px)");
+  const isLg = useMediaQuery("(max-width:1279px)");
+
   const getItemsPerRow = () => {
-    if (typeof window === "undefined") return 6; // Default for SSR
-    const width = window.innerWidth;
-    if (width < 375) return 1;
-    if (width < 768) return 2;
-    if (width < 1024) return 3;
-    if (width < 1280) return 5;
+    if (isXs) return 1;
+    if (isSm) return 2;
+    if (isMd) return 3;
+    if (isLg) return 5;
     return 6;
   };
 
@@ -627,7 +620,7 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
                                                 item.cash_value === "N/A"
                                               )
                                                 return "N/A";
-                                              return windowWidth <= 640
+                                              return isMobile
                                                 ? item.cash_value
                                                 : formatFullValue(
                                                     item.cash_value,
@@ -646,7 +639,7 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
                                                 item.duped_value === "N/A"
                                               )
                                                 return "N/A";
-                                              return windowWidth <= 640
+                                              return isMobile
                                                 ? item.duped_value
                                                 : formatFullValue(
                                                     item.duped_value,

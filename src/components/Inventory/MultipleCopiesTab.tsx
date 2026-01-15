@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect, useMemo } from "react";
+import { useState, useRef, useMemo } from "react";
 import Link from "next/link";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { Icon } from "@/components/ui/IconWrapper";
@@ -39,6 +39,7 @@ export default function DuplicatesTab({
   onItemClick,
   itemsData,
 }: DuplicatesTabProps) {
+  "use no memo";
   const [searchTerm, setSearchTerm] = useState("");
   const [leaderboardSearch, setLeaderboardSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
@@ -234,23 +235,13 @@ export default function DuplicatesTab({
   }, [multiCopyStats.allDuplicateItems, leaderboardSearch]);
 
   // TanStack Virtual setup for performance with large duplicate datasets
+  // eslint-disable-next-line react-hooks/incompatible-library
   const virtualizer = useVirtualizer({
     count: filteredLeaderboardItems.length,
     getScrollElement: () => parentRef.current,
     estimateSize: () => 80,
     overscan: 5,
   });
-
-  // Recalculate heights on window resize for responsive behavior
-  useEffect(() => {
-    const handleResize = () => {
-      virtualizer.measure();
-    };
-
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   // Parse numeric values
   const parseNumericValue = (value: string | null): number => {
@@ -460,6 +451,8 @@ export default function DuplicatesTab({
                   return (
                     <div
                       key={`${item.category}-${item.title}`}
+                      data-index={virtualItem.index}
+                      ref={virtualizer.measureElement}
                       style={{
                         position: "absolute",
                         top: 0,

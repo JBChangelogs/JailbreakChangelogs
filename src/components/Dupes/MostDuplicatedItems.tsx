@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useEffect } from "react";
+import { useRef } from "react";
 import Link from "next/link";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { DuplicatedItem } from "@/utils/api";
@@ -13,29 +13,20 @@ interface MostDuplicatedItemsProps {
 export default function MostDuplicatedItems({
   items,
 }: MostDuplicatedItemsProps) {
+  "use no memo";
   const parentRef = useRef<HTMLDivElement>(null);
 
   // Show only top 10 items
   const topItems = items && items.length > 0 ? items.slice(0, 10) : [];
 
   // TanStack Virtual setup for performance with large datasets
+  // eslint-disable-next-line react-hooks/incompatible-library
   const virtualizer = useVirtualizer({
     count: topItems.length,
     getScrollElement: () => parentRef.current,
     estimateSize: () => 80,
     overscan: 5,
   });
-
-  // Recalculate heights on window resize for responsive behavior
-  useEffect(() => {
-    const handleResize = () => {
-      virtualizer.measure();
-    };
-
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   if (!items || items.length === 0) {
     return null;
@@ -73,6 +64,8 @@ export default function MostDuplicatedItems({
                 return (
                   <div
                     key={`${item.name}-${item.type}-${virtualItem.index}`}
+                    data-index={virtualItem.index}
+                    ref={virtualizer.measureElement}
                     style={{
                       position: "absolute",
                       top: 0,
