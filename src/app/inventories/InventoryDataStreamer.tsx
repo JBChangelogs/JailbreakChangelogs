@@ -87,14 +87,26 @@ async function InventoryDataFetcher({
     );
   }
 
-  const [result, currentSeason, items, networthData, moneyHistoryData] =
-    await Promise.all([
-      fetchInventoryData(actualRobloxId),
-      fetchLatestSeason(),
-      fetchItems(),
-      fetchUserNetworth(actualRobloxId),
-      fetchUserMoneyHistory(actualRobloxId),
-    ]);
+  const [
+    result,
+    currentSeason,
+    items,
+    networthData,
+    moneyHistoryData,
+    commentsData,
+  ] = await Promise.all([
+    fetchInventoryData(actualRobloxId),
+    fetchLatestSeason(),
+    fetchItems(),
+    fetchUserNetworth(actualRobloxId),
+    fetchUserMoneyHistory(actualRobloxId),
+    !initialComments || initialComments.length === 0
+      ? fetchComments("inventory", actualRobloxId)
+      : Promise.resolve({
+          comments: initialComments || [],
+          userMap: initialCommentUserMap || {},
+        }),
+  ]);
 
   // Check if the result contains an error
   if (
@@ -183,8 +195,8 @@ async function InventoryDataFetcher({
           robloxId={actualRobloxId}
           initialData={result}
           isLoading={true}
-          initialComments={initialComments}
-          initialCommentUserMap={initialCommentUserMap}
+          initialComments={commentsData?.comments || []}
+          initialCommentUserMap={commentsData?.userMap || {}}
           initialNetworthData={networthData}
           initialMoneyHistoryData={moneyHistoryData}
         />
@@ -194,8 +206,8 @@ async function InventoryDataFetcher({
         robloxId={actualRobloxId}
         inventoryData={result}
         currentSeason={activeSeason}
-        initialComments={initialComments}
-        initialCommentUserMap={initialCommentUserMap}
+        initialComments={commentsData?.comments || []}
+        initialCommentUserMap={commentsData?.userMap || {}}
         items={items}
         networthData={networthData}
         moneyHistoryData={moneyHistoryData}

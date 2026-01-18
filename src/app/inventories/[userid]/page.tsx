@@ -6,7 +6,6 @@ import Breadcrumb from "@/components/Layout/Breadcrumb";
 import ExperimentalFeatureBanner from "@/components/ui/ExperimentalFeatureBanner";
 import ComingSoon from "@/components/ui/ComingSoon";
 import { isFeatureEnabled } from "@/utils/featureFlags";
-import { fetchComments } from "@/utils/api";
 import { checkInventoryMaintenanceMode } from "@/utils/maintenance";
 import FeatureMaintenance from "@/theme/FeatureMaintenance";
 import PremiumAwareLayout from "@/components/Layout/PremiumAwareLayout";
@@ -50,12 +49,6 @@ export default async function InventoryCheckerPage({
     notFound();
   }
 
-  // Fetch comments for the inventory - only for numeric IDs
-  // For usernames, comments will be fetched after username resolution in InventoryDataStreamer
-  const commentsData = isNumeric
-    ? await fetchComments("inventory", userid)
-    : { comments: [], userMap: {} };
-
   return (
     <div className="container mx-auto px-4 pb-8">
       <Breadcrumb />
@@ -74,11 +67,7 @@ export default async function InventoryCheckerPage({
             <InventoryCheckerClient robloxId={userid} isLoading={true} />
           }
         >
-          <InventoryDataStreamer
-            robloxId={userid}
-            initialComments={commentsData.comments}
-            initialCommentUserMap={commentsData.userMap}
-          />
+          <InventoryDataStreamer robloxId={userid} />
         </Suspense>
       </PremiumAwareLayout>
     </div>

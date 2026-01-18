@@ -1,6 +1,7 @@
 import DupeFinderClient from "@/components/Dupes/DupeFinderClient";
 import DupeFinderFAQ from "@/components/Dupes/DupeFinderFAQ";
-import MostDuplicatedItems from "@/components/Dupes/MostDuplicatedItems";
+import MostDuplicatedItemsServer from "@/components/Dupes/MostDuplicatedItemsServer";
+import MostDuplicatedItemsSkeleton from "@/components/Dupes/MostDuplicatedItemsSkeleton";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import ExperimentalFeatureBanner from "@/components/ui/ExperimentalFeatureBanner";
 import ComingSoon from "@/components/ui/ComingSoon";
@@ -12,7 +13,6 @@ import { checkDupeFinderMaintenanceMode } from "@/utils/maintenance";
 import FeatureMaintenance from "@/theme/FeatureMaintenance";
 import { Suspense } from "react";
 import PremiumAwareLayout from "@/components/Layout/PremiumAwareLayout";
-import { fetchMostDuplicatedItems } from "@/utils/api";
 
 export const dynamic = "force-dynamic";
 
@@ -33,9 +33,6 @@ export default async function DupeFinderPage() {
   if (!isFeatureEnabled("DUPE_FINDER")) {
     return <ComingSoon />;
   }
-
-  // Fetch most duplicated items
-  const mostDuplicatedItems = await fetchMostDuplicatedItems();
 
   return (
     <div className="container mx-auto px-4 pb-8">
@@ -59,7 +56,9 @@ export default async function DupeFinderPage() {
           <StatsPolling />
         </Suspense>
 
-        <MostDuplicatedItems items={mostDuplicatedItems} />
+        <Suspense fallback={<MostDuplicatedItemsSkeleton />}>
+          <MostDuplicatedItemsServer />
+        </Suspense>
 
         <ConnectedBotsPolling />
 

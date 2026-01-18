@@ -1,4 +1,3 @@
-import { Suspense } from "react";
 import {
   fetchOGSearchData,
   fetchRobloxUserByUsername,
@@ -39,83 +38,6 @@ interface OGSearchData {
 
 interface OGFinderDataStreamerProps {
   robloxId: string;
-}
-
-// Loading fallback component
-function OGFinderLoadingFallback({ robloxId }: { robloxId: string }) {
-  return (
-    <div className="space-y-6">
-      {/* Search Form */}
-      <form>
-        <div className="relative flex items-center">
-          <input
-            type="text"
-            id="searchInput"
-            value={robloxId}
-            readOnly
-            placeholder="Search by ID or username..."
-            className="border-border-primary bg-secondary-bg text-primary-text placeholder-secondary-text focus:border-button-info w-full rounded-lg border px-4 py-3 pr-16 transition-all duration-300 focus:outline-none"
-            disabled
-          />
-
-          {/* Right side controls container */}
-          <div className="absolute top-1/2 right-3 flex -translate-y-1/2 items-center gap-2">
-            {/* Search button with spinner */}
-            <button
-              type="button"
-              disabled
-              className="text-secondary-text flex h-8 w-8 cursor-progress items-center justify-center rounded-md transition-all duration-200"
-              aria-label="Loading"
-            >
-              <svg
-                className="h-5 w-5 animate-spin"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-              >
-                <circle
-                  className="opacity-25"
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  strokeWidth="4"
-                ></circle>
-                <path
-                  className="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                ></path>
-              </svg>
-            </button>
-          </div>
-        </div>
-      </form>
-
-      <div className="border-border-primary bg-secondary-bg shadow-card-shadow rounded-lg border p-6">
-        <div className="animate-pulse space-y-4">
-          <div className="flex items-center gap-4">
-            <div className="bg-surface-bg h-16 w-16 rounded-full"></div>
-            <div className="flex-1">
-              <div className="bg-surface-bg mb-2 h-6 w-32 rounded"></div>
-              <div className="bg-surface-bg h-4 w-24 rounded"></div>
-            </div>
-          </div>
-          <div className="space-y-3">
-            {[...Array(5)].map((_, i) => (
-              <div key={i} className="flex items-center gap-4 rounded-lg p-4">
-                <div className="bg-surface-bg h-12 w-12 rounded"></div>
-                <div className="flex-1 space-y-2">
-                  <div className="bg-surface-bg h-4 w-48 rounded"></div>
-                  <div className="bg-surface-bg h-3 w-32 rounded"></div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
 }
 
 // Component that fetches OG search data
@@ -298,9 +220,5 @@ async function OGFinderDataFetcher({ robloxId }: { robloxId: string }) {
 export default function OGFinderDataStreamer({
   robloxId,
 }: OGFinderDataStreamerProps) {
-  return (
-    <Suspense fallback={<OGFinderLoadingFallback robloxId={robloxId} />}>
-      <OGFinderDataFetcher robloxId={robloxId} />
-    </Suspense>
-  );
+  return <OGFinderDataFetcher robloxId={robloxId} />;
 }
