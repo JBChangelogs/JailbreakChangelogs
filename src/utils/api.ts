@@ -59,6 +59,37 @@ export interface NotificationHistory {
   size: number;
 }
 
+export interface ValueSuggestionVoteEntry {
+  created_at: number;
+  user: UserData;
+}
+
+export interface ValueSuggestionVotes {
+  upvotes: ValueSuggestionVoteEntry[];
+  downvotes: ValueSuggestionVoteEntry[];
+}
+
+export interface ValueSuggestion {
+  id: number;
+  item_id: number;
+  field: string;
+  current_value: string;
+  suggested_value: string;
+  reason: string;
+  status: string;
+  upvotes: number;
+  downvotes: number;
+  created_at: number;
+  updated_at: number;
+  user: UserData;
+  votes: ValueSuggestionVotes;
+}
+
+export interface ValueSuggestionsResponse {
+  total_suggestions: number;
+  suggestions: ValueSuggestion[];
+}
+
 import {
   Item,
   ItemDetails,
@@ -805,10 +836,144 @@ export async function fetchDuplicateVariants(
     }
 
     const data = await response.json();
-    return data;
+    return data as DuplicateVariantsResponse;
   } catch (err) {
     console.error("[SERVER] Error fetching duplicate variants:", err);
     return null;
+  }
+}
+
+export async function fetchValueSuggestions(limit: number = 100) {
+  try {
+    const response = await fetch(
+      `/api/value-suggestions/recent?limit=${limit}`,
+      {
+        headers: {
+          "User-Agent": "JailbreakChangelogs-ValueSuggestions/1.0",
+        },
+        cache: "no-store",
+      },
+    );
+
+    if (!response.ok) {
+      throw new Error("Failed to fetch value suggestions");
+    }
+
+    const data = await response.json();
+    return data as ValueSuggestionsResponse;
+  } catch (err) {
+    console.error("[SERVER] Error fetching value suggestions:", err);
+    return { total_suggestions: 0, suggestions: [] };
+  }
+}
+
+export async function fetchValueSuggestion(id: number | string) {
+  try {
+    const response = await fetch(
+      `${BASE_API_URL}/value-suggestions/get?id=${id}`,
+      {
+        headers: {
+          "User-Agent": "JailbreakChangelogs-ValueSuggestion/1.0",
+        },
+        cache: "no-store",
+      },
+    );
+
+    if (!response.ok) {
+      if (response.status === 404) return null;
+      throw new Error(`Failed to fetch value suggestion: ${response.status}`);
+    }
+
+    const data = await response.json();
+
+    return data as ValueSuggestion;
+  } catch (err) {
+    console.error("[SERVER] Error fetching value suggestion:", err);
+    return null;
+  }
+}
+
+export async function fetchValueSuggestionVotes(id: number | string) {
+  try {
+    const response = await fetch(
+      `/api/value-suggestions/votes?suggestion_id=${id}`,
+      {
+        headers: {
+          "User-Agent": "JailbreakChangelogs-ValueSuggestionVotes/1.0",
+        },
+        cache: "no-store",
+      },
+    );
+
+    if (response.status === 404) {
+      return null;
+    }
+
+    if (!response.ok) {
+      throw new Error(
+        `Failed to fetch value suggestion votes: ${response.status}`,
+      );
+    }
+
+    const data = await response.json();
+    return data as ValueSuggestionVotes;
+  } catch (err) {
+    console.error("[SERVER] Error fetching value suggestion votes:", err);
+    return null;
+  }
+}
+
+export async function voteValueSuggestion(
+  suggestionId: number,
+  voteType: "upvote" | "downvote",
+) {
+  try {
+    const response = await fetch("/api/value-suggestions/vote", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        suggestion_id: suggestionId,
+        vote_type: voteType,
+      }),
+    });
+
+    if (!response.ok) {
+      const data = await response.json().catch(() => ({}));
+      throw new Error(data.message || data.detail || "Failed to vote");
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (err) {
+    console.error("[CLIENT] Error voting on suggestion:", err);
+    throw err;
+  }
+}
+
+export async function unvoteValueSuggestion(suggestionId: number) {
+  try {
+    const response = await fetch("/api/value-suggestions/unvote", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        suggestion_id: suggestionId,
+      }),
+    });
+
+    if (!response.ok) {
+      const data = await response.json().catch(() => ({}));
+      throw new Error(data.message || data.detail || "Failed to unvote");
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (err) {
+    console.error("[CLIENT] Error unvoting suggestion:", err);
+    throw err;
   }
 }
 
