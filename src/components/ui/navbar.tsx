@@ -494,6 +494,12 @@ export const NavbarModern = ({ className }: { className?: string }) => {
                 <Badge variant="new">Beta</Badge>
               </div>
             </HoveredLink>
+            <HoveredLink href="/bounties" setActive={setActive}>
+              <div className="flex items-center gap-2">
+                <span>Bounty Tracker</span>
+                <Badge variant="new">Beta</Badge>
+              </div>
+            </HoveredLink>
             <HoveredLink href="/servers" setActive={setActive}>
               Private Servers
             </HoveredLink>
