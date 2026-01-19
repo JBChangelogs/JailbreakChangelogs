@@ -4,7 +4,6 @@ import Link from "next/link";
 import dynamic from "next/dynamic";
 import { Suspense, useEffect } from "react";
 import { Icon } from "../ui/IconWrapper";
-import VersionInfo from "@/components/Layout/VersionInfo";
 import ReportIssueButton from "@/components/ReportIssue/ReportIssueButton";
 const Tooltip = dynamic(() => import("@mui/material/Tooltip"));
 
@@ -18,9 +17,10 @@ declare global {
 
 interface FooterProps {
   githubUrl: string;
+  versionInfo: React.ReactNode;
 }
 
-export default function Footer({ githubUrl }: FooterProps) {
+export default function Footer({ githubUrl, versionInfo }: FooterProps) {
   useEffect(() => {
     // Show GDPR consent button only for EU users
     const showGDPRButton = () => {
@@ -177,7 +177,7 @@ export default function Footer({ githubUrl }: FooterProps) {
                   Jalenzz16
                 </Link>
               </p>
-              <VersionInfo />
+              {versionInfo}
             </div>
           </div>
         </div>

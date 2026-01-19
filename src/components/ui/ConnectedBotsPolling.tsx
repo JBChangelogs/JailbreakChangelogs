@@ -105,11 +105,26 @@ export default function ConnectedBotsPolling() {
           </div>
         </div>
         <div className="border-border-primary bg-secondary-bg shadow-card-shadow rounded-lg border p-4">
-          <div className="py-8 text-center">
-            <div className="text-secondary-text mb-2 text-lg font-medium">
-              Loading bots...
-            </div>
-            <div className="text-tertiary-text text-sm">Fetching bot data</div>
+          <div className="mb-4 space-y-2">
+            <div className="bg-button-secondary h-4 w-32 animate-pulse rounded"></div>
+            <div className="bg-button-secondary h-4 w-40 animate-pulse rounded"></div>
+            <div className="bg-button-secondary h-4 w-48 animate-pulse rounded"></div>
+          </div>
+          <div className="space-y-2">
+            {[1, 2, 3].map((i) => (
+              <div
+                key={i}
+                className="border-border-primary bg-primary-bg rounded-lg border p-3"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="bg-button-secondary h-8 w-8 animate-pulse rounded-full"></div>
+                  <div className="space-y-1">
+                    <div className="bg-button-secondary h-4 w-32 animate-pulse rounded"></div>
+                    <div className="bg-button-secondary h-3 w-20 animate-pulse rounded"></div>
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </div>
@@ -164,10 +179,27 @@ export default function ConnectedBotsPolling() {
       </div>
       <div className="border-border-primary bg-secondary-bg shadow-card-shadow rounded-lg border p-4">
         {isLoading && !botsData ? (
-          <div className="flex items-center justify-center py-20">
-            <div className="flex items-center gap-2">
-              <div className="h-5 w-5 animate-spin rounded-full border-2 border-blue-400 border-t-transparent"></div>
-              <span className="text-sm text-blue-400">Loading...</span>
+          <div className="space-y-2">
+            <div className="mb-4 space-y-2">
+              <div className="bg-button-secondary h-4 w-32 animate-pulse rounded"></div>
+              <div className="bg-button-secondary h-4 w-40 animate-pulse rounded"></div>
+              <div className="bg-button-secondary h-4 w-48 animate-pulse rounded"></div>
+            </div>
+            <div className="space-y-2">
+              {[1, 2].map((i) => (
+                <div
+                  key={i}
+                  className="border-border-primary bg-primary-bg rounded-lg border p-3"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="bg-button-secondary h-8 w-8 animate-pulse rounded-full"></div>
+                    <div className="space-y-1">
+                      <div className="bg-button-secondary h-4 w-32 animate-pulse rounded"></div>
+                      <div className="bg-button-secondary h-3 w-20 animate-pulse rounded"></div>
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         ) : (

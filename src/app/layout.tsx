@@ -7,6 +7,8 @@ import "./globals.css";
 import Header from "@/components/Layout/Header";
 import MaintenanceBypass from "@/components/Layout/MaintenanceBypass";
 import Footer from "@/components/Layout/Footer";
+import VersionInfoServer from "@/components/Layout/VersionInfoServer";
+import VersionInfoSkeleton from "@/components/Layout/VersionInfoSkeleton";
 
 import { Toaster } from "react-hot-toast";
 import NextTopLoader from "nextjs-toploader";
@@ -272,7 +274,14 @@ export default async function RootLayout({
                             <Suspense>
                               <main className="flex-1">{children}</main>
                             </Suspense>
-                            <Footer githubUrl={githubUrl} />
+                            <Footer
+                              githubUrl={githubUrl}
+                              versionInfo={
+                                <Suspense fallback={<VersionInfoSkeleton />}>
+                                  <VersionInfoServer />
+                                </Suspense>
+                              }
+                            />
                           </div>
                         </SurveyProvider>
                       </AuthProvider>
@@ -466,7 +475,14 @@ export default async function RootLayout({
                         <Suspense>
                           <main className="flex-1">{children}</main>
                         </Suspense>
-                        <Footer githubUrl={githubUrl} />
+                        <Footer
+                          githubUrl={githubUrl}
+                          versionInfo={
+                            <Suspense fallback={<VersionInfoSkeleton />}>
+                              <VersionInfoServer />
+                            </Suspense>
+                          }
+                        />
                       </div>
                     </SurveyProvider>
                   </AuthProvider>

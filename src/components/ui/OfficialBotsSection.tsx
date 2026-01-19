@@ -33,11 +33,11 @@ function OfficialBotsSkeleton() {
                     inline={true}
                   />
                 </div>
-                <div className="bg-surface-bg h-10 w-10 animate-pulse rounded-full"></div>
+                <div className="bg-button-secondary h-10 w-10 animate-pulse rounded-full"></div>
               </div>
               <div className="min-w-0 flex-1">
-                <div className="h-4 w-32 animate-pulse rounded bg-gray-300"></div>
-                <div className="mt-1 h-3 w-24 animate-pulse rounded bg-gray-200"></div>
+                <div className="bg-button-secondary h-4 w-32 animate-pulse rounded"></div>
+                <div className="bg-button-secondary mt-1 h-3 w-24 animate-pulse rounded"></div>
               </div>
             </div>
           ))}
