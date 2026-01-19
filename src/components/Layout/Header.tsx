@@ -477,6 +477,18 @@ export default function Header() {
         </Box>
       </Link>
       <Link
+        href="/bounties"
+        onClick={handleDrawerToggle}
+        className="hover:bg-button-info-hover/10 text-primary-text cursor-pointer px-8 py-2 transition-colors"
+      >
+        <Box className="flex flex-wrap items-center gap-1">
+          <span>Bounty Tracker</span>
+          <span className="bg-button-info text-form-button-text rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase">
+            Beta
+          </span>
+        </Box>
+      </Link>
+      <Link
         href="/servers"
         onClick={handleDrawerToggle}
         className="hover:bg-button-info-hover/10 text-primary-text cursor-pointer px-8 py-2 transition-colors"
