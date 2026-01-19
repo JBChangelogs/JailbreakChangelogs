@@ -9,9 +9,13 @@ import RobberyPlayersModal from "./RobberyPlayersModal";
 
 interface BountyCardProps {
   bounty: BountyData;
+  simplified?: boolean;
 }
 
-export default function BountyCard({ bounty }: BountyCardProps) {
+export default function BountyCard({
+  bounty,
+  simplified = false,
+}: BountyCardProps) {
   const [isPlayersModalOpen, setIsPlayersModalOpen] = useState(false);
 
   // Format bounty amount with commas
@@ -108,52 +112,59 @@ export default function BountyCard({ bounty }: BountyCardProps) {
           </div>
         )}
 
-        {/* Details */}
-        <div className="text-secondary-text space-y-2 text-sm">
-          {bounty.server_time && (
-            <div className="flex items-center justify-between">
-              <span className="text-secondary-text">Server Time:</span>
-              <span className="font-mono">
-                {formatServerTime(bounty.server_time)}
-              </span>
-            </div>
-          )}
+        {/* Details - Only show if not simplified */}
+        {!simplified && (
+          <div className="text-secondary-text space-y-2 text-sm">
+            {bounty.server_time && (
+              <div className="flex items-center justify-between">
+                <span className="text-secondary-text">Server Time:</span>
+                <span className="font-mono">
+                  {formatServerTime(bounty.server_time)}
+                </span>
+              </div>
+            )}
 
-          {/* Join Server Button */}
-          {jobId && (
-            <a
-              href={`http://tracker.jailbreakchangelogs.xyz/?jobid=${jobId}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="bg-button-info text-form-button-text hover:bg-button-info-hover focus:ring-border-focus active:bg-button-info-active mt-2 flex w-full items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition-colors duration-200 focus:ring-2 focus:outline-none"
-            >
-              <Icon
-                icon="heroicons:arrow-top-right-on-square"
-                className="h-4 w-4"
-              />
-              Join Server
-            </a>
-          )}
+            {/* Join Server Button */}
+            {jobId && (
+              <a
+                href={`http://tracker.jailbreakchangelogs.xyz/?jobid=${jobId}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="bg-button-info text-form-button-text hover:bg-button-info-hover focus:ring-border-focus active:bg-button-info-active mt-2 flex w-full items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition-colors duration-200 focus:ring-2 focus:outline-none"
+              >
+                <Icon
+                  icon="heroicons:arrow-top-right-on-square"
+                  className="h-4 w-4"
+                />
+                Join Server
+              </a>
+            )}
 
-          {/* View Players Button */}
-          {players.length > 0 && (
-            <button
-              onClick={() => setIsPlayersModalOpen(true)}
-              className="active:bg-button-secondary-active bg-button-secondary text-primary-text hover:bg-button-secondary-hover focus:ring-border-focus mt-2 flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition-colors duration-200 focus:ring-2 focus:outline-none"
-            >
-              <Icon icon="heroicons-outline:users" className="h-4 w-4" />
-              View {players.length} Players
-            </button>
-          )}
-        </div>
-
-        {/* Footer with Last Update */}
-        <div className="border-border-primary mt-4 border-t pt-3">
-          <div className="text-primary-text flex items-center justify-center gap-1.5 text-xs font-medium">
-            <Icon icon="mdi:clock" className="text-tertiary-text h-3.5 w-3.5" />
-            <span>Last update: {relativeTime || "Just now"}</span>
+            {/* View Players Button */}
+            {players.length > 0 && (
+              <button
+                onClick={() => setIsPlayersModalOpen(true)}
+                className="active:bg-button-secondary-active bg-button-secondary text-primary-text hover:bg-button-secondary-hover focus:ring-border-focus mt-2 flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition-colors duration-200 focus:ring-2 focus:outline-none"
+              >
+                <Icon icon="heroicons-outline:users" className="h-4 w-4" />
+                View {players.length} Players
+              </button>
+            )}
           </div>
-        </div>
+        )}
+
+        {/* Footer with Last Update - Only show if not simplified */}
+        {!simplified && (
+          <div className="border-border-primary mt-4 border-t pt-3">
+            <div className="text-primary-text flex items-center justify-center gap-1.5 text-xs font-medium">
+              <Icon
+                icon="mdi:clock"
+                className="text-tertiary-text h-3.5 w-3.5"
+              />
+              <span>Last update: {relativeTime || "Just now"}</span>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Players Modal */}
