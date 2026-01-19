@@ -1,25 +1,25 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import { useState, useMemo } from "react";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
-import { useRobberyTrackerBountiesWebSocket } from "@/hooks/useRobberyTrackerBountiesWebSocket";
+import {
+  useRobberyTrackerBountiesWebSocket,
+  type BountyData,
+} from "@/hooks/useRobberyTrackerBountiesWebSocket";
+
 import { Icon } from "@/components/ui/IconWrapper";
-import BountyCard from "@/components/RobberyTracker/BountyCard";
+import ServerBountyGroup from "@/components/RobberyTracker/ServerBountyGroup";
 import RobberyTrackerAuthWrapper from "@/components/RobberyTracker/RobberyTrackerAuthWrapper";
 import ExperimentalFeatureBanner from "@/components/ui/ExperimentalFeatureBanner";
 
-import { Masonry } from "@mui/lab";
-
-type TimeSort = "newest" | "oldest";
-type BountySort = "highest" | "lowest";
+type BountySort = "last_updated" | "highest_total" | "lowest_total";
 
 function BountyTrackerContent() {
   const { bounties, isConnected, error } =
     useRobberyTrackerBountiesWebSocket(true);
 
   const [searchQuery, setSearchQuery] = useState("");
-  const [timeSort, setTimeSort] = useState<TimeSort>("newest");
-  const [bountySort, setBountySort] = useState<BountySort>("highest");
+  const [bountySort, setBountySort] = useState<BountySort>("last_updated");
 
   // Filter and sort bounties
   const filteredBounties = useMemo(() => {
@@ -36,24 +36,43 @@ function BountyTrackerContent() {
       );
     }
 
-    // Sort by timestamp first, then by bounty amount
-    return filtered.sort((a, b) => {
-      // Primary sort: by timestamp
-      if (timeSort === "newest") {
-        const timeDiff = b.timestamp - a.timestamp;
-        if (timeDiff !== 0) return timeDiff;
-      } else {
-        const timeDiff = a.timestamp - b.timestamp;
-        if (timeDiff !== 0) return timeDiff;
-      }
+    // Sort by bounty amount descending for consistent display within groups
+    return filtered.sort((a, b) => b.bounty - a.bounty);
+  }, [bounties, searchQuery]);
 
-      // Secondary sort: by bounty amount
-      if (bountySort === "highest") {
-        return b.bounty - a.bounty;
+  // Group bounties by server
+  const serverGroups = useMemo(() => {
+    const groups = new Map<string, BountyData[]>();
+
+    filteredBounties.forEach((bounty) => {
+      const serverId = bounty.server?.job_id;
+      if (serverId) {
+        if (!groups.has(serverId)) {
+          groups.set(serverId, []);
+        }
+        groups.get(serverId)!.push(bounty);
       }
-      return a.bounty - b.bounty;
     });
-  }, [bounties, searchQuery, timeSort, bountySort]);
+
+    // Convert to array and sort
+    return Array.from(groups.entries())
+      .map(([serverId, serverBounties]) => ({
+        serverId,
+        bounties: serverBounties,
+        totalBounty: serverBounties.reduce((sum, b) => sum + b.bounty, 0),
+        lastUpdated: Math.max(...serverBounties.map((b) => b.timestamp)),
+      }))
+      .sort((a, b) => {
+        if (bountySort === "highest_total") {
+          return b.totalBounty - a.totalBounty;
+        }
+        if (bountySort === "lowest_total") {
+          return a.totalBounty - b.totalBounty;
+        }
+        // Default to last_updated (newest first)
+        return b.lastUpdated - a.lastUpdated;
+      });
+  }, [filteredBounties, bountySort]);
 
   // Calculate bounty statistics
   const bountyStats = useMemo(() => {
@@ -119,25 +138,17 @@ function BountyTrackerContent() {
                   onChange={(e) => setBountySort(e.target.value as BountySort)}
                 >
                   <option value="" disabled>
-                    Sort by Bounty
+                    Sort Servers
                   </option>
-                  <option value="highest">Bounty (Highest to Lowest)</option>
-                  <option value="lowest">Bounty (Lowest to Highest)</option>
-                </select>
-              </div>
-
-              {/* Time Sort Dropdown */}
-              <div className="w-full lg:w-1/2">
-                <select
-                  className="select font-inter bg-secondary-bg text-primary-text h-[56px] min-h-[56px] w-full"
-                  value={timeSort}
-                  onChange={(e) => setTimeSort(e.target.value as TimeSort)}
-                >
-                  <option value="" disabled>
-                    Sort by Time
+                  <option value="last_updated">
+                    Last Updated (Newest First)
                   </option>
-                  <option value="newest">Logged (Newest to Oldest)</option>
-                  <option value="oldest">Logged (Oldest to Newest)</option>
+                  <option value="highest_total">
+                    Total Bounty (Highest to Lowest)
+                  </option>
+                  <option value="lowest_total">
+                    Total Bounty (Lowest to Highest)
+                  </option>
                 </select>
               </div>
             </div>
@@ -224,20 +235,17 @@ function BountyTrackerContent() {
 
         {hasData ? (
           <>
-            {/* Bounties Grid */}
-            {filteredBounties.length > 0 ? (
-              <Masonry
-                columns={{ xs: 1, sm: 2, md: 2, lg: 3, xl: 4 }}
-                spacing={3}
-                sx={{ width: "auto", margin: 0 }}
-              >
-                {filteredBounties.map((bounty, index) => (
-                  <BountyCard
-                    key={`${bounty.userid}-${bounty.server?.job_id || index}-${bounty.timestamp}`}
-                    bounty={bounty}
+            {/* Server Groups */}
+            {serverGroups.length > 0 ? (
+              <div className="flex flex-col gap-4">
+                {serverGroups.map((group) => (
+                  <ServerBountyGroup
+                    key={group.serverId}
+                    serverId={group.serverId}
+                    bounties={group.bounties}
                   />
                 ))}
-              </Masonry>
+              </div>
             ) : (
               <div className="flex flex-col items-center justify-center py-12 text-center">
                 <Icon
