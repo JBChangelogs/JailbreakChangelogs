@@ -19,6 +19,8 @@ interface Props {
   }>;
 }
 
+import NitroItemRailAd from "@/components/Ads/NitroItemRailAd";
+
 export default async function ItemDetailsPage({ params }: Props) {
   const { type, name } = await params;
   const item = await fetchItem(type, name);
@@ -82,14 +84,17 @@ export default async function ItemDetailsPage({ params }: Props) {
   );
 
   return (
-    <ItemDetailsClient
-      item={item}
-      initialFavoriteCount={null}
-      changelogsSlot={changelogsSlot}
-      commentsSlot={commentsSlot}
-      similarItemsSlot={similarItemsSlot}
-      historyPromise={historyPromise}
-      favoriteButtonSlot={favoriteButtonSlot}
-    />
+    <>
+      <NitroItemRailAd />
+      <ItemDetailsClient
+        item={item}
+        initialFavoriteCount={null}
+        changelogsSlot={changelogsSlot}
+        commentsSlot={commentsSlot}
+        similarItemsSlot={similarItemsSlot}
+        historyPromise={historyPromise}
+        favoriteButtonSlot={favoriteButtonSlot}
+      />
+    </>
   );
 }

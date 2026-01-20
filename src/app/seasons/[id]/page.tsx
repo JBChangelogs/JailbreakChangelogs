@@ -18,6 +18,8 @@ interface Props {
   }>;
 }
 
+import NitroSeasonsRailAd from "@/components/Ads/NitroSeasonsRailAd";
+
 export default async function SeasonDetailsPage({ params }: Props) {
   const { id } = await params;
 
@@ -69,14 +71,17 @@ export default async function SeasonDetailsPage({ params }: Props) {
   }
 
   return (
-    <SeasonDetailsClient
-      seasonList={seasonList}
-      currentSeason={currentSeason}
-      seasonId={id}
-      latestSeasonNumber={LATEST_SEASON}
-      initialComments={commentsData.comments}
-      initialUserMap={commentsData.userMap}
-    />
+    <>
+      <NitroSeasonsRailAd />
+      <SeasonDetailsClient
+        seasonList={seasonList}
+        currentSeason={currentSeason}
+        seasonId={id}
+        latestSeasonNumber={LATEST_SEASON}
+        initialComments={commentsData.comments}
+        initialUserMap={commentsData.userMap}
+      />
+    </>
   );
 }
 

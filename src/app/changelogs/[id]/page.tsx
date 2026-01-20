@@ -10,6 +10,8 @@ interface Props {
   }>;
 }
 
+import NitroChangelogRailAd from "@/components/Ads/NitroChangelogRailAd";
+
 export default async function ChangelogDetailsPage({ params }: Props) {
   const { id } = await params;
 
@@ -36,12 +38,15 @@ export default async function ChangelogDetailsPage({ params }: Props) {
   }
 
   return (
-    <ChangelogDetailsClient
-      changelogList={sortedChangelogList}
-      currentChangelog={currentChangelog}
-      changelogId={id}
-      initialComments={commentsData.comments}
-      initialUserMap={commentsData.userMap}
-    />
+    <>
+      <NitroChangelogRailAd />
+      <ChangelogDetailsClient
+        changelogList={sortedChangelogList}
+        currentChangelog={currentChangelog}
+        changelogId={id}
+        initialComments={commentsData.comments}
+        initialUserMap={commentsData.userMap}
+      />
+    </>
   );
 }

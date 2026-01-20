@@ -7,6 +7,8 @@ import XpImportantDates from "@/components/Seasons/XpImportantDates";
 import XpLevelRequirements from "@/components/Seasons/XpLevelRequirements";
 import { Season } from "@/types/seasons";
 
+import NitroSeasonsCalculatorRailAd from "@/components/Ads/NitroSeasonsCalculatorRailAd";
+
 export default async function WillIMakeItPage() {
   let season: Season | null = null;
   let error: string | null = null;
@@ -24,6 +26,7 @@ export default async function WillIMakeItPage() {
   if (error || !season) {
     return (
       <div className="flex min-h-screen items-center justify-center">
+        <NitroSeasonsCalculatorRailAd />
         <div className="text-primary-text text-xl">
           Error: {error || "Season data not available"}
         </div>
@@ -33,6 +36,7 @@ export default async function WillIMakeItPage() {
 
   return (
     <div className="mb-8 min-h-screen">
+      <NitroSeasonsCalculatorRailAd />
       <div className="container mx-auto px-4">
         <Breadcrumb />
 

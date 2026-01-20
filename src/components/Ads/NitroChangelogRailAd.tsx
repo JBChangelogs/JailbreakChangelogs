@@ -4,10 +4,10 @@ import { useEffect, useRef } from "react";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { registerAdInstance, removeAdReference } from "@/utils/nitroAds";
 
-const AD_ID_SMALL = "np-rail-left-robberies";
-const AD_ID_WIDE = "np-rail-left-robberies-wide";
+const AD_ID_SMALL = "np-changelog-rail";
+const AD_ID_WIDE = "np-changelog-rail-wide";
 
-export default function NitroRobberiesRailAd() {
+export default function NitroChangelogRailAd() {
   const { user } = useAuthContext();
   const createdRef = useRef(false);
 

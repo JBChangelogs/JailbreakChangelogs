@@ -8,6 +8,8 @@ import SeasonHeader from "@/components/Leaderboard/SeasonLeaderboardHeader";
 
 export const revalidate = 300; // Revalidate every 5 minutes
 
+import NitroSeasonsLeaderboardRailAd from "@/components/Ads/NitroSeasonsLeaderboardRailAd";
+
 export default async function SeasonLeaderboardPage() {
   const [leaderboardResponse, latestSeason] = await Promise.all([
     fetchSeasonLeaderboard(),
@@ -18,6 +20,7 @@ export default async function SeasonLeaderboardPage() {
   if (!leaderboardResponse.data || leaderboardResponse.data.length === 0) {
     return (
       <div className="min-h-screen">
+        <NitroSeasonsLeaderboardRailAd />
         <div className="container mx-auto px-4 pb-16">
           <Breadcrumb />
 
@@ -64,6 +67,7 @@ export default async function SeasonLeaderboardPage() {
 
   return (
     <main className="mb-8 min-h-screen">
+      <NitroSeasonsLeaderboardRailAd />
       <div className="container mx-auto px-4">
         <Breadcrumb />
 

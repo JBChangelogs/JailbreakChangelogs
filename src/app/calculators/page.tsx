@@ -84,9 +84,12 @@ const calculators = [
   },
 ];
 
+import NitroCalculatorsRailAd from "@/components/Ads/NitroCalculatorsRailAd";
+
 export default function CalculatorsPage() {
   return (
     <div className="container mx-auto px-4 pb-8">
+      <NitroCalculatorsRailAd />
       <Breadcrumb />
 
       <div className="mb-8">
