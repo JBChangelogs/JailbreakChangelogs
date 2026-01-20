@@ -14,13 +14,9 @@ interface InventoryBreakdownProps {
 export default function InventoryBreakdown({
   networthData,
 }: InventoryBreakdownProps) {
-  // Get the latest networth data (highest snapshot_time)
+  // Get the latest networth data
   const latestData =
-    networthData && networthData.length > 0
-      ? networthData.reduce((latest, current) =>
-          current.snapshot_time > latest.snapshot_time ? current : latest,
-        )
-      : null;
+    networthData && networthData.length > 0 ? networthData[0] : null;
 
   // Format large numbers with commas for better readability
   const formatNetworth = (networth: number) => {
