@@ -26,3 +26,16 @@ export async function getCurrentUser(): Promise<UserData | null> {
     return null;
   }
 }
+
+/**
+ * Checks if the auth token cookie exists (without validating it).
+ */
+export async function hasAuthSessionCookie(): Promise<boolean> {
+  try {
+    const cookieStore = await cookies();
+    const token = cookieStore.get("token")?.value;
+    return !!token && token !== "undefined";
+  } catch {
+    return false;
+  }
+}

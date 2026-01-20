@@ -14,6 +14,7 @@ import {
   showProcessingAuthToast,
   dismissProcessingAuthToast,
 } from "@/utils/auth";
+import { hasAuthSessionCookie } from "@/utils/serverSession";
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -453,6 +454,20 @@ function LoginModalInner({ open, onClose }: LoginModalProps) {
                         </p>
                         <motion.button
                           onClick={async () => {
+                            // Check directly for presence of HttpOnly token cookie via server action
+                            // only check for existence, not validity
+                            const hasCookie = await hasAuthSessionCookie();
+                            if (!hasCookie) {
+                              toast.error(
+                                "You must be logged in with Discord first",
+                                {
+                                  duration: 3000,
+                                  position: "bottom-right",
+                                },
+                              );
+                              return;
+                            }
+
                             try {
                               setIsRedirecting(true);
                               const currentURL = window.location.href;
