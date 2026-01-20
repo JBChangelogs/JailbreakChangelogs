@@ -69,9 +69,7 @@ export default function UserStats({
   // Use networth data from backend only - no fallback calculations
   const latestNetworthData = useMemo(() => {
     return initialNetworthData && initialNetworthData.length > 0
-      ? initialNetworthData.reduce((latest, current) =>
-          current.snapshot_time > latest.snapshot_time ? current : latest,
-        )
+      ? initialNetworthData[0]
       : null;
   }, [initialNetworthData]);
 
