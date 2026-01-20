@@ -64,11 +64,9 @@ export default function InventoryItemCard({
   return (
     <div
       className={`text-primary-text hover:shadow-card-shadow relative flex min-h-[400px] cursor-pointer flex-col rounded-lg p-3 transition-all duration-200 ${
-        isDupedItem
-          ? "bg-button-danger/10 border-button-danger hover:border-button-danger border"
-          : isOriginalOwner
-            ? "border border-[#FFD700] bg-[#FFD700]/10 hover:border-[#FFD700]"
-            : "border-border-primary bg-primary-bg hover:border-border-focus border"
+        isOriginalOwner
+          ? "border border-[#FFD700] bg-[#FFD700]/10 hover:border-[#FFD700]"
+          : "border-border-primary bg-primary-bg hover:border-border-focus border"
       }`}
       onClick={() => onCardClick(item)}
     >
@@ -112,11 +110,6 @@ export default function InventoryItemCard({
             })()}
             {item.categoryTitle}
           </span>
-          {isDupedItem && (
-            <span className="border-button-danger bg-button-danger text-form-button-text flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-medium">
-              Duped
-            </span>
-          )}
         </div>
       </div>
 
@@ -345,25 +338,40 @@ export default function InventoryItemCard({
         </div>
       </div>
 
-      {/* Season and Level badges */}
-      <div className="border-secondary-text mt-3 flex min-h-[40px] justify-center gap-2 border-t pt-3">
-        {!isMissingItem && (
-          <>
-            {item.season && (
-              <div className="border-button-info bg-button-info flex h-8 w-8 items-center justify-center rounded-full border shadow-lg">
-                <span className="text-form-button-text text-xs font-bold">
-                  S{item.season}
-                </span>
-              </div>
+      {/* Season and Level badges or Duped Warning */}
+      <div className="border-secondary-text mt-3 min-h-[40px] border-t pt-3">
+        {isDupedItem ? (
+          <div className="flex flex-col items-center gap-1 text-center text-xs">
+            <span className="text-secondary-text">This item may be duped.</span>
+            <Link
+              href={`/dupes/compare?id=${encodeURIComponent(item.id)}`}
+              className="text-button-info hover:text-button-info-hover font-bold hover:underline"
+              onClick={(e) => e.stopPropagation()}
+            >
+              Compare Variants
+            </Link>
+          </div>
+        ) : (
+          <div className="flex justify-center gap-2">
+            {!isMissingItem && (
+              <>
+                {item.season && (
+                  <div className="border-button-info bg-button-info flex h-8 w-8 items-center justify-center rounded-full border shadow-lg">
+                    <span className="text-form-button-text text-xs font-bold">
+                      S{item.season}
+                    </span>
+                  </div>
+                )}
+                {item.level && (
+                  <div className="border-status-success bg-status-success flex h-8 w-8 items-center justify-center rounded-full border shadow-lg">
+                    <span className="text-form-button-text text-xs font-bold">
+                      L{item.level}
+                    </span>
+                  </div>
+                )}
+              </>
             )}
-            {item.level && (
-              <div className="border-status-success bg-status-success flex h-8 w-8 items-center justify-center rounded-full border shadow-lg">
-                <span className="text-form-button-text text-xs font-bold">
-                  L{item.level}
-                </span>
-              </div>
-            )}
-          </>
+          </div>
         )}
       </div>
     </div>
