@@ -1,3 +1,5 @@
+"use client";
+
 import { useState, useRef } from "react";
 import { convertUrlsToLinks } from "@/utils/urlConverter";
 import { Button } from "@mui/material";

@@ -1,15 +1,16 @@
 import {
   fetchItem,
-  fetchItemChanges,
   fetchItemsByType,
   fetchItemFavorites,
-  fetchUsersBatch,
-  fetchComments,
-  type CommentData,
+  fetchItemHistory,
 } from "@/utils/api";
 import ItemDetailsClient from "@/components/Items/ItemDetailsClient";
 import { notFound } from "next/navigation";
-import type { Change } from "@/components/Items/ItemChangelogs";
+import { Suspense } from "react";
+import ItemChangelogsServer from "@/components/Items/SuspenseWrapper/ItemChangelogsServer";
+import ItemCommentsServer from "@/components/Items/SuspenseWrapper/ItemCommentsServer";
+import SimilarItems from "@/components/Items/SimilarItems";
+import FavoriteButtonServer from "@/components/Items/SuspenseWrapper/FavoriteButtonWrapper";
 
 interface Props {
   params: Promise<{
@@ -26,36 +27,69 @@ export default async function ItemDetailsPage({ params }: Props) {
     notFound();
   }
 
-  // Parallelize independent API calls
-  const [initialChanges, favoriteCount, commentsData] = await Promise.all([
-    fetchItemChanges(String(item.id)),
-    fetchItemFavorites(String(item.id)),
-    fetchComments("item", String(item.id), item.type),
-  ]);
+  const favoriteCountPromise = fetchItemFavorites(String(item.id));
+  const similarItemsPromise = fetchItemsByType(item.type);
+  const historyPromise = fetchItemHistory(String(item.id));
 
-  // Extract user IDs from changes and comments
-  const userIds = Array.from(
-    new Set([
-      ...initialChanges.map((change: Change) => change.changed_by_id),
-      ...commentsData.comments.map((comment: CommentData) => comment.author),
-    ]),
-  ).filter(Boolean) as string[];
+  const changelogsSlot = (
+    <Suspense
+      fallback={
+        <div className="bg-secondary-bg h-[350px] animate-pulse rounded-lg" />
+      }
+    >
+      <ItemChangelogsServer itemId={String(item.id)} />
+    </Suspense>
+  );
 
-  // Fetch user data and similar items in parallel
-  const [userMap, similarItems] = await Promise.all([
-    fetchUsersBatch(userIds),
-    fetchItemsByType(item.type),
-  ]);
+  const commentsSlot = (
+    <Suspense
+      fallback={
+        <div className="bg-secondary-bg h-[350px] animate-pulse rounded-lg" />
+      }
+    >
+      <ItemCommentsServer
+        itemId={String(item.id)}
+        itemType={item.type}
+        itemName={item.name}
+      />
+    </Suspense>
+  );
+
+  const similarItemsSlot = (
+    <Suspense
+      fallback={
+        <div className="bg-secondary-bg h-[350px] animate-pulse rounded-lg" />
+      }
+    >
+      <SimilarItems
+        currentItem={item}
+        similarItemsPromise={similarItemsPromise}
+      />
+    </Suspense>
+  );
+
+  const favoriteButtonSlot = (
+    <Suspense
+      fallback={
+        <div className="bg-secondary-bg h-8 w-24 animate-pulse rounded-lg" />
+      }
+    >
+      <FavoriteButtonServer
+        itemId={item.id}
+        initialFavoriteCountPromise={favoriteCountPromise}
+      />
+    </Suspense>
+  );
 
   return (
     <ItemDetailsClient
       item={item}
-      initialChanges={initialChanges as Change[]}
-      initialUserMap={userMap}
-      similarItemsPromise={Promise.resolve(similarItems)}
-      initialFavoriteCount={favoriteCount}
-      initialComments={commentsData.comments}
-      initialCommentUserMap={commentsData.userMap}
+      initialFavoriteCount={null}
+      changelogsSlot={changelogsSlot}
+      commentsSlot={commentsSlot}
+      similarItemsSlot={similarItemsSlot}
+      historyPromise={historyPromise}
+      favoriteButtonSlot={favoriteButtonSlot}
     />
   );
 }

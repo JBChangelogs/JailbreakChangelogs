@@ -3,20 +3,14 @@
 import { useEffect, useState, useRef } from "react";
 import Image from "next/image";
 import { ThemeProvider } from "@mui/material";
-import React from "react";
+import React, { Suspense } from "react";
 import dynamic from "next/dynamic";
-
 const Tooltip = dynamic(() => import("@mui/material/Tooltip"), { ssr: false });
 import { darkTheme } from "@/theme/darkTheme";
-
 import { Icon } from "@/components/ui/IconWrapper";
-
-import toast from "react-hot-toast";
-
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import CreatorLink from "@/components/Items/CreatorLink";
 import ItemValues from "@/components/Items/ItemValues";
-import { Change as ItemChange } from "@/components/Items/ItemChangelogs";
 import { getCategoryColor } from "@/utils/categoryIcons";
 import NitroItemsVideoPlayer from "@/components/Ads/NitroItemsVideoPlayer";
 
@@ -30,31 +24,9 @@ const ItemValueChart = dynamic(
   },
 );
 
-const ItemChangelogs = dynamic(
-  () => import("@/components/Items/ItemChangelogs"),
-  {
-    loading: () => (
-      <div className="bg-secondary-bg h-[350px] animate-pulse rounded" />
-    ),
-    ssr: false,
-  },
-);
-
-const ChangelogComments = dynamic(
-  () => import("@/components/PageComments/ChangelogComments"),
-  {
-    loading: () => (
-      <div className="bg-secondary-bg h-[350px] animate-pulse rounded" />
-    ),
-    ssr: false,
-  },
-);
-
-import SimilarItems from "@/components/Items/SimilarItems";
+import { ValueHistory } from "@/components/Items/ItemValueChart";
 import HoardersTab from "@/components/Items/HoardersTab";
 import DupesTab from "@/components/Items/DupesTab";
-
-import { fetchUserFavorites, CommentData } from "@/utils/api";
 import {
   handleImageError,
   getItemImagePath,
@@ -67,20 +39,18 @@ import {
 } from "@/utils/images";
 import { formatCustomDate } from "@/utils/timestamp";
 import { useOptimizedRealTimeRelativeDate } from "@/hooks/useSharedTimer";
-import { useAuthContext } from "@/contexts/AuthContext";
 import { CategoryIconBadge } from "@/utils/categoryIcons";
 import { convertUrlsToLinks } from "@/utils/urlConverter";
 import { ItemDetails } from "@/types";
-import type { UserData } from "@/types/auth";
 
 interface ItemDetailsClientProps {
   item: ItemDetails;
-  initialChanges?: ItemChange[];
-  initialUserMap?: Record<string, UserData>;
-  similarItemsPromise?: Promise<ItemDetails[] | null>;
   initialFavoriteCount?: number | null;
-  initialComments?: CommentData[];
-  initialCommentUserMap?: Record<string, UserData>;
+  changelogsSlot: React.ReactNode;
+  commentsSlot: React.ReactNode;
+  similarItemsSlot: React.ReactNode;
+  historyPromise: Promise<ValueHistory[] | null>;
+  favoriteButtonSlot?: React.ReactNode;
 }
 
 // Move ItemDetailsTabs outside to avoid creating components during render
@@ -129,24 +99,20 @@ const ItemDetailsTabs = React.memo(
 
 export default function ItemDetailsClient({
   item,
-  initialChanges,
-  initialUserMap,
-  similarItemsPromise,
-  initialFavoriteCount,
-  initialComments = [],
-  initialCommentUserMap = {},
+  changelogsSlot,
+  commentsSlot,
+  similarItemsSlot,
+  historyPromise,
+  favoriteButtonSlot,
 }: ItemDetailsClientProps) {
   "use memo";
   const [isPlaying, setIsPlaying] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
-  const [isFavorited, setIsFavorited] = useState(false);
-  const [favoriteCount, setFavoriteCount] = useState(initialFavoriteCount || 0);
   const [visibleLength, setVisibleLength] = useState(500);
   const [activeTab, setActiveTab] = useState(0);
   const [activeChartTab, setActiveChartTab] = useState(0);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
-  const { isAuthenticated, user } = useAuthContext();
 
   // Use optimized real-time relative date for last updated timestamp
   const relativeTime = useOptimizedRealTimeRelativeDate(
@@ -191,66 +157,6 @@ export default function ItemDetailsClient({
       setTimeout(() => setActiveTab(0), 0);
     }
   }, []);
-
-  useEffect(() => {
-    // Check if item is favorited
-    const checkFavoriteStatus = async () => {
-      if (user && user.id) {
-        const favoritesData = await fetchUserFavorites(user.id);
-        if (favoritesData !== null && Array.isArray(favoritesData)) {
-          const isItemFavorited = favoritesData.some((fav) => {
-            const favoriteId = String(fav.item_id);
-            if (favoriteId.includes("-")) {
-              const [parentId] = favoriteId.split("-");
-              return Number(parentId) === item.id;
-            }
-            return Number(favoriteId) === item.id;
-          });
-          setIsFavorited(isItemFavorited);
-        }
-      }
-    };
-
-    checkFavoriteStatus();
-  }, [item.id, user]); // Only depend on item.id and user, not the entire item object
-
-  const handleFavoriteClick = async () => {
-    if (!isAuthenticated) {
-      toast.error(
-        "You must be logged in to favorite items. Please log in and try again.",
-      );
-      return;
-    }
-
-    try {
-      const itemId = String(item?.id);
-
-      const response = await fetch(
-        `/api/favorites/${isFavorited ? "remove" : "add"}`,
-        {
-          method: isFavorited ? "DELETE" : "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Origin: "https://jailbreakchangelogs.xyz",
-          },
-          body: JSON.stringify({ item_id: itemId }),
-        },
-      );
-
-      if (response.ok) {
-        setIsFavorited(!isFavorited);
-        setFavoriteCount((prev) => (isFavorited ? prev - 1 : prev + 1));
-        toast.success(
-          isFavorited ? "Removed from favorites" : "Added to favorites",
-        );
-      } else {
-        toast.error("Failed to update favorite status");
-      }
-    } catch (error) {
-      console.error("Error updating favorite status:", error);
-      toast.error("Failed to update favorite status");
-    }
-  };
 
   const handleHornClick = () => {
     if (!audioRef.current) {
@@ -350,31 +256,7 @@ export default function ItemDetailsClient({
                 </div>
 
                 <div className="absolute top-4 left-4 z-10">
-                  <button
-                    onClick={handleFavoriteClick}
-                    className="bg-secondary-bg/80 border-border-primary hover:border-border-focus hover:bg-secondary-bg flex cursor-pointer items-center gap-1.5 rounded-full border px-2 py-1.5 transition-opacity"
-                    title={
-                      isFavorited ? "Remove from favorites" : "Add to favorites"
-                    }
-                  >
-                    {isFavorited ? (
-                      <Icon
-                        icon="mdi:heart"
-                        className="h-5 w-5"
-                        style={{ color: "#ff5a79" }}
-                      />
-                    ) : (
-                      <Icon
-                        icon="mdi:heart-outline"
-                        className="text-primary-text h-5 w-5"
-                      />
-                    )}
-                    {favoriteCount > 0 && (
-                      <span className="text-primary-text text-sm">
-                        {favoriteCount}
-                      </span>
-                    )}
-                  </button>
+                  {favoriteButtonSlot}
                 </div>
 
                 {isVideoItem(item.name) ? (
@@ -795,28 +677,27 @@ export default function ItemDetailsClient({
 
                     {/* Chart Content */}
                     <div className="mt-4">
-                      <ItemValueChart
-                        itemId={String(currentItem.id)}
-                        hideTradingMetrics={
-                          activeChartTab === 0 || currentItem.id === 587
+                      <Suspense
+                        fallback={
+                          <div className="bg-secondary-bg h-[350px] animate-pulse rounded" />
                         }
-                        showOnlyValueHistory={activeChartTab === 0}
-                        showOnlyTradingMetrics={activeChartTab === 1}
-                      />
+                      >
+                        <ItemValueChart
+                          historyPromise={historyPromise}
+                          hideTradingMetrics={
+                            activeChartTab === 0 || currentItem.id === 587
+                          }
+                          showOnlyValueHistory={activeChartTab === 0}
+                          showOnlyTradingMetrics={activeChartTab === 1}
+                        />
+                      </Suspense>
                     </div>
                   </div>
                 </div>
               )}
 
               {activeTab === 2 && (
-                <div className="space-y-6">
-                  <ItemChangelogs
-                    initialChanges={
-                      currentItem.id === item.id ? initialChanges : undefined
-                    }
-                    initialUserMap={initialUserMap}
-                  />
-                </div>
+                <div className="space-y-6">{changelogsSlot}</div>
               )}
 
               {activeTab === 3 && (
@@ -832,24 +713,10 @@ export default function ItemDetailsClient({
               )}
 
               {activeTab === 5 && (
-                <div className="space-y-6">
-                  <SimilarItems
-                    currentItem={currentItem}
-                    similarItemsPromise={similarItemsPromise}
-                  />
-                </div>
+                <div className="space-y-6">{similarItemsSlot}</div>
               )}
 
-              {activeTab === 6 && item && (
-                <ChangelogComments
-                  changelogId={item.id}
-                  changelogTitle={item.name}
-                  type="item"
-                  itemType={item.type}
-                  initialComments={initialComments}
-                  initialUserMap={initialCommentUserMap}
-                />
-              )}
+              {activeTab === 6 && item && commentsSlot}
             </div>
           </div>
         </div>

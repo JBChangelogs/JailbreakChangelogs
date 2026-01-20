@@ -1,3 +1,5 @@
+"use client";
+
 import { useState, useCallback, use, useMemo } from "react";
 
 import { ItemDetails } from "@/types";

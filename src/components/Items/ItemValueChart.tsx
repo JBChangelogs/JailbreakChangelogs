@@ -1,5 +1,6 @@
-import { useEffect, useState, useRef } from "react";
-import { fetchItemHistory } from "@/utils/api";
+"use client";
+
+import { useEffect, useState, useRef, use } from "react";
 import { Skeleton } from "@mui/material";
 import toast from "react-hot-toast";
 import { useTheme } from "@/contexts/ThemeContext";
@@ -38,7 +39,7 @@ ChartJS.register(
   Filler,
 );
 
-interface ValueHistory {
+export interface ValueHistory {
   id: string;
   name: string;
   type: string;
@@ -57,50 +58,32 @@ interface ValueHistory {
 }
 
 interface ItemValueChartProps {
-  itemId: string;
+  historyPromise?: Promise<ValueHistory[] | null>;
   hideTradingMetrics?: boolean;
   showOnlyValueHistory?: boolean;
   showOnlyTradingMetrics?: boolean;
 }
 
 const ItemValueChart = ({
-  itemId,
+  historyPromise,
   hideTradingMetrics = false,
   showOnlyValueHistory = false,
   showOnlyTradingMetrics = false,
 }: ItemValueChartProps) => {
-  const [history, setHistory] = useState<ValueHistory[]>([]);
+  const historyData = historyPromise ? use(historyPromise) : null;
+  const history: ValueHistory[] = historyData || [];
+  const loading = false;
+
   const [dateRange, setDateRange] = useState<"1w" | "1m" | "6m" | "1y" | "all">(
     "all",
   );
-  const [loading, setLoading] = useState(true);
+
   const chartRef = useRef<ChartJS<"line">>(null);
   const tradingChartRef = useRef<ChartJS<"line">>(null);
   const { theme } = useTheme();
-
-  // Text color derived from current theme (stable reference)
   const textColor = theme === "light" ? "#1a1a1a" : "#fffffe";
 
   useEffect(() => {
-    const fetchHistory = async () => {
-      setLoading(true);
-      try {
-        const data = await fetchItemHistory(itemId);
-        if (data !== null) {
-          setHistory(data);
-        }
-      } catch (error) {
-        console.error("Error fetching item history:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchHistory();
-  }, [itemId]);
-
-  useEffect(() => {
-    // Dynamically import and register zoom plugin on client side
     const loadZoomPlugin = async () => {
       const zoomPlugin = (await import("chartjs-plugin-zoom")).default;
       ChartJS.register(zoomPlugin);
