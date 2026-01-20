@@ -1126,9 +1126,10 @@ export default function InventoryCheckerClient({
                 item={selectedItem}
                 username={robloxId ? getUsername(robloxId) : undefined}
                 isDupeTab={
-                  hasDupedItems &&
-                  ((hasDuplicates && effectiveActiveTab === 2) ||
-                    (!hasDuplicates && effectiveActiveTab === 1))
+                  (hasDupedItems &&
+                    ((hasDuplicates && effectiveActiveTab === 2) ||
+                      (!hasDuplicates && effectiveActiveTab === 1))) ||
+                  (selectedItem?.is_duplicated ?? false)
                 }
               />
             )}
