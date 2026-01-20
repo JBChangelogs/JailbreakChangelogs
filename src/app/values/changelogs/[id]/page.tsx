@@ -33,6 +33,8 @@ interface ChangeData {
   changed_by_id: string;
 }
 
+import NitroValuesChangelogsRailAd from "@/components/Ads/NitroValuesChangelogsRailAd";
+
 export default async function ChangelogDetailsPage({
   params,
 }: {
@@ -73,6 +75,7 @@ export default async function ChangelogDetailsPage({
 
   return (
     <main className="mb-8 min-h-screen">
+      <NitroValuesChangelogsRailAd />
       <div className="container mx-auto px-4">
         <Breadcrumb />
         <Suspense fallback={<Loading />}>

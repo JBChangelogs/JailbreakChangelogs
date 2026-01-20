@@ -16,6 +16,8 @@ import PremiumAwareLayout from "@/components/Layout/PremiumAwareLayout";
 
 export const dynamic = "force-dynamic";
 
+import NitroInventoriesRailAd from "@/components/Ads/NitroInventoriesRailAd";
+
 export default async function InventoriesPage() {
   // Check for inventory maintenance mode
   const { isInventoryMaintenanceMode } = await checkInventoryMaintenanceMode();
@@ -34,6 +36,7 @@ export default async function InventoriesPage() {
 
   return (
     <div className="container mx-auto px-4 pb-8">
+      <NitroInventoriesRailAd />
       <Breadcrumb />
 
       <ExperimentalFeatureBanner className="mb-6" />

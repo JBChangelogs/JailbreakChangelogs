@@ -18,6 +18,8 @@ interface OGFinderUserPageProps {
   }>;
 }
 
+import NitroOGDetailRailAd from "@/components/Ads/NitroOGDetailRailAd";
+
 export default async function OGFinderUserPage({
   params,
 }: OGFinderUserPageProps) {
@@ -42,6 +44,7 @@ export default async function OGFinderUserPage({
   return (
     <OGAuthWrapper>
       <div className="container mx-auto px-4 pb-8">
+        <NitroOGDetailRailAd />
         <Breadcrumb />
 
         <ExperimentalFeatureBanner className="mb-6" />

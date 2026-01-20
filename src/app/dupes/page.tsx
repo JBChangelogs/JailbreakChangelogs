@@ -16,6 +16,8 @@ import PremiumAwareLayout from "@/components/Layout/PremiumAwareLayout";
 
 export const dynamic = "force-dynamic";
 
+import NitroDupesRailAd from "@/components/Ads/NitroDupesRailAd";
+
 export default async function DupeFinderPage() {
   // Check for Dupe Finder maintenance mode
   const { isDupeFinderMaintenanceMode } =
@@ -36,6 +38,7 @@ export default async function DupeFinderPage() {
 
   return (
     <div className="container mx-auto px-4 pb-8">
+      <NitroDupesRailAd />
       <Breadcrumb />
 
       <ExperimentalFeatureBanner className="mb-6" />

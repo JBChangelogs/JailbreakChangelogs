@@ -4,8 +4,8 @@ import { useEffect, useRef } from "react";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { registerAdInstance, removeAdReference } from "@/utils/nitroAds";
 
-const AD_ID_SMALL = "np-rail-left-inventory-detail";
-const AD_ID_WIDE = "np-rail-left-inventory-detail-wide";
+const AD_ID_SMALL = "np-inventory-detail-rail";
+const AD_ID_WIDE = "np-inventory-detail-rail-wide";
 
 export default function NitroInventoryDetailRailAd() {
   const { user } = useAuthContext();
