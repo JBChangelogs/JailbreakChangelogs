@@ -1,12 +1,13 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Dialog, DialogPanel } from "@headlessui/react";
 import { Icon } from "../ui/IconWrapper";
 import {
   calculateRobberiesToLevelUp,
   calculateAllLevelPercentages,
 } from "@/utils/hyperchrome";
+import { toast } from "react-hot-toast";
 
 interface HyperchromeCalculatorModalProps {
   open: boolean;
@@ -17,24 +18,74 @@ export default function HyperchromeCalculatorModal({
   open,
   onClose,
 }: HyperchromeCalculatorModalProps) {
-  const [level, setLevel] = useState(0);
-  const [pity, setPity] = useState(0);
+  const [mounted, setMounted] = useState(false);
+  const [level, setLevel] = useState<string>("");
+  const [pity, setPity] = useState<string>("");
   const [step, setStep] = useState(1);
   const [hasCalculated, setHasCalculated] = useState(false);
+  const [resultRobberiesNeeded, setResultRobberiesNeeded] = useState<number>(0);
+  const [resultOtherPity, setResultOtherPity] = useState<Record<
+    number,
+    string
+  > | null>(null);
+  const [resultLevel, setResultLevel] = useState<number>(0);
+  const [resultPity, setResultPity] = useState<number>(0);
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setMounted(true);
+  }, []);
 
   const handleClose = useCallback(() => {
     // reset when closing
-    setLevel(0);
-    setPity(0);
+    setLevel("");
+    setPity("");
     setStep(1);
     setHasCalculated(false);
+    setResultRobberiesNeeded(0);
+    setResultOtherPity(null);
+    setResultLevel(0);
+    setResultPity(0);
     onClose();
   }, [onClose]);
 
-  const lvl = Math.min(Math.max(level, 0), 4) as 0 | 1 | 2 | 3 | 4;
-  const pityPercent = Math.min(Math.max(pity, 0), 100);
-  const robberiesNeeded = calculateRobberiesToLevelUp(lvl, pityPercent);
-  const otherPity = calculateAllLevelPercentages(lvl, pityPercent);
+  if (!mounted) return null;
+
+  const handleNext = () => {
+    const parsedLevel = parseInt(level);
+    if (isNaN(parsedLevel) || parsedLevel < 0 || parsedLevel > 4) {
+      toast.error("Please enter a valid level (0-4)");
+      return;
+    }
+    setStep(2);
+  };
+
+  const handleCalculate = () => {
+    const parsedLevel = parseInt(level);
+    const parsedPity = parseFloat(pity);
+
+    if (isNaN(parsedLevel) || parsedLevel < 0 || parsedLevel > 4) {
+      toast.error("Please enter a valid level (0-4)");
+      return;
+    }
+
+    if (isNaN(parsedPity) || parsedPity < 0 || parsedPity > 100) {
+      toast.error("Please enter a valid pity percentage (0-100)");
+      return;
+    }
+
+    const lvl = parsedLevel as 0 | 1 | 2 | 3 | 4;
+    const pityPercent = parsedPity;
+
+    const robberies = calculateRobberiesToLevelUp(lvl, pityPercent);
+    const others = calculateAllLevelPercentages(lvl, pityPercent);
+
+    setResultRobberiesNeeded(robberies);
+    setResultOtherPity(others);
+    setResultLevel(lvl);
+    setResultPity(pityPercent);
+    setHasCalculated(true);
+  };
 
   return (
     <Dialog open={open} onClose={handleClose} className="relative z-50">
@@ -86,13 +137,7 @@ export default function HyperchromeCalculatorModal({
                   className="border-border-primary bg-form-input text-primary-text hover:border-border-focus focus:border-button-info w-full rounded border p-3 text-sm focus:outline-none"
                   placeholder="Enter your hyperchrome level (0-4)"
                   value={level}
-                  onChange={(e) => {
-                    const raw = parseInt(e.target.value);
-                    const clamped = Number.isNaN(raw)
-                      ? 0
-                      : Math.max(0, Math.min(4, raw));
-                    setLevel(clamped);
-                  }}
+                  onChange={(e) => setLevel(e.target.value)}
                 />
               </div>
             )}
@@ -113,18 +158,12 @@ export default function HyperchromeCalculatorModal({
                   className="border-border-primary bg-form-input text-primary-text hover:border-border-focus focus:border-button-info w-full rounded border p-3 text-sm focus:outline-none"
                   placeholder="Enter your current pity percentage (0-100)"
                   value={pity}
-                  onChange={(e) => {
-                    const raw = parseFloat(e.target.value);
-                    const clamped = Number.isNaN(raw)
-                      ? 0
-                      : Math.max(0, Math.min(100, raw));
-                    setPity(clamped);
-                  }}
+                  onChange={(e) => setPity(e.target.value)}
                 />
               </div>
             )}
 
-            {hasCalculated && step === 2 && (
+            {hasCalculated && step === 2 && resultOtherPity && (
               <div className="mb-4">
                 <div className="border-border-primary bg-primary-bg hover:border-border-focus rounded-lg border p-4">
                   <div className="text-secondary-text mb-3 text-sm font-medium tracking-wider uppercase">
@@ -134,7 +173,7 @@ export default function HyperchromeCalculatorModal({
                   <div className="bg-secondary-bg mb-4 rounded-lg p-4">
                     <div className="mb-2 flex items-center justify-center gap-3">
                       <div className="text-primary-text text-4xl font-black">
-                        {robberiesNeeded}
+                        {resultRobberiesNeeded}
                       </div>
                       <div className="text-secondary-text text-lg font-medium">
                         robberies
@@ -143,7 +182,7 @@ export default function HyperchromeCalculatorModal({
                     <div className="text-secondary-text text-center text-sm">
                       to reach{" "}
                       <span className="text-primary-text font-semibold">
-                        HyperChrome Level {Math.min(level + 1, 5)}
+                        HyperChrome Level {Math.min(resultLevel + 1, 5)}
                       </span>
                     </div>
                   </div>
@@ -156,7 +195,7 @@ export default function HyperchromeCalculatorModal({
                       />
                       <div className="text-secondary-text text-xs leading-relaxed">
                         <span className="font-semibold">Helpful tip:</span>{" "}
-                        After {robberiesNeeded} robberies, pity reaches{" "}
+                        After {resultRobberiesNeeded} robberies, pity reaches{" "}
                         <span className="text-primary-text font-bold">
                           66.6%
                         </span>{" "}
@@ -167,12 +206,12 @@ export default function HyperchromeCalculatorModal({
                   </div>
 
                   <div className="text-secondary-text text-center text-xs">
-                    Based on Level {level}, {pity}% pity
+                    Based on Level {resultLevel}, {resultPity}% pity
                   </div>
                 </div>
               </div>
             )}
-            {hasCalculated && step === 2 && (
+            {hasCalculated && step === 2 && resultOtherPity && (
               <div className="mb-4">
                 <div className="border-border-primary bg-primary-bg hover:border-border-focus rounded-lg border p-4">
                   <div className="text-secondary-text mb-3 text-sm font-medium tracking-wider uppercase">
@@ -184,43 +223,43 @@ export default function HyperchromeCalculatorModal({
                   </div>
 
                   <div className="grid grid-cols-2 gap-3">
-                    {parseFloat(otherPity[1]) <= 100 && (
+                    {parseFloat(resultOtherPity[1]) <= 100 && (
                       <div className="bg-secondary-bg rounded-lg p-3 text-center">
                         <div className="text-primary-text text-lg font-bold">
                           Level 1
                         </div>
                         <div className="text-secondary-text text-sm">
-                          {otherPity[1]}% pity
+                          {resultOtherPity[1]}% pity
                         </div>
                       </div>
                     )}
-                    {parseFloat(otherPity[2]) <= 100 && (
+                    {parseFloat(resultOtherPity[2]) <= 100 && (
                       <div className="bg-secondary-bg rounded-lg p-3 text-center">
                         <div className="text-primary-text text-lg font-bold">
                           Level 2
                         </div>
                         <div className="text-secondary-text text-sm">
-                          {otherPity[2]}% pity
+                          {resultOtherPity[2]}% pity
                         </div>
                       </div>
                     )}
-                    {parseFloat(otherPity[3]) <= 100 && (
+                    {parseFloat(resultOtherPity[3]) <= 100 && (
                       <div className="bg-secondary-bg rounded-lg p-3 text-center">
                         <div className="text-primary-text text-lg font-bold">
                           Level 3
                         </div>
                         <div className="text-secondary-text text-sm">
-                          {otherPity[3]}% pity
+                          {resultOtherPity[3]}% pity
                         </div>
                       </div>
                     )}
-                    {parseFloat(otherPity[4]) <= 100 && (
+                    {parseFloat(resultOtherPity[4]) <= 100 && (
                       <div className="bg-secondary-bg rounded-lg p-3 text-center">
                         <div className="text-primary-text text-lg font-bold">
                           Level 4
                         </div>
                         <div className="text-secondary-text text-sm">
-                          {otherPity[4]}% pity
+                          {resultOtherPity[4]}% pity
                         </div>
                       </div>
                     )}
@@ -235,7 +274,6 @@ export default function HyperchromeCalculatorModal({
               <button
                 type="button"
                 onClick={() => {
-                  setHasCalculated(false);
                   setStep((s) => Math.max(1, s - 1));
                 }}
                 className="text-secondary-text hover:text-primary-text cursor-pointer rounded border-none bg-transparent px-4 py-2 text-sm"
@@ -246,7 +284,7 @@ export default function HyperchromeCalculatorModal({
             {step < 2 ? (
               <button
                 type="button"
-                onClick={() => setStep((s) => Math.min(2, s + 1))}
+                onClick={handleNext}
                 className="bg-button-info text-form-button-text hover:bg-button-info-hover min-w-[100px] cursor-pointer rounded border-none px-4 py-2 text-sm"
               >
                 Next
@@ -254,7 +292,7 @@ export default function HyperchromeCalculatorModal({
             ) : (
               <button
                 type="button"
-                onClick={() => setHasCalculated(true)}
+                onClick={handleCalculate}
                 className="bg-button-info text-form-button-text hover:bg-button-info-hover min-w-[100px] cursor-pointer rounded border-none px-4 py-2 text-sm"
               >
                 Calculate

@@ -13,7 +13,7 @@ interface XpCalculatorProps {
 export default function XpCalculator({ season }: XpCalculatorProps) {
   "use memo";
   const [currentLevel, setCurrentLevel] = useState(1);
-  const [currentXp, setCurrentXp] = useState(0);
+  const [currentXp, setCurrentXp] = useState<string | number>("");
   const [includeDailyXp, setIncludeDailyXp] = useState(true);
   const [includeContracts, setIncludeContracts] = useState(true);
   const [results, setResults] = useState<CalculationResults | null>(null);
@@ -103,6 +103,18 @@ export default function XpCalculator({ season }: XpCalculatorProps) {
       return roundedExp;
     }
 
+    // Validate XP input
+    const parsedXp =
+      typeof currentXp === "string" ? parseInt(currentXp) : currentXp;
+
+    const maxXpForCurrentLevel =
+      getExpFromLevel(currentLevel + 1) - getExpFromLevel(currentLevel);
+
+    if (isNaN(parsedXp) || parsedXp < 0 || parsedXp > maxXpForCurrentLevel) {
+      toast.error(`Please enter a valid XP amount (0-${maxXpForCurrentLevel})`);
+      return;
+    }
+
     // Calculate XP per week
     const expPerWeek = (hasGamePass: boolean) => {
       let weeklyXp = 0;
@@ -141,7 +153,7 @@ export default function XpCalculator({ season }: XpCalculatorProps) {
     };
 
     // Current progress
-    const myExp = getExpFromLevel(currentLevel) + currentXp;
+    const myExp = getExpFromLevel(currentLevel) + parsedXp;
     const targetLevelExp = getExpFromLevel(season.xp_data.targetLevel);
     const xpNeeded = targetLevelExp - myExp;
 
@@ -310,7 +322,7 @@ export default function XpCalculator({ season }: XpCalculatorProps) {
       <div className="border-border-primary bg-secondary-bg hover:border-border-focus mb-8 rounded-lg border p-6">
         <div className="text-center">
           <div className="mb-4">
-            <div className="to-button-danger/80 from-button-danger mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br">
+            <div className="to-button-danger/80 from-button-danger mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-linear-to-br">
               <svg
                 className="text-primary-text h-8 w-8"
                 fill="none"

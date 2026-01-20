@@ -3,10 +3,10 @@ import { Season } from "@/types/seasons";
 
 interface XpCalculatorFormProps {
   currentLevel: number;
-  currentXp: number;
+  currentXp: number | string;
   targetLevel: number;
   onLevelChange: (level: number) => void;
-  onXpChange: (xp: number) => void;
+  onXpChange: (xp: number | string) => void;
   onCalculate: () => void;
   season: Season;
   includeDailyXp: boolean;
@@ -123,7 +123,7 @@ export default function XpCalculatorForm({
             onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
               const newLevel = parseInt(e.target.value);
               onLevelChange(newLevel);
-              onXpChange(0); // Reset XP when level changes
+              onXpChange(""); // Reset XP when level changes
             }}
           >
             <option value="" disabled>
@@ -150,12 +150,7 @@ export default function XpCalculatorForm({
             min="0"
             max={maxXpForCurrentLevel}
             value={currentXp}
-            onChange={(e) => {
-              const value = parseInt(e.target.value) || 0;
-              // Clamp the value to the max XP for the current level
-              const clampedValue = Math.min(value, maxXpForCurrentLevel);
-              onXpChange(clampedValue);
-            }}
+            onChange={(e) => onXpChange(e.target.value)}
             className="border-button-info bg-form-input text-primary-text h-[56px] min-h-[56px] w-full rounded-lg border px-3 py-3 focus:outline-none"
             placeholder={`0-${maxXpForCurrentLevel}`}
           />
