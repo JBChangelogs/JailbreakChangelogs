@@ -34,8 +34,8 @@ export default function NitroGridAd({ adId, className }: NitroGridAdProps) {
             // Element is in view, create the ad
             if (!createdRef.current && window.nitroAds?.createAd) {
               createdRef.current = true;
-              window.nitroAds
-                .createAd(adId, {
+              Promise.resolve(
+                window.nitroAds.createAd(adId, {
                   sizes: [
                     ["320", "50"],
                     ["320", "100"],
@@ -48,10 +48,10 @@ export default function NitroGridAd({ adId, className }: NitroGridAdProps) {
                     position: "top-right",
                   },
                   mediaQuery: "(min-width: 320px) and (max-width: 767px)",
-                })
-                .catch(() => {
-                  createdRef.current = false;
-                });
+                }),
+              ).catch(() => {
+                createdRef.current = false;
+              });
             }
             // Stop observing once triggered
             observer.disconnect();

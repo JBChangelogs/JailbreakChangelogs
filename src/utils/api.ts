@@ -1816,8 +1816,14 @@ export async function fetchRobloxUserByUsername(username: string) {
           }
         } catch {
           // If not JSON, use the text directly
+          // If not JSON, use the text directly but avoid logging HTML
           if (responseText) {
-            errorMessage = responseText;
+            if (responseText.trim().startsWith("<")) {
+              errorMessage =
+                "Received HTML response (likely proxy/gateway error page)";
+            } else {
+              errorMessage = responseText;
+            }
           }
         }
       } catch (parseError) {

@@ -60,7 +60,7 @@ export default function NitroValuesVideoPlayer({ className }: Props) {
 
     createdRef.current = true;
 
-    nitroAds.createAd(SLOT_ID, VALUES_CONFIG).catch(() => {
+    Promise.resolve(nitroAds.createAd(SLOT_ID, VALUES_CONFIG)).catch(() => {
       createdRef.current = false;
     });
 
