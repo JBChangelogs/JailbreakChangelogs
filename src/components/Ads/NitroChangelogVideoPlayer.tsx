@@ -60,7 +60,7 @@ export default function NitroChangelogVideoPlayer({ className }: Props) {
 
     createdRef.current = true;
 
-    nitroAds.createAd(SLOT_ID, CHANGES_CONFIG).catch(() => {
+    Promise.resolve(nitroAds.createAd(SLOT_ID, CHANGES_CONFIG)).catch(() => {
       createdRef.current = false;
     });
 

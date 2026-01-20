@@ -73,8 +73,8 @@ export default function NitroVideoPlayer() {
 
     createdRef.current = true;
 
-    nitroAds
-      .createAd(VIDEO_PLAYER_ID, {
+    Promise.resolve(
+      nitroAds.createAd(VIDEO_PLAYER_ID, {
         format: "floating",
         report: {
           enabled: true,
@@ -87,10 +87,10 @@ export default function NitroVideoPlayer() {
         video: {
           mobile: "compact",
         },
-      })
-      .catch(() => {
-        createdRef.current = false;
-      });
+      }),
+    ).catch(() => {
+      createdRef.current = false;
+    });
   }, [user?.premiumtype, pathname]);
 
   return null;

@@ -62,7 +62,7 @@ export default function NitroCalculatorAd({ className }: Props) {
 
     createdRef.current = true;
 
-    nitroAds.createAd(SLOT_ID, CALCULATOR_CONFIG).catch(() => {
+    Promise.resolve(nitroAds.createAd(SLOT_ID, CALCULATOR_CONFIG)).catch(() => {
       createdRef.current = false;
     });
 

@@ -60,7 +60,7 @@ export default function NitroItemsVideoPlayer({ className }: Props) {
 
     createdRef.current = true;
 
-    nitroAds.createAd(SLOT_ID, ITEMS_CONFIG).catch(() => {
+    Promise.resolve(nitroAds.createAd(SLOT_ID, ITEMS_CONFIG)).catch(() => {
       createdRef.current = false;
     });
 

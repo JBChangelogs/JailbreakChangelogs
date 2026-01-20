@@ -95,7 +95,9 @@ export default function NitroHomepageAd({ className }: Props) {
     createdRef.current = true;
 
     // Mobile config
-    nitroAds.createAd(SLOT_ID_MOBILE, MOBILE_CONFIG).catch(() => {});
+    Promise.resolve(nitroAds.createAd(SLOT_ID_MOBILE, MOBILE_CONFIG)).catch(
+      () => {},
+    );
 
     // Desktop config
     let desktopConfig = DESKTOP_CONFIG;
@@ -108,7 +110,9 @@ export default function NitroHomepageAd({ className }: Props) {
         ),
       };
     }
-    nitroAds.createAd(SLOT_ID_DESKTOP, desktopConfig).catch(() => {});
+    Promise.resolve(nitroAds.createAd(SLOT_ID_DESKTOP, desktopConfig)).catch(
+      () => {},
+    );
 
     return () => {
       nitroAds?.removeAd?.(SLOT_ID_MOBILE);

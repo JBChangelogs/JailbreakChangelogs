@@ -61,7 +61,7 @@ export default function NitroValuesTopAd({ className }: Props) {
 
     createdRef.current = true;
 
-    nitroAds.createAd(SLOT_ID, CONFIG).catch(() => {
+    Promise.resolve(nitroAds.createAd(SLOT_ID, CONFIG)).catch(() => {
       createdRef.current = false;
     });
 

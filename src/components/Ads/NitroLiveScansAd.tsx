@@ -120,13 +120,19 @@ export default function NitroLiveScansAd({ className }: Props) {
     createdRef.current = true;
 
     // Mobile config
-    nitroAds.createAd(SLOT_ID_MOBILE, MOBILE_CONFIG).catch(() => {});
+    Promise.resolve(nitroAds.createAd(SLOT_ID_MOBILE, MOBILE_CONFIG)).catch(
+      () => {},
+    );
 
     // Tablet config
-    nitroAds.createAd(SLOT_ID_TABLET, TABLET_CONFIG).catch(() => {});
+    Promise.resolve(nitroAds.createAd(SLOT_ID_TABLET, TABLET_CONFIG)).catch(
+      () => {},
+    );
 
     // Desktop config
-    nitroAds.createAd(SLOT_ID_DESKTOP, DESKTOP_CONFIG).catch(() => {});
+    Promise.resolve(nitroAds.createAd(SLOT_ID_DESKTOP, DESKTOP_CONFIG)).catch(
+      () => {},
+    );
 
     return () => {
       nitroAds?.removeAd?.(SLOT_ID_MOBILE);
