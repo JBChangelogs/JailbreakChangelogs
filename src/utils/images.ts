@@ -141,9 +141,10 @@ export const getItemImagePath = (
   }
 
   if (isHornItem(type)) {
-    const backgroundVariant =
-      hornBackground === "light" ? "light_bg" : "dark_bg";
-    return `https://assets.jailbreakchangelogs.xyz/assets/audios/horn_thumbnail_${backgroundVariant}.webp`;
+    if (isValuesPage) {
+      return "https://assets.jailbreakchangelogs.xyz/assets/audios/horns/thumbnails/480p/horn_thumbnail.webp";
+    }
+    return "https://assets.jailbreakchangelogs.xyz/assets/audios/horns/thumbnails/horn_thumbnail.webp";
   }
 
   if (isDriftItem(type)) {
