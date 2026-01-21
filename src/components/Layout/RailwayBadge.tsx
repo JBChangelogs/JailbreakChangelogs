@@ -45,7 +45,7 @@ export default function RailwayBadge() {
           height={24}
           width={100}
           className="h-6 w-auto"
-          priority={false}
+          fetchPriority="auto"
         />
       </div>
     </a>

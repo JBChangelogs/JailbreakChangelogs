@@ -1,8 +1,6 @@
-"use client";
-
 import Link from "next/link";
-import { useEffect } from "react";
-
+import { getRandomBackgroundImage } from "@/utils/fisherYatesShuffle";
+import CCPAHandler from "@/components/Home/CCPAHandler";
 import { Icon } from "../components/ui/IconWrapper";
 import HeroBackgroundCarousel from "@/components/Home/HeroBackgroundCarousel";
 import NitroHomepageAd from "@/components/Ads/NitroHomepageAd";
@@ -19,20 +17,16 @@ declare global {
 }
 
 export default function Home() {
-  useEffect(() => {
-    // Trigger CCPA link rendering for SPAs
-    if (typeof window !== "undefined" && window.__uspapi) {
-      window.__uspapi("addLink", 1);
-    }
-  }, []);
+  const initialImage = getRandomBackgroundImage();
 
   return (
     <main className="bg-primary-bg min-h-screen">
+      <CCPAHandler />
       {/* Hero Section */}
       <section className="relative py-20">
         {/* Background Image */}
         <div className="absolute inset-0 z-0">
-          <HeroBackgroundCarousel />
+          <HeroBackgroundCarousel initialImage={initialImage} />
           <div
             className="absolute inset-0 z-10"
             style={{ backgroundColor: "var(--color-hero-overlay)" }}

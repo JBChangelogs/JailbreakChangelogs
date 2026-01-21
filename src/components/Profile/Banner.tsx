@@ -118,7 +118,7 @@ export const Banner = ({
       <Image
         {...getBannerSource()}
         fill
-        priority
+        fetchPriority="high"
         draggable={false}
         className="z-0 object-cover"
         alt={`${username}'s profile banner`}

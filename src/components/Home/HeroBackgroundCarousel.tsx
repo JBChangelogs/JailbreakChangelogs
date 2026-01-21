@@ -1,18 +1,21 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import { generateShuffledBackgroundImages } from "@/utils/fisherYatesShuffle";
 
-export default function HeroBackgroundCarousel() {
-  const [backgroundImages, setBackgroundImages] = useState<string[]>([]);
+export default function HeroBackgroundCarousel({
+  initialImage,
+}: {
+  initialImage: string;
+}) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
-  useEffect(() => {
-    setTimeout(() => {
-      setBackgroundImages(generateShuffledBackgroundImages());
-    }, 0);
-  }, []);
+  const backgroundImages = useMemo(() => {
+    const allImages = generateShuffledBackgroundImages();
+    const remainingImages = allImages.filter((img) => img !== initialImage);
+    return [initialImage, ...remainingImages];
+  }, [initialImage]);
 
   // Function to cycle to the next image
   const nextImage = useCallback(() => {
@@ -23,7 +26,7 @@ export default function HeroBackgroundCarousel() {
 
   // Auto-cycle through images every 10 seconds
   useEffect(() => {
-    if (backgroundImages.length === 0) return;
+    if (backgroundImages.length <= 1) return;
 
     const interval = setInterval(nextImage, 10000);
     return () => clearInterval(interval);
@@ -42,7 +45,7 @@ export default function HeroBackgroundCarousel() {
       fill
       className="object-cover transition-opacity duration-1000"
       style={{ objectPosition: "center 70%" }}
-      priority
+      fetchPriority={currentImageIndex === 0 ? "high" : "auto"}
     />
   );
 }

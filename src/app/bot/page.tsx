@@ -1,35 +1,10 @@
-"use client";
-
-import Image from "next/image";
-import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import { Icon } from "../../components/ui/IconWrapper";
-import { generateShuffledBackgroundImages } from "@/utils/fisherYatesShuffle";
+import { getRandomBackgroundImage } from "@/utils/fisherYatesShuffle";
+import HeroBackgroundCarousel from "@/components/Home/HeroBackgroundCarousel";
 
 export default function BotPage() {
-  const [backgroundImages, setBackgroundImages] = useState<string[]>([]);
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
-
-  useEffect(() => {
-    setTimeout(() => {
-      setBackgroundImages(generateShuffledBackgroundImages());
-    }, 0);
-  }, []);
-
-  // Function to cycle to the next image
-  const nextImage = useCallback(() => {
-    setCurrentImageIndex((prevIndex) =>
-      prevIndex + 1 >= backgroundImages.length ? 0 : prevIndex + 1,
-    );
-  }, [backgroundImages.length]);
-
-  // Auto-cycle through images every 10 seconds
-  useEffect(() => {
-    const interval = setInterval(nextImage, 10000);
-    return () => clearInterval(interval);
-  }, [nextImage]);
-
-  const currentBackgroundImage = backgroundImages[currentImageIndex] || "";
+  const initialImage = getRandomBackgroundImage();
 
   return (
     <main className="bg-primary-bg min-h-screen">
@@ -37,16 +12,7 @@ export default function BotPage() {
       <section className="relative py-20">
         {/* Background Image */}
         <div className="absolute inset-0 z-0">
-          {currentBackgroundImage && (
-            <Image
-              src={currentBackgroundImage}
-              alt="Jailbreak Background"
-              fill
-              className="object-cover transition-opacity duration-1000"
-              style={{ objectPosition: "center 70%" }}
-              priority
-            />
-          )}
+          <HeroBackgroundCarousel initialImage={initialImage} />
           <div
             className="absolute inset-0 z-10"
             style={{ backgroundColor: "var(--color-hero-overlay)" }}

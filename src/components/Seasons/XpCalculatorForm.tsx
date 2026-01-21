@@ -104,7 +104,7 @@ export default function XpCalculatorForm({
           width={400}
           height={300}
           className="mx-auto w-full max-w-sm"
-          priority
+          fetchPriority="high"
         />
         <p className="text-secondary-text mt-2 flex items-center justify-center gap-2 text-center text-sm">
           Use this image as a reference to find your current level and XP

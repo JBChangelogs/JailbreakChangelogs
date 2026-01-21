@@ -225,7 +225,7 @@ export const UserAvatar = ({
             src={avatarSource.src}
             alt={avatarSource.alt}
             fill
-            priority
+            fetchPriority="high"
             draggable={false}
             onError={avatarSource.onError}
             onLoad={() => {

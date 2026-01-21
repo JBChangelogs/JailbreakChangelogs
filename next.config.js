@@ -22,7 +22,7 @@ const nextConfig = {
     ignoreBuildErrors: true,
   },
   images: {
-    unoptimized: true,
+    unoptimized: false,
     qualities: [75, 90],
     remotePatterns: [
       {
