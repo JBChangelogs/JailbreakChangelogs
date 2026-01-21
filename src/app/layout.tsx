@@ -271,9 +271,9 @@ export default async function RootLayout({
                             >
                               <Header />
                             </Suspense>
-                            <Suspense>
-                              <main className="flex-1">{children}</main>
-                            </Suspense>
+                            <main className="flex-1">
+                              <Suspense>{children}</Suspense>
+                            </main>
                             <Footer
                               githubUrl={githubUrl}
                               versionInfo={
@@ -472,9 +472,9 @@ export default async function RootLayout({
                         >
                           <Header />
                         </Suspense>
-                        <Suspense>
-                          <main className="flex-1">{children}</main>
-                        </Suspense>
+                        <main className="flex-1">
+                          <Suspense>{children}</Suspense>
+                        </main>
                         <Footer
                           githubUrl={githubUrl}
                           versionInfo={
