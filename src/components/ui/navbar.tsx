@@ -391,10 +391,10 @@ export const NavbarModern = ({ className }: { className?: string }) => {
                   : "https://assets.jailbreakchangelogs.xyz/assets/logos/JBCL_Long_Transparent.webp"
               }
               alt="Jailbreak Changelogs Logo"
-              width={200}
+              width={213}
               height={48}
               quality={90}
-              priority
+              fetchPriority="high"
               style={{
                 height: "48px",
                 width: "auto",

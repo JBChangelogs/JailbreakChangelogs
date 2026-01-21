@@ -11,6 +11,7 @@ interface ImageModalProps {
   height?: number;
   className?: string;
   priority?: boolean;
+  fetchPriority?: "high" | "low" | "auto";
 }
 
 export default function ImageModal({
@@ -20,6 +21,7 @@ export default function ImageModal({
   height = 300,
   className = "",
   priority = false,
+  fetchPriority,
 }: ImageModalProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -47,7 +49,7 @@ export default function ImageModal({
           width={width}
           height={height}
           className="h-auto w-full rounded-lg border"
-          priority={priority}
+          fetchPriority={fetchPriority || (priority ? "high" : "auto")}
         />
 
         {/* Expand Icon Overlay */}
@@ -102,7 +104,7 @@ export default function ImageModal({
                   width={800}
                   height={600}
                   className="h-auto max-h-[80vh] w-auto max-w-full rounded-lg shadow-2xl"
-                  priority
+                  fetchPriority={fetchPriority || (priority ? "high" : "auto")}
                 />
               </div>
 

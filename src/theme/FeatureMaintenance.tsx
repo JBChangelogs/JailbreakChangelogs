@@ -38,7 +38,7 @@ export default function FeatureMaintenance({
             alt="Jailbreak Changelogs Logo"
             width={140}
             height={140}
-            priority
+            fetchPriority="high"
             draggable={false}
             className="h-[140px] w-auto drop-shadow-[0_2px_12px_rgba(0,0,0,0.5)] filter"
           />

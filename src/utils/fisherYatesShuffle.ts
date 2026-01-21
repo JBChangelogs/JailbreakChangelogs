@@ -39,3 +39,17 @@ export function generateShuffledBackgroundImages(
   // Shuffle the array using Fisher-Yates algorithm
   return fisherYatesShuffle(imageUrls);
 }
+
+/**
+ * Get a single random background image URL
+ * @param count - Number of background images available (default: 34)
+ * @param baseUrl - Base URL for the background images
+ * @returns A single random background image URL
+ */
+export function getRandomBackgroundImage(
+  count: number = 34,
+  baseUrl: string = "https://assets.jailbreakchangelogs.xyz/assets/backgrounds",
+): string {
+  const randomIndex = Math.floor(Math.random() * count) + 1;
+  return `${baseUrl}/background${randomIndex}.webp`;
+}

@@ -21,7 +21,6 @@ import EscapeLoginModal from "../Auth/EscapeLoginModal";
 import { useEscapeLogin } from "@/utils/escapeLogin";
 import { UserAvatar } from "@/utils/avatar";
 import { RobloxIcon } from "@/components/Icons/RobloxIcon";
-// import { PUBLIC_API_URL } from '@/utils/api';
 import { isFeatureEnabled } from "@/utils/featureFlags";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { useTheme } from "@/contexts/ThemeContext";
@@ -550,10 +549,11 @@ export default function Header() {
                           : "https://assets.jailbreakchangelogs.xyz/assets/logos/JBCL_Long_Transparent.webp"
                       }
                       alt="Jailbreak Changelogs Logo"
-                      width={200}
+                      width={213}
                       height={48}
                       quality={90}
-                      priority
+                      fetchPriority="high"
+                      unoptimized={false}
                       className="h-9 w-auto sm:h-12"
                     />
                   </Link>
