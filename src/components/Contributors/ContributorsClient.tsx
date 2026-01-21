@@ -116,16 +116,6 @@ export default function ContributorsClient({
       link: "https://discord.com/invite/jailbreaktrading",
       external: true,
     },
-    {
-      key: "eiesia",
-      name: "EIesia",
-      role: "Contributor",
-      username: "EIesia",
-      avatar:
-        "https://assets.jailbreakchangelogs.xyz/assets/contributors/EIesia.webp",
-      link: "https://www.roblox.com/users/582234297/profile",
-      external: true,
-    },
   ];
 
   const sortByHierarchy = (users: (UserWithFlags & { role: string })[]) => {

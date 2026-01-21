@@ -132,7 +132,7 @@ const AdBlockPrompt = () => {
           </p>
 
           {/* Alternative Option */}
-          <div className="mb-0 w-full sm:mb-8">
+          <div className="mb-4 w-full sm:mb-8">
             <button
               onClick={handleSupporterClick}
               className="bg-button-info text-form-button-text hover:bg-button-info-hover w-full max-w-xs cursor-pointer rounded-lg px-6 py-3 text-base font-bold tracking-wide uppercase shadow-lg transition-all hover:-translate-y-0.5 hover:shadow-xl active:translate-y-0"

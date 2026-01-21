@@ -23,9 +23,9 @@ export default function FeatureMaintenance({
       className="relative flex min-h-screen items-center justify-center bg-[url('https://assets.jailbreakchangelogs.xyz/assets/backgrounds/background16.webp')] bg-cover bg-center bg-no-repeat"
       style={{ color: "var(--color-secondary-text)" }}
     >
-      <div className="absolute inset-0 z-[1] bg-black/70" />
+      <div className="absolute inset-0 z-1 bg-black/70" />
 
-      <div className="relative z-[2] container mx-auto max-w-2xl px-4">
+      <div className="relative z-2 container mx-auto max-w-2xl px-4">
         <div
           className="flex flex-col items-center gap-4 rounded-2xl border px-8 py-8 text-center shadow-[0_8px_32px_0_rgba(0,0,0,0.25)] backdrop-blur-xl"
           style={{
