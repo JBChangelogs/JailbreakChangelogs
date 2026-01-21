@@ -545,8 +545,8 @@ export default function Header() {
                     <Image
                       src={
                         isCollabPage
-                          ? `https://assets.jailbreakchangelogs.xyz/assets/logos/collab/JBCL_X_TC_Logo_Long_Transparent_${resolvedTheme === "dark" ? "Dark" : "Light"}.webp`
-                          : "https://assets.jailbreakchangelogs.xyz/assets/logos/JBCL_Long_Transparent.webp"
+                          ? `/assets/logos/JBCL_X_TC_Logo_Long_Transparent_${resolvedTheme === "dark" ? "Dark" : "Light"}.webp`
+                          : "/assets/logos/JBCL_Long_Transparent.webp"
                       }
                       alt="Jailbreak Changelogs Logo"
                       width={213}
