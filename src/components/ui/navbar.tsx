@@ -974,6 +974,7 @@ export const NavbarModern = ({ className }: { className?: string }) => {
                       <button
                         className="hover:bg-button-danger/10 text-button-danger hover:text-button-danger flex w-full cursor-pointer items-center gap-3 px-4 py-2 text-left text-sm transition-colors"
                         onClick={handleLogout}
+                        data-umami-event="Logout"
                       >
                         <Icon
                           icon="material-symbols:logout"

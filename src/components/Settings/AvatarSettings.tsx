@@ -198,6 +198,13 @@ export const AvatarSettings = ({
         toast.success("Avatar updated successfully!", {
           duration: 3000,
         });
+
+        // Track avatar upload completion
+        if (typeof window !== "undefined" && window.umami) {
+          window.umami.track("Custom Avatar Uploaded", {
+            url: result.imageUrl,
+          });
+        }
       } catch {
         toast.success(
           'Image uploaded! URL has been added to the form. Click "Update" to set as avatar.',
@@ -245,6 +252,11 @@ export const AvatarSettings = ({
       });
       onAvatarUpdate(newAvatarUrl);
       toast.success("Custom avatar updated successfully");
+
+      // Track avatar URL update
+      if (typeof window !== "undefined" && window.umami) {
+        window.umami.track("Custom Avatar Updated", { url: customAvatarUrl });
+      }
     } catch (error) {
       console.error("Error updating avatar:", error);
       setAvatarError(

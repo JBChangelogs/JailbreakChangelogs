@@ -34,6 +34,12 @@ export default function DupeSearchInput({
     try {
       const isNumeric = /^\d+$/.test(input);
       const id = isNumeric ? input : await getId(input);
+
+      // Track dupe search with search term
+      if (typeof window !== "undefined" && window.umami) {
+        window.umami.track("Dupe Search", { searchTerm: input });
+      }
+
       router.push(`/dupes/${id ?? input}`);
     } catch (error) {
       console.error("Error searching for user:", error);

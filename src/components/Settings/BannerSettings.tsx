@@ -196,6 +196,13 @@ export const BannerSettings = ({
         toast.success("Banner updated successfully!", {
           duration: 3000,
         });
+
+        // Track banner upload completion
+        if (typeof window !== "undefined" && window.umami) {
+          window.umami.track("Custom Banner Uploaded", {
+            url: result.imageUrl,
+          });
+        }
       } catch {
         toast.success(
           'Image uploaded! URL has been added to the form. Click "Update" to set as banner.',
@@ -243,6 +250,11 @@ export const BannerSettings = ({
       });
       onBannerUpdate(newBannerUrl);
       toast.success("Custom banner updated successfully");
+
+      // Track banner URL update
+      if (typeof window !== "undefined" && window.umami) {
+        window.umami.track("Custom Banner Updated", { url: customBannerUrl });
+      }
     } catch (error) {
       console.error("Error updating banner:", error);
       setBannerError(
