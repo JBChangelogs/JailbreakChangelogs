@@ -187,7 +187,7 @@ export default function AirdropCard({ airdrop }: AirdropCardProps) {
           {/* Join Server Button */}
           {jobId && (
             <a
-              href={`http://tracker.jailbreakchangelogs.xyz/?jobid=${jobId}&utm_content=${jobId}&utm_campaign=Airdrop_Tracker&utm_term=${airdrop.color}+Airdrop&utm_source=website`}
+              href={`http://tracker.jailbreakchangelogs.xyz/?jobid=${jobId}&utm_campaign=Airdrop_Tracker&utm_term=${airdrop.color}+Airdrop&utm_source=website`}
               target="_blank"
               rel="noopener noreferrer"
               className="bg-button-info text-form-button-text hover:bg-button-info-hover focus:ring-border-focus active:bg-button-info-active mt-2 flex w-full items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition-colors duration-200 focus:ring-2 focus:outline-none"

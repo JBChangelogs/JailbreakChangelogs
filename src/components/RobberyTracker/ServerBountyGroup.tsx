@@ -120,7 +120,7 @@ export default function ServerBountyGroup({
             {/* Join Server Button */}
             {jobId && (
               <a
-                href={`http://tracker.jailbreakchangelogs.xyz/?jobid=${jobId}&utm_content=${jobId}&utm_campaign=Bounty_Tracker&utm_term=${totalBounty}&utm_source=website`}
+                href={`http://tracker.jailbreakchangelogs.xyz/?jobid=${jobId}&utm_campaign=Bounty_Tracker&utm_term=${totalBounty}&utm_source=website`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="bg-button-info text-form-button-text hover:bg-button-info-hover focus:ring-border-focus active:bg-button-info-active flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-semibold transition-colors duration-200 focus:ring-2 focus:outline-none"
