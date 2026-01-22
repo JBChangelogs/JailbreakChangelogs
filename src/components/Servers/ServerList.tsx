@@ -674,6 +674,8 @@ const ServerList: React.FC<{
                         onClick={() => handleCopyLink(server.link)}
                         className="border-button-info bg-button-info text-form-button-text hover:bg-button-info-hover cursor-pointer rounded-lg border px-2 py-1 text-sm transition-colors sm:px-3"
                         aria-label="Copy Server Link"
+                        data-umami-event="Copy Server Link"
+                        data-umami-event-server-id={server.id}
                       >
                         <Icon icon="heroicons:clipboard" className="h-4 w-4" />
                       </button>
@@ -699,6 +701,8 @@ const ServerList: React.FC<{
                         target="_blank"
                         rel="noopener noreferrer"
                         className="border-button-info bg-button-info text-form-button-text hover:bg-button-info-hover cursor-pointer rounded-lg border px-2 py-1 text-sm transition-colors sm:px-3"
+                        data-umami-event="Join Server"
+                        data-umami-event-server-id={server.id}
                       >
                         Join Server
                       </a>
@@ -709,6 +713,8 @@ const ServerList: React.FC<{
                         onClick={() => handleCopyLink(server.link)}
                         className="border-button-info bg-button-info text-form-button-text hover:bg-button-info-hover cursor-pointer rounded-lg border px-2 py-1 text-sm transition-colors sm:px-3"
                         aria-label="Copy Server Link"
+                        data-umami-event="Copy Server Link"
+                        data-umami-event-server-id={server.id}
                       >
                         <Icon icon="heroicons:clipboard" className="h-4 w-4" />
                       </button>
@@ -717,6 +723,8 @@ const ServerList: React.FC<{
                         target="_blank"
                         rel="noopener noreferrer"
                         className="border-button-info bg-button-info text-form-button-text hover:bg-button-info-hover cursor-pointer rounded-lg border px-2 py-1 text-sm transition-colors sm:px-3"
+                        data-umami-event="Join Server"
+                        data-umami-event-server-id={server.id}
                       >
                         Join Server
                       </a>
