@@ -982,6 +982,7 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
                   ? "border-button-info-disabled bg-button-info-disabled text-form-button-text cursor-progress"
                   : "border-button-info bg-button-info text-form-button-text hover:bg-button-info-hover cursor-pointer"
               }`}
+              {...(!editMode && { "data-umami-event": "Trade Offer Posted" })}
             >
               {submitting
                 ? editMode

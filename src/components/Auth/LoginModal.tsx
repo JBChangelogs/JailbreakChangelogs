@@ -387,6 +387,10 @@ function LoginModalInner({ open, onClose }: LoginModalProps) {
                           window.location.href = oauthRedirect;
                         }}
                         className={`hover:shadow-button-info/25 bg-button-info text-form-button-text hover:bg-button-info-hover flex w-full cursor-pointer items-center justify-center gap-2 rounded-md px-4 py-3 font-medium shadow-lg transition-all duration-200`}
+                        data-umami-event="Login with Discord"
+                        {...(campaign && {
+                          "data-umami-event-campaign": campaign,
+                        })}
                       >
                         {campaign
                           ? "Login to Support Campaign"
@@ -495,6 +499,7 @@ function LoginModalInner({ open, onClose }: LoginModalProps) {
                             }
                           }}
                           className={`hover:shadow-button-info/25 bg-button-info text-form-button-text hover:bg-button-info-hover flex w-full cursor-pointer items-center justify-center gap-2 rounded-md px-4 py-3 font-medium shadow-lg transition-all duration-200`}
+                          data-umami-event="Login with Roblox"
                         >
                           Continue with Roblox
                         </motion.button>

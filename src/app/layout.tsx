@@ -26,6 +26,7 @@ import NitroBottomAnchor from "@/components/Ads/NitroBottomAnchor";
 import NitroVideoPlayer from "@/components/Ads/NitroVideoPlayer";
 import AdBlockRecovery from "@/components/Ads/AdBlockRecovery";
 import AdBlockPrompt from "@/components/Ads/AdBlockPrompt";
+import UmamiIdentity from "@/components/Analytics/UmamiIdentity";
 import {
   checkMaintenanceMode,
   getMaintenanceMetadata,
@@ -140,6 +141,7 @@ export default async function RootLayout({
             defer
             src="https://umami.jailbreakchangelogs.xyz/script.js"
             data-website-id="c1c31e70-9638-4e97-8c99-5b02dcf5a0a1"
+            data-domains="jailbreakchangelogs.xyz"
           />
           {/* Nitro Pay Ads - Only load if user is NOT a supporter */}
           {!isSupporter && (
@@ -262,6 +264,7 @@ export default async function RootLayout({
 
                       <AuthCheck />
                       <AuthProvider>
+                        <UmamiIdentity />
                         <NitroBottomAnchor />
                         <NitroVideoPlayer />
                         <NitroAnchorCloseSupporterModal />
@@ -351,6 +354,7 @@ export default async function RootLayout({
           defer
           src="https://umami.jailbreakchangelogs.xyz/script.js"
           data-website-id="c1c31e70-9638-4e97-8c99-5b02dcf5a0a1"
+          data-domains="jailbreakchangelogs.xyz"
         />
         {/* Nitro Pay Ads - Only load if user is NOT a supporter */}
         {!isSupporter && (
@@ -472,6 +476,7 @@ export default async function RootLayout({
 
                   <AuthCheck />
                   <AuthProvider>
+                    <UmamiIdentity />
                     <NitroBottomAnchor />
                     <NitroVideoPlayer />
                     <NitroAnchorCloseSupporterModal />

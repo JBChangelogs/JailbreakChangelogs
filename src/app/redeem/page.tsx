@@ -447,6 +447,7 @@ export default function RedeemPage() {
                     ? "border-button-info-disabled bg-button-info-disabled text-form-button-text cursor-not-allowed"
                     : "bg-button-info text-form-button-text hover:bg-button-info-hover hover:cursor-pointer"
                 }`}
+                data-umami-event="Redeem Code"
               >
                 {isLoading ? (
                   <div className="flex items-center justify-center">

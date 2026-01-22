@@ -80,6 +80,12 @@ export default function OGFinderClient({
     try {
       const isNumeric = /^\d+$/.test(input);
       const id = isNumeric ? input : await getId(input);
+
+      // Track OG search with search term
+      if (typeof window !== "undefined" && window.umami) {
+        window.umami.track("OG Search", { searchTerm: input });
+      }
+
       router.push(`/og/${id ?? input}`);
     } catch (error) {
       console.error("Error searching for user:", error);

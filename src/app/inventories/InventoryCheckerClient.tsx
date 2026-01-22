@@ -586,6 +586,12 @@ export default function InventoryCheckerClient({
     try {
       const isNumeric = /^\d+$/.test(input);
       const id = isNumeric ? input : await getId(input);
+
+      // Track inventory search with search term
+      if (typeof window !== "undefined" && window.umami) {
+        window.umami.track("Inventory Search", { searchTerm: input });
+      }
+
       router.push(`/inventories/${id ?? input}`);
     } catch (error) {
       console.error("Error searching for user:", error);

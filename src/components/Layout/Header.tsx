@@ -280,6 +280,7 @@ export default function Header() {
           <div
             onClick={handleLogout}
             className="hover:bg-button-info-hover/10 flex cursor-pointer items-center gap-3 px-4 py-3 transition-colors"
+            data-umami-event="Logout"
           >
             <Icon
               icon="material-symbols:logout"

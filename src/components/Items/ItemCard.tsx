@@ -261,6 +261,10 @@ export default function ItemCard({
               isHovered ? "opacity-100" : "opacity-0"
             } hover:bg-secondary-bg`}
             title={isFavorited ? "Remove from favorites" : "Add to favorites"}
+            data-umami-event={
+              isFavorited ? "Item Unfavorited" : "Item Favorited"
+            }
+            data-umami-event-item-id={item.id}
           >
             {isFavorited ? (
               <Icon

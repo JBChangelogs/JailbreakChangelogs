@@ -116,6 +116,7 @@ export default function ScanOptionSection({
                     window.dispatchEvent(event);
                   }}
                   className="bg-button-info text-form-button-text hover:bg-button-info-hover inline-flex cursor-pointer items-center gap-1.5 rounded-md px-4 py-2 text-sm font-medium transition-colors"
+                  data-umami-event="Request Inventory Scan"
                 >
                   Request a Scan
                 </button>

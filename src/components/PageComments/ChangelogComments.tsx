@@ -428,6 +428,11 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
       setEditingCommentId(null);
       setEditContent("");
       refreshCommentsFromServer();
+
+      // Track comment edit
+      if (typeof window !== "undefined" && window.umami) {
+        window.umami.track("Comment Edited", { type });
+      }
     } catch (err) {
       setGlobalErrorSnackbarMsg(
         err instanceof Error ? err.message : "Failed to edit comment",
@@ -452,6 +457,10 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
         throw new Error("Failed to delete comment");
       }
       // Comment successfully deleted, no need to refresh since we already removed it optimistically
+      // Track comment delete
+      if (typeof window !== "undefined" && window.umami) {
+        window.umami.track("Comment Deleted", { type });
+      }
     } catch (err) {
       // If deletion failed, restore the comment
       setComments((prev) => {
@@ -707,6 +716,8 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                       ? "border-button-secondary bg-button-secondary text-secondary-text cursor-not-allowed"
                       : "border-button-info bg-button-info text-form-button-text hover:bg-button-info-hover cursor-pointer"
                 }`}
+                data-umami-event="Post Comment"
+                data-umami-event-type={type}
               >
                 {isLoggedIn ? (
                   isSubmittingComment ? (
