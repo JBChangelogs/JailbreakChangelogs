@@ -124,22 +124,6 @@ export default function BountyCard({
               </div>
             )}
 
-            {/* Join Server Button */}
-            {jobId && (
-              <a
-                href={`http://tracker.jailbreakchangelogs.xyz/?jobid=${jobId}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="bg-button-info text-form-button-text hover:bg-button-info-hover focus:ring-border-focus active:bg-button-info-active mt-2 flex w-full items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition-colors duration-200 focus:ring-2 focus:outline-none"
-              >
-                <Icon
-                  icon="heroicons:arrow-top-right-on-square"
-                  className="h-4 w-4"
-                />
-                Join Server
-              </a>
-            )}
-
             {/* View Players Button */}
             {players.length > 0 && (
               <button

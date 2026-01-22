@@ -243,7 +243,7 @@ export default function RobberyCard({ robbery }: RobberyCardProps) {
           {/* Join Server Button */}
           {jobId && (
             <a
-              href={`http://tracker.jailbreakchangelogs.xyz/?jobid=${jobId}`}
+              href={`http://tracker.jailbreakchangelogs.xyz/?jobid=${jobId}&utm_content=${jobId}&utm_campaign=${robbery.marker_name === "Mansion" ? "Mansion_Tracker" : "Robbery_Tracker"}&utm_term=${robbery.name.replace(/ /g, "+")}&utm_source=website`}
               target="_blank"
               rel="noopener noreferrer"
               className="bg-button-info text-form-button-text hover:bg-button-info-hover focus:ring-border-focus active:bg-button-info-active mt-3 flex w-full items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition-colors duration-200 focus:ring-2 focus:outline-none"
