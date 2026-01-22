@@ -27,7 +27,7 @@ export default function PrivacyPage() {
           </h1>
         </div>
         <p className="text-primary-text mb-6 text-sm">
-          Last updated: December 15th, 2025
+          Last updated: January 22nd, 2026
         </p>
 
         <div className="border-border-primary bg-secondary-bg hover:border-border-focus rounded-lg border p-6 transition-colors">
@@ -137,9 +137,58 @@ export default function PrivacyPage() {
               </Typography>
               <Typography className="text-secondary-text">
                 We use <strong>Google Consent Mode v2</strong> to ensure your
-                consent preferences are honored before any tracking cookies are
-                loaded. Your consent choices are communicated to Google and
-                other third-party services to respect your privacy decisions.
+                consent preferences are honored. Your consent choices are
+                communicated to Google and Microsoft to respect your privacy
+                decisions before any third-party tracking occurs.
+              </Typography>
+            </div>
+
+            <div>
+              <h2 className="text-primary-text mb-4 text-xl font-semibold">
+                Internal Analytics & Security (Umami)
+              </h2>
+              <Typography className="text-secondary-text mb-4">
+                We use a self-hosted instance of{" "}
+                <a
+                  href="https://umami.is"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-link hover:text-link-hover hover:underline"
+                >
+                  Umami Analytics
+                </a>{" "}
+                as an internal tool to analyze site usage and maintain platform
+                security. Because this system is entirely first-party (hosted on
+                our own infrastructure), uses no persistent cookies, and never
+                shares data with third parties, it is active for all visitors.
+              </Typography>
+              <Typography className="text-secondary-text mb-4">
+                This data is essential for us to identify site improvements and
+                detect bad actors or fraudulent activity. For guest visitors,
+                data is collected anonymously. For authenticated users, we link
+                specific site interactions to your account to better understand
+                how our registered members use the platform.
+              </Typography>
+              <Typography className="text-secondary-text mb-4">
+                <strong>What we track:</strong>
+              </Typography>
+              <ul className="text-secondary-text mb-4 list-inside list-disc space-y-1">
+                <li>Page views, referrers, and session duration</li>
+                <li>Technical data (Browser, OS, Device type, Country)</li>
+                <li>
+                  Interaction events (e.g., favoriting items, requesting
+                  inventory scans)
+                </li>
+              </ul>
+              <Typography className="text-secondary-text mb-4">
+                <strong>Identity and Personalization:</strong>
+              </Typography>
+              <Typography className="text-secondary-text mb-4">
+                When you are authenticated via Discord or Roblox, we may link
+                your internal Discord/Roblox User IDs and Usernames with your
+                Umami session. This allows us to understand how our registered
+                members interact with specific features. This data is stored
+                securely on our private servers and is never sold or shared.
               </Typography>
             </div>
 
