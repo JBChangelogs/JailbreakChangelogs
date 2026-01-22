@@ -205,6 +205,7 @@ export default function XpCalculatorForm({
         <button
           onClick={onCalculate}
           disabled={!currentLevel || (!includeDailyXp && !includeContracts)}
+          data-umami-event="Will I Make It Calculate"
           className={`flex items-center justify-center gap-2 rounded-md border px-4 py-2 text-sm font-medium transition-colors ${
             !currentLevel || (!includeDailyXp && !includeContracts)
               ? "border-button-secondary bg-button-secondary text-secondary-text cursor-not-allowed"

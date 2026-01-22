@@ -293,6 +293,7 @@ export default function HyperchromeCalculatorModal({
               <button
                 type="button"
                 onClick={handleCalculate}
+                data-umami-event="Hyper Pity Calculate"
                 className="bg-button-info text-form-button-text hover:bg-button-info-hover min-w-[100px] cursor-pointer rounded border-none px-4 py-2 text-sm"
               >
                 Calculate

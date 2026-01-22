@@ -476,6 +476,9 @@ const AddServerModal: React.FC<AddServerModalProps> = ({
                 <button
                   onClick={handleSubmit}
                   disabled={loading}
+                  data-umami-event={
+                    editingServer ? "Edit Server" : "Add Server"
+                  }
                   className="bg-button-info text-form-button-text hover:bg-button-info-hover cursor-pointer rounded-md px-4 py-2 text-sm font-medium disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {loading

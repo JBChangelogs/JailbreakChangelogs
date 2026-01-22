@@ -622,6 +622,11 @@ export const NavbarModern = ({ className }: { className?: string }) => {
                             );
                           }
                         }}
+                        data-umami-event={
+                          notificationTab === "unread"
+                            ? "Clear Unread Notifications"
+                            : "Clear Notification History"
+                        }
                         className="text-secondary-text cursor-pointer transition-colors hover:text-red-500"
                       >
                         <Icon
@@ -764,6 +769,7 @@ export const NavbarModern = ({ className }: { className?: string }) => {
                                         ? "bg-green-500/20 text-green-500"
                                         : "bg-secondary-bg text-secondary-text hover:bg-tertiary-bg hover:text-primary-text"
                                     }`}
+                                    data-umami-event="Mark Notification Read"
                                     aria-label="Mark as seen"
                                   >
                                     <Icon

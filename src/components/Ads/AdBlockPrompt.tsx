@@ -135,6 +135,7 @@ const AdBlockPrompt = () => {
           <div className="mb-4 w-full sm:mb-8">
             <button
               onClick={handleSupporterClick}
+              data-umami-event="Adblock Prompt - Become Supporter"
               className="bg-button-info text-form-button-text hover:bg-button-info-hover w-full max-w-xs cursor-pointer rounded-lg px-6 py-3 text-base font-bold tracking-wide uppercase shadow-lg transition-all hover:-translate-y-0.5 hover:shadow-xl active:translate-y-0"
             >
               Become A Supporter
@@ -144,6 +145,7 @@ const AdBlockPrompt = () => {
           {/* Dismiss Link */}
           <button
             onClick={handleModalDismiss}
+            data-umami-event="Adblock Prompt - Remind Later"
             className="text-secondary-text hover:text-primary-text cursor-pointer text-sm font-medium transition-colors hover:underline"
           >
             Remind Me Later

@@ -178,6 +178,8 @@ export default function AirdropCard({ airdrop }: AirdropCardProps) {
           {/* View Map Button */}
           <button
             onClick={() => setIsMapModalOpen(true)}
+            data-umami-event="View Airdrop Map"
+            data-umami-event-location={airdrop.location}
             className="active:bg-button-secondary-active bg-button-secondary text-form-button-text hover:bg-button-secondary-hover focus:ring-border-focus mt-2 flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition-colors duration-200 focus:ring-2 focus:outline-none"
           >
             <Icon icon="heroicons:map-pin" className="h-4 w-4" />
