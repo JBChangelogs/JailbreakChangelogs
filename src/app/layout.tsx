@@ -139,8 +139,14 @@ export default async function RootLayout({
           {/* Umami Analytics */}
           <Script
             defer
-            src="https://umami.jailbreakchangelogs.xyz/script.js"
-            data-website-id="c1c31e70-9638-4e97-8c99-5b02dcf5a0a1"
+            src={`https://umami.jailbreakchangelogs.xyz${
+              process.env.NEXT_PUBLIC_UMAMI_SCRIPT_NAME
+                ? process.env.NEXT_PUBLIC_UMAMI_SCRIPT_NAME.startsWith("/")
+                  ? process.env.NEXT_PUBLIC_UMAMI_SCRIPT_NAME
+                  : `/${process.env.NEXT_PUBLIC_UMAMI_SCRIPT_NAME}`
+                : "/assets/js/app.js"
+            }`}
+            data-website-id="91439a73-21f8-4129-961e-5de4267a08db"
             data-domains="jailbreakchangelogs.xyz"
           />
           {/* Nitro Pay Ads - Only load if user is NOT a supporter */}
@@ -352,8 +358,14 @@ export default async function RootLayout({
         {/* Umami Analytics */}
         <Script
           defer
-          src="https://umami.jailbreakchangelogs.xyz/script.js"
-          data-website-id="c1c31e70-9638-4e97-8c99-5b02dcf5a0a1"
+          src={`https://umami.jailbreakchangelogs.xyz${
+            process.env.NEXT_PUBLIC_UMAMI_SCRIPT_NAME
+              ? process.env.NEXT_PUBLIC_UMAMI_SCRIPT_NAME.startsWith("/")
+                ? process.env.NEXT_PUBLIC_UMAMI_SCRIPT_NAME
+                : `/${process.env.NEXT_PUBLIC_UMAMI_SCRIPT_NAME}`
+              : "/assets/js/app.js"
+          }`}
+          data-website-id="91439a73-21f8-4129-961e-5de4267a08db"
           data-domains="jailbreakchangelogs.xyz"
         />
         {/* Nitro Pay Ads - Only load if user is NOT a supporter */}
