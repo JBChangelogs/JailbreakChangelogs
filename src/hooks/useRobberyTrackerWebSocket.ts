@@ -16,6 +16,7 @@ export interface RobberyData {
   metadata: {
     casino_code?: string;
     plane_time?: number;
+    casino_time?: number;
   } | null;
   job_id: string;
   server_time: number;
@@ -176,8 +177,7 @@ export function useRobberyTrackerWebSocket(
       reconnectTimeoutRef.current = null;
     }
     setIsConnected(false);
-    // Clear robberies to prevent showing stale data on reconnect
-    setRobberies([]);
+    // Data is persisted to avoid flashing empty state on reconnect
   }, []);
 
   // Refs for state tracking without re-renders

@@ -15,6 +15,7 @@ interface RobberyCardProps {
 export default function RobberyCard({ robbery }: RobberyCardProps) {
   const [isPlayersModalOpen, setIsPlayersModalOpen] = useState(false);
   const [planeCountdown, setPlaneCountdown] = useState<string | null>(null);
+  const [casinoCountdown, setCasinoCountdown] = useState<string | null>(null);
   const imageUrl = `https://assets.jailbreakchangelogs.xyz/assets/images/robberies/${robbery.marker_name}.webp`;
 
   // Create unique ID for timer subscription (same pattern as card key)
@@ -80,6 +81,40 @@ export default function RobberyCard({ robbery }: RobberyCardProps) {
       return () => clearInterval(interval);
     }
   }, [robbery.marker_name, robbery.metadata]);
+
+  // Handle casino countdown
+  useEffect(() => {
+    if (
+      robbery.marker_name === "Casino" &&
+      robbery.status === 2 &&
+      robbery.metadata?.casino_time
+    ) {
+      const casinoTime = robbery.metadata.casino_time;
+
+      const updateCountdown = () => {
+        const now = Math.floor(Date.now() / 1000);
+        const diff = casinoTime - now;
+
+        if (diff > 0) {
+          const minutes = Math.floor(diff / 60);
+          const seconds = diff % 60;
+
+          if (minutes > 0) {
+            setCasinoCountdown(`${minutes}m ${seconds}s`);
+          } else {
+            setCasinoCountdown(`${seconds}s`);
+          }
+        } else {
+          setCasinoCountdown("0s");
+        }
+      };
+
+      updateCountdown();
+      const interval = setInterval(updateCountdown, 1000);
+
+      return () => clearInterval(interval);
+    }
+  }, [robbery.marker_name, robbery.status, robbery.metadata]);
 
   // Format server time as 12-hour clock with AM/PM (e.g., 2.24 -> 02:14 AM, 20.56 -> 08:34 PM)
   const formatServerTime = (serverTime: number) => {
@@ -218,6 +253,19 @@ export default function RobberyCard({ robbery }: RobberyCardProps) {
               </button>
             </div>
           )}
+
+          {/* Casino Countdown */}
+          {robbery.marker_name === "Casino" &&
+            robbery.status === 2 &&
+            robbery.metadata?.casino_time &&
+            casinoCountdown && (
+              <div className="flex items-center justify-between">
+                <span className="text-secondary-text">Closes In:</span>
+                <span className="text-primary-text font-mono font-semibold">
+                  {casinoCountdown}
+                </span>
+              </div>
+            )}
 
           {/* Cargo Plane Countdown */}
           {robbery.marker_name === "CargoPlane" &&

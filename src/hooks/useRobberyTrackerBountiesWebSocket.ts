@@ -171,8 +171,7 @@ export function useRobberyTrackerBountiesWebSocket(
       reconnectTimeoutRef.current = null;
     }
     setIsConnected(false);
-    // Clear bounties to prevent showing stale data on reconnect
-    setBounties([]);
+    // Data is persisted to avoid flashing empty state on reconnect
   }, []);
 
   // Refs for state tracking without re-renders

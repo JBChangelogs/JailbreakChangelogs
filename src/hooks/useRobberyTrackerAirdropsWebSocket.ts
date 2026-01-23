@@ -172,8 +172,7 @@ export function useRobberyTrackerAirdropsWebSocket(
       reconnectTimeoutRef.current = null;
     }
     setIsConnected(false);
-    // Clear airdrops to prevent showing stale data on reconnect
-    setAirdrops([]);
+    // Data is persisted to avoid flashing empty state on reconnect
   }, []);
 
   // Refs for state tracking without re-renders
