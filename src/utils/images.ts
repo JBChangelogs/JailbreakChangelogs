@@ -99,10 +99,10 @@ export const getVideoPath = (type: string, name: string): string => {
     return "https://assets.jailbreakchangelogs.xyz/assets/images/items/hyperchromes/HyperShift_optimized.mp4";
   }
   if (name === "Gamer TV Set") {
-    return "https://assets.jailbreakchangelogs.xyz/assets/images/items/videos/furnitures/Gamer TV Set.webm";
+    return "https://assets.jailbreakchangelogs.xyz/assets/images/items/furnitures/Gamer%20TV%20Set.webm";
   }
   if (name === "Arcade Racer") {
-    return "https://assets.jailbreakchangelogs.xyz/assets/images/items/videos/spoilers/Arcade Racer.webm";
+    return "https://assets.jailbreakchangelogs.xyz/assets/images/items/spoilers/Arcade%20Racer.webm";
   }
   throw new Error(`No video path found for ${name}`);
 };
