@@ -43,6 +43,70 @@ export default function TradingGuides({
       "Items which are on a fast rise due to short lived hype created by the community.",
   };
 
+  const tradingTerms = [
+    {
+      term: "Hype",
+      description:
+        "An item which has a massive demand spike that the community created",
+    },
+    { term: "Demand", description: "How often/much people look for an item" },
+    {
+      term: "Overpays",
+      description: "Amounts that people pay for items over their base value",
+    },
+    {
+      term: "Base",
+      description: "The value of an item on the list, the listed value",
+    },
+    {
+      term: "Avoided",
+      description:
+        "Items that people don't want to trade for, usually caused by bad demand",
+    },
+    { term: "LF", description: "Looking for" },
+    { term: "C", description: "Clean, items that are not duped" },
+    { term: "D", description: "Duped, items that are duped" },
+    { term: "TR", description: "Trading" },
+    { term: "IA", description: "Instant accept" },
+    { term: "MLF", description: "Mainly looking for" },
+    { term: "NLF", description: "Not looking for" },
+    {
+      term: "W",
+      description:
+        "Win, a trade offer where the offering side is winning, vice versa",
+    },
+    {
+      term: "L",
+      description:
+        "Loss, a trade offer where the offering side is losing, vice versa",
+    },
+    {
+      term: "F",
+      description:
+        "Fair, a trade that is fair in demand and/or value, can be unequal in some cases (depending on the item)",
+    },
+    {
+      term: "WFL",
+      description: "Win, fair, loss. Asking if my this offer is/was good",
+    },
+    {
+      term: "Adds",
+      description:
+        "Additions to the trade, usually asked for is if the side you're offering for is less than your side, or the other way around",
+    },
+    { term: "AA", description: "Auto Accept" },
+    {
+      term: "Downgrade",
+      description:
+        "When you want to trade one big item, or bigger items, for more smaller items, for example 1 of your item for 2 of the others item.",
+    },
+    {
+      term: "Upgrade",
+      description:
+        "When you want to trade multiple smaller items for a bigger item. For example 2 of your items for one of theirs.",
+    },
+  ];
+
   const getDemandHexColor = (demand: string): string => {
     switch (demand) {
       case "Close to none":
@@ -304,6 +368,25 @@ export default function TradingGuides({
                   </button>
                 </Tooltip>
               ))}
+            </div>
+
+            <h3 className="text-primary-text mb-4 text-xl font-semibold">
+              Common Trading Terms
+            </h3>
+            <div className="border-border-primary bg-tertiary-bg mb-4 max-h-[300px] overflow-y-auto rounded-lg border p-4">
+              <div className="space-y-4">
+                {tradingTerms.map((item) => (
+                  <div
+                    key={item.term}
+                    className="border-border-secondary border-b pb-3 last:border-0 last:pb-0"
+                  >
+                    <span className="text-link font-bold">{item.term}: </span>
+                    <span className="text-secondary-text text-sm">
+                      {item.description}
+                    </span>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
           <div className="flex flex-1 items-center justify-center">

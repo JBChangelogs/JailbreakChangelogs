@@ -52,6 +52,9 @@ export const DeleteAccount = () => {
     }
 
     try {
+      if (typeof window !== "undefined" && window.umami) {
+        window.umami.track("Delete Account");
+      }
       await deleteAccount();
       await logout();
 
@@ -224,7 +227,6 @@ export const DeleteAccount = () => {
           <button
             onClick={handleDelete}
             disabled={!showFinalWarning && timeLeft > 0}
-            data-umami-event="Delete Account"
             style={{
               backgroundColor: "var(--color-button-danger)",
               color: "var(--color-form-button-text)",

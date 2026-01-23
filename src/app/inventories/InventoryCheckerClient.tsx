@@ -716,6 +716,9 @@ export default function InventoryCheckerClient({
                       <div className="flex justify-center">
                         <button
                           onClick={() => {
+                            if (typeof window !== "undefined" && window.umami) {
+                              window.umami.track("Request Scan");
+                            }
                             console.log(
                               "[INVENTORY] Request Scan button clicked",
                             );

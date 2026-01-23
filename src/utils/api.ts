@@ -499,6 +499,7 @@ export async function fetchItem(
         headers: {
           "User-Agent": "JailbreakChangelogs-ItemDetails/1.0",
         },
+        next: { revalidate: 3600 },
       },
     );
 
@@ -524,6 +525,7 @@ export async function fetchItemById(id: string): Promise<ItemDetails | null> {
       headers: {
         "User-Agent": "JailbreakChangelogs-ItemDetails/1.0",
       },
+      next: { revalidate: 3600 },
     });
 
     if (!response.ok) {
@@ -577,6 +579,7 @@ export async function fetchItemsChangelog(id: string) {
         headers: {
           "User-Agent": "JailbreakChangelogs-Changelogs/1.0",
         },
+        next: { revalidate: 3600 },
       },
     );
 
@@ -603,6 +606,7 @@ export async function fetchItemChanges(id: string) {
       headers: {
         "User-Agent": "JailbreakChangelogs-Changelogs/1.0",
       },
+      next: { revalidate: 3600 },
     });
     if (response.status === 404) {
       return [] as unknown[];
@@ -1155,6 +1159,7 @@ export async function fetchItemFavorites(id: string) {
       headers: {
         "User-Agent": "JailbreakChangelogs-Favorites/1.0",
       },
+      next: { revalidate: 3600 },
     });
 
     if (response.status === 404) {
@@ -1249,6 +1254,7 @@ export async function fetchItemHistory(id: string) {
       headers: {
         "User-Agent": "JailbreakChangelogs-ValueHistory/1.0",
       },
+      next: { revalidate: 3600 },
     });
 
     if (response.status === 404) {
