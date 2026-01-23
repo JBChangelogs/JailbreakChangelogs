@@ -1684,8 +1684,10 @@ export async function fetchOfficialScanBots(): Promise<OfficialBotUser[]> {
 export interface ConnectedBot {
   id: string;
   connected: boolean;
+  client_state?: string;
   last_heartbeat: number;
   current_job: string;
+  method?: number;
 }
 
 export interface ConnectedBotsResponse {
