@@ -202,6 +202,7 @@ export const RobloxConnection = ({ userData }: RobloxConnectionProps) => {
               </button>
               <button
                 onClick={handleDisconnect}
+                data-umami-event="Disconnect Roblox"
                 className="bg-button-danger hover:bg-button-danger-hover cursor-pointer rounded-md px-4 py-2 font-medium text-white transition-colors"
               >
                 Disconnect
