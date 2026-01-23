@@ -84,6 +84,87 @@ export const safeLocalStorage = {
   },
 };
 
+export const safeSessionStorage = {
+  /**
+   * Safely get an item from sessionStorage
+   * @param key - The key to retrieve
+   * @returns The stored value or null if not available/accessible
+   */
+  getItem: (key: string): string | null => {
+    try {
+      if (typeof window === "undefined") return null;
+      return sessionStorage.getItem(key);
+    } catch (error) {
+      console.warn(`Failed to get sessionStorage item "${key}":`, error);
+      return null;
+    }
+  },
+
+  /**
+   * Safely set an item in sessionStorage
+   * @param key - The key to store
+   * @param value - The value to store
+   * @returns true if successful, false otherwise
+   */
+  setItem: (key: string, value: string): boolean => {
+    try {
+      if (typeof window === "undefined") return false;
+      sessionStorage.setItem(key, value);
+      return true;
+    } catch (error) {
+      console.warn(`Failed to set sessionStorage item "${key}":`, error);
+      return false;
+    }
+  },
+
+  /**
+   * Safely remove an item from sessionStorage
+   * @param key - The key to remove
+   * @returns true if successful, false otherwise
+   */
+  removeItem: (key: string): boolean => {
+    try {
+      if (typeof window === "undefined") return false;
+      sessionStorage.removeItem(key);
+      return true;
+    } catch (error) {
+      console.warn(`Failed to remove sessionStorage item "${key}":`, error);
+      return false;
+    }
+  },
+
+  /**
+   * Safely clear all sessionStorage
+   * @returns true if successful, false otherwise
+   */
+  clear: (): boolean => {
+    try {
+      if (typeof window === "undefined") return false;
+      sessionStorage.clear();
+      return true;
+    } catch (error) {
+      console.warn("Failed to clear sessionStorage:", error);
+      return false;
+    }
+  },
+
+  /**
+   * Check if sessionStorage is available
+   * @returns true if sessionStorage is accessible, false otherwise
+   */
+  isAvailable: (): boolean => {
+    try {
+      if (typeof window === "undefined") return false;
+      const testKey = "__sessionStorage_test__";
+      sessionStorage.setItem(testKey, "test");
+      sessionStorage.removeItem(testKey);
+      return true;
+    } catch {
+      return false;
+    }
+  },
+};
+
 /**
  * Safely parse JSON from localStorage
  * @param key - The key to retrieve and parse

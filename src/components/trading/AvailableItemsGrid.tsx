@@ -328,7 +328,9 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
                 className="select font-inter bg-primary-bg text-primary-text h-[56px] min-h-[56px] w-full"
                 value={filterSort}
                 onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
-                  setFilterSort(e.target.value as FilterSort);
+                  const val = e.target.value as FilterSort;
+                  setFilterSort(val);
+                  window.umami?.track("Trading Filter Change", { filter: val });
                 }}
               >
                 <option value="" disabled>
@@ -355,7 +357,9 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
                 className="select font-inter bg-primary-bg text-primary-text h-[56px] min-h-[56px] w-full"
                 value={valueSort}
                 onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
-                  setValueSort(e.target.value as ValueSort);
+                  const val = e.target.value as ValueSort;
+                  setValueSort(val);
+                  window.umami?.track("Trading Sort Change", { sort: val });
                 }}
               >
                 <option value="" disabled>
@@ -365,27 +369,7 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
                 <option value="cash-asc">Cash Value (Low to High)</option>
                 <option value="duped-desc">Duped Value (High to Low)</option>
                 <option value="duped-asc">Duped Value (Low to High)</option>
-                <option value="" disabled>
-                  Trading Metrics
-                </option>
-                <option value="times-traded-desc">
-                  Times Traded (High to Low)
-                </option>
-                <option value="times-traded-asc">
-                  Times Traded (Low to High)
-                </option>
-                <option value="unique-circulation-desc">
-                  Unique Circulation (High to Low)
-                </option>
-                <option value="unique-circulation-asc">
-                  Unique Circulation (Low to High)
-                </option>
-                <option value="demand-multiple-desc">
-                  Demand Multiple (High to Low)
-                </option>
-                <option value="demand-multiple-asc">
-                  Demand Multiple (Low to High)
-                </option>
+
                 <option value="" disabled>
                   Demand
                 </option>

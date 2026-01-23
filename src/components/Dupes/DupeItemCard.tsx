@@ -34,7 +34,6 @@ interface DupeItemCardProps {
   robloxId: string;
   ownerLabel?: string;
   bgClass?: string;
-  hideDupeRatio?: boolean;
   isDupedItem?: boolean;
 }
 
@@ -50,7 +49,6 @@ export default function DupeItemCard({
   robloxId,
   ownerLabel = "ORIGINAL OWNER",
   bgClass = "bg-primary-bg",
-  hideDupeRatio = false,
   isDupedItem = false,
 }: DupeItemCardProps) {
   const dupedValue = getDupedValueForItem(itemData, item);

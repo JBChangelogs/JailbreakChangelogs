@@ -552,7 +552,10 @@ export const NavbarModern = ({ className }: { className?: string }) => {
               }}
             >
               <PopoverTrigger asChild>
-                <button className="border-border-primary bg-secondary-bg text-secondary-text hover:bg-quaternary-bg hover:text-primary-text relative flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg border transition-colors duration-200">
+                <button
+                  suppressHydrationWarning={true}
+                  className="border-border-primary bg-secondary-bg text-secondary-text hover:bg-quaternary-bg hover:text-primary-text relative flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg border transition-colors duration-200"
+                >
                   <Icon
                     icon="mingcute:notification-line"
                     className="h-5 w-5"

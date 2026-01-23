@@ -6,7 +6,7 @@ import { FilterSort, ValueSort } from "@/types";
 import dynamic from "next/dynamic";
 import { useIsAuthenticated } from "@/contexts/AuthContext";
 import toast from "react-hot-toast";
-import { safeLocalStorage } from "@/utils/safeStorage";
+import { safeSessionStorage } from "@/utils/safeStorage";
 
 const Slider = dynamic(() => import("@mui/material/Slider"), {
   ssr: false,
@@ -167,7 +167,10 @@ export default function ValuesSearchControls({
                       }
                     }
                     setFilterSort(newValue);
-                    safeLocalStorage.setItem("valuesFilterSort", newValue);
+                    safeSessionStorage.setItem("valuesFilterSort", newValue);
+                    window.umami?.track("Values Filter Change", {
+                      filter: newValue,
+                    });
                   }}
                 >
                   <option value="" disabled>
@@ -200,7 +203,10 @@ export default function ValuesSearchControls({
                   onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
                     const newValue = e.target.value as ValueSort;
                     setValueSort(newValue);
-                    safeLocalStorage.setItem("valuesValueSort", newValue);
+                    safeSessionStorage.setItem("valuesValueSort", newValue);
+                    window.umami?.track("Values Sort Change", {
+                      sort: newValue,
+                    });
                   }}
                 >
                   <option value="" disabled>
@@ -228,27 +234,7 @@ export default function ValuesSearchControls({
                   <option value="cash-asc">Cash Value (Low to High)</option>
                   <option value="duped-desc">Duped Value (High to Low)</option>
                   <option value="duped-asc">Duped Value (Low to High)</option>
-                  <option value="" disabled>
-                    Trading Metrics
-                  </option>
-                  <option value="times-traded-desc">
-                    Times Traded (High to Low)
-                  </option>
-                  <option value="times-traded-asc">
-                    Times Traded (Low to High)
-                  </option>
-                  <option value="unique-circulation-desc">
-                    Unique Circulation (High to Low)
-                  </option>
-                  <option value="unique-circulation-asc">
-                    Unique Circulation (Low to High)
-                  </option>
-                  <option value="demand-multiple-desc">
-                    Demand Multiple (High to Low)
-                  </option>
-                  <option value="demand-multiple-asc">
-                    Demand Multiple (Low to High)
-                  </option>
+
                   <option value="" disabled>
                     Demand
                   </option>

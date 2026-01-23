@@ -434,6 +434,10 @@ export default function UserProfileClient({
           ? "Successfully unfollowed user"
           : "Successfully followed user",
       );
+
+      window.umami?.track(isFollowing ? "Unfollow User" : "Follow User", {
+        location: "User Profile",
+      });
     } catch (error) {
       console.error("Error updating follow status:", error);
       toast.error(

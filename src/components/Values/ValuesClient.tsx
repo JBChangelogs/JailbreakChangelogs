@@ -17,7 +17,7 @@ import HyperchromeCalculatorModal from "@/components/Hyperchrome/HyperchromeCalc
 import ValuesSearchControls from "./ValuesSearchControls";
 import ValuesItemsGrid from "./ValuesItemsGrid";
 import ValuesErrorBoundary from "./ValuesErrorBoundary";
-import { safeLocalStorage } from "@/utils/safeStorage";
+import { safeSessionStorage } from "@/utils/safeStorage";
 import NitroValuesVideoPlayer from "@/components/Ads/NitroValuesVideoPlayer";
 import NitroValuesRailAd from "@/components/Ads/NitroValuesRailAd";
 
@@ -38,74 +38,75 @@ export default function ValuesClient({
 
   const [searchTerm, setSearchTerm] = useState("");
 
-  // Derive initial state from URL params and localStorage
-  const getInitialFilterSort = (): FilterSort => {
-    if (typeof window === "undefined") return "name-all-items";
+  // Initialize with defaults to match server-side rendering
+  const [filterSort, setFilterSort] = useState<FilterSort>("name-all-items");
+  const [valueSort, setValueSort] = useState<ValueSort>("cash-desc");
+
+  // Sync state with URL params or sessionStorage after mount
+  useEffect(() => {
+    // Filter Sort Logic
     const searchParams = new URLSearchParams(window.location.search);
     const urlFilterSort = searchParams.get("filterSort");
     if (urlFilterSort) {
-      safeLocalStorage.setItem("valuesFilterSort", urlFilterSort);
-      return urlFilterSort as FilterSort;
+      safeSessionStorage.setItem("valuesFilterSort", urlFilterSort);
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setFilterSort(urlFilterSort as FilterSort);
+    } else {
+      const storedFilter = safeSessionStorage.getItem(
+        "valuesFilterSort",
+      ) as FilterSort;
+      if (storedFilter) {
+        setFilterSort(storedFilter);
+      }
     }
-    return (
-      (safeLocalStorage.getItem("valuesFilterSort") as FilterSort) ||
-      "name-all-items"
-    );
-  };
 
-  const getInitialValueSort = (): ValueSort => {
-    if (typeof window === "undefined") return "cash-desc";
-    const searchParams = new URLSearchParams(window.location.search);
+    // Value Sort Logic
     const urlValueSort = searchParams.get("valueSort");
     if (urlValueSort) {
-      safeLocalStorage.setItem("valuesValueSort", urlValueSort);
-      return urlValueSort as ValueSort;
+      safeSessionStorage.setItem("valuesValueSort", urlValueSort);
+      setValueSort(urlValueSort as ValueSort);
+    } else {
+      const savedSort = safeSessionStorage.getItem("valuesValueSort");
+      const validSorts: ValueSort[] = [
+        "random",
+        "alpha-asc",
+        "alpha-desc",
+        "cash-desc",
+        "cash-asc",
+        "duped-desc",
+        "duped-asc",
+        "demand-desc",
+        "demand-asc",
+        "last-updated-desc",
+        "last-updated-asc",
+        "times-traded-desc",
+        "times-traded-asc",
+        "unique-circulation-desc",
+        "unique-circulation-asc",
+        "demand-multiple-desc",
+        "demand-multiple-asc",
+        "demand-close-to-none",
+        "demand-very-low",
+        "demand-low",
+        "demand-medium",
+        "demand-decent",
+        "demand-high",
+        "demand-very-high",
+        "demand-extremely-high",
+        "trend-stable",
+        "trend-rising",
+        "trend-hyped",
+        "trend-dropping",
+        "trend-unstable",
+        "trend-hoarded",
+        "trend-manipulated",
+        "trend-recovering",
+      ];
+      if (savedSort && validSorts.includes(savedSort as ValueSort)) {
+        setValueSort(savedSort as ValueSort);
+      }
     }
-    const savedSort = safeLocalStorage.getItem("valuesValueSort");
-    // Validate that the saved sort is a valid ValueSort option
-    const validSorts: ValueSort[] = [
-      "random",
-      "alpha-asc",
-      "alpha-desc",
-      "cash-desc",
-      "cash-asc",
-      "duped-desc",
-      "duped-asc",
-      "demand-desc",
-      "demand-asc",
-      "last-updated-desc",
-      "last-updated-asc",
-      "times-traded-desc",
-      "times-traded-asc",
-      "unique-circulation-desc",
-      "unique-circulation-asc",
-      "demand-multiple-desc",
-      "demand-multiple-asc",
-      "demand-close-to-none",
-      "demand-very-low",
-      "demand-low",
-      "demand-medium",
-      "demand-decent",
-      "demand-high",
-      "demand-very-high",
-      "demand-extremely-high",
-      "trend-stable",
-      "trend-rising",
-      "trend-hyped",
-      "trend-dropping",
-      "trend-unstable",
-      "trend-hoarded",
-      "trend-manipulated",
-      "trend-recovering",
-    ];
-    return savedSort && validSorts.includes(savedSort as ValueSort)
-      ? (savedSort as ValueSort)
-      : "cash-desc";
-  };
-
-  const [filterSort, setFilterSort] =
-    useState<FilterSort>(getInitialFilterSort);
-  const [valueSort, setValueSort] = useState<ValueSort>(getInitialValueSort);
+  }, []);
   const [sortedItems, setSortedItems] = useState<Item[]>([]);
   const [favorites, setFavorites] = useState<number[]>([]);
   const searchSectionRef = useRef<HTMLDivElement>(null);
@@ -141,10 +142,10 @@ export default function ValuesClient({
   const handleCategorySelect = (filter: FilterSort) => {
     if (filterSort === filter) {
       setFilterSort("name-all-items");
-      safeLocalStorage.setItem("valuesFilterSort", "name-all-items");
+      safeSessionStorage.setItem("valuesFilterSort", "name-all-items");
     } else {
       setFilterSort(filter);
-      safeLocalStorage.setItem("valuesFilterSort", filter);
+      safeSessionStorage.setItem("valuesFilterSort", filter);
     }
 
     if (searchSectionRef.current) {
@@ -396,8 +397,8 @@ export default function ValuesClient({
               setRangeValue([0, MAX_VALUE_RANGE]);
               setAppliedMinValue(0);
               setAppliedMaxValue(MAX_VALUE_RANGE);
-              safeLocalStorage.setItem("valuesFilterSort", "name-all-items");
-              safeLocalStorage.setItem("valuesValueSort", "cash-desc");
+              safeSessionStorage.setItem("valuesFilterSort", "name-all-items");
+              safeSessionStorage.setItem("valuesValueSort", "cash-desc");
             }}
             filterSort={filterSort}
             valueSort={valueSort}
