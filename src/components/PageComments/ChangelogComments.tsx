@@ -718,6 +718,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                 }`}
                 data-umami-event="Post Comment"
                 data-umami-event-type={type}
+                data-umami-event-context-id={changelogId.toString()}
               >
                 {isLoggedIn ? (
                   isSubmittingComment ? (
