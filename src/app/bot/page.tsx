@@ -76,6 +76,7 @@ export default function BotPage() {
               target="_blank"
               rel="noopener noreferrer"
               className="bg-button-info text-form-button-text hover:bg-button-info-hover focus:ring-border-focus active:bg-button-info-active inline-block rounded-lg px-8 py-3 text-lg font-semibold transition-colors duration-200 focus:ring-2 focus:outline-none"
+              data-umami-event="Bot Invite Click"
             >
               Invite to Your Server
             </a>

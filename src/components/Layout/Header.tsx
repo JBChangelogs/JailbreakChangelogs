@@ -583,6 +583,7 @@ export default function Header() {
                   >
                     <PopoverTrigger asChild>
                       <button
+                        suppressHydrationWarning={true}
                         className="relative flex cursor-pointer items-center justify-center p-1 transition-all duration-200 hover:scale-105 active:scale-95"
                         aria-label="Notifications"
                       >

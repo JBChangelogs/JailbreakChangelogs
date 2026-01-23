@@ -214,6 +214,13 @@ const FollowingModal: React.FC<FollowingModalProps> = ({
           : "Successfully followed user",
       );
 
+      window.umami?.track(
+        isCurrentlyFollowing ? "Unfollow User" : "Follow User",
+        {
+          location: "Following Modal",
+        },
+      );
+
       // Refresh following list after successful follow/unfollow
       // The useEffect will handle the refetch when isOpen changes
     } catch (error) {
