@@ -334,7 +334,6 @@ function BotStatusCard({
   const userData = usersData?.[bot.id];
   const displayName =
     userData?.displayName || userData?.name || `Bot ${bot.id}`;
-  const username = userData?.name || bot.id;
 
   const relativeTime = useOptimizedRealTimeRelativeDate(
     bot.last_heartbeat,
@@ -346,56 +345,66 @@ function BotStatusCard({
   // Generate avatar URL directly
   const avatarUrl = `${process.env.NEXT_PUBLIC_INVENTORY_API_URL}/proxy/users/${bot.id}/avatar-headshot`;
 
+  // Determine method text
+  let methodText = "";
+  if (bot.method === 1) methodText = "Trade World";
+  else if (bot.method === 2) methodText = "Main Game";
+
   return (
     <div className="border-border-primary bg-primary-bg rounded-lg border p-3">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-center gap-3">
-          <div className="bg-tertiary-bg flex h-8 w-8 items-center justify-center overflow-hidden rounded-full">
-            <Image
-              src={avatarUrl}
-              alt={`${displayName} avatar`}
-              width={32}
-              height={32}
-              className="h-full w-full object-cover"
-              onError={(e) => {
-                e.currentTarget.style.display = "none";
-                const parent = e.currentTarget.parentElement;
-                if (parent && !parent.querySelector("svg")) {
-                  const fallback = document.createElement("div");
-                  fallback.className =
-                    "flex h-full w-full items-center justify-center";
-                  fallback.innerHTML = `<svg class="h-5 w-5 text-tertiary-text" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" /></svg>`;
-                  parent.appendChild(fallback);
-                }
-              }}
-            />
-          </div>
+      <div className="flex items-start gap-3">
+        <div className="bg-tertiary-bg flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full">
+          <Image
+            src={avatarUrl}
+            alt={`${displayName} avatar`}
+            width={40}
+            height={40}
+            className="h-full w-full object-cover"
+            onError={(e) => {
+              e.currentTarget.style.display = "none";
+              const parent = e.currentTarget.parentElement;
+              if (parent && !parent.querySelector("svg")) {
+                const fallback = document.createElement("div");
+                fallback.className =
+                  "flex h-full w-full items-center justify-center";
+                fallback.innerHTML = `<svg class="h-6 w-6 text-tertiary-text" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" /></svg>`;
+                parent.appendChild(fallback);
+              }
+            }}
+          />
+        </div>
 
-          <div>
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-center gap-x-2 text-sm leading-6">
             <a
               href={`https://www.roblox.com/users/${bot.id}/profile`}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-primary-text hover:text-link-hover text-sm font-medium transition-colors"
+              className="text-primary-text hover:text-link-hover font-bold text-nowrap transition-colors"
             >
               {displayName}
             </a>
-            <div className="text-secondary-text text-xs">@{username}</div>
+            {methodText && (
+              <>
+                <span className="text-secondary-text">|</span>
+                <span className="text-primary-text">{methodText}</span>
+              </>
+            )}
           </div>
-        </div>
 
-        <div className="sm:text-right">
-          <div className="text-secondary-text mb-1 text-xs">
-            Last updated: {fullDate} ({relativeTime})
-          </div>
-          {bot.current_job && (
-            <div className="text-status-info text-xs">
-              <div>Latest Job ID</div>
-              <div className="font-mono text-xs break-all">
-                {bot.current_job}
+          <div className="space-y-0.5">
+            {bot.current_job && (
+              <div className="text-secondary-text truncate text-xs">
+                <span className="font-semibold">Latest Job:</span>{" "}
+                <span className="font-mono">{bot.current_job}</span>
               </div>
+            )}
+
+            <div className="text-secondary-text text-xs">
+              <span className="font-semibold">Last User Updated:</span>{" "}
+              {fullDate} ({relativeTime})
             </div>
-          )}
+          </div>
         </div>
       </div>
     </div>

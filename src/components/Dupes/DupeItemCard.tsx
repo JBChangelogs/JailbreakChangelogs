@@ -358,15 +358,6 @@ export default function DupeItemCard({
           </div>
         )}
       </div>
-
-      {/* Very muted dev-only dupe ratio, bottom-right */}
-      {!hideDupeRatio &&
-        item.dupe_ratio !== null &&
-        item.dupe_ratio !== undefined && (
-          <span className="text-tertiary-text absolute right-3 bottom-3 font-mono text-[11px] opacity-70">
-            {item.dupe_ratio.toFixed(2)}
-          </span>
-        )}
     </div>
   );
 }
