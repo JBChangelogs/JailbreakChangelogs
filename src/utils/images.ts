@@ -113,7 +113,6 @@ export const getVideoPath = (type: string, name: string): string => {
  * @param name - The item name
  * @param isValuesPage - Whether this is for the values page (default: false)
  * @param isSocialEmbed - Whether this is for a social media embed (default: false)
- * @param hornBackground - Background variant for horn thumbnails ("dark" | "light", default: "dark")
  * @returns The full path to the item's media
  */
 export const getItemImagePath = (
@@ -121,7 +120,6 @@ export const getItemImagePath = (
   name: string,
   isValuesPage: boolean = false,
   isSocialEmbed: boolean = false,
-  hornBackground: "dark" | "light" = "dark",
 ): string => {
   if (isVideoItem(name)) {
     if (isSocialEmbed) {

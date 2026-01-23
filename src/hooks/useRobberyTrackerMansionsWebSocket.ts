@@ -147,8 +147,7 @@ export function useRobberyTrackerMansionsWebSocket(
       reconnectTimeoutRef.current = null;
     }
     setIsConnected(false);
-    // Clear mansions to prevent showing stale data on reconnect
-    setMansions([]);
+    // Data is persisted to avoid flashing empty state on reconnect
   }, []);
 
   // Refs for state tracking without re-renders

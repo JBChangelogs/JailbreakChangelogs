@@ -218,13 +218,7 @@ export default function FavoritesTab({
                 />
               ) : (
                 <Image
-                  src={getItemImagePath(
-                    itemType,
-                    imageName,
-                    true,
-                    false,
-                    "light",
-                  )}
+                  src={getItemImagePath(itemType, imageName, true, false)}
                   alt={itemName}
                   fill
                   className="object-cover"

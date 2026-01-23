@@ -142,7 +142,6 @@ export default function Comment({
         itemDetails.name,
         true,
         false,
-        "light",
       );
 
       // Special case for video items
