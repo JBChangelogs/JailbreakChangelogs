@@ -45,65 +45,68 @@ export default function TradingGuides({
 
   const tradingTerms = [
     {
-      term: "Hype",
+      term: "Demand",
+      description: "A measurement of how desired an item is in trading",
+    },
+    {
+      term: "Hyped",
       description:
-        "An item which has a massive demand spike that the community created",
-    },
-    { term: "Demand", description: "How often/much people look for an item" },
-    {
-      term: "Overpays",
-      description: "Amounts that people pay for items over their base value",
-    },
-    {
-      term: "Base",
-      description: "The value of an item on the list, the listed value",
+        "An item currently experiencing a significant but temporary spike in demand driven by the community",
     },
     {
       term: "Avoided",
       description:
-        "Items that people don't want to trade for, usually caused by bad demand",
+        "Items that traders generally avoid, typically due to low demand",
+    },
+    {
+      term: "Overpay(s)",
+      description:
+        "When one party offers additional value on top of an item's base value, usually due to a difference in demand between the two parties",
+    },
+    {
+      term: "Base",
+      description: "The flat value of an item without factoring in its demand",
     },
     { term: "LF", description: "Looking for" },
-    { term: "C", description: "Clean, items that are not duped" },
-    { term: "D", description: "Duped, items that are duped" },
+    { term: "D", description: "Duped; items that are duped" },
+    { term: "C", description: "Clean; items that are not duped" },
     { term: "TR", description: "Trading" },
     { term: "IA", description: "Instant accept" },
+    { term: "AA", description: "Auto Accept" },
     { term: "MLF", description: "Mainly looking for" },
     { term: "NLF", description: "Not looking for" },
     {
       term: "W",
       description:
-        "Win, a trade offer where the offering side is winning, vice versa",
+        "Win; a trade in which one side clearly receives greater overall value or demand",
     },
     {
       term: "L",
       description:
-        "Loss, a trade offer where the offering side is losing, vice versa",
+        "Loss; a trade in which one side clearly receives lower overall value or demand",
     },
     {
       term: "F",
-      description:
-        "Fair, a trade that is fair in demand and/or value, can be unequal in some cases (depending on the item)",
+      description: "Fair; a trade balanced in value and/or demand",
     },
     {
       term: "WFL",
-      description: "Win, fair, loss. Asking if my this offer is/was good",
+      description:
+        "Win/Fair/Loss. Asking if a particular trade is or was good (e.g: Was this a win, fair, or loss?)",
     },
     {
       term: "Adds",
       description:
-        "Additions to the trade, usually asked for is if the side you're offering for is less than your side, or the other way around",
+        "Additional items included in a trade to compensate for a value or demand imbalance",
     },
-    { term: "AA", description: "Auto Accept" },
     {
       term: "Downgrade",
-      description:
-        "When you want to trade one big item, or bigger items, for more smaller items, for example 1 of your item for 2 of the others item.",
+      description: "Trading one high-value item for multiple lower-value items",
     },
     {
       term: "Upgrade",
       description:
-        "When you want to trade multiple smaller items for a bigger item. For example 2 of your items for one of theirs.",
+        "Trading multiple lower-value items for one higher-value item",
     },
   ];
 
