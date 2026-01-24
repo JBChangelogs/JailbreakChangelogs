@@ -43,9 +43,9 @@ export default function HeroBackgroundCarousel({
       src={currentBackgroundImage}
       alt="Jailbreak Background"
       fill
+      priority={currentImageIndex === 0}
       className="object-cover transition-opacity duration-1000"
       style={{ objectPosition: "center 70%" }}
-      fetchPriority={currentImageIndex === 0 ? "high" : "auto"}
     />
   );
 }

@@ -171,7 +171,7 @@ export default function RobberyPlayersModal({
                           className="h-full w-full object-cover"
                           onError={(e) => {
                             e.currentTarget.src =
-                              "https://assets.jailbreakchangelogs.xyz/assets/images/placeholder.png";
+                              "/assets/images/Placeholder.webp";
                           }}
                         />
                       ) : (

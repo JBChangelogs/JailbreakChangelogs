@@ -120,8 +120,7 @@ const formatPreciseMoney = (money: number) => {
 };
 
 const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
-  e.currentTarget.src =
-    "https://assets.jailbreakchangelogs.xyz/assets/images/placeholder.png";
+  e.currentTarget.src = "/assets/images/Placeholder.webp";
 };
 
 const formatDate = (timestamp: number) => {
@@ -816,7 +815,7 @@ export default function UserStatsSection({
                             className="h-full w-full object-cover"
                             onError={(e) => {
                               e.currentTarget.src =
-                                "https://assets.jailbreakchangelogs.xyz/assets/images/placeholder.png";
+                                "/assets/images/Placeholder.webp";
                             }}
                           />
                         </div>

@@ -3,7 +3,6 @@
 import Image from "next/image";
 import Link from "next/link";
 import dynamic from "next/dynamic";
-import localFont from "next/font/local";
 import { DupeFinderItem, Item } from "@/types";
 import { formatCurrencyValue } from "@/utils/currency";
 import {
@@ -18,9 +17,7 @@ import { getCategoryIcon, getCategoryColor } from "@/utils/categoryIcons";
 
 const Tooltip = dynamic(() => import("@mui/material/Tooltip"), { ssr: false });
 
-const bangers = localFont({
-  src: "../../../public/fonts/Bangers.ttf",
-});
+import { bangers } from "@/app/fonts";
 
 interface DupeItemCardProps {
   item: DupeFinderItem;

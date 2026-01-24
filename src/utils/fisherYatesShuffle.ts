@@ -1,4 +1,25 @@
 /**
+ * Total number of available background images
+ */
+export const TOTAL_BACKGROUND_IMAGES = 42;
+
+/**
+ * Get a specific background image URL by index (1-based or 0-based mapped to 1-based)
+ * @param index - The index of the background image
+ * @param baseUrl - Base URL for the background images
+ * @returns The background image URL
+ */
+export function getBackgroundImageByIndex(
+  index: number,
+  baseUrl: string = "/backgrounds",
+): string {
+  // Ensure index is within 1-count range (using modulo if zero-based or large number passed)
+  // If we just want simple access mapped to file names:
+  const normalizedIndex = (index % TOTAL_BACKGROUND_IMAGES) + 1;
+  return `${baseUrl}/background${normalizedIndex}.webp`;
+}
+
+/**
  * Fisher-Yates shuffle algorithm implementation
  * This algorithm provides an unbiased way to shuffle an array
  * @param array - The array to shuffle
@@ -22,13 +43,13 @@ export function fisherYatesShuffle<T>(array: T[]): T[] {
 
 /**
  * Generate a shuffled array of background image URLs
- * @param count - Number of background images available (default: 30)
+ * @param count - Number of background images available (default: TOTAL_BACKGROUND_IMAGES)
  * @param baseUrl - Base URL for the background images
  * @returns Array of shuffled background image URLs
  */
 export function generateShuffledBackgroundImages(
-  count: number = 34,
-  baseUrl: string = "https://assets.jailbreakchangelogs.xyz/assets/backgrounds",
+  count: number = TOTAL_BACKGROUND_IMAGES,
+  baseUrl: string = "/backgrounds",
 ): string[] {
   // Generate array of image URLs
   const imageUrls = Array.from(
@@ -42,13 +63,13 @@ export function generateShuffledBackgroundImages(
 
 /**
  * Get a single random background image URL
- * @param count - Number of background images available (default: 34)
+ * @param count - Number of background images available (default: TOTAL_BACKGROUND_IMAGES)
  * @param baseUrl - Base URL for the background images
  * @returns A single random background image URL
  */
 export function getRandomBackgroundImage(
-  count: number = 34,
-  baseUrl: string = "https://assets.jailbreakchangelogs.xyz/assets/backgrounds",
+  count: number = TOTAL_BACKGROUND_IMAGES,
+  baseUrl: string = "/backgrounds",
 ): string {
   const randomIndex = Math.floor(Math.random() * count) + 1;
   return `${baseUrl}/background${randomIndex}.webp`;

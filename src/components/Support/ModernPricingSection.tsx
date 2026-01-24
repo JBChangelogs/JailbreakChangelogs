@@ -100,13 +100,13 @@ export default function ModernPricingSection() {
   // Dynamic image paths based on theme
   const kofiImagePath =
     resolvedTheme === "dark"
-      ? "https://assets.jailbreakchangelogs.xyz/assets/images/support/kofi/dark/kofi-dark.png"
-      : "https://assets.jailbreakchangelogs.xyz/assets/images/support/kofi/kofi-light.png";
+      ? "/support/kofi/dark/kofi-dark.png"
+      : "/support/kofi/kofi-light.png";
 
   const robloxImagePath =
     resolvedTheme === "dark"
-      ? "https://assets.jailbreakchangelogs.xyz/assets/images/support/roblox/dark/roblox-dark.png"
-      : "https://assets.jailbreakchangelogs.xyz/assets/images/support/roblox/roblox-light.png";
+      ? "/support/roblox/dark/roblox-dark.png"
+      : "/support/roblox/roblox-light.png";
 
   const copyToClipboard = async (address: string, cryptoType: string) => {
     try {

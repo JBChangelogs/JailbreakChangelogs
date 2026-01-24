@@ -25,8 +25,8 @@ export default function RailwayBadge() {
 
   const logoSrc =
     resolvedTheme === "dark"
-      ? "https://assets.jailbreakchangelogs.xyz/assets/logos/railway/railway-logotype-light.svg"
-      : "https://assets.jailbreakchangelogs.xyz/assets/logos/railway/railway-logotype-dark.svg";
+      ? "/logos/railway/railway-logotype-light.svg"
+      : "/logos/railway/railway-logotype-dark.svg";
 
   return (
     <a

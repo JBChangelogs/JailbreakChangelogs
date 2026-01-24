@@ -2,12 +2,8 @@
 
 import React from "react";
 import { formatMessageDate } from "@/utils/timestamp";
-import localFont from "next/font/local";
 import { Icon } from "../ui/IconWrapper";
-
-const bangers = localFont({
-  src: "../../../public/fonts/Bangers.ttf",
-});
+import { bangers } from "@/app/fonts";
 
 export interface SeasonContractProps {
   contracts: Array<{

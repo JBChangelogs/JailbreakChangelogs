@@ -1,6 +1,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import { UserSettings } from "@/types/auth";
+import { getBackgroundImageByIndex } from "@/utils/fisherYatesShuffle";
 
 interface BannerProps {
   userId: string;
@@ -10,14 +11,6 @@ interface BannerProps {
   settings?: UserSettings;
   premiumType?: number;
 }
-
-// Move static data outside component
-const BACKGROUND_COUNT = 42;
-const BACKGROUNDS = Array.from(
-  { length: BACKGROUND_COUNT },
-  (_, i) =>
-    `https://assets.jailbreakchangelogs.xyz/assets/backgrounds/background${i + 1}.webp`,
-);
 
 // Optimized seed calculation - converts string to number more efficiently
 const calculateSeed = (userId: string): number => {
@@ -45,8 +38,7 @@ export const Banner = ({
 
   // Calculate fallback banner during render
   const seed = calculateSeed(userId);
-  const index = seed % BACKGROUND_COUNT;
-  const fallbackBanner = BACKGROUNDS[index];
+  const fallbackBanner = getBackgroundImageByIndex(seed);
 
   const handleBannerError = () => {
     setPrimaryBannerFailed(true);
@@ -118,7 +110,7 @@ export const Banner = ({
       <Image
         {...getBannerSource()}
         fill
-        fetchPriority="high"
+        priority // Add priority since banners are usually above fold or critical
         draggable={false}
         className="z-0 object-cover"
         alt={`${username}'s profile banner`}
