@@ -10,6 +10,7 @@ export default function HeroBackgroundCarousel({
   initialImage: string;
 }) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [isFirstRender, setIsFirstRender] = useState(true);
 
   const backgroundImages = useMemo(() => {
     const allImages = generateShuffledBackgroundImages();
@@ -17,14 +18,13 @@ export default function HeroBackgroundCarousel({
     return [initialImage, ...remainingImages];
   }, [initialImage]);
 
-  // Function to cycle to the next image
   const nextImage = useCallback(() => {
     setCurrentImageIndex((prevIndex) =>
       prevIndex + 1 >= backgroundImages.length ? 0 : prevIndex + 1,
     );
+    setIsFirstRender(false);
   }, [backgroundImages.length]);
 
-  // Auto-cycle through images every 10 seconds
   useEffect(() => {
     if (backgroundImages.length <= 1) return;
 
@@ -40,10 +40,13 @@ export default function HeroBackgroundCarousel({
 
   return (
     <Image
+      key={currentBackgroundImage}
       src={currentBackgroundImage}
       alt="Jailbreak Background"
       fill
-      priority={currentImageIndex === 0}
+      priority={isFirstRender}
+      fetchPriority={isFirstRender ? "high" : "auto"}
+      loading={isFirstRender ? undefined : "lazy"}
       className="object-cover transition-opacity duration-1000"
       style={{ objectPosition: "center 70%" }}
     />

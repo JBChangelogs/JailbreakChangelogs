@@ -81,10 +81,10 @@
   --color-card-shadow: hsl(0, 0%, 0%, 0.1); /* Card shadows */
 
   /* Interactive Elements */
-  --color-link: hsl(210, 77%, 50%); /* Primary links */
-  --color-link-hover: hsl(210, 77%, 40%); /* Link hover states */
-  --color-link-active: hsl(210, 77%, 40%); /* Link active states */
-  --color-link-visited: hsl(214, 12%, 45%); /* Visited links */
+  --color-link: hsl(210, 100%, 70%); /* Primary links - Lighter for contrast */
+  --color-link-hover: hsl(210, 100%, 75%); /* Link hover states */
+  --color-link-active: hsl(210, 100%, 65%); /* Link active states */
+  --color-link-visited: hsl(214, 12%, 65%); /* Visited links */
 
   /* Button Colors */
   --color-button-info: hsl(
@@ -295,8 +295,8 @@
   --color-card-shadow: hsl(0, 0%, 0%, 0.05); /* Card shadows - Very light */
 
   /* Interactive Elements - Light theme */
-  --color-link: hsl(210, 99%, 50%); /* Primary links - Blue */
-  --color-link-hover: hsl(210, 99%, 40%); /* Link hover states - Darker blue */
+  --color-link: hsl(210, 99%, 40%); /* Primary links - Darker for contrast */
+  --color-link-hover: hsl(210, 99%, 30%); /* Link hover states - Darker */
   --color-link-active: hsl(
     218,
     60%,
