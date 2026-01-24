@@ -239,7 +239,7 @@ function LoginModalInner({ open, onClose }: LoginModalProps) {
                     <Tab
                       icon={
                         <Image
-                          src="https://assets.jailbreakchangelogs.xyz/assets/logos/discord/Discord_Logo.webp"
+                          src="/logos/discord/Discord_Logo.webp"
                           alt="Discord"
                           width={120}
                           height={36}
@@ -260,8 +260,8 @@ function LoginModalInner({ open, onClose }: LoginModalProps) {
                           <Image
                             src={
                               resolvedTheme === "dark"
-                                ? "/assets/logos/roblox/Roblox_Logo_Light.webp"
-                                : "/assets/logos/roblox/Roblox_Logo_Dark.webp"
+                                ? "/logos/roblox/Roblox_Logo.webp"
+                                : "/logos/roblox/Roblox_Logo_Dark.webp"
                             }
                             alt="Roblox"
                             width={120}

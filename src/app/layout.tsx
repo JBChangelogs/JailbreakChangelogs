@@ -178,7 +178,7 @@ export default async function RootLayout({
             <div className="bg-primary-bg fixed inset-0 z-50 flex items-center justify-center">
               <div className="mx-auto max-w-md p-8 text-center">
                 <Image
-                  src="https://assets.jailbreakchangelogs.xyz/assets/logos/JBCL_Short_Transparent.webp"
+                  src="/logos/JBCL_Short_Transparent.webp"
                   alt="Jailbreak Changelogs"
                   width={96}
                   height={96}

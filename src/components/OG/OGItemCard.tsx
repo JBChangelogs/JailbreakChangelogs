@@ -3,7 +3,6 @@
 import Image from "next/image";
 import Link from "next/link";
 import dynamic from "next/dynamic";
-import localFont from "next/font/local";
 import {
   getItemImagePath,
   isVideoItem,
@@ -19,9 +18,7 @@ import { Item } from "@/types";
 
 const Tooltip = dynamic(() => import("@mui/material/Tooltip"), { ssr: false });
 
-const bangers = localFont({
-  src: "../../../public/fonts/Bangers.ttf",
-});
+import { bangers } from "@/app/fonts";
 
 // Helper function to format numbers with commas
 const formatNumber = (num: number) => {

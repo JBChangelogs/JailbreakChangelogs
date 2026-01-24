@@ -4,11 +4,7 @@ import { useEffect } from "react";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { canBypassMaintenance } from "@/utils/maintenance";
 import Image from "next/image";
-import localFont from "next/font/local";
-
-const bangers = localFont({
-  src: "../../public/fonts/Bangers.ttf",
-});
+import { bangers } from "@/app/fonts";
 
 export default function Maintenance() {
   const { isAuthenticated, user, isLoading } = useAuthContext();

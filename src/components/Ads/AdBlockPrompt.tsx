@@ -107,7 +107,7 @@ const AdBlockPrompt = () => {
           {/* Logo */}
           <div className="mb-6">
             <Image
-              src="https://assets.jailbreakchangelogs.xyz/assets/logos/JBCL_Long_Transparent.webp"
+              src="/logos/JBCL_Long_Transparent.webp"
               alt="JBCL Logo"
               width={600}
               height={100}

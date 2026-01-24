@@ -18,11 +18,7 @@ import {
   getVideoPath,
   handleImageError,
 } from "@/utils/images";
-import localFont from "next/font/local";
-
-const bangers = localFont({
-  src: "../../../public/fonts/Bangers.ttf",
-});
+import { bangers } from "@/app/fonts";
 
 interface DupeComparisonClientProps {
   ogItem: DupeFinderItem;

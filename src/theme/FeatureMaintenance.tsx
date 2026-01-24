@@ -2,12 +2,8 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import localFont from "next/font/local";
+import { bangers } from "@/app/fonts";
 import { Icon } from "@/components/ui/IconWrapper";
-
-const bangers = localFont({
-  src: "../../public/fonts/Bangers.ttf",
-});
 
 interface FeatureMaintenanceProps {
   featureName?: string;

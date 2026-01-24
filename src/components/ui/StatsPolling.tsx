@@ -1,22 +1,26 @@
 "use client";
 
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { fetchItemCountStats, fetchDuplicatesCount } from "@/utils/api";
 
 export default function StatsPolling() {
-  const { data: stats } = useSuspenseQuery({
+  const { data: stats, isLoading: isLoadingStats } = useQuery({
     queryKey: ["item-count-stats"],
     queryFn: fetchItemCountStats,
     refetchInterval: 30000,
     refetchIntervalInBackground: true,
   });
 
-  const { data: duplicatesStats } = useSuspenseQuery({
+  const { data: duplicatesStats, isLoading: isLoadingDuplicates } = useQuery({
     queryKey: ["duplicates-count"],
     queryFn: fetchDuplicatesCount,
     refetchInterval: 30000,
     refetchIntervalInBackground: true,
   });
+
+  if (isLoadingStats || isLoadingDuplicates) {
+    return <StatsSkeleton />;
+  }
 
   return (
     <div className="mb-6 grid grid-cols-1 gap-4 pt-6 md:grid-cols-3">

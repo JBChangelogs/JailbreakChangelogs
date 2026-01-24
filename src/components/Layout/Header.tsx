@@ -564,8 +564,8 @@ export default function Header() {
                     <Image
                       src={
                         isCollabPage
-                          ? `/assets/logos/JBCL_X_TC_Logo_Long_Transparent_${resolvedTheme === "dark" ? "Dark" : "Light"}.webp`
-                          : "/assets/logos/JBCL_Long_Transparent.webp"
+                          ? `/logos/collab/JBCL_X_TC_Logo_Long_Transparent_${resolvedTheme === "dark" ? "Dark" : "Light"}.webp`
+                          : "/logos/JBCL_Long_Transparent.webp"
                       }
                       alt="Jailbreak Changelogs Logo"
                       width={213}
@@ -924,7 +924,7 @@ export default function Header() {
                       aria-label="Support us"
                     >
                       <Image
-                        src="https://assets.jailbreakchangelogs.xyz/assets/images/kofi_assets/kofi_symbol.svg"
+                        src="/logos/kofi_symbol.svg"
                         alt="Ko-fi"
                         width={20}
                         height={20}
