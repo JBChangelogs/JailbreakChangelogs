@@ -49,6 +49,31 @@ export const UtmGeneratorModal: React.FC<UtmGeneratorModalProps> = ({
   const handleCopy = () => {
     navigator.clipboard.writeText(generatedUrl);
     toast.success("URL copied to clipboard!");
+
+    // Track UTM URL generation with parameters
+    if (typeof window !== "undefined" && window.umami) {
+      try {
+        const url = new URL(generatedUrl);
+        const pathname = url.pathname;
+
+        // Build payload with used parameters
+        const payload: Record<string, string> = {
+          route: pathname,
+          generated_url: generatedUrl,
+        };
+
+        if (source) payload.utm_source = source;
+        if (medium) payload.utm_medium = medium;
+        if (campaign) payload.utm_campaign = campaign;
+        if (term) payload.utm_term = term;
+        if (content) payload.utm_content = content;
+
+        window.umami.track("Generate UTM Link", payload);
+      } catch (e) {
+        console.error("Error tracking UTM generation:", e);
+      }
+    }
+
     onClose();
   };
 

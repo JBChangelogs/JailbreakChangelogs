@@ -1562,7 +1562,7 @@ export async function fetchUserNetworth(
 ): Promise<UserNetworthData[]> {
   try {
     const response = await fetch(
-      `${INVENTORY_API_URL}/user/networth?id=${robloxId}&limit=500`,
+      `${INVENTORY_API_URL}/user/networth?id=${robloxId}`,
       {
         headers: {
           "User-Agent": "JailbreakChangelogs-Inventory/1.0",
