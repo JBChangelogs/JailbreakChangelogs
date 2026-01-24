@@ -85,7 +85,15 @@ export default function TestimonialsSection() {
     <section className="py-8">
       <div className="container mx-auto px-6">
         {/* Masonry Layout */}
-        <Masonry columns={columns} spacing={3} sx={{ width: "100%" }}>
+        <Masonry
+          columns={columns}
+          spacing={3}
+          sx={{
+            width: "100%",
+            overflow: "hidden",
+            transition: "height 0.2s ease-in-out",
+          }}
+        >
           {testimonials.map((testimonial, index) => (
             <a
               key={index}

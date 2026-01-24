@@ -485,7 +485,12 @@ export default function TradeAds({
               <Masonry
                 columns={{ xs: 1, sm: 2, md: 2, lg: 3 }}
                 spacing={2}
-                sx={{ width: "auto", margin: 0 }}
+                sx={{
+                  width: "auto",
+                  margin: 0,
+                  overflow: "hidden",
+                  transition: "height 0.2s ease-in-out",
+                }}
               >
                 {currentPageItems.map((trade) => {
                   const enrichedTrade: TradeAd = {
@@ -591,7 +596,12 @@ export default function TradeAds({
                 <Masonry
                   columns={{ xs: 1, sm: 2, md: 2, lg: 3 }}
                   spacing={2}
-                  sx={{ width: "auto", margin: 0 }}
+                  sx={{
+                    width: "auto",
+                    margin: 0,
+                    overflow: "hidden",
+                    transition: "height 0.2s ease-in-out",
+                  }}
                 >
                   {currentPageItems.map((trade) => {
                     const enrichedTrade: TradeAd = {
@@ -744,7 +754,12 @@ export default function TradeAds({
                   <Masonry
                     columns={{ xs: 1, sm: 2, md: 2, lg: 3 }}
                     spacing={2}
-                    sx={{ width: "auto", margin: 0 }}
+                    sx={{
+                      width: "auto",
+                      margin: 0,
+                      overflow: "hidden",
+                      transition: "height 0.2s ease-in-out",
+                    }}
                   >
                     {filteredUserTradeAds.map((trade) => {
                       const enrichedTrade: TradeAd = {
