@@ -129,16 +129,18 @@ export default function NitroHomepageAd({ className }: Props) {
 
   return (
     <div className={`flex justify-center ${className || ""}`}>
+      {/* Mobile ad container with min-height to prevent CLS (only for non-supporters) */}
       <div
         id={SLOT_ID_MOBILE}
         ref={containerRefMobile}
-        className="block md:hidden"
+        className={`block md:hidden ${!isSupporter ? "min-h-[280px]" : ""}`}
       />
 
+      {/* Desktop ad container with min-height to prevent CLS (only for non-supporters) */}
       <div
         id={SLOT_ID_DESKTOP}
         ref={containerRefDesktop}
-        className="hidden lg:block"
+        className={`hidden lg:block ${!isSupporter ? "min-h-[250px]" : ""}`}
       />
     </div>
   );

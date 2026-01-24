@@ -529,10 +529,6 @@ export default function Header() {
       </Link>
 
       <div className="border-border-primary my-4 border-t" />
-      <UtmGeneratorModal
-        isOpen={utmModalOpen}
-        onClose={() => setUtmModalOpen(false)}
-      />
     </div>
   );
 
@@ -974,7 +970,15 @@ export default function Header() {
         onClose={() => setShowLoginModal(false)}
       />
 
-      <EscapeLoginModal />
+      {/* EscapeLoginModal - Desktop only (no Escape key on mobile) */}
+      <div className="hidden xl:block">
+        <EscapeLoginModal />
+      </div>
+
+      <UtmGeneratorModal
+        isOpen={utmModalOpen}
+        onClose={() => setUtmModalOpen(false)}
+      />
     </>
   );
 }

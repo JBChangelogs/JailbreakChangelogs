@@ -281,12 +281,12 @@ export default async function RootLayout({
                           >
                             <Suspense
                               fallback={
-                                <div className="border-secondary-text bg-secondary-bg h-16 border-b" />
+                                <div className="bg-primary-bg/75 border-border-primary h-16 border-b backdrop-blur-lg" />
                               }
                             >
                               <Header />
                             </Suspense>
-                            <main className="flex-1">
+                            <main className="min-h-screen flex-1">
                               <Suspense>{children}</Suspense>
                             </main>
                             <Footer
@@ -496,12 +496,12 @@ export default async function RootLayout({
                       <div className="flex min-h-screen flex-col">
                         <Suspense
                           fallback={
-                            <div className="border-secondary-text bg-secondary-bg h-16 border-b" />
+                            <div className="bg-primary-bg/75 border-border-primary h-16 border-b backdrop-blur-lg" />
                           }
                         >
                           <Header />
                         </Suspense>
-                        <main className="flex-1">
+                        <main className="min-h-screen flex-1">
                           <Suspense>{children}</Suspense>
                         </main>
                         <Footer
