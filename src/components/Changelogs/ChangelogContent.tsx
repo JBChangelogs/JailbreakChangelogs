@@ -158,7 +158,10 @@ const ChangelogContent: React.FC<ChangelogContentProps> = ({
                 )}
                 <ul className="text-secondary-text space-y-2">
                   {section.items.map((item, itemIndex) => (
-                    <li key={itemIndex} className="flex items-start gap-2">
+                    <li
+                      key={itemIndex}
+                      className={`flex items-start gap-2 ${item.isNested ? "ml-8" : ""}`}
+                    >
                       {item.type === "media" ? (
                         <ChangelogMediaEmbed
                           type={item.mediaType}

@@ -60,6 +60,7 @@ import {
 } from "@/utils/api";
 import { formatCompactDateTime } from "@/utils/timestamp";
 import { parseNotificationUrl } from "@/utils/notificationUrl";
+import { UtmGeneratorModal } from "@/components/Modals/UtmGeneratorModal";
 
 const UnreadNotificationBadge = ({ count }: { count: number }) => {
   if (count === 0) return null;
@@ -108,6 +109,7 @@ export default function Header() {
     pathname.startsWith("/trading") ||
     pathname.startsWith("/values/changelogs");
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [utmModalOpen, setUtmModalOpen] = useState(false);
   const [notificationMenuOpen, setNotificationMenuOpen] = useState(false);
   const [notificationTab, setNotificationTab] = useState<"history" | "unread">(
     "unread",
@@ -277,6 +279,23 @@ export default function Header() {
             />
             <span className="text-primary-text">Settings</span>
           </Link>
+          {userData?.flags?.some((f) => f.flag === "is_owner") && (
+            <div
+              onClick={() => {
+                handleDrawerToggle();
+                setUtmModalOpen(true);
+              }}
+              className="hover:bg-button-info-hover/10 flex cursor-pointer items-center gap-3 px-4 py-3 transition-colors"
+              data-umami-event="Generate UTM Link"
+            >
+              <Icon
+                icon="heroicons:link"
+                className="text-primary-text h-5 w-5"
+                inline={true}
+              />
+              <span className="text-primary-text">Generate UTM Link</span>
+            </div>
+          )}
           <div
             onClick={handleLogout}
             className="hover:bg-button-info-hover/10 flex cursor-pointer items-center gap-3 px-4 py-3 transition-colors"
@@ -511,6 +530,10 @@ export default function Header() {
       </Link>
 
       <div className="border-border-primary my-4 border-t" />
+      <UtmGeneratorModal
+        isOpen={utmModalOpen}
+        onClose={() => setUtmModalOpen(false)}
+      />
     </div>
   );
 

@@ -46,6 +46,7 @@ import {
   PopoverTrigger,
   PopoverContent,
 } from "@/components/ui/popover";
+import { UtmGeneratorModal } from "@/components/Modals/UtmGeneratorModal";
 
 const menuTransition = {
   type: "spring" as const,
@@ -265,6 +266,7 @@ const NotificationTimestamp = ({
 export const NavbarModern = ({ className }: { className?: string }) => {
   const [active, setActive] = useState<string | null>(null);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [utmModalOpen, setUtmModalOpen] = useState(false);
   const [notificationMenuOpen, setNotificationMenuOpen] = useState(false);
   const [notificationTab, setNotificationTab] = useState<"history" | "unread">(
     "unread",
@@ -980,6 +982,24 @@ export const NavbarModern = ({ className }: { className?: string }) => {
                         Settings
                       </Link>
 
+                      {userData?.flags?.some((f) => f.flag === "is_owner") && (
+                        <button
+                          className="text-primary-text hover:bg-button-info-hover hover:text-form-button-text flex w-full cursor-pointer items-center gap-3 px-4 py-2 text-left text-sm transition-colors"
+                          onClick={() => {
+                            setUtmModalOpen(true);
+                            setUserMenuOpen(false);
+                          }}
+                          data-umami-event="Generate UTM Link"
+                        >
+                          <Icon
+                            icon="heroicons:link"
+                            className="h-4 w-4"
+                            inline={true}
+                          />
+                          Generate UTM Link
+                        </button>
+                      )}
+
                       <button
                         className="hover:bg-button-danger/10 text-button-danger hover:text-button-danger flex w-full cursor-pointer items-center gap-3 px-4 py-2 text-left text-sm transition-colors"
                         onClick={handleLogout}
@@ -1007,6 +1027,11 @@ export const NavbarModern = ({ className }: { className?: string }) => {
           )}
         </div>
       </div>
+      {/* Render the modal outside the dropdown but inside the component */}
+      <UtmGeneratorModal
+        isOpen={utmModalOpen}
+        onClose={() => setUtmModalOpen(false)}
+      />
     </div>
   );
 };
