@@ -454,8 +454,8 @@ export default function Home() {
                 </h3>
               </div>
               <p className="text-card-paragraph mb-4 leading-relaxed">
-                View money and networth leaderboards. See top players and
-                compare your progress with the community.
+                View money leaderboards. See top players and compare your
+                progress with the community.
               </p>
               <div className="text-link group-hover:text-link-hover flex items-center gap-1 text-sm font-semibold">
                 Explore{" "}
