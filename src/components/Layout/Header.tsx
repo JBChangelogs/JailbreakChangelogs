@@ -286,7 +286,6 @@ export default function Header() {
                 setUtmModalOpen(true);
               }}
               className="hover:bg-button-info-hover/10 flex cursor-pointer items-center gap-3 px-4 py-3 transition-colors"
-              data-umami-event="Generate UTM Link"
             >
               <Icon
                 icon="heroicons:link"

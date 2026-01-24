@@ -989,7 +989,6 @@ export const NavbarModern = ({ className }: { className?: string }) => {
                             setUtmModalOpen(true);
                             setUserMenuOpen(false);
                           }}
-                          data-umami-event="Generate UTM Link"
                         >
                           <Icon
                             icon="heroicons:link"
