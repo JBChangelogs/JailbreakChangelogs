@@ -413,6 +413,7 @@ export async function fetchItems() {
       headers: {
         "User-Agent": "JailbreakChangelogs-ItemCatalog/1.0",
       },
+      next: { revalidate: 300 }, // Cache for 5 minutes
     });
     if (!response.ok) throw new Error("Failed to fetch items");
     const data = await response.json();
@@ -894,7 +895,7 @@ export async function fetchLatestSeason() {
       headers: {
         "User-Agent": "JailbreakChangelogs-Seasons/1.0",
       },
-      cache: "no-store",
+      next: { revalidate: 600 }, // Cache for 10 minutes
     });
 
     if (!response.ok) {
@@ -973,6 +974,7 @@ export async function fetchSeason(id: string) {
       headers: {
         "User-Agent": "JailbreakChangelogs-Seasons/1.0",
       },
+      next: { revalidate: 600 }, // Cache for 10 minutes
     });
 
     if (!response.ok) {

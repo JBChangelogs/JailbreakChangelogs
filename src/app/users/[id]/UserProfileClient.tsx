@@ -102,11 +102,12 @@ const LinSuperIdol = ({ userId }: { userId: string }) => {
         }
       }, 0);
 
-      // Cleanup: don't stop audio on unmount if it's playing
-      // Let it finish playing
       return () => {
-        // Only cleanup if component unmounts and audio is not playing
-        // Otherwise let it finish
+        if (globalSuperIdolAudio && isPlaying) {
+          globalSuperIdolAudio.pause();
+          globalSuperIdolAudio.currentTime = 0;
+          isPlaying = false;
+        }
       };
     }
   }, [userId]);
