@@ -17,8 +17,13 @@ export default function SearchForm({
   isLoading,
   externalIsLoading,
 }: SearchFormProps) {
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    handleSearch(e);
+  };
+
   return (
-    <form onSubmit={handleSearch}>
+    <form onSubmit={handleSubmit}>
       <div className="relative flex items-center">
         <input
           type="text"

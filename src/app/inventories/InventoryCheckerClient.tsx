@@ -629,34 +629,6 @@ export default function InventoryCheckerClient({
     setSelectedItem(null);
   };
 
-  if (isLoading || externalIsLoading) {
-    return (
-      <div className="space-y-6">
-        {/* Search Form */}
-        <SearchForm
-          searchId={searchId}
-          setSearchId={setSearchId}
-          handleSearch={handleSearch}
-          isLoading={isLoading}
-          externalIsLoading={externalIsLoading || false}
-        />
-
-        {/* Loading Skeleton for User Data */}
-        <div className="border-border-primary bg-secondary-bg min-h-[200px] rounded-lg border p-6 shadow-sm">
-          <div className="animate-pulse space-y-4">
-            <div className="flex items-center gap-4">
-              <div className="bg-button-secondary h-16 w-16 rounded-full"></div>
-              <div className="flex-1">
-                <div className="bg-button-secondary mb-2 h-6 w-32 rounded"></div>
-                <div className="bg-button-secondary h-4 w-24 rounded"></div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <ThemeProvider theme={{}}>
       <div className="space-y-6">
@@ -675,507 +647,536 @@ export default function InventoryCheckerClient({
           externalIsLoading={externalIsLoading || false}
         />
 
-        {/* Error Display */}
-        {error && !initialData && (
-          <div className="border-border-primary bg-secondary-bg shadow-card-shadow rounded-lg border p-6">
-            <div className="text-center">
-              <div className="mb-4 flex justify-center">
-                <div className="bg-status-error/10 rounded-full p-3">
-                  <Icon
-                    icon="heroicons:exclamation-triangle"
-                    className="text-status-error h-8 w-8"
-                  />
+        {isLoading || externalIsLoading ? (
+          /* Loading Skeleton for User Data */
+          <div className="border-border-primary bg-secondary-bg min-h-[200px] rounded-lg border p-6 shadow-sm">
+            <div className="animate-pulse space-y-4">
+              <div className="flex items-center gap-4">
+                <div className="bg-button-secondary h-16 w-16 rounded-full"></div>
+                <div className="flex-1">
+                  <div className="bg-button-secondary mb-2 h-6 w-32 rounded"></div>
+                  <div className="bg-button-secondary h-4 w-24 rounded"></div>
                 </div>
               </div>
-              <h3 className="text-status-error mb-2 text-lg font-semibold">
-                {error.includes("Server error")
-                  ? "Server Error"
-                  : "Unable to Load Inventory"}
-              </h3>
-              <p className="text-secondary-text mb-4 wrap-break-word">
-                {error}
-              </p>
-
-              {/* Show scan option for profile owner or login prompt for others */}
-              {isOwnInventory ? (
-                <div className="border-border-primary bg-secondary-bg shadow-card-shadow mt-4 rounded-lg border p-4">
-                  <div className="space-y-3">
-                    <p className="text-primary-text mb-3 text-center text-sm">
-                      Your inventory hasn&apos;t been scanned yet.
-                    </p>
-                    <div className="space-y-3">
-                      <div className="text-center">
-                        <p className="text-secondary-text text-sm">
-                          Wait for one of our bots to randomly join your trade
-                          server
-                        </p>
-                      </div>
-                      <div className="text-secondary-text text-center text-sm font-medium">
-                        OR
-                      </div>
-                      <div className="flex justify-center">
-                        <button
-                          onClick={() => {
-                            if (typeof window !== "undefined" && window.umami) {
-                              window.umami.track("Request Scan");
-                            }
-                            console.log(
-                              "[INVENTORY] Request Scan button clicked",
-                            );
-                            console.log(
-                              "[INVENTORY] Current scan status:",
-                              scanWebSocket.status,
-                            );
-                            console.log(
-                              "[INVENTORY] Current scan error:",
-                              scanWebSocket.error,
-                            );
-                            // Show Turnstile modal before scan
-                            if (
-                              ENABLE_WS_SCAN &&
-                              scanWebSocket.status !== "scanning" &&
-                              scanWebSocket.status !== "connecting"
-                            ) {
-                              setShowScanModal(true);
-                            }
-                          }}
-                          disabled={
-                            !ENABLE_WS_SCAN ||
-                            scanWebSocket.status === "scanning" ||
-                            scanWebSocket.status === "connecting"
-                          }
-                          className={`inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
-                            !ENABLE_WS_SCAN ||
-                            scanWebSocket.status === "scanning" ||
-                            scanWebSocket.status === "connecting"
-                              ? `border-button-info-disabled bg-button-info-disabled text-form-button-text ${
-                                  !ENABLE_WS_SCAN
-                                    ? "cursor-not-allowed"
-                                    : "cursor-progress"
-                                }`
-                              : "bg-button-info text-form-button-text hover:bg-button-info-hover cursor-pointer"
-                          }`}
-                        >
-                          {scanWebSocket.status === "connecting" ? (
-                            <>
-                              <svg
-                                className="h-4 w-4 animate-spin"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                              >
-                                <circle
-                                  className="opacity-25"
-                                  cx="12"
-                                  cy="12"
-                                  r="10"
-                                  stroke="currentColor"
-                                  strokeWidth="4"
-                                />
-                                <path
-                                  className="opacity-75"
-                                  fill="currentColor"
-                                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                                />
-                              </svg>
-                              Connecting...
-                            </>
-                          ) : scanWebSocket.status === "scanning" ? (
-                            <>
-                              <svg
-                                className="h-4 w-4 animate-spin"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                              >
-                                <circle
-                                  className="opacity-25"
-                                  cx="12"
-                                  cy="12"
-                                  r="10"
-                                  stroke="currentColor"
-                                  strokeWidth="4"
-                                />
-                                <path
-                                  className="opacity-75"
-                                  fill="currentColor"
-                                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                                />
-                              </svg>
-                              {scanWebSocket.message &&
-                              scanWebSocket.message.includes(
-                                "Bot joined server",
-                              )
-                                ? "Scanning..."
-                                : scanWebSocket.message &&
-                                    scanWebSocket.message.includes("Retrying")
-                                  ? "Retrying..."
-                                  : scanWebSocket.message &&
-                                      scanWebSocket.message.includes(
-                                        "You will be scanned when you join",
-                                      )
-                                    ? "Processing..."
-                                    : scanWebSocket.message || "Processing..."}
-                            </>
-                          ) : scanWebSocket.status === "completed" ? (
-                            <>
-                              <svg
-                                className="h-4 w-4"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth={2}
-                                  d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                                />
-                              </svg>
-                              Scan Complete
-                            </>
-                          ) : (
-                            <>
-                              <svg
-                                className="h-4 w-4"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth={2}
-                                  d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                                />
-                              </svg>
-                              {scanWebSocket.message &&
-                              scanWebSocket.message.includes("recent scan") ? (
-                                <>
-                                  <svg
-                                    className="h-4 w-4"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                  >
-                                    <path
-                                      strokeLinecap="round"
-                                      strokeLinejoin="round"
-                                      strokeWidth={2}
-                                      d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                                    />
-                                  </svg>
-                                  {scanWebSocket.message.includes("recent scan")
-                                    ? "Recent Scan Found"
-                                    : scanWebSocket.message.includes(
-                                          "User not found",
-                                        )
-                                      ? "User Not Found"
-                                      : scanWebSocket.message.includes(
-                                            "not in game",
-                                          )
-                                        ? "Not In Game"
-                                        : scanWebSocket.message}
-                                </>
-                              ) : scanWebSocket.message &&
-                                scanWebSocket.message.includes("not found") ? (
-                                <>
-                                  <svg
-                                    className="h-4 w-4"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                  >
-                                    <path
-                                      strokeLinecap="round"
-                                      strokeLinejoin="round"
-                                      strokeWidth={2}
-                                      d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"
-                                    />
-                                  </svg>
-                                  User Not Found
-                                </>
-                              ) : !ENABLE_WS_SCAN ? (
-                                "Scanning Disabled"
-                              ) : (
-                                "Request a Scan"
-                              )}
-                            </>
-                          )}
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <div className="border-border-primary bg-primary-bg shadow-card-shadow mt-4 rounded-lg border p-4">
-                  <p className="text-primary-text mb-1 text-sm font-medium">
-                    Looking for your inventory?
-                  </p>
-                  {isAuthenticated && user?.roblox_id ? (
-                    <Link
-                      href={`/inventories/${user.roblox_id}`}
-                      prefetch={false}
-                      className="bg-button-info text-form-button-text hover:bg-button-info-hover mt-2 inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors"
-                    >
-                      View My Inventory
-                    </Link>
-                  ) : isAuthenticated ? (
-                    <p className="text-secondary-text text-sm">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setLoginModalOpen(true);
-                          const event = new CustomEvent("setLoginTab", {
-                            detail: 1,
-                          });
-                          window.dispatchEvent(event);
-                        }}
-                        className="text-button-info hover:text-button-info-hover cursor-pointer font-semibold underline transition-colors"
-                      >
-                        Connect your Roblox account
-                      </button>{" "}
-                      to request a scan.
-                    </p>
-                  ) : (
-                    <p className="text-secondary-text text-sm">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setLoginModalOpen(true);
-                        }}
-                        className="text-button-info hover:text-button-info-hover cursor-pointer font-semibold underline transition-colors"
-                      >
-                        Login and connect Roblox
-                      </button>{" "}
-                      to request a scan.
-                    </p>
-                  )}
-                </div>
-              )}
             </div>
           </div>
-        )}
-
-        {/* User Stats and Inventory Items - Only show when no error and has data */}
-        {!error && initialData && currentData && (
+        ) : (
           <>
-            {/* User Stats */}
-            <UserStats
-              initialData={currentData}
-              robloxUsers={robloxUsers}
-              userConnectionData={userConnectionData || null}
-              itemsData={itemsData}
-              dupedItems={dupedItems}
-              currentSeason={currentSeason}
-              initialNetworthData={networthData}
+            {/* Error Display */}
+            {error && !initialData && (
+              <div className="border-border-primary bg-secondary-bg shadow-card-shadow rounded-lg border p-6">
+                <div className="text-center">
+                  <div className="mb-4 flex justify-center">
+                    <div className="bg-status-error/10 rounded-full p-3">
+                      <Icon
+                        icon="heroicons:exclamation-triangle"
+                        className="text-status-error h-8 w-8"
+                      />
+                    </div>
+                  </div>
+                  <h3 className="text-status-error mb-2 text-lg font-semibold">
+                    {error.includes("Server error")
+                      ? "Server Error"
+                      : "Unable to Load Inventory"}
+                  </h3>
+                  <p className="text-secondary-text mb-4 wrap-break-word">
+                    {error}
+                  </p>
+
+                  {/* Show scan option for profile owner or login prompt for others */}
+                  {isOwnInventory ? (
+                    <div className="border-border-primary bg-secondary-bg shadow-card-shadow mt-4 rounded-lg border p-4">
+                      <div className="space-y-3">
+                        <p className="text-primary-text mb-3 text-center text-sm">
+                          Your inventory hasn&apos;t been scanned yet.
+                        </p>
+                        <div className="space-y-3">
+                          <div className="text-center">
+                            <p className="text-secondary-text text-sm">
+                              Wait for one of our bots to randomly join your
+                              trade server
+                            </p>
+                          </div>
+                          <div className="text-secondary-text text-center text-sm font-medium">
+                            OR
+                          </div>
+                          <div className="flex justify-center">
+                            <button
+                              onClick={() => {
+                                if (
+                                  typeof window !== "undefined" &&
+                                  window.umami
+                                ) {
+                                  window.umami.track("Request Scan");
+                                }
+                                console.log(
+                                  "[INVENTORY] Request Scan button clicked",
+                                );
+                                console.log(
+                                  "[INVENTORY] Current scan status:",
+                                  scanWebSocket.status,
+                                );
+                                console.log(
+                                  "[INVENTORY] Current scan error:",
+                                  scanWebSocket.error,
+                                );
+                                // Show Turnstile modal before scan
+                                if (
+                                  ENABLE_WS_SCAN &&
+                                  scanWebSocket.status !== "scanning" &&
+                                  scanWebSocket.status !== "connecting"
+                                ) {
+                                  setShowScanModal(true);
+                                }
+                              }}
+                              disabled={
+                                !ENABLE_WS_SCAN ||
+                                scanWebSocket.status === "scanning" ||
+                                scanWebSocket.status === "connecting"
+                              }
+                              className={`inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
+                                !ENABLE_WS_SCAN ||
+                                scanWebSocket.status === "scanning" ||
+                                scanWebSocket.status === "connecting"
+                                  ? `border-button-info-disabled bg-button-info-disabled text-form-button-text ${
+                                      !ENABLE_WS_SCAN
+                                        ? "cursor-not-allowed"
+                                        : "cursor-progress"
+                                    }`
+                                  : "bg-button-info text-form-button-text hover:bg-button-info-hover cursor-pointer"
+                              }`}
+                            >
+                              {scanWebSocket.status === "connecting" ? (
+                                <>
+                                  <svg
+                                    className="h-4 w-4 animate-spin"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                  >
+                                    <circle
+                                      className="opacity-25"
+                                      cx="12"
+                                      cy="12"
+                                      r="10"
+                                      stroke="currentColor"
+                                      strokeWidth="4"
+                                    />
+                                    <path
+                                      className="opacity-75"
+                                      fill="currentColor"
+                                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                                    />
+                                  </svg>
+                                  Connecting...
+                                </>
+                              ) : scanWebSocket.status === "scanning" ? (
+                                <>
+                                  <svg
+                                    className="h-4 w-4 animate-spin"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                  >
+                                    <circle
+                                      className="opacity-25"
+                                      cx="12"
+                                      cy="12"
+                                      r="10"
+                                      stroke="currentColor"
+                                      strokeWidth="4"
+                                    />
+                                    <path
+                                      className="opacity-75"
+                                      fill="currentColor"
+                                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                                    />
+                                  </svg>
+                                  {scanWebSocket.message &&
+                                  scanWebSocket.message.includes(
+                                    "Bot joined server",
+                                  )
+                                    ? "Scanning..."
+                                    : scanWebSocket.message &&
+                                        scanWebSocket.message.includes(
+                                          "Retrying",
+                                        )
+                                      ? "Retrying..."
+                                      : scanWebSocket.message &&
+                                          scanWebSocket.message.includes(
+                                            "You will be scanned when you join",
+                                          )
+                                        ? "Processing..."
+                                        : scanWebSocket.message ||
+                                          "Processing..."}
+                                </>
+                              ) : scanWebSocket.status === "completed" ? (
+                                <>
+                                  <svg
+                                    className="h-4 w-4"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                  >
+                                    <path
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      strokeWidth={2}
+                                      d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                                    />
+                                  </svg>
+                                  Scan Complete
+                                </>
+                              ) : (
+                                <>
+                                  <svg
+                                    className="h-4 w-4"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                  >
+                                    <path
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      strokeWidth={2}
+                                      d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                                    />
+                                  </svg>
+                                  {scanWebSocket.message &&
+                                  scanWebSocket.message.includes(
+                                    "recent scan",
+                                  ) ? (
+                                    <>
+                                      <svg
+                                        className="h-4 w-4"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                      >
+                                        <path
+                                          strokeLinecap="round"
+                                          strokeLinejoin="round"
+                                          strokeWidth={2}
+                                          d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                                        />
+                                      </svg>
+                                      {scanWebSocket.message.includes(
+                                        "recent scan",
+                                      )
+                                        ? "Recent Scan Found"
+                                        : scanWebSocket.message.includes(
+                                              "User not found",
+                                            )
+                                          ? "User Not Found"
+                                          : scanWebSocket.message.includes(
+                                                "not in game",
+                                              )
+                                            ? "Not In Game"
+                                            : scanWebSocket.message}
+                                    </>
+                                  ) : scanWebSocket.message &&
+                                    scanWebSocket.message.includes(
+                                      "not found",
+                                    ) ? (
+                                    <>
+                                      <svg
+                                        className="h-4 w-4"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                      >
+                                        <path
+                                          strokeLinecap="round"
+                                          strokeLinejoin="round"
+                                          strokeWidth={2}
+                                          d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"
+                                        />
+                                      </svg>
+                                      User Not Found
+                                    </>
+                                  ) : !ENABLE_WS_SCAN ? (
+                                    "Scanning Disabled"
+                                  ) : (
+                                    "Request a Scan"
+                                  )}
+                                </>
+                              )}
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="border-border-primary bg-primary-bg shadow-card-shadow mt-4 rounded-lg border p-4">
+                      <p className="text-primary-text mb-1 text-sm font-medium">
+                        Looking for your inventory?
+                      </p>
+                      {isAuthenticated && user?.roblox_id ? (
+                        <Link
+                          href={`/inventories/${user.roblox_id}`}
+                          prefetch={false}
+                          className="bg-button-info text-form-button-text hover:bg-button-info-hover mt-2 inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors"
+                        >
+                          View My Inventory
+                        </Link>
+                      ) : isAuthenticated ? (
+                        <p className="text-secondary-text text-sm">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setLoginModalOpen(true);
+                              const event = new CustomEvent("setLoginTab", {
+                                detail: 1,
+                              });
+                              window.dispatchEvent(event);
+                            }}
+                            className="text-button-info hover:text-button-info-hover cursor-pointer font-semibold underline transition-colors"
+                          >
+                            Connect your Roblox account
+                          </button>{" "}
+                          to request a scan.
+                        </p>
+                      ) : (
+                        <p className="text-secondary-text text-sm">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setLoginModalOpen(true);
+                            }}
+                            className="text-button-info hover:text-button-info-hover cursor-pointer font-semibold underline transition-colors"
+                          >
+                            Login and connect Roblox
+                          </button>{" "}
+                          to request a scan.
+                        </p>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* User Stats and Inventory Items - Only show when no error and has data */}
+            {!error && initialData && currentData && (
+              <>
+                {/* User Stats */}
+                <UserStats
+                  initialData={currentData}
+                  robloxUsers={robloxUsers}
+                  userConnectionData={userConnectionData || null}
+                  itemsData={itemsData}
+                  dupedItems={dupedItems}
+                  currentSeason={currentSeason}
+                  initialNetworthData={networthData}
+                />
+
+                {/* Tabbed Interface */}
+                <div className="mt-6">
+                  <InventoryOverflowTabs
+                    value={effectiveActiveTab}
+                    onChange={(e, idx) =>
+                      handleTabChange(e as unknown as React.SyntheticEvent, idx)
+                    }
+                    hasComments={Boolean(robloxId)}
+                    hasDuplicates={hasDuplicates}
+                    hasDupedItems={hasDupedItems}
+                    hasBreakdown={hasBreakdownData}
+                    robloxId={robloxId}
+                  />
+
+                  {/* Tab Content */}
+                  <div className="mt-4">
+                    {effectiveActiveTab === 0 && (
+                      <InventoryItems
+                        initialData={currentData}
+                        robloxUsers={mergedRobloxUsers}
+                        onItemClick={handleItemClick}
+                        itemsData={itemsData}
+                        isOwnInventory={isOwnInventory}
+                      />
+                    )}
+
+                    {effectiveActiveTab === 1 && hasDuplicates && (
+                      <DuplicatesTab
+                        initialData={{
+                          data: currentData.data,
+                          user_id: currentData.user_id,
+                          duplicates: currentData.duplicates,
+                        }}
+                        robloxUsers={mergedRobloxUsers}
+                        onItemClick={handleItemClick}
+                        itemsData={itemsData}
+                      />
+                    )}
+
+                    {((hasDuplicates && effectiveActiveTab === 2) ||
+                      (!hasDuplicates && effectiveActiveTab === 1)) &&
+                      hasDupedItems &&
+                      currentData.duplicates && (
+                        <DupedItemsTab
+                          duplicates={currentData.duplicates}
+                          robloxUsers={mergedRobloxUsers}
+                          onItemClick={handleItemClick}
+                          itemsData={itemsData}
+                          userId={currentData.user_id}
+                        />
+                      )}
+
+                    {((hasDuplicates &&
+                      hasDupedItems &&
+                      effectiveActiveTab === 3) ||
+                      (hasDuplicates &&
+                        !hasDupedItems &&
+                        effectiveActiveTab === 2) ||
+                      (!hasDuplicates &&
+                        hasDupedItems &&
+                        effectiveActiveTab === 2) ||
+                      (!hasDuplicates &&
+                        !hasDupedItems &&
+                        effectiveActiveTab === 1)) &&
+                      robloxId && (
+                        <MoneyHistoryChart
+                          userId={robloxId}
+                          initialData={moneyHistoryData}
+                        />
+                      )}
+
+                    {((hasDuplicates &&
+                      hasDupedItems &&
+                      effectiveActiveTab === 4) ||
+                      (hasDuplicates &&
+                        !hasDupedItems &&
+                        effectiveActiveTab === 3) ||
+                      (!hasDuplicates &&
+                        hasDupedItems &&
+                        effectiveActiveTab === 3) ||
+                      (!hasDuplicates &&
+                        !hasDupedItems &&
+                        effectiveActiveTab === 2)) &&
+                      robloxId && (
+                        <NetworthHistoryChart
+                          userId={robloxId}
+                          initialData={networthData}
+                        />
+                      )}
+
+                    {((hasDuplicates &&
+                      hasDupedItems &&
+                      hasBreakdownData &&
+                      effectiveActiveTab === 5) ||
+                      (hasDuplicates &&
+                        !hasDupedItems &&
+                        hasBreakdownData &&
+                        effectiveActiveTab === 4) ||
+                      (!hasDuplicates &&
+                        hasDupedItems &&
+                        hasBreakdownData &&
+                        effectiveActiveTab === 4) ||
+                      (!hasDuplicates &&
+                        !hasDupedItems &&
+                        hasBreakdownData &&
+                        effectiveActiveTab === 3)) &&
+                      robloxId && (
+                        <InventoryBreakdown
+                          networthData={networthData}
+                          username={getUserDisplay(robloxId)}
+                        />
+                      )}
+
+                    {((hasDuplicates &&
+                      hasDupedItems &&
+                      hasBreakdownData &&
+                      effectiveActiveTab === 6) ||
+                      (hasDuplicates &&
+                        hasDupedItems &&
+                        !hasBreakdownData &&
+                        effectiveActiveTab === 5) ||
+                      (hasDuplicates &&
+                        !hasDupedItems &&
+                        hasBreakdownData &&
+                        effectiveActiveTab === 5) ||
+                      (hasDuplicates &&
+                        !hasDupedItems &&
+                        !hasBreakdownData &&
+                        effectiveActiveTab === 4) ||
+                      (!hasDuplicates &&
+                        hasDupedItems &&
+                        hasBreakdownData &&
+                        effectiveActiveTab === 5) ||
+                      (!hasDuplicates &&
+                        hasDupedItems &&
+                        !hasBreakdownData &&
+                        effectiveActiveTab === 4) ||
+                      (!hasDuplicates &&
+                        !hasDupedItems &&
+                        hasBreakdownData &&
+                        effectiveActiveTab === 4) ||
+                      (!hasDuplicates &&
+                        !hasDupedItems &&
+                        !hasBreakdownData &&
+                        effectiveActiveTab === 3)) &&
+                      robloxId && (
+                        <ChangelogComments
+                          changelogId={robloxId}
+                          changelogTitle={`${getUserDisplay(robloxId)}'s Inventory`}
+                          type="inventory"
+                          inventory={{ owner: robloxId }}
+                          initialComments={initialComments}
+                          initialUserMap={initialCommentUserMap}
+                        />
+                      )}
+                  </div>
+                </div>
+
+                {/* Trade History Modal */}
+                {showHistoryModal && selectedItem && (
+                  <TradeHistoryModal
+                    isOpen={showHistoryModal}
+                    onClose={closeHistoryModal}
+                    item={selectedItem}
+                    username={robloxId ? getUsername(robloxId) : undefined}
+                    isDupeTab={
+                      (hasDupedItems &&
+                        ((hasDuplicates && effectiveActiveTab === 2) ||
+                          (!hasDuplicates && effectiveActiveTab === 1))) ||
+                      (selectedItem?.is_duplicated ?? false)
+                    }
+                  />
+                )}
+              </>
+            )}
+
+            {/* Supporter Modal */}
+            <SupporterModal
+              isOpen={modalState.isOpen}
+              onClose={closeModal}
+              feature={modalState.feature}
+              currentTier={modalState.currentTier || user?.premiumtype || 0}
+              requiredTier={modalState.requiredTier || 3}
+              currentLimit={modalState.currentLimit}
+              requiredLimit={modalState.requiredLimit}
             />
 
-            {/* Tabbed Interface */}
-            <div className="mt-6">
-              <InventoryOverflowTabs
-                value={effectiveActiveTab}
-                onChange={(e, idx) =>
-                  handleTabChange(e as unknown as React.SyntheticEvent, idx)
+            {/* Scan Inventory Modal with Turnstile */}
+            <ScanInventoryModal
+              isOpen={showScanModal}
+              onClose={() => {
+                if (
+                  scanWebSocket.status !== "scanning" &&
+                  scanWebSocket.status !== "connecting"
+                ) {
+                  setShowScanModal(false);
                 }
-                hasComments={Boolean(robloxId)}
-                hasDuplicates={hasDuplicates}
-                hasDupedItems={hasDupedItems}
-                hasBreakdown={hasBreakdownData}
-                robloxId={robloxId}
-              />
-
-              {/* Tab Content */}
-              <div className="mt-4">
-                {effectiveActiveTab === 0 && (
-                  <InventoryItems
-                    initialData={currentData}
-                    robloxUsers={mergedRobloxUsers}
-                    onItemClick={handleItemClick}
-                    itemsData={itemsData}
-                    isOwnInventory={isOwnInventory}
-                  />
-                )}
-
-                {effectiveActiveTab === 1 && hasDuplicates && (
-                  <DuplicatesTab
-                    initialData={{
-                      data: currentData.data,
-                      user_id: currentData.user_id,
-                      duplicates: currentData.duplicates,
-                    }}
-                    robloxUsers={mergedRobloxUsers}
-                    onItemClick={handleItemClick}
-                    itemsData={itemsData}
-                  />
-                )}
-
-                {((hasDuplicates && effectiveActiveTab === 2) ||
-                  (!hasDuplicates && effectiveActiveTab === 1)) &&
-                  hasDupedItems &&
-                  currentData.duplicates && (
-                    <DupedItemsTab
-                      duplicates={currentData.duplicates}
-                      robloxUsers={mergedRobloxUsers}
-                      onItemClick={handleItemClick}
-                      itemsData={itemsData}
-                      userId={currentData.user_id}
-                    />
-                  )}
-
-                {((hasDuplicates &&
-                  hasDupedItems &&
-                  effectiveActiveTab === 3) ||
-                  (hasDuplicates &&
-                    !hasDupedItems &&
-                    effectiveActiveTab === 2) ||
-                  (!hasDuplicates &&
-                    hasDupedItems &&
-                    effectiveActiveTab === 2) ||
-                  (!hasDuplicates &&
-                    !hasDupedItems &&
-                    effectiveActiveTab === 1)) &&
-                  robloxId && (
-                    <MoneyHistoryChart
-                      userId={robloxId}
-                      initialData={moneyHistoryData}
-                    />
-                  )}
-
-                {((hasDuplicates &&
-                  hasDupedItems &&
-                  effectiveActiveTab === 4) ||
-                  (hasDuplicates &&
-                    !hasDupedItems &&
-                    effectiveActiveTab === 3) ||
-                  (!hasDuplicates &&
-                    hasDupedItems &&
-                    effectiveActiveTab === 3) ||
-                  (!hasDuplicates &&
-                    !hasDupedItems &&
-                    effectiveActiveTab === 2)) &&
-                  robloxId && (
-                    <NetworthHistoryChart
-                      userId={robloxId}
-                      initialData={networthData}
-                    />
-                  )}
-
-                {((hasDuplicates &&
-                  hasDupedItems &&
-                  hasBreakdownData &&
-                  effectiveActiveTab === 5) ||
-                  (hasDuplicates &&
-                    !hasDupedItems &&
-                    hasBreakdownData &&
-                    effectiveActiveTab === 4) ||
-                  (!hasDuplicates &&
-                    hasDupedItems &&
-                    hasBreakdownData &&
-                    effectiveActiveTab === 4) ||
-                  (!hasDuplicates &&
-                    !hasDupedItems &&
-                    hasBreakdownData &&
-                    effectiveActiveTab === 3)) &&
-                  robloxId && (
-                    <InventoryBreakdown
-                      networthData={networthData}
-                      username={getUserDisplay(robloxId)}
-                    />
-                  )}
-
-                {((hasDuplicates &&
-                  hasDupedItems &&
-                  hasBreakdownData &&
-                  effectiveActiveTab === 6) ||
-                  (hasDuplicates &&
-                    hasDupedItems &&
-                    !hasBreakdownData &&
-                    effectiveActiveTab === 5) ||
-                  (hasDuplicates &&
-                    !hasDupedItems &&
-                    hasBreakdownData &&
-                    effectiveActiveTab === 5) ||
-                  (hasDuplicates &&
-                    !hasDupedItems &&
-                    !hasBreakdownData &&
-                    effectiveActiveTab === 4) ||
-                  (!hasDuplicates &&
-                    hasDupedItems &&
-                    hasBreakdownData &&
-                    effectiveActiveTab === 5) ||
-                  (!hasDuplicates &&
-                    hasDupedItems &&
-                    !hasBreakdownData &&
-                    effectiveActiveTab === 4) ||
-                  (!hasDuplicates &&
-                    !hasDupedItems &&
-                    hasBreakdownData &&
-                    effectiveActiveTab === 4) ||
-                  (!hasDuplicates &&
-                    !hasDupedItems &&
-                    !hasBreakdownData &&
-                    effectiveActiveTab === 3)) &&
-                  robloxId && (
-                    <ChangelogComments
-                      changelogId={robloxId}
-                      changelogTitle={`${getUserDisplay(robloxId)}'s Inventory`}
-                      type="inventory"
-                      inventory={{ owner: robloxId }}
-                      initialComments={initialComments}
-                      initialUserMap={initialCommentUserMap}
-                    />
-                  )}
-              </div>
-            </div>
-
-            {/* Trade History Modal */}
-            {showHistoryModal && selectedItem && (
-              <TradeHistoryModal
-                isOpen={showHistoryModal}
-                onClose={closeHistoryModal}
-                item={selectedItem}
-                username={robloxId ? getUsername(robloxId) : undefined}
-                isDupeTab={
-                  (hasDupedItems &&
-                    ((hasDuplicates && effectiveActiveTab === 2) ||
-                      (!hasDuplicates && effectiveActiveTab === 1))) ||
-                  (selectedItem?.is_duplicated ?? false)
-                }
-              />
-            )}
+              }}
+              onSuccess={(turnstileToken) => {
+                scanWebSocket.startScan(turnstileToken);
+                setShowScanModal(false);
+              }}
+              isScanning={
+                scanWebSocket.status === "scanning" ||
+                scanWebSocket.status === "connecting"
+              }
+            />
           </>
         )}
-
-        {/* Supporter Modal */}
-        <SupporterModal
-          isOpen={modalState.isOpen}
-          onClose={closeModal}
-          feature={modalState.feature}
-          currentTier={modalState.currentTier || user?.premiumtype || 0}
-          requiredTier={modalState.requiredTier || 3}
-          currentLimit={modalState.currentLimit}
-          requiredLimit={modalState.requiredLimit}
-        />
-
-        {/* Scan Inventory Modal with Turnstile */}
-        <ScanInventoryModal
-          isOpen={showScanModal}
-          onClose={() => {
-            if (
-              scanWebSocket.status !== "scanning" &&
-              scanWebSocket.status !== "connecting"
-            ) {
-              setShowScanModal(false);
-            }
-          }}
-          onSuccess={(turnstileToken) => {
-            scanWebSocket.startScan(turnstileToken);
-            setShowScanModal(false);
-          }}
-          isScanning={
-            scanWebSocket.status === "scanning" ||
-            scanWebSocket.status === "connecting"
-          }
-        />
       </div>
     </ThemeProvider>
   );

@@ -60,7 +60,7 @@ const LinSuperIdol = ({ userId }: { userId: string }) => {
     if (userId === "231616789979594754") {
       // Create audio instance only if it doesn't exist
       if (!globalSuperIdolAudio) {
-        globalSuperIdolAudio = new Audio("/assets/images/super_idol.mp3");
+        globalSuperIdolAudio = new Audio("/assets/audios/super_idol.mp3");
         globalSuperIdolAudio.volume = 0.7;
 
         // Handle when audio ends
