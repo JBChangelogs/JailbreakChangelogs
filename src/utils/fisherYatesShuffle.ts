@@ -4,6 +4,11 @@
 export const TOTAL_BACKGROUND_IMAGES = 42;
 
 /**
+ * Base URL for background images
+ */
+export const BACKGROUNDS_BASE_URL = "/backgrounds/v2";
+
+/**
  * Get a specific background image URL by index (1-based or 0-based mapped to 1-based)
  * @param index - The index of the background image
  * @param baseUrl - Base URL for the background images
@@ -11,7 +16,7 @@ export const TOTAL_BACKGROUND_IMAGES = 42;
  */
 export function getBackgroundImageByIndex(
   index: number,
-  baseUrl: string = "/backgrounds",
+  baseUrl: string = BACKGROUNDS_BASE_URL,
 ): string {
   // Ensure index is within 1-count range (using modulo if zero-based or large number passed)
   // If we just want simple access mapped to file names:
@@ -49,7 +54,7 @@ export function fisherYatesShuffle<T>(array: T[]): T[] {
  */
 export function generateShuffledBackgroundImages(
   count: number = TOTAL_BACKGROUND_IMAGES,
-  baseUrl: string = "/backgrounds",
+  baseUrl: string = BACKGROUNDS_BASE_URL,
 ): string[] {
   // Generate array of image URLs
   const imageUrls = Array.from(
@@ -69,7 +74,7 @@ export function generateShuffledBackgroundImages(
  */
 export function getRandomBackgroundImage(
   count: number = TOTAL_BACKGROUND_IMAGES,
-  baseUrl: string = "/backgrounds",
+  baseUrl: string = BACKGROUNDS_BASE_URL,
 ): string {
   const randomIndex = Math.floor(Math.random() * count) + 1;
   return `${baseUrl}/background${randomIndex}.webp`;
