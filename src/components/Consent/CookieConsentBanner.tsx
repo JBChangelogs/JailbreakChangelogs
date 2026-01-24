@@ -22,7 +22,7 @@ export default function CookieConsentBanner() {
               &quot;Accept All&quot;, you consent to our use of cookies.{" "}
               <Link
                 href="/privacy"
-                className="text-button-info hover:text-button-info-hover underline transition-colors"
+                className="text-link hover:text-link-hover active:text-link-active transition-colors duration-200 hover:underline"
               >
                 Privacy Policy
               </Link>
