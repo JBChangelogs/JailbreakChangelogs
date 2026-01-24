@@ -542,7 +542,12 @@ function RobberyTrackerContent() {
                   <Masonry
                     columns={{ xs: 1, sm: 2, md: 2, lg: 3, xl: 4 }}
                     spacing={3}
-                    sx={{ width: "auto", margin: 0 }}
+                    sx={{
+                      width: "auto",
+                      margin: 0,
+                      overflow: "hidden",
+                      transition: "height 0.2s ease-in-out",
+                    }}
                   >
                     {filteredRobberies.map((robbery) => (
                       <RobberyCard
@@ -584,7 +589,12 @@ function RobberyTrackerContent() {
                   <Masonry
                     columns={{ xs: 1, sm: 2, md: 2, lg: 3, xl: 4 }}
                     spacing={3}
-                    sx={{ width: "auto", margin: 0 }}
+                    sx={{
+                      width: "auto",
+                      margin: 0,
+                      overflow: "hidden",
+                      transition: "height 0.2s ease-in-out",
+                    }}
                   >
                     {filteredMansions.map((robbery) => (
                       <RobberyCard
@@ -681,7 +691,12 @@ function RobberyTrackerContent() {
                   <Masonry
                     columns={{ xs: 1, sm: 2, md: 2, lg: 3, xl: 4 }}
                     spacing={3}
-                    sx={{ width: "auto", margin: 0 }}
+                    sx={{
+                      width: "auto",
+                      margin: 0,
+                      overflow: "hidden",
+                      transition: "height 0.2s ease-in-out",
+                    }}
                   >
                     {filteredAirdrops.map((airdrop, index) => (
                       <AirdropCard

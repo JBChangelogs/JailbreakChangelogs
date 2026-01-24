@@ -545,7 +545,11 @@ export default function ChangelogDetailsClient({
               <Masonry
                 columns={isAtLeast1440 ? 3 : isAtLeast1024 ? 2 : 1}
                 spacing={2}
-                sx={{ width: "100%" }}
+                sx={{
+                  width: "100%",
+                  overflow: "hidden",
+                  transition: "height 0.2s ease-in-out",
+                }}
               >
                 {paginatedChanges.map((change) => (
                   <div
