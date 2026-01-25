@@ -18,9 +18,6 @@ import ThemeProvider from "@/components/ThemeProvider";
 import { ThemeProvider as CustomThemeProvider } from "@/contexts/ThemeContext";
 import SurveyProvider from "@/components/Survey/SurveyProvider";
 import { AuthProvider } from "@/contexts/AuthContext";
-import { ConsentProviderWrapper } from "@/components/Providers/ConsentProviderWrapper";
-import ConsentBannerWrapper from "@/components/Consent/ConsentBannerWrapper";
-import CookieSettingsButton from "@/components/Consent/CookieSettingsButton";
 import NitroAnchorCloseSupporterModal from "@/components/Ads/NitroAnchorCloseSupporterModal";
 import NitroBottomAnchor from "@/components/Ads/NitroBottomAnchor";
 import NitroVideoPlayer from "@/components/Ads/NitroVideoPlayer";
@@ -33,9 +30,7 @@ import {
 } from "@/utils/maintenance";
 import { getGitHubUrl } from "@/utils/version";
 import { Suspense } from "react";
-import { GoogleAnalytics, GoogleTagManager } from "@next/third-parties/google";
 import QueryProvider from "@/components/QueryProvider";
-import { getDefaultConsent } from "@/utils/serverConsent";
 import { getCurrentUser } from "@/utils/serverSession";
 
 export const viewport: Viewport = {
@@ -95,7 +90,6 @@ export default async function RootLayout({
 }) {
   const { isMaintenanceMode } = await checkMaintenanceMode();
   const githubUrl = getGitHubUrl();
-  const defaultConsent = await getDefaultConsent();
 
   // Check if user is a supporter before loading Nitro script
   const user = await getCurrentUser();
@@ -106,36 +100,6 @@ export default async function RootLayout({
     return (
       <html lang="en" className={`${GeistSans.variable} ${GeistMono.variable}`}>
         <head>
-          {/* Google Consent Mode v2 - MUST be before Google Analytics */}
-          <Script
-            id="google-consent-mode"
-            strategy="beforeInteractive"
-            dangerouslySetInnerHTML={{
-              __html: `
-                window.dataLayer = window.dataLayer || [];
-                function gtag(){dataLayer.push(arguments);}
-                gtag('consent', 'default', {
-                  'analytics_storage': '${defaultConsent.analytics_storage}',
-                  'wait_for_update': 500
-                });
-              `,
-            }}
-          />
-          {/* Google Analytics */}
-          <GoogleAnalytics gaId="G-729QSV9S7B" />
-          {/* Microsoft Clarity */}
-          <Script
-            id="microsoft-clarity-analytics"
-            dangerouslySetInnerHTML={{
-              __html: `
-              (function(c,l,a,r,i,t,y){
-                c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
-                t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
-                y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
-              })(window, document, "clarity", "script", "${process.env.NEXT_PUBLIC_CLARITY_PROJECT}");
-            `,
-            }}
-          />
           {/* Umami Analytics */}
           <Script
             defer
@@ -173,7 +137,6 @@ export default async function RootLayout({
           )}
         </head>
         <body className="bg-primary-bg font-sans">
-          <GoogleTagManager gtmId={process.env.NEXT_PUBLIC_GTM_ID!} />
           <noscript>
             <div className="bg-primary-bg fixed inset-0 z-50 flex items-center justify-center">
               <div className="mx-auto max-w-md p-8 text-center">
@@ -199,227 +162,6 @@ export default async function RootLayout({
             </div>
           </noscript>
           <AppRouterCacheProvider options={{ enableCssLayer: true }}>
-            <ConsentProviderWrapper>
-              <CookieSettingsButton />
-              <CustomThemeProvider>
-                <ThemeProvider>
-                  <QueryProvider>
-                    <Toaster
-                      position="bottom-right"
-                      toastOptions={{
-                        success: {
-                          style: {
-                            background: "var(--color-secondary-bg)",
-                            color: "var(--color-primary-text)",
-                            border: "1px solid var(--color-border-primary)",
-                            borderRadius: "16px",
-                            backdropFilter: "blur(20px)",
-                            WebkitBackdropFilter: "blur(20px)",
-                            boxShadow: "0 8px 32px rgba(0,0,0,0.3)",
-                          },
-                          iconTheme: {
-                            primary: "var(--color-button-info)",
-                            secondary: "var(--color-secondary-bg)",
-                          },
-                        },
-                        error: {
-                          style: {
-                            background: "var(--color-secondary-bg)",
-                            color: "var(--color-primary-text)",
-                            border: "1px solid var(--color-border-primary)",
-                            borderRadius: "16px",
-                            backdropFilter: "blur(20px)",
-                            WebkitBackdropFilter: "blur(20px)",
-                            boxShadow: "0 8px 32px rgba(0,0,0,0.3)",
-                          },
-                          iconTheme: {
-                            primary: "var(--color-button-info)",
-                            secondary: "var(--color-secondary-bg)",
-                          },
-                        },
-                        loading: {
-                          style: {
-                            background: "var(--color-secondary-bg)",
-                            color: "var(--color-primary-text)",
-                            border: "1px solid var(--color-border-primary)",
-                            borderRadius: "16px",
-                            backdropFilter: "blur(20px)",
-                            WebkitBackdropFilter: "blur(20px)",
-                            boxShadow: "0 8px 32px rgba(0,0,0,0.3)",
-                          },
-                          iconTheme: {
-                            primary: "var(--color-button-info)",
-                            secondary: "var(--color-secondary-bg)",
-                          },
-                        },
-                      }}
-                    />
-                    <MaintenanceBypass>
-                      <NextTopLoader
-                        color="var(--color-button-info)"
-                        initialPosition={0.08}
-                        crawlSpeed={200}
-                        height={3}
-                        crawl={true}
-                        showSpinner={false}
-                        easing="ease"
-                        speed={200}
-                        shadow="0 0 10px var(--color-button-info),0 0 5px var(--color-button-info)"
-                        zIndex={1600}
-                      />
-
-                      <AuthCheck />
-                      <AuthProvider>
-                        <UmamiIdentity />
-                        <NitroBottomAnchor />
-                        <NitroVideoPlayer />
-                        <NitroAnchorCloseSupporterModal />
-                        <SurveyProvider>
-                          <div
-                            id="main-layout"
-                            className="flex min-h-screen flex-col"
-                          >
-                            <Suspense
-                              fallback={
-                                <div className="bg-primary-bg/75 border-border-primary h-16 border-b backdrop-blur-lg" />
-                              }
-                            >
-                              <Header />
-                            </Suspense>
-                            <main className="min-h-screen flex-1">
-                              <Suspense>{children}</Suspense>
-                            </main>
-                            <Footer
-                              githubUrl={githubUrl}
-                              versionInfo={
-                                <Suspense fallback={<VersionInfoSkeleton />}>
-                                  <VersionInfoServer />
-                                </Suspense>
-                              }
-                            />
-                          </div>
-                        </SurveyProvider>
-                      </AuthProvider>
-                    </MaintenanceBypass>
-                  </QueryProvider>
-                </ThemeProvider>
-                {/* Ad Block Prompt UI - Only shown to non-supporters when ad blocking is detected */}
-                <AdBlockPrompt />
-              </CustomThemeProvider>
-              <ConsentBannerWrapper />
-            </ConsentProviderWrapper>
-          </AppRouterCacheProvider>
-          {/* Ad Block Detection Script - Only load if user is NOT a supporter */}
-          <AdBlockRecovery isSupporter={!!isSupporter} />
-        </body>
-      </html>
-    );
-  }
-
-  return (
-    <html lang="en" className={`${GeistSans.variable} ${GeistMono.variable}`}>
-      <head>
-        {/* Preconnect to external asset domains */}
-        <link rel="preconnect" href="https://assets.jailbreakchangelogs.xyz" />
-        <link
-          rel="dns-prefetch"
-          href="https://assets.jailbreakchangelogs.xyz"
-        />
-        {/* Google Consent Mode v2 - MUST be before Google Analytics */}
-        <Script
-          id="google-consent-mode"
-          strategy="beforeInteractive"
-          dangerouslySetInnerHTML={{
-            __html: `
-              window.dataLayer = window.dataLayer || [];
-              function gtag(){dataLayer.push(arguments);}
-              gtag('consent', 'default', {
-                'analytics_storage': '${defaultConsent.analytics_storage}',
-                'wait_for_update': 500
-              });
-            `,
-          }}
-        />
-        {/* Google Analytics */}
-        <GoogleAnalytics gaId="G-729QSV9S7B" />
-        {/* Microsoft Clarity */}
-        <Script
-          id="microsoft-clarity-analytics"
-          dangerouslySetInnerHTML={{
-            __html: `
-              (function(c,l,a,r,i,t,y){
-                c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
-                t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
-                y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
-              })(window, document, "clarity", "script", "${process.env.NEXT_PUBLIC_CLARITY_PROJECT}");
-            `,
-          }}
-        />
-        {/* Umami Analytics */}
-        <Script
-          defer
-          src={`https://umami.jailbreakchangelogs.xyz${
-            process.env.NEXT_PUBLIC_UMAMI_SCRIPT_NAME
-              ? process.env.NEXT_PUBLIC_UMAMI_SCRIPT_NAME.startsWith("/")
-                ? process.env.NEXT_PUBLIC_UMAMI_SCRIPT_NAME
-                : `/${process.env.NEXT_PUBLIC_UMAMI_SCRIPT_NAME}`
-              : "/assets/js/app.js"
-          }`}
-          data-website-id="91439a73-21f8-4129-961e-5de4267a08db"
-          data-domains="jailbreakchangelogs.xyz"
-        />
-        {/* Nitro Pay Ads - Only load if user is NOT a supporter */}
-        {!isSupporter && (
-          <>
-            <Script
-              id="nitropay-init"
-              data-cfasync="false"
-              dangerouslySetInnerHTML={{
-                __html: `window.nitroAds=window.nitroAds||{createAd:function(){return new Promise(e=>{window.nitroAds.queue.push(["createAd",arguments,e])})},addUserToken:function(){window.nitroAds.queue.push(["addUserToken",arguments])},queue:[]};`,
-              }}
-            />
-            <Script
-              async
-              src="https://s.nitropay.com/ads-2263.js"
-              data-cfasync="false"
-              data-spa="auto"
-              data-log-level="silent"
-              data-demo={
-                process.env.NODE_ENV === "development" ? "true" : undefined
-              }
-            />
-          </>
-        )}
-      </head>
-      <body className="bg-primary-bg font-sans">
-        <GoogleTagManager gtmId={process.env.NEXT_PUBLIC_GTM_ID!} />
-        <noscript>
-          <div className="bg-primary-bg fixed inset-0 z-50 flex items-center justify-center">
-            <div className="mx-auto max-w-md p-8 text-center">
-              <Image
-                src="https://assets.jailbreakchangelogs.xyz/assets/logos/JBCL_Short_Transparent.webp"
-                alt="Jailbreak Changelogs"
-                width={96}
-                height={96}
-                className="mx-auto mb-6 h-24 w-24"
-              />
-              <h1 className="text-primary-text mb-4 text-2xl font-bold">
-                JavaScript Required
-              </h1>
-              <p className="text-secondary-text mb-6">
-                This application requires JavaScript to function properly.
-                Please enable JavaScript in your browser settings and refresh
-                the page.
-              </p>
-              <p className="text-secondary-text text-sm">
-                After enabling JavaScript, please refresh this page.
-              </p>
-            </div>
-          </div>
-        </noscript>
-        <AppRouterCacheProvider options={{ enableCssLayer: true }}>
-          <ConsentProviderWrapper>
-            <CookieSettingsButton />
             <CustomThemeProvider>
               <ThemeProvider>
                 <QueryProvider>
@@ -473,55 +215,237 @@ export default async function RootLayout({
                       },
                     }}
                   />
-                  <NextTopLoader
-                    color="var(--color-button-info)"
-                    initialPosition={0.08}
-                    crawlSpeed={200}
-                    height={3}
-                    crawl={true}
-                    showSpinner={false}
-                    easing="ease"
-                    speed={200}
-                    shadow="0 0 10px var(--color-button-info),0 0 5px var(--color-button-info)"
-                    zIndex={1600}
-                  />
+                  <MaintenanceBypass>
+                    <NextTopLoader
+                      color="var(--color-button-info)"
+                      initialPosition={0.08}
+                      crawlSpeed={200}
+                      height={3}
+                      crawl={true}
+                      showSpinner={false}
+                      easing="ease"
+                      speed={200}
+                      shadow="0 0 10px var(--color-button-info),0 0 5px var(--color-button-info)"
+                      zIndex={1600}
+                    />
 
-                  <AuthCheck />
-                  <AuthProvider>
-                    <UmamiIdentity />
-                    <NitroBottomAnchor />
-                    <NitroVideoPlayer />
-                    <NitroAnchorCloseSupporterModal />
-                    <SurveyProvider>
-                      <div className="flex min-h-screen flex-col">
-                        <Suspense
-                          fallback={
-                            <div className="bg-primary-bg/75 border-border-primary h-16 border-b backdrop-blur-lg" />
-                          }
+                    <AuthCheck />
+                    <AuthProvider>
+                      <UmamiIdentity />
+                      <NitroBottomAnchor />
+                      <NitroVideoPlayer />
+                      <NitroAnchorCloseSupporterModal />
+                      <SurveyProvider>
+                        <div
+                          id="main-layout"
+                          className="flex min-h-screen flex-col"
                         >
-                          <Header />
-                        </Suspense>
-                        <main className="min-h-screen flex-1">
-                          <Suspense>{children}</Suspense>
-                        </main>
-                        <Footer
-                          githubUrl={githubUrl}
-                          versionInfo={
-                            <Suspense fallback={<VersionInfoSkeleton />}>
-                              <VersionInfoServer />
-                            </Suspense>
-                          }
-                        />
-                      </div>
-                    </SurveyProvider>
-                  </AuthProvider>
+                          <Suspense
+                            fallback={
+                              <div className="bg-primary-bg/75 border-border-primary h-16 border-b backdrop-blur-lg" />
+                            }
+                          >
+                            <Header />
+                          </Suspense>
+                          <main className="min-h-screen flex-1">
+                            <Suspense>{children}</Suspense>
+                          </main>
+                          <Footer
+                            githubUrl={githubUrl}
+                            versionInfo={
+                              <Suspense fallback={<VersionInfoSkeleton />}>
+                                <VersionInfoServer />
+                              </Suspense>
+                            }
+                          />
+                        </div>
+                      </SurveyProvider>
+                    </AuthProvider>
+                  </MaintenanceBypass>
                 </QueryProvider>
               </ThemeProvider>
               {/* Ad Block Prompt UI - Only shown to non-supporters when ad blocking is detected */}
               <AdBlockPrompt />
             </CustomThemeProvider>
-            <ConsentBannerWrapper />
-          </ConsentProviderWrapper>
+          </AppRouterCacheProvider>
+          {/* Ad Block Detection Script - Only load if user is NOT a supporter */}
+          <AdBlockRecovery isSupporter={!!isSupporter} />
+        </body>
+      </html>
+    );
+  }
+
+  return (
+    <html lang="en" className={`${GeistSans.variable} ${GeistMono.variable}`}>
+      <head>
+        {/* Preconnect to external asset domains */}
+        <link rel="preconnect" href="https://assets.jailbreakchangelogs.xyz" />
+        <link
+          rel="dns-prefetch"
+          href="https://assets.jailbreakchangelogs.xyz"
+        />
+        {/* Umami Analytics */}
+        <Script
+          defer
+          src={`https://umami.jailbreakchangelogs.xyz${
+            process.env.NEXT_PUBLIC_UMAMI_SCRIPT_NAME
+              ? process.env.NEXT_PUBLIC_UMAMI_SCRIPT_NAME.startsWith("/")
+                ? process.env.NEXT_PUBLIC_UMAMI_SCRIPT_NAME
+                : `/${process.env.NEXT_PUBLIC_UMAMI_SCRIPT_NAME}`
+              : "/assets/js/app.js"
+          }`}
+          data-website-id="91439a73-21f8-4129-961e-5de4267a08db"
+          data-domains="jailbreakchangelogs.xyz"
+        />
+        {/* Nitro Pay Ads - Only load if user is NOT a supporter */}
+        {!isSupporter && (
+          <>
+            <Script
+              id="nitropay-init"
+              data-cfasync="false"
+              dangerouslySetInnerHTML={{
+                __html: `window.nitroAds=window.nitroAds||{createAd:function(){return new Promise(e=>{window.nitroAds.queue.push(["createAd",arguments,e])})},addUserToken:function(){window.nitroAds.queue.push(["addUserToken",arguments])},queue:[]};`,
+              }}
+            />
+            <Script
+              async
+              src="https://s.nitropay.com/ads-2263.js"
+              data-cfasync="false"
+              data-spa="auto"
+              data-log-level="silent"
+              data-demo={
+                process.env.NODE_ENV === "development" ? "true" : undefined
+              }
+            />
+          </>
+        )}
+      </head>
+      <body className="bg-primary-bg font-sans">
+        <noscript>
+          <div className="bg-primary-bg fixed inset-0 z-50 flex items-center justify-center">
+            <div className="mx-auto max-w-md p-8 text-center">
+              <Image
+                src="/logos/JBCL_Long_Transparent.webp"
+                alt="Jailbreak Changelogs"
+                width={96}
+                height={96}
+                className="mx-auto mb-6 h-24 w-24"
+              />
+              <h1 className="text-primary-text mb-4 text-2xl font-bold">
+                JavaScript Required
+              </h1>
+              <p className="text-secondary-text mb-6">
+                This application requires JavaScript to function properly.
+                Please enable JavaScript in your browser settings and refresh
+                the page.
+              </p>
+              <p className="text-secondary-text text-sm">
+                After enabling JavaScript, please refresh this page.
+              </p>
+            </div>
+          </div>
+        </noscript>
+        <AppRouterCacheProvider options={{ enableCssLayer: true }}>
+          <CustomThemeProvider>
+            <ThemeProvider>
+              <QueryProvider>
+                <Toaster
+                  position="bottom-right"
+                  toastOptions={{
+                    success: {
+                      style: {
+                        background: "var(--color-secondary-bg)",
+                        color: "var(--color-primary-text)",
+                        border: "1px solid var(--color-border-primary)",
+                        borderRadius: "16px",
+                        backdropFilter: "blur(20px)",
+                        WebkitBackdropFilter: "blur(20px)",
+                        boxShadow: "0 8px 32px rgba(0,0,0,0.3)",
+                      },
+                      iconTheme: {
+                        primary: "var(--color-button-info)",
+                        secondary: "var(--color-secondary-bg)",
+                      },
+                    },
+                    error: {
+                      style: {
+                        background: "var(--color-secondary-bg)",
+                        color: "var(--color-primary-text)",
+                        border: "1px solid var(--color-border-primary)",
+                        borderRadius: "16px",
+                        backdropFilter: "blur(20px)",
+                        WebkitBackdropFilter: "blur(20px)",
+                        boxShadow: "0 8px 32px rgba(0,0,0,0.3)",
+                      },
+                      iconTheme: {
+                        primary: "var(--color-button-info)",
+                        secondary: "var(--color-secondary-bg)",
+                      },
+                    },
+                    loading: {
+                      style: {
+                        background: "var(--color-secondary-bg)",
+                        color: "var(--color-primary-text)",
+                        border: "1px solid var(--color-border-primary)",
+                        borderRadius: "16px",
+                        backdropFilter: "blur(20px)",
+                        WebkitBackdropFilter: "blur(20px)",
+                        boxShadow: "0 8px 32px rgba(0,0,0,0.3)",
+                      },
+                      iconTheme: {
+                        primary: "var(--color-button-info)",
+                        secondary: "var(--color-secondary-bg)",
+                      },
+                    },
+                  }}
+                />
+                <NextTopLoader
+                  color="var(--color-button-info)"
+                  initialPosition={0.08}
+                  crawlSpeed={200}
+                  height={3}
+                  crawl={true}
+                  showSpinner={false}
+                  easing="ease"
+                  speed={200}
+                  shadow="0 0 10px var(--color-button-info),0 0 5px var(--color-button-info)"
+                  zIndex={1600}
+                />
+
+                <AuthCheck />
+                <AuthProvider>
+                  <UmamiIdentity />
+                  <NitroBottomAnchor />
+                  <NitroVideoPlayer />
+                  <NitroAnchorCloseSupporterModal />
+                  <SurveyProvider>
+                    <div className="flex min-h-screen flex-col">
+                      <Suspense
+                        fallback={
+                          <div className="bg-primary-bg/75 border-border-primary h-16 border-b backdrop-blur-lg" />
+                        }
+                      >
+                        <Header />
+                      </Suspense>
+                      <main className="min-h-screen flex-1">
+                        <Suspense>{children}</Suspense>
+                      </main>
+                      <Footer
+                        githubUrl={githubUrl}
+                        versionInfo={
+                          <Suspense fallback={<VersionInfoSkeleton />}>
+                            <VersionInfoServer />
+                          </Suspense>
+                        }
+                      />
+                    </div>
+                  </SurveyProvider>
+                </AuthProvider>
+              </QueryProvider>
+            </ThemeProvider>
+            {/* Ad Block Prompt UI - Only shown to non-supporters when ad blocking is detected */}
+            <AdBlockPrompt />
+          </CustomThemeProvider>
         </AppRouterCacheProvider>
         {/* Ad Block Detection Script - Only load if user is NOT a supporter */}
         <AdBlockRecovery isSupporter={!!isSupporter} />

@@ -10,7 +10,7 @@ export default function PrivacyPage() {
       <div
         className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-40"
         style={{
-          backgroundImage: "url('/backgrounds/background8.webp')",
+          backgroundImage: "url('/backgrounds/v2/background8.webp')",
         }}
       />
       <div className="absolute inset-0 opacity-60" />
@@ -26,7 +26,7 @@ export default function PrivacyPage() {
           </h1>
         </div>
         <p className="text-primary-text mb-6 text-sm">
-          Last updated: January 22nd, 2026
+          Last updated: January 25th, 2026
         </p>
 
         <div className="border-border-primary bg-secondary-bg hover:border-border-focus rounded-lg border p-6 transition-colors">
@@ -68,78 +68,6 @@ export default function PrivacyPage() {
                 <li>Roblox Avatar</li>
                 <li>Roblox Join Date</li>
               </ul>
-            </div>
-
-            <div>
-              <h2 className="text-primary-text mb-4 text-xl font-semibold">
-                Cookies and Consent Management
-              </h2>
-              <Typography className="text-secondary-text mb-4">
-                We use cookies and similar technologies to enhance your
-                experience on our website. This includes cookies from Microsoft
-                Clarity for analytics and Google services for analytics
-                purposes.
-              </Typography>
-              <Typography className="text-secondary-text mb-4">
-                <strong>Your Cookie Preferences:</strong> We respect your
-                privacy choices. You have full control over which types of
-                cookies we use:
-              </Typography>
-
-              <div className="bg-tertiary-bg mb-4 space-y-4 rounded-lg p-4">
-                <div>
-                  <h3 className="text-primary-text mb-2 font-semibold">
-                    Analytics Storage
-                  </h3>
-                  <Typography className="text-secondary-text mb-2 text-sm">
-                    <strong>What it does:</strong> Allows us to analyze website
-                    usage and improve your experience
-                  </Typography>
-                  <Typography className="text-secondary-text mb-2 text-sm">
-                    <strong>Cookies used:</strong> Google Analytics (_ga, _gid,
-                    _gat), Microsoft Clarity (_clid)
-                  </Typography>
-                  <Typography className="text-secondary-text text-sm">
-                    <strong>Purpose:</strong> Tracks page views, user behavior,
-                    and session duration to help us understand how you use our
-                    site and identify areas for improvement.
-                  </Typography>
-                </div>
-              </div>
-
-              <Typography className="text-secondary-text mb-4">
-                <strong>Your Consent Preferences:</strong> We respect your
-                privacy choices. You have full control over which types of
-                cookies we use:
-              </Typography>
-              <ul className="text-secondary-text mb-4 list-inside list-disc space-y-1">
-                <li>
-                  <strong>
-                    In regulated regions (EU, Brazil, Australia, Canada):
-                  </strong>{" "}
-                  All cookies are disabled by default. You must actively opt-in
-                  to enable them.
-                </li>
-                <li>
-                  <strong>In other regions:</strong> All cookies are enabled by
-                  default for the best experience, but you can opt-out at any
-                  time.
-                </li>
-              </ul>
-
-              <Typography className="text-secondary-text mb-4">
-                You can manage your cookie preferences at any time by clicking
-                the <strong>&quot;Manage Cookies&quot;</strong> button in the
-                Resources section of our footer. Your preferences are stored
-                securely in a cookie named <strong>gcm-consent</strong> and will
-                be respected across all your visits to our website.
-              </Typography>
-              <Typography className="text-secondary-text">
-                We use <strong>Google Consent Mode v2</strong> to ensure your
-                consent preferences are honored. Your consent choices are
-                communicated to Google and Microsoft to respect your privacy
-                decisions before any third-party tracking occurs.
-              </Typography>
             </div>
 
             <div>
@@ -188,42 +116,6 @@ export default function PrivacyPage() {
                 Umami session. This allows us to understand how our registered
                 members interact with specific features. This data is stored
                 securely on our private servers and is never sold or shared.
-              </Typography>
-            </div>
-
-            <div>
-              <h2 className="text-primary-text mb-4 text-xl font-semibold">
-                Microsoft Clarity and Advertising
-              </h2>
-              <Typography className="text-secondary-text mb-4">
-                We partner with Microsoft Clarity and Microsoft Advertising to
-                capture how you use and interact with our website through
-                behavioral metrics, heatmaps, and session replay to improve and
-                market our products/services. Website usage data is captured
-                using first and third-party cookies and other tracking
-                technologies to determine the popularity of products/services
-                and online activity. Additionally, we use this information for
-                site optimization, fraud/security purposes, and advertising.
-              </Typography>
-              <Typography className="text-secondary-text mb-4">
-                <strong>Consent Required:</strong> Microsoft Clarity and
-                advertising cookies are only loaded after you grant explicit
-                consent through our cookie consent system. We respect your
-                privacy choices and will not load these services until you
-                opt-in.
-              </Typography>
-              <Typography className="text-secondary-text">
-                For more information about how Microsoft collects and uses your
-                data, visit the{" "}
-                <a
-                  href="https://www.microsoft.com/en-us/privacy/privacystatement"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-link hover:text-link-hover hover:underline"
-                >
-                  Microsoft Privacy Statement
-                </a>
-                .
               </Typography>
             </div>
 

@@ -38,7 +38,7 @@ export default function Maintenance() {
 
   return (
     <div
-      className="relative flex min-h-screen items-center justify-center bg-[url('https://assets.jailbreakchangelogs.xyz/assets/backgrounds/background16.webp')] bg-cover bg-center bg-no-repeat"
+      className="relative flex min-h-screen items-center justify-center bg-[url(/backgrounds/v2/background16.webp)] bg-cover bg-center bg-no-repeat"
       style={{ color: "var(--color-secondary-text)" }}
     >
       <div className="absolute inset-0 z-1 bg-black/70" />
