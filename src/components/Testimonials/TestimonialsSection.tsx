@@ -171,6 +171,13 @@ const testimonials: Testimonial[] = [
       "Jailbreak changelogs is the best roblox jailbreak website i've stumbled across in my trading journey, this site helped me so much, and i managed to trade from a volt bike to a javelin in 1 month just with the pure help of this beautiful website and this active and friendly community. Whenever the new update comes out, viewing the changlelogs is so easy with the help of Jailbreak Changelogs. Feels like a crime to use any other jailbreak site instead of Jailbreak Changelogs.",
     url: "#",
   },
+  {
+    name: "Smyke",
+    role: "Supporter",
+    quote:
+      "The Jailbreak trading eras should be split into BC (Before Changelogs) and CE (Changelogs Era)",
+    url: "#",
+  },
 ];
 
 export default function TestimonialsSection() {
