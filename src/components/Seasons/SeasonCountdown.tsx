@@ -306,10 +306,21 @@ const SeasonCountdown: React.FC<SeasonCountdownProps> = ({
             {nextSeasonStatus.includes("Submissions") && (
               <div className="mt-2">
                 <a
-                  href="https://www.reddit.com/r/JailbreakCreations/comments/1p1lmzp/season_30_entries_horror/?sort=new"
+                  href={process.env.NEXT_PUBLIC_SUBMISSIONS_URL || "#"}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="bg-button-info text-form-button-text hover:bg-button-info-hover inline-block rounded-lg px-4 py-2 transition-colors"
+                  onClick={() => {
+                    if (typeof window !== "undefined" && window.umami) {
+                      const buttonType = nextSeasonStatus.includes("close in")
+                        ? "Submit a Creation"
+                        : "View Submissions";
+                      window.umami.track("Season Submission Click", {
+                        buttonType,
+                        season: nextSeason?.season || "unknown",
+                      });
+                    }
+                  }}
                 >
                   {nextSeasonStatus.includes("close in")
                     ? "Submit a Creation"
