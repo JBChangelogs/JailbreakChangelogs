@@ -378,7 +378,7 @@ export const NavbarModern = ({ className }: { className?: string }) => {
   return (
     <div
       className={cn(
-        "bg-primary-bg/75 border-border-primary border-b backdrop-blur-lg",
+        "bg-primary-bg/45 border-border-primary border-b backdrop-blur-lg",
         className,
       )}
     >

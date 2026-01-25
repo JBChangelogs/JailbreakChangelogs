@@ -556,7 +556,7 @@ export default function Header() {
               position="static"
               color="transparent"
               elevation={0}
-              className="bg-primary-bg/75 border-border-primary border-b backdrop-blur-lg"
+              className="bg-primary-bg/45 border-border-primary border-b backdrop-blur-lg"
             >
               <Toolbar className="flex items-center justify-between">
                 <Box className="flex items-center">
