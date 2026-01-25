@@ -22,7 +22,7 @@ interface FooterProps {
 
 export default function Footer({ githubUrl, versionInfo }: FooterProps) {
   useEffect(() => {
-    // Show GDPR consent button only for EU users
+    // Show GDPR consent button only for EU users (nitro pay requires consent)
     const showGDPRButton = () => {
       const consentBox = document.getElementById("gdpr-consent-box");
       if (consentBox && window.__tcfapi) {
@@ -116,15 +116,6 @@ export default function Footer({ githubUrl, versionInfo }: FooterProps) {
               >
                 Terms of Service
               </Link>
-              <button
-                onClick={() => {
-                  const event = new CustomEvent("openCookieSettings");
-                  window.dispatchEvent(event);
-                }}
-                className="text-link hover:text-link-hover active:text-link-active cursor-pointer border-none bg-none p-0 text-left transition-colors duration-200"
-              >
-                Cookies
-              </button>
               <div id="gdpr-consent-box" style={{ display: "none" }}>
                 <button
                   onClick={() => {
