@@ -340,67 +340,264 @@
   --color-overlay-dark: rgba(28, 35, 42, 0.9);
   --color-hero-overlay: rgba(15, 23, 42, 0.75);
 }
-/* LIGHT THEME */
+/* LIGHT THEME - Applied when .light class is present */
 .light {
-  --color-primary-bg: #f8fafc;
-  --color-secondary-bg: #f1f5f9;
-  --color-tertiary-bg: #e2e8f0;
-  --color-quaternary-bg: #cbd5e1;
-  --color-surface-bg: #ffffff;
-  --color-overlay-bg: rgba(255, 255, 255, 0.85);
-  --color-newsletter-bg: #2e3944;
+  /* Background Colors - Light theme */
+  --color-primary-bg: hsl(0, 0%, 100%); /* Main page background - White */
+  --color-secondary-bg: hsl(
+    240,
+    4%,
+    95%
+  ); /* Card background - Very light gray */
+  --color-tertiary-bg: hsl(0, 0%, 96%); /* Elevated surfaces - Light gray */
+  --color-quaternary-bg: hsl(
+    0,
+    0%,
+    94%
+  ); /* Subtle backgrounds - Slightly darker gray */
+  --color-surface-bg: hsl(0, 0%, 100%); /* Surface backgrounds - White */
+  --color-overlay-bg: hsl(
+    0,
+    0%,
+    100%,
+    0.8
+  ); /* Overlay backgrounds - White with opacity */
+  --color-newsletter-bg: hsl(240, 8%, 9%); /* Dark sections */
 
-  --color-primary-text: #1e293b;
-  --color-secondary-text: #475569;
-  --color-tertiary-text: #64748b;
-  --color-quaternary-text: #94a3b8;
-  --color-card-headline: #0f172a;
-  --color-card-paragraph: #334155;
+  /* Text Colors - Light theme */
+  --color-primary-text: hsl(240, 8%, 9%); /* Main headings - Dark */
+  --color-secondary-text: hsl(214, 16%, 36%); /* Body text - Medium dark */
+  --color-tertiary-text: hsl(214, 12%, 55%); /* Muted text - Medium gray */
+  --color-quaternary-text: hsl(214, 8%, 65%); /* Disabled text - Light gray */
+  --color-card-headline: hsl(240, 8%, 9%); /* Headings within cards - Dark */
+  --color-card-paragraph: hsl(
+    214,
+    16%,
+    36%
+  ); /* Text within cards - Medium dark */
 
-  --color-border-primary: #cbd5e1;
-  --color-border-secondary: #e2e8f0;
-  --color-border-tertiary: #f1f5f9;
-  --color-border-focus: #0ea5e9;
-  --color-border-error: #ef4444;
+  /* Border and Separator Colors - Light theme */
+  --color-border-primary: hsl(214, 8%, 80%); /* Primary borders - Light gray */
+  --color-border-secondary: hsl(
+    214,
+    6%,
+    85%
+  ); /* Secondary borders - Very light gray */
+  --color-border-tertiary: hsl(
+    214,
+    4%,
+    88%
+  ); /* Tertiary borders - Almost white */
+  --color-border-focus: hsl(210, 99%, 50%); /* Focus borders - Same blue */
+  --color-border-error: hsl(0, 81%, 62%); /* Error borders - Same red */
 
-  --color-card-tag-bg: #0ea5e9;
-  --color-card-tag-text: #ffffff;
-  --color-card-highlight: #1e293b;
-  --color-card-shadow: rgba(0, 0, 0, 0.05);
+  /* Card Elements - Light theme */
+  --color-card-tag-bg: hsl(
+    210,
+    99%,
+    50%
+  ); /* Tag/chip backgrounds - Same blue */
+  --color-card-tag-text: hsl(60, 100%, 100%); /* Text on tags/chips - White */
+  --color-card-highlight: hsl(240, 8%, 9%); /* Highlighted elements - Dark */
+  --color-card-shadow: hsl(0, 0%, 0%, 0.05); /* Card shadows - Very light */
 
-  --color-link: #0284c7;
-  --color-link-hover: #0369a1;
-  --color-link-active: #075985;
-  --color-link-visited: #64748b;
+  /* Interactive Elements - Light theme */
+  --color-link: hsl(210, 99%, 40%); /* Primary links - Darker for contrast */
+  --color-link-hover: hsl(210, 99%, 30%); /* Link hover states - Darker */
+  --color-link-active: hsl(
+    218,
+    60%,
+    32%
+  ); /* Link active states - Even darker */
+  --color-link-visited: hsl(214, 12%, 55%); /* Visited links - Gray */
 
-  --color-button-info-disabled: #cbd5e1;
-  --color-button-secondary: #e2e8f0;
-  --color-button-secondary-hover: #cbd5e1;
+  /* Button Colors - Light theme (same as dark) */
+  --color-button-info: hsl(
+    210,
+    99%,
+    35%
+  ); /* Primary buttons - Darker for better contrast */
+  --color-button-info-hover: hsl(210, 99%, 30%); /* Button hover states */
+  --color-button-info-active: hsl(218, 60%, 32%); /* Button active states */
+  --color-button-info-disabled: hsl(
+    214,
+    8%,
+    75%
+  ); /* Disabled buttons - Light gray */
+  --color-button-success: hsl(155, 61%, 44%); /* Success actions */
+  --color-button-success-hover: hsl(155, 55%, 38%); /* Success hover */
+  --color-button-danger: hsl(0, 81%, 62%); /* Error/destructive actions */
+  --color-button-danger-hover: hsl(0, 75%, 55%); /* Danger hover */
+  --color-button-secondary: hsl(
+    214,
+    8%,
+    75%
+  ); /* Secondary buttons - Light gray */
+  --color-button-secondary-hover: hsl(
+    214,
+    6%,
+    80%
+  ); /* Secondary hover - Lighter */
+  --color-form-button: hsl(
+    210,
+    99%,
+    35%
+  ); /* Form submit buttons - Darker for better contrast */
+  --color-form-button-text: hsl(60, 100%, 100%); /* Text on form buttons */
 
-  --color-form-input: #ffffff;
-  --color-form-input-focus: #f8fafc;
-  --color-form-input-disabled: #f1f5f9;
-  --color-form-label: #1e293b;
-  --color-form-placeholder: #94a3b8;
+  /* Form Elements - Light theme */
+  --color-form-input: hsl(0, 0%, 100%); /* Input field backgrounds - White */
+  --color-form-input-focus: hsl(
+    0,
+    0%,
+    98%
+  ); /* Input focus backgrounds - Very light */
+  --color-form-input-disabled: hsl(
+    214,
+    4%,
+    88%
+  ); /* Disabled input backgrounds - Light gray */
+  --color-form-label: hsl(240, 8%, 9%); /* Form labels - Dark */
+  --color-form-placeholder: hsl(
+    214,
+    8%,
+    65%
+  ); /* Placeholder text - Light gray */
+  --color-form-error: hsl(0, 81%, 62%); /* Error text - Same red */
+  --color-form-success: hsl(155, 61%, 44%); /* Success text - Same green */
 
-  --color-status-neutral: #94a3b8;
-  --color-stroke: #cbd5e1;
+  /* Status Colors - Light theme (same as dark) */
+  --color-status-success: hsl(
+    155,
+    61%,
+    30%
+  ); /* Success states - Even darker for better contrast */
+  --color-status-success-vibrant: hsl(
+    120,
+    61%,
+    50%
+  ); /* Vibrant green for online presence - theme independent */
+  --color-status-warning: hsl(38, 100%, 61%); /* Warning states */
+  --color-status-error: hsl(
+    0,
+    81%,
+    45%
+  ); /* Error states - Darker for better contrast */
+  --color-status-info: hsl(210, 99%, 50%); /* Info states */
+  --color-status-neutral: hsl(214, 8%, 65%); /* Neutral states - Light gray */
 
-  --color-supporter-bronze-bg: #fef3c7;
-  --color-supporter-silver-bg: #f1f5f9;
-  --color-supporter-gold-bg: #fef9c3;
+  /* Additional Utility Colors - Light theme */
+  --color-highlight: hsl(
+    210,
+    99%,
+    50%
+  ); /* Accent color for highlights - Same blue */
+  --color-secondary: hsl(225, 5%, 47%); /* Secondary accent color - Same */
+  --color-tertiary: hsl(155, 61%, 44%); /* Tertiary accent color - Same */
+  --color-stroke: hsl(214, 8%, 80%); /* Primary stroke color - Light gray */
 
-  --color-overlay-light: rgba(255, 255, 255, 0.5);
-  --color-overlay-medium: rgba(255, 255, 255, 0.7);
-  --color-overlay-dark: rgba(255, 255, 255, 0.9);
-  --color-hero-overlay: rgba(0, 0, 0, 0.4);
+  /* Warning Colors - Light theme (same as dark) */
+  --color-warning: hsl(38, 100%, 61%); /* Orange for Double XP alerts */
+  --color-warning-light: hsl(48, 100%, 62%); /* Yellow for 2 weeks left */
+  --color-warning-dark: hsl(32, 85%, 52%); /* Darker warning */
+
+  /* Badge Colors - Light theme (same as dark) */
+  --color-badge-owner: linear-gradient(
+    to right,
+    hsl(270, 100%, 50%),
+    hsl(240, 100%, 50%)
+  ); /* Purple to indigo gradient */
+  --color-badge-tester: hsl(270, 100%, 60%); /* Purple */
+  --color-badge-vtm: linear-gradient(
+    to right,
+    hsl(155, 100%, 30%),
+    hsl(155, 100%, 25%)
+  ); /* Emerald gradient */
+  --color-badge-vt: hsl(220, 100%, 50%); /* Blue */
+  --color-badge-partner: hsl(25, 100%, 50%); /* Orange */
+  --color-badge-contributor: linear-gradient(
+    to right,
+    hsl(180, 100%, 30%),
+    hsl(180, 100%, 25%)
+  ); /* Teal gradient */
+  --color-badge-developer: linear-gradient(
+    to right,
+    hsl(90, 100%, 50%),
+    hsl(90, 100%, 45%)
+  ); /* Lime gradient */
+  --color-badge-designer: linear-gradient(
+    to right,
+    hsl(290, 100%, 55%),
+    hsl(320, 100%, 50%)
+  ); /* Pink to magenta gradient */
+  --color-badge-early-adopter: linear-gradient(
+    to right,
+    hsl(45, 100%, 50%),
+    hsl(45, 100%, 45%)
+  ); /* Amber to yellow gradient */
+  --color-badge-premium-bronze: linear-gradient(
+    to right,
+    hsl(30, 100%, 50%),
+    hsl(30, 100%, 45%)
+  ); /* Bronze gradient */
+  --color-badge-premium-silver: linear-gradient(
+    to right,
+    hsl(0, 0%, 75%),
+    hsl(0, 0%, 65%)
+  ); /* Silver gradient */
+  --color-badge-premium-gold: linear-gradient(
+    to right,
+    hsl(45, 100%, 50%),
+    hsl(45, 100%, 45%)
+  ); /* Gold gradient */
+
+  /* Supporter Border Colors - Light theme (same as dark) */
+  --color-supporter-bronze-border: #cd7f32; /* Bronze border for Supporter 1 */
+  --color-supporter-silver-border: #c0c0c0; /* Silver border for Supporter 2 */
+  --color-supporter-gold-border: #ffd700; /* Gold border for Supporter 3 */
+
+  /* Supporter Card Backgrounds - Light theme */
+  --color-supporter-bronze-bg: hsl(
+    30,
+    35%,
+    94%
+  ); /* Subtle bronze tint for Supporter 1 */
+  --color-supporter-silver-bg: hsl(
+    210,
+    15%,
+    94%
+  ); /* Subtle silver tint for Supporter 2 */
+  --color-supporter-gold-bg: hsl(
+    45,
+    45%,
+    94%
+  ); /* Subtle gold tint for Supporter 3 */
+
+  /* Opacity Variations - Light theme */
+  --color-overlay-light: hsl(0, 0%, 100%, 0.5); /* Light overlay - White */
+  --color-overlay-medium: hsl(0, 0%, 100%, 0.7); /* Medium overlay - White */
+  --color-overlay-dark: hsl(0, 0%, 100%, 0.9); /* Dark overlay - White */
+
+  /* Hero Overlays - Light theme */
+  --color-hero-overlay: hsl(
+    0,
+    0%,
+    0%,
+    0.5
+  ); /* Hero overlay - Light mode (lighter) */
 }
 
 @layer base {
   * {
-    outline-color: rgba(14, 165, 233, 0.3);
+    outline-color: hsla(
+      231,
+      100%,
+      62%,
+      0.3
+    ); /* Button info color with opacity */
   }
 
+  /* Ensure Inter font applies to select elements and their options */
   select,
   select option {
     font-family: "Inter", sans-serif;
@@ -413,6 +610,7 @@
   animation: none;
 }
 
+/* Ensure smooth theme transitions */
 ::view-transition-old(root) {
   z-index: 1;
 }
@@ -422,6 +620,7 @@
 }
 
 /* Custom Scrollbar Styles */
+/* Webkit browsers (Chrome, Safari, Edge) */
 .scrollbar-thin::-webkit-scrollbar {
   width: 8px;
   height: 8px;
@@ -446,6 +645,7 @@
   background: transparent;
 }
 
+/* Firefox */
 .scrollbar-thin {
   scrollbar-width: thin;
   scrollbar-color: var(--color-border-primary) transparent;
@@ -481,7 +681,7 @@
   background: none !important;
   border: none !important;
   padding: 0 !important;
-  font-size: 0.875rem !important;
+  font-size: 0.875rem !important; /* text-sm */
   line-height: 1.25rem !important;
   text-align: left !important;
   cursor: pointer !important;
