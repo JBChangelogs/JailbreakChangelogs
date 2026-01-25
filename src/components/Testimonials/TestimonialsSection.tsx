@@ -119,14 +119,14 @@ const testimonials: Testimonial[] = [
     name: "Banana",
     role: "Supporter",
     quote:
-      "Ever since i started using the jbcl value list in june 2025 my invintory value has increased a lot. And as a contributor to the website I can safely say, jbcl has the best tools for any and every jailbreak player.",
+      "Ever since i started using the jbcl value list in june 2025 my inventory value has increased a lot. And as a contributor to the website I can safely say, jbcl has the best tools for any and every jailbreak player.",
     url: "#",
   },
   {
     name: "NotTesla",
     role: "Supporter",
     quote:
-      "Jailbreak changelogs is the go to site for trading or checking when you complete the season pass, the team behind the shit is always eager to add new features and always engages the community. I highly recommend using this site as it has all the features would you want.",
+      "Jailbreak changelogs is the go to site for trading or checking when you complete the season pass, the team behind the shit is always eager to add new features and always engages the community. I highly recommend using this site as it has all the features you would want.",
     url: "#",
   },
   {
@@ -141,6 +141,34 @@ const testimonials: Testimonial[] = [
     role: "Supporter",
     quote:
       "Jailbreak Changelogs helped me with finding values, checking for dupes, tracking robberies and bounties with the newly added bounty tracker. I would recommend JBCL for players that like to have a variety of features in one place.",
+    url: "#",
+  },
+  {
+    name: "PRO_jailbreak124",
+    role: "Supporter",
+    quote:
+      "Jailbreak changelogs is the best website i ever used it has all the features i need and i am super grateful for the people behind it. They are so kind and it's truly such a masterpiece of a website",
+    url: "#",
+  },
+  {
+    name: "PopMan",
+    role: "Lead Designer",
+    quote:
+      "I've been part of the online Jailbreak community for over five years, and working behind the scenes as Jailbreak Changelog's lead designer has been an incredibly rewarding experience. It's easily one of the best communities I've worked with in recent years. I work closely with Jakob and Jalen on a daily basis, and they are some of the most approachable, outgoing, and easy to work with people I've worked alongside. Beyond the great relationships, the website itself is clean, simple, and extremely user-friendly, making it an excellent platform for Jailbreak players. I would highly recommend Jailbreak Changelogs to anyone interested in working with JBCL or simply using the site for their trades. Yall are amazing :)",
+    url: "#",
+  },
+  {
+    name: "rareqn",
+    role: "Supporter",
+    quote:
+      "Jailbreak Changelogs is the only site any jb player will need : from values, robbery trackers, changelogs, season tools, pity calculator, og finder and even inventory trackers, it pleases both trading and main game players, new and old. I even find myself, an experienced player learning new stuff from the reading the changelogs & using the other cool feautures. All this for free as well!",
+    url: "#",
+  },
+  {
+    name: "Green",
+    role: "Supporter",
+    quote:
+      "Jailbreak changelogs is the best roblox jailbreak website i've stumbled across in my trading journey, this site helped me so much, and i managed to trade from a volt bike to a javelin in 1 month just with the pure help of this beautiful website and this active and friendly community. Whenever the new update comes out, viewing the changlelogs is so easy with the help of Jailbreak Changelogs. Feels like a crime to use any other jailbreak site instead of Jailbreak Changelogs.",
     url: "#",
   },
 ];
