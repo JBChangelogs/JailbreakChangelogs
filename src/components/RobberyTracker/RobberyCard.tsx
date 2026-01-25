@@ -16,7 +16,22 @@ export default function RobberyCard({ robbery }: RobberyCardProps) {
   const [isPlayersModalOpen, setIsPlayersModalOpen] = useState(false);
   const [planeCountdown, setPlaneCountdown] = useState<string | null>(null);
   const [casinoCountdown, setCasinoCountdown] = useState<string | null>(null);
-  const imageUrl = `https://assets.jailbreakchangelogs.xyz/assets/images/robberies/${robbery.marker_name}.webp`;
+
+  // Map marker_name to image name (for cases where image name differs from marker_name)
+  const getImageName = (markerName: string): string => {
+    if (markerName === "MoneyTruck") return "Bank Truck";
+    return markerName;
+  };
+
+  // Map marker_name to display name (override the name from API if needed)
+  const getDisplayName = (markerName: string, apiName: string): string => {
+    if (markerName === "MoneyTruck") return "Bank Truck";
+    return apiName;
+  };
+
+  const imageName = getImageName(robbery.marker_name);
+  const displayName = getDisplayName(robbery.marker_name, robbery.name);
+  const imageUrl = `https://assets.jailbreakchangelogs.xyz/assets/images/robberies/${imageName}.webp`;
 
   // Create unique ID for timer subscription (same pattern as card key)
   const jobId = robbery.server?.job_id || robbery.job_id;
@@ -202,12 +217,7 @@ export default function RobberyCard({ robbery }: RobberyCardProps) {
     <div className="border-border-primary bg-secondary-bg hover:border-border-focus flex flex-col overflow-hidden rounded-lg border transition-all duration-200 hover:shadow-lg">
       {/* Image */}
       <div className="bg-secondary-background relative aspect-video w-full shrink-0 overflow-hidden">
-        <Image
-          src={imageUrl}
-          alt={robbery.name}
-          fill
-          className="object-cover"
-        />
+        <Image src={imageUrl} alt={displayName} fill className="object-cover" />
       </div>
 
       {/* Content */}
@@ -215,7 +225,7 @@ export default function RobberyCard({ robbery }: RobberyCardProps) {
         {/* Header */}
         <div className="mb-3 flex items-start justify-between">
           <h3 className="text-primary-text text-lg font-semibold">
-            {robbery.name}
+            {displayName}
           </h3>
           {getStatusBadge()}
         </div>
@@ -291,7 +301,7 @@ export default function RobberyCard({ robbery }: RobberyCardProps) {
           {/* Join Server Button */}
           {jobId && (
             <a
-              href={`http://tracker.jailbreakchangelogs.xyz/?jobid=${jobId}&utm_campaign=${robbery.marker_name === "Mansion" ? "Mansion_Tracker" : "Robbery_Tracker"}&utm_term=${robbery.name.replace(/ /g, "+")}&utm_source=website`}
+              href={`http://tracker.jailbreakchangelogs.xyz/?jobid=${jobId}&utm_campaign=${robbery.marker_name === "Mansion" ? "Mansion_Tracker" : "Robbery_Tracker"}&utm_term=${displayName.replace(/ /g, "+")}&utm_source=website`}
               target="_blank"
               rel="noopener noreferrer"
               className="bg-button-info text-form-button-text hover:bg-button-info-hover focus:ring-border-focus active:bg-button-info-active mt-3 flex w-full items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition-colors duration-200 focus:ring-2 focus:outline-none"
