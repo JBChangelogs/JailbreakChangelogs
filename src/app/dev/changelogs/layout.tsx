@@ -14,7 +14,7 @@ export const metadata: Metadata = {
     siteName: siteConfig.name,
     images: [
       {
-        url: "/dev/changelogs/opengraph-image",
+        url: "https://assets.jailbreakchangelogs.xyz/assets/logos/embeds/JBCL_Website_Embed_Graphic_DevLogs.png",
         width: 1200,
         height: 630,
         alt: "Development Changelog",
@@ -28,7 +28,9 @@ export const metadata: Metadata = {
     title: "Development Changelog",
     description: siteConfig.description,
     creator: "@jbchangelogs",
-    images: ["/dev/changelogs/opengraph-image"],
+    images: [
+      "https://assets.jailbreakchangelogs.xyz/assets/logos/embeds/JBCL_Website_Embed_Graphic_DevLogs.png",
+    ],
   },
 };
 
