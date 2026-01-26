@@ -113,28 +113,24 @@ export default async function RootLayout({
             data-website-id="91439a73-21f8-4129-961e-5de4267a08db"
             data-domains="jailbreakchangelogs.xyz"
           />
-          {/* Nitro Pay Ads - Only load if user is NOT a supporter */}
-          {!isSupporter && (
-            <>
-              <Script
-                id="nitropay-init"
-                data-cfasync="false"
-                dangerouslySetInnerHTML={{
-                  __html: `window.nitroAds=window.nitroAds||{createAd:function(){return new Promise(e=>{window.nitroAds.queue.push(["createAd",arguments,e])})},addUserToken:function(){window.nitroAds.queue.push(["addUserToken",arguments])},queue:[]};`,
-                }}
-              />
-              <Script
-                async
-                src="https://s.nitropay.com/ads-2263.js"
-                data-cfasync="false"
-                data-spa="auto"
-                data-log-level="silent"
-                data-demo={
-                  process.env.NODE_ENV === "development" ? "true" : undefined
-                }
-              />
-            </>
-          )}
+          {/* Nitro Pay Ads & GDPR - Always load script for consent prompts */}
+          <Script
+            id="nitropay-init"
+            data-cfasync="false"
+            dangerouslySetInnerHTML={{
+              __html: `window.nitroAds=window.nitroAds||{createAd:function(){return new Promise(e=>{window.nitroAds.queue.push(["createAd",arguments,e])})},addUserToken:function(){window.nitroAds.queue.push(["addUserToken",arguments])},queue:[]};`,
+            }}
+          />
+          <Script
+            async
+            src="https://s.nitropay.com/ads-2263.js"
+            data-cfasync="false"
+            data-spa="auto"
+            data-log-level="silent"
+            data-demo={
+              process.env.NODE_ENV === "development" ? "true" : undefined
+            }
+          />
         </head>
         <body className="bg-primary-bg font-sans">
           <noscript>
@@ -297,28 +293,24 @@ export default async function RootLayout({
           data-website-id="91439a73-21f8-4129-961e-5de4267a08db"
           data-domains="jailbreakchangelogs.xyz"
         />
-        {/* Nitro Pay Ads - Only load if user is NOT a supporter */}
-        {!isSupporter && (
-          <>
-            <Script
-              id="nitropay-init"
-              data-cfasync="false"
-              dangerouslySetInnerHTML={{
-                __html: `window.nitroAds=window.nitroAds||{createAd:function(){return new Promise(e=>{window.nitroAds.queue.push(["createAd",arguments,e])})},addUserToken:function(){window.nitroAds.queue.push(["addUserToken",arguments])},queue:[]};`,
-              }}
-            />
-            <Script
-              async
-              src="https://s.nitropay.com/ads-2263.js"
-              data-cfasync="false"
-              data-spa="auto"
-              data-log-level="silent"
-              data-demo={
-                process.env.NODE_ENV === "development" ? "true" : undefined
-              }
-            />
-          </>
-        )}
+        {/* Nitro Pay Ads & GDPR - Always load script for consent prompts */}
+        <Script
+          id="nitropay-init"
+          data-cfasync="false"
+          dangerouslySetInnerHTML={{
+            __html: `window.nitroAds=window.nitroAds||{createAd:function(){return new Promise(e=>{window.nitroAds.queue.push(["createAd",arguments,e])})},addUserToken:function(){window.nitroAds.queue.push(["addUserToken",arguments])},queue:[]};`,
+          }}
+        />
+        <Script
+          async
+          src="https://s.nitropay.com/ads-2263.js"
+          data-cfasync="false"
+          data-spa="auto"
+          data-log-level="silent"
+          data-demo={
+            process.env.NODE_ENV === "development" ? "true" : undefined
+          }
+        />
       </head>
       <body className="bg-primary-bg font-sans">
         <noscript>
