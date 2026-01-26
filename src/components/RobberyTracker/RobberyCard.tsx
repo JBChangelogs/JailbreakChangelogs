@@ -1,10 +1,11 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import { Icon } from "@/components/ui/IconWrapper";
 import { useOptimizedRealTimeRelativeDate } from "@/hooks/useSharedTimer";
 import { RobberyData } from "@/hooks/useRobberyTrackerWebSocket";
+import { useServerRegions } from "@/hooks/useServerRegions";
 import toast from "react-hot-toast";
 import RobberyPlayersModal from "./RobberyPlayersModal";
 
@@ -16,6 +17,9 @@ export default function RobberyCard({ robbery }: RobberyCardProps) {
   const [isPlayersModalOpen, setIsPlayersModalOpen] = useState(false);
   const [planeCountdown, setPlaneCountdown] = useState<string | null>(null);
   const [casinoCountdown, setCasinoCountdown] = useState<string | null>(null);
+  const [regionData, setRegionData] = useState(robbery.region_data || null);
+
+  const { fetchRegionData } = useServerRegions();
 
   // Map marker_name to image name (for cases where image name differs from marker_name)
   const getImageName = (markerName: string): string => {
@@ -49,6 +53,19 @@ export default function RobberyCard({ robbery }: RobberyCardProps) {
       robbery.marker_name === "TrainCargo") &&
     robbery.progress !== null &&
     robbery.progress > 0.6;
+
+  // Fetch region data when job_id changes (use job_id as region identifier)
+  useEffect(() => {
+    const regionId = robbery.region_id || jobId;
+    if (regionId) {
+      // Fire off the fetch in the background - don't block card rendering
+      fetchRegionData(regionId).then((data) => {
+        if (data) {
+          setRegionData(data);
+        }
+      });
+    }
+  }, [jobId, robbery.region_id, fetchRegionData]);
 
   // Handle cargo plane countdown
   useEffect(() => {
@@ -295,6 +312,16 @@ export default function RobberyCard({ robbery }: RobberyCardProps) {
             <span className="text-secondary-text">Server Time:</span>
             <span className="font-mono">
               {formatServerTime(robbery.server_time)}
+            </span>
+          </div>
+
+          {/* Region Info */}
+          <div className="space-y-1">
+            <span className="text-secondary-text text-sm">Region:</span>
+            <span className="text-primary-text block font-medium">
+              {regionData
+                ? `${regionData.city}, ${regionData.regionName}, ${regionData.country}`
+                : "Unknown"}
             </span>
           </div>
 
