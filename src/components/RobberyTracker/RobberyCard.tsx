@@ -54,12 +54,11 @@ export default function RobberyCard({ robbery }: RobberyCardProps) {
     robbery.progress !== null &&
     robbery.progress > 0.6;
 
-  // Fetch region data when job_id changes (use job_id as region identifier)
   useEffect(() => {
     const regionId = robbery.region_id || jobId;
     if (regionId) {
-      // Fire off the fetch in the background - don't block card rendering
-      fetchRegionData(regionId).then((data) => {
+      fetchRegionData([regionId]).then((results) => {
+        const data = results[regionId];
         if (data) {
           setRegionData(data);
         }

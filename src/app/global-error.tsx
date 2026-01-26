@@ -29,12 +29,17 @@ export default function GlobalError({
 
   const handleRefresh = () => {
     // Track refresh button click with Umami
-    if (typeof window !== "undefined" && window.umami) {
-      window.umami.track("Error Page - Refresh Clicked", {
-        isChunkError: isChunkError,
-        errorDigest: error.digest || "unknown",
-        path: window.location.pathname,
-      });
+    try {
+      if (typeof window !== "undefined" && window.umami) {
+        window.umami.track("Error Page - Refresh Clicked", {
+          isChunkError: isChunkError,
+          errorDigest: error.digest || "unknown",
+          path: window.location.pathname,
+        });
+      }
+    } catch (e) {
+      // Silently fail tracking, but continue with refresh
+      console.error("Failed to track error page refresh:", e);
     }
 
     if (isChunkError) {
