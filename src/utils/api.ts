@@ -474,10 +474,6 @@ export async function fetchItem(
     );
 
     if (!response.ok) {
-      console.log("[SERVER] Item not found:", {
-        type: itemType,
-        name: itemName,
-      });
       return null;
     }
 
@@ -1040,7 +1036,6 @@ export async function fetchUserFavorites(userId: string) {
     clearTimeout(timeoutId);
 
     if (response.status === 404) {
-      console.log(`[CLIENT] User favorites ${userId} not found`);
       return null;
     }
 
