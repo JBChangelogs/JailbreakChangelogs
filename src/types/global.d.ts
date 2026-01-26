@@ -5,12 +5,6 @@ declare global {
       key?: string,
       value?: string | number | boolean,
     ) => void;
-    gtag?: (
-      command: string,
-      action: string,
-      config?: Record<string, unknown>,
-    ) => void;
-    dataLayer?: unknown[];
 
     nitroAds?: {
       loaded?: boolean;
