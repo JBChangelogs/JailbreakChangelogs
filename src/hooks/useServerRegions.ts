@@ -5,56 +5,95 @@ import { INVENTORY_API_URL } from "@/utils/api";
 import { ServerRegionData } from "./useRobberyTrackerWebSocket";
 
 /**
- * Hook to fetch server region data without persistent caching
- * Deduplicates concurrent requests for the same region ID
+ * Hook to fetch server region data in batches without persistent caching
+ * Deduplicates concurrent requests for the same region IDs
+ * Supports batch fetching of up to 100 region IDs in a single request
  */
 export function useServerRegions() {
   // Set of region IDs currently being fetched to prevent duplicate concurrent requests
   const fetchingRef = useRef<Set<string>>(new Set());
 
   const fetchRegionData = useCallback(
-    async (regionId: string): Promise<ServerRegionData | null> => {
-      if (!regionId) return null;
+    async (
+      regionIds: string[],
+    ): Promise<Record<string, ServerRegionData | null>> => {
+      if (!regionIds || regionIds.length === 0) return {};
 
-      // Skip if already fetching this region (prevent concurrent duplicates)
-      if (fetchingRef.current.has(regionId)) {
-        // Wait for the in-flight request to complete by polling
-        return new Promise((resolve) => {
+      // Filter out empty IDs
+      const validIds = regionIds.filter((id) => id);
+      if (validIds.length === 0) return {};
+
+      // Check for already fetching IDs and wait for them
+      const alreadyFetching = validIds.filter((id) =>
+        fetchingRef.current.has(id),
+      );
+      if (alreadyFetching.length > 0) {
+        // Wait for in-flight requests to complete by polling
+        await new Promise<void>((resolve) => {
           const checkInterval = setInterval(() => {
-            if (!fetchingRef.current.has(regionId)) {
+            const stillFetching = alreadyFetching.some((id) =>
+              fetchingRef.current.has(id),
+            );
+            if (!stillFetching) {
               clearInterval(checkInterval);
-              resolve(null); // Return null since component handles its own state
+              resolve();
             }
           }, 50);
         });
       }
 
       try {
-        fetchingRef.current.add(regionId);
+        // Mark all IDs as fetching
+        validIds.forEach((id) => fetchingRef.current.add(id));
 
-        const url = `${INVENTORY_API_URL}/server/region?id=${encodeURIComponent(regionId)}`;
-        const response = await fetch(url);
-
-        if (!response.ok) {
-          console.error(
-            `[REGION FETCH] Failed to fetch region ${regionId}:`,
-            response.status,
-          );
-          return null;
+        // Split into batches of up to 100 IDs per request
+        const batchSize = 100;
+        const batches = [];
+        for (let i = 0; i < validIds.length; i += batchSize) {
+          batches.push(validIds.slice(i, i + batchSize));
         }
 
-        const data = (await response.json()) as ServerRegionData;
+        const allResults: Record<string, ServerRegionData | null> = {};
 
-        console.log(`[REGION FETCH] Fetched region ${regionId}`);
-        return data;
+        for (const batch of batches) {
+          const idsParam = batch.map(encodeURIComponent).join(",");
+          const url = `${INVENTORY_API_URL}/servers/regions?ids=${idsParam}`;
+
+          const response = await fetch(url);
+
+          if (!response.ok) {
+            console.error(
+              `[REGION FETCH] Failed to fetch regions (${batch.join(", ")}):`,
+              response.status,
+            );
+            // Set null for all IDs in this batch on error
+            batch.forEach((id) => {
+              allResults[id] = null;
+            });
+            continue;
+          }
+
+          const data = (await response.json()) as Record<
+            string,
+            ServerRegionData | null
+          >;
+          Object.assign(allResults, data);
+
+          console.log(
+            `[REGION FETCH] Fetched ${batch.length} region(s): ${batch.join(", ")}`,
+          );
+        }
+
+        return allResults;
       } catch (error) {
         console.error(
-          `[REGION FETCH] Error fetching region ${regionId}:`,
+          `[REGION FETCH] Error fetching regions (${validIds.join(", ")}):`,
           error,
         );
-        return null;
+        // Return null for all requested IDs on error
+        return Object.fromEntries(validIds.map((id) => [id, null]));
       } finally {
-        fetchingRef.current.delete(regionId);
+        validIds.forEach((id) => fetchingRef.current.delete(id));
       }
     },
     [],
