@@ -155,21 +155,22 @@ const CalculatorItemGrid: React.FC<{
   getSelectedValueType,
   side,
 }) => {
-  const [actionModalOpen, setActionModalOpen] = useState(false);
-  const [actionItem, setActionItem] = useState<
+  const [removeAllModalOpen, setRemoveAllModalOpen] = useState(false);
+  const [removeAllItem, setRemoveAllItem] = useState<
     (TradeItem & { count?: number }) | null
   >(null);
-  const openActionModal = (item: TradeItem & { count?: number }) => {
-    setActionItem(item);
-    setActionModalOpen(true);
+
+  const openRemoveAllModal = (item: TradeItem & { count?: number }) => {
+    setRemoveAllItem(item);
+    setRemoveAllModalOpen(true);
   };
 
-  const closeActionModal = () => {
-    setActionModalOpen(false);
-    setActionItem(null);
+  const closeRemoveAllModal = () => {
+    setRemoveAllModalOpen(false);
+    setRemoveAllItem(null);
   };
 
-  useLockBodyScroll(actionModalOpen);
+  useLockBodyScroll(removeAllModalOpen);
 
   if (items.length === 0) {
     const handleClick = () => {
@@ -195,7 +196,7 @@ const CalculatorItemGrid: React.FC<{
 
     return (
       <div
-        className={`hover:bg-secondary-bg/80 border-border-primary bg-secondary-bg hover:border-border-focus cursor-pointer rounded-lg border-2 border-dashed p-6 text-center transition-colors ${borderColor}`}
+        className={`border-border-primary bg-tertiary-bg hover:border-border-focus cursor-pointer rounded-lg border-2 border-dashed p-6 text-center transition-colors ${borderColor}`}
         onClick={handleClick}
         role="button"
         tabIndex={0}
@@ -242,14 +243,16 @@ const CalculatorItemGrid: React.FC<{
             const displayName = item.sub_name
               ? `${item.name} (${item.sub_name})`
               : item.name;
-            const selectedType = getSelectedValueType(item);
+            const selectedType = side ? getSelectedValueType(item) : "cash";
             const isDupedSelected = selectedType === "duped";
+            const hasDuped = !!(item.duped_value && item.duped_value !== "N/A");
 
             return (
               <div
                 key={`${item.id}-${item.sub_name || "base"}`}
-                className="group relative cursor-help"
+                className="group relative"
               >
+                {/* Item Image Container - Click to Remove */}
                 <Tooltip
                   title={
                     <TradeAdTooltip
@@ -261,272 +264,160 @@ const CalculatorItemGrid: React.FC<{
                     />
                   }
                   arrow
-                  placement="bottom"
+                  placement="right"
                   disableTouchListener
                   slotProps={{
                     tooltip: {
                       sx: {
-                        backgroundColor: "var(--color-secondary-bg)",
+                        backgroundColor: "var(--color-primary-bg)",
                         color: "var(--color-primary-text)",
                         border: "1px solid var(--color-stroke)",
                         maxWidth: "400px",
                         width: "auto",
                         minWidth: "300px",
                         "& .MuiTooltip-arrow": {
-                          color: "var(--color-secondary-bg)",
+                          color: "var(--color-primary-bg)",
                         },
                       },
                     },
                   }}
                 >
-                  <div>
-                    <div className="relative aspect-square">
-                      <div
-                        className="relative h-full w-full cursor-pointer overflow-hidden rounded-lg"
-                        onClick={() => openActionModal(item)}
-                      >
-                        <Image
-                          src={getItemImagePath(item.type, item.name, true)}
-                          alt={item.name}
-                          fill
-                          className="object-cover"
-                          onError={handleImageError}
-                        />
-                        {/* Status badge for Clean/Duped selection */}
-                        <div
-                          className={`text-form-button-text absolute top-1 left-1 rounded-full px-1.5 py-0.5 text-xs ${
-                            isDupedSelected
-                              ? "border-status-error bg-status-error"
-                              : "border-status-success bg-status-success"
-                          } border`}
-                          aria-label={
-                            isDupedSelected
-                              ? "Duped value selected"
-                              : "Clean value selected"
-                          }
-                        >
-                          {isDupedSelected ? "Duped" : "Clean"}
-                        </div>
-                        <button
-                          type="button"
-                          aria-label="Edit item"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            openActionModal(item);
-                          }}
-                          className="text-form-button-text absolute right-1 bottom-1 rounded-full border border-white/10 bg-black/50 p-1 hover:bg-black/60"
-                        >
-                          <Icon
-                            icon="heroicons:ellipsis-vertical"
-                            className="h-4 w-4"
-                          />
-                        </button>
-                        {item.count > 1 && (
-                          <div className="border-primary bg-primary/90 text-primary-foreground absolute top-1 right-1 rounded-full border px-1.5 py-0.5 text-xs">
-                            ×{item.count}
-                          </div>
-                        )}
-                      </div>
-                    </div>
+                  <div
+                    className="relative aspect-square cursor-pointer overflow-hidden rounded-lg"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (onRemove) {
+                        if (item.count && item.count > 1) {
+                          // Show modal for batch remove confirmation
+                          openRemoveAllModal(item);
+                        } else {
+                          // Single item, remove directly
+                          onRemove(item.id, item.sub_name);
+                        }
+                      }
+                    }}
+                  >
+                    <Image
+                      src={getItemImagePath(item.type, item.name, true)}
+                      alt={item.name}
+                      fill
+                      className="object-cover"
+                      onError={handleImageError}
+                    />
 
-                    {/* Item Name */}
-                    <div className="mt-2 text-center">
-                      <p className="text-primary-text hover:text-link line-clamp-2 text-xs font-medium transition-colors">
-                        {displayName}
-                      </p>
-                    </div>
+                    {/* Quantity Badge - Top Left */}
+                    {item.count > 1 && (
+                      <div className="absolute top-2 left-2 rounded-full border border-white/20 bg-black/70 px-2 py-1 text-xs font-bold text-white backdrop-blur-sm">
+                        ×{item.count}
+                      </div>
+                    )}
                   </div>
                 </Tooltip>
+
+                {/* Item Name */}
+                <div className="mt-2 text-center">
+                  <p className="text-primary-text line-clamp-2 text-xs font-medium">
+                    {displayName}
+                  </p>
+                </div>
+
+                {/* Modern Segmented Control for Clean/Duped - Always visible */}
+                <div className="mt-2 flex justify-center">
+                  <div className="bg-secondary-bg border-border-primary inline-flex rounded-lg border p-0.5">
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onValueTypeChange(item.id, item.sub_name, "cash");
+                      }}
+                      className={`cursor-pointer rounded-md px-2.5 py-1 text-xs font-medium transition-all duration-200 ${
+                        !isDupedSelected
+                          ? "bg-status-success text-white shadow-sm"
+                          : "bg-tertiary-bg text-secondary-text hover:text-primary-text"
+                      }`}
+                    >
+                      Clean
+                    </button>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onValueTypeChange(item.id, item.sub_name, "duped");
+                      }}
+                      className={`cursor-pointer rounded-md px-2.5 py-1 text-xs font-medium transition-all duration-200 ${
+                        isDupedSelected
+                          ? "bg-status-error text-white shadow-sm"
+                          : "bg-tertiary-bg text-secondary-text hover:text-primary-text"
+                      }`}
+                    >
+                      Duped
+                    </button>
+                  </div>
+                </div>
               </div>
             );
           })}
         </div>
       </div>
 
-      {/* Action Modal styled like CustomConfirmationModal */}
-      {actionModalOpen && (
+      {/* Simplified Modal - Only for Batch Remove Confirmation */}
+      {removeAllModalOpen && removeAllItem && (
         <div className="fixed inset-0 z-50">
           <div
             className="fixed inset-0 bg-black/30 backdrop-blur-sm"
             aria-hidden="true"
-            onClick={closeActionModal}
+            onClick={closeRemoveAllModal}
           />
           <div className="fixed inset-0 flex items-center justify-center p-4">
             <div className="modal-container border-button-info bg-secondary-bg mx-auto w-full max-w-sm rounded-lg border p-6 shadow-lg">
               <h2 className="text-primary-text mb-4 text-xl font-semibold">
-                {actionItem
-                  ? actionItem.sub_name
-                    ? `${actionItem.name} (${actionItem.sub_name})`
-                    : actionItem.name
-                  : "Item Actions"}
+                Remove All Items?
               </h2>
-              {actionItem && (
-                <div className="space-y-4">
-                  <div className="flex items-center gap-2">
-                    <span
-                      className="text-primary-text flex items-center rounded-full border px-2 py-0.5 text-xs font-medium"
-                      style={{
-                        borderColor: getCategoryColor(actionItem.type),
-                        backgroundColor:
-                          getCategoryColor(actionItem.type) + "20", // Add 20% opacity
-                      }}
-                    >
-                      {actionItem.type}
-                    </span>
-                    {actionItem.count && actionItem.count > 1 && (
-                      <span className="bg-button-info/10 border-button-info text-form-button-text inline-flex items-center rounded-full border px-2 py-0.5 text-xs">
-                        Quantity ×{actionItem.count}
-                      </span>
-                    )}
-                  </div>
-                  <div className="px-2 py-1">
-                    <div className="flex flex-col gap-2">
-                      <label className="flex cursor-pointer items-center gap-2">
-                        <div className="relative">
-                          <input
-                            type="checkbox"
-                            checked={
-                              getSelectedValueType(actionItem) === "cash"
-                            }
-                            onChange={() => {
-                              onValueTypeChange(
-                                actionItem.id,
-                                actionItem.sub_name,
-                                "cash",
-                              );
-                            }}
-                            className="sr-only"
-                          />
-                          <div
-                            className={`border-secondary flex h-4 w-4 items-center justify-center rounded border ${
-                              getSelectedValueType(actionItem) === "cash"
-                                ? "border-button-info bg-button-info"
-                                : "bg-transparent"
-                            }`}
-                          >
-                            {getSelectedValueType(actionItem) === "cash" && (
-                              <svg
-                                className="text-form-button-text h-3 w-3"
-                                fill="currentColor"
-                                viewBox="0 0 20 20"
-                              >
-                                <path
-                                  fillRule="evenodd"
-                                  d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                  clipRule="evenodd"
-                                />
-                              </svg>
-                            )}
-                          </div>
-                        </div>
-                        <span className="text-secondary-text text-sm">
-                          Clean
-                        </span>
-                      </label>
-                      {actionItem.duped_value &&
-                      actionItem.duped_value !== "N/A" ? (
-                        <label className="flex cursor-pointer items-center gap-2">
-                          <div className="relative">
-                            <input
-                              type="checkbox"
-                              checked={
-                                getSelectedValueType(actionItem) === "duped"
-                              }
-                              onChange={() => {
-                                onValueTypeChange(
-                                  actionItem.id,
-                                  actionItem.sub_name,
-                                  "duped",
-                                );
-                              }}
-                              className="sr-only"
-                            />
-                            <div
-                              className={`border-secondary flex h-4 w-4 items-center justify-center rounded border ${
-                                getSelectedValueType(actionItem) === "duped"
-                                  ? "border-button-info bg-button-info"
-                                  : "bg-transparent"
-                              }`}
-                            >
-                              {getSelectedValueType(actionItem) === "duped" && (
-                                <svg
-                                  className="text-form-button-text h-3 w-3"
-                                  fill="currentColor"
-                                  viewBox="0 0 20 20"
-                                >
-                                  <path
-                                    fillRule="evenodd"
-                                    d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                    clipRule="evenodd"
-                                  />
-                                </svg>
-                              )}
-                            </div>
-                          </div>
-                          <span className="text-secondary-text text-sm">
-                            Duped
-                          </span>
-                        </label>
-                      ) : (
-                        <label className="flex cursor-not-allowed items-center gap-2 opacity-50">
-                          <div className="border-secondary flex h-4 w-4 items-center justify-center rounded border bg-transparent">
-                            <svg
-                              className="text-quaternary-text h-3 w-3"
-                              fill="currentColor"
-                              viewBox="0 0 20 20"
-                            >
-                              <path
-                                fillRule="evenodd"
-                                d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                clipRule="evenodd"
-                              />
-                            </svg>
-                          </div>
-                          <span className="text-quaternary-text text-sm">
-                            Duped (N/A)
-                          </span>
-                        </label>
-                      )}
-                    </div>
-                  </div>
-                  <div className="flex justify-end gap-3">
-                    <button
-                      onClick={closeActionModal}
-                      className="text-secondary-text hover:text-primary-text cursor-pointer rounded border-none bg-transparent px-4 py-2 text-sm"
-                    >
-                      Close
-                    </button>
-                    {onRemove && (
-                      <>
-                        <button
-                          onClick={() => {
-                            onRemove(actionItem.id, actionItem.sub_name);
-                            closeActionModal();
-                          }}
-                          className="bg-button-info text-form-button-text hover:bg-button-info-hover cursor-pointer rounded border-none px-3 py-2 text-sm"
-                        >
-                          {actionItem.count && actionItem.count > 1
-                            ? "Remove one"
-                            : "Remove"}
-                        </button>
-                        {onRemoveAll &&
-                          actionItem.count &&
-                          actionItem.count > 1 && (
-                            <button
-                              onClick={() => {
-                                onRemoveAll(actionItem.id, actionItem.sub_name);
-                                closeActionModal();
-                              }}
-                              className="bg-button-info text-form-button-text hover:bg-button-info-hover cursor-pointer rounded border-none px-3 py-2 text-sm"
-                            >
-                              Remove all ×{actionItem.count}
-                            </button>
-                          )}
-                      </>
-                    )}
-                  </div>
-                </div>
-              )}
+              <div className="mb-6">
+                <p className="text-secondary-text mb-3">
+                  You have{" "}
+                  <span className="text-primary-text font-semibold">
+                    {removeAllItem.count}
+                  </span>{" "}
+                  copies of{" "}
+                  <span className="text-primary-text font-semibold">
+                    {removeAllItem.sub_name
+                      ? `${removeAllItem.name} (${removeAllItem.sub_name})`
+                      : removeAllItem.name}
+                  </span>
+                  . What would you like to do?
+                </p>
+              </div>
+              <div className="flex justify-end gap-3">
+                <button
+                  onClick={closeRemoveAllModal}
+                  className="text-secondary-text hover:text-primary-text cursor-pointer rounded border-none bg-transparent px-4 py-2 text-sm"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => {
+                    if (onRemove) {
+                      onRemove(removeAllItem.id, removeAllItem.sub_name);
+                    }
+                    closeRemoveAllModal();
+                  }}
+                  className="text-secondary-text hover:text-primary-text cursor-pointer rounded border-none bg-transparent px-3 py-2 text-sm"
+                >
+                  Remove One
+                </button>
+                <button
+                  onClick={() => {
+                    if (onRemoveAll) {
+                      onRemoveAll(removeAllItem.id, removeAllItem.sub_name);
+                    }
+                    closeRemoveAllModal();
+                  }}
+                  className="bg-status-error hover:bg-status-error/90 cursor-pointer rounded border-none px-4 py-2 text-sm font-medium text-white"
+                >
+                  Remove All ×{removeAllItem.count}
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -1084,10 +975,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
 
     items.forEach((item) => {
       const itemKey = getItemKey(item.id, item.sub_name, side);
-      const rawType = itemValueTypes[itemKey] || "cash";
-      const dupedAvailable = !!(item.duped_value && item.duped_value !== "N/A");
-      const effectiveType =
-        rawType === "duped" && dupedAvailable ? "duped" : "cash";
+      const effectiveType = itemValueTypes[itemKey] || "cash";
       const value = parseValueString(
         effectiveType === "cash" ? item.cash_value : item.duped_value,
       );
@@ -1148,6 +1036,21 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
           ...offeringItems.slice(index + 1),
         ];
         setOfferingItems(newOfferingItems);
+
+        // Clear value type if no more items of this type remain on this side
+        const remains = newOfferingItems.some(
+          (item) =>
+            item.id === itemId &&
+            (item.sub_name === subName || (!item.sub_name && !subName)),
+        );
+        if (!remains) {
+          const itemKey = getItemKey(itemId, subName, side);
+          setItemValueTypes((prev) => {
+            const next = { ...prev };
+            delete next[itemKey];
+            return next;
+          });
+        }
       }
     } else {
       const index = requestingItems.findIndex(
@@ -1161,6 +1064,21 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
           ...requestingItems.slice(index + 1),
         ];
         setRequestingItems(newRequestingItems);
+
+        // Clear value type if no more items of this type remain on this side
+        const remains = newRequestingItems.some(
+          (item) =>
+            item.id === itemId &&
+            (item.sub_name === subName || (!item.sub_name && !subName)),
+        );
+        if (!remains) {
+          const itemKey = getItemKey(itemId, subName, side);
+          setItemValueTypes((prev) => {
+            const next = { ...prev };
+            delete next[itemKey];
+            return next;
+          });
+        }
       }
     }
   };
@@ -1171,29 +1089,54 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
     subName?: string,
   ) => {
     if (side === "offering") {
-      const newOfferingItems = offeringItems.filter(
-        (item) =>
-          !(
-            item.id === itemId &&
-            (item.sub_name === subName || (!item.sub_name && !subName))
-          ),
+      setOfferingItems((prev) =>
+        prev.filter(
+          (item) =>
+            !(
+              item.id === itemId &&
+              (item.sub_name === subName || (!item.sub_name && !subName))
+            ),
+        ),
       );
-      setOfferingItems(newOfferingItems);
     } else {
-      const newRequestingItems = requestingItems.filter(
-        (item) =>
-          !(
-            item.id === itemId &&
-            (item.sub_name === subName || (!item.sub_name && !subName))
-          ),
+      setRequestingItems((prev) =>
+        prev.filter(
+          (item) =>
+            !(
+              item.id === itemId &&
+              (item.sub_name === subName || (!item.sub_name && !subName))
+            ),
+        ),
       );
-      setRequestingItems(newRequestingItems);
     }
+
+    // Clear value type for this item on this side
+    const itemKey = getItemKey(itemId, subName, side);
+    setItemValueTypes((prev) => {
+      const next = { ...prev };
+      delete next[itemKey];
+      return next;
+    });
   };
 
   const handleSwapSides = () => {
     setOfferingItems(requestingItems);
     setRequestingItems(offeringItems);
+
+    // Swap item value types as well
+    setItemValueTypes((prev) => {
+      const next: Record<string, "cash" | "duped"> = {};
+      Object.entries(prev).forEach(([key, value]) => {
+        if (key.startsWith("offering-")) {
+          next[key.replace("offering-", "requesting-")] = value;
+        } else if (key.startsWith("requesting-")) {
+          next[key.replace("requesting-", "offering-")] = value;
+        } else {
+          next[key] = value;
+        }
+      });
+      return next;
+    });
   };
 
   const handleClearSides = (event?: React.MouseEvent) => {
@@ -1216,6 +1159,30 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
     } else {
       setRequestingItems(sourceItems);
     }
+
+    // Mirror item value types as well
+    setItemValueTypes((prev) => {
+      const next = { ...prev };
+      const fromPrefix = `${fromSide}-`;
+      const toPrefix = `${targetSide}-`;
+
+      // First, clear existing value types for the target side
+      Object.keys(next).forEach((key) => {
+        if (key.startsWith(toPrefix)) {
+          delete next[key];
+        }
+      });
+
+      // Then copy from source side to target side
+      Object.entries(prev).forEach(([key, value]) => {
+        if (key.startsWith(fromPrefix)) {
+          const newKey = key.replace(fromPrefix, toPrefix);
+          next[newKey] = value;
+        }
+      });
+
+      return next;
+    });
   };
 
   // Helper function to get unique key for an item
@@ -1228,15 +1195,12 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
     return side ? `${side}-${baseKey}` : baseKey;
   };
 
-  // Helper function to get selected value TYPE for an item
   const getSelectedValueType = (
     item: TradeItem,
     side: "offering" | "requesting",
   ): "cash" | "duped" => {
     const itemKey = getItemKey(item.id, item.sub_name, side);
-    const rawType = itemValueTypes[itemKey] || "cash";
-    const dupedAvailable = !!(item.duped_value && item.duped_value !== "N/A");
-    return rawType === "duped" && dupedAvailable ? "duped" : "cash";
+    return itemValueTypes[itemKey] || "cash";
   };
 
   // Helper function to get selected value for an item
@@ -1865,10 +1829,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
                     selectedSideItems.forEach((it) => {
                       const k = getItemKey(it.id, it.sub_name, sideKey);
                       const vt = itemValueTypes[k] || "cash";
-                      const dupedAvailable = !!(
-                        it.duped_value && it.duped_value !== "N/A"
-                      );
-                      if (vt === "duped" && dupedAvailable) dupedCount++;
+                      if (vt === "duped") dupedCount++;
                       else cleanCount++;
                     });
 
@@ -1971,10 +1932,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
                                   sideKey,
                                 );
                                 const vt = itemValueTypes[k] || "cash";
-                                const dupedAvailable = !!(
-                                  it.duped_value && it.duped_value !== "N/A"
-                                );
-                                return vt === "duped" && dupedAvailable;
+                                return vt === "duped";
                               });
                               return allDuped ? "duped" : "cash";
                             }
