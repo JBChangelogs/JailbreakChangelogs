@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import Link from "next/link";
 import { RobloxUser, Item } from "@/types";
 import { InventoryData, InventoryItem } from "@/app/inventories/types";
 import InventoryFilters from "./InventoryFilters";
@@ -646,7 +647,11 @@ export default function InventoryItems({
               className="text-button-info shrink-0 text-lg"
             />
             <span className="font-medium">
-              Helpful Tip: Click on any item card to view its ownership history.
+              To check if an item is duped, please use our{" "}
+              <Link href="/dupes" className="font-bold underline">
+                Dupe Finder
+              </Link>
+              .
             </span>
           </div>
         </div>

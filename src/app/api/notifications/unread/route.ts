@@ -13,7 +13,10 @@ export async function GET() {
 
     const response = await fetch(
       `${BASE_API_URL}/notifications/unread?token=${encodeURIComponent(token)}`,
-      { cache: "no-store" },
+      {
+        cache: "no-store",
+        signal: AbortSignal.timeout(20000),
+      },
     );
 
     if (!response.ok) {

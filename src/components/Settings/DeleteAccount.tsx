@@ -109,6 +109,8 @@ export const DeleteAccount = () => {
             backgroundColor: "var(--color-button-danger-hover)",
             color: "var(--color-form-button-text)",
           },
+          fontSize: "0.875rem",
+          fontWeight: 600,
         }}
       >
         Delete Account

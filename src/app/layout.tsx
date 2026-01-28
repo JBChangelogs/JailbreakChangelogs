@@ -129,7 +129,7 @@ export default async function RootLayout({
             data-spa="auto"
             data-log-level="silent"
             data-demo={
-              process.env.NODE_ENV === "development" ? "true" : undefined
+              process.env.NODE_ENV === "development" ? "false" : undefined
             }
           />
         </head>
@@ -311,7 +311,7 @@ export default async function RootLayout({
           data-spa="auto"
           data-log-level="silent"
           data-demo={
-            process.env.NODE_ENV === "development" ? "true" : undefined
+            process.env.NODE_ENV === "development" ? "false" : undefined
           }
         />
       </head>

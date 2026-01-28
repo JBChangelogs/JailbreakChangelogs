@@ -263,7 +263,17 @@ const NotificationTimestamp = ({
   );
 };
 
-export const NavbarModern = ({ className }: { className?: string }) => {
+export const NavbarModern = ({
+  className,
+  unreadCount,
+  setUnreadCount,
+  fetchUnreadCount,
+}: {
+  className?: string;
+  unreadCount: number;
+  setUnreadCount: React.Dispatch<React.SetStateAction<number>>;
+  fetchUnreadCount: () => Promise<void>;
+}) => {
   const [active, setActive] = useState<string | null>(null);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [utmModalOpen, setUtmModalOpen] = useState(false);
@@ -279,7 +289,6 @@ export const NavbarModern = ({ className }: { className?: string }) => {
   const [notificationTimeoutId, setNotificationTimeoutId] =
     useState<NodeJS.Timeout | null>(null);
   const [mounted, setMounted] = useState(false);
-  const [unreadCount, setUnreadCount] = useState(0);
 
   // Debounced notification fetching functions
   const fetchUnreadWithDebounce = (page: number, limit: number) => {
@@ -320,45 +329,12 @@ export const NavbarModern = ({ className }: { className?: string }) => {
     logout,
   } = useAuthContext();
 
-  const fetchUnreadCount = useCallback(async () => {
-    if (!isAuthenticated) {
-      setUnreadCount(0);
-      return;
-    }
-
-    try {
-      const response = await fetch("/api/notifications/unread", {
-        cache: "no-store",
-      });
-      if (response.ok) {
-        const data = await response.json();
-        setUnreadCount(data.unread_count || 0);
-      } else {
-        setUnreadCount(0);
-      }
-    } catch (error) {
-      console.error("Error fetching unread count:", error);
-      setUnreadCount(0);
-    }
-  }, [isAuthenticated]);
   const { resolvedTheme } = useTheme();
   const userData = isAuthenticated ? authUser : null;
 
   React.useEffect(() => {
     setMounted(true);
   }, []);
-
-  React.useEffect(() => {
-    if (mounted) {
-      fetchUnreadCount();
-    }
-  }, [mounted, isAuthenticated, fetchUnreadCount]);
-
-  React.useEffect(() => {
-    if (mounted && isAuthenticated) {
-      fetchUnreadCount();
-    }
-  }, [pathname, mounted, isAuthenticated, fetchUnreadCount]);
 
   const isCollabPage =
     pathname === "/values" ||
@@ -680,6 +656,22 @@ export const NavbarModern = ({ className }: { className?: string }) => {
                       History
                     </button>
                   </div>
+                </div>
+              )}
+
+              {/* Manage Notifications Link */}
+              {isAuthenticated && (
+                <div className="border-border-secondary bg-secondary-bg/30 border-b px-4 py-2">
+                  <p className="text-secondary-text text-xs">
+                    Manage which notifications you receive in{" "}
+                    <Link
+                      href="/settings?highlight=notifications"
+                      className="text-link hover:underline"
+                      onClick={() => setNotificationMenuOpen(false)}
+                    >
+                      Settings
+                    </Link>
+                  </p>
                 </div>
               )}
 

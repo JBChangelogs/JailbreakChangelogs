@@ -208,8 +208,6 @@ export default async function DevChangelogPage() {
           </div>
         )}
       </div>
-
-      {/* Marquee Demo */}
     </div>
   );
 }
