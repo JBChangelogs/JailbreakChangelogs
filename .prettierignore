@@ -6,3 +6,6 @@ dist/**
 .source/**
 node_modules/**
 .agent/skills/**
+.claude/**
+.cursor/**
+public/**
