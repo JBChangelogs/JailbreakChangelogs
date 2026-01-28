@@ -293,7 +293,13 @@ export default function UserStatsSection({
           </label>
           <button
             id="non-og-toggle"
-            onClick={() => setShowNonOgOnly(!showNonOgOnly)}
+            onClick={() => {
+              const newValue = !showNonOgOnly;
+              setShowNonOgOnly(newValue);
+              window.umami?.track("Inventory UserStats Non-OG Toggle", {
+                active: newValue,
+              });
+            }}
             className={`relative inline-flex h-6 w-11 cursor-pointer items-center rounded-full transition-colors focus:outline-none ${
               showNonOgOnly ? "bg-button-info" : "bg-button-secondary"
             }`}
