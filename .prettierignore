@@ -5,3 +5,4 @@ build/**
 dist/**
 .source/**
 node_modules/**
+.agent/skills/**
