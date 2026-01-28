@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect } from "react";
-import Image from "next/image";
 
 export default function GlobalError({
   error,
@@ -10,44 +9,26 @@ export default function GlobalError({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
-  const isChunkError =
-    error.message?.includes("Loading chunk") ||
-    error.message?.includes("Failed to fetch dynamically imported module") ||
-    error.message?.includes("ChunkLoadError") ||
-    error.message?.includes("Loading CSS chunk");
-
-  // Track error with Umami when error page is triggered
   useEffect(() => {
-    if (typeof window !== "undefined" && window.umami) {
-      window.umami.track("Global Error Page", {
-        isChunkError: isChunkError,
-        errorDigest: error.digest || "unknown",
-        path: window.location.pathname,
-      });
-    }
-  }, [isChunkError, error.digest]);
-
-  const handleRefresh = () => {
-    // Track refresh button click with Umami
     try {
       if (typeof window !== "undefined" && window.umami) {
-        window.umami.track("Error Page - Refresh Clicked", {
-          isChunkError: isChunkError,
+        // Truncate error message to avoid Umami limits (~1000 chars)
+        const errorMessage = error.message?.substring(0, 500) || "No message";
+        const errorStack = error.stack?.substring(0, 500) || "No stack";
+
+        window.umami.track("Global Error Page", {
           errorDigest: error.digest || "unknown",
           path: window.location.pathname,
+          errorMessage: errorMessage,
+          errorStack: errorStack,
+          errorName: error.name || "Unknown",
         });
       }
     } catch (e) {
-      // Silently fail tracking, but continue with refresh
-      console.error("Failed to track error page refresh:", e);
+      // Silently fail - don't break anything
+      console.error("Error logging to Umami:", e);
     }
-
-    if (isChunkError) {
-      window.location.reload();
-    } else {
-      reset();
-    }
-  };
+  }, [error.digest, error.message, error.stack, error.name]);
 
   return (
     <html lang="en">
@@ -66,90 +47,40 @@ export default function GlobalError({
                 color: var(--color-primary-text, hsl(60, 100%, 100%));
                 min-height: 100vh;
                 display: flex;
-                flex-direction: column;
                 align-items: center;
                 justify-content: center;
                 padding: 2rem;
+              }
+              .error-container {
+                text-align: center;
+                max-width: 42rem;
+              }
+              h2 {
+                font-size: 2rem;
+                margin-bottom: 1rem;
+              }
+              button {
+                background: var(--color-button-info, hsl(210, 99%, 50%));
+                color: var(--color-button-text, hsl(60, 100%, 100%));
+                border: none;
+                border-radius: 8px;
+                padding: 0.875rem 2rem;
+                font-size: 1rem;
+                font-weight: 600;
+                cursor: pointer;
+                transition: opacity 0.2s;
+              }
+              button:hover {
+                opacity: 0.9;
               }
             `,
           }}
         />
       </head>
       <body>
-        <div
-          style={{
-            maxWidth: "42rem",
-            width: "100%",
-            textAlign: "center",
-          }}
-        >
-          <div
-            style={{
-              marginBottom: "2rem",
-              width: "100%",
-              maxWidth: "300px",
-              margin: "0 auto 2rem",
-              display: "flex",
-              justifyContent: "center",
-            }}
-          >
-            <Image
-              src="https://assets.jailbreakchangelogs.xyz/assets/logos/JBCL_Long_Transparent.svg"
-              alt="Jailbreak Changelogs"
-              width={300}
-              height={120}
-              style={{
-                maxWidth: "100%",
-                height: "auto",
-              }}
-            />
-          </div>
-
-          <h1
-            style={{
-              color: "var(--color-primary-text, hsl(60, 100%, 100%))",
-              fontSize: "2rem",
-              fontWeight: "bold",
-              marginBottom: "1rem",
-            }}
-          >
-            Something went wrong!
-          </h1>
-
-          <p
-            style={{
-              color: "var(--color-secondary-text, hsl(214, 16%, 64%))",
-              marginBottom: "2rem",
-              lineHeight: "1.6",
-              fontSize: "1.125rem",
-            }}
-          >
-            It&apos;s not you, it&apos;s us. We&apos;re sorry for the
-            inconvenience.
-          </p>
-
-          <button
-            onClick={handleRefresh}
-            style={{
-              background: "var(--color-button-info, hsl(210, 99%, 50%))",
-              color: "var(--color-button-text, hsl(60, 100%, 100%))",
-              border: "none",
-              borderRadius: "8px",
-              padding: "0.875rem 2rem",
-              fontSize: "1rem",
-              fontWeight: "600",
-              cursor: "pointer",
-              transition: "opacity 0.2s",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.opacity = "0.9";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.opacity = "1";
-            }}
-          >
-            Refresh Page
-          </button>
+        <div className="error-container">
+          <h2>Something went wrong!</h2>
+          <button onClick={() => reset()}>Try again</button>
         </div>
       </body>
     </html>

@@ -119,20 +119,39 @@ export default function NitroLiveScansAd({ className }: Props) {
 
     createdRef.current = true;
 
-    // Mobile config
-    Promise.resolve(nitroAds.createAd(SLOT_ID_MOBILE, MOBILE_CONFIG)).catch(
-      () => {},
-    );
+    try {
+      // Mobile config
+      Promise.resolve(nitroAds.createAd(SLOT_ID_MOBILE, MOBILE_CONFIG)).catch(
+        (error) => {
+          console.warn(
+            "[Nitro Ad] Failed to create live scans mobile ad:",
+            error,
+          );
+        },
+      );
 
-    // Tablet config
-    Promise.resolve(nitroAds.createAd(SLOT_ID_TABLET, TABLET_CONFIG)).catch(
-      () => {},
-    );
+      // Tablet config
+      Promise.resolve(nitroAds.createAd(SLOT_ID_TABLET, TABLET_CONFIG)).catch(
+        (error) => {
+          console.warn(
+            "[Nitro Ad] Failed to create live scans tablet ad:",
+            error,
+          );
+        },
+      );
 
-    // Desktop config
-    Promise.resolve(nitroAds.createAd(SLOT_ID_DESKTOP, DESKTOP_CONFIG)).catch(
-      () => {},
-    );
+      // Desktop config
+      Promise.resolve(nitroAds.createAd(SLOT_ID_DESKTOP, DESKTOP_CONFIG)).catch(
+        (error) => {
+          console.warn(
+            "[Nitro Ad] Failed to create live scans desktop ad:",
+            error,
+          );
+        },
+      );
+    } catch (error) {
+      console.warn("[Nitro Ad] Error initializing live scans ads:", error);
+    }
 
     return () => {
       nitroAds?.removeAd?.(SLOT_ID_MOBILE);

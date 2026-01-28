@@ -45,37 +45,45 @@ export default function NitroBottomAnchor() {
 
     createdRef.current = true;
 
-    Promise.resolve(
-      window.nitroAds.createAd(ANCHOR_ID, {
-        format: "anchor-v2",
-        anchor: "bottom",
-        anchorBgColor: "rgb(0 0 0 / 0%)",
-        anchorClose: false,
-        anchorPersistClose: false,
-        anchorStickyOffset: 0,
-        report: {
-          enabled: true,
-          icon: true,
-          wording: "Report Ad",
-          position: "top-right",
-        },
-        mediaQuery:
-          "(min-width: 1025px), (min-width: 768px) and (max-width: 1024px), (min-width: 320px) and (max-width: 767px)",
-      }),
-    )
-      .then((adInstance) => {
-        // Register this ad instance so we can call onNavigate on it later
-        if (
-          adInstance &&
-          typeof adInstance === "object" &&
-          "onNavigate" in adInstance
-        ) {
-          registerAdInstance(ANCHOR_ID, adInstance);
-        }
-      })
-      .catch(() => {
-        createdRef.current = false;
-      });
+    try {
+      Promise.resolve(
+        window.nitroAds.createAd(ANCHOR_ID, {
+          format: "anchor-v2",
+          anchor: "bottom",
+          anchorBgColor: "rgb(0 0 0 / 0%)",
+          anchorClose: false,
+          anchorPersistClose: false,
+          anchorStickyOffset: 0,
+          report: {
+            enabled: true,
+            icon: true,
+            wording: "Report Ad",
+            position: "top-right",
+          },
+          mediaQuery:
+            "(min-width: 1025px), (min-width: 768px) and (max-width: 1024px), (min-width: 320px) and (max-width: 767px)",
+        }),
+      )
+        .then((adInstance) => {
+          // Register this ad instance so we can call onNavigate on it later
+          if (
+            adInstance &&
+            typeof adInstance === "object" &&
+            "onNavigate" in adInstance
+          ) {
+            registerAdInstance(ANCHOR_ID, adInstance);
+          }
+        })
+        .catch((error) => {
+          // Silently handle ad creation errors per Nitropay best practices
+          console.warn(`[Nitro Ad] Failed to create bottom anchor ad:`, error);
+          createdRef.current = false;
+        });
+    } catch (error) {
+      // Catch synchronous errors
+      console.warn(`[Nitro Ad] Error initializing bottom anchor ad:`, error);
+      createdRef.current = false;
+    }
 
     // Clean up when component unmounts
     return () => {

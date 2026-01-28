@@ -21,6 +21,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import NitroAnchorCloseSupporterModal from "@/components/Ads/NitroAnchorCloseSupporterModal";
 import NitroBottomAnchor from "@/components/Ads/NitroBottomAnchor";
 import NitroVideoPlayer from "@/components/Ads/NitroVideoPlayer";
+import AdErrorBoundary from "@/components/Ads/AdErrorBoundary";
 import AdBlockRecovery from "@/components/Ads/AdBlockRecovery";
 import AdBlockPrompt from "@/components/Ads/AdBlockPrompt";
 import UmamiIdentity from "@/components/Analytics/UmamiIdentity";
@@ -228,9 +229,11 @@ export default async function RootLayout({
                     <AuthCheck />
                     <AuthProvider>
                       <UmamiIdentity />
-                      <NitroBottomAnchor />
-                      <NitroVideoPlayer />
-                      <NitroAnchorCloseSupporterModal />
+                      <AdErrorBoundary>
+                        <NitroBottomAnchor />
+                        <NitroVideoPlayer />
+                        <NitroAnchorCloseSupporterModal />
+                      </AdErrorBoundary>
                       <SurveyProvider>
                         <div
                           id="main-layout"
