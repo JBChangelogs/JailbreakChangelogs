@@ -43,6 +43,8 @@ export default function DuplicatesTab({
   const [searchTerm, setSearchTerm] = useState("");
   const [leaderboardSearch, setLeaderboardSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
+  const [selectedLeaderboardCategory, setSelectedLeaderboardCategory] =
+    useState("");
   const [sortOrder, setSortOrder] = useState<SortOrder>("count-desc");
   const parentRef = useRef<HTMLDivElement>(null);
   const MAX_SEARCH_LENGTH = 50;
@@ -189,10 +191,19 @@ export default function DuplicatesTab({
     return Array.from(categories).sort();
   })();
 
-  // Filter leaderboard items based on search
+  // Filter leaderboard items based on search and category
   const filteredLeaderboardItems = useMemo(() => {
+    let items = multiCopyStats.allDuplicateItems;
+
+    // Filter by category
+    if (selectedLeaderboardCategory) {
+      items = items.filter(
+        (item) => item.category === selectedLeaderboardCategory,
+      );
+    }
+
     if (!leaderboardSearch.trim()) {
-      return multiCopyStats.allDuplicateItems;
+      return items;
     }
 
     const normalize = (str: string) =>
@@ -219,7 +230,7 @@ export default function DuplicatesTab({
       return i === searchTokens.length;
     }
 
-    return multiCopyStats.allDuplicateItems.filter((item) => {
+    return items.filter((item) => {
       const titleNormalized = normalize(item.title);
       const categoryNormalized = normalize(item.category);
       const titleTokens = tokenize(item.title);
@@ -232,7 +243,11 @@ export default function DuplicatesTab({
         isTokenSubsequence(searchAlphaNum, titleAlphaNum)
       );
     });
-  }, [multiCopyStats.allDuplicateItems, leaderboardSearch]);
+  }, [
+    multiCopyStats.allDuplicateItems,
+    leaderboardSearch,
+    selectedLeaderboardCategory,
+  ]);
 
   // TanStack Virtual setup for performance with large duplicate datasets
   // eslint-disable-next-line react-hooks/incompatible-library
@@ -392,28 +407,54 @@ export default function DuplicatesTab({
         </h2>
 
         {/* Leaderboard Search */}
-        <div className="relative mb-4">
-          <input
-            type="text"
-            placeholder="Search leaderboard..."
-            value={leaderboardSearch}
-            onChange={(e) => setLeaderboardSearch(e.target.value)}
-            maxLength={MAX_SEARCH_LENGTH}
-            className="border-border-primary bg-tertiary-bg text-primary-text placeholder-secondary-text focus:border-button-info min-h-[48px] w-full rounded-lg border px-4 py-2 pr-10 pl-10 transition-all duration-300 focus:outline-none"
-          />
-          <Icon
-            icon="heroicons:magnifying-glass"
-            className="text-secondary-text absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2"
-          />
-          {leaderboardSearch && (
-            <button
-              onClick={() => setLeaderboardSearch("")}
-              className="text-secondary-text hover:text-primary-text absolute top-1/2 right-3 h-5 w-5 -translate-y-1/2 cursor-pointer"
-              aria-label="Clear search"
+        <div className="mb-4 flex flex-col gap-4 sm:flex-row">
+          <div className="relative flex-1">
+            <input
+              type="text"
+              placeholder="Search leaderboard..."
+              value={leaderboardSearch}
+              onChange={(e) => setLeaderboardSearch(e.target.value)}
+              maxLength={MAX_SEARCH_LENGTH}
+              className="border-border-primary bg-tertiary-bg text-primary-text placeholder-secondary-text focus:border-button-info min-h-[48px] w-full rounded-lg border px-4 py-2 pr-10 pl-10 transition-all duration-300 focus:outline-none"
+            />
+            <Icon
+              icon="heroicons:magnifying-glass"
+              className="text-secondary-text absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2"
+            />
+            {leaderboardSearch && (
+              <button
+                onClick={() => setLeaderboardSearch("")}
+                className="text-secondary-text hover:text-primary-text absolute top-1/2 right-3 h-5 w-5 -translate-y-1/2 cursor-pointer"
+                aria-label="Clear search"
+              >
+                <Icon icon="heroicons:x-mark" />
+              </button>
+            )}
+          </div>
+
+          <div className="w-full sm:w-1/3">
+            <select
+              className="select bg-tertiary-bg text-primary-text min-h-[48px] w-full"
+              value={selectedLeaderboardCategory}
+              onChange={(e) => {
+                const val = e.target.value;
+                setSelectedLeaderboardCategory(val);
+                window.umami?.track(
+                  "Multiple Copies Leaderboard Category Change",
+                  {
+                    category: val || "All",
+                  },
+                );
+              }}
             >
-              <Icon icon="heroicons:x-mark" />
-            </button>
-          )}
+              <option value="">All Categories</option>
+              {availableCategories.map((category) => (
+                <option key={category} value={category}>
+                  {category}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
 
         {/* Results count for leaderboard */}
@@ -431,7 +472,7 @@ export default function DuplicatesTab({
           filteredLeaderboardItems.length > 0 && (
             <div
               ref={parentRef}
-              className="scrollbar-thin scrollbar-track-transparent scrollbar-thumb-border-primary hover:scrollbar-thumb-border-focus max-h-96 overflow-y-auto pr-2"
+              className="scrollbar-thin scrollbar-track-transparent scrollbar-thumb-border-primary hover:scrollbar-thumb-border-focus border-border-primary bg-tertiary-bg max-h-96 overflow-y-auto rounded-lg border"
               style={{
                 scrollbarWidth: "thin",
                 scrollbarColor: "var(--color-border-primary) transparent",
@@ -460,7 +501,12 @@ export default function DuplicatesTab({
                         width: "100%",
                         transform: `translateY(${virtualItem.start}px)`,
                       }}
-                      className="border-border-primary bg-tertiary-bg flex items-center justify-between rounded-lg border p-3"
+                      className={`border-border-primary hover:bg-primary-bg/10 flex items-center justify-between p-3 transition-colors ${
+                        virtualItem.index !==
+                        filteredLeaderboardItems.length - 1
+                          ? "border-b"
+                          : ""
+                      }`}
                     >
                       <div className="flex min-w-0 flex-1 items-center gap-3">
                         <span className="text-primary-text w-6 shrink-0 text-sm font-bold">
@@ -519,7 +565,6 @@ export default function DuplicatesTab({
         )}
       </div>
 
-      {/* Search and Filters */}
       <div className="mb-4 flex w-full flex-col gap-4 sm:flex-row">
         {/* Search Bar */}
         <div className="relative w-full sm:w-1/3">
@@ -551,7 +596,13 @@ export default function DuplicatesTab({
           <select
             className="select bg-secondary-bg text-primary-text min-h-[56px] w-full"
             value={selectedCategory}
-            onChange={(e) => setSelectedCategory(e.target.value)}
+            onChange={(e) => {
+              const val = e.target.value;
+              setSelectedCategory(val);
+              window.umami?.track("Multiple Copies Category Change", {
+                category: val || "All",
+              });
+            }}
           >
             <option value="">All categories</option>
             {availableCategories.map((category) => (
@@ -567,7 +618,11 @@ export default function DuplicatesTab({
           <select
             className="select bg-secondary-bg text-primary-text min-h-[56px] w-full"
             value={sortOrder}
-            onChange={(e) => setSortOrder(e.target.value as SortOrder)}
+            onChange={(e) => {
+              const val = e.target.value as SortOrder;
+              setSortOrder(val);
+              window.umami?.track("Multiple Copies Sort Change", { sort: val });
+            }}
           >
             <option disabled>Copies</option>
             <option value="count-desc">Most Copies First</option>
