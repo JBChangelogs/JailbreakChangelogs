@@ -126,7 +126,7 @@ const testimonials: Testimonial[] = [
     name: "NotTesla",
     role: "Supporter",
     quote:
-      "Jailbreak changelogs is the go to site for trading or checking when you complete the season pass, the team behind the shit is always eager to add new features and always engages the community. I highly recommend using this site as it has all the features you would want.",
+      "Jailbreak changelogs is the go to site for trading or checking when you complete the season pass, the team behind the site is always eager to add new features and always engages the community. I highly recommend using this site as it has all the features would you want.",
     url: "#",
   },
   {
