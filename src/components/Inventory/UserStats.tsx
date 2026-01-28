@@ -83,6 +83,7 @@ export default function UserStats({
         networth: 0,
         dupedValue: 0,
         itemCount: 0,
+        dupedItemCount: 0,
       };
     }
 
@@ -105,6 +106,7 @@ export default function UserStats({
     let nonOgInventoryValue = 0;
     let nonOgDupedValue = 0;
     let nonOgItemCount = 0;
+    let nonOgDupedItemCount = 0;
 
     // Clean items
     initialData.data.forEach((invItem) => {
@@ -121,6 +123,7 @@ export default function UserStats({
     (initialData.duplicates || []).forEach((invItem) => {
       if (!invItem.isOriginalOwner) {
         nonOgItemCount++;
+        nonOgDupedItemCount++;
         const item = itemsMap.get(invItem.item_id.toString());
         if (item) {
           nonOgDupedValue += parse(item.duped_value);
@@ -136,6 +139,7 @@ export default function UserStats({
         nonOgDupedValue +
         (Number(initialData.money) || 0),
       itemCount: nonOgItemCount,
+      dupedItemCount: nonOgDupedItemCount,
     };
   }, [itemsData, initialData]);
 

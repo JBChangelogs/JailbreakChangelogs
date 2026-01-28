@@ -74,6 +74,7 @@ interface UserStatsSectionProps {
     networth: number;
     dupedValue: number;
     itemCount: number;
+    dupedItemCount: number;
   };
   showNonOgOnly: boolean;
   setShowNonOgOnly: (val: boolean) => void;
@@ -88,20 +89,23 @@ interface UserStatsSectionProps {
 // Helper functions
 const formatNumber = (num: number) => {
   if (num >= 1000000000) {
-    return (num / 1000000000).toFixed(1) + "B";
+    const value = Math.floor(num / 100000000) / 10;
+    return (value % 1 === 0 ? value.toFixed(0) : value.toFixed(1)) + "B";
   }
   if (num >= 1000000) {
-    return (num / 1000000).toFixed(1) + "M";
+    const value = Math.floor(num / 100000) / 10;
+    return (value % 1 === 0 ? value.toFixed(0) : value.toFixed(1)) + "M";
   }
-  if (num >= 1000) {
-    return (num / 1000).toFixed(1) + "K";
+  if (num >= 10000) {
+    const value = Math.floor(num / 100) / 10;
+    return (value % 1 === 0 ? value.toFixed(0) : value.toFixed(1)) + "K";
   }
-  return num.toString();
+  return num.toLocaleString();
 };
 
 const formatMoney = (money: number) => {
   if (money >= 1000000000) {
-    const value = Math.round(money / 100000000) / 10;
+    const value = Math.floor(money / 100000000) / 10;
     return `$${value % 1 === 0 ? value.toFixed(0) : value.toFixed(1)}B`;
   } else if (money >= 1000000) {
     const value = Math.floor(money / 100000) / 10;
@@ -448,7 +452,7 @@ export default function UserStatsSection({
             <p className="text-secondary-text text-sm">Duped Items</p>
             <Tooltip
               title={(showNonOgOnly
-                ? nonOgStats?.itemCount || 0
+                ? nonOgStats?.dupedItemCount || 0
                 : duplicatesCount
               ).toLocaleString()}
               placement="top"
@@ -473,9 +477,7 @@ export default function UserStatsSection({
               <p className="text-primary-text cursor-help text-2xl font-bold">
                 {formatNumber(
                   showNonOgOnly
-                    ? (currentData.duplicates || []).filter(
-                        (i) => !i.isOriginalOwner,
-                      ).length
+                    ? nonOgStats?.dupedItemCount || 0
                     : duplicatesCount,
                 )}
               </p>
