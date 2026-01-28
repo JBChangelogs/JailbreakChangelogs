@@ -171,20 +171,20 @@ function RobberyTrackerContent() {
   // Calculate robbery statistics
   const robberyStats = useMemo(() => {
     return {
-      total: robberies.length,
-      open: robberies.filter((r) => r.status === 1).length,
-      inProgress: robberies.filter((r) => r.status === 2).length,
+      total: filteredRobberies.length,
+      open: filteredRobberies.filter((r) => r.status === 1).length,
+      inProgress: filteredRobberies.filter((r) => r.status === 2).length,
     };
-  }, [robberies]);
+  }, [filteredRobberies]);
 
   // Calculate mansion statistics
   const mansionStats = useMemo(() => {
     return {
-      total: mansions.length,
-      open: mansions.filter((r) => r.status === 1).length,
-      ready: mansions.filter((r) => r.status === 2).length,
+      total: filteredMansions.length,
+      open: filteredMansions.filter((r) => r.status === 1).length,
+      ready: filteredMansions.filter((r) => r.status === 2).length,
     };
-  }, [mansions]);
+  }, [filteredMansions]);
 
   // Filter airdrops by location
   const filteredAirdrops = useMemo(() => {
@@ -311,8 +311,17 @@ function RobberyTrackerContent() {
             ? robberyStats.total > 0 && (
                 <div className="flex flex-wrap items-center gap-3 text-sm">
                   <span className="text-primary-text font-semibold">
-                    {robberyStats.total}{" "}
-                    {robberyStats.total === 1 ? "Robbery" : "Robberies"}
+                    {searchQuery || selectedRobberyTypes.length > 0 ? (
+                      <>
+                        Showing {robberyStats.total} of {robberies.length}{" "}
+                        Robberies
+                      </>
+                    ) : (
+                      <>
+                        {robberyStats.total}{" "}
+                        {robberyStats.total === 1 ? "Robbery" : "Robberies"}
+                      </>
+                    )}
                   </span>
                   <div className="flex items-center gap-2 text-xs">
                     {robberyStats.open > 0 && (
@@ -335,8 +344,17 @@ function RobberyTrackerContent() {
               ? mansionStats.total > 0 && (
                   <div className="flex flex-wrap items-center gap-3 text-sm">
                     <span className="text-primary-text font-semibold">
-                      {mansionStats.total}{" "}
-                      {mansionStats.total === 1 ? "Mansion" : "Mansions"}
+                      {searchQuery ? (
+                        <>
+                          Showing {mansionStats.total} of {mansions.length}{" "}
+                          Mansions
+                        </>
+                      ) : (
+                        <>
+                          {mansionStats.total}{" "}
+                          {mansionStats.total === 1 ? "Mansion" : "Mansions"}
+                        </>
+                      )}
                     </span>
                     <div className="flex items-center gap-2 text-xs">
                       {mansionStats.open > 0 && (
@@ -358,8 +376,17 @@ function RobberyTrackerContent() {
               : airdropStats.total > 0 && (
                   <div className="flex flex-wrap items-center gap-3 text-sm">
                     <span className="text-primary-text font-semibold">
-                      {airdropStats.total}{" "}
-                      {airdropStats.total === 1 ? "Airdrop" : "Airdrops"}
+                      {searchQuery || activeAirdropLocation !== "all" ? (
+                        <>
+                          Showing {airdropStats.total} of {airdrops.length}{" "}
+                          Airdrops
+                        </>
+                      ) : (
+                        <>
+                          {airdropStats.total}{" "}
+                          {airdropStats.total === 1 ? "Airdrop" : "Airdrops"}
+                        </>
+                      )}
                     </span>
                     <div className="flex items-center gap-2 text-xs">
                       {airdropStats.easy > 0 && (
@@ -447,7 +474,7 @@ function RobberyTrackerContent() {
 
         {/* Loading State - only show when no data and no error */}
         {!isConnected && !error && !hasData && (
-          <div className="flex items-center justify-center py-20">
+          <div className="flex min-h-screen flex-col items-center justify-start py-20 pt-24">
             <div className="text-center">
               <div className="border-primary-border border-t-primary-accent mb-4 inline-block h-12 w-12 animate-spin rounded-full border-4" />
               <p className="text-secondary-text">
@@ -492,9 +519,9 @@ function RobberyTrackerContent() {
                     {selectedRobberyTypes.length > 0 && (
                       <button
                         onClick={() => setSelectedRobberyTypes([])}
-                        className="text-button-info hover:text-button-info-hover cursor-pointer text-sm font-medium transition-colors"
+                        className="text-link hover:text-link-hover cursor-pointer text-sm font-medium transition-colors"
                       >
-                        Clear All
+                        Clear Filters
                       </button>
                     )}
                   </div>
@@ -554,7 +581,7 @@ function RobberyTrackerContent() {
                     ))}
                   </Masonry>
                 ) : (
-                  <div className="flex flex-col items-center justify-center py-12 text-center">
+                  <div className="flex min-h-screen flex-col items-center justify-start py-12 pt-24 text-center">
                     <Icon
                       icon="heroicons:magnifying-glass"
                       className="text-tertiary-text mb-4 h-12 w-12"
@@ -601,7 +628,7 @@ function RobberyTrackerContent() {
                     ))}
                   </Masonry>
                 ) : (
-                  <div className="flex flex-col items-center justify-center py-12 text-center">
+                  <div className="flex min-h-screen flex-col items-center justify-start py-12 pt-24 text-center">
                     <Icon
                       icon="heroicons:magnifying-glass"
                       className="text-tertiary-text mb-4 h-12 w-12"
@@ -653,8 +680,17 @@ function RobberyTrackerContent() {
                 {airdropStats.total > 0 && (
                   <div className="mb-4 flex flex-wrap items-center gap-3 text-sm">
                     <span className="text-primary-text font-semibold">
-                      {airdropStats.total}{" "}
-                      {airdropStats.total === 1 ? "Airdrop" : "Airdrops"}
+                      {searchQuery || activeAirdropLocation !== "all" ? (
+                        <>
+                          Showing {airdropStats.total} of {airdrops.length}{" "}
+                          Airdrops
+                        </>
+                      ) : (
+                        <>
+                          {airdropStats.total}{" "}
+                          {airdropStats.total === 1 ? "Airdrop" : "Airdrops"}
+                        </>
+                      )}
                     </span>
                     <div className="flex items-center gap-2 text-xs">
                       {airdropStats.easy > 0 && (
@@ -703,7 +739,7 @@ function RobberyTrackerContent() {
                     ))}
                   </Masonry>
                 ) : (
-                  <div className="flex flex-col items-center justify-center py-12 text-center">
+                  <div className="flex min-h-screen flex-col items-center justify-start py-12 pt-24 text-center">
                     <Icon
                       icon="heroicons:magnifying-glass"
                       className="text-tertiary-text mb-4 h-12 w-12"
@@ -725,7 +761,7 @@ function RobberyTrackerContent() {
           /* Empty State - only when connected with no data and no error */
           isConnected &&
           !error && (
-            <div className="flex items-center justify-center py-20">
+            <div className="flex min-h-screen flex-col items-center justify-start py-20 pt-24">
               <div className="text-center">
                 <Icon
                   icon="mdi:clock"
