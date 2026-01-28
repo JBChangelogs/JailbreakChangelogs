@@ -27,6 +27,14 @@ import SupporterModal from "@/components/Modals/SupporterModal";
 import { useSupporterModal } from "@/hooks/useSupporterModal";
 import { safeSetJSON } from "@/utils/safeStorage";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
+import toast from "react-hot-toast";
+import { NotificationPreferenceToggle } from "@/components/Settings/NotificationPreferenceToggle";
+import {
+  fetchAvailableNotificationPreferences,
+  fetchUserNotificationPreferences,
+  updateUserNotificationPreferences,
+  type NotificationPreferenceEntry,
+} from "@/services/notificationPreferencesService";
 
 export default function SettingsPage() {
   const { user, isLoading } = useAuthContext();
@@ -34,6 +42,17 @@ export default function SettingsPage() {
   const router = useRouter();
   const [showHighlight, setShowHighlight] = useState(false);
   const [highlightSetting, setHighlightSetting] = useState<string | null>(null);
+  const [notificationPrefs, setNotificationPrefs] = useState<
+    NotificationPreferenceEntry[] | null
+  >(null);
+  const [notificationPrefsLoading, setNotificationPrefsLoading] =
+    useState<boolean>(true);
+  const [notificationPrefsSaving, setNotificationPrefsSaving] = useState<
+    Record<string, boolean>
+  >({});
+  const [notificationPrefsError, setNotificationPrefsError] = useState<
+    string | null
+  >(null);
 
   // Derive state from props instead of setting in useEffect
   const userData = user;
@@ -78,6 +97,90 @@ export default function SettingsPage() {
       router.push("/");
     }
   }, [user, isLoading, router]);
+
+  useEffect(() => {
+    let mounted = true;
+    async function loadNotificationPrefs() {
+      try {
+        setNotificationPrefsError(null);
+        setNotificationPrefsLoading(true);
+
+        // These hit Next.js API routes (server-side calls upstream)
+        const [available, userPrefs] = await Promise.all([
+          fetchAvailableNotificationPreferences(),
+          fetchUserNotificationPreferences(),
+        ]);
+
+        const explicitMap = new Map(
+          (userPrefs.preferences ?? []).map((p) => [p.title, !!p.enabled]),
+        );
+
+        // Missing preference = ON by default
+        const merged: NotificationPreferenceEntry[] = available.map(
+          (title) => ({
+            title,
+            enabled: explicitMap.has(title)
+              ? (explicitMap.get(title) as boolean)
+              : true,
+          }),
+        );
+
+        if (mounted) setNotificationPrefs(merged);
+      } catch (e) {
+        if (!mounted) return;
+        setNotificationPrefs([]);
+        setNotificationPrefsError(
+          e instanceof Error
+            ? e.message
+            : "Failed to load notification preferences",
+        );
+      } finally {
+        if (mounted) setNotificationPrefsLoading(false);
+      }
+    }
+
+    // Only attempt when auth is resolved and user is present
+    if (!isLoading && user) loadNotificationPrefs();
+    return () => {
+      mounted = false;
+    };
+  }, [isLoading, user]);
+
+  const setSaving = (title: string, saving: boolean) => {
+    setNotificationPrefsSaving((prev) => ({ ...prev, [title]: saving }));
+  };
+
+  const handleNotificationPrefToggle = async (
+    title: string,
+    nextEnabled: boolean,
+  ) => {
+    if (!notificationPrefs) return;
+
+    // Optimistic UI update
+    const prev = notificationPrefs;
+    const next = prev.map((p) =>
+      p.title === title ? { ...p, enabled: nextEnabled } : p,
+    );
+    setNotificationPrefs(next);
+    setNotificationPrefsError(null);
+    setSaving(title, true);
+
+    try {
+      await updateUserNotificationPreferences([
+        { title, enabled: nextEnabled },
+      ]);
+      toast.success("Setting updated successfully");
+    } catch (e) {
+      // Revert on failure
+      setNotificationPrefs(prev);
+      const msg =
+        e instanceof Error ? e.message : "Failed to update preference";
+      setNotificationPrefsError(msg);
+      toast.error(msg);
+    } finally {
+      setSaving(title, false);
+    }
+  };
 
   const handleBannerUpdate = (newBannerUrl: string) => {
     if (userData) {
@@ -514,6 +617,72 @@ export default function SettingsPage() {
           </Paper>
         );
       })}
+
+      <Paper
+        elevation={1}
+        sx={{
+          mb: 4,
+          p: 3,
+          backgroundColor: "var(--color-secondary-bg)",
+          color: "var(--color-primary-text)",
+        }}
+      >
+        <Typography
+          variant="h6"
+          component="h2"
+          gutterBottom
+          sx={{ fontWeight: "bold", color: "var(--color-primary-text)" }}
+        >
+          Notification Preferences
+        </Typography>
+        <Divider sx={{ mb: 2 }} />
+
+        {notificationPrefsError && (
+          <Typography
+            variant="body2"
+            sx={{ mb: 2, color: "var(--color-button-danger)" }}
+          >
+            {notificationPrefsError}
+          </Typography>
+        )}
+
+        {notificationPrefsLoading ? (
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+            {[1, 2, 3].map((i) => (
+              <Box
+                key={i}
+                sx={{ display: "flex", alignItems: "center", gap: 2 }}
+              >
+                <Skeleton variant="rectangular" width={40} height={24} />
+                <Box sx={{ flex: 1 }}>
+                  <Skeleton
+                    variant="text"
+                    width="60%"
+                    height={24}
+                    sx={{ mb: 1 }}
+                  />
+                  <Skeleton variant="text" width="80%" height={20} />
+                </Box>
+              </Box>
+            ))}
+          </Box>
+        ) : (
+          <FormGroup>
+            {(notificationPrefs ?? []).map((pref) => (
+              <NotificationPreferenceToggle
+                key={pref.title}
+                title={pref.title}
+                enabled={pref.enabled}
+                disabled={!!notificationPrefsSaving[pref.title]}
+                onChange={(nextEnabled) =>
+                  handleNotificationPrefToggle(pref.title, nextEnabled)
+                }
+                description="Toggle whether you receive this notification"
+              />
+            ))}
+          </FormGroup>
+        )}
+      </Paper>
 
       <Paper
         elevation={1}
