@@ -136,7 +136,7 @@ export const TotalSimilarItems: React.FC<TotalSimilarItemsProps> = ({
                   className={`cursor-pointer px-4 py-2 text-sm font-medium transition-all duration-200 ${
                     sortMode === "diff"
                       ? "bg-button-info text-form-button-text shadow-sm"
-                      : "hover:bg-primary/10 text-secondary-text hover:text-primary-text"
+                      : "bg-tertiary-bg text-secondary-text hover:text-primary-text"
                   }`}
                 >
                   Closest
@@ -146,7 +146,7 @@ export const TotalSimilarItems: React.FC<TotalSimilarItemsProps> = ({
                   className={`cursor-pointer px-4 py-2 text-sm font-medium transition-all duration-200 ${
                     sortMode === "demand-desc"
                       ? "bg-button-info text-form-button-text shadow-sm"
-                      : "hover:bg-primary/10 text-secondary-text hover:text-primary-text"
+                      : "bg-tertiary-bg text-secondary-text hover:text-primary-text"
                   }`}
                 >
                   Demand ↓
@@ -156,7 +156,7 @@ export const TotalSimilarItems: React.FC<TotalSimilarItemsProps> = ({
                   className={`cursor-pointer px-4 py-2 text-sm font-medium transition-all duration-200 ${
                     sortMode === "demand-asc"
                       ? "bg-button-info text-form-button-text shadow-sm"
-                      : "hover:bg-primary/10 text-secondary-text hover:text-primary-text"
+                      : "bg-tertiary-bg text-secondary-text hover:text-primary-text"
                   }`}
                 >
                   Demand ↑
