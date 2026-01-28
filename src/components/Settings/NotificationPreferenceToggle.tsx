@@ -71,9 +71,15 @@ export function NotificationPreferenceToggle({
         <Switch
           checked={enabled}
           onChange={(checked) => onChange(checked)}
-          className="data-checked:bg-button-info group border-border-primary dark:bg-primary-bg inline-flex h-6 w-11 cursor-pointer items-center rounded-full border bg-gray-200 transition data-disabled:cursor-not-allowed data-disabled:opacity-50"
+          className={`relative inline-flex h-6 w-11 cursor-pointer items-center rounded-full transition-colors focus:outline-none ${
+            enabled ? "bg-button-info" : "bg-button-secondary"
+          } ${disabled ? "cursor-not-allowed opacity-50" : ""}`}
         >
-          <span className="size-4 translate-x-1 rounded-full bg-white transition group-data-checked:translate-x-6 dark:bg-gray-200" />
+          <span
+            className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+              enabled ? "translate-x-6" : "translate-x-1"
+            }`}
+          />
         </Switch>
       </Field>
     </div>

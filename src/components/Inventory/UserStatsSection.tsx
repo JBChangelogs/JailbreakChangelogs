@@ -69,6 +69,14 @@ interface UserStatsSectionProps {
   totalCashValue: number;
   totalNetworth: number;
   totalDupedValue: number;
+  nonOgStats?: {
+    inventoryValue: number;
+    networth: number;
+    dupedValue: number;
+    itemCount: number;
+  };
+  showNonOgOnly: boolean;
+  setShowNonOgOnly: (val: boolean) => void;
   isLoadingValues: boolean;
   userId: string;
   hasDupedValue?: boolean;
@@ -148,6 +156,9 @@ export default function UserStatsSection({
   totalCashValue,
   totalNetworth,
   totalDupedValue,
+  nonOgStats,
+  showNonOgOnly,
+  setShowNonOgOnly,
   isLoadingValues,
   userId,
   hasDupedValue = false,
@@ -271,6 +282,31 @@ export default function UserStatsSection({
 
   return (
     <div className="space-y-4">
+      {/* Non-OG Toggle */}
+      {nonOgStats && (
+        <div className="flex items-center justify-end gap-2">
+          <label
+            className="text-secondary-text cursor-pointer text-sm font-medium select-none"
+            htmlFor="non-og-toggle"
+          >
+            Only Non-OG
+          </label>
+          <button
+            id="non-og-toggle"
+            onClick={() => setShowNonOgOnly(!showNonOgOnly)}
+            className={`relative inline-flex h-6 w-11 cursor-pointer items-center rounded-full transition-colors focus:outline-none ${
+              showNonOgOnly ? "bg-button-info" : "bg-button-secondary"
+            }`}
+          >
+            <span
+              className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                showNonOgOnly ? "translate-x-6" : "translate-x-1"
+              }`}
+            />
+          </button>
+        </div>
+      )}
+
       {/* Basic Stats */}
       <div
         className={`grid grid-cols-2 gap-4 ${(currentData.dupe_count ?? 0) > 0 ? "sm:grid-cols-3 lg:grid-cols-5" : "sm:grid-cols-4"}`}
@@ -278,43 +314,12 @@ export default function UserStatsSection({
         <div className="text-center">
           <p className="text-secondary-text text-sm">Total Items</p>
           <Tooltip
-            title={totalItemsCount.toLocaleString()}
-            placement="top"
-            arrow
-            slotProps={{
-              tooltip: {
-                sx: {
-                  backgroundColor: "var(--color-secondary-bg)",
-                  color: "var(--color-primary-text)",
-                  fontSize: "0.75rem",
-                  padding: "8px 12px",
-                  borderRadius: "8px",
-
-                  boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
-                  "& .MuiTooltip-arrow": {
-                    color: "var(--color-secondary-bg)",
-                  },
-                },
-              },
-            }}
-          >
-            <p className="text-primary-text cursor-help text-2xl font-bold">
-              {formatNumber(totalItemsCount)}
-            </p>
-          </Tooltip>
-        </div>
-        <div className="text-center">
-          <p className="text-secondary-text text-sm">Original Items</p>
-          <Tooltip
-            title={(() => {
-              const regularOriginal = currentData.data.filter(
-                (item) => item.isOriginalOwner,
-              ).length;
-              const dupeOriginal = (currentData.duplicates || []).filter(
-                (item) => item.isOriginalOwner,
-              ).length;
-              return (regularOriginal + dupeOriginal).toLocaleString();
-            })()}
+            title={
+              (showNonOgOnly
+                ? nonOgStats?.itemCount
+                : totalItemsCount
+              )?.toLocaleString() || "0"
+            }
             placement="top"
             arrow
             slotProps={{
@@ -336,11 +341,56 @@ export default function UserStatsSection({
           >
             <p className="text-primary-text cursor-help text-2xl font-bold">
               {formatNumber(
-                currentData.data.filter((item) => item.isOriginalOwner).length +
-                  (currentData.duplicates || []).filter(
-                    (item) => item.isOriginalOwner,
-                  ).length,
+                showNonOgOnly ? nonOgStats?.itemCount || 0 : totalItemsCount,
               )}
+            </p>
+          </Tooltip>
+        </div>
+        <div className="text-center">
+          <p className="text-secondary-text text-sm">Original Items</p>
+          <Tooltip
+            title={
+              showNonOgOnly
+                ? "0"
+                : (() => {
+                    const regularOriginal = currentData.data.filter(
+                      (item) => item.isOriginalOwner,
+                    ).length;
+                    const dupeOriginal = (currentData.duplicates || []).filter(
+                      (item) => item.isOriginalOwner,
+                    ).length;
+                    return (regularOriginal + dupeOriginal).toLocaleString();
+                  })()
+            }
+            placement="top"
+            arrow
+            slotProps={{
+              tooltip: {
+                sx: {
+                  backgroundColor: "var(--color-secondary-bg)",
+                  color: "var(--color-primary-text)",
+                  fontSize: "0.75rem",
+                  padding: "8px 12px",
+                  borderRadius: "8px",
+
+                  boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
+                  "& .MuiTooltip-arrow": {
+                    color: "var(--color-secondary-bg)",
+                  },
+                },
+              },
+            }}
+          >
+            <p className="text-primary-text cursor-help text-2xl font-bold">
+              {showNonOgOnly
+                ? "0"
+                : formatNumber(
+                    currentData.data.filter((item) => item.isOriginalOwner)
+                      .length +
+                      (currentData.duplicates || []).filter(
+                        (item) => item.isOriginalOwner,
+                      ).length,
+                  )}
             </p>
           </Tooltip>
         </div>
@@ -391,7 +441,10 @@ export default function UserStatsSection({
           <div className="text-center">
             <p className="text-secondary-text text-sm">Duped Items</p>
             <Tooltip
-              title={duplicatesCount.toLocaleString()}
+              title={(showNonOgOnly
+                ? nonOgStats?.itemCount || 0
+                : duplicatesCount
+              ).toLocaleString()}
               placement="top"
               arrow
               slotProps={{
@@ -412,7 +465,13 @@ export default function UserStatsSection({
               }}
             >
               <p className="text-primary-text cursor-help text-2xl font-bold">
-                {formatNumber(duplicatesCount)}
+                {formatNumber(
+                  showNonOgOnly
+                    ? (currentData.duplicates || []).filter(
+                        (i) => !i.isOriginalOwner,
+                      ).length
+                    : duplicatesCount,
+                )}
               </p>
             </Tooltip>
           </div>
@@ -461,9 +520,13 @@ export default function UserStatsSection({
         {/* Inventory Value */}
         <div className="border-border-primary bg-primary-bg rounded-lg border p-4 text-center">
           <div className="text-secondary-text mb-2 flex items-center justify-center gap-1.5 text-sm">
-            Total Inventory Value
+            {showNonOgOnly ? "Non-OG Inventory Value" : "Total Inventory Value"}
             <Tooltip
-              title="Only counts clean items' cash value. Does not include cash value of duped items."
+              title={
+                showNonOgOnly
+                  ? "Only counts clean non-OG items' cash value."
+                  : "Only counts clean items' cash value. Does not include cash value of duped items."
+              }
               placement="top"
               arrow
               slotProps={{
@@ -496,7 +559,7 @@ export default function UserStatsSection({
             </div>
           ) : (
             <Tooltip
-              title={`$${totalCashValue.toLocaleString()}`}
+              title={`$${(showNonOgOnly ? nonOgStats?.inventoryValue || 0 : totalCashValue).toLocaleString()}`}
               placement="top"
               arrow
               slotProps={{
@@ -516,7 +579,11 @@ export default function UserStatsSection({
               }}
             >
               <div className="text-primary-text cursor-help text-2xl font-bold">
-                {formatPreciseMoney(totalCashValue)}
+                {formatPreciseMoney(
+                  showNonOgOnly
+                    ? nonOgStats?.inventoryValue || 0
+                    : totalCashValue,
+                )}
               </div>
             </Tooltip>
           )}
@@ -525,9 +592,13 @@ export default function UserStatsSection({
         {/* Total Networth */}
         <div className="border-border-primary bg-primary-bg rounded-lg border p-4 text-center">
           <div className="text-secondary-text mb-2 flex items-center justify-center gap-1.5 text-sm">
-            Total Networth
+            {showNonOgOnly ? "Non-OG Networth" : "Total Networth"}
             <Tooltip
-              title="Includes total cash value of all items, including duped items' cash value."
+              title={
+                showNonOgOnly
+                  ? "Includes cash value of all non-OG items and your cash."
+                  : "Includes total cash value of all items, including duped items' cash value."
+              }
               placement="top"
               arrow
               slotProps={{
@@ -560,7 +631,7 @@ export default function UserStatsSection({
             </div>
           ) : (
             <Tooltip
-              title={`$${totalNetworth.toLocaleString()}`}
+              title={`$${(showNonOgOnly ? nonOgStats?.networth || 0 : totalNetworth).toLocaleString()}`}
               placement="top"
               arrow
               slotProps={{
@@ -580,7 +651,9 @@ export default function UserStatsSection({
               }}
             >
               <div className="text-primary-text cursor-help text-2xl font-bold">
-                {formatPreciseMoney(totalNetworth)}
+                {formatPreciseMoney(
+                  showNonOgOnly ? nonOgStats?.networth || 0 : totalNetworth,
+                )}
               </div>
             </Tooltip>
           )}
@@ -593,9 +666,13 @@ export default function UserStatsSection({
             currentData.duplicates.length > 0)) && (
           <div className="border-border-primary bg-primary-bg rounded-lg border p-4 text-center">
             <div className="text-secondary-text mb-2 flex items-center justify-center gap-1.5 text-sm">
-              Total Duped Value
+              {showNonOgOnly ? "Non-OG Duped Value" : "Total Duped Value"}
               <Tooltip
-                title="Collective duped value of all duped items in your inventory."
+                title={
+                  showNonOgOnly
+                    ? "Collective duped value of all non-OG duped items in your inventory."
+                    : "Collective duped value of all duped items in your inventory."
+                }
                 placement="top"
                 arrow
                 slotProps={{
@@ -628,7 +705,7 @@ export default function UserStatsSection({
               </div>
             ) : (
               <Tooltip
-                title={`$${totalDupedValue.toLocaleString()}`}
+                title={`$${(showNonOgOnly ? nonOgStats?.dupedValue || 0 : totalDupedValue).toLocaleString()}`}
                 placement="top"
                 arrow
                 slotProps={{
@@ -648,7 +725,11 @@ export default function UserStatsSection({
                 }}
               >
                 <div className="text-primary-text cursor-help text-2xl font-bold">
-                  {formatPreciseMoney(totalDupedValue)}
+                  {formatPreciseMoney(
+                    showNonOgOnly
+                      ? nonOgStats?.dupedValue || 0
+                      : totalDupedValue,
+                  )}
                 </div>
               </Tooltip>
             )}

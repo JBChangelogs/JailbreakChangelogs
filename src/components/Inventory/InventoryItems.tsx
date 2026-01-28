@@ -15,6 +15,7 @@ interface InventoryItemsProps {
   onItemClick: (item: InventoryItem) => void;
   itemsData?: Item[];
   isOwnInventory?: boolean;
+  showNonOgOnlyFromParent?: boolean;
 }
 
 export default function InventoryItems({
@@ -22,16 +23,35 @@ export default function InventoryItems({
   robloxUsers,
   onItemClick,
   itemsData: propItemsData,
+  showNonOgOnlyFromParent,
 }: InventoryItemsProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [showOnlyOriginal, setShowOnlyOriginal] = useState(false);
-  const [showOnlyNonOriginal, setShowOnlyNonOriginal] = useState(false);
+  const [showOnlyNonOriginal, setShowOnlyNonOriginal] = useState(
+    showNonOgOnlyFromParent || false,
+  );
   const [hideDuplicates, setHideDuplicates] = useState(false);
   const [showMissingItems, setShowMissingItems] = useState(false);
   const [showOnlyLimited, setShowOnlyLimited] = useState(false);
   const [showOnlySeasonal, setShowOnlySeasonal] = useState(false);
   const [isFiltering, setIsFiltering] = useState(false);
+
+  // Sync with parent toggle - recommended pattern to avoid cascading renders
+  const [prevShowNonOgOnly, setPrevShowNonOgOnly] = useState(
+    showNonOgOnlyFromParent,
+  );
+  if (showNonOgOnlyFromParent !== prevShowNonOgOnly) {
+    setPrevShowNonOgOnly(showNonOgOnlyFromParent);
+    if (showNonOgOnlyFromParent) {
+      setShowOnlyNonOriginal(true);
+      setShowOnlyOriginal(false);
+      setShowMissingItems(false);
+    } else {
+      setShowOnlyNonOriginal(false);
+    }
+  }
+
   const [sortOrder, setSortOrder] = useState<
     | "alpha-asc"
     | "alpha-desc"
