@@ -61,6 +61,8 @@ export interface TradeItem {
     last_updated: number;
   };
   demand?: string;
+  isDuped?: boolean;
+  instanceId?: string;
 }
 
 export interface TradeAd {

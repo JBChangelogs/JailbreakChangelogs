@@ -13,6 +13,7 @@ import CreatorLink from "@/components/Items/CreatorLink";
 import ItemValues from "@/components/Items/ItemValues";
 import { getCategoryColor } from "@/utils/categoryIcons";
 import NitroItemsVideoPlayer from "@/components/Ads/NitroItemsVideoPlayer";
+import NitroItemMobileAd from "@/components/Ads/NitroItemMobileAd";
 
 const ItemValueChart = dynamic(
   () => import("@/components/Items/ItemValueChart"),
@@ -339,7 +340,7 @@ export default function ItemDetailsClient({
                 )}
               </div>
 
-              <div className="mt-4 flex justify-center">
+              <div className="mt-4 hidden justify-center xl:flex">
                 <NitroItemsVideoPlayer className="min-h-[180px] w-full max-w-xs sm:max-w-sm md:max-w-md" />
               </div>
 
@@ -532,6 +533,11 @@ export default function ItemDetailsClient({
                       </div>
                     </div>
                   )}
+
+                {/* Mobile Ad - shown only on smaller screens */}
+                <div className="mt-4 flex justify-center xl:hidden">
+                  <NitroItemMobileAd className="min-h-[180px] w-full max-w-xs sm:max-w-sm md:max-w-md" />
+                </div>
               </div>
 
               <ItemDetailsTabs value={activeTab} onChange={handleTabChange} />
