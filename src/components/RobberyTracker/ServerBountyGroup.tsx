@@ -1,11 +1,12 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Icon } from "@/components/ui/IconWrapper";
 import { BountyData } from "@/hooks/useRobberyTrackerBountiesWebSocket";
 import BountyCard from "./BountyCard";
 import { useOptimizedRealTimeRelativeDate } from "@/hooks/useSharedTimer";
 import RobberyPlayersModal from "./RobberyPlayersModal";
+import { useServerRegions } from "@/hooks/useServerRegions";
 
 interface ServerBountyGroupProps {
   serverId: string;
@@ -17,9 +18,18 @@ export default function ServerBountyGroup({
   bounties,
 }: ServerBountyGroupProps) {
   const [isPlayersModalOpen, setIsPlayersModalOpen] = React.useState(false);
+  const [regionData, setRegionData] = useState<{
+    city: string;
+    regionName: string;
+    country: string;
+  } | null>(null);
+
+  const { fetchRegionData } = useServerRegions();
 
   // Calculate total bounty value for the server
   const totalBounty = bounties.reduce((sum, b) => sum + b.bounty, 0);
+
+  const jobId = bounties[0]?.server?.job_id || "";
 
   // Get unique cop count from server players
   const players = bounties[0]?.server?.players || [];
@@ -29,9 +39,6 @@ export default function ServerBountyGroup({
   const formatBounty = (amount: number): string => {
     return amount.toLocaleString();
   };
-
-  // Get the first bounty's job_id for the Join Server link
-  const jobId = bounties[0]?.server?.job_id || "";
 
   // Get latest timestamp for "Last update"
   const latestTimestamp = Math.max(...bounties.map((b) => b.timestamp));
@@ -51,6 +58,18 @@ export default function ServerBountyGroup({
   };
 
   const serverTime = bounties[0]?.server_time;
+
+  // Fetch region data for this server
+  useEffect(() => {
+    if (jobId) {
+      fetchRegionData([jobId]).then((results) => {
+        const data = results[jobId];
+        if (data) {
+          setRegionData(data);
+        }
+      });
+    }
+  }, [jobId, fetchRegionData]);
 
   return (
     <div className="border-border-primary flex flex-col overflow-hidden rounded-xl border">
@@ -95,17 +114,8 @@ export default function ServerBountyGroup({
 
         {/* Right Side: Actions & Info */}
         <div className="flex flex-col gap-3 lg:items-end">
+          {/* Action Buttons */}
           <div className="flex flex-wrap items-center gap-4">
-            {/* Server Time */}
-            {serverTime && (
-              <div className="flex items-center gap-1.5 text-sm">
-                <span className="text-secondary-text">Server Time:</span>
-                <span className="text-primary-text font-mono font-medium">
-                  {formatServerTime(serverTime)}
-                </span>
-              </div>
-            )}
-
             {/* View Players Button */}
             {players.length > 0 && (
               <button
@@ -133,6 +143,29 @@ export default function ServerBountyGroup({
               </a>
             )}
           </div>
+
+          {/* Server Region */}
+          <div className="flex items-center gap-1.5 text-sm">
+            <Icon
+              icon="mdi:map-marker"
+              className="text-secondary-text h-4 w-4"
+            />
+            <span className="text-secondary-text">
+              {regionData
+                ? `${regionData.city}, ${regionData.regionName}, ${regionData.country}`
+                : "Unknown"}
+            </span>
+          </div>
+
+          {/* Server Time */}
+          {serverTime && (
+            <div className="flex items-center gap-1.5 text-sm">
+              <span className="text-secondary-text">Server Time:</span>
+              <span className="text-primary-text font-mono font-medium">
+                {formatServerTime(serverTime)}
+              </span>
+            </div>
+          )}
 
           {/* Last Update */}
           <div className="text-tertiary-text flex items-center gap-1.5 text-xs">

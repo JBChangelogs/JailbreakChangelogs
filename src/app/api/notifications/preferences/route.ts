@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { BASE_API_URL } from "@/utils/api";
+import { getCurrentUser } from "@/utils/serverSession";
 
 type PreferenceEntry = {
   title: string;
@@ -9,16 +10,6 @@ type PreferenceEntry = {
 
 export async function GET() {
   try {
-    const cookieStore = await cookies();
-    const token = cookieStore.get("token")?.value;
-
-    if (!token || token === "undefined") {
-      return NextResponse.json(
-        { error: "Authentication required" },
-        { status: 401 },
-      );
-    }
-
     if (!BASE_API_URL) {
       return NextResponse.json(
         { error: "API URL not configured" },
@@ -26,8 +17,16 @@ export async function GET() {
       );
     }
 
+    const user = await getCurrentUser();
+    if (!user) {
+      return NextResponse.json(
+        { error: "Authentication required" },
+        { status: 401 },
+      );
+    }
+
     const resp = await fetch(
-      `${BASE_API_URL}/notifications/preferences?token=${encodeURIComponent(token)}`,
+      `${BASE_API_URL}/notifications/preferences?user_id=${encodeURIComponent(user.id)}`,
       {
         method: "GET",
         headers: { "Content-Type": "application/json" },

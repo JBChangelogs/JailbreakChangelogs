@@ -7,6 +7,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useOptimizedRealTimeRelativeDate } from "@/hooks/useSharedTimer";
 import { AirdropData } from "@/hooks/useRobberyTrackerAirdropsWebSocket";
 import RobberyPlayersModal from "./RobberyPlayersModal";
+import { useServerRegions } from "@/hooks/useServerRegions";
+import { ServerRegionData } from "@/hooks/useRobberyTrackerWebSocket";
 import { INVENTORY_API_URL } from "@/utils/api";
 
 interface AirdropCardProps {
@@ -17,6 +19,8 @@ export default function AirdropCard({ airdrop }: AirdropCardProps) {
   const [isPlayersModalOpen, setIsPlayersModalOpen] = useState(false);
   const [isMapModalOpen, setIsMapModalOpen] = useState(false);
   const [despawnCountdown, setDespawnCountdown] = useState<string | null>(null);
+  const [regionData, setRegionData] = useState<ServerRegionData | null>(null);
+  const { fetchRegionData } = useServerRegions();
 
   // Get difficulty based on color
   const getDifficulty = (color: string): string => {
@@ -90,6 +94,17 @@ export default function AirdropCard({ airdrop }: AirdropCardProps) {
       return () => clearInterval(interval);
     }
   }, [airdrop.gone_at]);
+
+  useEffect(() => {
+    if (jobId) {
+      fetchRegionData([jobId]).then((results) => {
+        const data = results[jobId];
+        if (data) {
+          setRegionData(data);
+        }
+      });
+    }
+  }, [jobId, fetchRegionData]);
 
   // Format server time as 12-hour clock with AM/PM
   const formatServerTime = (serverTime: number) => {
@@ -172,6 +187,16 @@ export default function AirdropCard({ airdrop }: AirdropCardProps) {
             <span className="text-secondary-text">Server Time:</span>
             <span className="font-mono">
               {formatServerTime(airdrop.server_time)}
+            </span>
+          </div>
+
+          {/* Region Info */}
+          <div className="space-y-1">
+            <span className="text-secondary-text text-sm">Region:</span>
+            <span className="text-primary-text block font-medium">
+              {regionData
+                ? `${regionData.city}, ${regionData.regionName}, ${regionData.country}`
+                : "Unknown"}
             </span>
           </div>
 

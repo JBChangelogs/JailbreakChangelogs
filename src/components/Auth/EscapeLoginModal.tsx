@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogPanel } from "@headlessui/react";
 import { useEscapeLogin } from "@/utils/escapeLogin";
 
@@ -9,6 +9,31 @@ export default function EscapeLoginModal() {
   const [token, setToken] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    if (showModal) {
+      const fetchToken = async () => {
+        try {
+          const response = await fetch("/api/auth/token");
+          if (response.ok) {
+            const data = await response.json();
+            if (data.token) {
+              setToken(data.token);
+            }
+          }
+        } catch (error) {
+          console.error("Failed to fetch token:", error);
+        }
+      };
+
+      fetchToken();
+    }
+  }, [showModal]);
+
+  const handleClose = () => {
+    setShowModal(false);
+    setError(null);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -23,11 +48,7 @@ export default function EscapeLoginModal() {
   };
 
   return (
-    <Dialog
-      open={showModal}
-      onClose={() => setShowModal(false)}
-      className="relative z-50"
-    >
+    <Dialog open={showModal} onClose={handleClose} className="relative z-50">
       <div
         className="fixed inset-0 bg-black/30 backdrop-blur-sm"
         aria-hidden="true"
@@ -66,7 +87,7 @@ export default function EscapeLoginModal() {
             <div className="modal-footer flex justify-end gap-2 px-6 py-4">
               <button
                 type="button"
-                onClick={() => setShowModal(false)}
+                onClick={handleClose}
                 disabled={isLoading}
                 className="text-secondary-text hover:text-primary-text cursor-pointer rounded border-none bg-transparent px-4 py-2 text-sm disabled:opacity-50"
               >
