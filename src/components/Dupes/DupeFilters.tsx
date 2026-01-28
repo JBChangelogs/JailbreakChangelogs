@@ -103,15 +103,15 @@ export default function DupeFilters({
             {hasDuplicates && (
               <option value="duplicates">Group Duplicates</option>
             )}
+            <option disabled>Alphabetically</option>
+            <option value="alpha-asc">Name (A to Z)</option>
+            <option value="alpha-desc">Name (Z to A)</option>
             <option disabled>Date</option>
             <option value="created-desc">Logged On (Newest to Oldest)</option>
             <option value="created-asc">Logged On (Oldest to Newest)</option>
             <option disabled>Value</option>
             <option value="duped-desc">Dupe Value (High to Low)</option>
             <option value="duped-asc">Dupe Value (Low to High)</option>
-            <option disabled>Alphabetically</option>
-            <option value="alpha-asc">Name (A to Z)</option>
-            <option value="alpha-desc">Name (Z to A)</option>
           </select>
         </div>
       </div>

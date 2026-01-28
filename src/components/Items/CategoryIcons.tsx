@@ -54,6 +54,12 @@ export default function CategoryIcons({
         handleCategoryClick("favorites");
       },
     },
+    getCategoryData("body colors", "name-body-colors", "Body Colors"),
+    getCategoryData("textures", "name-textures", "Textures"),
+    getCategoryData("drifts", "name-drifts", "Drifts"),
+    getCategoryData("furniture", "name-furnitures", "Furniture"),
+    getCategoryData("horns", "name-horns", "Horns"),
+    getCategoryData("hyperchromes", "name-hyperchromes", "HyperChromes"),
     {
       id: "name-limited-items",
       name: "Limited",
@@ -62,6 +68,7 @@ export default function CategoryIcons({
       bgColor: "rgba(18, 78, 102, 0.1)",
       iconColor: "#ffd700",
     },
+    getCategoryData("rims", "name-rims", "Rims"),
     {
       id: "name-seasonal-items",
       name: "Seasonal",
@@ -70,17 +77,10 @@ export default function CategoryIcons({
       bgColor: "rgba(64, 192, 231, 0.1)",
       iconColor: "#40c0e7",
     },
-    getCategoryData("vehicles", "name-vehicles", "Vehicles"),
-    getCategoryData("hyperchromes", "name-hyperchromes", "HyperChromes"),
-    getCategoryData("rims", "name-rims", "Rims"),
     getCategoryData("spoilers", "name-spoilers", "Spoilers"),
-    getCategoryData("body colors", "name-body-colors", "Body Colors"),
-    getCategoryData("textures", "name-textures", "Textures"),
     getCategoryData("tire stickers", "name-tire-stickers", "Tire Stickers"),
     getCategoryData("tire styles", "name-tire-styles", "Tire Styles"),
-    getCategoryData("drifts", "name-drifts", "Drifts"),
-    getCategoryData("furniture", "name-furnitures", "Furniture"),
-    getCategoryData("horns", "name-horns", "Horns"),
+    getCategoryData("vehicles", "name-vehicles", "Vehicles"),
     getCategoryData("weapon skins", "name-weapon-skins", "Weapon Skins"),
   ];
 
