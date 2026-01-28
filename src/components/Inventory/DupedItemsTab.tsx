@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import Link from "next/link";
 import { RobloxUser, Item } from "@/types";
 import { InventoryItem } from "@/app/inventories/types";
 import InventoryItemsGrid from "./InventoryItemsGrid";
@@ -310,7 +311,11 @@ export default function DupedItemsTab({
               className="text-button-info shrink-0 text-lg"
             />
             <span className="font-medium">
-              Helpful Tip: This tab shows items that have been flagged as dupes.
+              To check if an item is duped, please use our{" "}
+              <Link href="/dupes" className="font-bold underline">
+                Dupe Finder
+              </Link>
+              .
             </span>
           </div>
         </div>

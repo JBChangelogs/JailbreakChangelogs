@@ -1,4 +1,7 @@
 import { Switch, Field, Label, Description } from "@headlessui/react";
+import { Icon } from "@/components/ui/IconWrapper";
+import toast from "react-hot-toast";
+import Tooltip from "@mui/material/Tooltip";
 
 export type NotificationPreferenceToggleProps = {
   title: string;
@@ -23,12 +26,45 @@ export function NotificationPreferenceToggle({
   description,
   disabled,
 }: NotificationPreferenceToggleProps) {
+  const handleCopyLink = () => {
+    const url = new URL(window.location.href);
+    url.searchParams.set("highlight", title);
+    navigator.clipboard.writeText(url.toString());
+    toast.success(`Link for "${humanizeTitle(title)}" copied!`);
+  };
+
   return (
     <div className="mb-2">
       <Field disabled={disabled}>
-        <Label className="text-primary-text text-base font-medium">
-          {humanizeTitle(title)}
-        </Label>
+        <div className="flex items-center gap-2">
+          <Label className="text-primary-text text-base font-medium">
+            {humanizeTitle(title)}
+          </Label>
+          <Tooltip
+            title="Copy URL"
+            arrow
+            placement="top"
+            slotProps={{
+              tooltip: {
+                sx: {
+                  backgroundColor: "var(--color-secondary-bg)",
+                  color: "var(--color-primary-text)",
+                  "& .MuiTooltip-arrow": {
+                    color: "var(--color-secondary-bg)",
+                  },
+                },
+              },
+            }}
+          >
+            <button
+              onClick={handleCopyLink}
+              className="text-secondary-text hover:text-link cursor-pointer transition-colors"
+              aria-label="Copy highlight link"
+            >
+              <Icon icon="heroicons:link" className="h-4 w-4" />
+            </button>
+          </Tooltip>
+        </div>
         <Description className="text-secondary-text text-sm">
           {description ?? "Manage this notification type"}
         </Description>

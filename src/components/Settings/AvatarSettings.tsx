@@ -353,14 +353,17 @@ export const AvatarSettings = ({
               helperText={avatarError}
               sx={{
                 "& .MuiOutlinedInput-root": {
-                  "& fieldset": {},
+                  "& fieldset": {
+                    borderColor: "var(--color-border-primary)",
+                  },
                   "&:hover fieldset": {
                     borderColor: "var(--color-button-info)",
                   },
                   "&.Mui-focused fieldset": {
                     borderColor: "var(--color-button-info)",
+                    borderWidth: "1px",
                   },
-                  backgroundColor: "var(--color-secondary-bg)",
+                  backgroundColor: "var(--color-tertiary-bg)",
                   height: "40px",
                 },
                 "& .MuiInputBase-input": {
@@ -422,6 +425,8 @@ export const AvatarSettings = ({
                 height: "40px",
                 minWidth: { xs: "100%", sm: "120px" },
                 flex: { xs: 1, sm: "none" },
+                fontSize: "0.875rem",
+                fontWeight: 600,
               }}
             >
               {isUploading ? "Uploading..." : "Upload File"}
@@ -455,6 +460,8 @@ export const AvatarSettings = ({
                 height: "40px",
                 minWidth: { xs: "100%", sm: "100px" },
                 flex: { xs: 1, sm: "none" },
+                fontSize: "0.875rem",
+                fontWeight: 600,
               }}
             >
               Update

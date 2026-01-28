@@ -542,7 +542,13 @@ export default function Header() {
         <OfflineDetector />
         <NewsTicker />
         <div className="relative z-10">
-          <NavbarModern />
+          <NavbarModern
+            unreadCount={unreadCount}
+            setUnreadCount={setUnreadCount}
+            fetchUnreadCount={async () => {
+              await fetchUnreadCount();
+            }}
+          />
         </div>
       </div>
 
@@ -730,6 +736,22 @@ export default function Header() {
                               History
                             </button>
                           </div>
+                        </div>
+                      )}
+
+                      {/* Manage Notifications Link */}
+                      {isAuthenticated && (
+                        <div className="border-border-secondary bg-secondary-bg/30 border-b px-4 py-2">
+                          <p className="text-secondary-text text-xs">
+                            Manage which notifications you receive in{" "}
+                            <Link
+                              href="/settings?highlight=notifications"
+                              className="text-link hover:underline"
+                              onClick={() => setNotificationMenuOpen(false)}
+                            >
+                              Settings
+                            </Link>
+                          </p>
                         </div>
                       )}
 

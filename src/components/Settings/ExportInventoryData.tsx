@@ -57,12 +57,13 @@ export const ExportInventoryData = () => {
           sx={{
             fontWeight: "bold",
             color: "var(--text-primary)",
-            mb: 1,
             display: "flex",
             alignItems: "center",
-            gap: 1,
+            gap: 1.5,
+            mb: 1,
           }}
         >
+          <Icon icon="heroicons-outline:download" className="h-6 w-6" />
           Export Inventory Data
         </Typography>
         <Typography variant="body2" sx={{ color: "var(--color-primary-text)" }}>
@@ -82,6 +83,7 @@ export const ExportInventoryData = () => {
           backgroundColor: "var(--color-button-info)",
           color: "var(--color-form-button-text)",
           fontWeight: 600,
+          fontSize: "0.875rem",
           "&:hover": {
             backgroundColor: "var(--color-button-info-hover)",
           },

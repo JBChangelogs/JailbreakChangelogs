@@ -16,6 +16,7 @@ export async function GET() {
         method: "GET",
         headers: { "Content-Type": "application/json" },
         cache: "no-store",
+        signal: AbortSignal.timeout(20000),
       },
     );
 
