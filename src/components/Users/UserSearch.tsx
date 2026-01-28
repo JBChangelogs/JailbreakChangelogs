@@ -44,7 +44,10 @@ export default function UserSearch() {
       fetchTimeoutIdRef.current = setTimeout(async () => {
         setIsLoading(true);
         try {
-          const searchResults = await searchUsers(query, usersPerPage);
+          const searchResultsRaw = await searchUsers(query, usersPerPage);
+          const searchResults = Array.isArray(searchResultsRaw)
+            ? searchResultsRaw
+            : [];
           setUsers(searchResults);
           setTotalPages(0); // No pagination for search results
           setTotal(searchResults.length);
@@ -72,9 +75,14 @@ export default function UserSearch() {
         setIsLoading(true);
         try {
           const data = await fetchPaginatedUsers(pageNum, usersPerPage);
-          setUsers(data.items);
-          setTotalPages(data.total_pages);
-          setTotal(data.total);
+          const items = Array.isArray(data?.items) ? data.items : [];
+          const nextTotalPages =
+            typeof data?.total_pages === "number" ? data.total_pages : 0;
+          const nextTotal = typeof data?.total === "number" ? data.total : 0;
+
+          setUsers(items);
+          setTotalPages(nextTotalPages);
+          setTotal(nextTotal);
         } catch (error) {
           console.error("Error fetching users:", error);
           setUsers([]);
@@ -229,8 +237,9 @@ export default function UserSearch() {
                 queryFromUrl && queryFromUrl.length > MAX_QUERY_DISPLAY
                   ? queryFromUrl.slice(0, MAX_QUERY_DISPLAY) + "..."
                   : queryFromUrl;
+              const usersCount = users?.length ?? 0;
               return queryFromUrl
-                ? `Found ${users.length.toLocaleString()} ${users.length === 1 ? "user" : "users"} matching "${displayQuery}"`
+                ? `Found ${usersCount.toLocaleString()} ${usersCount === 1 ? "user" : "users"} matching "${displayQuery}"`
                 : `Total Users: ${total.toLocaleString()}`;
             })()}
           </span>

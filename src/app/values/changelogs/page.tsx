@@ -2,7 +2,6 @@
 
 import { useEffect, useState, useRef } from "react";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
-import React from "react";
 import { ThemeProvider, Skeleton } from "@mui/material";
 import { darkTheme } from "@/theme/darkTheme";
 import ValuesChangelogHeader from "@/components/Values/ValuesChangelogHeader";
