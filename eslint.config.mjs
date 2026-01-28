@@ -9,19 +9,8 @@ const eslintConfig = defineConfig([
   prettier,
   // Override default ignores of eslint-config-next.
   globalIgnores([
-    // Default ignores of eslint-config-next:
-    ".next/**",
-    "out/**",
-    "build/**",
-    "dist/**",
-    ".source/**",
-    "scripts/**",
-    "next-env.d.ts",
-    "dev-changelog/content/**",
-    ".agent/skills/**",
-    ".claude/**",
-    ".cursor/**",
-    "public/**",
+    "**",
+    "!src/**",
   ]),
 ]);
 
