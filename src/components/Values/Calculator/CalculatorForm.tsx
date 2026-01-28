@@ -245,7 +245,6 @@ const CalculatorItemGrid: React.FC<{
               : item.name;
             const selectedType = side ? getSelectedValueType(item) : "cash";
             const isDupedSelected = selectedType === "duped";
-            const hasDuped = !!(item.duped_value && item.duped_value !== "N/A");
 
             return (
               <div

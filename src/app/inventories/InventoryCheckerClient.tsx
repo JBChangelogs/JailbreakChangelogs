@@ -73,7 +73,6 @@ export default function InventoryCheckerClient({
   originalSearchTerm,
   robloxUsers: initialRobloxUsers,
   userConnectionData,
-  initialDupeData,
   currentSeason = null,
   error,
   isLoading: externalIsLoading,
@@ -101,8 +100,7 @@ export default function InventoryCheckerClient({
   const [networthData] = useState<UserNetworthData[]>(initialNetworthData);
   const [moneyHistoryData] = useState<MoneyHistory[]>(initialMoneyHistoryData);
   const [activeTab, setActiveTab] = useState(0);
-  const dupedItems =
-    initialDupeData && Array.isArray(initialDupeData) ? initialDupeData : [];
+  const [showNonOgOnly, setShowNonOgOnly] = useState(false);
 
   const router = useRouter();
   const { getId } = useUsernameToId();
@@ -963,9 +961,10 @@ export default function InventoryCheckerClient({
                   robloxUsers={robloxUsers}
                   userConnectionData={userConnectionData || null}
                   itemsData={itemsData}
-                  dupedItems={dupedItems}
                   currentSeason={currentSeason}
                   initialNetworthData={networthData}
+                  showNonOgOnly={showNonOgOnly}
+                  setShowNonOgOnly={setShowNonOgOnly}
                 />
 
                 {/* Tabbed Interface */}
@@ -991,6 +990,7 @@ export default function InventoryCheckerClient({
                         onItemClick={handleItemClick}
                         itemsData={itemsData}
                         isOwnInventory={isOwnInventory}
+                        showNonOgOnlyFromParent={showNonOgOnly}
                       />
                     )}
 
