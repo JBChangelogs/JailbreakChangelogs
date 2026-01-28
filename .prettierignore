@@ -1,11 +1,6 @@
-dev-changelog/content/**
-.next/**
-out/**
-build/**
-dist/**
-.source/**
-node_modules/**
-.agent/skills/**
-.claude/**
-.cursor/**
-public/**
+# Ignore all files and folders in the root
+/*
+.*
+
+# But do not ignore the src folder
+!src/
