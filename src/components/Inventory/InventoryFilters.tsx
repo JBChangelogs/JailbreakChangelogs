@@ -135,6 +135,9 @@ export default function InventoryFilters({
               window.umami?.track("Inventory Sort Change", { sort: val });
             }}
           >
+            <option disabled>Alphabetically</option>
+            <option value="alpha-asc">Name (A to Z)</option>
+            <option value="alpha-desc">Name (Z to A)</option>
             <option disabled>Date</option>
             <option value="created-asc">Oldest First</option>
             <option value="created-desc">Newest First</option>
@@ -143,9 +146,6 @@ export default function InventoryFilters({
             <option value="cash-asc">Cash Value (Low to High)</option>
             <option value="duped-desc">Duped Value (High to Low)</option>
             <option value="duped-asc">Duped Value (Low to High)</option>
-            <option disabled>Alphabetically</option>
-            <option value="alpha-asc">Name (A to Z)</option>
-            <option value="alpha-desc">Name (Z to A)</option>
           </select>
         </div>
       </div>

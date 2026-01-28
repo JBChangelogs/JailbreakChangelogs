@@ -337,19 +337,19 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
                   Select category
                 </option>
                 <option value="name-all-items">All Items</option>
-                <option value="name-limited-items">Limited Items</option>
-                <option value="name-seasonal-items">Seasonal Items</option>
-                <option value="name-vehicles">Vehicles</option>
-                <option value="name-spoilers">Spoilers</option>
-                <option value="name-rims">Rims</option>
                 <option value="name-body-colors">Body Colors</option>
-                <option value="name-hyperchromes">HyperChromes</option>
                 <option value="name-textures">Body Textures</option>
-                <option value="name-tire-stickers">Tire Stickers</option>
-                <option value="name-tire-styles">Tire Styles</option>
                 <option value="name-drifts">Drifts</option>
                 <option value="name-furnitures">Furniture</option>
                 <option value="name-horns">Horns</option>
+                <option value="name-hyperchromes">HyperChromes</option>
+                <option value="name-limited-items">Limited Items</option>
+                <option value="name-rims">Rims</option>
+                <option value="name-seasonal-items">Seasonal Items</option>
+                <option value="name-spoilers">Spoilers</option>
+                <option value="name-tire-stickers">Tire Stickers</option>
+                <option value="name-tire-styles">Tire Styles</option>
+                <option value="name-vehicles">Vehicles</option>
                 <option value="name-weapon-skins">Weapon Skins</option>
               </select>
 
@@ -363,18 +363,18 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
                 }}
               >
                 <option value="" disabled>
+                  Demand
+                </option>
+                <option value="demand-desc">Demand (High to Low)</option>
+                <option value="demand-asc">Demand (Low to High)</option>
+
+                <option value="" disabled>
                   Values
                 </option>
                 <option value="cash-desc">Cash Value (High to Low)</option>
                 <option value="cash-asc">Cash Value (Low to High)</option>
                 <option value="duped-desc">Duped Value (High to Low)</option>
                 <option value="duped-asc">Duped Value (Low to High)</option>
-
-                <option value="" disabled>
-                  Demand
-                </option>
-                <option value="demand-desc">Demand (High to Low)</option>
-                <option value="demand-asc">Demand (Low to High)</option>
               </select>
             </div>
           </div>

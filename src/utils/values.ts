@@ -23,8 +23,11 @@ export const trendOrder = [
 ] as const;
 
 export const parseCashValue = (value: string | null): number => {
-  if (value === null || value === "N/A") return -1;
-  const num = parseFloat(value.replace(/[^0-9.]/g, ""));
+  if (value === null || value === "N/A" || value === "null") return -1;
+  const numericPart = value.replace(/[^0-9.]/g, "");
+  if (numericPart === "") return -1;
+  const num = parseFloat(numericPart);
+  if (isNaN(num)) return -1;
   if (value.toLowerCase().includes("k")) return num * 1000;
   if (value.toLowerCase().includes("m")) return num * 1000000;
   if (value.toLowerCase().includes("b")) return num * 1000000000;
@@ -448,7 +451,7 @@ export const sortAndFilterItems = async (
  * @returns Formatted string with full number and commas
  */
 export const formatFullValue = (value: string | null): string => {
-  if (value === null || value === "N/A") return "N/A";
+  if (value === null || value === "N/A" || value === "null") return "N/A";
 
   // Remove any suffix (k, m, b, etc.) and convert to number
   const numericPart = value.toLowerCase().replace(/[kmb]$/, "");
@@ -498,7 +501,8 @@ export const formatPrice = (price: string | null): string => {
 };
 
 const formatSinglePrice = (price: string): string => {
-  if (price === "N/A" || price === "Free") return price;
+  if (price === "N/A" || price === "Free" || price === "null")
+    return price === "null" ? "N/A" : price;
 
   // Remove any suffix (k, m, b, etc.) and convert to number
   const numericPart = price.toLowerCase().replace(/[kmb]$/, "");

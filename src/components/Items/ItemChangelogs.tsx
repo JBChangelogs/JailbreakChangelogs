@@ -8,7 +8,7 @@ import { Dialog, DialogPanel } from "@headlessui/react";
 import { Icon } from "@/components/ui/IconWrapper";
 import Link from "next/link";
 import ReactMarkdown from "react-markdown";
-import { formatFullValue } from "@/utils/values";
+import { formatFullValue, formatPrice } from "@/utils/values";
 import { formatCustomDate } from "@/utils/timestamp";
 import Image from "next/image";
 import { DefaultAvatar } from "@/utils/avatar";
@@ -854,6 +854,9 @@ export default function ItemChangelogs({
                           } => {
                             if (k === "cash_value" || k === "duped_value") {
                               return { display: formatFullValue(String(v)) };
+                            }
+                            if (k === "price") {
+                              return { display: formatPrice(String(v)) };
                             }
                             if (k === "creator") {
                               const creatorInfo = formatCreatorValue(

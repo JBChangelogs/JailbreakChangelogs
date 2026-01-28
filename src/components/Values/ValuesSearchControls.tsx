@@ -178,19 +178,19 @@ export default function ValuesSearchControls({
                   </option>
                   <option value="name-all-items">All Items</option>
                   <option value="favorites">My Favorites</option>
-                  <option value="name-limited-items">Limited Items</option>
-                  <option value="name-seasonal-items">Seasonal Items</option>
-                  <option value="name-vehicles">Vehicles</option>
-                  <option value="name-spoilers">Spoilers</option>
-                  <option value="name-rims">Rims</option>
                   <option value="name-body-colors">Body Colors</option>
-                  <option value="name-hyperchromes">HyperChromes</option>
                   <option value="name-textures">Body Textures</option>
-                  <option value="name-tire-stickers">Tire Stickers</option>
-                  <option value="name-tire-styles">Tire Styles</option>
                   <option value="name-drifts">Drifts</option>
                   <option value="name-furnitures">Furniture</option>
                   <option value="name-horns">Horns</option>
+                  <option value="name-hyperchromes">HyperChromes</option>
+                  <option value="name-limited-items">Limited Items</option>
+                  <option value="name-rims">Rims</option>
+                  <option value="name-seasonal-items">Seasonal Items</option>
+                  <option value="name-spoilers">Spoilers</option>
+                  <option value="name-tire-stickers">Tire Stickers</option>
+                  <option value="name-tire-styles">Tire Styles</option>
+                  <option value="name-vehicles">Vehicles</option>
                   <option value="name-weapon-skins">Weapon Skins</option>
                 </select>
               </div>
@@ -210,9 +210,32 @@ export default function ValuesSearchControls({
                   }}
                 >
                   <option value="" disabled>
+                    Alphabetically
+                  </option>
+                  <option value="alpha-asc">Name (A to Z)</option>
+                  <option value="alpha-desc">Name (Z to A)</option>
+
+                  <option value="" disabled>
+                    Demand
+                  </option>
+                  <option value="demand-desc">Demand (High to Low)</option>
+                  <option value="demand-asc">Demand (Low to High)</option>
+                  <option value="demand-close-to-none">Close to None</option>
+                  <option value="demand-decent">Decent Demand</option>
+                  <option value="demand-extremely-high">
+                    Extremely High Demand
+                  </option>
+                  <option value="demand-high">High Demand</option>
+                  <option value="demand-low">Low Demand</option>
+                  <option value="demand-medium">Medium Demand</option>
+                  <option value="demand-very-high">Very High Demand</option>
+                  <option value="demand-very-low">Very Low Demand</option>
+
+                  <option value="" disabled>
                     Display
                   </option>
                   <option value="random">Random</option>
+
                   <option value="" disabled>
                     Last Updated
                   </option>
@@ -222,11 +245,19 @@ export default function ValuesSearchControls({
                   <option value="last-updated-asc">
                     Last Updated (Oldest to Newest)
                   </option>
+
                   <option value="" disabled>
-                    Alphabetically
+                    Trend
                   </option>
-                  <option value="alpha-asc">Name (A to Z)</option>
-                  <option value="alpha-desc">Name (Z to A)</option>
+                  <option value="trend-dropping">Dropping Trend</option>
+                  <option value="trend-hoarded">Hoarded Trend</option>
+                  <option value="trend-hyped">Hyped Trend</option>
+                  <option value="trend-manipulated">Manipulated Trend</option>
+                  <option value="trend-recovering">Recovering Trend</option>
+                  <option value="trend-rising">Rising Trend</option>
+                  <option value="trend-stable">Stable Trend</option>
+                  <option value="trend-unstable">Unstable Trend</option>
+
                   <option value="" disabled>
                     Values
                   </option>
@@ -234,33 +265,6 @@ export default function ValuesSearchControls({
                   <option value="cash-asc">Cash Value (Low to High)</option>
                   <option value="duped-desc">Duped Value (High to Low)</option>
                   <option value="duped-asc">Duped Value (Low to High)</option>
-
-                  <option value="" disabled>
-                    Demand
-                  </option>
-                  <option value="demand-desc">Demand (High to Low)</option>
-                  <option value="demand-asc">Demand (Low to High)</option>
-                  <option value="demand-extremely-high">
-                    Extremely High Demand
-                  </option>
-                  <option value="demand-very-high">Very High Demand</option>
-                  <option value="demand-high">High Demand</option>
-                  <option value="demand-decent">Decent Demand</option>
-                  <option value="demand-medium">Medium Demand</option>
-                  <option value="demand-low">Low Demand</option>
-                  <option value="demand-very-low">Very Low Demand</option>
-                  <option value="demand-close-to-none">Close to None</option>
-                  <option value="" disabled>
-                    Trend
-                  </option>
-                  <option value="trend-dropping">Dropping Trend</option>
-                  <option value="trend-unstable">Unstable Trend</option>
-                  <option value="trend-hoarded">Hoarded Trend</option>
-                  <option value="trend-manipulated">Manipulated Trend</option>
-                  <option value="trend-stable">Stable Trend</option>
-                  <option value="trend-recovering">Recovering Trend</option>
-                  <option value="trend-rising">Rising Trend</option>
-                  <option value="trend-hyped">Hyped Trend</option>
                 </select>
               </div>
             </div>

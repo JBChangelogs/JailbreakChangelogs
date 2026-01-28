@@ -18,7 +18,7 @@ import {
 } from "@/utils/images";
 import { getCategoryColor } from "@/utils/categoryIcons";
 import { formatMessageDate } from "@/utils/timestamp";
-import { formatFullValue } from "@/utils/values";
+import { formatFullValue, formatPrice } from "@/utils/values";
 import ReactMarkdown from "react-markdown";
 import ChangelogDetailsHeader from "./ChangelogDetailsHeader";
 import { Icon } from "../ui/IconWrapper";
@@ -814,6 +814,9 @@ export default function ChangelogDetailsClient({
                           } => {
                             if (k === "cash_value" || k === "duped_value") {
                               return { display: formatFullValue(String(v)) };
+                            }
+                            if (k === "price") {
+                              return { display: formatPrice(String(v)) };
                             }
                             if (k === "creator") {
                               const creatorInfo = formatCreatorValue(

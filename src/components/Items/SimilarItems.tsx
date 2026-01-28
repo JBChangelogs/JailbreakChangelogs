@@ -306,10 +306,10 @@ const SimilarItems = ({
             setSortBy(e.target.value as SortCriteria)
           }
         >
+          <option value="creator">Sort by Creator</option>
           <option value="similarity">Sort by Similarity</option>
           <option value="trading_metrics">Sort by Trading Metrics</option>
           <option value="trend">Sort by Trend</option>
-          <option value="creator">Sort by Creator</option>
         </select>
       </div>
 
