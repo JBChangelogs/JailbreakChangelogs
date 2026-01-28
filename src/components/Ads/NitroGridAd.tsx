@@ -34,24 +34,39 @@ export default function NitroGridAd({ adId, className }: NitroGridAdProps) {
             // Element is in view, create the ad
             if (!createdRef.current && window.nitroAds?.createAd) {
               createdRef.current = true;
-              Promise.resolve(
-                window.nitroAds.createAd(adId, {
-                  sizes: [
-                    ["320", "50"],
-                    ["320", "100"],
-                    ["300", "250"],
-                  ],
-                  report: {
-                    enabled: true,
-                    icon: true,
-                    wording: "Report Ad",
-                    position: "top-right",
-                  },
-                  mediaQuery: "(min-width: 320px) and (max-width: 767px)",
-                }),
-              ).catch(() => {
+              try {
+                // Wrap in try-catch per Nitropay best practices
+                Promise.resolve(
+                  window.nitroAds.createAd(adId, {
+                    sizes: [
+                      ["320", "50"],
+                      ["320", "100"],
+                      ["300", "250"],
+                    ],
+                    report: {
+                      enabled: true,
+                      icon: true,
+                      wording: "Report Ad",
+                      position: "top-right",
+                    },
+                    mediaQuery: "(min-width: 320px) and (max-width: 767px)",
+                  }),
+                ).catch((error) => {
+                  // Silently handle ad creation errors
+                  console.warn(
+                    `[Nitro Ad] Failed to create ad ${adId}:`,
+                    error,
+                  );
+                  createdRef.current = false;
+                });
+              } catch (error) {
+                // Catch synchronous errors
+                console.warn(
+                  `[Nitro Ad] Error initializing ad ${adId}:`,
+                  error,
+                );
                 createdRef.current = false;
-              });
+              }
             }
             // Stop observing once triggered
             observer.disconnect();

@@ -94,25 +94,39 @@ export default function NitroHomepageAd({ className }: Props) {
 
     createdRef.current = true;
 
-    // Mobile config
-    Promise.resolve(nitroAds.createAd(SLOT_ID_MOBILE, MOBILE_CONFIG)).catch(
-      () => {},
-    );
+    try {
+      // Mobile config
+      Promise.resolve(nitroAds.createAd(SLOT_ID_MOBILE, MOBILE_CONFIG)).catch(
+        (error) => {
+          console.warn(
+            "[Nitro Ad] Failed to create homepage mobile ad:",
+            error,
+          );
+        },
+      );
 
-    // Desktop config
-    let desktopConfig = DESKTOP_CONFIG;
-    // If the window height is less than 800px, remove the 970x250 ad size to prevent it from touching the bottom anchor ad
-    if (window.innerHeight < 800) {
-      desktopConfig = {
-        ...DESKTOP_CONFIG,
-        sizes: DESKTOP_CONFIG.sizes.filter(
-          (size) => !(size[0] === "970" && size[1] === "250"),
-        ),
-      };
+      // Desktop config
+      let desktopConfig = DESKTOP_CONFIG;
+      // If the window height is less than 800px, remove the 970x250 ad size to prevent it from touching the bottom anchor ad
+      if (window.innerHeight < 800) {
+        desktopConfig = {
+          ...DESKTOP_CONFIG,
+          sizes: DESKTOP_CONFIG.sizes.filter(
+            (size) => !(size[0] === "970" && size[1] === "250"),
+          ),
+        };
+      }
+      Promise.resolve(nitroAds.createAd(SLOT_ID_DESKTOP, desktopConfig)).catch(
+        (error) => {
+          console.warn(
+            "[Nitro Ad] Failed to create homepage desktop ad:",
+            error,
+          );
+        },
+      );
+    } catch (error) {
+      console.warn("[Nitro Ad] Error initializing homepage ads:", error);
     }
-    Promise.resolve(nitroAds.createAd(SLOT_ID_DESKTOP, desktopConfig)).catch(
-      () => {},
-    );
 
     return () => {
       nitroAds?.removeAd?.(SLOT_ID_MOBILE);

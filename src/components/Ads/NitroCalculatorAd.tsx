@@ -62,9 +62,17 @@ export default function NitroCalculatorAd({ className }: Props) {
 
     createdRef.current = true;
 
-    Promise.resolve(nitroAds.createAd(SLOT_ID, CALCULATOR_CONFIG)).catch(() => {
+    try {
+      Promise.resolve(nitroAds.createAd(SLOT_ID, CALCULATOR_CONFIG)).catch(
+        (error) => {
+          console.warn("[Nitro Ad] Failed to create calculator ad:", error);
+          createdRef.current = false;
+        },
+      );
+    } catch (error) {
+      console.warn("[Nitro Ad] Error initializing calculator ad:", error);
       createdRef.current = false;
-    });
+    }
 
     return () => {
       nitroAds?.removeAd?.(SLOT_ID);

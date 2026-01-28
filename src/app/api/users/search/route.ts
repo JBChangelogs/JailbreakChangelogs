@@ -40,6 +40,11 @@ export async function GET(request: Request) {
     });
 
     if (!response.ok) {
+      // Handle 404 as a valid "no results" response
+      if (response.status === 404) {
+        return NextResponse.json({ users: [] });
+      }
+
       const errorText = await response.text();
       console.error(
         `Users search API error: ${response.status} - ${errorText}`,

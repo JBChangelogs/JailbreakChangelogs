@@ -60,9 +60,23 @@ export default function NitroItemsVideoPlayer({ className }: Props) {
 
     createdRef.current = true;
 
-    Promise.resolve(nitroAds.createAd(SLOT_ID, ITEMS_CONFIG)).catch(() => {
+    try {
+      Promise.resolve(nitroAds.createAd(SLOT_ID, ITEMS_CONFIG)).catch(
+        (error) => {
+          console.warn(
+            "[Nitro Ad] Failed to create items video player ad:",
+            error,
+          );
+          createdRef.current = false;
+        },
+      );
+    } catch (error) {
+      console.warn(
+        "[Nitro Ad] Error initializing items video player ad:",
+        error,
+      );
       createdRef.current = false;
-    });
+    }
 
     return () => {
       nitroAds?.removeAd?.(SLOT_ID);

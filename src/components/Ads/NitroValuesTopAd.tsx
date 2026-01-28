@@ -61,9 +61,15 @@ export default function NitroValuesTopAd({ className }: Props) {
 
     createdRef.current = true;
 
-    Promise.resolve(nitroAds.createAd(SLOT_ID, CONFIG)).catch(() => {
+    try {
+      Promise.resolve(nitroAds.createAd(SLOT_ID, CONFIG)).catch((error) => {
+        console.warn("[Nitro Ad] Failed to create values top ad:", error);
+        createdRef.current = false;
+      });
+    } catch (error) {
+      console.warn("[Nitro Ad] Error initializing values top ad:", error);
       createdRef.current = false;
-    });
+    }
 
     return () => {
       nitroAds?.removeAd?.(SLOT_ID);

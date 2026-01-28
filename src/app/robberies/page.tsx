@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import { useState, useMemo } from "react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import { useRobberyTrackerWebSocket } from "@/hooks/useRobberyTrackerWebSocket";
@@ -461,10 +461,6 @@ function RobberyTrackerContent() {
         {!isConnected && hasData && (
           <div className="bg-button-info/10 border-border-primary mb-4 rounded-lg border p-4 shadow-sm">
             <div className="flex items-start gap-3">
-              <Icon
-                icon="mdi:clock"
-                className="text-primary-text mt-0.5 h-5 w-5"
-              />
               <div>
                 <span className="text-primary-text text-base font-bold">
                   Connection Lost
@@ -526,7 +522,7 @@ function RobberyTrackerContent() {
                           {isSelected && (
                             <Icon
                               icon="heroicons:check"
-                              className="text-button-info h-4 w-4"
+                              className="text-link h-4 w-4"
                             />
                           )}
                           <span className="text-sm font-medium">
