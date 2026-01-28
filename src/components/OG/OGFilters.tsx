@@ -106,11 +106,15 @@ export default function OGFilters({
             className="select bg-primary-bg text-primary-text min-h-[56px] w-full"
             value={selectedCategories.length > 0 ? selectedCategories[0] : ""}
             onChange={(e) => {
-              if (e.target.value === "") {
+              const val = e.target.value;
+              if (val === "") {
                 setSelectedCategories([]);
               } else {
-                setSelectedCategories([e.target.value]);
+                setSelectedCategories([val]);
               }
+              window.umami?.track("OG Search Category Change", {
+                category: val || "All",
+              });
             }}
           >
             <option value="">All categories</option>
@@ -127,9 +131,11 @@ export default function OGFilters({
           <select
             className="select bg-primary-bg text-primary-text min-h-[56px] w-full"
             value={sortOrder}
-            onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
-              setSortOrder(e.target.value)
-            }
+            onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
+              const val = e.target.value;
+              setSortOrder(val);
+              window.umami?.track("OG Search Sort Change", { sort: val });
+            }}
           >
             {hasDuplicates && (
               <option value="duplicates">Group Duplicates</option>

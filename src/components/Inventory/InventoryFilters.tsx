@@ -104,11 +104,15 @@ export default function InventoryFilters({
             className="select bg-primary-bg text-primary-text min-h-[56px] w-full"
             value={selectedCategories.length > 0 ? selectedCategories[0] : ""}
             onChange={(e) => {
-              if (e.target.value === "") {
+              const val = e.target.value;
+              if (val === "") {
                 setSelectedCategories([]);
               } else {
-                setSelectedCategories([e.target.value]);
+                setSelectedCategories([val]);
               }
+              window.umami?.track("Inventory Category Change", {
+                category: val || "All",
+              });
             }}
           >
             <option value="">All categories</option>
@@ -125,9 +129,11 @@ export default function InventoryFilters({
           <select
             className="select bg-primary-bg text-primary-text min-h-[56px] w-full"
             value={sortOrder}
-            onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
-              setSortOrder(e.target.value as SortOrder)
-            }
+            onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
+              const val = e.target.value as SortOrder;
+              setSortOrder(val);
+              window.umami?.track("Inventory Sort Change", { sort: val });
+            }}
           >
             <option disabled>Date</option>
             <option value="created-asc">Oldest First</option>
@@ -171,6 +177,7 @@ export default function InventoryFilters({
                     onChange={() => {
                       onFilterToggle(false);
                       onNonOriginalFilterToggle(false);
+                      window.umami?.track("Inventory Filter Owner Type Reset");
                     }}
                     className="text-button-info focus:ring-button-info h-4 w-4 cursor-pointer"
                   />
@@ -181,7 +188,12 @@ export default function InventoryFilters({
                     type="radio"
                     name="ownerType"
                     checked={showOnlyOriginal}
-                    onChange={() => onFilterToggle(true)}
+                    onChange={() => {
+                      onFilterToggle(true);
+                      window.umami?.track("Inventory Filter Original Toggle", {
+                        active: true,
+                      });
+                    }}
                     className="text-button-info focus:ring-button-info h-4 w-4 cursor-pointer"
                   />
                   <span className="text-primary-text text-sm">Original</span>
@@ -191,7 +203,13 @@ export default function InventoryFilters({
                     type="radio"
                     name="ownerType"
                     checked={showOnlyNonOriginal}
-                    onChange={() => onNonOriginalFilterToggle(true)}
+                    onChange={() => {
+                      onNonOriginalFilterToggle(true);
+                      window.umami?.track(
+                        "Inventory Filter Non-Original Toggle",
+                        { active: true },
+                      );
+                    }}
                     className="text-button-info focus:ring-button-info h-4 w-4 cursor-pointer"
                   />
                   <span className="text-primary-text text-sm">
@@ -216,6 +234,7 @@ export default function InventoryFilters({
                       onChange={() => {
                         onLimitedFilterToggle(false);
                         onSeasonalFilterToggle(false);
+                        window.umami?.track("Inventory Filter Item Type Reset");
                       }}
                       className="text-button-info focus:ring-button-info h-4 w-4 cursor-pointer"
                     />
@@ -229,6 +248,9 @@ export default function InventoryFilters({
                       onChange={() => {
                         onLimitedFilterToggle(true);
                         onSeasonalFilterToggle(false);
+                        window.umami?.track("Inventory Filter Limited Toggle", {
+                          active: true,
+                        });
                       }}
                       className="text-button-info focus:ring-button-info h-4 w-4 cursor-pointer"
                     />
@@ -244,6 +266,10 @@ export default function InventoryFilters({
                       onChange={() => {
                         onLimitedFilterToggle(false);
                         onSeasonalFilterToggle(true);
+                        window.umami?.track(
+                          "Inventory Filter Seasonal Toggle",
+                          { active: true },
+                        );
                       }}
                       className="text-button-info focus:ring-button-info h-4 w-4 cursor-pointer"
                     />
@@ -263,7 +289,14 @@ export default function InventoryFilters({
                     <input
                       type="checkbox"
                       checked={hideDuplicates}
-                      onChange={(e) => onHideDuplicatesToggle(e.target.checked)}
+                      onChange={(e) => {
+                        const checked = e.target.checked;
+                        onHideDuplicatesToggle(checked);
+                        window.umami?.track(
+                          "Inventory Filter Hide Duplicates Toggle",
+                          { active: checked },
+                        );
+                      }}
                       className="text-button-info focus:ring-button-info h-4 w-4 cursor-pointer rounded"
                     />
                     <span className="text-primary-text text-sm">
@@ -275,9 +308,14 @@ export default function InventoryFilters({
                     <input
                       type="checkbox"
                       checked={showMissingItems}
-                      onChange={(e) =>
-                        onShowMissingItemsToggle(e.target.checked)
-                      }
+                      onChange={(e) => {
+                        const checked = e.target.checked;
+                        onShowMissingItemsToggle(checked);
+                        window.umami?.track(
+                          "Inventory Filter Show Missing Items Toggle",
+                          { active: checked },
+                        );
+                      }}
                       className="text-button-info focus:ring-button-info h-4 w-4 cursor-pointer rounded"
                     />
                     <span className="text-primary-text text-sm">
