@@ -764,7 +764,7 @@ export default function Header() {
                                   >
                                     <div className="flex-1">
                                       <div className="flex items-start justify-between gap-2">
-                                        <p className="text-primary-text flex-1 text-sm font-semibold">
+                                        <p className="text-primary-text flex-1 text-sm font-semibold wrap-break-word whitespace-normal">
                                           {notif.title}
                                         </p>
                                         {notificationTab === "unread" && (
@@ -847,7 +847,7 @@ export default function Header() {
                                           </Tooltip>
                                         )}
                                       </div>
-                                      <p className="text-secondary-text mt-1 text-xs">
+                                      <p className="text-secondary-text mt-1 text-xs wrap-break-word whitespace-normal">
                                         {notif.description}
                                       </p>
                                       {urlInfo.isWhitelisted ? (

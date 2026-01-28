@@ -170,6 +170,11 @@ export default function SettingsPage() {
         { title, enabled: nextEnabled },
       ]);
       toast.success("Setting updated successfully");
+
+      window.umami?.track("Update Notification Preference", {
+        preference: title,
+        enabled: nextEnabled,
+      });
     } catch (e) {
       // Revert on failure
       setNotificationPrefs(prev);

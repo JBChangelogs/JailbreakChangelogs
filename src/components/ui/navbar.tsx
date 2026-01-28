@@ -711,7 +711,7 @@ export const NavbarModern = ({ className }: { className?: string }) => {
                             className="border-border-secondary hover:bg-secondary-bg block border-b px-4 py-3 transition-colors last:border-b-0"
                           >
                             <div className="flex items-start justify-between gap-2">
-                              <p className="text-primary-text flex-1 text-sm font-semibold">
+                              <p className="text-primary-text flex-1 text-sm font-semibold wrap-break-word whitespace-normal">
                                 {notif.title}
                               </p>
                               {notificationTab === "unread" && (
@@ -786,7 +786,7 @@ export const NavbarModern = ({ className }: { className?: string }) => {
                                 </Tooltip>
                               )}
                             </div>
-                            <p className="text-secondary-text mt-1 text-xs">
+                            <p className="text-secondary-text mt-1 text-xs wrap-break-word whitespace-normal">
                               {notif.description}
                             </p>
                             {urlInfo.isWhitelisted ? (
@@ -827,6 +827,7 @@ export const NavbarModern = ({ className }: { className?: string }) => {
                         <Pagination
                           count={notifications.total_pages}
                           page={notificationPage}
+                          siblingCount={0}
                           onChange={(_event, value) => {
                             setNotificationPage(value);
                             if (notificationTab === "history") {
