@@ -29,7 +29,6 @@ export default function TurnstileWidget({
 
   const handleSuccess = useCallback(
     (token: string) => {
-      console.log("Turnstile token generated successfully");
       onSuccess(token);
     },
     [onSuccess],
@@ -41,7 +40,6 @@ export default function TurnstileWidget({
   }, [onError]);
 
   const handleExpire = useCallback(() => {
-    console.log("Turnstile token expired");
     onExpire?.();
   }, [onExpire]);
 

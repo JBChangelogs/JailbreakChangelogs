@@ -581,7 +581,6 @@ export async function fetchItemsChangelog(id: string) {
     );
 
     if (response.status === 404) {
-      console.log(`[SERVER] Items changelog ${id} not found`);
       return null;
     }
 
@@ -653,7 +652,6 @@ export async function fetchTradeAd(id: string) {
     });
 
     if (response.status === 404) {
-      console.log(`[SERVER] Trade ad ${id} not found`);
       return null;
     }
 
@@ -1139,7 +1137,6 @@ export async function fetchSeason(id: string) {
     });
 
     if (!response.ok) {
-      console.log("[SERVER] Season not found:", { id });
       return null;
     }
 
@@ -1161,7 +1158,6 @@ export async function fetchItemFavorites(id: string) {
     });
 
     if (response.status === 404) {
-      console.log(`[SERVER] Item favorites ${id} not found`);
       return null;
     }
 
@@ -1255,7 +1251,6 @@ export async function fetchItemHistory(id: string) {
     });
 
     if (response.status === 404) {
-      console.log(`[CLIENT] Value history for Item ${id} not found`);
       return null;
     }
 
@@ -1283,7 +1278,6 @@ export async function fetchItemsByType(type: string) {
     );
 
     if (response.status === 404) {
-      console.log(`[SERVER] Items with type ${type} not found`);
       return null;
     }
 
@@ -1438,9 +1432,6 @@ export async function fetchRobloxUsersBatch(userIds: string[]) {
   try {
     // Validate input
     if (!userIds || userIds.length === 0) {
-      console.log(
-        "[SERVER] fetchRobloxUsersBatch: No userIds provided, returning empty data",
-      );
       return { data: [] };
     }
 
@@ -1515,9 +1506,6 @@ export async function fetchRobloxUsersBatchLeaderboard(userIds: string[]) {
   try {
     // Validate input
     if (!userIds || userIds.length === 0) {
-      console.log(
-        "[SERVER] fetchRobloxUsersBatchLeaderboard: No userIds provided, returning empty data",
-      );
       return {};
     }
 
@@ -2152,7 +2140,6 @@ export async function fetchOGSearchData(
 
         // Exponential backoff: wait 1s, 2s, 4s between retries
         const delayMs = Math.pow(2, attempt) * 1000;
-        console.log(`[SERVER] Retrying OG search in ${delayMs}ms...`);
         await new Promise((resolve) => setTimeout(resolve, delayMs));
         continue;
       }
@@ -2184,58 +2171,6 @@ export async function fetchOGSearchData(
     message:
       "Failed to fetch data after multiple attempts. Please check your connection and try again.",
   };
-}
-
-export async function fetchInventoryDataRefresh(robloxId: string) {
-  console.log(
-    "[SERVER] fetchInventoryDataRefresh called with robloxId:",
-    robloxId,
-  );
-  try {
-    const response = await fetch(
-      `${INVENTORY_API_URL}/user?id=${robloxId}&nocache=true`,
-      {
-        headers: {
-          "User-Agent": "JailbreakChangelogs-InventoryChecker/1.0",
-          "X-Source": INVENTORY_API_SOURCE_HEADER,
-        },
-      },
-    );
-
-    if (!response.ok) {
-      console.error(
-        `[SERVER] Inventory refresh API returned ${response.status} for ID: ${robloxId}`,
-      );
-
-      if (response.status === 404) {
-        return {
-          error: "not_found",
-          message: "Inventory not found for this user.",
-        };
-      }
-
-      throw new Error(
-        `Failed to fetch refreshed inventory data: ${response.status}`,
-      );
-    }
-
-    const data = await response.json();
-    return data;
-  } catch (err) {
-    console.error("[SERVER] Error fetching refreshed inventory data:", err);
-
-    if (err instanceof Error) {
-      return {
-        error: "fetch_error",
-        message: `Failed to refresh inventory data: ${err.message}`,
-      };
-    }
-
-    return {
-      error: "fetch_error",
-      message: "Failed to refresh inventory data. Please try again.",
-    };
-  }
 }
 
 export interface Supporter {

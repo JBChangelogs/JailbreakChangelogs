@@ -90,12 +90,10 @@ const LinSuperIdol = ({ userId }: { userId: string }) => {
           globalSuperIdolAudio
             .play()
             .then(() => {
-              console.log("Lin successfully became a super idol!");
               isPlaying = true;
               setShowPlayButton(false);
             })
             .catch((error) => {
-              console.log("Lin refused to be a super idol:", error);
               isPlaying = false;
               setShowPlayButton(true);
             });
@@ -128,7 +126,6 @@ const LinSuperIdol = ({ userId }: { userId: string }) => {
           setShowPlayButton(false);
         })
         .catch((error) => {
-          console.log("Lin still refused to be a super idol:", error);
           isPlaying = false;
         });
     }

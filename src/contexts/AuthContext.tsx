@@ -168,7 +168,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
       // Set new idle timeout (8 minutes of inactivity - shorter than auth check interval)
       idleTimeout = setTimeout(() => {
         const now = new Date().toISOString();
-        console.log(`[${now}] User marked as idle - pausing auth checks`);
         isUserActiveRef.current = false;
       }, 480000); // 8 minutes
     };
@@ -182,12 +181,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
       authInterval = setInterval(() => {
         const now = new Date().toISOString();
         if (isUserActiveRef.current) {
-          console.log(`[${now}] Running auth validation...`);
           validateAuth().catch((error) => {
             console.error("Auth validation error:", error);
           });
-        } else {
-          console.log(`[${now}] Skipping auth validation - user is idle`);
         }
       }, 600000); // Check every 10 minutes when active (reduced frequency)
     };
