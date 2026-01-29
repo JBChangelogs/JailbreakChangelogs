@@ -1,11 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Snackbar, Alert } from "@mui/material";
-import dynamic from "next/dynamic";
 import { YouTubeEmbed } from "@next/third-parties/google";
-
-const Tooltip = dynamic(() => import("@mui/material/Tooltip"), { ssr: false });
 import { Icon } from "@/components/ui/IconWrapper";
 import { demandOrder, trendOrder } from "@/utils/values";
 import { ValueSort } from "@/types";
@@ -22,8 +18,6 @@ export default function TradingGuides({
   onScrollToSearch,
 }: TradingGuidesProps) {
   const [isExpanded, setIsExpanded] = useState(false);
-  const [snackbarOpen, setSnackbarOpen] = useState(false);
-  const [snackbarMessage, setSnackbarMessage] = useState("");
 
   const trendDescriptions: Record<string, string> = {
     Dropping:
@@ -40,7 +34,7 @@ export default function TradingGuides({
     Rising:
       "Items which are consistently getting larger overpays from base overtime.",
     Hyped:
-      "Items which are on a fast rise due to short lived hype created by the community.",
+      "Items which are experiencing a significant, but temporary, spike in demand which is driven by the community",
   };
 
   const tradingTerms = [
@@ -49,9 +43,9 @@ export default function TradingGuides({
       description: "A measurement of how desired an item is in trading",
     },
     {
-      term: "Hyped",
+      term: "Lowball",
       description:
-        "An item currently experiencing a significant but temporary spike in demand driven by the community",
+        "When someone offers for your items but their side is lower in value and or demand",
     },
     {
       term: "Avoided",
@@ -213,18 +207,6 @@ export default function TradingGuides({
   };
 
   const handleTrendClick = (trend: string) => {
-    // On touch devices, show a snackbar-style popup with the description
-    if (
-      typeof window !== "undefined" &&
-      (window.matchMedia("(pointer: coarse)").matches ||
-        window.innerWidth < 768)
-    ) {
-      const description = trendDescriptions[trend];
-      if (description) {
-        setSnackbarMessage(description);
-        setSnackbarOpen(true);
-      }
-    }
     const trendValue = getTrendValue(trend);
     if (valueSort === trendValue) {
       onValueSortChange("cash-desc");
@@ -234,19 +216,17 @@ export default function TradingGuides({
     onScrollToSearch();
   };
 
-  const handleSnackbarClose = (
-    _event?: React.SyntheticEvent | Event,
-    reason?: string,
-  ) => {
-    if (reason === "clickaway") return;
-    setSnackbarOpen(false);
-  };
-
   return (
     <div className="border-secondary-text mt-8 border-t pt-8">
       {/* Collapsible Header */}
       <button
-        onClick={() => setIsExpanded(!isExpanded)}
+        onClick={() => {
+          const newExpanded = !isExpanded;
+          if (newExpanded) {
+            window.umami?.track("Trading Guides Expanded");
+          }
+          setIsExpanded(newExpanded);
+        }}
         className="border-border-primary bg-primary-bg hover:border-border-focus hover:bg-primary-bg mb-4 flex w-full cursor-pointer items-center justify-between rounded-lg border p-4 transition-colors"
       >
         <div className="flex items-center gap-3">
@@ -274,165 +254,136 @@ export default function TradingGuides({
         )}
       </button>
 
-      {/* Collapsible Content */}
       {isExpanded && (
-        <div className="flex flex-col gap-8 lg:flex-row">
-          <div className="flex-1">
-            <h3 className="text-primary-text mb-2 text-xl font-semibold">
-              Trader Notes
-            </h3>
-            <ul className="text-secondary-text mb-4 list-inside list-disc space-y-2">
-              <li>This is NOT an official list, it is 100% community based</li>
-              <li>
-                Some values may be outdated but we do our best to make sure
-                it&apos;s accurate as possible
-              </li>
-              <li>
-                Please don&apos;t 100% rely on the value list, use your own
-                judgment as well
-              </li>
-            </ul>
+        <div className="flex flex-col gap-8">
+          {/* Top Section: Notes, Demand, and Video */}
+          <div className="grid grid-cols-1 gap-8 lg:grid-cols-2 lg:items-start xl:grid-cols-[1fr_400px]">
+            <div className="min-w-0">
+              <h3 className="text-primary-text mb-2 text-xl font-semibold">
+                Trader Notes
+              </h3>
+              <ul className="text-secondary-text mb-6 list-inside list-disc space-y-2">
+                <li>
+                  This is NOT an official list, it is 100% community based
+                </li>
+                <li>
+                  Some values may be outdated but we do our best to make sure
+                  it&apos;s accurate as possible
+                </li>
+                <li>
+                  Please don&apos;t 100% rely on the value list, use your own
+                  judgment as well
+                </li>
+              </ul>
 
-            <h3 className="text-primary-text mb-4 text-xl font-semibold">
-              Demand Levels Guide
-            </h3>
-            <div className="mb-4 flex flex-wrap gap-3">
-              {demandOrder.map((demand) => (
-                <button
-                  key={demand}
-                  onClick={() => handleDemandClick(demand)}
-                  className={`bg-primary-bg flex cursor-pointer items-center gap-3 rounded-lg border-2 px-4 py-2 transition-all focus:outline-none ${
-                    valueSort === getDemandValue(demand) ? "ring-2" : ""
-                  }`}
-                  style={
-                    {
-                      borderColor: getDemandHexColor(demand),
-                      "--tw-ring-color": getDemandHexColor(demand),
-                    } as React.CSSProperties
-                  }
-                >
-                  <span className="text-primary-text text-sm font-semibold">
-                    {demand}
-                  </span>
-                </button>
-              ))}
-            </div>
-            <p className="text-secondary-text mb-4 text-sm">
-              <strong>Note:</strong> Demand levels are ranked from lowest to
-              highest. Items with higher demand are generally easier to trade
-              and may have better values.
-              <br />
-              Not all demand levels are currently in use; some may not be
-              represented among items.
-            </p>
-
-            <h3 className="text-primary-text mb-4 text-xl font-semibold">
-              Trend Levels Guide
-            </h3>
-            <div className="mb-4 flex flex-wrap gap-3">
-              {trendOrder.map((trend) => (
-                <Tooltip
-                  key={trend}
-                  title={trendDescriptions[trend] || ""}
-                  placement="top"
-                  arrow
-                  disableTouchListener
-                  slotProps={{
-                    tooltip: {
-                      sx: {
-                        backgroundColor: "var(--color-primary-bg)",
-                        color: "var(--color-primary-text)",
-                        fontSize: "0.75rem",
-                        padding: "8px 12px",
-                        borderRadius: "8px",
-                        boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
-                        "& .MuiTooltip-arrow": {
-                          color: "var(--color-primary-bg)",
-                        },
-                      },
-                    },
-                  }}
-                >
+              <h3 className="text-primary-text mb-4 text-xl font-semibold">
+                Demand Levels Guide
+              </h3>
+              <div className="mb-4 flex flex-wrap gap-3">
+                {demandOrder.map((demand) => (
                   <button
-                    onClick={() => handleTrendClick(trend)}
+                    key={demand}
+                    onClick={() => handleDemandClick(demand)}
                     className={`bg-primary-bg flex cursor-pointer items-center gap-3 rounded-lg border-2 px-4 py-2 transition-all focus:outline-none ${
-                      valueSort === getTrendValue(trend) ? "ring-2" : ""
+                      valueSort === getDemandValue(demand) ? "ring-2" : ""
                     }`}
                     style={
                       {
-                        borderColor: getTrendHexColor(trend),
-                        "--tw-ring-color": getTrendHexColor(trend),
+                        borderColor: getDemandHexColor(demand),
+                        "--tw-ring-color": getDemandHexColor(demand),
                       } as React.CSSProperties
                     }
                   >
                     <span className="text-primary-text text-sm font-semibold">
-                      {trend}
+                      {demand}
                     </span>
                   </button>
-                </Tooltip>
-              ))}
-            </div>
-
-            <h3 className="text-primary-text mb-4 text-xl font-semibold">
-              Common Trading Terms
-            </h3>
-            <div className="border-border-primary bg-tertiary-bg mb-4 max-h-[300px] overflow-y-auto rounded-lg border p-4">
-              <div className="space-y-4">
-                {tradingTerms.map((item) => (
-                  <div
-                    key={item.term}
-                    className="border-border-secondary border-b pb-3 last:border-0 last:pb-0"
-                  >
-                    <span className="text-link font-bold">{item.term}: </span>
-                    <span className="text-secondary-text text-sm">
-                      {item.description}
-                    </span>
-                  </div>
                 ))}
               </div>
+              <p className="text-secondary-text text-sm">
+                <strong>Note:</strong> Demand levels are ranked from lowest to
+                highest. Items with higher demand are generally easier to trade
+                and may have better values.
+              </p>
+            </div>
+
+            {/* Video positioned at top right */}
+            <div className="flex flex-col items-center lg:items-end">
+              <div className="border-border-primary bg-tertiary-bg w-full max-w-[400px] overflow-hidden rounded-xl border shadow-lg">
+                <YouTubeEmbed
+                  videoid="yEsTOaJka3k"
+                  height={225}
+                  params="controls=0&rel=0"
+                />
+              </div>
+              <p className="text-secondary-text mt-2 w-full max-w-[400px] text-center text-[10px] italic lg:text-right">
+                Learn how to access the Trading Hub
+              </p>
             </div>
           </div>
-          <div className="flex flex-1 items-center justify-center">
-            <div
-              style={{
-                borderRadius: "20px",
-                maxWidth: 560,
-                width: "100%",
-              }}
-            >
-              <YouTubeEmbed
-                videoid="yEsTOaJka3k"
-                height={315}
-                params="controls=0&rel=0"
-              />
+
+          <hr className="border-secondary-text opacity-20" />
+
+          {/* Bottom Sections: Full Width Trend and Terms */}
+          <div className="grid grid-cols-1 gap-8">
+            <div>
+              <h3 className="text-primary-text mb-4 text-xl font-semibold">
+                Trend Levels Guide
+              </h3>
+              <div className="border-border-primary bg-tertiary-bg mb-4 max-h-[400px] overflow-y-auto rounded-lg border p-4 sm:max-h-none sm:border-0 sm:bg-transparent sm:p-0">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                  {trendOrder.map((trend) => (
+                    <button
+                      key={trend}
+                      onClick={() => handleTrendClick(trend)}
+                      className={`bg-primary-bg hover:bg-opacity-80 flex cursor-pointer flex-col items-start gap-2 rounded-xl border-2 p-3 text-left transition-all focus:outline-none ${
+                        valueSort === getTrendValue(trend) ? "ring-2" : ""
+                      }`}
+                      style={
+                        {
+                          borderColor: getTrendHexColor(trend),
+                          "--tw-ring-color": getTrendHexColor(trend),
+                        } as React.CSSProperties
+                      }
+                    >
+                      <span
+                        className="rounded px-2 py-0.5 text-xs font-bold tracking-wider text-white uppercase"
+                        style={{ backgroundColor: getTrendHexColor(trend) }}
+                      >
+                        {trend}
+                      </span>
+                      <p className="text-secondary-text text-xs leading-relaxed">
+                        {trendDescriptions[trend]}
+                      </p>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <h3 className="text-primary-text mb-4 text-xl font-semibold">
+                Common Trading Terms
+              </h3>
+              <div className="border-border-primary bg-tertiary-bg max-h-[300px] overflow-y-auto rounded-lg border p-4">
+                <div className="grid grid-cols-1 gap-x-8 gap-y-4 md:grid-cols-2">
+                  {tradingTerms.map((item) => (
+                    <div
+                      key={item.term}
+                      className="border-border-secondary border-b pb-3 last:border-0 md:border-0 md:pb-0"
+                    >
+                      <span className="text-link font-bold">{item.term}: </span>
+                      <span className="text-secondary-text text-sm">
+                        {item.description}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
         </div>
       )}
-      <Snackbar
-        open={snackbarOpen}
-        autoHideDuration={7000}
-        onClose={handleSnackbarClose}
-        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-      >
-        <Alert
-          severity="info"
-          sx={{
-            width: "100%",
-            backgroundColor: "var(--color-primary-bg)",
-            color: "var(--color-primary-text)",
-            borderRadius: "30px",
-            "& .MuiAlert-message": {
-              width: "100%",
-              display: "flex",
-              justifyContent: "center",
-              textAlign: "center",
-            },
-          }}
-        >
-          {snackbarMessage}
-        </Alert>
-      </Snackbar>
     </div>
   );
 }
