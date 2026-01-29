@@ -163,8 +163,10 @@ export default async function RootLayout({
               <ThemeProvider>
                 <QueryProvider>
                   <Toaster
-                    position="top-left"
-                    toastOptions={{ style: { marginTop: "3rem" } }}
+                    position="top-center"
+                    toastOptions={{
+                      className: "xl:!mt-12",
+                    }}
                   />
                   <MaintenanceBypass>
                     <NextTopLoader
@@ -299,8 +301,10 @@ export default async function RootLayout({
             <ThemeProvider>
               <QueryProvider>
                 <Toaster
-                  position="top-left"
-                  toastOptions={{ style: { marginTop: "3rem" } }}
+                  position="top-center"
+                  toastOptions={{
+                    className: "xl:!mt-12",
+                  }}
                 />
                 <NextTopLoader
                   color="var(--color-button-info)"

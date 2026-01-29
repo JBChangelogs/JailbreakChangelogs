@@ -231,6 +231,10 @@
 
   /* Hero Overlays */
   --color-hero-overlay: hsl(0, 0%, 0%, 0.7); /* Hero overlay - Dark mode */
+
+  /* Header Heights */
+  --header-height-mobile: 4rem; /* Mobile header height (64px) */
+  --header-height-desktop: 3rem; /* Desktop header height (48px) */
 }
 
 /* LIGHT THEME - Applied when .light class is present */
