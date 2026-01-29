@@ -139,7 +139,7 @@ export default function ValuesClient({
       loading: "Finding a random item...",
       success: (item: { name: string; type: string }) => ({
         message: "Item Found",
-        description: `Redirecting you to ${item.name}...`,
+        description: `Redirecting you to ${item.name} (${item.type})...`,
       }),
       error: (err) => ({
         message: "Failed to pick item",
