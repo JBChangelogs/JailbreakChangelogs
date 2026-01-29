@@ -60,6 +60,12 @@ export async function GET(request: Request) {
     const data = await response.json();
     return NextResponse.json(data);
   } catch (error) {
+    if (
+      error instanceof Error &&
+      (error.name === "TimeoutError" || error.name === "AbortError")
+    ) {
+      return NextResponse.json({ error: "Request timed out" }, { status: 504 });
+    }
     console.error("Error fetching notifications:", error);
     return NextResponse.json(
       { error: "Internal server error" },

@@ -621,7 +621,7 @@ export const NavbarModern = ({
 
               {/* Tabs */}
               {isAuthenticated && (
-                <div className="border-border-secondary border-b px-2">
+                <div className="border-border-secondary border-b">
                   <div role="tablist" className="tabs flex w-full">
                     <button
                       role="tab"
@@ -784,6 +784,7 @@ export const NavbarModern = ({
                                   href={urlInfo.relativePath}
                                   prefetch={false}
                                   className="border-button-info bg-button-info text-form-button-text hover:bg-button-info-hover mt-2 inline-flex cursor-pointer items-center gap-1 rounded-lg border px-2 py-1 text-sm transition-colors sm:px-3"
+                                  onClick={() => setNotificationMenuOpen(false)}
                                 >
                                   View
                                 </Link>
