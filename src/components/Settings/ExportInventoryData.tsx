@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { Paper, Typography, Box, Button } from "@mui/material";
 import { Icon } from "@/components/ui/IconWrapper";
 import { toast } from "sonner";
 
@@ -38,63 +37,24 @@ export const ExportInventoryData = () => {
   };
 
   return (
-    <Paper
-      elevation={1}
-      sx={{
-        mb: 4,
-        p: 3,
-        backgroundColor: "var(--color-secondary-bg)",
-        color: "var(--color-primary-text)",
-        borderRadius: 1,
-        position: "relative",
-      }}
-    >
-      <Box sx={{ mb: 2 }}>
-        <Typography
-          variant="h6"
-          component="h2"
-          gutterBottom
-          sx={{
-            fontWeight: "bold",
-            color: "var(--text-primary)",
-            display: "flex",
-            alignItems: "center",
-            gap: 1.5,
-            mb: 1,
-          }}
-        >
-          <Icon icon="heroicons-outline:download" className="h-6 w-6" />
+    <div>
+      <div className="mb-6">
+        <h3 className="text-primary-text mb-2 text-lg font-bold">
           Export Inventory Data
-        </Typography>
-        <Typography variant="body2" sx={{ color: "var(--color-primary-text)" }}>
+        </h3>
+        <p className="text-primary-text">
           Export your inventory data including scan history, duplicates, and
           networth history. The export process happens in the background.
-        </Typography>
-      </Box>
+        </p>
+      </div>
 
-      <Button
-        variant="contained"
-        startIcon={
-          <Icon icon="heroicons-outline:download" className="h-5 w-5" />
-        }
+      <button
         onClick={handleExport}
         disabled={loading}
-        sx={{
-          backgroundColor: "var(--color-button-info)",
-          color: "var(--color-form-button-text)",
-          fontWeight: 600,
-          fontSize: "0.875rem",
-          "&:hover": {
-            backgroundColor: "var(--color-button-info-hover)",
-          },
-          "&.Mui-disabled": {
-            backgroundColor: "var(--color-button-info)",
-            color: "var(--color-form-button-text)",
-          },
-        }}
+        className="bg-button-info text-form-button-text hover:bg-button-info-hover disabled:bg-button-info disabled:text-form-button-text inline-flex cursor-pointer items-center gap-2 rounded-md px-4 py-2 text-sm font-semibold uppercase transition-colors disabled:cursor-not-allowed disabled:opacity-60"
       >
         {loading ? "Scheduling Export..." : "Export Data"}
-      </Button>
-    </Paper>
+      </button>
+    </div>
   );
 };
