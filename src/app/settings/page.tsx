@@ -995,9 +995,38 @@ export default function SettingsPage() {
             <RobloxConnection userData={userData} />
           </Paper>
 
-          <Box id="export">
+          <Paper
+            id="export"
+            elevation={1}
+            sx={{
+              mb: 4,
+              p: 3,
+              backgroundColor: "var(--color-secondary-bg)",
+              color: "var(--color-primary-text)",
+              borderRadius: 3,
+              backgroundImage: "none",
+              border: "1px solid var(--color-border-primary)",
+            }}
+          >
+            <Typography
+              variant="h6"
+              component="h2"
+              gutterBottom
+              sx={{
+                fontWeight: "bold",
+                color: "var(--color-primary-text)",
+                display: "flex",
+                alignItems: "center",
+                gap: 1.5,
+                mb: 2,
+              }}
+            >
+              <Icon icon="heroicons:arrow-down-tray" className="h-6 w-6" />
+              Export Data
+            </Typography>
+            <Divider sx={{ mb: 2 }} />
             <ExportInventoryData />
-          </Box>
+          </Paper>
 
           <Paper
             id="danger"

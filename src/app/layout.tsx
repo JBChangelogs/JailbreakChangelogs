@@ -162,7 +162,10 @@ export default async function RootLayout({
             <CustomThemeProvider>
               <ThemeProvider>
                 <QueryProvider>
-                  <Toaster position="top-center" />
+                  <Toaster
+                    position="top-left"
+                    toastOptions={{ style: { marginTop: "3rem" } }}
+                  />
                   <MaintenanceBypass>
                     <NextTopLoader
                       color="var(--color-button-info)"
@@ -295,7 +298,10 @@ export default async function RootLayout({
           <CustomThemeProvider>
             <ThemeProvider>
               <QueryProvider>
-                <Toaster position="top-center" />
+                <Toaster
+                  position="top-left"
+                  toastOptions={{ style: { marginTop: "3rem" } }}
+                />
                 <NextTopLoader
                   color="var(--color-button-info)"
                   initialPosition={0.08}
