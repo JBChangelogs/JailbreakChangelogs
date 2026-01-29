@@ -63,7 +63,7 @@ export function useServerRegions() {
 
           if (!response.ok) {
             console.error(
-              `[REGION FETCH] Failed to fetch regions (${batch.join(", ")}):`,
+              `[REGION FETCH] Failed to fetch regions:`,
               response.status,
             );
             // Set null for all IDs in this batch on error
@@ -78,10 +78,6 @@ export function useServerRegions() {
             ServerRegionData | null
           >;
           Object.assign(allResults, data);
-
-          console.log(
-            `[REGION FETCH] Fetched ${batch.length} region(s): ${batch.join(", ")}`,
-          );
         }
 
         return allResults;

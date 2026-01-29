@@ -36,6 +36,8 @@ export interface BountyData {
 interface UseRobberyTrackerBountiesWebSocketReturn {
   bounties: BountyData[];
   isConnected: boolean;
+  isConnecting: boolean;
+  isIdle: boolean;
   error: string | undefined;
 }
 
@@ -44,6 +46,8 @@ export function useRobberyTrackerBountiesWebSocket(
 ): UseRobberyTrackerBountiesWebSocketReturn {
   const [bounties, setBounties] = useState<BountyData[]>([]);
   const [isConnected, setIsConnected] = useState(false);
+  const [isConnecting, setIsConnecting] = useState(false);
+  const [isIdle, setIsIdle] = useState(false);
   const [error, setError] = useState<string | undefined>();
 
   const wsRef = useRef<WebSocket | null>(null);
@@ -81,6 +85,8 @@ export function useRobberyTrackerBountiesWebSocket(
       ws.addEventListener("open", () => {
         console.log("[BOUNTY TRACKER WS] Connected");
         setIsConnected(true);
+        setIsConnecting(false);
+        setIsIdle(false);
         setError(undefined);
         reconnectAttemptsRef.current = 0;
 
@@ -112,6 +118,7 @@ export function useRobberyTrackerBountiesWebSocket(
       ws.addEventListener("close", (event) => {
         console.log("[BOUNTY TRACKER WS] Closed:", event.code, event.reason);
         setIsConnected(false);
+        setIsConnecting(false);
 
         if (pingIntervalRef.current) {
           clearInterval(pingIntervalRef.current);
@@ -135,6 +142,7 @@ export function useRobberyTrackerBountiesWebSocket(
             );
 
             reconnectTimeoutRef.current = setTimeout(() => {
+              setIsConnecting(true);
               connectRef.current?.();
             }, delay);
           } else {
@@ -171,6 +179,8 @@ export function useRobberyTrackerBountiesWebSocket(
       reconnectTimeoutRef.current = null;
     }
     setIsConnected(false);
+    setIsConnecting(false);
+    setError(undefined);
     // Data is persisted to avoid flashing empty state on reconnect
   }, []);
 
@@ -199,7 +209,9 @@ export function useRobberyTrackerBountiesWebSocket(
       // If user was idle, they are now active
       if (isIdleRef.current) {
         isIdleRef.current = false;
+        setIsIdle(false);
         console.log("[BOUNTY TRACKER WS] User active - reconnecting");
+        setIsConnecting(true);
         connect();
       }
 
@@ -207,6 +219,7 @@ export function useRobberyTrackerBountiesWebSocket(
       idleTimeoutRef.current = setTimeout(() => {
         console.log("[BOUNTY TRACKER WS] User idle - disconnecting");
         isIdleRef.current = true;
+        setIsIdle(true);
         disconnect();
       }, IDLE_TIMEOUT);
     };
@@ -216,6 +229,7 @@ export function useRobberyTrackerBountiesWebSocket(
       if (document.hidden) {
         console.log("[BOUNTY TRACKER WS] Tab hidden - disconnecting");
         isVisibleRef.current = false;
+        setIsIdle(true);
         disconnect();
         // Clear idle timer when tab is hidden
         if (idleTimeoutRef.current) {
@@ -226,6 +240,7 @@ export function useRobberyTrackerBountiesWebSocket(
         console.log("[BOUNTY TRACKER WS] Tab visible - reconnecting");
         isVisibleRef.current = true;
         isIdleRef.current = false;
+        setIsConnecting(true);
         connect();
         // Restart idle timer when tab becomes visible
         resetIdleTimer();
@@ -273,6 +288,8 @@ export function useRobberyTrackerBountiesWebSocket(
   return {
     bounties,
     isConnected,
+    isConnecting,
+    isIdle,
     error,
   };
 }
