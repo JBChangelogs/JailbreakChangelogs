@@ -12,6 +12,8 @@ import { RobberyData } from "./useRobberyTrackerWebSocket";
 interface UseRobberyTrackerMansionsWebSocketReturn {
   mansions: RobberyData[];
   isConnected: boolean;
+  isConnecting: boolean;
+  isIdle: boolean;
   error: string | undefined;
 }
 
@@ -20,6 +22,8 @@ export function useRobberyTrackerMansionsWebSocket(
 ): UseRobberyTrackerMansionsWebSocketReturn {
   const [mansions, setMansions] = useState<RobberyData[]>([]);
   const [isConnected, setIsConnected] = useState(false);
+  const [isConnecting, setIsConnecting] = useState(false);
+  const [isIdle, setIsIdle] = useState(false);
   const [error, setError] = useState<string | undefined>();
 
   const wsRef = useRef<WebSocket | null>(null);
@@ -57,6 +61,8 @@ export function useRobberyTrackerMansionsWebSocket(
       ws.addEventListener("open", () => {
         console.log("[MANSION TRACKER WS] Connected");
         setIsConnected(true);
+        setIsConnecting(false);
+        setIsIdle(false);
         setError(undefined);
         reconnectAttemptsRef.current = 0;
 
@@ -88,6 +94,8 @@ export function useRobberyTrackerMansionsWebSocket(
       ws.addEventListener("close", (event) => {
         console.log("[MANSION TRACKER WS] Closed:", event.code, event.reason);
         setIsConnected(false);
+        setIsConnecting(false);
+        setIsConnecting(false);
 
         if (pingIntervalRef.current) {
           clearInterval(pingIntervalRef.current);
@@ -111,6 +119,7 @@ export function useRobberyTrackerMansionsWebSocket(
             );
 
             reconnectTimeoutRef.current = setTimeout(() => {
+              setIsConnecting(true);
               connectRef.current?.();
             }, delay);
           } else {
@@ -147,6 +156,8 @@ export function useRobberyTrackerMansionsWebSocket(
       reconnectTimeoutRef.current = null;
     }
     setIsConnected(false);
+    setIsConnecting(false);
+    setError(undefined);
     // Data is persisted to avoid flashing empty state on reconnect
   }, []);
 
@@ -175,7 +186,9 @@ export function useRobberyTrackerMansionsWebSocket(
       // If user was idle, they are now active
       if (isIdleRef.current) {
         isIdleRef.current = false;
+        setIsIdle(false);
         console.log("[MANSION TRACKER WS] User active - reconnecting");
+        setIsConnecting(true);
         connect();
       }
 
@@ -183,6 +196,7 @@ export function useRobberyTrackerMansionsWebSocket(
       idleTimeoutRef.current = setTimeout(() => {
         console.log("[MANSION TRACKER WS] User idle - disconnecting");
         isIdleRef.current = true;
+        setIsIdle(true);
         disconnect();
       }, IDLE_TIMEOUT);
     };
@@ -192,6 +206,7 @@ export function useRobberyTrackerMansionsWebSocket(
       if (document.hidden) {
         console.log("[MANSION TRACKER WS] Tab hidden - disconnecting");
         isVisibleRef.current = false;
+        setIsIdle(true);
         disconnect();
         // Clear idle timer when tab is hidden
         if (idleTimeoutRef.current) {
@@ -202,6 +217,7 @@ export function useRobberyTrackerMansionsWebSocket(
         console.log("[MANSION TRACKER WS] Tab visible - reconnecting");
         isVisibleRef.current = true;
         isIdleRef.current = false;
+        setIsConnecting(true);
         connect();
         // Restart idle timer when tab becomes visible
         resetIdleTimer();
@@ -249,6 +265,8 @@ export function useRobberyTrackerMansionsWebSocket(
   return {
     mansions,
     isConnected,
+    isConnecting,
+    isIdle,
     error,
   };
 }

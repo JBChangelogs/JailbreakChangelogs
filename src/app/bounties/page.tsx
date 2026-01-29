@@ -15,7 +15,7 @@ import ExperimentalFeatureBanner from "@/components/ui/ExperimentalFeatureBanner
 type BountySort = "last_updated" | "highest_total" | "lowest_total";
 
 function BountyTrackerContent() {
-  const { bounties, isConnected, error } =
+  const { bounties, isConnected, isConnecting, isIdle, error } =
     useRobberyTrackerBountiesWebSocket(true);
 
   const [searchQuery, setSearchQuery] = useState("");
@@ -178,12 +178,12 @@ function BountyTrackerContent() {
           <div className="flex items-center gap-2">
             <Icon
               icon="fluent:live-24-filled"
-              className={`h-4 w-4 ${isConnected ? "text-status-success" : "text-status-error"}`}
+              className={`h-4 w-4 ${isConnected ? "text-status-success" : isIdle ? "text-status-warning" : "text-status-error"}`}
             />
             <span
-              className={`text-xs font-medium tracking-wide uppercase ${isConnected ? "text-status-success" : "text-status-error"}`}
+              className={`text-xs font-medium tracking-wide uppercase ${isConnected ? "text-status-success" : isIdle ? "text-status-warning" : "text-status-error"}`}
             >
-              {isConnected ? "LIVE" : "OFFLINE"}
+              {isConnected ? "LIVE" : isIdle ? "IDLE" : "OFFLINE"}
             </span>
           </div>
         </div>
@@ -215,7 +215,7 @@ function BountyTrackerContent() {
 
         {/* Show stale data warning if disconnected */}
         {!isConnected && hasData && (
-          <div className="bg-button-info/10 border-border-primary mb-4 rounded-lg border p-4 shadow-sm">
+          <div className="bg-secondary-bg border-border-primary mb-4 rounded-lg border p-4 shadow-sm">
             <div className="flex items-start gap-3">
               <Icon
                 icon="mdi:clock"
@@ -223,10 +223,18 @@ function BountyTrackerContent() {
               />
               <div>
                 <span className="text-primary-text text-base font-bold">
-                  Connection Lost
+                  {isConnecting
+                    ? "Connecting..."
+                    : isIdle
+                      ? "Inactivity Detected"
+                      : "Connection Lost"}
                 </span>
                 <p className="text-secondary-text mt-1 text-sm">
-                  Showing last known data. Connection will resume automatically.
+                  {isConnecting
+                    ? "Resuming connection to bounty tracker..."
+                    : isIdle
+                      ? "Tracker paused due to inactivity. Move your mouse or press a key to resume."
+                      : "Showing last known data. Connection will resume automatically."}
                 </p>
               </div>
             </div>

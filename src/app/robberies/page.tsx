@@ -16,6 +16,7 @@ import { Masonry } from "@mui/lab";
 
 type NameSort = "a-z" | "z-a";
 type TimeSort = "newest" | "oldest";
+type ServerSize = "all" | "big" | "small";
 
 // Define all robbery types with their marker names
 const ROBBERY_TYPES = [
@@ -66,28 +67,47 @@ function RobberyTrackerContent() {
   const {
     robberies,
     isConnected: robberiesConnected,
+    isConnecting: robberiesConnecting,
+    isIdle: robberiesIdle,
     error: robberiesError,
   } = useRobberyTrackerWebSocket(activeView === "robberies");
 
   const {
     mansions,
     isConnected: mansionsConnected,
+    isConnecting: mansionsConnecting,
+    isIdle: mansionsIdle,
     error: mansionsError,
   } = useRobberyTrackerMansionsWebSocket(activeView === "mansions");
 
   const {
     airdrops,
     isConnected: airdropsConnected,
+    isConnecting: airdropsConnecting,
+    isIdle: airdropsIdle,
     error: airdropsError,
   } = useRobberyTrackerAirdropsWebSocket(activeView === "airdrops");
 
-  // Determine active connection status and data presence
+  const isConnecting =
+    activeView === "robberies"
+      ? robberiesConnecting
+      : activeView === "mansions"
+        ? mansionsConnecting
+        : airdropsConnecting;
+
   const isConnected =
     activeView === "robberies"
       ? robberiesConnected
       : activeView === "mansions"
         ? mansionsConnected
         : airdropsConnected;
+
+  const isIdle =
+    activeView === "robberies"
+      ? robberiesIdle
+      : activeView === "mansions"
+        ? mansionsIdle
+        : airdropsIdle;
 
   const error =
     activeView === "robberies"
@@ -102,9 +122,11 @@ function RobberyTrackerContent() {
       : activeView === "mansions"
         ? mansions.length > 0
         : airdrops.length > 0;
+
   const [searchQuery, setSearchQuery] = useState("");
   const [nameSort, setNameSort] = useState<NameSort>("a-z");
   const [timeSort, setTimeSort] = useState<TimeSort>("newest");
+  const [serverSize, setServerSize] = useState<ServerSize>("all");
   const [selectedRobberyTypes, setSelectedRobberyTypes] = useState<string[]>(
     [],
   );
@@ -130,6 +152,14 @@ function RobberyTrackerContent() {
       });
     }
 
+    // Apply server size filter
+    if (serverSize !== "all") {
+      filtered = filtered.filter((robbery) => {
+        const playerCount = robbery.server?.players?.length || 0;
+        return serverSize === "big" ? playerCount >= 9 : playerCount < 9;
+      });
+    }
+
     // Apply search query
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
@@ -148,11 +178,19 @@ function RobberyTrackerContent() {
       }
       return a.timestamp - b.timestamp;
     });
-  }, [robberies, selectedRobberyTypes, searchQuery, timeSort]);
+  }, [robberies, selectedRobberyTypes, searchQuery, timeSort, serverSize]);
 
   // Filter and sort Mansions (simpler as no type filtering)
   const filteredMansions = useMemo(() => {
     let filtered = mansions;
+
+    // Apply server size filter
+    if (serverSize !== "all") {
+      filtered = filtered.filter((robbery) => {
+        const playerCount = robbery.server?.players?.length || 0;
+        return serverSize === "big" ? playerCount >= 9 : playerCount < 9;
+      });
+    }
 
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
@@ -166,7 +204,7 @@ function RobberyTrackerContent() {
       if (timeSort === "newest") return b.timestamp - a.timestamp;
       return a.timestamp - b.timestamp;
     });
-  }, [mansions, searchQuery, timeSort]);
+  }, [mansions, searchQuery, timeSort, serverSize]);
 
   // Calculate robbery statistics
   const robberyStats = useMemo(() => {
@@ -197,6 +235,14 @@ function RobberyTrackerContent() {
       );
     }
 
+    // Apply server size filter
+    if (serverSize !== "all") {
+      filtered = filtered.filter((airdrop) => {
+        const playerCount = airdrop.server?.players?.length || 0;
+        return serverSize === "big" ? playerCount >= 9 : playerCount < 9;
+      });
+    }
+
     // Apply search query
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
@@ -213,7 +259,7 @@ function RobberyTrackerContent() {
         ? b.timestamp - a.timestamp
         : a.timestamp - b.timestamp,
     );
-  }, [airdrops, activeAirdropLocation, searchQuery, timeSort]);
+  }, [airdrops, activeAirdropLocation, searchQuery, timeSort, serverSize]);
 
   // Calculate airdrop statistics
   const airdropStats = useMemo(() => {
@@ -270,8 +316,21 @@ function RobberyTrackerContent() {
 
             {/* Filter Dropdowns */}
             <div className="flex flex-col gap-4 lg:flex-1 lg:flex-row lg:gap-4">
+              {/* Server Size Filter */}
+              <div className="w-full lg:w-1/3">
+                <select
+                  className="select font-inter bg-secondary-bg text-primary-text h-[56px] min-h-[56px] w-full"
+                  value={serverSize}
+                  onChange={(e) => setServerSize(e.target.value as ServerSize)}
+                >
+                  <option value="all">All Server Sizes</option>
+                  <option value="big">Big Servers (9+ Players)</option>
+                  <option value="small">Small Servers (0-8 Players)</option>
+                </select>
+              </div>
+
               {/* Name Sort Dropdown */}
-              <div className="w-full lg:w-1/2">
+              <div className="w-full lg:w-1/3">
                 <select
                   className="select font-inter bg-secondary-bg text-primary-text h-[56px] min-h-[56px] w-full"
                   value={nameSort}
@@ -286,7 +345,7 @@ function RobberyTrackerContent() {
               </div>
 
               {/* Time Sort Dropdown */}
-              <div className="w-full lg:w-1/2">
+              <div className="w-full lg:w-1/3">
                 <select
                   className="select font-inter bg-secondary-bg text-primary-text h-[56px] min-h-[56px] w-full"
                   value={timeSort}
@@ -419,12 +478,12 @@ function RobberyTrackerContent() {
           <div className="flex items-center gap-2">
             <Icon
               icon="fluent:live-24-filled"
-              className={`h-4 w-4 ${isConnected ? "text-status-success" : "text-status-error"}`}
+              className={`h-4 w-4 ${isConnected ? "text-status-success" : isIdle ? "text-status-warning" : "text-status-error"}`}
             />
             <span
-              className={`text-xs font-medium tracking-wide uppercase ${isConnected ? "text-status-success" : "text-status-error"}`}
+              className={`text-xs font-medium tracking-wide uppercase ${isConnected ? "text-status-success" : isIdle ? "text-status-warning" : "text-status-error"}`}
             >
-              {isConnected ? "LIVE" : "OFFLINE"}
+              {isConnected ? "LIVE" : isIdle ? "IDLE" : "OFFLINE"}
             </span>
           </div>
         </div>
@@ -486,14 +545,22 @@ function RobberyTrackerContent() {
 
         {/* Show stale data warning if disconnected */}
         {!isConnected && hasData && (
-          <div className="bg-button-info/10 border-border-primary mb-4 rounded-lg border p-4 shadow-sm">
+          <div className="bg-secondary-bg border-border-primary mb-4 rounded-lg border p-4 shadow-sm">
             <div className="flex items-start gap-3">
               <div>
                 <span className="text-primary-text text-base font-bold">
-                  Connection Lost
+                  {isConnecting
+                    ? "Connecting..."
+                    : isIdle
+                      ? "Inactivity Detected"
+                      : "Connection Lost"}
                 </span>
                 <p className="text-secondary-text mt-1 text-sm">
-                  Showing last known data. Connection will resume automatically.
+                  {isConnecting
+                    ? "Resuming connection to robbery tracker..."
+                    : isIdle
+                      ? "Tracker paused due to inactivity. Move your mouse or press a key to resume."
+                      : "Showing last known data. Connection will resume automatically."}
                 </p>
               </div>
             </div>

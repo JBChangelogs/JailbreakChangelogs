@@ -61,6 +61,8 @@ export interface RobberyData {
 interface UseRobberyTrackerWebSocketReturn {
   robberies: RobberyData[];
   isConnected: boolean;
+  isConnecting: boolean;
+  isIdle: boolean;
   error: string | undefined;
 }
 
@@ -69,6 +71,8 @@ export function useRobberyTrackerWebSocket(
 ): UseRobberyTrackerWebSocketReturn {
   const [robberies, setRobberies] = useState<RobberyData[]>([]);
   const [isConnected, setIsConnected] = useState(false);
+  const [isConnecting, setIsConnecting] = useState(false);
+  const [isIdle, setIsIdle] = useState(false);
   const [error, setError] = useState<string | undefined>();
 
   const wsRef = useRef<WebSocket | null>(null);
@@ -98,14 +102,13 @@ export function useRobberyTrackerWebSocket(
 
     try {
       const wsUrl = `${INVENTORY_WS_URL}/tracker`;
-      console.log("[ROBBERY TRACKER WS] Connecting to:", wsUrl);
-
       const ws = new WebSocket(wsUrl);
       wsRef.current = ws;
 
       ws.addEventListener("open", () => {
-        console.log("[ROBBERY TRACKER WS] Connected");
         setIsConnected(true);
+        setIsConnecting(false);
+        setIsIdle(false);
         setError(undefined);
         reconnectAttemptsRef.current = 0;
 
@@ -135,8 +138,8 @@ export function useRobberyTrackerWebSocket(
       });
 
       ws.addEventListener("close", (event) => {
-        console.log("[ROBBERY TRACKER WS] Closed:", event.code, event.reason);
         setIsConnected(false);
+        setIsConnecting(false);
 
         if (pingIntervalRef.current) {
           clearInterval(pingIntervalRef.current);
@@ -155,11 +158,9 @@ export function useRobberyTrackerWebSocket(
           if (reconnectAttemptsRef.current < maxAttempts) {
             reconnectAttemptsRef.current++;
             const delay = getReconnectDelay(reconnectAttemptsRef.current);
-            console.log(
-              `[ROBBERY TRACKER WS] Reconnecting in ${delay}ms... (${reconnectAttemptsRef.current}/${maxAttempts})`,
-            );
 
             reconnectTimeoutRef.current = setTimeout(() => {
+              setIsConnecting(true);
               connectRef.current?.();
             }, delay);
           } else {
@@ -183,7 +184,6 @@ export function useRobberyTrackerWebSocket(
 
   const disconnect = useCallback(() => {
     if (wsRef.current) {
-      console.log("[ROBBERY TRACKER WS] Disconnecting (Idle/Hidden/Unmount)");
       wsRef.current.close(1000, "Client disconnect");
       wsRef.current = null;
     }
@@ -196,6 +196,8 @@ export function useRobberyTrackerWebSocket(
       reconnectTimeoutRef.current = null;
     }
     setIsConnected(false);
+    setIsConnecting(false);
+    setError(undefined);
     // Data is persisted to avoid flashing empty state on reconnect
   }, []);
 
@@ -224,14 +226,15 @@ export function useRobberyTrackerWebSocket(
       // If user was idle, they are now active
       if (isIdleRef.current) {
         isIdleRef.current = false;
-        console.log("[ROBBERY TRACKER WS] User active - reconnecting");
+        setIsIdle(false);
+        setIsConnecting(true);
         connect();
       }
 
       // Set new timeout
       idleTimeoutRef.current = setTimeout(() => {
-        console.log("[ROBBERY TRACKER WS] User idle - disconnecting");
         isIdleRef.current = true;
+        setIsIdle(true);
         disconnect();
       }, IDLE_TIMEOUT);
     };
@@ -239,8 +242,8 @@ export function useRobberyTrackerWebSocket(
     // Handle page visibility changes
     const handleVisibilityChange = () => {
       if (document.hidden) {
-        console.log("[ROBBERY TRACKER WS] Tab hidden - disconnecting");
         isVisibleRef.current = false;
+        setIsIdle(true);
         disconnect();
         // Clear idle timer when tab is hidden
         if (idleTimeoutRef.current) {
@@ -248,9 +251,9 @@ export function useRobberyTrackerWebSocket(
           idleTimeoutRef.current = null;
         }
       } else {
-        console.log("[ROBBERY TRACKER WS] Tab visible - reconnecting");
         isVisibleRef.current = true;
         isIdleRef.current = false;
+        setIsConnecting(true);
         connect();
         // Restart idle timer when tab becomes visible
         resetIdleTimer();
@@ -298,6 +301,8 @@ export function useRobberyTrackerWebSocket(
   return {
     robberies,
     isConnected,
+    isConnecting,
+    isIdle,
     error,
   };
 }
