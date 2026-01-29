@@ -45,18 +45,6 @@ export function useScanWebSocket(userId: string): UseScanWebSocketReturn {
   const [forceShowError, setForceShowError] = useState(false);
   const [turnstileToken, setTurnstileToken] = useState<string | undefined>();
 
-  useEffect(() => {
-    console.log("[SCAN WS] Status changed to:", status);
-  }, [status]);
-
-  useEffect(() => {
-    console.log("[SCAN WS] Error changed to:", error);
-  }, [error]);
-
-  useEffect(() => {
-    console.log("[SCAN WS] ForceShowError changed to:", forceShowError);
-  }, [forceShowError]);
-
   const wsRef = useRef<WebSocket | null>(null);
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const heartbeatIntervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -96,7 +84,6 @@ export function useScanWebSocket(userId: string): UseScanWebSocketReturn {
       wsRef.current = ws;
 
       ws.addEventListener("open", () => {
-        console.log("[SCAN WS] Connected");
         setStatus("connected");
         setIsConnected(true);
         setError(undefined);
@@ -110,26 +97,18 @@ export function useScanWebSocket(userId: string): UseScanWebSocketReturn {
             ws.extensions?.includes("permessage-deflate") || false,
         };
 
-        console.log("[SCAN WS] Connection quality:", {
-          compression: connectionQualityRef.current.compressionEnabled,
-          extensions: ws.extensions,
-        });
-
         ws.send(JSON.stringify({ action: "request" }));
         setStatus("scanning");
 
-        // Start scanning timeout (1 minute)
+        // Start scanning timeout (3 minutes)
         scanningTimeoutRef.current = setTimeout(() => {
-          console.log(
-            "[SCAN WS] Scanning timeout - no updates received for 1 minute",
-          );
           setError("Scanning timeout - please try again");
           setStatus("error");
 
           if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
             wsRef.current.close();
           }
-        }, 60000); // 1 minute
+        }, 180000); // 3 minutes
 
         heartbeatIntervalRef.current = setInterval(() => {
           if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
@@ -139,7 +118,6 @@ export function useScanWebSocket(userId: string): UseScanWebSocketReturn {
                 timestamp: Date.now(),
               });
               wsRef.current.send(heartbeatMsg);
-              console.log("[SCAN WS] Sent status check");
             } catch (err) {
               console.error("[SCAN WS] Status check send failed:", err);
             }
@@ -159,10 +137,8 @@ export function useScanWebSocket(userId: string): UseScanWebSocketReturn {
           if (isCompressed) {
             const decoder = new TextDecoder();
             data = JSON.parse(decoder.decode(messageData));
-            console.log("[SCAN WS] Received compressed message:", data);
           } else {
             data = JSON.parse(messageData);
-            console.log("[SCAN WS] Received:", data);
           }
 
           // If attempt exceeds total_attempts, use attempt as the max to show accurate progress
@@ -194,9 +170,6 @@ export function useScanWebSocket(userId: string): UseScanWebSocketReturn {
             if (scanningTimeoutRef.current) {
               clearTimeout(scanningTimeoutRef.current);
               scanningTimeoutRef.current = setTimeout(() => {
-                console.log(
-                  "[SCAN WS] Scanning timeout - no updates received for 1 minute",
-                );
                 setError("Scanning timeout - please try again");
                 setStatus("error");
 
@@ -206,7 +179,7 @@ export function useScanWebSocket(userId: string): UseScanWebSocketReturn {
                 ) {
                   wsRef.current.close();
                 }
-              }, 60000); // 1 minute
+              }, 180000); // 3 minutes
             }
           } else if (data.action === "update") {
             setStatus("scanning");
@@ -230,9 +203,6 @@ export function useScanWebSocket(userId: string): UseScanWebSocketReturn {
                   wsRef.current &&
                   wsRef.current.readyState === WebSocket.OPEN
                 ) {
-                  console.log(
-                    "[SCAN WS] User not found - closing connection and resetting",
-                  );
                   wsRef.current.close();
                   setStatus("idle");
                   setMessage(undefined);
@@ -250,9 +220,6 @@ export function useScanWebSocket(userId: string): UseScanWebSocketReturn {
               if (scanningTimeoutRef.current) {
                 clearTimeout(scanningTimeoutRef.current);
                 scanningTimeoutRef.current = setTimeout(() => {
-                  console.log(
-                    "[SCAN WS] Scanning timeout - no updates received for 1 minute",
-                  );
                   setError("Scanning timeout - please try again");
                   setStatus("error");
 
@@ -262,7 +229,7 @@ export function useScanWebSocket(userId: string): UseScanWebSocketReturn {
                   ) {
                     wsRef.current.close();
                   }
-                }, 60000); // 1 minute
+                }, 180000); // 3 minutes
               }
             } else if (
               data.message &&
@@ -274,9 +241,6 @@ export function useScanWebSocket(userId: string): UseScanWebSocketReturn {
               if (scanningTimeoutRef.current) {
                 clearTimeout(scanningTimeoutRef.current);
                 scanningTimeoutRef.current = setTimeout(() => {
-                  console.log(
-                    "[SCAN WS] Scanning timeout - no updates received for 1 minute",
-                  );
                   setError("Scanning timeout - please try again");
                   setStatus("error");
 
@@ -286,7 +250,7 @@ export function useScanWebSocket(userId: string): UseScanWebSocketReturn {
                   ) {
                     wsRef.current.close();
                   }
-                }, 60000); // 1 minute
+                }, 180000); // 3 minutes
               }
             } else if (
               data.message &&
@@ -343,7 +307,6 @@ export function useScanWebSocket(userId: string): UseScanWebSocketReturn {
           } else if (data.action === "status") {
             setStatus(data.status || "scanning");
             setMessage(data.message || "Scanning...");
-            console.log("[SCAN WS] Received status:", data);
             return;
           }
 
@@ -359,24 +322,12 @@ export function useScanWebSocket(userId: string): UseScanWebSocketReturn {
           }
         } catch (err) {
           console.error("[SCAN WS] Parse error:", err);
-
-          const quality = connectionQualityRef.current;
-          const connectionDuration = Date.now() - quality.connectionStartTime;
-
-          console.error("[SCAN WS] Connection quality at error:", {
-            messagesReceived: quality.messagesReceived,
-            connectionDuration: `${connectionDuration}ms`,
-            compressionEnabled: quality.compressionEnabled,
-            lastMessageAge: `${Date.now() - quality.lastMessageTime}ms`,
-          });
-
           setError("Invalid response from server - connection may be unstable");
           setStatus("error");
         }
       });
 
       ws.addEventListener("close", (event) => {
-        console.log("[SCAN WS] Closed:", event.code, event.reason);
         setIsConnected(false);
 
         const quality = connectionQualityRef.current;
@@ -454,20 +405,13 @@ export function useScanWebSocket(userId: string): UseScanWebSocketReturn {
 
   const startScan = useCallback(
     (token?: string) => {
-      console.log("[SCAN WS] startScan called with userId:", userId);
-      console.log("[SCAN WS] Turnstile token provided:", !!token);
-      console.log("[SCAN WS] Current status:", status);
-      console.log("[SCAN WS] ENABLE_WS_SCAN:", ENABLE_WS_SCAN);
-
       if (!userId) {
-        console.log("[SCAN WS] No userId provided, setting error");
         setError("No user ID provided");
         setStatus("error");
         return;
       }
 
       if (!ENABLE_WS_SCAN) {
-        console.log("[SCAN WS] WebSocket scanning disabled, setting error");
         setError("Inventory scanning is temporarily disabled");
         setStatus("error");
         setForceShowError(true); // Force error display on next render
@@ -479,7 +423,6 @@ export function useScanWebSocket(userId: string): UseScanWebSocketReturn {
         setTurnstileToken(token);
       }
 
-      console.log("[SCAN WS] Starting scan connection...");
       connect();
     },
     [userId, connect, status],
@@ -516,7 +459,6 @@ export function useScanWebSocket(userId: string): UseScanWebSocketReturn {
   }, []);
 
   const resetForceShowError = useCallback(() => {
-    console.log("[SCAN WS] Resetting forceShowError flag");
     setForceShowError(false);
   }, []);
 
