@@ -29,7 +29,6 @@ export function useBotsPolling(intervalMs: number = 30000) {
 
   const fetchData = useCallback(async () => {
     const timestamp = new Date().toISOString();
-    console.log(`[POLLING] Starting data fetch at ${timestamp}`);
 
     // Set loading state
     setData((prev) => ({ ...prev, isLoading: true }));
@@ -40,12 +39,6 @@ export function useBotsPolling(intervalMs: number = 30000) {
       if (result.success && result.data) {
         const totalBotsCount =
           result.data.botsData?.recent_heartbeats?.length || 0;
-
-        console.log(`[POLLING] Successfully fetched data at ${timestamp}:`, {
-          botsCount: totalBotsCount,
-          queueLength: result.data.queueInfo?.queue_length || 0,
-          lastProcessed: result.data.queueInfo?.last_dequeue?.user_id || "none",
-        });
 
         setData({
           botsData: result.data.botsData,
@@ -96,9 +89,6 @@ export function useBotsPolling(intervalMs: number = 30000) {
   // Auto-retry on error
   useEffect(() => {
     if (data.error && data.retryCount < 3) {
-      console.log(
-        `[POLLING] Auto-retrying in 5 seconds (attempt ${data.retryCount + 1}/3)`,
-      );
       const retryTimeout = setTimeout(() => {
         fetchData();
       }, 5000);

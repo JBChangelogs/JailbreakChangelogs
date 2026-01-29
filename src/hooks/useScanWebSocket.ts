@@ -330,17 +330,6 @@ export function useScanWebSocket(userId: string): UseScanWebSocketReturn {
       ws.addEventListener("close", (event) => {
         setIsConnected(false);
 
-        const quality = connectionQualityRef.current;
-        const connectionDuration = Date.now() - quality.connectionStartTime;
-
-        console.log("[SCAN WS] Connection quality summary:", {
-          duration: `${connectionDuration}ms`,
-          messagesReceived: quality.messagesReceived,
-          compressionEnabled: quality.compressionEnabled,
-          closeCode: event.code,
-          closeReason: event.reason,
-        });
-
         if (heartbeatIntervalRef.current) {
           clearInterval(heartbeatIntervalRef.current);
           heartbeatIntervalRef.current = null;
@@ -359,9 +348,6 @@ export function useScanWebSocket(userId: string): UseScanWebSocketReturn {
           if (!event.reason || event.reason.trim() === "") {
             if (reconnectAttemptsRef.current < 2) {
               reconnectAttemptsRef.current++;
-              console.log(
-                `[SCAN WS] Unexpected disconnection, attempting reconnection ${reconnectAttemptsRef.current}/2`,
-              );
 
               setMessage(`Reconnecting... (${reconnectAttemptsRef.current}/2)`);
 

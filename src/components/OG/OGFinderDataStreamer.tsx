@@ -155,12 +155,6 @@ async function OGFinderDataFetcher({ robloxId }: { robloxId: string }) {
       },
     );
     result.count = result.results.length;
-
-    if (filteredCount > 0) {
-      console.log(
-        `[OG FINDER] Filtered ${filteredCount} "${tireStickerName}" ${categoryTitle}'s for ${actualRobloxId}`,
-      );
-    }
   }
 
   // Fetch main user data, connection data, and items metadata

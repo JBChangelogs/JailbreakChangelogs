@@ -413,7 +413,6 @@ export default function InventoryCheckerClient({
 
     // Handle forceShowError flag for disabled WebSocket scanning
     if (scanForceShowError && scanError && !forceShowErrorHandledRef.current) {
-      console.log("[INVENTORY] Force showing error:", scanError);
       showScanErrorToast(scanError);
       scanResetForceShowError(); // Reset the flag
       forceShowErrorHandledRef.current = true; // Mark as handled
@@ -498,8 +497,6 @@ export default function InventoryCheckerClient({
   };
 
   // Comments are provided server-side via initialComments prop
-  // No need for client-side fetching
-
   // Helper function to get user display name with progressive loading
   const getUserDisplay = useCallback(
     (userId: string) => {
@@ -525,28 +522,16 @@ export default function InventoryCheckerClient({
       const BATCH_SIZE = 100; // Load 100 users at a time
       const DELAY_BETWEEN_BATCHES = 2000; // 2 second delay between batches
 
-      console.log(
-        `[INVENTORY] Starting background load of ${remainingUserIds.length} remaining users`,
-      );
-
       for (let i = 0; i < remainingUserIds.length; i += BATCH_SIZE) {
         const batch = remainingUserIds.slice(i, i + BATCH_SIZE);
 
         try {
-          console.log(
-            `[INVENTORY] Loading batch ${Math.floor(i / BATCH_SIZE) + 1}/${Math.ceil(remainingUserIds.length / BATCH_SIZE)}: ${batch.length} users`,
-          );
-
           const result = await fetchMissingRobloxData(batch);
 
           // Update state with new user data
           if (result.userData && typeof result.userData === "object") {
             setRobloxUsers((prev) => ({ ...prev, ...result.userData }));
           }
-
-          console.log(
-            `[INVENTORY] Successfully loaded batch ${Math.floor(i / BATCH_SIZE) + 1}`,
-          );
         } catch (error) {
           console.error(
             `[INVENTORY] Failed to load batch ${Math.floor(i / BATCH_SIZE) + 1}:`,
@@ -561,10 +546,6 @@ export default function InventoryCheckerClient({
           );
         }
       }
-
-      console.log(
-        `[INVENTORY] Completed background loading of all remaining users`,
-      );
     };
 
     // Start loading after a short delay to let the initial page load
@@ -707,17 +688,6 @@ export default function InventoryCheckerClient({
                                 ) {
                                   window.umami.track("Request Scan");
                                 }
-                                console.log(
-                                  "[INVENTORY] Request Scan button clicked",
-                                );
-                                console.log(
-                                  "[INVENTORY] Current scan status:",
-                                  scanWebSocket.status,
-                                );
-                                console.log(
-                                  "[INVENTORY] Current scan error:",
-                                  scanWebSocket.error,
-                                );
                                 // Show Turnstile modal before scan
                                 if (
                                   ENABLE_WS_SCAN &&

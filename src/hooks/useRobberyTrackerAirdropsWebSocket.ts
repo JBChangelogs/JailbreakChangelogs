@@ -78,13 +78,11 @@ export function useRobberyTrackerAirdropsWebSocket(
 
     try {
       const wsUrl = `${INVENTORY_WS_URL}/tracker?type=airdrops`;
-      console.log("[AIRDROP TRACKER WS] Connecting to:", wsUrl);
 
       const ws = new WebSocket(wsUrl);
       wsRef.current = ws;
 
       ws.addEventListener("open", () => {
-        console.log("[AIRDROP TRACKER WS] Connected");
         setIsConnected(true);
         setIsConnecting(false);
         setIsIdle(false);
@@ -117,7 +115,6 @@ export function useRobberyTrackerAirdropsWebSocket(
       });
 
       ws.addEventListener("close", (event) => {
-        console.log("[AIRDROP TRACKER WS] Closed:", event.code, event.reason);
         setIsConnected(false);
         setIsConnecting(false);
 
@@ -138,9 +135,6 @@ export function useRobberyTrackerAirdropsWebSocket(
           if (reconnectAttemptsRef.current < maxAttempts) {
             reconnectAttemptsRef.current++;
             const delay = getReconnectDelay(reconnectAttemptsRef.current);
-            console.log(
-              `[AIRDROP TRACKER WS] Reconnecting in ${delay}ms... (${reconnectAttemptsRef.current}/${maxAttempts})`,
-            );
 
             reconnectTimeoutRef.current = setTimeout(() => {
               setIsConnecting(true);
@@ -167,7 +161,6 @@ export function useRobberyTrackerAirdropsWebSocket(
 
   const disconnect = useCallback(() => {
     if (wsRef.current) {
-      console.log("[AIRDROP TRACKER WS] Disconnecting (Idle/Hidden/Unmount)");
       wsRef.current.close(1000, "Client disconnect");
       wsRef.current = null;
     }
@@ -211,14 +204,12 @@ export function useRobberyTrackerAirdropsWebSocket(
       if (isIdleRef.current) {
         isIdleRef.current = false;
         setIsIdle(false);
-        console.log("[AIRDROP TRACKER WS] User active - reconnecting");
         setIsConnecting(true);
         connect();
       }
 
       // Set new timeout
       idleTimeoutRef.current = setTimeout(() => {
-        console.log("[AIRDROP TRACKER WS] User idle - disconnecting");
         isIdleRef.current = true;
         setIsIdle(true);
         disconnect();
@@ -228,7 +219,6 @@ export function useRobberyTrackerAirdropsWebSocket(
     // Handle page visibility changes
     const handleVisibilityChange = () => {
       if (document.hidden) {
-        console.log("[AIRDROP TRACKER WS] Tab hidden - disconnecting");
         isVisibleRef.current = false;
         setIsIdle(true);
         disconnect();
@@ -238,7 +228,6 @@ export function useRobberyTrackerAirdropsWebSocket(
           idleTimeoutRef.current = null;
         }
       } else {
-        console.log("[AIRDROP TRACKER WS] Tab visible - reconnecting");
         isVisibleRef.current = true;
         isIdleRef.current = false;
         setIsConnecting(true);
