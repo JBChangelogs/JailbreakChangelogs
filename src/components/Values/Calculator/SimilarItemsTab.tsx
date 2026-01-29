@@ -1,6 +1,6 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { TradeItem } from "@/types/trading";
-import { Slider } from "@mui/material";
+import { Slider } from "@/components/ui/slider";
 import { EmptyState } from "./EmptyState";
 import TotalSimilarItems from "./TotalSimilarItems";
 
@@ -33,6 +33,27 @@ export const SimilarItemsTab: React.FC<SimilarItemsTabProps> = ({
   getSelectedValue,
   onBrowseItems,
 }) => {
+  const currentRange =
+    totalBasis === "offering"
+      ? offeringSimilarItemsRange
+      : requestingSimilarItemsRange;
+
+  const [localRange, setLocalRange] = useState(currentRange);
+  const [rangeInput, setRangeInput] = useState(currentRange.toLocaleString());
+
+  // Sync internal states when parent props change (e.g. from tab switch)
+  useEffect(() => {
+    setLocalRange(currentRange);
+    setRangeInput(currentRange.toLocaleString());
+  }, [currentRange]);
+
+  // Sync inputs when localRange changes from slider movement
+  useEffect(() => {
+    setRangeInput(localRange.toLocaleString());
+  }, [localRange]);
+
+  const stripCommas = (str: string) => str.replace(/,/g, "");
+
   // Check if both sides are empty
   if (offeringItems.length === 0 && requestingItems.length === 0) {
     return (
@@ -167,46 +188,51 @@ export const SimilarItemsTab: React.FC<SimilarItemsTabProps> = ({
       {/* Range controls */}
       <div className="border-border-primary bg-secondary-bg hover:border-border-focus hover:shadow-card-shadow mb-4 rounded-lg border p-4 transition-colors duration-200 hover:shadow-lg">
         <div className="flex flex-col gap-3">
-          <div className="flex items-center justify-between gap-3">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-2">
               <span className="text-secondary-text text-sm">Range</span>
             </div>
+            <div className="flex items-center gap-2">
+              <input
+                type="text"
+                inputMode="numeric"
+                value={rangeInput}
+                onFocus={(e) => setRangeInput(stripCommas(e.target.value))}
+                onChange={(e) => {
+                  const val = e.target.value.replace(/\D/g, "");
+                  setRangeInput(val);
+                }}
+                onBlur={() => {
+                  let val = parseInt(stripCommas(rangeInput)) || 0;
+                  val = Math.max(0, Math.min(val, MAX_SIMILAR_ITEMS_RANGE));
+                  setLocalRange(val);
+                  if (totalBasis === "offering") {
+                    setOfferingSimilarItemsRange(val);
+                  } else {
+                    setRequestingSimilarItemsRange(val);
+                  }
+                  setRangeInput(val.toLocaleString());
+                }}
+                className="border-border-primary bg-primary-bg text-primary-text focus:border-button-info h-7 w-24 rounded border px-2 text-[11px] focus:outline-none"
+                placeholder="Range"
+              />
+            </div>
           </div>
           <Slider
-            value={
-              totalBasis === "offering"
-                ? offeringSimilarItemsRange
-                : requestingSimilarItemsRange
-            }
+            value={[localRange]}
             min={0}
             max={MAX_SIMILAR_ITEMS_RANGE}
             step={50_000}
-            onChange={(_, v) => {
-              const val = Array.isArray(v) ? v[0] : v;
-              if (typeof val === "number") {
-                if (totalBasis === "offering")
-                  setOfferingSimilarItemsRange(val);
-                else setRequestingSimilarItemsRange(val);
-              }
+            onValueChange={(v: number[]) => {
+              setLocalRange(v[0]);
             }}
-            sx={{
-              color: "var(--color-button-info)",
-              mt: 1,
-              "& .MuiSlider-markLabel": {
-                color: "var(--color-secondary-text)",
-              },
-              "& .MuiSlider-mark": {
-                backgroundColor: "var(--color-secondary-text)",
-              },
+            onValueCommit={(v: number[]) => {
+              const val = v[0];
+              if (totalBasis === "offering") setOfferingSimilarItemsRange(val);
+              else setRequestingSimilarItemsRange(val);
             }}
+            className="mt-4"
           />
-          <div className="text-secondary-text text-xs">
-            Current:{" "}
-            {(totalBasis === "offering"
-              ? offeringSimilarItemsRange
-              : requestingSimilarItemsRange
-            ).toLocaleString()}
-          </div>
         </div>
       </div>
 

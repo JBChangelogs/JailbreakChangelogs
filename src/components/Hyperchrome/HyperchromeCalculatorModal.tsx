@@ -38,7 +38,6 @@ export default function HyperchromeCalculatorModal({
   const [isSmallServer, setIsSmallServer] = useState(false);
 
   useEffect(() => {
-     
     setMounted(true);
   }, []);
 
@@ -136,13 +135,15 @@ export default function HyperchromeCalculatorModal({
         <DialogPanel className="modal-container border-button-info bg-secondary-bg flex max-h-[70vh] w-full max-w-[480px] min-w-[320px] flex-col rounded-lg border shadow-lg">
           <div className="modal-header text-primary-text flex shrink-0 items-center justify-between px-6 py-4 text-xl font-semibold">
             <span>Hyperchrome Pity Calculator</span>
-            <button
+            <Button
+              variant="ghost"
+              size="icon"
               aria-label="Close"
               onClick={handleClose}
-              className="text-secondary-text hover:text-primary-text cursor-pointer rounded-md p-1 hover:bg-white/10"
+              className="text-secondary-text hover:text-primary-text"
             >
               <Icon icon="heroicons:x-mark" className="h-5 w-5" />
-            </button>
+            </Button>
           </div>
 
           <div className="modal-content flex-1 overflow-y-auto p-6">
@@ -368,8 +369,8 @@ export default function HyperchromeCalculatorModal({
 
           <div className="modal-footer flex shrink-0 justify-end gap-2 px-6 py-4">
             {step > 1 && (
-              <button
-                type="button"
+              <Button
+                variant="ghost"
                 onClick={() => {
                   if (hasCalculated) {
                     setHasCalculated(false);
@@ -377,10 +378,9 @@ export default function HyperchromeCalculatorModal({
                     setStep((s) => Math.max(1, s - 1));
                   }
                 }}
-                className="text-secondary-text hover:text-primary-text cursor-pointer rounded border-none bg-transparent px-4 py-2 text-sm"
               >
                 Back
-              </button>
+              </Button>
             )}
             {step < 2 ? (
               <Button

@@ -112,7 +112,7 @@ export default function ValuesClient({
   const [favorites, setFavorites] = useState<number[]>([]);
   const searchSectionRef = useRef<HTMLDivElement>(null);
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
-  const MAX_VALUE_RANGE = 100_000_000;
+  const MAX_VALUE_RANGE = 50_000_000;
   const [rangeValue, setRangeValue] = useState<number[]>([0, MAX_VALUE_RANGE]);
   const [appliedMinValue, setAppliedMinValue] = useState<number>(0);
   const [appliedMaxValue, setAppliedMaxValue] =

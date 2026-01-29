@@ -3,17 +3,11 @@
 import { useState, useEffect, useRef } from "react";
 import { Icon } from "../ui/IconWrapper";
 import { FilterSort, ValueSort } from "@/types";
-import dynamic from "next/dynamic";
 import { useIsAuthenticated } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { safeSessionStorage } from "@/utils/safeStorage";
 
-const Slider = dynamic(() => import("@mui/material/Slider"), {
-  ssr: false,
-  loading: () => (
-    <div className="border-border-primary bg-secondary-bg hover:border-border-focus mt-1 h-8 w-full animate-pulse rounded-md border"></div>
-  ),
-});
+import { Slider } from "@/components/ui/slider";
 
 interface ValuesSearchControlsProps {
   searchTerm: string;
@@ -45,8 +39,28 @@ export default function ValuesSearchControls({
   const isAuthenticated = useIsAuthenticated();
   const [isSearchHighlighted, setIsSearchHighlighted] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
-  const MAX_VALUE_RANGE = 100_000_000;
-  const MIN_VALUE_DISTANCE = 4_000_000;
+  const MAX_VALUE_RANGE = 50_000_000;
+  // Local state for the slider visual position to ensure 60fps movement
+  const [localRange, setLocalRange] = useState(rangeValue);
+  // Local state for numerical inputs to allow typing
+  const [minInput, setMinInput] = useState(rangeValue[0].toLocaleString());
+  const [maxInput, setMaxInput] = useState(rangeValue[1].toLocaleString());
+
+  // Helper to strip commas
+  const stripCommas = (str: string) => str.replace(/,/g, "");
+
+  // Sync internal states when rangeValue changes (e.g. from parent reset or clear)
+  useEffect(() => {
+    setLocalRange(rangeValue);
+    setMinInput(rangeValue[0].toLocaleString());
+    setMaxInput(rangeValue[1].toLocaleString());
+  }, [rangeValue]);
+
+  // Also sync inputs when localRange changes from slider movement
+  useEffect(() => {
+    setMinInput(localRange[0].toLocaleString());
+    setMaxInput(localRange[1].toLocaleString());
+  }, [localRange]);
 
   // Derive isItemIdSearch from searchTerm instead of using useEffect
   const isItemIdSearch =
@@ -86,8 +100,6 @@ export default function ValuesSearchControls({
     { value: 10_000_000, label: "10M" },
     { value: 25_000_000, label: "25M" },
     { value: 50_000_000, label: "50M" },
-    { value: 75_000_000, label: "75M" },
-    { value: 100_000_000 },
   ];
 
   // Handle Ctrl+F to focus search input
@@ -270,69 +282,109 @@ export default function ValuesSearchControls({
             </div>
           </div>
 
-          {/* Value range slider */}
           <div className="w-full">
             <div className="border-border-primary bg-secondary-bg hover:border-border-focus rounded-lg border px-3 py-2">
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex items-center gap-2">
                   <span className="text-secondary-text text-xs">
                     Value Range
                   </span>
                 </div>
-                <span className="text-secondary-text text-[11px]">
-                  {rangeValue[0].toLocaleString()} -{" "}
-                  {rangeValue[1] >= MAX_VALUE_RANGE
-                    ? `${MAX_VALUE_RANGE.toLocaleString()}+`
-                    : rangeValue[1].toLocaleString()}
-                </span>
+                <div className="flex flex-wrap items-center gap-2">
+                  <div className="flex items-center gap-1.5">
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      value={minInput}
+                      onFocus={(e) => {
+                        setMinInput(stripCommas(e.target.value));
+                      }}
+                      onChange={(e) => {
+                        const val = e.target.value.replace(/\D/g, "");
+                        setMinInput(val);
+                      }}
+                      onBlur={() => {
+                        let val = parseInt(stripCommas(minInput)) || 0;
+                        val = Math.max(0, Math.min(val, localRange[1]));
+                        const newRange = [val, localRange[1]];
+                        setLocalRange(newRange);
+                        setRangeValue(newRange);
+                        setAppliedMinValue(val);
+                        setAppliedMaxValue(localRange[1]);
+                        setMinInput(val.toLocaleString());
+                      }}
+                      className="border-border-primary bg-primary-bg text-primary-text focus:border-button-info h-7 w-20 rounded border px-2 text-[11px] focus:outline-none"
+                      placeholder="Min"
+                    />
+                    <span className="text-secondary-text text-xs">-</span>
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      value={maxInput}
+                      onFocus={(e) => {
+                        setMaxInput(stripCommas(e.target.value));
+                      }}
+                      onChange={(e) => {
+                        const val = e.target.value.replace(/\D/g, "");
+                        setMaxInput(val);
+                      }}
+                      onBlur={() => {
+                        let val = parseInt(stripCommas(maxInput)) || 0;
+                        val = Math.max(
+                          localRange[0],
+                          Math.min(val, MAX_VALUE_RANGE),
+                        );
+                        const newRange = [localRange[0], val];
+                        setLocalRange(newRange);
+                        setRangeValue(newRange);
+                        setAppliedMinValue(localRange[0]);
+                        setAppliedMaxValue(val);
+                        setMaxInput(val.toLocaleString());
+                      }}
+                      className="border-border-primary bg-primary-bg text-primary-text focus:border-button-info h-7 w-20 rounded border px-2 text-[11px] focus:outline-none"
+                      placeholder="Max"
+                    />
+                  </div>
+                  <span className="text-secondary-text text-[11px] whitespace-nowrap">
+                    {localRange[0].toLocaleString()} -{" "}
+                    {localRange[1] >= MAX_VALUE_RANGE
+                      ? `${MAX_VALUE_RANGE.toLocaleString()}+`
+                      : localRange[1].toLocaleString()}
+                  </span>
+                </div>
               </div>
-              <div className="px-1">
+              <div className="mt-2 px-1 py-1">
                 <Slider
                   key="value-range-slider"
-                  value={rangeValue}
-                  onChange={(_, newValue, activeThumb) => {
-                    if (!Array.isArray(newValue)) return;
-                    // Clamp only the active thumb; do NOT push the other thumb
-                    if (activeThumb === 0) {
-                      const clampedMin = Math.min(
-                        newValue[0],
-                        rangeValue[1] - MIN_VALUE_DISTANCE,
-                      );
-                      setRangeValue([Math.max(0, clampedMin), rangeValue[1]]);
-                    } else if (activeThumb === 1) {
-                      const clampedMax = Math.max(
-                        newValue[1],
-                        rangeValue[0] + MIN_VALUE_DISTANCE,
-                      );
-                      setRangeValue([
-                        rangeValue[0],
-                        Math.min(MAX_VALUE_RANGE, clampedMax),
-                      ]);
-                    }
+                  value={localRange}
+                  onValueChange={(newValue) => {
+                    setLocalRange(newValue);
                   }}
-                  onChangeCommitted={(_, newValue) => {
-                    if (!Array.isArray(newValue)) return;
-                    // Use the clamped state values to avoid raw event values like [0,0]
-                    setAppliedMinValue(rangeValue[0]);
-                    setAppliedMaxValue(rangeValue[1]);
+                  onValueCommit={(newValue) => {
+                    setRangeValue(newValue);
+                    setAppliedMinValue(newValue[0]);
+                    setAppliedMaxValue(newValue[1]);
                   }}
-                  valueLabelDisplay="off"
                   min={0}
                   max={MAX_VALUE_RANGE}
                   step={50_000}
-                  marks={sliderMarks}
-                  disableSwap
-                  sx={{
-                    color: "var(--color-button-info)",
-                    mt: 1,
-                    "& .MuiSlider-markLabel": {
-                      color: "var(--color-secondary-text)",
-                    },
-                    "& .MuiSlider-mark": {
-                      backgroundColor: "var(--color-secondary-text)",
-                    },
-                  }}
                 />
+                <div className="relative mt-2 h-4 w-full">
+                  {sliderMarks.map((mark) => (
+                    <div
+                      key={mark.value}
+                      className="absolute top-0 flex -translate-x-1/2 flex-col items-center"
+                      style={{
+                        left: `${(mark.value / MAX_VALUE_RANGE) * 100}%`,
+                      }}
+                    >
+                      <div className="bg-secondary-text mb-1 h-1 w-0.5" />
+                      <span className="text-secondary-text text-[10px] leading-none font-medium">
+                        {mark.label}
+                      </span>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           </div>
