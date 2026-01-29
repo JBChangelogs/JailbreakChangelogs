@@ -3,7 +3,7 @@
 import { useAuthContext } from "@/contexts/AuthContext";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef } from "react";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 
 interface RobberyTrackerAuthWrapperProps {
   children: React.ReactNode;
@@ -29,7 +29,7 @@ export default function RobberyTrackerAuthWrapper({
       hasRedirected.current = true;
       toast.error("You need to be logged in to use the Robbery Tracker.", {
         duration: 4000,
-        position: "bottom-right",
+        position: "top-center",
       });
       setShowLoginModal(true);
       router.push("/");

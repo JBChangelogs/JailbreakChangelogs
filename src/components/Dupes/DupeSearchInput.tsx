@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Icon } from "@/components/ui/IconWrapper";
 import { useUsernameToId } from "@/hooks/useUsernameToId";
 import { MaxStreamsError } from "@/utils/api";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 
 interface DupeSearchInputProps {
   initialValue?: string;
@@ -50,7 +50,7 @@ export default function DupeSearchInput({
           "Unable to search by username at this time due to a temporary server issue. Please use the user's Roblox ID to search instead.",
           {
             duration: 6000,
-            position: "bottom-right",
+            position: "top-center",
           },
         );
       } else {
@@ -58,7 +58,7 @@ export default function DupeSearchInput({
           "Failed to find user. Please check the spelling and try again, or try searching by Roblox ID instead.",
           {
             duration: 5000,
-            position: "bottom-right",
+            position: "top-center",
           },
         );
       }

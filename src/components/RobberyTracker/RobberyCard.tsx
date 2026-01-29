@@ -6,7 +6,7 @@ import { Icon } from "@/components/ui/IconWrapper";
 import { useOptimizedRealTimeRelativeDate } from "@/hooks/useSharedTimer";
 import { RobberyData } from "@/hooks/useRobberyTrackerWebSocket";
 import { useServerRegions } from "@/hooks/useServerRegions";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 import RobberyPlayersModal from "./RobberyPlayersModal";
 
 interface RobberyCardProps {

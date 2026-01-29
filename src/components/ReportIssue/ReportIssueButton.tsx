@@ -4,7 +4,7 @@ import { useState, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
 import ReportIssueModal from "./ReportIssueModal";
 import { useAuthContext } from "@/contexts/AuthContext";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 
 export default function ReportIssueButton() {
   const [isOpen, setIsOpen] = useState(false);

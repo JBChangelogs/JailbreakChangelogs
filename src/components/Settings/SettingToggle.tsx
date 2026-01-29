@@ -2,7 +2,7 @@ import { Switch, Field, Label, Description } from "@headlessui/react";
 import { SettingConfigItem } from "@/config/settings";
 import { UserSettings } from "@/types/auth";
 import { Icon } from "@/components/ui/IconWrapper";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 import Tooltip from "@mui/material/Tooltip";
 
 interface SettingToggleProps {

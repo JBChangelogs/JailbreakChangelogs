@@ -3,7 +3,7 @@ import { Dialog, CircularProgress } from "@mui/material";
 import { Icon } from "@/components/ui/IconWrapper";
 import { UserAvatar } from "@/utils/avatar";
 import Link from "next/link";
-import { toast } from "react-hot-toast";
+import { toast } from "sonner";
 import { UserSettings } from "@/types/auth";
 
 interface Follower {

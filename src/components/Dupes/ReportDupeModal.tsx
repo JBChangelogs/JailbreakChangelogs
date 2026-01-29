@@ -5,7 +5,7 @@ import { Icon } from "@/components/ui/IconWrapper";
 import Image from "next/image";
 import { getItemImagePath, handleImageError } from "@/utils/images";
 import { getCategoryColor } from "@/utils/categoryIcons";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 
 interface ReportDupeModalProps {
   isOpen: boolean;

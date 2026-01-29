@@ -15,7 +15,7 @@ import { Season } from "@/types/seasons";
 import { useUsernameToId } from "@/hooks/useUsernameToId";
 import { useBatchUserData } from "@/hooks/useBatchUserData";
 import { MaxStreamsError } from "@/utils/api";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 
 import SearchForm from "@/components/Inventory/SearchForm";
 import UserStats from "@/components/Inventory/UserStats";
@@ -354,7 +354,9 @@ export default function InventoryCheckerClient({
 
       if (scanError && scanError.includes("No bots available")) {
         showScanErrorToast(
-          "No scan bots are currently online. Please try again later.",
+          "No scan bots available",
+          undefined,
+          "All scan bots are currently unavailable. Please try again later.",
         );
       } else if (
         scanMessage &&
@@ -577,21 +579,19 @@ export default function InventoryCheckerClient({
 
       // Check for max streams error - this is a temporary server issue
       if (error instanceof MaxStreamsError) {
-        toast.error(
-          "Unable to search by username at this time due to a temporary server issue. Please use the user's Roblox ID to search instead.",
-          {
-            duration: 6000,
-            position: "bottom-right",
-          },
-        );
+        toast.error("Service Limitation", {
+          description:
+            "Unable to search by username due to temporary server issues. Please use a Roblox ID instead.",
+          duration: 6000,
+          position: "top-center",
+        });
       } else {
-        toast.error(
-          "Failed to find user. Please check the spelling and try again, or try searching by Roblox ID instead.",
-          {
-            duration: 5000,
-            position: "bottom-right",
-          },
-        );
+        toast.error("User Not Found", {
+          description:
+            "Please check the spelling or try searching by Roblox ID instead.",
+          duration: 5000,
+          position: "top-center",
+        });
       }
     } finally {
       setInternalIsLoading(false);

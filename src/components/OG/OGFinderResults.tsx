@@ -7,7 +7,7 @@ import { useUsernameToId } from "@/hooks/useUsernameToId";
 import { UserConnectionData } from "@/app/inventories/types";
 import { useBatchUserData } from "@/hooks/useBatchUserData";
 import { MaxStreamsError } from "@/utils/api";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 import OGFinderFAQ from "./OGFinderFAQ";
 import SearchForm from "./SearchForm";
 import TradeHistoryModal from "@/components/Modals/TradeHistoryModal";
@@ -171,7 +171,7 @@ export default function OGFinderResults({
           "Unable to search by username at this time due to a temporary server issue. Please use the user's Roblox ID to search instead.",
           {
             duration: 6000,
-            position: "bottom-right",
+            position: "top-center",
           },
         );
       } else {
@@ -179,7 +179,7 @@ export default function OGFinderResults({
           "Failed to find user. Please check the spelling and try again, or try searching by Roblox ID instead.",
           {
             duration: 5000,
-            position: "bottom-right",
+            position: "top-center",
           },
         );
       }

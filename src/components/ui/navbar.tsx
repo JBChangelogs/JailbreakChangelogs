@@ -23,7 +23,7 @@ import {
 } from "@/utils/api";
 import { formatCustomDate } from "@/utils/timestamp";
 import { useOptimizedRealTimeRelativeDate } from "@/hooks/useSharedTimer";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 import { parseNotificationUrl } from "@/utils/notificationUrl";
 
 const AnimatedThemeToggler = dynamic(
@@ -577,7 +577,7 @@ export const NavbarModern = ({
                                 : "Cleared notification history",
                               {
                                 duration: 2000,
-                                position: "bottom-right",
+                                position: "top-center",
                               },
                             );
                             // Refetch to update the list
@@ -598,7 +598,7 @@ export const NavbarModern = ({
                                 : "Failed to clear notification history",
                               {
                                 duration: 3000,
-                                position: "bottom-right",
+                                position: "top-center",
                               },
                             );
                           }
@@ -738,7 +738,7 @@ export const NavbarModern = ({
 
                                       toast.success("Marked as read", {
                                         duration: 2000,
-                                        position: "bottom-right",
+                                        position: "top-center",
                                       });
 
                                       // Call API in background
@@ -749,7 +749,7 @@ export const NavbarModern = ({
                                         // Revert on failure
                                         toast.error("Failed to mark as read", {
                                           duration: 2000,
-                                          position: "bottom-right",
+                                          position: "top-center",
                                         });
                                         // Refetch to restore state
                                         const data =

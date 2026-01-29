@@ -10,7 +10,7 @@ import { Button, Skeleton } from "@mui/material";
 import { Icon } from "../../../components/ui/IconWrapper";
 import { Banner } from "@/components/Profile/Banner";
 import { UserSettings, FollowingData } from "@/types/auth";
-import { toast } from "react-hot-toast";
+import { toast } from "sonner";
 import dynamic from "next/dynamic";
 import { PUBLIC_API_URL } from "@/utils/api";
 
@@ -93,7 +93,7 @@ const LinSuperIdol = ({ userId }: { userId: string }) => {
               isPlaying = true;
               setShowPlayButton(false);
             })
-            .catch((error) => {
+            .catch(() => {
               isPlaying = false;
               setShowPlayButton(true);
             });
@@ -125,7 +125,7 @@ const LinSuperIdol = ({ userId }: { userId: string }) => {
           isPlaying = true;
           setShowPlayButton(false);
         })
-        .catch((error) => {
+        .catch(() => {
           isPlaying = false;
         });
     }

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Paper, Typography, Box, Button } from "@mui/material";
 import { Icon } from "@/components/ui/IconWrapper";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 
 export const ExportInventoryData = () => {
   const [loading, setLoading] = useState(false);

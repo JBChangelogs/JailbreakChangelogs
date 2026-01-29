@@ -1,6 +1,6 @@
 import { Switch, Field, Label, Description } from "@headlessui/react";
 import { Icon } from "@/components/ui/IconWrapper";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 import Tooltip from "@mui/material/Tooltip";
 
 export type NotificationPreferenceToggleProps = {

@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { useAuthContext } from "@/contexts/AuthContext";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 
 interface Survey {
   id: string;

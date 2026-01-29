@@ -5,7 +5,7 @@ import { PUBLIC_API_URL } from "@/utils/api";
 import { Icon } from "@iconify/react";
 import { formatProfileDate } from "@/utils/timestamp";
 import { useAuthContext } from "@/contexts/AuthContext";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 import AddServerModal from "./AddServerModal";
 import { Skeleton } from "@mui/material";
 import dynamic from "next/dynamic";

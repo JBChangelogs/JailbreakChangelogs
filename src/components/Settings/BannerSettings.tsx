@@ -7,7 +7,7 @@ const Tooltip = dynamic(() => import("@mui/material/Tooltip"), { ssr: false });
 import { Icon } from "@/components/ui/IconWrapper";
 import { UserData } from "@/types/auth";
 import { updateBanner, updateSettings } from "@/services/settingsService";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 import { useSupporterModal } from "@/hooks/useSupporterModal";
 import SupporterModal from "../Modals/SupporterModal";
 import { UPLOAD_CONFIG } from "@/config/settings";
@@ -119,7 +119,7 @@ export const BannerSettings = ({
       return; // Modal will be shown by the hook
     }
 
-    // Client-side validation with helpful warnings
+    // Client-side validation
     const allowedExtensions = [".jpg", ".jpeg", ".png", ".gif"];
     const allowedMimeTypes = [...UPLOAD_CONFIG.ALLOWED_FILE_TYPES];
 
@@ -139,16 +139,7 @@ export const BannerSettings = ({
     setIsUploading(true);
     setBannerError(null);
 
-    // Show loading toast
-    const loadingToast = toast.loading(
-      "Uploading your image to the server...",
-      {
-        duration: Infinity,
-        position: "bottom-right",
-      },
-    );
-
-    try {
+    const uploadAndSave = (async () => {
       const formData = new FormData();
       formData.append("file", file);
 
@@ -160,68 +151,63 @@ export const BannerSettings = ({
       const result = await response.json();
 
       if (!response.ok) {
-        // If it's an authentication error, suggest using direct URLs
         if (response.status === 401) {
           throw new Error(
-            "File upload is not available. Please use a direct image URL from ImgBB, PostImg, or other image hosting services.",
+            "File upload is not available. Please use a direct link.",
           );
         }
-        // Handle timeout errors specifically
         if (response.status === 408) {
-          throw new Error(
-            result.message ||
-              "Upload timeout - the file is too large or the connection is too slow. Please try a smaller file or use a direct image URL.",
-          );
+          throw new Error("Upload timeout - please try a smaller file.");
         }
         throw new Error(result.message || "Upload failed");
       }
 
-      // Auto-fill the URL field with uploaded image
+      // Update UI state
       setCustomBannerUrl(result.imageUrl);
       validateBannerUrl(result.imageUrl);
 
-      // Dismiss loading toast
-      toast.dismiss(loadingToast);
-
-      // Auto-save the banner immediately
+      // Perform auto-save
       try {
         await updateBanner(result.imageUrl);
-        // Also update settings to use custom banner instead of Discord
-        // Include all current settings when updating
         await updateSettings({
           ...userData.settings,
           banner_discord: 0,
         });
         onBannerUpdate(result.imageUrl);
-        toast.success("Banner updated successfully!", {
-          duration: 3000,
-        });
 
-        // Track banner upload completion
         if (typeof window !== "undefined" && window.umami) {
           window.umami.track("Custom Banner Uploaded", {
             url: result.imageUrl,
           });
         }
-      } catch {
-        toast.success(
-          'Image uploaded! URL has been added to the form. Click "Update" to set as banner.',
-          {
-            duration: 4000,
-          },
-        );
+      } catch (saveError) {
+        console.warn("Auto-save failed after upload:", saveError);
+        // We still consider the upload a success if the image was uploaded
       }
+
+      return result.imageUrl;
+    })();
+
+    toast.promise(uploadAndSave, {
+      loading: "Uploading your banner...",
+      success: {
+        message: "Banner updated successfully!",
+        description: "Your new custom banner is now active.",
+      },
+      error: (err) => ({
+        message: "Upload failed",
+        description:
+          err instanceof Error
+            ? err.message
+            : "Please try again or use a direct URL.",
+      }),
+    });
+
+    try {
+      await uploadAndSave;
     } catch (error) {
-      // Dismiss loading toast on error
-      toast.dismiss(loadingToast);
-
-      console.error("Error uploading file:", error);
-      const errorMessage =
-        error instanceof Error ? error.message : "Failed to upload file";
-      setBannerError(errorMessage);
-      toast.error(errorMessage);
-
-      // Reset file input to allow selecting the same file again
+      console.error("Banner upload error:", error);
+      // Reset file input on error
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
       }

@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { RobloxUser } from "@/types";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { useUsernameToId } from "@/hooks/useUsernameToId";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 import { MaxStreamsError } from "@/utils/api";
 import OGFinderDataStreamer from "./OGFinderDataStreamer";
 import { Icon } from "@/components/ui/IconWrapper";
@@ -70,7 +70,7 @@ export default function OGFinderClient({
     if (!isAuthenticated) {
       toast.error("You need to be logged in to use the OG Finder feature.", {
         duration: 4000,
-        position: "bottom-right",
+        position: "top-center",
       });
       setShowLoginModal(true);
       return;
@@ -96,7 +96,7 @@ export default function OGFinderClient({
           "Unable to search by username at this time due to a temporary server issue. Please use the user's Roblox ID to search instead.",
           {
             duration: 6000,
-            position: "bottom-right",
+            position: "top-center",
           },
         );
       } else {
@@ -104,7 +104,7 @@ export default function OGFinderClient({
           "Failed to find user. Please check the spelling and try again, or try searching by Roblox ID instead.",
           {
             duration: 5000,
-            position: "bottom-right",
+            position: "top-center",
           },
         );
       }

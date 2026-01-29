@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef, use } from "react";
 import { Skeleton } from "@mui/material";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 import { useTheme } from "@/contexts/ThemeContext";
 import {
   CustomButtonGroup,

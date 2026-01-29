@@ -8,14 +8,8 @@ import { Pagination } from "@/components/ui/Pagination";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import dynamic from "next/dynamic";
 import { useState, useCallback, useEffect } from "react";
-import {
-  logout,
-  trackLogoutSource,
-  showLogoutToast,
-  showLogoutLoadingToast,
-  dismissLogoutLoadingToast,
-} from "@/utils/auth";
-import toast from "react-hot-toast";
+import { logout, trackLogoutSource } from "@/utils/auth";
+import { toast } from "sonner";
 import LoginModalWrapper from "../Auth/LoginModalWrapper";
 import EscapeLoginModal from "../Auth/EscapeLoginModal";
 import { useEscapeLogin } from "@/utils/escapeLogin";
@@ -187,37 +181,26 @@ export default function Header() {
   }, [isAuthenticated]);
 
   useEffect(() => {
-    fetchUnreadCount();
+    setTimeout(() => {
+      fetchUnreadCount();
+    }, 0);
   }, [fetchUnreadCount]);
 
   useEffect(() => {
     if (isAuthenticated) {
-      fetchUnreadCount();
+      setTimeout(() => {
+        fetchUnreadCount();
+      }, 0);
     }
   }, [pathname, isAuthenticated, fetchUnreadCount]);
 
   const handleLogout = async () => {
-    let loadingToast: string | undefined;
-
     try {
-      // Show loading toast with deduplication
-      loadingToast = showLogoutLoadingToast();
-
       trackLogoutSource("Header Component");
       await logout();
-
-      // Dismiss loading toast and show success
-      toast.dismiss(loadingToast);
-      showLogoutToast();
     } catch (err) {
       console.error("Logout error:", err);
-      toast.error("Failed to log out. Please try again.", {
-        duration: 3000,
-        position: "bottom-right",
-      });
-    } finally {
-      // Always dismiss the loading toast
-      dismissLogoutLoadingToast(loadingToast);
+      // Errors are now handled by toast.promise in logout()
     }
   };
 
@@ -657,7 +640,7 @@ export default function Header() {
                                         : "Cleared notification history",
                                       {
                                         duration: 2000,
-                                        position: "bottom-right",
+                                        position: "top-center",
                                       },
                                     );
                                     // Refetch to update the list
@@ -678,7 +661,7 @@ export default function Header() {
                                         : "Failed to clear notification history",
                                       {
                                         duration: 3000,
-                                        position: "bottom-right",
+                                        position: "top-center",
                                       },
                                     );
                                   }
@@ -823,7 +806,7 @@ export default function Header() {
                                                   "Marked as read",
                                                   {
                                                     duration: 2000,
-                                                    position: "bottom-right",
+                                                    position: "top-center",
                                                   },
                                                 );
 
@@ -839,7 +822,7 @@ export default function Header() {
                                                     "Failed to mark as read",
                                                     {
                                                       duration: 2000,
-                                                      position: "bottom-right",
+                                                      position: "top-center",
                                                     },
                                                   );
                                                   // Refetch to restore state

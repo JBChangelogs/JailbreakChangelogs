@@ -2,7 +2,7 @@
 
 import { use } from "react";
 import { useRouter } from "next/navigation";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 import { Changelog } from "@/utils/api";
 import Image from "next/image";
 

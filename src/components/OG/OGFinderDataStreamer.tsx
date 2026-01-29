@@ -49,45 +49,37 @@ async function OGFinderDataFetcher({ robloxId }: { robloxId: string }) {
 
   // If it's a username, try to get the Roblox ID first
   if (isUsername) {
+    let fetchError: string | null = null;
     try {
       const userData = await fetchRobloxUserByUsername(robloxId);
       if (userData && userData.id) {
         actualRobloxId = userData.id.toString();
       } else {
-        return (
-          <OGFinderResults
-            robloxId={robloxId}
-            error={`Username "${robloxId}" not found. Please check the spelling and try again.`}
-            initialData={null}
-            robloxUsers={{}}
-            userConnectionData={null}
-            items={[]}
-          />
-        );
+        fetchError = `Username "${robloxId}" not found. Please check the spelling and try again.`;
       }
     } catch (error) {
       console.error("Error fetching user by username:", error);
 
-      let errorMessage: string;
-
       // Check for max streams error - this is a temporary server issue
       if (error instanceof MaxStreamsError) {
-        errorMessage = `Unable to search by username at this time due to a temporary server issue. Please use the user's Roblox ID to search instead.`;
+        fetchError = `Unable to search by username at this time due to a temporary server issue. Please use the user's Roblox ID to search instead.`;
       } else {
         // Check if it's a 502 error specifically for the username lookup
         const isServerError =
           error instanceof Error &&
           error.message.includes("Failed to fetch user: 502");
 
-        errorMessage = isServerError
+        fetchError = isServerError
           ? `Server error while searching for "${robloxId}". Please try searching by Roblox ID instead, or try again later.`
           : `Failed to find user "${robloxId}". Please check the spelling and try again, or try searching by Roblox ID instead.`;
       }
+    }
 
+    if (fetchError) {
       return (
         <OGFinderResults
           robloxId={robloxId}
-          error={errorMessage}
+          error={fetchError}
           initialData={null}
           robloxUsers={{}}
           userConnectionData={null}
@@ -139,7 +131,6 @@ async function OGFinderDataFetcher({ robloxId }: { robloxId: string }) {
     Array.isArray(result.results)
   ) {
     const tireStickerName = tireStickerFilteredUsers[actualRobloxId];
-    let filteredCount = 0;
     let categoryTitle = "";
 
     result.results = result.results.filter(
@@ -148,7 +139,6 @@ async function OGFinderDataFetcher({ robloxId }: { robloxId: string }) {
           item.categoryTitle === "Tire Sticker" &&
           item.title === tireStickerName;
         if (shouldFilter) {
-          filteredCount++;
           if (!categoryTitle) categoryTitle = item.categoryTitle;
         }
         return !shouldFilter;
