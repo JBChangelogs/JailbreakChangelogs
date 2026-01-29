@@ -258,25 +258,11 @@ export function useScanWebSocket(userId: string): UseScanWebSocketReturn {
             ) {
               const queueMessage = data.message;
               const positionMatch = queueMessage.match(/Position: (\d+)/);
-              const delayMatch = queueMessage.match(/delay: ([\d.]+)/);
 
               let formattedMessage = queueMessage;
-              if (positionMatch && delayMatch) {
+              if (positionMatch) {
                 const position = parseInt(positionMatch[1]);
-                const delaySeconds = parseFloat(delayMatch[1]);
-
-                let delayText;
-                if (delaySeconds < 60) {
-                  delayText = `${Math.round(delaySeconds)}s`;
-                } else if (delaySeconds < 3600) {
-                  delayText = `${Math.round(delaySeconds / 60)}m ${Math.round(delaySeconds % 60)}s`;
-                } else {
-                  const hours = Math.floor(delaySeconds / 3600);
-                  const minutes = Math.round((delaySeconds % 3600) / 60);
-                  delayText = `${hours}h ${minutes}m`;
-                }
-
-                formattedMessage = `Added to queue - Position ${position} (${delayText} wait)`;
+                formattedMessage = `Added to queue - Position ${position}`;
               }
 
               setMessage(formattedMessage);

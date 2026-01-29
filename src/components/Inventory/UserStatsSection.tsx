@@ -139,21 +139,6 @@ const formatDate = (timestamp: number) => {
   return formatMessageDate(timestamp);
 };
 
-const formatDelay = (seconds: number) => {
-  if (seconds < 60) {
-    return `${Math.ceil(seconds)}s`;
-  }
-  const minutes = Math.floor(seconds / 60);
-  const remainingSeconds = Math.ceil(seconds % 60);
-  if (remainingSeconds === 0) {
-    return `${minutes}m`;
-  }
-  if (remainingSeconds === 60) {
-    return `${minutes + 1}m`;
-  }
-  return `${minutes}m ${remainingSeconds}s`;
-};
-
 export default function UserStatsSection({
   currentData,
   currentSeason,
@@ -966,8 +951,7 @@ export default function UserStatsSection({
                     </span>
                   ) : queuePosition ? (
                     <span className="text-xs">
-                      #{queuePosition.position.toLocaleString()} (
-                      {formatDelay(queuePosition.delay)})
+                      #{queuePosition.position.toLocaleString()}
                     </span>
                   ) : (
                     <span className="text-secondary-text text-xs">
