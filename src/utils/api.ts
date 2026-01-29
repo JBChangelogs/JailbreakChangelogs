@@ -754,7 +754,6 @@ export async function fetchDupeFinderData(userId: string) {
     const data = await response.json();
     return data;
   } catch (err) {
-    console.error("[SERVER] Error fetching dupe finder data:", err);
     return { error: "Failed to fetch dupe finder data. Please try again." };
   }
 }
@@ -769,6 +768,9 @@ export async function fetchDuplicatesCount() {
       },
     });
     if (!response.ok) {
+      if (response.status === 404) {
+        return { total_duplicates: 0, total_duplicates_str: "0" };
+      }
       throw new Error("Failed to fetch duplicates count");
     }
 
@@ -800,6 +802,9 @@ export async function fetchMostDuplicatedItems(): Promise<DuplicatedItem[]> {
       cache: "no-store",
     });
     if (!response.ok) {
+      if (response.status === 404) {
+        return [];
+      }
       throw new Error(
         `Failed to fetch most duplicated items: ${response.status}`,
       );
@@ -998,6 +1003,9 @@ export async function fetchItemHoarders(
       next: { revalidate: 3600 }, // Revalidate every 1 hour
     });
     if (!response.ok) {
+      if (response.status === 404) {
+        return [];
+      }
       throw new Error(`Failed to fetch item hoarders: ${response.status}`);
     }
 
@@ -1116,6 +1124,9 @@ export async function fetchSeasonsList() {
     });
 
     if (!response.ok) {
+      if (response.status === 404) {
+        return [];
+      }
       throw new Error("Failed to fetch seasons list");
     }
 
@@ -1230,6 +1241,9 @@ export async function fetchRandomItem() {
     });
 
     if (!response.ok) {
+      if (response.status === 404) {
+        return null;
+      }
       throw new Error("Failed to fetch random item");
     }
 
@@ -1369,7 +1383,7 @@ export async function fetchInventoryData(robloxId: string) {
     });
 
     if (!response.ok) {
-      if (response.status !== 404) {
+      if (response.status !== 404 && response.status !== 500) {
         console.error(
           `[SERVER] Inventory API returned ${response.status} for ID: ${robloxId}`,
         );
@@ -1533,9 +1547,11 @@ export async function fetchRobloxUsersBatchLeaderboard(userIds: string[]) {
       });
 
       if (!response.ok) {
-        console.error(
-          `[SERVER] fetchRobloxUsersBatchLeaderboard: Failed with status ${response.status} ${response.statusText}`,
-        );
+        if (response.status !== 404) {
+          console.error(
+            `[SERVER] fetchRobloxUsersBatchLeaderboard: Failed with status ${response.status} ${response.statusText}`,
+          );
+        }
         return {};
       }
 
@@ -1608,6 +1624,9 @@ export async function fetchItemCountStats(): Promise<ItemCountStats | null> {
     });
 
     if (!response.ok) {
+      if (response.status === 404) {
+        return null;
+      }
       throw new Error("Failed to fetch item count stats");
     }
 
@@ -1629,6 +1648,9 @@ export async function fetchUserScansLeaderboard(): Promise<UserScan[]> {
     });
 
     if (!response.ok) {
+      if (response.status === 404) {
+        return [];
+      }
       throw new Error("Failed to fetch user scans leaderboard");
     }
 
@@ -1655,6 +1677,9 @@ export async function fetchMoneyLeaderboard(): Promise<
     );
 
     if (!response.ok) {
+      if (response.status === 404) {
+        return [];
+      }
       throw new Error("Failed to fetch money leaderboard");
     }
 
@@ -1681,6 +1706,9 @@ export async function fetchSeasonLeaderboard(): Promise<SeasonLeaderboardRespons
     });
 
     if (!response.ok) {
+      if (response.status === 404) {
+        return { data: [], updated_at: 0 };
+      }
       throw new Error("Failed to fetch season leaderboard");
     }
 
@@ -1722,6 +1750,9 @@ export async function fetchUserNetworth(
     );
 
     if (!response.ok) {
+      if (response.status === 404) {
+        return [];
+      }
       throw new Error("Failed to fetch user networth");
     }
 
@@ -1746,6 +1777,9 @@ export async function fetchUserMoneyRank(robloxId: string) {
     );
 
     if (!response.ok) {
+      if (response.status === 404) {
+        return null;
+      }
       throw new Error("Failed to fetch user money rank");
     }
 
@@ -1783,7 +1817,6 @@ export async function fetchUserMoneyHistory(
     const data = await response.json();
     return Array.isArray(data) ? data : [];
   } catch (err) {
-    console.error("[CLIENT] Error fetching money history:", err);
     return [];
   }
 }
