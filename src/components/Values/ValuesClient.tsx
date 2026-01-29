@@ -126,6 +126,10 @@ export default function ValuesClient({
       const loadingToast = toast.loading("Finding a random item...");
       const item = await fetchRandomItem();
       toast.dismiss(loadingToast);
+      if (!item) {
+        toast.error("No items found to pick from!");
+        return;
+      }
       const redirectToast = toast.loading(
         `Redirecting to ${item.name} ${item.type}...`,
       );
