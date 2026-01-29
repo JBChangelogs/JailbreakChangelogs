@@ -372,7 +372,6 @@ function LoginModalInner({ open, onClose }: LoginModalProps) {
 
                           toast.loading("Redirecting to Discord...", {
                             duration: 2000,
-                            position: "top-center",
                           });
 
                           window.location.href = oauthRedirect;
@@ -457,7 +456,6 @@ function LoginModalInner({ open, onClose }: LoginModalProps) {
                                 "You must be logged in with Discord first",
                                 {
                                   duration: 3000,
-                                  position: "top-center",
                                 },
                               );
                               return;
@@ -470,7 +468,6 @@ function LoginModalInner({ open, onClose }: LoginModalProps) {
 
                               toast.loading("Redirecting to Roblox...", {
                                 duration: 2000,
-                                position: "top-center",
                               });
 
                               window.location.href = oauthRedirect;
@@ -483,7 +480,6 @@ function LoginModalInner({ open, onClose }: LoginModalProps) {
                                 "Failed to start Roblox authentication",
                                 {
                                   duration: 4000,
-                                  position: "top-center",
                                 },
                               );
                               setIsRedirecting(false);

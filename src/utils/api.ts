@@ -652,6 +652,12 @@ export async function fetchUsersBatch(userIds: string[]) {
     );
 
     if (!response.ok) {
+      if (response.status === 404) {
+        return {};
+      }
+      console.error(
+        `Failed to fetch users batch: ${response.status} ${response.statusText}`,
+      );
       throw new Error("Failed to fetch users batch");
     }
 
@@ -698,7 +704,8 @@ export async function fetchUsersBatch(userIds: string[]) {
     );
 
     return userMap;
-  } catch {
+  } catch (error) {
+    console.error("Error fetching users batch:", error);
     // Silently fail to prevent Railway log spam - return empty user map
     return {};
   }

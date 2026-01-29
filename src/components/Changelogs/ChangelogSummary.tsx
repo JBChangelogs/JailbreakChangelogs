@@ -73,7 +73,6 @@ export default function ChangelogSummary({
                 `AI Summary rate limit exceeded. Please try again in ${hoursUntilReset} hour${hoursUntilReset !== 1 ? "s" : ""}.`,
                 {
                   duration: 8000,
-                  position: "top-center",
                 },
               );
             } else {
@@ -81,7 +80,6 @@ export default function ChangelogSummary({
                 "AI Summary rate limit exceeded. Please try again later.",
                 {
                   duration: 6000,
-                  position: "top-center",
                 },
               );
             }
@@ -90,7 +88,6 @@ export default function ChangelogSummary({
               "AI Summary rate limit exceeded. Please try again later.",
               {
                 duration: 6000,
-                position: "top-center",
               },
             );
           }
@@ -112,7 +109,6 @@ export default function ChangelogSummary({
       // For other errors, show a generic error toast
       toast.error("Failed to generate AI summary. Please try again.", {
         duration: 4000,
-        position: "top-center",
       });
       setError(
         error instanceof Error ? error.message : "Failed to generate summary",

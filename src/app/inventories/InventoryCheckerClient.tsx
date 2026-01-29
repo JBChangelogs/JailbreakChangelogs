@@ -583,14 +583,12 @@ export default function InventoryCheckerClient({
           description:
             "Unable to search by username due to temporary server issues. Please use a Roblox ID instead.",
           duration: 6000,
-          position: "top-center",
         });
       } else {
         toast.error("User Not Found", {
           description:
             "Please check the spelling or try searching by Roblox ID instead.",
           duration: 5000,
-          position: "top-center",
         });
       }
     } finally {

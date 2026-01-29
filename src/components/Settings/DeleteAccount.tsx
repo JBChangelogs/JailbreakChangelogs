@@ -61,7 +61,6 @@ export const DeleteAccount = () => {
       // Show success message before redirecting
       toast.success("Account successfully deleted", {
         duration: 3000,
-        position: "top-center",
       });
 
       setTimeout(() => {

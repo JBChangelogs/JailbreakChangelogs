@@ -268,7 +268,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
           .then(() => {
             toast.success("Campaign visit recorded!", {
               duration: 3000,
-              position: "top-center",
             });
           })
           .catch((err) => {
@@ -282,7 +281,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
             ) {
               toast.error("You are already participating in this campaign", {
                 duration: 3000,
-                position: "top-center",
               });
             }
           })
@@ -325,7 +323,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
             await countCampaignVisit(campaign, token);
             toast.success("Campaign visit recorded!", {
               duration: 3000,
-              position: "top-center",
             });
           } catch (e) {
             console.error("Campaign visit error during login:", e);
