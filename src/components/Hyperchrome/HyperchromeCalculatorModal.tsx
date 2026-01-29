@@ -6,6 +6,9 @@ import { Icon } from "../ui/IconWrapper";
 import {
   calculateRobberiesToLevelUp,
   calculateAllLevelPercentages,
+  calculateRobberiesToPublicPityGoal,
+  HYPERCHROME_PITY_PUBLIC,
+  HYPERCHROME_PITY_SMALL,
 } from "@/utils/hyperchrome";
 import { toast } from "sonner";
 
@@ -30,6 +33,8 @@ export default function HyperchromeCalculatorModal({
   > | null>(null);
   const [resultLevel, setResultLevel] = useState<number>(0);
   const [resultPity, setResultPity] = useState<number>(0);
+  const [resultTipRobberies, setResultTipRobberies] = useState<number>(0);
+  const [isSmallServer, setIsSmallServer] = useState(false);
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -46,6 +51,8 @@ export default function HyperchromeCalculatorModal({
     setResultOtherPity(null);
     setResultLevel(0);
     setResultPity(0);
+    setResultTipRobberies(0);
+    setIsSmallServer(false);
     onClose();
   }, [onClose]);
 
@@ -57,6 +64,7 @@ export default function HyperchromeCalculatorModal({
       toast.error("Please enter a valid level (0-4)");
       return;
     }
+    setHasCalculated(false);
     setStep(2);
   };
 
@@ -77,10 +85,31 @@ export default function HyperchromeCalculatorModal({
     const lvl = parsedLevel as 0 | 1 | 2 | 3 | 4;
     const pityPercent = parsedPity;
 
-    const robberies = calculateRobberiesToLevelUp(lvl, pityPercent);
-    const others = calculateAllLevelPercentages(lvl, pityPercent);
+    const limit = 100;
+
+    if (pityPercent > limit) {
+      toast.error("Pity percentage cannot exceed 100%");
+      return;
+    }
+
+    const robberies = calculateRobberiesToLevelUp(
+      lvl,
+      pityPercent,
+      isSmallServer,
+    );
+    const tipRobberies = calculateRobberiesToPublicPityGoal(
+      lvl,
+      pityPercent,
+      isSmallServer,
+    );
+    const others = calculateAllLevelPercentages(
+      lvl,
+      pityPercent,
+      isSmallServer,
+    );
 
     setResultRobberiesNeeded(robberies);
+    setResultTipRobberies(tipRobberies);
     setResultOtherPity(others);
     setResultLevel(lvl);
     setResultPity(pityPercent);
@@ -142,127 +171,161 @@ export default function HyperchromeCalculatorModal({
               </div>
             )}
 
-            {step === 2 && (
+            {step === 2 && !hasCalculated && (
               <div className="mb-4">
-                <label
-                  htmlFor="pity"
-                  className="text-secondary-text mb-1 text-xs tracking-wider uppercase"
-                >
-                  Current Pity
-                </label>
+                <div className="mb-2 flex items-center justify-between gap-4">
+                  <label
+                    htmlFor="pity"
+                    className="text-secondary-text text-xs tracking-wider uppercase"
+                  >
+                    Current {isSmallServer ? "Small" : "Big"} Server Pity
+                  </label>
+                  <button
+                    onClick={() => setIsSmallServer(!isSmallServer)}
+                    className="text-link hover:text-link-hover cursor-pointer text-xs font-medium transition-colors"
+                  >
+                    Switch to {isSmallServer ? "Big Server" : "Small Server"}
+                  </button>
+                </div>
                 <input
                   type="number"
                   id="pity"
                   min={0}
                   max={100}
+                  step="any"
                   className="border-border-primary bg-form-input text-primary-text hover:border-border-focus focus:border-button-info w-full rounded border p-3 text-sm focus:outline-none"
-                  placeholder="Enter your current pity percentage (0-100)"
+                  placeholder={`Enter your current ${isSmallServer ? "small" : "big"} server pity %`}
                   value={pity}
                   onChange={(e) => setPity(e.target.value)}
                 />
+                {isSmallServer && (
+                  <div className="text-secondary-text mt-2 text-xs">
+                    Reaching 66.6% in a small server is equivalent to 100% in a
+                    big server, guaranteeing an instant level-up!
+                  </div>
+                )}
               </div>
             )}
 
             {hasCalculated && step === 2 && resultOtherPity && (
               <div className="mb-4">
-                <div className="border-border-primary bg-primary-bg hover:border-border-focus rounded-lg border p-4">
-                  <div className="text-secondary-text mb-3 text-sm font-medium tracking-wider uppercase">
-                    Result
+                <div className="border-border-primary bg-tertiary-bg hover:border-border-focus rounded-lg border p-4">
+                  <div className="mb-3 flex items-center justify-between">
+                    <div className="text-secondary-text text-sm font-bold tracking-wider uppercase">
+                      Result
+                    </div>
+                    <div
+                      className={`rounded-full px-2 py-0.5 text-[10px] font-bold tracking-wider uppercase ${
+                        isSmallServer
+                          ? "bg-amber-500/10 text-amber-500"
+                          : "bg-blue-500/10 text-blue-500"
+                      }`}
+                    >
+                      {isSmallServer
+                        ? "Small Server (0-8 Players)"
+                        : "Big Server (9+ Players)"}
+                    </div>
                   </div>
 
-                  <div className="bg-secondary-bg mb-4 rounded-lg p-4">
+                  <div className="bg-primary-bg mb-4 rounded-lg p-5">
                     <div className="mb-2 flex items-center justify-center gap-3">
                       <div className="text-primary-text text-4xl font-black">
                         {resultRobberiesNeeded}
                       </div>
-                      <div className="text-secondary-text text-lg font-medium">
+                      <div className="text-secondary-text text-lg font-bold">
                         robberies
                       </div>
                     </div>
-                    <div className="text-secondary-text text-center text-sm">
+                    <div className="text-primary-text text-center text-sm font-medium">
                       to reach{" "}
-                      <span className="text-primary-text font-semibold">
+                      <span className="font-black">
                         HyperChrome Level {Math.min(resultLevel + 1, 5)}
+                      </span>
+                      <br />
+                      <span className="text-secondary-text mt-1 inline-block text-[13px] font-normal">
+                        (staying in{" "}
+                        {isSmallServer ? "Small Servers" : "Big Servers"})
                       </span>
                     </div>
                   </div>
 
-                  <div className="border-warning/20 bg-secondary-bg mb-3 rounded-lg border p-3">
-                    <div className="flex items-start gap-2">
+                  <div className="border-warning/30 bg-primary-bg mb-4 rounded-lg border p-4">
+                    <div className="flex items-start gap-3">
                       <Icon
                         icon="emojione:light-bulb"
-                        className="text-warning text-3xl"
+                        className="text-warning shrink-0 text-4xl"
                       />
-                      <div className="text-secondary-text text-xs leading-relaxed">
-                        <span className="font-semibold">Helpful tip:</span>{" "}
-                        After {resultRobberiesNeeded} robberies, pity reaches{" "}
-                        <span className="text-primary-text font-bold">
-                          66.6%
+                      <div className="text-primary-text text-[13px] leading-relaxed">
+                        <span className="text-warning font-bold">
+                          Helpful tip:
                         </span>{" "}
-                        in private servers. Robbing in a public server at that
-                        point guarantees an instant level-up!
+                        After {resultTipRobberies} robberies, pity reaches{" "}
+                        <span className="font-black">66.6%</span> in Small
+                        Servers (0-8 Players). Robbing in a Big Server (9+
+                        Players) at that point guarantees an instant level-up!
                       </div>
                     </div>
                   </div>
 
-                  <div className="text-secondary-text text-center text-xs">
-                    Based on Level {resultLevel}, {resultPity}% pity
+                  <div className="text-primary-text flex flex-col items-center gap-1 text-center text-xs font-medium">
+                    <div>
+                      Based on Level {resultLevel} with {resultPity}%{" "}
+                      {isSmallServer ? "Small Server" : "Big Server"} Pity
+                    </div>
+                    {isSmallServer && (
+                      <div className="text-primary-text/80">
+                        Equivalent to{" "}
+                        {(
+                          (((resultPity / 100) *
+                            HYPERCHROME_PITY_SMALL[resultLevel]) /
+                            HYPERCHROME_PITY_PUBLIC[resultLevel]) *
+                          100
+                        ).toFixed(2)}
+                        % Big Server Pity
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
             )}
             {hasCalculated && step === 2 && resultOtherPity && (
               <div className="mb-4">
-                <div className="border-border-primary bg-primary-bg hover:border-border-focus rounded-lg border p-4">
-                  <div className="text-secondary-text mb-3 text-sm font-medium tracking-wider uppercase">
+                <div className="border-border-primary bg-tertiary-bg hover:border-border-focus rounded-lg border p-4">
+                  <div className="text-secondary-text mb-3 text-sm font-bold tracking-wider uppercase">
                     Alternative Level Calculations
                   </div>
-                  <div className="text-secondary-text mb-4 text-xs">
+                  <div className="text-primary-text mb-4 text-xs font-medium">
                     If you trade to a different level, here&apos;s what your
-                    pity would be for each level-up:
+                    public pity would be:
                   </div>
 
                   <div className="grid grid-cols-2 gap-3">
-                    {parseFloat(resultOtherPity[1]) <= 100 && (
-                      <div className="bg-secondary-bg rounded-lg p-3 text-center">
-                        <div className="text-primary-text text-lg font-bold">
-                          Level 1
+                    {[1, 2, 3, 4].map((lvlNum) => {
+                      // Always show public/big server pity here as it's the standard for trading
+                      const currentPityBase = isSmallServer
+                        ? HYPERCHROME_PITY_SMALL[resultLevel]
+                        : HYPERCHROME_PITY_PUBLIC[resultLevel];
+                      const robberiesDone =
+                        (resultPity / 100) * currentPityBase;
+                      const publicPity =
+                        (robberiesDone / HYPERCHROME_PITY_PUBLIC[lvlNum]) * 100;
+
+                      if (publicPity > 100) return null;
+
+                      return (
+                        <div
+                          key={lvlNum}
+                          className="bg-primary-bg rounded-lg p-3 text-center"
+                        >
+                          <div className="text-primary-text text-lg font-bold">
+                            Level {lvlNum}
+                          </div>
+                          <div className="text-secondary-text text-sm">
+                            {publicPity.toFixed(2)}% pity
+                          </div>
                         </div>
-                        <div className="text-secondary-text text-sm">
-                          {resultOtherPity[1]}% pity
-                        </div>
-                      </div>
-                    )}
-                    {parseFloat(resultOtherPity[2]) <= 100 && (
-                      <div className="bg-secondary-bg rounded-lg p-3 text-center">
-                        <div className="text-primary-text text-lg font-bold">
-                          Level 2
-                        </div>
-                        <div className="text-secondary-text text-sm">
-                          {resultOtherPity[2]}% pity
-                        </div>
-                      </div>
-                    )}
-                    {parseFloat(resultOtherPity[3]) <= 100 && (
-                      <div className="bg-secondary-bg rounded-lg p-3 text-center">
-                        <div className="text-primary-text text-lg font-bold">
-                          Level 3
-                        </div>
-                        <div className="text-secondary-text text-sm">
-                          {resultOtherPity[3]}% pity
-                        </div>
-                      </div>
-                    )}
-                    {parseFloat(resultOtherPity[4]) <= 100 && (
-                      <div className="bg-secondary-bg rounded-lg p-3 text-center">
-                        <div className="text-primary-text text-lg font-bold">
-                          Level 4
-                        </div>
-                        <div className="text-secondary-text text-sm">
-                          {resultOtherPity[4]}% pity
-                        </div>
-                      </div>
-                    )}
+                      );
+                    })}
                   </div>
                 </div>
               </div>
@@ -274,7 +337,11 @@ export default function HyperchromeCalculatorModal({
               <button
                 type="button"
                 onClick={() => {
-                  setStep((s) => Math.max(1, s - 1));
+                  if (hasCalculated) {
+                    setHasCalculated(false);
+                  } else {
+                    setStep((s) => Math.max(1, s - 1));
+                  }
                 }}
                 className="text-secondary-text hover:text-primary-text cursor-pointer rounded border-none bg-transparent px-4 py-2 text-sm"
               >
@@ -289,7 +356,7 @@ export default function HyperchromeCalculatorModal({
               >
                 Next
               </button>
-            ) : (
+            ) : !hasCalculated ? (
               <button
                 type="button"
                 onClick={handleCalculate}
@@ -298,7 +365,7 @@ export default function HyperchromeCalculatorModal({
               >
                 Calculate
               </button>
-            )}
+            ) : null}
           </div>
         </DialogPanel>
       </div>
