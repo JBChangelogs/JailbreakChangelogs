@@ -640,7 +640,6 @@ export default function Header() {
                                         : "Cleared notification history",
                                       {
                                         duration: 2000,
-                                        position: "top-center",
                                       },
                                     );
                                     // Refetch to update the list
@@ -661,7 +660,6 @@ export default function Header() {
                                         : "Failed to clear notification history",
                                       {
                                         duration: 3000,
-                                        position: "top-center",
                                       },
                                     );
                                   }
@@ -806,7 +804,6 @@ export default function Header() {
                                                   "Marked as read",
                                                   {
                                                     duration: 2000,
-                                                    position: "top-center",
                                                   },
                                                 );
 
@@ -822,7 +819,6 @@ export default function Header() {
                                                     "Failed to mark as read",
                                                     {
                                                       duration: 2000,
-                                                      position: "top-center",
                                                     },
                                                   );
                                                   // Refetch to restore state

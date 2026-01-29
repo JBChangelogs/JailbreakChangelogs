@@ -577,7 +577,6 @@ export const NavbarModern = ({
                                 : "Cleared notification history",
                               {
                                 duration: 2000,
-                                position: "top-center",
                               },
                             );
                             // Refetch to update the list
@@ -598,7 +597,6 @@ export const NavbarModern = ({
                                 : "Failed to clear notification history",
                               {
                                 duration: 3000,
-                                position: "top-center",
                               },
                             );
                           }
@@ -738,7 +736,6 @@ export const NavbarModern = ({
 
                                       toast.success("Marked as read", {
                                         duration: 2000,
-                                        position: "top-center",
                                       });
 
                                       // Call API in background
@@ -749,7 +746,6 @@ export const NavbarModern = ({
                                         // Revert on failure
                                         toast.error("Failed to mark as read", {
                                           duration: 2000,
-                                          position: "top-center",
                                         });
                                         // Refetch to restore state
                                         const data =

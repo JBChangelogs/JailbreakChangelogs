@@ -21,7 +21,6 @@ export function showLogoutToast(): void {
   activeLogoutToast = toast.success("Successfully logged out!", {
     description: "Your session has been cleared. Come back soon!",
     duration: 3000,
-    position: "top-center",
   });
 
   // Clear the tracking when toast expires
@@ -42,7 +41,6 @@ export function showLoginLoadingToast(): string | number {
   // Show new login loading toast and track its ID
   activeLoginLoadingToast = toast.loading("Logging you in...", {
     duration: Infinity,
-    position: "top-center",
   });
 
   return activeLoginLoadingToast;
@@ -60,7 +58,6 @@ export function showLogoutLoadingToast(): string | number {
   // Show new logout loading toast and track its ID
   activeLogoutLoadingToast = toast.loading("Logging you out...", {
     duration: Infinity,
-    position: "top-center",
   });
 
   return activeLogoutLoadingToast;
@@ -102,7 +99,6 @@ export function showProcessingAuthToast(): string | number {
   // Show new processing auth toast and track its ID
   activeProcessingAuthToast = toast.loading("Processing authentication...", {
     duration: Infinity,
-    position: "top-center",
   });
 
   return activeProcessingAuthToast;

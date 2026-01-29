@@ -128,7 +128,6 @@ export default function TradeAds({
       if (!currentUserId) {
         toast.error("You must be logged in to make an offer", {
           duration: 3000,
-          position: "top-center",
         });
         setOfferStatuses((prev) => ({
           ...prev,
@@ -152,7 +151,6 @@ export default function TradeAds({
       if (response.status === 409) {
         toast.error("You have already made an offer for this trade", {
           duration: 3000,
-          position: "top-center",
         });
         setOfferStatuses((prev) => ({
           ...prev,
@@ -165,7 +163,6 @@ export default function TradeAds({
       } else if (response.status === 403) {
         toast.error("The trade owner's settings do not allow direct messages", {
           duration: 3000,
-          position: "top-center",
         });
         setOfferStatuses((prev) => ({
           ...prev,
@@ -180,7 +177,6 @@ export default function TradeAds({
       } else {
         toast.success("Offer sent successfully!", {
           duration: 3000,
-          position: "top-center",
         });
         setOfferStatuses((prev) => ({
           ...prev,
@@ -195,7 +191,6 @@ export default function TradeAds({
       console.error("Error creating offer:", err);
       toast.error("Failed to create offer. Please try again.", {
         duration: 3000,
-        position: "top-center",
       });
       setOfferStatuses((prev) => ({
         ...prev,
@@ -342,6 +337,8 @@ export default function TradeAds({
         : a.created_at - b.created_at;
     });
 
+  const isSystemError = tradeAds.length > 0 && sortedTradeAds.length === 0;
+
   // Filter supporter trade ads (premium types 1-3)
   const supporterTradeAds = sortedTradeAds.filter(
     (trade) =>
@@ -402,39 +399,40 @@ export default function TradeAds({
       {/* Search Input - Show for view, supporter, and myads tabs */}
       {(activeTab === "view" ||
         activeTab === "supporter" ||
-        activeTab === "myads") && (
-        <div className="mt-6">
-          <div className="relative flex items-center">
-            <input
-              type="text"
-              placeholder="Search for items in trade ads (e.g., Torpedo)"
-              value={searchQuery}
-              onChange={(e) => {
-                setSearchQuery(e.target.value);
-                setPage(1); // Reset to first page when searching
-              }}
-              className="border-border-primary bg-secondary-bg text-primary-text placeholder-secondary-text focus:border-button-info w-full rounded-lg border px-4 py-3 pr-16 transition-all duration-300 focus:outline-none"
-            />
-            {/* Right side controls container */}
-            <div className="absolute top-1/2 right-3 flex -translate-y-1/2 items-center gap-2">
-              {/* Clear button - only show when there's text */}
-              {searchQuery && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setSearchQuery("");
-                    setPage(1);
-                  }}
-                  className="text-secondary-text hover:text-primary-text cursor-pointer transition-colors"
-                  aria-label="Clear search"
-                >
-                  <Icon icon="heroicons:x-mark" className="h-5 w-5" />
-                </button>
-              )}
+        activeTab === "myads") &&
+        !isSystemError && (
+          <div className="mt-6">
+            <div className="relative flex items-center">
+              <input
+                type="text"
+                placeholder="Search for items in trade ads (e.g., Torpedo)"
+                value={searchQuery}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  setPage(1); // Reset to first page when searching
+                }}
+                className="border-border-primary bg-secondary-bg text-primary-text placeholder-secondary-text focus:border-button-info w-full rounded-lg border px-4 py-3 pr-16 transition-all duration-300 focus:outline-none"
+              />
+              {/* Right side controls container */}
+              <div className="absolute top-1/2 right-3 flex -translate-y-1/2 items-center gap-2">
+                {/* Clear button - only show when there's text */}
+                {searchQuery && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSearchQuery("");
+                      setPage(1);
+                    }}
+                    className="text-secondary-text hover:text-primary-text cursor-pointer transition-colors"
+                    aria-label="Clear search"
+                  >
+                    <Icon icon="heroicons:x-mark" className="h-5 w-5" />
+                  </button>
+                )}
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
 
       {/* Tab Content */}
       <div
@@ -446,41 +444,59 @@ export default function TradeAds({
       >
         {activeTab === "view" && (
           <>
-            <div className="mb-4 flex items-center justify-between">
-              <p className="text-secondary-text">
-                Showing {displayTradeAds.length}{" "}
-                {displayTradeAds.length === 1 ? "trade ad" : "trade ads"}
-              </p>
-              <button
-                onClick={toggleSortOrder}
-                className="border-border-primary bg-button-info text-form-button-text hover:border-border-focus hover:bg-button-info-hover flex cursor-pointer items-center gap-1 rounded-lg border px-3 py-1.5 text-sm transition-colors"
-              >
-                {sortOrder === "newest" ? (
+            {!isSystemError &&
+              (displayTradeAds.length > 0 || searchQuery.trim()) && (
+                <div className="mb-4 flex items-center justify-between">
+                  <p className="text-secondary-text">
+                    Showing {displayTradeAds.length}{" "}
+                    {displayTradeAds.length === 1 ? "trade ad" : "trade ads"}
+                  </p>
+                  <button
+                    onClick={toggleSortOrder}
+                    className="border-border-primary bg-button-info text-form-button-text hover:border-border-focus hover:bg-button-info-hover flex cursor-pointer items-center gap-1 rounded-lg border px-3 py-1.5 text-sm transition-colors"
+                  >
+                    {sortOrder === "newest" ? (
+                      <Icon
+                        icon="heroicons-outline:arrow-down"
+                        className="h-4 w-4"
+                        inline={true}
+                      />
+                    ) : (
+                      <Icon
+                        icon="heroicons-outline:arrow-up"
+                        className="h-4 w-4"
+                        inline={true}
+                      />
+                    )}
+                    {sortOrder === "newest" ? "Newest First" : "Oldest First"}
+                  </button>
+                </div>
+              )}
+            {displayTradeAds.length === 0 ? (
+              !isSystemError && searchQuery.trim() ? (
+                <div className="border-border-primary mb-8 rounded-lg border p-6 text-center">
+                  <h3 className="text-secondary-text mb-4 text-lg font-medium">
+                    No Trade Ads Match Your Search
+                  </h3>
+                  <p className="text-secondary-text">
+                    No trade ads found containing &quot;{searchQuery}&quot;. Try
+                    adjusting your search query.
+                  </p>
+                </div>
+              ) : (
+                <div className="border-border-primary bg-secondary-bg mb-8 flex min-h-[50vh] flex-col items-center justify-center rounded-lg border p-12 text-center">
                   <Icon
-                    icon="heroicons-outline:arrow-down"
-                    className="h-4 w-4"
-                    inline={true}
+                    icon="mdi:face-sad-outline"
+                    className="text-link mb-4 h-16 w-16 opacity-50"
                   />
-                ) : (
-                  <Icon
-                    icon="heroicons-outline:arrow-up"
-                    className="h-4 w-4"
-                    inline={true}
-                  />
-                )}
-                {sortOrder === "newest" ? "Newest First" : "Oldest First"}
-              </button>
-            </div>
-            {displayTradeAds.length === 0 && searchQuery.trim() ? (
-              <div className="border-border-primary mb-8 rounded-lg border p-6 text-center">
-                <h3 className="text-secondary-text mb-4 text-lg font-medium">
-                  No Trade Ads Match Your Search
-                </h3>
-                <p className="text-secondary-text">
-                  No trade ads found containing &quot;{searchQuery}&quot;. Try
-                  adjusting your search query.
-                </p>
-              </div>
+                  <h3 className="text-secondary-text mb-4 text-xl font-medium">
+                    Unable to Load Trades
+                  </h3>
+                  <p className="text-secondary-text max-w-md">
+                    Please try again later.
+                  </p>
+                </div>
+              )
             ) : (
               <Masonry
                 columns={{ xs: 1, sm: 2, md: 2, lg: 3 }}
@@ -543,54 +559,71 @@ export default function TradeAds({
       >
         {activeTab === "supporter" && (
           <>
-            <div className="mb-4 flex items-center justify-between">
-              <p className="text-secondary-text">
-                Showing {displayTradeAds.length}{" "}
-                {displayTradeAds.length === 1
-                  ? "supporter trade ad"
-                  : "supporter trade ads"}
-              </p>
-              <button
-                onClick={toggleSortOrder}
-                className="border-border-primary bg-button-info text-form-button-text hover:border-border-focus hover:bg-button-info-hover flex cursor-pointer items-center gap-1 rounded-lg border px-3 py-1.5 text-sm transition-colors"
-              >
-                {sortOrder === "newest" ? (
-                  <Icon
-                    icon="heroicons-outline:arrow-down"
-                    className="h-4 w-4"
-                    inline={true}
-                  />
-                ) : (
-                  <Icon
-                    icon="heroicons-outline:arrow-up"
-                    className="h-4 w-4"
-                    inline={true}
-                  />
-                )}
-                {sortOrder === "newest" ? "Newest First" : "Oldest First"}
-              </button>
-            </div>
-            {displayTradeAds.length === 0 ? (
-              <div className="border-border-primary mb-8 rounded-lg border p-6 text-center">
-                <h3 className="text-tertiary-text mb-4 text-lg font-medium">
-                  No Supporter Trade Ads Available
-                </h3>
-                <p className="text-tertiary-text/70 mb-8">
-                  There are currently no trade ads from Supporters.
+            {!isSystemError && (
+              <div className="mb-4 flex items-center justify-between">
+                <p className="text-secondary-text">
+                  Showing {displayTradeAds.length}{" "}
+                  {displayTradeAds.length === 1
+                    ? "supporter trade ad"
+                    : "supporter trade ads"}
                 </p>
-                <Button
-                  variant="contained"
-                  onClick={() => handleTabChange("view")}
-                  sx={{
-                    backgroundColor: "var(--color-button-info)",
-                    "&:hover": {
-                      backgroundColor: "var(--color-button-info-hover)",
-                    },
-                  }}
+                <button
+                  onClick={toggleSortOrder}
+                  className="border-border-primary bg-button-info text-form-button-text hover:border-border-focus hover:bg-button-info-hover flex cursor-pointer items-center gap-1 rounded-lg border px-3 py-1.5 text-sm transition-colors"
                 >
-                  View All Trade Ads
-                </Button>
+                  {sortOrder === "newest" ? (
+                    <Icon
+                      icon="heroicons-outline:arrow-down"
+                      className="h-4 w-4"
+                      inline={true}
+                    />
+                  ) : (
+                    <Icon
+                      icon="heroicons-outline:arrow-up"
+                      className="h-4 w-4"
+                      inline={true}
+                    />
+                  )}
+                  {sortOrder === "newest" ? "Newest First" : "Oldest First"}
+                </button>
               </div>
+            )}
+            {displayTradeAds.length === 0 ? (
+              isSystemError ? (
+                <div className="border-border-primary bg-secondary-bg mb-8 flex min-h-[50vh] flex-col items-center justify-center rounded-lg border p-12 text-center">
+                  <Icon
+                    icon="mdi:face-sad-outline"
+                    className="text-link mb-4 h-16 w-16 opacity-50"
+                  />
+                  <h3 className="text-secondary-text mb-4 text-xl font-medium">
+                    Unable to Load Supporter Trades
+                  </h3>
+                  <p className="text-secondary-text max-w-md">
+                    Please try again later.
+                  </p>
+                </div>
+              ) : (
+                <div className="border-border-primary mb-8 rounded-lg border p-6 text-center">
+                  <h3 className="text-tertiary-text mb-4 text-lg font-medium">
+                    No Supporter Trade Ads Available
+                  </h3>
+                  <p className="text-tertiary-text/70 mb-8">
+                    There are currently no trade ads from Supporters.
+                  </p>
+                  <Button
+                    variant="contained"
+                    onClick={() => handleTabChange("view")}
+                    sx={{
+                      backgroundColor: "var(--color-button-info)",
+                      "&:hover": {
+                        backgroundColor: "var(--color-button-info-hover)",
+                      },
+                    }}
+                  >
+                    View All Trade Ads
+                  </Button>
+                </div>
+              )
             ) : (
               <>
                 <Masonry

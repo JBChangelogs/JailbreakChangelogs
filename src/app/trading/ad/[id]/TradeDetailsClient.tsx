@@ -75,7 +75,6 @@ export default function TradeDetailsClient({
       if (!currentUserId) {
         toast.error("You must be logged in to make an offer", {
           duration: 3000,
-          position: "top-center",
         });
         setOfferStatus({
           loading: false,
@@ -98,7 +97,6 @@ export default function TradeDetailsClient({
       if (response.status === 409) {
         toast.error("You have already made an offer for this trade", {
           duration: 3000,
-          position: "top-center",
         });
         setOfferStatus({
           loading: false,
@@ -108,7 +106,6 @@ export default function TradeDetailsClient({
       } else if (response.status === 403) {
         toast.error("The trade owner's settings do not allow direct messages", {
           duration: 3000,
-          position: "top-center",
         });
         setOfferStatus({
           loading: false,
@@ -122,7 +119,6 @@ export default function TradeDetailsClient({
           description:
             "Your offer has been successfully sent to the trade owner.",
           duration: 3000,
-          position: "top-center",
         });
         setOfferStatus({
           loading: false,
@@ -134,7 +130,6 @@ export default function TradeDetailsClient({
       console.error("Error creating offer:", err);
       toast.error("Failed to create offer. Please try again.", {
         duration: 3000,
-        position: "top-center",
       });
       setOfferStatus({
         loading: false,

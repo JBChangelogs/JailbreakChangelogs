@@ -58,7 +58,6 @@ export const RobloxConnection = ({ userData }: RobloxConnectionProps) => {
 
       toast.success("Successfully disconnected Roblox account", {
         duration: 3000,
-        position: "top-center",
       });
 
       handleClose();

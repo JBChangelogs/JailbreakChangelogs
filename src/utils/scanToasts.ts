@@ -19,7 +19,6 @@ export function showScanLoadingToast(
   // Show new scan loading toast and track its ID
   activeScanLoadingToast = toast.loading(message, {
     duration: Infinity,
-    position: "top-center",
   });
 
   return activeScanLoadingToast;
@@ -33,7 +32,6 @@ export function updateScanLoadingToast(message: string): void {
     toast.loading(message, {
       id: activeScanLoadingToast,
       duration: Infinity,
-      position: "top-center",
     });
   }
 }
@@ -64,7 +62,6 @@ export function showScanSuccessToast(
       id,
       description,
       duration: 4000,
-      position: "top-center",
     });
   }
   activeScanLoadingToast = null;
@@ -90,14 +87,12 @@ export function showScanErrorToast(
       id,
       description,
       duration: 5000,
-      position: "top-center",
     });
   } else {
     // Create independent error toast if no valid ID
     activeScanErrorToast = toast.error(message, {
       description,
       duration: 5000,
-      position: "top-center",
     });
   }
   activeScanLoadingToast = null;

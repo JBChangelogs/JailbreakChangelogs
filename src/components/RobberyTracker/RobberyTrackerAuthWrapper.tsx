@@ -29,7 +29,6 @@ export default function RobberyTrackerAuthWrapper({
       hasRedirected.current = true;
       toast.error("You need to be logged in to use the Robbery Tracker.", {
         duration: 4000,
-        position: "top-center",
       });
       setShowLoginModal(true);
       router.push("/");

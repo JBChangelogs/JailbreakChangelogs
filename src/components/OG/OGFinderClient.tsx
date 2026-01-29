@@ -70,7 +70,6 @@ export default function OGFinderClient({
     if (!isAuthenticated) {
       toast.error("You need to be logged in to use the OG Finder feature.", {
         duration: 4000,
-        position: "top-center",
       });
       setShowLoginModal(true);
       return;
@@ -96,7 +95,6 @@ export default function OGFinderClient({
           "Unable to search by username at this time due to a temporary server issue. Please use the user's Roblox ID to search instead.",
           {
             duration: 6000,
-            position: "top-center",
           },
         );
       } else {
@@ -104,7 +102,6 @@ export default function OGFinderClient({
           "Failed to find user. Please check the spelling and try again, or try searching by Roblox ID instead.",
           {
             duration: 5000,
-            position: "top-center",
           },
         );
       }
