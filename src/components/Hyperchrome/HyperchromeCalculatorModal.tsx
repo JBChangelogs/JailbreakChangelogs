@@ -11,6 +11,7 @@ import {
   HYPERCHROME_PITY_SMALL,
 } from "@/utils/hyperchrome";
 import { toast } from "sonner";
+import { Button } from "../ui/button";
 
 interface HyperchromeCalculatorModalProps {
   open: boolean;
@@ -37,7 +38,7 @@ export default function HyperchromeCalculatorModal({
   const [isSmallServer, setIsSmallServer] = useState(false);
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
+     
     setMounted(true);
   }, []);
 
@@ -55,8 +56,6 @@ export default function HyperchromeCalculatorModal({
     setIsSmallServer(false);
     onClose();
   }, [onClose]);
-
-  if (!mounted) return null;
 
   const handleNext = () => {
     const parsedLevel = parseInt(level);
@@ -116,6 +115,16 @@ export default function HyperchromeCalculatorModal({
     setHasCalculated(true);
   };
 
+  // Keep results in sync if server type is toggled at result stage
+  useEffect(() => {
+    if (hasCalculated) {
+      handleCalculate();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isSmallServer]);
+
+  if (!mounted) return null;
+
   return (
     <Dialog open={open} onClose={handleClose} className="relative z-50">
       <div
@@ -142,8 +151,20 @@ export default function HyperchromeCalculatorModal({
                 Answer a few questions to calculate robberies needed to reach
                 the next level.
               </p>
-              <div className="text-secondary-text mt-2 text-sm">
-                Step {step} of 2
+              <div className="text-secondary-text mt-2 flex items-center justify-between text-sm">
+                <span>Step {step} of 2</span>
+                {hasCalculated && (
+                  <Button
+                    size="sm"
+                    onClick={() => setIsSmallServer(!isSmallServer)}
+                  >
+                    <Icon
+                      icon="heroicons:arrows-right-left"
+                      className="h-3.5 w-3.5"
+                    />
+                    Switch to {isSmallServer ? "Big Server" : "Small Server"}
+                  </Button>
+                )}
               </div>
             </div>
 
@@ -180,12 +201,12 @@ export default function HyperchromeCalculatorModal({
                   >
                     Current {isSmallServer ? "Small" : "Big"} Server Pity
                   </label>
-                  <button
+                  <Button
+                    size="sm"
                     onClick={() => setIsSmallServer(!isSmallServer)}
-                    className="text-link hover:text-link-hover cursor-pointer text-xs font-medium transition-colors"
                   >
                     Switch to {isSmallServer ? "Big Server" : "Small Server"}
-                  </button>
+                  </Button>
                 </div>
                 <input
                   type="number"
@@ -272,18 +293,31 @@ export default function HyperchromeCalculatorModal({
                       Based on Level {resultLevel} with {resultPity}%{" "}
                       {isSmallServer ? "Small Server" : "Big Server"} Pity
                     </div>
-                    {isSmallServer && (
-                      <div className="text-primary-text/80">
-                        Equivalent to{" "}
-                        {(
-                          (((resultPity / 100) *
-                            HYPERCHROME_PITY_SMALL[resultLevel]) /
-                            HYPERCHROME_PITY_PUBLIC[resultLevel]) *
-                          100
-                        ).toFixed(2)}
-                        % Big Server Pity
-                      </div>
-                    )}
+                    <div className="text-primary-text/70 mt-1">
+                      {isSmallServer ? (
+                        <>
+                          Equivalent to{" "}
+                          {(
+                            (((resultPity / 100) *
+                              HYPERCHROME_PITY_SMALL[resultLevel]) /
+                              HYPERCHROME_PITY_PUBLIC[resultLevel]) *
+                            100
+                          ).toFixed(2)}
+                          % Big Server Pity
+                        </>
+                      ) : (
+                        <>
+                          Equivalent to{" "}
+                          {(
+                            (((resultPity / 100) *
+                              HYPERCHROME_PITY_PUBLIC[resultLevel]) /
+                              HYPERCHROME_PITY_SMALL[resultLevel]) *
+                            100
+                          ).toFixed(2)}
+                          % Small Server Pity
+                        </>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -349,22 +383,22 @@ export default function HyperchromeCalculatorModal({
               </button>
             )}
             {step < 2 ? (
-              <button
+              <Button
                 type="button"
                 onClick={handleNext}
-                className="bg-button-info text-form-button-text hover:bg-button-info-hover min-w-[100px] cursor-pointer rounded border-none px-4 py-2 text-sm"
+                className="min-w-[100px]"
               >
                 Next
-              </button>
+              </Button>
             ) : !hasCalculated ? (
-              <button
+              <Button
                 type="button"
                 onClick={handleCalculate}
                 data-umami-event="Hyper Pity Calculate"
-                className="bg-button-info text-form-button-text hover:bg-button-info-hover min-w-[100px] cursor-pointer rounded border-none px-4 py-2 text-sm"
+                className="min-w-[100px]"
               >
                 Calculate
-              </button>
+              </Button>
             ) : null}
           </div>
         </DialogPanel>

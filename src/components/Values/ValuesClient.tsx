@@ -20,6 +20,7 @@ import ValuesErrorBoundary from "./ValuesErrorBoundary";
 import { safeSessionStorage } from "@/utils/safeStorage";
 import NitroValuesVideoPlayer from "@/components/Ads/NitroValuesVideoPlayer";
 import NitroValuesRailAd from "@/components/Ads/NitroValuesRailAd";
+import { Button } from "@/components/ui/button";
 
 interface ValuesClientProps {
   itemsPromise: Promise<Item[]>;
@@ -305,25 +306,17 @@ export default function ValuesClient({
             </p>
 
             <div className="mb-4 flex flex-wrap gap-2">
-              <button
-                onClick={handleRandomItem}
-                className="border-border-primary bg-button-info text-form-button-text hover:border-border-focus hover:bg-button-info-hover flex cursor-pointer items-center gap-1.5 rounded-lg border px-4 py-2 focus:outline-none sm:gap-2 sm:px-6 sm:py-3"
-              >
+              <Button onClick={handleRandomItem}>
                 <Icon
                   icon="material-symbols:auto-awesome"
-                  className="h-4 w-4 sm:h-6 sm:w-6"
+                  className="h-6 w-6"
                   inline={true}
                 />
-                <span className="text-sm sm:text-base">Random Item</span>
-              </button>
-              <button
-                onClick={handleOpenHcModal}
-                className="border-border-primary bg-button-info text-form-button-text hover:border-border-focus hover:bg-button-info-hover flex cursor-pointer items-center gap-1.5 rounded-lg border px-4 py-2 focus:outline-none sm:gap-2 sm:px-6 sm:py-3"
-              >
-                <span className="text-sm sm:text-base">
-                  Hyperchrome Pity Calculator
-                </span>
-              </button>
+                Random Item
+              </Button>
+              <Button onClick={handleOpenHcModal}>
+                Hyperchrome Pity Calculator
+              </Button>
             </div>
 
             {lastUpdated && (

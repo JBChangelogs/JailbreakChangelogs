@@ -517,40 +517,42 @@ export default function SettingsPage() {
                     className="h-6 w-6"
                   />
                   {category}
-                  <Tooltip
-                    title="Copy URL"
-                    arrow
-                    placement="top"
-                    slotProps={{
-                      tooltip: {
-                        sx: {
-                          backgroundColor: "var(--color-secondary-bg)",
-                          color: "var(--color-primary-text)",
-                          "& .MuiTooltip-arrow": {
-                            color: "var(--color-secondary-bg)",
+                  {userData?.flags?.some((f) => f.flag === "is_owner") && (
+                    <Tooltip
+                      title="Copy URL"
+                      arrow
+                      placement="top"
+                      slotProps={{
+                        tooltip: {
+                          sx: {
+                            backgroundColor: "var(--color-secondary-bg)",
+                            color: "var(--color-primary-text)",
+                            "& .MuiTooltip-arrow": {
+                              color: "var(--color-secondary-bg)",
+                            },
                           },
                         },
-                      },
-                    }}
-                  >
-                    <button
-                      onClick={() => {
-                        const url = new URL(window.location.href);
-                        const highlightVal = category
-                          .replace(/\s+/g, "_")
-                          .toLowerCase();
-                        url.searchParams.set("highlight", highlightVal);
-                        navigator.clipboard.writeText(url.toString());
-                        toast.success("Link Copied", {
-                          description: `The URL for the "${category}" section is now on your clipboard.`,
-                        });
                       }}
-                      className="text-secondary-text hover:text-link cursor-pointer transition-colors"
-                      aria-label="Copy category link"
                     >
-                      <Icon icon="heroicons:link" className="h-4 w-4" />
-                    </button>
-                  </Tooltip>
+                      <button
+                        onClick={() => {
+                          const url = new URL(window.location.href);
+                          const highlightVal = category
+                            .replace(/\s+/g, "_")
+                            .toLowerCase();
+                          url.searchParams.set("highlight", highlightVal);
+                          navigator.clipboard.writeText(url.toString());
+                          toast.success("Link Copied", {
+                            description: `The URL for the "${category}" section is now on your clipboard.`,
+                          });
+                        }}
+                        className="text-secondary-text hover:text-link cursor-pointer transition-colors"
+                        aria-label="Copy category link"
+                      >
+                        <Icon icon="heroicons:link" className="h-4 w-4" />
+                      </button>
+                    </Tooltip>
+                  )}
                 </Typography>
                 <Divider sx={{ mb: 2 }} />
                 <FormGroup>

@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { Icon } from "@/components/ui/IconWrapper";
 import { toast } from "sonner";
 
 export const ExportInventoryData = () => {

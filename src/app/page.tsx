@@ -4,6 +4,7 @@ import CCPAHandler from "@/components/Home/CCPAHandler";
 import { Icon } from "../components/ui/IconWrapper";
 import HeroBackgroundCarousel from "@/components/Home/HeroBackgroundCarousel";
 import NitroHomepageAd from "@/components/Ads/NitroHomepageAd";
+import { Button } from "@/components/ui/button";
 
 // Extend Window interface for USP API (CCPA)
 declare global {
@@ -51,21 +52,20 @@ export default function Home() {
               connect with other players!
             </p>
             <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
-              <a
-                href="roblox://experiences/start?placeId=606849621"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="bg-button-info text-form-button-text hover:bg-button-info-hover focus:ring-border-focus active:bg-button-info-active rounded-lg px-8 py-3 text-lg font-semibold transition-colors duration-200 focus:ring-2 focus:outline-none"
-              >
-                Play Jailbreak Now
-              </a>
-              <Link
-                href="/testimonials"
-                prefetch={false}
-                className="border-form-button-text text-form-button-text hover:bg-button-info-hover rounded-lg border-2 px-8 py-3 text-lg font-semibold transition-colors duration-200"
-              >
-                Read Testimonials
-              </Link>
+              <Button asChild size="lg">
+                <a
+                  href="roblox://experiences/start?placeId=606849621"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Play Jailbreak Now
+                </a>
+              </Button>
+              <Button asChild variant="outline" size="lg">
+                <Link href="/testimonials" prefetch={false}>
+                  Read Testimonials
+                </Link>
+              </Button>
             </div>
 
             <div className="mt-12 flex justify-center">

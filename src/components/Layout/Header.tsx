@@ -39,6 +39,7 @@ import NewsTicker from "./NewsTicker";
 import OfflineDetector from "../OfflineDetector";
 
 import { Icon } from "../ui/IconWrapper";
+import { Button } from "../ui/button";
 import {
   Popover,
   PopoverTrigger,
@@ -365,6 +366,13 @@ export default function Header() {
         All Calculators
       </Link>
       <div className="px-4 py-2">
+        <Button asChild className="w-full shadow-lg">
+          <Link href="/values#hyper-pity-calc" onClick={handleDrawerToggle}>
+            Hyper Pity Calc
+          </Link>
+        </Button>
+      </div>
+      <div className="px-4 py-2">
         <Typography className="text-secondary-text text-sm font-semibold tracking-wider uppercase">
           Values
         </Typography>
@@ -684,7 +692,7 @@ export default function Header() {
 
                       {/* Tabs */}
                       {isAuthenticated && (
-                        <div className="border-border-secondary border-b px-2">
+                        <div className="border-border-secondary border-b">
                           <div role="tablist" className="tabs flex w-full">
                             <button
                               role="tab"
@@ -858,6 +866,9 @@ export default function Header() {
                                             href={urlInfo.relativePath}
                                             prefetch={false}
                                             className="border-button-info bg-button-info text-form-button-text hover:bg-button-info-hover mt-2 inline-flex cursor-pointer items-center gap-1 rounded-lg border px-2 py-1 text-sm transition-colors sm:px-3"
+                                            onClick={() =>
+                                              setNotificationMenuOpen(false)
+                                            }
                                           >
                                             View
                                           </Link>

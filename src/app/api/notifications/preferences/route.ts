@@ -45,6 +45,12 @@ export async function GET() {
     const data = await resp.json();
     return NextResponse.json(data);
   } catch (error) {
+    if (
+      error instanceof Error &&
+      (error.name === "TimeoutError" || error.name === "AbortError")
+    ) {
+      return NextResponse.json({ error: "Request timed out" }, { status: 504 });
+    }
     console.error("Error fetching notification preferences:", error);
     return NextResponse.json(
       { error: "Internal server error" },
@@ -109,6 +115,12 @@ export async function POST(request: Request) {
     const data = await resp.json().catch(() => ({}));
     return NextResponse.json(data);
   } catch (error) {
+    if (
+      error instanceof Error &&
+      (error.name === "TimeoutError" || error.name === "AbortError")
+    ) {
+      return NextResponse.json({ error: "Request timed out" }, { status: 504 });
+    }
     console.error("Error updating notification preferences:", error);
     return NextResponse.json(
       { error: "Internal server error" },
