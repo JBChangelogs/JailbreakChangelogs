@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { UserData, UserSettings } from "@/types/auth";
 import { updateSettings } from "@/services/settingsService";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 import { safeSetJSON } from "@/utils/safeStorage";
 
 export const useSettings = (

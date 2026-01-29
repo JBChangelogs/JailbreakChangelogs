@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from "react";
 import { Dialog, DialogPanel } from "@headlessui/react";
 import { Icon } from "@/components/ui/IconWrapper";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 
 interface UtmGeneratorModalProps {
   isOpen: boolean;

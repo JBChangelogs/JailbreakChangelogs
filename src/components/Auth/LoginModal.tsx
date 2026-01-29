@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback, Suspense } from "react";
 import Image from "next/image";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import { Tabs, Tab, Box, Dialog, DialogContent } from "@mui/material";
 import { PUBLIC_API_URL } from "@/utils/api";
@@ -10,10 +10,6 @@ import { useAuthContext } from "@/contexts/AuthContext";
 import { useTheme } from "@/contexts/ThemeContext";
 import { storeCampaign } from "@/utils/campaign";
 import { useSearchParams } from "next/navigation";
-import {
-  showProcessingAuthToast,
-  dismissProcessingAuthToast,
-} from "@/utils/auth";
 import { hasAuthSessionCookie } from "@/utils/serverSession";
 
 interface TabPanelProps {
@@ -69,8 +65,6 @@ function LoginModalInner({ open, onClose }: LoginModalProps) {
         tokenProcessedRef.current = true;
         // Only show loading toast if we're not already redirecting
         if (!isRedirecting) {
-          const loadingToast = showProcessingAuthToast();
-
           login(token)
             .then((response) => {
               if (response.success) {
@@ -118,9 +112,6 @@ function LoginModalInner({ open, onClose }: LoginModalProps) {
               window.history.replaceState({}, "", newUrl);
               // Reset the processed token state on error
               tokenProcessedRef.current = false;
-            })
-            .finally(() => {
-              dismissProcessingAuthToast(loadingToast);
             });
         }
       }
@@ -381,7 +372,7 @@ function LoginModalInner({ open, onClose }: LoginModalProps) {
 
                           toast.loading("Redirecting to Discord...", {
                             duration: 2000,
-                            position: "bottom-right",
+                            position: "top-center",
                           });
 
                           window.location.href = oauthRedirect;
@@ -466,7 +457,7 @@ function LoginModalInner({ open, onClose }: LoginModalProps) {
                                 "You must be logged in with Discord first",
                                 {
                                   duration: 3000,
-                                  position: "bottom-right",
+                                  position: "top-center",
                                 },
                               );
                               return;
@@ -479,7 +470,7 @@ function LoginModalInner({ open, onClose }: LoginModalProps) {
 
                               toast.loading("Redirecting to Roblox...", {
                                 duration: 2000,
-                                position: "bottom-right",
+                                position: "top-center",
                               });
 
                               window.location.href = oauthRedirect;
@@ -492,7 +483,7 @@ function LoginModalInner({ open, onClose }: LoginModalProps) {
                                 "Failed to start Roblox authentication",
                                 {
                                   duration: 4000,
-                                  position: "bottom-right",
+                                  position: "top-center",
                                 },
                               );
                               setIsRedirecting(false);

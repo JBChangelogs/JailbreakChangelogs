@@ -13,7 +13,7 @@ import { useRouter } from "next/navigation";
 import { deleteAccount } from "@/services/settingsService";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { Icon } from "@/components/ui/IconWrapper";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 
 export const DeleteAccount = () => {
   const [open, setOpen] = useState(false);
@@ -61,7 +61,7 @@ export const DeleteAccount = () => {
       // Show success message before redirecting
       toast.success("Account successfully deleted", {
         duration: 3000,
-        position: "bottom-right",
+        position: "top-center",
       });
 
       setTimeout(() => {

@@ -1,38 +1,12 @@
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 import { UserData, AuthResponse } from "../types/auth";
 import { safeLocalStorage, safeSetJSON } from "./safeStorage";
-// import { PUBLIC_API_URL } from '@/utils/api';
-// Removed removeCookie import - using server-side logout instead
 
 let lastLogoutSource: string = "Unknown";
-
-// Track active toasts to prevent duplicates
-let activeWelcomeToast: string | null = null;
-let activeLogoutToast: string | null = null;
-let activeLoginLoadingToast: string | null = null;
-let activeLogoutLoadingToast: string | null = null;
-let activeProcessingAuthToast: string | null = null;
-
-/**
- * Shows a welcome toast with deduplication to prevent multiple welcome messages
- */
-function showWelcomeToast(username: string): void {
-  // If there's already an active welcome toast, dismiss it first
-  if (activeWelcomeToast) {
-    toast.dismiss(activeWelcomeToast);
-  }
-
-  // Show new welcome toast and track its ID
-  activeWelcomeToast = toast.success(`Welcome back, ${username}!`, {
-    duration: 3000,
-    position: "bottom-right",
-  });
-
-  // Clear the tracking when toast expires
-  setTimeout(() => {
-    activeWelcomeToast = null;
-  }, 3000);
-}
+let activeLogoutToast: string | number | null = null;
+let activeLoginLoadingToast: string | number | null = null;
+let activeLogoutLoadingToast: string | number | null = null;
+let activeProcessingAuthToast: string | number | null = null;
 
 /**
  * Shows a logout success toast with deduplication to prevent multiple logout messages
@@ -45,8 +19,9 @@ export function showLogoutToast(): void {
 
   // Show new logout toast and track its ID
   activeLogoutToast = toast.success("Successfully logged out!", {
+    description: "Your session has been cleared. Come back soon!",
     duration: 3000,
-    position: "bottom-right",
+    position: "top-center",
   });
 
   // Clear the tracking when toast expires
@@ -58,7 +33,7 @@ export function showLogoutToast(): void {
 /**
  * Shows a login loading toast with deduplication to prevent multiple loading messages
  */
-export function showLoginLoadingToast(): string {
+export function showLoginLoadingToast(): string | number {
   // If there's already an active login loading toast, dismiss it first
   if (activeLoginLoadingToast) {
     toast.dismiss(activeLoginLoadingToast);
@@ -67,7 +42,7 @@ export function showLoginLoadingToast(): string {
   // Show new login loading toast and track its ID
   activeLoginLoadingToast = toast.loading("Logging you in...", {
     duration: Infinity,
-    position: "bottom-right",
+    position: "top-center",
   });
 
   return activeLoginLoadingToast;
@@ -76,7 +51,7 @@ export function showLoginLoadingToast(): string {
 /**
  * Shows a logout loading toast with deduplication to prevent multiple loading messages
  */
-export function showLogoutLoadingToast(): string {
+export function showLogoutLoadingToast(): string | number {
   // If there's already an active logout loading toast, dismiss it first
   if (activeLogoutLoadingToast) {
     toast.dismiss(activeLogoutLoadingToast);
@@ -85,7 +60,7 @@ export function showLogoutLoadingToast(): string {
   // Show new logout loading toast and track its ID
   activeLogoutLoadingToast = toast.loading("Logging you out...", {
     duration: Infinity,
-    position: "bottom-right",
+    position: "top-center",
   });
 
   return activeLogoutLoadingToast;
@@ -94,7 +69,7 @@ export function showLogoutLoadingToast(): string {
 /**
  * Dismisses a login loading toast and clears tracking
  */
-export function dismissLoginLoadingToast(toastId?: string): void {
+export function dismissLoginLoadingToast(toastId?: string | number): void {
   if (toastId) {
     toast.dismiss(toastId);
   } else if (activeLoginLoadingToast) {
@@ -106,7 +81,7 @@ export function dismissLoginLoadingToast(toastId?: string): void {
 /**
  * Dismisses a logout loading toast and clears tracking
  */
-export function dismissLogoutLoadingToast(toastId?: string): void {
+export function dismissLogoutLoadingToast(toastId?: string | number): void {
   if (toastId) {
     toast.dismiss(toastId);
   } else if (activeLogoutLoadingToast) {
@@ -118,7 +93,7 @@ export function dismissLogoutLoadingToast(toastId?: string): void {
 /**
  * Shows a processing authentication toast with deduplication
  */
-export function showProcessingAuthToast(): string {
+export function showProcessingAuthToast(): string | number {
   // If there's already an active processing auth toast, dismiss it first
   if (activeProcessingAuthToast) {
     toast.dismiss(activeProcessingAuthToast);
@@ -127,7 +102,7 @@ export function showProcessingAuthToast(): string {
   // Show new processing auth toast and track its ID
   activeProcessingAuthToast = toast.loading("Processing authentication...", {
     duration: Infinity,
-    position: "bottom-right",
+    position: "top-center",
   });
 
   return activeProcessingAuthToast;
@@ -136,7 +111,7 @@ export function showProcessingAuthToast(): string {
 /**
  * Dismisses a processing authentication toast and clears tracking
  */
-export function dismissProcessingAuthToast(toastId?: string): void {
+export function dismissProcessingAuthToast(toastId?: string | number): void {
   if (toastId) {
     toast.dismiss(toastId);
   } else if (activeProcessingAuthToast) {
@@ -151,9 +126,8 @@ export function trackLogoutSource(source: string) {
 
 export async function logout() {
   const source = lastLogoutSource || "Direct API Call";
-  let timeoutId: NodeJS.Timeout | undefined;
 
-  try {
+  const logoutPromise = (async () => {
     console.group("🔐 Logout Process");
     console.log("📝 Logout Details:", {
       Source: source,
@@ -162,49 +136,50 @@ export async function logout() {
 
     // Create AbortController for request cancellation
     const abortController = new AbortController();
+    const timeoutId = setTimeout(() => abortController.abort(), 10000);
 
-    // Set a timeout to abort the request after 10 seconds
-    timeoutId = setTimeout(() => {
-      abortController.abort();
-    }, 10000);
+    try {
+      const response = await fetch("/api/auth/logout", {
+        method: "POST",
+        signal: abortController.signal,
+      });
 
-    const response = await fetch("/api/auth/logout", {
-      method: "POST",
-      signal: abortController.signal,
-    });
-
-    // Clear timeout since request completed
-    clearTimeout(timeoutId);
-
-    if (!response.ok) {
-      throw new Error("Failed to clear session");
-    }
-
-    clearAuthData("user-initiated logout");
-    console.groupEnd();
-  } catch (error) {
-    // Clear timeout in case of error
-    if (timeoutId) {
       clearTimeout(timeoutId);
-    }
 
-    // Handle AbortError specifically - still clear auth data locally
-    if (error instanceof Error && error.name === "AbortError") {
-      console.log("Logout request was aborted, clearing auth data locally");
-      clearAuthData("logout request aborted");
+      if (!response.ok) {
+        throw new Error("Failed to clear session");
+      }
+
+      clearAuthData("user-initiated logout");
       console.groupEnd();
-      return; // Don't throw error for aborted logout
+    } catch (error) {
+      clearTimeout(timeoutId);
+      if (error instanceof Error && error.name === "AbortError") {
+        console.log("Logout request was aborted, clearing auth data locally");
+        clearAuthData("logout request aborted");
+        console.groupEnd();
+        return;
+      }
+      console.error("❌ Error During Logout:", error);
+      console.groupEnd();
+      throw error;
     }
+  })();
 
-    console.error("❌ Error During Logout:", {
-      Source: source,
-      Timestamp: new Date().toISOString(),
-      "Error Message": error instanceof Error ? error.message : "Unknown error",
-      "Stack Trace": error instanceof Error ? error.stack : undefined,
-    });
-    console.groupEnd();
-    throw error;
-  }
+  toast.promise(logoutPromise, {
+    loading: "Logging you out...",
+    success: {
+      message: "Successfully logged out!",
+      description: "Your session has been cleared. Come back soon!",
+    },
+    error: {
+      message: "Logout failed",
+      description:
+        "We couldn't clear your session on the server, but you have been logged out locally.",
+    },
+  });
+
+  return logoutPromise;
 }
 
 function clearAuthData(reason: string) {
@@ -301,83 +276,76 @@ async function performAuthValidation(): Promise<boolean> {
 }
 
 export async function handleTokenAuth(token: string): Promise<AuthResponse> {
-  let loadingToast: string | undefined;
-  let timeoutId: NodeJS.Timeout | undefined;
-
-  try {
-    // Show loading toast with deduplication
-    loadingToast = showLoginLoadingToast();
-
+  const loginPromise = (async () => {
     // Create AbortController for request cancellation
     const abortController = new AbortController();
+    const timeoutId = setTimeout(() => abortController.abort(), 15000);
 
-    // Set a timeout to abort the request after 15 seconds
-    timeoutId = setTimeout(() => {
-      abortController.abort();
-    }, 15000);
+    try {
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token }),
+        signal: abortController.signal,
+      });
 
-    // Validate token and set cookie via server route
-    const response = await fetch("/api/auth/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ token }),
-      signal: abortController.signal,
-    });
+      clearTimeout(timeoutId);
 
-    // Clear timeout since request completed
-    clearTimeout(timeoutId);
+      if (!response.ok) {
+        throw new Error("Invalid or expired session token.");
+      }
 
-    if (!response.ok) {
-      throw new Error("Failed to validate token");
+      const userData: UserData = await response.json();
+
+      // Set local storage
+      safeSetJSON("user", userData);
+      safeLocalStorage.setItem("userid", userData.id);
+
+      // Set avatar if available
+      if (userData.avatar) {
+        const avatarURL = `https://cdn.discordapp.com/avatars/${userData.id}/${userData.avatar}?size=4096`;
+        safeLocalStorage.setItem("avatar", avatarURL);
+      }
+
+      // Dispatch custom event for components to listen to
+      window.dispatchEvent(
+        new CustomEvent("authStateChanged", { detail: userData }),
+      );
+
+      return userData;
+    } catch (error) {
+      clearTimeout(timeoutId);
+      throw error;
     }
+  })();
 
-    const userData: UserData = await response.json();
+  toast.promise(loginPromise, {
+    loading: "Logging you in...",
+    success: (userData) => ({
+      message: `Welcome back, ${userData.username}!`,
+      description: "You have successfully signed in to your account.",
+    }),
+    error: (error) => ({
+      message: "Login failed",
+      description:
+        error instanceof Error && error.name === "AbortError"
+          ? "The request timed out. Please try again."
+          : error instanceof Error
+            ? error.message
+            : "An unexpected error occurred during login.",
+    }),
+  });
 
-    // Set local storage
-    safeSetJSON("user", userData);
-    safeLocalStorage.setItem("userid", userData.id);
-
-    // Set avatar if available
-    if (userData.avatar) {
-      const avatarURL = `https://cdn.discordapp.com/avatars/${userData.id}/${userData.avatar}?size=4096`;
-      safeLocalStorage.setItem("avatar", avatarURL);
-    }
-
-    // Dispatch custom event for components to listen to
-    window.dispatchEvent(
-      new CustomEvent("authStateChanged", { detail: userData }),
-    );
-
-    // Dismiss loading toast and show success
-    toast.dismiss(loadingToast);
-    showWelcomeToast(userData.username);
-
+  try {
+    const userData = await loginPromise;
     return { success: true, data: userData };
   } catch (error) {
-    // Clear timeout in case of error
-    if (timeoutId) {
-      clearTimeout(timeoutId);
-    }
-
-    // Handle AbortError specifically
-    if (error instanceof Error && error.name === "AbortError") {
-      console.log("Login request was aborted");
-      toast.error("Login request was cancelled. Please try again.", {
-        duration: 3000,
-        position: "bottom-right",
-      });
-      return { success: false, error: "Request was cancelled" };
-    }
-
     console.error("Token authentication error:", error);
-    toast.error("Failed to log in. Please try again.", {
-      duration: 3000,
-      position: "bottom-right",
-    });
-    return { success: false, error: "Failed to validate token" };
-  } finally {
-    // Always dismiss the loading toast
-    dismissLoginLoadingToast(loadingToast);
+    return {
+      success: false,
+      error:
+        error instanceof Error ? error.message : "Failed to validate token",
+    };
   }
 }
 

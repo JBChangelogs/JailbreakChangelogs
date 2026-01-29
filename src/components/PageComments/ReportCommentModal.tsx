@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Dialog, DialogPanel } from "@headlessui/react";
 import { useAuthContext } from "@/contexts/AuthContext";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 import LoginModalWrapper from "../Auth/LoginModalWrapper";
 
 interface ReportCommentModalProps {

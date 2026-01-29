@@ -753,7 +753,7 @@ export async function fetchDupeFinderData(userId: string) {
 
     const data = await response.json();
     return data;
-  } catch (err) {
+  } catch {
     return { error: "Failed to fetch dupe finder data. Please try again." };
   }
 }
@@ -1816,7 +1816,7 @@ export async function fetchUserMoneyHistory(
 
     const data = await response.json();
     return Array.isArray(data) ? data : [];
-  } catch (err) {
+  } catch {
     return [];
   }
 }

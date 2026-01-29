@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Dialog, DialogPanel } from "@headlessui/react";
 import { Icon } from "@/components/ui/IconWrapper";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 import LoginModalWrapper from "../Auth/LoginModalWrapper";
 import { safeGetJSON, safeSetJSON } from "@/utils/safeStorage";
 import { UserData } from "@/types/auth";
@@ -58,7 +58,7 @@ export const RobloxConnection = ({ userData }: RobloxConnectionProps) => {
 
       toast.success("Successfully disconnected Roblox account", {
         duration: 3000,
-        position: "bottom-right",
+        position: "top-center",
       });
 
       handleClose();

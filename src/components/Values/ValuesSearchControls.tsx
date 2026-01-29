@@ -5,7 +5,7 @@ import { Icon } from "../ui/IconWrapper";
 import { FilterSort, ValueSort } from "@/types";
 import dynamic from "next/dynamic";
 import { useIsAuthenticated } from "@/contexts/AuthContext";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 import { safeSessionStorage } from "@/utils/safeStorage";
 
 const Slider = dynamic(() => import("@mui/material/Slider"), {

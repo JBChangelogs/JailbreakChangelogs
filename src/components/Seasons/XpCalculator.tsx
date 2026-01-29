@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { toast } from "react-hot-toast";
+import { toast } from "sonner";
 import XpCalculatorForm from "./XpCalculatorForm";
 import XpResultsSummary from "./XpResultsSummary";
 import { Season, CalculationResults, DoubleXpResult } from "@/types/seasons";

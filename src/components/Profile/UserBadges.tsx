@@ -1,5 +1,5 @@
 import { Tooltip } from "@mui/material";
-import { toast } from "react-hot-toast";
+import { toast } from "sonner";
 import type { UserFlag } from "@/types/auth";
 import Image from "next/image";
 

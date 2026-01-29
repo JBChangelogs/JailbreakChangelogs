@@ -29,7 +29,7 @@ import SupporterModal from "@/components/Modals/SupporterModal";
 import { useSupporterModal } from "@/hooks/useSupporterModal";
 import { safeSetJSON } from "@/utils/safeStorage";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 import { NotificationPreferenceToggle } from "@/components/Settings/NotificationPreferenceToggle";
 import {
   fetchAvailableNotificationPreferences,
@@ -189,7 +189,9 @@ export default function SettingsPage() {
       await updateUserNotificationPreferences([
         { title, enabled: nextEnabled },
       ]);
-      toast.success("Setting updated successfully");
+      toast.success("Setting Updated", {
+        description: `Notification preference for "${title}" has been ${nextEnabled ? "enabled" : "disabled"}.`,
+      });
 
       window.umami?.track("Update Notification Preference", {
         preference: title,
@@ -539,7 +541,9 @@ export default function SettingsPage() {
                           .toLowerCase();
                         url.searchParams.set("highlight", highlightVal);
                         navigator.clipboard.writeText(url.toString());
-                        toast.success(`Link for "${category}" copied!`);
+                        toast.success("Link Copied", {
+                          description: `The URL for the "${category}" section is now on your clipboard.`,
+                        });
                       }}
                       className="text-secondary-text hover:text-link cursor-pointer transition-colors"
                       aria-label="Copy category link"

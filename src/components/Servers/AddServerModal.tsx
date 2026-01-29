@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { toast } from "react-hot-toast";
+import { toast } from "sonner";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";

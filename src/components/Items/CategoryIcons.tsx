@@ -1,5 +1,5 @@
 import { FilterSort, ValueSort } from "@/types";
-import { toast } from "react-hot-toast";
+import { toast } from "sonner";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { getCategoryIcon, getCategoryColor } from "@/utils/categoryIcons";
 

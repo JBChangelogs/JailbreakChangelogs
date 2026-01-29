@@ -10,7 +10,7 @@ import Footer from "@/components/Layout/Footer";
 import VersionInfoServer from "@/components/Layout/VersionInfoServer";
 import VersionInfoSkeleton from "@/components/Layout/VersionInfoSkeleton";
 
-import { Toaster } from "react-hot-toast";
+import { Toaster } from "@/components/ui/sonner";
 import NextTopLoader from "nextjs-toploader";
 import AuthCheck from "@/components/Auth/AuthCheck";
 import { AppRouterCacheProvider } from "@mui/material-nextjs/v15-appRouter";
@@ -162,56 +162,7 @@ export default async function RootLayout({
             <CustomThemeProvider>
               <ThemeProvider>
                 <QueryProvider>
-                  <Toaster
-                    position="bottom-right"
-                    toastOptions={{
-                      success: {
-                        style: {
-                          background: "var(--color-secondary-bg)",
-                          color: "var(--color-primary-text)",
-                          border: "1px solid var(--color-border-primary)",
-                          borderRadius: "16px",
-                          backdropFilter: "blur(20px)",
-                          WebkitBackdropFilter: "blur(20px)",
-                          boxShadow: "0 8px 32px rgba(0,0,0,0.3)",
-                        },
-                        iconTheme: {
-                          primary: "var(--color-button-info)",
-                          secondary: "var(--color-secondary-bg)",
-                        },
-                      },
-                      error: {
-                        style: {
-                          background: "var(--color-secondary-bg)",
-                          color: "var(--color-primary-text)",
-                          border: "1px solid var(--color-border-primary)",
-                          borderRadius: "16px",
-                          backdropFilter: "blur(20px)",
-                          WebkitBackdropFilter: "blur(20px)",
-                          boxShadow: "0 8px 32px rgba(0,0,0,0.3)",
-                        },
-                        iconTheme: {
-                          primary: "var(--color-button-info)",
-                          secondary: "var(--color-secondary-bg)",
-                        },
-                      },
-                      loading: {
-                        style: {
-                          background: "var(--color-secondary-bg)",
-                          color: "var(--color-primary-text)",
-                          border: "1px solid var(--color-border-primary)",
-                          borderRadius: "16px",
-                          backdropFilter: "blur(20px)",
-                          WebkitBackdropFilter: "blur(20px)",
-                          boxShadow: "0 8px 32px rgba(0,0,0,0.3)",
-                        },
-                        iconTheme: {
-                          primary: "var(--color-button-info)",
-                          secondary: "var(--color-secondary-bg)",
-                        },
-                      },
-                    }}
-                  />
+                  <Toaster position="top-center" />
                   <MaintenanceBypass>
                     <NextTopLoader
                       color="var(--color-button-info)"
@@ -344,56 +295,7 @@ export default async function RootLayout({
           <CustomThemeProvider>
             <ThemeProvider>
               <QueryProvider>
-                <Toaster
-                  position="bottom-right"
-                  toastOptions={{
-                    success: {
-                      style: {
-                        background: "var(--color-secondary-bg)",
-                        color: "var(--color-primary-text)",
-                        border: "1px solid var(--color-border-primary)",
-                        borderRadius: "16px",
-                        backdropFilter: "blur(20px)",
-                        WebkitBackdropFilter: "blur(20px)",
-                        boxShadow: "0 8px 32px rgba(0,0,0,0.3)",
-                      },
-                      iconTheme: {
-                        primary: "var(--color-button-info)",
-                        secondary: "var(--color-secondary-bg)",
-                      },
-                    },
-                    error: {
-                      style: {
-                        background: "var(--color-secondary-bg)",
-                        color: "var(--color-primary-text)",
-                        border: "1px solid var(--color-border-primary)",
-                        borderRadius: "16px",
-                        backdropFilter: "blur(20px)",
-                        WebkitBackdropFilter: "blur(20px)",
-                        boxShadow: "0 8px 32px rgba(0,0,0,0.3)",
-                      },
-                      iconTheme: {
-                        primary: "var(--color-button-info)",
-                        secondary: "var(--color-secondary-bg)",
-                      },
-                    },
-                    loading: {
-                      style: {
-                        background: "var(--color-secondary-bg)",
-                        color: "var(--color-primary-text)",
-                        border: "1px solid var(--color-border-primary)",
-                        borderRadius: "16px",
-                        backdropFilter: "blur(20px)",
-                        WebkitBackdropFilter: "blur(20px)",
-                        boxShadow: "0 8px 32px rgba(0,0,0,0.3)",
-                      },
-                      iconTheme: {
-                        primary: "var(--color-button-info)",
-                        secondary: "var(--color-secondary-bg)",
-                      },
-                    },
-                  }}
-                />
+                <Toaster position="top-center" />
                 <NextTopLoader
                   color="var(--color-button-info)"
                   initialPosition={0.08}

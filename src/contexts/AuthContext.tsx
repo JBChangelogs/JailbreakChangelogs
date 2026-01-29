@@ -15,9 +15,6 @@ import {
   logout as authLogout,
   handleTokenAuth,
   trackLogoutSource,
-  showLogoutToast,
-  showLogoutLoadingToast,
-  dismissLogoutLoadingToast,
 } from "@/utils/auth";
 // Removed hasValidToken import - using session API instead
 import {
@@ -27,7 +24,7 @@ import {
   storeCampaign,
 } from "@/utils/campaign";
 import { safeGetJSON } from "@/utils/safeStorage";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 
 // Helper function to track user status in Clarity
 const trackUserStatus = (isAuthenticated: boolean, action?: string) => {
@@ -151,7 +148,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }, []);
 
   useEffect(() => {
-    initializeAuth();
+    setTimeout(() => {
+      initializeAuth();
+    }, 0);
 
     let idleTimeout: NodeJS.Timeout;
     let authInterval: NodeJS.Timeout;
@@ -167,7 +166,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
       // Set new idle timeout (8 minutes of inactivity - shorter than auth check interval)
       idleTimeout = setTimeout(() => {
-        const now = new Date().toISOString();
         isUserActiveRef.current = false;
       }, 480000); // 8 minutes
     };
@@ -179,7 +177,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
       }
 
       authInterval = setInterval(() => {
-        const now = new Date().toISOString();
         if (isUserActiveRef.current) {
           validateAuth().catch((error) => {
             console.error("Auth validation error:", error);
@@ -271,7 +268,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
           .then(() => {
             toast.success("Campaign visit recorded!", {
               duration: 3000,
-              position: "bottom-right",
+              position: "top-center",
             });
           })
           .catch((err) => {
@@ -285,7 +282,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
             ) {
               toast.error("You are already participating in this campaign", {
                 duration: 3000,
-                position: "bottom-right",
+                position: "top-center",
               });
             }
           })
@@ -298,7 +295,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
       } else {
         // User not logged in
         storeCampaign(campaign);
-        setShowLoginModal(true);
+        setTimeout(() => {
+          setShowLoginModal(true);
+        }, 0);
       }
     }
   }, [authState.isAuthenticated, authState.isLoading]);
@@ -326,7 +325,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
             await countCampaignVisit(campaign, token);
             toast.success("Campaign visit recorded!", {
               duration: 3000,
-              position: "bottom-right",
+              position: "top-center",
             });
           } catch (e) {
             console.error("Campaign visit error during login:", e);
@@ -363,12 +362,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   };
 
   const handleLogout = async () => {
-    let loadingToast: string | undefined;
-
     try {
-      // Show loading toast with deduplication
-      loadingToast = showLogoutLoadingToast();
-
       trackLogoutSource("AuthContext");
       await authLogout();
       setAuthState({
@@ -380,19 +374,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
       // Track user status in Clarity
       trackUserStatus(false, "logout");
-
-      // Dismiss loading toast and show success
-      toast.dismiss(loadingToast);
-      showLogoutToast();
     } catch (err) {
       console.error("Logout error:", err);
-      toast.error("Failed to log out. Please try again.", {
-        duration: 3000,
-        position: "bottom-right",
-      });
-    } finally {
-      // Always dismiss the loading toast
-      dismissLogoutLoadingToast(loadingToast);
+      // Errors are now handled by toast.promise in authLogout()
     }
   };
 

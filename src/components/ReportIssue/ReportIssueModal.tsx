@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Dialog, DialogPanel } from "@headlessui/react";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 // import { PUBLIC_API_URL } from '@/utils/api';
 import { useAuthContext } from "@/contexts/AuthContext";
 

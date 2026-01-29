@@ -5,7 +5,7 @@ import { use } from "react";
 import { Icon } from "@/components/ui/IconWrapper";
 import { Item, FilterSort, ValueSort, FavoriteItem } from "@/types";
 import { sortAndFilterItems } from "@/utils/values";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 import SearchParamsHandler from "@/components/SearchParamsHandler";
 import CategoryIcons from "@/components/Items/CategoryIcons";
 import { fetchUserFavorites, fetchRandomItem } from "@/utils/api";
@@ -122,25 +122,31 @@ export default function ValuesClient({
   });
 
   const handleRandomItem = async () => {
-    try {
-      const loadingToast = toast.loading("Finding a random item...");
+    const randomPromise = (async () => {
       const item = await fetchRandomItem();
-      toast.dismiss(loadingToast);
       if (!item) {
-        toast.error("No items found to pick from!");
-        return;
+        throw new Error("No items found to pick from!");
       }
-      const redirectToast = toast.loading(
-        `Redirecting to ${item.name} ${item.type}...`,
-      );
+
+      // Delay slightly to show the "pick" before redirecting
+      await new Promise((resolve) => setTimeout(resolve, 500));
+
       router.push(`/item/${item.type.toLowerCase()}/${item.name}`);
-      setTimeout(() => {
-        toast.dismiss(redirectToast);
-      }, 2000);
-    } catch (error) {
-      console.error("Error fetching random item:", error);
-      toast.error("Failed to fetch random item");
-    }
+      return item;
+    })();
+
+    toast.promise(randomPromise, {
+      loading: "Finding a random item...",
+      success: (item: { name: string; type: string }) => ({
+        message: "Item Found",
+        description: `Redirecting you to ${item.name}...`,
+      }),
+      error: (err) => ({
+        message: "Failed to pick item",
+        description:
+          err instanceof Error ? err.message : "An unexpected error occurred.",
+      }),
+    });
   };
 
   const handleCategorySelect = (filter: FilterSort) => {

@@ -12,7 +12,7 @@ import {
 } from "@/utils/safeStorage";
 import { DndContext, DragEndEvent, DragStartEvent } from "@dnd-kit/core";
 import { CustomDragOverlay } from "@/components/dnd/DragOverlay";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 import NitroCalculatorAd from "@/components/Ads/NitroCalculatorAd";
 
 // Import extracted components and utilities

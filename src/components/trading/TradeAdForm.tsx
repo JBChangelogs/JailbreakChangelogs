@@ -4,7 +4,7 @@ import { TradeItem, TradeAd } from "@/types/trading";
 import { UserData } from "@/types/auth";
 import { ItemGrid } from "./ItemGrid";
 import { Button, Skeleton, Tooltip } from "@mui/material";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 import { AvailableItemsGrid } from "./AvailableItemsGrid";
 import { CustomConfirmationModal } from "../Modals/CustomConfirmationModal";
 import { useRouter } from "next/navigation";
@@ -242,7 +242,9 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
         const itemName = item.sub_name
           ? `${item.name} (${item.sub_name})`
           : item.name;
-        toast.success(`Added ${itemName} to ${side} items`);
+        toast.success("Item Added", {
+          description: `${itemName} was added to your ${side} list.`,
+        });
       }
     }
   };

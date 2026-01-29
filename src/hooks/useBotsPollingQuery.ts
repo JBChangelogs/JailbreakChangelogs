@@ -11,8 +11,7 @@ export function useBotsPollingQuery(intervalMs: number = 30000) {
       const result = await pollBotsData();
 
       if (result.success && result.data) {
-        const totalBotsCount =
-          result.data.botsData?.recent_heartbeats?.length || 0;
+        // const totalBotsCount = result.data.botsData?.recent_heartbeats?.length || 0;
 
         return result.data;
       } else {

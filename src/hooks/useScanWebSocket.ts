@@ -411,7 +411,7 @@ export function useScanWebSocket(userId: string): UseScanWebSocketReturn {
 
       connect();
     },
-    [userId, connect, status],
+    [userId, connect],
   );
 
   const stopScan = useCallback(() => {

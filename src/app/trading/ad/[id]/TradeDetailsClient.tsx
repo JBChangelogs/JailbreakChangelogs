@@ -9,7 +9,7 @@ import { Icon } from "@/components/ui/IconWrapper";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import ChangelogComments from "@/components/PageComments/ChangelogComments";
 import { deleteTradeAd } from "@/utils/trading";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 import TradeItemsImages from "@/components/trading/TradeItemsImages";
 import TradeItemsWithValues from "@/components/trading/TradeItemsWithValues";
 import { TradeAd } from "@/types/trading";
@@ -75,7 +75,7 @@ export default function TradeDetailsClient({
       if (!currentUserId) {
         toast.error("You must be logged in to make an offer", {
           duration: 3000,
-          position: "bottom-right",
+          position: "top-center",
         });
         setOfferStatus({
           loading: false,
@@ -98,7 +98,7 @@ export default function TradeDetailsClient({
       if (response.status === 409) {
         toast.error("You have already made an offer for this trade", {
           duration: 3000,
-          position: "bottom-right",
+          position: "top-center",
         });
         setOfferStatus({
           loading: false,
@@ -108,7 +108,7 @@ export default function TradeDetailsClient({
       } else if (response.status === 403) {
         toast.error("The trade owner's settings do not allow direct messages", {
           duration: 3000,
-          position: "bottom-right",
+          position: "top-center",
         });
         setOfferStatus({
           loading: false,
@@ -118,9 +118,11 @@ export default function TradeDetailsClient({
       } else if (!response.ok) {
         throw new Error("Failed to create offer");
       } else {
-        toast.success("Offer sent successfully!", {
+        toast.success("Offer Sent", {
+          description:
+            "Your offer has been successfully sent to the trade owner.",
           duration: 3000,
-          position: "bottom-right",
+          position: "top-center",
         });
         setOfferStatus({
           loading: false,
@@ -132,7 +134,7 @@ export default function TradeDetailsClient({
       console.error("Error creating offer:", err);
       toast.error("Failed to create offer. Please try again.", {
         duration: 3000,
-        position: "bottom-right",
+        position: "top-center",
       });
       setOfferStatus({
         loading: false,
@@ -148,7 +150,10 @@ export default function TradeDetailsClient({
     try {
       setIsDeleting(true);
       await deleteTradeAd(trade.id);
-      toast.success("Trade ad deleted successfully");
+      toast.success("Trade Ad Deleted", {
+        description:
+          "Your trade ad has been successfully removed from the platform.",
+      });
       router.push("/trading");
     } catch (error) {
       console.error("Error deleting trade ad:", error);

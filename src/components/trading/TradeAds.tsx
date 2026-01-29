@@ -11,7 +11,7 @@ import { Pagination } from "@/components/ui/Pagination";
 import { Masonry } from "@mui/lab";
 import { Icon } from "@/components/ui/IconWrapper";
 import { deleteTradeAd } from "@/utils/trading";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 import { TradeAdForm } from "./TradeAdForm";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { useAuthContext } from "@/contexts/AuthContext";
@@ -128,7 +128,7 @@ export default function TradeAds({
       if (!currentUserId) {
         toast.error("You must be logged in to make an offer", {
           duration: 3000,
-          position: "bottom-right",
+          position: "top-center",
         });
         setOfferStatuses((prev) => ({
           ...prev,
@@ -152,7 +152,7 @@ export default function TradeAds({
       if (response.status === 409) {
         toast.error("You have already made an offer for this trade", {
           duration: 3000,
-          position: "bottom-right",
+          position: "top-center",
         });
         setOfferStatuses((prev) => ({
           ...prev,
@@ -165,7 +165,7 @@ export default function TradeAds({
       } else if (response.status === 403) {
         toast.error("The trade owner's settings do not allow direct messages", {
           duration: 3000,
-          position: "bottom-right",
+          position: "top-center",
         });
         setOfferStatuses((prev) => ({
           ...prev,
@@ -180,7 +180,7 @@ export default function TradeAds({
       } else {
         toast.success("Offer sent successfully!", {
           duration: 3000,
-          position: "bottom-right",
+          position: "top-center",
         });
         setOfferStatuses((prev) => ({
           ...prev,
@@ -195,7 +195,7 @@ export default function TradeAds({
       console.error("Error creating offer:", err);
       toast.error("Failed to create offer. Please try again.", {
         duration: 3000,
-        position: "bottom-right",
+        position: "top-center",
       });
       setOfferStatuses((prev) => ({
         ...prev,

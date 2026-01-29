@@ -7,7 +7,7 @@ const Tooltip = dynamic(() => import("@mui/material/Tooltip"), { ssr: false });
 import { Icon } from "@/components/ui/IconWrapper";
 import { UserData } from "@/types/auth";
 import { updateAvatar, updateSettings } from "@/services/settingsService";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 import { useSupporterModal } from "@/hooks/useSupporterModal";
 import SupporterModal from "../Modals/SupporterModal";
 import { UPLOAD_CONFIG } from "@/config/settings";
@@ -121,7 +121,7 @@ export const AvatarSettings = ({
       return; // Modal will be shown by the hook
     }
 
-    // Client-side validation with helpful warnings
+    // Client-side validation
     const allowedExtensions = [".jpg", ".jpeg", ".png", ".gif"];
     const allowedMimeTypes = [...UPLOAD_CONFIG.ALLOWED_FILE_TYPES];
 
@@ -141,16 +141,7 @@ export const AvatarSettings = ({
     setIsUploading(true);
     setAvatarError(null);
 
-    // Show loading toast
-    const loadingToast = toast.loading(
-      "Uploading your image to the server...",
-      {
-        duration: Infinity,
-        position: "bottom-right",
-      },
-    );
-
-    try {
+    const uploadAndSave = (async () => {
       const formData = new FormData();
       formData.append("file", file);
 
@@ -162,68 +153,62 @@ export const AvatarSettings = ({
       const result = await response.json();
 
       if (!response.ok) {
-        // If it's an authentication error, suggest using direct URLs
         if (response.status === 401) {
           throw new Error(
-            "File upload is not available. Please use a direct image URL from ImgBB, PostImg, or other image hosting services.",
+            "File upload is not available. Please use a direct link.",
           );
         }
-        // Handle timeout errors specifically
         if (response.status === 408) {
-          throw new Error(
-            result.message ||
-              "Upload timeout - the file is too large or the connection is too slow. Please try a smaller file or use a direct image URL.",
-          );
+          throw new Error("Upload timeout - please try a smaller file.");
         }
         throw new Error(result.message || "Upload failed");
       }
 
-      // Auto-fill the URL field with uploaded image
+      // Update UI state
       setCustomAvatarUrl(result.imageUrl);
       validateAvatarUrl(result.imageUrl);
 
-      // Dismiss loading toast
-      toast.dismiss(loadingToast);
-
-      // Auto-save the avatar immediately
+      // Perform auto-save
       try {
         await updateAvatar(result.imageUrl);
-        // Also update settings to use custom avatar instead of Discord
-        // Include all current settings when updating
         await updateSettings({
           ...userData.settings,
           avatar_discord: 0,
         });
         onAvatarUpdate(result.imageUrl);
-        toast.success("Avatar updated successfully!", {
-          duration: 3000,
-        });
 
-        // Track avatar upload completion
         if (typeof window !== "undefined" && window.umami) {
           window.umami.track("Custom Avatar Uploaded", {
             url: result.imageUrl,
           });
         }
-      } catch {
-        toast.success(
-          'Image uploaded! URL has been added to the form. Click "Update" to set as avatar.',
-          {
-            duration: 4000,
-          },
-        );
+      } catch (saveError) {
+        console.warn("Auto-save failed after upload:", saveError);
       }
+
+      return result.imageUrl;
+    })();
+
+    toast.promise(uploadAndSave, {
+      loading: "Uploading your avatar...",
+      success: {
+        message: "Avatar updated successfully!",
+        description: "Your new custom avatar is now active.",
+      },
+      error: (err) => ({
+        message: "Upload failed",
+        description:
+          err instanceof Error
+            ? err.message
+            : "Please try again or use a direct URL.",
+      }),
+    });
+
+    try {
+      await uploadAndSave;
     } catch (error) {
-      // Dismiss loading toast on error
-      toast.dismiss(loadingToast);
-
-      console.error("Error uploading file:", error);
-      const errorMessage =
-        error instanceof Error ? error.message : "Failed to upload file";
-      setAvatarError(errorMessage);
-      toast.error(errorMessage);
-
-      // Reset file input to allow selecting the same file again
+      console.error("Avatar upload error:", error);
+      // Reset file input on error
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
       }

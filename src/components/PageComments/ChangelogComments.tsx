@@ -26,8 +26,7 @@ import { useSupporterModal } from "@/hooks/useSupporterModal";
 import { UserDetailsTooltip } from "@/components/Users/UserDetailsTooltip";
 import { UserBadges } from "@/components/Profile/UserBadges";
 import CommentTimestamp from "./CommentTimestamp";
-import Snackbar from "@mui/material/Snackbar";
-import MuiAlert from "@mui/material/Alert";
+import { toast } from "sonner";
 import DOMPurify from "dompurify";
 import { Pagination } from "@/components/ui/Pagination";
 
@@ -160,17 +159,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
   );
   const [loginModalOpen, setLoginModalOpen] = useState(false);
   const [isSubmittingComment, setIsSubmittingComment] = useState(false);
-  const [postSnackbarOpen, setPostSnackbarOpen] = useState(false);
-  const [postSnackbarMsg, setPostSnackbarMsg] = useState("");
-  const [postErrorSnackbarOpen, setPostErrorSnackbarOpen] = useState(false);
-  const [postErrorSnackbarMsg, setPostErrorSnackbarMsg] = useState("");
   const [isRefreshingComments, setIsRefreshingComments] = useState(false);
-  const [editSnackbarOpen, setEditSnackbarOpen] = useState(false);
-  const [editSnackbarMsg, setEditSnackbarMsg] = useState("");
-  const [globalErrorSnackbarOpen, setGlobalErrorSnackbarOpen] = useState(false);
-  const [globalErrorSnackbarMsg, setGlobalErrorSnackbarMsg] = useState("");
-  const [infoSnackbarOpen, setInfoSnackbarOpen] = useState(false);
-  const [infoSnackbarMsg, setInfoSnackbarMsg] = useState("");
   const [isClient, setIsClient] = useState(false);
 
   const [page, setPage] = useState(1);
@@ -330,10 +319,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
     // Check if comment length exceeds user's tier limit
     if (!checkCommentLength(newComment, currentUserPremiumType)) {
       if (currentUserPremiumType >= 3 && newComment.length > 2000) {
-        setGlobalErrorSnackbarMsg(
-          "Comment is too long. Maximum length is 2000 characters.",
-        );
-        setGlobalErrorSnackbarOpen(true);
+        toast.error("Comment is too long. Maximum length is 2000 characters.");
       }
       return; // Modal will be shown by the hook for lower tiers
     }
@@ -354,10 +340,9 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
       });
 
       if (response.status === 429) {
-        setPostErrorSnackbarMsg(
+        toast.error(
           "Slow down! You're posting too fast. Take a breather and try again in a moment.",
         );
-        setPostErrorSnackbarOpen(true);
         return;
       }
 
@@ -365,17 +350,15 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
         throw new Error("Failed to post comment");
       }
 
-      setPostSnackbarMsg(
-        "Comment posted successfully. You have 1 hour to edit your comment.",
-      );
-      setPostSnackbarOpen(true);
+      toast.success("Comment posted successfully", {
+        description: "You have 1 hour to edit your comment.",
+      });
       setNewComment("");
       refreshCommentsFromServer();
     } catch (err) {
-      setGlobalErrorSnackbarMsg(
+      toast.error(
         err instanceof Error ? err.message : "Failed to post comment",
       );
-      setGlobalErrorSnackbarOpen(true);
     } finally {
       setIsSubmittingComment(false);
     }
@@ -399,10 +382,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
     // Check if edit content length exceeds user's tier limit
     if (!checkCommentLength(editContent, currentUserPremiumType)) {
       if (currentUserPremiumType >= 3 && editContent.length > 2000) {
-        setGlobalErrorSnackbarMsg(
-          "Comment is too long. Maximum length is 2000 characters.",
-        );
-        setGlobalErrorSnackbarOpen(true);
+        toast.error("Comment is too long. Maximum length is 2000 characters.");
       }
       return; // Modal will be shown by the hook for lower tiers
     }
@@ -423,8 +403,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
       if (!response.ok) {
         throw new Error("Failed to edit comment");
       }
-      setEditSnackbarMsg("Comment edited successfully.");
-      setEditSnackbarOpen(true);
+      toast.success("Comment edited successfully.");
       setEditingCommentId(null);
       setEditContent("");
       refreshCommentsFromServer();
@@ -434,10 +413,9 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
         window.umami.track("Comment Edited", { type });
       }
     } catch (err) {
-      setGlobalErrorSnackbarMsg(
+      toast.error(
         err instanceof Error ? err.message : "Failed to edit comment",
       );
-      setGlobalErrorSnackbarOpen(true);
     }
   };
 
@@ -467,10 +445,9 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
         const originalComment = comments.find((c) => c.id === commentId);
         return originalComment ? [originalComment, ...prev] : prev;
       });
-      setGlobalErrorSnackbarMsg(
+      toast.error(
         err instanceof Error ? err.message : "Failed to delete comment",
       );
-      setGlobalErrorSnackbarOpen(true);
     }
   };
 
@@ -565,8 +542,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
 
   const handleReportClick = () => {
     if (!isAuthenticated) {
-      setGlobalErrorSnackbarMsg("You must be logged in to report comments");
-      setGlobalErrorSnackbarOpen(true);
+      toast.error("You must be logged in to report comments");
       setLoginModalOpen(true);
       return;
     }
@@ -597,16 +573,14 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
         throw new Error("Failed to report comment");
       }
 
-      setInfoSnackbarMsg("We have successfully received your report");
-      setInfoSnackbarOpen(true);
+      toast.success("We have successfully received your report");
       setReportModalOpen(false);
       setReportReason("");
       setReportingCommentId(null);
     } catch (err) {
-      setGlobalErrorSnackbarMsg(
+      toast.error(
         err instanceof Error ? err.message : "Failed to report comment",
       );
-      setGlobalErrorSnackbarOpen(true);
     }
   };
 
@@ -1236,90 +1210,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
         requiredLimit={modalState.requiredLimit}
       />
 
-      {/* Post Success Snackbar */}
-      <Snackbar
-        open={postSnackbarOpen}
-        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-        onClose={() => setPostSnackbarOpen(false)}
-        autoHideDuration={5000}
-      >
-        <MuiAlert
-          elevation={6}
-          variant="filled"
-          severity="success"
-          className="border-border-focus bg-secondary-bg text-primary-text border font-medium"
-        >
-          {postSnackbarMsg}
-        </MuiAlert>
-      </Snackbar>
-
-      {/* Post Error Snackbar */}
-      <Snackbar
-        open={postErrorSnackbarOpen}
-        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-        onClose={() => setPostErrorSnackbarOpen(false)}
-        autoHideDuration={6000}
-      >
-        <MuiAlert
-          elevation={6}
-          variant="filled"
-          severity="error"
-          className="border-border-error bg-secondary-bg text-primary-text border font-medium"
-        >
-          {postErrorSnackbarMsg}
-        </MuiAlert>
-      </Snackbar>
-
-      {/* Edit Success Snackbar */}
-      <Snackbar
-        open={editSnackbarOpen}
-        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-        onClose={() => setEditSnackbarOpen(false)}
-        autoHideDuration={5000}
-      >
-        <MuiAlert
-          elevation={6}
-          variant="filled"
-          severity="success"
-          className="border-border-focus bg-secondary-bg text-primary-text border font-medium"
-        >
-          {editSnackbarMsg}
-        </MuiAlert>
-      </Snackbar>
-
-      {/* Global Error Snackbar */}
-      <Snackbar
-        open={globalErrorSnackbarOpen}
-        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-        onClose={() => setGlobalErrorSnackbarOpen(false)}
-        autoHideDuration={6000}
-      >
-        <MuiAlert
-          elevation={6}
-          variant="filled"
-          severity="error"
-          className="border-border-error bg-secondary-bg text-primary-text border font-medium"
-        >
-          {globalErrorSnackbarMsg}
-        </MuiAlert>
-      </Snackbar>
-
-      {/* Info Snackbar (for report received) */}
-      <Snackbar
-        open={infoSnackbarOpen}
-        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-        onClose={() => setInfoSnackbarOpen(false)}
-        autoHideDuration={5000}
-      >
-        <MuiAlert
-          elevation={6}
-          variant="filled"
-          severity="info"
-          className="border-border-focus bg-secondary-bg text-primary-text border font-medium"
-        >
-          {infoSnackbarMsg}
-        </MuiAlert>
-      </Snackbar>
+      {/* Info Snackbar removed - replaced with toast */}
     </div>
   );
 };

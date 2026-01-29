@@ -2,7 +2,7 @@ import React from "react";
 import { Icon } from "@/components/ui/IconWrapper";
 import { formatProfileDate } from "@/utils/timestamp";
 import Link from "next/link";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 
 interface Server {
   id: number;

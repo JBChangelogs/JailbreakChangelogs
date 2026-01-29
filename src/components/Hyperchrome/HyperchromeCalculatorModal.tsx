@@ -7,7 +7,7 @@ import {
   calculateRobberiesToLevelUp,
   calculateAllLevelPercentages,
 } from "@/utils/hyperchrome";
-import { toast } from "react-hot-toast";
+import { toast } from "sonner";
 
 interface HyperchromeCalculatorModalProps {
   open: boolean;

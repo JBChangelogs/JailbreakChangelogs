@@ -1,5 +1,5 @@
 import React from "react";
-import { toast } from "react-hot-toast";
+import { toast } from "sonner";
 import Link from "next/link";
 import { Icon } from "@/components/ui/IconWrapper";
 import ChangelogSearchInput from "./ChangelogSearchInput";

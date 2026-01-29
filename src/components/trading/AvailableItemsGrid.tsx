@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { TradeItem } from "@/types/trading";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 import {
   getItemImagePath,
   handleImageError,
