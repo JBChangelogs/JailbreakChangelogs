@@ -188,19 +188,33 @@ export default function ValuesItemsGrid({
     <>
       <div className="mb-4 flex flex-col gap-4">
         <p className="text-secondary-text">
-          {debouncedSearchTerm
-            ? `Found ${rangeFilteredItems.length} ${
+          {(() => {
+            const isDefaultRange =
+              appliedMinValue === 0 && appliedMaxValue >= MAX_VALUE_RANGE;
+            const rangeText = !isDefaultRange
+              ? ` in range ${appliedMinValue.toLocaleString()} - ${
+                  appliedMaxValue >= MAX_VALUE_RANGE
+                    ? `${MAX_VALUE_RANGE.toLocaleString()}+`
+                    : appliedMaxValue.toLocaleString()
+                }`
+              : "";
+
+            if (debouncedSearchTerm) {
+              return `Found ${rangeFilteredItems.length} ${
                 rangeFilteredItems.length === 1 ? "item" : "items"
-              } matching "${debouncedSearchTerm}"${
+              } matching "${debouncedSearchTerm}"${rangeText}${
                 filterSort !== "name-all-items"
                   ? ` in ${getFilterDisplayName(filterSort)}`
                   : ""
-              }`
-            : `Total ${
-                filterSort !== "name-all-items"
-                  ? getFilterDisplayName(filterSort)
-                  : "Items"
-              }: ${rangeFilteredItems.length}`}
+              }`;
+            }
+
+            return `Total ${
+              filterSort !== "name-all-items"
+                ? getFilterDisplayName(filterSort)
+                : "Items"
+            }${rangeText}: ${rangeFilteredItems.length}`;
+          })()}
         </p>
 
         <NitroValuesTopAd />

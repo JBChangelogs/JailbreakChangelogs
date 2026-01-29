@@ -4,12 +4,12 @@ import { Icon } from "../ui/IconWrapper";
 import React, { useState, useEffect, useCallback } from "react";
 import {
   CircularProgress,
-  Button,
   IconButton,
   Menu,
   MenuItem,
   Tooltip,
 } from "@mui/material";
+import { Button } from "../ui/button";
 import { CommentData } from "@/utils/api";
 import {
   refreshComments,
@@ -650,9 +650,10 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
               )}
             </div>
             <div className="mt-2 flex items-center justify-between">
-              <button
+              <Button
+                variant="default"
+                size="sm"
                 onClick={toggleSortOrder}
-                className="border-border-primary bg-button-info text-form-button-text hover:border-border-focus hover:bg-button-info-hover flex items-center gap-1 rounded-lg border px-4 py-2 text-sm transition-colors"
                 type="button"
               >
                 {sortOrder === "newest" ? (
@@ -669,8 +670,8 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                   />
                 )}
                 {sortOrder === "newest" ? "Newest First" : "Oldest First"}
-              </button>
-              <button
+              </Button>
+              <Button
                 type="submit"
                 disabled={
                   isLoggedIn && (!newComment.trim() || isSubmittingComment)
@@ -683,13 +684,6 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                       }
                     : undefined
                 }
-                className={`flex items-center gap-2 rounded-md border px-4 py-2 text-sm font-medium transition-colors ${
-                  isSubmittingComment
-                    ? "border-button-info-disabled bg-button-info-disabled text-form-button-text cursor-progress"
-                    : isLoggedIn && !newComment.trim()
-                      ? "border-button-secondary bg-button-secondary text-secondary-text cursor-not-allowed"
-                      : "border-button-info bg-button-info text-form-button-text hover:bg-button-info-hover cursor-pointer"
-                }`}
                 data-umami-event="Post Comment"
                 data-umami-event-type={type}
                 data-umami-event-context-id={changelogId.toString()}
@@ -719,7 +713,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                     Login to Comment
                   </>
                 )}
-              </button>
+              </Button>
             </div>
             {isLoggedIn && (
               <div className="mt-2 text-center">
@@ -1011,22 +1005,19 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                             </div>
                             <div className="flex gap-2">
                               <Button
-                                size="small"
-                                variant="contained"
+                                size="sm"
                                 onClick={() => handleEditComment(comment.id)}
                                 disabled={!editContent.trim()}
-                                className="bg-button-info text-form-button-text hover:bg-button-info-hover rounded-md text-sm normal-case"
                               >
                                 Update
                               </Button>
                               <Button
-                                size="small"
-                                variant="outlined"
+                                size="sm"
+                                variant="ghost"
                                 onClick={() => {
                                   setEditingCommentId(null);
                                   setEditContent("");
                                 }}
-                                className="text-secondary-text hover:text-primary-text rounded-md border-none bg-transparent text-sm normal-case"
                               >
                                 Cancel
                               </Button>
@@ -1061,11 +1052,12 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                                   )}
 
                                   {shouldTruncate && (
-                                    <button
+                                    <Button
+                                      variant="link"
                                       onClick={() =>
                                         toggleCommentExpand(comment.id)
                                       }
-                                      className="text-link hover:text-link-hover mt-2 flex items-center gap-1 text-sm font-medium transition-colors duration-200 hover:underline"
+                                      className="mt-2 h-auto p-0 font-medium"
                                     >
                                       {isExpanded ? (
                                         <>
@@ -1086,7 +1078,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                                           Read more
                                         </>
                                       )}
-                                    </button>
+                                    </Button>
                                   )}
                                 </div>
                               </>
