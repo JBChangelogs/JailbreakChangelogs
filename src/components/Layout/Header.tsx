@@ -294,15 +294,14 @@ export default function Header() {
         </>
       ) : (
         <div className="px-4 py-3">
-          <button
+          <Button
             onClick={() => {
               setShowLoginModal(true);
               handleDrawerToggle();
             }}
-            className="bg-button-info text-form-button-text hover:bg-button-info-hover cursor-pointer rounded-lg px-4 py-2 font-semibold transition-colors"
           >
             Login
-          </button>
+          </Button>
         </div>
       )}
 
@@ -365,13 +364,13 @@ export default function Header() {
       >
         All Calculators
       </Link>
-      <div className="px-4 py-2">
-        <Button asChild className="w-full shadow-lg">
-          <Link href="/values#hyper-pity-calc" onClick={handleDrawerToggle}>
-            Hyper Pity Calc
-          </Link>
-        </Button>
-      </div>
+      <Link
+        href="/values#hyper-pity-calc"
+        onClick={handleDrawerToggle}
+        className="hover:bg-button-info-hover/10 text-primary-text cursor-pointer px-8 py-2 transition-colors"
+      >
+        Hyper Pity Calc
+      </Link>
       <div className="px-4 py-2">
         <Typography className="text-secondary-text text-sm font-semibold tracking-wider uppercase">
           Values
@@ -597,11 +596,9 @@ export default function Header() {
                     }}
                   >
                     <PopoverTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="icon"
+                      <button
                         suppressHydrationWarning={true}
-                        className="relative h-8 w-8 hover:scale-105 active:scale-95"
+                        className="relative flex cursor-pointer items-center justify-center p-1 transition-all duration-200 hover:scale-105 active:scale-95"
                         aria-label="Notifications"
                       >
                         <Icon
@@ -612,7 +609,7 @@ export default function Header() {
                         {isAuthenticated && (
                           <UnreadNotificationBadge count={unreadCount} />
                         )}
-                      </Button>
+                      </button>
                     </PopoverTrigger>
 
                     <PopoverContent
