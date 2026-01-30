@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { Icon } from "../ui/IconWrapper";
+import { Button } from "../ui/button";
 import { cleanMarkdown } from "@/utils/changelogs";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
@@ -186,12 +187,9 @@ export default function ChangelogSummary({
               AI Summary Error
             </span>
           </div>
-          <button
-            onClick={generateSummary}
-            className="bg-button-info text-form-button-text hover:bg-button-info-hover cursor-pointer rounded px-3 py-1 text-sm transition-colors"
-          >
+          <Button size="sm" onClick={generateSummary}>
             Retry
-          </button>
+          </Button>
         </div>
         <p className="text-primary-text text-sm">{error}</p>
       </div>
@@ -271,13 +269,10 @@ export default function ChangelogSummary({
           <Icon icon="solar:magic-stick-3-bold" className="text-link h-5 w-5" />
           <span className="text-primary-text font-medium">AI Summary</span>
         </div>
-        <button
-          onClick={generateSummary}
-          className="bg-button-info text-form-button-text hover:bg-button-info-hover flex w-full cursor-pointer items-center justify-center gap-2 rounded px-4 py-2 transition-colors sm:w-auto"
-        >
+        <Button onClick={generateSummary} className="w-full sm:w-auto">
           <Icon icon="solar:magic-stick-3-bold" className="h-4 w-4" />
           Generate Summary
-        </button>
+        </Button>
       </div>
     </div>
   );

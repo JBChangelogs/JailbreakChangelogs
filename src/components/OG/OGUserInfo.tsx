@@ -184,7 +184,7 @@ export default function OGUserInfo({
         <div className="mt-4 flex flex-col items-center gap-4 sm:mt-0 sm:ml-auto sm:flex-col sm:items-end">
           {/* Original Items Found */}
           <div className="text-center sm:text-right">
-            <div className="text-secondary-text text-sm">original items</div>
+            <div className="text-secondary-text text-sm">Original Items</div>
             <div className="text-primary-text text-2xl font-bold">
               {(originalItemsCount || 0).toLocaleString()}
             </div>

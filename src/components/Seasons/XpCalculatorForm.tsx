@@ -1,4 +1,5 @@
 import ImageModal from "@/components/ui/ImageModal";
+import { Button } from "@/components/ui/button";
 import { Season } from "@/types/seasons";
 
 interface XpCalculatorFormProps {
@@ -202,18 +203,13 @@ export default function XpCalculatorForm({
       </div>
 
       <div className="flex justify-center">
-        <button
+        <Button
           onClick={onCalculate}
           disabled={!currentLevel || (!includeDailyXp && !includeContracts)}
           data-umami-event="Will I Make It Calculate"
-          className={`flex items-center justify-center gap-2 rounded-md border px-4 py-2 text-sm font-medium transition-colors ${
-            !currentLevel || (!includeDailyXp && !includeContracts)
-              ? "border-button-secondary bg-button-secondary text-secondary-text cursor-not-allowed"
-              : "border-button-info bg-button-info text-form-button-text hover:bg-button-info-hover cursor-pointer"
-          }`}
         >
           Will I Make It?
-        </button>
+        </Button>
       </div>
     </div>
   );

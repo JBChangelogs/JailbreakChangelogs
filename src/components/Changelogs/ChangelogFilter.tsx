@@ -2,6 +2,7 @@ import React from "react";
 import { toast } from "sonner";
 import Link from "next/link";
 import { Icon } from "@/components/ui/IconWrapper";
+import { Button } from "@/components/ui/button";
 import ChangelogSearchInput from "./ChangelogSearchInput";
 
 interface SearchResult {
@@ -74,7 +75,8 @@ const ChangelogFilter: React.FC<ChangelogFilterProps> = ({
       <div className="flex flex-col gap-4 sm:flex-row sm:flex-wrap">
         {/* Go to Latest Update Button */}
         {changelogList.length > 0 && (
-          <button
+          <Button
+            variant="default"
             onClick={() => {
               const latestChangelogId = Math.max(
                 ...changelogList.map((item) => item.id),
@@ -89,30 +91,23 @@ const ChangelogFilter: React.FC<ChangelogFilterProps> = ({
               onChangelogSelect(latestChangelogId.toString());
               toast.success("Navigated to latest update");
             }}
-            className={`bg-button-info text-form-button-text hover:bg-button-info-hover flex cursor-pointer items-center gap-2 rounded px-4 py-2 transition-colors ${
-              Math.max(...changelogList.map((item) => item.id)).toString() ===
-              selectedId
-                ? "cursor-not-allowed opacity-50"
-                : ""
-            }`}
-            aria-disabled={
+            disabled={
               Math.max(...changelogList.map((item) => item.id)).toString() ===
               selectedId
             }
           >
             <Icon icon="mdi:clock" className="h-4 w-4" />
             <span>Go to Latest Update</span>
-          </button>
+          </Button>
         )}
 
         {/* View Timeline Button */}
-        <Link
-          href="/changelogs/timeline"
-          className="bg-button-info text-form-button-text hover:bg-button-info-hover flex cursor-pointer items-center gap-2 rounded px-4 py-2 transition-colors"
-        >
-          <Icon icon="heroicons-solid:clock" className="h-4 w-4" />
-          <span>View Timeline</span>
-        </Link>
+        <Button variant="default" asChild>
+          <Link href="/changelogs/timeline">
+            <Icon icon="heroicons-solid:clock" className="h-4 w-4" />
+            <span>View Timeline</span>
+          </Link>
+        </Button>
       </div>
     </div>
   );
