@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { Dialog, DialogPanel } from "@headlessui/react";
 import { useEscapeLogin } from "@/utils/escapeLogin";
+import { Button } from "@/components/ui/button";
 
 export default function EscapeLoginModal() {
   const { showModal, setShowModal, handleTokenSubmit } = useEscapeLogin();
@@ -85,21 +86,24 @@ export default function EscapeLoginModal() {
             </div>
 
             <div className="modal-footer flex justify-end gap-2 px-6 py-4">
-              <button
+              <Button
                 type="button"
                 onClick={handleClose}
                 disabled={isLoading}
-                className="text-secondary-text hover:text-primary-text cursor-pointer rounded border-none bg-transparent px-4 py-2 text-sm disabled:opacity-50"
+                variant="ghost"
+                size="md"
               >
                 Cancel
-              </button>
-              <button
+              </Button>
+              <Button
                 type="submit"
                 disabled={!token.trim() || isLoading}
-                className="bg-button-info text-form-button-text hover:bg-button-info-hover min-w-[100px] cursor-pointer rounded border-none px-4 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-50"
+                variant="default"
+                size="md"
+                className="min-w-[100px]"
               >
                 {isLoading ? "Logging in..." : "Login"}
-              </button>
+              </Button>
             </div>
           </form>
         </DialogPanel>

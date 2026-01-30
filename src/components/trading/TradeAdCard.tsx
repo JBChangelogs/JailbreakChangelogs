@@ -10,6 +10,7 @@ import { useRealTimeRelativeDate } from "@/hooks/useRealTimeRelativeDate";
 import dynamic from "next/dynamic";
 import { formatCustomDate } from "@/utils/timestamp";
 import Image from "next/image";
+import { Button } from "../ui/button";
 
 const Tooltip = dynamic(() => import("@mui/material/Tooltip"), {
   ssr: false,
@@ -176,45 +177,38 @@ export const TradeAdCard: React.FC<TradeAdCardProps> = ({
         <div className="mt-4 pt-0">
           <div className="flex flex-row gap-2">
             {trade.status === "Pending" && trade.author !== currentUserId && (
-              <button
+              <Button
                 onClick={() => onMakeOffer(trade.id)}
                 disabled={offerStatus?.loading}
-                className={`flex flex-1 items-center justify-center gap-2 rounded-lg px-4 py-2 transition-colors ${
-                  offerStatus?.loading
-                    ? "text-secondary-text cursor-not-allowed"
-                    : offerStatus?.success
-                      ? "hover:bg-status-success/80 bg-status-success text-form-button-text"
-                      : "bg-button-info text-form-button-text hover:bg-button-info-hover"
-                }`}
+                variant={offerStatus?.success ? "success" : "default"}
+                className="flex-1"
               >
-                <Icon icon="heroicons:chat-bubble-left" className="h-5 w-5" />
+                <Icon icon="heroicons:chat-bubble-left" />
                 {offerStatus?.loading
                   ? "Making Offer..."
                   : offerStatus?.success
                     ? "Offer Sent!"
                     : "Make Offer"}
-              </button>
+              </Button>
             )}
-            <Link
-              href={`/trading/ad/${trade.id}`}
-              className="bg-button-info text-form-button-text hover:bg-button-info-hover flex flex-1 items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors"
-              role="button"
-              tabIndex={0}
-            >
-              <Icon icon="heroicons:magnifying-glass" className="h-5 w-5" />
-              View Details
-            </Link>
+            <Button asChild className="flex-1">
+              <Link href={`/trading/ad/${trade.id}`}>
+                <Icon icon="heroicons:magnifying-glass" />
+                View Details
+              </Link>
+            </Button>
           </div>
           {trade.message_id && (
-            <a
-              href={`https://discord.com/channels/${discordGuildId}/${discordChannelId}/${trade.message_id}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="bg-button-info text-form-button-text hover:bg-button-info-hover mt-2 flex w-full items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors"
-            >
-              <DiscordIcon className="h-5 w-5" />
-              View in Discord
-            </a>
+            <Button asChild className="mt-2 w-full">
+              <a
+                href={`https://discord.com/channels/${discordGuildId}/${discordChannelId}/${trade.message_id}`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <DiscordIcon />
+                View in Discord
+              </a>
+            </Button>
           )}
         </div>
 
@@ -227,33 +221,30 @@ export const TradeAdCard: React.FC<TradeAdCardProps> = ({
           </span>
           {trade.author === currentUserId && (
             <div className="flex items-center gap-2">
-              <button
+              <Button
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
                   onEdit?.();
                 }}
-                className="bg-button-info text-form-button-text hover:bg-button-info-hover flex cursor-pointer items-center gap-1 rounded-lg px-3 py-1 text-sm transition-colors"
+                size="sm"
               >
-                <Icon icon="heroicons-outline:pencil" className="h-4 w-4" />
+                <Icon icon="heroicons-outline:pencil" />
                 Edit
-              </button>
-              <button
+              </Button>
+              <Button
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
                   setShowDeleteConfirm(true);
                 }}
                 disabled={isDeleting}
-                className={`flex items-center gap-1 rounded-lg px-3 py-1 text-sm transition-colors ${
-                  isDeleting
-                    ? "bg-status-error/50 text-form-button-text cursor-not-allowed"
-                    : "hover:bg-status-error/80 bg-status-error text-form-button-text cursor-pointer"
-                }`}
+                variant="destructive"
+                size="sm"
               >
-                <Icon icon="heroicons-outline:trash" className="h-4 w-4" />
+                <Icon icon="heroicons-outline:trash" />
                 {isDeleting ? "Deleting..." : "Delete"}
-              </button>
+              </Button>
             </div>
           )}
         </div>

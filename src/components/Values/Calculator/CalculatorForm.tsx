@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { TradeItem } from "@/types/trading";
 import { AvailableItemsGrid } from "../../trading/AvailableItemsGrid";
 import { CustomConfirmationModal } from "../../Modals/CustomConfirmationModal";
@@ -44,7 +44,15 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
     useState<number>(2_500_000);
   const [requestingSimilarItemsRange, setRequestingSimilarItemsRange] =
     useState<number>(2_500_000);
-  const MAX_SIMILAR_ITEMS_RANGE = 10_000_000;
+  const DYNAMIC_MAX_VALUE = useMemo(() => {
+    return initialItems.reduce((currentMax, item) => {
+      if (item.tradable === 1) {
+        const val = parseValueString(item.cash_value);
+        return val > currentMax ? val : currentMax;
+      }
+      return currentMax;
+    }, 10_000_000);
+  }, [initialItems]);
 
   // Drag and drop state
   const [activeItem, setActiveItem] = useState<TradeItem | null>(null);
@@ -284,10 +292,8 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
     return !isDuped ? item.cash_value : item.duped_value;
   };
 
-  // Function to update value type for an item
   const updateItemValueType = (
     itemId: number,
-    subName: string | undefined,
     valueType: "cash" | "duped",
     side: "offering" | "requesting",
     instanceId?: string,
@@ -301,11 +307,8 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
           }
           return item;
         }
-        // Fallback: update all matching by ID/subName (old behavior or when group toggled)
-        if (
-          item.id === itemId &&
-          (item.sub_name === subName || (!item.sub_name && !subName))
-        ) {
+        // Fallback: update all matching by ID (old behavior or when group toggled)
+        if (item.id === itemId) {
           return { ...item, isDuped: valueType === "duped" };
         }
         return item;
@@ -346,10 +349,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
     if (side) {
       const success = handleAddItem(item, side);
       if (success) {
-        const itemName = item.sub_name
-          ? `${item.name} (${item.sub_name})`
-          : item.name;
-        toast.success(`Added ${itemName} to ${side} items`);
+        toast.success(`Added ${item.name} to ${side} items`);
       }
     }
   };
@@ -396,14 +396,8 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
               onRemoveItem={(instanceId) =>
                 handleRemoveItem(instanceId, "offering")
               }
-              onValueTypeChange={(id, subName, valueType, instanceId) =>
-                updateItemValueType(
-                  id,
-                  subName,
-                  valueType,
-                  "offering",
-                  instanceId,
-                )
+              onValueTypeChange={(id, valueType, instanceId) =>
+                updateItemValueType(id, valueType, "offering", instanceId)
               }
               getSelectedValueString={getSelectedValueString}
               getSelectedValueType={getSelectedValueType}
@@ -416,14 +410,8 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
               onRemoveItem={(instanceId) =>
                 handleRemoveItem(instanceId, "requesting")
               }
-              onValueTypeChange={(id, subName, valueType, instanceId) =>
-                updateItemValueType(
-                  id,
-                  subName,
-                  valueType,
-                  "requesting",
-                  instanceId,
-                )
+              onValueTypeChange={(id, valueType, instanceId) =>
+                updateItemValueType(id, valueType, "requesting", instanceId)
               }
               getSelectedValueString={getSelectedValueString}
               getSelectedValueType={getSelectedValueType}
@@ -528,7 +516,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
                 requestingSimilarItemsRange={requestingSimilarItemsRange}
                 setOfferingSimilarItemsRange={setOfferingSimilarItemsRange}
                 setRequestingSimilarItemsRange={setRequestingSimilarItemsRange}
-                MAX_SIMILAR_ITEMS_RANGE={MAX_SIMILAR_ITEMS_RANGE}
+                MAX_SIMILAR_ITEMS_RANGE={DYNAMIC_MAX_VALUE}
                 initialItems={initialItems}
                 getSelectedValue={getSelectedValue}
                 onBrowseItems={() => handleTabChange("items")}

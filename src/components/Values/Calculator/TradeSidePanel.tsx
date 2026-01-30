@@ -1,10 +1,10 @@
 import React from "react";
 import { TradeItem } from "@/types/trading";
-import { Button } from "@mui/material";
 import dynamic from "next/dynamic";
 import { DroppableZone } from "@/components/dnd/DroppableZone";
 import { Icon } from "../../ui/IconWrapper";
 import { CalculatorItemGrid } from "./CalculatorItemGrid";
+import { Button } from "../../ui/button";
 
 const Tooltip = dynamic(() => import("@mui/material/Tooltip"), { ssr: false });
 
@@ -14,7 +14,6 @@ interface TradeSidePanelProps {
   onRemoveItem: (instanceId: string) => void;
   onValueTypeChange: (
     id: number,
-    subName: string | undefined,
     valueType: "cash" | "duped",
     instanceId?: string,
   ) => void;
@@ -74,13 +73,8 @@ export const TradeSidePanel: React.FC<TradeSidePanelProps> = ({
             },
           }}
         >
-          <Button
-            variant="outlined"
-            onClick={onMirror}
-            size="small"
-            className={`bg-${sideColor}/15 hover:bg-${sideColor}/25 border-${sideColor} text-primary-text hover:border-${sideColor}`}
-          >
-            <Icon icon="heroicons:arrows-right-left" className="mr-1 h-4 w-4" />
+          <Button variant="default" onClick={onMirror} size="sm">
+            <Icon icon="heroicons:arrows-right-left" />
             Mirror
           </Button>
         </Tooltip>

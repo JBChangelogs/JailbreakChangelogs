@@ -41,6 +41,7 @@ const AnimatedThemeToggler = dynamic(
   },
 );
 import { Icon } from "./IconWrapper";
+import { Button } from "./button";
 import {
   Popover,
   PopoverTrigger,
@@ -530,7 +531,9 @@ export const NavbarModern = ({
               }}
             >
               <PopoverTrigger asChild>
-                <button
+                <Button
+                  variant="ghost"
+                  size="icon"
                   suppressHydrationWarning={true}
                   className="border-border-primary bg-secondary-bg text-secondary-text hover:bg-quaternary-bg hover:text-primary-text relative flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg border transition-colors duration-200"
                 >
@@ -542,7 +545,7 @@ export const NavbarModern = ({
                   {isAuthenticated && (
                     <UnreadNotificationBadge count={unreadCount} />
                   )}
-                </button>
+                </Button>
               </PopoverTrigger>
             </Tooltip>
 
@@ -780,23 +783,37 @@ export const NavbarModern = ({
                             {urlInfo.isWhitelisted ? (
                               urlInfo.isJailbreakChangelogs &&
                               urlInfo.relativePath ? (
-                                <Link
-                                  href={urlInfo.relativePath}
-                                  prefetch={false}
-                                  className="border-button-info bg-button-info text-form-button-text hover:bg-button-info-hover mt-2 inline-flex cursor-pointer items-center gap-1 rounded-lg border px-2 py-1 text-sm transition-colors sm:px-3"
-                                  onClick={() => setNotificationMenuOpen(false)}
+                                <Button
+                                  variant="default"
+                                  size="sm"
+                                  asChild
+                                  className="mt-2"
                                 >
-                                  View
-                                </Link>
+                                  <Link
+                                    href={urlInfo.relativePath}
+                                    prefetch={false}
+                                    onClick={() =>
+                                      setNotificationMenuOpen(false)
+                                    }
+                                  >
+                                    View
+                                  </Link>
+                                </Button>
                               ) : urlInfo.href ? (
-                                <a
-                                  href={urlInfo.href}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="border-button-info bg-button-info text-form-button-text hover:bg-button-info-hover mt-2 inline-flex cursor-pointer items-center gap-1 rounded-lg border px-2 py-1 text-sm transition-colors sm:px-3"
+                                <Button
+                                  variant="default"
+                                  size="sm"
+                                  asChild
+                                  className="mt-2"
                                 >
-                                  View
-                                </a>
+                                  <a
+                                    href={urlInfo.href}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                  >
+                                    View
+                                  </a>
+                                </Button>
                               ) : null
                             ) : (
                               <p className="text-secondary-text mt-1 text-xs break-all">

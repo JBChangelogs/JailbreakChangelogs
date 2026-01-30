@@ -8,6 +8,8 @@ import { getEffectiveCashValue } from "@/utils/values";
 import NitroGridAd from "@/components/Ads/NitroGridAd";
 import NitroValuesTopAd from "@/components/Ads/NitroValuesTopAd";
 import React from "react";
+import { Button } from "../ui/button";
+import { Icon } from "../ui/IconWrapper";
 
 interface ValuesItemsGridProps {
   items: Item[];
@@ -232,7 +234,7 @@ export default function ValuesItemsGrid({
 
       <div className="mb-8 grid grid-cols-1 gap-4 min-[375px]:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {displayedItems.length === 0 ? (
-          <div className="border-border-primary bg-secondary-bg hover:border-border-focus col-span-full mb-4 rounded-lg border p-8 text-center">
+          <div className="border-border-primary bg-secondary-bg hover:border-border-focus col-span-full mb-4 rounded-lg border p-8 text-center transition-colors">
             <p className="text-secondary-text text-lg">
               {rangeFilteredItems.length === 0 && items.length > 0
                 ? `No items found in the selected value range (${appliedMinValue.toLocaleString()} - ${
@@ -242,20 +244,16 @@ export default function ValuesItemsGrid({
                   })`
                 : getNoItemsMessage()}
             </p>
-            {rangeFilteredItems.length === 0 && items.length > 0 && (
-              <button
-                onClick={onResetValueRange}
-                className="border-border-primary bg-button-info text-form-button-text hover:border-border-focus hover:bg-button-info-hover mt-4 mr-3 cursor-pointer rounded-lg border px-6 py-2 focus:outline-none"
-              >
-                Reset Value Range
-              </button>
-            )}
-            <button
-              onClick={onClearAllFilters}
-              className="border-border-primary bg-button-info text-form-button-text hover:border-border-focus hover:bg-button-info-hover mt-4 cursor-pointer rounded-lg border px-6 py-2 focus:outline-none"
-            >
-              Clear All Filters
-            </button>
+            <div className="mt-4 flex flex-wrap justify-center gap-3">
+              {rangeFilteredItems.length === 0 && items.length > 0 && (
+                <Button onClick={onResetValueRange} variant="default">
+                  Reset Value Range
+                </Button>
+              )}
+              <Button onClick={onClearAllFilters} variant="default">
+                Clear All Filters
+              </Button>
+            </div>
           </div>
         ) : (
           displayedItems.map((item, index) => (

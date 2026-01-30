@@ -67,9 +67,7 @@ export const ValueSidePanel: React.FC<ValueSidePanelProps> = ({
                   {/* Item Name */}
                   <div className="mb-3 flex items-center gap-2">
                     <h5 className="text-primary-text text-base font-semibold">
-                      {item.sub_name
-                        ? `${item.name} (${item.sub_name})`
-                        : item.name}
+                      {item.name}
                     </h5>
                   </div>
 

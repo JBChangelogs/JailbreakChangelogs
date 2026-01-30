@@ -3,6 +3,7 @@ import { TradeItem } from "@/types/trading";
 import { Slider } from "@/components/ui/slider";
 import { EmptyState } from "./EmptyState";
 import TotalSimilarItems from "./TotalSimilarItems";
+import { Button } from "@/components/ui/button";
 
 interface SimilarItemsTabProps {
   offeringItems: TradeItem[];
@@ -148,27 +149,31 @@ export const SimilarItemsTab: React.FC<SimilarItemsTabProps> = ({
 
       {/* Basis Selector */}
       <div className="mb-4 flex justify-center sm:justify-start">
-        <div className="border-border-primary bg-secondary-bg hover:border-border-focus inline-flex gap-1 rounded-lg border p-2">
-          <button
+        <div className="border-border-primary bg-secondary-bg hover:border-border-focus inline-flex gap-1 rounded-lg border p-1">
+          <Button
             onClick={() => setTotalBasis("offering")}
-            className={`cursor-pointer rounded-md px-3 py-1 text-sm font-medium ${
+            variant={totalBasis === "offering" ? "success" : "ghost"}
+            size="sm"
+            className={
               totalBasis === "offering"
-                ? "bg-status-success text-form-button-text"
-                : "hover:bg-secondary-bg/80 hover:text-primary-foreground text-secondary-text"
-            }`}
+                ? ""
+                : "text-secondary-text hover:text-primary-text"
+            }
           >
             Offering Total
-          </button>
-          <button
+          </Button>
+          <Button
             onClick={() => setTotalBasis("requesting")}
-            className={`cursor-pointer rounded-md px-3 py-1 text-sm font-medium ${
+            variant={totalBasis === "requesting" ? "destructive" : "ghost"}
+            size="sm"
+            className={
               totalBasis === "requesting"
-                ? "bg-status-error text-form-button-text"
-                : "hover:bg-secondary-bg/80 hover:text-primary-foreground text-secondary-text"
-            }`}
+                ? ""
+                : "text-secondary-text hover:text-primary-text"
+            }
           >
             Requesting Total
-          </button>
+          </Button>
         </div>
       </div>
 

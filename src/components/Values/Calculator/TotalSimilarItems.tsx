@@ -188,13 +188,11 @@ export const TotalSimilarItems: React.FC<TotalSimilarItemsProps> = ({
               baselineDemandIndex >= 0 && itemDemandIndex >= 0
                 ? itemDemandIndex - baselineDemandIndex
                 : null;
-            const displayName = item.sub_name
-              ? `${item.name} (${item.sub_name})`
-              : item.name;
+            const displayName = item.name;
             return (
               <Link
-                key={`${item.id}-${item.sub_name || "base"}`}
-                href={`/item/${item.type.toLowerCase()}/${item.name}${item.sub_name ? `?variant=${item.sub_name}` : ""}`}
+                key={`${item.id}`}
+                href={`/item/${item.type.toLowerCase()}/${item.name}`}
                 prefetch={false}
                 className="group"
               >

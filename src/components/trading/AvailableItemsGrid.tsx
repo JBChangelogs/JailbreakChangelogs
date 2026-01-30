@@ -19,6 +19,7 @@ import { useDebounce } from "@/hooks/useDebounce";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { DraggableItemCard } from "@/components/dnd/DraggableItemCard";
 import { useMediaQuery } from "@mui/material";
+import { Button } from "../ui/button";
 
 interface AvailableItemsGridProps {
   items: TradeItem[];
@@ -262,7 +263,6 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
   const handleAddItem = (item: TradeItem, side: "offering" | "requesting") => {
     const itemToAdd = {
       ...item,
-      sub_name: undefined,
       base_name: item.name,
       side,
     };
@@ -278,7 +278,6 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
   const getItemForDrag = (item: TradeItem): TradeItem => {
     return {
       ...item,
-      sub_name: undefined,
       base_name: item.name,
     };
   };
@@ -429,21 +428,22 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
           >
             {filteredItems.length === 0 ? (
               <div className="py-8 text-center">
-                <p className="text-tertiary-text">
+                <p className="text-secondary-text">
                   {searchQuery
-                    ? `No items found matching "${displaySearchQuery}"${filterSort !== "name-all-items" ? ` in ${getFilterDisplayName(filterSort)}` : ""}`
-                    : `No items found${filterSort !== "name-all-items" ? ` in ${getFilterDisplayName(filterSort)}` : ""}`}
+                    ? `No items found matching "${displaySearchQuery}"`
+                    : "No items found"}
                 </p>
-                <button
+                <Button
                   onClick={() => {
                     setSearchQuery("");
                     setFilterSort("name-all-items");
                     setValueSort("cash-desc");
                   }}
-                  className="border-border-primary bg-button-info text-secondary-text hover:border-border-focus hover:bg-button-info-hover mt-4 cursor-pointer rounded-lg border px-6 py-2 focus:outline-none"
+                  variant="default"
+                  className="mt-4"
                 >
                   Clear All Filters
-                </button>
+                </Button>
               </div>
             ) : (
               <div
@@ -654,26 +654,30 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
                                 </div>
                                 {item.tradable === 1 && (
                                   <div className="mt-auto flex gap-2 pt-2">
-                                    <button
+                                    <Button
                                       onClick={(e) => {
                                         e.stopPropagation();
                                         e.preventDefault();
                                         handleAddItem(item, "offering");
                                       }}
-                                      className="flex-1 rounded-md bg-green-600 px-2 py-1 text-xs text-white transition-colors hover:cursor-pointer hover:bg-green-700"
+                                      variant="success"
+                                      size="sm"
+                                      className="flex-1"
                                     >
                                       Offer
-                                    </button>
-                                    <button
+                                    </Button>
+                                    <Button
                                       onClick={(e) => {
                                         e.stopPropagation();
                                         e.preventDefault();
                                         handleAddItem(item, "requesting");
                                       }}
-                                      className="bg-status-error/80 text-form-button-text flex-1 rounded-md px-2 py-1 text-xs transition-colors hover:cursor-pointer hover:bg-red-600"
+                                      variant="destructive"
+                                      size="sm"
+                                      className="flex-1"
                                     >
                                       Request
-                                    </button>
+                                    </Button>
                                   </div>
                                 )}
                               </div>

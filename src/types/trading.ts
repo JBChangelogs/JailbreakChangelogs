@@ -16,31 +16,7 @@ export interface TradeItem {
     DemandMultiple?: number;
     LastUpdated?: number;
   };
-  children?: Array<{
-    id: number;
-    parent: number;
-    sub_name: string;
-    created_at: number;
-    data: {
-      name: string;
-      type: string;
-      creator: string;
-      is_seasonal: number | null;
-      cash_value: string;
-      duped_value: string;
-      price: string;
-      is_limited: number | null;
-      duped_owners: string;
-      notes: string;
-      demand: string;
-      trend?: string | null;
-      description: string;
-      health: number;
-      tradable: boolean;
-      last_updated: number;
-    };
-  }>;
-  is_sub: boolean;
+  is_sub?: boolean;
   sub_name?: string;
   data?: {
     name: string;

@@ -21,6 +21,7 @@ import { SettingToggle } from "@/components/Settings/SettingToggle";
 import { BannerSettings } from "@/components/Settings/BannerSettings";
 import { AvatarSettings } from "@/components/Settings/AvatarSettings";
 import { Icon } from "@/components/ui/IconWrapper";
+import { Button as CustomButton } from "@/components/ui/button";
 import { DeleteAccount } from "@/components/Settings/DeleteAccount";
 import { RobloxConnection } from "@/components/Settings/RobloxConnection";
 import { ExportInventoryData } from "@/components/Settings/ExportInventoryData";
@@ -619,15 +620,9 @@ export default function SettingsPage() {
                     <>
                       <Divider sx={{ my: 3 }} />
                       <Box sx={{ display: "flex", gap: 1.5, flexWrap: "wrap" }}>
-                        <Button
-                          variant="contained"
-                          size="medium"
-                          startIcon={
-                            <Icon
-                              icon="akar-icons:link-out"
-                              className="h-5 w-5"
-                            />
-                          }
+                        <CustomButton
+                          variant="default"
+                          size="sm"
                           onClick={() =>
                             window.open(
                               "https://imgbb.com/",
@@ -635,34 +630,16 @@ export default function SettingsPage() {
                               "noopener,noreferrer",
                             )
                           }
-                          sx={{
-                            backgroundColor: "var(--color-button-info)",
-                            color: "var(--color-form-button-text)",
-                            fontWeight: 600,
-                            fontSize: "0.875rem",
-                            borderRadius: 2,
-                            px: 2,
-                            py: 1,
-                            boxShadow: "var(--color-card-shadow)",
-                            "&:hover": {
-                              backgroundColor: "var(--color-button-info-hover)",
-                              boxShadow: "var(--color-card-shadow)",
-                              transform: "translateY(-1px)",
-                            },
-                            transition: "all 0.2s ease-in-out",
-                          }}
                         >
+                          <Icon
+                            icon="akar-icons:link-out"
+                            className="h-4 w-4"
+                          />
                           ImgBB
-                        </Button>
-                        <Button
-                          variant="contained"
-                          size="medium"
-                          startIcon={
-                            <Icon
-                              icon="akar-icons:link-out"
-                              className="h-5 w-5"
-                            />
-                          }
+                        </CustomButton>
+                        <CustomButton
+                          variant="default"
+                          size="sm"
                           onClick={() =>
                             window.open(
                               "https://postimages.org/",
@@ -670,34 +647,16 @@ export default function SettingsPage() {
                               "noopener,noreferrer",
                             )
                           }
-                          sx={{
-                            backgroundColor: "var(--color-button-info)",
-                            color: "var(--color-form-button-text)",
-                            fontWeight: 600,
-                            fontSize: "0.875rem",
-                            borderRadius: 2,
-                            px: 2,
-                            py: 1,
-                            boxShadow: "var(--color-card-shadow)",
-                            "&:hover": {
-                              backgroundColor: "var(--color-button-info-hover)",
-                              boxShadow: "var(--color-card-shadow)",
-                              transform: "translateY(-1px)",
-                            },
-                            transition: "all 0.2s ease-in-out",
-                          }}
                         >
+                          <Icon
+                            icon="akar-icons:link-out"
+                            className="h-4 w-4"
+                          />
                           PostImages
-                        </Button>
-                        <Button
-                          variant="contained"
-                          size="medium"
-                          startIcon={
-                            <Icon
-                              icon="akar-icons:link-out"
-                              className="h-5 w-5"
-                            />
-                          }
+                        </CustomButton>
+                        <CustomButton
+                          variant="default"
+                          size="sm"
                           onClick={() =>
                             window.open(
                               "https://tenor.com/",
@@ -705,34 +664,16 @@ export default function SettingsPage() {
                               "noopener,noreferrer",
                             )
                           }
-                          sx={{
-                            backgroundColor: "var(--color-button-info)",
-                            color: "var(--color-form-button-text)",
-                            fontWeight: 600,
-                            fontSize: "0.875rem",
-                            borderRadius: 2,
-                            px: 2,
-                            py: 1,
-                            boxShadow: "var(--color-card-shadow)",
-                            "&:hover": {
-                              backgroundColor: "var(--color-button-info-hover)",
-                              boxShadow: "var(--color-card-shadow)",
-                              transform: "translateY(-1px)",
-                            },
-                            transition: "all 0.2s ease-in-out",
-                          }}
                         >
+                          <Icon
+                            icon="akar-icons:link-out"
+                            className="h-4 w-4"
+                          />
                           Tenor
-                        </Button>
-                        <Button
-                          variant="contained"
-                          size="medium"
-                          startIcon={
-                            <Icon
-                              icon="akar-icons:link-out"
-                              className="h-5 w-5"
-                            />
-                          }
+                        </CustomButton>
+                        <CustomButton
+                          variant="default"
+                          size="sm"
                           onClick={() =>
                             window.open(
                               "https://imgur.com/",
@@ -740,34 +681,16 @@ export default function SettingsPage() {
                               "noopener,noreferrer",
                             )
                           }
-                          sx={{
-                            backgroundColor: "var(--color-button-info)",
-                            color: "var(--color-form-button-text)",
-                            fontWeight: 600,
-                            fontSize: "0.875rem",
-                            borderRadius: 2,
-                            px: 2,
-                            py: 1,
-                            boxShadow: "var(--color-card-shadow)",
-                            "&:hover": {
-                              backgroundColor: "var(--color-button-info-hover)",
-                              boxShadow: "var(--color-card-shadow)",
-                              transform: "translateY(-1px)",
-                            },
-                            transition: "all 0.2s ease-in-out",
-                          }}
                         >
+                          <Icon
+                            icon="akar-icons:link-out"
+                            className="h-4 w-4"
+                          />
                           Imgur
-                        </Button>
-                        <Button
-                          variant="contained"
-                          size="medium"
-                          startIcon={
-                            <Icon
-                              icon="akar-icons:link-out"
-                              className="h-5 w-5"
-                            />
-                          }
+                        </CustomButton>
+                        <CustomButton
+                          variant="default"
+                          size="sm"
                           onClick={() =>
                             window.open(
                               "https://vgy.me/",
@@ -775,25 +698,13 @@ export default function SettingsPage() {
                               "noopener,noreferrer",
                             )
                           }
-                          sx={{
-                            backgroundColor: "var(--color-button-info)",
-                            color: "var(--color-form-button-text)",
-                            fontWeight: 600,
-                            fontSize: "0.875rem",
-                            borderRadius: 2,
-                            px: 2,
-                            py: 1,
-                            boxShadow: "var(--color-card-shadow)",
-                            "&:hover": {
-                              backgroundColor: "var(--color-button-info-hover)",
-                              boxShadow: "var(--color-card-shadow)",
-                              transform: "translateY(-1px)",
-                            },
-                            transition: "all 0.2s ease-in-out",
-                          }}
                         >
+                          <Icon
+                            icon="akar-icons:link-out"
+                            className="h-4 w-4"
+                          />
                           vgy.me
-                        </Button>
+                        </CustomButton>
                       </Box>
                     </>
                   )}
@@ -848,37 +759,39 @@ export default function SettingsPage() {
             >
               <Icon icon="heroicons:bell" className="h-6 w-6" />
               Notification Preferences
-              <Tooltip
-                title="Copy URL"
-                arrow
-                placement="top"
-                slotProps={{
-                  tooltip: {
-                    sx: {
-                      backgroundColor: "var(--color-secondary-bg)",
-                      color: "var(--color-primary-text)",
-                      "& .MuiTooltip-arrow": {
-                        color: "var(--color-secondary-bg)",
+              {userData?.flags?.some((f) => f.flag === "is_owner") && (
+                <Tooltip
+                  title="Copy URL"
+                  arrow
+                  placement="top"
+                  slotProps={{
+                    tooltip: {
+                      sx: {
+                        backgroundColor: "var(--color-secondary-bg)",
+                        color: "var(--color-primary-text)",
+                        "& .MuiTooltip-arrow": {
+                          color: "var(--color-secondary-bg)",
+                        },
                       },
                     },
-                  },
-                }}
-              >
-                <button
-                  onClick={() => {
-                    const url = new URL(window.location.href);
-                    url.searchParams.set("highlight", "notifications");
-                    navigator.clipboard.writeText(url.toString());
-                    toast.success(
-                      'Link for "Notification Preferences" copied!',
-                    );
                   }}
-                  className="text-secondary-text hover:text-link cursor-pointer transition-colors"
-                  aria-label="Copy section link"
                 >
-                  <Icon icon="heroicons:link" className="h-4 w-4" />
-                </button>
-              </Tooltip>
+                  <button
+                    onClick={() => {
+                      const url = new URL(window.location.href);
+                      url.searchParams.set("highlight", "notifications");
+                      navigator.clipboard.writeText(url.toString());
+                      toast.success(
+                        'Link for "Notification Preferences" copied!',
+                      );
+                    }}
+                    className="text-secondary-text hover:text-link cursor-pointer transition-colors"
+                    aria-label="Copy section link"
+                  >
+                    <Icon icon="heroicons:link" className="h-4 w-4" />
+                  </button>
+                </Tooltip>
+              )}
             </Typography>
             <Divider sx={{ mb: 2 }} />
 
@@ -956,6 +869,7 @@ export default function SettingsPage() {
                           handleNotificationPrefToggle(pref.title, nextEnabled)
                         }
                         description="Toggle whether you receive this notification"
+                        userData={userData}
                       />
                     </Box>
                   );

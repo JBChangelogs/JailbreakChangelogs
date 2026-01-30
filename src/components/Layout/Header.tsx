@@ -597,9 +597,11 @@ export default function Header() {
                     }}
                   >
                     <PopoverTrigger asChild>
-                      <button
+                      <Button
+                        variant="ghost"
+                        size="icon"
                         suppressHydrationWarning={true}
-                        className="relative flex cursor-pointer items-center justify-center p-1 transition-all duration-200 hover:scale-105 active:scale-95"
+                        className="relative h-8 w-8 hover:scale-105 active:scale-95"
                         aria-label="Notifications"
                       >
                         <Icon
@@ -610,7 +612,7 @@ export default function Header() {
                         {isAuthenticated && (
                           <UnreadNotificationBadge count={unreadCount} />
                         )}
-                      </button>
+                      </Button>
                     </PopoverTrigger>
 
                     <PopoverContent
@@ -862,25 +864,37 @@ export default function Header() {
                                       {urlInfo.isWhitelisted ? (
                                         urlInfo.isJailbreakChangelogs &&
                                         urlInfo.relativePath ? (
-                                          <Link
-                                            href={urlInfo.relativePath}
-                                            prefetch={false}
-                                            className="border-button-info bg-button-info text-form-button-text hover:bg-button-info-hover mt-2 inline-flex cursor-pointer items-center gap-1 rounded-lg border px-2 py-1 text-sm transition-colors sm:px-3"
-                                            onClick={() =>
-                                              setNotificationMenuOpen(false)
-                                            }
+                                          <Button
+                                            variant="default"
+                                            size="sm"
+                                            asChild
+                                            className="mt-2"
                                           >
-                                            View
-                                          </Link>
+                                            <Link
+                                              href={urlInfo.relativePath}
+                                              prefetch={false}
+                                              onClick={() =>
+                                                setNotificationMenuOpen(false)
+                                              }
+                                            >
+                                              View
+                                            </Link>
+                                          </Button>
                                         ) : urlInfo.href ? (
-                                          <a
-                                            href={urlInfo.href}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="border-button-info bg-button-info text-form-button-text hover:bg-button-info-hover mt-2 inline-flex cursor-pointer items-center gap-1 rounded-lg border px-2 py-1 text-sm transition-colors sm:px-3"
+                                          <Button
+                                            variant="default"
+                                            size="sm"
+                                            asChild
+                                            className="mt-2"
                                           >
-                                            View
-                                          </a>
+                                            <a
+                                              href={urlInfo.href}
+                                              target="_blank"
+                                              rel="noopener noreferrer"
+                                            >
+                                              View
+                                            </a>
+                                          </Button>
                                         ) : null
                                       ) : (
                                         <p className="text-secondary-text mt-1 text-xs break-all">

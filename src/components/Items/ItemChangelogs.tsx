@@ -2,8 +2,8 @@
 
 import { useState, useRef } from "react";
 import { convertUrlsToLinks } from "@/utils/urlConverter";
-import { Button } from "@mui/material";
 import { useVirtualizer } from "@tanstack/react-virtual";
+import { Button } from "@/components/ui/button";
 import { Dialog, DialogPanel } from "@headlessui/react";
 import { Icon } from "@/components/ui/IconWrapper";
 import Link from "next/link";
@@ -364,12 +364,7 @@ export default function ItemChangelogs({
         </p>
         <div className="mt-6">
           <Link href="/changelogs">
-            <Button
-              variant="contained"
-              className="border-border-primary bg-button-info text-form-button-text hover:border-border-focus hover:bg-button-info-hover rounded-lg border px-6 py-3 text-sm font-semibold normal-case"
-            >
-              View All Changelogs
-            </Button>
+            <Button>View All Changelogs</Button>
           </Link>
         </div>
       </div>
@@ -565,25 +560,18 @@ export default function ItemChangelogs({
               </span>
             )}
           </div>
-          <button
+          <Button
             onClick={toggleSortOrder}
-            className="border-border-primary bg-button-info text-form-button-text hover:border-border-focus hover:bg-button-info-hover flex w-full items-center justify-center gap-1 rounded-lg border px-3 py-1.5 text-sm transition-colors sm:w-auto"
+            size="sm"
+            className="w-full sm:w-auto"
           >
             {sortOrder === "newest" ? (
-              <Icon
-                icon="heroicons-outline:arrow-down"
-                className="h-4 w-4"
-                inline={true}
-              />
+              <Icon icon="heroicons-outline:arrow-down" inline={true} />
             ) : (
-              <Icon
-                icon="heroicons-outline:arrow-up"
-                className="h-4 w-4"
-                inline={true}
-              />
+              <Icon icon="heroicons-outline:arrow-up" inline={true} />
             )}
             {sortOrder === "newest" ? "Newest First" : "Oldest First"}
-          </button>
+          </Button>
         </div>
       </div>
 

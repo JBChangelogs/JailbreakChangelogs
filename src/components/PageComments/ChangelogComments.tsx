@@ -598,7 +598,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
 
   return (
     <div className="space-y-2 sm:space-y-3">
-      <div className="border-border-primary bg-secondary-bg rounded-lg border p-2 sm:p-3">
+      <div className="border-border-primary bg-tertiary-bg rounded-lg border p-2 sm:p-3">
         <div className="flex flex-col gap-4">
           <div>
             <h2
@@ -657,17 +657,9 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                 type="button"
               >
                 {sortOrder === "newest" ? (
-                  <Icon
-                    icon="heroicons-outline:arrow-down"
-                    className="h-4 w-4"
-                    inline={true}
-                  />
+                  <Icon icon="heroicons-outline:arrow-down" inline={true} />
                 ) : (
-                  <Icon
-                    icon="heroicons-outline:arrow-up"
-                    className="h-4 w-4"
-                    inline={true}
-                  />
+                  <Icon icon="heroicons-outline:arrow-up" inline={true} />
                 )}
                 {sortOrder === "newest" ? "Newest First" : "Oldest First"}
               </Button>
@@ -702,7 +694,6 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                     <>
                       <Icon
                         icon="streamline-plump:mail-send-email-message-solid"
-                        className="h-4 w-4"
                         inline={true}
                       />
                       Post Comment
@@ -710,7 +701,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                   )
                 ) : (
                   <>
-                    <Icon icon="uil:signin" className="h-4 w-4" inline={true} />
+                    <Icon icon="uil:signin" inline={true} />
                     Login to Comment
                   </>
                 )}

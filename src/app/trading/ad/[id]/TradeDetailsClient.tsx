@@ -19,6 +19,7 @@ import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { useAuthContext } from "@/contexts/AuthContext";
 import Image from "next/image";
 import dynamic from "next/dynamic";
+import { Button } from "@/components/ui/button";
 // Removed MUI Tabs in favor of calculator-style tabs
 
 const Tooltip = dynamic(() => import("@mui/material/Tooltip"), {
@@ -217,44 +218,32 @@ export default function TradeDetailsClient({
                         {trade &&
                           trade.status === "Pending" &&
                           trade.author !== currentUserId && (
-                            <button
+                            <Button
                               onClick={() => setShowOfferConfirm(true)}
                               disabled={offerStatus.loading}
-                              className={`flex items-center gap-1 rounded-lg px-3 py-1 text-sm transition-colors ${
-                                offerStatus.loading
-                                  ? "text-secondary-text cursor-not-allowed"
-                                  : offerStatus.success
-                                    ? "hover:bg-status-success/80 bg-status-success text-form-button-text"
-                                    : "bg-button-info text-form-button-text hover:bg-button-info-hover"
-                              }`}
+                              variant={
+                                offerStatus.success ? "success" : "default"
+                              }
+                              size="sm"
                             >
-                              <Icon
-                                icon="heroicons:chat-bubble-left"
-                                className="h-4 w-4"
-                              />
+                              <Icon icon="heroicons:chat-bubble-left" />
                               {offerStatus.loading
                                 ? "Making Offer..."
                                 : offerStatus.success
                                   ? "Offer Sent!"
                                   : "Make Offer"}
-                            </button>
+                            </Button>
                           )}
                         {trade.author === currentUserId && (
-                          <button
+                          <Button
                             onClick={() => setShowDeleteConfirm(true)}
                             disabled={isDeleting}
-                            className={`flex items-center gap-1 rounded-lg px-3 py-1 text-sm transition-colors ${
-                              isDeleting
-                                ? "bg-status-error/50 text-form-button-text cursor-not-allowed"
-                                : "hover:bg-status-error/80 bg-status-error text-form-button-text cursor-pointer"
-                            }`}
+                            variant="destructive"
+                            size="sm"
                           >
-                            <Icon
-                              icon="heroicons-outline:trash"
-                              className="h-4 w-4"
-                            />
+                            <Icon icon="heroicons-outline:trash" />
                             {isDeleting ? "Deleting..." : "Delete"}
-                          </button>
+                          </Button>
                         )}
                         {/* View in Discord Button */}
                         {trade.message_id && (

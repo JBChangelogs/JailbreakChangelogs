@@ -239,11 +239,8 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
     if (side) {
       const success = handleAddItem(item, side);
       if (success) {
-        const itemName = item.sub_name
-          ? `${item.name} (${item.sub_name})`
-          : item.name;
         toast.success("Item Added", {
-          description: `${itemName} was added to your ${side} list.`,
+          description: `${item.name} was added to your ${side} list.`,
         });
       }
     }
@@ -252,14 +249,9 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
   const handleRemoveItem = (
     itemId: number,
     side: "offering" | "requesting",
-    subName?: string,
   ) => {
     if (side === "offering") {
-      const index = offeringItems.findIndex(
-        (item) =>
-          item.id === itemId &&
-          (item.sub_name === subName || (!item.sub_name && !subName)),
-      );
+      const index = offeringItems.findIndex((item) => item.id === itemId);
       if (index !== -1) {
         const newOfferingItems = [
           ...offeringItems.slice(0, index),
@@ -269,11 +261,7 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
         saveItemsToLocalStorage(newOfferingItems, requestingItems);
       }
     } else {
-      const index = requestingItems.findIndex(
-        (item) =>
-          item.id === itemId &&
-          (item.sub_name === subName || (!item.sub_name && !subName)),
-      );
+      const index = requestingItems.findIndex((item) => item.id === itemId);
       if (index !== -1) {
         const newRequestingItems = [
           ...requestingItems.slice(0, index),
@@ -848,9 +836,7 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
               <ItemGrid
                 items={offeringItems}
                 title="Offering"
-                onRemove={(id, subName) =>
-                  handleRemoveItem(id, "offering", subName)
-                }
+                onRemove={(id) => handleRemoveItem(id, "offering")}
               />
               <div className="text-secondary-text/70 mt-4 flex flex-col flex-wrap items-start gap-2 text-xs sm:flex-row sm:items-center sm:gap-3 sm:text-sm">
                 <span>
@@ -917,9 +903,7 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
               <ItemGrid
                 items={requestingItems}
                 title="Requesting"
-                onRemove={(id, subName) =>
-                  handleRemoveItem(id, "requesting", subName)
-                }
+                onRemove={(id) => handleRemoveItem(id, "requesting")}
               />
               <div className="text-secondary-text/70 mt-4 flex flex-col flex-wrap items-start gap-2 text-xs sm:flex-row sm:items-center sm:gap-3 sm:text-sm">
                 <span>
