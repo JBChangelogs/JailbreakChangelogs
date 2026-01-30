@@ -34,7 +34,6 @@ export default function ValuesSearchControls({
   rangeValue,
   setRangeValue,
   setAppliedMinValue,
-  appliedMaxValue,
   setAppliedMaxValue,
   searchSectionRef,
   maxValueRange,

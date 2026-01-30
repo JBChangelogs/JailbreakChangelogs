@@ -9,7 +9,6 @@ import NitroGridAd from "@/components/Ads/NitroGridAd";
 import NitroValuesTopAd from "@/components/Ads/NitroValuesTopAd";
 import React from "react";
 import { Button } from "../ui/button";
-import { Icon } from "../ui/IconWrapper";
 
 interface ValuesItemsGridProps {
   items: Item[];

@@ -37,55 +37,57 @@ export function NotificationPreferenceToggle({
   };
 
   return (
-    <div className="mb-2">
-      <Field disabled={disabled}>
-        <div className="flex items-center gap-2">
-          <Label className="text-primary-text text-base font-medium">
-            {humanizeTitle(title)}
-          </Label>
-          {userData?.flags?.some((f) => f.flag === "is_owner") && (
-            <Tooltip
-              title="Copy URL"
-              arrow
-              placement="top"
-              slotProps={{
-                tooltip: {
-                  sx: {
-                    backgroundColor: "var(--color-secondary-bg)",
-                    color: "var(--color-primary-text)",
-                    "& .MuiTooltip-arrow": {
-                      color: "var(--color-secondary-bg)",
+    <div className="mb-4 w-full">
+      <Field disabled={disabled} className="w-full">
+        <div className="mb-1 flex w-full items-center justify-between gap-4">
+          <div className="flex items-center gap-2">
+            <Label className="text-primary-text text-base font-medium">
+              {humanizeTitle(title)}
+            </Label>
+            {userData?.flags?.some((f) => f.flag === "is_owner") && (
+              <Tooltip
+                title="Copy URL"
+                arrow
+                placement="top"
+                slotProps={{
+                  tooltip: {
+                    sx: {
+                      backgroundColor: "var(--color-secondary-bg)",
+                      color: "var(--color-primary-text)",
+                      "& .MuiTooltip-arrow": {
+                        color: "var(--color-secondary-bg)",
+                      },
                     },
                   },
-                },
-              }}
-            >
-              <button
-                onClick={handleCopyLink}
-                className="text-secondary-text hover:text-link cursor-pointer transition-colors"
-                aria-label="Copy highlight link"
+                }}
               >
-                <Icon icon="heroicons:link" className="h-4 w-4" />
-              </button>
-            </Tooltip>
-          )}
+                <button
+                  onClick={handleCopyLink}
+                  className="text-secondary-text hover:text-link cursor-pointer transition-colors"
+                  aria-label="Copy highlight link"
+                >
+                  <Icon icon="heroicons:link" className="h-4 w-4" />
+                </button>
+              </Tooltip>
+            )}
+          </div>
+          <Switch
+            checked={enabled}
+            onChange={(checked) => onChange(checked)}
+            className={`relative inline-flex h-6 w-11 cursor-pointer items-center rounded-full transition-colors focus:outline-none ${
+              enabled ? "bg-button-info" : "bg-button-secondary"
+            } ${disabled ? "cursor-not-allowed opacity-50" : ""}`}
+          >
+            <span
+              className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                enabled ? "translate-x-6" : "translate-x-1"
+              }`}
+            />
+          </Switch>
         </div>
         <Description className="text-secondary-text text-sm">
           {description ?? "Manage this notification type"}
         </Description>
-        <Switch
-          checked={enabled}
-          onChange={(checked) => onChange(checked)}
-          className={`relative inline-flex h-6 w-11 cursor-pointer items-center rounded-full transition-colors focus:outline-none ${
-            enabled ? "bg-button-info" : "bg-button-secondary"
-          } ${disabled ? "cursor-not-allowed opacity-50" : ""}`}
-        >
-          <span
-            className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-              enabled ? "translate-x-6" : "translate-x-1"
-            }`}
-          />
-        </Switch>
       </Field>
     </div>
   );

@@ -430,7 +430,6 @@ export const BannerSettings = ({
             </Button>
           </Box>
         </Box>
-        <Box sx={{ height: "40px" }} />
       </Box>
 
       {/* Supporter Modal */}
