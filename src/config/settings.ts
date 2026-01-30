@@ -36,47 +36,47 @@ export const settingsConfig: Record<SettingKey, SettingConfigItem> = {
   profile_public: {
     displayName: "Public Profile",
     description: "Allow others to view your profile",
-    category: "Privacy Settings",
+    category: "Privacy",
   },
   show_recent_comments: {
     displayName: "Show Recent Comments",
     description: "Display your recent comments on your profile",
-    category: "Privacy Settings",
+    category: "Privacy",
   },
   hide_following: {
     displayName: "Hide Following",
     description: "Hide your following list from others",
-    category: "Privacy Settings",
+    category: "Privacy",
   },
   hide_followers: {
     displayName: "Hide Followers",
     description: "Hide your followers list from others",
-    category: "Privacy Settings",
+    category: "Privacy",
   },
   hide_favorites: {
     displayName: "Hide Favorites",
     description: "Hide your favorites from others",
-    category: "Privacy Settings",
+    category: "Privacy",
   },
   hide_presence: {
     displayName: "Hide Presence",
     description: "Hide your online status from others",
-    category: "Privacy Settings",
+    category: "Privacy",
   },
   banner_discord: {
     displayName: "Use Discord Banner",
     description: "Use your Discord banner as profile background",
-    category: "Appearance Settings",
+    category: "Appearance",
   },
   avatar_discord: {
     displayName: "Use Discord Avatar",
     description: "Use your Discord avatar as profile picture",
-    category: "Appearance Settings",
+    category: "Appearance",
   },
   dms_allowed: {
     displayName: "Allow Direct Messages",
     description: "Allow our discord bot to send you direct messages",
-    category: "Privacy Settings",
+    category: "Privacy",
   },
   updated_at: {
     displayName: "Last Updated",

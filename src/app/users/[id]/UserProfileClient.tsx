@@ -982,32 +982,18 @@ export default function UserProfileClient({
                       >
                         <span>
                           <Button
-                            variant="contained"
-                            startIcon={
-                              <Icon
-                                icon="heroicons:user-plus"
-                                className="h-5 w-5"
-                              />
-                            }
+                            variant="default"
+                            size="md"
                             onClick={() =>
                               toast.error(
                                 "You need to be logged in to follow users",
                               )
                             }
-                            sx={{
-                              backgroundColor: "var(--color-button-info)",
-                              color: "var(--color-form-button-text)",
-                              borderColor: "var(--color-button-info)",
-                              "&:hover": {
-                                backgroundColor:
-                                  "var(--color-button-info-hover)",
-                                borderColor: "var(--color-button-info-hover)",
-                              },
-                              "& .MuiButton-startIcon": {
-                                color: "var(--color-form-button-text)",
-                              },
-                            }}
                           >
+                            <Icon
+                              icon="heroicons:user-plus"
+                              className="h-5 w-5"
+                            />
                             Follow
                           </Button>
                         </span>

@@ -165,7 +165,8 @@ export default function SettingsPage() {
     return () => {
       mounted = false;
     };
-  }, [isLoading, user]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isLoading, user?.id]);
 
   const setSaving = (title: string, saving: boolean) => {
     setNotificationPrefsSaving((prev) => ({ ...prev, [title]: saving }));
@@ -186,12 +187,18 @@ export default function SettingsPage() {
     setNotificationPrefsError(null);
     setSaving(title, true);
 
+    const humanizedTitle = title
+      .split("_")
+      .filter(Boolean)
+      .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+      .join(" ");
+
     try {
       await updateUserNotificationPreferences([
         { title, enabled: nextEnabled },
       ]);
       toast.success("Setting Updated", {
-        description: `Notification preference for "${title}" has been ${nextEnabled ? "enabled" : "disabled"}.`,
+        description: `Notification preference for "${humanizedTitle}" has been ${nextEnabled ? "enabled" : "disabled"}.`,
       });
 
       window.umami?.track("Update Notification Preference", {
@@ -356,12 +363,39 @@ export default function SettingsPage() {
       }
     });
 
+  // Sort settings within categories
+  const LINKED_ORDER: Record<string, string[]> = {
+    Privacy: [
+      "dms_allowed",
+      "hide_presence",
+      "hide_favorites",
+      "hide_followers",
+      "hide_following",
+      "profile_public",
+      "show_recent_comments",
+    ],
+    Appearance: ["avatar_discord", "banner_discord"],
+  };
+
+  Object.keys(settingsByCategory).forEach((category) => {
+    if (LINKED_ORDER[category]) {
+      settingsByCategory[category].sort((a, b) => {
+        const indexA = LINKED_ORDER[category].indexOf(a);
+        const indexB = LINKED_ORDER[category].indexOf(b);
+        if (indexA !== -1 && indexB !== -1) return indexA - indexB;
+        if (indexA !== -1) return -1;
+        if (indexB !== -1) return 1;
+        return 0;
+      });
+    }
+  });
+
   return (
     <Container maxWidth="lg" sx={{ minHeight: "100vh", py: 4 }}>
       <Box sx={{ mt: -2, mb: 0 }}>
         <Breadcrumb />
       </Box>
-      <Grid container spacing={4} sx={{ mt: 2 }}>
+      <Grid container spacing={4} sx={{ mt: 2 }} alignItems="flex-start">
         {/* Sidebar Navigation */}
         <Grid
           size={{ xs: 12, lg: 3 }}
@@ -402,18 +436,18 @@ export default function SettingsPage() {
                 id: cat.replace(/\s+/g, "_").toLowerCase(),
                 title: cat,
                 icon:
-                  cat === "Privacy Settings"
+                  cat === "Privacy"
                     ? "heroicons:lock-closed"
                     : "heroicons:sparkles",
               })),
               {
                 id: "notifications",
-                title: "Notifications",
+                title: "Notification Preferences",
                 icon: "heroicons:bell",
               },
               {
                 id: "connections",
-                title: "Connections",
+                title: "Account Connections",
                 icon: "heroicons:link",
               },
               {
@@ -511,7 +545,7 @@ export default function SettingsPage() {
                 >
                   <Icon
                     icon={
-                      category === "Privacy Settings"
+                      category === "Privacy"
                         ? "heroicons:lock-closed"
                         : "heroicons:sparkles"
                     }
@@ -557,7 +591,7 @@ export default function SettingsPage() {
                 </Typography>
                 <Divider sx={{ mb: 2 }} />
                 <FormGroup>
-                  {settingKeys.map((key) => {
+                  {settingKeys.map((key, index) => {
                     const typedKey = key as keyof typeof settings;
                     const isHighlighted =
                       highlightSetting === key && showHighlight;
@@ -565,6 +599,7 @@ export default function SettingsPage() {
                       <Box
                         key={key}
                         sx={{
+                          mb: index === settingKeys.length - 1 ? 0 : 4,
                           ...(isHighlighted && {
                             borderRadius: 1,
                             outline:
@@ -594,7 +629,7 @@ export default function SettingsPage() {
                           disabled={false}
                           userData={userData}
                         />
-                        {category === "Appearance Settings" &&
+                        {category === "Appearance" &&
                           key === "banner_discord" &&
                           settings[typedKey] === 0 && (
                             <BannerSettings
@@ -602,7 +637,7 @@ export default function SettingsPage() {
                               onBannerUpdate={handleBannerUpdate}
                             />
                           )}
-                        {category === "Appearance Settings" &&
+                        {category === "Appearance" &&
                           key === "avatar_discord" &&
                           settings[typedKey] === 0 && (
                             <AvatarSettings
@@ -614,11 +649,11 @@ export default function SettingsPage() {
                     );
                   })}
                 </FormGroup>
-                {category === "Appearance Settings" &&
+                {category === "Appearance" &&
                   (settings.banner_discord === 0 ||
                     settings.avatar_discord === 0) && (
                     <>
-                      <Divider sx={{ my: 3 }} />
+                      <Divider sx={{ my: 2 }} />
                       <Box sx={{ display: "flex", gap: 1.5, flexWrap: "wrap" }}>
                         <CustomButton
                           variant="default"

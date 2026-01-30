@@ -4,6 +4,8 @@ import { updateSettings } from "@/services/settingsService";
 import { toast } from "sonner";
 import { safeSetJSON } from "@/utils/safeStorage";
 
+import { settingsConfig } from "@/config/settings";
+
 export const useSettings = (
   userData: UserData | null,
   openModal?: (state: {
@@ -104,7 +106,10 @@ export const useSettings = (
       );
 
       // Show success toast
-      toast.success("Setting updated successfully");
+      const displayName = settingsConfig[name]?.displayName || name;
+      toast.success("Setting Updated", {
+        description: `"${displayName}" has been ${value === 1 ? "enabled" : "disabled"}.`,
+      });
 
       // Track setting change
       window.umami?.track("Update Setting", { setting: name, value: value });

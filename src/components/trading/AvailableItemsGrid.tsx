@@ -35,32 +35,6 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
 }) => {
   "use no memo";
   const isMobile = useMediaQuery("(max-width:640px)");
-
-  const getFilterDisplayName = (filterSort: string): string => {
-    const filterMap: Record<string, string> = {
-      "name-all-items": "All Items",
-      favorites: "My Favorites",
-      "name-limited-items": "Limited Items",
-      "name-seasonal-items": "Seasonal Items",
-      "name-vehicles": "Vehicles",
-      "name-spoilers": "Spoilers",
-      "name-rims": "Rims",
-      "name-body-colors": "Body Colors",
-      "name-hyperchromes": "HyperChromes",
-      "name-textures": "Body Textures",
-      "name-tire-stickers": "Tire Stickers",
-      "name-tire-styles": "Tire Styles",
-      "name-drifts": "Drifts",
-      "name-furnitures": "Furniture",
-      "name-horns": "Horns",
-      "name-weapon-skins": "Weapon Skins",
-    };
-
-    return (
-      filterMap[filterSort] ||
-      filterSort.replace("name-", "").replace("-items", "").replace(/-/g, " ")
-    );
-  };
   const parentRef = useRef<HTMLDivElement>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [showErrorModal, setShowErrorModal] = useState(false);
