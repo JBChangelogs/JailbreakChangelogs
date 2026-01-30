@@ -1,6 +1,6 @@
 import { Switch, Field, Label, Description } from "@headlessui/react";
 import { SettingConfigItem } from "@/config/settings";
-import { UserSettings } from "@/types/auth";
+import { UserSettings, UserData } from "@/types/auth";
 import { Icon } from "@/components/ui/IconWrapper";
 import { toast } from "sonner";
 import Tooltip from "@mui/material/Tooltip";
@@ -11,9 +11,7 @@ interface SettingToggleProps {
   config: SettingConfigItem;
   onChange: (name: keyof UserSettings, value: number) => void;
   disabled?: boolean;
-  userData?: {
-    premiumtype?: number;
-  };
+  userData?: Pick<UserData, "flags"> | null;
 }
 
 export const SettingToggle = ({
@@ -22,6 +20,7 @@ export const SettingToggle = ({
   config,
   onChange,
   disabled,
+  userData,
 }: SettingToggleProps) => {
   const handleCopyLink = () => {
     const url = new URL(window.location.href);
@@ -37,30 +36,32 @@ export const SettingToggle = ({
           <Label className="text-primary-text text-base font-medium">
             {config.displayName}
           </Label>
-          <Tooltip
-            title="Copy URL"
-            arrow
-            placement="top"
-            slotProps={{
-              tooltip: {
-                sx: {
-                  backgroundColor: "var(--color-secondary-bg)",
-                  color: "var(--color-primary-text)",
-                  "& .MuiTooltip-arrow": {
-                    color: "var(--color-secondary-bg)",
+          {userData?.flags?.some((f) => f.flag === "is_owner") && (
+            <Tooltip
+              title="Copy URL"
+              arrow
+              placement="top"
+              slotProps={{
+                tooltip: {
+                  sx: {
+                    backgroundColor: "var(--color-secondary-bg)",
+                    color: "var(--color-primary-text)",
+                    "& .MuiTooltip-arrow": {
+                      color: "var(--color-secondary-bg)",
+                    },
                   },
                 },
-              },
-            }}
-          >
-            <button
-              onClick={handleCopyLink}
-              className="text-secondary-text hover:text-link cursor-pointer transition-colors"
-              aria-label="Copy highlight link"
+              }}
             >
-              <Icon icon="heroicons:link" className="h-4 w-4" />
-            </button>
-          </Tooltip>
+              <button
+                onClick={handleCopyLink}
+                className="text-secondary-text hover:text-link cursor-pointer transition-colors"
+                aria-label="Copy highlight link"
+              >
+                <Icon icon="heroicons:link" className="h-4 w-4" />
+              </button>
+            </Tooltip>
+          )}
         </div>
         <Description className="text-secondary-text text-sm">
           {config.description}

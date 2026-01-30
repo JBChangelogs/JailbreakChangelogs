@@ -15,14 +15,12 @@ import { TradeAdTooltip } from "./TradeAdTooltip";
 interface ItemGridProps {
   items: TradeItem[];
   title: string;
-  onRemove?: (itemId: number, subName?: string) => void;
+  onRemove?: (itemId: number) => void;
 }
 
 interface ItemWithData {
   data: TradeItem;
   id: number;
-  is_sub: boolean;
-  sub_name?: string;
 }
 
 const getItemData = (item: TradeItem | ItemWithData): TradeItem => {
@@ -30,7 +28,7 @@ const getItemData = (item: TradeItem | ItemWithData): TradeItem => {
     return {
       ...item.data,
       id: item.id,
-      is_sub: item.is_sub,
+      is_sub: false,
       tradable: item.data.tradable ? 1 : 0,
       is_limited: item.data.is_limited ?? 0,
       name: item.data.name, // Keep original name for image paths
@@ -44,9 +42,6 @@ const getItemData = (item: TradeItem | ItemWithData): TradeItem => {
 };
 
 const getDisplayName = (item: TradeItem | ItemWithData): string => {
-  if ("data" in item && item.is_sub && item.sub_name && item.data) {
-    return `${item.data.name} (${item.sub_name})`;
-  }
   if ("data" in item && item.data) {
     return item.data.name;
   }
@@ -58,17 +53,13 @@ const groupItems = (items: TradeItem[]) => {
   const grouped = items.reduce(
     (acc, item) => {
       const itemData = getItemData(item);
-      // Generate a unique key that includes sub_name for variants, or 'base' for parent items
-      const key = item.sub_name
-        ? `${item.id}-${item.sub_name}`
-        : `${item.id}-base`;
+      const key = `${item.id}`;
 
       if (!acc[key]) {
         acc[key] = {
           ...itemData,
           count: 1,
           id: item.id,
-          sub_name: item.sub_name,
         };
       } else {
         acc[key].count++;
@@ -160,21 +151,13 @@ export const ItemGrid: React.FC<ItemGridProps> = ({
       >
         <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-4">
           {groupItems(items).map((item) => {
-            const originalItem = items.find(
-              (i) =>
-                i.id === item.id &&
-                (i.sub_name === item.sub_name ||
-                  (!i.sub_name && !item.sub_name)),
-            );
+            const originalItem = items.find((i) => i.id === item.id);
             const displayName = originalItem
               ? getDisplayName(originalItem)
               : item.name;
 
             return (
-              <div
-                key={`${item.id}-${item.sub_name || "base"}`}
-                className="group relative cursor-help"
-              >
+              <div key={`${item.id}`} className="group relative cursor-help">
                 <Tooltip
                   title={
                     <TradeAdTooltip
@@ -235,7 +218,7 @@ export const ItemGrid: React.FC<ItemGridProps> = ({
                             type="button"
                             onClick={(e) => {
                               e.stopPropagation();
-                              onRemove(item.id, item.sub_name);
+                              onRemove(item.id);
                             }}
                             className="text-form-button-text absolute top-1 left-1 z-10 flex h-6 w-6 cursor-pointer items-center justify-center rounded-full bg-red-600/90 transition-colors hover:bg-red-700"
                             aria-label="Remove item"

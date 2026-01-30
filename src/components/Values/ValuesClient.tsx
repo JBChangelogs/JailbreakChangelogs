@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useEffect, useRef, Suspense } from "react";
+import { useState, useEffect, useRef, Suspense, useMemo } from "react";
 import { use } from "react";
 import { Icon } from "@/components/ui/IconWrapper";
 import { Item, FilterSort, ValueSort, FavoriteItem } from "@/types";
-import { sortAndFilterItems } from "@/utils/values";
+import { sortAndFilterItems, parseCashValue } from "@/utils/values";
 import { toast } from "sonner";
 import SearchParamsHandler from "@/components/SearchParamsHandler";
 import CategoryIcons from "@/components/Items/CategoryIcons";
@@ -112,11 +112,23 @@ export default function ValuesClient({
   const [favorites, setFavorites] = useState<number[]>([]);
   const searchSectionRef = useRef<HTMLDivElement>(null);
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
-  const MAX_VALUE_RANGE = 50_000_000;
-  const [rangeValue, setRangeValue] = useState<number[]>([0, MAX_VALUE_RANGE]);
+  const DYNAMIC_MAX_VALUE = useMemo(() => {
+    return items.reduce((currentMax, item) => {
+      if (item.tradable === 1) {
+        const val = parseCashValue(item.cash_value);
+        return val > currentMax ? val : currentMax;
+      }
+      return currentMax;
+    }, 50_000_000);
+  }, [items]);
+
+  const [rangeValue, setRangeValue] = useState<number[]>(() => [
+    0,
+    DYNAMIC_MAX_VALUE,
+  ]);
   const [appliedMinValue, setAppliedMinValue] = useState<number>(0);
   const [appliedMaxValue, setAppliedMaxValue] =
-    useState<number>(MAX_VALUE_RANGE);
+    useState<number>(DYNAMIC_MAX_VALUE);
   const [showHcModal, setShowHcModal] = useState(() => {
     if (typeof window === "undefined") return false;
     return window.location.hash === "#hyper-pity-calc";
@@ -307,11 +319,7 @@ export default function ValuesClient({
 
             <div className="mb-4 flex flex-wrap gap-2">
               <Button onClick={handleRandomItem}>
-                <Icon
-                  icon="material-symbols:auto-awesome"
-                  className="h-6 w-6"
-                  inline={true}
-                />
+                <Icon icon="material-symbols:auto-awesome" inline={true} />
                 Random Item
               </Button>
               <Button onClick={handleOpenHcModal}>
@@ -369,8 +377,10 @@ export default function ValuesClient({
         rangeValue={rangeValue}
         setRangeValue={setRangeValue}
         setAppliedMinValue={setAppliedMinValue}
+        appliedMaxValue={appliedMaxValue}
         setAppliedMaxValue={setAppliedMaxValue}
         searchSectionRef={searchSectionRef}
+        maxValueRange={DYNAMIC_MAX_VALUE}
       />
 
       <div className="grid grid-cols-1 gap-8">
@@ -387,19 +397,19 @@ export default function ValuesClient({
             }}
             appliedMinValue={appliedMinValue}
             appliedMaxValue={appliedMaxValue}
-            MAX_VALUE_RANGE={MAX_VALUE_RANGE}
+            MAX_VALUE_RANGE={DYNAMIC_MAX_VALUE}
             onResetValueRange={() => {
-              setRangeValue([0, MAX_VALUE_RANGE]);
+              setRangeValue([0, DYNAMIC_MAX_VALUE]);
               setAppliedMinValue(0);
-              setAppliedMaxValue(MAX_VALUE_RANGE);
+              setAppliedMaxValue(DYNAMIC_MAX_VALUE);
             }}
             onClearAllFilters={() => {
               setFilterSort("name-all-items");
               setValueSort("cash-desc");
               setSearchTerm("");
-              setRangeValue([0, MAX_VALUE_RANGE]);
+              setRangeValue([0, DYNAMIC_MAX_VALUE]);
               setAppliedMinValue(0);
-              setAppliedMaxValue(MAX_VALUE_RANGE);
+              setAppliedMaxValue(DYNAMIC_MAX_VALUE);
               safeSessionStorage.setItem("valuesFilterSort", "name-all-items");
               safeSessionStorage.setItem("valuesValueSort", "cash-desc");
             }}

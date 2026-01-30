@@ -6,8 +6,8 @@ import { UserData } from "@/types/auth";
 import { TradeItem } from "@/types/trading";
 import { TradeAdCard } from "./TradeAdCard";
 import { TradeAdTabs } from "./TradeAdTabs";
-import { Button } from "@mui/material";
 import { Pagination } from "@/components/ui/Pagination";
+import { Button } from "@/components/ui/button";
 import { Masonry } from "@mui/lab";
 import { Icon } from "@/components/ui/IconWrapper";
 import { deleteTradeAd } from "@/utils/trading";
@@ -273,28 +273,8 @@ export default function TradeAds({
                 This page seems empty at the moment.
               </p>
               <div className="flex justify-center gap-4">
-                <Button
-                  variant="contained"
-                  onClick={refreshTradeAds}
-                  sx={{
-                    backgroundColor: "var(--color-button-info)",
-                    "&:hover": {
-                      backgroundColor: "var(--color-button-info-hover)",
-                    },
-                  }}
-                >
-                  Refresh List
-                </Button>
-                <Button
-                  variant="contained"
-                  onClick={() => handleTabChange("create")}
-                  sx={{
-                    backgroundColor: "var(--color-button-info)",
-                    "&:hover": {
-                      backgroundColor: "var(--color-button-info-hover)",
-                    },
-                  }}
-                >
+                <Button onClick={refreshTradeAds}>Refresh List</Button>
+                <Button onClick={() => handleTabChange("create")}>
                   Create A Trade Ad
                 </Button>
               </div>
@@ -451,25 +431,14 @@ export default function TradeAds({
                     Showing {displayTradeAds.length}{" "}
                     {displayTradeAds.length === 1 ? "trade ad" : "trade ads"}
                   </p>
-                  <button
-                    onClick={toggleSortOrder}
-                    className="border-border-primary bg-button-info text-form-button-text hover:border-border-focus hover:bg-button-info-hover flex cursor-pointer items-center gap-1 rounded-lg border px-3 py-1.5 text-sm transition-colors"
-                  >
+                  <Button onClick={toggleSortOrder} size="sm">
                     {sortOrder === "newest" ? (
-                      <Icon
-                        icon="heroicons-outline:arrow-down"
-                        className="h-4 w-4"
-                        inline={true}
-                      />
+                      <Icon icon="heroicons-outline:arrow-down" inline={true} />
                     ) : (
-                      <Icon
-                        icon="heroicons-outline:arrow-up"
-                        className="h-4 w-4"
-                        inline={true}
-                      />
+                      <Icon icon="heroicons-outline:arrow-up" inline={true} />
                     )}
                     {sortOrder === "newest" ? "Newest First" : "Oldest First"}
-                  </button>
+                  </Button>
                 </div>
               )}
             {displayTradeAds.length === 0 ? (
@@ -567,25 +536,14 @@ export default function TradeAds({
                     ? "supporter trade ad"
                     : "supporter trade ads"}
                 </p>
-                <button
-                  onClick={toggleSortOrder}
-                  className="border-border-primary bg-button-info text-form-button-text hover:border-border-focus hover:bg-button-info-hover flex cursor-pointer items-center gap-1 rounded-lg border px-3 py-1.5 text-sm transition-colors"
-                >
+                <Button onClick={toggleSortOrder} size="sm">
                   {sortOrder === "newest" ? (
-                    <Icon
-                      icon="heroicons-outline:arrow-down"
-                      className="h-4 w-4"
-                      inline={true}
-                    />
+                    <Icon icon="heroicons-outline:arrow-down" inline={true} />
                   ) : (
-                    <Icon
-                      icon="heroicons-outline:arrow-up"
-                      className="h-4 w-4"
-                      inline={true}
-                    />
+                    <Icon icon="heroicons-outline:arrow-up" inline={true} />
                   )}
                   {sortOrder === "newest" ? "Newest First" : "Oldest First"}
-                </button>
+                </Button>
               </div>
             )}
             {displayTradeAds.length === 0 ? (
@@ -610,16 +568,7 @@ export default function TradeAds({
                   <p className="text-tertiary-text/70 mb-8">
                     There are currently no trade ads from Supporters.
                   </p>
-                  <Button
-                    variant="contained"
-                    onClick={() => handleTabChange("view")}
-                    sx={{
-                      backgroundColor: "var(--color-button-info)",
-                      "&:hover": {
-                        backgroundColor: "var(--color-button-info-hover)",
-                      },
-                    }}
-                  >
+                  <Button onClick={() => handleTabChange("view")}>
                     View All Trade Ads
                   </Button>
                 </div>
@@ -730,25 +679,14 @@ export default function TradeAds({
                       ? "trade ad"
                       : "trade ads"}
                   </p>
-                  <button
-                    onClick={toggleSortOrder}
-                    className="border-border-primary bg-button-info text-form-button-text hover:border-border-focus hover:bg-button-info-hover flex cursor-pointer items-center gap-1 rounded-lg border px-3 py-1.5 text-sm transition-colors"
-                  >
+                  <Button onClick={toggleSortOrder} size="sm">
                     {sortOrder === "newest" ? (
-                      <Icon
-                        icon="heroicons-outline:arrow-down"
-                        className="h-4 w-4"
-                        inline={true}
-                      />
+                      <Icon icon="heroicons-outline:arrow-down" inline={true} />
                     ) : (
-                      <Icon
-                        icon="heroicons-outline:arrow-up"
-                        className="h-4 w-4"
-                        inline={true}
-                      />
+                      <Icon icon="heroicons-outline:arrow-up" inline={true} />
                     )}
                     {sortOrder === "newest" ? "Newest First" : "Oldest First"}
-                  </button>
+                  </Button>
                 </div>
                 {filteredUserTradeAds.length === 0 ? (
                   userTradeAds.length === 0 ? (
@@ -759,16 +697,7 @@ export default function TradeAds({
                       <p className="text-tertiary-text/70 mb-8">
                         You haven&apos;t created any trade ads yet.
                       </p>
-                      <Button
-                        variant="contained"
-                        onClick={() => handleTabChange("create")}
-                        sx={{
-                          backgroundColor: "var(--color-button-info)",
-                          "&:hover": {
-                            backgroundColor: "var(--color-button-info-hover)",
-                          },
-                        }}
-                      >
+                      <Button onClick={() => handleTabChange("create")}>
                         Create Your First Trade Ad
                       </Button>
                     </div>

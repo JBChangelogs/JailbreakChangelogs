@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Button } from "@mui/material";
+import { Button } from "@/components/ui/button";
 import dynamic from "next/dynamic";
 
 const Tooltip = dynamic(() => import("@mui/material/Tooltip"), {
@@ -148,18 +148,12 @@ export default function AboutTab({
               }}
             >
               <Button
-                variant="text"
+                variant="ghost"
                 onClick={() => setIsEditingBio(true)}
-                sx={{
-                  color: "var(--color-button-info)",
-                  minWidth: "auto",
-                  padding: "4px",
-                }}
+                size="sm"
+                className="h-auto p-1"
               >
-                <Icon
-                  icon="heroicons:pencil"
-                  className="text-button-info h-5 w-5"
-                />
+                <Icon icon="heroicons:pencil" className="text-link h-5 w-5" />
               </Button>
             </Tooltip>
           )}
@@ -184,22 +178,19 @@ export default function AboutTab({
             </div>
             <div className="flex justify-end gap-2">
               <Button
-                size="small"
-                variant="outlined"
+                size="sm"
+                variant="outline"
                 onClick={() => {
                   setIsEditingBio(false);
                   setNewBio(bio || "");
                 }}
-                className="text-secondary-text hover:text-primary-text rounded-md border-none bg-transparent text-sm normal-case"
               >
                 Cancel
               </Button>
               <Button
-                size="small"
-                variant="contained"
+                size="sm"
                 onClick={handleSaveBio}
                 disabled={!newBio.trim() || isSavingBio}
-                className="bg-button-info text-form-button-text hover:bg-button-info-hover rounded-md text-sm normal-case"
               >
                 {isSavingBio ? "Saving..." : "Save"}
               </Button>

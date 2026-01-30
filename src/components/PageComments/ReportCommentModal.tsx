@@ -104,7 +104,6 @@ const ReportCommentModal: React.FC<ReportCommentModalProps> = ({
                 size="sm"
                 onClick={handleSubmit}
                 disabled={!reportReason.trim() || isSubmitting}
-                className="min-w-[100px]"
               >
                 {isSubmitting ? "Submitting..." : "Submit Report"}
               </Button>

@@ -142,7 +142,7 @@ export default function HyperchromeCalculatorModal({
               onClick={handleClose}
               className="text-secondary-text hover:text-primary-text"
             >
-              <Icon icon="heroicons:x-mark" className="h-5 w-5" />
+              <Icon icon="heroicons:x-mark" />
             </Button>
           </div>
 
@@ -159,10 +159,7 @@ export default function HyperchromeCalculatorModal({
                     size="sm"
                     onClick={() => setIsSmallServer(!isSmallServer)}
                   >
-                    <Icon
-                      icon="heroicons:arrows-right-left"
-                      className="h-3.5 w-3.5"
-                    />
+                    <Icon icon="heroicons:arrows-right-left" />
                     Switch to {isSmallServer ? "Big Server" : "Small Server"}
                   </Button>
                 )}
@@ -383,11 +380,7 @@ export default function HyperchromeCalculatorModal({
               </Button>
             )}
             {step < 2 ? (
-              <Button
-                type="button"
-                onClick={handleNext}
-                className="min-w-[100px]"
-              >
+              <Button type="button" onClick={handleNext}>
                 Next
               </Button>
             ) : !hasCalculated ? (
@@ -395,7 +388,6 @@ export default function HyperchromeCalculatorModal({
                 type="button"
                 onClick={handleCalculate}
                 data-umami-event="Hyper Pity Calculate"
-                className="min-w-[100px]"
               >
                 Calculate
               </Button>

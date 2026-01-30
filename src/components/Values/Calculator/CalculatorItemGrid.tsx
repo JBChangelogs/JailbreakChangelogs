@@ -12,7 +12,6 @@ interface CalculatorItemGridProps {
   onRemove?: (instanceId: string) => void;
   onValueTypeChange: (
     itemId: number,
-    subName: string | undefined,
     valueType: "cash" | "duped",
     instanceId?: string,
   ) => void;
@@ -96,9 +95,7 @@ export const CalculatorItemGrid: React.FC<CalculatorItemGridProps> = ({
       >
         <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-4">
           {items.map((item) => {
-            const displayName = item.sub_name
-              ? `${item.name} (${item.sub_name})`
-              : item.name;
+            const displayName = item.name;
             const selectedType = side ? getSelectedValueType(item) : "cash";
             const isDupedSelected = selectedType === "duped";
 
@@ -166,12 +163,7 @@ export const CalculatorItemGrid: React.FC<CalculatorItemGridProps> = ({
                       type="button"
                       onClick={(e) => {
                         e.stopPropagation();
-                        onValueTypeChange(
-                          item.id,
-                          item.sub_name,
-                          "cash",
-                          item.instanceId,
-                        );
+                        onValueTypeChange(item.id, "cash", item.instanceId);
                       }}
                       className={`cursor-pointer rounded-md px-2.5 py-1 text-xs font-medium transition-all duration-200 ${
                         !isDupedSelected
@@ -185,12 +177,7 @@ export const CalculatorItemGrid: React.FC<CalculatorItemGridProps> = ({
                       type="button"
                       onClick={(e) => {
                         e.stopPropagation();
-                        onValueTypeChange(
-                          item.id,
-                          item.sub_name,
-                          "duped",
-                          item.instanceId,
-                        );
+                        onValueTypeChange(item.id, "duped", item.instanceId);
                       }}
                       className={`cursor-pointer rounded-md px-2.5 py-1 text-xs font-medium transition-all duration-200 ${
                         isDupedSelected

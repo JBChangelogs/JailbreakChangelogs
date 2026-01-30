@@ -1,6 +1,7 @@
 import React from "react";
 import { TradeItem } from "@/types/trading";
 import { safeLocalStorage } from "@/utils/safeStorage";
+import { Button } from "../../ui/button";
 
 interface ClearConfirmModalProps {
   isOpen: boolean;
@@ -36,17 +37,17 @@ export const ClearConfirmModal: React.FC<ClearConfirmModalProps> = ({
         onClick={onClose}
       />
       <div className="fixed inset-0 flex items-center justify-center p-4">
-        <div className="modal-container border-button-info bg-secondary-bg mx-auto w-full max-w-sm rounded-lg border p-6 shadow-lg">
-          <div className="modal-header text-primary-text mb-2 text-xl font-semibold">
+        <div className="modal-container border-border-primary bg-secondary-bg mx-auto w-full max-w-sm rounded-lg border p-6 shadow-lg">
+          <div className="modal-header text-primary-text mb-2 text-xl font-bold">
             Clear Calculator?
           </div>
           <div className="modal-content mb-6">
-            <p className="text-secondary-text">
+            <p className="text-secondary-text text-sm">
               Choose what to clear. This action cannot be undone.
             </p>
           </div>
-          <div className="mb-4 grid grid-cols-1 gap-3">
-            <button
+          <div className="mb-4 flex flex-col gap-3">
+            <Button
               onClick={() => {
                 setOfferingItems([]);
                 if (requestingItems.length === 0) {
@@ -56,11 +57,12 @@ export const ClearConfirmModal: React.FC<ClearConfirmModalProps> = ({
                 }
                 onClose();
               }}
-              className="bg-button-success/10 hover:bg-button-success/20 border-button-success text-button-success w-full rounded-md border px-4 py-2 text-sm font-medium transition-colors hover:cursor-pointer"
+              variant="outline"
+              className="border-button-success text-button-success hover:bg-button-success/10"
             >
               Clear Offering
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={() => {
                 setRequestingItems([]);
                 if (offeringItems.length === 0) {
@@ -70,26 +72,24 @@ export const ClearConfirmModal: React.FC<ClearConfirmModalProps> = ({
                 }
                 onClose();
               }}
-              className="bg-button-danger/10 hover:bg-button-danger/20 border-button-danger text-button-danger w-full rounded-md border px-4 py-2 text-sm font-medium transition-colors hover:cursor-pointer"
+              variant="outline"
+              className="border-button-danger text-button-danger hover:bg-button-danger/10"
             >
               Clear Requesting
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={() => {
                 handleStartNew();
               }}
-              className="bg-button-danger text-form-button-text hover:bg-button-danger-hover w-full rounded-md px-4 py-2 text-sm font-medium transition-colors hover:cursor-pointer"
+              variant="destructive"
             >
               Clear Both
-            </button>
+            </Button>
           </div>
-          <div className="modal-footer flex justify-end">
-            <button
-              onClick={onClose}
-              className="text-secondary-text hover:text-primary-text cursor-pointer rounded border-none bg-transparent px-4 py-2 text-sm"
-            >
+          <div className="modal-footer flex justify-end pt-2">
+            <Button variant="ghost" onClick={onClose} className="px-4">
               Cancel
-            </button>
+            </Button>
           </div>
         </div>
       </div>

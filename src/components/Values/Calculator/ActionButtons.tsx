@@ -1,7 +1,7 @@
 import React from "react";
-import { Button } from "@mui/material";
 import dynamic from "next/dynamic";
 import { Icon } from "../../ui/IconWrapper";
+import { Button } from "../../ui/button";
 
 const Tooltip = dynamic(() => import("@mui/material/Tooltip"), { ssr: false });
 
@@ -34,12 +34,8 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
             },
           }}
         >
-          <Button
-            variant="contained"
-            onClick={onSwapSides}
-            className="bg-button-info text-form-button-text hover:bg-button-info-hover"
-          >
-            <Icon icon="heroicons:arrows-right-left" className="mr-1 h-5 w-5" />
+          <Button variant="default" onClick={onSwapSides} size="md">
+            <Icon icon="heroicons:arrows-right-left" />
             Swap Sides
           </Button>
         </Tooltip>
@@ -59,12 +55,8 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
             },
           }}
         >
-          <Button
-            variant="contained"
-            onClick={onClearSides}
-            className="hover:bg-status-error-hover bg-status-error text-form-button-text"
-          >
-            <Icon icon="heroicons-outline:trash" className="mr-1 h-5 w-5" />
+          <Button variant="destructive" onClick={onClearSides} size="md">
+            <Icon icon="heroicons-outline:trash" />
             Clear
           </Button>
         </Tooltip>

@@ -11,6 +11,7 @@ import { useTheme } from "@/contexts/ThemeContext";
 import { storeCampaign } from "@/utils/campaign";
 import { useSearchParams } from "next/navigation";
 import { hasAuthSessionCookie } from "@/utils/serverSession";
+import { Button } from "@/components/ui/button";
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -364,7 +365,7 @@ function LoginModalInner({ open, onClose }: LoginModalProps) {
                           </span>
                         </label>
                       </div>
-                      <motion.button
+                      <Button
                         onClick={() => {
                           setIsRedirecting(true);
                           const currentURL = window.location.href;
@@ -376,7 +377,9 @@ function LoginModalInner({ open, onClose }: LoginModalProps) {
 
                           window.location.href = oauthRedirect;
                         }}
-                        className={`hover:shadow-button-info/25 bg-button-info text-form-button-text hover:bg-button-info-hover flex w-full cursor-pointer items-center justify-center gap-2 rounded-md px-4 py-3 font-medium shadow-lg transition-all duration-200`}
+                        variant="default"
+                        size="lg"
+                        className="w-full"
                         data-umami-event="Login with Discord"
                         {...(campaign && {
                           "data-umami-event-campaign": campaign,
@@ -385,7 +388,7 @@ function LoginModalInner({ open, onClose }: LoginModalProps) {
                         {campaign
                           ? "Login to Support Campaign"
                           : "Continue with Discord"}
-                      </motion.button>
+                      </Button>
                     </motion.div>
                   </TabPanel>
                 </motion.div>
@@ -446,7 +449,7 @@ function LoginModalInner({ open, onClose }: LoginModalProps) {
                           </a>
                           .
                         </p>
-                        <motion.button
+                        <Button
                           onClick={async () => {
                             // Check directly for presence of HttpOnly token cookie via server action
                             // only check for existence, not validity
@@ -485,11 +488,13 @@ function LoginModalInner({ open, onClose }: LoginModalProps) {
                               setIsRedirecting(false);
                             }
                           }}
-                          className={`hover:shadow-button-info/25 bg-button-info text-form-button-text hover:bg-button-info-hover flex w-full cursor-pointer items-center justify-center gap-2 rounded-md px-4 py-3 font-medium shadow-lg transition-all duration-200`}
+                          variant="default"
+                          size="lg"
+                          className="w-full"
                           data-umami-event="Login with Roblox"
                         >
                           Continue with Roblox
-                        </motion.button>
+                        </Button>
                       </motion.div>
                     </TabPanel>
                   </motion.div>

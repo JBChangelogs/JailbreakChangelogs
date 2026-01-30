@@ -81,31 +81,21 @@ export default function TradeAdsTab({
   const indexOfLastAd = currentPage * adsPerPage;
   const indexOfFirstAd = indexOfLastAd - adsPerPage;
   const currentAds = tradeAds.slice(indexOfFirstAd, indexOfLastAd);
-  const renderTradeItem = (
-    item: TradeItem | { data: TradeItem; sub_name?: string },
-    totalItems: number,
-  ) => {
-    // Handle both direct item data and nested data structure
-    const itemData = "data" in item ? item.data : item;
-    const isVideo = isVideoItem(itemData.name);
-    const isVariant = "data" in item && item.sub_name;
-    const displayName = isVariant
-      ? `${itemData.name} [${item.sub_name}]`
-      : itemData.name;
-    const itemUrl = isVariant
-      ? `/item/${itemData.type.toLowerCase()}/${itemData.name}?variant=${item.sub_name}`
-      : `/item/${itemData.type.toLowerCase()}/${itemData.name}`;
+  const renderTradeItem = (item: TradeItem, totalItems: number) => {
+    const isVideo = isVideoItem(item.name);
+    const displayName = item.name;
+    const itemUrl = `/item/${item.type.toLowerCase()}/${item.name}`;
 
     return (
       <div
-        key={itemData.id}
+        key={item.id}
         className="border-border-primary bg-primary-bg hover:border-border-focus rounded-lg border p-3 shadow-sm transition-colors"
       >
         <div className="mb-2 flex items-center">
-          <div className="relative mr-3 h-16 w-16 shrink-0 overflow-hidden rounded-md md:h-[4.5rem] md:w-32">
+          <div className="relative mr-3 h-16 w-16 shrink-0 overflow-hidden rounded-md md:h-18 md:w-32">
             {isVideo ? (
               <video
-                src={getVideoPath(itemData.type, itemData.name)}
+                src={getVideoPath(item.type, item.name)}
                 className="h-full w-full object-cover"
                 muted
                 playsInline
@@ -114,7 +104,7 @@ export default function TradeAdsTab({
               />
             ) : (
               <Image
-                src={getItemImagePath(itemData.type, itemData.name)}
+                src={getItemImagePath(item.type, item.name)}
                 alt={displayName}
                 fill
                 className="object-cover"
@@ -141,19 +131,19 @@ export default function TradeAdsTab({
                   <Skeleton variant="rounded" width={80} height={20} />
                 ) : (
                   <Chip
-                    label={itemData.type}
+                    label={item.type}
                     size="small"
                     variant="outlined"
                     sx={{
-                      backgroundColor: getCategoryColor(itemData.type) + "20", // Add 20% opacity
-                      borderColor: getCategoryColor(itemData.type),
+                      backgroundColor: getCategoryColor(item.type) + "20", // Add 20% opacity
+                      borderColor: getCategoryColor(item.type),
                       color: "var(--color-primary-text)",
                       fontSize: "0.65rem",
                       height: "20px",
                       fontWeight: "medium",
                       "&:hover": {
-                        borderColor: getCategoryColor(itemData.type),
-                        backgroundColor: getCategoryColor(itemData.type) + "30", // Slightly more opacity on hover
+                        borderColor: getCategoryColor(item.type),
+                        backgroundColor: getCategoryColor(item.type) + "30", // Slightly more opacity on hover
                       },
                     }}
                   />

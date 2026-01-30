@@ -2,6 +2,7 @@ import { Switch, Field, Label, Description } from "@headlessui/react";
 import { Icon } from "@/components/ui/IconWrapper";
 import { toast } from "sonner";
 import Tooltip from "@mui/material/Tooltip";
+import { UserData } from "@/types/auth";
 
 export type NotificationPreferenceToggleProps = {
   title: string;
@@ -9,6 +10,7 @@ export type NotificationPreferenceToggleProps = {
   onChange: (nextEnabled: boolean) => void;
   description?: string;
   disabled?: boolean;
+  userData?: Pick<UserData, "flags"> | null;
 };
 
 function humanizeTitle(title: string) {
@@ -25,6 +27,7 @@ export function NotificationPreferenceToggle({
   onChange,
   description,
   disabled,
+  userData,
 }: NotificationPreferenceToggleProps) {
   const handleCopyLink = () => {
     const url = new URL(window.location.href);
@@ -40,30 +43,32 @@ export function NotificationPreferenceToggle({
           <Label className="text-primary-text text-base font-medium">
             {humanizeTitle(title)}
           </Label>
-          <Tooltip
-            title="Copy URL"
-            arrow
-            placement="top"
-            slotProps={{
-              tooltip: {
-                sx: {
-                  backgroundColor: "var(--color-secondary-bg)",
-                  color: "var(--color-primary-text)",
-                  "& .MuiTooltip-arrow": {
-                    color: "var(--color-secondary-bg)",
+          {userData?.flags?.some((f) => f.flag === "is_owner") && (
+            <Tooltip
+              title="Copy URL"
+              arrow
+              placement="top"
+              slotProps={{
+                tooltip: {
+                  sx: {
+                    backgroundColor: "var(--color-secondary-bg)",
+                    color: "var(--color-primary-text)",
+                    "& .MuiTooltip-arrow": {
+                      color: "var(--color-secondary-bg)",
+                    },
                   },
                 },
-              },
-            }}
-          >
-            <button
-              onClick={handleCopyLink}
-              className="text-secondary-text hover:text-link cursor-pointer transition-colors"
-              aria-label="Copy highlight link"
+              }}
             >
-              <Icon icon="heroicons:link" className="h-4 w-4" />
-            </button>
-          </Tooltip>
+              <button
+                onClick={handleCopyLink}
+                className="text-secondary-text hover:text-link cursor-pointer transition-colors"
+                aria-label="Copy highlight link"
+              >
+                <Icon icon="heroicons:link" className="h-4 w-4" />
+              </button>
+            </Tooltip>
+          )}
         </div>
         <Description className="text-secondary-text text-sm">
           {description ?? "Manage this notification type"}

@@ -1,5 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import { Box, TextField, Button, Typography } from "@mui/material";
+import { cn } from "@/lib/utils";
+import { Box, TextField, Typography } from "@mui/material";
+import { Button } from "@/components/ui/button";
 import dynamic from "next/dynamic";
 import Image from "next/image";
 
@@ -383,49 +385,37 @@ export const AvatarSettings = ({
             }}
           >
             <Button
-              variant="contained"
-              size="small"
-              component="label"
-              startIcon={
-                <Icon
-                  icon="material-symbols:cloud-upload"
-                  className="h-5 w-5"
-                />
-              }
+              variant="default"
+              size="md"
+              asChild
               disabled={
                 !userData?.premiumtype ||
                 userData.premiumtype < 2 ||
                 isUploading
               }
-              className={isUploading ? "cursor-progress" : "cursor-pointer"}
-              sx={{
-                backgroundColor: "var(--color-button-info)",
-                color: "var(--color-form-button-text)",
-                "&:hover": {
-                  backgroundColor: "var(--color-button-info-hover)",
-                },
-                "&.Mui-disabled": {
-                  color: "var(--color-form-button-text)",
-                },
-                height: "40px",
-                minWidth: { xs: "100%", sm: "120px" },
-                flex: { xs: 1, sm: "none" },
-                fontSize: "0.875rem",
-                fontWeight: 600,
-              }}
+              className={cn(
+                "min-w-full flex-1 sm:min-w-[120px] sm:flex-none",
+                isUploading ? "cursor-progress" : "cursor-pointer",
+              )}
             >
-              {isUploading ? "Uploading..." : "Upload File"}
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept={UPLOAD_CONFIG.ALLOWED_FILE_TYPES.join(",")}
-                onChange={handleFileUpload}
-                style={{ display: "none" }}
-              />
+              <label>
+                <Icon
+                  icon="material-symbols:cloud-upload"
+                  className="h-5 w-5"
+                />
+                {isUploading ? "Uploading..." : "Upload File"}
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept={UPLOAD_CONFIG.ALLOWED_FILE_TYPES.join(",")}
+                  onChange={handleFileUpload}
+                  style={{ display: "none" }}
+                />
+              </label>
             </Button>
             <Button
-              variant="contained"
-              size="small"
+              variant="default"
+              size="md"
               onClick={handleUpdateAvatar}
               disabled={
                 !isValidAvatar ||
@@ -433,21 +423,7 @@ export const AvatarSettings = ({
                 userData.premiumtype < 2 ||
                 isUploading
               }
-              sx={{
-                backgroundColor: "var(--color-button-info)",
-                color: "var(--color-form-button-text)",
-                "&:hover": {
-                  backgroundColor: "var(--color-button-info-hover)",
-                },
-                "&.Mui-disabled": {
-                  color: "var(--color-form-button-text)",
-                },
-                height: "40px",
-                minWidth: { xs: "100%", sm: "100px" },
-                flex: { xs: 1, sm: "none" },
-                fontSize: "0.875rem",
-                fontWeight: 600,
-              }}
+              className="min-w-full flex-1 sm:min-w-[100px] sm:flex-none"
             >
               Update
             </Button>

@@ -15,14 +15,10 @@ const getItemData = (item: TradeItem): TradeItem => {
     return {
       ...item.data,
       id: item.id,
-      is_sub: "sub_name" in item,
-      sub_name: "sub_name" in item ? item.sub_name : undefined,
+      is_sub: false,
       tradable: item.data.tradable ? 1 : 0,
       is_limited: item.data.is_limited ?? 0,
-      name:
-        "sub_name" in item
-          ? `${item.data.name} (${item.sub_name})`
-          : item.data.name,
+      name: item.data.name,
       base_name: item.data.name,
     };
   }
@@ -92,7 +88,7 @@ const ItemRow: React.FC<ItemRowProps> = ({ item, side, isFirst = false }) => {
 
   return (
     <div
-      className="border-border-primary hover:border-border-focus rounded-lg border p-4 transition-colors hover:cursor-pointer"
+      className="bg-tertiary-bg border-border-primary hover:border-border-focus rounded-lg border p-4 transition-colors hover:cursor-pointer"
       onClick={toggleExpanded}
     >
       {/* Main Item Info */}
@@ -106,7 +102,7 @@ const ItemRow: React.FC<ItemRowProps> = ({ item, side, isFirst = false }) => {
           <div className="min-w-0 flex-1">
             <div className="flex items-center justify-between">
               <Link
-                href={`/item/${item.type.toLowerCase()}/${item.base_name || item.name}${"sub_name" in item ? `?variant=${item.sub_name}` : ""}`}
+                href={`/item/${item.type.toLowerCase()}/${item.base_name || item.name}`}
                 prefetch={false}
                 className="text-primary-text hover:text-link font-medium transition-colors"
                 onClick={(e) => e.stopPropagation()}
@@ -171,7 +167,7 @@ const ItemRow: React.FC<ItemRowProps> = ({ item, side, isFirst = false }) => {
         <div className="border-border-primary mt-4 border-t pt-4">
           <div className="space-y-2">
             {/* Cash Value */}
-            <div className="bg-primary-bg flex items-center justify-between rounded-lg p-2">
+            <div className="bg-secondary-bg flex items-center justify-between rounded-lg p-2">
               <span className="text-secondary-text text-xs font-medium">
                 Cash Value
               </span>
@@ -183,7 +179,7 @@ const ItemRow: React.FC<ItemRowProps> = ({ item, side, isFirst = false }) => {
             </div>
 
             {/* Duped Value */}
-            <div className="bg-primary-bg flex items-center justify-between rounded-lg p-2">
+            <div className="bg-secondary-bg flex items-center justify-between rounded-lg p-2">
               <span className="text-secondary-text text-xs font-medium">
                 Duped Value
               </span>
@@ -195,7 +191,7 @@ const ItemRow: React.FC<ItemRowProps> = ({ item, side, isFirst = false }) => {
             </div>
 
             {/* Demand */}
-            <div className="bg-primary-bg flex items-center justify-between rounded-lg p-2">
+            <div className="bg-secondary-bg flex items-center justify-between rounded-lg p-2">
               <span className="text-secondary-text text-xs font-medium">
                 Demand
               </span>
@@ -207,7 +203,7 @@ const ItemRow: React.FC<ItemRowProps> = ({ item, side, isFirst = false }) => {
             </div>
 
             {/* Trend */}
-            <div className="bg-primary-bg flex items-center justify-between rounded-lg p-2">
+            <div className="bg-secondary-bg flex items-center justify-between rounded-lg p-2">
               <span className="text-secondary-text text-xs font-medium">
                 Trend
               </span>
@@ -275,7 +271,7 @@ export default function TradeItemsWithValues({
           </div>
 
           {/* Items Container */}
-          <div className="space-y-4 rounded-xl p-6">
+          <div className="bg-tertiary-bg space-y-4 rounded-xl p-6">
             {offeringItems.map((item, index) => (
               <ItemRow
                 key={`${item.id}-${item.name}-${item.type}`}
@@ -327,7 +323,7 @@ export default function TradeItemsWithValues({
           </div>
 
           {/* Items Container */}
-          <div className="space-y-4 rounded-xl p-6">
+          <div className="bg-tertiary-bg space-y-4 rounded-xl p-6">
             {requestingItems.map((item, index) => (
               <ItemRow
                 key={`${item.id}-${item.name}-${item.type}`}

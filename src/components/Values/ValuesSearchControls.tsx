@@ -1,12 +1,11 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { Icon } from "../ui/IconWrapper";
 import { FilterSort, ValueSort } from "@/types";
 import { useIsAuthenticated } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { safeSessionStorage } from "@/utils/safeStorage";
-
 import { Slider } from "@/components/ui/slider";
 
 interface ValuesSearchControlsProps {
@@ -19,8 +18,10 @@ interface ValuesSearchControlsProps {
   rangeValue: number[];
   setRangeValue: (value: number[]) => void;
   setAppliedMinValue: (value: number) => void;
+  appliedMaxValue: number;
   setAppliedMaxValue: (value: number) => void;
   searchSectionRef: React.RefObject<HTMLDivElement | null>;
+  maxValueRange: number;
 }
 
 export default function ValuesSearchControls({
@@ -33,13 +34,15 @@ export default function ValuesSearchControls({
   rangeValue,
   setRangeValue,
   setAppliedMinValue,
+  appliedMaxValue,
   setAppliedMaxValue,
   searchSectionRef,
+  maxValueRange,
 }: ValuesSearchControlsProps) {
   const isAuthenticated = useIsAuthenticated();
   const [isSearchHighlighted, setIsSearchHighlighted] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
-  const MAX_VALUE_RANGE = 50_000_000;
+
   // Local state for the slider visual position to ensure 60fps movement
   const [localRange, setLocalRange] = useState(rangeValue);
   // Local state for numerical inputs to allow typing
@@ -96,11 +99,24 @@ export default function ValuesSearchControls({
     );
   };
 
-  const sliderMarks = [
-    { value: 10_000_000, label: "10M" },
-    { value: 25_000_000, label: "25M" },
-    { value: 50_000_000, label: "50M" },
-  ];
+  const sliderMarks = useMemo(() => {
+    const marks = [];
+    if (maxValueRange >= 10_000_000)
+      marks.push({ value: 10_000_000, label: "10M" });
+    if (maxValueRange >= 25_000_000)
+      marks.push({ value: 25_000_000, label: "25M" });
+
+    // Add marks every 50M if max is large
+    if (maxValueRange > 50_000_000) {
+      for (let i = 50_000_000; i <= maxValueRange; i += 50_000_000) {
+        marks.push({ value: i, label: `${i / 1_000_000}M` });
+      }
+    } else if (maxValueRange >= 50_000_000) {
+      marks.push({ value: 50_000_000, label: "50M" });
+    }
+
+    return marks;
+  }, [maxValueRange]);
 
   // Handle Ctrl+F to focus search input
   useEffect(() => {
@@ -332,7 +348,7 @@ export default function ValuesSearchControls({
                         let val = parseInt(stripCommas(maxInput)) || 0;
                         val = Math.max(
                           localRange[0],
-                          Math.min(val, MAX_VALUE_RANGE),
+                          Math.min(val, maxValueRange),
                         );
                         const newRange = [localRange[0], val];
                         setLocalRange(newRange);
@@ -347,8 +363,8 @@ export default function ValuesSearchControls({
                   </div>
                   <span className="text-secondary-text text-[11px] whitespace-nowrap">
                     {localRange[0].toLocaleString()} -{" "}
-                    {localRange[1] >= MAX_VALUE_RANGE
-                      ? `${MAX_VALUE_RANGE.toLocaleString()}+`
+                    {localRange[1] >= maxValueRange
+                      ? `${maxValueRange.toLocaleString()}+`
                       : localRange[1].toLocaleString()}
                   </span>
                 </div>
@@ -366,16 +382,16 @@ export default function ValuesSearchControls({
                     setAppliedMaxValue(newValue[1]);
                   }}
                   min={0}
-                  max={MAX_VALUE_RANGE}
+                  max={maxValueRange}
                   step={50_000}
                 />
                 <div className="relative mt-2 h-4 w-full">
-                  {sliderMarks.map((mark) => (
+                  {sliderMarks.map((mark: { value: number; label: string }) => (
                     <div
                       key={mark.value}
                       className="absolute top-0 flex -translate-x-1/2 flex-col items-center"
                       style={{
-                        left: `${(mark.value / MAX_VALUE_RANGE) * 100}%`,
+                        left: `${(mark.value / maxValueRange) * 100}%`,
                       }}
                     >
                       <div className="bg-secondary-text mb-1 h-1 w-0.5" />

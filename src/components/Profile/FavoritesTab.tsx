@@ -194,7 +194,7 @@ export default function FavoritesTab({
       >
         <Box className="border-border-primary bg-primary-bg hover:border-border-focus rounded-lg border p-3 shadow-sm transition-colors">
           <div className="mb-2 flex items-center">
-            <div className="relative mr-3 h-16 w-16 shrink-0 overflow-hidden rounded-md md:h-[4.5rem] md:w-32">
+            <div className="relative mr-3 h-16 w-16 shrink-0 overflow-hidden rounded-md md:h-18 md:w-32">
               {isVideo ? (
                 <video
                   src={getVideoPath(itemType, imageName)}
@@ -305,7 +305,7 @@ export default function FavoritesTab({
             {[...Array(6)].map((_, index) => (
               <Box key={index} className="rounded-lg border p-3 shadow-sm">
                 <div className="mb-2 flex items-center">
-                  <div className="relative mr-3 h-16 w-16 shrink-0 overflow-hidden rounded-md md:h-[4.5rem] md:w-32">
+                  <div className="relative mr-3 h-16 w-16 shrink-0 overflow-hidden rounded-md md:h-18 md:w-32">
                     <Skeleton
                       variant="rectangular"
                       width="100%"

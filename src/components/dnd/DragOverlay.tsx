@@ -12,19 +12,11 @@ interface CustomDragOverlayProps {
 export const CustomDragOverlay: React.FC<CustomDragOverlayProps> = ({
   item,
 }) => {
-  const getDisplayName = (tradeItem: TradeItem) => {
-    if (tradeItem.sub_name) {
-      const base = tradeItem.base_name ?? tradeItem.name;
-      return `${base} (${tradeItem.sub_name})`;
-    }
-    return tradeItem.name;
-  };
-
   return (
     <DndKitDragOverlay>
       {item ? (
         <div className="border-button-info bg-primary-bg shadow-card-shadow w-[200px] rounded-lg border-2 p-2 opacity-90">
-          <div className="relative mb-2 aspect-[4/3] overflow-hidden rounded-md">
+          <div className="relative mb-2 aspect-4/3 overflow-hidden rounded-md">
             <Image
               src={getItemImagePath(item.type, item.name, true)}
               alt={item.name}
@@ -35,7 +27,7 @@ export const CustomDragOverlay: React.FC<CustomDragOverlayProps> = ({
           </div>
           <div className="flex flex-col space-y-1">
             <span className="text-primary-text text-sm font-semibold">
-              {getDisplayName(item)}
+              {item.name}
             </span>
             <span
               className="text-primary-text inline-flex w-fit items-center rounded-full border px-2 py-0.5 text-xs font-medium"

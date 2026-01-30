@@ -23,15 +23,11 @@ const getItemData = (item: TradeItem): TradeItem => {
     return {
       ...item.data,
       id: item.id,
-      is_sub: "sub_name" in item,
-      sub_name: "sub_name" in item ? item.sub_name : undefined,
+      is_sub: false,
       tradable: item.data.tradable ? 1 : 0,
       is_limited: item.data.is_limited ?? 0,
       trend: item.trend ?? item.data?.trend ?? null,
-      name:
-        "sub_name" in item
-          ? `${item.data.name} (${item.sub_name})`
-          : item.data.name,
+      name: item.data.name,
       base_name: item.data.name,
     };
   }
@@ -99,7 +95,7 @@ export default function TradeItemsImages({
               }}
             >
               <Link
-                href={`/item/${item.type.toLowerCase()}/${item.base_name || item.name}${"sub_name" in item ? `?variant=${item.sub_name}` : ""}`}
+                href={`/item/${item.type.toLowerCase()}/${item.base_name || item.name}`}
                 prefetch={false}
                 className="hover:ring-button-info relative aspect-square h-32 w-32 overflow-hidden rounded-lg transition-all hover:ring-2"
               >
@@ -173,7 +169,7 @@ export default function TradeItemsImages({
               }}
             >
               <Link
-                href={`/item/${item.type.toLowerCase()}/${item.base_name || item.name}${"sub_name" in item ? `?variant=${item.sub_name}` : ""}`}
+                href={`/item/${item.type.toLowerCase()}/${item.base_name || item.name}`}
                 prefetch={false}
                 className="hover:ring-button-info relative aspect-square h-32 w-32 overflow-hidden rounded-lg transition-all hover:ring-2"
               >
