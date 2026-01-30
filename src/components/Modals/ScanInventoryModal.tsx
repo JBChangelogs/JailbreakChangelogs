@@ -1,5 +1,6 @@
 "use client";
 
+import { Button } from "../ui/button";
 import TurnstileWidget from "../Turnstile/TurnstileWidget";
 
 interface ScanInventoryModalProps {
@@ -42,12 +43,14 @@ export default function ScanInventoryModal({
           <p className="text-secondary-text mb-4">
             Turnstile is not configured. Please contact support.
           </p>
-          <button
+          <Button
             onClick={onClose}
-            className="bg-button-secondary text-secondary-text hover:bg-button-secondary-hover w-full cursor-pointer rounded-lg px-4 py-2 text-sm font-medium transition-colors"
+            variant="secondary"
+            size="md"
+            className="w-full"
           >
             Close
-          </button>
+          </Button>
         </div>
       </div>
     );
@@ -101,13 +104,15 @@ export default function ScanInventoryModal({
           </div>
         )}
 
-        <button
+        <Button
           onClick={onClose}
           disabled={isScanning}
-          className="bg-button-secondary text-secondary-text hover:bg-button-secondary-hover w-full cursor-pointer rounded-lg px-4 py-2 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+          variant="secondary"
+          size="md"
+          className="w-full"
         >
           Cancel
-        </button>
+        </Button>
       </div>
     </div>
   );

@@ -93,7 +93,7 @@ const ReportCommentModal: React.FC<ReportCommentModalProps> = ({
             <div className="modal-footer flex justify-end gap-2 px-6 py-4">
               <Button
                 variant="ghost"
-                size="sm"
+                size="md"
                 onClick={onClose}
                 disabled={isSubmitting}
               >
@@ -101,7 +101,7 @@ const ReportCommentModal: React.FC<ReportCommentModalProps> = ({
               </Button>
               <Button
                 variant="default"
-                size="sm"
+                size="md"
                 onClick={handleSubmit}
                 disabled={!reportReason.trim() || isSubmitting}
               >

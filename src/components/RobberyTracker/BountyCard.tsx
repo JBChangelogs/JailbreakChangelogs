@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import { Icon } from "@/components/ui/IconWrapper";
+import { Button } from "@/components/ui/button";
 import { useOptimizedRealTimeRelativeDate } from "@/hooks/useSharedTimer";
 import { BountyData } from "@/hooks/useRobberyTrackerBountiesWebSocket";
 import RobberyPlayersModal from "./RobberyPlayersModal";
@@ -126,13 +127,14 @@ export default function BountyCard({
 
             {/* View Players Button */}
             {players.length > 0 && (
-              <button
+              <Button
                 onClick={() => setIsPlayersModalOpen(true)}
-                className="active:bg-button-secondary-active bg-button-secondary text-primary-text hover:bg-button-secondary-hover focus:ring-border-focus mt-2 flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition-colors duration-200 focus:ring-2 focus:outline-none"
+                variant="secondary"
+                className="mt-2 w-full"
               >
                 <Icon icon="heroicons-outline:users" className="h-4 w-4" />
                 View {players.length} Players
-              </button>
+              </Button>
             )}
           </div>
         )}

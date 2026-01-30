@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { CircularProgress, Box, Chip, Skeleton, Tooltip } from "@mui/material";
+import { Button } from "@/components/ui/button";
 import { Pagination } from "@/components/ui/Pagination";
 import { useOptimizedRealTimeRelativeDate } from "@/hooks/useSharedTimer";
 import { formatCustomDate } from "@/utils/timestamp";
@@ -338,12 +339,9 @@ export default function TradeAdsTab({
                 : "No trade ads available."}
             </h3>
             {isOwnProfile && (
-              <Link
-                href="/trading"
-                className="border-button-info bg-button-info text-form-button-text hover:bg-button-info-hover mt-4 inline-block rounded-lg border px-4 py-2 text-sm font-semibold transition-colors"
-              >
-                Create Trade Ad
-              </Link>
+              <Button asChild variant="default" size="sm" className="mt-4">
+                <Link href="/trading">Create Trade Ad</Link>
+              </Button>
             )}
           </div>
         ) : (

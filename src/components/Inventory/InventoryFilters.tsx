@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Icon } from "../ui/IconWrapper";
+import { Button } from "../ui/button";
 
 type SortOrder =
   | "alpha-asc"
@@ -151,13 +152,14 @@ export default function InventoryFilters({
       </div>
 
       {/* Advanced Filters Toggle Button */}
-      <button
+      <Button
         onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
-        className="bg-button-info text-form-button-text hover:bg-button-info-hover flex w-fit cursor-pointer items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors"
+        size="sm"
+        className="w-fit"
       >
         <Icon icon="rivet-icons:filter" className="h-4 w-4" inline={true} />
         Filter
-      </button>
+      </Button>
 
       {/* Advanced Filters Section */}
       {showAdvancedFilters && (

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { CircularProgress, Box, Chip } from "@mui/material";
+import { Button } from "@/components/ui/button";
 import { Pagination } from "@/components/ui/Pagination";
 import Comment from "../ProfileComments/Comments";
 import { Icon } from "@/components/ui/IconWrapper";
@@ -238,27 +239,21 @@ export default function CommentsTab({
               Comments [{filteredComments.length}]
             </h2>
           </div>
-          <button
+          <Button
             onClick={() =>
               setSortOrder((prev) => (prev === "newest" ? "oldest" : "newest"))
             }
-            className="border-border-primary bg-button-info text-form-button-text hover:border-border-focus hover:bg-button-info-hover flex cursor-pointer items-center gap-1 rounded-lg border px-3 py-1.5 text-sm transition-colors"
+            variant="default"
+            size="sm"
+            className="flex items-center gap-1"
           >
             {sortOrder === "newest" ? (
-              <Icon
-                icon="heroicons-outline:arrow-down"
-                className="h-4 w-4"
-                inline={true}
-              />
+              <Icon icon="heroicons-outline:arrow-down" className="h-4 w-4" />
             ) : (
-              <Icon
-                icon="heroicons-outline:arrow-up"
-                className="h-4 w-4"
-                inline={true}
-              />
+              <Icon icon="heroicons-outline:arrow-up" className="h-4 w-4" />
             )}
             {sortOrder === "newest" ? "Newest First" : "Oldest First"}
-          </button>
+          </Button>
         </div>
 
         {comments.length === 0 ? (

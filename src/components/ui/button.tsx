@@ -18,7 +18,7 @@ const buttonVariants = cva(
         outline:
           "border-2! border-form-button-text! text-form-button-text! hover:bg-button-info-hover! active:bg-button-info-active!",
         secondary:
-          "bg-secondary-bg! text-primary-text! shadow-md hover:bg-quaternary-bg! active:bg-tertiary-bg! border! border-border-primary!",
+          "bg-button-secondary! text-primary-text! hover:bg-button-secondary-hover! active:bg-button-secondary-active!",
         ghost:
           "text-primary-text! hover:bg-secondary-bg! active:bg-tertiary-bg!",
         link: "text-link! underline-offset-4 hover:underline active:scale-100",

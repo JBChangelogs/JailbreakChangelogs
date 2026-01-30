@@ -11,6 +11,7 @@ import RobberyCard from "@/components/RobberyTracker/RobberyCard";
 import AirdropCard from "@/components/RobberyTracker/AirdropCard";
 import RobberyTrackerAuthWrapper from "@/components/RobberyTracker/RobberyTrackerAuthWrapper";
 import ExperimentalFeatureBanner from "@/components/ui/ExperimentalFeatureBanner";
+import { Button } from "@/components/ui/button";
 
 import { Masonry } from "@mui/lab";
 
@@ -598,7 +599,7 @@ function RobberyTrackerContent() {
                         type.marker_name,
                       );
                       return (
-                        <button
+                        <Button
                           key={type.marker_name}
                           onClick={() => {
                             setSelectedRobberyTypes((prev) =>
@@ -607,22 +608,15 @@ function RobberyTrackerContent() {
                                 : [...prev, type.marker_name],
                             );
                           }}
-                          className={`bg-secondary-bg text-primary-text hover:border-border-focus flex cursor-pointer items-center gap-2 rounded-lg border px-4 py-2 transition-all ${
-                            isSelected
-                              ? "border-button-info"
-                              : "border-border-primary"
-                          }`}
+                          variant={isSelected ? "default" : "secondary"}
+                          size="sm"
+                          className="gap-2"
                         >
                           {isSelected && (
-                            <Icon
-                              icon="heroicons:check"
-                              className="text-link h-4 w-4"
-                            />
+                            <Icon icon="heroicons:check" className="h-4 w-4" />
                           )}
-                          <span className="text-sm font-medium">
-                            {type.name}
-                          </span>
-                        </button>
+                          <span>{type.name}</span>
+                        </Button>
                       );
                     })}
                   </div>

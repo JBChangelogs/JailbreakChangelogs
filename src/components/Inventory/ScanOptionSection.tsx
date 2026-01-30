@@ -4,6 +4,8 @@ import Link from "next/link";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { ENABLE_WS_SCAN } from "@/utils/api";
 
+import { Button } from "../ui/button";
+
 interface ScanOptionSectionProps {
   variant?: "main" | "embedded";
   isOwnInventory?: boolean;
@@ -65,34 +67,26 @@ export default function ScanOptionSection({
             className={`flex ${isOwnInventory ? "justify-center" : "gap-2"}`}
           >
             {!isAuthenticated ? (
-              <Link
-                href="/faq"
-                className="bg-button-info text-form-button-text hover:bg-button-info-hover inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors"
-              >
-                Learn More
-              </Link>
+              <Button asChild size="sm">
+                <Link href="/faq">Learn More</Link>
+              </Button>
             ) : user?.roblox_id && !isOwnInventory ? (
               <div className="flex gap-2">
-                <Link
-                  href={`/inventories/${user.roblox_id}`}
-                  prefetch={false}
-                  className="bg-button-info text-form-button-text hover:bg-button-info-hover inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors"
-                >
-                  View My Inventory
-                </Link>
-                <Link
-                  href={`/og/${user.roblox_id}`}
-                  className="bg-button-info text-form-button-text hover:bg-button-info-hover inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors"
-                >
-                  View My OG items
-                </Link>
+                <Button asChild size="sm">
+                  <Link
+                    href={`/inventories/${user.roblox_id}`}
+                    prefetch={false}
+                  >
+                    View My Inventory
+                  </Link>
+                </Button>
+                <Button asChild size="sm">
+                  <Link href={`/og/${user.roblox_id}`}>View My OG items</Link>
+                </Button>
               </div>
             ) : user?.roblox_id && isOwnInventory ? (
               !ENABLE_WS_SCAN ? (
-                <button
-                  disabled
-                  className="border-button-info-disabled bg-button-info-disabled text-form-button-text inline-flex cursor-not-allowed items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium"
-                >
+                <Button disabled size="sm" className="gap-1.5">
                   <svg
                     className="h-4 w-4"
                     fill="none"
@@ -107,31 +101,30 @@ export default function ScanOptionSection({
                     />
                   </svg>
                   Scanning Temporarily Disabled
-                </button>
+                </Button>
               ) : (
-                <button
+                <Button
                   onClick={() => {
                     // This will be handled by the parent component with scan functionality
                     const event = new CustomEvent("requestScan");
                     window.dispatchEvent(event);
                   }}
-                  className="bg-button-info text-form-button-text hover:bg-button-info-hover inline-flex cursor-pointer items-center gap-1.5 rounded-md px-4 py-2 text-sm font-medium transition-colors"
                   data-umami-event="Request Inventory Scan"
                 >
                   Request a Scan
-                </button>
+                </Button>
               )
             ) : (
-              <button
+              <Button
                 onClick={() => {
                   setShowLoginModal(true);
                   const event = new CustomEvent("setLoginTab", { detail: 1 });
                   window.dispatchEvent(event);
                 }}
-                className="bg-button-info text-form-button-text hover:bg-button-info-hover inline-flex cursor-pointer items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors"
+                size="sm"
               >
                 Connect Roblox Account
-              </button>
+              </Button>
             )}
           </div>
         </div>

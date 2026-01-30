@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
 import { RobloxIcon } from "@/components/Icons/RobloxIcon";
 import { formatShortDate, formatCustomDate } from "@/utils/timestamp";
 import TradeAdsTab from "./TradeAdsTab";
@@ -172,14 +173,15 @@ export default function RobloxProfileTab({
 
               {user.roblox_id && (
                 <div className="pt-2">
-                  <Link
-                    href={`https://www.roblox.com/users/${user.roblox_id}/profile`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="bg-button-info text-form-button-text hover:bg-button-info-hover inline-flex items-center gap-2 rounded-lg px-4 py-2 transition-colors"
-                  >
-                    <span>View Roblox Profile</span>
-                  </Link>
+                  <Button asChild variant="default" size="md">
+                    <Link
+                      href={`https://www.roblox.com/users/${user.roblox_id}/profile`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <span>View Roblox Profile</span>
+                    </Link>
+                  </Button>
                 </div>
               )}
             </div>

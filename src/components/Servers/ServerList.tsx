@@ -19,6 +19,8 @@ import DOMPurify from "dompurify";
 import type { UserData } from "@/types/auth";
 import { CustomConfirmationModal } from "@/components/Modals/CustomConfirmationModal";
 
+import { Button } from "@/components/ui/button";
+
 const BADGE_BASE_URL =
   "https://assets.jailbreakchangelogs.xyz/assets/website_icons";
 const supporterIcons = {
@@ -570,9 +572,10 @@ const ServerList: React.FC<{
               </select>
             </div>
           </div>
-          <button
+          <Button
             onClick={handleAddServer}
-            className="border-button-info bg-button-info text-form-button-text hover:bg-button-info-hover inline-flex cursor-pointer items-center rounded-lg border px-3 py-2 whitespace-nowrap transition-colors"
+            size="sm"
+            className="whitespace-nowrap"
           >
             <Icon
               icon="heroicons:plus-circle"
@@ -580,7 +583,7 @@ const ServerList: React.FC<{
             />
             <span className="hidden sm:inline">Add Server</span>
             <span className="sm:hidden">Add</span>
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -670,64 +673,84 @@ const ServerList: React.FC<{
                 <div className="flex flex-wrap gap-2">
                   {loggedInUserId && loggedInUserId === server.owner ? (
                     <>
-                      <button
+                      <Button
                         onClick={() => handleCopyLink(server.link)}
-                        className="border-button-info bg-button-info text-form-button-text hover:bg-button-info-hover cursor-pointer rounded-lg border px-2 py-1 text-sm transition-colors sm:px-3"
+                        size="sm"
+                        variant="default"
+                        className="px-2 sm:px-3"
                         aria-label="Copy Server Link"
                         data-umami-event="Copy Server Link"
                         data-umami-event-server-id={server.id}
                       >
                         <Icon icon="heroicons:clipboard" className="h-4 w-4" />
-                      </button>
-                      <button
+                      </Button>
+                      <Button
                         onClick={() => handleEditServer(server)}
-                        className="border-button-info bg-button-info text-form-button-text hover:bg-button-info-hover cursor-pointer rounded-lg border px-2 py-1 text-sm transition-colors sm:px-3"
+                        size="sm"
+                        variant="secondary"
+                        className="px-2 sm:px-3"
                         aria-label="Edit Server"
                       >
                         <Icon icon="heroicons:pencil" className="h-4 w-4" />
-                      </button>
-                      <button
+                      </Button>
+                      <Button
                         onClick={() => handleDeleteServer(server)}
-                        className="border-button-danger bg-button-danger text-form-button-text hover:bg-button-danger-hover cursor-pointer rounded-lg border px-2 py-1 text-sm transition-colors sm:px-3"
+                        size="sm"
+                        variant="destructive"
+                        className="px-2 sm:px-3"
                         aria-label="Delete Server"
                       >
                         <Icon
                           icon="heroicons:trash-solid"
                           className="h-4 w-4"
                         />
-                      </button>
-                      <a
-                        href={server.link}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="border-button-info bg-button-info text-form-button-text hover:bg-button-info-hover cursor-pointer rounded-lg border px-2 py-1 text-sm transition-colors sm:px-3"
+                      </Button>
+                      <Button
+                        asChild
+                        size="sm"
+                        variant="default"
+                        className="px-2 sm:px-3"
                         data-umami-event="Join Server"
                         data-umami-event-server-id={server.id}
                       >
-                        Join Server
-                      </a>
+                        <a
+                          href={server.link}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          Join Server
+                        </a>
+                      </Button>
                     </>
                   ) : (
                     <>
-                      <button
+                      <Button
                         onClick={() => handleCopyLink(server.link)}
-                        className="border-button-info bg-button-info text-form-button-text hover:bg-button-info-hover cursor-pointer rounded-lg border px-2 py-1 text-sm transition-colors sm:px-3"
+                        size="sm"
+                        variant="default"
+                        className="px-2 sm:px-3"
                         aria-label="Copy Server Link"
                         data-umami-event="Copy Server Link"
                         data-umami-event-server-id={server.id}
                       >
                         <Icon icon="heroicons:clipboard" className="h-4 w-4" />
-                      </button>
-                      <a
-                        href={server.link}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="border-button-info bg-button-info text-form-button-text hover:bg-button-info-hover cursor-pointer rounded-lg border px-2 py-1 text-sm transition-colors sm:px-3"
+                      </Button>
+                      <Button
+                        asChild
+                        size="sm"
+                        variant="default"
+                        className="px-2 sm:px-3"
                         data-umami-event="Join Server"
                         data-umami-event-server-id={server.id}
                       >
-                        Join Server
-                      </a>
+                        <a
+                          href={server.link}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          Join Server
+                        </a>
+                      </Button>
                     </>
                   )}
                 </div>

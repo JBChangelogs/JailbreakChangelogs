@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Dialog, CircularProgress } from "@mui/material";
+import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/IconWrapper";
 import { UserAvatar } from "@/utils/avatar";
 import Link from "next/link";
@@ -371,27 +372,21 @@ const FollowersModal: React.FC<FollowersModalProps> = ({
                                             ·
                                           </span>
                                         )}
-                                        <button
+                                        <Button
                                           onClick={(e) => {
                                             e.preventDefault();
                                             e.stopPropagation();
                                             handleFollow(user.id);
                                           }}
                                           disabled={loadingFollow[user.id]}
-                                          className="text-button-info hover:text-button-info-hover disabled:text-primary-text text-xs whitespace-nowrap hover:cursor-pointer hover:underline sm:text-sm"
+                                          variant="ghost"
+                                          size="sm"
+                                          className="text-button-info hover:text-button-info-hover px-2"
                                         >
-                                          {loadingFollow[user.id] ? (
-                                            <CircularProgress
-                                              size={10}
-                                              sx={{
-                                                color:
-                                                  "var(--color-button-info)",
-                                              }}
-                                            />
-                                          ) : (
-                                            "Follow"
-                                          )}
-                                        </button>
+                                          {loadingFollow[user.id]
+                                            ? "..."
+                                            : "Follow"}
+                                        </Button>
                                       </>
                                     )}
                                 </div>
