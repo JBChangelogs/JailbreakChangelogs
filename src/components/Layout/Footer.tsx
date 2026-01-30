@@ -149,8 +149,7 @@ export default function Footer({ githubUrl, versionInfo }: FooterProps) {
                 Crafted with{" "}
                 <Icon
                   icon="line-md:heart-filled"
-                  className="inline h-4 w-4"
-                  style={{ color: "#1d80e2" }}
+                  className="text-link inline h-4 w-4"
                   inline={true}
                 />{" "}
                 by{" "}
