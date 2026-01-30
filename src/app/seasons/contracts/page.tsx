@@ -1,6 +1,7 @@
 import React from "react";
 import Link from "next/link";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
+import { Button } from "@/components/ui/button";
 import SeasonContractsClient from "@/components/Seasons/SeasonContractsClient";
 import WeeklyContractsCountdown from "@/components/Seasons/WeeklyContractsCountdown";
 import { fetchLatestSeason } from "@/utils/api";
@@ -56,13 +57,12 @@ export default async function SeasonContractsPage() {
 
               {/* Action buttons */}
               <div className="flex justify-center">
-                <Link
-                  href="/seasons"
-                  className="bg-button-info text-form-button-text hover:bg-button-info-hover inline-flex items-center gap-2 rounded-lg px-6 py-3 font-medium transition-colors"
-                >
-                  <Icon icon="line-md:calendar" className="h-5 w-5" />
-                  View Seasons
-                </Link>
+                <Button asChild>
+                  <Link href="/seasons">
+                    <Icon icon="line-md:calendar" className="h-5 w-5" />
+                    View Seasons
+                  </Link>
+                </Button>
               </div>
 
               {/* Additional helpful info */}
@@ -122,13 +122,12 @@ export default async function SeasonContractsPage() {
 
               {/* Action buttons */}
               <div className="flex justify-center">
-                <Link
-                  href="/seasons"
-                  className="bg-button-info text-form-button-text hover:bg-button-info-hover inline-flex items-center gap-2 rounded-lg px-6 py-3 font-medium transition-colors"
-                >
-                  <Icon icon="line-md:calendar" className="h-5 w-5" />
-                  View Seasons
-                </Link>
+                <Button asChild>
+                  <Link href="/seasons">
+                    <Icon icon="line-md:calendar" className="h-5 w-5" />
+                    View Seasons
+                  </Link>
+                </Button>
               </div>
 
               {/* Additional helpful info */}

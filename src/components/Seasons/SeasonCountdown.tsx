@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
 
 interface Reward {
   id: number;
@@ -305,27 +306,28 @@ const SeasonCountdown: React.FC<SeasonCountdownProps> = ({
             )}
             {nextSeasonStatus.includes("Submissions") && (
               <div className="mt-2">
-                <a
-                  href={process.env.NEXT_PUBLIC_SUBMISSIONS_URL || "#"}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="bg-button-info text-form-button-text hover:bg-button-info-hover inline-block rounded-lg px-4 py-2 transition-colors"
-                  onClick={() => {
-                    if (typeof window !== "undefined" && window.umami) {
-                      const buttonType = nextSeasonStatus.includes("close in")
-                        ? "Submit a Creation"
-                        : "View Submissions";
-                      window.umami.track("Season Submission Click", {
-                        buttonType,
-                        season: nextSeason?.season || "unknown",
-                      });
-                    }
-                  }}
-                >
-                  {nextSeasonStatus.includes("close in")
-                    ? "Submit a Creation"
-                    : "View Submissions"}
-                </a>
+                <Button asChild>
+                  <a
+                    href={process.env.NEXT_PUBLIC_SUBMISSIONS_URL || "#"}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={() => {
+                      if (typeof window !== "undefined" && window.umami) {
+                        const buttonType = nextSeasonStatus.includes("close in")
+                          ? "Submit a Creation"
+                          : "View Submissions";
+                        window.umami.track("Season Submission Click", {
+                          buttonType,
+                          season: nextSeason?.season || "unknown",
+                        });
+                      }
+                    }}
+                  >
+                    {nextSeasonStatus.includes("close in")
+                      ? "Submit a Creation"
+                      : "View Submissions"}
+                  </a>
+                </Button>
               </div>
             )}
           </div>

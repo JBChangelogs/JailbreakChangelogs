@@ -7,6 +7,7 @@ import SeasonHeader from "@/components/Seasons/SeasonHeader";
 import SeasonNavigation from "@/components/Seasons/SeasonNavigation";
 import ImageGallery from "@/components/Seasons/ImageGallery";
 import ChangelogComments from "@/components/PageComments/ChangelogComments";
+import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { formatProfileDate } from "@/utils/timestamp";
 import { Season, CommentData } from "@/utils/api";
@@ -147,12 +148,11 @@ export default function SeasonDetailsClient({
                       </p>
                     </div>
                     <div className="shrink-0">
-                      <Link
-                        href="/seasons/will-i-make-it"
-                        className="bg-button-info text-form-button-text hover:bg-button-info-hover inline-block w-full rounded-lg px-6 py-3 text-center font-semibold transition-colors lg:w-auto"
-                      >
-                        Calculate My Progress
-                      </Link>
+                      <Button asChild className="w-full lg:w-auto">
+                        <Link href="/seasons/will-i-make-it">
+                          Calculate My Progress
+                        </Link>
+                      </Button>
                     </div>
                   </div>
                 </div>
@@ -171,12 +171,9 @@ export default function SeasonDetailsClient({
                       </p>
                     </div>
                     <div className="shrink-0">
-                      <Link
-                        href="/seasons/contracts"
-                        className="bg-button-info text-form-button-text hover:bg-button-info-hover inline-block w-full rounded-lg px-6 py-3 text-center font-semibold transition-colors lg:w-auto"
-                      >
-                        View Contracts
-                      </Link>
+                      <Button asChild className="w-full lg:w-auto">
+                        <Link href="/seasons/contracts">View Contracts</Link>
+                      </Button>
                     </div>
                   </div>
                 </div>

@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
 
 // Weekly contracts reset every Monday at 17:00 UTC
 const RESET_WEEKDAY = 1;
@@ -178,12 +179,11 @@ const WeeklyContractsCountdown: React.FC<WeeklyContractsCountdownProps> = ({
 
           {/* View Rewards Button */}
           <div className="flex justify-center">
-            <Link
-              href={`/seasons/${season?.season}`}
-              className="bg-button-info text-form-button-text hover:bg-button-info-hover rounded-lg px-4 py-2 text-sm font-semibold transition-colors"
-            >
-              View Season Rewards
-            </Link>
+            <Button asChild size="sm">
+              <Link href={`/seasons/${season?.season}`}>
+                View Season Rewards
+              </Link>
+            </Button>
           </div>
         </div>
 

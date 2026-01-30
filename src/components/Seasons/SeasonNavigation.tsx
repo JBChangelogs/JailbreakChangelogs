@@ -3,6 +3,7 @@
 import React from "react";
 import { toast } from "sonner";
 import { Icon } from "../ui/IconWrapper";
+import { Button } from "@/components/ui/button";
 
 interface SeasonNavigationProps {
   seasonList: Array<{ season: number; title: string }>;
@@ -48,22 +49,18 @@ const SeasonNavigation: React.FC<SeasonNavigationProps> = ({
             currentSeason && currentSeason.season.toString() !== selectedId
           );
         })() ? (
-          <button
-            onClick={onGoToLatestSeason}
-            className="bg-button-info text-form-button-text hover:bg-button-info-hover flex cursor-pointer items-center gap-2 rounded px-4 py-2 transition-colors"
-          >
+          <Button onClick={onGoToLatestSeason}>
             <Icon icon="heroicons:clock" className="h-4 w-4" inline={true} />
             <span>Go to Current Season</span>
-          </button>
+          </Button>
         ) : (
-          <button
+          <Button
             onClick={() => toast.error("Already on the current season")}
-            className="bg-button-info text-form-button-text hover:bg-button-info-hover flex cursor-not-allowed items-center gap-2 rounded px-4 py-2 opacity-50 transition-colors"
-            aria-disabled="true"
+            disabled
           >
             <Icon icon="heroicons:clock" className="h-4 w-4" inline={true} />
             <span>Go to Current Season</span>
-          </button>
+          </Button>
         )}
       </div>
     </div>
