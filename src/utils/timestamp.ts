@@ -150,7 +150,7 @@ export const formatFullDate = (timestamp: string | number): string => {
     hour12: true,
   };
 
-  return date.toLocaleDateString("en-US", options);
+  return date.toLocaleString(undefined, options);
 };
 
 /**

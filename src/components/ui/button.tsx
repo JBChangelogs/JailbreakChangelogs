@@ -10,21 +10,22 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          "bg-button-info text-form-button-text shadow-lg hover:bg-button-info-hover active:bg-button-info-active",
+          "!bg-button-info !text-form-button-text shadow-lg hover:!bg-button-info-hover active:!bg-button-info-active",
         destructive:
-          "bg-button-danger text-form-button-text shadow-lg hover:bg-button-danger-hover active:bg-button-danger",
+          "!bg-button-danger !text-form-button-text shadow-lg hover:!bg-button-danger-hover active:!bg-button-danger",
         outline:
-          "border-2 border-form-button-text text-form-button-text hover:bg-button-info-hover active:bg-button-info-active",
+          "!border-2 !border-form-button-text !text-form-button-text hover:!bg-button-info-hover active:!bg-button-info-active",
         secondary:
-          "bg-secondary-bg text-primary-text shadow-md hover:bg-quaternary-bg active:bg-tertiary-bg border border-border-primary",
-        ghost: "text-primary-text hover:bg-secondary-bg active:bg-tertiary-bg",
-        link: "text-link underline-offset-4 hover:underline active:scale-100",
+          "!bg-secondary-bg !text-primary-text shadow-md hover:!bg-quaternary-bg active:!bg-tertiary-bg border !border-border-primary",
+        ghost:
+          "!text-primary-text hover:!bg-secondary-bg active:!bg-tertiary-bg",
+        link: "!text-link underline-offset-4 hover:underline active:scale-100",
       },
       size: {
-        sm: "h-8 gap-1.5 px-3 text-xs",
-        md: "h-10 px-5 text-base",
-        lg: "px-8 py-3 text-lg",
-        icon: "size-10",
+        sm: "!h-8 !gap-1.5 !px-3 !text-xs",
+        md: "!h-10 !px-5 !text-base",
+        lg: "!px-8 !py-3 !text-lg",
+        icon: "!size-10",
       },
     },
     defaultVariants: {

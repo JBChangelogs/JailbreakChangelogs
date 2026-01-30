@@ -25,7 +25,15 @@ export async function DELETE(request: Request) {
   const text = await upstream.text();
 
   if (!upstream.ok) {
-    console.error("Trade delete failed:", text);
+    // Don't log 404 or 403 as errors
+    if (upstream.status !== 404 && upstream.status !== 403) {
+      const isHtml =
+        text.trim().startsWith("<!DOCTYPE") || text.trim().startsWith("<html");
+      const loggedText = isHtml
+        ? `HTML Error Page (Status ${upstream.status})`
+        : text.slice(0, 100);
+      console.error("Trade delete failed:", loggedText);
+    }
     return NextResponse.json(
       { message: "Failed to delete trade" },
       { status: upstream.status },

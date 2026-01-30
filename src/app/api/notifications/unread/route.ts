@@ -20,8 +20,11 @@ export async function GET() {
     );
 
     if (!response.ok) {
-      if (response.status === 404) {
-        return NextResponse.json({ error: "User not found" }, { status: 404 });
+      if (response.status === 404 || response.status === 522) {
+        return NextResponse.json(
+          { error: `Error: ${response.status}` },
+          { status: response.status },
+        );
       }
       throw new Error(`HTTP error! status: ${response.status}`);
     }
@@ -35,6 +38,12 @@ export async function GET() {
     ) {
       return NextResponse.json({ error: "Request timed out" }, { status: 504 });
     }
+
+    // Don't log expected errors like 404
+    if (error instanceof Error && error.message.includes("status: 404")) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+
     console.error("Error fetching unread notification count:", error);
     return NextResponse.json(
       { error: "Internal server error" },

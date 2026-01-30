@@ -3,6 +3,7 @@ import { Dialog, DialogPanel } from "@headlessui/react";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import LoginModalWrapper from "../Auth/LoginModalWrapper";
+import { Button } from "../ui/button";
 
 interface ReportCommentModalProps {
   open: boolean;
@@ -90,20 +91,23 @@ const ReportCommentModal: React.FC<ReportCommentModalProps> = ({
               </div>
             </div>
             <div className="modal-footer flex justify-end gap-2 px-6 py-4">
-              <button
+              <Button
+                variant="ghost"
+                size="sm"
                 onClick={onClose}
                 disabled={isSubmitting}
-                className="text-secondary-text hover:text-primary-text cursor-pointer rounded border-none bg-transparent px-4 py-2 text-sm disabled:opacity-50"
               >
                 Cancel
-              </button>
-              <button
+              </Button>
+              <Button
+                variant="default"
+                size="sm"
                 onClick={handleSubmit}
                 disabled={!reportReason.trim() || isSubmitting}
-                className="bg-button-info text-form-button-text min-w-[100px] cursor-pointer rounded border-none px-4 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-50"
+                className="min-w-[100px]"
               >
                 {isSubmitting ? "Submitting..." : "Submit Report"}
-              </button>
+              </Button>
             </div>
           </DialogPanel>
         </div>

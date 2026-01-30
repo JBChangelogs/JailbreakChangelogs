@@ -3,6 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { Icon } from "@/components/ui/IconWrapper";
+import { Button } from "@/components/ui/button";
 
 export default function NotFound() {
   return (
@@ -19,21 +20,27 @@ export default function NotFound() {
           </p>
 
           <div className="mt-6 flex flex-col items-center gap-3 sm:flex-row">
-            <button
+            <Button
+              variant="secondary"
+              size="md"
               onClick={() => window.history.back()}
-              className="bg-primary-bg text-primary-text hover:bg-secondary-bg flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg px-6 py-3 transition-colors sm:w-auto"
+              className="w-full sm:w-auto"
             >
               <Icon icon="heroicons-outline:arrow-left" className="h-5 w-5" />
               <span>Go back</span>
-            </button>
+            </Button>
 
-            <Link
-              href="/"
-              className="bg-button-info text-form-button-text hover:bg-button-info-hover flex w-full items-center justify-center gap-2 rounded-lg px-6 py-3 font-medium transition-colors sm:w-auto"
+            <Button
+              variant="default"
+              size="md"
+              asChild
+              className="w-full sm:w-auto"
             >
-              <Icon icon="heroicons-outline:home" className="h-5 w-5" />
-              Take me home
-            </Link>
+              <Link href="/">
+                <Icon icon="heroicons-outline:home" className="h-5 w-5" />
+                Take me home
+              </Link>
+            </Button>
           </div>
         </div>
 

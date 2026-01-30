@@ -7,9 +7,8 @@ import "./globals.css";
 import Header from "@/components/Layout/Header";
 import MaintenanceBypass from "@/components/Layout/MaintenanceBypass";
 import Footer from "@/components/Layout/Footer";
-import VersionInfoServer from "@/components/Layout/VersionInfoServer";
+import VersionInfoWrapper from "@/components/Layout/VersionInfoWrapper";
 import VersionInfoSkeleton from "@/components/Layout/VersionInfoSkeleton";
-
 import { Toaster } from "@/components/ui/sonner";
 import NextTopLoader from "nextjs-toploader";
 import AuthCheck from "@/components/Auth/AuthCheck";
@@ -209,7 +208,7 @@ export default async function RootLayout({
                             githubUrl={githubUrl}
                             versionInfo={
                               <Suspense fallback={<VersionInfoSkeleton />}>
-                                <VersionInfoServer />
+                                <VersionInfoWrapper />
                               </Suspense>
                             }
                           />
@@ -341,7 +340,7 @@ export default async function RootLayout({
                         githubUrl={githubUrl}
                         versionInfo={
                           <Suspense fallback={<VersionInfoSkeleton />}>
-                            <VersionInfoServer />
+                            <VersionInfoWrapper />
                           </Suspense>
                         }
                       />
