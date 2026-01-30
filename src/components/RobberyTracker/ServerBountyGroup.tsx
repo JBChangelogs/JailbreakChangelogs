@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { Icon } from "@/components/ui/IconWrapper";
+import { Button } from "@/components/ui/button";
 import { BountyData } from "@/hooks/useRobberyTrackerBountiesWebSocket";
 import BountyCard from "./BountyCard";
 import { useOptimizedRealTimeRelativeDate } from "@/hooks/useSharedTimer";
@@ -118,29 +119,31 @@ export default function ServerBountyGroup({
           <div className="flex flex-wrap items-center gap-4">
             {/* View Players Button */}
             {players.length > 0 && (
-              <button
+              <Button
                 onClick={() => setIsPlayersModalOpen(true)}
-                className="bg-button-secondary text-primary-text hover:bg-button-secondary-hover focus:ring-border-focus active:bg-button-secondary-active flex cursor-pointer items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-semibold transition-colors duration-200 focus:ring-2 focus:outline-none"
+                variant="secondary"
+                size="sm"
               >
                 <Icon icon="heroicons-outline:users" className="h-3.5 w-3.5" />
                 View {players.length} Players
-              </button>
+              </Button>
             )}
 
             {/* Join Server Button */}
             {jobId && (
-              <a
-                href={`http://tracker.jailbreakchangelogs.xyz/?jobid=${jobId}&utm_campaign=Bounty_Tracker&utm_term=Bounty&utm_source=website`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="bg-button-info text-form-button-text hover:bg-button-info-hover focus:ring-border-focus active:bg-button-info-active flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-semibold transition-colors duration-200 focus:ring-2 focus:outline-none"
-              >
-                <Icon
-                  icon="heroicons:arrow-top-right-on-square"
-                  className="h-3.5 w-3.5"
-                />
-                Join Server
-              </a>
+              <Button asChild variant="default" size="sm">
+                <a
+                  href={`http://tracker.jailbreakchangelogs.xyz/?jobid=${jobId}&utm_campaign=Bounty_Tracker&utm_term=Bounty&utm_source=website`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <Icon
+                    icon="heroicons:arrow-top-right-on-square"
+                    className="h-3.5 w-3.5"
+                  />
+                  Join Server
+                </a>
+              </Button>
             )}
           </div>
 

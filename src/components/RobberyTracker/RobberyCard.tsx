@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { Icon } from "@/components/ui/IconWrapper";
+import { Button } from "@/components/ui/button";
 import { useOptimizedRealTimeRelativeDate } from "@/hooks/useSharedTimer";
 import { RobberyData } from "@/hooks/useRobberyTrackerWebSocket";
 import { useServerRegions } from "@/hooks/useServerRegions";
@@ -326,29 +327,31 @@ export default function RobberyCard({ robbery }: RobberyCardProps) {
 
           {/* Join Server Button */}
           {jobId && (
-            <a
-              href={`http://tracker.jailbreakchangelogs.xyz/?jobid=${jobId}&utm_campaign=${robbery.marker_name === "Mansion" ? "Mansion_Tracker" : "Robbery_Tracker"}&utm_term=${displayName.replace(/ /g, "+")}&utm_source=website`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="bg-button-info text-form-button-text hover:bg-button-info-hover focus:ring-border-focus active:bg-button-info-active mt-3 flex w-full items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition-colors duration-200 focus:ring-2 focus:outline-none"
-            >
-              <Icon
-                icon="heroicons:arrow-top-right-on-square"
-                className="h-4 w-4"
-              />
-              Join Server
-            </a>
+            <Button asChild variant="default" className="mt-3 w-full">
+              <a
+                href={`http://tracker.jailbreakchangelogs.xyz/?jobid=${jobId}&utm_campaign=${robbery.marker_name === "Mansion" ? "Mansion_Tracker" : "Robbery_Tracker"}&utm_term=${displayName.replace(/ /g, "+")}&utm_source=website`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <Icon
+                  icon="heroicons:arrow-top-right-on-square"
+                  className="h-4 w-4"
+                />
+                Join Server
+              </a>
+            </Button>
           )}
 
           {/* View Players Button */}
           {players.length > 0 && (
-            <button
+            <Button
               onClick={() => setIsPlayersModalOpen(true)}
-              className="active:bg-button-secondary-active bg-button-secondary text-primary-text hover:bg-button-secondary-hover focus:ring-border-focus mt-2 flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition-colors duration-200 focus:ring-2 focus:outline-none"
+              variant="default"
+              className="mt-2 w-full"
             >
               <Icon icon="heroicons-outline:users" className="h-4 w-4" />
               View {players.length} Players
-            </button>
+            </Button>
           )}
         </div>
 

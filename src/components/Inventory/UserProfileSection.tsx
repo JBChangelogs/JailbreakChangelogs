@@ -23,6 +23,7 @@ import {
   showScanSuccessToast,
   showScanErrorToast,
 } from "@/utils/scanToasts";
+import { Button } from "../ui/button";
 
 const Tooltip = dynamic(() => import("@mui/material/Tooltip"), { ssr: false });
 
@@ -350,22 +351,16 @@ export default function UserProfileSection({
         <div className="mt-4 space-y-3 xl:mt-0 xl:shrink-0">
           {/* Action Buttons */}
           <div className="flex flex-col gap-3 lg:flex-row lg:gap-3">
-            <button
+            <Button
               onClick={handleScanClick}
               disabled={
                 !ENABLE_WS_SCAN ||
                 scanWebSocket.status === "scanning" ||
                 scanWebSocket.status === "connecting"
               }
-              className={`inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
-                !ENABLE_WS_SCAN ||
-                scanWebSocket.status === "scanning" ||
-                scanWebSocket.status === "connecting"
-                  ? `border-button-info-disabled bg-button-info-disabled text-form-button-text ${
-                      !ENABLE_WS_SCAN ? "cursor-not-allowed" : "cursor-progress"
-                    }`
-                  : "bg-button-info text-form-button-text hover:bg-button-info-hover cursor-pointer"
-              }`}
+              variant="default"
+              size="md"
+              className="gap-2"
             >
               {!ENABLE_WS_SCAN ? (
                 <>
@@ -476,7 +471,7 @@ export default function UserProfileSection({
                   Scan Inventory
                 </>
               )}
-            </button>
+            </Button>
           </div>
 
           {/* Progress Bar - Only show when progress is defined */}
@@ -535,21 +530,17 @@ export default function UserProfileSection({
                       Scanning Temporarily Disabled
                     </span>
                   ) : !isAuthenticated ? (
-                    <Link
-                      href="/faq"
-                      className="bg-button-info text-form-button-text hover:bg-button-info-hover inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors"
-                    >
-                      Learn More
-                    </Link>
+                    <Button asChild size="sm">
+                      <Link href="/faq">Learn More</Link>
+                    </Button>
                   ) : user?.roblox_id ? (
-                    <Link
-                      href={`/inventories/${user.roblox_id}`}
-                      className="bg-button-info text-form-button-text hover:bg-button-info-hover inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors"
-                    >
-                      View My Inventory
-                    </Link>
+                    <Button asChild size="sm">
+                      <Link href={`/inventories/${user.roblox_id}`}>
+                        View My Inventory
+                      </Link>
+                    </Button>
                   ) : (
-                    <button
+                    <Button
                       onClick={() => {
                         setShowLoginModal(true);
                         const event = new CustomEvent("setLoginTab", {
@@ -557,10 +548,10 @@ export default function UserProfileSection({
                         });
                         window.dispatchEvent(event);
                       }}
-                      className="bg-button-info text-form-button-text hover:bg-button-info-hover inline-flex cursor-pointer items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors"
+                      size="sm"
                     >
                       Connect Roblox Account
-                    </button>
+                    </Button>
                   )}
                 </div>
               </div>

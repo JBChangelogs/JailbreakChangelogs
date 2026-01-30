@@ -7,6 +7,7 @@ import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { Dialog, DialogPanel } from "@headlessui/react";
+import { Button } from "@/components/ui/button";
 
 interface AddServerModalProps {
   isOpen: boolean;
@@ -467,19 +468,17 @@ const AddServerModal: React.FC<AddServerModalProps> = ({
 
               {/* Actions */}
               <div className="border-border-primary mt-8 flex justify-end space-x-4 border-t pt-6">
-                <button
-                  onClick={onClose}
-                  className="text-secondary-text hover:text-primary-text cursor-pointer rounded-md px-4 py-2 text-sm font-medium"
-                >
+                <Button onClick={onClose} variant="ghost" size="md">
                   Cancel
-                </button>
-                <button
+                </Button>
+                <Button
                   onClick={handleSubmit}
                   disabled={loading}
+                  variant="default"
+                  size="md"
                   data-umami-event={
                     editingServer ? "Edit Server" : "Add Server"
                   }
-                  className="bg-button-info text-form-button-text hover:bg-button-info-hover cursor-pointer rounded-md px-4 py-2 text-sm font-medium disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {loading
                     ? editingServer
@@ -488,7 +487,7 @@ const AddServerModal: React.FC<AddServerModalProps> = ({
                     : editingServer
                       ? "Edit Server"
                       : "Add Server"}
-                </button>
+                </Button>
               </div>
             </div>
           </div>

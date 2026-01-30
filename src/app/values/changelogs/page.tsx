@@ -9,6 +9,7 @@ import { PUBLIC_API_URL } from "@/utils/api";
 import Link from "next/link";
 import { formatMessageDate } from "@/utils/timestamp";
 import { Icon } from "@/components/ui/IconWrapper";
+import { Button } from "@/components/ui/button";
 import { useVirtualizer } from "@tanstack/react-virtual";
 
 interface ChangeData {
@@ -174,10 +175,7 @@ export default function ValuesChangelogPage() {
                 <p className="text-secondary-text mb-2 md:mb-0">
                   Total Changelogs: {changelogs.length}
                 </p>
-                <button
-                  onClick={toggleSortOrder}
-                  className="border-border-primary bg-button-info text-form-button-text hover:border-border-focus hover:bg-button-info-hover flex cursor-pointer items-center gap-1 rounded-lg border px-3 py-1.5 text-sm transition-colors"
-                >
+                <Button onClick={toggleSortOrder} size="sm">
                   {sortOrder === "newest" ? (
                     <Icon
                       icon="heroicons-outline:arrow-down"
@@ -192,14 +190,14 @@ export default function ValuesChangelogPage() {
                     />
                   )}
                   {sortOrder === "newest" ? "Newest First" : "Oldest First"}
-                </button>
+                </Button>
               </div>
 
               {/* Virtualized changelogs container */}
               <div className="border-border-primary bg-secondary-bg rounded-lg border">
                 <div
                   ref={parentRef}
-                  className="scrollbar-thin scrollbar-track-transparent scrollbar-thumb-border-primary hover:scrollbar-thumb-border-focus h-[60rem] overflow-y-auto"
+                  className="scrollbar-thin scrollbar-track-transparent scrollbar-thumb-border-primary hover:scrollbar-thumb-border-focus h-240 overflow-y-auto"
                   style={{
                     scrollbarWidth: "thin",
                     scrollbarColor: "var(--color-border-primary) transparent",

@@ -6,7 +6,8 @@ import Error from "next/error";
 import { notFound } from "next/navigation";
 import { UserAvatar } from "@/utils/avatar";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
-import { Button, Skeleton } from "@mui/material";
+import { Skeleton } from "@mui/material";
+import { Button } from "@/components/ui/button";
 import { Icon } from "../../../components/ui/IconWrapper";
 import { Banner } from "@/components/Profile/Banner";
 import { UserSettings, FollowingData } from "@/types/auth";
@@ -903,21 +904,15 @@ export default function UserProfileClient({
                   {/* Action Buttons */}
                   <div className="mt-1 flex justify-center md:mt-0 md:self-start">
                     {currentUserId === user.id ? (
-                      <Link href="/settings">
-                        <Button
-                          variant="contained"
-                          startIcon={
-                            <Icon
-                              icon="material-symbols:settings"
-                              className="h-5 w-5"
-                              inline={true}
-                            />
-                          }
-                          className="bg-button-info text-form-button-text hover:bg-button-info-hover"
-                        >
+                      <Button asChild variant="default" size="md">
+                        <Link href="/settings">
+                          <Icon
+                            icon="material-symbols:settings"
+                            className="h-5 w-5"
+                          />
                           Settings
-                        </Button>
-                      </Link>
+                        </Link>
+                      </Button>
                     ) : isAuthenticatedUser && currentUserId ? (
                       <Tooltip
                         title={
@@ -946,33 +941,19 @@ export default function UserProfileClient({
                       >
                         <span>
                           <Button
-                            variant="contained"
-                            startIcon={
-                              <Icon
-                                icon="heroicons:user-plus"
-                                className="h-5 w-5"
-                              />
-                            }
+                            variant={isFollowing ? "secondary" : "default"}
                             onClick={handleFollow}
                             disabled={isLoadingFollow}
-                            sx={{
-                              backgroundColor: "var(--color-button-info)",
-                              color: "var(--color-form-button-text)",
-                              borderColor: "var(--color-button-info)",
-                              "&:hover": {
-                                backgroundColor:
-                                  "var(--color-button-info-hover)",
-                                borderColor: "var(--color-button-info-hover)",
-                              },
-                              "&.Mui-disabled": {
-                                backgroundColor: "var(--color-quaternary-bg)",
-                                color: "var(--color-tertiary-text)",
-                              },
-                              "& .MuiButton-startIcon": {
-                                color: "var(--color-form-button-text)",
-                              },
-                            }}
+                            size="md"
                           >
+                            <Icon
+                              icon={
+                                isFollowing
+                                  ? "heroicons:user-minus"
+                                  : "heroicons:user-plus"
+                              }
+                              className="h-5 w-5"
+                            />
                             {isFollowing ? "Unfollow" : "Follow"}
                           </Button>
                         </span>

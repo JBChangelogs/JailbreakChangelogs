@@ -179,7 +179,7 @@ export default function AboutTab({
             <div className="flex justify-end gap-2">
               <Button
                 size="sm"
-                variant="outline"
+                variant="ghost"
                 onClick={() => {
                   setIsEditingBio(false);
                   setNewBio(bio || "");

@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Icon } from "@/components/ui/IconWrapper";
+import { Button } from "@/components/ui/button";
 import { ThemeProvider } from "@mui/material";
 import React from "react";
 import { fetchMissingRobloxData } from "./actions";
@@ -678,7 +679,7 @@ export default function InventoryCheckerClient({
                             OR
                           </div>
                           <div className="flex justify-center">
-                            <button
+                            <Button
                               onClick={() => {
                                 if (
                                   typeof window !== "undefined" &&
@@ -700,17 +701,9 @@ export default function InventoryCheckerClient({
                                 scanWebSocket.status === "scanning" ||
                                 scanWebSocket.status === "connecting"
                               }
-                              className={`inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
-                                !ENABLE_WS_SCAN ||
-                                scanWebSocket.status === "scanning" ||
-                                scanWebSocket.status === "connecting"
-                                  ? `border-button-info-disabled bg-button-info-disabled text-form-button-text ${
-                                      !ENABLE_WS_SCAN
-                                        ? "cursor-not-allowed"
-                                        : "cursor-progress"
-                                    }`
-                                  : "bg-button-info text-form-button-text hover:bg-button-info-hover cursor-pointer"
-                              }`}
+                              variant="default"
+                              size="md"
+                              className="gap-2"
                             >
                               {scanWebSocket.status === "connecting" ? (
                                 <>
@@ -865,7 +858,7 @@ export default function InventoryCheckerClient({
                                   )}
                                 </>
                               )}
-                            </button>
+                            </Button>
                           </div>
                         </div>
                       </div>

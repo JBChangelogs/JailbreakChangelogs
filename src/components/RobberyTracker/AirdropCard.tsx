@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import { Icon } from "@/components/ui/IconWrapper";
+import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 import { useOptimizedRealTimeRelativeDate } from "@/hooks/useSharedTimer";
 import { AirdropData } from "@/hooks/useRobberyTrackerAirdropsWebSocket";
@@ -201,41 +202,44 @@ export default function AirdropCard({ airdrop }: AirdropCardProps) {
           </div>
 
           {/* View Map Button */}
-          <button
+          <Button
             onClick={() => setIsMapModalOpen(true)}
+            variant="default"
+            className="mt-2 w-full"
             data-umami-event="View Airdrop Map"
             data-umami-event-location={airdrop.location}
-            className="active:bg-button-secondary-active bg-button-secondary text-form-button-text hover:bg-button-secondary-hover focus:ring-border-focus mt-2 flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition-colors duration-200 focus:ring-2 focus:outline-none"
           >
             <Icon icon="heroicons:map-pin" className="h-4 w-4" />
             View Location
-          </button>
+          </Button>
 
           {/* Join Server Button */}
           {jobId && (
-            <a
-              href={`http://tracker.jailbreakchangelogs.xyz/?jobid=${jobId}&utm_campaign=Airdrop_Tracker&utm_term=${airdrop.color}+Airdrop&utm_source=website`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="bg-button-info text-form-button-text hover:bg-button-info-hover focus:ring-border-focus active:bg-button-info-active mt-2 flex w-full items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition-colors duration-200 focus:ring-2 focus:outline-none"
-            >
-              <Icon
-                icon="heroicons:arrow-top-right-on-square"
-                className="h-4 w-4"
-              />
-              Join Server
-            </a>
+            <Button asChild variant="default" className="mt-2 w-full">
+              <a
+                href={`http://tracker.jailbreakchangelogs.xyz/?jobid=${jobId}&utm_campaign=Airdrop_Tracker&utm_term=${airdrop.color}+Airdrop&utm_source=website`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <Icon
+                  icon="heroicons:arrow-top-right-on-square"
+                  className="h-4 w-4"
+                />
+                Join Server
+              </a>
+            </Button>
           )}
 
           {/* View Players Button */}
           {players.length > 0 && (
-            <button
+            <Button
               onClick={() => setIsPlayersModalOpen(true)}
-              className="active:bg-button-secondary-active bg-button-secondary text-primary-text hover:bg-button-secondary-hover focus:ring-border-focus mt-2 flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition-colors duration-200 focus:ring-2 focus:outline-none"
+              variant="default"
+              className="mt-2 w-full"
             >
               <Icon icon="heroicons-outline:users" className="h-4 w-4" />
               View {players.length} Players
-            </button>
+            </Button>
           )}
         </div>
 

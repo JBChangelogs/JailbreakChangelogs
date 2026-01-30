@@ -1,5 +1,6 @@
 import React from "react";
 import { Icon } from "@/components/ui/IconWrapper";
+import { Button } from "@/components/ui/button";
 import { formatProfileDate } from "@/utils/timestamp";
 import Link from "next/link";
 import { toast } from "sonner";
@@ -44,12 +45,9 @@ const PrivateServersTab: React.FC<PrivateServersTabProps> = ({
             : "No private servers available."}
         </h3>
         {isOwnProfile && (
-          <Link
-            href="/servers"
-            className="border-button-info bg-button-info text-form-button-text hover:bg-button-info-hover mt-4 inline-block rounded-lg border px-4 py-2 text-sm font-semibold transition-colors"
-          >
-            Add Private Server
-          </Link>
+          <Button asChild variant="default" size="sm" className="mt-4">
+            <Link href="/servers">Add Private Server</Link>
+          </Button>
         )}
       </div>
     );
@@ -82,24 +80,32 @@ const PrivateServersTab: React.FC<PrivateServersTabProps> = ({
                   <span className="text-primary-text">Server #{index + 1}</span>
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  <button
+                  <Button
                     onClick={() => handleCopyLink(server.link)}
-                    className="border-button-info bg-button-info text-form-button-text hover:bg-button-info-hover cursor-pointer rounded-lg border px-2 py-1 text-sm transition-colors sm:px-3"
+                    variant="default"
+                    size="sm"
+                    className="px-2 sm:px-3"
                     aria-label="Copy Server Link"
                   >
                     <Icon
                       icon="heroicons-outline:clipboard"
                       className="h-4 w-4"
                     />
-                  </button>
-                  <a
-                    href={server.link}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="border-button-info bg-button-info text-form-button-text hover:bg-button-info-hover rounded-lg border px-2 py-1 text-sm transition-colors sm:px-3"
+                  </Button>
+                  <Button
+                    asChild
+                    variant="default"
+                    size="sm"
+                    className="px-2 sm:px-3"
                   >
-                    Join Server
-                  </a>
+                    <a
+                      href={server.link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Join Server
+                    </a>
+                  </Button>
                 </div>
               </div>
               <div className="space-y-3 sm:space-y-4">

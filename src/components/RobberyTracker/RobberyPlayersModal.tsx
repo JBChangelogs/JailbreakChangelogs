@@ -7,6 +7,8 @@ import { useRobloxBotsDataQuery } from "@/hooks/useRobloxDataQuery";
 import { Icon } from "@/components/ui/IconWrapper";
 import { DefaultAvatar } from "@/utils/avatar";
 
+import { Button } from "@/components/ui/button";
+
 interface Player {
   user_id: string;
   username: string | null;
@@ -98,14 +100,14 @@ export default function RobberyPlayersModal({
                     ? "Player"
                     : "Players"}
             </span>
-            <button
-              type="button"
+            <Button
+              variant="ghost"
+              size="icon"
               onClick={onClose}
-              className="text-secondary-text hover:text-primary-text cursor-pointer p-1 transition-colors"
               aria-label="Close modal"
             >
               <Icon icon="heroicons:x-mark" className="h-6 w-6" />
-            </button>
+            </Button>
           </div>
 
           {/* Tabs */}

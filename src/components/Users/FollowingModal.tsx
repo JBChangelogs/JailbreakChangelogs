@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Dialog, CircularProgress, Button } from "@mui/material";
+import { Dialog, CircularProgress } from "@mui/material";
+import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/IconWrapper";
 import { UserAvatar } from "@/utils/avatar";
 import Link from "next/link";
@@ -359,49 +360,24 @@ const FollowingModal: React.FC<FollowingModalProps> = ({
                           </Link>
                           {isOwnProfile && (
                             <Button
-                              variant="outlined"
-                              size="small"
-                              onClick={(e: React.MouseEvent) => {
+                              variant={
+                                followingStatus[user.id]
+                                  ? "secondary"
+                                  : "default"
+                              }
+                              size="sm"
+                              onClick={(e) => {
                                 e.preventDefault();
                                 handleFollowToggle(user.id);
                               }}
                               disabled={loadingFollow[user.id]}
-                              sx={{
-                                ml: 0.5,
-                                minWidth: "auto",
-                                px: 0.5,
-                                py: 0.5,
-                                borderColor: "var(--color-button-info)",
-                                color: "var(--color-button-info)",
-                                fontSize: "0.75rem",
-                                "&:hover": {
-                                  borderColor: "var(--color-button-info-hover)",
-                                  backgroundColor: followingStatus[user.id]
-                                    ? "transparent"
-                                    : "var(--color-button-info-hover)",
-                                },
-                                "&.Mui-disabled": {
-                                  color: "var(--color-form-button-text)",
-                                },
-                              }}
+                              className="ml-2 h-7 px-2 text-xs"
                             >
-                              {loadingFollow[user.id] ? (
-                                <div
-                                  className="flex items-center justify-center"
-                                  style={{ width: "80px" }}
-                                >
-                                  <CircularProgress
-                                    size={16}
-                                    sx={{ color: "var(--color-button-info)" }}
-                                  />
-                                </div>
-                              ) : (
-                                <div style={{ width: "80px" }}>
-                                  {followingStatus[user.id]
-                                    ? "Unfollow"
-                                    : "Follow"}
-                                </div>
-                              )}
+                              {loadingFollow[user.id]
+                                ? "..."
+                                : followingStatus[user.id]
+                                  ? "Unfollow"
+                                  : "Follow"}
                             </Button>
                           )}
                         </div>
