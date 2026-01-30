@@ -531,9 +531,7 @@ export const NavbarModern = ({
               }}
             >
               <PopoverTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
+                <button
                   suppressHydrationWarning={true}
                   className="border-border-primary bg-secondary-bg text-secondary-text hover:bg-quaternary-bg hover:text-primary-text relative flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg border transition-colors duration-200"
                 >
@@ -545,7 +543,7 @@ export const NavbarModern = ({
                   {isAuthenticated && (
                     <UnreadNotificationBadge count={unreadCount} />
                   )}
-                </Button>
+                </button>
               </PopoverTrigger>
             </Tooltip>
 
@@ -898,12 +896,7 @@ export const NavbarModern = ({
           {/* User menu or login button */}
           {!mounted ? (
             // Show login button during SSR and initial hydration to prevent mismatch
-            <button
-              onClick={() => setShowLoginModal(true)}
-              className="bg-button-info text-form-button-text hover:bg-button-info-hover cursor-pointer rounded-lg px-4 py-2 font-semibold transition-colors"
-            >
-              Login
-            </button>
+            <Button onClick={() => setShowLoginModal(true)}>Login</Button>
           ) : userData ? (
             <div
               className="relative"
@@ -1024,12 +1017,7 @@ export const NavbarModern = ({
               </AnimatePresence>
             </div>
           ) : (
-            <button
-              onClick={() => setShowLoginModal(true)}
-              className="bg-button-info text-form-button-text hover:bg-button-info-hover cursor-pointer rounded-lg px-4 py-2 font-semibold transition-colors"
-            >
-              Login
-            </button>
+            <Button onClick={() => setShowLoginModal(true)}>Login</Button>
           )}
         </div>
       </div>
