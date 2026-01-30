@@ -38,7 +38,13 @@ export async function POST(request: Request) {
     if (!resp.ok) {
       // Don't log 204, 404 or 403 as errors
       if (resp.status !== 204 && resp.status !== 404 && resp.status !== 403) {
-        console.error("Survey submit failed:", text);
+        const isHtml =
+          text.trim().startsWith("<!DOCTYPE") ||
+          text.trim().startsWith("<html");
+        const loggedText = isHtml
+          ? `HTML Error Page (Status ${resp.status})`
+          : text.slice(0, 100);
+        console.error("Survey submit failed:", loggedText);
       }
       return NextResponse.json(json ?? { message: "Error submitting survey" }, {
         status: resp.status,

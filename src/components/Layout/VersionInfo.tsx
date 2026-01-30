@@ -4,16 +4,22 @@ import { useState, useEffect } from "react";
 import { formatFullDate } from "@/utils/timestamp";
 import RailwayBadge from "./RailwayBadge";
 
-interface VersionInfoState {
+export interface VersionInfoState {
   version: string;
   date: number;
   branch: string;
   commitUrl: string;
 }
 
-export default function VersionInfo() {
+interface VersionInfoProps {
+  initialData?: VersionInfoState;
+}
+
+export default function VersionInfo({ initialData }: VersionInfoProps = {}) {
   const [formattedDate, setFormattedDate] = useState<string>("");
-  const [versionInfo, setVersionInfo] = useState<VersionInfoState | null>(null);
+  const [versionInfo, setVersionInfo] = useState<VersionInfoState | null>(
+    initialData || null,
+  );
 
   useEffect(() => {
     const fetchVersion = async () => {
@@ -24,7 +30,6 @@ export default function VersionInfo() {
         }
         const data: VersionInfoState = await response.json();
         setVersionInfo(data);
-        setFormattedDate(formatFullDate(data.date));
       } catch (error) {
         console.error("Error fetching version info:", error);
         const fallback: VersionInfoState = {
@@ -34,12 +39,21 @@ export default function VersionInfo() {
           commitUrl: "#",
         };
         setVersionInfo(fallback);
-        setFormattedDate(formatFullDate(fallback.date));
       }
     };
 
-    fetchVersion();
-  }, []);
+    if (!versionInfo) {
+      fetchVersion();
+    }
+  }, [versionInfo]);
+
+  // Handle date formatting on client only to avoid hydration mismatch
+  // and ensure local timezone display
+  useEffect(() => {
+    if (versionInfo?.date) {
+      setFormattedDate(formatFullDate(versionInfo.date));
+    }
+  }, [versionInfo?.date]);
 
   return (
     <div className="text-secondary-text space-y-1 text-xs leading-relaxed">

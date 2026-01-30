@@ -673,6 +673,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
               </Button>
               <Button
                 type="submit"
+                size="sm"
                 disabled={
                   isLoggedIn && (!newComment.trim() || isSubmittingComment)
                 }

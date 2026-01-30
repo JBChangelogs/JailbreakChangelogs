@@ -26,7 +26,12 @@ export async function GET() {
   if (!upstream.ok) {
     // Don't log 404 or 403 as errors
     if (upstream.status !== 404 && upstream.status !== 403) {
-      console.error("Survey request failed:", text);
+      const isHtml =
+        text.trim().startsWith("<!DOCTYPE") || text.trim().startsWith("<html");
+      const loggedText = isHtml
+        ? `HTML Error Page (Status ${upstream.status})`
+        : text.slice(0, 100);
+      console.error("Survey request failed:", loggedText);
     }
     return NextResponse.json({ survey: null }, { status: 200 });
   }
