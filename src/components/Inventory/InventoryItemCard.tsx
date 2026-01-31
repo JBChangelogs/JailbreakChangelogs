@@ -329,7 +329,7 @@ export default function InventoryItemCard({
             <span className="text-secondary-text">This item may be duped.</span>
             <Link
               href={`/dupes/compare?id=${encodeURIComponent(item.id)}`}
-              className="text-button-info hover:text-button-info-hover font-bold hover:underline"
+              className="text-link hover:text-link-hover font-bold hover:underline"
               onClick={(e) => e.stopPropagation()}
             >
               Compare Variants

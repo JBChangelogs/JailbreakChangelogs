@@ -8,6 +8,7 @@ import Image from "next/image";
 import { getCategoryColor } from "@/utils/categoryIcons";
 import { VerifiedBadgeIcon } from "@/components/Icons/VerifiedBadgeIcon";
 import { RobloxUser } from "@/types";
+import { Button } from "@/components/ui/button";
 
 interface TradeHistoryEntry {
   UserId: number;
@@ -243,14 +244,19 @@ export default function TradeHistoryModal({
                     </p>
                   </div>
                 </div>
-                <a
-                  href={`/dupes/compare?id=${encodeURIComponent(item.id)}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="bg-button-info text-form-button-text hover:bg-button-info-hover w-full shrink-0 rounded-md px-4 py-2 text-center text-sm font-bold whitespace-nowrap transition-colors sm:w-auto"
+                <Button
+                  asChild
+                  variant="default"
+                  className="w-full shrink-0 sm:w-auto"
                 >
-                  Compare Variants
-                </a>
+                  <a
+                    href={`/dupes/compare?id=${encodeURIComponent(item.id)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Compare Variants
+                  </a>
+                </Button>
               </div>
             )}
           </div>
