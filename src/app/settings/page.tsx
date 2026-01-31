@@ -591,7 +591,7 @@ export default function SettingsPage() {
                 </Typography>
                 <Divider sx={{ mb: 2 }} />
                 <FormGroup>
-                  {settingKeys.map((key, index) => {
+                  {settingKeys.map((key) => {
                     const typedKey = key as keyof typeof settings;
                     const isHighlighted =
                       highlightSetting === key && showHighlight;

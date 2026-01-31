@@ -38,7 +38,38 @@ export default function CategoryIcons({
     };
   };
 
+  const mobileOrderMap: Record<string, number> = {
+    "name-vehicles": 1,
+    "name-hyperchromes": 2,
+    "name-textures": 3,
+    "name-rims": 4,
+    "name-spoilers": 5,
+    "name-drifts": 6,
+    "name-tire-styles": 7,
+    "name-tire-stickers": 8,
+    "name-furnitures": 9,
+    "name-body-colors": 10,
+    "name-weapon-skins": 11,
+    "name-horns": 12,
+    "name-seasonal-items": 13,
+    "name-limited-items": 14,
+    favorites: 15,
+  };
+
   const categories = [
+    getCategoryData("body colors", "name-body-colors", "Body Colors"),
+    getCategoryData("drifts", "name-drifts", "Drifts"),
+    getCategoryData("furniture", "name-furnitures", "Furniture"),
+    getCategoryData("horns", "name-horns", "Horns"),
+    getCategoryData("hyperchromes", "name-hyperchromes", "HyperChromes"),
+    {
+      id: "name-limited-items",
+      name: "Limited",
+      icon: "mdi:clock",
+      iconComponent: null,
+      bgColor: "rgba(18, 78, 102, 0.1)",
+      iconColor: "#ffd700",
+    },
     {
       id: "favorites",
       name: "My Favorites",
@@ -54,20 +85,6 @@ export default function CategoryIcons({
         handleCategoryClick("favorites");
       },
     },
-    getCategoryData("body colors", "name-body-colors", "Body Colors"),
-    getCategoryData("textures", "name-textures", "Textures"),
-    getCategoryData("drifts", "name-drifts", "Drifts"),
-    getCategoryData("furniture", "name-furnitures", "Furniture"),
-    getCategoryData("horns", "name-horns", "Horns"),
-    getCategoryData("hyperchromes", "name-hyperchromes", "HyperChromes"),
-    {
-      id: "name-limited-items",
-      name: "Limited",
-      icon: "mdi:clock",
-      iconComponent: null,
-      bgColor: "rgba(18, 78, 102, 0.1)",
-      iconColor: "#ffd700",
-    },
     getCategoryData("rims", "name-rims", "Rims"),
     {
       id: "name-seasonal-items",
@@ -78,6 +95,7 @@ export default function CategoryIcons({
       iconColor: "#40c0e7",
     },
     getCategoryData("spoilers", "name-spoilers", "Spoilers"),
+    getCategoryData("textures", "name-textures", "Textures"),
     getCategoryData("tire stickers", "name-tire-stickers", "Tire Stickers"),
     getCategoryData("tire styles", "name-tire-styles", "Tire Styles"),
     getCategoryData("vehicles", "name-vehicles", "Vehicles"),
@@ -90,13 +108,15 @@ export default function CategoryIcons({
       <div className="scrollbar-thin scrollbar-track-transparent scrollbar-thumb-border-primary hover:scrollbar-thumb-border-focus grid max-h-96 grid-cols-1 gap-4 overflow-y-auto sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
         {categories.map((category) => {
           const isSelected = selectedFilter === category.id;
+          const mobileOrder = mobileOrderMap[category.id] || 99;
+
           return (
             <button
               key={category.id}
               onClick={
                 category.onClick || (() => handleCategoryClick(category.id))
               }
-              className={`flex cursor-pointer items-center gap-3 rounded-lg border-2 p-3 transition-all sm:p-4 ${
+              className={`order-(--mobile-order) flex cursor-pointer items-center gap-3 rounded-lg border-2 p-3 transition-all sm:order-0 sm:p-4 ${
                 isSelected
                   ? "bg-primary-bg ring-border-focus ring-2"
                   : "bg-primary-bg"
@@ -104,6 +124,7 @@ export default function CategoryIcons({
               style={
                 {
                   borderColor: category.iconColor,
+                  "--mobile-order": mobileOrder,
                   "--tw-ring-color": isSelected
                     ? category.iconColor
                     : undefined,
