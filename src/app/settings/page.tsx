@@ -313,7 +313,7 @@ export default function SettingsPage() {
                   <Skeleton variant="text" width="40%" height={40} />
                 </Box>
 
-                <Box sx={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
                   {[1, 2, 3].map((j) => (
                     <Box key={j}>
                       <Skeleton
@@ -599,7 +599,6 @@ export default function SettingsPage() {
                       <Box
                         key={key}
                         sx={{
-                          mb: index === settingKeys.length - 1 ? 0 : 4,
                           ...(isHighlighted && {
                             borderRadius: 1,
                             outline:

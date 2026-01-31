@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import {
   Box,
-  Button,
   Typography,
   Dialog,
   DialogTitle,
@@ -14,6 +13,7 @@ import { deleteAccount } from "@/services/settingsService";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { Icon } from "@/components/ui/IconWrapper";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
 
 export const DeleteAccount = () => {
   const [open, setOpen] = useState(false);
@@ -97,20 +97,9 @@ export const DeleteAccount = () => {
       </Box>
 
       <Button
-        variant="contained"
-        color="error"
+        variant="destructive"
         onClick={handleOpen}
-        sx={{
-          backgroundColor: "var(--color-button-danger)",
-          color: "var(--color-form-button-text)",
-          border: "none",
-          "&:hover": {
-            backgroundColor: "var(--color-button-danger-hover)",
-            color: "var(--color-form-button-text)",
-          },
-          fontSize: "0.875rem",
-          fontWeight: 600,
-        }}
+        className="font-semibold"
       >
         Delete Account
       </Button>
@@ -208,57 +197,24 @@ export const DeleteAccount = () => {
           }}
         >
           <Button
+            variant="ghost"
             onClick={handleClose}
-            sx={{
-              color: "var(--color-secondary-text)",
-              backgroundColor: "transparent",
-              border: "none",
-              borderRadius: "4px",
-              px: 2,
-              py: 1,
-              fontSize: "0.875rem",
-              "&:hover": {
-                backgroundColor: "transparent",
-                color: "var(--color-primary-text)",
-              },
-            }}
+            className="text-secondary-text hover:text-primary-text"
           >
             Cancel
           </Button>
-          <button
+          <Button
+            variant="destructive"
             onClick={handleDelete}
             disabled={!showFinalWarning && timeLeft > 0}
-            style={{
-              backgroundColor: "var(--color-button-danger)",
-              color: "var(--color-form-button-text)",
-              border: "none",
-              borderRadius: "4px",
-              padding: "8px 16px",
-              fontSize: "0.875rem",
-              minWidth: "100px",
-              cursor:
-                !showFinalWarning && timeLeft > 0 ? "not-allowed" : "pointer",
-              opacity: !showFinalWarning && timeLeft > 0 ? 0.7 : 1,
-            }}
-            onMouseEnter={(e) => {
-              if (!(!showFinalWarning && timeLeft > 0)) {
-                e.currentTarget.style.backgroundColor =
-                  "var(--color-button-danger-hover)";
-              }
-            }}
-            onMouseLeave={(e) => {
-              if (!(!showFinalWarning && timeLeft > 0)) {
-                e.currentTarget.style.backgroundColor =
-                  "var(--color-button-danger)";
-              }
-            }}
+            className="min-w-[100px]"
           >
             {!showFinalWarning
               ? timeLeft > 0
                 ? `Please wait ${timeLeft}s`
                 : "Delete Account"
               : "Confirm Delete"}
-          </button>
+          </Button>
         </DialogActions>
       </Dialog>
     </Box>
