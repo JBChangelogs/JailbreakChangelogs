@@ -686,5 +686,15 @@ export const UserBadges = ({
 
   if (badges.length === 0) return null;
 
-  return <div className={`flex items-center gap-1 ${className}`}>{badges}</div>;
+  return (
+    <div
+      className={`inline-flex items-center gap-1.5 rounded-lg border px-2 py-1.5 ${className}`}
+      style={{
+        borderColor: "rgba(107, 114, 128, 0.3)",
+        backgroundColor: "rgba(31, 41, 55, 0.3)",
+      }}
+    >
+      {badges}
+    </div>
+  );
 };

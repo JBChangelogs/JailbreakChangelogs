@@ -298,20 +298,18 @@ export default function UserSearch() {
                     currentUserId={currentUserId}
                   />
                 }
-                arrow
+                arrow={false}
                 disableTouchListener
+                disableInteractive={false}
                 slotProps={{
                   tooltip: {
                     sx: {
-                      backgroundColor: "var(--color-secondary-bg)",
-                      color: "var(--color-primary-text)",
-                      border: "1px solid var(--color-stroke)",
-                      maxWidth: "24rem",
-                      width: "auto",
-                      minWidth: "300px",
-                      "& .MuiTooltip-arrow": {
-                        color: "var(--color-secondary-bg)",
-                      },
+                      backgroundColor: "transparent !important",
+                      padding: "0 !important",
+                      maxWidth: "none !important",
+                      border: "none !important",
+                      boxShadow: "none !important",
+                      backdropFilter: "none !important",
                     },
                   },
                 }}
