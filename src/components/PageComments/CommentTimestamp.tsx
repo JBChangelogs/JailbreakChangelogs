@@ -1,7 +1,9 @@
 import React from "react";
-import dynamic from "next/dynamic";
-
-const Tooltip = dynamic(() => import("@mui/material/Tooltip"), { ssr: false });
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { formatCustomDate } from "@/utils/timestamp";
 import { useOptimizedRealTimeRelativeDate } from "@/hooks/useSharedTimer";
 
@@ -36,29 +38,15 @@ const CommentTimestamp: React.FC<CommentTimestampProps> = ({
     : `posted ${displayRelativeTime}`;
 
   return (
-    <Tooltip
-      title={formatCustomDate(parseInt(displayTimestamp))}
-      placement="top"
-      arrow
-      slotProps={{
-        tooltip: {
-          sx: {
-            backgroundColor: "var(--color-secondary-bg)",
-            color: "var(--color-primary-text)",
-            fontSize: "0.75rem",
-            padding: "8px 12px",
-            borderRadius: "8px",
-            boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
-            "& .MuiTooltip-arrow": {
-              color: "var(--color-secondary-bg)",
-            },
-          },
-        },
-      }}
-    >
-      <span className="mt-0.5 cursor-help text-xs text-[#748D92]">
-        {displayText}
-      </span>
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <span className="mt-0.5 cursor-help text-xs text-[#748D92]">
+          {displayText}
+        </span>
+      </TooltipTrigger>
+      <TooltipContent>
+        {formatCustomDate(parseInt(displayTimestamp))}
+      </TooltipContent>
     </Tooltip>
   );
 };

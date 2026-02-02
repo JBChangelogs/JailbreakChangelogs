@@ -1,7 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { CircularProgress, Box, Chip, Skeleton, Tooltip } from "@mui/material";
+import { CircularProgress, Box, Chip, Skeleton } from "@mui/material";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
 import { Pagination } from "@/components/ui/Pagination";
 import { useOptimizedRealTimeRelativeDate } from "@/hooks/useSharedTimer";
@@ -228,52 +233,20 @@ export default function TradeAdsTab({
         </div>
 
         <div className="border-border-primary text-secondary-text mt-6 flex flex-wrap items-center gap-2 border-t pt-4 text-sm">
-          <Tooltip
-            title={formatCustomDate(ad.created_at)}
-            placement="top"
-            arrow
-            slotProps={{
-              tooltip: {
-                sx: {
-                  backgroundColor: "var(--color-secondary-bg)",
-                  color: "var(--color-primary-text)",
-                  fontSize: "0.75rem",
-                  padding: "8px 12px",
-                  borderRadius: "8px",
-                  boxShadow: "0 4px 12px var(--color-card-shadow)",
-                  "& .MuiTooltip-arrow": {
-                    color: "var(--color-secondary-bg)",
-                  },
-                },
-              },
-            }}
-          >
-            <span className="cursor-help">Created {ad.createdTime}</span>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span className="cursor-help">Created {ad.createdTime}</span>
+            </TooltipTrigger>
+            <TooltipContent>{formatCustomDate(ad.created_at)}</TooltipContent>
           </Tooltip>
           {ad.expires && (
             <>
               <span className="text-tertiary-text">|</span>
-              <Tooltip
-                title={formatCustomDate(ad.expires)}
-                placement="top"
-                arrow
-                slotProps={{
-                  tooltip: {
-                    sx: {
-                      backgroundColor: "var(--color-secondary-bg)",
-                      color: "var(--color-primary-text)",
-                      fontSize: "0.75rem",
-                      padding: "8px 12px",
-                      borderRadius: "8px",
-                      boxShadow: "0 4px 12px var(--color-card-shadow)",
-                      "& .MuiTooltip-arrow": {
-                        color: "var(--color-secondary-bg)",
-                      },
-                    },
-                  },
-                }}
-              >
-                <span className="cursor-help">Expires {ad.expiresTime}</span>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span className="cursor-help">Expires {ad.expiresTime}</span>
+                </TooltipTrigger>
+                <TooltipContent>{formatCustomDate(ad.expires)}</TooltipContent>
               </Tooltip>
             </>
           )}

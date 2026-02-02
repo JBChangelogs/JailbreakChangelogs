@@ -2,13 +2,16 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import dynamic from "next/dynamic";
 import { UserConnectionData } from "@/app/inventories/types";
 import { DiscordIcon } from "@/components/Icons/DiscordIcon";
 import { RobloxIcon } from "@/components/Icons/RobloxIcon";
 import { VerifiedBadgeIcon } from "@/components/Icons/VerifiedBadgeIcon";
 
-const Tooltip = dynamic(() => import("@mui/material/Tooltip"), { ssr: false });
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface DupeUserInfoProps {
   robloxId: string;
@@ -81,94 +84,58 @@ export default function DupeUserInfo({
             <div className="mt-3 flex flex-wrap items-center gap-2">
               {/* Discord Profile */}
               {userConnectionData && (
-                <Tooltip
-                  title="Visit Discord Profile"
-                  placement="top"
-                  arrow
-                  slotProps={{
-                    tooltip: {
-                      sx: {
-                        backgroundColor: "var(--color-secondary-bg)",
-                        color: "var(--color-primary-text)",
-                        "& .MuiTooltip-arrow": {
-                          color: "var(--color-secondary-bg)",
-                        },
-                      },
-                    },
-                  }}
-                >
-                  <a
-                    href={`https://discord.com/users/${userConnectionData.id}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="border-primary-text text-primary-text hover:bg-quaternary-bg inline-flex items-center gap-1 rounded-full border bg-transparent px-2 py-0.5 text-xs transition-colors"
-                  >
-                    <DiscordIcon className="h-3 w-3" />
-                    Discord
-                  </a>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Link
+                      href={`https://discord.com/users/${userConnectionData.id}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="bg-tertiary-bg/40 border-border-primary text-primary-text inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium shadow-sm transition-opacity hover:opacity-80"
+                    >
+                      <DiscordIcon className="text-border-focus h-3.5 w-3.5 shrink-0" />
+                      <span className="text-sm font-semibold">Discord</span>
+                    </Link>
+                  </TooltipTrigger>
+                  <TooltipContent>Visit Discord Profile</TooltipContent>
                 </Tooltip>
               )}
 
               {/* Roblox Profile */}
-              <Tooltip
-                title="Visit Roblox Profile"
-                placement="top"
-                arrow
-                slotProps={{
-                  tooltip: {
-                    sx: {
-                      backgroundColor: "var(--color-secondary-bg)",
-                      color: "var(--color-primary-text)",
-                      "& .MuiTooltip-arrow": {
-                        color: "var(--color-secondary-bg)",
-                      },
-                    },
-                  },
-                }}
-              >
-                <a
-                  href={`https://www.roblox.com/users/${robloxId}/profile`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="border-primary-text text-primary-text hover:bg-quaternary-bg inline-flex items-center gap-1 rounded-full border bg-transparent px-2 py-0.5 text-xs transition-colors"
-                >
-                  <RobloxIcon className="h-3 w-3" />
-                  Roblox
-                </a>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Link
+                    href={`https://www.roblox.com/users/${robloxId}/profile`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="bg-tertiary-bg/40 border-border-primary text-primary-text inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium shadow-sm transition-opacity hover:opacity-80"
+                  >
+                    <RobloxIcon className="h-3.5 w-3.5 shrink-0" />
+                    <span className="text-sm font-semibold">Roblox</span>
+                  </Link>
+                </TooltipTrigger>
+                <TooltipContent>Visit Roblox Profile</TooltipContent>
               </Tooltip>
 
               {/* Website Profile */}
               {userConnectionData && (
-                <Tooltip
-                  title="Visit Website Profile"
-                  placement="top"
-                  arrow
-                  slotProps={{
-                    tooltip: {
-                      sx: {
-                        backgroundColor: "var(--color-secondary-bg)",
-                        color: "var(--color-primary-text)",
-                        "& .MuiTooltip-arrow": {
-                          color: "var(--color-secondary-bg)",
-                        },
-                      },
-                    },
-                  }}
-                >
-                  <Link
-                    href={`/users/${userConnectionData.id}`}
-                    prefetch={false}
-                    className="border-primary-text text-primary-text hover:bg-quaternary-bg inline-flex items-center gap-1 rounded-full border bg-transparent px-2 py-0.5 text-xs transition-colors"
-                  >
-                    <Image
-                      src="https://assets.jailbreakchangelogs.xyz/assets/logos/JBCL_Short_Transparent.webp"
-                      alt="JBCL Logo"
-                      width={12}
-                      height={12}
-                      className="h-3 w-3 shrink-0"
-                    />
-                    Website
-                  </Link>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Link
+                      href={`/users/${userConnectionData.id}`}
+                      prefetch={false}
+                      className="bg-tertiary-bg/40 border-border-primary text-primary-text inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium shadow-sm transition-opacity hover:opacity-80"
+                    >
+                      <Image
+                        src="https://assets.jailbreakchangelogs.xyz/assets/logos/JBCL_Short_Transparent.webp"
+                        alt="JBCL Logo"
+                        width={16}
+                        height={16}
+                        className="h-3.5 w-3.5 shrink-0"
+                      />
+                      <span className="text-sm font-semibold">Website</span>
+                    </Link>
+                  </TooltipTrigger>
+                  <TooltipContent>Visit Website Profile</TooltipContent>
                 </Tooltip>
               )}
             </div>
@@ -183,62 +150,40 @@ export default function DupeUserInfo({
             <div className="text-secondary-text mb-2 text-sm">
               Dupe Items Found
             </div>
-            <Tooltip
-              title={`${dupeItemsCount.toLocaleString()}`}
-              placement="top"
-              arrow
-              slotProps={{
-                tooltip: {
-                  sx: {
-                    backgroundColor: "var(--color-secondary-bg)",
-                    color: "var(--color-primary-text)",
-                    "& .MuiTooltip-arrow": {
-                      color: "var(--color-secondary-bg)",
-                    },
-                  },
-                },
-              }}
-            >
-              <div className="text-primary-text cursor-help text-2xl font-bold">
-                {dupeItemsCount.toLocaleString()}
-              </div>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="text-primary-text cursor-help text-2xl font-bold">
+                  {dupeItemsCount.toLocaleString()}
+                </div>
+              </TooltipTrigger>
+              <TooltipContent>{dupeItemsCount.toLocaleString()}</TooltipContent>
             </Tooltip>
           </div>
           <div className="border-border-primary bg-primary-bg rounded-lg border p-4 text-center">
             <div className="text-secondary-text mb-2 text-sm">
               Total Duped Value
             </div>
-            <Tooltip
-              title={`$${totalDupedValue.toLocaleString()}`}
-              placement="top"
-              arrow
-              slotProps={{
-                tooltip: {
-                  sx: {
-                    backgroundColor: "var(--color-secondary-bg)",
-                    color: "var(--color-primary-text)",
-                    "& .MuiTooltip-arrow": {
-                      color: "var(--color-secondary-bg)",
-                    },
-                  },
-                },
-              }}
-            >
-              <div className="text-primary-text cursor-help text-2xl font-bold">
-                <span className="sm:hidden">
-                  $
-                  {totalDupedValue >= 1000000000
-                    ? `${(totalDupedValue / 1000000000).toFixed(1)}B`
-                    : totalDupedValue >= 1000000
-                      ? `${(totalDupedValue / 1000000).toFixed(1)}M`
-                      : totalDupedValue >= 1000
-                        ? `${(totalDupedValue / 1000).toFixed(1)}K`
-                        : totalDupedValue.toLocaleString()}
-                </span>
-                <span className="hidden sm:inline">
-                  ${totalDupedValue.toLocaleString()}
-                </span>
-              </div>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="text-primary-text cursor-help text-2xl font-bold">
+                  <span className="sm:hidden">
+                    $
+                    {totalDupedValue >= 1000000000
+                      ? `${(totalDupedValue / 1000000000).toFixed(1)}B`
+                      : totalDupedValue >= 1000000
+                        ? `${(totalDupedValue / 1000000).toFixed(1)}M`
+                        : totalDupedValue >= 1000
+                          ? `${(totalDupedValue / 1000).toFixed(1)}K`
+                          : totalDupedValue.toLocaleString()}
+                  </span>
+                  <span className="hidden sm:inline">
+                    ${totalDupedValue.toLocaleString()}
+                  </span>
+                </div>
+              </TooltipTrigger>
+              <TooltipContent>
+                ${totalDupedValue.toLocaleString()}
+              </TooltipContent>
             </Tooltip>
           </div>
         </div>

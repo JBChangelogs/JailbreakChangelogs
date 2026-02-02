@@ -2,11 +2,12 @@
 
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import dynamic from "next/dynamic";
 
-const Tooltip = dynamic(() => import("@mui/material/Tooltip"), {
-  ssr: false,
-});
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { Icon } from "../ui/IconWrapper";
 import { formatCustomDate } from "@/utils/timestamp";
 import { useRealTimeRelativeDate } from "@/hooks/useRealTimeRelativeDate";
@@ -127,34 +128,18 @@ export default function AboutTab({
         <div className="mb-3 flex items-center gap-2">
           <h2 className="text-primary-text text-lg font-semibold">About Me</h2>
           {currentUserId === user.id && !isEditingBio && (
-            <Tooltip
-              title="Edit bio"
-              placement="top"
-              arrow
-              slotProps={{
-                tooltip: {
-                  sx: {
-                    backgroundColor: "var(--color-primary-bg)",
-                    color: "var(--color-secondary-text)",
-                    fontSize: "0.75rem",
-                    padding: "8px 12px",
-                    borderRadius: "8px",
-                    boxShadow: "0 4px 12px var(--color-card-shadow)",
-                    "& .MuiTooltip-arrow": {
-                      color: "var(--color-primary-bg)",
-                    },
-                  },
-                },
-              }}
-            >
-              <Button
-                variant="ghost"
-                onClick={() => setIsEditingBio(true)}
-                size="sm"
-                className="h-auto p-1"
-              >
-                <Icon icon="heroicons:pencil" className="text-link h-5 w-5" />
-              </Button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  onClick={() => setIsEditingBio(true)}
+                  size="sm"
+                  className="h-auto p-1"
+                >
+                  <Icon icon="heroicons:pencil" className="text-link h-5 w-5" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Edit bio</TooltipContent>
             </Tooltip>
           )}
         </div>
@@ -247,27 +232,13 @@ export default function AboutTab({
             {localBioLastUpdated && (
               <p className="text-secondary-text mt-2 text-xs">
                 Last updated:{" "}
-                <Tooltip
-                  title={formatCustomDate(localBioLastUpdated)}
-                  placement="top"
-                  arrow
-                  slotProps={{
-                    tooltip: {
-                      sx: {
-                        backgroundColor: "var(--color-secondary-bg)",
-                        color: "var(--color-primary-text)",
-                        fontSize: "0.75rem",
-                        padding: "8px 12px",
-                        borderRadius: "8px",
-                        boxShadow: "0 4px 12px var(--color-card-shadow)",
-                        "& .MuiTooltip-arrow": {
-                          color: "var(--color-secondary-bg)",
-                        },
-                      },
-                    },
-                  }}
-                >
-                  <span className="cursor-help">{realTimeRelativeDate}</span>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span className="cursor-help">{realTimeRelativeDate}</span>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    {formatCustomDate(localBioLastUpdated)}
+                  </TooltipContent>
                 </Tooltip>
               </p>
             )}

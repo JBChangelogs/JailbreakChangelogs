@@ -9,7 +9,11 @@ import { formatShortDate, formatCustomDate } from "@/utils/timestamp";
 import TradeAdsTab from "./TradeAdsTab";
 import { CircularProgress, Skeleton } from "@mui/material";
 
-import { Tooltip } from "@mui/material";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface User {
   id: string;
@@ -142,29 +146,15 @@ export default function RobloxProfileTab({
                   user.roblox_join_date && (
                     <span className="text-secondary-text">
                       <span className="text-primary-text">Member since</span>{" "}
-                      <Tooltip
-                        title={formatCustomDate(user.roblox_join_date)}
-                        placement="top"
-                        arrow
-                        slotProps={{
-                          tooltip: {
-                            sx: {
-                              backgroundColor: "var(--color-secondary-bg)",
-                              color: "var(--color-primary-text)",
-                              fontSize: "0.75rem",
-                              padding: "8px 12px",
-                              borderRadius: "8px",
-                              boxShadow: "0 4px 12px var(--color-card-shadow)",
-                              "& .MuiTooltip-arrow": {
-                                color: "var(--color-secondary-bg)",
-                              },
-                            },
-                          },
-                        }}
-                      >
-                        <span className="cursor-help">
-                          {formatShortDate(user.roblox_join_date)}
-                        </span>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <span className="cursor-help">
+                            {formatShortDate(user.roblox_join_date)}
+                          </span>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          {formatCustomDate(user.roblox_join_date)}
+                        </TooltipContent>
                       </Tooltip>
                     </span>
                   )

@@ -11,7 +11,11 @@ import { UserAvatar } from "@/utils/avatar";
 import { RobloxIcon } from "@/components/Icons/RobloxIcon";
 import { isFeatureEnabled } from "@/utils/featureFlags";
 import dynamic from "next/dynamic";
-import { Tooltip } from "@mui/material";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { Pagination } from "@/components/ui/Pagination";
 import {
   fetchNotificationHistory,
@@ -236,29 +240,13 @@ const NotificationTimestamp = ({
 
   return (
     <p className="text-secondary-text mt-1 text-right text-xs">
-      <Tooltip
-        title={
-          hasValidNumber ? formatCustomDate(timestampNumber) : timestampString
-        }
-        placement="top"
-        arrow
-        slotProps={{
-          tooltip: {
-            sx: {
-              backgroundColor: "var(--color-secondary-bg)",
-              color: "var(--color-primary-text)",
-              fontSize: "0.75rem",
-              padding: "8px 12px",
-              borderRadius: "8px",
-              boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
-              "& .MuiTooltip-arrow": {
-                color: "var(--color-secondary-bg)",
-              },
-            },
-          },
-        }}
-      >
-        <span className="cursor-help">{relativeTime}</span>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <span className="cursor-help">{relativeTime}</span>
+        </TooltipTrigger>
+        <TooltipContent>
+          {hasValidNumber ? formatCustomDate(timestampNumber) : timestampString}
+        </TooltipContent>
       </Tooltip>
     </p>
   );
@@ -514,37 +502,25 @@ export const NavbarModern = ({
               }
             }}
           >
-            <Tooltip
-              title="Notifications"
-              arrow
-              placement="bottom"
-              slotProps={{
-                tooltip: {
-                  sx: {
-                    backgroundColor: "var(--color-secondary-bg)",
-                    color: "var(--color-primary-text)",
-                    "& .MuiTooltip-arrow": {
-                      color: "var(--color-secondary-bg)",
-                    },
-                  },
-                },
-              }}
-            >
-              <PopoverTrigger asChild>
-                <button
-                  suppressHydrationWarning={true}
-                  className="border-border-primary bg-secondary-bg text-secondary-text hover:bg-quaternary-bg hover:text-primary-text relative flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg border transition-all duration-200 hover:scale-105 active:scale-95"
-                >
-                  <Icon
-                    icon="mingcute:notification-line"
-                    className="text-primary-text h-5 w-5"
-                    inline={true}
-                  />
-                  {isAuthenticated && (
-                    <UnreadNotificationBadge count={unreadCount} />
-                  )}
-                </button>
-              </PopoverTrigger>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <PopoverTrigger asChild>
+                  <button
+                    suppressHydrationWarning={true}
+                    className="border-border-primary bg-secondary-bg text-secondary-text hover:bg-quaternary-bg hover:text-primary-text relative flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg border transition-all duration-200 hover:scale-105 active:scale-95"
+                  >
+                    <Icon
+                      icon="mingcute:notification-line"
+                      className="text-primary-text h-5 w-5"
+                      inline={true}
+                    />
+                    {isAuthenticated && (
+                      <UnreadNotificationBadge count={unreadCount} />
+                    )}
+                  </button>
+                </PopoverTrigger>
+              </TooltipTrigger>
+              <TooltipContent>Notifications</TooltipContent>
             </Tooltip>
 
             <PopoverContent align="end" className="w-80 p-0">
@@ -557,64 +533,64 @@ export const NavbarModern = ({
                       : `0 ${notificationTab === "unread" ? "Unread " : ""}Notifications`}
                   </h3>
                   {notifications && notifications.total > 0 && (
-                    <Tooltip
-                      title={
-                        notificationTab === "unread"
-                          ? "Clear Unread"
-                          : "Clear History"
-                      }
-                      arrow
-                    >
-                      <button
-                        onClick={async () => {
-                          const success =
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <button
+                          onClick={async () => {
+                            const success =
+                              notificationTab === "unread"
+                                ? await clearUnreadNotifications()
+                                : await clearNotificationHistory();
+                            if (success) {
+                              toast.success(
+                                notificationTab === "unread"
+                                  ? "Cleared all unread notifications"
+                                  : "Cleared notification history",
+                                {
+                                  duration: 2000,
+                                },
+                              );
+                              // Refetch to update the list
+                              setIsLoadingNotifications(true);
+                              const data =
+                                notificationTab === "unread"
+                                  ? await fetchUnreadNotifications(1, 5)
+                                  : await fetchNotificationHistory(1, 5);
+                              setNotifications(data);
+                              setNotificationPage(1);
+                              setIsLoadingNotifications(false);
+                              // Refresh unread count
+                              fetchUnreadCount();
+                            } else {
+                              toast.error(
+                                notificationTab === "unread"
+                                  ? "Failed to clear unread notifications"
+                                  : "Failed to clear notification history",
+                                {
+                                  duration: 3000,
+                                },
+                              );
+                            }
+                          }}
+                          data-umami-event={
                             notificationTab === "unread"
-                              ? await clearUnreadNotifications()
-                              : await clearNotificationHistory();
-                          if (success) {
-                            toast.success(
-                              notificationTab === "unread"
-                                ? "Cleared all unread notifications"
-                                : "Cleared notification history",
-                              {
-                                duration: 2000,
-                              },
-                            );
-                            // Refetch to update the list
-                            setIsLoadingNotifications(true);
-                            const data =
-                              notificationTab === "unread"
-                                ? await fetchUnreadNotifications(1, 5)
-                                : await fetchNotificationHistory(1, 5);
-                            setNotifications(data);
-                            setNotificationPage(1);
-                            setIsLoadingNotifications(false);
-                            // Refresh unread count
-                            fetchUnreadCount();
-                          } else {
-                            toast.error(
-                              notificationTab === "unread"
-                                ? "Failed to clear unread notifications"
-                                : "Failed to clear notification history",
-                              {
-                                duration: 3000,
-                              },
-                            );
+                              ? "Clear Unread Notifications"
+                              : "Clear Notification History"
                           }
-                        }}
-                        data-umami-event={
-                          notificationTab === "unread"
-                            ? "Clear Unread Notifications"
-                            : "Clear Notification History"
-                        }
-                        className="text-secondary-text cursor-pointer transition-colors hover:text-red-500"
-                      >
-                        <Icon
-                          icon="si:bin-fill"
-                          className="h-5 w-5"
-                          inline={true}
-                        />
-                      </button>
+                          className="text-secondary-text cursor-pointer transition-colors hover:text-red-500"
+                        >
+                          <Icon
+                            icon="si:bin-fill"
+                            className="h-5 w-5"
+                            inline={true}
+                          />
+                        </button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        {notificationTab === "unread"
+                          ? "Clear Unread"
+                          : "Clear History"}
+                      </TooltipContent>
                     </Tooltip>
                   )}
                 </div>
@@ -706,72 +682,76 @@ export const NavbarModern = ({
                                 {notif.title}
                               </p>
                               {notificationTab === "unread" && (
-                                <Tooltip
-                                  title="Mark As Read"
-                                  arrow
-                                  placement="top"
-                                >
-                                  <button
-                                    onClick={async () => {
-                                      // Optimistically remove from UI
-                                      setNotifications((prev) => {
-                                        if (!prev) return prev;
-                                        return {
-                                          ...prev,
-                                          items: prev.items.filter(
-                                            (n) => n.id !== notif.id,
-                                          ),
-                                          total: prev.total - 1,
-                                        };
-                                      });
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <button
+                                      onClick={async () => {
+                                        // Optimistically remove from UI
+                                        setNotifications((prev) => {
+                                          if (!prev) return prev;
+                                          return {
+                                            ...prev,
+                                            items: prev.items.filter(
+                                              (n) => n.id !== notif.id,
+                                            ),
+                                            total: prev.total - 1,
+                                          };
+                                        });
 
-                                      // Update unread count immediately
-                                      setUnreadCount((prev) =>
-                                        Math.max(0, prev - 1),
-                                      );
+                                        // Update unread count immediately
+                                        setUnreadCount((prev) =>
+                                          Math.max(0, prev - 1),
+                                        );
 
-                                      // Mark as seen for visual feedback
-                                      setMarkedAsSeen((prev) =>
-                                        new Set(prev).add(notif.id),
-                                      );
+                                        // Mark as seen for visual feedback
+                                        setMarkedAsSeen((prev) =>
+                                          new Set(prev).add(notif.id),
+                                        );
 
-                                      toast.success("Marked as read", {
-                                        duration: 2000,
-                                      });
-
-                                      // Call API in background
-                                      const success =
-                                        await markNotificationAsSeen(notif.id);
-
-                                      if (!success) {
-                                        // Revert on failure
-                                        toast.error("Failed to mark as read", {
+                                        toast.success("Marked as read", {
                                           duration: 2000,
                                         });
-                                        // Refetch to restore state
-                                        const data =
-                                          await fetchUnreadNotifications(
-                                            notificationPage,
-                                            5,
+
+                                        // Call API in background
+                                        const success =
+                                          await markNotificationAsSeen(
+                                            notif.id,
                                           );
-                                        setNotifications(data);
-                                        fetchUnreadCount();
-                                      }
-                                    }}
-                                    className={`shrink-0 cursor-pointer rounded-full p-1 transition-all ${
-                                      markedAsSeen.has(notif.id)
-                                        ? "bg-green-500/20 text-green-500"
-                                        : "bg-secondary-bg text-secondary-text hover:bg-tertiary-bg hover:text-primary-text"
-                                    }`}
-                                    data-umami-event="Mark Notification Read"
-                                    aria-label="Mark as seen"
-                                  >
-                                    <Icon
-                                      icon="proicons:checkmark"
-                                      className="h-4 w-4"
-                                      inline={true}
-                                    />
-                                  </button>
+
+                                        if (!success) {
+                                          // Revert on failure
+                                          toast.error(
+                                            "Failed to mark as read",
+                                            {
+                                              duration: 2000,
+                                            },
+                                          );
+                                          // Refetch to restore state
+                                          const data =
+                                            await fetchUnreadNotifications(
+                                              notificationPage,
+                                              5,
+                                            );
+                                          setNotifications(data);
+                                          fetchUnreadCount();
+                                        }
+                                      }}
+                                      className={`shrink-0 cursor-pointer rounded-full p-1 transition-all ${
+                                        markedAsSeen.has(notif.id)
+                                          ? "bg-green-500/20 text-green-500"
+                                          : "bg-secondary-bg text-secondary-text hover:bg-tertiary-bg hover:text-primary-text"
+                                      }`}
+                                      data-umami-event="Mark Notification Read"
+                                      aria-label="Mark as seen"
+                                    >
+                                      <Icon
+                                        icon="proicons:checkmark"
+                                        className="h-4 w-4"
+                                        inline={true}
+                                      />
+                                    </button>
+                                  </TooltipTrigger>
+                                  <TooltipContent>Mark As Read</TooltipContent>
                                 </Tooltip>
                               )}
                             </div>
@@ -861,33 +841,21 @@ export const NavbarModern = ({
           </Popover>
 
           {/* Support button */}
-          <Tooltip
-            title="Support us"
-            arrow
-            placement="bottom"
-            slotProps={{
-              tooltip: {
-                sx: {
-                  backgroundColor: "var(--color-secondary-bg)",
-                  color: "var(--color-primary-text)",
-                  "& .MuiTooltip-arrow": {
-                    color: "var(--color-secondary-bg)",
-                  },
-                },
-              },
-            }}
-          >
-            <Link href="/supporting">
-              <button className="border-border-primary bg-secondary-bg text-secondary-text hover:bg-quaternary-bg hover:text-primary-text flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg border transition-all duration-200 hover:scale-105 active:scale-95">
-                <Image
-                  src="/logos/kofi_symbol.svg"
-                  alt="Ko-fi"
-                  width={22}
-                  height={22}
-                  style={{ display: "block" }}
-                />
-              </button>
-            </Link>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Link href="/supporting">
+                <button className="border-border-primary bg-secondary-bg text-secondary-text hover:bg-quaternary-bg hover:text-primary-text flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg border transition-all duration-200 hover:scale-105 active:scale-95">
+                  <Image
+                    src="/logos/kofi_symbol.svg"
+                    alt="Ko-fi"
+                    width={22}
+                    height={22}
+                    style={{ display: "block" }}
+                  />
+                </button>
+              </Link>
+            </TooltipTrigger>
+            <TooltipContent>Support us</TooltipContent>
           </Tooltip>
 
           {/* Theme toggle */}

@@ -5,7 +5,11 @@ import { Box, Chip, Skeleton, Divider } from "@mui/material";
 import { Button } from "@/components/ui/button";
 import { Pagination } from "@/components/ui/Pagination";
 
-import { Tooltip } from "@mui/material";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { Icon } from "@/components/ui/IconWrapper";
 import Image from "next/image";
 import Link from "next/link";
@@ -260,29 +264,15 @@ export default function FavoritesTab({
           />
 
           <div className="flex items-center justify-start text-xs">
-            <Tooltip
-              title={formatCustomDate(favorite.created_at)}
-              placement="top"
-              arrow
-              slotProps={{
-                tooltip: {
-                  sx: {
-                    backgroundColor: "var(--color-primary-bg)",
-                    color: "var(--color-secondary-text)",
-                    fontSize: "0.75rem",
-                    padding: "8px 12px",
-                    borderRadius: "8px",
-                    boxShadow: "var(--color-card-shadow)",
-                    "& .MuiTooltip-arrow": {
-                      color: "var(--color-primary-bg)",
-                    },
-                  },
-                },
-              }}
-            >
-              <span className="text-secondary-text cursor-help">
-                Favorited {formatRelativeDate(favorite.created_at)}
-              </span>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span className="text-secondary-text cursor-help">
+                  Favorited {formatRelativeDate(favorite.created_at)}
+                </span>
+              </TooltipTrigger>
+              <TooltipContent>
+                {formatCustomDate(favorite.created_at)}
+              </TooltipContent>
             </Tooltip>
           </div>
         </Box>

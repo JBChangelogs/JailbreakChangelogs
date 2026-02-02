@@ -7,7 +7,7 @@ const nextConfig = {
   },
   experimental: {
     webpackMemoryOptimizations: true,
-    optimizePackageImports: ["@mui/material"],
+    optimizePackageImports: ["@mui/material", "radix-ui"],
   },
   turbopack: {
     rules: {

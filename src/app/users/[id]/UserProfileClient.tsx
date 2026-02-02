@@ -15,20 +15,12 @@ import { toast } from "sonner";
 import dynamic from "next/dynamic";
 import { PUBLIC_API_URL } from "@/utils/api";
 
-const Tooltip = dynamic(() => import("@mui/material/Tooltip"), {
-  ssr: false,
-});
-
-const UserBadges = dynamic(
-  () =>
-    import("@/components/Profile/UserBadges").then((mod) => ({
-      default: mod.UserBadges,
-    })),
-  {
-    ssr: false,
-    loading: () => <div className="h-6 w-6" />, // Placeholder with same size as lg badge
-  },
-);
+import { UserBadges } from "@/components/Profile/UserBadges";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { formatShortDate, formatCustomDate } from "@/utils/timestamp";
 import { useOptimizedRealTimeRelativeDate } from "@/hooks/useSharedTimer";
 import ProfileTabs from "@/components/Profile/ProfileTabs";
@@ -136,30 +128,20 @@ const LinSuperIdol = ({ userId }: { userId: string }) => {
 
   return (
     <div className="fixed right-4 bottom-4 z-50">
-      <Tooltip
-        title="Lin is a super idol"
-        arrow
-        placement="top"
-        slotProps={{
-          tooltip: {
-            sx: {
-              backgroundColor: "var(--color-secondary-bg)",
-              color: "var(--color-primary-text)",
-              "& .MuiTooltip-arrow": { color: "var(--color-secondary-bg)" },
-            },
-          },
-        }}
-      >
-        <button
-          onClick={handlePlayClick}
-          className="bg-secondary-bg/80 text-primary-text/80 group hover:bg-secondary-bg hover:text-primary-text cursor-pointer rounded-full p-3 shadow-lg backdrop-blur-sm transition-all duration-300"
-        >
-          <Icon
-            icon="material-symbols:music-note"
-            className="text-xl opacity-60 transition-opacity duration-300 group-hover:opacity-100"
-            inline={true}
-          />
-        </button>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <button
+            onClick={handlePlayClick}
+            className="bg-secondary-bg/80 text-primary-text/80 group hover:bg-secondary-bg hover:text-primary-text cursor-pointer rounded-full p-3 shadow-lg backdrop-blur-sm transition-all duration-300"
+          >
+            <Icon
+              icon="material-symbols:music-note"
+              className="text-xl opacity-60 transition-opacity duration-300 group-hover:opacity-100"
+              inline={true}
+            />
+          </button>
+        </TooltipTrigger>
+        <TooltipContent>Lin is a super idol</TooltipContent>
       </Tooltip>
     </div>
   );
@@ -699,35 +681,18 @@ export default function UserProfileClient({
                           user.last_seen && (
                             <p className="text-secondary-text text-sm">
                               Last seen:{" "}
-                              <Tooltip
-                                title={formatCustomDate(user.last_seen)}
-                                placement="top"
-                                arrow
-                                slotProps={{
-                                  tooltip: {
-                                    sx: {
-                                      backgroundColor:
-                                        "var(--color-primary-bg)",
-                                      color: "var(--color-secondary-text)",
-                                      fontSize: "0.75rem",
-                                      padding: "8px 12px",
-                                      borderRadius: "8px",
-
-                                      boxShadow:
-                                        "0 4px 12px var(--color-card-shadow)",
-                                      "& .MuiTooltip-arrow": {
-                                        color: "var(--color-primary-bg)",
-                                      },
-                                    },
-                                  },
-                                }}
-                              >
-                                <span
-                                  className="cursor-help"
-                                  aria-label={`User was last seen ${lastSeenTime}`}
-                                >
-                                  {lastSeenTime}
-                                </span>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <span
+                                    className="cursor-help"
+                                    aria-label={`User was last seen ${lastSeenTime}`}
+                                  >
+                                    {lastSeenTime}
+                                  </span>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  {formatCustomDate(user.last_seen)}
+                                </TooltipContent>
                               </Tooltip>
                             </p>
                           )
@@ -748,33 +713,17 @@ export default function UserProfileClient({
                           <span className="text-primary-text">Member</span> #
                           {user.usernumber}{" "}
                           <span className="text-primary-text">since</span>{" "}
-                          <Tooltip
-                            title={formatCustomDate(
-                              parseInt(user.created_at) * 1000,
-                            )}
-                            placement="top"
-                            arrow
-                            slotProps={{
-                              tooltip: {
-                                sx: {
-                                  backgroundColor: "var(--color-primary-bg)",
-                                  color: "var(--color-secondary-text)",
-                                  fontSize: "0.75rem",
-                                  padding: "8px 12px",
-                                  borderRadius: "8px",
-
-                                  boxShadow:
-                                    "0 4px 12px var(--color-card-shadow)",
-                                  "& .MuiTooltip-arrow": {
-                                    color: "var(--color-primary-bg)",
-                                  },
-                                },
-                              },
-                            }}
-                          >
-                            <span className="cursor-help">
-                              {formatShortDate(user.created_at)}
-                            </span>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <span className="cursor-help">
+                                {formatShortDate(user.created_at)}
+                              </span>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              {formatCustomDate(
+                                parseInt(user.created_at) * 1000,
+                              )}
+                            </TooltipContent>
                           </Tooltip>
                         </p>
                       )
@@ -825,75 +774,43 @@ export default function UserProfileClient({
                         </>
                       ) : (
                         <>
-                          <Tooltip
-                            title="Visit Discord Profile"
-                            placement="top"
-                            arrow
-                            slotProps={{
-                              tooltip: {
-                                sx: {
-                                  backgroundColor: "var(--color-primary-bg)",
-                                  color: "var(--color-secondary-text)",
-                                  fontSize: "0.75rem",
-                                  padding: "8px 12px",
-                                  borderRadius: "8px",
-
-                                  boxShadow:
-                                    "0 4px 12px var(--color-card-shadow)",
-                                  "& .MuiTooltip-arrow": {
-                                    color: "var(--color-primary-bg)",
-                                  },
-                                },
-                              },
-                            }}
-                          >
-                            <Link
-                              href={`https://discord.com/users/${user.id}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="border-primary-text text-primary-text inline-flex items-center gap-1 rounded-full border bg-transparent px-2 py-0.5 text-xs"
-                            >
-                              <DiscordIcon className="text-border-focus h-4 w-4 shrink-0" />
-                              <span className="text-sm font-medium">
-                                Discord
-                              </span>
-                            </Link>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Link
+                                href={`https://discord.com/users/${user.id}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="bg-tertiary-bg/40 border-border-primary text-primary-text inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium shadow-sm transition-opacity hover:opacity-80"
+                              >
+                                <DiscordIcon className="text-border-focus h-3.5 w-3.5 shrink-0" />
+                                <span className="text-sm font-semibold">
+                                  Discord
+                                </span>
+                              </Link>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              Visit Discord Profile
+                            </TooltipContent>
                           </Tooltip>
 
                           {user.roblox_id && (
-                            <Tooltip
-                              title="Visit Roblox Profile"
-                              placement="top"
-                              arrow
-                              slotProps={{
-                                tooltip: {
-                                  sx: {
-                                    backgroundColor: "var(--color-primary-bg)",
-                                    color: "var(--color-secondary-text)",
-                                    fontSize: "0.75rem",
-                                    padding: "8px 12px",
-                                    borderRadius: "8px",
-
-                                    boxShadow:
-                                      "0 4px 12px var(--color-card-shadow)",
-                                    "& .MuiTooltip-arrow": {
-                                      color: "var(--color-primary-bg)",
-                                    },
-                                  },
-                                },
-                              }}
-                            >
-                              <Link
-                                href={`https://www.roblox.com/users/${user.roblox_id}/profile`}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="border-primary-text text-primary-text inline-flex items-center gap-1 rounded-full border bg-transparent px-2 py-0.5 text-xs"
-                              >
-                                <RobloxIcon className="h-4 w-4 shrink-0" />
-                                <span className="text-sm font-medium">
-                                  Roblox
-                                </span>
-                              </Link>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Link
+                                  href={`https://www.roblox.com/users/${user.roblox_id}/profile`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="bg-tertiary-bg/40 border-border-primary text-primary-text inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium shadow-sm transition-opacity hover:opacity-80"
+                                >
+                                  <RobloxIcon className="h-3.5 w-3.5 shrink-0" />
+                                  <span className="text-sm font-semibold">
+                                    Roblox
+                                  </span>
+                                </Link>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                Visit Roblox Profile
+                              </TooltipContent>
                             </Tooltip>
                           )}
                         </>
@@ -914,89 +831,57 @@ export default function UserProfileClient({
                         </Link>
                       </Button>
                     ) : isAuthenticatedUser && currentUserId ? (
-                      <Tooltip
-                        title={
-                          isFollowing
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <span>
+                            <Button
+                              variant={isFollowing ? "secondary" : "default"}
+                              onClick={handleFollow}
+                              disabled={isLoadingFollow}
+                              size="md"
+                            >
+                              <Icon
+                                icon={
+                                  isFollowing
+                                    ? "heroicons:user-minus"
+                                    : "heroicons:user-plus"
+                                }
+                                className="h-5 w-5"
+                              />
+                              {isFollowing ? "Unfollow" : "Follow"}
+                            </Button>
+                          </span>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          {isFollowing
                             ? "Unfollow this user"
-                            : "Follow this user"
-                        }
-                        placement="top"
-                        arrow
-                        slotProps={{
-                          tooltip: {
-                            sx: {
-                              backgroundColor: "var(--color-primary-bg)",
-                              color: "var(--color-secondary-text)",
-                              fontSize: "0.75rem",
-                              padding: "8px 12px",
-                              borderRadius: "8px",
-
-                              boxShadow: "0 4px 12px var(--color-card-shadow)",
-                              "& .MuiTooltip-arrow": {
-                                color: "var(--color-primary-bg)",
-                              },
-                            },
-                          },
-                        }}
-                      >
-                        <span>
-                          <Button
-                            variant={isFollowing ? "secondary" : "default"}
-                            onClick={handleFollow}
-                            disabled={isLoadingFollow}
-                            size="md"
-                          >
-                            <Icon
-                              icon={
-                                isFollowing
-                                  ? "heroicons:user-minus"
-                                  : "heroicons:user-plus"
-                              }
-                              className="h-5 w-5"
-                            />
-                            {isFollowing ? "Unfollow" : "Follow"}
-                          </Button>
-                        </span>
+                            : "Follow this user"}
+                        </TooltipContent>
                       </Tooltip>
                     ) : (
-                      <Tooltip
-                        title="You need to be logged in to follow users"
-                        placement="top"
-                        arrow
-                        slotProps={{
-                          tooltip: {
-                            sx: {
-                              backgroundColor: "var(--color-primary-bg)",
-                              color: "var(--color-secondary-text)",
-                              fontSize: "0.75rem",
-                              padding: "8px 12px",
-                              borderRadius: "8px",
-
-                              boxShadow: "0 4px 12px var(--color-card-shadow)",
-                              "& .MuiTooltip-arrow": {
-                                color: "var(--color-primary-bg)",
-                              },
-                            },
-                          },
-                        }}
-                      >
-                        <span>
-                          <Button
-                            variant="default"
-                            size="md"
-                            onClick={() =>
-                              toast.error(
-                                "You need to be logged in to follow users",
-                              )
-                            }
-                          >
-                            <Icon
-                              icon="heroicons:user-plus"
-                              className="h-5 w-5"
-                            />
-                            Follow
-                          </Button>
-                        </span>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <span>
+                            <Button
+                              variant="default"
+                              size="md"
+                              onClick={() =>
+                                toast.error(
+                                  "You need to be logged in to follow users",
+                                )
+                              }
+                            >
+                              <Icon
+                                icon="heroicons:user-plus"
+                                className="h-5 w-5"
+                              />
+                              Follow
+                            </Button>
+                          </span>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          You need to be logged in to follow users
+                        </TooltipContent>
                       </Tooltip>
                     )}
                   </div>

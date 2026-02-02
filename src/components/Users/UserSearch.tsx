@@ -8,11 +8,13 @@ import Form from "next/form";
 import { useSearchParams, useRouter } from "next/navigation";
 import { UserData } from "@/types/auth";
 import DiscordUserCard from "@/components/Users/DiscordUserCard";
-import dynamic from "next/dynamic";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { fetchPaginatedUsers, searchUsers } from "@/utils/api";
-
-const Tooltip = dynamic(() => import("@mui/material/Tooltip"), { ssr: false });
-import { UserDetailsTooltip } from "./UserDetailsTooltip";
+import { UserDetailsTooltip } from "../ui/UserDetailsTooltip";
 import { useAuthContext } from "@/contexts/AuthContext";
 import UserCardSkeleton from "./UserCardSkeleton";
 
@@ -290,52 +292,41 @@ export default function UserSearch() {
             };
 
             return (
-              <Tooltip
-                key={user.id}
-                title={
+              <Tooltip key={user.id} delayDuration={0}>
+                <TooltipTrigger asChild>
+                  <Link
+                    href={`/users/${user.id}`}
+                    prefetch={false}
+                    className={`${getBorderClass()} group bg-secondary-bg hover:border-border-focus relative block rounded-lg border p-4 shadow-md transition-colors`}
+                  >
+                    {user.settings?.hide_presence !== 1 &&
+                      user.presence?.status === "Online" && (
+                        <div
+                          className="absolute top-2 right-2 z-10 h-3 w-3 rounded-full border-2"
+                          style={{
+                            backgroundColor:
+                              "var(--color-status-success-vibrant)",
+                            borderColor: "var(--color-secondary-bg)",
+                          }}
+                        />
+                      )}
+                    <div className="flex items-center space-x-3">
+                      <DiscordUserCard
+                        user={user}
+                        disableBadgeTooltips={true}
+                      />
+                    </div>
+                  </Link>
+                </TooltipTrigger>
+                <TooltipContent
+                  side="top"
+                  className="max-w-sm min-w-[300px] p-0"
+                >
                   <UserDetailsTooltip
                     user={user}
                     currentUserId={currentUserId}
                   />
-                }
-                arrow
-                disableTouchListener
-                slotProps={{
-                  tooltip: {
-                    sx: {
-                      backgroundColor: "var(--color-secondary-bg)",
-                      color: "var(--color-primary-text)",
-                      border: "1px solid var(--color-stroke)",
-                      maxWidth: "24rem",
-                      width: "auto",
-                      minWidth: "300px",
-                      "& .MuiTooltip-arrow": {
-                        color: "var(--color-secondary-bg)",
-                      },
-                    },
-                  },
-                }}
-              >
-                <Link
-                  href={`/users/${user.id}`}
-                  prefetch={false}
-                  className={`${getBorderClass()} group bg-secondary-bg hover:border-border-focus relative block rounded-lg border p-4 shadow-md transition-colors`}
-                >
-                  {user.settings?.hide_presence !== 1 &&
-                    user.presence?.status === "Online" && (
-                      <div
-                        className="absolute top-2 right-2 z-10 h-3 w-3 rounded-full border-2"
-                        style={{
-                          backgroundColor:
-                            "var(--color-status-success-vibrant)",
-                          borderColor: "var(--color-secondary-bg)",
-                        }}
-                      />
-                    )}
-                  <div className="flex items-center space-x-3">
-                    <DiscordUserCard user={user} />
-                  </div>
-                </Link>
+                </TooltipContent>
               </Tooltip>
             );
           })

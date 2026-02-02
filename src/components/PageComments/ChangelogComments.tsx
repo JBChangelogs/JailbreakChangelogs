@@ -2,13 +2,12 @@
 
 import { Icon } from "../ui/IconWrapper";
 import React, { useState, useEffect, useCallback } from "react";
+import { CircularProgress, IconButton, Menu, MenuItem } from "@mui/material";
 import {
-  CircularProgress,
-  IconButton,
-  Menu,
-  MenuItem,
   Tooltip,
-} from "@mui/material";
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { Button } from "../ui/button";
 import { CommentData } from "@/utils/api";
 import {
@@ -23,7 +22,7 @@ import ReportCommentModal from "./ReportCommentModal";
 import LoginModalWrapper from "../Auth/LoginModalWrapper";
 import SupporterModal from "../Modals/SupporterModal";
 import { useSupporterModal } from "@/hooks/useSupporterModal";
-import { UserDetailsTooltip } from "@/components/Users/UserDetailsTooltip";
+import { UserDetailsTooltip } from "@/components/ui/UserDetailsTooltip";
 import { UserBadges } from "@/components/Profile/UserBadges";
 import CommentTimestamp from "./CommentTimestamp";
 import { toast } from "sonner";
@@ -878,38 +877,24 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                               ) : (
                                 <>
                                   <div className="flex items-center gap-2">
-                                    <Tooltip
-                                      title={
-                                        userData[comment.user_id] && (
+                                    <Tooltip>
+                                      <TooltipTrigger asChild>
+                                        <Link
+                                          href={`/users/${comment.user_id}`}
+                                          prefetch={false}
+                                          className="text-md text-primary-text group-hover:text-link truncate font-semibold transition-colors duration-200 group-hover:underline"
+                                        >
+                                          {userData[comment.user_id]
+                                            ?.username || comment.author}
+                                        </Link>
+                                      </TooltipTrigger>
+                                      <TooltipContent className="max-w-sm min-w-[300px] p-0">
+                                        {userData[comment.user_id] && (
                                           <UserDetailsTooltip
                                             user={userData[comment.user_id]}
                                           />
-                                        )
-                                      }
-                                      arrow
-                                      disableTouchListener
-                                      slotProps={{
-                                        tooltip: {
-                                          sx: {
-                                            backgroundColor:
-                                              "var(--color-secondary-bg)",
-                                            color: "var(--color-primary-text)",
-                                            "& .MuiTooltip-arrow": {
-                                              color:
-                                                "var(--color-secondary-bg)",
-                                            },
-                                          },
-                                        },
-                                      }}
-                                    >
-                                      <Link
-                                        href={`/users/${comment.user_id}`}
-                                        prefetch={false}
-                                        className="text-md text-primary-text group-hover:text-link truncate font-semibold transition-colors duration-200 group-hover:underline"
-                                      >
-                                        {userData[comment.user_id]?.username ||
-                                          comment.author}
-                                      </Link>
+                                        )}
+                                      </TooltipContent>
                                     </Tooltip>
 
                                     {/* User Badges */}
@@ -921,6 +906,10 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                                           }
                                           premiumType={premiumType}
                                           flags={flags}
+                                          primary_guild={
+                                            userData[comment.user_id]
+                                              .primary_guild
+                                          }
                                           size="md"
                                         />
                                       )}
