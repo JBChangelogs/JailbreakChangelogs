@@ -5,11 +5,9 @@ import { use } from "react";
 import { Icon } from "@/components/ui/IconWrapper";
 import { Item, FilterSort, ValueSort, FavoriteItem } from "@/types";
 import { sortAndFilterItems, parseCashValue } from "@/utils/values";
-import { toast } from "sonner";
 import SearchParamsHandler from "@/components/SearchParamsHandler";
 import CategoryIcons from "@/components/Items/CategoryIcons";
 import { fetchUserFavorites } from "@/utils/api";
-import { useRouter } from "next/navigation";
 import { useDebounce } from "@/hooks/useDebounce";
 import { useAuthContext } from "@/contexts/AuthContext";
 import TradingGuides from "./TradingGuides";
@@ -32,7 +30,6 @@ export default function ValuesClient({
   itemsPromise,
   lastUpdatedPromise,
 }: ValuesClientProps) {
-  const router = useRouter();
   const { user } = useAuthContext();
 
   const items = use(itemsPromise);
