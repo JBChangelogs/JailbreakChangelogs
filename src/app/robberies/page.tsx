@@ -18,6 +18,7 @@ import { Masonry } from "@mui/lab";
 type NameSort = "a-z" | "z-a";
 type TimeSort = "newest" | "oldest";
 type ServerSize = "all" | "big" | "small";
+type DifficultySort = "none" | "easy-to-hard" | "hard-to-easy";
 
 // Define all robbery types with their marker names
 const ROBBERY_TYPES = [
@@ -128,6 +129,7 @@ function RobberyTrackerContent() {
   const [nameSort, setNameSort] = useState<NameSort>("a-z");
   const [timeSort, setTimeSort] = useState<TimeSort>("newest");
   const [serverSize, setServerSize] = useState<ServerSize>("all");
+  const [difficultySort, setDifficultySort] = useState<DifficultySort>("none");
   const [selectedRobberyTypes, setSelectedRobberyTypes] = useState<string[]>(
     [],
   );
@@ -174,12 +176,33 @@ function RobberyTrackerContent() {
       if (a.status !== b.status) {
         return a.status - b.status;
       }
+
+      // If status is the same, apply the requested sorts
+      // If name sort is explicitly chosen, it could be the primary secondary sort
+      // But usually people want to see newest first by default within a status
+      // So I prioritize name sort if it's not the default or if we want to support it properly
+
+      if (nameSort === "a-z") {
+        const nameCompare = a.name.localeCompare(b.name);
+        if (nameCompare !== 0) return nameCompare;
+      } else if (nameSort === "z-a") {
+        const nameCompare = b.name.localeCompare(a.name);
+        if (nameCompare !== 0) return nameCompare;
+      }
+
       if (timeSort === "newest") {
         return b.timestamp - a.timestamp;
       }
       return a.timestamp - b.timestamp;
     });
-  }, [robberies, selectedRobberyTypes, searchQuery, timeSort, serverSize]);
+  }, [
+    robberies,
+    selectedRobberyTypes,
+    searchQuery,
+    timeSort,
+    serverSize,
+    nameSort,
+  ]);
 
   // Filter and sort Mansions (simpler as no type filtering)
   const filteredMansions = useMemo(() => {
@@ -202,10 +225,19 @@ function RobberyTrackerContent() {
 
     return filtered.sort((a, b) => {
       if (a.status !== b.status) return a.status - b.status;
+
+      if (nameSort === "a-z") {
+        const nameCompare = a.name.localeCompare(b.name);
+        if (nameCompare !== 0) return nameCompare;
+      } else if (nameSort === "z-a") {
+        const nameCompare = b.name.localeCompare(a.name);
+        if (nameCompare !== 0) return nameCompare;
+      }
+
       if (timeSort === "newest") return b.timestamp - a.timestamp;
       return a.timestamp - b.timestamp;
     });
-  }, [mansions, searchQuery, timeSort, serverSize]);
+  }, [mansions, searchQuery, timeSort, serverSize, nameSort]);
 
   // Calculate robbery statistics
   const robberyStats = useMemo(() => {
@@ -254,13 +286,36 @@ function RobberyTrackerContent() {
       );
     }
 
-    // Sort by timestamp
-    return filtered.sort((a, b) =>
-      timeSort === "newest"
+    // Sort by timestamp or difficulty
+    return filtered.sort((a, b) => {
+      if (difficultySort !== "none") {
+        const difficultyMap: Record<string, number> = {
+          Brown: 1, // Easy
+          Blue: 2, // Medium
+          Red: 3, // Hard
+        };
+        const diffA = difficultyMap[a.color] || 0;
+        const diffB = difficultyMap[b.color] || 0;
+
+        if (diffA !== diffB) {
+          return difficultySort === "easy-to-hard"
+            ? diffA - diffB
+            : diffB - diffA;
+        }
+      }
+
+      return timeSort === "newest"
         ? b.timestamp - a.timestamp
-        : a.timestamp - b.timestamp,
-    );
-  }, [airdrops, activeAirdropLocation, searchQuery, timeSort, serverSize]);
+        : a.timestamp - b.timestamp;
+    });
+  }, [
+    airdrops,
+    activeAirdropLocation,
+    searchQuery,
+    timeSort,
+    serverSize,
+    difficultySort,
+  ]);
 
   // Calculate airdrop statistics
   const airdropStats = useMemo(() => {
@@ -330,19 +385,37 @@ function RobberyTrackerContent() {
                 </select>
               </div>
 
-              {/* Name Sort Dropdown */}
+              {/* Name Sort or Difficulty Sort Dropdown */}
               <div className="w-full lg:w-1/3">
-                <select
-                  className="select font-inter bg-secondary-bg text-primary-text h-[56px] min-h-[56px] w-full"
-                  value={nameSort}
-                  onChange={(e) => setNameSort(e.target.value as NameSort)}
-                >
-                  <option value="" disabled>
-                    Sort by Name
-                  </option>
-                  <option value="a-z">Name (A to Z)</option>
-                  <option value="z-a">Name (Z to A)</option>
-                </select>
+                {activeView === "airdrops" ? (
+                  <select
+                    className="select font-inter bg-secondary-bg text-primary-text h-[56px] min-h-[56px] w-full"
+                    value={difficultySort}
+                    onChange={(e) =>
+                      setDifficultySort(e.target.value as DifficultySort)
+                    }
+                  >
+                    <option value="none">Sort by Difficulty</option>
+                    <option value="easy-to-hard">
+                      Difficulty (Easy First)
+                    </option>
+                    <option value="hard-to-easy">
+                      Difficulty (Hard First)
+                    </option>
+                  </select>
+                ) : (
+                  <select
+                    className="select font-inter bg-secondary-bg text-primary-text h-[56px] min-h-[56px] w-full"
+                    value={nameSort}
+                    onChange={(e) => setNameSort(e.target.value as NameSort)}
+                  >
+                    <option value="" disabled>
+                      Sort by Name
+                    </option>
+                    <option value="a-z">Name (A to Z)</option>
+                    <option value="z-a">Name (Z to A)</option>
+                  </select>
+                )}
               </div>
 
               {/* Time Sort Dropdown */}
