@@ -1720,32 +1720,56 @@ export interface ConnectedBotsResponse {
   recent_heartbeats: ConnectedBot[];
 }
 
-export async function fetchConnectedBots(): Promise<ConnectedBotsResponse | null> {
-  try {
-    if (!INVENTORY_API_URL) {
-      throw new Error("Missing INVENTORY_API_URL");
-    }
+export async function fetchConnectedBots(
+  maxRetries: number = 3,
+): Promise<ConnectedBotsResponse | null> {
+  let lastError: Error | null = null;
 
-    const response = await fetch(`${INVENTORY_API_URL}/bots/connected`, {
-      headers: {
-        "User-Agent": "JailbreakChangelogs-Inventory/1.0",
-        "X-Source": INVENTORY_API_SOURCE_HEADER,
-      },
-    });
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000);
 
-    if (!response.ok) {
-      console.error(
-        `[SERVER] fetchConnectedBots: Failed with status ${response.status} ${response.statusText}`,
+    try {
+      if (!INVENTORY_API_URL) {
+        throw new Error("Missing INVENTORY_API_URL");
+      }
+
+      const response = await fetch(`${INVENTORY_API_URL}/bots/connected`, {
+        headers: {
+          "User-Agent": "JailbreakChangelogs-Inventory/1.0",
+          "X-Source": INVENTORY_API_SOURCE_HEADER,
+        },
+        signal: controller.signal,
+      });
+
+      if (!response.ok) {
+        throw new Error(`Status ${response.status} ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      return data as ConnectedBotsResponse;
+    } catch (err) {
+      lastError = err as Error;
+
+      if (attempt === maxRetries) break;
+
+      // Exponential backoff: 1s, 2s, 4s
+      const delayMs = Math.pow(2, attempt) * 1000;
+      console.warn(
+        `[SERVER] fetchConnectedBots failed (attempt ${attempt + 1}/${maxRetries + 1}), retrying in ${delayMs}ms:`,
+        err instanceof Error ? err.message : err,
       );
-      return null;
+      await new Promise((resolve) => setTimeout(resolve, delayMs));
+    } finally {
+      clearTimeout(timeoutId);
     }
-
-    const data = await response.json();
-    return data as ConnectedBotsResponse;
-  } catch (err) {
-    console.error("[SERVER] fetchConnectedBots: Unexpected error:", err);
-    return null;
   }
+
+  console.error(
+    "[SERVER] fetchConnectedBots: All attempts failed:",
+    lastError?.message || lastError,
+  );
+  return null;
 }
 
 interface InventoryItem {
@@ -1781,32 +1805,55 @@ export interface QueueInfo {
   } | null;
 }
 
-export async function fetchQueueInfo(): Promise<QueueInfo | null> {
-  try {
-    if (!INVENTORY_API_URL) {
-      throw new Error("Missing INVENTORY_API_URL");
-    }
+export async function fetchQueueInfo(
+  maxRetries: number = 3,
+): Promise<QueueInfo | null> {
+  let lastError: Error | null = null;
 
-    const response = await fetch(`${INVENTORY_API_URL}/queue/info`, {
-      headers: {
-        "User-Agent": "JailbreakChangelogs-Inventory/1.0",
-        "X-Source": INVENTORY_API_SOURCE_HEADER,
-      },
-    });
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000);
 
-    if (!response.ok) {
-      console.error(
-        `[SERVER] fetchQueueInfo: Failed with status ${response.status} ${response.statusText}`,
+    try {
+      if (!INVENTORY_API_URL) {
+        throw new Error("Missing INVENTORY_API_URL");
+      }
+
+      const response = await fetch(`${INVENTORY_API_URL}/queue/info`, {
+        headers: {
+          "User-Agent": "JailbreakChangelogs-Inventory/1.0",
+          "X-Source": INVENTORY_API_SOURCE_HEADER,
+        },
+        signal: controller.signal,
+      });
+
+      if (!response.ok) {
+        throw new Error(`Status ${response.status} ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      return data as QueueInfo;
+    } catch (err) {
+      lastError = err as Error;
+
+      if (attempt === maxRetries) break;
+
+      const delayMs = Math.pow(2, attempt) * 1000;
+      console.warn(
+        `[SERVER] fetchQueueInfo failed (attempt ${attempt + 1}/${maxRetries + 1}), retrying in ${delayMs}ms:`,
+        err instanceof Error ? err.message : err,
       );
-      return null;
+      await new Promise((resolve) => setTimeout(resolve, delayMs));
+    } finally {
+      clearTimeout(timeoutId);
     }
-
-    const data = await response.json();
-    return data as QueueInfo;
-  } catch (err) {
-    console.error("[SERVER] fetchQueueInfo: Unexpected error:", err);
-    return null;
   }
+
+  console.error(
+    "[SERVER] fetchQueueInfo: All attempts failed:",
+    lastError?.message || lastError,
+  );
+  return null;
 }
 
 // Custom error class for max streams error

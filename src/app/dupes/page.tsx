@@ -13,6 +13,9 @@ import { checkDupeFinderMaintenanceMode } from "@/utils/maintenance";
 import FeatureMaintenance from "@/theme/FeatureMaintenance";
 import { Suspense } from "react";
 import PremiumAwareLayout from "@/components/Layout/PremiumAwareLayout";
+import { Button } from "@/components/ui/button";
+import { Icon } from "@/components/ui/IconWrapper";
+import Link from "next/link";
 
 export const dynamic = "force-dynamic";
 
@@ -43,8 +46,14 @@ export default async function DupeFinderPage() {
 
       <ExperimentalFeatureBanner className="mb-6" />
 
-      <div className="mb-6 flex items-center gap-3">
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
         <h1 className="text-primary-text text-3xl font-bold">Dupe Finder</h1>
+        <Button asChild variant="outline" size="sm">
+          <Link href="/values" prefetch={false}>
+            <Icon icon="heroicons:list-bullet" className="mr-2" />
+            Values List
+          </Link>
+        </Button>
       </div>
 
       <p className="text-secondary-text mb-4">

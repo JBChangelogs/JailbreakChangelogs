@@ -8,7 +8,7 @@ import { sortAndFilterItems, parseCashValue } from "@/utils/values";
 import { toast } from "sonner";
 import SearchParamsHandler from "@/components/SearchParamsHandler";
 import CategoryIcons from "@/components/Items/CategoryIcons";
-import { fetchUserFavorites, fetchRandomItem } from "@/utils/api";
+import { fetchUserFavorites } from "@/utils/api";
 import { useRouter } from "next/navigation";
 import { useDebounce } from "@/hooks/useDebounce";
 import { useAuthContext } from "@/contexts/AuthContext";
@@ -21,6 +21,7 @@ import { safeSessionStorage } from "@/utils/safeStorage";
 import NitroValuesVideoPlayer from "@/components/Ads/NitroValuesVideoPlayer";
 import NitroValuesRailAd from "@/components/Ads/NitroValuesRailAd";
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 interface ValuesClientProps {
   itemsPromise: Promise<Item[]>;
@@ -133,34 +134,6 @@ export default function ValuesClient({
     if (typeof window === "undefined") return false;
     return window.location.hash === "#hyper-pity-calc";
   });
-
-  const handleRandomItem = async () => {
-    const randomPromise = (async () => {
-      const item = await fetchRandomItem();
-      if (!item) {
-        throw new Error("No items found to pick from!");
-      }
-
-      // Delay slightly to show the "pick" before redirecting
-      await new Promise((resolve) => setTimeout(resolve, 500));
-
-      router.push(`/item/${item.type.toLowerCase()}/${item.name}`);
-      return item;
-    })();
-
-    toast.promise(randomPromise, {
-      loading: "Finding a random item...",
-      success: (item: { name: string; type: string }) => ({
-        message: "Item Found",
-        description: `Redirecting you to ${item.name} (${item.type})...`,
-      }),
-      error: (err) => ({
-        message: "Failed to pick item",
-        description:
-          err instanceof Error ? err.message : "An unexpected error occurred.",
-      }),
-    });
-  };
 
   const handleCategorySelect = (filter: FilterSort) => {
     if (filterSort === filter) {
@@ -318,9 +291,11 @@ export default function ValuesClient({
             </p>
 
             <div className="mb-4 flex flex-wrap gap-2">
-              <Button onClick={handleRandomItem}>
-                <Icon icon="material-symbols:auto-awesome" inline={true} />
-                Random Item
+              <Button asChild>
+                <Link href="/dupes" prefetch={false}>
+                  <Icon icon="heroicons:magnifying-glass" inline={true} />
+                  Dupe Finder
+                </Link>
               </Button>
               <Button onClick={handleOpenHcModal}>
                 Hyperchrome Pity Calculator
