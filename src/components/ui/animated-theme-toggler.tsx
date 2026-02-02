@@ -8,11 +8,13 @@ import { safeLocalStorage } from "@/utils/safeStorage";
 
 interface AnimatedThemeTogglerProps extends React.ComponentPropsWithoutRef<"button"> {
   duration?: number;
+  size?: "sm" | "md";
 }
 
 export const AnimatedThemeToggler = ({
   className,
   duration = 400,
+  size = "md",
   ...props
 }: AnimatedThemeTogglerProps) => {
   const { theme, setTheme } = useTheme();
@@ -73,11 +75,12 @@ export const AnimatedThemeToggler = ({
 
   // Determine which icon to show based on current theme
   const getIcon = () => {
+    const iconSize = size === "sm" ? "h-4 w-4" : "h-5 w-5";
     if (theme === "dark") {
       // Show moon icon for dark theme
       return (
         <svg
-          className="h-5 w-5 fill-current text-white"
+          className={cn("text-primary-text fill-current", iconSize)}
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 24 24"
         >
@@ -88,7 +91,7 @@ export const AnimatedThemeToggler = ({
       // Show sun icon for light theme
       return (
         <svg
-          className="h-5 w-5 fill-current text-black"
+          className={cn("text-primary-text fill-current", iconSize)}
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 24 24"
         >
@@ -104,7 +107,8 @@ export const AnimatedThemeToggler = ({
       type="button"
       onClick={toggleTheme}
       className={cn(
-        "border-border-primary bg-secondary-bg text-secondary-text hover:bg-quaternary-bg hover:text-primary-text flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg border transition-all duration-200 hover:scale-105 active:scale-95",
+        "border-border-primary bg-secondary-bg text-secondary-text hover:bg-quaternary-bg hover:text-primary-text flex cursor-pointer items-center justify-center rounded-lg border transition-all duration-200 hover:scale-105 active:scale-95",
+        size === "sm" ? "h-8 w-8" : "h-10 w-10",
         className,
       )}
       aria-label={`Switch theme (current: ${theme})`}

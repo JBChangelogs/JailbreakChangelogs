@@ -27,8 +27,8 @@ const AnimatedThemeToggler = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="border-border-primary bg-secondary-bg text-secondary-text hover:bg-quaternary-bg hover:text-primary-text flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg border transition-all duration-200 hover:scale-105 active:scale-95">
-        <div className="h-5 w-5" />
+      <div className="border-border-primary bg-secondary-bg text-secondary-text hover:bg-quaternary-bg hover:text-primary-text flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg border transition-all duration-200 hover:scale-105 active:scale-95">
+        <div className="h-4 w-4" />
       </div>
     ),
   },
@@ -598,12 +598,12 @@ export default function Header() {
                     <PopoverTrigger asChild>
                       <button
                         suppressHydrationWarning={true}
-                        className="relative flex cursor-pointer items-center justify-center p-1 transition-all duration-200 hover:scale-105 active:scale-95"
+                        className="border-border-primary bg-secondary-bg text-secondary-text hover:bg-quaternary-bg hover:text-primary-text relative flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg border transition-all duration-200 hover:scale-105 active:scale-95"
                         aria-label="Notifications"
                       >
                         <Icon
                           icon="mingcute:notification-line"
-                          className="text-primary-text h-5 w-5"
+                          className="text-primary-text h-4 w-4"
                           inline={true}
                         />
                         {isAuthenticated && (
@@ -943,20 +943,20 @@ export default function Header() {
                     className="flex items-center justify-center"
                   >
                     <button
-                      className="flex cursor-pointer items-center justify-center transition-all duration-200 hover:scale-105 active:scale-95"
+                      className="border-border-primary bg-secondary-bg text-secondary-text hover:bg-quaternary-bg hover:text-primary-text flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg border transition-all duration-200 hover:scale-105 active:scale-95"
                       aria-label="Support us"
                     >
                       <Image
                         src="/logos/kofi_symbol.svg"
                         alt="Ko-fi"
-                        width={20}
-                        height={20}
+                        width={18}
+                        height={18}
                         style={{ display: "block" }}
                       />
                     </button>
                   </Link>
                   <div className="flex items-center justify-center">
-                    <AnimatedThemeToggler />
+                    <AnimatedThemeToggler size="sm" />
                   </div>
                   <button
                     onClick={handleDrawerToggle}

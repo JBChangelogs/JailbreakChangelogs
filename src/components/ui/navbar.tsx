@@ -533,11 +533,11 @@ export const NavbarModern = ({
               <PopoverTrigger asChild>
                 <button
                   suppressHydrationWarning={true}
-                  className="border-border-primary bg-secondary-bg text-secondary-text hover:bg-quaternary-bg hover:text-primary-text relative flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg border transition-colors duration-200"
+                  className="border-border-primary bg-secondary-bg text-secondary-text hover:bg-quaternary-bg hover:text-primary-text relative flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg border transition-all duration-200 hover:scale-105 active:scale-95"
                 >
                   <Icon
                     icon="mingcute:notification-line"
-                    className="h-5 w-5"
+                    className="text-primary-text h-5 w-5"
                     inline={true}
                   />
                   {isAuthenticated && (
@@ -878,7 +878,7 @@ export const NavbarModern = ({
             }}
           >
             <Link href="/supporting">
-              <button className="text-tertiary-text hover:text-primary-text cursor-pointer p-2 transition-colors">
+              <button className="border-border-primary bg-secondary-bg text-secondary-text hover:bg-quaternary-bg hover:text-primary-text flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg border transition-all duration-200 hover:scale-105 active:scale-95">
                 <Image
                   src="/logos/kofi_symbol.svg"
                   alt="Ko-fi"
