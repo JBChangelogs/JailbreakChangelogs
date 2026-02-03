@@ -117,7 +117,7 @@ export default function ItemValues({
             {!hasNoPrice &&
               (isRobuxPrice ? (
                 <Image
-                  src="https://assets.jailbreakchangelogs.xyz/assets/images/Robux_Icon.png"
+                  src="/assets/icons/Robux_Icon.webp"
                   alt="Robux"
                   width={20}
                   height={20}

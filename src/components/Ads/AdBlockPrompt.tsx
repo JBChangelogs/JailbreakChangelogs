@@ -5,6 +5,7 @@ import { useRouter, usePathname } from "next/navigation";
 import Image from "next/image";
 
 import { Icon } from "@/components/ui/IconWrapper";
+import { Button } from "@/components/ui/button";
 
 // Simple ad block detection strategy:
 // 1. Show modal immediately if adblock is detected
@@ -133,23 +134,24 @@ const AdBlockPrompt = () => {
 
           {/* Alternative Option */}
           <div className="mb-4 w-full sm:mb-8">
-            <button
+            <Button
               onClick={handleSupporterClick}
               data-umami-event="Adblock Prompt - Become Supporter"
-              className="bg-button-info text-form-button-text hover:bg-button-info-hover w-full max-w-xs cursor-pointer rounded-lg px-6 py-3 text-base font-bold tracking-wide uppercase shadow-lg transition-all hover:-translate-y-0.5 hover:shadow-xl active:translate-y-0"
+              className="w-full max-w-xs tracking-wide uppercase"
             >
               Become A Supporter
-            </button>
+            </Button>
           </div>
 
           {/* Dismiss Link */}
-          <button
+          <Button
             onClick={handleModalDismiss}
             data-umami-event="Adblock Prompt - Remind Later"
-            className="text-secondary-text hover:text-primary-text cursor-pointer text-sm font-medium transition-colors hover:underline"
+            variant="ghost"
+            className="text-secondary-text hover:text-primary-text hover:bg-transparent hover:underline"
           >
             Remind Me Later
-          </button>
+          </Button>
         </div>
       </div>
     </div>

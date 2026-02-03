@@ -8,6 +8,7 @@ import { getAllowedFileExtensions } from "@/config/settings";
 import { useTheme } from "@/contexts/ThemeContext";
 import { Icon } from "@/components/ui/IconWrapper";
 import ImageModal from "@/components/ui/ImageModal";
+import { Button } from "@/components/ui/button";
 
 interface SupporterTier {
   name: string;
@@ -181,26 +182,22 @@ export default function ModernPricingSection() {
 
           <div className="border-border-primary mt-6 overflow-hidden rounded-lg border p-0.5">
             <div className="flex sm:-mx-0.5">
-              <button
+              <Button
                 onClick={() => setIsYearly(false)}
-                className={`w-1/2 cursor-pointer rounded-lg px-3 py-1 transition-colors focus:outline-none sm:mx-0.5 sm:w-auto ${
-                  !isYearly
-                    ? "bg-button-info text-white"
-                    : "bg-secondary-bg text-secondary-text hover:bg-quaternary-bg"
-                }`}
+                variant={!isYearly ? "default" : "ghost"}
+                className={`w-1/2 sm:w-auto ${!isYearly ? "text-white" : "text-secondary-text bg-secondary-bg hover:bg-quaternary-bg"}`}
+                size="sm"
               >
                 Ko-fi
-              </button>
-              <button
+              </Button>
+              <Button
                 onClick={() => setIsYearly(true)}
-                className={`w-1/2 cursor-pointer rounded-lg px-3 py-1 transition-colors focus:outline-none sm:mx-0.5 sm:w-auto ${
-                  isYearly
-                    ? "bg-button-info text-white"
-                    : "bg-secondary-bg text-secondary-text hover:bg-quaternary-bg"
-                }`}
+                variant={isYearly ? "default" : "ghost"}
+                className={`w-1/2 sm:w-auto ${isYearly ? "text-white" : "text-secondary-text bg-secondary-bg hover:bg-quaternary-bg"}`}
+                size="sm"
               >
                 Roblox
-              </button>
+              </Button>
             </div>
           </div>
         </div>
@@ -245,7 +242,7 @@ export default function ModernPricingSection() {
                     {isYearly ? (
                       <>
                         <Image
-                          src="https://assets.jailbreakchangelogs.xyz/assets/images/Robux_Icon.png"
+                          src="/assets/icons/Robux_Icon.webp"
                           alt="Robux"
                           width={24}
                           height={24}
@@ -264,7 +261,7 @@ export default function ModernPricingSection() {
                 ) : isYearly && tier.priceAlt ? (
                   <div className="flex items-center gap-2">
                     <Image
-                      src="https://assets.jailbreakchangelogs.xyz/assets/images/Robux_Icon.png"
+                      src="/assets/icons/Robux_Icon.webp"
                       alt="Robux"
                       width={24}
                       height={24}
@@ -318,7 +315,7 @@ export default function ModernPricingSection() {
               </div>
 
               {tier.name !== "Free" ? (
-                <button
+                <Button
                   onClick={() => {
                     const targetElement = document.querySelector(
                       ".support-methods-section",
@@ -331,10 +328,10 @@ export default function ModernPricingSection() {
                       });
                     }
                   }}
-                  className="bg-button-info hover:bg-button-info-hover focus:bg-button-info-hover mt-10 inline-block w-full transform cursor-pointer rounded-md px-4 py-2 text-center font-medium tracking-wide text-white capitalize transition-colors duration-300 focus:outline-none"
+                  className="mt-10 w-full tracking-wide capitalize"
                 >
                   {isYearly ? "Support with Robux" : "Support with Ko-fi"}
-                </button>
+                </Button>
               ) : (
                 <div className="border-border-primary bg-primary-bg text-primary-text mt-10 w-full rounded-md border px-4 py-2 text-center font-medium tracking-wide capitalize">
                   Already included

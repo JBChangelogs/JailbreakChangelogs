@@ -6,6 +6,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { RobloxIcon } from "@/components/Icons/RobloxIcon";
 import { Icon } from "@/components/ui/IconWrapper";
+import { Button } from "@/components/ui/button";
 import confetti from "canvas-confetti";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import { Dialog, DialogPanel, DialogTitle } from "@headlessui/react";
@@ -429,7 +430,7 @@ export default function RedeemPage() {
                 </p>
               </div>
 
-              <button
+              <Button
                 type="submit"
                 disabled={
                   isLoading ||
@@ -438,15 +439,8 @@ export default function RedeemPage() {
                   (validationResult !== null &&
                     (!validationResult.valid || validationResult.redeemed))
                 }
-                className={`w-full rounded-lg px-6 py-4 text-lg font-semibold transition-colors ${
-                  isLoading ||
-                  !code.trim() ||
-                  isValidating ||
-                  (validationResult !== null &&
-                    (!validationResult.valid || validationResult.redeemed))
-                    ? "border-button-info-disabled bg-button-info-disabled text-form-button-text cursor-not-allowed"
-                    : "bg-button-info text-form-button-text hover:bg-button-info-hover hover:cursor-pointer"
-                }`}
+                className="w-full py-6 text-lg"
+                size="lg"
                 data-umami-event="Redeem Code"
               >
                 {isLoading ? (
@@ -476,7 +470,7 @@ export default function RedeemPage() {
                 ) : (
                   "Redeem"
                 )}
-              </button>
+              </Button>
             </form>
           </div>
 
@@ -677,22 +671,30 @@ export default function RedeemPage() {
             </div>
 
             <div className="flex flex-col gap-3 sm:flex-row">
-              <button
+              <Button
+                variant="outline"
                 onClick={() => setShowConfirmModal(false)}
-                className="border-border-primary text-secondary-text hover:bg-tertiary-bg hover:text-primary-text w-full rounded-lg border px-4 py-2 transition-colors hover:cursor-pointer sm:flex-1"
+                className="w-full sm:flex-1"
               >
                 Cancel
-              </button>
-              <button
+              </Button>
+              <Button
                 onClick={confirmRedeem}
-                className={`${user && validationResult && user.premiumtype > validationResult.premiumtype ? "bg-button-danger hover:bg-red-600" : "bg-button-info hover:bg-button-info-hover"} text-form-button-text w-full rounded-lg px-4 py-2 transition-colors hover:cursor-pointer sm:flex-1`}
+                variant={
+                  user &&
+                  validationResult &&
+                  user.premiumtype > validationResult.premiumtype
+                    ? "destructive"
+                    : "default"
+                }
+                className="w-full sm:flex-1"
               >
                 {user &&
                 validationResult &&
                 user.premiumtype > validationResult.premiumtype
                   ? "Confirm Downgrade"
                   : "Redeem Code"}
-              </button>
+              </Button>
             </div>
           </DialogPanel>
         </div>
