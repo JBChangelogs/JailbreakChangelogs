@@ -1,8 +1,10 @@
 import React from "react";
 import Link from "next/link";
-import dynamic from "next/dynamic";
-
-const Tooltip = dynamic(() => import("@mui/material/Tooltip"), { ssr: false });
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { UserAvatar } from "@/utils/avatar";
 import { TradeUserTooltip } from "./TradeUserTooltip";
 import RobloxTradeUser from "./RobloxTradeUser";
@@ -57,34 +59,24 @@ export default function TradeUserProfile({ user }: TradeUserProfileProps) {
                     <span className="text-primary-text text-xs">Discord</span>
                   </div>
                 </div>
-                <Tooltip
-                  title={<TradeUserTooltip user={user} />}
-                  arrow
-                  disableTouchListener
-                  slotProps={{
-                    tooltip: {
-                      sx: {
-                        backgroundColor: "var(--color-secondary-bg)",
-                        color: "var(--color-primary-text)",
-                        maxWidth: "400px",
-                        width: "auto",
-                        minWidth: "300px",
-                        "& .MuiTooltip-arrow": {
-                          color: "var(--color-secondary-bg)",
-                        },
-                      },
-                    },
-                  }}
-                >
-                  <Link
-                    href={`/users/${user.id}`}
-                    prefetch={false}
-                    className="text-primary-text hover:text-link font-medium transition-colors"
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Link
+                      href={`/users/${user.id}`}
+                      prefetch={false}
+                      className="text-primary-text hover:text-link font-medium transition-colors"
+                    >
+                      {user.global_name && user.global_name !== "None"
+                        ? user.global_name
+                        : user.username}
+                    </Link>
+                  </TooltipTrigger>
+                  <TooltipContent
+                    side="bottom"
+                    className="bg-secondary-bg text-primary-text max-w-[400px] min-w-[300px] border-none shadow-[var(--color-card-shadow)]"
                   >
-                    {user.global_name && user.global_name !== "None"
-                      ? user.global_name
-                      : user.username}
-                  </Link>
+                    <TradeUserTooltip user={user} />
+                  </TooltipContent>
                 </Tooltip>
                 <div className="text-secondary-text text-sm">
                   @{user.username}

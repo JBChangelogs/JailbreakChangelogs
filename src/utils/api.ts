@@ -1268,7 +1268,7 @@ export async function fetchInventoryData(robloxId: string) {
 
     return data;
   } catch (err) {
-    console.error("[SERVER] Error fetching inventory data:", err);
+    // console.error("[SERVER] Error fetching inventory data:", err);
 
     if (err instanceof Error) {
       return {
@@ -1755,10 +1755,10 @@ export async function fetchConnectedBots(
 
       // Exponential backoff: 1s, 2s, 4s
       const delayMs = Math.pow(2, attempt) * 1000;
-      console.warn(
-        `[SERVER] fetchConnectedBots failed (attempt ${attempt + 1}/${maxRetries + 1}), retrying in ${delayMs}ms:`,
-        err instanceof Error ? err.message : err,
-      );
+      // console.warn(
+      //   `[SERVER] fetchConnectedBots failed (attempt ${attempt + 1}/${maxRetries + 1}), retrying in ${delayMs}ms:`,
+      //   err instanceof Error ? err.message : err,
+      // );
       await new Promise((resolve) => setTimeout(resolve, delayMs));
     } finally {
       clearTimeout(timeoutId);
@@ -1839,10 +1839,10 @@ export async function fetchQueueInfo(
       if (attempt === maxRetries) break;
 
       const delayMs = Math.pow(2, attempt) * 1000;
-      console.warn(
-        `[SERVER] fetchQueueInfo failed (attempt ${attempt + 1}/${maxRetries + 1}), retrying in ${delayMs}ms:`,
-        err instanceof Error ? err.message : err,
-      );
+      // console.warn(
+      //   `[SERVER] fetchQueueInfo failed (attempt ${attempt + 1}/${maxRetries + 1}), retrying in ${delayMs}ms:`,
+      //   err instanceof Error ? err.message : err,
+      // );
       await new Promise((resolve) => setTimeout(resolve, delayMs));
     } finally {
       clearTimeout(timeoutId);

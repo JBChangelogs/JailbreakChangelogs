@@ -1,11 +1,14 @@
 import React from "react";
 import { TradeItem } from "@/types/trading";
-import dynamic from "next/dynamic";
 import Image from "next/image";
 import { getItemImagePath, handleImageError } from "@/utils/images";
 import { TradeAdTooltip } from "../../trading/TradeAdTooltip";
 
-const Tooltip = dynamic(() => import("@mui/material/Tooltip"), { ssr: false });
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface CalculatorItemGridProps {
   items: TradeItem[];
@@ -102,8 +105,30 @@ export const CalculatorItemGrid: React.FC<CalculatorItemGridProps> = ({
             return (
               <div key={item.instanceId} className="group relative">
                 {/* Item Image Container - Click to Remove */}
-                <Tooltip
-                  title={
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div
+                      className="relative aspect-square cursor-pointer overflow-hidden rounded-lg"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (onRemove && item.instanceId) {
+                          onRemove(item.instanceId);
+                        }
+                      }}
+                    >
+                      <Image
+                        src={getItemImagePath(item.type, item.name, true)}
+                        alt={item.name}
+                        fill
+                        className="object-cover"
+                        onError={handleImageError}
+                      />
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent
+                    side="right"
+                    className="bg-primary-bg text-primary-text border-stroke max-w-[400px] min-w-[300px] border"
+                  >
                     <TradeAdTooltip
                       item={{
                         ...item,
@@ -111,43 +136,7 @@ export const CalculatorItemGrid: React.FC<CalculatorItemGridProps> = ({
                         base_name: item.base_name || item.name,
                       }}
                     />
-                  }
-                  arrow
-                  placement="right"
-                  disableTouchListener
-                  slotProps={{
-                    tooltip: {
-                      sx: {
-                        backgroundColor: "var(--color-primary-bg)",
-                        color: "var(--color-primary-text)",
-                        border: "1px solid var(--color-stroke)",
-                        maxWidth: "400px",
-                        width: "auto",
-                        minWidth: "300px",
-                        "& .MuiTooltip-arrow": {
-                          color: "var(--color-primary-bg)",
-                        },
-                      },
-                    },
-                  }}
-                >
-                  <div
-                    className="relative aspect-square cursor-pointer overflow-hidden rounded-lg"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      if (onRemove && item.instanceId) {
-                        onRemove(item.instanceId);
-                      }
-                    }}
-                  >
-                    <Image
-                      src={getItemImagePath(item.type, item.name, true)}
-                      alt={item.name}
-                      fill
-                      className="object-cover"
-                      onError={handleImageError}
-                    />
-                  </div>
+                  </TooltipContent>
                 </Tooltip>
 
                 {/* Item Name */}

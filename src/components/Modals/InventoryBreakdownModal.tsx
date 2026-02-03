@@ -2,9 +2,7 @@
 
 import { Dialog, DialogPanel } from "@headlessui/react";
 import { getCategoryColor, getCategoryIcon } from "@/utils/categoryIcons";
-import dynamic from "next/dynamic";
-
-const Tooltip = dynamic(() => import("@mui/material/Tooltip"), { ssr: false });
+import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 
 interface InventoryBreakdownModalProps {
   isOpen: boolean;
@@ -169,30 +167,24 @@ export default function InventoryBreakdownModal({
                     {Object.entries(percentages)
                       .sort(([, a], [, b]) => b - a)
                       .map(([category, percentage]) => (
-                        <Tooltip
-                          key={category}
-                          title={`${category}: ${formatPercentage(percentage)}%`}
-                          placement="top"
-                          arrow
-                          slotProps={{
-                            tooltip: {
-                              sx: {
-                                backgroundColor: "var(--color-secondary-bg)",
-                                color: "var(--color-primary-text)",
-                                "& .MuiTooltip-arrow": {
-                                  color: "var(--color-secondary-bg)",
-                                },
-                              },
-                            },
-                          }}
-                        >
-                          <div
-                            className="group relative"
-                            style={{
-                              width: `${percentage}%`,
-                              backgroundColor: getCategoryColor(category),
-                            }}
-                          ></div>
+                        <Tooltip key={category}>
+                          <TooltipTrigger asChild>
+                            <div
+                              className="group relative"
+                              style={{
+                                width: `${percentage}%`,
+                                backgroundColor: getCategoryColor(category),
+                              }}
+                            ></div>
+                          </TooltipTrigger>
+                          <TooltipContent
+                            side="top"
+                            className="bg-secondary-bg text-primary-text border-none shadow-[var(--color-card-shadow)]"
+                          >
+                            <p>
+                              {category}: {formatPercentage(percentage)}%
+                            </p>
+                          </TooltipContent>
                         </Tooltip>
                       ))}
                   </div>
@@ -286,30 +278,24 @@ export default function InventoryBreakdownModal({
                     {Object.entries(duplicatesPercentages)
                       .sort(([, a], [, b]) => b - a)
                       .map(([category, percentage]) => (
-                        <Tooltip
-                          key={category}
-                          title={`${category}: ${formatPercentage(percentage)}%`}
-                          placement="top"
-                          arrow
-                          slotProps={{
-                            tooltip: {
-                              sx: {
-                                backgroundColor: "var(--color-secondary-bg)",
-                                color: "var(--color-primary-text)",
-                                "& .MuiTooltip-arrow": {
-                                  color: "var(--color-secondary-bg)",
-                                },
-                              },
-                            },
-                          }}
-                        >
-                          <div
-                            className="group relative"
-                            style={{
-                              width: `${percentage}%`,
-                              backgroundColor: getCategoryColor(category),
-                            }}
-                          ></div>
+                        <Tooltip key={category}>
+                          <TooltipTrigger asChild>
+                            <div
+                              className="group relative"
+                              style={{
+                                width: `${percentage}%`,
+                                backgroundColor: getCategoryColor(category),
+                              }}
+                            ></div>
+                          </TooltipTrigger>
+                          <TooltipContent
+                            side="top"
+                            className="bg-secondary-bg text-primary-text border-none shadow-[var(--color-card-shadow)]"
+                          >
+                            <p>
+                              {category}: {formatPercentage(percentage)}%
+                            </p>
+                          </TooltipContent>
                         </Tooltip>
                       ))}
                   </div>

@@ -1,7 +1,9 @@
 import { Box, Typography, Divider, Chip, Skeleton } from "@mui/material";
-import dynamic from "next/dynamic";
-
-const Tooltip = dynamic(() => import("@mui/material/Tooltip"), { ssr: false });
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { formatRelativeDate, formatCustomDate } from "@/utils/timestamp";
 import Link from "next/link";
 import Image from "next/image";
@@ -335,36 +337,25 @@ export default function Comment({
 
         <div className="flex items-center justify-start text-xs">
           <div className="flex items-center gap-1">
-            <Tooltip
-              title={
-                edited_at
-                  ? formatCustomDate(edited_at)
-                  : formatCustomDate(parseInt(date))
-              }
-              placement="top"
-              arrow
-              slotProps={{
-                tooltip: {
-                  sx: {
-                    backgroundColor: "var(--color-primary-bg)",
-                    color: "var(--color-secondary-text)",
-                    fontSize: "0.75rem",
-                    padding: "8px 12px",
-                    borderRadius: "8px",
-                    boxShadow: "var(--color-card-shadow)",
-                    "& .MuiTooltip-arrow": {
-                      color: "var(--color-primary-bg)",
-                    },
-                  },
-                },
-              }}
-            >
-              <Typography
-                variant="caption"
-                className="text-secondary-text cursor-help"
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Typography
+                  variant="caption"
+                  className="text-secondary-text cursor-help"
+                >
+                  Posted {formattedDate}
+                </Typography>
+              </TooltipTrigger>
+              <TooltipContent
+                side="top"
+                className="bg-primary-bg text-secondary-text border-none shadow-[var(--color-card-shadow)]"
               >
-                Posted {formattedDate}
-              </Typography>
+                <p>
+                  {edited_at
+                    ? formatCustomDate(edited_at)
+                    : formatCustomDate(parseInt(date))}
+                </p>
+              </TooltipContent>
             </Tooltip>
             {edited_at && (
               <Typography variant="caption" className="text-secondary-text">

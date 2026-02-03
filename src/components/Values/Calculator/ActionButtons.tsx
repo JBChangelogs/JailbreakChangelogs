@@ -1,9 +1,8 @@
 import React from "react";
-import dynamic from "next/dynamic";
 import { Icon } from "../../ui/IconWrapper";
 import { Button } from "../../ui/button";
 
-const Tooltip = dynamic(() => import("@mui/material/Tooltip"), { ssr: false });
+import { Tooltip, TooltipContent, TooltipTrigger } from "../../ui/tooltip";
 
 interface ActionButtonsProps {
   onSwapSides: () => void;
@@ -18,47 +17,27 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
     <>
       {/* Action Buttons */}
       <div className="flex items-center justify-center gap-3">
-        <Tooltip
-          title="Swap sides"
-          arrow
-          placement="top"
-          slotProps={{
-            tooltip: {
-              sx: {
-                backgroundColor: "var(--color-secondary-bg)",
-                color: "var(--color-primary-text)",
-                "& .MuiTooltip-arrow": {
-                  color: "var(--color-secondary-bg)",
-                },
-              },
-            },
-          }}
-        >
-          <Button variant="default" onClick={onSwapSides} size="md">
-            <Icon icon="heroicons:arrows-right-left" />
-            Swap Sides
-          </Button>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button variant="default" onClick={onSwapSides} size="md">
+              <Icon icon="heroicons:arrows-right-left" />
+              Swap Sides
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent side="top">
+            <p>Swap sides</p>
+          </TooltipContent>
         </Tooltip>
-        <Tooltip
-          title="Clear all items (hold Shift to clear both sides instantly)"
-          arrow
-          placement="top"
-          slotProps={{
-            tooltip: {
-              sx: {
-                backgroundColor: "var(--color-secondary-bg)",
-                color: "var(--color-primary-text)",
-                "& .MuiTooltip-arrow": {
-                  color: "var(--color-secondary-bg)",
-                },
-              },
-            },
-          }}
-        >
-          <Button variant="destructive" onClick={onClearSides} size="md">
-            <Icon icon="heroicons-outline:trash" />
-            Clear
-          </Button>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button variant="destructive" onClick={onClearSides} size="md">
+              <Icon icon="heroicons-outline:trash" />
+              Clear
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent side="top">
+            <p>Clear all items (hold Shift to clear both sides instantly)</p>
+          </TooltipContent>
         </Tooltip>
       </div>
 

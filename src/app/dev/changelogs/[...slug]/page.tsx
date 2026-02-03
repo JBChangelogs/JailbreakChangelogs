@@ -2,7 +2,6 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
-import dynamic from "next/dynamic";
 import { ChangelogDate } from "@/components/Changelogs/ChangelogDate";
 import {
   getCachedChangelogEntries,
@@ -14,7 +13,11 @@ import rehypeSanitize from "rehype-sanitize";
 import remarkGfm from "remark-gfm";
 import { Icon } from "@/components/ui/IconWrapper";
 
-const Tooltip = dynamic(() => import("@mui/material/Tooltip"));
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface PageProps {
   params: Promise<{
@@ -165,64 +168,50 @@ export default async function ChangelogEntryPage({ params }: PageProps) {
                     </a>
 
                     {entry.zipballUrl && (
-                      <Tooltip
-                        title="Download Source Code (ZIP)"
-                        arrow
-                        placement="top"
-                        slotProps={{
-                          tooltip: {
-                            sx: {
-                              backgroundColor: "var(--color-secondary-bg)",
-                              color: "var(--color-primary-text)",
-                              "& .MuiTooltip-arrow": {
-                                color: "var(--color-secondary-bg)",
-                              },
-                            },
-                          },
-                        }}
-                      >
-                        <a
-                          href={entry.zipballUrl}
-                          className="text-secondary-text hover:text-primary-text inline-flex items-center gap-1 text-sm transition-colors"
-                          aria-label="Download Source Code (ZIP)"
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <a
+                            href={entry.zipballUrl}
+                            className="text-secondary-text hover:text-primary-text inline-flex items-center gap-1 text-sm transition-colors"
+                            aria-label="Download Source Code (ZIP)"
+                          >
+                            <Icon
+                              icon="heroicons-outline:document-download"
+                              className="h-4 w-4"
+                            />
+                            Source (ZIP)
+                          </a>
+                        </TooltipTrigger>
+                        <TooltipContent
+                          side="top"
+                          className="bg-secondary-bg text-primary-text border-none shadow-[var(--color-card-shadow)]"
                         >
-                          <Icon
-                            icon="heroicons-outline:document-download"
-                            className="h-4 w-4"
-                          />
-                          Source (ZIP)
-                        </a>
+                          <p>Download Source Code (ZIP)</p>
+                        </TooltipContent>
                       </Tooltip>
                     )}
 
                     {entry.tarballUrl && (
-                      <Tooltip
-                        title="Download Source Code (TAR)"
-                        arrow
-                        placement="top"
-                        slotProps={{
-                          tooltip: {
-                            sx: {
-                              backgroundColor: "var(--color-secondary-bg)",
-                              color: "var(--color-primary-text)",
-                              "& .MuiTooltip-arrow": {
-                                color: "var(--color-secondary-bg)",
-                              },
-                            },
-                          },
-                        }}
-                      >
-                        <a
-                          href={entry.tarballUrl}
-                          className="text-secondary-text hover:text-primary-text inline-flex items-center gap-1 text-sm transition-colors"
-                          aria-label="Download Source Code (TAR)"
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <a
+                            href={entry.tarballUrl}
+                            className="text-secondary-text hover:text-primary-text inline-flex items-center gap-1 text-sm transition-colors"
+                            aria-label="Download Source Code (TAR)"
+                          >
+                            <Icon
+                              icon="heroicons-outline:document-download"
+                              className="h-4 w-4"
+                            />
+                            Source (TAR)
+                          </a>
+                        </TooltipTrigger>
+                        <TooltipContent
+                          side="top"
+                          className="bg-secondary-bg text-primary-text border-none shadow-[var(--color-card-shadow)]"
                         >
-                          <Icon
-                            icon="heroicons-outline:document-download"
-                            className="h-4 w-4"
-                          />
-                          Source (TAR)
-                        </a>
+                          <p>Download Source Code (TAR)</p>
+                        </TooltipContent>
                       </Tooltip>
                     )}
                   </div>

@@ -9,12 +9,11 @@ import { formatMessageDate } from "@/utils/timestamp";
 import { useRobloxUserDataQuery } from "@/hooks/useRobloxDataQuery";
 import { INVENTORY_API_URL } from "@/utils/api";
 import XpProgressBar from "./XpProgressBar";
-import dynamic from "next/dynamic";
 import Image from "next/image";
 import ScanHistoryModal from "../Modals/ScanHistoryModal";
 import { Icon } from "../ui/IconWrapper";
 
-const Tooltip = dynamic(() => import("@mui/material/Tooltip"), { ssr: false });
+import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 const gamepassData = {
   PremiumGarage: {
     link: "https://www.roblox.com/game-pass/2725211/Pro-Garage",
@@ -308,193 +307,138 @@ export default function UserStatsSection({
       >
         <div className="text-center">
           <p className="text-secondary-text text-sm">Total Items</p>
-          <Tooltip
-            title={
-              (showNonOgOnly
-                ? nonOgStats?.itemCount
-                : totalItemsCount
-              )?.toLocaleString() || "0"
-            }
-            placement="top"
-            arrow
-            slotProps={{
-              tooltip: {
-                sx: {
-                  backgroundColor: "var(--color-secondary-bg)",
-                  color: "var(--color-primary-text)",
-                  fontSize: "0.75rem",
-                  padding: "8px 12px",
-                  borderRadius: "8px",
-
-                  boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
-                  "& .MuiTooltip-arrow": {
-                    color: "var(--color-secondary-bg)",
-                  },
-                },
-              },
-            }}
-          >
-            <p className="text-primary-text cursor-help text-2xl font-bold">
-              {formatNumber(
-                showNonOgOnly ? nonOgStats?.itemCount || 0 : totalItemsCount,
-              )}
-            </p>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <p className="text-primary-text cursor-help text-2xl font-bold">
+                {formatNumber(
+                  showNonOgOnly ? nonOgStats?.itemCount || 0 : totalItemsCount,
+                )}
+              </p>
+            </TooltipTrigger>
+            <TooltipContent
+              side="top"
+              className="bg-secondary-bg text-primary-text border-none shadow-[var(--color-card-shadow)]"
+            >
+              <p>
+                {(
+                  (showNonOgOnly ? nonOgStats?.itemCount : totalItemsCount) || 0
+                ).toLocaleString()}
+              </p>
+            </TooltipContent>
           </Tooltip>
         </div>
         <div className="text-center">
           <p className="text-secondary-text text-sm">Original Items</p>
-          <Tooltip
-            title={
-              showNonOgOnly
-                ? "0"
-                : (() => {
-                    const regularOriginal = currentData.data.filter(
-                      (item) => item.isOriginalOwner,
-                    ).length;
-                    const dupeOriginal = (currentData.duplicates || []).filter(
-                      (item) => item.isOriginalOwner,
-                    ).length;
-                    return (regularOriginal + dupeOriginal).toLocaleString();
-                  })()
-            }
-            placement="top"
-            arrow
-            slotProps={{
-              tooltip: {
-                sx: {
-                  backgroundColor: "var(--color-secondary-bg)",
-                  color: "var(--color-primary-text)",
-                  fontSize: "0.75rem",
-                  padding: "8px 12px",
-                  borderRadius: "8px",
-
-                  boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
-                  "& .MuiTooltip-arrow": {
-                    color: "var(--color-secondary-bg)",
-                  },
-                },
-              },
-            }}
-          >
-            <p className="text-primary-text cursor-help text-2xl font-bold">
-              {showNonOgOnly
-                ? "0"
-                : formatNumber(
-                    currentData.data.filter((item) => item.isOriginalOwner)
-                      .length +
-                      (currentData.duplicates || []).filter(
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <p className="text-primary-text cursor-help text-2xl font-bold">
+                {showNonOgOnly
+                  ? "0"
+                  : formatNumber(
+                      currentData.data.filter((item) => item.isOriginalOwner)
+                        .length +
+                        (currentData.duplicates || []).filter(
+                          (item) => item.isOriginalOwner,
+                        ).length,
+                    )}
+              </p>
+            </TooltipTrigger>
+            <TooltipContent
+              side="top"
+              className="bg-secondary-bg text-primary-text border-none shadow-[var(--color-card-shadow)]"
+            >
+              <p>
+                {showNonOgOnly
+                  ? "0"
+                  : (() => {
+                      const regularOriginal = currentData.data.filter(
                         (item) => item.isOriginalOwner,
-                      ).length,
-                  )}
-            </p>
+                      ).length;
+                      const dupeOriginal = (
+                        currentData.duplicates || []
+                      ).filter((item) => item.isOriginalOwner).length;
+                      return (regularOriginal + dupeOriginal).toLocaleString();
+                    })()}
+              </p>
+            </TooltipContent>
           </Tooltip>
         </div>
         <div className="text-center">
           <p className="text-secondary-text text-sm">Non-Original</p>
-          <Tooltip
-            title={(() => {
-              const regularNonOriginal = currentData.data.filter(
-                (item) => !item.isOriginalOwner,
-              ).length;
-              const dupeNonOriginal = (currentData.duplicates || []).filter(
-                (item) => !item.isOriginalOwner,
-              ).length;
-              return (regularNonOriginal + dupeNonOriginal).toLocaleString();
-            })()}
-            placement="top"
-            arrow
-            slotProps={{
-              tooltip: {
-                sx: {
-                  backgroundColor: "var(--color-secondary-bg)",
-                  color: "var(--color-primary-text)",
-                  fontSize: "0.75rem",
-                  padding: "8px 12px",
-                  borderRadius: "8px",
-
-                  boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
-                  "& .MuiTooltip-arrow": {
-                    color: "var(--color-secondary-bg)",
-                  },
-                },
-              },
-            }}
-          >
-            <p className="text-primary-text cursor-help text-2xl font-bold">
-              {formatNumber(
-                currentData.data.filter((item) => !item.isOriginalOwner)
-                  .length +
-                  (currentData.duplicates || []).filter(
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <p className="text-primary-text cursor-help text-2xl font-bold">
+                {formatNumber(
+                  currentData.data.filter((item) => !item.isOriginalOwner)
+                    .length +
+                    (currentData.duplicates || []).filter(
+                      (item) => !item.isOriginalOwner,
+                    ).length,
+                )}
+              </p>
+            </TooltipTrigger>
+            <TooltipContent
+              side="top"
+              className="bg-secondary-bg text-primary-text border-none shadow-[var(--color-card-shadow)]"
+            >
+              <p>
+                {(() => {
+                  const regularNonOriginal = currentData.data.filter(
                     (item) => !item.isOriginalOwner,
-                  ).length,
-              )}
-            </p>
+                  ).length;
+                  const dupeNonOriginal = (currentData.duplicates || []).filter(
+                    (item) => !item.isOriginalOwner,
+                  ).length;
+                  return (
+                    regularNonOriginal + dupeNonOriginal
+                  ).toLocaleString();
+                })()}
+              </p>
+            </TooltipContent>
           </Tooltip>
         </div>
         {/* Total Duped Items - Only show if duplicatesCount > 0 */}
         {duplicatesCount !== undefined && duplicatesCount > 0 && (
           <div className="text-center">
             <p className="text-secondary-text text-sm">Duped Items</p>
-            <Tooltip
-              title={(showNonOgOnly
-                ? nonOgStats?.dupedItemCount || 0
-                : duplicatesCount
-              ).toLocaleString()}
-              placement="top"
-              arrow
-              slotProps={{
-                tooltip: {
-                  sx: {
-                    backgroundColor: "var(--color-secondary-bg)",
-                    color: "var(--color-primary-text)",
-                    fontSize: "0.75rem",
-                    padding: "8px 12px",
-                    borderRadius: "8px",
-
-                    boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
-                    "& .MuiTooltip-arrow": {
-                      color: "var(--color-secondary-bg)",
-                    },
-                  },
-                },
-              }}
-            >
-              <p className="text-primary-text cursor-help text-2xl font-bold">
-                {formatNumber(
-                  showNonOgOnly
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <p className="text-primary-text cursor-help text-2xl font-bold">
+                  {formatNumber(
+                    showNonOgOnly
+                      ? nonOgStats?.dupedItemCount || 0
+                      : duplicatesCount,
+                  )}
+                </p>
+              </TooltipTrigger>
+              <TooltipContent
+                side="top"
+                className="bg-secondary-bg text-primary-text border-none shadow-[var(--color-card-shadow)]"
+              >
+                <p>
+                  {(showNonOgOnly
                     ? nonOgStats?.dupedItemCount || 0
-                    : duplicatesCount,
-                )}
-              </p>
+                    : duplicatesCount
+                  ).toLocaleString()}
+                </p>
+              </TooltipContent>
             </Tooltip>
           </div>
         )}
         <div className="text-center">
           <p className="text-secondary-text text-sm">Money</p>
-          <Tooltip
-            title={`$${currentData.money.toLocaleString()}`}
-            placement="top"
-            arrow
-            slotProps={{
-              tooltip: {
-                sx: {
-                  backgroundColor: "var(--color-secondary-bg)",
-                  color: "var(--color-primary-text)",
-                  fontSize: "0.75rem",
-                  padding: "8px 12px",
-                  borderRadius: "8px",
-
-                  boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
-                  "& .MuiTooltip-arrow": {
-                    color: "var(--color-secondary-bg)",
-                  },
-                },
-              },
-            }}
-          >
-            <p className="text-primary-text cursor-help text-2xl font-bold">
-              {formatMoney(currentData.money)}
-            </p>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <p className="text-primary-text cursor-help text-2xl font-bold">
+                {formatMoney(currentData.money)}
+              </p>
+            </TooltipTrigger>
+            <TooltipContent
+              side="top"
+              className="bg-secondary-bg text-primary-text border-none shadow-[var(--color-card-shadow)]"
+            >
+              <p>${currentData.money.toLocaleString()}</p>
+            </TooltipContent>
           </Tooltip>
         </div>
       </div>
@@ -514,36 +458,24 @@ export default function UserStatsSection({
         <div className="border-border-primary bg-primary-bg rounded-lg border p-4 text-center">
           <div className="text-secondary-text mb-2 flex items-center justify-center gap-1.5 text-sm">
             {showNonOgOnly ? "Non-OG Inventory Value" : "Total Inventory Value"}
-            <Tooltip
-              title={
-                showNonOgOnly
-                  ? "Only counts clean non-OG items' cash value."
-                  : "Only counts clean items' cash value. Does not include cash value of duped items."
-              }
-              placement="top"
-              arrow
-              slotProps={{
-                tooltip: {
-                  sx: {
-                    backgroundColor: "var(--color-secondary-bg)",
-                    color: "var(--color-primary-text)",
-                    fontSize: "0.75rem",
-                    padding: "8px 12px",
-                    borderRadius: "8px",
-                    boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
-                    maxWidth: "250px",
-                    "& .MuiTooltip-arrow": {
-                      color: "var(--color-secondary-bg)",
-                    },
-                  },
-                },
-              }}
-            >
-              <Icon
-                icon="material-symbols:info-outline"
-                className="text-secondary-text h-4 w-4 cursor-help"
-                inline={true}
-              />
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Icon
+                  icon="material-symbols:info-outline"
+                  className="text-secondary-text h-4 w-4 cursor-help"
+                  inline={true}
+                />
+              </TooltipTrigger>
+              <TooltipContent
+                side="top"
+                className="bg-secondary-bg text-primary-text max-w-[250px] border-none shadow-[var(--color-card-shadow)]"
+              >
+                <p>
+                  {showNonOgOnly
+                    ? "Only counts clean non-OG items' cash value."
+                    : "Only counts clean items' cash value. Does not include cash value of duped items."}
+                </p>
+              </TooltipContent>
             </Tooltip>
           </div>
           {isLoadingValues ? (
@@ -551,33 +483,28 @@ export default function UserStatsSection({
               Loading...
             </div>
           ) : (
-            <Tooltip
-              title={`$${(showNonOgOnly ? nonOgStats?.inventoryValue || 0 : totalCashValue).toLocaleString()}`}
-              placement="top"
-              arrow
-              slotProps={{
-                tooltip: {
-                  sx: {
-                    backgroundColor: "var(--color-secondary-bg)",
-                    color: "var(--color-primary-text)",
-                    fontSize: "0.75rem",
-                    padding: "8px 12px",
-                    borderRadius: "8px",
-                    boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
-                    "& .MuiTooltip-arrow": {
-                      color: "var(--color-secondary-bg)",
-                    },
-                  },
-                },
-              }}
-            >
-              <div className="text-primary-text cursor-help text-2xl font-bold">
-                {formatPreciseMoney(
-                  showNonOgOnly
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="text-primary-text cursor-help text-2xl font-bold">
+                  {formatPreciseMoney(
+                    showNonOgOnly
+                      ? nonOgStats?.inventoryValue || 0
+                      : totalCashValue,
+                  )}
+                </div>
+              </TooltipTrigger>
+              <TooltipContent
+                side="top"
+                className="bg-secondary-bg text-primary-text border-none shadow-[var(--color-card-shadow)]"
+              >
+                <p>
+                  $
+                  {(showNonOgOnly
                     ? nonOgStats?.inventoryValue || 0
-                    : totalCashValue,
-                )}
-              </div>
+                    : totalCashValue
+                  ).toLocaleString()}
+                </p>
+              </TooltipContent>
             </Tooltip>
           )}
         </div>
@@ -586,36 +513,24 @@ export default function UserStatsSection({
         <div className="border-border-primary bg-primary-bg rounded-lg border p-4 text-center">
           <div className="text-secondary-text mb-2 flex items-center justify-center gap-1.5 text-sm">
             {showNonOgOnly ? "Non-OG Networth" : "Total Networth"}
-            <Tooltip
-              title={
-                showNonOgOnly
-                  ? "Includes cash value of all non-OG items and your cash."
-                  : "Includes total cash value of all items, including duped items' cash value."
-              }
-              placement="top"
-              arrow
-              slotProps={{
-                tooltip: {
-                  sx: {
-                    backgroundColor: "var(--color-secondary-bg)",
-                    color: "var(--color-primary-text)",
-                    fontSize: "0.75rem",
-                    padding: "8px 12px",
-                    borderRadius: "8px",
-                    boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
-                    maxWidth: "250px",
-                    "& .MuiTooltip-arrow": {
-                      color: "var(--color-secondary-bg)",
-                    },
-                  },
-                },
-              }}
-            >
-              <Icon
-                icon="material-symbols:info-outline"
-                className="text-secondary-text h-4 w-4 cursor-help"
-                inline={true}
-              />
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Icon
+                  icon="material-symbols:info-outline"
+                  className="text-secondary-text h-4 w-4 cursor-help"
+                  inline={true}
+                />
+              </TooltipTrigger>
+              <TooltipContent
+                side="top"
+                className="bg-secondary-bg text-primary-text max-w-[250px] border-none shadow-[var(--color-card-shadow)]"
+              >
+                <p>
+                  {showNonOgOnly
+                    ? "Includes cash value of all non-OG items and your cash."
+                    : "Includes total cash value of all items, including duped items' cash value."}
+                </p>
+              </TooltipContent>
             </Tooltip>
           </div>
           {isLoadingValues ? (
@@ -623,31 +538,26 @@ export default function UserStatsSection({
               Loading...
             </div>
           ) : (
-            <Tooltip
-              title={`$${(showNonOgOnly ? nonOgStats?.networth || 0 : totalNetworth).toLocaleString()}`}
-              placement="top"
-              arrow
-              slotProps={{
-                tooltip: {
-                  sx: {
-                    backgroundColor: "var(--color-secondary-bg)",
-                    color: "var(--color-primary-text)",
-                    fontSize: "0.75rem",
-                    padding: "8px 12px",
-                    borderRadius: "8px",
-                    boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
-                    "& .MuiTooltip-arrow": {
-                      color: "var(--color-secondary-bg)",
-                    },
-                  },
-                },
-              }}
-            >
-              <div className="text-primary-text cursor-help text-2xl font-bold">
-                {formatPreciseMoney(
-                  showNonOgOnly ? nonOgStats?.networth || 0 : totalNetworth,
-                )}
-              </div>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="text-primary-text cursor-help text-2xl font-bold">
+                  {formatPreciseMoney(
+                    showNonOgOnly ? nonOgStats?.networth || 0 : totalNetworth,
+                  )}
+                </div>
+              </TooltipTrigger>
+              <TooltipContent
+                side="top"
+                className="bg-secondary-bg text-primary-text border-none shadow-[var(--color-card-shadow)]"
+              >
+                <p>
+                  $
+                  {(showNonOgOnly
+                    ? nonOgStats?.networth || 0
+                    : totalNetworth
+                  ).toLocaleString()}
+                </p>
+              </TooltipContent>
             </Tooltip>
           )}
         </div>
@@ -660,36 +570,24 @@ export default function UserStatsSection({
           <div className="border-border-primary bg-primary-bg rounded-lg border p-4 text-center">
             <div className="text-secondary-text mb-2 flex items-center justify-center gap-1.5 text-sm">
               {showNonOgOnly ? "Non-OG Duped Value" : "Total Duped Value"}
-              <Tooltip
-                title={
-                  showNonOgOnly
-                    ? "Collective duped value of all non-OG duped items in your inventory."
-                    : "Collective duped value of all duped items in your inventory."
-                }
-                placement="top"
-                arrow
-                slotProps={{
-                  tooltip: {
-                    sx: {
-                      backgroundColor: "var(--color-secondary-bg)",
-                      color: "var(--color-primary-text)",
-                      fontSize: "0.75rem",
-                      padding: "8px 12px",
-                      borderRadius: "8px",
-                      boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
-                      maxWidth: "250px",
-                      "& .MuiTooltip-arrow": {
-                        color: "var(--color-secondary-bg)",
-                      },
-                    },
-                  },
-                }}
-              >
-                <Icon
-                  icon="material-symbols:info-outline"
-                  className="text-secondary-text h-4 w-4 cursor-help"
-                  inline={true}
-                />
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Icon
+                    icon="material-symbols:info-outline"
+                    className="text-secondary-text h-4 w-4 cursor-help"
+                    inline={true}
+                  />
+                </TooltipTrigger>
+                <TooltipContent
+                  side="top"
+                  className="bg-secondary-bg text-primary-text max-w-[250px] border-none shadow-[var(--color-card-shadow)]"
+                >
+                  <p>
+                    {showNonOgOnly
+                      ? "Collective duped value of all non-OG duped items in your inventory."
+                      : "Collective duped value of all duped items in your inventory."}
+                  </p>
+                </TooltipContent>
               </Tooltip>
             </div>
             {isLoadingValues ? (
@@ -697,33 +595,28 @@ export default function UserStatsSection({
                 Loading...
               </div>
             ) : (
-              <Tooltip
-                title={`$${(showNonOgOnly ? nonOgStats?.dupedValue || 0 : totalDupedValue).toLocaleString()}`}
-                placement="top"
-                arrow
-                slotProps={{
-                  tooltip: {
-                    sx: {
-                      backgroundColor: "var(--color-secondary-bg)",
-                      color: "var(--color-primary-text)",
-                      fontSize: "0.75rem",
-                      padding: "8px 12px",
-                      borderRadius: "8px",
-                      boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
-                      "& .MuiTooltip-arrow": {
-                        color: "var(--color-secondary-bg)",
-                      },
-                    },
-                  },
-                }}
-              >
-                <div className="text-primary-text cursor-help text-2xl font-bold">
-                  {formatPreciseMoney(
-                    showNonOgOnly
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="text-primary-text cursor-help text-2xl font-bold">
+                    {formatPreciseMoney(
+                      showNonOgOnly
+                        ? nonOgStats?.dupedValue || 0
+                        : totalDupedValue,
+                    )}
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent
+                  side="top"
+                  className="bg-secondary-bg text-primary-text border-none shadow-[var(--color-card-shadow)]"
+                >
+                  <p>
+                    $
+                    {(showNonOgOnly
                       ? nonOgStats?.dupedValue || 0
-                      : totalDupedValue,
-                  )}
-                </div>
+                      : totalDupedValue
+                    ).toLocaleString()}
+                  </p>
+                </TooltipContent>
               </Tooltip>
             )}
           </div>
@@ -922,15 +815,23 @@ export default function UserStatsSection({
                   <span className="text-secondary-text min-w-[100px]">
                     Job ID:
                   </span>
-                  <Tooltip title={currentData.job_id} placement="top" arrow>
-                    <a
-                      href={`https://tracker.jailbreakchangelogs.xyz/?jobid=${currentData.job_id}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-primary-text hover:text-link max-w-[200px] cursor-pointer truncate font-mono text-xs font-medium transition-colors md:max-w-full"
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <a
+                        href={`https://tracker.jailbreakchangelogs.xyz/?jobid=${currentData.job_id}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-primary-text hover:text-link max-w-[200px] cursor-pointer truncate font-mono text-xs font-medium transition-colors md:max-w-full"
+                      >
+                        {currentData.job_id}
+                      </a>
+                    </TooltipTrigger>
+                    <TooltipContent
+                      side="top"
+                      className="bg-secondary-bg text-primary-text border-none shadow-[var(--color-card-shadow)]"
                     >
-                      {currentData.job_id}
-                    </a>
+                      <p>{currentData.job_id}</p>
+                    </TooltipContent>
                   </Tooltip>
                 </div>
               )}
@@ -958,37 +859,25 @@ export default function UserStatsSection({
                       Not in queue
                     </span>
                   )}
-                  <Tooltip
-                    title="Refresh position"
-                    placement="top"
-                    arrow
-                    slotProps={{
-                      tooltip: {
-                        sx: {
-                          backgroundColor: "var(--color-secondary-bg)",
-                          color: "var(--color-primary-text)",
-                          fontSize: "0.75rem",
-                          padding: "8px 12px",
-                          borderRadius: "8px",
-
-                          boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
-                          "& .MuiTooltip-arrow": {
-                            color: "var(--color-secondary-bg)",
-                          },
-                        },
-                      },
-                    }}
-                  >
-                    <button
-                      onClick={() => fetchQueuePosition()}
-                      disabled={isLoadingQueuePosition}
-                      className="text-secondary-text hover:text-primary-text cursor-pointer rounded p-0.5 transition-colors hover:bg-white/10 disabled:opacity-50"
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button
+                        onClick={() => fetchQueuePosition()}
+                        disabled={isLoadingQueuePosition}
+                        className="text-secondary-text hover:text-primary-text cursor-pointer rounded p-0.5 transition-colors hover:bg-white/10 disabled:opacity-50"
+                      >
+                        <Icon
+                          icon="material-symbols:refresh"
+                          className={`h-4 w-4 ${isLoadingQueuePosition ? "animate-spin" : ""}`}
+                        />
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent
+                      side="top"
+                      className="bg-secondary-bg text-primary-text border-none shadow-[var(--color-card-shadow)]"
                     >
-                      <Icon
-                        icon="material-symbols:refresh"
-                        className={`h-4 w-4 ${isLoadingQueuePosition ? "animate-spin" : ""}`}
-                      />
-                    </button>
+                      <p>Refresh position</p>
+                    </TooltipContent>
                   </Tooltip>
                 </div>
               </div>

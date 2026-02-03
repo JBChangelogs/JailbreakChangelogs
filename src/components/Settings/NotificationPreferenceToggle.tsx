@@ -1,7 +1,11 @@
 import { Switch, Field, Label, Description } from "@headlessui/react";
 import { Icon } from "@/components/ui/IconWrapper";
 import { toast } from "sonner";
-import Tooltip from "@mui/material/Tooltip";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { UserData } from "@/types/auth";
 
 export type NotificationPreferenceToggleProps = {
@@ -45,29 +49,22 @@ export function NotificationPreferenceToggle({
               {humanizeTitle(title)}
             </Label>
             {userData?.flags?.some((f) => f.flag === "is_owner") && (
-              <Tooltip
-                title="Copy URL"
-                arrow
-                placement="top"
-                slotProps={{
-                  tooltip: {
-                    sx: {
-                      backgroundColor: "var(--color-secondary-bg)",
-                      color: "var(--color-primary-text)",
-                      "& .MuiTooltip-arrow": {
-                        color: "var(--color-secondary-bg)",
-                      },
-                    },
-                  },
-                }}
-              >
-                <button
-                  onClick={handleCopyLink}
-                  className="text-secondary-text hover:text-link cursor-pointer transition-colors"
-                  aria-label="Copy highlight link"
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    onClick={handleCopyLink}
+                    className="text-secondary-text hover:text-link cursor-pointer transition-colors"
+                    aria-label="Copy highlight link"
+                  >
+                    <Icon icon="heroicons:link" className="h-4 w-4" />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent
+                  side="top"
+                  className="bg-secondary-bg text-primary-text border-none shadow-[var(--color-card-shadow)]"
                 >
-                  <Icon icon="heroicons:link" className="h-4 w-4" />
-                </button>
+                  <p>Copy URL</p>
+                </TooltipContent>
               </Tooltip>
             )}
           </div>

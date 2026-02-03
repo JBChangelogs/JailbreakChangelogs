@@ -1,8 +1,10 @@
 import React from "react";
 import Image from "next/image";
-import dynamic from "next/dynamic";
-
-const Tooltip = dynamic(() => import("@mui/material/Tooltip"), { ssr: false });
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { TradeItem } from "@/types/trading";
 import {
   getItemImagePath,
@@ -158,8 +160,75 @@ export const ItemGrid: React.FC<ItemGridProps> = ({
 
             return (
               <div key={`${item.id}`} className="group relative cursor-help">
-                <Tooltip
-                  title={
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div>
+                      <div className="relative aspect-square">
+                        <div className="relative h-full w-full overflow-hidden rounded-lg">
+                          {isVideoItem(item.name) ? (
+                            <video
+                              src={getVideoPath(item.type, item.name)}
+                              className="h-full w-full object-cover"
+                              muted
+                              playsInline
+                              loop
+                              autoPlay
+                            />
+                          ) : (
+                            <Image
+                              src={getItemImagePath(item.type, item.name, true)}
+                              alt={item.name}
+                              fill
+                              className="object-cover"
+                              onError={handleImageError}
+                            />
+                          )}
+                          {item.count > 1 && (
+                            <div className="bg-button-info/90 border-button-info text-form-button-text absolute top-1 right-1 z-5 rounded-full border px-1.5 py-0.5 text-xs">
+                              ×{item.count}
+                            </div>
+                          )}
+                          {/* Remove button - positioned in top-left corner */}
+                          {onRemove && (
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                onRemove(item.id);
+                              }}
+                              className="text-form-button-text absolute top-1 left-1 z-10 flex h-6 w-6 cursor-pointer items-center justify-center rounded-full bg-red-600/90 transition-colors hover:bg-red-700"
+                              aria-label="Remove item"
+                            >
+                              <svg
+                                className="h-4 w-4"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M6 18L18 6M6 6l12 12"
+                                />
+                              </svg>
+                            </button>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Item Name */}
+                      <div className="mt-2 text-center">
+                        <p className="text-primary-text hover:text-link line-clamp-2 text-xs font-medium transition-colors">
+                          {displayName}
+                        </p>
+                      </div>
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent
+                    side="bottom"
+                    className="bg-secondary-bg text-primary-text max-w-[400px] min-w-[300px] border-none shadow-[var(--color-card-shadow)]"
+                  >
                     <TradeAdTooltip
                       item={{
                         ...item,
@@ -167,87 +236,7 @@ export const ItemGrid: React.FC<ItemGridProps> = ({
                         base_name: originalItem?.data?.name || item.name,
                       }}
                     />
-                  }
-                  arrow
-                  placement="bottom"
-                  disableTouchListener
-                  slotProps={{
-                    tooltip: {
-                      sx: {
-                        backgroundColor: "var(--color-secondary-bg)",
-                        color: "var(--color-primary-text)",
-                        maxWidth: "400px",
-                        width: "auto",
-                        minWidth: "300px",
-                        "& .MuiTooltip-arrow": {
-                          color: "var(--color-secondary-bg)",
-                        },
-                      },
-                    },
-                  }}
-                >
-                  <div>
-                    <div className="relative aspect-square">
-                      <div className="relative h-full w-full overflow-hidden rounded-lg">
-                        {isVideoItem(item.name) ? (
-                          <video
-                            src={getVideoPath(item.type, item.name)}
-                            className="h-full w-full object-cover"
-                            muted
-                            playsInline
-                            loop
-                            autoPlay
-                          />
-                        ) : (
-                          <Image
-                            src={getItemImagePath(item.type, item.name, true)}
-                            alt={item.name}
-                            fill
-                            className="object-cover"
-                            onError={handleImageError}
-                          />
-                        )}
-                        {item.count > 1 && (
-                          <div className="bg-button-info/90 border-button-info text-form-button-text absolute top-1 right-1 z-5 rounded-full border px-1.5 py-0.5 text-xs">
-                            ×{item.count}
-                          </div>
-                        )}
-                        {/* Remove button - positioned in top-left corner */}
-                        {onRemove && (
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              onRemove(item.id);
-                            }}
-                            className="text-form-button-text absolute top-1 left-1 z-10 flex h-6 w-6 cursor-pointer items-center justify-center rounded-full bg-red-600/90 transition-colors hover:bg-red-700"
-                            aria-label="Remove item"
-                          >
-                            <svg
-                              className="h-4 w-4"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M6 18L18 6M6 6l12 12"
-                              />
-                            </svg>
-                          </button>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Item Name */}
-                    <div className="mt-2 text-center">
-                      <p className="text-primary-text hover:text-link line-clamp-2 text-xs font-medium transition-colors">
-                        {displayName}
-                      </p>
-                    </div>
-                  </div>
+                  </TooltipContent>
                 </Tooltip>
               </div>
             );

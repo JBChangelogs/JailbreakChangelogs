@@ -2,9 +2,11 @@ import React from "react";
 import { TradeItem } from "@/types/trading";
 import Image from "next/image";
 import Link from "next/link";
-import dynamic from "next/dynamic";
-
-const Tooltip = dynamic(() => import("@mui/material/Tooltip"), { ssr: false });
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import {
   getItemImagePath,
   handleImageError,
@@ -65,9 +67,46 @@ export default function TradeItemsImages({
         </h2>
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
           {groupItems(offering).map((item) => (
-            <Tooltip
-              key={`${item.id}-${item.name}-${item.type}`}
-              title={
+            <Tooltip key={`${item.id}-${item.name}-${item.type}`}>
+              <TooltipTrigger asChild>
+                <Link
+                  href={`/item/${item.type.toLowerCase()}/${item.base_name || item.name}`}
+                  prefetch={false}
+                  className="hover:ring-button-info relative aspect-square h-32 w-32 overflow-hidden rounded-lg transition-all hover:ring-2"
+                >
+                  {isVideoItem(item.name) ? (
+                    <video
+                      src={getVideoPath(item.type, item.base_name || item.name)}
+                      className="h-full w-full object-cover"
+                      muted
+                      playsInline
+                      loop
+                      autoPlay
+                    />
+                  ) : (
+                    <Image
+                      src={getItemImagePath(
+                        item.type,
+                        item.base_name || item.name,
+                        true,
+                      )}
+                      alt={item.name}
+                      fill
+                      className="object-cover"
+                      onError={handleImageError}
+                    />
+                  )}
+                  {item.count > 1 && (
+                    <span className="border-button-info/20 bg-button-info absolute top-2 right-2 rounded-full border px-2.5 py-1 text-sm text-white">
+                      ×{item.count}
+                    </span>
+                  )}
+                </Link>
+              </TooltipTrigger>
+              <TooltipContent
+                side="bottom"
+                className="bg-secondary-bg text-primary-text max-w-[400px] min-w-[300px] border-none shadow-[var(--color-card-shadow)]"
+              >
                 <TradeAdTooltip
                   item={{
                     ...item,
@@ -75,58 +114,7 @@ export default function TradeItemsImages({
                     name: item.name,
                   }}
                 />
-              }
-              arrow
-              placement="bottom"
-              disableTouchListener
-              slotProps={{
-                tooltip: {
-                  sx: {
-                    backgroundColor: "var(--color-secondary-bg)",
-                    color: "var(--color-primary-text)",
-                    maxWidth: "400px",
-                    width: "auto",
-                    minWidth: "300px",
-                    "& .MuiTooltip-arrow": {
-                      color: "var(--color-secondary-bg)",
-                    },
-                  },
-                },
-              }}
-            >
-              <Link
-                href={`/item/${item.type.toLowerCase()}/${item.base_name || item.name}`}
-                prefetch={false}
-                className="hover:ring-button-info relative aspect-square h-32 w-32 overflow-hidden rounded-lg transition-all hover:ring-2"
-              >
-                {isVideoItem(item.name) ? (
-                  <video
-                    src={getVideoPath(item.type, item.base_name || item.name)}
-                    className="h-full w-full object-cover"
-                    muted
-                    playsInline
-                    loop
-                    autoPlay
-                  />
-                ) : (
-                  <Image
-                    src={getItemImagePath(
-                      item.type,
-                      item.base_name || item.name,
-                      true,
-                    )}
-                    alt={item.name}
-                    fill
-                    className="object-cover"
-                    onError={handleImageError}
-                  />
-                )}
-                {item.count > 1 && (
-                  <span className="border-button-info/20 bg-button-info absolute top-2 right-2 rounded-full border px-2.5 py-1 text-sm text-white">
-                    ×{item.count}
-                  </span>
-                )}
-              </Link>
+              </TooltipContent>
             </Tooltip>
           ))}
         </div>
@@ -139,9 +127,46 @@ export default function TradeItemsImages({
         </h2>
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
           {groupItems(requesting).map((item) => (
-            <Tooltip
-              key={`${item.id}-${item.name}-${item.type}`}
-              title={
+            <Tooltip key={`${item.id}-${item.name}-${item.type}`}>
+              <TooltipTrigger asChild>
+                <Link
+                  href={`/item/${item.type.toLowerCase()}/${item.base_name || item.name}`}
+                  prefetch={false}
+                  className="hover:ring-button-info relative aspect-square h-32 w-32 overflow-hidden rounded-lg transition-all hover:ring-2"
+                >
+                  {isVideoItem(item.name) ? (
+                    <video
+                      src={getVideoPath(item.type, item.base_name || item.name)}
+                      className="h-full w-full object-cover"
+                      muted
+                      playsInline
+                      loop
+                      autoPlay
+                    />
+                  ) : (
+                    <Image
+                      src={getItemImagePath(
+                        item.type,
+                        item.base_name || item.name,
+                        true,
+                      )}
+                      alt={item.name}
+                      fill
+                      className="object-cover"
+                      onError={handleImageError}
+                    />
+                  )}
+                  {item.count > 1 && (
+                    <span className="border-button-info/20 bg-button-info absolute top-2 right-2 rounded-full border px-2.5 py-1 text-sm text-white">
+                      ×{item.count}
+                    </span>
+                  )}
+                </Link>
+              </TooltipTrigger>
+              <TooltipContent
+                side="bottom"
+                className="bg-secondary-bg text-primary-text max-w-[400px] min-w-[300px] border-none shadow-[var(--color-card-shadow)]"
+              >
                 <TradeAdTooltip
                   item={{
                     ...item,
@@ -149,58 +174,7 @@ export default function TradeItemsImages({
                     name: item.name,
                   }}
                 />
-              }
-              arrow
-              placement="bottom"
-              disableTouchListener
-              slotProps={{
-                tooltip: {
-                  sx: {
-                    backgroundColor: "var(--color-secondary-bg)",
-                    color: "var(--color-primary-text)",
-                    maxWidth: "400px",
-                    width: "auto",
-                    minWidth: "300px",
-                    "& .MuiTooltip-arrow": {
-                      color: "var(--color-secondary-bg)",
-                    },
-                  },
-                },
-              }}
-            >
-              <Link
-                href={`/item/${item.type.toLowerCase()}/${item.base_name || item.name}`}
-                prefetch={false}
-                className="hover:ring-button-info relative aspect-square h-32 w-32 overflow-hidden rounded-lg transition-all hover:ring-2"
-              >
-                {isVideoItem(item.name) ? (
-                  <video
-                    src={getVideoPath(item.type, item.base_name || item.name)}
-                    className="h-full w-full object-cover"
-                    muted
-                    playsInline
-                    loop
-                    autoPlay
-                  />
-                ) : (
-                  <Image
-                    src={getItemImagePath(
-                      item.type,
-                      item.base_name || item.name,
-                      true,
-                    )}
-                    alt={item.name}
-                    fill
-                    className="object-cover"
-                    onError={handleImageError}
-                  />
-                )}
-                {item.count > 1 && (
-                  <span className="border-button-info/20 bg-button-info absolute top-2 right-2 rounded-full border px-2.5 py-1 text-sm text-white">
-                    ×{item.count}
-                  </span>
-                )}
-              </Link>
+              </TooltipContent>
             </Tooltip>
           ))}
         </div>

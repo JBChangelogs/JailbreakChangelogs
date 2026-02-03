@@ -1,11 +1,12 @@
 import React from "react";
 import { useRealTimeRelativeDate } from "@/hooks/useRealTimeRelativeDate";
-import dynamic from "next/dynamic";
 import { formatCustomDate } from "@/utils/timestamp";
 
-const Tooltip = dynamic(() => import("@mui/material/Tooltip"), {
-  ssr: false,
-});
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface TradeAdMetadataProps {
   status: string;
@@ -42,52 +43,30 @@ export default function TradeAdMetadata({
         {status}
       </span>
       <div className="text-secondary-text flex items-center gap-2 text-sm">
-        <Tooltip
-          title={formatCustomDate(created_at)}
-          placement="top"
-          arrow
-          slotProps={{
-            tooltip: {
-              sx: {
-                backgroundColor: "var(--color-primary-bg)",
-                color: "var(--color-secondary-text)",
-                fontSize: "0.75rem",
-                padding: "8px 12px",
-                borderRadius: "8px",
-                boxShadow: "0 4px 12px var(--color-card-shadow)",
-                "& .MuiTooltip-arrow": {
-                  color: "var(--color-primary-bg)",
-                },
-              },
-            },
-          }}
-        >
-          <span className="cursor-help">Created {createdRelative}</span>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <span className="cursor-help">Created {createdRelative}</span>
+          </TooltipTrigger>
+          <TooltipContent
+            side="top"
+            className="bg-primary-bg text-secondary-text border-none shadow-[var(--color-card-shadow)]"
+          >
+            <p>{formatCustomDate(created_at)}</p>
+          </TooltipContent>
         </Tooltip>
         {expires && (
           <>
             <span>•</span>
-            <Tooltip
-              title={formatCustomDate(expires)}
-              placement="top"
-              arrow
-              slotProps={{
-                tooltip: {
-                  sx: {
-                    backgroundColor: "var(--color-primary-bg)",
-                    color: "var(--color-secondary-text)",
-                    fontSize: "0.75rem",
-                    padding: "8px 12px",
-                    borderRadius: "8px",
-                    boxShadow: "0 4px 12px var(--color-card-shadow)",
-                    "& .MuiTooltip-arrow": {
-                      color: "var(--color-primary-bg)",
-                    },
-                  },
-                },
-              }}
-            >
-              <span className="cursor-help">Expires {expiresRelative}</span>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span className="cursor-help">Expires {expiresRelative}</span>
+              </TooltipTrigger>
+              <TooltipContent
+                side="top"
+                className="bg-primary-bg text-secondary-text border-none shadow-[var(--color-card-shadow)]"
+              >
+                <p>{formatCustomDate(expires)}</p>
+              </TooltipContent>
             </Tooltip>
           </>
         )}

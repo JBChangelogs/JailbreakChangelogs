@@ -8,12 +8,15 @@ import { useAuthContext } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import AddServerModal from "./AddServerModal";
 import { Skeleton } from "@mui/material";
-import dynamic from "next/dynamic";
 import Image from "next/image";
 import Link from "next/link";
 import { Pagination } from "@/components/ui/Pagination";
 
-const Tooltip = dynamic(() => import("@mui/material/Tooltip"), { ssr: false });
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { UserAvatar } from "@/utils/avatar";
 import DOMPurify from "dompurify";
 import type { UserData } from "@/types/auth";
@@ -634,39 +637,28 @@ const ServerList: React.FC<{
                     Server #{serverNumberMap[server.id]}
                   </span>
                   {isSupporter && supporterTier && (
-                    <Tooltip
-                      title={`Supporter Type ${supporterTier}`}
-                      placement="top"
-                      arrow
-                      slotProps={{
-                        tooltip: {
-                          sx: {
-                            backgroundColor: "var(--color-secondary-bg)",
-                            color: "var(--color-primary-text)",
-                            fontSize: "0.75rem",
-                            padding: "8px 12px",
-                            borderRadius: "8px",
-                            boxShadow: "0 4px 12px var(--color-card-shadow)",
-                            "& .MuiTooltip-arrow": {
-                              color: "var(--color-secondary-bg)",
-                            },
-                          },
-                        },
-                      }}
-                    >
-                      <a href="/supporting" className="flex items-center">
-                        <Image
-                          src={
-                            supporterIcons[
-                              supporterTier as keyof typeof supporterIcons
-                            ]
-                          }
-                          alt={`Supporter Type ${supporterTier}`}
-                          width={20}
-                          height={20}
-                          className="object-contain transition-opacity hover:opacity-80"
-                        />
-                      </a>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <a href="/supporting" className="flex items-center">
+                          <Image
+                            src={
+                              supporterIcons[
+                                supporterTier as keyof typeof supporterIcons
+                              ]
+                            }
+                            alt={`Supporter Type ${supporterTier}`}
+                            width={20}
+                            height={20}
+                            className="object-contain transition-opacity hover:opacity-80"
+                          />
+                        </a>
+                      </TooltipTrigger>
+                      <TooltipContent
+                        side="top"
+                        className="bg-secondary-bg text-primary-text border-none shadow-[var(--color-card-shadow)]"
+                      >
+                        <p>Supporter Type {supporterTier}</p>
+                      </TooltipContent>
                     </Tooltip>
                   )}
                 </div>

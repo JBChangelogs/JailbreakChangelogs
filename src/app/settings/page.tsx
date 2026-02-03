@@ -14,7 +14,11 @@ import {
   Skeleton,
   Grid,
 } from "@mui/material";
-import Tooltip from "@mui/material/Tooltip";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { settingsConfig, SettingKey } from "@/config/settings";
 import { useSettings } from "@/hooks/useSettings";
 import { SettingToggle } from "@/components/Settings/SettingToggle";
@@ -553,39 +557,32 @@ export default function SettingsPage() {
                   />
                   {category}
                   {userData?.flags?.some((f) => f.flag === "is_owner") && (
-                    <Tooltip
-                      title="Copy URL"
-                      arrow
-                      placement="top"
-                      slotProps={{
-                        tooltip: {
-                          sx: {
-                            backgroundColor: "var(--color-secondary-bg)",
-                            color: "var(--color-primary-text)",
-                            "& .MuiTooltip-arrow": {
-                              color: "var(--color-secondary-bg)",
-                            },
-                          },
-                        },
-                      }}
-                    >
-                      <button
-                        onClick={() => {
-                          const url = new URL(window.location.href);
-                          const highlightVal = category
-                            .replace(/\s+/g, "_")
-                            .toLowerCase();
-                          url.searchParams.set("highlight", highlightVal);
-                          navigator.clipboard.writeText(url.toString());
-                          toast.success("Link Copied", {
-                            description: `The URL for the "${category}" section is now on your clipboard.`,
-                          });
-                        }}
-                        className="text-secondary-text hover:text-link cursor-pointer transition-colors"
-                        aria-label="Copy category link"
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <button
+                          onClick={() => {
+                            const url = new URL(window.location.href);
+                            const highlightVal = category
+                              .replace(/\s+/g, "_")
+                              .toLowerCase();
+                            url.searchParams.set("highlight", highlightVal);
+                            navigator.clipboard.writeText(url.toString());
+                            toast.success("Link Copied", {
+                              description: `The URL for the "${category}" section is now on your clipboard.`,
+                            });
+                          }}
+                          className="text-secondary-text hover:text-link cursor-pointer transition-colors"
+                          aria-label="Copy category link"
+                        >
+                          <Icon icon="heroicons:link" className="h-4 w-4" />
+                        </button>
+                      </TooltipTrigger>
+                      <TooltipContent
+                        side="top"
+                        className="bg-secondary-bg text-primary-text border-none shadow-[var(--color-card-shadow)]"
                       >
-                        <Icon icon="heroicons:link" className="h-4 w-4" />
-                      </button>
+                        <p>Copy URL</p>
+                      </TooltipContent>
                     </Tooltip>
                   )}
                 </Typography>
@@ -794,36 +791,29 @@ export default function SettingsPage() {
               <Icon icon="heroicons:bell" className="h-6 w-6" />
               Notification Preferences
               {userData?.flags?.some((f) => f.flag === "is_owner") && (
-                <Tooltip
-                  title="Copy URL"
-                  arrow
-                  placement="top"
-                  slotProps={{
-                    tooltip: {
-                      sx: {
-                        backgroundColor: "var(--color-secondary-bg)",
-                        color: "var(--color-primary-text)",
-                        "& .MuiTooltip-arrow": {
-                          color: "var(--color-secondary-bg)",
-                        },
-                      },
-                    },
-                  }}
-                >
-                  <button
-                    onClick={() => {
-                      const url = new URL(window.location.href);
-                      url.searchParams.set("highlight", "notifications");
-                      navigator.clipboard.writeText(url.toString());
-                      toast.success(
-                        'Link for "Notification Preferences" copied!',
-                      );
-                    }}
-                    className="text-secondary-text hover:text-link cursor-pointer transition-colors"
-                    aria-label="Copy section link"
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button
+                      onClick={() => {
+                        const url = new URL(window.location.href);
+                        url.searchParams.set("highlight", "notifications");
+                        navigator.clipboard.writeText(url.toString());
+                        toast.success(
+                          'Link for "Notification Preferences" copied!',
+                        );
+                      }}
+                      className="text-secondary-text hover:text-link cursor-pointer transition-colors"
+                      aria-label="Copy section link"
+                    >
+                      <Icon icon="heroicons:link" className="h-4 w-4" />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent
+                    side="top"
+                    className="bg-secondary-bg text-primary-text border-none shadow-[var(--color-card-shadow)]"
                   >
-                    <Icon icon="heroicons:link" className="h-4 w-4" />
-                  </button>
+                    <p>Copy URL</p>
+                  </TooltipContent>
                 </Tooltip>
               )}
             </Typography>

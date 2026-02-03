@@ -2,9 +2,11 @@
 
 import { getCategoryColor, getCategoryIcon } from "@/utils/categoryIcons";
 import { UserNetworthData } from "@/utils/api";
-import dynamic from "next/dynamic";
-
-const Tooltip = dynamic(() => import("@mui/material/Tooltip"), { ssr: false });
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface InventoryBreakdownProps {
   networthData: UserNetworthData[];
@@ -140,30 +142,21 @@ export default function InventoryBreakdown({
               {Object.entries(percentages)
                 .sort(([, a], [, b]) => b - a)
                 .map(([category, percentage]) => (
-                  <Tooltip
-                    key={category}
-                    title={`${category}: ${formatPercentage(percentage)}%`}
-                    placement="top"
-                    arrow
-                    slotProps={{
-                      tooltip: {
-                        sx: {
-                          backgroundColor: "var(--color-secondary-bg)",
-                          color: "var(--color-primary-text)",
-                          "& .MuiTooltip-arrow": {
-                            color: "var(--color-secondary-bg)",
-                          },
-                        },
-                      },
-                    }}
-                  >
-                    <div
-                      className="group relative"
-                      style={{
-                        width: `${percentage}%`,
-                        backgroundColor: getCategoryColor(category),
-                      }}
-                    ></div>
+                  <Tooltip key={category}>
+                    <TooltipTrigger asChild>
+                      <div
+                        className="group relative"
+                        style={{
+                          width: `${percentage}%`,
+                          backgroundColor: getCategoryColor(category),
+                        }}
+                      ></div>
+                    </TooltipTrigger>
+                    <TooltipContent side="top">
+                      <p>
+                        {category}: {formatPercentage(percentage)}%
+                      </p>
+                    </TooltipContent>
                   </Tooltip>
                 ))}
             </div>
@@ -257,30 +250,21 @@ export default function InventoryBreakdown({
               {Object.entries(duplicatesPercentages)
                 .sort(([, a], [, b]) => b - a)
                 .map(([category, percentage]) => (
-                  <Tooltip
-                    key={category}
-                    title={`${category}: ${formatPercentage(percentage)}%`}
-                    placement="top"
-                    arrow
-                    slotProps={{
-                      tooltip: {
-                        sx: {
-                          backgroundColor: "var(--color-secondary-bg)",
-                          color: "var(--color-primary-text)",
-                          "& .MuiTooltip-arrow": {
-                            color: "var(--color-secondary-bg)",
-                          },
-                        },
-                      },
-                    }}
-                  >
-                    <div
-                      className="group relative"
-                      style={{
-                        width: `${percentage}%`,
-                        backgroundColor: getCategoryColor(category),
-                      }}
-                    ></div>
+                  <Tooltip key={category}>
+                    <TooltipTrigger asChild>
+                      <div
+                        className="group relative"
+                        style={{
+                          width: `${percentage}%`,
+                          backgroundColor: getCategoryColor(category),
+                        }}
+                      ></div>
+                    </TooltipTrigger>
+                    <TooltipContent side="top">
+                      <p>
+                        {category}: {formatPercentage(percentage)}%
+                      </p>
+                    </TooltipContent>
                   </Tooltip>
                 ))}
             </div>

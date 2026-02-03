@@ -1,12 +1,11 @@
 import React from "react";
 import { TradeItem } from "@/types/trading";
-import dynamic from "next/dynamic";
 import { DroppableZone } from "@/components/dnd/DroppableZone";
 import { Icon } from "../../ui/IconWrapper";
 import { CalculatorItemGrid } from "./CalculatorItemGrid";
 import { Button } from "../../ui/button";
 
-const Tooltip = dynamic(() => import("@mui/material/Tooltip"), { ssr: false });
+import { Tooltip, TooltipContent, TooltipTrigger } from "../../ui/tooltip";
 
 interface TradeSidePanelProps {
   side: "offering" | "requesting";
@@ -57,26 +56,16 @@ export const TradeSidePanel: React.FC<TradeSidePanelProps> = ({
             ({items.length})
           </span>
         </div>
-        <Tooltip
-          title={`Mirror to ${isOffering ? "requesting" : "offering"}`}
-          arrow
-          placement="top"
-          slotProps={{
-            tooltip: {
-              sx: {
-                backgroundColor: "var(--color-secondary-bg)",
-                color: "var(--color-primary-text)",
-                "& .MuiTooltip-arrow": {
-                  color: "var(--color-secondary-bg)",
-                },
-              },
-            },
-          }}
-        >
-          <Button variant="default" onClick={onMirror} size="sm">
-            <Icon icon="heroicons:arrows-right-left" />
-            Mirror
-          </Button>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button variant="default" onClick={onMirror} size="sm">
+              <Icon icon="heroicons:arrows-right-left" />
+              Mirror
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent side="top">
+            <p>Mirror to {isOffering ? "requesting" : "offering"}</p>
+          </TooltipContent>
         </Tooltip>
       </div>
       <CalculatorItemGrid

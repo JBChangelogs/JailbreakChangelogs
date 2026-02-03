@@ -7,14 +7,15 @@ import { ItemGrid } from "./ItemGrid";
 import RobloxTradeUser from "./RobloxTradeUser";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { useRealTimeRelativeDate } from "@/hooks/useRealTimeRelativeDate";
-import dynamic from "next/dynamic";
 import { formatCustomDate } from "@/utils/timestamp";
 import Image from "next/image";
 import { Button } from "../ui/button";
 
-const Tooltip = dynamic(() => import("@mui/material/Tooltip"), {
-  ssr: false,
-});
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface TradeAdCardProps {
   trade: TradeAd;
@@ -133,37 +134,28 @@ export const TradeAdCard: React.FC<TradeAdCardProps> = ({
             Trade #{trade.id}
           </Link>
           {isSupporter && supporterTier && (
-            <Tooltip
-              title={`Supporter Type ${supporterTier}`}
-              placement="top"
-              arrow
-              slotProps={{
-                tooltip: {
-                  sx: {
-                    backgroundColor: "var(--color-secondary-bg)",
-                    color: "var(--color-primary-text)",
-                    fontSize: "0.75rem",
-                    padding: "8px 12px",
-                    borderRadius: "8px",
-                    boxShadow: "0 4px 12px var(--color-card-shadow)",
-                    "& .MuiTooltip-arrow": {
-                      color: "var(--color-secondary-bg)",
-                    },
-                  },
-                },
-              }}
-            >
-              <Link href="/supporting" className="flex items-center">
-                <Image
-                  src={
-                    supporterIcons[supporterTier as keyof typeof supporterIcons]
-                  }
-                  alt={`Supporter Type ${supporterTier}`}
-                  width={20}
-                  height={20}
-                  className="object-contain transition-opacity hover:opacity-80"
-                />
-              </Link>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Link href="/supporting" className="flex items-center">
+                  <Image
+                    src={
+                      supporterIcons[
+                        supporterTier as keyof typeof supporterIcons
+                      ]
+                    }
+                    alt={`Supporter Type ${supporterTier}`}
+                    width={20}
+                    height={20}
+                    className="object-contain transition-opacity hover:opacity-80"
+                  />
+                </Link>
+              </TooltipTrigger>
+              <TooltipContent
+                side="top"
+                className="bg-secondary-bg text-primary-text border-none shadow-[var(--color-card-shadow)]"
+              >
+                <p>Supporter Type {supporterTier}</p>
+              </TooltipContent>
             </Tooltip>
           )}
         </div>
@@ -256,54 +248,32 @@ export const TradeAdCard: React.FC<TradeAdCardProps> = ({
         </div>
 
         <div className="text-secondary-text mt-4 text-xs">
-          <Tooltip
-            title={formatCustomDate(trade.created_at)}
-            placement="top"
-            arrow
-            slotProps={{
-              tooltip: {
-                sx: {
-                  backgroundColor: "var(--color-primary-bg)",
-                  color: "var(--color-secondary-text)",
-                  fontSize: "0.75rem",
-                  padding: "8px 12px",
-                  borderRadius: "8px",
-                  boxShadow: "0 4px 12px var(--color-card-shadow)",
-                  "& .MuiTooltip-arrow": {
-                    color: "var(--color-primary-bg)",
-                  },
-                },
-              },
-            }}
-          >
-            <span className="cursor-help">Created {createdRelative}</span>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span className="cursor-help">Created {createdRelative}</span>
+            </TooltipTrigger>
+            <TooltipContent
+              side="top"
+              className="bg-primary-bg text-secondary-text border-none shadow-[var(--color-card-shadow)]"
+            >
+              <p>{formatCustomDate(trade.created_at)}</p>
+            </TooltipContent>
           </Tooltip>
           {trade.expires && (
             <>
               <span className="ml-2">•</span>
-              <Tooltip
-                title={formatCustomDate(trade.expires)}
-                placement="top"
-                arrow
-                slotProps={{
-                  tooltip: {
-                    sx: {
-                      backgroundColor: "var(--color-primary-bg)",
-                      color: "var(--color-secondary-text)",
-                      fontSize: "0.75rem",
-                      padding: "8px 12px",
-                      borderRadius: "8px",
-                      boxShadow: "0 4px 12px var(--color-card-shadow)",
-                      "& .MuiTooltip-arrow": {
-                        color: "var(--color-primary-bg)",
-                      },
-                    },
-                  },
-                }}
-              >
-                <span className="ml-2 cursor-help">
-                  Expires {expiresRelative}
-                </span>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span className="ml-2 cursor-help">
+                    Expires {expiresRelative}
+                  </span>
+                </TooltipTrigger>
+                <TooltipContent
+                  side="top"
+                  className="bg-primary-bg text-secondary-text border-none shadow-[var(--color-card-shadow)]"
+                >
+                  <p>{formatCustomDate(trade.expires)}</p>
+                </TooltipContent>
               </Tooltip>
             </>
           )}

@@ -3,9 +3,7 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import dynamic from "next/dynamic";
-
-const Tooltip = dynamic(() => import("@mui/material/Tooltip"), { ssr: false });
+import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import { RobloxIcon } from "@/components/Icons/RobloxIcon";
 import { TradeUserTooltip } from "./TradeUserTooltip";
 
@@ -63,33 +61,23 @@ export default function RobloxTradeUser({
           </div>
         )}
         <div className="flex flex-col">
-          <Tooltip
-            title={<TradeUserTooltip user={user} />}
-            arrow
-            disableTouchListener
-            slotProps={{
-              tooltip: {
-                sx: {
-                  backgroundColor: "var(--color-secondary-bg)",
-                  color: "var(--color-primary-text)",
-                  maxWidth: "400px",
-                  width: "auto",
-                  minWidth: "300px",
-                  "& .MuiTooltip-arrow": {
-                    color: "var(--color-secondary-bg)",
-                  },
-                },
-              },
-            }}
-          >
-            <Link
-              href={`https://www.roblox.com/users/${user.roblox_id}/profile`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-primary-text hover:text-link inline-block truncate font-medium transition-colors"
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Link
+                href={`https://www.roblox.com/users/${user.roblox_id}/profile`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-primary-text hover:text-link inline-block truncate font-medium transition-colors"
+              >
+                {user.roblox_display_name || user.roblox_username}
+              </Link>
+            </TooltipTrigger>
+            <TooltipContent
+              side="bottom"
+              className="bg-secondary-bg text-primary-text max-w-[400px] min-w-[300px] border-none shadow-[var(--color-card-shadow)]"
             >
-              {user.roblox_display_name || user.roblox_username}
-            </Link>
+              <TradeUserTooltip user={user} />
+            </TooltipContent>
           </Tooltip>
           {user.roblox_display_name && (
             <span className="text-secondary-text truncate text-xs">
