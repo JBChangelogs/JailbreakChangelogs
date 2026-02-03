@@ -1,10 +1,7 @@
 import { Item } from "@/types";
 import Image from "next/image";
 import Link from "next/link";
-import dynamic from "next/dynamic";
 import { useMediaQuery } from "@mui/material";
-
-const Tooltip = dynamic(() => import("@mui/material/Tooltip"), { ssr: false });
 import {
   getItemImagePath,
   handleImageError,
@@ -25,6 +22,11 @@ import { useIsAuthenticated } from "@/contexts/AuthContext";
 import { usePathname } from "next/navigation";
 import { CategoryIconBadge, getCategoryColor } from "@/utils/categoryIcons";
 import { Icon } from "@/components/ui/IconWrapper";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface ItemCardProps {
   item: Item;
@@ -411,22 +413,23 @@ export default function ItemCard({
                       : diff.toLocaleString();
 
                     badges.push(
-                      <Tooltip
-                        key="cash-change"
-                        title={`Cash Value ${isPositive ? "increased" : "decreased"} by ${formattedDiff}`}
-                        arrow
-                        placement="top"
-                      >
-                        <span
-                          className={`inline-flex items-center gap-0.5 rounded-full px-1.5 py-0.5 text-[10px] font-semibold sm:px-2 sm:py-1 sm:text-xs ${
-                            isPositive
-                              ? "bg-status-success text-white"
-                              : "bg-status-error text-white"
-                          }`}
-                        >
-                          {isPositive ? "+" : "-"}
+                      <Tooltip key="cash-change">
+                        <TooltipTrigger asChild>
+                          <span
+                            className={`inline-flex items-center gap-0.5 rounded-full px-1.5 py-0.5 text-[10px] font-semibold sm:px-2 sm:py-1 sm:text-xs ${
+                              isPositive
+                                ? "bg-status-success text-white"
+                                : "bg-status-error text-white"
+                            }`}
+                          >
+                            {isPositive ? "+" : "-"}
+                            {formattedDiff}
+                          </span>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          Cash Value {isPositive ? "increased" : "decreased"} by{" "}
                           {formattedDiff}
-                        </span>
+                        </TooltipContent>
                       </Tooltip>,
                     );
                   }
@@ -446,22 +449,23 @@ export default function ItemCard({
                       : diff.toLocaleString();
 
                     badges.push(
-                      <Tooltip
-                        key="duped-change"
-                        title={`Duped Value ${isPositive ? "increased" : "decreased"} by ${formattedDiff}`}
-                        arrow
-                        placement="top"
-                      >
-                        <span
-                          className={`inline-flex items-center gap-0.5 rounded-full px-1.5 py-0.5 text-[10px] font-semibold sm:px-2 sm:py-1 sm:text-xs ${
-                            isPositive
-                              ? "bg-status-success text-white"
-                              : "bg-status-error text-white"
-                          }`}
-                        >
-                          {isPositive ? "+" : "-"}
-                          {formattedDiff}
-                        </span>
+                      <Tooltip key="duped-change">
+                        <TooltipTrigger asChild>
+                          <span
+                            className={`inline-flex items-center gap-0.5 rounded-full px-1.5 py-0.5 text-[10px] font-semibold sm:px-2 sm:py-1 sm:text-xs ${
+                              isPositive
+                                ? "bg-status-success text-white"
+                                : "bg-status-error text-white"
+                            }`}
+                          >
+                            {isPositive ? "+" : "-"}
+                            {formattedDiff}
+                          </span>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          Duped Value {isPositive ? "increased" : "decreased"}{" "}
+                          by {formattedDiff}
+                        </TooltipContent>
                       </Tooltip>,
                     );
                   }
@@ -575,24 +579,16 @@ export default function ItemCard({
 
             <div className="border-secondary-text text-secondary-text mt-auto border-t pt-1 text-[10px] sm:pt-2 sm:text-xs">
               {currentItemData.last_updated ? (
-                <Tooltip
-                  title={formatCustomDate(currentItemData.last_updated)}
-                  placement="top"
-                  arrow
-                  slotProps={{
-                    tooltip: {
-                      className:
-                        "bg-primary-bg text-primary-text text-xs px-3 py-2 rounded-lg shadow-lg",
-                    },
-                    arrow: {
-                      className: "text-primary-bg",
-                    },
-                  }}
-                >
-                  <span className="cursor-help">
-                    Last updated:{" "}
-                    {formatLastUpdated(currentItemData.last_updated)}
-                  </span>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span className="cursor-help">
+                      Last updated:{" "}
+                      {formatLastUpdated(currentItemData.last_updated)}
+                    </span>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    {formatCustomDate(currentItemData.last_updated)}
+                  </TooltipContent>
                 </Tooltip>
               ) : (
                 <>Last updated: Never</>

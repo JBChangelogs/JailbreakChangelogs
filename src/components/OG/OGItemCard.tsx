@@ -2,7 +2,6 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import dynamic from "next/dynamic";
 import {
   getItemImagePath,
   isVideoItem,
@@ -16,7 +15,11 @@ import { VerifiedBadgeIcon } from "@/components/Icons/VerifiedBadgeIcon";
 import { formatFullValue } from "@/utils/values";
 import { Item } from "@/types";
 
-const Tooltip = dynamic(() => import("@mui/material/Tooltip"), { ssr: false });
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 import { bangers } from "@/app/fonts";
 
@@ -190,25 +193,15 @@ export default function OGItemCard({
       <div className="flex flex-1 flex-col justify-center space-y-2 text-center">
         <div>
           <div className="text-secondary-text text-sm">MONTHLY UNIQUE</div>
-          <Tooltip
-            title={item.uniqueCirculation.toLocaleString()}
-            placement="top"
-            arrow
-            slotProps={{
-              tooltip: {
-                sx: {
-                  backgroundColor: "var(--color-secondary-bg)",
-                  color: "var(--color-primary-text)",
-                  "& .MuiTooltip-arrow": {
-                    color: "var(--color-secondary-bg)",
-                  },
-                },
-              },
-            }}
-          >
-            <div className="text-primary-text cursor-help text-xl font-bold">
-              {formatNumber(item.uniqueCirculation)}
-            </div>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div className="text-primary-text cursor-help text-xl font-bold">
+                {formatNumber(item.uniqueCirculation)}
+              </div>
+            </TooltipTrigger>
+            <TooltipContent>
+              {item.uniqueCirculation.toLocaleString()}
+            </TooltipContent>
           </Tooltip>
         </div>
 
@@ -216,32 +209,23 @@ export default function OGItemCard({
         {itemData && (
           <div>
             <div className="text-secondary-text text-sm">CASH VALUE</div>
-            <Tooltip
-              title={formatFullValue(itemData.cash_value)}
-              placement="top"
-              arrow
-              slotProps={{
-                tooltip: {
-                  sx: {
-                    backgroundColor: "var(--color-secondary-bg)",
-                    color: "var(--color-primary-text)",
-                    "& .MuiTooltip-arrow": {
-                      color: "var(--color-secondary-bg)",
-                    },
-                  },
-                },
-              }}
-            >
-              <div className="text-primary-text cursor-help text-xl font-bold">
-                <span className="sm:hidden">
-                  {itemData.cash_value === null || itemData.cash_value === "N/A"
-                    ? "N/A"
-                    : itemData.cash_value}
-                </span>
-                <span className="hidden sm:inline">
-                  {formatFullValue(itemData.cash_value)}
-                </span>
-              </div>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="text-primary-text cursor-help text-xl font-bold">
+                  <span className="sm:hidden">
+                    {itemData.cash_value === null ||
+                    itemData.cash_value === "N/A"
+                      ? "N/A"
+                      : itemData.cash_value}
+                  </span>
+                  <span className="hidden sm:inline">
+                    {formatFullValue(itemData.cash_value)}
+                  </span>
+                </div>
+              </TooltipTrigger>
+              <TooltipContent>
+                {formatFullValue(itemData.cash_value)}
+              </TooltipContent>
             </Tooltip>
           </div>
         )}
@@ -250,33 +234,23 @@ export default function OGItemCard({
         {itemData && (
           <div>
             <div className="text-secondary-text text-sm">DUPED VALUE</div>
-            <Tooltip
-              title={formatFullValue(itemData.duped_value)}
-              placement="top"
-              arrow
-              slotProps={{
-                tooltip: {
-                  sx: {
-                    backgroundColor: "var(--color-secondary-bg)",
-                    color: "var(--color-primary-text)",
-                    "& .MuiTooltip-arrow": {
-                      color: "var(--color-secondary-bg)",
-                    },
-                  },
-                },
-              }}
-            >
-              <div className="text-primary-text cursor-help text-xl font-bold">
-                <span className="sm:hidden">
-                  {itemData.duped_value === null ||
-                  itemData.duped_value === "N/A"
-                    ? "N/A"
-                    : itemData.duped_value}
-                </span>
-                <span className="hidden sm:inline">
-                  {formatFullValue(itemData.duped_value)}
-                </span>
-              </div>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="text-primary-text cursor-help text-xl font-bold">
+                  <span className="sm:hidden">
+                    {itemData.duped_value === null ||
+                    itemData.duped_value === "N/A"
+                      ? "N/A"
+                      : itemData.duped_value}
+                  </span>
+                  <span className="hidden sm:inline">
+                    {formatFullValue(itemData.duped_value)}
+                  </span>
+                </div>
+              </TooltipTrigger>
+              <TooltipContent>
+                {formatFullValue(itemData.duped_value)}
+              </TooltipContent>
             </Tooltip>
           </div>
         )}

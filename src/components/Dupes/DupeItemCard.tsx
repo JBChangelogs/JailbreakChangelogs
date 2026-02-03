@@ -2,7 +2,6 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import dynamic from "next/dynamic";
 import { DupeFinderItem, Item } from "@/types";
 import { formatCurrencyValue } from "@/utils/currency";
 import {
@@ -15,7 +14,11 @@ import {
 } from "@/utils/images";
 import { getCategoryIcon, getCategoryColor } from "@/utils/categoryIcons";
 
-const Tooltip = dynamic(() => import("@mui/material/Tooltip"), { ssr: false });
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 import { bangers } from "@/app/fonts";
 
@@ -177,89 +180,57 @@ export default function DupeItemCard({
       <div className="flex flex-1 flex-col justify-center space-y-2 text-center">
         <div>
           <div className="text-secondary-text text-sm">MONTHLY UNIQUE</div>
-          <Tooltip
-            title={item.uniqueCirculation.toLocaleString()}
-            placement="top"
-            arrow
-            slotProps={{
-              tooltip: {
-                sx: {
-                  backgroundColor: "var(--color-secondary-bg)",
-                  color: "var(--color-primary-text)",
-                  "& .MuiTooltip-arrow": {
-                    color: "var(--color-secondary-bg)",
-                  },
-                },
-              },
-            }}
-          >
-            <div className="text-primary-text cursor-help text-xl font-bold">
-              {itemData?.metadata?.UniqueCirculation
-                ? formatNumber(itemData.metadata.UniqueCirculation)
-                : item.uniqueCirculation
-                  ? formatNumber(item.uniqueCirculation)
-                  : "N/A"}
-            </div>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div className="text-primary-text cursor-help text-xl font-bold">
+                {itemData?.metadata?.UniqueCirculation
+                  ? formatNumber(itemData.metadata.UniqueCirculation)
+                  : item.uniqueCirculation
+                    ? formatNumber(item.uniqueCirculation)
+                    : "N/A"}
+              </div>
+            </TooltipTrigger>
+            <TooltipContent>
+              {item.uniqueCirculation.toLocaleString()}
+            </TooltipContent>
           </Tooltip>
         </div>
         <div>
           <div className="text-secondary-text text-sm">MONTHLY TRADED</div>
-          <Tooltip
-            title={
-              itemData?.metadata?.TimesTraded
-                ? itemData.metadata.TimesTraded.toLocaleString()
-                : "N/A"
-            }
-            placement="top"
-            arrow
-            slotProps={{
-              tooltip: {
-                sx: {
-                  backgroundColor: "var(--color-secondary-bg)",
-                  color: "var(--color-primary-text)",
-                  "& .MuiTooltip-arrow": {
-                    color: "var(--color-secondary-bg)",
-                  },
-                },
-              },
-            }}
-          >
-            <div className="text-primary-text cursor-help text-xl font-bold">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div className="text-primary-text cursor-help text-xl font-bold">
+                {itemData?.metadata?.TimesTraded
+                  ? formatNumber(itemData.metadata.TimesTraded)
+                  : "N/A"}
+              </div>
+            </TooltipTrigger>
+            <TooltipContent>
               {itemData?.metadata?.TimesTraded
-                ? formatNumber(itemData.metadata.TimesTraded)
+                ? itemData.metadata.TimesTraded.toLocaleString()
                 : "N/A"}
-            </div>
+            </TooltipContent>
           </Tooltip>
         </div>
         <div>
           <div className="text-secondary-text text-sm">DUPED VALUE</div>
-          <Tooltip
-            title={dupedValue > 0 ? `$${dupedValue.toLocaleString()}` : "N/A"}
-            placement="top"
-            arrow
-            slotProps={{
-              tooltip: {
-                sx: {
-                  backgroundColor: "var(--color-secondary-bg)",
-                  color: "var(--color-primary-text)",
-                  "& .MuiTooltip-arrow": {
-                    color: "var(--color-secondary-bg)",
-                  },
-                },
-              },
-            }}
-          >
-            <div
-              className="text-primary-text cursor-help text-xl font-bold"
-              aria-label={`Duped value: ${dupedValue > 0 ? formatCurrencyValue(dupedValue) : "Not available"}`}
-            >
-              <span className="sm:hidden">
-                {dupedValue > 0 ? formatCurrencyValue(dupedValue) : "N/A"}
-              </span>
-              <span className="hidden sm:inline">
-                {dupedValue > 0 ? `$${dupedValue.toLocaleString()}` : "N/A"}
-              </span>
-            </div>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div
+                className="text-primary-text cursor-help text-xl font-bold"
+                aria-label={`Duped value: ${dupedValue > 0 ? formatCurrencyValue(dupedValue) : "Not available"}`}
+              >
+                <span className="sm:hidden">
+                  {dupedValue > 0 ? formatCurrencyValue(dupedValue) : "N/A"}
+                </span>
+                <span className="hidden sm:inline">
+                  {dupedValue > 0 ? `$${dupedValue.toLocaleString()}` : "N/A"}
+                </span>
+              </div>
+            </TooltipTrigger>
+            <TooltipContent>
+              {dupedValue > 0 ? `$${dupedValue.toLocaleString()}` : "N/A"}
+            </TooltipContent>
           </Tooltip>
         </div>
         <div>
@@ -301,25 +272,15 @@ export default function DupeItemCard({
         </div>
         <div>
           <div className="text-secondary-text text-sm">LOGGED ON</div>
-          <Tooltip
-            title={new Date(item.logged_at * 1000).toLocaleString()}
-            placement="top"
-            arrow
-            slotProps={{
-              tooltip: {
-                sx: {
-                  backgroundColor: "var(--color-secondary-bg)",
-                  color: "var(--color-primary-text)",
-                  "& .MuiTooltip-arrow": {
-                    color: "var(--color-secondary-bg)",
-                  },
-                },
-              },
-            }}
-          >
-            <div className="text-primary-text cursor-help text-xl font-bold">
-              {formatDateOnly(item.logged_at)}
-            </div>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div className="text-primary-text cursor-help text-xl font-bold">
+                {formatDateOnly(item.logged_at)}
+              </div>
+            </TooltipTrigger>
+            <TooltipContent>
+              {new Date(item.logged_at * 1000).toLocaleString()}
+            </TooltipContent>
           </Tooltip>
         </div>
       </div>

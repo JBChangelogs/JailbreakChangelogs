@@ -105,7 +105,7 @@ export default function CategoryIcons({
   return (
     <div className="mb-8">
       <h3 className="text-primary-text mb-6 text-2xl font-bold">Categories</h3>
-      <div className="scrollbar-thin scrollbar-track-transparent scrollbar-thumb-border-primary hover:scrollbar-thumb-border-focus grid max-h-96 grid-cols-1 gap-4 overflow-y-auto sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+      <div className="scrollbar-thin scrollbar-track-transparent scrollbar-thumb-border-primary hover:scrollbar-thumb-border-focus grid max-h-96 grid-cols-1 gap-4 overflow-y-auto py-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
         {categories.map((category) => {
           const isSelected = selectedFilter === category.id;
           const mobileOrder = mobileOrderMap[category.id] || 99;
