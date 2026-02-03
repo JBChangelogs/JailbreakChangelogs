@@ -74,7 +74,7 @@ const cleanCommentText = (text: string): string => {
 // Process @ mentions in comment text similar to changelogs
 const processMentions = (text: string): string => {
   return text.replace(/@(\w+)/g, (_, username) => {
-    return `<span class="text-link-hover">@${username}</span>`;
+    return `<span>@${username}</span>`;
   });
 };
 
@@ -101,7 +101,7 @@ const convertUrlsToLinksHTML = (text: string): string => {
       ) {
         // Escape the URL to prevent attribute injection
         const escapedUrl = escapeHtml(url);
-        return `<a href="${escapedUrl}" target="_blank" rel="noopener noreferrer" class="text-blue-400 transition-colors duration-200 hover:text-blue-300 hover:underline">${escapedUrl}</a>`;
+        return `<a href="${escapedUrl}" target="_blank" rel="noopener noreferrer">${escapedUrl}</a>`;
       }
       return url;
     } catch {
@@ -113,9 +113,9 @@ const convertUrlsToLinksHTML = (text: string): string => {
 const sanitizeHTML = (html: string): string => {
   return DOMPurify.sanitize(html, {
     ALLOWED_TAGS: ["a", "span", "br"],
-    ALLOWED_ATTR: ["href", "target", "rel", "class"],
+    ALLOWED_ATTR: ["href", "target", "rel"],
     ALLOWED_URI_REGEXP:
-      /^https?:\/\/(www\.)?(roblox\.com|reddit\.com|amazon\.com|jailbreakchangelogs\.xyz)/,
+      /^https?:\/\/(www\.)?(roblox\.com|reddit\.com|amazon\.com|jailbreakchangelogs\.xyz)([/?#]|$)/,
   });
 };
 
@@ -1014,7 +1014,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                               </div>
                             ) : (
                               <>
-                                <div className="prose prose-sm max-w-none">
+                                <div className="prose prose-sm prose-a:text-blue-400 prose-a:transition-colors prose-a:duration-200 hover:prose-a:text-blue-300 hover:prose-a:underline max-w-none">
                                   {isClient ? (
                                     <p
                                       className="text-primary-text text-sm leading-relaxed wrap-break-word whitespace-pre-wrap"

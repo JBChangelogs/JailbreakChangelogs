@@ -46,14 +46,14 @@ type SortOption =
 
 const processMentions = (text: string): string => {
   return text.replace(/@(\w+)/g, (_, username) => {
-    return `<span class="text-link-hover">@${username}</span>`;
+    return `<span>@${username}</span>`;
   });
 };
 
 const sanitizeHTML = (html: string): string => {
   return DOMPurify.sanitize(html, {
     ALLOWED_TAGS: ["span", "br"],
-    ALLOWED_ATTR: ["class"],
+    ALLOWED_ATTR: [],
   });
 };
 
