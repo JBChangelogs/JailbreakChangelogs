@@ -338,7 +338,7 @@ export default function ItemCard({
                     />
                     <video
                       ref={videoRef}
-                      src={getDriftVideoPath(item.name)}
+                      src={getDriftVideoPath(item.name, isValuesPage)}
                       loop
                       muted
                       playsInline

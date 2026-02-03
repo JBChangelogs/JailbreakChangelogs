@@ -290,7 +290,7 @@ export default function DupeComparisonClient({
                     onError={handleImageError}
                   />
                   <video
-                    src={getDriftVideoPath(duplicateItem.title)}
+                    src={getDriftVideoPath(duplicateItem.title, true)}
                     className="absolute inset-0 h-full w-full object-cover opacity-0 transition-opacity duration-300 hover:opacity-100"
                     muted
                     loop

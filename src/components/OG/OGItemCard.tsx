@@ -159,7 +159,7 @@ export default function OGItemCard({
                 onError={handleImageError}
               />
               <video
-                src={getDriftVideoPath(item.title)}
+                src={getDriftVideoPath(item.title, true)}
                 className="absolute inset-0 h-full w-full object-cover opacity-0 transition-opacity duration-300 hover:opacity-100"
                 muted
                 playsInline

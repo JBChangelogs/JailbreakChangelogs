@@ -61,18 +61,32 @@ export const getHornAudioPath = (name: string): string => {
 /**
  * Get the drift video path
  * @param name - The drift name
+ * @param isValuesPage - Whether this is for the values page (default: false)
  * @returns The full path to the drift's video file
  */
-export const getDriftVideoPath = (name: string): string => {
-  return `https://assets.jailbreakchangelogs.xyz/assets/images/items/drifts/${name}.webm`;
+export const getDriftVideoPath = (
+  name: string,
+  isValuesPage: boolean = false,
+): string => {
+  if (isValuesPage) {
+    return `https://assets.jailbreakchangelogs.xyz/assets/images/items/480p/drifts/previews/${name}.webm`;
+  }
+  return `https://assets.jailbreakchangelogs.xyz/assets/images/items/drifts/previews/${name}.webm`;
 };
 
 /**
  * Get the drift thumbnail path
  * @param name - The drift name
+ * @param isValuesPage - Whether this is for the values page (default: false)
  * @returns The full path to the drift's thumbnail image
  */
-export const getDriftThumbnailPath = (name: string): string => {
+export const getDriftThumbnailPath = (
+  name: string,
+  isValuesPage: boolean = false,
+): string => {
+  if (isValuesPage) {
+    return `https://assets.jailbreakchangelogs.xyz/assets/images/items/480p/drifts/thumbnails/${name}.webp`;
+  }
   return `https://assets.jailbreakchangelogs.xyz/assets/images/items/drifts/thumbnails/${name}.webp`;
 };
 
@@ -146,7 +160,7 @@ export const getItemImagePath = (
   }
 
   if (isDriftItem(type)) {
-    return getDriftThumbnailPath(name);
+    return getDriftThumbnailPath(name, isValuesPage);
   }
 
   const normalizedType = type.toLowerCase();
