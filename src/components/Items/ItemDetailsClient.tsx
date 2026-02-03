@@ -16,6 +16,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { Button } from "@/components/ui/button";
 
 const ItemValueChart = dynamic(
   () => import("@/components/Items/ItemValueChart"),
@@ -367,19 +368,20 @@ export default function ItemDetailsClient({
                   insights about this {currentItem.type.toLowerCase()} -{" "}
                   {currentItem.name}.
                 </p>
-                <a
-                  href="https://discord.com/invite/baHCsb8N5A"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="bg-button-info text-form-button-text hover:bg-button-info-hover inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors"
-                >
-                  <Icon
-                    icon="ic:baseline-discord"
-                    className="h-4 w-4"
-                    inline={true}
-                  />
-                  Join Trading Core
-                </a>
+                <Button asChild className="gap-2">
+                  <a
+                    href="https://discord.com/invite/baHCsb8N5A"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <Icon
+                      icon="ic:baseline-discord"
+                      className="h-4 w-4"
+                      inline={true}
+                    />
+                    Join Trading Core
+                  </a>
+                </Button>
               </div>
             </div>
           </div>

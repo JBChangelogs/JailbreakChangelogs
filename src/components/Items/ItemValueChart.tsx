@@ -8,6 +8,7 @@ import {
   CustomButtonGroup,
   CustomButton,
 } from "@/components/ui/CustomButtonGroup";
+import { Button } from "@/components/ui/button";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -617,12 +618,9 @@ const ItemValueChart = ({
                 <Line ref={chartRef} data={chartData} options={options} />
               </div>
               <div className="mt-2 flex justify-end">
-                <button
-                  onClick={() => chartRef.current?.resetZoom()}
-                  className="bg-button-info hover:bg-button-info-hover inline-flex cursor-pointer items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors"
-                >
+                <Button onClick={() => chartRef.current?.resetZoom()}>
                   Reset Zoom
-                </button>
+                </Button>
               </div>
             </>
           ) : (
@@ -706,12 +704,9 @@ const ItemValueChart = ({
               />
             </div>
             <div className="mt-2 flex justify-end">
-              <button
-                onClick={() => tradingChartRef.current?.resetZoom()}
-                className="bg-button-info hover:bg-button-info-hover inline-flex cursor-pointer items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors"
-              >
+              <Button onClick={() => tradingChartRef.current?.resetZoom()}>
                 Reset Zoom
-              </button>
+              </Button>
             </div>
           </div>
         )}
