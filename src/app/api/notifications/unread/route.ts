@@ -56,10 +56,6 @@ export async function GET() {
 
       // Exponential backoff
       const delayMs = Math.pow(2, attempt) * 1000;
-      console.warn(
-        `[SERVER] unread notifications fetch failed (attempt ${attempt + 1}/${maxRetries + 1}), retrying in ${delayMs}ms:`,
-        error instanceof Error ? error.message : error,
-      );
       await new Promise((resolve) => setTimeout(resolve, delayMs));
     } finally {
       clearTimeout(timeoutId);

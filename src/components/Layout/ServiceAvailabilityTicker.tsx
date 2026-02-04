@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { isFeatureEnabled } from "@/utils/featureFlags";
 
 export default function ServiceAvailabilityTicker() {
@@ -20,9 +21,17 @@ export default function ServiceAvailabilityTicker() {
 
           <div className="flex items-center gap-2">
             <span className="text-primary-text text-center text-xs">
-              <strong>Service degradation:</strong> On-demand inventory scans
-              have been disabled for the next 72 hours as we investigate a
-              performance issue.
+              <strong>Bank Truck Tracker:</strong> Bank Trucks are temporarily
+              unavailable on the{" "}
+              <Link
+                href="/robberies"
+                prefetch={false}
+                className="text-link hover:underline"
+              >
+                robbery tracker
+              </Link>{" "}
+              due to technical issues. All other robbery tracking services
+              remain functional.
             </span>
           </div>
         </div>

@@ -53,22 +53,12 @@ export async function getCurrentUser(): Promise<UserData | null> {
       if (!isRetryable) break;
 
       const delayMs = Math.pow(2, attempt) * 1000;
-      console.warn(
-        `[SERVER] getCurrentUser fetch failed (attempt ${attempt + 1}/${maxRetries + 1}), retrying in ${delayMs}ms:`,
-        error instanceof Error ? error.message : error,
-      );
       await new Promise((resolve) => setTimeout(resolve, delayMs));
     } finally {
       clearTimeout(timeoutId);
     }
   }
 
-  if (lastError) {
-    console.error(
-      "[SERVER] getCurrentUser: All attempts failed:",
-      lastError.message,
-    );
-  }
   return null;
 }
 
