@@ -14,7 +14,6 @@ export async function getCurrentUser(): Promise<UserData | null> {
   if (!token || token === "undefined") return null;
 
   const maxRetries = 2; // Keep retries low for session to avoid long hangs
-  let lastError: Error | null = null;
 
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     const controller = new AbortController();
@@ -39,8 +38,6 @@ export async function getCurrentUser(): Promise<UserData | null> {
       const user = (await response.json()) as UserData;
       return user;
     } catch (error) {
-      lastError = error as Error;
-
       if (attempt === maxRetries) break;
 
       // Only retry on network/timeout errors

@@ -1170,6 +1170,8 @@ export interface CommentData {
   user_id: string;
   edited_at: string | null;
   owner: string;
+  parent_id?: number | null;
+  depth?: number; // Local UI only
 }
 
 export async function fetchComments(

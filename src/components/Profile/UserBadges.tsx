@@ -23,6 +23,7 @@ interface UserBadgesProps {
     identity_guild_id: string | null;
   } | null;
   disableTooltips?: boolean;
+  customBgClass?: string;
 }
 
 export const UserBadges = ({
@@ -33,6 +34,7 @@ export const UserBadges = ({
   className = "",
   primary_guild,
   disableTooltips = false,
+  customBgClass,
 }: UserBadgesProps) => {
   const badges = [];
 
@@ -498,7 +500,7 @@ export const UserBadges = ({
     const guildBadgeContent = (
       <div
         onClick={(e) => e.stopPropagation()}
-        className={`bg-tertiary-bg/40 border-border-primary text-primary-text hover:bg-quaternary-bg/30 flex cursor-pointer items-center gap-1.5 rounded-lg border px-2.5 shadow-2xl backdrop-blur-xl transition-colors ${containerHeight}`}
+        className={`${customBgClass || "bg-tertiary-bg/40"} border-border-primary text-primary-text hover:bg-quaternary-bg/30 flex cursor-pointer items-center gap-1.5 rounded-lg border px-2.5 shadow-2xl backdrop-blur-xl transition-colors ${containerHeight}`}
       >
         <Image
           src={badgeUrl}
@@ -529,7 +531,7 @@ export const UserBadges = ({
       {badges.length > 0 && (
         <div
           onClick={(e) => e.stopPropagation()}
-          className={`bg-tertiary-bg/40 border-border-primary inline-flex items-center gap-2 rounded-lg border px-2.5 shadow-2xl backdrop-blur-xl ${containerHeight}`}
+          className={`${customBgClass || "bg-tertiary-bg/40"} border-border-primary inline-flex items-center gap-2 rounded-lg border px-2.5 shadow-2xl backdrop-blur-xl ${containerHeight}`}
         >
           {badges}
         </div>

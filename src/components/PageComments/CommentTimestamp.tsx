@@ -40,7 +40,7 @@ const CommentTimestamp: React.FC<CommentTimestampProps> = ({
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <span className="mt-0.5 cursor-help text-xs text-[#748D92]">
+        <span className="text-secondary-text mt-0.5 cursor-help text-xs">
           {displayText}
         </span>
       </TooltipTrigger>

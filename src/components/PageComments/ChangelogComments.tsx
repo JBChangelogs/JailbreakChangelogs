@@ -2,12 +2,18 @@
 
 import { Icon } from "../ui/IconWrapper";
 import React, { useState, useEffect, useCallback } from "react";
-import { CircularProgress, IconButton, Menu, MenuItem } from "@mui/material";
+import { CircularProgress } from "@mui/material";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Button } from "../ui/button";
 import { CommentData } from "@/utils/api";
 import {
@@ -61,6 +67,20 @@ interface ChangelogCommentsProps {
   };
   initialComments?: CommentData[];
   initialUserMap?: Record<string, UserData>;
+}
+
+// Type for comments with depth for threading
+interface ThreadedComment extends CommentData {
+  depth: number;
+}
+
+// Type for "load more" items in the threaded comment list
+interface MoreItem {
+  id: string;
+  isMore: true;
+  parentId: number;
+  count: number;
+  depth: number;
 }
 
 const cleanCommentText = (text: string): string => {
@@ -147,10 +167,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
   const [expandedComments, setExpandedComments] = useState<Set<number>>(
     new Set(),
   );
-  const [menuAnchorEl, setMenuAnchorEl] = useState<null | HTMLElement>(null);
-  const [selectedCommentId, setSelectedCommentId] = useState<number | null>(
-    null,
-  );
+
   const [reportModalOpen, setReportModalOpen] = useState(false);
   const [reportReason, setReportReason] = useState("");
   const [reportingCommentId, setReportingCommentId] = useState<number | null>(
@@ -160,9 +177,28 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
   const [isSubmittingComment, setIsSubmittingComment] = useState(false);
   const [isRefreshingComments, setIsRefreshingComments] = useState(false);
   const [isClient, setIsClient] = useState(false);
+  const [fullyExpandedThreads, setFullyExpandedThreads] = useState<Set<number>>(
+    new Set(),
+  );
+
+  const toggleThreadExpansion = (parentId: number) => {
+    setFullyExpandedThreads((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(parentId)) {
+        newSet.delete(parentId);
+      } else {
+        newSet.add(parentId);
+      }
+      return newSet;
+    });
+  };
 
   const [page, setPage] = useState(1);
   const itemsPerPage = 10;
+
+  // Reply state
+  const [replyingToId, setReplyingToId] = useState<number | null>(null);
+  const [replyContent, setReplyContent] = useState("");
 
   // Supporter modal hook
   const { modalState, closeModal, checkCommentLength } = useSupporterModal();
@@ -202,6 +238,14 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
       "authStateChanged",
       handleAuthChange as EventListener,
     );
+
+    // Sync current user with userData for optimistic updates
+    if (user) {
+      setUserData((prev) => {
+        if (prev[user.id]) return prev;
+        return { ...prev, [user.id]: user as UserData };
+      });
+    }
 
     return () => {
       window.removeEventListener(
@@ -270,31 +314,34 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
   );
 
   // Function to refresh comments using Server Action
-  const refreshCommentsFromServer = useCallback(async () => {
-    setIsRefreshingComments(true);
-    try {
-      const result = await refreshComments(
-        type === "item" ? itemType || type : type,
-        changelogId.toString(),
-      );
+  const refreshCommentsFromServer = useCallback(
+    async (silent = false) => {
+      if (!silent) setIsRefreshingComments(true);
+      try {
+        const result = await refreshComments(
+          type === "item" ? itemType || type : type,
+          changelogId.toString(),
+        );
 
-      if (!result.success) {
-        throw new Error(result.error || "Failed to fetch comments");
+        if (!result.success) {
+          throw new Error(result.error || "Failed to fetch comments");
+        }
+
+        const commentsArray = Array.isArray(result.data?.comments)
+          ? result.data.comments
+          : [];
+        setComments(commentsArray);
+
+        // We no longer fetch user data for all comments here.
+        // It is now handled by the useEffect that watches currentComments.
+      } catch (err) {
+        console.error("Error refreshing comments:", err);
+      } finally {
+        if (!silent) setIsRefreshingComments(false);
       }
-
-      const commentsArray = Array.isArray(result.data?.comments)
-        ? result.data.comments
-        : [];
-      setComments(commentsArray);
-
-      // We no longer fetch user data for all comments here.
-      // It is now handled by the useEffect that watches currentComments.
-    } catch (err) {
-      console.error("Error refreshing comments:", err);
-    } finally {
-      setIsRefreshingComments(false);
-    }
-  }, [changelogId, type, itemType]);
+    },
+    [changelogId, type, itemType],
+  );
 
   // Refresh comments when changelogId changes with simple debouncing
   useEffect(() => {
@@ -349,11 +396,55 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
         throw new Error("Failed to post comment");
       }
 
+      const addedCommentData = await response.json();
+
+      // Try to extract ID if the backend returned it
+      const realId =
+        addedCommentData?.id ||
+        addedCommentData?.comment_id ||
+        addedCommentData?.ID;
+
       toast.success("Comment posted successfully", {
         description: "You have 1 hour to edit your comment.",
       });
       setNewComment("");
-      refreshCommentsFromServer();
+
+      // Construct optimistic comment to ensure all fields are present
+      const optimisticComment: CommentData = {
+        id: realId || Date.now(),
+        author: user?.username || "You",
+        content: cleanCommentText(newComment),
+        date: Math.floor(Date.now() / 1000).toString(),
+        item_id: Number(changelogId),
+        item_type: type === "item" ? itemType || type : type,
+        user_id: currentUserId || "",
+        edited_at: null,
+        owner: "",
+        parent_id: null,
+        ...addedCommentData,
+      };
+
+      // Visually add the optimistic comment
+      setComments((prev) => [optimisticComment, ...prev]);
+
+      // Always trigger a silent refresh to sync with server state (official IDs, timestamps, etc)
+      // without showing loading spinners or flickering
+      refreshCommentsFromServer(true);
+
+      // If adding a new root comment, go to the first page to see it
+      if (sortOrder === "newest") {
+        setPage(1);
+      } else {
+        // If sorting by oldest, the new comment will be at the end
+        const totalWithNew = comments.length + 1;
+        const newTotalPages = Math.ceil(totalWithNew / itemsPerPage);
+        setPage(newTotalPages);
+      }
+
+      // Track comment post
+      if (typeof window !== "undefined" && window.umami) {
+        window.umami.track("Comment Posted", { type });
+      }
     } catch (err) {
       toast.error(
         err instanceof Error ? err.message : "Failed to post comment",
@@ -402,10 +493,17 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
       if (!response.ok) {
         throw new Error("Failed to edit comment");
       }
+
+      const updatedComment = await response.json();
+
       toast.success("Comment edited successfully.");
       setEditingCommentId(null);
       setEditContent("");
-      refreshCommentsFromServer();
+
+      // Visually update the comment instead of refetching
+      setComments((prev) =>
+        prev.map((c) => (c.id === commentId ? { ...updatedComment } : c)),
+      );
 
       // Track comment edit
       if (typeof window !== "undefined" && window.umami) {
@@ -462,18 +560,119 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
     (comment) => !failedUserData.has(comment.user_id),
   );
 
+  // Build a threaded / nested order of comments while preserving sort order
+  const buildThreadedComments = useCallback(
+    (allComments: CommentData[]): (ThreadedComment | MoreItem)[] => {
+      // Group children by parent_id
+      const childrenMap = new Map<number, CommentData[]>();
+
+      for (const comment of allComments) {
+        const parentId =
+          typeof comment.parent_id === "number" ? comment.parent_id : null;
+
+        if (parentId === null) continue;
+
+        if (!childrenMap.has(parentId)) {
+          childrenMap.set(parentId, []);
+        }
+        childrenMap.get(parentId)!.push(comment);
+      }
+
+      // Sort children for each parent based on the selected sortOrder
+      for (const [key, childComments] of childrenMap.entries()) {
+        childrenMap.set(
+          key,
+          [...childComments].sort((a, b) => {
+            const dateA = parseInt(a.date);
+            const dateB = parseInt(b.date);
+            return sortOrder === "newest" ? dateB - dateA : dateA - dateB;
+          }),
+        );
+      }
+
+      const result: (ThreadedComment | MoreItem)[] = [];
+
+      const roots = allComments.filter(
+        (comment) =>
+          comment.parent_id === null ||
+          typeof comment.parent_id === "undefined",
+      );
+
+      const nonRoots = new Set(
+        allComments
+          .filter(
+            (comment) =>
+              typeof comment.parent_id === "number" &&
+              comment.parent_id !== null,
+          )
+          .map((c) => c.id),
+      );
+
+      const additionalRoots = allComments.filter(
+        (c) => !nonRoots.has(c.id) && !roots.includes(c),
+      );
+
+      const allRoots = [...roots, ...additionalRoots].sort((a, b) => {
+        const dateA = parseInt(a.date);
+        const dateB = parseInt(b.date);
+        return sortOrder === "newest" ? dateB - dateA : dateA - dateB;
+      });
+
+      const visit = (comment: CommentData, depth: number = 0) => {
+        result.push({ ...comment, depth });
+
+        const children = childrenMap.get(comment.id) || [];
+        if (children.length === 0) return;
+
+        const isExpanded = fullyExpandedThreads.has(comment.id);
+        const limit = depth >= 2 ? 1 : 2; // Show only 2 replies, or 1 if very deep
+
+        const displayChildren = isExpanded
+          ? children
+          : children.slice(0, limit);
+
+        for (const child of displayChildren) {
+          visit(child, depth + 1);
+        }
+
+        if (!isExpanded && children.length > limit) {
+          result.push({
+            id: `more-${comment.id}`,
+            isMore: true,
+            parentId: comment.id,
+            count: children.length - limit,
+            depth: depth + 1,
+          });
+        }
+      };
+
+      for (const root of allRoots) {
+        visit(root, 0);
+      }
+
+      return result;
+    },
+    [sortOrder, fullyExpandedThreads],
+  );
+
+  const threadedComments: (ThreadedComment | MoreItem)[] =
+    buildThreadedComments(filteredComments);
+
   // Pagination Logic
-  const totalPages = Math.ceil(filteredComments.length / itemsPerPage);
+  const totalPages = Math.ceil(threadedComments.length / itemsPerPage);
   const startIndex = (page - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
-  const currentComments = filteredComments.slice(startIndex, endIndex);
+  const currentComments: (ThreadedComment | MoreItem)[] =
+    threadedComments.slice(startIndex, endIndex);
 
   // Fetch user data for the current page's comments
   useEffect(() => {
     if (currentComments.length > 0) {
-      const userIds = currentComments.map((comment) => comment.user_id);
+      const userIds = currentComments
+        .filter((c): c is ThreadedComment => !("isMore" in c))
+        .map((comment) => comment.user_id);
       // Determine which IDs need fetching
-      const uniqueIds = Array.from(new Set(userIds));
+      const uniqueIds = Array.from(new Set(userIds)).filter(Boolean);
       const idsToFetch = uniqueIds.filter(
         (id) =>
           !userData[id] && !loadingUserData[id] && !failedUserData.has(id),
@@ -508,49 +707,104 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
     });
   };
 
-  const handleMenuOpen = (
-    event: React.MouseEvent<HTMLElement>,
-    commentId: number,
-  ) => {
-    setMenuAnchorEl(event.currentTarget);
-    setSelectedCommentId(commentId);
-  };
+  const handleSubmitReply = async (parentId: number) => {
+    if (!isLoggedIn || !replyContent.trim() || isSubmittingComment) return;
 
-  const handleMenuClose = () => {
-    setMenuAnchorEl(null);
-    setSelectedCommentId(null);
-  };
-
-  const handleEditClick = () => {
-    if (selectedCommentId) {
-      const comment = filteredComments.find((c) => c.id === selectedCommentId);
-      if (comment) {
-        setEditingCommentId(selectedCommentId);
-        setEditContent(comment.content);
+    // Check if reply length exceeds user's tier limit
+    if (!checkCommentLength(replyContent, currentUserPremiumType)) {
+      if (currentUserPremiumType >= 3 && replyContent.length > 2000) {
+        toast.error("Comment is too long. Maximum length is 2000 characters.");
       }
+      return;
     }
-    handleMenuClose();
+
+    setIsSubmittingComment(true);
+
+    try {
+      const response = await fetch(`/api/comments/add`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          content: cleanCommentText(replyContent),
+          item_id: changelogId,
+          item_type: type === "item" ? itemType : type,
+          parent_id: parentId,
+        }),
+      });
+
+      if (response.status === 429) {
+        toast.error(
+          "Slow down! You're posting too fast. Take a breather and try again in a moment.",
+        );
+        return;
+      }
+
+      if (!response.ok) {
+        throw new Error("Failed to post reply");
+      }
+
+      const addedReplyData = await response.json();
+
+      // Try to extract ID if the backend returned it
+      const realId =
+        addedReplyData?.id || addedReplyData?.comment_id || addedReplyData?.ID;
+
+      toast.success("Reply posted successfully", {
+        description: "You have 1 hour to edit your comment.",
+      });
+      setReplyContent("");
+      setReplyingToId(null);
+
+      // Construct optimistic reply
+      const optimisticReply: CommentData = {
+        id: realId || Date.now(),
+        author: user?.username || "You",
+        content: cleanCommentText(replyContent),
+        date: Math.floor(Date.now() / 1000).toString(),
+        item_id: Number(changelogId),
+        item_type: type === "item" ? itemType || type : type,
+        user_id: currentUserId || "",
+        edited_at: null,
+        owner: "",
+        parent_id: parentId,
+        ...addedReplyData,
+      };
+
+      // Visually add the optimistic reply
+      setComments((prev) => [optimisticReply, ...prev]);
+
+      // Always trigger a silent refresh to sync with server state (official IDs, timestamps, etc)
+      // without showing loading spinners or flickering
+      refreshCommentsFromServer(true);
+
+      // We don't necessarily change the page for replies as they are
+      // attached to their parents which might be on the current page.
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to post reply");
+    } finally {
+      setIsSubmittingComment(false);
+    }
   };
 
-  const handleDeleteClick = () => {
-    if (selectedCommentId) {
-      handleDeleteComment(selectedCommentId);
+  const handleEditClick = (commentId: number) => {
+    const comment = filteredComments.find((c) => c.id === commentId);
+    if (comment) {
+      setEditingCommentId(commentId);
+      setEditContent(comment.content);
     }
-    handleMenuClose();
   };
 
-  const handleReportClick = () => {
+  const handleReportClick = (commentId: number) => {
     if (!isAuthenticated) {
       toast.error("You must be logged in to report comments");
       setLoginModalOpen(true);
       return;
     }
 
-    if (selectedCommentId) {
-      setReportingCommentId(selectedCommentId);
-      setReportModalOpen(true);
-    }
-    handleMenuClose();
+    setReportingCommentId(commentId);
+    setReportModalOpen(true);
   };
 
   const handleReportSubmit = async (reason: string) => {
@@ -706,13 +960,6 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                 )}
               </Button>
             </div>
-            {isLoggedIn && (
-              <div className="mt-2 text-center">
-                <span className="text-secondary-text text-xs">
-                  Tip: Comments can be edited within 1 hour of posting
-                </span>
-              </div>
-            )}
           </form>
 
           {/* Comments List */}
@@ -757,9 +1004,37 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
               </p>
             </div>
           ) : (
-            <div className="flex flex-col space-y-4">
-              <div className="flex flex-col space-y-4">
-                {currentComments.map((comment) => {
+            <div className="flex flex-col">
+              <div className="flex flex-col">
+                {currentComments.map((item) => {
+                  if (!item) return null;
+                  if ("isMore" in item && item.isMore) {
+                    return (
+                      <div key={item.id} className="flex py-1">
+                        {/* Indentation spacing for parent levels */}
+                        {Array.from({
+                          length: Math.min((item.depth || 1) - 1, 6),
+                        }).map((_, i) => (
+                          <div key={i} className="w-6 shrink-0 sm:w-6" />
+                        ))}
+
+                        {/* Additional spacing for current level */}
+                        <div className="w-6 shrink-0 sm:w-6" />
+
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-link hover:text-link-hover hover:bg-quaternary-bg/50 my-1 py-2 text-xs font-bold transition-colors"
+                          onClick={() => toggleThreadExpansion(item.parentId)}
+                        >
+                          {item.count} more{" "}
+                          {item.count === 1 ? "reply" : "replies"}
+                        </Button>
+                      </div>
+                    );
+                  }
+
+                  const comment = item as CommentData;
                   const flags = userData[comment.user_id]?.flags || [];
                   const premiumType = userData[comment.user_id]?.premiumtype;
                   const hideRecent =
@@ -770,8 +1045,9 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                   const isExpanded = expandedComments.has(comment.id);
                   const MAX_VISIBLE_LINES = 5;
                   const MAX_VISIBLE_CHARS = 500;
-                  const lines = comment.content.split(/\r?\n/);
-                  const isLongLine = comment.content.length > MAX_VISIBLE_CHARS;
+                  const commentContent = comment.content || "";
+                  const lines = commentContent.split(/\r?\n/);
+                  const isLongLine = commentContent.length > MAX_VISIBLE_CHARS;
                   const shouldTruncate =
                     lines.length > MAX_VISIBLE_LINES || isLongLine;
 
@@ -783,20 +1059,52 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                         .join("\n");
                     } else {
                       visibleContent =
-                        comment.content.slice(0, MAX_VISIBLE_CHARS) + "...";
+                        commentContent.slice(0, MAX_VISIBLE_CHARS) + "...";
                     }
                   } else {
-                    visibleContent = comment.content;
+                    visibleContent = commentContent;
                   }
+
+                  const isReply =
+                    typeof comment.parent_id === "number" &&
+                    comment.parent_id !== null;
+
+                  const parentComment =
+                    isReply && typeof comment.parent_id === "number"
+                      ? filteredComments.find((c) => c.id === comment.parent_id)
+                      : null;
+
+                  const parentUsername =
+                    parentComment &&
+                    !(
+                      userData[parentComment.user_id]?.settings
+                        ?.show_recent_comments === 0 &&
+                      currentUserId !== parentComment.user_id
+                    )
+                      ? userData[parentComment.user_id]?.username ||
+                        parentComment.author
+                      : null;
+
+                  const depth = comment.depth || 0;
+                  const displayDepth = Math.min(depth, 7); // Cap display depth at 7
+                  const isMaxDepth = depth >= 7;
 
                   return (
                     <div
                       key={comment.id}
-                      className="group border-border-primary bg-primary-bg hover:border-border-focus relative rounded-lg border p-3 transition-colors"
+                      className={`group relative transition-all duration-200 ${
+                        depth === 0 ? "py-2" : "py-1.5"
+                      }`}
                     >
-                      {/* Header Section */}
-                      <div className="flex items-center justify-between pb-2">
-                        <div className="flex items-center gap-3">
+                      <div className="flex gap-2 sm:gap-3">
+                        {/* Indentation spacing for nested replies */}
+                        {displayDepth > 0 &&
+                          Array.from({ length: displayDepth }).map((_, i) => (
+                            <div key={i} className="w-4 shrink-0 sm:w-6" />
+                          ))}
+
+                        {/* Avatar Gutter - Always present for consistent indentation */}
+                        <div className="flex w-8 shrink-0 items-start pt-1.5 sm:w-10">
                           {loadingUserData[comment.user_id] ? (
                             <div className="ring-border-focus/20 bg-tertiary-bg flex h-10 w-10 items-center justify-center rounded-full ring-2">
                               <CircularProgress
@@ -847,270 +1155,391 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                               />
                             </div>
                           )}
+                        </div>
 
-                          <div className="flex min-w-0 flex-col">
-                            <div className="flex flex-wrap items-center gap-2">
-                              {loadingUserData[comment.user_id] ? (
-                                <>
-                                  <div className="bg-button-secondary h-5 w-30 animate-pulse rounded" />
-                                  <div className="bg-button-secondary h-4 w-20 animate-pulse rounded" />
-                                </>
-                              ) : hideRecent ? (
-                                <div className="flex items-center gap-2">
-                                  <svg
-                                    className="text-secondary-text h-4 w-4"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    stroke="currentColor"
-                                  >
-                                    <path
-                                      strokeLinecap="round"
-                                      strokeLinejoin="round"
-                                      strokeWidth={2}
-                                      d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
-                                    />
-                                  </svg>
-                                  <span className="text-secondary-text text-sm font-medium">
-                                    Hidden User
-                                  </span>
-                                </div>
-                              ) : (
-                                <>
-                                  <div className="flex items-center gap-2">
-                                    <Tooltip>
-                                      <TooltipTrigger asChild>
-                                        <Link
-                                          href={`/users/${comment.user_id}`}
-                                          prefetch={false}
-                                          className="text-md text-primary-text group-hover:text-link truncate font-semibold transition-colors duration-200 group-hover:underline"
-                                        >
-                                          {userData[comment.user_id]
-                                            ?.username || comment.author}
-                                        </Link>
-                                      </TooltipTrigger>
-                                      <TooltipContent className="max-w-sm min-w-[300px] p-0">
-                                        {userData[comment.user_id] && (
-                                          <UserDetailsTooltip
-                                            user={userData[comment.user_id]}
-                                          />
-                                        )}
-                                      </TooltipContent>
-                                    </Tooltip>
-
-                                    {/* User Badges */}
-                                    {!hideRecent &&
-                                      userData[comment.user_id] && (
-                                        <UserBadges
-                                          usernumber={
-                                            userData[comment.user_id].usernumber
-                                          }
-                                          premiumType={premiumType}
-                                          flags={flags}
-                                          primary_guild={
-                                            userData[comment.user_id]
-                                              .primary_guild
-                                          }
-                                          size="md"
+                        {/* Content Area */}
+                        <div className="min-w-0 flex-1">
+                          {/* Header Section */}
+                          <div className="flex items-start justify-between gap-2 pt-1.5 pb-1.5">
+                            <div className="flex min-w-0 flex-1 items-start gap-2 sm:gap-3">
+                              <div className="flex min-w-0 flex-col">
+                                <div className="flex flex-wrap items-center gap-2">
+                                  {loadingUserData[comment.user_id] ? (
+                                    <>
+                                      <div className="bg-button-secondary h-5 w-30 animate-pulse rounded" />
+                                      <div className="bg-button-secondary h-4 w-20 animate-pulse rounded" />
+                                    </>
+                                  ) : hideRecent ? (
+                                    <div className="flex items-center gap-2">
+                                      <svg
+                                        className="text-secondary-text h-4 w-4"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                      >
+                                        <path
+                                          strokeLinecap="round"
+                                          strokeLinejoin="round"
+                                          strokeWidth={2}
+                                          d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
                                         />
-                                      )}
-                                  </div>
-
-                                  {/* Trade OP Badge */}
-                                  {type === "trade" &&
-                                    trade &&
-                                    comment.user_id === trade.author && (
-                                      <span className="from-button-info to-button-info-hover text-card-tag-text rounded-full bg-linear-to-r px-2 py-0.5 text-xs font-medium shadow-sm">
-                                        OP
+                                      </svg>
+                                      <span className="text-secondary-text text-sm font-medium">
+                                        Hidden User
                                       </span>
+                                    </div>
+                                  ) : (
+                                    <>
+                                      <div className="flex min-w-0 items-center gap-2">
+                                        <Tooltip>
+                                          <TooltipTrigger asChild>
+                                            <Link
+                                              href={`/users/${comment.user_id}`}
+                                              prefetch={false}
+                                              className="text-primary-text group-hover:text-link block max-w-[120px] truncate text-sm font-semibold transition-colors duration-200 group-hover:underline sm:max-w-[200px] sm:text-base"
+                                            >
+                                              {userData[comment.user_id]
+                                                ?.username || comment.author}
+                                            </Link>
+                                          </TooltipTrigger>
+                                          <TooltipContent className="max-w-sm min-w-[300px] p-0">
+                                            {userData[comment.user_id] && (
+                                              <UserDetailsTooltip
+                                                user={userData[comment.user_id]}
+                                              />
+                                            )}
+                                          </TooltipContent>
+                                        </Tooltip>
+
+                                        {/* User Badges */}
+                                        {!hideRecent &&
+                                          userData[comment.user_id] && (
+                                            <UserBadges
+                                              usernumber={
+                                                userData[comment.user_id]
+                                                  .usernumber
+                                              }
+                                              premiumType={premiumType}
+                                              flags={flags}
+                                              primary_guild={
+                                                userData[comment.user_id]
+                                                  .primary_guild
+                                              }
+                                              size="md"
+                                              customBgClass="bg-primary-bg/50"
+                                            />
+                                          )}
+                                      </div>
+
+                                      {/* Trade OP Badge */}
+                                      {type === "trade" &&
+                                        trade &&
+                                        comment.user_id === trade.author && (
+                                          <span className="from-button-info to-button-info-hover text-card-tag-text rounded-full bg-linear-to-r px-2 py-0.5 text-xs font-medium shadow-sm">
+                                            OP
+                                          </span>
+                                        )}
+                                    </>
+                                  )}
+                                </div>
+
+                                <CommentTimestamp
+                                  date={comment.date}
+                                  editedAt={comment.edited_at}
+                                  commentId={comment.id}
+                                />
+                              </div>
+                            </div>
+
+                            {/* Enhanced Action Menu */}
+                            <div className="flex items-center gap-2">
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="text-primary-text hover:bg-quaternary-bg h-8 w-8 rounded-lg p-0 opacity-100 transition-all duration-200 data-[state=open]:opacity-100 lg:opacity-0 lg:group-hover:opacity-100"
+                                  >
+                                    <Icon
+                                      icon="heroicons:ellipsis-horizontal"
+                                      className="h-4 w-4"
+                                    />
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                  {currentUserId === comment.user_id ? (
+                                    <>
+                                      {isCommentEditable(comment.date) && (
+                                        <DropdownMenuItem
+                                          onClick={() =>
+                                            handleEditClick(comment.id)
+                                          }
+                                        >
+                                          <Icon
+                                            icon="heroicons-outline:pencil"
+                                            className="mr-2 h-4 w-4"
+                                          />
+                                          Edit Comment
+                                        </DropdownMenuItem>
+                                      )}
+                                      <DropdownMenuItem
+                                        onClick={() =>
+                                          handleDeleteComment(comment.id)
+                                        }
+                                        className="text-button-danger focus:text-button-danger focus:bg-button-danger/10"
+                                      >
+                                        <Icon
+                                          icon="heroicons-outline:trash"
+                                          className="mr-2 h-4 w-4"
+                                        />
+                                        Delete Comment
+                                      </DropdownMenuItem>
+                                    </>
+                                  ) : (
+                                    <DropdownMenuItem
+                                      onClick={() =>
+                                        handleReportClick(comment.id)
+                                      }
+                                    >
+                                      <Icon
+                                        icon="heroicons-outline:flag"
+                                        className="mr-2 h-4 w-4"
+                                      />
+                                      Report Comment
+                                    </DropdownMenuItem>
+                                  )}
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            </div>
+                          </div>
+
+                          {/* Content Section */}
+                          <div className="pb-2">
+                            {editingCommentId === comment.id ? (
+                              <div className="space-y-3">
+                                <div className="space-y-2">
+                                  <textarea
+                                    value={editContent}
+                                    onChange={(e) =>
+                                      setEditContent(e.target.value)
+                                    }
+                                    rows={3}
+                                    className={`w-full resize-y rounded border p-3 text-sm focus:outline-none ${
+                                      editContent.length >
+                                      getCharLimit(
+                                        currentUserPremiumType as keyof typeof COMMENT_CHAR_LIMITS,
+                                      )
+                                        ? "border-button-danger bg-form-input text-primary-text focus:border-button-danger"
+                                        : "border-border-primary bg-form-input text-primary-text hover:border-border-focus focus:border-button-info"
+                                    }`}
+                                    autoCorrect="off"
+                                    autoComplete="off"
+                                    spellCheck="false"
+                                    autoCapitalize="off"
+                                  />
+                                  {editContent.length >
+                                    getCharLimit(
+                                      currentUserPremiumType as keyof typeof COMMENT_CHAR_LIMITS,
+                                    ) && (
+                                    <p className="text-button-danger text-xs">
+                                      Comment is too long. Character limit:{" "}
+                                      {getCharLimit(
+                                        currentUserPremiumType as keyof typeof COMMENT_CHAR_LIMITS,
+                                      )}
+                                    </p>
+                                  )}
+                                </div>
+                                <div className="flex gap-2">
+                                  <Button
+                                    size="sm"
+                                    onClick={() =>
+                                      handleEditComment(comment.id)
+                                    }
+                                    disabled={!editContent.trim()}
+                                  >
+                                    Update
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    onClick={() => {
+                                      setEditingCommentId(null);
+                                      setEditContent("");
+                                    }}
+                                  >
+                                    Cancel
+                                  </Button>
+                                </div>
+                              </div>
+                            ) : (
+                              <div>
+                                {loadingUserData[comment.user_id] ? (
+                                  <div className="space-y-2">
+                                    <div className="bg-button-secondary h-5 w-full animate-pulse rounded" />
+                                    <div className="bg-button-secondary h-5 w-[90%] animate-pulse rounded" />
+                                    <div className="bg-button-secondary h-5 w-[80%] animate-pulse rounded" />
+                                  </div>
+                                ) : (
+                                  <>
+                                    {isReply && parentUsername && (
+                                      <div className="text-secondary-text mb-1 flex items-center gap-1 text-[11px] font-medium">
+                                        <Icon
+                                          icon="heroicons:arrow-turn-down-right"
+                                          className="h-3 w-3"
+                                        />
+                                        <span>Replying to</span>
+                                        <Link
+                                          href={`/users/${parentComment?.user_id}`}
+                                          prefetch={false}
+                                          className="text-link font-semibold transition-colors hover:underline"
+                                        >
+                                          @{parentUsername}
+                                        </Link>
+                                      </div>
                                     )}
-                                </>
+                                    {isMaxDepth && depth > 7 && (
+                                      <div className="text-secondary-text/70 mb-2 flex items-center gap-1.5 text-xs italic">
+                                        <Icon
+                                          icon="heroicons:arrow-right"
+                                          className="h-3 w-3"
+                                        />
+                                        <span>
+                                          Showing nested thread (level {depth})
+                                        </span>
+                                      </div>
+                                    )}
+                                    <div className="prose prose-sm prose-a:text-blue-400 prose-a:transition-colors prose-a:duration-200 hover:prose-a:text-blue-300 hover:prose-a:underline max-w-none">
+                                      {isClient ? (
+                                        <p
+                                          className="text-primary-text text-sm leading-relaxed wrap-break-word whitespace-pre-wrap"
+                                          dangerouslySetInnerHTML={{
+                                            __html: sanitizeHTML(
+                                              convertUrlsToLinksHTML(
+                                                processMentions(visibleContent),
+                                              ),
+                                            ),
+                                          }}
+                                        />
+                                      ) : (
+                                        <p className="text-primary-text text-sm leading-relaxed wrap-break-word whitespace-pre-wrap">
+                                          {visibleContent}
+                                        </p>
+                                      )}
+
+                                      {shouldTruncate && (
+                                        <Button
+                                          variant="link"
+                                          onClick={() =>
+                                            toggleCommentExpand(comment.id)
+                                          }
+                                          className="mt-2 h-auto p-0 font-medium"
+                                        >
+                                          {isExpanded ? (
+                                            <>
+                                              <Icon
+                                                icon="mdi:chevron-up"
+                                                className="h-4 w-4"
+                                                inline={true}
+                                              />
+                                              Show less
+                                            </>
+                                          ) : (
+                                            <>
+                                              <Icon
+                                                icon="mdi:chevron-down"
+                                                className="h-4 w-4"
+                                                inline={true}
+                                              />
+                                              Read more
+                                            </>
+                                          )}
+                                        </Button>
+                                      )}
+                                    </div>
+                                  </>
+                                )}
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Reply and Action Row */}
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              {isLoggedIn && (
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="text-secondary-text hover:text-primary-text hover:bg-quaternary-bg h-7 px-2 text-xs transition-colors"
+                                  onClick={() => {
+                                    if (replyingToId === comment.id) {
+                                      setReplyingToId(null);
+                                      setReplyContent("");
+                                    } else {
+                                      setReplyingToId(comment.id);
+                                      setReplyContent("");
+                                    }
+                                  }}
+                                >
+                                  <Icon
+                                    icon="heroicons-outline:chat-bubble-left-right"
+                                    className="mr-1.5 h-3.5 w-3.5"
+                                  />
+                                  Reply
+                                </Button>
+                              )}
+                              {depth >= 7 && (
+                                <span className="text-secondary-text/60 text-[10px] italic">
+                                  Deep thread (level {depth})
+                                </span>
                               )}
                             </div>
 
-                            <CommentTimestamp
-                              date={comment.date}
-                              editedAt={comment.edited_at}
-                              commentId={comment.id}
-                            />
+                            {/* Enhanced Menu */}
                           </div>
-                        </div>
 
-                        {/* Enhanced Action Menu */}
-                        <div className="flex items-center gap-2">
-                          <IconButton
-                            size="small"
-                            onClick={(e) => handleMenuOpen(e, comment.id)}
-                            className={`text-primary-text hover:bg-quaternary-bg rounded-lg p-2 opacity-100 transition-all duration-200 lg:opacity-0 lg:group-hover:opacity-100 ${Boolean(menuAnchorEl) && selectedCommentId === comment.id ? "opacity-100" : ""}`}
-                          >
-                            <Icon
-                              icon="heroicons:ellipsis-horizontal"
-                              className="h-4 w-4"
-                            />
-                          </IconButton>
-                        </div>
-                      </div>
-
-                      {/* Content Section */}
-                      <div>
-                        {editingCommentId === comment.id ? (
-                          <div className="space-y-3">
-                            <div className="space-y-2">
+                          {/* Inline Reply Form */}
+                          {isLoggedIn && replyingToId === comment.id && (
+                            <div className="mt-3 space-y-2">
                               <textarea
-                                value={editContent}
-                                onChange={(e) => setEditContent(e.target.value)}
-                                rows={3}
-                                className={`w-full resize-y rounded border p-3 text-sm focus:outline-none ${
-                                  editContent.length >
-                                  getCharLimit(
-                                    currentUserPremiumType as keyof typeof COMMENT_CHAR_LIMITS,
-                                  )
-                                    ? "border-button-danger bg-form-input text-primary-text focus:border-button-danger"
-                                    : "border-border-primary bg-form-input text-primary-text hover:border-border-focus focus:border-button-info"
-                                }`}
+                                value={replyContent}
+                                onChange={(e) =>
+                                  setReplyContent(e.target.value)
+                                }
+                                rows={2}
+                                className="border-border-primary bg-form-input text-primary-text placeholder-secondary-text focus:border-button-info w-full resize-y rounded border p-2 text-sm focus:outline-none"
+                                placeholder="Write a reply..."
                                 autoCorrect="off"
                                 autoComplete="off"
                                 spellCheck="false"
                                 autoCapitalize="off"
                               />
-                              {editContent.length >
-                                getCharLimit(
-                                  currentUserPremiumType as keyof typeof COMMENT_CHAR_LIMITS,
-                                ) && (
-                                <p className="text-button-danger text-xs">
-                                  Comment is too long. Character limit:{" "}
-                                  {getCharLimit(
-                                    currentUserPremiumType as keyof typeof COMMENT_CHAR_LIMITS,
-                                  )}
-                                </p>
-                              )}
-                            </div>
-                            <div className="flex gap-2">
-                              <Button
-                                size="sm"
-                                onClick={() => handleEditComment(comment.id)}
-                                disabled={!editContent.trim()}
-                              >
-                                Update
-                              </Button>
-                              <Button
-                                size="sm"
-                                variant="ghost"
-                                onClick={() => {
-                                  setEditingCommentId(null);
-                                  setEditContent("");
-                                }}
-                              >
-                                Cancel
-                              </Button>
-                            </div>
-                          </div>
-                        ) : (
-                          <div>
-                            {loadingUserData[comment.user_id] ? (
-                              <div className="space-y-2">
-                                <div className="bg-button-secondary h-5 w-full animate-pulse rounded" />
-                                <div className="bg-button-secondary h-5 w-[90%] animate-pulse rounded" />
-                                <div className="bg-button-secondary h-5 w-[80%] animate-pulse rounded" />
+                              <div className="flex gap-2">
+                                <Button
+                                  size="sm"
+                                  className="h-7 px-3 text-xs"
+                                  disabled={
+                                    !replyContent.trim() || isSubmittingComment
+                                  }
+                                  onClick={() => handleSubmitReply(comment.id)}
+                                >
+                                  {isSubmittingComment ? "Posting..." : "Reply"}
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  className="h-7 px-3 text-xs"
+                                  onClick={() => {
+                                    setReplyingToId(null);
+                                    setReplyContent("");
+                                  }}
+                                >
+                                  Cancel
+                                </Button>
                               </div>
-                            ) : (
-                              <>
-                                <div className="prose prose-sm prose-a:text-blue-400 prose-a:transition-colors prose-a:duration-200 hover:prose-a:text-blue-300 hover:prose-a:underline max-w-none">
-                                  {isClient ? (
-                                    <p
-                                      className="text-primary-text text-sm leading-relaxed wrap-break-word whitespace-pre-wrap"
-                                      dangerouslySetInnerHTML={{
-                                        __html: sanitizeHTML(
-                                          convertUrlsToLinksHTML(
-                                            processMentions(visibleContent),
-                                          ),
-                                        ),
-                                      }}
-                                    />
-                                  ) : (
-                                    <p className="text-primary-text text-sm leading-relaxed wrap-break-word whitespace-pre-wrap">
-                                      {visibleContent}
-                                    </p>
-                                  )}
-
-                                  {shouldTruncate && (
-                                    <Button
-                                      variant="link"
-                                      onClick={() =>
-                                        toggleCommentExpand(comment.id)
-                                      }
-                                      className="mt-2 h-auto p-0 font-medium"
-                                    >
-                                      {isExpanded ? (
-                                        <>
-                                          <Icon
-                                            icon="mdi:chevron-up"
-                                            className="h-4 w-4"
-                                            inline={true}
-                                          />
-                                          Show less
-                                        </>
-                                      ) : (
-                                        <>
-                                          <Icon
-                                            icon="mdi:chevron-down"
-                                            className="h-4 w-4"
-                                            inline={true}
-                                          />
-                                          Read more
-                                        </>
-                                      )}
-                                    </Button>
-                                  )}
-                                </div>
-                              </>
-                            )}
-                          </div>
-                        )}
+                            </div>
+                          )}
+                        </div>
                       </div>
-
-                      {/* Enhanced Menu */}
-                      <Menu
-                        anchorEl={menuAnchorEl}
-                        open={
-                          Boolean(menuAnchorEl) &&
-                          selectedCommentId === comment.id
-                        }
-                        onClose={handleMenuClose}
-                      >
-                        {currentUserId === comment.user_id ? (
-                          [
-                            // Only show edit option if comment is within 1 hour of creation
-                            isCommentEditable(comment.date) && (
-                              <MenuItem key="edit" onClick={handleEditClick}>
-                                <Icon
-                                  icon="heroicons-outline:pencil"
-                                  className="mr-3 h-4 w-4"
-                                />
-                                Edit Comment
-                              </MenuItem>
-                            ),
-                            <MenuItem
-                              key="delete"
-                              onClick={handleDeleteClick}
-                              className="hover:bg-button-danger/10 text-button-danger"
-                            >
-                              <Icon
-                                icon="heroicons-outline:trash"
-                                className="text-button-danger mr-3 h-4 w-4"
-                              />
-                              Delete Comment
-                            </MenuItem>,
-                          ].filter(Boolean)
-                        ) : (
-                          <MenuItem onClick={handleReportClick}>
-                            <Icon
-                              icon="heroicons-outline:flag"
-                              className="mr-3 h-4 w-4"
-                            />
-                            Report Comment
-                          </MenuItem>
-                        )}
-                      </Menu>
                     </div>
                   );
                 })}
