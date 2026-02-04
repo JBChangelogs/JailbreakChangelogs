@@ -12,6 +12,8 @@ import AirdropCard from "@/components/RobberyTracker/AirdropCard";
 import RobberyTrackerAuthWrapper from "@/components/RobberyTracker/RobberyTrackerAuthWrapper";
 import ExperimentalFeatureBanner from "@/components/ui/ExperimentalFeatureBanner";
 import { Button } from "@/components/ui/button";
+import NitroRobberiesTopAd from "@/components/Ads/NitroRobberiesTopAd";
+import NitroRobberiesRailAd from "@/components/Ads/NitroRobberiesRailAd";
 
 import { Masonry } from "@mui/lab";
 
@@ -330,6 +332,7 @@ function RobberyTrackerContent() {
     <main className="text-primary-text min-h-screen">
       <div className="container mx-auto mb-8 px-4">
         <Breadcrumb />
+        <NitroRobberiesRailAd />
 
         <ExperimentalFeatureBanner className="mb-6" />
 
@@ -592,21 +595,10 @@ function RobberyTrackerContent() {
           </div>
         </div>
 
-        {/* Error Display */}
-        {error && (
-          <div className="border-status-error/50 bg-status-error/10 mb-6 rounded-lg border p-4">
-            <div className="flex items-center gap-2">
-              <Icon
-                icon="heroicons:exclamation-triangle"
-                className="text-status-error h-5 w-5"
-              />
-              <p className="text-status-error">{error}</p>
-            </div>
-          </div>
-        )}
+        <NitroRobberiesTopAd className="mb-6" />
 
-        {/* Loading State - only show when no data and no error */}
-        {!isConnected && !error && !hasData && (
+        {/* Loading State - only show when no data */}
+        {!isConnected && !hasData && (
           <div className="flex min-h-screen flex-col items-center justify-start py-20 pt-24">
             <div className="text-center">
               <div className="border-primary-border border-t-primary-accent mb-4 inline-block h-12 w-12 animate-spin rounded-full border-4" />
