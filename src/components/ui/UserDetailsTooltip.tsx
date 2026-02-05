@@ -71,16 +71,26 @@ export const UserDetailsTooltip: React.FC<UserDetailsTooltipProps> = ({
           <div className="space-y-2 text-sm">
             {/* Connection Badges */}
             <div className="flex flex-wrap items-center gap-2">
-              <span className="text-primary-text bg-tertiary-bg/40 border-border-primary inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium shadow-sm transition-opacity hover:opacity-80">
+              <a
+                href={`https://discord.com/users/${user.id}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-primary-text bg-tertiary-bg/40 border-border-primary hover:bg-quaternary-bg/60 inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium shadow-sm transition-all"
+              >
                 <DiscordIcon className="h-3.5 w-3.5" />
                 Discord
-              </span>
+              </a>
 
               {user.roblox_id && (
-                <span className="text-primary-text bg-tertiary-bg/40 border-border-primary inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium shadow-sm transition-opacity hover:opacity-80">
+                <a
+                  href={`https://www.roblox.com/users/${user.roblox_id}/profile`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-primary-text bg-tertiary-bg/40 border-border-primary hover:bg-quaternary-bg/60 inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium shadow-sm transition-all"
+                >
                   <RobloxIcon className="h-3.5 w-3.5" />
                   Roblox
-                </span>
+                </a>
               )}
             </div>
 

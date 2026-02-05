@@ -509,15 +509,14 @@ export default function SettingsPage() {
                   backgroundImage: "none",
                   border: "1px solid var(--color-border-primary)",
                   ...(highlightSetting ===
-                    category.replace(/\s+/g, "_").toLowerCase() &&
-                    showHighlight && {
-                      outline:
-                        "4px solid color-mix(in srgb, var(--color-warning), transparent 25%)",
-                      outlineOffset: "4px",
-                      borderRadius: 1,
-                      zIndex: 1,
-                      position: "relative",
-                    }),
+                    category.replace(/\s+/g, "_").toLowerCase() && showHighlight
+                    ? {
+                        backgroundColor:
+                          "color-mix(in srgb, var(--color-button-info), transparent 80%)",
+                        transition: "background-color 0.5s ease",
+                        borderRadius: 1,
+                      }
+                    : {}),
                 }}
                 ref={(el) => {
                   if (
@@ -596,14 +595,14 @@ export default function SettingsPage() {
                       <Box
                         key={key}
                         sx={{
-                          ...(isHighlighted && {
-                            borderRadius: 1,
-                            outline:
-                              "3px solid color-mix(in srgb, var(--color-warning), transparent 25%)",
-                            outlineOffset: "2px",
-                            zIndex: 1,
-                            position: "relative",
-                          }),
+                          ...(isHighlighted
+                            ? {
+                                backgroundColor:
+                                  "color-mix(in srgb, var(--color-button-info), transparent 80%)",
+                                transition: "background-color 0.5s ease",
+                                borderRadius: 1,
+                              }
+                            : {}),
                         }}
                         ref={(el) => {
                           if (isHighlighted && el) {
@@ -754,15 +753,14 @@ export default function SettingsPage() {
               borderRadius: 3,
               backgroundImage: "none",
               border: "1px solid var(--color-border-primary)",
-              ...(highlightSetting === "notifications" &&
-                showHighlight && {
-                  outline:
-                    "4px solid color-mix(in srgb, var(--color-warning), transparent 25%)",
-                  outlineOffset: "4px",
-                  borderRadius: 1,
-                  zIndex: 1,
-                  position: "relative",
-                }),
+              ...(highlightSetting === "notifications" && showHighlight
+                ? {
+                    backgroundColor:
+                      "color-mix(in srgb, var(--color-button-info), transparent 80%)",
+                    transition: "background-color 0.5s ease",
+                    borderRadius: 1,
+                  }
+                : {}),
             }}
             ref={(el) => {
               if (highlightSetting === "notifications" && showHighlight && el) {
@@ -865,14 +863,14 @@ export default function SettingsPage() {
                     <Box
                       key={pref.title}
                       sx={{
-                        ...(isHighlighted && {
-                          borderRadius: 1,
-                          outline:
-                            "3px solid color-mix(in srgb, var(--color-warning), transparent 25%)",
-                          outlineOffset: "2px",
-                          zIndex: 1,
-                          position: "relative",
-                        }),
+                        ...(isHighlighted
+                          ? {
+                              backgroundColor:
+                                "color-mix(in srgb, var(--color-button-info), transparent 80%)",
+                              transition: "background-color 0.5s ease",
+                              borderRadius: 1,
+                            }
+                          : {}),
                       }}
                       ref={(el) => {
                         if (isHighlighted && el) {

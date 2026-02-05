@@ -24,6 +24,7 @@ interface UserBadgesProps {
   } | null;
   disableTooltips?: boolean;
   customBgClass?: string;
+  noContainer?: boolean;
 }
 
 export const UserBadges = ({
@@ -35,6 +36,7 @@ export const UserBadges = ({
   primary_guild,
   disableTooltips = false,
   customBgClass,
+  noContainer = false,
 }: UserBadgesProps) => {
   const badges = [];
 
@@ -528,14 +530,17 @@ export const UserBadges = ({
       onClick={(e) => e.stopPropagation()}
       className={`inline-flex items-stretch gap-2 ${className}`}
     >
-      {badges.length > 0 && (
-        <div
-          onClick={(e) => e.stopPropagation()}
-          className={`${customBgClass || "bg-tertiary-bg/40"} border-border-primary inline-flex items-center gap-2 rounded-lg border px-2.5 shadow-2xl backdrop-blur-xl ${containerHeight}`}
-        >
-          {badges}
-        </div>
-      )}
+      {badges.length > 0 &&
+        (noContainer ? (
+          <div className="flex items-center gap-1">{badges}</div>
+        ) : (
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className={`${customBgClass || "bg-tertiary-bg/40"} border-border-primary inline-flex items-center gap-2 rounded-lg border px-2.5 shadow-2xl backdrop-blur-xl ${containerHeight}`}
+          >
+            {badges}
+          </div>
+        ))}
       {guildBadge}
     </div>
   );

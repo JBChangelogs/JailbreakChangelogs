@@ -1,3 +1,22 @@
+/**
+ * ChangelogComments Component
+ *
+ * This component handles the comment system for various parts of the application:
+ * - Changelogs
+ * - Seasons
+ * - Items
+ * - Trade Ads
+ * - User Inventories
+ *
+ * It supports features like:
+ * - Nested threading (Discord-style)
+ * - Real-time optimistic updates
+ * - Built-in HTML sanitization and URL linkification
+ * - Pagination and sorting
+ * - Support tier based character limits
+ * - Profanity and rate-limit handling via the API
+ */
+
 "use client";
 
 import { Icon } from "../ui/IconWrapper";
@@ -35,6 +54,10 @@ import { toast } from "sonner";
 import DOMPurify from "dompurify";
 import { Pagination } from "@/components/ui/Pagination";
 
+/**
+ * Character limits based on the user's supporter tier.
+ * 0: Free, 1: Supporter T1, 2: Supporter T2, 3: Supporter T3
+ */
 const COMMENT_CHAR_LIMITS = {
   0: 200, // Free tier
   1: 400, // Supporter tier 1
@@ -47,6 +70,10 @@ const getCharLimit = (tier: keyof typeof COMMENT_CHAR_LIMITS): number => {
   return limit;
 };
 
+/**
+ * Checks if a comment is still within its 1-hour edit window.
+ * @param commentDate Unix timestamp as a string
+ */
 const isCommentEditable = (commentDate: string): boolean => {
   const commentTime = parseInt(commentDate);
   const currentTime = Math.floor(Date.now() / 1000);
@@ -54,6 +81,9 @@ const isCommentEditable = (commentDate: string): boolean => {
   return currentTime - commentTime <= oneHourInSeconds;
 };
 
+/**
+ * Properties for the ChangelogComments component.
+ */
 interface ChangelogCommentsProps {
   changelogId: number | string;
   changelogTitle: string;
@@ -69,12 +99,16 @@ interface ChangelogCommentsProps {
   initialUserMap?: Record<string, UserData>;
 }
 
-// Type for comments with depth for threading
+/**
+ * Metadata for a comment that is part of a threaded conversation.
+ */
 interface ThreadedComment extends CommentData {
   depth: number;
 }
 
-// Type for "load more" items in the threaded comment list
+/**
+ * Placeholder for "load more" functionality in deep threads.
+ */
 interface MoreItem {
   id: string;
   isMore: true;
@@ -83,6 +117,9 @@ interface MoreItem {
   depth: number;
 }
 
+/**
+ * Cleans up comment text by removing excess whitespace and empty lines.
+ */
 const cleanCommentText = (text: string): string => {
   return text
     .split(/\r?\n/)
@@ -91,25 +128,35 @@ const cleanCommentText = (text: string): string => {
     .join("\n");
 };
 
-// Process @ mentions in comment text similar to changelogs
+/**
+ * Wraps @mentions in <span> tags for styling.
+ */
 const processMentions = (text: string): string => {
   return text.replace(/@(\w+)/g, (_, username) => {
     return `<span>@${username}</span>`;
   });
 };
 
+/**
+ * Escapes HTML characters to prevent XSS.
+ */
 const escapeHtml = (text: string): string => {
   const div = document.createElement("div");
   div.textContent = text;
   return div.innerHTML;
 };
 
+/**
+ * Identifies URLs in text and converts them to safe <a> tags
+ * if they belong to whitelisted domains.
+ */
 const convertUrlsToLinksHTML = (text: string): string => {
   const urlRegex = /(https?:\/\/[^\s]+)/g;
   return text.replace(urlRegex, (url) => {
     try {
       const urlObj = new URL(url);
       if (
+        // Whitelist of safe domains for linking
         urlObj.hostname === "roblox.com" ||
         urlObj.hostname.endsWith(".roblox.com") ||
         urlObj.hostname === "reddit.com" ||
@@ -130,13 +177,99 @@ const convertUrlsToLinksHTML = (text: string): string => {
   });
 };
 
+/**
+ * Sanitizes HTML content using DOMPurify with a strict whitelist.
+ * Run only on the client side.
+ */
 const sanitizeHTML = (html: string): string => {
-  return DOMPurify.sanitize(html, {
+  if (typeof window === "undefined") return html;
+
+  // Handle both default and named exports for cross-environment compatibility
+  const purify =
+    (DOMPurify as unknown as { default?: typeof DOMPurify }).default ||
+    DOMPurify;
+
+  if (typeof purify.sanitize !== "function") {
+    // SECURITY: If sanitizer is missing, redact the content rather than showing potentially unsafe HTML
+    return "<i>[Content Redacted]</i>";
+  }
+
+  const result = purify.sanitize(html, {
     ALLOWED_TAGS: ["a", "span", "br"],
     ALLOWED_ATTR: ["href", "target", "rel"],
     ALLOWED_URI_REGEXP:
       /^https?:\/\/(www\.)?(roblox\.com|reddit\.com|amazon\.com|jailbreakchangelogs\.xyz)([/?#]|$)/,
   });
+
+  // If sanitization produces an empty result from what should be valid content, redact it
+  if (html.trim() && !result.trim()) {
+    return "<i>[Content Redacted]</i>";
+  }
+
+  return result;
+};
+
+/**
+ * Handle Specialized Comment API Errors
+ */
+interface CommentApiErrorData {
+  error?: string;
+  flagged?: string[];
+  try_again?: number;
+  message?: string;
+  [key: string]: unknown;
+}
+
+const handleCommentApiError = (
+  data: CommentApiErrorData | null | undefined,
+  defaultMessage: string,
+) => {
+  if (data?.error === "profanity_detected") {
+    const flagged = data.flagged || [];
+    toast.error("Profanity Detected", {
+      description: `Please remove profanity from your comment. ${flagged.length > 0 ? `Flagged: ${flagged.join(", ")}` : ""}`,
+    });
+    return true;
+  }
+
+  if (data?.error === "rate_limit") {
+    const tryAgain = data.try_again;
+    let message = "You're posting too fast!";
+    if (tryAgain) {
+      const remaining = Math.max(0, tryAgain - Math.floor(Date.now() / 1000));
+      if (remaining > 0) {
+        message += ` Please try again in ${remaining} seconds.`;
+      }
+    }
+    toast.error("Rate Limit Exceeded", {
+      description: message,
+    });
+    return true;
+  }
+
+  if (data?.error === "invalid_token") {
+    toast.error("Session Expired", {
+      description: "Please log in again to post a comment.",
+    });
+    return true;
+  }
+
+  if (data?.error === "parent_not_found" || data?.error === "invalid_parent") {
+    toast.error("Reply Error", {
+      description:
+        "The comment you are replying to no longer exists or is invalid.",
+    });
+    return true;
+  }
+
+  if (data?.error === "internal_server_error" || data?.message) {
+    toast.error("Server Error", {
+      description: data.message || defaultMessage,
+    });
+    return true;
+  }
+
+  return false;
 };
 
 const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
@@ -148,26 +281,31 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
   initialComments = [],
   initialUserMap = {},
 }) => {
+  // --- Core State ---
   const [comments, setComments] = useState<CommentData[]>(initialComments);
-  const [newComment, setNewComment] = useState("");
-  const [editingCommentId, setEditingCommentId] = useState<number | null>(null);
-  const [editContent, setEditContent] = useState("");
-  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [userData, setUserData] =
     useState<Record<string, UserData>>(initialUserMap);
-  const [loadingUserData, setLoadingUserData] = useState<
-    Record<string, boolean>
-  >({});
-  const [failedUserData, setFailedUserData] = useState<Set<string>>(new Set());
+  const [isClient, setIsClient] = useState(false);
+
+  // --- Auth & User State ---
+  const { isAuthenticated, user } = useAuthContext();
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [currentUserPremiumType, setCurrentUserPremiumType] =
     useState<number>(0);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const { isAuthenticated, user } = useAuthContext();
-  const [sortOrder, setSortOrder] = useState<"newest" | "oldest">("newest");
+
+  // --- UI State (Comments) ---
+  const [newComment, setNewComment] = useState("");
+  const [replyingToId, setReplyingToId] = useState<number | null>(null);
+  const [replyContent, setReplyContent] = useState("");
+  const [editingCommentId, setEditingCommentId] = useState<number | null>(null);
+  const [editContent, setEditContent] = useState("");
   const [expandedComments, setExpandedComments] = useState<Set<number>>(
     new Set(),
   );
+  const [sortOrder, setSortOrder] = useState<"newest" | "oldest">("newest");
 
+  // --- UI State (Modals & Loading) ---
   const [reportModalOpen, setReportModalOpen] = useState(false);
   const [reportReason, setReportReason] = useState("");
   const [reportingCommentId, setReportingCommentId] = useState<number | null>(
@@ -176,37 +314,30 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
   const [loginModalOpen, setLoginModalOpen] = useState(false);
   const [isSubmittingComment, setIsSubmittingComment] = useState(false);
   const [isRefreshingComments, setIsRefreshingComments] = useState(false);
-  const [isClient, setIsClient] = useState(false);
-  const [fullyExpandedThreads, setFullyExpandedThreads] = useState<Set<number>>(
-    new Set(),
-  );
 
-  const toggleThreadExpansion = (parentId: number) => {
-    setFullyExpandedThreads((prev) => {
-      const newSet = new Set(prev);
-      if (newSet.has(parentId)) {
-        newSet.delete(parentId);
-      } else {
-        newSet.add(parentId);
-      }
-      return newSet;
-    });
-  };
+  // --- Data Fetching State ---
+  const [loadingUserData, setLoadingUserData] = useState<
+    Record<string, boolean>
+  >({});
+  const [failedUserData, setFailedUserData] = useState<Set<string>>(new Set());
 
+  // --- Pagination ---
   const [page, setPage] = useState(1);
   const itemsPerPage = 10;
 
-  // Reply state
-  const [replyingToId, setReplyingToId] = useState<number | null>(null);
-  const [replyContent, setReplyContent] = useState("");
-
-  // Supporter modal hook
+  // Supporter modal hook for handling tier-based restrictions
   const { modalState, closeModal, checkCommentLength } = useSupporterModal();
 
+  // Set isClient to true on mount to avoid hydration mismatches for browser-only features
   useEffect(() => {
     setIsClient(true);
   }, []);
 
+  /**
+   * Syncs the local state with the global AuthContext.
+   * Listens for both internal context changes and external 'authStateChanged' events
+   * to maintain real-time auth state across the UI.
+   */
   useEffect(() => {
     // Check if user is logged in
     setIsLoggedIn(!!isAuthenticated);
@@ -255,6 +386,10 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
     };
   }, [isAuthenticated, user]);
 
+  /**
+   * Fetches user profile data for a batch of user IDs.
+   * This is used to populate avatars, usernames, and badges for commenters.
+   */
   const fetchUserData = useCallback(
     async (userIds: string[]) => {
       if (userIds.length === 0) return;
@@ -313,7 +448,10 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
     [userData, loadingUserData, failedUserData],
   );
 
-  // Function to refresh comments using Server Action
+  /**
+   * Refreshes the comment list from the server.
+   * @param silent If true, suppresses loading indicators for a seamless update.
+   */
   const refreshCommentsFromServer = useCallback(
     async (silent = false) => {
       if (!silent) setIsRefreshingComments(true);
@@ -358,6 +496,10 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
     return () => clearTimeout(timeoutId);
   }, [changelogId, refreshCommentsFromServer]);
 
+  /**
+   * Submits a new top-level comment.
+   * Optimistically updates the UI before confirming with a silent refresh.
+   */
   const handleSubmitComment = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!isLoggedIn || !newComment.trim() || isSubmittingComment) return;
@@ -385,14 +527,18 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
         }),
       });
 
-      if (response.status === 429) {
-        toast.error(
-          "Slow down! You're posting too fast. Take a breather and try again in a moment.",
-        );
-        return;
-      }
-
       if (!response.ok) {
+        let errorData;
+        try {
+          errorData = await response.json();
+        } catch {
+          // Fallback if not JSON
+        }
+
+        if (handleCommentApiError(errorData, "Failed to post comment")) {
+          return;
+        }
+
         throw new Error("Failed to post comment");
       }
 
@@ -454,6 +600,9 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
     }
   };
 
+  /**
+   * Submits an edit for an existing comment.
+   */
   const handleEditComment = async (commentId: number) => {
     if (!editContent.trim()) return;
 
@@ -516,6 +665,9 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
     }
   };
 
+  /**
+   * Deletes a comment. Optimistically removes it from the UI.
+   */
   const handleDeleteComment = async (commentId: number) => {
     // Optimistically remove from UI
     setComments((prev) => prev.filter((c) => c.id !== commentId));
@@ -548,124 +700,59 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
     }
   };
 
-  // Sort comments based on sortOrder
+  // Sort comments based on sortOrder (newest vs oldest)
   const sortedComments = [...comments].sort((a, b) => {
     const dateA = parseInt(a.date);
     const dateB = parseInt(b.date);
     return sortOrder === "newest" ? dateB - dateA : dateA - dateB;
   });
 
-  // Filter out comments from users whose data fetch failed
+  // Filter out comments from users whose data fetch failed to maintain UI quality
   const filteredComments = sortedComments.filter(
     (comment) => !failedUserData.has(comment.user_id),
   );
 
-  // Build a threaded / nested order of comments while preserving sort order
+  /**
+   * Build a threaded / nested order of comments.
+   * Currently implements a Discord-style flat thread where replies
+   * appear in the main flow but show context of the parent comment.
+   */
   const buildThreadedComments = useCallback(
     (allComments: CommentData[]): (ThreadedComment | MoreItem)[] => {
-      // Group children by parent_id
-      const childrenMap = new Map<number, CommentData[]>();
+      if (!allComments || allComments.length === 0) return [];
 
-      for (const comment of allComments) {
-        const parentId =
-          typeof comment.parent_id === "number" ? comment.parent_id : null;
-
-        if (parentId === null) continue;
-
-        if (!childrenMap.has(parentId)) {
-          childrenMap.set(parentId, []);
-        }
-        childrenMap.get(parentId)!.push(comment);
-      }
-
-      // Sort children for each parent based on the selected sortOrder
-      for (const [key, childComments] of childrenMap.entries()) {
-        childrenMap.set(
-          key,
-          [...childComments].sort((a, b) => {
-            const dateA = parseInt(a.date);
-            const dateB = parseInt(b.date);
-            return sortOrder === "newest" ? dateB - dateA : dateA - dateB;
-          }),
-        );
-      }
-
-      const result: (ThreadedComment | MoreItem)[] = [];
-
-      const roots = allComments.filter(
-        (comment) =>
-          comment.parent_id === null ||
-          typeof comment.parent_id === "undefined",
-      );
-
-      const nonRoots = new Set(
-        allComments
-          .filter(
-            (comment) =>
-              typeof comment.parent_id === "number" &&
-              comment.parent_id !== null,
-          )
-          .map((c) => c.id),
-      );
-
-      const additionalRoots = allComments.filter(
-        (c) => !nonRoots.has(c.id) && !roots.includes(c),
-      );
-
-      const allRoots = [...roots, ...additionalRoots].sort((a, b) => {
-        const dateA = parseInt(a.date);
-        const dateB = parseInt(b.date);
-        return sortOrder === "newest" ? dateB - dateA : dateA - dateB;
-      });
-
-      const visit = (comment: CommentData, depth: number = 0) => {
-        result.push({ ...comment, depth });
-
-        const children = childrenMap.get(comment.id) || [];
-        if (children.length === 0) return;
-
-        const isExpanded = fullyExpandedThreads.has(comment.id);
-        const limit = depth >= 2 ? 1 : 2; // Show only 2 replies, or 1 if very deep
-
-        const displayChildren = isExpanded
-          ? children
-          : children.slice(0, limit);
-
-        for (const child of displayChildren) {
-          visit(child, depth + 1);
-        }
-
-        if (!isExpanded && children.length > limit) {
-          result.push({
-            id: `more-${comment.id}`,
-            isMore: true,
-            parentId: comment.id,
-            count: children.length - limit,
-            depth: depth + 1,
-          });
-        }
-      };
-
-      for (const root of allRoots) {
-        visit(root, 0);
-      }
+      // Simply sort all comments chronologically by their own dates
+      // In Discord-style, replies appear in the main flow but show a preview
+      const result = [...allComments]
+        .sort((a, b) => {
+          const dateA = parseInt(a.date);
+          const dateB = parseInt(b.date);
+          return sortOrder === "newest" ? dateB - dateA : dateA - dateB;
+        })
+        .map((comment) => ({
+          ...comment,
+          depth: 0,
+        }));
 
       return result;
     },
-    [sortOrder, fullyExpandedThreads],
+    [sortOrder],
   );
 
   const threadedComments: (ThreadedComment | MoreItem)[] =
     buildThreadedComments(filteredComments);
 
-  // Pagination Logic
+  // Pagination Logic Constants
   const totalPages = Math.ceil(threadedComments.length / itemsPerPage);
   const startIndex = (page - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
   const currentComments: (ThreadedComment | MoreItem)[] =
     threadedComments.slice(startIndex, endIndex);
 
-  // Fetch user data for the current page's comments
+  /**
+   * Automatically fetch user profile data for all users visible
+   * on the current page of comments.
+   */
   useEffect(() => {
     if (currentComments.length > 0) {
       const userIds = currentComments
@@ -707,6 +794,9 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
     });
   };
 
+  /**
+   * Submits a reply to an existing comment.
+   */
   const handleSubmitReply = async (parentId: number) => {
     if (!isLoggedIn || !replyContent.trim() || isSubmittingComment) return;
 
@@ -734,14 +824,18 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
         }),
       });
 
-      if (response.status === 429) {
-        toast.error(
-          "Slow down! You're posting too fast. Take a breather and try again in a moment.",
-        );
-        return;
-      }
-
       if (!response.ok) {
+        let errorData;
+        try {
+          errorData = await response.json();
+        } catch {
+          // Fallback
+        }
+
+        if (handleCommentApiError(errorData, "Failed to post reply")) {
+          return;
+        }
+
         throw new Error("Failed to post reply");
       }
 
@@ -1005,27 +1099,22 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
             </div>
           ) : (
             <div className="flex flex-col">
+              {/* Main transition wrapper for comment list updates */}
               <div className="flex flex-col">
                 {currentComments.map((item) => {
                   if (!item) return null;
+
+                  // Handle "Load More" placeholder items
                   if ("isMore" in item && item.isMore) {
                     return (
                       <div key={item.id} className="flex py-1">
-                        {/* Indentation spacing for parent levels */}
-                        {Array.from({
-                          length: Math.min((item.depth || 1) - 1, 6),
-                        }).map((_, i) => (
-                          <div key={i} className="w-6 shrink-0 sm:w-6" />
-                        ))}
-
-                        {/* Additional spacing for current level */}
-                        <div className="w-6 shrink-0 sm:w-6" />
+                        <div className="w-8 shrink-0 sm:w-10" />
 
                         <Button
                           variant="ghost"
                           size="sm"
                           className="text-link hover:text-link-hover hover:bg-quaternary-bg/50 my-1 py-2 text-xs font-bold transition-colors"
-                          onClick={() => toggleThreadExpansion(item.parentId)}
+                          onClick={() => {}}
                         >
                           {item.count} more{" "}
                           {item.count === 1 ? "reply" : "replies"}
@@ -1035,6 +1124,8 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                   }
 
                   const comment = item as CommentData;
+
+                  // Setup permissions and display flags
                   const flags = userData[comment.user_id]?.flags || [];
                   const premiumType = userData[comment.user_id]?.premiumtype;
                   const hideRecent =
@@ -1042,6 +1133,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                       ?.show_recent_comments === 0 &&
                     currentUserId !== comment.user_id;
 
+                  // Truncation logic for long comments
                   const isExpanded = expandedComments.has(comment.id);
                   const MAX_VISIBLE_LINES = 5;
                   const MAX_VISIBLE_CHARS = 500;
@@ -1065,6 +1157,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                     visibleContent = commentContent;
                   }
 
+                  // Context for replies
                   const isReply =
                     typeof comment.parent_id === "number" &&
                     comment.parent_id !== null;
@@ -1086,24 +1179,105 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                       : null;
 
                   const depth = comment.depth || 0;
-                  const displayDepth = Math.min(depth, 7); // Cap display depth at 7
                   const isMaxDepth = depth >= 7;
 
                   return (
                     <div
+                      id={`comment-${comment.id}`}
                       key={comment.id}
                       className={`group relative transition-all duration-200 ${
                         depth === 0 ? "py-2" : "py-1.5"
                       }`}
                     >
-                      <div className="flex gap-2 sm:gap-3">
-                        {/* Indentation spacing for nested replies */}
-                        {displayDepth > 0 &&
-                          Array.from({ length: displayDepth }).map((_, i) => (
-                            <div key={i} className="w-4 shrink-0 sm:w-6" />
-                          ))}
+                      {/* 
+                         Discord-style Reply Context 
+                         Shows which comment this is replying to with a curved line transition.
+                      */}
+                      {isReply && parentComment && (
+                        <div className="mb-1 flex items-center gap-2 sm:gap-3">
+                          {/* Spine Alignment Column (The curved line) */}
+                          <div className="flex w-8 shrink-0 justify-end sm:w-10">
+                            <div className="border-secondary-text/40 h-3 w-5 translate-x-2 translate-y-1.5 rounded-tl-md border-t-2 border-l-2" />
+                          </div>
 
-                        {/* Avatar Gutter - Always present for consistent indentation */}
+                          {/* 
+                             Parent Content Preview
+                             Allows users to jump back to the parent comment.
+                          */}
+                          <div
+                            className="text-secondary-text/80 -ml-1 flex min-w-0 cursor-pointer items-center gap-1.5 overflow-hidden rounded px-1 text-xs transition-opacity hover:opacity-100"
+                            onClick={() => {
+                              const el = document.getElementById(
+                                `comment-${parentComment.id}`,
+                              );
+                              if (el) {
+                                el.scrollIntoView({
+                                  behavior: "smooth",
+                                  block: "center",
+                                });
+                                // Flash effect to highlight the target comment
+                                el.classList.add(
+                                  "bg-button-info/20",
+                                  "transition-colors",
+                                  "duration-500",
+                                );
+                                setTimeout(
+                                  () =>
+                                    el.classList.remove(
+                                      "bg-button-info/20",
+                                      "transition-colors",
+                                      "duration-500",
+                                    ),
+                                  1500,
+                                );
+                              }
+                            }}
+                          >
+                            <UserAvatar
+                              userId={parentComment.user_id}
+                              avatarHash={
+                                userData[parentComment.user_id]?.avatar
+                              }
+                              username={
+                                userData[parentComment.user_id]?.username ||
+                                parentComment.author
+                              }
+                              size={4}
+                              showBadge={false}
+                              premiumType={
+                                userData[parentComment.user_id]?.premiumtype
+                              }
+                              settings={
+                                userData[parentComment.user_id]?.settings
+                              }
+                              custom_avatar={
+                                userData[parentComment.user_id]?.custom_avatar
+                              }
+                              className="h-4 w-4"
+                            />
+                            <span className="text-primary-text shrink-0 font-semibold">
+                              @{parentUsername || "Unknown"}
+                            </span>
+                            <span
+                              className="text-secondary-text max-w-[200px] truncate sm:max-w-[400px]"
+                              dangerouslySetInnerHTML={{
+                                __html: sanitizeHTML(
+                                  parentComment.content.replace(
+                                    /<[^>]*>?/gm,
+                                    "",
+                                  ),
+                                ),
+                              }}
+                            />
+                          </div>
+                        </div>
+                      )}
+
+                      <div className="flex gap-2 sm:gap-3">
+                        {/* 
+                           Avatar Gutter
+                           Left side of the comment containing the user's avatar.
+                        */}
                         <div className="flex w-8 shrink-0 items-start pt-1.5 sm:w-10">
                           {loadingUserData[comment.user_id] ? (
                             <div className="ring-border-focus/20 bg-tertiary-bg flex h-10 w-10 items-center justify-center rounded-full ring-2">
@@ -1114,6 +1288,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                             </div>
                           ) : hideRecent ? (
                             <div className="ring-tertiary-text/20 border-border-primary bg-primary-bg flex h-10 w-10 items-center justify-center rounded-full border ring-2">
+                              {/* Lock icon for hidden users */}
                               <svg
                                 className="text-secondary-text h-5 w-5"
                                 fill="none"
@@ -1157,9 +1332,12 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                           )}
                         </div>
 
-                        {/* Content Area */}
+                        {/* 
+                           Content Area
+                           Right side of the comment containing author info, timestamp, and text.
+                        */}
                         <div className="min-w-0 flex-1">
-                          {/* Header Section */}
+                          {/* Header Section (Author, Badge, timestamp, and actions) */}
                           <div className="flex items-start justify-between gap-2 pt-1.5 pb-1.5">
                             <div className="flex min-w-0 flex-1 items-start gap-2 sm:gap-3">
                               <div className="flex min-w-0 flex-col">
@@ -1171,6 +1349,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                                     </>
                                   ) : hideRecent ? (
                                     <div className="flex items-center gap-2">
+                                      {/* Hidden user identity */}
                                       <svg
                                         className="text-secondary-text h-4 w-4"
                                         fill="none"
@@ -1190,6 +1369,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                                     </div>
                                   ) : (
                                     <>
+                                      {/* Author Name and Hover Profile Tooltip */}
                                       <div className="flex min-w-0 items-center gap-2">
                                         <Tooltip>
                                           <TooltipTrigger asChild>
@@ -1211,7 +1391,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                                           </TooltipContent>
                                         </Tooltip>
 
-                                        {/* User Badges */}
+                                        {/* User Badges (Legacy, Premium, Staff, etc) */}
                                         {!hideRecent &&
                                           userData[comment.user_id] && (
                                             <UserBadges
@@ -1221,17 +1401,15 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                                               }
                                               premiumType={premiumType}
                                               flags={flags}
-                                              primary_guild={
-                                                userData[comment.user_id]
-                                                  .primary_guild
-                                              }
+                                              primary_guild={undefined}
                                               size="md"
                                               customBgClass="bg-primary-bg/50"
+                                              noContainer={true}
                                             />
                                           )}
                                       </div>
 
-                                      {/* Trade OP Badge */}
+                                      {/* Special OP badge for trade ad authors */}
                                       {type === "trade" &&
                                         trade &&
                                         comment.user_id === trade.author && (
@@ -1251,7 +1429,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                               </div>
                             </div>
 
-                            {/* Enhanced Action Menu */}
+                            {/* Action Menu Dropdown (Edit, Delete, Report) */}
                             <div className="flex items-center gap-2">
                               <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
@@ -1269,6 +1447,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                                 <DropdownMenuContent align="end">
                                   {currentUserId === comment.user_id ? (
                                     <>
+                                      {/* Check if comment is still editable (within 1 hour) */}
                                       {isCommentEditable(comment.date) && (
                                         <DropdownMenuItem
                                           onClick={() =>
@@ -1381,22 +1560,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                                   </div>
                                 ) : (
                                   <>
-                                    {isReply && parentUsername && (
-                                      <div className="text-secondary-text mb-1 flex items-center gap-1 text-[11px] font-medium">
-                                        <Icon
-                                          icon="heroicons:arrow-turn-down-right"
-                                          className="h-3 w-3"
-                                        />
-                                        <span>Replying to</span>
-                                        <Link
-                                          href={`/users/${parentComment?.user_id}`}
-                                          prefetch={false}
-                                          className="text-link font-semibold transition-colors hover:underline"
-                                        >
-                                          @{parentUsername}
-                                        </Link>
-                                      </div>
-                                    )}
+                                    {/* isReply check moved to top */}
                                     {isMaxDepth && depth > 7 && (
                                       <div className="text-secondary-text/70 mb-2 flex items-center gap-1.5 text-xs italic">
                                         <Icon

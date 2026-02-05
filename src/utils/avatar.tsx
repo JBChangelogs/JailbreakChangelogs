@@ -23,6 +23,7 @@ interface UserAvatarProps {
   };
   shape?: "circle" | "square";
   premiumType?: number;
+  className?: string;
 }
 
 export const DefaultAvatar = ({
@@ -69,6 +70,7 @@ const AvatarWrapper = ({
   isHidden = false,
   shape = "circle",
   premiumType,
+  className,
 }: {
   children: React.ReactNode;
   isOnline?: boolean;
@@ -76,6 +78,7 @@ const AvatarWrapper = ({
   isHidden?: boolean;
   shape?: "circle" | "square";
   premiumType?: number;
+  className?: string;
 }) => {
   if (!showBadge) return <>{children}</>;
 
@@ -99,7 +102,7 @@ const AvatarWrapper = ({
 
   return (
     <div
-      className={`${ringClass} ${roundedClass} relative z-20`}
+      className={`${ringClass} ${roundedClass} relative z-20 ${className || ""}`}
       style={ringStyle}
     >
       {children}
@@ -118,6 +121,7 @@ export const UserAvatar = ({
   settings,
   shape = "circle",
   premiumType,
+  className,
 }: UserAvatarProps) => {
   const [imageError, setImageError] = useState(false);
   const [customAvatarError, setCustomAvatarError] = useState(false);
@@ -172,6 +176,21 @@ export const UserAvatar = ({
 
   const avatarSource = getAvatarSource();
 
+  // If showBadge is true, we pass className to wrapper.
+  // If showBadge is false, we pass className to inner div.
+  const wrapperClassName = showBadge ? className : undefined;
+  const innerClassName = !showBadge ? className : undefined;
+
+  const innerDivCommonClass = `relative ${
+    finalShape === "circle"
+      ? "rounded-full"
+      : finalShape === "square" && premiumType === 3
+        ? "rounded-sm"
+        : finalShape === "square"
+          ? "rounded-lg"
+          : "rounded-full"
+  } bg-primary-bg shrink-0 overflow-hidden ${innerClassName || ""}`;
+
   if (!avatarSource) {
     return (
       <AvatarWrapper
@@ -180,9 +199,10 @@ export const UserAvatar = ({
         isHidden={settings?.hide_presence === 1}
         shape={shape}
         premiumType={premiumType}
+        className={wrapperClassName}
       >
         <div
-          className={`relative ${finalShape === "circle" ? "rounded-full" : finalShape === "square" && premiumType === 3 ? "rounded-sm" : finalShape === "square" ? "rounded-lg" : "rounded-full"} bg-primary-bg shrink-0 overflow-hidden`}
+          className={innerDivCommonClass}
           style={{
             width: size * 4,
             height: size * 4,
@@ -205,9 +225,10 @@ export const UserAvatar = ({
       isHidden={settings?.hide_presence === 1}
       shape={shape}
       premiumType={premiumType}
+      className={wrapperClassName}
     >
       <div
-        className={`relative ${finalShape === "circle" ? "rounded-full" : finalShape === "square" && premiumType === 3 ? "rounded-sm" : finalShape === "square" ? "rounded-lg" : "rounded-full"} bg-primary-bg shrink-0 overflow-hidden`}
+        className={innerDivCommonClass}
         style={{
           width: size * 4,
           height: size * 4,
