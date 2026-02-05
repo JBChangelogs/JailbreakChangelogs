@@ -643,7 +643,7 @@ export async function fetchUsersBatch(userIds: string[]) {
     }
 
     const response = await fetch(
-      `${BASE_API_URL}/users/get/batch?ids=${userIds.join(",")}`,
+      `${BASE_API_URL}/users/get/batch?ids=${userIds.join(",")}&nocache=false`,
       {
         headers: {
           "User-Agent": "JailbreakChangelogs-UserBatch/1.0",

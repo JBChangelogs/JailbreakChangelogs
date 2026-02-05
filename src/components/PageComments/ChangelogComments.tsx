@@ -226,15 +226,17 @@ const handleCommentApiError = (
 ) => {
   if (data?.error === "profanity_detected") {
     const flagged = data.flagged || [];
+    const message =
+      data.message || "Please remove profanity from your comment.";
     toast.error("Profanity Detected", {
-      description: `Please remove profanity from your comment. ${flagged.length > 0 ? `Flagged: ${flagged.join(", ")}` : ""}`,
+      description: `${message}${flagged.length > 0 ? ` Flagged: ${flagged.join(", ")}` : ""}`,
     });
     return true;
   }
 
   if (data?.error === "rate_limit") {
     const tryAgain = data.try_again;
-    let message = "You're posting too fast!";
+    let message = data.message || "You're posting too fast!";
     if (tryAgain) {
       const remaining = Math.max(0, tryAgain - Math.floor(Date.now() / 1000));
       if (remaining > 0) {
@@ -249,7 +251,7 @@ const handleCommentApiError = (
 
   if (data?.error === "invalid_token") {
     toast.error("Session Expired", {
-      description: "Please log in again to post a comment.",
+      description: data.message || "Please log in again to post a comment.",
     });
     return true;
   }
@@ -257,14 +259,35 @@ const handleCommentApiError = (
   if (data?.error === "parent_not_found" || data?.error === "invalid_parent") {
     toast.error("Reply Error", {
       description:
+        data.message ||
         "The comment you are replying to no longer exists or is invalid.",
     });
     return true;
   }
 
-  if (data?.error === "internal_server_error" || data?.message) {
-    toast.error("Server Error", {
+  // Handle any error with a message, or internal_server_error
+  if (data?.message || data?.error === "internal_server_error") {
+    const errorTitle =
+      data?.error === "internal_server_error"
+        ? "Server Error"
+        : data?.error
+          ? data.error
+              .replace(/_/g, " ")
+              .replace(/\b\w/g, (l) => l.toUpperCase())
+          : "Error";
+    toast.error(errorTitle, {
       description: data.message || defaultMessage,
+    });
+    return true;
+  }
+
+  // If we have an error but no message, show the error code
+  if (data?.error) {
+    const errorTitle = data.error
+      .replace(/_/g, " ")
+      .replace(/\b\w/g, (l) => l.toUpperCase());
+    toast.error(errorTitle, {
+      description: defaultMessage,
     });
     return true;
   }
@@ -533,13 +556,19 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
           errorData = await response.json();
         } catch {
           // Fallback if not JSON
+          errorData = null;
         }
 
         if (handleCommentApiError(errorData, "Failed to post comment")) {
           return;
         }
 
-        throw new Error("Failed to post comment");
+        // If error handler didn't handle it, show the message from API if available
+        const errorMessage = errorData?.message || "Failed to post comment";
+        toast.error("Error", {
+          description: errorMessage,
+        });
+        return;
       }
 
       const addedCommentData = await response.json();
@@ -640,7 +669,24 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
       });
 
       if (!response.ok) {
-        throw new Error("Failed to edit comment");
+        let errorData;
+        try {
+          errorData = await response.json();
+        } catch {
+          // Fallback if not JSON
+          errorData = null;
+        }
+
+        if (handleCommentApiError(errorData, "Failed to edit comment")) {
+          return;
+        }
+
+        // If error handler didn't handle it, show the message from API if available
+        const errorMessage = errorData?.message || "Failed to edit comment";
+        toast.error("Error", {
+          description: errorMessage,
+        });
+        return;
       }
 
       const updatedComment = await response.json();
@@ -750,14 +796,13 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
     threadedComments.slice(startIndex, endIndex);
 
   /**
-   * Automatically fetch user profile data for all users visible
-   * on the current page of comments.
+   * Automatically fetch user profile data for all users in comments.
+   * We need user data for all comments to properly display hidden identity
+   * for users with privacy settings enabled (show_recent_comments or profile_public).
    */
   useEffect(() => {
-    if (currentComments.length > 0) {
-      const userIds = currentComments
-        .filter((c): c is ThreadedComment => !("isMore" in c))
-        .map((comment) => comment.user_id);
+    if (comments.length > 0) {
+      const userIds = comments.map((comment) => comment.user_id);
       // Determine which IDs need fetching
       const uniqueIds = Array.from(new Set(userIds)).filter(Boolean);
       const idsToFetch = uniqueIds.filter(
@@ -769,13 +814,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
         fetchUserData(idsToFetch);
       }
     }
-  }, [
-    currentComments,
-    userData,
-    loadingUserData,
-    failedUserData,
-    fetchUserData,
-  ]);
+  }, [comments, userData, loadingUserData, failedUserData, fetchUserData]);
 
   const toggleSortOrder = () => {
     setSortOrder((prev) => (prev === "newest" ? "oldest" : "newest"));
@@ -829,14 +868,20 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
         try {
           errorData = await response.json();
         } catch {
-          // Fallback
+          // Fallback if not JSON
+          errorData = null;
         }
 
         if (handleCommentApiError(errorData, "Failed to post reply")) {
           return;
         }
 
-        throw new Error("Failed to post reply");
+        // If error handler didn't handle it, show the message from API if available
+        const errorMessage = errorData?.message || "Failed to post reply";
+        toast.error("Error", {
+          description: errorMessage,
+        });
+        return;
       }
 
       const addedReplyData = await response.json();
@@ -1128,9 +1173,16 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                   // Setup permissions and display flags
                   const flags = userData[comment.user_id]?.flags || [];
                   const premiumType = userData[comment.user_id]?.premiumtype;
+                  const commentAuthorSettings =
+                    userData[comment.user_id]?.settings;
+
+                  // Hide identity if:
+                  // 1. show_recent_comments is 0 (disabled), OR
+                  // 2. profile_public is 0 (private profile)
+                  // AND the viewer is not the comment author
                   const hideRecent =
-                    userData[comment.user_id]?.settings
-                      ?.show_recent_comments === 0 &&
+                    (commentAuthorSettings?.show_recent_comments === 0 ||
+                      commentAuthorSettings?.profile_public === 0) &&
                     currentUserId !== comment.user_id;
 
                   // Truncation logic for long comments
@@ -1170,8 +1222,10 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                   const parentUsername =
                     parentComment &&
                     !(
-                      userData[parentComment.user_id]?.settings
-                        ?.show_recent_comments === 0 &&
+                      (userData[parentComment.user_id]?.settings
+                        ?.show_recent_comments === 0 ||
+                        userData[parentComment.user_id]?.settings
+                          ?.profile_public === 0) &&
                       currentUserId !== parentComment.user_id
                     )
                       ? userData[parentComment.user_id]?.username ||
