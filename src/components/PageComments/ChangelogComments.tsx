@@ -129,6 +129,22 @@ const cleanCommentText = (text: string): string => {
 };
 
 /**
+ * Strips all HTML tags from a string.
+ * Uses a loop to ensure all nested tags are removed, preventing
+ * incomplete sanitization vulnerabilities (CodeQL js/incomplete-multi-character-sanitization).
+ */
+const stripHTML = (html: string): string => {
+  if (!html) return "";
+  let current = html;
+  let previous;
+  do {
+    previous = current;
+    current = current.replace(/<[^>]*>?/gm, "");
+  } while (current !== previous);
+  return current;
+};
+
+/**
  * Wraps @mentions in <span> tags for styling.
  */
 const processMentions = (text: string): string => {
@@ -168,7 +184,7 @@ const convertUrlsToLinksHTML = (text: string): string => {
       ) {
         // Escape the URL to prevent attribute injection
         const escapedUrl = escapeHtml(url);
-        return `<a href="${escapedUrl}" target="_blank" rel="noopener noreferrer">${escapedUrl}</a>`;
+        return `<a href="${escapedUrl}" target="_blank" rel="noopener noreferrer" class="text-link hover:text-link-hover active:text-link-active transition-colors duration-200 hover:underline">${escapedUrl}</a>`;
       }
       return url;
     } catch {
@@ -194,19 +210,10 @@ const sanitizeHTML = (html: string): string => {
     return "<i>[Content Redacted]</i>";
   }
 
-  const result = purify.sanitize(html, {
-    ALLOWED_TAGS: ["a", "span", "br"],
-    ALLOWED_ATTR: ["href", "target", "rel"],
-    ALLOWED_URI_REGEXP:
-      /^https?:\/\/(www\.)?(roblox\.com|reddit\.com|amazon\.com|jailbreakchangelogs\.xyz)([/?#]|$)/,
+  return purify.sanitize(html, {
+    ALLOWED_TAGS: ["br", "b", "strong", "i", "u"],
+    ALLOWED_ATTR: [],
   });
-
-  // If sanitization produces an empty result from what should be valid content, redact it
-  if (html.trim() && !result.trim()) {
-    return "<i>[Content Redacted]</i>";
-  }
-
-  return result;
 };
 
 /**
@@ -715,8 +722,29 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
    * Deletes a comment. Optimistically removes it from the UI.
    */
   const handleDeleteComment = async (commentId: number) => {
-    // Optimistically remove from UI
-    setComments((prev) => prev.filter((c) => c.id !== commentId));
+    // Keep a copy of current comments for restoration if delete fails
+    const previousComments = [...comments];
+
+    // Optimistically remove the comment and all its descendants from UI
+    // Since the backend handles cascading delete, we must do the same to stay in sync
+    setComments((prev) => {
+      const idsToRemove = new Set([commentId]);
+      let sizeBefore;
+      do {
+        sizeBefore = idsToRemove.size;
+        prev.forEach((c) => {
+          if (
+            c.parent_id &&
+            typeof c.parent_id === "number" &&
+            idsToRemove.has(c.parent_id)
+          ) {
+            idsToRemove.add(c.id);
+          }
+        });
+      } while (idsToRemove.size > sizeBefore);
+
+      return prev.filter((c) => !idsToRemove.has(c.id));
+    });
 
     try {
       const response = await fetch(`/api/comments/delete`, {
@@ -729,17 +757,13 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
       if (!response.ok) {
         throw new Error("Failed to delete comment");
       }
-      // Comment successfully deleted, no need to refresh since we already removed it optimistically
-      // Track comment delete
+      // Comment successfully deleted, track with analytics
       if (typeof window !== "undefined" && window.umami) {
         window.umami.track("Comment Deleted", { type });
       }
     } catch (err) {
-      // If deletion failed, restore the comment
-      setComments((prev) => {
-        const originalComment = comments.find((c) => c.id === commentId);
-        return originalComment ? [originalComment, ...prev] : prev;
-      });
+      // If deletion failed, restore the previous state
+      setComments(previousComments);
       toast.error(
         err instanceof Error ? err.message : "Failed to delete comment",
       );
@@ -1316,10 +1340,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                               className="text-secondary-text max-w-[200px] truncate sm:max-w-[400px]"
                               dangerouslySetInnerHTML={{
                                 __html: sanitizeHTML(
-                                  parentComment.content.replace(
-                                    /<[^>]*>?/gm,
-                                    "",
-                                  ),
+                                  stripHTML(parentComment.content),
                                 ),
                               }}
                             />
@@ -1359,7 +1380,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                             </div>
                           ) : (
                             <div
-                              className={`group-hover:ring-border-focus/60 group-hover:bg-border-focus/10 ring-2 ring-transparent transition-all duration-200 ${
+                              className={`${
                                 userData[comment.user_id]?.premiumtype === 3
                                   ? "rounded-sm"
                                   : "rounded-full"
@@ -1430,7 +1451,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                                             <Link
                                               href={`/users/${comment.user_id}`}
                                               prefetch={false}
-                                              className="text-primary-text group-hover:text-link block max-w-[120px] truncate text-sm font-semibold transition-colors duration-200 group-hover:underline sm:max-w-[200px] sm:text-base"
+                                              className="text-primary-text hover:text-link block max-w-[120px] truncate text-sm font-semibold transition-colors duration-200 sm:max-w-[200px] sm:text-base"
                                             >
                                               {userData[comment.user_id]
                                                 ?.username || comment.author}
@@ -1626,14 +1647,14 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                                         </span>
                                       </div>
                                     )}
-                                    <div className="prose prose-sm prose-a:text-blue-400 prose-a:transition-colors prose-a:duration-200 hover:prose-a:text-blue-300 hover:prose-a:underline max-w-none">
+                                    <div className="prose prose-sm max-w-none">
                                       {isClient ? (
                                         <p
                                           className="text-primary-text text-sm leading-relaxed wrap-break-word whitespace-pre-wrap"
                                           dangerouslySetInnerHTML={{
-                                            __html: sanitizeHTML(
-                                              convertUrlsToLinksHTML(
-                                                processMentions(visibleContent),
+                                            __html: convertUrlsToLinksHTML(
+                                              processMentions(
+                                                sanitizeHTML(visibleContent),
                                               ),
                                             ),
                                           }}
