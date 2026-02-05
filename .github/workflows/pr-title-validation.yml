@@ -33,7 +33,7 @@ jobs:
             // Require conventional commit format for human PRs
             const conventionalCommitPattern = /^(feat|fix|chore|docs|style|refactor|perf|test|ci|build|revert)(\([^)]+\))?:\s.+$/
             if (!conventionalCommitPattern.test(prTitle)) {
-              const message = `❌ PR title does not follow conventional commit format: ${prTitle}\nExpected format: type(scope): description\nExamples:\n  feat: add user authentication\n  fix: resolve login bug\n  docs: update README\n  chore: update dependencies`;
+              const message = `❌ PR title does not follow conventional commit format: ${prTitle}\nExpected format: type(scope?): description\nExamples:\n  feat: add user authentication\n  fix: resolve login bug\n  docs: update README\n  chore: update dependencies`;
               core.setFailed(message);
               return;
             }
