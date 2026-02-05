@@ -341,7 +341,7 @@ function RobberyTrackerContent() {
               Service Alert:
             </span>
             <p className="text-primary-text mt-1 text-sm">
-              Bank Truck tracking is currently unavailable due to technica
+              Bank Truck tracking is currently unavailable due to technical
               issues. All other robberies are still being tracked normally. We
               are working to restore Bank Truck tracking as soon as possible.
             </p>
