@@ -164,7 +164,7 @@ export default async function RootLayout({
                   <Toaster
                     position="top-center"
                     toastOptions={{
-                      className: "xl:!mt-12",
+                      className: "!mt-[calc(var(--header-height,0px)+16px)]",
                     }}
                   />
                   <MaintenanceBypass>
@@ -302,7 +302,7 @@ export default async function RootLayout({
                 <Toaster
                   position="top-center"
                   toastOptions={{
-                    className: "xl:!mt-12",
+                    className: "!mt-[calc(var(--header-height,0px)+16px)]",
                   }}
                 />
                 <NextTopLoader

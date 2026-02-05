@@ -18,6 +18,7 @@ import { RobloxIcon } from "@/components/Icons/RobloxIcon";
 import { isFeatureEnabled } from "@/utils/featureFlags";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { useTheme } from "@/contexts/ThemeContext";
+import { useRef } from "react";
 
 const AnimatedThemeToggler = dynamic(
   () =>
@@ -195,6 +196,47 @@ export default function Header() {
       }, 0);
     }
   }, [pathname, isAuthenticated, fetchUnreadCount]);
+
+  const headerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    let frameId: number;
+
+    const updateHeaderHeight = () => {
+      if (frameId) return;
+
+      frameId = requestAnimationFrame(() => {
+        if (headerRef.current) {
+          const rect = headerRef.current.getBoundingClientRect();
+          const height = Math.max(0, rect.bottom);
+          document.documentElement.style.setProperty(
+            "--header-height",
+            `${height}px`,
+          );
+        }
+        frameId = 0;
+      });
+    };
+
+    // Initial measurement
+    updateHeaderHeight();
+
+    // Set up listeners for things that can change the height/position
+    window.addEventListener("scroll", updateHeaderHeight, { passive: true });
+    window.addEventListener("resize", updateHeaderHeight);
+
+    const observer = new ResizeObserver(updateHeaderHeight);
+    if (headerRef.current) {
+      observer.observe(headerRef.current);
+    }
+
+    return () => {
+      window.removeEventListener("scroll", updateHeaderHeight);
+      window.removeEventListener("resize", updateHeaderHeight);
+      if (frameId) cancelAnimationFrame(frameId);
+      observer.disconnect();
+    };
+  }, []);
 
   const handleLogout = async () => {
     try {
@@ -522,9 +564,8 @@ export default function Header() {
       <div className="border-border-primary my-4 border-t" />
     </div>
   );
-
   return (
-    <>
+    <div ref={headerRef} className="flex flex-col">
       {/* Desktop navbar - hidden on mobile/tablet via CSS */}
       <ServiceAvailabilityTicker />
 
@@ -1008,6 +1049,6 @@ export default function Header() {
         isOpen={utmModalOpen}
         onClose={() => setUtmModalOpen(false)}
       />
-    </>
+    </div>
   );
 }

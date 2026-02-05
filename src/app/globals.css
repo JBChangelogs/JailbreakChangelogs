@@ -235,6 +235,7 @@
   /* Header Heights */
   --header-height-mobile: 4rem; /* Mobile header height (64px) */
   --header-height-desktop: 3rem; /* Desktop header height (48px) */
+  --header-height: 0px; /* Dynamic header height, set by JS */
 }
 
 /* LIGHT THEME - Applied when .light class is present */

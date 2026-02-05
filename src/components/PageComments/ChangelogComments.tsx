@@ -1076,7 +1076,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                 <div className="border-border-focus/30 bg-secondary-bg relative rounded-full border p-4">
                   <Icon
                     icon="heroicons:chat-bubble-left"
-                    className="text-border-focus h-8 w-8 sm:h-10 sm:w-10"
+                    className="text-border-focus h-10 w-10"
                   />
                 </div>
               </div>
@@ -1108,7 +1108,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                   if ("isMore" in item && item.isMore) {
                     return (
                       <div key={item.id} className="flex py-1">
-                        <div className="w-8 shrink-0 sm:w-10" />
+                        <div className="w-10 shrink-0" />
 
                         <Button
                           variant="ghost"
@@ -1196,7 +1196,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                       {isReply && parentComment && (
                         <div className="mb-1 flex items-center gap-2 sm:gap-3">
                           {/* Spine Alignment Column (The curved line) */}
-                          <div className="flex w-8 shrink-0 justify-end sm:w-10">
+                          <div className="flex w-10 shrink-0 justify-end">
                             <div className="border-secondary-text/40 h-3 w-5 translate-x-2 translate-y-1.5 rounded-tl-md border-t-2 border-l-2" />
                           </div>
 
@@ -1278,7 +1278,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                            Avatar Gutter
                            Left side of the comment containing the user's avatar.
                         */}
-                        <div className="flex w-8 shrink-0 items-start pt-1.5 sm:w-10">
+                        <div className="flex w-10 shrink-0 items-start pt-1.5">
                           {loadingUserData[comment.user_id] ? (
                             <div className="ring-border-focus/20 bg-tertiary-bg flex h-10 w-10 items-center justify-center rounded-full ring-2">
                               <CircularProgress
