@@ -407,7 +407,7 @@ const SimilarItems = ({
                     </span>
                     {(item.tradable === 0 || item.tradable === false) && (
                       <span className="border-primary-text text-primary-text flex items-center rounded-full border bg-transparent px-1.5 py-0.5 text-[10px]">
-                        Non-Tradable
+                        {item.id === 713 ? "Reference Only" : "Non-Tradable"}
                       </span>
                     )}
                   </div>

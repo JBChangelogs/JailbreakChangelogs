@@ -33,6 +33,8 @@ interface InventoryFiltersProps {
   showMissingItems: boolean;
   showOnlyLimited: boolean;
   showOnlySeasonal: boolean;
+  showOnlyTradable: boolean;
+  showOnlyUntradable: boolean;
   availableCategories: string[];
   onFilterToggle: (checked: boolean) => void;
   onNonOriginalFilterToggle: (checked: boolean) => void;
@@ -40,6 +42,8 @@ interface InventoryFiltersProps {
   onShowMissingItemsToggle: (checked: boolean) => void;
   onLimitedFilterToggle: (checked: boolean) => void;
   onSeasonalFilterToggle: (checked: boolean) => void;
+  onTradableFilterToggle: (checked: boolean) => void;
+  onUntradableFilterToggle: (checked: boolean) => void;
   sortOrder: SortOrder;
   setSortOrder: (order: SortOrder) => void;
 }
@@ -55,6 +59,8 @@ export default function InventoryFilters({
   showMissingItems,
   showOnlyLimited,
   showOnlySeasonal,
+  showOnlyTradable,
+  showOnlyUntradable,
   availableCategories,
   onFilterToggle,
   onNonOriginalFilterToggle,
@@ -62,6 +68,8 @@ export default function InventoryFilters({
   onShowMissingItemsToggle,
   onLimitedFilterToggle,
   onSeasonalFilterToggle,
+  onTradableFilterToggle,
+  onUntradableFilterToggle,
   sortOrder,
   setSortOrder,
 }: InventoryFiltersProps) {
@@ -277,6 +285,66 @@ export default function InventoryFilters({
                     />
                     <span className="text-primary-text text-sm">
                       Seasonal Only
+                    </span>
+                  </label>
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <span className="text-primary-text text-sm font-medium">
+                  Tradability:
+                </span>
+                <div className="flex flex-wrap gap-4">
+                  <label className="flex items-center space-x-2">
+                    <input
+                      type="radio"
+                      name="tradability"
+                      checked={!showOnlyTradable && !showOnlyUntradable}
+                      onChange={() => {
+                        onTradableFilterToggle(false);
+                        onUntradableFilterToggle(false);
+                        window.umami?.track(
+                          "Inventory Filter Tradability Reset",
+                        );
+                      }}
+                      className="text-button-info focus:ring-button-info h-4 w-4 cursor-pointer"
+                    />
+                    <span className="text-primary-text text-sm">All</span>
+                  </label>
+                  <label className="flex items-center space-x-2">
+                    <input
+                      type="radio"
+                      name="tradability"
+                      checked={showOnlyTradable}
+                      onChange={() => {
+                        onTradableFilterToggle(true);
+                        window.umami?.track(
+                          "Inventory Filter Tradable Toggle",
+                          { active: true },
+                        );
+                      }}
+                      className="text-button-info focus:ring-button-info h-4 w-4 cursor-pointer"
+                    />
+                    <span className="text-primary-text text-sm">
+                      Tradable Only
+                    </span>
+                  </label>
+                  <label className="flex items-center space-x-2">
+                    <input
+                      type="radio"
+                      name="tradability"
+                      checked={showOnlyUntradable}
+                      onChange={() => {
+                        onUntradableFilterToggle(true);
+                        window.umami?.track(
+                          "Inventory Filter Untradable Toggle",
+                          { active: true },
+                        );
+                      }}
+                      className="text-button-info focus:ring-button-info h-4 w-4 cursor-pointer"
+                    />
+                    <span className="text-primary-text text-sm">
+                      Untradable Only
                     </span>
                   </label>
                 </div>

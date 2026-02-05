@@ -417,7 +417,7 @@ export default function ItemDetailsClient({
                 )}
                 {currentItem.tradable === 0 && (
                   <span className="border-primary-text text-primary-text flex items-center rounded-full border bg-transparent px-2 py-1 text-xs">
-                    Non-Tradable
+                    {currentItem.id === 713 ? "Reference Only" : "Non-Tradable"}
                   </span>
                 )}
               </div>

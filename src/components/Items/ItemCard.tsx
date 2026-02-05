@@ -383,7 +383,9 @@ export default function ItemCard({
               </span>
               {currentItemData.tradable === 0 && (
                 <span className="border-primary-text text-primary-text hidden items-center rounded-full border bg-transparent px-2 py-0.5 text-xs sm:flex sm:py-1">
-                  Non-Tradable
+                  {currentItemData.id === 713
+                    ? "Reference Only"
+                    : "Non-Tradable"}
                 </span>
               )}
               {isValuesPage &&

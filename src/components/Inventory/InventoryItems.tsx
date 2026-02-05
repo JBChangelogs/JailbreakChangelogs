@@ -35,6 +35,8 @@ export default function InventoryItems({
   const [showMissingItems, setShowMissingItems] = useState(false);
   const [showOnlyLimited, setShowOnlyLimited] = useState(false);
   const [showOnlySeasonal, setShowOnlySeasonal] = useState(false);
+  const [showOnlyTradable, setShowOnlyTradable] = useState(false);
+  const [showOnlyUntradable, setShowOnlyUntradable] = useState(false);
   const [isFiltering, setIsFiltering] = useState(false);
 
   // Sync with parent toggle - recommended pattern to avoid cascading renders
@@ -156,6 +158,32 @@ export default function InventoryItems({
   const handleSeasonalFilterToggle = (checked: boolean) => {
     setIsFiltering(true);
     setShowOnlySeasonal(checked);
+    setTimeout(() => {
+      setIsFiltering(false);
+    }, 300);
+  };
+
+  const handleTradableFilterToggle = (checked: boolean) => {
+    setIsFiltering(true);
+    if (checked) {
+      setShowOnlyTradable(true);
+      setShowOnlyUntradable(false);
+    } else {
+      setShowOnlyTradable(false);
+    }
+    setTimeout(() => {
+      setIsFiltering(false);
+    }, 300);
+  };
+
+  const handleUntradableFilterToggle = (checked: boolean) => {
+    setIsFiltering(true);
+    if (checked) {
+      setShowOnlyUntradable(true);
+      setShowOnlyTradable(false);
+    } else {
+      setShowOnlyUntradable(false);
+    }
     setTimeout(() => {
       setIsFiltering(false);
     }, 300);
@@ -311,6 +339,17 @@ export default function InventoryItems({
           }
         }
 
+        // Filter by tradability
+        if (showOnlyTradable) {
+          if (itemData.tradable !== 1) {
+            return false;
+          }
+        } else if (showOnlyUntradable) {
+          if (itemData.tradable !== 0) {
+            return false;
+          }
+        }
+
         // For missing items, we don't filter by original/non-original since the user doesn't own them
         // These filters are disabled when showMissingItems is true
 
@@ -460,6 +499,17 @@ export default function InventoryItems({
       // Filter by seasonal items
       if (showOnlySeasonal) {
         if (itemData.is_seasonal !== 1) {
+          return false;
+        }
+      }
+
+      // Filter by tradability
+      if (showOnlyTradable) {
+        if (itemData.tradable !== 1) {
+          return false;
+        }
+      } else if (showOnlyUntradable) {
+        if (itemData.tradable !== 0) {
           return false;
         }
       }
@@ -618,6 +668,8 @@ export default function InventoryItems({
         showMissingItems={showMissingItems}
         showOnlyLimited={showOnlyLimited}
         showOnlySeasonal={showOnlySeasonal}
+        showOnlyTradable={showOnlyTradable}
+        showOnlyUntradable={showOnlyUntradable}
         availableCategories={availableCategories}
         onFilterToggle={handleOriginalFilterToggle}
         onNonOriginalFilterToggle={handleNonOriginalFilterToggle}
@@ -625,6 +677,8 @@ export default function InventoryItems({
         onShowMissingItemsToggle={handleShowMissingItemsToggle}
         onLimitedFilterToggle={handleLimitedFilterToggle}
         onSeasonalFilterToggle={handleSeasonalFilterToggle}
+        onTradableFilterToggle={handleTradableFilterToggle}
+        onUntradableFilterToggle={handleUntradableFilterToggle}
         sortOrder={sortOrder}
         setSortOrder={setSortOrder}
       />
@@ -639,6 +693,8 @@ export default function InventoryItems({
           showMissingItems ||
           showOnlyLimited ||
           showOnlySeasonal ||
+          showOnlyTradable ||
+          showOnlyUntradable ||
           selectedCategories.length > 0
             ? `Found ${filteredAndSortedItems.length} ${filteredAndSortedItems.length === 1 ? "item" : "items"}${
                 searchTerm ? ` matching "${searchTerm}"` : ""
@@ -652,6 +708,8 @@ export default function InventoryItems({
                 showMissingItems ? " (Missing items)" : ""
               }${showOnlyLimited ? " (Limited only)" : ""}${
                 showOnlySeasonal ? " (Seasonal only)" : ""
+              }${showOnlyTradable ? " (Tradable only)" : ""}${
+                showOnlyUntradable ? " (Untradable only)" : ""
               }${selectedCategories.length > 0 ? ` in ${selectedCategories[0]}` : ""}`
             : `Total Items: ${filteredAndSortedItems.length}`}
         </p>
