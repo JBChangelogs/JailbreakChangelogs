@@ -60,13 +60,6 @@ const testimonials: Testimonial[] = [
     url: "https://www.youtube.com/@mrflyingpies",
   },
   {
-    name: "C3T1C",
-    role: "Jailbreak YouTuber",
-    quote:
-      "JBCL is the website we were asking for. There are so many features that are not present on other jailbreak websites such as an OG finder and an inventory logger! The community aswell are very kind and welcoming, and I highly, HIGHLY reccomend joining their discord server for a positive experience!",
-    url: "https://www.youtube.com/@C3T1C",
-  },
-  {
     name: "ItsSpecter",
     role: "Jailbreak YouTuber",
     quote:

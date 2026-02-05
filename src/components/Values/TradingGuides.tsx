@@ -58,8 +58,14 @@ export default function TradingGuides({
         "When one party offers additional value on top of an item's base value, usually due to a difference in demand between the two parties",
     },
     {
-      term: "Base",
-      description: "The flat value of an item without factoring in its demand",
+      term: "Base value",
+      description:
+        "The flat value of an item without factoring in its pull power",
+    },
+    {
+      term: "Pull power / Pull value",
+      description:
+        "The highest value an item can consistently obtain in trades based on current market demand and offers",
     },
     { term: "LF", description: "Looking for" },
     { term: "D", description: "Duped; items that are duped" },
