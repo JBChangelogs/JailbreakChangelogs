@@ -226,15 +226,17 @@ const handleCommentApiError = (
 ) => {
   if (data?.error === "profanity_detected") {
     const flagged = data.flagged || [];
+    const message =
+      data.message || "Please remove profanity from your comment.";
     toast.error("Profanity Detected", {
-      description: `Please remove profanity from your comment. ${flagged.length > 0 ? `Flagged: ${flagged.join(", ")}` : ""}`,
+      description: `${message}${flagged.length > 0 ? ` Flagged: ${flagged.join(", ")}` : ""}`,
     });
     return true;
   }
 
   if (data?.error === "rate_limit") {
     const tryAgain = data.try_again;
-    let message = "You're posting too fast!";
+    let message = data.message || "You're posting too fast!";
     if (tryAgain) {
       const remaining = Math.max(0, tryAgain - Math.floor(Date.now() / 1000));
       if (remaining > 0) {
@@ -249,7 +251,7 @@ const handleCommentApiError = (
 
   if (data?.error === "invalid_token") {
     toast.error("Session Expired", {
-      description: "Please log in again to post a comment.",
+      description: data.message || "Please log in again to post a comment.",
     });
     return true;
   }
@@ -257,14 +259,35 @@ const handleCommentApiError = (
   if (data?.error === "parent_not_found" || data?.error === "invalid_parent") {
     toast.error("Reply Error", {
       description:
+        data.message ||
         "The comment you are replying to no longer exists or is invalid.",
     });
     return true;
   }
 
-  if (data?.error === "internal_server_error" || data?.message) {
-    toast.error("Server Error", {
+  // Handle any error with a message, or internal_server_error
+  if (data?.message || data?.error === "internal_server_error") {
+    const errorTitle =
+      data?.error === "internal_server_error"
+        ? "Server Error"
+        : data?.error
+          ? data.error
+              .replace(/_/g, " ")
+              .replace(/\b\w/g, (l) => l.toUpperCase())
+          : "Error";
+    toast.error(errorTitle, {
       description: data.message || defaultMessage,
+    });
+    return true;
+  }
+
+  // If we have an error but no message, show the error code
+  if (data?.error) {
+    const errorTitle = data.error
+      .replace(/_/g, " ")
+      .replace(/\b\w/g, (l) => l.toUpperCase());
+    toast.error(errorTitle, {
+      description: defaultMessage,
     });
     return true;
   }
@@ -533,13 +556,19 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
           errorData = await response.json();
         } catch {
           // Fallback if not JSON
+          errorData = null;
         }
 
         if (handleCommentApiError(errorData, "Failed to post comment")) {
           return;
         }
 
-        throw new Error("Failed to post comment");
+        // If error handler didn't handle it, show the message from API if available
+        const errorMessage = errorData?.message || "Failed to post comment";
+        toast.error("Error", {
+          description: errorMessage,
+        });
+        return;
       }
 
       const addedCommentData = await response.json();
@@ -640,7 +669,24 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
       });
 
       if (!response.ok) {
-        throw new Error("Failed to edit comment");
+        let errorData;
+        try {
+          errorData = await response.json();
+        } catch {
+          // Fallback if not JSON
+          errorData = null;
+        }
+
+        if (handleCommentApiError(errorData, "Failed to edit comment")) {
+          return;
+        }
+
+        // If error handler didn't handle it, show the message from API if available
+        const errorMessage = errorData?.message || "Failed to edit comment";
+        toast.error("Error", {
+          description: errorMessage,
+        });
+        return;
       }
 
       const updatedComment = await response.json();
@@ -822,14 +868,20 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
         try {
           errorData = await response.json();
         } catch {
-          // Fallback
+          // Fallback if not JSON
+          errorData = null;
         }
 
         if (handleCommentApiError(errorData, "Failed to post reply")) {
           return;
         }
 
-        throw new Error("Failed to post reply");
+        // If error handler didn't handle it, show the message from API if available
+        const errorMessage = errorData?.message || "Failed to post reply";
+        toast.error("Error", {
+          description: errorMessage,
+        });
+        return;
       }
 
       const addedReplyData = await response.json();

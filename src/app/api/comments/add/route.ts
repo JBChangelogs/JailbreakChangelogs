@@ -29,29 +29,27 @@ export async function POST(request: Request) {
     cache: "no-store",
   });
 
-  const text = await upstream.text();
-
   if (!upstream.ok) {
-    // Don't log 404 or 403 as errors
-    if (upstream.status !== 404 && upstream.status !== 403) {
-      const isHtml =
-        text.trim().startsWith("<!DOCTYPE") || text.trim().startsWith("<html");
-      const loggedText = isHtml
-        ? `HTML Error Page (Status ${upstream.status})`
-        : text.slice(0, 100);
-      console.error("Comment add failed:", loggedText);
+    // Try to parse JSON error response
+    let errorBody;
+    try {
+      errorBody = await upstream.json();
+    } catch {
+      // If parsing fails (e.g., HTML error page), use a default error structure
+      // Don't log 404 or 403 as errors
+      if (upstream.status !== 404 && upstream.status !== 403) {
+        console.error("Comment add failed: Non-JSON response", upstream.status);
+      }
+      errorBody = {
+        error: "unknown_error",
+        message: "Failed to add comment",
+      };
     }
-    return NextResponse.json(
-      { message: "Failed to add comment" },
-      { status: upstream.status },
-    );
+
+    return NextResponse.json(errorBody, { status: upstream.status });
   }
 
-  return new NextResponse(text, {
-    status: upstream.status,
-    headers: {
-      "content-type":
-        upstream.headers.get("content-type") || "application/json",
-    },
-  });
+  // Parse and return the successful JSON response
+  const responseData = await upstream.json();
+  return NextResponse.json(responseData, { status: upstream.status });
 }
