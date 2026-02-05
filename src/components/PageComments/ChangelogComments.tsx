@@ -750,14 +750,13 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
     threadedComments.slice(startIndex, endIndex);
 
   /**
-   * Automatically fetch user profile data for all users visible
-   * on the current page of comments.
+   * Automatically fetch user profile data for all users in comments.
+   * We need user data for all comments to properly display hidden identity
+   * for users with privacy settings enabled (show_recent_comments or profile_public).
    */
   useEffect(() => {
-    if (currentComments.length > 0) {
-      const userIds = currentComments
-        .filter((c): c is ThreadedComment => !("isMore" in c))
-        .map((comment) => comment.user_id);
+    if (comments.length > 0) {
+      const userIds = comments.map((comment) => comment.user_id);
       // Determine which IDs need fetching
       const uniqueIds = Array.from(new Set(userIds)).filter(Boolean);
       const idsToFetch = uniqueIds.filter(
@@ -769,13 +768,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
         fetchUserData(idsToFetch);
       }
     }
-  }, [
-    currentComments,
-    userData,
-    loadingUserData,
-    failedUserData,
-    fetchUserData,
-  ]);
+  }, [comments, userData, loadingUserData, failedUserData, fetchUserData]);
 
   const toggleSortOrder = () => {
     setSortOrder((prev) => (prev === "newest" ? "oldest" : "newest"));
@@ -1128,9 +1121,16 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                   // Setup permissions and display flags
                   const flags = userData[comment.user_id]?.flags || [];
                   const premiumType = userData[comment.user_id]?.premiumtype;
+                  const commentAuthorSettings =
+                    userData[comment.user_id]?.settings;
+
+                  // Hide identity if:
+                  // 1. show_recent_comments is 0 (disabled), OR
+                  // 2. profile_public is 0 (private profile)
+                  // AND the viewer is not the comment author
                   const hideRecent =
-                    userData[comment.user_id]?.settings
-                      ?.show_recent_comments === 0 &&
+                    (commentAuthorSettings?.show_recent_comments === 0 ||
+                      commentAuthorSettings?.profile_public === 0) &&
                     currentUserId !== comment.user_id;
 
                   // Truncation logic for long comments
@@ -1170,8 +1170,10 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                   const parentUsername =
                     parentComment &&
                     !(
-                      userData[parentComment.user_id]?.settings
-                        ?.show_recent_comments === 0 &&
+                      (userData[parentComment.user_id]?.settings
+                        ?.show_recent_comments === 0 ||
+                        userData[parentComment.user_id]?.settings
+                          ?.profile_public === 0) &&
                       currentUserId !== parentComment.user_id
                     )
                       ? userData[parentComment.user_id]?.username ||
