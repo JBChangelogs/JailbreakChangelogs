@@ -197,7 +197,8 @@ export default function Header() {
     }
   }, [pathname, isAuthenticated, fetchUnreadCount]);
 
-  const headerRef = useRef<HTMLDivElement>(null);
+  const desktopHeaderRef = useRef<HTMLDivElement>(null);
+  const mobileHeaderRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     let frameId: number;
@@ -206,14 +207,20 @@ export default function Header() {
       if (frameId) return;
 
       frameId = requestAnimationFrame(() => {
-        if (headerRef.current) {
-          const rect = headerRef.current.getBoundingClientRect();
-          const height = Math.max(0, rect.bottom);
-          document.documentElement.style.setProperty(
-            "--header-height",
-            `${height}px`,
-          );
-        }
+        const desktopRect = desktopHeaderRef.current?.getBoundingClientRect();
+        const mobileRect = mobileHeaderRef.current?.getBoundingClientRect();
+
+        // Get the bottom-most point of whichever header is currently active
+        const height = Math.max(
+          0,
+          desktopRect?.bottom ?? 0,
+          mobileRect?.bottom ?? 0,
+        );
+
+        document.documentElement.style.setProperty(
+          "--header-height",
+          `${height}px`,
+        );
         frameId = 0;
       });
     };
@@ -226,9 +233,8 @@ export default function Header() {
     window.addEventListener("resize", updateHeaderHeight);
 
     const observer = new ResizeObserver(updateHeaderHeight);
-    if (headerRef.current) {
-      observer.observe(headerRef.current);
-    }
+    if (desktopHeaderRef.current) observer.observe(desktopHeaderRef.current);
+    if (mobileHeaderRef.current) observer.observe(mobileHeaderRef.current);
 
     return () => {
       window.removeEventListener("scroll", updateHeaderHeight);
@@ -565,12 +571,15 @@ export default function Header() {
     </div>
   );
   return (
-    <div ref={headerRef} className="flex flex-col">
+    <>
       {/* Desktop navbar - hidden on mobile/tablet via CSS */}
       <ServiceAvailabilityTicker />
 
       {/* Desktop navbar - hidden on mobile/tablet via CSS */}
-      <div className="sticky top-0 z-1300 hidden xl:block">
+      <div
+        ref={desktopHeaderRef}
+        className="sticky top-0 z-1300 hidden xl:block"
+      >
         <OfflineDetector />
         <NewsTicker />
         <div className="relative z-10">
@@ -585,7 +594,10 @@ export default function Header() {
       </div>
 
       {/* Mobile header - hidden on desktop via CSS */}
-      <div className="sticky top-0 z-1400 block xl:hidden">
+      <div
+        ref={mobileHeaderRef}
+        className="sticky top-0 z-1400 block xl:hidden"
+      >
         <>
           <OfflineDetector />
           <NewsTicker />
@@ -1049,6 +1061,6 @@ export default function Header() {
         isOpen={utmModalOpen}
         onClose={() => setUtmModalOpen(false)}
       />
-    </div>
+    </>
   );
 }
