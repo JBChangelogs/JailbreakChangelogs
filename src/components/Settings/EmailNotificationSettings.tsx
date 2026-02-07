@@ -1,0 +1,203 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import { Switch, Field, Label, Description } from "@headlessui/react";
+import { Button } from "@/components/ui/button";
+import { Icon } from "@/components/ui/IconWrapper";
+import { toast } from "sonner";
+import { UserData } from "@/types/auth";
+
+interface EmailNotificationSettingsProps {
+  userData: UserData | null;
+}
+
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+
+export const EmailNotificationSettings = ({
+  userData,
+}: EmailNotificationSettingsProps) => {
+  const [enabled, setEnabled] = useState(false);
+  const [isLinked, setIsLinked] = useState<boolean | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [checkingStatus, setCheckingStatus] = useState(false);
+  const [showUnlinkConfirm, setShowUnlinkConfirm] = useState(false);
+
+  useEffect(() => {
+    const checkStatus = async () => {
+      if (!userData) return;
+      setCheckingStatus(true);
+      try {
+        const res = await fetch("/api/users/email/status");
+        if (res.ok) {
+          const data = await res.json();
+          setIsLinked(data.linked === true);
+        }
+      } catch (e) {
+        console.error("Failed to check email status", e);
+      } finally {
+        setCheckingStatus(false);
+      }
+    };
+    checkStatus();
+  }, [userData]);
+
+  const handleToggle = async (checked: boolean) => {
+    if (!userData) return;
+    setLoading(true);
+
+    try {
+      if (checked) {
+        const response = await fetch("/api/notifications/emails/enable", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          setEnabled(true);
+          toast.success("Email Notifications Enabled", {
+            description: "You will now receive email notifications.",
+          });
+          setIsLinked(true);
+        } else {
+          if (response.status === 404) {
+            toast.error("Email Not Linked", {
+              description: data.message || "Please link your email first.",
+            });
+            setEnabled(false);
+          } else {
+            toast.error("Error", {
+              description: data.message || "Failed to enable notifications.",
+            });
+            setEnabled(false);
+          }
+        }
+      } else {
+        const response = await fetch("/api/notifications/emails/disable", {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+        });
+
+        if (response.ok) {
+          setEnabled(false);
+          toast.success("Email Notifications Disabled");
+        } else {
+          const data = await response.json();
+          toast.error("Error", {
+            description: data.message || "Failed to disable notifications.",
+          });
+          setEnabled(true);
+        }
+      }
+    } catch (error) {
+      console.error("Error toggling email notifications:", error);
+      toast.error("Something went wrong");
+      setEnabled(!checked);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleLinkEmail = () => {
+    window.location.href = "/api/notifications/emails/link";
+  };
+
+  const handleUnlinkClick = () => {
+    setShowUnlinkConfirm(true);
+  };
+
+  const handleUnlinkConfirm = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch("/api/users/email/unlink", { method: "DELETE" });
+      const data = await res.json();
+      if (res.ok) {
+        toast.success("Email Unlinked");
+        setIsLinked(false);
+        setEnabled(false);
+      } else {
+        toast.error("Failed to unlink", { description: data.message });
+      }
+    } catch {
+      toast.error("Error unlinking email");
+    } finally {
+      setLoading(false);
+      setShowUnlinkConfirm(false);
+    }
+  };
+
+  return (
+    <div className="mb-6">
+      <div className="flex flex-col gap-4">
+        {/* Toggle Section */}
+        {/* ... existing code ... */}
+        <Field className="flex items-center justify-between gap-4">
+          <div className="flex flex-col">
+            <Label className="text-primary-text flex items-center gap-2 text-base font-medium">
+              <Icon icon="heroicons:envelope" className="h-5 w-5" />
+              Email Notifications
+            </Label>
+            <Description className="text-secondary-text mt-1 text-sm">
+              Receive important updates and notifications via email.
+            </Description>
+          </div>
+          <Switch
+            checked={enabled}
+            onChange={handleToggle}
+            disabled={loading || !userData || !isLinked}
+            className={`group relative inline-flex h-6 w-11 cursor-pointer items-center rounded-full transition-colors focus:outline-none ${
+              enabled ? "bg-button-info" : "bg-button-secondary"
+            } ${loading || !userData || !isLinked ? "cursor-not-allowed opacity-50" : ""}`}
+          >
+            <span
+              className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                enabled ? "translate-x-6" : "translate-x-1"
+              }`}
+            />
+          </Switch>
+        </Field>
+
+        {/* Link/Unlink Email Button */}
+        <div className="flex items-center gap-2">
+          {checkingStatus ? (
+            <Button variant="outline" size="sm" disabled>
+              Loading...
+            </Button>
+          ) : isLinked ? (
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={handleUnlinkClick}
+              disabled={loading}
+            >
+              <Icon icon="heroicons:link-slash" className="mr-2 h-4 w-4" />
+              Unlink Email
+            </Button>
+          ) : (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleLinkEmail}
+              disabled={!userData || loading}
+            >
+              <Icon icon="heroicons:link" className="mr-2 h-4 w-4" />
+              Link Email
+            </Button>
+          )}
+        </div>
+      </div>
+
+      <ConfirmDialog
+        isOpen={showUnlinkConfirm}
+        onClose={() => setShowUnlinkConfirm(false)}
+        onConfirm={handleUnlinkConfirm}
+        title="Unlink Email"
+        message="Are you sure you want to unlink your email? You will stop receiving notifications."
+        confirmText="Unlink"
+        cancelText="Cancel"
+        confirmVariant="destructive"
+      />
+    </div>
+  );
+};

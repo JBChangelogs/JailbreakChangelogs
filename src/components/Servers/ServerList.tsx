@@ -20,8 +20,7 @@ import {
 import { UserAvatar } from "@/utils/avatar";
 import DOMPurify from "dompurify";
 import type { UserData } from "@/types/auth";
-import { CustomConfirmationModal } from "@/components/Modals/CustomConfirmationModal";
-
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { Button } from "@/components/ui/button";
 
 const BADGE_BASE_URL =
@@ -836,15 +835,15 @@ const ServerList: React.FC<{
       )}
 
       {deleteModalOpen && serverToDelete && (
-        <CustomConfirmationModal
-          open={deleteModalOpen}
+        <ConfirmDialog
+          isOpen={deleteModalOpen}
           onClose={() => setDeleteModalOpen(false)}
           onConfirm={confirmDeleteServer}
-          onCancel={() => setDeleteModalOpen(false)}
           title="Delete Server?"
           message="Are you sure you want to delete this server? This action cannot be undone."
           confirmText="Delete"
           cancelText="Cancel"
+          confirmVariant="destructive"
         />
       )}
     </div>

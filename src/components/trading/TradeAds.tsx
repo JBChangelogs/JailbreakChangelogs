@@ -772,7 +772,7 @@ export default function TradeAds({
         }
         confirmText="Make Offer"
         cancelText="Cancel"
-        confirmButtonClass="bg-button-info hover:bg-button-info-hover"
+        confirmVariant="default"
       />
     </div>
   );

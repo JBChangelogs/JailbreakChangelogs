@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import confetti from "canvas-confetti";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import { Dialog, DialogPanel, DialogTitle } from "@headlessui/react";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 
 export default function RedeemPage() {
   const [code, setCode] = useState("");
@@ -267,6 +268,9 @@ export default function RedeemPage() {
       setIsLoading(false);
     }
   };
+
+  const isDowngrade =
+    user && validationResult && user.premiumtype > validationResult.premiumtype;
 
   return (
     <div className="container mx-auto mb-8 max-w-[1920px] px-4 pb-16 sm:px-8">
@@ -609,96 +613,58 @@ export default function RedeemPage() {
         </div>
       </div>
 
-      <Dialog
-        open={showConfirmModal}
+      <ConfirmDialog
+        isOpen={showConfirmModal}
         onClose={() => setShowConfirmModal(false)}
-        className="relative z-50"
+        onConfirm={confirmRedeem}
+        title="Confirm Code Redemption"
+        confirmText={isDowngrade ? "Confirm Downgrade" : "Redeem Code"}
+        confirmVariant={isDowngrade ? "destructive" : "default"}
       >
-        <div
-          className="bg-overlay-bg fixed inset-0 backdrop-blur-sm"
-          aria-hidden="true"
-        />
-
-        <div className="fixed inset-0 flex items-center justify-center p-4">
-          <DialogPanel className="modal-container border-button-info bg-secondary-bg mx-auto w-full max-w-md rounded-lg border p-4 shadow-lg sm:p-6">
-            <div className="mb-4">
-              <DialogTitle className="text-primary-text text-xl font-semibold">
-                Confirm Code Redemption
-              </DialogTitle>
-              {user &&
-              validationResult &&
-              user.premiumtype > validationResult.premiumtype ? (
-                <div className="bg-button-danger/10 border-button-danger mt-4 rounded-lg border p-3">
-                  <p className="text-button-danger mb-1 text-sm font-bold">
-                    Warning: Downgrade Detected
-                  </p>
-                  <p className="text-secondary-text text-sm">
-                    You are currently{" "}
-                    <span className="text-primary-text font-bold">
-                      Tier {user.premiumtype}
-                    </span>
-                    . Redeeming this code (Tier {validationResult.premiumtype})
-                    will{" "}
-                    <span className="text-primary-text font-bold">
-                      replace your current benefits
-                    </span>{" "}
-                    and you will be downgraded.
-                  </p>
-                  <p className="text-secondary-text mt-2 text-sm font-bold">
-                    Are you sure you want to proceed?
-                  </p>
-                </div>
-              ) : (
-                <p className="text-secondary-text mt-2 text-sm">
-                  Are you sure you want to redeem this code?
-                </p>
-              )}
-            </div>
-
-            <div className="border-border-primary bg-tertiary-bg mb-6 rounded-lg border p-3">
-              <p className="text-secondary-text text-sm">
-                <span className="font-medium">Code:</span>{" "}
-                <code className="text-primary-text break-all">{code}</code>
+        <>
+          {isDowngrade ? (
+            <div className="bg-button-danger/10 border-button-danger mb-4 rounded-lg border p-3">
+              <p className="text-button-danger mb-1 text-sm font-bold">
+                Warning: Downgrade Detected
               </p>
-              {validationResult && validationResult.premiumtype > 0 && (
-                <p className="text-secondary-text mt-1 text-sm">
-                  <span className="font-medium">Tier:</span>{" "}
-                  <span className="text-primary-text">
-                    Tier {validationResult.premiumtype}
-                  </span>
-                </p>
-              )}
+              <p className="text-secondary-text text-sm">
+                You are currently{" "}
+                <span className="text-primary-text font-bold">
+                  Tier {user.premiumtype}
+                </span>
+                . Redeeming this code (Tier {validationResult!.premiumtype})
+                will{" "}
+                <span className="text-primary-text font-bold">
+                  replace your current benefits
+                </span>{" "}
+                and you will be downgraded.
+              </p>
+              <p className="text-secondary-text mt-2 text-sm font-bold">
+                Are you sure you want to proceed?
+              </p>
             </div>
+          ) : (
+            <p className="text-secondary-text mb-4 text-sm">
+              Are you sure you want to redeem this code?
+            </p>
+          )}
 
-            <div className="flex flex-col gap-3 sm:flex-row">
-              <Button
-                variant="outline"
-                onClick={() => setShowConfirmModal(false)}
-                className="w-full sm:flex-1"
-              >
-                Cancel
-              </Button>
-              <Button
-                onClick={confirmRedeem}
-                variant={
-                  user &&
-                  validationResult &&
-                  user.premiumtype > validationResult.premiumtype
-                    ? "destructive"
-                    : "default"
-                }
-                className="w-full sm:flex-1"
-              >
-                {user &&
-                validationResult &&
-                user.premiumtype > validationResult.premiumtype
-                  ? "Confirm Downgrade"
-                  : "Redeem Code"}
-              </Button>
-            </div>
-          </DialogPanel>
-        </div>
-      </Dialog>
+          <div className="border-border-primary bg-tertiary-bg mb-6 rounded-lg border p-3">
+            <p className="text-secondary-text text-sm">
+              <span className="font-medium">Code:</span>{" "}
+              <code className="text-primary-text break-all">{code}</code>
+            </p>
+            {validationResult && validationResult.premiumtype > 0 && (
+              <p className="text-secondary-text mt-1 text-sm">
+                <span className="font-medium">Tier:</span>{" "}
+                <span className="text-primary-text">
+                  Tier {validationResult.premiumtype}
+                </span>
+              </p>
+            )}
+          </div>
+        </>
+      </ConfirmDialog>
 
       <Dialog
         open={showCelebrationModal}

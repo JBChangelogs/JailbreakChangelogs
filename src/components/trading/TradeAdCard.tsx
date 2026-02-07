@@ -289,7 +289,7 @@ export const TradeAdCard: React.FC<TradeAdCardProps> = ({
         message="Are you sure you want to delete this trade ad? This action cannot be undone."
         confirmText="Delete"
         cancelText="Cancel"
-        confirmButtonClass="bg-status-error hover:bg-status-error-hover"
+        confirmVariant="destructive"
       />
     </div>
   );

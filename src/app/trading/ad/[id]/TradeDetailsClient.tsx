@@ -343,7 +343,7 @@ export default function TradeDetailsClient({
           message="Are you sure you want to delete this trade ad? This action cannot be undone."
           confirmText="Delete"
           cancelText="Cancel"
-          confirmButtonClass="bg-status-error text-form-button-text hover:bg-status-error-hover"
+          confirmVariant="destructive"
         />
 
         {/* Offer Confirmation Dialog */}
@@ -355,7 +355,7 @@ export default function TradeDetailsClient({
           message={`Are you sure you want to make an offer for Trade #${trade.id}? This will notify ${trade.user?.username || "the trade owner"} about your interest in trading for their ${trade.offering.length} items.`}
           confirmText="Make Offer"
           cancelText="Cancel"
-          confirmButtonClass="bg-button-info text-form-button-text hover:bg-button-info-hover"
+          confirmVariant="default"
         />
       </div>
     </>

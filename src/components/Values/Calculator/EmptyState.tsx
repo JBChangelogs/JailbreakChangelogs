@@ -1,10 +1,6 @@
 import React from "react";
 import { Button } from "../../ui/button";
 
-/**
- * Shared empty-state panel used across tabs.
- * Keep visual style consistent with `CustomConfirmationModal` and other surfaces.
- */
 export const EmptyState: React.FC<{
   message: string;
   onBrowse: () => void;

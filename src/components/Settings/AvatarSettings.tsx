@@ -258,7 +258,7 @@ export const AvatarSettings = ({
 
   return (
     <>
-      <Box sx={{ mt: 2 }}>
+      <Box sx={{ mt: 2, mb: 3 }}>
         <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
           <Typography
             variant="subtitle1"
