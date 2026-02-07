@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { RobloxUser } from "@/types";
-import { useAuthContext } from "@/contexts/AuthContext";
 import { useUsernameToId } from "@/hooks/useUsernameToId";
 import { toast } from "sonner";
 import { MaxStreamsError } from "@/utils/api";
@@ -55,7 +54,6 @@ export default function OGFinderClient({
   const [searchId, setSearchId] = useState(robloxId || "");
   const [isSearching, setIsSearching] = useState(false);
   const router = useRouter();
-  const { isAuthenticated, setShowLoginModal } = useAuthContext();
   const { getId } = useUsernameToId();
 
   // Compute loading state during render
@@ -65,15 +63,6 @@ export default function OGFinderClient({
     e.preventDefault();
     const input = searchId.trim();
     if (!input) return;
-
-    // Check if user is authenticated before navigation
-    if (!isAuthenticated) {
-      toast.error("You need to be logged in to use the OG Finder feature.", {
-        duration: 4000,
-      });
-      setShowLoginModal(true);
-      return;
-    }
 
     setIsSearching(true);
     try {

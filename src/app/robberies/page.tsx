@@ -335,18 +335,6 @@ function RobberyTrackerContent() {
         <NitroRobberiesRailAd />
 
         <ExperimentalFeatureBanner className="mb-6" />
-        <div className="from-status-warning/20 to-status-warning/10 border-status-warning/20 mb-6 flex items-start gap-4 rounded-lg border bg-linear-to-r p-4 shadow-sm backdrop-blur-lg">
-          <div className="flex-1">
-            <span className="text-status-warning flex items-center gap-2 text-base font-bold">
-              Service Alert:
-            </span>
-            <p className="text-primary-text mt-1 text-sm">
-              Bank Truck tracking is currently unavailable due to technical
-              issues. All other robberies are still being tracked normally. We
-              are working to restore Bank Truck tracking as soon as possible.
-            </p>
-          </div>
-        </div>
 
         {/* Header */}
         <div className="mb-6">
