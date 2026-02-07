@@ -1037,10 +1037,7 @@ export default function Header() {
 
           {/* Mobile Drawer */}
           <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
-            <SheetContent
-              side="right"
-              className="z-1450 w-60 overflow-y-auto p-0"
-            >
+            <SheetContent side="right" className="w-60 overflow-y-auto p-0">
               {drawer}
             </SheetContent>
           </Sheet>

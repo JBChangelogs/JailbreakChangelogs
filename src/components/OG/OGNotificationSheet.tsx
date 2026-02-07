@@ -88,10 +88,9 @@ export default function OGNotificationSheet({
     setIsLoadingNotifications(true);
     try {
       // Add a timestamp to bust any browser cache
-      const response = await fetch(
-        `/api/og/notify?user_id=${user.roblox_id}&t=${Date.now()}`,
-        { cache: "no-store" },
-      );
+      const response = await fetch(`/api/og/notify?user_id=${user.roblox_id}`, {
+        cache: "no-store",
+      });
       if (!response.ok) {
         throw new Error("Failed to fetch notifications");
       }
