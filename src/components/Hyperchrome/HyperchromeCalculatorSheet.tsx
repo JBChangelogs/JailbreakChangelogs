@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import Image from "next/image";
 import { Icon } from "../ui/IconWrapper";
 import { Sheet, SheetContent } from "../ui/sheet";
 import {
@@ -22,6 +23,63 @@ export default function HyperchromeCalculatorModal({
   open,
   onClose,
 }: HyperchromeCalculatorModalProps) {
+  const hyperchromeRobberyImages = [
+    { name: "HyperRed", robbery: "Tomb" },
+    { name: "HyperOrange", robbery: "Museum" },
+    { name: "HyperYellow", robbery: "Cargo Train / Passenger Train" },
+    { name: "HyperGreen", robbery: "Crater Bank / Rising City Bank" },
+    { name: "HyperDiamond", robbery: "Jewelry Store" },
+    { name: "HyperBlue", robbery: "Cargo Plane" },
+    { name: "HyperPurple", robbery: "Power Plant" },
+    { name: "HyperPink", robbery: "Crown Jewel" },
+  ];
+  const hyperchromeBorderColors: Record<string, string> = {
+    HyperRed: "#ef4444",
+    HyperOrange: "#f97316",
+    HyperYellow: "#f59e0b",
+    HyperGreen: "#22c55e",
+    HyperDiamond: "#60a5fa",
+    HyperBlue: "#3b82f6",
+    HyperPurple: "#a855f7",
+    HyperPink: "#ec4899",
+  };
+  const referenceRows = [
+    {
+      level: 1,
+      probability: "0.446%",
+      pity: 225,
+      smallProbability: "0.297%",
+      smallPity: 337,
+    },
+    {
+      level: 2,
+      probability: "0.2116%",
+      pity: 470,
+      smallProbability: "0.14%",
+      smallPity: 709,
+    },
+    {
+      level: 3,
+      probability: "0.135%",
+      pity: 740,
+      smallProbability: "0.09%",
+      smallPity: 1009,
+    },
+    {
+      level: 4,
+      probability: "0.115%",
+      pity: 870,
+      smallProbability: "0.077%",
+      smallPity: 1305,
+    },
+    {
+      level: 5,
+      probability: "0.07499%",
+      pity: 1334,
+      smallProbability: "0.04999%",
+      smallPity: 2001,
+    },
+  ];
   const [mounted, setMounted] = useState(false);
   const [level, setLevel] = useState<string>("");
   const [pity, setPity] = useState<string>("");
@@ -159,6 +217,114 @@ export default function HyperchromeCalculatorModal({
                 </Button>
               )}
             </div>
+          </div>
+
+          <div className="mb-4">
+            <details className="border-border-primary bg-tertiary-bg hover:border-border-focus rounded-lg border p-4">
+              <summary className="text-secondary-text cursor-pointer text-sm font-bold tracking-wider uppercase">
+                Pities and Chances
+              </summary>
+              <div className="text-primary-text/80 mt-3 space-y-2 text-xs leading-relaxed">
+                <p>
+                  Upon failing to obtain or evolve a HyperChrome, their pity to
+                  that color is increased by a small percentage (the higher the
+                  level, the smaller the percentage). The pity to a HyperColor
+                  can be viewed as a percentage underneath the bonus roll,
+                  provided it is above 10%, otherwise, no number is shown. If
+                  their pity reaches 100% or above, the player is guaranteed to
+                  obtain or evolve their HyperChrome.
+                </p>
+                <p>
+                  Upon successfully obtaining or evolving a HyperChrome from a
+                  bonus roll (either through chance or through pity), the
+                  player&apos;s pity for that color is reset to 0. Trading for a
+                  HyperChrome does not reset the pity.
+                </p>
+                <p className="text-primary-text/70">
+                  Below is a table containing the approximate probabilities and
+                  pities for each level. The odds are lesser and pities require
+                  more in small (0-8 players) and private servers.
+                </p>
+              </div>
+              <div className="mt-3 overflow-x-auto">
+                <table className="text-primary-text min-w-full text-xs">
+                  <thead className="text-secondary-text">
+                    <tr className="border-border-primary border-b">
+                      <th className="px-2 py-2 text-left font-semibold">
+                        Level
+                      </th>
+                      <th className="px-2 py-2 text-left font-semibold">
+                        Probability
+                      </th>
+                      <th className="px-2 py-2 text-left font-semibold">
+                        Pity Amount
+                      </th>
+                      <th className="px-2 py-2 text-left font-semibold">
+                        Small Probability
+                      </th>
+                      <th className="px-2 py-2 text-left font-semibold">
+                        Small Pity
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {referenceRows.map((row) => (
+                      <tr
+                        key={row.level}
+                        className="border-border-primary/60 border-b last:border-b-0"
+                      >
+                        <td className="px-2 py-2 font-semibold">{row.level}</td>
+                        <td className="px-2 py-2">{row.probability}</td>
+                        <td className="px-2 py-2">{row.pity}</td>
+                        <td className="px-2 py-2">{row.smallProbability}</td>
+                        <td className="px-2 py-2">{row.smallPity}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </details>
+          </div>
+
+          <div className="mb-4">
+            <details className="border-border-primary bg-tertiary-bg hover:border-border-focus rounded-lg border p-4">
+              <summary className="text-secondary-text cursor-pointer text-sm font-bold tracking-wider uppercase">
+                Hyperchrome Colors by Robbery
+              </summary>
+              <div className="text-primary-text/70 mt-2 text-xs">
+                Each robbery drops a specific HyperChrome color.
+              </div>
+              <div className="mt-4 grid grid-cols-2 gap-3">
+                {hyperchromeRobberyImages.map((item) => {
+                  const imageSrc = `https://assets.jailbreakchangelogs.xyz/assets/images/items/hyperchromes/jars/${item.name}.webp`;
+                  return (
+                    <div
+                      key={item.name}
+                      className="bg-primary-bg flex flex-col items-center gap-2 rounded-lg border p-3 text-center"
+                      style={{
+                        borderColor:
+                          hyperchromeBorderColors[item.name] ?? "#ffffff1a",
+                      }}
+                    >
+                      <div className="relative h-16 w-16">
+                        <Image
+                          src={imageSrc}
+                          alt={item.name}
+                          fill
+                          className="object-contain"
+                        />
+                      </div>
+                      <div className="text-primary-text text-xs font-semibold">
+                        {item.name}
+                      </div>
+                      <div className="text-secondary-text text-[11px]">
+                        {item.robbery}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </details>
           </div>
 
           {step === 1 && (

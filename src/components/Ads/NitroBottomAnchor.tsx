@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useMemo, useSyncExternalStore } from "react";
+import { useMediaQuery } from "@mui/material";
 import { usePathname } from "next/navigation";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { registerAdInstance, removeAdReference } from "@/utils/nitroAds";
@@ -33,10 +34,12 @@ export default function NitroBottomAnchor() {
   const createdRef = useRef(false);
   const pathname = usePathname();
   const hash = useLocationHash();
+  const isSmallScreen = useMediaQuery("(max-width: 425px)");
 
   const disableAnchor = useMemo(
-    () => pathname === "/values" && hash === "#hyper-pity-calc",
-    [pathname, hash],
+    () =>
+      isSmallScreen && pathname === "/values" && hash === "#hyper-pity-calc",
+    [isSmallScreen, pathname, hash],
   );
 
   useEffect(() => {
