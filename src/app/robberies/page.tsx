@@ -1068,7 +1068,7 @@ function RobberyTrackerContent() {
 
 export default function RobberyTrackerPage() {
   return (
-    <RobberyTrackerAuthWrapper>
+    <RobberyTrackerAuthWrapper redirectOnFail={false} requireAuth>
       <RobberyTrackerContent />
     </RobberyTrackerAuthWrapper>
   );
