@@ -11,7 +11,7 @@ import { fetchUserFavorites } from "@/utils/api";
 import { useDebounce } from "@/hooks/useDebounce";
 import { useAuthContext } from "@/contexts/AuthContext";
 import TradingGuides from "./TradingGuides";
-import HyperchromeCalculatorModal from "@/components/Hyperchrome/HyperchromeCalculatorModal";
+import HyperchromeCalculatorModal from "@/components/Hyperchrome/HyperchromeCalculatorSheet";
 import ValuesSearchControls from "./ValuesSearchControls";
 import ValuesItemsGrid from "./ValuesItemsGrid";
 import ValuesErrorBoundary from "./ValuesErrorBoundary";
@@ -127,10 +127,7 @@ export default function ValuesClient({
   const [appliedMinValue, setAppliedMinValue] = useState<number>(0);
   const [appliedMaxValue, setAppliedMaxValue] =
     useState<number>(DYNAMIC_MAX_VALUE);
-  const [showHcModal, setShowHcModal] = useState(() => {
-    if (typeof window === "undefined") return false;
-    return window.location.hash === "#hyper-pity-calc";
-  });
+  const [showSheet, setShowSheet] = useState(false);
 
   const handleCategorySelect = (filter: FilterSort) => {
     if (filterSort === filter) {
@@ -175,21 +172,20 @@ export default function ValuesClient({
   }, [user]);
 
   useEffect(() => {
-    const handleHashChange = () => {
-      if (window.location.hash === "#hyper-pity-calc") {
-        setShowHcModal(true);
-      }
+    const syncFromHash = () => {
+      setShowSheet(window.location.hash === "#hyper-pity-calc");
     };
 
-    window.addEventListener("hashchange", handleHashChange);
+    syncFromHash();
+    window.addEventListener("hashchange", syncFromHash);
 
     return () => {
-      window.removeEventListener("hashchange", handleHashChange);
+      window.removeEventListener("hashchange", syncFromHash);
     };
   }, []);
 
   const handleOpenHcModal = () => {
-    setShowHcModal(true);
+    setShowSheet(true);
     window.history.replaceState(
       null,
       "",
@@ -198,7 +194,7 @@ export default function ValuesClient({
   };
 
   const handleCloseHcModal = () => {
-    setShowHcModal(false);
+    setShowSheet(false);
     if (window.location.hash === "#hyper-pity-calc") {
       window.history.replaceState(
         null,
@@ -335,7 +331,7 @@ export default function ValuesClient({
       </div>
 
       <HyperchromeCalculatorModal
-        open={showHcModal}
+        open={showSheet}
         onClose={handleCloseHcModal}
       />
 

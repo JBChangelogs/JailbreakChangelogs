@@ -1,18 +1,57 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useMemo, useSyncExternalStore } from "react";
+import { usePathname } from "next/navigation";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { registerAdInstance, removeAdReference } from "@/utils/nitroAds";
 
 const ANCHOR_ID = "np-bottom-anchor";
 
+function useLocationHash() {
+  return useSyncExternalStore(
+    (onStoreChange) => {
+      if (typeof window === "undefined") {
+        return () => {};
+      }
+
+      const handler = () => onStoreChange();
+      window.addEventListener("hashchange", handler);
+      window.addEventListener("popstate", handler);
+
+      return () => {
+        window.removeEventListener("hashchange", handler);
+        window.removeEventListener("popstate", handler);
+      };
+    },
+    () => (typeof window === "undefined" ? "" : window.location.hash),
+    () => "",
+  );
+}
+
 export default function NitroBottomAnchor() {
   const { user } = useAuthContext();
   const createdRef = useRef(false);
+  const pathname = usePathname();
+  const hash = useLocationHash();
+
+  const disableAnchor = useMemo(
+    () => pathname === "/values" && hash === "#hyper-pity-calc",
+    [pathname, hash],
+  );
 
   useEffect(() => {
     const tier = user?.premiumtype ?? 0;
     const isSupporter = tier >= 2 && tier <= 3;
+
+    if (disableAnchor) {
+      const el = document.getElementById(ANCHOR_ID);
+      if (el) {
+        el.remove();
+      }
+      removeAdReference(ANCHOR_ID);
+      createdRef.current = false;
+      return;
+    }
 
     if (isSupporter) {
       const removeAd = () => {
@@ -89,7 +128,7 @@ export default function NitroBottomAnchor() {
     return () => {
       removeAdReference(ANCHOR_ID);
     };
-  }, [user?.premiumtype]);
+  }, [user?.premiumtype, disableAnchor]);
 
   return null;
 }
