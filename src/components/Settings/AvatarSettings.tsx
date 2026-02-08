@@ -279,7 +279,7 @@ export const AvatarSettings = ({
             </TooltipTrigger>
             <TooltipContent
               side="top"
-              className="bg-secondary-bg text-primary-text border-none shadow-[var(--color-card-shadow)]"
+              className="bg-secondary-bg text-primary-text border-none shadow-(--color-card-shadow)"
             >
               <p>Supporter Tier II</p>
             </TooltipContent>
@@ -380,17 +380,23 @@ export const AvatarSettings = ({
               variant="default"
               size="md"
               asChild
-              disabled={
-                !userData?.premiumtype ||
-                userData.premiumtype < 2 ||
-                isUploading
-              }
               className={cn(
                 "min-w-full flex-1 sm:min-w-[120px] sm:flex-none",
+                (!userData?.premiumtype ||
+                  userData.premiumtype < 2 ||
+                  isUploading) &&
+                  "cursor-not-allowed opacity-50",
                 isUploading ? "cursor-progress" : "cursor-pointer",
               )}
             >
-              <label>
+              <label
+                onClick={(e) => {
+                  if (!userData?.premiumtype || userData.premiumtype < 2) {
+                    e.preventDefault();
+                    checkAvatarAccess(userData.premiumtype || 0);
+                  }
+                }}
+              >
                 <Icon
                   icon="material-symbols:cloud-upload"
                   className="h-5 w-5"
@@ -402,20 +408,35 @@ export const AvatarSettings = ({
                   accept={UPLOAD_CONFIG.ALLOWED_FILE_TYPES.join(",")}
                   onChange={handleFileUpload}
                   style={{ display: "none" }}
+                  disabled={
+                    !userData?.premiumtype ||
+                    userData.premiumtype < 2 ||
+                    isUploading
+                  }
                 />
               </label>
             </Button>
             <Button
               variant="default"
               size="md"
-              onClick={handleUpdateAvatar}
+              onClick={() => {
+                if (!userData?.premiumtype || userData.premiumtype < 2) {
+                  checkAvatarAccess(userData.premiumtype || 0);
+                } else {
+                  handleUpdateAvatar();
+                }
+              }}
               disabled={
-                !isValidAvatar ||
-                !userData?.premiumtype ||
-                userData.premiumtype < 2 ||
+                (userData?.premiumtype &&
+                  userData.premiumtype >= 2 &&
+                  !isValidAvatar) ||
                 isUploading
               }
-              className="min-w-full flex-1 sm:min-w-[100px] sm:flex-none"
+              className={cn(
+                "min-w-full flex-1 sm:min-w-[100px] sm:flex-none",
+                (!userData?.premiumtype || userData.premiumtype < 2) &&
+                  "opacity-50",
+              )}
             >
               Update
             </Button>

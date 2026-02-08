@@ -25,6 +25,7 @@ const supporterTiers: SupporterTier[] = [
     price: "$0",
     features: [
       "Post Comments up to 200 characters",
+      "Monitor up to 3 OG Items",
       "Trade Ad Duration: 6 Hours",
       "Get your trade ads featured in our Discord for maximum reach.",
     ],
@@ -37,6 +38,7 @@ const supporterTiers: SupporterTier[] = [
     features: [
       "**All Free tier benefits**",
       "Post Comments up to 400 characters",
+      "Monitor up to 5 OG Items",
       "Trade Ad Duration: +6 Hours (12 Hours total)",
       "Custom Supporter Badge",
       "Discord Role: Supporter",
@@ -54,6 +56,7 @@ const supporterTiers: SupporterTier[] = [
       "**All Supporter I benefits**",
       "Hide all advertisements",
       "Post Comments up to 800 characters",
+      "Monitor up to 10 OG Items",
       "Trade Ad Duration: +12 Hours (24 Hours total)",
       `Upload and Use Custom Banners (${getAllowedFileExtensions()})`,
       `Upload and Use Custom Avatars (${getAllowedFileExtensions()})`,
@@ -71,6 +74,7 @@ const supporterTiers: SupporterTier[] = [
     features: [
       "**All Supporter II benefits**",
       "Post Comments up to 2,000 characters",
+      "Monitor up to 15 OG Items",
       "Trade Ad Duration: +24 Hours (48 Hours total)",
       "Comments highlighted with Gold border and badge",
       "Square Avatar Border",

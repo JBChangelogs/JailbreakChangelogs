@@ -42,10 +42,18 @@ export async function GET(request: Request) {
     if (!response.ok) {
       const errorText = await response.text();
       console.error(`OG notify API error: ${response.status} - ${errorText}`);
-      return NextResponse.json(
-        { error: "Failed to fetch OG notifications" },
-        { status: response.status },
-      );
+      let errorResponse: Record<string, unknown> = {
+        error: "Failed to fetch OG notifications",
+      };
+      try {
+        const parsedError = JSON.parse(errorText);
+        if (parsedError && typeof parsedError === "object") {
+          errorResponse = parsedError as Record<string, unknown>;
+        }
+      } catch {
+        // use default error
+      }
+      return NextResponse.json(errorResponse, { status: response.status });
     }
 
     const data = await response.json();
@@ -97,10 +105,18 @@ export async function POST(request: Request) {
     if (!response.ok) {
       const errorText = await response.text();
       console.error(`OG notify API error: ${response.status} - ${errorText}`);
-      return NextResponse.json(
-        { error: "Failed to add OG notification" },
-        { status: response.status },
-      );
+      let errorResponse: Record<string, unknown> = {
+        error: "Failed to add OG notification",
+      };
+      try {
+        const parsedError = JSON.parse(errorText);
+        if (parsedError && typeof parsedError === "object") {
+          errorResponse = parsedError as Record<string, unknown>;
+        }
+      } catch {
+        // use default error
+      }
+      return NextResponse.json(errorResponse, { status: response.status });
     }
 
     const data = await response.json();
@@ -152,10 +168,18 @@ export async function DELETE(request: Request) {
     if (!response.ok) {
       const errorText = await response.text();
       console.error(`OG notify API error: ${response.status} - ${errorText}`);
-      return NextResponse.json(
-        { error: "Failed to remove OG notification" },
-        { status: response.status },
-      );
+      let errorResponse: Record<string, unknown> = {
+        error: "Failed to remove OG notification",
+      };
+      try {
+        const parsedError = JSON.parse(errorText);
+        if (parsedError && typeof parsedError === "object") {
+          errorResponse = parsedError as Record<string, unknown>;
+        }
+      } catch {
+        // use default error
+      }
+      return NextResponse.json(errorResponse, { status: response.status });
     }
 
     const data = await response.json();

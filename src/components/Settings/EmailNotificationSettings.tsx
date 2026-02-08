@@ -27,10 +27,19 @@ export const EmailNotificationSettings = ({
       if (!userData) return;
       setCheckingStatus(true);
       try {
-        const res = await fetch("/api/users/email/status");
-        if (res.ok) {
-          const data = await res.json();
+        const [linkedRes, enabledRes] = await Promise.all([
+          fetch("/api/users/email/linked"),
+          fetch("/api/notifications/emails/status"),
+        ]);
+
+        if (linkedRes.ok) {
+          const data = await linkedRes.json();
           setIsLinked(data.linked === true);
+        }
+
+        if (enabledRes.ok) {
+          const data = await enabledRes.json();
+          setEnabled(data.enabled === true);
         }
       } catch (e) {
         console.error("Failed to check email status", e);
@@ -52,7 +61,10 @@ export const EmailNotificationSettings = ({
           headers: { "Content-Type": "application/json" },
         });
 
-        const data = await response.json();
+        let data: { message?: string } = {};
+        try {
+          data = await response.json();
+        } catch {}
 
         if (response.ok) {
           setEnabled(true);
@@ -65,13 +77,12 @@ export const EmailNotificationSettings = ({
             toast.error("Email Not Linked", {
               description: data.message || "Please link your email first.",
             });
-            setEnabled(false);
           } else {
             toast.error("Error", {
               description: data.message || "Failed to enable notifications.",
             });
-            setEnabled(false);
           }
+          setEnabled(false);
         }
       } else {
         const response = await fetch("/api/notifications/emails/disable", {
@@ -79,15 +90,27 @@ export const EmailNotificationSettings = ({
           headers: { "Content-Type": "application/json" },
         });
 
+        let data: { message?: string } = {};
+        try {
+          data = await response.json();
+        } catch {}
+
         if (response.ok) {
           setEnabled(false);
           toast.success("Email Notifications Disabled");
         } else {
-          const data = await response.json();
-          toast.error("Error", {
-            description: data.message || "Failed to disable notifications.",
-          });
-          setEnabled(true);
+          if (response.status === 404) {
+            toast.error("Email Not Linked", {
+              description: data.message || "Please link your email first.",
+            });
+            // Revert state since the action failed
+            setEnabled(true);
+          } else {
+            toast.error("Error", {
+              description: data.message || "Failed to disable notifications.",
+            });
+            setEnabled(true); // Revert state on error
+          }
         }
       }
     } catch (error) {
@@ -145,10 +168,10 @@ export const EmailNotificationSettings = ({
           <Switch
             checked={enabled}
             onChange={handleToggle}
-            disabled={loading || !userData || !isLinked}
+            disabled={loading || !userData}
             className={`group relative inline-flex h-6 w-11 cursor-pointer items-center rounded-full transition-colors focus:outline-none ${
               enabled ? "bg-button-info" : "bg-button-secondary"
-            } ${loading || !userData || !isLinked ? "cursor-not-allowed opacity-50" : ""}`}
+            } ${loading || !userData ? "cursor-not-allowed opacity-50" : ""}`}
           >
             <span
               className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${

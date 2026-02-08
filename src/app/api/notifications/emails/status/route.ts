@@ -7,12 +7,12 @@ export async function GET() {
   const token = cookieStore.get("token")?.value;
 
   if (!token) {
-    return NextResponse.json({ linked: false }, { status: 200 });
+    return NextResponse.json({ enabled: false }, { status: 200 });
   }
 
   try {
     const response = await fetch(
-      `${BASE_API_URL}/users/email/linked?token=${token}`,
+      `${BASE_API_URL}/notifications/emails?token=${token}`,
       {
         method: "GET",
         headers: {
@@ -23,13 +23,13 @@ export async function GET() {
     );
 
     if (!response.ok) {
-      return NextResponse.json({ linked: false });
+      return NextResponse.json({ enabled: false });
     }
 
     const data = await response.json();
     return NextResponse.json(data);
   } catch (error) {
-    console.error("Error checking email status:", error);
-    return NextResponse.json({ linked: false });
+    console.error("Error checking notification status:", error);
+    return NextResponse.json({ enabled: false });
   }
 }

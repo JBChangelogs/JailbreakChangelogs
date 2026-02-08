@@ -4,6 +4,7 @@ import { Icon } from "@/components/ui/IconWrapper";
 import Link from "next/link";
 import Image from "next/image";
 import { getAllowedFileExtensions } from "@/config/settings";
+import { Button } from "@/components/ui/button";
 
 interface SupporterModalProps {
   isOpen: boolean;
@@ -113,6 +114,13 @@ const getFeatureDescription = (
         current: `Current tier: ${currentLimit}`,
         required: `Required: ${requiredLimit}`,
       };
+    case "og_notification":
+      return {
+        title: "Unlock More OG Notifications",
+        description: `You've reached your limit of ${currentLimit} tracked items. Upgrade your supporter tier to track more OG items!`,
+        current: `Current limit: ${currentLimit} items`,
+        required: `Next tier limit: ${requiredLimit} items`,
+      };
     default:
       return {
         title: "Supporter Feature",
@@ -141,7 +149,7 @@ export default function SupporterModal({
   );
 
   return (
-    <Dialog open={isOpen} onClose={onClose} className="relative z-50">
+    <Dialog open={isOpen} onClose={onClose} className="relative z-[3000]">
       <div
         className="bg-overlay-bg fixed inset-0 backdrop-blur-sm"
         aria-hidden="true"
@@ -167,12 +175,14 @@ export default function SupporterModal({
                 </p>
               </div>
             </div>
-            <button
+            <Button
+              variant="ghost"
+              size="icon"
               onClick={onClose}
-              className="text-secondary-text cursor-pointer rounded-lg p-2 transition-colors"
+              className="text-secondary-text h-9 w-9 p-0"
             >
               <Icon icon="heroicons:x-mark" className="h-5 w-5" />
-            </button>
+            </Button>
           </div>
 
           {/* Content */}
@@ -302,6 +312,24 @@ export default function SupporterModal({
                                 On-Demand Inventory Scan
                               </span>
                             );
+                          } else if (feature === "og_notification") {
+                            const ogPerks = [
+                              "Monitor up to 3 OG Items",
+                              "Monitor up to 5 OG Items",
+                              "Monitor up to 10 OG Items",
+                              "Monitor up to 15 OG Items",
+                            ];
+                            return (
+                              <span className="text-secondary-text block">
+                                {
+                                  ogPerks[
+                                    recommendedTier
+                                      ? SUPPORTER_TIERS.indexOf(recommendedTier)
+                                      : 0
+                                  ]
+                                }
+                              </span>
+                            );
                           } else {
                             // fallback: show the first feature
                             return recommendedTier &&
@@ -320,19 +348,18 @@ export default function SupporterModal({
             </div>
 
             {/* Action Buttons */}
-            <div className="flex flex-col gap-3 sm:flex-row">
-              <Link
-                href="/supporting"
-                className="bg-button-info text-form-button-text hover:bg-button-info-hover flex-1 rounded-lg px-6 py-3 text-center font-medium transition-all duration-200"
-              >
-                View All Supporter Benefits
-              </Link>
-              <button
+            <div className="mt-4 flex flex-col gap-3 sm:flex-row">
+              <Button asChild size="lg" className="flex-1">
+                <Link href="/supporting">View All Supporter Benefits</Link>
+              </Button>
+              <Button
+                variant="ghost"
+                size="lg"
                 onClick={onClose}
-                className="border-border-primary bg-tertiary-bg text-secondary-text hover:bg-primary-bg hover:text-primary-text cursor-pointer rounded-lg border px-6 py-3 transition-colors"
+                className="border-border-primary bg-tertiary-bg text-secondary-text hover:bg-primary-bg hover:text-primary-text border"
               >
                 Maybe Later
-              </button>
+              </Button>
             </div>
 
             {/* Footer Note */}
