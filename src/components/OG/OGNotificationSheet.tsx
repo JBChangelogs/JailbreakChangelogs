@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { useAuthContext } from "@/contexts/AuthContext";
 import Image from "next/image";
 import {
@@ -18,6 +18,12 @@ import Link from "next/link";
 import { getCategoryColor, getCategoryIcon } from "@/utils/categoryIcons";
 import SupporterModal from "@/components/Modals/SupporterModal";
 import { useSupporterModal } from "@/hooks/useSupporterModal";
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 /**
  * Item type for partial items list
@@ -58,6 +64,7 @@ export default function OGNotificationSheet({
   const [avatarError, setAvatarError] = useState(false);
 
   const { modalState, openModal, closeModal } = useSupporterModal();
+  const sheetContentRef = useRef<HTMLDivElement | null>(null);
 
   /**
    * Fetches the partial items list from the API
@@ -290,6 +297,8 @@ export default function OGNotificationSheet({
 
   // Get unique item types for filter
   const itemTypes = Array.from(new Set(items.map((item) => item.type))).sort();
+  const currentTypeLabel =
+    selectedType === "all" ? "All Item Categories" : selectedType;
 
   // Check authentication states
   const isAuthenticated = !!user;
@@ -299,7 +308,10 @@ export default function OGNotificationSheet({
   return (
     <>
       <Sheet open={isOpen} onOpenChange={onClose}>
-        <SheetContent className="bg-secondary-bg flex h-full w-full flex-col sm:max-w-md">
+        <SheetContent
+          ref={sheetContentRef}
+          className="bg-secondary-bg flex h-full w-full flex-col sm:max-w-md"
+        >
           <SheetHeader className="shrink-0">
             <SheetTitle className="text-2xl font-bold">
               OG Notifications
@@ -422,18 +434,51 @@ export default function OGNotificationSheet({
                     </div>
 
                     {/* Type filter */}
-                    <select
-                      value={selectedType}
-                      onChange={(e) => setSelectedType(e.target.value)}
-                      className="border-border-primary bg-primary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus select h-[56px] w-full appearance-none rounded-xl border px-4 py-2 text-sm transition-all duration-300 focus:ring-1 focus:outline-none"
-                    >
-                      <option value="all">All Item Categories</option>
-                      {itemTypes.map((type) => (
-                        <option key={type} value={type}>
-                          {type}
-                        </option>
-                      ))}
-                    </select>
+                    <DropdownMenu modal={false}>
+                      <DropdownMenuTrigger asChild>
+                        <button
+                          type="button"
+                          className="border-border-primary bg-primary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus flex h-[56px] w-full items-center justify-between rounded-xl border px-4 py-2 text-sm transition-all duration-300 focus:ring-1 focus:outline-none"
+                          aria-label="Select item category"
+                        >
+                          <span className="truncate">{currentTypeLabel}</span>
+                          <Icon
+                            icon="heroicons:chevron-down"
+                            className="text-secondary-text h-5 w-5"
+                            inline={true}
+                          />
+                        </button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent
+                        align="start"
+                        container={sheetContentRef.current}
+                        className="border-border-primary bg-primary-bg text-primary-text scrollbar-thin max-h-[280px] w-[var(--radix-popper-anchor-width)] min-w-[var(--radix-popper-anchor-width)] overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
+                      >
+                        <DropdownMenuCheckboxItem
+                          checked={selectedType === "all"}
+                          onCheckedChange={(checked) => {
+                            if (checked) setSelectedType("all");
+                          }}
+                          className="focus:bg-quaternary-bg focus:text-primary-text data-[state=checked]:bg-quaternary-bg cursor-pointer rounded-lg px-3 py-2 text-sm"
+                        >
+                          All Item Categories
+                        </DropdownMenuCheckboxItem>
+                        {itemTypes.map((type) => (
+                          <DropdownMenuCheckboxItem
+                            key={type}
+                            checked={selectedType === type}
+                            onCheckedChange={(checked) => {
+                              if (checked) setSelectedType(type);
+                              else if (selectedType === type)
+                                setSelectedType("all");
+                            }}
+                            className="focus:bg-quaternary-bg focus:text-primary-text data-[state=checked]:bg-quaternary-bg cursor-pointer rounded-lg px-3 py-2 text-sm"
+                          >
+                            {type}
+                          </DropdownMenuCheckboxItem>
+                        ))}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </div>
 
                   {/* Items list */}

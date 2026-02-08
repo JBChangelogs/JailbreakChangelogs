@@ -42,7 +42,7 @@ const ChangelogSearchInput: React.FC<ChangelogSearchInputProps> = ({
           setTimeout(() => onSearchFocus(false), 200);
         }}
         placeholder={placeholder}
-        className="border-border-primary bg-secondary-bg text-secondary-text placeholder-secondary-text hover:border-border-focus focus:border-button-info w-full rounded-lg border px-4 py-2 pr-10 pl-10 focus:outline-none"
+        className="border-border-primary bg-secondary-bg text-secondary-text placeholder-secondary-text hover:border-border-focus focus:border-button-info h-[56px] w-full rounded-lg border px-4 pr-10 pl-10 focus:outline-none"
       />
       <div className="absolute top-1/2 left-3 -translate-y-1/2">
         <Icon

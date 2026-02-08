@@ -11,6 +11,13 @@ import { Icon } from "@/components/ui/IconWrapper";
 import ServerBountyGroup from "@/components/RobberyTracker/ServerBountyGroup";
 import RobberyTrackerAuthWrapper from "@/components/RobberyTracker/RobberyTrackerAuthWrapper";
 import ExperimentalFeatureBanner from "@/components/ui/ExperimentalFeatureBanner";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 type BountySort = "last_updated" | "highest_total" | "lowest_total";
 
@@ -20,6 +27,12 @@ function BountyTrackerContent() {
 
   const [searchQuery, setSearchQuery] = useState("");
   const [bountySort, setBountySort] = useState<BountySort>("last_updated");
+  const bountySortLabel =
+    bountySort === "last_updated"
+      ? "Last Updated (Newest First)"
+      : bountySort === "highest_total"
+        ? "Total Bounty (Highest to Lowest)"
+        : "Total Bounty (Lowest to Highest)";
 
   // Filter and sort bounties
   const filteredBounties = useMemo(() => {
@@ -132,24 +145,51 @@ function BountyTrackerContent() {
             <div className="flex flex-col gap-4 lg:flex-1 lg:flex-row lg:gap-4">
               {/* Bounty Sort Dropdown */}
               <div className="w-full lg:w-1/2">
-                <select
-                  className="select font-inter bg-secondary-bg text-primary-text h-[56px] min-h-[56px] w-full"
-                  value={bountySort}
-                  onChange={(e) => setBountySort(e.target.value as BountySort)}
-                >
-                  <option value="" disabled>
-                    Sort Servers
-                  </option>
-                  <option value="last_updated">
-                    Last Updated (Newest First)
-                  </option>
-                  <option value="highest_total">
-                    Total Bounty (Highest to Lowest)
-                  </option>
-                  <option value="lowest_total">
-                    Total Bounty (Lowest to Highest)
-                  </option>
-                </select>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button
+                      type="button"
+                      className="border-border-primary bg-secondary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus flex h-[56px] w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all focus:ring-1 focus:outline-none"
+                      aria-label="Sort servers"
+                    >
+                      <span className="truncate">{bountySortLabel}</span>
+                      <Icon
+                        icon="heroicons:chevron-down"
+                        className="text-secondary-text h-5 w-5"
+                      />
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent
+                    align="start"
+                    className="border-border-primary bg-secondary-bg text-primary-text scrollbar-thin max-h-[240px] w-[var(--radix-popper-anchor-width)] min-w-[var(--radix-popper-anchor-width)] overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
+                  >
+                    <DropdownMenuRadioGroup
+                      value={bountySort}
+                      onValueChange={(value) =>
+                        setBountySort(value as BountySort)
+                      }
+                    >
+                      <DropdownMenuRadioItem
+                        value="last_updated"
+                        className="focus:bg-quaternary-bg focus:text-primary-text data-[state=checked]:bg-quaternary-bg cursor-pointer rounded-lg px-3 py-2 text-sm"
+                      >
+                        Last Updated (Newest First)
+                      </DropdownMenuRadioItem>
+                      <DropdownMenuRadioItem
+                        value="highest_total"
+                        className="focus:bg-quaternary-bg focus:text-primary-text data-[state=checked]:bg-quaternary-bg cursor-pointer rounded-lg px-3 py-2 text-sm"
+                      >
+                        Total Bounty (Highest to Lowest)
+                      </DropdownMenuRadioItem>
+                      <DropdownMenuRadioItem
+                        value="lowest_total"
+                        className="focus:bg-quaternary-bg focus:text-primary-text data-[state=checked]:bg-quaternary-bg cursor-pointer rounded-lg px-3 py-2 text-sm"
+                      >
+                        Total Bounty (Lowest to Highest)
+                      </DropdownMenuRadioItem>
+                    </DropdownMenuRadioGroup>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
             </div>
           </div>

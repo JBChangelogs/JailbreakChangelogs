@@ -22,6 +22,13 @@ import { formatFullValue, formatPrice } from "@/utils/values";
 import ReactMarkdown from "react-markdown";
 import ChangelogDetailsHeader from "./ChangelogDetailsHeader";
 import { Icon } from "../ui/IconWrapper";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface Item {
   id: number;
@@ -477,18 +484,47 @@ export default function ChangelogDetailsClient({
                   Filter by item type:
                 </h3>
               </div>
-              <select
-                className="select font-inter bg-secondary-bg text-primary-text w-full"
-                value={selectedType}
-                onChange={(e) => setSelectedType(e.target.value)}
-              >
-                <option value="All Items">All Items</option>
-                {itemTypes.map((type) => (
-                  <option key={type} value={type}>
-                    {type}
-                  </option>
-                ))}
-              </select>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button
+                    type="button"
+                    className="border-border-primary bg-secondary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus flex h-[56px] w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all duration-300 focus:ring-1 focus:outline-none"
+                    aria-label="Filter by item type"
+                  >
+                    <span className="truncate">{selectedType}</span>
+                    <Icon
+                      icon="heroicons:chevron-down"
+                      className="text-secondary-text h-5 w-5"
+                      inline={true}
+                    />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  align="start"
+                  className="border-border-primary bg-secondary-bg text-primary-text scrollbar-thin max-h-[320px] w-[var(--radix-popper-anchor-width)] min-w-[var(--radix-popper-anchor-width)] overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
+                >
+                  <DropdownMenuRadioGroup
+                    value={selectedType}
+                    onValueChange={setSelectedType}
+                  >
+                    <DropdownMenuRadioItem
+                      value="All Items"
+                      className="focus:bg-quaternary-bg focus:text-primary-text data-[state=checked]:bg-quaternary-bg cursor-pointer rounded-lg px-3 py-2 text-sm"
+                    >
+                      All Items
+                    </DropdownMenuRadioItem>
+                    {itemTypes.map((type) => (
+                      <DropdownMenuRadioItem
+                        key={type}
+                        value={type}
+                        className="focus:bg-quaternary-bg focus:text-primary-text data-[state=checked]:bg-quaternary-bg cursor-pointer rounded-lg px-3 py-2 text-sm"
+                      >
+                        {type}
+                      </DropdownMenuRadioItem>
+                    ))}
+                  </DropdownMenuRadioGroup>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
 
             {/* Suggestion Type Filter */}
@@ -498,22 +534,59 @@ export default function ChangelogDetailsClient({
                   Filter by suggestion type:
                 </h3>
               </div>
-              <select
-                className="select font-inter bg-secondary-bg text-primary-text w-full"
-                value={selectedSuggestionType}
-                onChange={(e) => setSelectedSuggestionType(e.target.value)}
-              >
-                <option value="all">All Suggestion Types</option>
-                {suggestionTypes.map((type) => (
-                  <option key={type || ""} value={type || ""}>
-                    {type
-                      ? type
-                          .replace(/_/g, " ")
-                          .replace(/\b\w/g, (l) => l.toUpperCase())
-                      : "Unknown"}
-                  </option>
-                ))}
-              </select>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button
+                    type="button"
+                    className="border-border-primary bg-secondary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus flex h-[56px] w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all duration-300 focus:ring-1 focus:outline-none"
+                    aria-label="Filter by suggestion type"
+                  >
+                    <span className="truncate">
+                      {selectedSuggestionType === "all"
+                        ? "All Suggestion Types"
+                        : selectedSuggestionType
+                          ? selectedSuggestionType
+                              .replace(/_/g, " ")
+                              .replace(/\b\w/g, (l) => l.toUpperCase())
+                          : "Unknown"}
+                    </span>
+                    <Icon
+                      icon="heroicons:chevron-down"
+                      className="text-secondary-text h-5 w-5"
+                      inline={true}
+                    />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  align="start"
+                  className="border-border-primary bg-secondary-bg text-primary-text scrollbar-thin max-h-[320px] w-[var(--radix-popper-anchor-width)] min-w-[var(--radix-popper-anchor-width)] overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
+                >
+                  <DropdownMenuRadioGroup
+                    value={selectedSuggestionType}
+                    onValueChange={setSelectedSuggestionType}
+                  >
+                    <DropdownMenuRadioItem
+                      value="all"
+                      className="focus:bg-quaternary-bg focus:text-primary-text data-[state=checked]:bg-quaternary-bg cursor-pointer rounded-lg px-3 py-2 text-sm"
+                    >
+                      All Suggestion Types
+                    </DropdownMenuRadioItem>
+                    {suggestionTypes.map((type) => (
+                      <DropdownMenuRadioItem
+                        key={type || ""}
+                        value={type || ""}
+                        className="focus:bg-quaternary-bg focus:text-primary-text data-[state=checked]:bg-quaternary-bg cursor-pointer rounded-lg px-3 py-2 text-sm"
+                      >
+                        {type
+                          ? type
+                              .replace(/_/g, " ")
+                              .replace(/\b\w/g, (l) => l.toUpperCase())
+                          : "Unknown"}
+                      </DropdownMenuRadioItem>
+                    ))}
+                  </DropdownMenuRadioGroup>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           </div>
 

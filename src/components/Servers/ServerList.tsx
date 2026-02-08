@@ -2,7 +2,7 @@
 
 import React from "react";
 import { PUBLIC_API_URL } from "@/utils/api";
-import { Icon } from "@iconify/react";
+import { Icon } from "@/components/ui/IconWrapper";
 import { formatProfileDate } from "@/utils/timestamp";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { toast } from "sonner";
@@ -22,6 +22,13 @@ import DOMPurify from "dompurify";
 import type { UserData } from "@/types/auth";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const BADGE_BASE_URL =
   "https://assets.jailbreakchangelogs.xyz/assets/website_icons";
@@ -89,6 +96,9 @@ const ServerList: React.FC<{
     { value: "date_expires_desc", label: "Date Expires (Latest First)" },
     { value: "date_expires_asc", label: "Date Expires (Earliest First)" },
   ];
+  const sortLabel =
+    sortOptions.find((option) => option.value === sortOption)?.label ??
+    "Select sort option";
 
   const sortedServers = React.useMemo(() => {
     const sorted = [...servers];
@@ -554,24 +564,44 @@ const ServerList: React.FC<{
         <div className="flex flex-row items-center gap-3">
           <div className="flex items-center gap-2">
             <div className="w-64 sm:w-80">
-              <select
-                className="select bg-secondary-bg text-primary-text w-full"
-                value={sortOption}
-                onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
-                  if (onSortChange) {
-                    onSortChange(e.target.value as SortOption);
-                  }
-                }}
-              >
-                <option value="" disabled>
-                  Select sort option
-                </option>
-                {sortOptions.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button
+                    type="button"
+                    className="border-border-primary bg-secondary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus flex h-[40px] w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all focus:ring-1 focus:outline-none"
+                    aria-label="Select sort option"
+                  >
+                    <span className="truncate">{sortLabel}</span>
+                    <Icon
+                      icon="heroicons:chevron-down"
+                      className="text-secondary-text h-4 w-4"
+                    />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  align="start"
+                  className="border-border-primary bg-secondary-bg text-primary-text scrollbar-thin max-h-[240px] w-[var(--radix-popper-anchor-width)] min-w-[var(--radix-popper-anchor-width)] overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
+                >
+                  <DropdownMenuRadioGroup
+                    value={sortOption}
+                    onValueChange={(value) => {
+                      if (onSortChange) {
+                        onSortChange(value as SortOption);
+                      }
+                    }}
+                  >
+                    {sortOptions.map((option) => (
+                      <DropdownMenuRadioItem
+                        key={option.value}
+                        value={option.value}
+                        className="focus:bg-quaternary-bg focus:text-primary-text data-[state=checked]:bg-quaternary-bg cursor-pointer rounded-lg px-3 py-2 text-sm"
+                      >
+                        {option.label}
+                      </DropdownMenuRadioItem>
+                    ))}
+                  </DropdownMenuRadioGroup>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           </div>
           <Button

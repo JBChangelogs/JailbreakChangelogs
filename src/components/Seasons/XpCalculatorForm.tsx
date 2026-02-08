@@ -1,6 +1,14 @@
 import ImageModal from "@/components/ui/ImageModal";
 import { Button } from "@/components/ui/button";
 import { Season } from "@/types/seasons";
+import { Icon } from "@/components/ui/IconWrapper";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface XpCalculatorFormProps {
   currentLevel: number;
@@ -91,6 +99,11 @@ export default function XpCalculatorForm({
   };
 
   const maxXpForCurrentLevel = getMaxXpForLevel(currentLevel);
+  const levelOptions = Array.from({ length: targetLevel - 1 }, (_, i) => i + 1);
+  const currentLevelLabel = currentLevel
+    ? `Level ${currentLevel}`
+    : "Select your level";
+
   return (
     <div className="border-border-primary bg-secondary-bg hover:border-border-focus mb-8 rounded-lg border p-6">
       <h2 className="text-primary-text mb-6 text-2xl font-semibold">
@@ -118,24 +131,46 @@ export default function XpCalculatorForm({
           <label className="text-primary-text mb-2 block text-sm font-medium">
             Current Level
           </label>
-          <select
-            className="select bg-primary-bg text-primary-text h-[56px] min-h-[56px] w-full"
-            value={currentLevel}
-            onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
-              const newLevel = parseInt(e.target.value);
-              onLevelChange(newLevel);
-              onXpChange(""); // Reset XP when level changes
-            }}
-          >
-            <option value="" disabled>
-              Select your level
-            </option>
-            {Array.from({ length: targetLevel - 1 }, (_, i) => (
-              <option key={i + 1} value={i + 1}>
-                Level {i + 1}
-              </option>
-            ))}
-          </select>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                type="button"
+                className="border-border-primary bg-primary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus flex h-[56px] w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all duration-300 focus:ring-1 focus:outline-none"
+                aria-label="Select your level"
+              >
+                <span className="truncate">{currentLevelLabel}</span>
+                <Icon
+                  icon="heroicons:chevron-down"
+                  className="text-secondary-text h-5 w-5"
+                  inline={true}
+                />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
+              align="start"
+              className="border-border-primary bg-primary-bg text-primary-text scrollbar-thin max-h-[280px] w-[var(--radix-popper-anchor-width)] min-w-[var(--radix-popper-anchor-width)] overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
+            >
+              <DropdownMenuRadioGroup
+                value={currentLevel ? currentLevel.toString() : ""}
+                onValueChange={(value) => {
+                  const newLevel = parseInt(value, 10);
+                  if (Number.isNaN(newLevel)) return;
+                  onLevelChange(newLevel);
+                  onXpChange(""); // Reset XP when level changes
+                }}
+              >
+                {levelOptions.map((level) => (
+                  <DropdownMenuRadioItem
+                    key={level}
+                    value={level.toString()}
+                    className="focus:bg-quaternary-bg focus:text-primary-text data-[state=checked]:bg-quaternary-bg cursor-pointer rounded-lg px-3 py-2 text-sm"
+                  >
+                    Level {level}
+                  </DropdownMenuRadioItem>
+                ))}
+              </DropdownMenuRadioGroup>
+            </DropdownMenuContent>
+          </DropdownMenu>
           <div className="text-secondary-text mt-1 text-xs">
             Select your current level (
             <span className="font-bold">1-{targetLevel - 1}</span>)
@@ -152,7 +187,7 @@ export default function XpCalculatorForm({
             max={maxXpForCurrentLevel}
             value={currentXp}
             onChange={(e) => onXpChange(e.target.value)}
-            className="border-button-info bg-form-input text-primary-text h-[56px] min-h-[56px] w-full rounded-lg border px-3 py-3 focus:outline-none"
+            className="border-button-info bg-form-input text-primary-text h-[56px] min-h-[56px] w-full rounded-lg border px-3 py-2 focus:outline-none"
             placeholder={`0-${maxXpForCurrentLevel}`}
           />
           <div className="text-secondary-text mt-1 text-xs">

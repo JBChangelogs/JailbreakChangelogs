@@ -500,6 +500,15 @@
   select option {
     font-family: "Inter", sans-serif;
   }
+
+  /* Global dropdown rounding to match rounded-xl selects */
+  select {
+    border-radius: 0.75rem;
+  }
+
+  select option {
+    border-radius: 0.75rem;
+  }
 }
 
 ::view-transition-old(root),

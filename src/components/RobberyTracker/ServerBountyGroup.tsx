@@ -154,9 +154,14 @@ export default function ServerBountyGroup({
               className="text-secondary-text h-4 w-4"
             />
             <span className="text-secondary-text">
-              {regionData
-                ? `${regionData.city}, ${regionData.regionName}, ${regionData.country}`
-                : "Unknown"}
+              {regionData ? (
+                `${regionData.city}, ${regionData.regionName}, ${regionData.country}`
+              ) : (
+                <span className="inline-flex items-center gap-2">
+                  <Icon icon="svg-spinners:180-ring" className="h-3.5 w-3.5" />
+                  Loading...
+                </span>
+              )}
             </span>
           </div>
 
@@ -171,7 +176,7 @@ export default function ServerBountyGroup({
           )}
 
           {/* Last Update */}
-          <div className="text-tertiary-text flex items-center gap-1.5 text-xs">
+          <div className="text-secondary-text flex items-center gap-1.5 text-xs">
             <Icon icon="mdi:clock" className="h-3 w-3" />
             <span>Last update: {relativeTime || "Just now"}</span>
           </div>
