@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { BASE_API_URL } from "@/utils/api";
 
+export const dynamic = "force-dynamic";
+
 export async function GET(request: Request) {
   const cookieStore = await cookies();
   const token = cookieStore.get("token")?.value;
