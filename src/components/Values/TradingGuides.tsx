@@ -317,7 +317,7 @@ export default function TradingGuides({
             <div className="flex flex-col items-center lg:items-end">
               <div className="border-border-primary bg-tertiary-bg w-full max-w-[400px] overflow-hidden rounded-xl border shadow-lg">
                 <YouTubeEmbed
-                  videoid="yEsTOaJka3k"
+                  videoid="Yn38fUrV7zo"
                   height={225}
                   params="controls=0&rel=0"
                 />
