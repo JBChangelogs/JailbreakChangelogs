@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { BASE_API_URL } from "@/utils/api";
 
-export async function POST(request: Request) {
+export async function POST() {
   const cookieStore = await cookies();
   const token = cookieStore.get("jbcl_token")?.value;
 

@@ -9,6 +9,7 @@ import NitroGridAd from "@/components/Ads/NitroGridAd";
 import NitroValuesTopAd from "@/components/Ads/NitroValuesTopAd";
 import React from "react";
 import { Button } from "../ui/button";
+import { getFilterDisplayName } from "./valuesFilterOptions";
 
 interface ValuesItemsGridProps {
   items: Item[];
@@ -39,32 +40,6 @@ export default function ValuesItemsGrid({
 }: ValuesItemsGridProps) {
   const [page, setPage] = useState(1);
   const itemsPerPage = 24;
-
-  const getFilterDisplayName = (filterSort: string): string => {
-    const filterMap: Record<string, string> = {
-      "name-all-items": "All Items",
-      favorites: "My Favorites",
-      "name-limited-items": "Limited Items",
-      "name-seasonal-items": "Seasonal Items",
-      "name-vehicles": "Vehicles",
-      "name-spoilers": "Spoilers",
-      "name-rims": "Rims",
-      "name-body-colors": "Body Colors",
-      "name-hyperchromes": "HyperChromes",
-      "name-textures": "Body Textures",
-      "name-tire-stickers": "Tire Stickers",
-      "name-tire-styles": "Tire Styles",
-      "name-drifts": "Drifts",
-      "name-furnitures": "Furniture",
-      "name-horns": "Horns",
-      "name-weapon-skins": "Weapon Skins",
-    };
-
-    return (
-      filterMap[filterSort] ||
-      filterSort.replace("name-", "").replace("-items", "").replace(/-/g, " ")
-    );
-  };
 
   // State derivation to reset page when filters change
   const [prevFilters, setPrevFilters] = useState({

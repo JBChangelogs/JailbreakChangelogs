@@ -8,6 +8,7 @@ import { FilterSort, ValueSort } from "@/types";
 const validFilterSorts = [
   "name-all-items",
   "name-limited-items",
+  "name-untradeable-items",
   "name-seasonal-items",
   "name-vehicles",
   "name-spoilers",

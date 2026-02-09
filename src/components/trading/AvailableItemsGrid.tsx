@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState, useEffect, useRef } from "react";
 import { TradeItem } from "@/types/trading";
 import { toast } from "sonner";
@@ -23,10 +25,20 @@ import { Button } from "../ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuLabel,
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  filterGroups,
+  filterOptions,
+} from "@/components/Values/valuesFilterOptions";
+import {
+  valueSortGroups,
+  getValueSortLabel,
+} from "@/components/Values/valuesSortOptions";
 
 interface AvailableItemsGridProps {
   items: TradeItem[];
@@ -49,32 +61,36 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
 
   const [filterSort, setFilterSort] = useState<FilterSort>("name-all-items");
   const [valueSort, setValueSort] = useState<ValueSort>("cash-desc");
-  const filterLabels: Record<FilterSort, string> = {
-    "name-all-items": "All Items",
-    "name-body-colors": "Body Colors",
-    "name-textures": "Body Textures",
-    "name-drifts": "Drifts",
-    "name-furnitures": "Furniture",
-    "name-horns": "Horns",
-    "name-hyperchromes": "HyperChromes",
-    "name-limited-items": "Limited Items",
-    "name-rims": "Rims",
-    "name-seasonal-items": "Seasonal Items",
-    "name-spoilers": "Spoilers",
-    "name-tire-stickers": "Tire Stickers",
-    "name-tire-styles": "Tire Styles",
-    "name-vehicles": "Vehicles",
-    "name-weapon-skins": "Weapon Skins",
-    favorites: "Favorites",
-  };
-  const valueSortLabels: Partial<Record<ValueSort, string>> = {
-    "demand-desc": "Demand (High to Low)",
-    "demand-asc": "Demand (Low to High)",
-    "cash-desc": "Cash Value (High to Low)",
-    "cash-asc": "Cash Value (Low to High)",
-    "duped-desc": "Duped Value (High to Low)",
-    "duped-asc": "Duped Value (Low to High)",
-  };
+  const supportedFilterSorts = new Set<FilterSort>([
+    "name-all-items",
+    "name-body-colors",
+    "name-textures",
+    "name-drifts",
+    "name-furnitures",
+    "name-horns",
+    "name-hyperchromes",
+    "name-limited-items",
+    "name-rims",
+    "name-seasonal-items",
+    "name-spoilers",
+    "name-tire-stickers",
+    "name-tire-styles",
+    "name-vehicles",
+    "name-weapon-skins",
+  ]);
+  const availableFilterGroups = filterGroups
+    .map((group) => ({
+      ...group,
+      options: group.options.filter((option) =>
+        supportedFilterSorts.has(option.value),
+      ),
+    }))
+    .filter((group) => group.options.length > 0);
+  const filterLabel =
+    filterOptions.find((option) => option.value === filterSort)?.label ??
+    "Select category";
+  const summaryLabel = filterSort === "name-all-items" ? "Items" : filterLabel;
+  const sortLabel = getValueSortLabel(valueSort);
 
   const debouncedSearchQuery = useDebounce(searchQuery, 300);
   const MAX_QUERY_DISPLAY_LENGTH = 120;
@@ -110,131 +126,245 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
     };
   }, []);
 
-  const filteredItems = items
-    .filter((item) => {
-      const normalize = (str: string) =>
-        str.toLowerCase().replace(/[^a-z0-9]/g, "");
-      const tokenize = (str: string) =>
-        str.toLowerCase().match(/[a-z0-9]+/g) || [];
-      const splitAlphaNum = (str: string) => {
-        return (str.match(/[a-z]+|[0-9]+/gi) || []).map((s) => s.toLowerCase());
-      };
-      const searchNormalized = normalize(debouncedSearchQuery);
-      const searchTokens = tokenize(debouncedSearchQuery);
-      const searchAlphaNum = splitAlphaNum(debouncedSearchQuery);
-      function isTokenSubsequence(
-        searchTokens: string[],
-        nameTokens: string[],
-      ) {
-        let i = 0,
-          j = 0;
-        while (i < searchTokens.length && j < nameTokens.length) {
-          if (nameTokens[j].includes(searchTokens[i])) {
-            i++;
-          }
-          j++;
+  const baseFilteredItems = items.filter((item) => {
+    const normalize = (str: string) =>
+      str.toLowerCase().replace(/[^a-z0-9]/g, "");
+    const tokenize = (str: string) =>
+      str.toLowerCase().match(/[a-z0-9]+/g) || [];
+    const splitAlphaNum = (str: string) => {
+      return (str.match(/[a-z]+|[0-9]+/gi) || []).map((s) => s.toLowerCase());
+    };
+    const searchNormalized = normalize(debouncedSearchQuery);
+    const searchTokens = tokenize(debouncedSearchQuery);
+    const searchAlphaNum = splitAlphaNum(debouncedSearchQuery);
+    function isTokenSubsequence(searchTokens: string[], nameTokens: string[]) {
+      let i = 0,
+        j = 0;
+      while (i < searchTokens.length && j < nameTokens.length) {
+        if (nameTokens[j].includes(searchTokens[i])) {
+          i++;
         }
-        return i === searchTokens.length;
+        j++;
       }
-      const nameNormalized = normalize(item.name);
-      const typeNormalized = normalize(item.type);
-      const nameTokens = tokenize(item.name);
-      const nameAlphaNum = splitAlphaNum(item.name);
-      const matchesSearch =
-        nameNormalized.includes(searchNormalized) ||
-        typeNormalized.includes(searchNormalized) ||
-        isTokenSubsequence(searchTokens, nameTokens) ||
-        isTokenSubsequence(searchAlphaNum, nameAlphaNum);
-      if (!matchesSearch) return false;
-      if (item.tradable !== 1) return false;
+      return i === searchTokens.length;
+    }
+    const nameNormalized = normalize(item.name);
+    const typeNormalized = normalize(item.type);
+    const nameTokens = tokenize(item.name);
+    const nameAlphaNum = splitAlphaNum(item.name);
+    const matchesSearch =
+      nameNormalized.includes(searchNormalized) ||
+      typeNormalized.includes(searchNormalized) ||
+      isTokenSubsequence(searchTokens, nameTokens) ||
+      isTokenSubsequence(searchAlphaNum, nameAlphaNum);
+    if (!matchesSearch) return false;
+    if (item.tradable !== 1) return false;
 
-      switch (filterSort) {
-        case "name-limited-items":
-          return item.is_limited === 1;
-        case "name-seasonal-items":
-          return item.is_seasonal === 1;
-        case "name-vehicles":
-          return item.type.toLowerCase() === "vehicle";
-        case "name-spoilers":
-          return item.type.toLowerCase() === "spoiler";
-        case "name-rims":
-          return item.type.toLowerCase() === "rim";
-        case "name-body-colors":
-          return item.type.toLowerCase() === "body color";
-        case "name-hyperchromes":
-          return item.type.toLowerCase() === "hyperchrome";
-        case "name-textures":
-          return item.type.toLowerCase() === "texture";
-        case "name-tire-stickers":
-          return item.type.toLowerCase() === "tire sticker";
-        case "name-tire-styles":
-          return item.type.toLowerCase() === "tire style";
-        case "name-drifts":
-          return item.type.toLowerCase() === "drift";
-        case "name-furnitures":
-          return item.type.toLowerCase() === "furniture";
-        case "name-horns":
-          return item.type.toLowerCase() === "horn";
-        case "name-weapon-skins":
-          return item.type.toLowerCase() === "weapon skin";
-        default:
-          return true;
+    switch (filterSort) {
+      case "name-limited-items":
+        return item.is_limited === 1;
+      case "name-seasonal-items":
+        return item.is_seasonal === 1;
+      case "name-vehicles":
+        return item.type.toLowerCase() === "vehicle";
+      case "name-spoilers":
+        return item.type.toLowerCase() === "spoiler";
+      case "name-rims":
+        return item.type.toLowerCase() === "rim";
+      case "name-body-colors":
+        return item.type.toLowerCase() === "body color";
+      case "name-hyperchromes":
+        return item.type.toLowerCase() === "hyperchrome";
+      case "name-textures":
+        return item.type.toLowerCase() === "texture";
+      case "name-tire-stickers":
+        return item.type.toLowerCase() === "tire sticker";
+      case "name-tire-styles":
+        return item.type.toLowerCase() === "tire style";
+      case "name-drifts":
+        return item.type.toLowerCase() === "drift";
+      case "name-furnitures":
+        return item.type.toLowerCase() === "furniture";
+      case "name-horns":
+        return item.type.toLowerCase() === "horn";
+      case "name-weapon-skins":
+        return item.type.toLowerCase() === "weapon skin";
+      default:
+        return true;
+    }
+  });
+
+  const demandMap: Record<string, string> = {
+    "demand-close-to-none": "Close to none",
+    "demand-very-low": "Very Low",
+    "demand-low": "Low",
+    "demand-medium": "Medium",
+    "demand-decent": "Decent",
+    "demand-high": "High",
+    "demand-very-high": "Very High",
+    "demand-extremely-high": "Extremely High",
+  };
+
+  const trendMap: Record<string, string> = {
+    "trend-stable": "Stable",
+    "trend-rising": "Rising",
+    "trend-hyped": "Hyped",
+    "trend-dropping": "Dropping",
+    "trend-unstable": "Unstable",
+    "trend-hoarded": "Hoarded",
+    "trend-manipulated": "Manipulated",
+    "trend-recovering": "Recovering",
+  };
+
+  const applyDemandFilter = (itemsToFilter: TradeItem[]) => {
+    if (
+      valueSort.startsWith("demand-") &&
+      valueSort !== "demand-desc" &&
+      valueSort !== "demand-asc" &&
+      valueSort !== "demand-multiple-desc" &&
+      valueSort !== "demand-multiple-asc"
+    ) {
+      const targetDemand = demandMap[valueSort]?.toLowerCase();
+      if (targetDemand) {
+        return itemsToFilter.filter(
+          (item) => (item.demand ?? "").toLowerCase() === targetDemand,
+        );
       }
-    })
-    .sort((a, b) => {
-      switch (valueSort) {
-        case "cash-desc":
-          return sortByCashValue(a.cash_value, b.cash_value, "desc");
-        case "cash-asc":
-          return sortByCashValue(a.cash_value, b.cash_value, "asc");
-        case "duped-desc":
-          return sortByCashValue(a.duped_value, b.duped_value, "desc");
-        case "duped-asc":
-          return sortByCashValue(a.duped_value, b.duped_value, "asc");
-        case "demand-desc":
-          return sortByDemand(
+    }
+    return itemsToFilter;
+  };
+
+  const applyTrendFilter = (itemsToFilter: TradeItem[]) => {
+    if (valueSort.startsWith("trend-")) {
+      const targetTrend = trendMap[valueSort]?.toLowerCase();
+      if (targetTrend) {
+        return itemsToFilter.filter(
+          (item) => (item.trend ?? "").toLowerCase() === targetTrend,
+        );
+      }
+    }
+    return itemsToFilter;
+  };
+
+  const getItemLastUpdated = (item: TradeItem): number => {
+    return item.metadata?.LastUpdated ?? item.data?.last_updated ?? 0;
+  };
+
+  const sortItems = (itemsToSort: TradeItem[]): TradeItem[] => {
+    const sorted = [...itemsToSort];
+    switch (valueSort) {
+      case "random":
+        for (let i = sorted.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [sorted[i], sorted[j]] = [sorted[j], sorted[i]];
+        }
+        break;
+      case "alpha-asc":
+        sorted.sort((a, b) => a.name.localeCompare(b.name));
+        break;
+      case "alpha-desc":
+        sorted.sort((a, b) => b.name.localeCompare(a.name));
+        break;
+      case "cash-desc":
+        sorted.sort((a, b) =>
+          sortByCashValue(a.cash_value, b.cash_value, "desc"),
+        );
+        break;
+      case "cash-asc":
+        sorted.sort((a, b) =>
+          sortByCashValue(a.cash_value, b.cash_value, "asc"),
+        );
+        break;
+      case "duped-desc":
+        sorted.sort((a, b) =>
+          sortByCashValue(a.duped_value, b.duped_value, "desc"),
+        );
+        break;
+      case "duped-asc":
+        sorted.sort((a, b) =>
+          sortByCashValue(a.duped_value, b.duped_value, "asc"),
+        );
+        break;
+      case "demand-desc":
+        sorted.sort((a, b) =>
+          sortByDemand(
             a.demand || "Close to none",
             b.demand || "Close to none",
             "desc",
-          );
-        case "demand-asc":
-          return sortByDemand(
+          ),
+        );
+        break;
+      case "demand-asc":
+        sorted.sort((a, b) =>
+          sortByDemand(
             a.demand || "Close to none",
             b.demand || "Close to none",
             "asc",
-          );
-        case "times-traded-desc":
-          return (
-            (b.metadata?.TimesTraded ?? 0) - (a.metadata?.TimesTraded ?? 0)
-          );
-        case "times-traded-asc":
-          return (
-            (a.metadata?.TimesTraded ?? 0) - (b.metadata?.TimesTraded ?? 0)
-          );
-        case "unique-circulation-desc":
-          return (
+          ),
+        );
+        break;
+      case "last-updated-desc":
+        sorted.sort((a, b) => getItemLastUpdated(b) - getItemLastUpdated(a));
+        break;
+      case "last-updated-asc":
+        sorted.sort((a, b) => getItemLastUpdated(a) - getItemLastUpdated(b));
+        break;
+      case "times-traded-desc":
+        sorted.sort(
+          (a, b) =>
+            (b.metadata?.TimesTraded ?? 0) - (a.metadata?.TimesTraded ?? 0),
+        );
+        break;
+      case "times-traded-asc":
+        sorted.sort(
+          (a, b) =>
+            (a.metadata?.TimesTraded ?? 0) - (b.metadata?.TimesTraded ?? 0),
+        );
+        break;
+      case "unique-circulation-desc":
+        sorted.sort(
+          (a, b) =>
             (b.metadata?.UniqueCirculation ?? 0) -
-            (a.metadata?.UniqueCirculation ?? 0)
-          );
-        case "unique-circulation-asc":
-          return (
+            (a.metadata?.UniqueCirculation ?? 0),
+        );
+        break;
+      case "unique-circulation-asc":
+        sorted.sort(
+          (a, b) =>
             (a.metadata?.UniqueCirculation ?? 0) -
-            (b.metadata?.UniqueCirculation ?? 0)
-          );
-        case "demand-multiple-desc":
-          return (
+            (b.metadata?.UniqueCirculation ?? 0),
+        );
+        break;
+      case "demand-multiple-desc":
+        sorted.sort(
+          (a, b) =>
             (b.metadata?.DemandMultiple ?? 0) -
-            (a.metadata?.DemandMultiple ?? 0)
-          );
-        case "demand-multiple-asc":
-          return (
+            (a.metadata?.DemandMultiple ?? 0),
+        );
+        break;
+      case "demand-multiple-asc":
+        sorted.sort(
+          (a, b) =>
             (a.metadata?.DemandMultiple ?? 0) -
-            (b.metadata?.DemandMultiple ?? 0)
-          );
-        default:
-          return 0;
-      }
-    });
+            (b.metadata?.DemandMultiple ?? 0),
+        );
+        break;
+      default:
+        break;
+    }
+    return sorted;
+  };
+
+  const filteredItems = sortItems(
+    applyTrendFilter(applyDemandFilter(baseFilteredItems)),
+  );
+  const summaryMessage = debouncedSearchQuery
+    ? `Found ${filteredItems.length} ${
+        filteredItems.length === 1 ? "item" : "items"
+      } matching "${displayDebouncedSearchQuery}"${
+        filterSort !== "name-all-items" ? ` in ${filterLabel}` : ""
+      }`
+    : `Total ${summaryLabel}: ${filteredItems.length}`;
 
   // Organize items into rows for grid virtualization
   // Each row contains multiple items based on screen size
@@ -318,14 +448,9 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
                   </button>
                 )}
               </div>
-              {debouncedSearchQuery && (
-                <div className="text-secondary-text mt-2 text-sm">
-                  Found {filteredItems.length}{" "}
-                  {filteredItems.length === 1 ? "item" : "items"} matching
-                  &quot;
-                  {displayDebouncedSearchQuery}&quot;
-                </div>
-              )}
+              <div className="text-secondary-text mt-2 text-sm">
+                {summaryMessage}
+              </div>
             </div>
 
             {/* Dropdowns - Side by side on desktop */}
@@ -337,9 +462,7 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
                     className="border-border-primary bg-primary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus flex h-[56px] w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all duration-300 focus:ring-1 focus:outline-none"
                     aria-label="Filter by category"
                   >
-                    <span className="truncate">
-                      {filterLabels[filterSort] ?? "Select category"}
-                    </span>
+                    <span className="truncate">{filterLabel}</span>
                     <Icon
                       icon="heroicons:chevron-down"
                       className="text-secondary-text h-5 w-5"
@@ -361,96 +484,25 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
                       });
                     }}
                   >
-                    <DropdownMenuRadioItem
-                      value="name-all-items"
-                      className="hover:bg-quaternary-bg focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
-                    >
-                      All Items
-                    </DropdownMenuRadioItem>
-                    <DropdownMenuRadioItem
-                      value="name-body-colors"
-                      className="hover:bg-quaternary-bg focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
-                    >
-                      Body Colors
-                    </DropdownMenuRadioItem>
-                    <DropdownMenuRadioItem
-                      value="name-textures"
-                      className="hover:bg-quaternary-bg focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
-                    >
-                      Body Textures
-                    </DropdownMenuRadioItem>
-                    <DropdownMenuRadioItem
-                      value="name-drifts"
-                      className="hover:bg-quaternary-bg focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
-                    >
-                      Drifts
-                    </DropdownMenuRadioItem>
-                    <DropdownMenuRadioItem
-                      value="name-furnitures"
-                      className="hover:bg-quaternary-bg focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
-                    >
-                      Furniture
-                    </DropdownMenuRadioItem>
-                    <DropdownMenuRadioItem
-                      value="name-horns"
-                      className="hover:bg-quaternary-bg focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
-                    >
-                      Horns
-                    </DropdownMenuRadioItem>
-                    <DropdownMenuRadioItem
-                      value="name-hyperchromes"
-                      className="hover:bg-quaternary-bg focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
-                    >
-                      HyperChromes
-                    </DropdownMenuRadioItem>
-                    <DropdownMenuRadioItem
-                      value="name-limited-items"
-                      className="hover:bg-quaternary-bg focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
-                    >
-                      Limited Items
-                    </DropdownMenuRadioItem>
-                    <DropdownMenuRadioItem
-                      value="name-rims"
-                      className="hover:bg-quaternary-bg focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
-                    >
-                      Rims
-                    </DropdownMenuRadioItem>
-                    <DropdownMenuRadioItem
-                      value="name-seasonal-items"
-                      className="hover:bg-quaternary-bg focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
-                    >
-                      Seasonal Items
-                    </DropdownMenuRadioItem>
-                    <DropdownMenuRadioItem
-                      value="name-spoilers"
-                      className="hover:bg-quaternary-bg focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
-                    >
-                      Spoilers
-                    </DropdownMenuRadioItem>
-                    <DropdownMenuRadioItem
-                      value="name-tire-stickers"
-                      className="hover:bg-quaternary-bg focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
-                    >
-                      Tire Stickers
-                    </DropdownMenuRadioItem>
-                    <DropdownMenuRadioItem
-                      value="name-tire-styles"
-                      className="hover:bg-quaternary-bg focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
-                    >
-                      Tire Styles
-                    </DropdownMenuRadioItem>
-                    <DropdownMenuRadioItem
-                      value="name-vehicles"
-                      className="hover:bg-quaternary-bg focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
-                    >
-                      Vehicles
-                    </DropdownMenuRadioItem>
-                    <DropdownMenuRadioItem
-                      value="name-weapon-skins"
-                      className="hover:bg-quaternary-bg focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
-                    >
-                      Weapon Skins
-                    </DropdownMenuRadioItem>
+                    {availableFilterGroups.map((group, index) => (
+                      <React.Fragment key={group.label}>
+                        <DropdownMenuLabel className="text-secondary-text px-3 py-1 text-xs tracking-widest uppercase">
+                          {group.label}
+                        </DropdownMenuLabel>
+                        {group.options.map((option) => (
+                          <DropdownMenuRadioItem
+                            key={option.value}
+                            value={option.value}
+                            className="hover:bg-quaternary-bg focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
+                          >
+                            {option.label}
+                          </DropdownMenuRadioItem>
+                        ))}
+                        {index !== availableFilterGroups.length - 1 && (
+                          <DropdownMenuSeparator className="bg-border-primary/60" />
+                        )}
+                      </React.Fragment>
+                    ))}
                   </DropdownMenuRadioGroup>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -462,9 +514,7 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
                     className="border-border-primary bg-primary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus flex h-[56px] w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all duration-300 focus:ring-1 focus:outline-none"
                     aria-label="Sort items"
                   >
-                    <span className="truncate">
-                      {valueSortLabels[valueSort] ?? "Sort"}
-                    </span>
+                    <span className="truncate">{sortLabel}</span>
                     <Icon
                       icon="heroicons:chevron-down"
                       className="text-secondary-text h-5 w-5"
@@ -486,42 +536,25 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
                       });
                     }}
                   >
-                    <DropdownMenuRadioItem
-                      value="demand-desc"
-                      className="hover:bg-quaternary-bg focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
-                    >
-                      Demand (High to Low)
-                    </DropdownMenuRadioItem>
-                    <DropdownMenuRadioItem
-                      value="demand-asc"
-                      className="hover:bg-quaternary-bg focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
-                    >
-                      Demand (Low to High)
-                    </DropdownMenuRadioItem>
-                    <DropdownMenuRadioItem
-                      value="cash-desc"
-                      className="hover:bg-quaternary-bg focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
-                    >
-                      Cash Value (High to Low)
-                    </DropdownMenuRadioItem>
-                    <DropdownMenuRadioItem
-                      value="cash-asc"
-                      className="hover:bg-quaternary-bg focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
-                    >
-                      Cash Value (Low to High)
-                    </DropdownMenuRadioItem>
-                    <DropdownMenuRadioItem
-                      value="duped-desc"
-                      className="hover:bg-quaternary-bg focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
-                    >
-                      Duped Value (High to Low)
-                    </DropdownMenuRadioItem>
-                    <DropdownMenuRadioItem
-                      value="duped-asc"
-                      className="hover:bg-quaternary-bg focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
-                    >
-                      Duped Value (Low to High)
-                    </DropdownMenuRadioItem>
+                    {valueSortGroups.map((group, index) => (
+                      <React.Fragment key={group.label}>
+                        <DropdownMenuLabel className="text-secondary-text px-3 py-1 text-xs tracking-widest uppercase">
+                          {group.label}
+                        </DropdownMenuLabel>
+                        {group.options.map((option) => (
+                          <DropdownMenuRadioItem
+                            key={option.value}
+                            value={option.value}
+                            className="hover:bg-quaternary-bg focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
+                          >
+                            {option.label}
+                          </DropdownMenuRadioItem>
+                        ))}
+                        {index !== valueSortGroups.length - 1 && (
+                          <DropdownMenuSeparator className="bg-border-primary/60" />
+                        )}
+                      </React.Fragment>
+                    ))}
                   </DropdownMenuRadioGroup>
                 </DropdownMenuContent>
               </DropdownMenu>

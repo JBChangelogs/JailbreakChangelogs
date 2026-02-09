@@ -119,6 +119,8 @@ export const filterByType = async (
   switch (filterSort) {
     case "name-limited-items":
       return items.filter((item) => item.is_limited === 1);
+    case "name-untradeable-items":
+      return items.filter((item) => item.tradable === 0);
     case "name-seasonal-items":
       return items.filter((item) => item.is_seasonal === 1);
     case "name-vehicles":

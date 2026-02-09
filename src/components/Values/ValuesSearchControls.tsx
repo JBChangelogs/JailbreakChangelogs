@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useMemo } from "react";
+import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import { Icon } from "../ui/IconWrapper";
 import { FilterSort, ValueSort } from "@/types";
 import { useIsAuthenticated } from "@/contexts/AuthContext";
@@ -16,6 +16,12 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  filterGroups,
+  filterOptions,
+  getFilterDisplayName,
+} from "./valuesFilterOptions";
+import { valueSortGroups, getValueSortLabel } from "./valuesSortOptions";
 
 interface ValuesSearchControlsProps {
   searchTerm: string;
@@ -77,36 +83,6 @@ export default function ValuesSearchControls({
   const isItemIdSearch =
     /^id:\s*\d*$/i.test(searchTerm.trim()) && searchTerm.trim() !== "";
 
-  const getFilterDisplayName = (filterSort: string): string => {
-    const filterMap: Record<string, string> = {
-      "name-all-items": "items",
-      favorites: "favorites",
-      "name-limited-items": "limited items",
-      "name-seasonal-items": "seasonal items",
-      "name-vehicles": "vehicles",
-      "name-spoilers": "spoilers",
-      "name-rims": "rims",
-      "name-body-colors": "body colors",
-      "name-hyperchromes": "hyperchromes",
-      "name-textures": "body textures",
-      "name-tire-stickers": "tire stickers",
-      "name-tire-styles": "tire styles",
-      "name-drifts": "drifts",
-      "name-furnitures": "furniture",
-      "name-horns": "horns",
-      "name-weapon-skins": "weapon skins",
-    };
-
-    return (
-      filterMap[filterSort] ||
-      filterSort
-        .replace("name-", "")
-        .replace("-items", "")
-        .replace(/-/g, " ")
-        .toLowerCase()
-    );
-  };
-
   const sliderMarks = useMemo(() => {
     const marks = [];
     if (maxValueRange >= 10_000_000)
@@ -126,100 +102,11 @@ export default function ValuesSearchControls({
     return marks;
   }, [maxValueRange]);
 
-  const filterOptions: { value: FilterSort; label: string }[] = [
-    { value: "name-all-items", label: "All Items" },
-    { value: "favorites", label: "My Favorites" },
-    { value: "name-body-colors", label: "Body Colors" },
-    { value: "name-textures", label: "Body Textures" },
-    { value: "name-drifts", label: "Drifts" },
-    { value: "name-furnitures", label: "Furniture" },
-    { value: "name-horns", label: "Horns" },
-    { value: "name-hyperchromes", label: "HyperChromes" },
-    { value: "name-limited-items", label: "Limited Items" },
-    { value: "name-rims", label: "Rims" },
-    { value: "name-seasonal-items", label: "Seasonal Items" },
-    { value: "name-spoilers", label: "Spoilers" },
-    { value: "name-tire-stickers", label: "Tire Stickers" },
-    { value: "name-tire-styles", label: "Tire Styles" },
-    { value: "name-vehicles", label: "Vehicles" },
-    { value: "name-weapon-skins", label: "Weapon Skins" },
-  ];
-
-  const valueSortGroups: {
-    label: string;
-    options: { value: ValueSort; label: string }[];
-  }[] = [
-    {
-      label: "Alphabetically",
-      options: [
-        { value: "alpha-asc", label: "Name (A to Z)" },
-        { value: "alpha-desc", label: "Name (Z to A)" },
-      ],
-    },
-    {
-      label: "Demand",
-      options: [
-        { value: "demand-desc", label: "Demand (High to Low)" },
-        { value: "demand-asc", label: "Demand (Low to High)" },
-        { value: "demand-close-to-none", label: "Close to None" },
-        { value: "demand-decent", label: "Decent Demand" },
-        { value: "demand-extremely-high", label: "Extremely High Demand" },
-        { value: "demand-high", label: "High Demand" },
-        { value: "demand-low", label: "Low Demand" },
-        { value: "demand-medium", label: "Medium Demand" },
-        { value: "demand-very-high", label: "Very High Demand" },
-        { value: "demand-very-low", label: "Very Low Demand" },
-      ],
-    },
-    {
-      label: "Display",
-      options: [{ value: "random", label: "Random" }],
-    },
-    {
-      label: "Last Updated",
-      options: [
-        {
-          value: "last-updated-desc",
-          label: "Last Updated (Newest to Oldest)",
-        },
-        {
-          value: "last-updated-asc",
-          label: "Last Updated (Oldest to Newest)",
-        },
-      ],
-    },
-    {
-      label: "Trend",
-      options: [
-        { value: "trend-dropping", label: "Dropping Trend" },
-        { value: "trend-hoarded", label: "Hoarded Trend" },
-        { value: "trend-hyped", label: "Hyped Trend" },
-        { value: "trend-manipulated", label: "Manipulated Trend" },
-        { value: "trend-recovering", label: "Recovering Trend" },
-        { value: "trend-rising", label: "Rising Trend" },
-        { value: "trend-stable", label: "Stable Trend" },
-        { value: "trend-unstable", label: "Unstable Trend" },
-      ],
-    },
-    {
-      label: "Values",
-      options: [
-        { value: "cash-desc", label: "Cash Value (High to Low)" },
-        { value: "cash-asc", label: "Cash Value (Low to High)" },
-        { value: "duped-desc", label: "Duped Value (High to Low)" },
-        { value: "duped-asc", label: "Duped Value (Low to High)" },
-      ],
-    },
-  ];
-
   const filterLabel =
     filterOptions.find((option) => option.value === filterSort)?.label ??
     "Select category";
 
-  const sortLabel =
-    valueSortGroups
-      .flatMap((group) => group.options)
-      .find((option) => option.value === valueSort)?.label ?? "Sort";
+  const sortLabel = getValueSortLabel(valueSort);
 
   // Handle Ctrl+F to focus search input
   useEffect(() => {
@@ -323,14 +210,24 @@ export default function ValuesSearchControls({
                         });
                       }}
                     >
-                      {filterOptions.map((option) => (
-                        <DropdownMenuRadioItem
-                          key={option.value}
-                          value={option.value}
-                          className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
-                        >
-                          {option.label}
-                        </DropdownMenuRadioItem>
+                      {filterGroups.map((group, groupIndex) => (
+                        <Fragment key={group.label}>
+                          <DropdownMenuLabel className="text-secondary-text px-3 py-1 text-xs tracking-widest uppercase">
+                            {group.label}
+                          </DropdownMenuLabel>
+                          {group.options.map((option) => (
+                            <DropdownMenuRadioItem
+                              key={option.value}
+                              value={option.value}
+                              className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
+                            >
+                              {option.label}
+                            </DropdownMenuRadioItem>
+                          ))}
+                          {groupIndex !== filterGroups.length - 1 && (
+                            <DropdownMenuSeparator className="bg-border-primary/60" />
+                          )}
+                        </Fragment>
                       ))}
                     </DropdownMenuRadioGroup>
                   </DropdownMenuContent>
