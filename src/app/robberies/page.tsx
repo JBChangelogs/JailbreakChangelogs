@@ -431,19 +431,19 @@ function RobberyTrackerContent() {
                     >
                       <DropdownMenuRadioItem
                         value="all"
-                        className="focus:bg-quaternary-bg focus:text-primary-text data-[state=checked]:bg-quaternary-bg cursor-pointer rounded-lg px-3 py-2 text-sm"
+                        className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
                       >
                         All Server Sizes
                       </DropdownMenuRadioItem>
                       <DropdownMenuRadioItem
                         value="big"
-                        className="focus:bg-quaternary-bg focus:text-primary-text data-[state=checked]:bg-quaternary-bg cursor-pointer rounded-lg px-3 py-2 text-sm"
+                        className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
                       >
                         Big Servers (9+ Players)
                       </DropdownMenuRadioItem>
                       <DropdownMenuRadioItem
                         value="small"
-                        className="focus:bg-quaternary-bg focus:text-primary-text data-[state=checked]:bg-quaternary-bg cursor-pointer rounded-lg px-3 py-2 text-sm"
+                        className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
                       >
                         Small Servers (0-8 Players)
                       </DropdownMenuRadioItem>
@@ -481,19 +481,19 @@ function RobberyTrackerContent() {
                       >
                         <DropdownMenuRadioItem
                           value="none"
-                          className="focus:bg-quaternary-bg focus:text-primary-text data-[state=checked]:bg-quaternary-bg cursor-pointer rounded-lg px-3 py-2 text-sm"
+                          className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
                         >
                           Sort by Difficulty
                         </DropdownMenuRadioItem>
                         <DropdownMenuRadioItem
                           value="easy-to-hard"
-                          className="focus:bg-quaternary-bg focus:text-primary-text data-[state=checked]:bg-quaternary-bg cursor-pointer rounded-lg px-3 py-2 text-sm"
+                          className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
                         >
                           Difficulty (Easy First)
                         </DropdownMenuRadioItem>
                         <DropdownMenuRadioItem
                           value="hard-to-easy"
-                          className="focus:bg-quaternary-bg focus:text-primary-text data-[state=checked]:bg-quaternary-bg cursor-pointer rounded-lg px-3 py-2 text-sm"
+                          className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
                         >
                           Difficulty (Hard First)
                         </DropdownMenuRadioItem>
@@ -527,13 +527,13 @@ function RobberyTrackerContent() {
                       >
                         <DropdownMenuRadioItem
                           value="a-z"
-                          className="focus:bg-quaternary-bg focus:text-primary-text data-[state=checked]:bg-quaternary-bg cursor-pointer rounded-lg px-3 py-2 text-sm"
+                          className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
                         >
                           Name (A to Z)
                         </DropdownMenuRadioItem>
                         <DropdownMenuRadioItem
                           value="z-a"
-                          className="focus:bg-quaternary-bg focus:text-primary-text data-[state=checked]:bg-quaternary-bg cursor-pointer rounded-lg px-3 py-2 text-sm"
+                          className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
                         >
                           Name (Z to A)
                         </DropdownMenuRadioItem>
@@ -569,13 +569,13 @@ function RobberyTrackerContent() {
                     >
                       <DropdownMenuRadioItem
                         value="newest"
-                        className="focus:bg-quaternary-bg focus:text-primary-text data-[state=checked]:bg-quaternary-bg cursor-pointer rounded-lg px-3 py-2 text-sm"
+                        className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
                       >
                         Logged (Newest to Oldest)
                       </DropdownMenuRadioItem>
                       <DropdownMenuRadioItem
                         value="oldest"
-                        className="focus:bg-quaternary-bg focus:text-primary-text data-[state=checked]:bg-quaternary-bg cursor-pointer rounded-lg px-3 py-2 text-sm"
+                        className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
                       >
                         Logged (Oldest to Newest)
                       </DropdownMenuRadioItem>

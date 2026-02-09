@@ -171,19 +171,19 @@ function BountyTrackerContent() {
                     >
                       <DropdownMenuRadioItem
                         value="last_updated"
-                        className="focus:bg-quaternary-bg focus:text-primary-text data-[state=checked]:bg-quaternary-bg cursor-pointer rounded-lg px-3 py-2 text-sm"
+                        className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
                       >
                         Last Updated (Newest First)
                       </DropdownMenuRadioItem>
                       <DropdownMenuRadioItem
                         value="highest_total"
-                        className="focus:bg-quaternary-bg focus:text-primary-text data-[state=checked]:bg-quaternary-bg cursor-pointer rounded-lg px-3 py-2 text-sm"
+                        className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
                       >
                         Total Bounty (Highest to Lowest)
                       </DropdownMenuRadioItem>
                       <DropdownMenuRadioItem
                         value="lowest_total"
-                        className="focus:bg-quaternary-bg focus:text-primary-text data-[state=checked]:bg-quaternary-bg cursor-pointer rounded-lg px-3 py-2 text-sm"
+                        className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
                       >
                         Total Bounty (Lowest to Highest)
                       </DropdownMenuRadioItem>
