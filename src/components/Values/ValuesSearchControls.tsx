@@ -5,7 +5,6 @@ import { Icon } from "../ui/IconWrapper";
 import { FilterSort, ValueSort } from "@/types";
 import { useIsAuthenticated } from "@/contexts/AuthContext";
 import { toast } from "sonner";
-import { safeSessionStorage } from "@/utils/safeStorage";
 import { Slider } from "@/components/ui/slider";
 import {
   DropdownMenu,
@@ -201,10 +200,6 @@ export default function ValuesSearchControls({
                           return;
                         }
                         setFilterSort(nextValue);
-                        safeSessionStorage.setItem(
-                          "valuesFilterSort",
-                          nextValue,
-                        );
                         window.umami?.track("Values Filter Change", {
                           filter: nextValue,
                         });
@@ -260,10 +255,6 @@ export default function ValuesSearchControls({
                       onValueChange={(newValue) => {
                         const nextValue = newValue as ValueSort;
                         setValueSort(nextValue);
-                        safeSessionStorage.setItem(
-                          "valuesValueSort",
-                          nextValue,
-                        );
                         window.umami?.track("Values Sort Change", {
                           sort: nextValue,
                         });

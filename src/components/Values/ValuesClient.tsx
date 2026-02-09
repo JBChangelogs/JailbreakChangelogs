@@ -1,11 +1,10 @@
 "use client";
 
-import { useState, useEffect, useRef, Suspense, useMemo } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { use } from "react";
 import { Icon } from "@/components/ui/IconWrapper";
-import { Item, FilterSort, ValueSort, FavoriteItem } from "@/types";
+import { Item, FilterSort, FavoriteItem } from "@/types";
 import { sortAndFilterItems, parseCashValue } from "@/utils/values";
-import SearchParamsHandler from "@/components/SearchParamsHandler";
 import CategoryIcons from "@/components/Items/CategoryIcons";
 import { fetchUserFavorites } from "@/utils/api";
 import { useDebounce } from "@/hooks/useDebounce";
@@ -15,7 +14,9 @@ import HyperchromeCalculatorModal from "@/components/Hyperchrome/HyperchromeCalc
 import ValuesSearchControls from "./ValuesSearchControls";
 import ValuesItemsGrid from "./ValuesItemsGrid";
 import ValuesErrorBoundary from "./ValuesErrorBoundary";
-import { safeSessionStorage } from "@/utils/safeStorage";
+import { useValueSortState } from "@/hooks/useValueSortState";
+import { filterOptions } from "./valuesFilterOptions";
+import { valueSortOptions } from "./valuesSortOptions";
 import NitroValuesVideoPlayer from "@/components/Ads/NitroValuesVideoPlayer";
 import NitroValuesRailAd from "@/components/Ads/NitroValuesRailAd";
 import { Button } from "@/components/ui/button";
@@ -37,75 +38,30 @@ export default function ValuesClient({
 
   const [searchTerm, setSearchTerm] = useState("");
 
-  // Initialize with defaults to match server-side rendering
-  const [filterSort, setFilterSort] = useState<FilterSort>("name-all-items");
-  const [valueSort, setValueSort] = useState<ValueSort>("cash-desc");
+  const validFilterSorts = useMemo(
+    () => filterOptions.map((option) => option.value),
+    [],
+  );
+  const validValueSorts = useMemo(
+    () => valueSortOptions.map((option) => option.value),
+    [],
+  );
 
-  // Sync state with URL params or sessionStorage after mount
-  useEffect(() => {
-    // Filter Sort Logic
-    const searchParams = new URLSearchParams(window.location.search);
-    const urlFilterSort = searchParams.get("filterSort");
-    if (urlFilterSort) {
-      safeSessionStorage.setItem("valuesFilterSort", urlFilterSort);
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setFilterSort(urlFilterSort as FilterSort);
-    } else {
-      const storedFilter = safeSessionStorage.getItem(
-        "valuesFilterSort",
-      ) as FilterSort;
-      if (storedFilter) {
-        setFilterSort(storedFilter);
-      }
-    }
-
-    // Value Sort Logic
-    const urlValueSort = searchParams.get("valueSort");
-    if (urlValueSort) {
-      safeSessionStorage.setItem("valuesValueSort", urlValueSort);
-      setValueSort(urlValueSort as ValueSort);
-    } else {
-      const savedSort = safeSessionStorage.getItem("valuesValueSort");
-      const validSorts: ValueSort[] = [
-        "random",
-        "alpha-asc",
-        "alpha-desc",
-        "cash-desc",
-        "cash-asc",
-        "duped-desc",
-        "duped-asc",
-        "demand-desc",
-        "demand-asc",
-        "last-updated-desc",
-        "last-updated-asc",
-        "times-traded-desc",
-        "times-traded-asc",
-        "unique-circulation-desc",
-        "unique-circulation-asc",
-        "demand-multiple-desc",
-        "demand-multiple-asc",
-        "demand-close-to-none",
-        "demand-very-low",
-        "demand-low",
-        "demand-medium",
-        "demand-decent",
-        "demand-high",
-        "demand-very-high",
-        "demand-extremely-high",
-        "trend-stable",
-        "trend-rising",
-        "trend-hyped",
-        "trend-dropping",
-        "trend-unstable",
-        "trend-hoarded",
-        "trend-manipulated",
-        "trend-recovering",
-      ];
-      if (savedSort && validSorts.includes(savedSort as ValueSort)) {
-        setValueSort(savedSort as ValueSort);
-      }
-    }
-  }, []);
+  const { filterSort, setFilterSort, valueSort, setValueSort } =
+    useValueSortState({
+      defaultFilterSort: "name-all-items",
+      defaultValueSort: "cash-desc",
+      storageKeys: {
+        filterSort: "valuesFilterSort",
+        valueSort: "valuesValueSort",
+      },
+      validFilterSorts,
+      validValueSorts,
+      urlSync: {
+        enabled: true,
+        cleanupPath: "/values",
+      },
+    });
   const [sortedItems, setSortedItems] = useState<Item[]>([]);
   const [favorites, setFavorites] = useState<number[]>([]);
   const searchSectionRef = useRef<HTMLDivElement>(null);
@@ -132,10 +88,8 @@ export default function ValuesClient({
   const handleCategorySelect = (filter: FilterSort) => {
     if (filterSort === filter) {
       setFilterSort("name-all-items");
-      safeSessionStorage.setItem("valuesFilterSort", "name-all-items");
     } else {
       setFilterSort(filter);
-      safeSessionStorage.setItem("valuesFilterSort", filter);
     }
 
     if (searchSectionRef.current) {
@@ -252,13 +206,6 @@ export default function ValuesClient({
           }
         }
       `}</style>
-      <Suspense fallback={<div style={{ display: "none" }} />}>
-        <SearchParamsHandler
-          setFilterSort={setFilterSort}
-          setValueSort={setValueSort}
-        />
-      </Suspense>
-
       <div className="border-border-primary bg-secondary-bg mb-8 rounded-lg border p-6">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-start">
           <div className="flex-1">
@@ -378,8 +325,6 @@ export default function ValuesClient({
               setRangeValue([0, DYNAMIC_MAX_VALUE]);
               setAppliedMinValue(0);
               setAppliedMaxValue(DYNAMIC_MAX_VALUE);
-              safeSessionStorage.setItem("valuesFilterSort", "name-all-items");
-              safeSessionStorage.setItem("valuesValueSort", "cash-desc");
             }}
             filterSort={filterSort}
             valueSort={valueSort}

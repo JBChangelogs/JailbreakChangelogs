@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import { TradeItem } from "@/types/trading";
 import { toast } from "sonner";
 import {
@@ -9,7 +9,11 @@ import {
   isVideoItem,
   getVideoPath,
 } from "@/utils/images";
-import { sortByCashValue, sortByDemand, formatFullValue } from "@/utils/values";
+import {
+  filterByValueSort,
+  sortByValueSort,
+  formatFullValue,
+} from "@/utils/values";
 import { getDemandColor, getTrendColor } from "@/utils/badgeColors";
 import { CategoryIconBadge, getCategoryColor } from "@/utils/categoryIcons";
 import { TradeAdErrorModal } from "./TradeAdErrorModal";
@@ -38,7 +42,9 @@ import {
 import {
   valueSortGroups,
   getValueSortLabel,
+  valueSortOptions,
 } from "@/components/Values/valuesSortOptions";
+import { useValueSortState } from "@/hooks/useValueSortState";
 
 interface AvailableItemsGridProps {
   items: TradeItem[];
@@ -59,25 +65,43 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
   const [showErrorModal, setShowErrorModal] = useState(false);
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
 
-  const [filterSort, setFilterSort] = useState<FilterSort>("name-all-items");
-  const [valueSort, setValueSort] = useState<ValueSort>("cash-desc");
-  const supportedFilterSorts = new Set<FilterSort>([
-    "name-all-items",
-    "name-body-colors",
-    "name-textures",
-    "name-drifts",
-    "name-furnitures",
-    "name-horns",
-    "name-hyperchromes",
-    "name-limited-items",
-    "name-rims",
-    "name-seasonal-items",
-    "name-spoilers",
-    "name-tire-stickers",
-    "name-tire-styles",
-    "name-vehicles",
-    "name-weapon-skins",
-  ]);
+  const supportedFilterSorts = useMemo(
+    () =>
+      new Set<FilterSort>([
+        "name-all-items",
+        "name-body-colors",
+        "name-textures",
+        "name-drifts",
+        "name-furnitures",
+        "name-horns",
+        "name-hyperchromes",
+        "name-limited-items",
+        "name-rims",
+        "name-seasonal-items",
+        "name-spoilers",
+        "name-tire-stickers",
+        "name-tire-styles",
+        "name-vehicles",
+        "name-weapon-skins",
+      ]),
+    [],
+  );
+  const validFilterSorts = useMemo(
+    () => Array.from(supportedFilterSorts),
+    [supportedFilterSorts],
+  );
+  const validValueSorts = useMemo(
+    () => valueSortOptions.map((option) => option.value),
+    [],
+  );
+
+  const { filterSort, setFilterSort, valueSort, setValueSort } =
+    useValueSortState({
+      defaultFilterSort: "name-all-items",
+      defaultValueSort: "cash-desc",
+      validFilterSorts,
+      validValueSorts,
+    });
   const availableFilterGroups = filterGroups
     .map((group) => ({
       ...group,
@@ -194,169 +218,25 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
     }
   });
 
-  const demandMap: Record<string, string> = {
-    "demand-close-to-none": "Close to none",
-    "demand-very-low": "Very Low",
-    "demand-low": "Low",
-    "demand-medium": "Medium",
-    "demand-decent": "Decent",
-    "demand-high": "High",
-    "demand-very-high": "Very High",
-    "demand-extremely-high": "Extremely High",
-  };
-
-  const trendMap: Record<string, string> = {
-    "trend-stable": "Stable",
-    "trend-rising": "Rising",
-    "trend-hyped": "Hyped",
-    "trend-dropping": "Dropping",
-    "trend-unstable": "Unstable",
-    "trend-hoarded": "Hoarded",
-    "trend-manipulated": "Manipulated",
-    "trend-recovering": "Recovering",
-  };
-
-  const applyDemandFilter = (itemsToFilter: TradeItem[]) => {
-    if (
-      valueSort.startsWith("demand-") &&
-      valueSort !== "demand-desc" &&
-      valueSort !== "demand-asc" &&
-      valueSort !== "demand-multiple-desc" &&
-      valueSort !== "demand-multiple-asc"
-    ) {
-      const targetDemand = demandMap[valueSort]?.toLowerCase();
-      if (targetDemand) {
-        return itemsToFilter.filter(
-          (item) => (item.demand ?? "").toLowerCase() === targetDemand,
-        );
-      }
-    }
-    return itemsToFilter;
-  };
-
-  const applyTrendFilter = (itemsToFilter: TradeItem[]) => {
-    if (valueSort.startsWith("trend-")) {
-      const targetTrend = trendMap[valueSort]?.toLowerCase();
-      if (targetTrend) {
-        return itemsToFilter.filter(
-          (item) => (item.trend ?? "").toLowerCase() === targetTrend,
-        );
-      }
-    }
-    return itemsToFilter;
-  };
-
-  const getItemLastUpdated = (item: TradeItem): number => {
-    return item.metadata?.LastUpdated ?? item.data?.last_updated ?? 0;
-  };
-
-  const sortItems = (itemsToSort: TradeItem[]): TradeItem[] => {
-    const sorted = [...itemsToSort];
-    switch (valueSort) {
-      case "random":
-        for (let i = sorted.length - 1; i > 0; i--) {
-          const j = Math.floor(Math.random() * (i + 1));
-          [sorted[i], sorted[j]] = [sorted[j], sorted[i]];
-        }
-        break;
-      case "alpha-asc":
-        sorted.sort((a, b) => a.name.localeCompare(b.name));
-        break;
-      case "alpha-desc":
-        sorted.sort((a, b) => b.name.localeCompare(a.name));
-        break;
-      case "cash-desc":
-        sorted.sort((a, b) =>
-          sortByCashValue(a.cash_value, b.cash_value, "desc"),
-        );
-        break;
-      case "cash-asc":
-        sorted.sort((a, b) =>
-          sortByCashValue(a.cash_value, b.cash_value, "asc"),
-        );
-        break;
-      case "duped-desc":
-        sorted.sort((a, b) =>
-          sortByCashValue(a.duped_value, b.duped_value, "desc"),
-        );
-        break;
-      case "duped-asc":
-        sorted.sort((a, b) =>
-          sortByCashValue(a.duped_value, b.duped_value, "asc"),
-        );
-        break;
-      case "demand-desc":
-        sorted.sort((a, b) =>
-          sortByDemand(
-            a.demand || "Close to none",
-            b.demand || "Close to none",
-            "desc",
-          ),
-        );
-        break;
-      case "demand-asc":
-        sorted.sort((a, b) =>
-          sortByDemand(
-            a.demand || "Close to none",
-            b.demand || "Close to none",
-            "asc",
-          ),
-        );
-        break;
-      case "last-updated-desc":
-        sorted.sort((a, b) => getItemLastUpdated(b) - getItemLastUpdated(a));
-        break;
-      case "last-updated-asc":
-        sorted.sort((a, b) => getItemLastUpdated(a) - getItemLastUpdated(b));
-        break;
-      case "times-traded-desc":
-        sorted.sort(
-          (a, b) =>
-            (b.metadata?.TimesTraded ?? 0) - (a.metadata?.TimesTraded ?? 0),
-        );
-        break;
-      case "times-traded-asc":
-        sorted.sort(
-          (a, b) =>
-            (a.metadata?.TimesTraded ?? 0) - (b.metadata?.TimesTraded ?? 0),
-        );
-        break;
-      case "unique-circulation-desc":
-        sorted.sort(
-          (a, b) =>
-            (b.metadata?.UniqueCirculation ?? 0) -
-            (a.metadata?.UniqueCirculation ?? 0),
-        );
-        break;
-      case "unique-circulation-asc":
-        sorted.sort(
-          (a, b) =>
-            (a.metadata?.UniqueCirculation ?? 0) -
-            (b.metadata?.UniqueCirculation ?? 0),
-        );
-        break;
-      case "demand-multiple-desc":
-        sorted.sort(
-          (a, b) =>
-            (b.metadata?.DemandMultiple ?? 0) -
-            (a.metadata?.DemandMultiple ?? 0),
-        );
-        break;
-      case "demand-multiple-asc":
-        sorted.sort(
-          (a, b) =>
-            (a.metadata?.DemandMultiple ?? 0) -
-            (b.metadata?.DemandMultiple ?? 0),
-        );
-        break;
-      default:
-        break;
-    }
-    return sorted;
-  };
-
-  const filteredItems = sortItems(
-    applyTrendFilter(applyDemandFilter(baseFilteredItems)),
+  const filteredItems = sortByValueSort(
+    filterByValueSort(baseFilteredItems, valueSort, {
+      getDemand: (item) => item.demand,
+      getTrend: (item) => item.trend,
+    }),
+    valueSort,
+    {
+      getCashValue: (item) => item.cash_value,
+      getDupedValue: (item) => item.duped_value,
+      getDemand: (item) => item.demand,
+      getLastUpdated: (item) =>
+        item.metadata?.LastUpdated ?? item.data?.last_updated ?? 0,
+      getTimesTraded: (item) => item.metadata?.TimesTraded ?? 0,
+      getUniqueCirculation: (item) => item.metadata?.UniqueCirculation ?? 0,
+      getDemandMultiple: (item) => item.metadata?.DemandMultiple ?? 0,
+      defaultDemand: "Close to none",
+      normalizeLastUpdated: false,
+      fallbackSortForDemandTrend: "none",
+    },
   );
   const summaryMessage = debouncedSearchQuery
     ? `Found ${filteredItems.length} ${

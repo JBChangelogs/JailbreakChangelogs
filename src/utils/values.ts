@@ -22,6 +22,28 @@ export const trendOrder = [
   "Hyped",
 ] as const;
 
+export const demandValueMap: Record<string, string> = {
+  "demand-close-to-none": "Close to none",
+  "demand-very-low": "Very Low",
+  "demand-low": "Low",
+  "demand-medium": "Medium",
+  "demand-decent": "Decent",
+  "demand-high": "High",
+  "demand-very-high": "Very High",
+  "demand-extremely-high": "Extremely High",
+};
+
+export const trendValueMap: Record<string, string> = {
+  "trend-stable": "Stable",
+  "trend-rising": "Rising",
+  "trend-hyped": "Hyped",
+  "trend-dropping": "Dropping",
+  "trend-unstable": "Unstable",
+  "trend-hoarded": "Hoarded",
+  "trend-manipulated": "Manipulated",
+  "trend-recovering": "Recovering",
+};
+
 export const parseCashValue = (value: string | null): number => {
   if (value === null || value === "N/A" || value === "null") return -1;
   const numericPart = value.replace(/[^0-9.]/g, "");
@@ -89,6 +111,241 @@ export const sortByTrend = (
     ? trendOrder.indexOf(normalizedB as (typeof trendOrder)[number])
     : -1;
   return order === "desc" ? bIndex - aIndex : aIndex - bIndex;
+};
+
+type ValueSortGetters<T> = {
+  getCashValue?: (item: T) => string;
+  getDupedValue?: (item: T) => string;
+  getDemand?: (item: T) => string | null | undefined;
+  getTrend?: (item: T) => string | null | undefined;
+  getLastUpdated?: (item: T) => number | null | undefined;
+  getTimesTraded?: (item: T) => number | null | undefined;
+  getUniqueCirculation?: (item: T) => number | null | undefined;
+  getDemandMultiple?: (item: T) => number | null | undefined;
+};
+
+type ValueSortOptions<T> = ValueSortGetters<T> & {
+  defaultDemand?: string;
+  fallbackSortForDemandTrend?: "cash-desc" | "none";
+  normalizeLastUpdated?: boolean;
+};
+
+const normalizeValueText = (value: string | null | undefined): string =>
+  (value ?? "").toLowerCase().trim();
+
+const normalizeLastUpdated = (value: number, shouldNormalize: boolean) =>
+  shouldNormalize && value < 10000000000 ? value * 1000 : value;
+
+export const filterByValueSort = <T>(
+  items: T[],
+  valueSort: ValueSort,
+  getters: Pick<ValueSortGetters<T>, "getDemand" | "getTrend"> = {},
+): T[] => {
+  const getDemand =
+    getters.getDemand ??
+    ((item: T) => (item as { demand?: string | null }).demand);
+  const getTrend =
+    getters.getTrend ??
+    ((item: T) => (item as { trend?: string | null }).trend);
+
+  if (
+    valueSort.startsWith("demand-") &&
+    valueSort !== "demand-desc" &&
+    valueSort !== "demand-asc" &&
+    valueSort !== "demand-multiple-desc" &&
+    valueSort !== "demand-multiple-asc"
+  ) {
+    const targetDemand = demandValueMap[valueSort];
+    if (!targetDemand) return items;
+    const target = normalizeValueText(targetDemand);
+    return items.filter(
+      (item) => normalizeValueText(getDemand(item)) === target,
+    );
+  }
+
+  if (valueSort.startsWith("trend-")) {
+    const targetTrend = trendValueMap[valueSort];
+    if (!targetTrend) return items;
+    const target = normalizeValueText(targetTrend);
+    return items.filter(
+      (item) => normalizeValueText(getTrend(item)) === target,
+    );
+  }
+
+  return items;
+};
+
+export const sortByValueSort = <T>(
+  items: T[],
+  valueSort: ValueSort,
+  options: ValueSortOptions<T> = {},
+): T[] => {
+  const sorted = [...items];
+  const {
+    getCashValue = (item: T) => (item as { cash_value: string }).cash_value,
+    getDupedValue = (item: T) => (item as { duped_value: string }).duped_value,
+    getDemand = (item: T) => (item as { demand?: string | null }).demand,
+    getLastUpdated = (item: T) =>
+      (item as { last_updated?: number | null }).last_updated ?? 0,
+    getTimesTraded = (item: T) =>
+      (item as { metadata?: { TimesTraded?: number | null } }).metadata
+        ?.TimesTraded ?? 0,
+    getUniqueCirculation = (item: T) =>
+      (item as { metadata?: { UniqueCirculation?: number | null } }).metadata
+        ?.UniqueCirculation ?? 0,
+    getDemandMultiple = (item: T) =>
+      (item as { metadata?: { DemandMultiple?: number | null } }).metadata
+        ?.DemandMultiple ?? 0,
+    defaultDemand,
+    fallbackSortForDemandTrend = "cash-desc",
+    normalizeLastUpdated: shouldNormalizeLastUpdated = true,
+  } = options;
+
+  const demandDefaultValue = defaultDemand;
+  const demandValue = (item: T) => {
+    const value = getDemand(item);
+    if (value === null || value === undefined || value === "") {
+      return demandDefaultValue ?? "";
+    }
+    return value;
+  };
+
+  switch (valueSort) {
+    case "random":
+      for (let i = sorted.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [sorted[i], sorted[j]] = [sorted[j], sorted[i]];
+      }
+      break;
+    case "alpha-asc":
+      sorted.sort((a, b) =>
+        (a as { name: string }).name.localeCompare(
+          (b as { name: string }).name,
+        ),
+      );
+      break;
+    case "alpha-desc":
+      sorted.sort((a, b) =>
+        (b as { name: string }).name.localeCompare(
+          (a as { name: string }).name,
+        ),
+      );
+      break;
+    case "cash-desc":
+      sorted.sort((a, b) =>
+        sortByCashValue(getCashValue(a), getCashValue(b), "desc"),
+      );
+      break;
+    case "cash-asc":
+      sorted.sort((a, b) =>
+        sortByCashValue(getCashValue(a), getCashValue(b), "asc"),
+      );
+      break;
+    case "duped-desc":
+      sorted.sort((a, b) =>
+        sortByCashValue(getDupedValue(a), getDupedValue(b), "desc"),
+      );
+      break;
+    case "duped-asc":
+      sorted.sort((a, b) =>
+        sortByCashValue(getDupedValue(a), getDupedValue(b), "asc"),
+      );
+      break;
+    case "demand-desc":
+      sorted.sort((a, b) =>
+        sortByDemand(demandValue(a), demandValue(b), "desc"),
+      );
+      break;
+    case "demand-asc":
+      sorted.sort((a, b) =>
+        sortByDemand(demandValue(a), demandValue(b), "asc"),
+      );
+      break;
+    case "last-updated-desc":
+      sorted.sort(
+        (a, b) =>
+          normalizeLastUpdated(
+            getLastUpdated(b) ?? 0,
+            shouldNormalizeLastUpdated,
+          ) -
+          normalizeLastUpdated(
+            getLastUpdated(a) ?? 0,
+            shouldNormalizeLastUpdated,
+          ),
+      );
+      break;
+    case "last-updated-asc":
+      sorted.sort(
+        (a, b) =>
+          normalizeLastUpdated(
+            getLastUpdated(a) ?? 0,
+            shouldNormalizeLastUpdated,
+          ) -
+          normalizeLastUpdated(
+            getLastUpdated(b) ?? 0,
+            shouldNormalizeLastUpdated,
+          ),
+      );
+      break;
+    case "times-traded-desc":
+      sorted.sort(
+        (a, b) => (getTimesTraded(b) ?? 0) - (getTimesTraded(a) ?? 0),
+      );
+      break;
+    case "times-traded-asc":
+      sorted.sort(
+        (a, b) => (getTimesTraded(a) ?? 0) - (getTimesTraded(b) ?? 0),
+      );
+      break;
+    case "unique-circulation-desc":
+      sorted.sort(
+        (a, b) =>
+          (getUniqueCirculation(b) ?? 0) - (getUniqueCirculation(a) ?? 0),
+      );
+      break;
+    case "unique-circulation-asc":
+      sorted.sort(
+        (a, b) =>
+          (getUniqueCirculation(a) ?? 0) - (getUniqueCirculation(b) ?? 0),
+      );
+      break;
+    case "demand-multiple-desc":
+      sorted.sort(
+        (a, b) => (getDemandMultiple(b) ?? 0) - (getDemandMultiple(a) ?? 0),
+      );
+      break;
+    case "demand-multiple-asc":
+      sorted.sort(
+        (a, b) => (getDemandMultiple(a) ?? 0) - (getDemandMultiple(b) ?? 0),
+      );
+      break;
+    case "demand-close-to-none":
+    case "demand-very-low":
+    case "demand-low":
+    case "demand-medium":
+    case "demand-decent":
+    case "demand-high":
+    case "demand-very-high":
+    case "demand-extremely-high":
+    case "trend-stable":
+    case "trend-rising":
+    case "trend-hyped":
+    case "trend-dropping":
+    case "trend-unstable":
+    case "trend-hoarded":
+    case "trend-manipulated":
+    case "trend-recovering":
+      if (fallbackSortForDemandTrend === "cash-desc") {
+        sorted.sort((a, b) =>
+          sortByCashValue(getCashValue(a), getCashValue(b), "desc"),
+        );
+      }
+      break;
+    default:
+      break;
+  }
+
+  return sorted;
 };
 
 // Helper function to get the current cash value for an item
@@ -237,214 +494,21 @@ export const sortAndFilterItems = async (
     }
   }
 
-  // Apply demand filtering if a specific demand level is selected
-  if (
-    valueSort.startsWith("demand-") &&
-    valueSort !== "demand-desc" &&
-    valueSort !== "demand-asc" &&
-    valueSort !== "demand-multiple-desc" &&
-    valueSort !== "demand-multiple-asc"
-  ) {
-    // Map the valueSort to the exact demand string from demandOrder
-    const demandMap: Record<string, string> = {
-      "demand-close-to-none": "Close to none",
-      "demand-very-low": "Very Low",
-      "demand-low": "Low",
-      "demand-medium": "Medium",
-      "demand-decent": "Decent",
-      "demand-high": "High",
-      "demand-very-high": "Very High",
-      "demand-extremely-high": "Extremely High",
-    };
+  result = filterByValueSort(result, valueSort, {
+    getDemand: getEffectiveDemand,
+    getTrend: getEffectiveTrend,
+  });
 
-    const formattedDemand = demandMap[valueSort];
-
-    result = result.filter(
-      (item) => getEffectiveDemand(item) === formattedDemand,
-    );
-  }
-
-  // Apply trend filtering if a specific trend level is selected
-  if (valueSort.startsWith("trend-")) {
-    // Map the valueSort to the exact trend string from trendOrder
-    const trendMap: Record<string, string> = {
-      "trend-stable": "Stable",
-      "trend-rising": "Rising",
-      "trend-hyped": "Hyped",
-      "trend-dropping": "Dropping",
-      "trend-unstable": "Unstable",
-      "trend-hoarded": "Hoarded",
-      "trend-manipulated": "Manipulated",
-      "trend-recovering": "Recovering",
-    };
-
-    const formattedTrend = trendMap[valueSort];
-
-    result = result.filter(
-      (item) => getEffectiveTrend(item) === formattedTrend,
-    );
-  }
-
-  // Apply value sorting
-  switch (valueSort) {
-    case "random":
-      // Fisher-Yates shuffle algorithm
-      for (let i = result.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [result[i], result[j]] = [result[j], result[i]];
-      }
-      break;
-    case "alpha-asc":
-      result = result.sort((a, b) => a.name.localeCompare(b.name));
-      break;
-    case "alpha-desc":
-      result = result.sort((a, b) => b.name.localeCompare(a.name));
-      break;
-    case "cash-desc":
-      result = result.sort((a, b) =>
-        sortByCashValue(
-          getEffectiveCashValue(a),
-          getEffectiveCashValue(b),
-          "desc",
-        ),
-      );
-      break;
-    case "cash-asc":
-      result = result.sort((a, b) =>
-        sortByCashValue(
-          getEffectiveCashValue(a),
-          getEffectiveCashValue(b),
-          "asc",
-        ),
-      );
-      break;
-    case "duped-desc":
-      result = result.sort((a, b) =>
-        sortByCashValue(
-          getEffectiveDupedValue(a),
-          getEffectiveDupedValue(b),
-          "desc",
-        ),
-      );
-      break;
-    case "duped-asc":
-      result = result.sort((a, b) =>
-        sortByCashValue(
-          getEffectiveDupedValue(a),
-          getEffectiveDupedValue(b),
-          "asc",
-        ),
-      );
-      break;
-    case "demand-desc":
-      result = result.sort((a, b) =>
-        sortByDemand(getEffectiveDemand(a), getEffectiveDemand(b), "desc"),
-      );
-      break;
-    case "demand-asc":
-      result = result.sort((a, b) =>
-        sortByDemand(getEffectiveDemand(a), getEffectiveDemand(b), "asc"),
-      );
-      break;
-    case "last-updated-desc":
-      result = result.sort((a, b) => {
-        // Normalize timestamps to milliseconds
-        const aTime =
-          a.last_updated < 10000000000 ? a.last_updated * 1000 : a.last_updated;
-        const bTime =
-          b.last_updated < 10000000000 ? b.last_updated * 1000 : b.last_updated;
-        return bTime - aTime;
-      });
-      break;
-    case "last-updated-asc":
-      result = result.sort((a, b) => {
-        // Normalize timestamps to milliseconds
-        const aTime =
-          a.last_updated < 10000000000 ? a.last_updated * 1000 : a.last_updated;
-        const bTime =
-          b.last_updated < 10000000000 ? b.last_updated * 1000 : b.last_updated;
-        return aTime - bTime;
-      });
-      break;
-    case "times-traded-desc":
-      result = result.sort((a, b) => {
-        const aTimesTraded = a.metadata?.TimesTraded ?? 0;
-        const bTimesTraded = b.metadata?.TimesTraded ?? 0;
-        return bTimesTraded - aTimesTraded;
-      });
-      break;
-    case "times-traded-asc":
-      result = result.sort((a, b) => {
-        const aTimesTraded = a.metadata?.TimesTraded ?? 0;
-        const bTimesTraded = b.metadata?.TimesTraded ?? 0;
-        return aTimesTraded - bTimesTraded;
-      });
-      break;
-    case "unique-circulation-desc":
-      result = result.sort((a, b) => {
-        const aUniqueCirculation = a.metadata?.UniqueCirculation ?? 0;
-        const bUniqueCirculation = b.metadata?.UniqueCirculation ?? 0;
-        return bUniqueCirculation - aUniqueCirculation;
-      });
-      break;
-    case "unique-circulation-asc":
-      result = result.sort((a, b) => {
-        const aUniqueCirculation = a.metadata?.UniqueCirculation ?? 0;
-        const bUniqueCirculation = b.metadata?.UniqueCirculation ?? 0;
-        return aUniqueCirculation - bUniqueCirculation;
-      });
-      break;
-    case "demand-multiple-desc":
-      result = result.sort((a, b) => {
-        const aDemandMultiple = a.metadata?.DemandMultiple ?? 0;
-        const bDemandMultiple = b.metadata?.DemandMultiple ?? 0;
-        return bDemandMultiple - aDemandMultiple;
-      });
-      break;
-    case "demand-multiple-asc":
-      result = result.sort((a, b) => {
-        const aDemandMultiple = a.metadata?.DemandMultiple ?? 0;
-        const bDemandMultiple = b.metadata?.DemandMultiple ?? 0;
-        return aDemandMultiple - bDemandMultiple;
-      });
-      break;
-    // For demand filter cases, we already filtered above, so sort by cash value (high to low)
-    case "demand-close-to-none":
-    case "demand-very-low":
-    case "demand-low":
-    case "demand-medium":
-    case "demand-decent":
-    case "demand-high":
-    case "demand-very-high":
-    case "demand-extremely-high":
-      result = result.sort((a, b) =>
-        sortByCashValue(
-          getEffectiveCashValue(a),
-          getEffectiveCashValue(b),
-          "desc",
-        ),
-      );
-      break;
-    // For trend filter cases, we already filtered above, so sort by cash value (high to low)
-    case "trend-stable":
-    case "trend-rising":
-    case "trend-hyped":
-    case "trend-dropping":
-    case "trend-unstable":
-    case "trend-hoarded":
-    case "trend-manipulated":
-    case "trend-recovering":
-      result = result.sort((a, b) =>
-        sortByCashValue(
-          getEffectiveCashValue(a),
-          getEffectiveCashValue(b),
-          "desc",
-        ),
-      );
-      break;
-  }
-
-  return result;
+  return sortByValueSort(result, valueSort, {
+    getCashValue: getEffectiveCashValue,
+    getDupedValue: getEffectiveDupedValue,
+    getDemand: getEffectiveDemand,
+    getTrend: getEffectiveTrend,
+    getLastUpdated: (item) => item.last_updated,
+    getTimesTraded: (item) => item.metadata?.TimesTraded ?? 0,
+    getUniqueCirculation: (item) => item.metadata?.UniqueCirculation ?? 0,
+    getDemandMultiple: (item) => item.metadata?.DemandMultiple ?? 0,
+  });
 };
 
 /**
