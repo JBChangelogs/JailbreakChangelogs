@@ -16,6 +16,8 @@ import { logError } from "@/services/logger";
 import OGUserInfo from "./OGUserInfo";
 import OGFilters from "./OGFilters";
 import OGItemsGrid from "./OGItemsGrid";
+import OGNotificationSheet from "./OGNotificationSheet";
+import { Button } from "@/components/ui/button";
 
 interface OGItem {
   tradePopularMetric: number;
@@ -82,6 +84,7 @@ export default function OGFinderResults({
 
   const [selectedItem, setSelectedItem] = useState<OGItem | null>(null);
   const [showHistoryModal, setShowHistoryModal] = useState(false);
+  const [showNotificationSheet, setShowNotificationSheet] = useState(false);
 
   // Extract all unique user IDs from OG data
   const allUserIds = useMemo(() => {
@@ -402,17 +405,40 @@ export default function OGFinderResults({
 
   return (
     <div className="space-y-6">
-      {/* Search Form */}
-      <SearchForm
-        searchId={searchId}
-        setSearchId={setSearchId}
-        handleSearch={(e) => {
-          e.preventDefault();
-          handleSearch(searchId);
-        }}
-        isLoading={isLoading}
-        externalIsLoading={false}
-      />
+      {/* Search Form and Notification Button */}
+      <div className="flex items-start gap-3">
+        <div className="flex-1">
+          <SearchForm
+            searchId={searchId}
+            setSearchId={setSearchId}
+            handleSearch={(e) => {
+              e.preventDefault();
+              handleSearch(searchId);
+            }}
+            isLoading={isLoading}
+            externalIsLoading={false}
+          />
+        </div>
+        <Button
+          onClick={() => {
+            setShowNotificationSheet(true);
+            if (typeof window !== "undefined" && window.umami) {
+              window.umami.track("Open OG Notification Sheet");
+            }
+          }}
+          variant="default"
+          size="lg"
+          title="Get Notified"
+        >
+          <span className="flex items-center gap-2">
+            <Icon
+              icon="material-symbols:notifications-outline"
+              className="h-5 w-5"
+            />
+            <span className="hidden sm:inline">Get Notified</span>
+          </span>
+        </Button>
+      </div>
 
       {/* Error Display */}
       {error && (
@@ -541,6 +567,12 @@ export default function OGFinderResults({
           username={robloxId ? getUsername(robloxId) : undefined}
         />
       )}
+
+      {/* OG Notification Sheet */}
+      <OGNotificationSheet
+        isOpen={showNotificationSheet}
+        onClose={() => setShowNotificationSheet(false)}
+      />
     </div>
   );
 }

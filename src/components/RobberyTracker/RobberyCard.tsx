@@ -319,9 +319,14 @@ export default function RobberyCard({ robbery }: RobberyCardProps) {
           <div className="space-y-1">
             <span className="text-secondary-text text-sm">Region:</span>
             <span className="text-primary-text block font-medium">
-              {regionData
-                ? `${regionData.city}, ${regionData.regionName}, ${regionData.country}`
-                : "Unknown"}
+              {regionData ? (
+                `${regionData.city}, ${regionData.regionName}, ${regionData.country}`
+              ) : (
+                <span className="text-secondary-text inline-flex items-center gap-2">
+                  <Icon icon="svg-spinners:180-ring" className="h-3.5 w-3.5" />
+                  Loading...
+                </span>
+              )}
             </span>
           </div>
 

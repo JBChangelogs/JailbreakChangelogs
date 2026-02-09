@@ -42,6 +42,7 @@ import {
   updateUserNotificationPreferences,
   type NotificationPreferenceEntry,
 } from "@/services/notificationPreferencesService";
+import { EmailNotificationSettings } from "@/components/Settings/EmailNotificationSettings";
 
 export default function SettingsPage() {
   const { user, isLoading } = useAuthContext();
@@ -514,7 +515,6 @@ export default function SettingsPage() {
                         backgroundColor:
                           "color-mix(in srgb, var(--color-button-info), transparent 80%)",
                         transition: "background-color 0.5s ease",
-                        borderRadius: 1,
                       }
                     : {}),
                 }}
@@ -600,7 +600,6 @@ export default function SettingsPage() {
                                 backgroundColor:
                                   "color-mix(in srgb, var(--color-button-info), transparent 80%)",
                                 transition: "background-color 0.5s ease",
-                                borderRadius: 1,
                               }
                             : {}),
                         }}
@@ -758,7 +757,6 @@ export default function SettingsPage() {
                     backgroundColor:
                       "color-mix(in srgb, var(--color-button-info), transparent 80%)",
                     transition: "background-color 0.5s ease",
-                    borderRadius: 1,
                   }
                 : {}),
             }}
@@ -817,6 +815,9 @@ export default function SettingsPage() {
             </Typography>
             <Divider sx={{ mb: 2 }} />
 
+            <EmailNotificationSettings userData={userData} />
+            <Divider sx={{ mb: 2, opacity: 0.5 }} />
+
             {notificationPrefsError && (
               <Typography
                 variant="body2"
@@ -868,7 +869,6 @@ export default function SettingsPage() {
                               backgroundColor:
                                 "color-mix(in srgb, var(--color-button-info), transparent 80%)",
                               transition: "background-color 0.5s ease",
-                              borderRadius: 1,
                             }
                           : {}),
                       }}

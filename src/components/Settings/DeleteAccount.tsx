@@ -1,19 +1,11 @@
 import { useState, useEffect } from "react";
-import {
-  Box,
-  Typography,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Alert,
-} from "@mui/material";
 import { useRouter } from "next/navigation";
 import { deleteAccount } from "@/services/settingsService";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { Icon } from "@/components/ui/IconWrapper";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 
 export const DeleteAccount = () => {
   const [open, setOpen] = useState(false);
@@ -58,7 +50,6 @@ export const DeleteAccount = () => {
       await deleteAccount();
       await logout();
 
-      // Show success message before redirecting
       toast.success("Account successfully deleted", {
         duration: 3000,
       });
@@ -75,26 +66,15 @@ export const DeleteAccount = () => {
   };
 
   return (
-    <Box
-      sx={{
-        borderRadius: 1,
-      }}
-    >
-      <Box sx={{ mb: 2 }}>
-        <Typography
-          variant="h6"
-          sx={{
-            color: "var(--color-button-danger)",
-            fontWeight: "bold",
-            mb: 1,
-          }}
-        >
+    <div className="rounded-lg">
+      <div className="mb-2">
+        <h6 className="text-button-danger mb-1 text-lg font-bold">
           Account Deletion
-        </Typography>
-        <Typography variant="body2" sx={{ color: "var(--color-primary-text)" }}>
+        </h6>
+        <p className="text-primary-text text-sm">
           Delete your account and all associated data
-        </Typography>
-      </Box>
+        </p>
+      </div>
 
       <Button
         variant="destructive"
@@ -104,119 +84,58 @@ export const DeleteAccount = () => {
         Delete Account
       </Button>
 
-      <Dialog
-        open={open}
+      <ConfirmDialog
+        isOpen={open}
         onClose={handleClose}
-        slotProps={{
-          paper: {
-            sx: {
-              backgroundColor: "var(--color-primary-bg)",
-              border: "1px solid var(--color-button-info)",
-              borderRadius: "8px",
-              boxShadow: "var(--color-card-shadow)",
-              color: "var(--color-primary-text)",
-              maxWidth: "500px",
-              width: "100%",
-            },
-          },
-        }}
+        onConfirm={handleDelete}
+        title="Delete Account"
+        confirmText={
+          !showFinalWarning
+            ? timeLeft > 0
+              ? `Please wait ${timeLeft}s`
+              : "Delete Account"
+            : "Confirm Delete"
+        }
+        confirmVariant="destructive"
+        confirmDisabled={!showFinalWarning && timeLeft > 0}
       >
-        <DialogTitle
-          sx={{
-            color: "var(--color-button-danger)",
-            backgroundColor: "var(--color-primary-bg)",
-            pb: 2,
-            display: "flex",
-            alignItems: "center",
-            gap: 1,
-            fontSize: "1.25rem",
-            fontWeight: 600,
-            px: 3,
-            py: 2,
-          }}
-        >
-          <Icon
-            icon="heroicons:exclamation-triangle"
-            className="h-6 w-6"
-            style={{ color: "var(--color-button-danger)" }}
-          />
-          Delete Account
-        </DialogTitle>
-        <DialogContent
-          sx={{
-            pt: 3,
-            px: 3,
-            py: 2,
-            backgroundColor: "var(--color-primary-bg)",
-          }}
-        >
-          {!showFinalWarning ? (
-            <>
-              <Typography
-                variant="body1"
-                sx={{ mb: 3, color: "var(--color-primary-text)" }}
-              >
-                Are you sure you want to delete your account?
-              </Typography>
-
-              {error && (
-                <Alert severity="error" sx={{ mt: 2 }}>
-                  {error}
-                </Alert>
-              )}
-            </>
-          ) : (
-            <Box sx={{ textAlign: "center", py: 2 }}>
+        {!showFinalWarning ? (
+          <>
+            <div className="text-button-danger mb-4 flex items-center gap-2">
               <Icon
                 icon="heroicons:exclamation-triangle"
-                className="mb-2 h-12 w-12"
+                className="h-6 w-6"
                 style={{ color: "var(--color-button-danger)" }}
               />
-              <Typography
-                variant="h6"
-                sx={{ color: "var(--color-button-danger)", mb: 2 }}
-              >
-                Final Warning
-              </Typography>
-              <Typography
-                variant="body1"
-                sx={{ color: "var(--color-primary-text)" }}
-              >
-                This is your last chance to cancel. Once you click delete, your
-                account will be permanently removed.
-              </Typography>
-            </Box>
-          )}
-        </DialogContent>
-        <DialogActions
-          sx={{
-            backgroundColor: "var(--color-primary-bg)",
-            p: 2,
-            px: 3,
-            py: 2,
-          }}
-        >
-          <Button
-            variant="ghost"
-            onClick={handleClose}
-            className="text-secondary-text hover:text-primary-text"
-          >
-            Cancel
-          </Button>
-          <Button
-            variant="destructive"
-            onClick={handleDelete}
-            disabled={!showFinalWarning && timeLeft > 0}
-            className="min-w-[100px]"
-          >
-            {!showFinalWarning
-              ? timeLeft > 0
-                ? `Please wait ${timeLeft}s`
-                : "Delete Account"
-              : "Confirm Delete"}
-          </Button>
-        </DialogActions>
-      </Dialog>
-    </Box>
+              <span className="text-lg font-semibold">Warning</span>
+            </div>
+            <p className="text-primary-text mb-6">
+              Are you sure you want to delete your account?
+            </p>
+
+            {error && (
+              <div className="mt-2 rounded bg-red-100 p-2 text-red-800">
+                {error}
+              </div>
+            )}
+          </>
+        ) : (
+          <div className="py-2 text-center">
+            <Icon
+              icon="heroicons:exclamation-triangle"
+              className="mx-auto mb-2 h-12 w-12"
+              style={{ color: "var(--color-button-danger)" }}
+            />
+            <h6 className="text-button-danger mb-2 text-lg font-bold">
+              Final Warning
+            </h6>
+            <p className="text-primary-text">
+              This is your last chance to cancel. Once you click delete, your
+              account will be permanently removed.
+            </p>
+          </div>
+        )}
+      </ConfirmDialog>
+    </div>
   );
 };

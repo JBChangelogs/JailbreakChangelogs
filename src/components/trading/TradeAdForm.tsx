@@ -6,7 +6,7 @@ import { ItemGrid } from "./ItemGrid";
 import { Button, Skeleton, Tooltip } from "@mui/material";
 import { toast } from "sonner";
 import { AvailableItemsGrid } from "./AvailableItemsGrid";
-import { CustomConfirmationModal } from "../Modals/CustomConfirmationModal";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useSupporterModal } from "@/hooks/useSupporterModal";
@@ -549,26 +549,26 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
           onClose={() => setLoginModalOpen(false)}
         />
         <div className="space-y-6">
-          <CustomConfirmationModal
-            open={showRestoreModal}
+          <ConfirmDialog
+            isOpen={showRestoreModal}
             onClose={() => setShowRestoreModal(false)}
             title="Restore Trade Ad?"
             message="Do you want to restore your previously added items or start a new trade ad?"
             confirmText="Restore"
             cancelText="Start New"
             onConfirm={handleRestoreItems}
-            onCancel={handleStartNewTradeAd}
+            confirmVariant="default"
           />
 
-          <CustomConfirmationModal
-            open={showSuccessModal}
+          <ConfirmDialog
+            isOpen={showSuccessModal}
             onClose={handleSuccessModalClose}
+            onConfirm={handleEnableBotDMs}
             title="Trade Ad Created!"
             message="Want to know when someone wants to trade with you? Turn on bot DMs to get notifications on Discord."
             confirmText="Enable Bot DMs"
             cancelText="Not Now"
-            onConfirm={handleEnableBotDMs}
-            onCancel={handleSuccessModalClose}
+            confirmVariant="default"
           />
 
           {/* Clear Confirmation Modal - Multi-option like calculator */}

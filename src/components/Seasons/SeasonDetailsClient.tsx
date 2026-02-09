@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import SeasonHeader from "@/components/Seasons/SeasonHeader";
 import SeasonNavigation from "@/components/Seasons/SeasonNavigation";
+import { Icon } from "@/components/ui/IconWrapper";
 import ImageGallery from "@/components/Seasons/ImageGallery";
 import ChangelogComments from "@/components/PageComments/ChangelogComments";
 import { Button } from "@/components/ui/button";
@@ -120,10 +121,8 @@ export default function SeasonDetailsClient({
           />
           <SeasonNavigation
             seasonList={filteredSeasonList}
-            fullSeasonList={seasonList}
             selectedId={season.season.toString()}
             onSeasonSelect={handleSeasonSelect}
-            onGoToLatestSeason={handleGoToLatestSeason}
           />
 
           <div className="grid grid-cols-1 gap-8 xl:grid-cols-12">
@@ -133,6 +132,37 @@ export default function SeasonDetailsClient({
                 Season {season.season} / {season.title}
               </h1>
               <p className="text-secondary-text mb-4">{season.description}</p>
+
+              {/* Go to Current Season - Only show when not on latest */}
+              {season.season !== latestSeasonNumber && (
+                <div className="border-button-info bg-secondary-bg mb-6 rounded-lg border p-4">
+                  <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                    <div className="flex-1">
+                      <h3 className="text-primary-text mb-2 text-lg font-semibold">
+                        Go to Current Season
+                      </h3>
+                      <p className="text-secondary-text text-sm">
+                        Jump to the latest season to see current rewards and
+                        weekly contracts.
+                      </p>
+                    </div>
+                    <div className="shrink-0">
+                      <Button
+                        type="button"
+                        onClick={handleGoToLatestSeason}
+                        className="w-full lg:w-auto"
+                      >
+                        <Icon
+                          icon="heroicons:clock"
+                          className="h-4 w-4"
+                          inline={true}
+                        />
+                        <span>Go to Current Season</span>
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {/* XP Calculator Button - Only show for highest season */}
               {season.season === latestSeasonNumber && (

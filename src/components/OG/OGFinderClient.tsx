@@ -3,12 +3,13 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { RobloxUser } from "@/types";
-import { useAuthContext } from "@/contexts/AuthContext";
 import { useUsernameToId } from "@/hooks/useUsernameToId";
 import { toast } from "sonner";
 import { MaxStreamsError } from "@/utils/api";
 import OGFinderDataStreamer from "./OGFinderDataStreamer";
 import { Icon } from "@/components/ui/IconWrapper";
+import OGNotificationSheet from "./OGNotificationSheet";
+import { Button } from "@/components/ui/button";
 
 interface OGSearchData {
   results: Array<{
@@ -54,8 +55,8 @@ export default function OGFinderClient({
 }: OGFinderClientProps) {
   const [searchId, setSearchId] = useState(robloxId || "");
   const [isSearching, setIsSearching] = useState(false);
+  const [showNotificationSheet, setShowNotificationSheet] = useState(false);
   const router = useRouter();
-  const { isAuthenticated, setShowLoginModal } = useAuthContext();
   const { getId } = useUsernameToId();
 
   // Compute loading state during render
@@ -65,15 +66,6 @@ export default function OGFinderClient({
     e.preventDefault();
     const input = searchId.trim();
     if (!input) return;
-
-    // Check if user is authenticated before navigation
-    if (!isAuthenticated) {
-      toast.error("You need to be logged in to use the OG Finder feature.", {
-        duration: 4000,
-      });
-      setShowLoginModal(true);
-      return;
-    }
 
     setIsSearching(true);
     try {
@@ -112,80 +104,106 @@ export default function OGFinderClient({
 
   return (
     <div className="space-y-6">
-      {/* Search Form */}
-      <form onSubmit={handleSearch}>
-        <div className="relative flex items-center">
-          <input
-            type="text"
-            id="searchId"
-            value={searchId}
-            onChange={(e) => setSearchId(e.target.value)}
-            placeholder="Search by ID or username..."
-            className="border-border-primary bg-secondary-bg text-primary-text placeholder-secondary-text focus:border-button-info w-full rounded-lg border px-4 py-3 pr-16 transition-all duration-300 focus:outline-none"
-            disabled={isLoading}
-            required
-          />
+      {/* Search Form and Notification Button */}
+      <div className="flex items-start gap-3">
+        <div className="flex-1">
+          <form onSubmit={handleSearch}>
+            <div className="relative flex items-center">
+              <input
+                type="text"
+                id="searchId"
+                value={searchId}
+                onChange={(e) => setSearchId(e.target.value)}
+                placeholder="Search by ID or username..."
+                className="border-border-primary bg-secondary-bg text-primary-text placeholder-secondary-text focus:border-button-info w-full rounded-lg border px-4 py-3 pr-16 transition-all duration-300 focus:outline-none"
+                disabled={isLoading}
+                required
+              />
 
-          {/* Right side controls container */}
-          <div className="absolute top-1/2 right-3 flex -translate-y-1/2 items-center gap-2">
-            {/* Clear button - only show when there's text */}
-            {searchId && (
-              <button
-                type="button"
-                onClick={() => setSearchId("")}
-                className="text-secondary-text hover:text-primary-text cursor-pointer transition-colors"
-                aria-label="Clear search"
-              >
-                <Icon icon="heroicons:x-mark" className="h-5 w-5" />
-              </button>
-            )}
+              {/* Right side controls container */}
+              <div className="absolute top-1/2 right-3 flex -translate-y-1/2 items-center gap-2">
+                {/* Clear button - only show when there's text */}
+                {searchId && (
+                  <button
+                    type="button"
+                    onClick={() => setSearchId("")}
+                    className="text-secondary-text hover:text-primary-text cursor-pointer transition-colors"
+                    aria-label="Clear search"
+                  >
+                    <Icon icon="heroicons:x-mark" className="h-5 w-5" />
+                  </button>
+                )}
 
-            {/* Vertical divider - only show when there's text to clear */}
-            {searchId && (
-              <div className="border-primary-text h-6 border-l opacity-30"></div>
-            )}
+                {/* Vertical divider - only show when there's text to clear */}
+                {searchId && (
+                  <div className="border-primary-text h-6 border-l opacity-30"></div>
+                )}
 
-            {/* Search button */}
-            <button
-              type="submit"
-              disabled={isLoading || externalIsLoading || !searchId.trim()}
-              className={`flex h-8 w-8 items-center justify-center rounded-md transition-all duration-200 ${
-                isLoading || externalIsLoading
-                  ? "text-secondary-text cursor-progress"
-                  : !searchId.trim()
-                    ? "text-secondary-text cursor-not-allowed opacity-50"
-                    : "hover:bg-button-info/10 text-button-info cursor-pointer"
-              }`}
-              aria-label="Search"
-            >
-              {isLoading || externalIsLoading ? (
-                <svg
-                  className="h-5 w-5 animate-spin"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
+                {/* Search button */}
+                <button
+                  type="submit"
+                  disabled={isLoading || externalIsLoading || !searchId.trim()}
+                  className={`flex h-8 w-8 items-center justify-center rounded-md transition-all duration-200 ${
+                    isLoading || externalIsLoading
+                      ? "text-secondary-text cursor-progress"
+                      : !searchId.trim()
+                        ? "text-secondary-text cursor-not-allowed opacity-50"
+                        : "hover:bg-button-info/10 text-button-info cursor-pointer"
+                  }`}
+                  aria-label="Search"
                 >
-                  <circle
-                    className="opacity-25"
-                    cx="12"
-                    cy="12"
-                    r="10"
-                    stroke="currentColor"
-                    strokeWidth="4"
-                  ></circle>
-                  <path
-                    className="opacity-75"
-                    fill="currentColor"
-                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                  ></path>
-                </svg>
-              ) : (
-                <Icon icon="heroicons:magnifying-glass" className="h-5 w-5" />
-              )}
-            </button>
-          </div>
+                  {isLoading || externalIsLoading ? (
+                    <svg
+                      className="h-5 w-5 animate-spin"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      ></path>
+                    </svg>
+                  ) : (
+                    <Icon
+                      icon="heroicons:magnifying-glass"
+                      className="h-5 w-5"
+                    />
+                  )}
+                </button>
+              </div>
+            </div>
+          </form>
         </div>
-      </form>
+        <Button
+          onClick={() => {
+            setShowNotificationSheet(true);
+            if (typeof window !== "undefined" && window.umami) {
+              window.umami.track("Open OG Notification Sheet");
+            }
+          }}
+          variant="default"
+          size="lg"
+          title="Get Notified"
+        >
+          <span className="flex items-center gap-2">
+            <Icon
+              icon="material-symbols:notifications-outline"
+              className="h-5 w-5"
+            />
+            <span className="hidden sm:inline">Get Notified</span>
+          </span>
+        </Button>
+      </div>
 
       {/* Results */}
       {robloxId && <OGFinderDataStreamer robloxId={robloxId} />}
@@ -211,6 +229,12 @@ export default function OGFinderClient({
           </div>
         </div>
       )}
+
+      {/* OG Notification Sheet */}
+      <OGNotificationSheet
+        isOpen={showNotificationSheet}
+        onClose={() => setShowNotificationSheet(false)}
+      />
     </div>
   );
 }

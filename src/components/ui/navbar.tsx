@@ -153,7 +153,7 @@ export const HoveredLink = ({
     <motion.div whileHover={{ scale: 1.02 }} transition={{ duration: 0.2 }}>
       <Link
         href={href}
-        className={`text-primary-text hover:bg-button-info-hover hover:text-form-button-text block rounded-lg px-4 py-2 text-base font-bold transition-colors ${className}`}
+        className={`text-primary-text hover:bg-button-info hover:text-form-button-text block rounded-lg px-4 py-2 text-base font-bold transition-colors ${className}`}
         onClick={() => setActive?.(null)}
         {...rest}
       >
@@ -183,7 +183,7 @@ export const NavLink = ({
     >
       <Link
         href={href}
-        className={`text-primary-text hover:bg-button-info-hover hover:text-form-button-text active:bg-button-info-active active:text-form-button-text rounded-lg px-3 py-1 font-bold transition-colors duration-200 ${className}`}
+        className={`text-primary-text hover:bg-button-info hover:text-form-button-text active:bg-button-info-active active:text-form-button-text rounded-lg px-3 py-1 font-bold transition-colors duration-200 ${className}`}
       >
         {children}
       </Link>

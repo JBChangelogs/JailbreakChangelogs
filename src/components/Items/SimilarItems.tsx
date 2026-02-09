@@ -16,6 +16,13 @@ import { Icon } from "@/components/ui/IconWrapper";
 import { formatFullValue } from "@/utils/values";
 import { getCategoryColor } from "@/utils/categoryIcons";
 import { getTrendColor, getDemandColor } from "@/utils/badgeColors";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface SimilarItemsProps {
   currentItem: ItemDetails;
@@ -299,18 +306,64 @@ const SimilarItems = ({
           </div>
         </div>
 
-        <select
-          className="select bg-primary-bg text-primary-text min-h-[56px] w-full"
-          value={sortBy}
-          onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
-            setSortBy(e.target.value as SortCriteria)
-          }
-        >
-          <option value="creator">Sort by Creator</option>
-          <option value="similarity">Sort by Similarity</option>
-          <option value="trading_metrics">Sort by Trading Metrics</option>
-          <option value="trend">Sort by Trend</option>
-        </select>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button
+              type="button"
+              className="border-border-primary bg-primary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus flex h-[56px] w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all duration-300 focus:ring-1 focus:outline-none"
+              aria-label="Sort similar items"
+            >
+              <span className="truncate">
+                {sortBy === "creator"
+                  ? "Sort by Creator"
+                  : sortBy === "similarity"
+                    ? "Sort by Similarity"
+                    : sortBy === "trading_metrics"
+                      ? "Sort by Trading Metrics"
+                      : "Sort by Trend"}
+              </span>
+              <Icon
+                icon="heroicons:chevron-down"
+                className="text-secondary-text h-5 w-5"
+                inline={true}
+              />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent
+            align="start"
+            className="border-border-primary bg-primary-bg text-primary-text scrollbar-thin max-h-[240px] w-[var(--radix-popper-anchor-width)] min-w-[var(--radix-popper-anchor-width)] overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
+          >
+            <DropdownMenuRadioGroup
+              value={sortBy}
+              onValueChange={(value) => setSortBy(value as SortCriteria)}
+            >
+              <DropdownMenuRadioItem
+                value="creator"
+                className="focus:bg-quaternary-bg focus:text-primary-text data-[state=checked]:bg-quaternary-bg cursor-pointer rounded-lg px-3 py-2 text-sm"
+              >
+                Sort by Creator
+              </DropdownMenuRadioItem>
+              <DropdownMenuRadioItem
+                value="similarity"
+                className="focus:bg-quaternary-bg focus:text-primary-text data-[state=checked]:bg-quaternary-bg cursor-pointer rounded-lg px-3 py-2 text-sm"
+              >
+                Sort by Similarity
+              </DropdownMenuRadioItem>
+              <DropdownMenuRadioItem
+                value="trading_metrics"
+                className="focus:bg-quaternary-bg focus:text-primary-text data-[state=checked]:bg-quaternary-bg cursor-pointer rounded-lg px-3 py-2 text-sm"
+              >
+                Sort by Trading Metrics
+              </DropdownMenuRadioItem>
+              <DropdownMenuRadioItem
+                value="trend"
+                className="focus:bg-quaternary-bg focus:text-primary-text data-[state=checked]:bg-quaternary-bg cursor-pointer rounded-lg px-3 py-2 text-sm"
+              >
+                Sort by Trend
+              </DropdownMenuRadioItem>
+            </DropdownMenuRadioGroup>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
 
       {/* Content Section */}

@@ -14,6 +14,13 @@ import ExperimentalFeatureBanner from "@/components/ui/ExperimentalFeatureBanner
 import { Button } from "@/components/ui/button";
 import NitroRobberiesTopAd from "@/components/Ads/NitroRobberiesTopAd";
 import NitroRobberiesRailAd from "@/components/Ads/NitroRobberiesRailAd";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 import { Masonry } from "@mui/lab";
 
@@ -138,6 +145,27 @@ function RobberyTrackerContent() {
   const [activeAirdropLocation, setActiveAirdropLocation] = useState<
     "all" | "CactusValley" | "Dunes"
   >("all");
+
+  const serverSizeLabel =
+    serverSize === "all"
+      ? "All Server Sizes"
+      : serverSize === "big"
+        ? "Big Servers (9+ Players)"
+        : "Small Servers (0-8 Players)";
+
+  const nameSortLabel = nameSort === "a-z" ? "Name (A to Z)" : "Name (Z to A)";
+
+  const timeSortLabel =
+    timeSort === "newest"
+      ? "Logged (Newest to Oldest)"
+      : "Logged (Oldest to Newest)";
+
+  const difficultySortLabel =
+    difficultySort === "none"
+      ? "Sort by Difficulty"
+      : difficultySort === "easy-to-hard"
+        ? "Difficulty (Easy First)"
+        : "Difficulty (Hard First)";
 
   // Filter and sort robberies
   const filteredRobberies = useMemo(() => {
@@ -335,18 +363,6 @@ function RobberyTrackerContent() {
         <NitroRobberiesRailAd />
 
         <ExperimentalFeatureBanner className="mb-6" />
-        <div className="from-status-warning/20 to-status-warning/10 border-status-warning/20 mb-6 flex items-start gap-4 rounded-lg border bg-linear-to-r p-4 shadow-sm backdrop-blur-lg">
-          <div className="flex-1">
-            <span className="text-status-warning flex items-center gap-2 text-base font-bold">
-              Service Alert:
-            </span>
-            <p className="text-primary-text mt-1 text-sm">
-              Bank Truck tracking is currently unavailable due to technical
-              issues. All other robberies are still being tracked normally. We
-              are working to restore Bank Truck tracking as soon as possible.
-            </p>
-          </div>
-        </div>
 
         {/* Header */}
         <div className="mb-6">
@@ -389,63 +405,183 @@ function RobberyTrackerContent() {
             <div className="flex flex-col gap-4 lg:flex-1 lg:flex-row lg:gap-4">
               {/* Server Size Filter */}
               <div className="w-full lg:w-1/3">
-                <select
-                  className="select font-inter bg-secondary-bg text-primary-text h-[56px] min-h-[56px] w-full"
-                  value={serverSize}
-                  onChange={(e) => setServerSize(e.target.value as ServerSize)}
-                >
-                  <option value="all">All Server Sizes</option>
-                  <option value="big">Big Servers (9+ Players)</option>
-                  <option value="small">Small Servers (0-8 Players)</option>
-                </select>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button
+                      type="button"
+                      className="border-border-primary bg-secondary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus flex h-[56px] w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all focus:ring-1 focus:outline-none"
+                      aria-label="Filter by server size"
+                    >
+                      <span className="truncate">{serverSizeLabel}</span>
+                      <Icon
+                        icon="heroicons:chevron-down"
+                        className="text-secondary-text h-5 w-5"
+                      />
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent
+                    align="start"
+                    className="border-border-primary bg-secondary-bg text-primary-text scrollbar-thin max-h-[240px] w-[var(--radix-popper-anchor-width)] min-w-[var(--radix-popper-anchor-width)] overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
+                  >
+                    <DropdownMenuRadioGroup
+                      value={serverSize}
+                      onValueChange={(value) =>
+                        setServerSize(value as ServerSize)
+                      }
+                    >
+                      <DropdownMenuRadioItem
+                        value="all"
+                        className="focus:bg-quaternary-bg focus:text-primary-text data-[state=checked]:bg-quaternary-bg cursor-pointer rounded-lg px-3 py-2 text-sm"
+                      >
+                        All Server Sizes
+                      </DropdownMenuRadioItem>
+                      <DropdownMenuRadioItem
+                        value="big"
+                        className="focus:bg-quaternary-bg focus:text-primary-text data-[state=checked]:bg-quaternary-bg cursor-pointer rounded-lg px-3 py-2 text-sm"
+                      >
+                        Big Servers (9+ Players)
+                      </DropdownMenuRadioItem>
+                      <DropdownMenuRadioItem
+                        value="small"
+                        className="focus:bg-quaternary-bg focus:text-primary-text data-[state=checked]:bg-quaternary-bg cursor-pointer rounded-lg px-3 py-2 text-sm"
+                      >
+                        Small Servers (0-8 Players)
+                      </DropdownMenuRadioItem>
+                    </DropdownMenuRadioGroup>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
 
               {/* Name Sort or Difficulty Sort Dropdown */}
               <div className="w-full lg:w-1/3">
                 {activeView === "airdrops" ? (
-                  <select
-                    className="select font-inter bg-secondary-bg text-primary-text h-[56px] min-h-[56px] w-full"
-                    value={difficultySort}
-                    onChange={(e) =>
-                      setDifficultySort(e.target.value as DifficultySort)
-                    }
-                  >
-                    <option value="none">Sort by Difficulty</option>
-                    <option value="easy-to-hard">
-                      Difficulty (Easy First)
-                    </option>
-                    <option value="hard-to-easy">
-                      Difficulty (Hard First)
-                    </option>
-                  </select>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <button
+                        type="button"
+                        className="border-border-primary bg-secondary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus flex h-[56px] w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all focus:ring-1 focus:outline-none"
+                        aria-label="Sort by difficulty"
+                      >
+                        <span className="truncate">{difficultySortLabel}</span>
+                        <Icon
+                          icon="heroicons:chevron-down"
+                          className="text-secondary-text h-5 w-5"
+                        />
+                      </button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent
+                      align="start"
+                      className="border-border-primary bg-secondary-bg text-primary-text scrollbar-thin max-h-[240px] w-[var(--radix-popper-anchor-width)] min-w-[var(--radix-popper-anchor-width)] overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
+                    >
+                      <DropdownMenuRadioGroup
+                        value={difficultySort}
+                        onValueChange={(value) =>
+                          setDifficultySort(value as DifficultySort)
+                        }
+                      >
+                        <DropdownMenuRadioItem
+                          value="none"
+                          className="focus:bg-quaternary-bg focus:text-primary-text data-[state=checked]:bg-quaternary-bg cursor-pointer rounded-lg px-3 py-2 text-sm"
+                        >
+                          Sort by Difficulty
+                        </DropdownMenuRadioItem>
+                        <DropdownMenuRadioItem
+                          value="easy-to-hard"
+                          className="focus:bg-quaternary-bg focus:text-primary-text data-[state=checked]:bg-quaternary-bg cursor-pointer rounded-lg px-3 py-2 text-sm"
+                        >
+                          Difficulty (Easy First)
+                        </DropdownMenuRadioItem>
+                        <DropdownMenuRadioItem
+                          value="hard-to-easy"
+                          className="focus:bg-quaternary-bg focus:text-primary-text data-[state=checked]:bg-quaternary-bg cursor-pointer rounded-lg px-3 py-2 text-sm"
+                        >
+                          Difficulty (Hard First)
+                        </DropdownMenuRadioItem>
+                      </DropdownMenuRadioGroup>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 ) : (
-                  <select
-                    className="select font-inter bg-secondary-bg text-primary-text h-[56px] min-h-[56px] w-full"
-                    value={nameSort}
-                    onChange={(e) => setNameSort(e.target.value as NameSort)}
-                  >
-                    <option value="" disabled>
-                      Sort by Name
-                    </option>
-                    <option value="a-z">Name (A to Z)</option>
-                    <option value="z-a">Name (Z to A)</option>
-                  </select>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <button
+                        type="button"
+                        className="border-border-primary bg-secondary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus flex h-[56px] w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all focus:ring-1 focus:outline-none"
+                        aria-label="Sort by name"
+                      >
+                        <span className="truncate">{nameSortLabel}</span>
+                        <Icon
+                          icon="heroicons:chevron-down"
+                          className="text-secondary-text h-5 w-5"
+                        />
+                      </button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent
+                      align="start"
+                      className="border-border-primary bg-secondary-bg text-primary-text scrollbar-thin max-h-[240px] w-[var(--radix-popper-anchor-width)] min-w-[var(--radix-popper-anchor-width)] overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
+                    >
+                      <DropdownMenuRadioGroup
+                        value={nameSort}
+                        onValueChange={(value) =>
+                          setNameSort(value as NameSort)
+                        }
+                      >
+                        <DropdownMenuRadioItem
+                          value="a-z"
+                          className="focus:bg-quaternary-bg focus:text-primary-text data-[state=checked]:bg-quaternary-bg cursor-pointer rounded-lg px-3 py-2 text-sm"
+                        >
+                          Name (A to Z)
+                        </DropdownMenuRadioItem>
+                        <DropdownMenuRadioItem
+                          value="z-a"
+                          className="focus:bg-quaternary-bg focus:text-primary-text data-[state=checked]:bg-quaternary-bg cursor-pointer rounded-lg px-3 py-2 text-sm"
+                        >
+                          Name (Z to A)
+                        </DropdownMenuRadioItem>
+                      </DropdownMenuRadioGroup>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 )}
               </div>
 
               {/* Time Sort Dropdown */}
               <div className="w-full lg:w-1/3">
-                <select
-                  className="select font-inter bg-secondary-bg text-primary-text h-[56px] min-h-[56px] w-full"
-                  value={timeSort}
-                  onChange={(e) => setTimeSort(e.target.value as TimeSort)}
-                >
-                  <option value="" disabled>
-                    Sort by Time
-                  </option>
-                  <option value="newest">Logged (Newest to Oldest)</option>
-                  <option value="oldest">Logged (Oldest to Newest)</option>
-                </select>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button
+                      type="button"
+                      className="border-border-primary bg-secondary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus flex h-[56px] w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all focus:ring-1 focus:outline-none"
+                      aria-label="Sort by time"
+                    >
+                      <span className="truncate">{timeSortLabel}</span>
+                      <Icon
+                        icon="heroicons:chevron-down"
+                        className="text-secondary-text h-5 w-5"
+                      />
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent
+                    align="start"
+                    className="border-border-primary bg-secondary-bg text-primary-text scrollbar-thin max-h-[240px] w-[var(--radix-popper-anchor-width)] min-w-[var(--radix-popper-anchor-width)] overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
+                  >
+                    <DropdownMenuRadioGroup
+                      value={timeSort}
+                      onValueChange={(value) => setTimeSort(value as TimeSort)}
+                    >
+                      <DropdownMenuRadioItem
+                        value="newest"
+                        className="focus:bg-quaternary-bg focus:text-primary-text data-[state=checked]:bg-quaternary-bg cursor-pointer rounded-lg px-3 py-2 text-sm"
+                      >
+                        Logged (Newest to Oldest)
+                      </DropdownMenuRadioItem>
+                      <DropdownMenuRadioItem
+                        value="oldest"
+                        className="focus:bg-quaternary-bg focus:text-primary-text data-[state=checked]:bg-quaternary-bg cursor-pointer rounded-lg px-3 py-2 text-sm"
+                      >
+                        Logged (Oldest to Newest)
+                      </DropdownMenuRadioItem>
+                    </DropdownMenuRadioGroup>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
             </div>
           </div>
@@ -932,7 +1068,7 @@ function RobberyTrackerContent() {
 
 export default function RobberyTrackerPage() {
   return (
-    <RobberyTrackerAuthWrapper>
+    <RobberyTrackerAuthWrapper redirectOnFail={false} requireAuth>
       <RobberyTrackerContent />
     </RobberyTrackerAuthWrapper>
   );

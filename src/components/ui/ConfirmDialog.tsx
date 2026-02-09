@@ -1,15 +1,24 @@
 import React from "react";
 import { Dialog, DialogPanel } from "@headlessui/react";
+import { Button } from "@/components/ui/button";
 
 interface ConfirmDialogProps {
   isOpen: boolean;
   onClose: () => void;
   onConfirm: () => void;
   title: string;
-  message: string;
+  message?: string;
   confirmText?: string;
   cancelText?: string;
-  confirmButtonClass?: string;
+  confirmVariant?:
+    | "default"
+    | "destructive"
+    | "outline"
+    | "secondary"
+    | "ghost"
+    | "link";
+  confirmDisabled?: boolean;
+  children?: React.ReactNode;
 }
 
 export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
@@ -20,7 +29,9 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   message,
   confirmText = "Confirm",
   cancelText = "Cancel",
-  confirmButtonClass = "bg-red-500 hover:bg-red-600",
+  confirmVariant = "destructive",
+  confirmDisabled = false,
+  children,
 }) => {
   return (
     <Dialog open={isOpen} onClose={onClose} className="relative z-50">
@@ -31,30 +42,33 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
 
       <div className="fixed inset-0 flex items-center justify-center p-4">
         <DialogPanel className="modal-container border-button-info bg-secondary-bg w-full max-w-[480px] min-w-[320px] rounded-lg border shadow-lg">
-          <div className="modal-header text-primary-text px-6 py-4 text-xl font-semibold">
+          <div className="modal-header border-border-primary text-primary-text border-b px-6 py-4 text-xl font-semibold">
             {title}
           </div>
 
           <div className="modal-content p-6">
-            <p className="text-secondary-text mb-6">{message}</p>
+            {children ? (
+              children
+            ) : (
+              <p className="text-secondary-text">{message}</p>
+            )}
           </div>
 
           <div className="modal-footer flex justify-end gap-2 px-6 py-4">
-            <button
-              onClick={onClose}
-              className="text-secondary-text hover:text-primary-text cursor-pointer rounded border-none bg-transparent px-4 py-2 text-sm"
-            >
+            <Button variant="ghost" onClick={onClose} size="sm">
               {cancelText}
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={() => {
                 onConfirm();
-                onClose();
+                if (!confirmDisabled) onClose();
               }}
-              className={`cursor-pointer rounded-lg px-4 py-2 text-sm font-medium transition-colors ${confirmButtonClass}`}
+              variant={confirmVariant}
+              size="sm"
+              disabled={confirmDisabled}
             >
               {confirmText}
-            </button>
+            </Button>
           </div>
         </DialogPanel>
       </div>

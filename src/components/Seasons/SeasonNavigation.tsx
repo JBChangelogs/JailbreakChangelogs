@@ -1,67 +1,72 @@
 "use client";
 
 import React from "react";
-import { toast } from "sonner";
 import { Icon } from "../ui/IconWrapper";
-import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface SeasonNavigationProps {
   seasonList: Array<{ season: number; title: string }>;
-  fullSeasonList: Array<{ season: number; title: string; is_current: number }>;
   selectedId: string;
   onSeasonSelect: (id: string) => void;
-  onGoToLatestSeason: () => void;
 }
 
 const SeasonNavigation: React.FC<SeasonNavigationProps> = ({
   seasonList,
-  fullSeasonList,
   selectedId,
   onSeasonSelect,
-  onGoToLatestSeason,
 }) => {
+  const selectedLabel =
+    seasonList.find((item) => item.season.toString() === selectedId)?.title ??
+    "";
+
   return (
     <div className="mb-8 grid grid-cols-1 gap-4">
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        <select
-          className="select bg-secondary-bg text-primary-text w-full"
-          value={selectedId}
-          onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
-            onSeasonSelect(e.target.value)
-          }
-        >
-          <option value="" disabled>
-            Select a season
-          </option>
-          {seasonList.map((item) => (
-            <option key={item.season} value={item.season.toString()}>
-              Season {item.season} - {item.title}
-            </option>
-          ))}
-        </select>
-
-        {seasonList.length > 0 &&
-        (() => {
-          const currentSeason = fullSeasonList.find(
-            (season) => season.is_current === 1,
-          );
-          return (
-            currentSeason && currentSeason.season.toString() !== selectedId
-          );
-        })() ? (
-          <Button onClick={onGoToLatestSeason}>
-            <Icon icon="heroicons:clock" className="h-4 w-4" inline={true} />
-            <span>Go to Current Season</span>
-          </Button>
-        ) : (
-          <Button
-            onClick={() => toast.error("Already on the current season")}
-            disabled
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button
+              type="button"
+              className="border-border-primary bg-secondary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus flex h-[56px] w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all duration-300 focus:ring-1 focus:outline-none"
+              aria-label="Select a season"
+            >
+              <span className="truncate">
+                {selectedId
+                  ? `Season ${selectedId} - ${selectedLabel}`
+                  : "Select a season"}
+              </span>
+              <Icon
+                icon="heroicons:chevron-down"
+                className="text-secondary-text h-5 w-5"
+                inline={true}
+              />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent
+            align="start"
+            className="border-border-primary bg-secondary-bg text-primary-text scrollbar-thin max-h-[320px] w-[var(--radix-popper-anchor-width)] min-w-[var(--radix-popper-anchor-width)] overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
           >
-            <Icon icon="heroicons:clock" className="h-4 w-4" inline={true} />
-            <span>Go to Current Season</span>
-          </Button>
-        )}
+            <DropdownMenuRadioGroup
+              value={selectedId}
+              onValueChange={onSeasonSelect}
+            >
+              {seasonList.map((item) => (
+                <DropdownMenuRadioItem
+                  key={item.season}
+                  value={item.season.toString()}
+                  className="focus:bg-quaternary-bg focus:text-primary-text data-[state=checked]:bg-quaternary-bg cursor-pointer rounded-lg px-3 py-2 text-sm"
+                >
+                  Season {item.season} - {item.title}
+                </DropdownMenuRadioItem>
+              ))}
+            </DropdownMenuRadioGroup>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </div>
   );

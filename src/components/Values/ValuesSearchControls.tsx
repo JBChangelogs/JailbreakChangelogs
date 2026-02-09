@@ -7,6 +7,15 @@ import { useIsAuthenticated } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { safeSessionStorage } from "@/utils/safeStorage";
 import { Slider } from "@/components/ui/slider";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface ValuesSearchControlsProps {
   searchTerm: string;
@@ -117,6 +126,101 @@ export default function ValuesSearchControls({
     return marks;
   }, [maxValueRange]);
 
+  const filterOptions: { value: FilterSort; label: string }[] = [
+    { value: "name-all-items", label: "All Items" },
+    { value: "favorites", label: "My Favorites" },
+    { value: "name-body-colors", label: "Body Colors" },
+    { value: "name-textures", label: "Body Textures" },
+    { value: "name-drifts", label: "Drifts" },
+    { value: "name-furnitures", label: "Furniture" },
+    { value: "name-horns", label: "Horns" },
+    { value: "name-hyperchromes", label: "HyperChromes" },
+    { value: "name-limited-items", label: "Limited Items" },
+    { value: "name-rims", label: "Rims" },
+    { value: "name-seasonal-items", label: "Seasonal Items" },
+    { value: "name-spoilers", label: "Spoilers" },
+    { value: "name-tire-stickers", label: "Tire Stickers" },
+    { value: "name-tire-styles", label: "Tire Styles" },
+    { value: "name-vehicles", label: "Vehicles" },
+    { value: "name-weapon-skins", label: "Weapon Skins" },
+  ];
+
+  const valueSortGroups: {
+    label: string;
+    options: { value: ValueSort; label: string }[];
+  }[] = [
+    {
+      label: "Alphabetically",
+      options: [
+        { value: "alpha-asc", label: "Name (A to Z)" },
+        { value: "alpha-desc", label: "Name (Z to A)" },
+      ],
+    },
+    {
+      label: "Demand",
+      options: [
+        { value: "demand-desc", label: "Demand (High to Low)" },
+        { value: "demand-asc", label: "Demand (Low to High)" },
+        { value: "demand-close-to-none", label: "Close to None" },
+        { value: "demand-decent", label: "Decent Demand" },
+        { value: "demand-extremely-high", label: "Extremely High Demand" },
+        { value: "demand-high", label: "High Demand" },
+        { value: "demand-low", label: "Low Demand" },
+        { value: "demand-medium", label: "Medium Demand" },
+        { value: "demand-very-high", label: "Very High Demand" },
+        { value: "demand-very-low", label: "Very Low Demand" },
+      ],
+    },
+    {
+      label: "Display",
+      options: [{ value: "random", label: "Random" }],
+    },
+    {
+      label: "Last Updated",
+      options: [
+        {
+          value: "last-updated-desc",
+          label: "Last Updated (Newest to Oldest)",
+        },
+        {
+          value: "last-updated-asc",
+          label: "Last Updated (Oldest to Newest)",
+        },
+      ],
+    },
+    {
+      label: "Trend",
+      options: [
+        { value: "trend-dropping", label: "Dropping Trend" },
+        { value: "trend-hoarded", label: "Hoarded Trend" },
+        { value: "trend-hyped", label: "Hyped Trend" },
+        { value: "trend-manipulated", label: "Manipulated Trend" },
+        { value: "trend-recovering", label: "Recovering Trend" },
+        { value: "trend-rising", label: "Rising Trend" },
+        { value: "trend-stable", label: "Stable Trend" },
+        { value: "trend-unstable", label: "Unstable Trend" },
+      ],
+    },
+    {
+      label: "Values",
+      options: [
+        { value: "cash-desc", label: "Cash Value (High to Low)" },
+        { value: "cash-asc", label: "Cash Value (Low to High)" },
+        { value: "duped-desc", label: "Duped Value (High to Low)" },
+        { value: "duped-asc", label: "Duped Value (Low to High)" },
+      ],
+    },
+  ];
+
+  const filterLabel =
+    filterOptions.find((option) => option.value === filterSort)?.label ??
+    "Select category";
+
+  const sortLabel =
+    valueSortGroups
+      .flatMap((group) => group.options)
+      .find((option) => option.value === valueSort)?.label ?? "Sort";
+
   // Handle Ctrl+F to focus search input
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -154,7 +258,7 @@ export default function ValuesSearchControls({
                   placeholder={`Search ${getFilterDisplayName(filterSort)}...`}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className={`border-border-primary bg-secondary-bg text-primary-text placeholder-secondary-text hover:border-border-focus w-full rounded-lg border px-4 py-4 pr-10 pl-10 transition-all duration-300 focus:outline-none ${
+                  className={`border-border-primary bg-secondary-bg text-primary-text placeholder-secondary-text hover:border-border-focus h-[56px] w-full rounded-lg border px-4 pr-10 pl-10 transition-all duration-300 focus:outline-none ${
                     isSearchHighlighted
                       ? "bg-button-info/10 shadow-button-info/20 border-button-info shadow-lg"
                       : isItemIdSearch
@@ -182,117 +286,114 @@ export default function ValuesSearchControls({
             <div className="flex flex-col gap-4 lg:flex-1 lg:flex-row lg:gap-4">
               {/* Filter dropdown */}
               <div className="w-full lg:w-1/2">
-                <select
-                  className="select font-inter bg-secondary-bg text-primary-text h-[56px] min-h-[56px] w-full"
-                  value={filterSort}
-                  onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
-                    const newValue = e.target.value as FilterSort;
-                    if (newValue === "favorites") {
-                      if (!isAuthenticated) {
-                        toast.error("Please log in to view your favorites");
-                        return;
-                      }
-                    }
-                    setFilterSort(newValue);
-                    safeSessionStorage.setItem("valuesFilterSort", newValue);
-                    window.umami?.track("Values Filter Change", {
-                      filter: newValue,
-                    });
-                  }}
-                >
-                  <option value="" disabled>
-                    Select category
-                  </option>
-                  <option value="name-all-items">All Items</option>
-                  <option value="favorites">My Favorites</option>
-                  <option value="name-body-colors">Body Colors</option>
-                  <option value="name-textures">Body Textures</option>
-                  <option value="name-drifts">Drifts</option>
-                  <option value="name-furnitures">Furniture</option>
-                  <option value="name-horns">Horns</option>
-                  <option value="name-hyperchromes">HyperChromes</option>
-                  <option value="name-limited-items">Limited Items</option>
-                  <option value="name-rims">Rims</option>
-                  <option value="name-seasonal-items">Seasonal Items</option>
-                  <option value="name-spoilers">Spoilers</option>
-                  <option value="name-tire-stickers">Tire Stickers</option>
-                  <option value="name-tire-styles">Tire Styles</option>
-                  <option value="name-vehicles">Vehicles</option>
-                  <option value="name-weapon-skins">Weapon Skins</option>
-                </select>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button
+                      type="button"
+                      className="border-border-primary bg-secondary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus flex h-[56px] min-h-[56px] w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all duration-300 focus:ring-1 focus:outline-none"
+                      aria-label="Select category"
+                    >
+                      <span className="truncate">{filterLabel}</span>
+                      <Icon
+                        icon="heroicons:chevron-down"
+                        className="text-secondary-text h-5 w-5"
+                        inline={true}
+                      />
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent
+                    align="start"
+                    className="border-border-primary bg-secondary-bg text-primary-text scrollbar-thin max-h-[320px] w-[var(--radix-popper-anchor-width)] min-w-[var(--radix-popper-anchor-width)] overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
+                  >
+                    <DropdownMenuRadioGroup
+                      value={filterSort}
+                      onValueChange={(newValue) => {
+                        const nextValue = newValue as FilterSort;
+                        if (nextValue === "favorites" && !isAuthenticated) {
+                          toast.error("Please log in to view your favorites");
+                          return;
+                        }
+                        setFilterSort(nextValue);
+                        safeSessionStorage.setItem(
+                          "valuesFilterSort",
+                          nextValue,
+                        );
+                        window.umami?.track("Values Filter Change", {
+                          filter: nextValue,
+                        });
+                      }}
+                    >
+                      {filterOptions.map((option) => (
+                        <DropdownMenuRadioItem
+                          key={option.value}
+                          value={option.value}
+                          className="focus:bg-quaternary-bg focus:text-primary-text data-[state=checked]:bg-quaternary-bg cursor-pointer rounded-lg px-3 py-2 text-sm"
+                        >
+                          {option.label}
+                        </DropdownMenuRadioItem>
+                      ))}
+                    </DropdownMenuRadioGroup>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
 
               {/* Sort dropdown */}
               <div className="w-full lg:w-1/2">
-                <select
-                  className="select font-inter bg-secondary-bg text-primary-text h-[56px] min-h-[56px] w-full"
-                  value={valueSort}
-                  onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
-                    const newValue = e.target.value as ValueSort;
-                    setValueSort(newValue);
-                    safeSessionStorage.setItem("valuesValueSort", newValue);
-                    window.umami?.track("Values Sort Change", {
-                      sort: newValue,
-                    });
-                  }}
-                >
-                  <option value="" disabled>
-                    Alphabetically
-                  </option>
-                  <option value="alpha-asc">Name (A to Z)</option>
-                  <option value="alpha-desc">Name (Z to A)</option>
-
-                  <option value="" disabled>
-                    Demand
-                  </option>
-                  <option value="demand-desc">Demand (High to Low)</option>
-                  <option value="demand-asc">Demand (Low to High)</option>
-                  <option value="demand-close-to-none">Close to None</option>
-                  <option value="demand-decent">Decent Demand</option>
-                  <option value="demand-extremely-high">
-                    Extremely High Demand
-                  </option>
-                  <option value="demand-high">High Demand</option>
-                  <option value="demand-low">Low Demand</option>
-                  <option value="demand-medium">Medium Demand</option>
-                  <option value="demand-very-high">Very High Demand</option>
-                  <option value="demand-very-low">Very Low Demand</option>
-
-                  <option value="" disabled>
-                    Display
-                  </option>
-                  <option value="random">Random</option>
-
-                  <option value="" disabled>
-                    Last Updated
-                  </option>
-                  <option value="last-updated-desc">
-                    Last Updated (Newest to Oldest)
-                  </option>
-                  <option value="last-updated-asc">
-                    Last Updated (Oldest to Newest)
-                  </option>
-
-                  <option value="" disabled>
-                    Trend
-                  </option>
-                  <option value="trend-dropping">Dropping Trend</option>
-                  <option value="trend-hoarded">Hoarded Trend</option>
-                  <option value="trend-hyped">Hyped Trend</option>
-                  <option value="trend-manipulated">Manipulated Trend</option>
-                  <option value="trend-recovering">Recovering Trend</option>
-                  <option value="trend-rising">Rising Trend</option>
-                  <option value="trend-stable">Stable Trend</option>
-                  <option value="trend-unstable">Unstable Trend</option>
-
-                  <option value="" disabled>
-                    Values
-                  </option>
-                  <option value="cash-desc">Cash Value (High to Low)</option>
-                  <option value="cash-asc">Cash Value (Low to High)</option>
-                  <option value="duped-desc">Duped Value (High to Low)</option>
-                  <option value="duped-asc">Duped Value (Low to High)</option>
-                </select>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button
+                      type="button"
+                      className="border-border-primary bg-secondary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus flex h-[56px] min-h-[56px] w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all duration-300 focus:ring-1 focus:outline-none"
+                      aria-label="Select sort"
+                    >
+                      <span className="truncate">{sortLabel}</span>
+                      <Icon
+                        icon="heroicons:chevron-down"
+                        className="text-secondary-text h-5 w-5"
+                        inline={true}
+                      />
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent
+                    align="start"
+                    className="border-border-primary bg-secondary-bg text-primary-text scrollbar-thin max-h-[360px] w-[var(--radix-popper-anchor-width)] min-w-[var(--radix-popper-anchor-width)] overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
+                  >
+                    <DropdownMenuRadioGroup
+                      value={valueSort}
+                      onValueChange={(newValue) => {
+                        const nextValue = newValue as ValueSort;
+                        setValueSort(nextValue);
+                        safeSessionStorage.setItem(
+                          "valuesValueSort",
+                          nextValue,
+                        );
+                        window.umami?.track("Values Sort Change", {
+                          sort: nextValue,
+                        });
+                      }}
+                    >
+                      {valueSortGroups.map((group, groupIndex) => (
+                        <div key={group.label}>
+                          <DropdownMenuLabel className="text-secondary-text px-3 py-1 text-xs tracking-widest uppercase">
+                            {group.label}
+                          </DropdownMenuLabel>
+                          {group.options.map((option) => (
+                            <DropdownMenuRadioItem
+                              key={option.value}
+                              value={option.value}
+                              className="focus:bg-quaternary-bg focus:text-primary-text data-[state=checked]:bg-quaternary-bg cursor-pointer rounded-lg px-3 py-2 text-sm"
+                            >
+                              {option.label}
+                            </DropdownMenuRadioItem>
+                          ))}
+                          {groupIndex !== valueSortGroups.length - 1 && (
+                            <DropdownMenuSeparator className="bg-border-primary/60" />
+                          )}
+                        </div>
+                      ))}
+                    </DropdownMenuRadioGroup>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
             </div>
           </div>

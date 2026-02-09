@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { TradeItem } from "@/types/trading";
 import { AvailableItemsGrid } from "../../trading/AvailableItemsGrid";
-import { CustomConfirmationModal } from "../../Modals/CustomConfirmationModal";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { useLockBodyScroll } from "@/hooks/useLockBodyScroll";
 import {
   safeLocalStorage,
@@ -358,15 +358,15 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
     <DndContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
       <div className="space-y-6">
         {/* Restore Modal */}
-        <CustomConfirmationModal
-          open={showRestoreModal}
+        <ConfirmDialog
+          isOpen={showRestoreModal}
           onClose={() => setShowRestoreModal(false)}
           title="Restore Calculator Items?"
           message="Do you want to restore your previously added items or start a new calculation?"
           confirmText="Restore Items"
           cancelText="Start New"
           onConfirm={handleRestoreItems}
-          onCancel={handleStartNew}
+          confirmVariant="default"
         />
 
         {/* Clear Confirmation Modal */}

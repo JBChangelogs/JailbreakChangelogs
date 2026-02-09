@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Dialog, DialogPanel } from "@headlessui/react";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { Icon } from "@/components/ui/IconWrapper";
 import { toast } from "sonner";
 import LoginModalWrapper from "../Auth/LoginModalWrapper";
@@ -138,78 +138,61 @@ export const RobloxConnection = ({ userData }: RobloxConnectionProps) => {
         onClose={() => setLoginModalOpen(false)}
       />
 
-      <Dialog open={open} onClose={handleClose} className="relative z-50">
-        <div
-          className="fixed inset-0 bg-black/30 backdrop-blur-sm"
-          aria-hidden="true"
-        />
+      <LoginModalWrapper
+        open={loginModalOpen}
+        onClose={() => setLoginModalOpen(false)}
+      />
 
-        <div className="fixed inset-0 flex items-center justify-center p-4">
-          <DialogPanel className="modal-container border-button-info bg-secondary-bg w-full max-w-[500px] min-w-[320px] rounded-lg border shadow-lg">
-            <div className="modal-header text-button-danger px-6 py-4 text-xl font-semibold">
-              Disconnect Roblox Account
-            </div>
+      <ConfirmDialog
+        isOpen={open}
+        onClose={handleClose}
+        onConfirm={handleDisconnect}
+        title="Disconnect Roblox Account"
+        confirmText="Disconnect"
+        confirmVariant="destructive"
+      >
+        <>
+          <p className="text-primary-text mb-6">
+            Are you sure you want to disconnect your Roblox account?
+          </p>
 
-            <div className="modal-content p-6">
-              <p className="text-primary-text mb-6">
-                Are you sure you want to disconnect your Roblox account?
+          <div className="space-y-3">
+            <div className="flex items-start gap-3">
+              <Icon
+                icon="heroicons:exclamation-triangle"
+                className="text-button-danger mt-0.5 h-5 w-5 shrink-0"
+              />
+              <p className="text-primary-text text-sm">
+                Remove your Roblox profile from your account
               </p>
-
-              <div className="space-y-3">
-                <div className="flex items-start gap-3">
-                  <Icon
-                    icon="heroicons:exclamation-triangle"
-                    className="text-button-danger mt-0.5 h-5 w-5 shrink-0"
-                  />
-                  <p className="text-primary-text text-sm">
-                    Remove your Roblox profile from your account
-                  </p>
-                </div>
-                <div className="flex items-start gap-3">
-                  <Icon
-                    icon="heroicons:exclamation-triangle"
-                    className="text-button-danger mt-0.5 h-5 w-5 shrink-0"
-                  />
-                  <p className="text-primary-text text-sm">
-                    Disable trading features and delete all existing trade ads
-                  </p>
-                </div>
-                <div className="flex items-start gap-3">
-                  <Icon
-                    icon="heroicons:exclamation-triangle"
-                    className="text-button-danger mt-0.5 h-5 w-5 shrink-0"
-                  />
-                  <p className="text-primary-text text-sm">
-                    Require re-authentication to use Trading features again
-                  </p>
-                </div>
-              </div>
-
-              {error && (
-                <div className="mt-4 rounded-md border border-red-500/20 bg-red-500/10 p-3">
-                  <p className="text-sm text-red-400">{error}</p>
-                </div>
-              )}
             </div>
-
-            <div className="modal-footer border-border-primary flex justify-end gap-2 border-t px-6 py-4">
-              <button
-                onClick={handleClose}
-                className="text-primary-text cursor-pointer rounded-md px-4 py-2 font-medium transition-colors hover:bg-white/10"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleDisconnect}
-                data-umami-event="Disconnect Roblox"
-                className="bg-button-danger hover:bg-button-danger-hover cursor-pointer rounded-md px-4 py-2 font-medium text-white transition-colors"
-              >
-                Disconnect
-              </button>
+            <div className="flex items-start gap-3">
+              <Icon
+                icon="heroicons:exclamation-triangle"
+                className="text-button-danger mt-0.5 h-5 w-5 shrink-0"
+              />
+              <p className="text-primary-text text-sm">
+                Disable trading features and delete all existing trade ads
+              </p>
             </div>
-          </DialogPanel>
-        </div>
-      </Dialog>
+            <div className="flex items-start gap-3">
+              <Icon
+                icon="heroicons:exclamation-triangle"
+                className="text-button-danger mt-0.5 h-5 w-5 shrink-0"
+              />
+              <p className="text-primary-text text-sm">
+                Require re-authentication to use Trading features again
+              </p>
+            </div>
+          </div>
+
+          {error && (
+            <div className="mt-4 rounded-md border border-red-500/20 bg-red-500/10 p-3">
+              <p className="text-sm text-red-400">{error}</p>
+            </div>
+          )}
+        </>
+      </ConfirmDialog>
     </div>
   );
 };

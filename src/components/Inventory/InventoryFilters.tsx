@@ -3,6 +3,15 @@
 import { useState } from "react";
 import { Icon } from "../ui/IconWrapper";
 import { Button } from "../ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 type SortOrder =
   | "alpha-asc"
@@ -75,6 +84,17 @@ export default function InventoryFilters({
 }: InventoryFiltersProps) {
   const MAX_SEARCH_LENGTH = 50;
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+  const selectedCategoryValue = selectedCategories[0] ?? "all";
+  const sortLabels: Record<SortOrder, string> = {
+    "alpha-asc": "Name (A to Z)",
+    "alpha-desc": "Name (Z to A)",
+    "created-asc": "Oldest First",
+    "created-desc": "Newest First",
+    "cash-desc": "Cash Value (High to Low)",
+    "cash-asc": "Cash Value (Low to High)",
+    "duped-desc": "Duped Value (High to Low)",
+    "duped-asc": "Duped Value (Low to High)",
+  };
 
   return (
     <div className="mb-4 flex flex-col gap-4">
@@ -109,53 +129,157 @@ export default function InventoryFilters({
 
         {/* Category Filter - Second */}
         <div className="w-full sm:w-1/3">
-          <select
-            className="select bg-primary-bg text-primary-text min-h-[56px] w-full"
-            value={selectedCategories.length > 0 ? selectedCategories[0] : ""}
-            onChange={(e) => {
-              const val = e.target.value;
-              if (val === "") {
-                setSelectedCategories([]);
-              } else {
-                setSelectedCategories([val]);
-              }
-              window.umami?.track("Inventory Category Change", {
-                category: val || "All",
-              });
-            }}
-          >
-            <option value="">All categories</option>
-            {availableCategories.map((category) => (
-              <option key={category} value={category}>
-                {category}
-              </option>
-            ))}
-          </select>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                type="button"
+                className="border-border-primary bg-primary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus flex h-[56px] w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all duration-300 focus:ring-1 focus:outline-none"
+                aria-label="Filter by category"
+              >
+                <span className="truncate">
+                  {selectedCategoryValue === "all"
+                    ? "All categories"
+                    : selectedCategoryValue}
+                </span>
+                <Icon
+                  icon="heroicons:chevron-down"
+                  className="text-secondary-text h-5 w-5"
+                  inline={true}
+                />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
+              align="start"
+              className="border-border-primary bg-primary-bg text-primary-text scrollbar-thin max-h-[320px] w-[var(--radix-popper-anchor-width)] min-w-[var(--radix-popper-anchor-width)] overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
+            >
+              <DropdownMenuRadioGroup
+                value={selectedCategoryValue}
+                onValueChange={(val) => {
+                  if (val === "all") {
+                    setSelectedCategories([]);
+                  } else {
+                    setSelectedCategories([val]);
+                  }
+                  window.umami?.track("Inventory Category Change", {
+                    category: val === "all" ? "All" : val,
+                  });
+                }}
+              >
+                <DropdownMenuRadioItem
+                  value="all"
+                  className="focus:bg-quaternary-bg focus:text-primary-text data-[state=checked]:bg-quaternary-bg cursor-pointer rounded-lg px-3 py-2 text-sm"
+                >
+                  All categories
+                </DropdownMenuRadioItem>
+                {availableCategories.map((category) => (
+                  <DropdownMenuRadioItem
+                    key={category}
+                    value={category}
+                    className="focus:bg-quaternary-bg focus:text-primary-text data-[state=checked]:bg-quaternary-bg cursor-pointer rounded-lg px-3 py-2 text-sm"
+                  >
+                    {category}
+                  </DropdownMenuRadioItem>
+                ))}
+              </DropdownMenuRadioGroup>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
 
         {/* Sort Filter - Third */}
         <div className="w-full sm:w-1/3">
-          <select
-            className="select bg-primary-bg text-primary-text min-h-[56px] w-full"
-            value={sortOrder}
-            onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
-              const val = e.target.value as SortOrder;
-              setSortOrder(val);
-              window.umami?.track("Inventory Sort Change", { sort: val });
-            }}
-          >
-            <option disabled>Alphabetically</option>
-            <option value="alpha-asc">Name (A to Z)</option>
-            <option value="alpha-desc">Name (Z to A)</option>
-            <option disabled>Date</option>
-            <option value="created-asc">Oldest First</option>
-            <option value="created-desc">Newest First</option>
-            <option disabled>Values</option>
-            <option value="cash-desc">Cash Value (High to Low)</option>
-            <option value="cash-asc">Cash Value (Low to High)</option>
-            <option value="duped-desc">Duped Value (High to Low)</option>
-            <option value="duped-asc">Duped Value (Low to High)</option>
-          </select>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                type="button"
+                className="border-border-primary bg-primary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus flex h-[56px] w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all duration-300 focus:ring-1 focus:outline-none"
+                aria-label="Sort items"
+              >
+                <span className="truncate">
+                  {sortLabels[sortOrder] ?? "Sort"}
+                </span>
+                <Icon
+                  icon="heroicons:chevron-down"
+                  className="text-secondary-text h-5 w-5"
+                  inline={true}
+                />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
+              align="start"
+              className="border-border-primary bg-primary-bg text-primary-text scrollbar-thin max-h-[320px] w-[var(--radix-popper-anchor-width)] min-w-[var(--radix-popper-anchor-width)] overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
+            >
+              <DropdownMenuRadioGroup
+                value={sortOrder}
+                onValueChange={(val) => {
+                  const nextValue = val as SortOrder;
+                  setSortOrder(nextValue);
+                  window.umami?.track("Inventory Sort Change", {
+                    sort: nextValue,
+                  });
+                }}
+              >
+                <DropdownMenuLabel className="text-secondary-text px-3 py-1 text-xs tracking-widest uppercase">
+                  Alphabetically
+                </DropdownMenuLabel>
+                <DropdownMenuRadioItem
+                  value="alpha-asc"
+                  className="focus:bg-quaternary-bg focus:text-primary-text data-[state=checked]:bg-quaternary-bg cursor-pointer rounded-lg px-3 py-2 text-sm"
+                >
+                  Name (A to Z)
+                </DropdownMenuRadioItem>
+                <DropdownMenuRadioItem
+                  value="alpha-desc"
+                  className="focus:bg-quaternary-bg focus:text-primary-text data-[state=checked]:bg-quaternary-bg cursor-pointer rounded-lg px-3 py-2 text-sm"
+                >
+                  Name (Z to A)
+                </DropdownMenuRadioItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuLabel className="text-secondary-text px-3 py-1 text-xs tracking-widest uppercase">
+                  Date
+                </DropdownMenuLabel>
+                <DropdownMenuRadioItem
+                  value="created-asc"
+                  className="focus:bg-quaternary-bg focus:text-primary-text data-[state=checked]:bg-quaternary-bg cursor-pointer rounded-lg px-3 py-2 text-sm"
+                >
+                  Oldest First
+                </DropdownMenuRadioItem>
+                <DropdownMenuRadioItem
+                  value="created-desc"
+                  className="focus:bg-quaternary-bg focus:text-primary-text data-[state=checked]:bg-quaternary-bg cursor-pointer rounded-lg px-3 py-2 text-sm"
+                >
+                  Newest First
+                </DropdownMenuRadioItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuLabel className="text-secondary-text px-3 py-1 text-xs tracking-widest uppercase">
+                  Values
+                </DropdownMenuLabel>
+                <DropdownMenuRadioItem
+                  value="cash-desc"
+                  className="focus:bg-quaternary-bg focus:text-primary-text data-[state=checked]:bg-quaternary-bg cursor-pointer rounded-lg px-3 py-2 text-sm"
+                >
+                  Cash Value (High to Low)
+                </DropdownMenuRadioItem>
+                <DropdownMenuRadioItem
+                  value="cash-asc"
+                  className="focus:bg-quaternary-bg focus:text-primary-text data-[state=checked]:bg-quaternary-bg cursor-pointer rounded-lg px-3 py-2 text-sm"
+                >
+                  Cash Value (Low to High)
+                </DropdownMenuRadioItem>
+                <DropdownMenuRadioItem
+                  value="duped-desc"
+                  className="focus:bg-quaternary-bg focus:text-primary-text data-[state=checked]:bg-quaternary-bg cursor-pointer rounded-lg px-3 py-2 text-sm"
+                >
+                  Duped Value (High to Low)
+                </DropdownMenuRadioItem>
+                <DropdownMenuRadioItem
+                  value="duped-asc"
+                  className="focus:bg-quaternary-bg focus:text-primary-text data-[state=checked]:bg-quaternary-bg cursor-pointer rounded-lg px-3 py-2 text-sm"
+                >
+                  Duped Value (Low to High)
+                </DropdownMenuRadioItem>
+              </DropdownMenuRadioGroup>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
 
