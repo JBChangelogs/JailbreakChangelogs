@@ -509,7 +509,7 @@ export default function ChangelogDetailsClient({
                   >
                     <DropdownMenuRadioItem
                       value="All Items"
-                      className="focus:bg-quaternary-bg focus:text-primary-text data-[state=checked]:bg-quaternary-bg cursor-pointer rounded-lg px-3 py-2 text-sm"
+                      className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
                     >
                       All Items
                     </DropdownMenuRadioItem>
@@ -517,7 +517,7 @@ export default function ChangelogDetailsClient({
                       <DropdownMenuRadioItem
                         key={type}
                         value={type}
-                        className="focus:bg-quaternary-bg focus:text-primary-text data-[state=checked]:bg-quaternary-bg cursor-pointer rounded-lg px-3 py-2 text-sm"
+                        className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
                       >
                         {type}
                       </DropdownMenuRadioItem>
@@ -567,7 +567,7 @@ export default function ChangelogDetailsClient({
                   >
                     <DropdownMenuRadioItem
                       value="all"
-                      className="focus:bg-quaternary-bg focus:text-primary-text data-[state=checked]:bg-quaternary-bg cursor-pointer rounded-lg px-3 py-2 text-sm"
+                      className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
                     >
                       All Suggestion Types
                     </DropdownMenuRadioItem>
@@ -575,7 +575,7 @@ export default function ChangelogDetailsClient({
                       <DropdownMenuRadioItem
                         key={type || ""}
                         value={type || ""}
-                        className="focus:bg-quaternary-bg focus:text-primary-text data-[state=checked]:bg-quaternary-bg cursor-pointer rounded-lg px-3 py-2 text-sm"
+                        className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
                       >
                         {type
                           ? type

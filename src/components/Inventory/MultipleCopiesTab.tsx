@@ -494,7 +494,7 @@ export default function DuplicatesTab({
                 >
                   <DropdownMenuRadioItem
                     value="all"
-                    className="focus:bg-quaternary-bg focus:text-primary-text data-[state=checked]:bg-quaternary-bg cursor-pointer rounded-lg px-3 py-2 text-sm"
+                    className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
                   >
                     All Categories
                   </DropdownMenuRadioItem>
@@ -502,7 +502,7 @@ export default function DuplicatesTab({
                     <DropdownMenuRadioItem
                       key={category}
                       value={category}
-                      className="focus:bg-quaternary-bg focus:text-primary-text data-[state=checked]:bg-quaternary-bg cursor-pointer rounded-lg px-3 py-2 text-sm"
+                      className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
                     >
                       {category}
                     </DropdownMenuRadioItem>
@@ -684,7 +684,7 @@ export default function DuplicatesTab({
               >
                 <DropdownMenuRadioItem
                   value="all"
-                  className="focus:bg-quaternary-bg focus:text-primary-text data-[state=checked]:bg-quaternary-bg cursor-pointer rounded-lg px-3 py-2 text-sm"
+                  className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
                 >
                   All categories
                 </DropdownMenuRadioItem>
@@ -692,7 +692,7 @@ export default function DuplicatesTab({
                   <DropdownMenuRadioItem
                     key={category}
                     value={category}
-                    className="focus:bg-quaternary-bg focus:text-primary-text data-[state=checked]:bg-quaternary-bg cursor-pointer rounded-lg px-3 py-2 text-sm"
+                    className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
                   >
                     {category}
                   </DropdownMenuRadioItem>
@@ -740,13 +740,13 @@ export default function DuplicatesTab({
                 </DropdownMenuLabel>
                 <DropdownMenuRadioItem
                   value="count-desc"
-                  className="focus:bg-quaternary-bg focus:text-primary-text data-[state=checked]:bg-quaternary-bg cursor-pointer rounded-lg px-3 py-2 text-sm"
+                  className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
                 >
                   Most Copies First
                 </DropdownMenuRadioItem>
                 <DropdownMenuRadioItem
                   value="count-asc"
-                  className="focus:bg-quaternary-bg focus:text-primary-text data-[state=checked]:bg-quaternary-bg cursor-pointer rounded-lg px-3 py-2 text-sm"
+                  className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
                 >
                   Least Copies First
                 </DropdownMenuRadioItem>
@@ -756,13 +756,13 @@ export default function DuplicatesTab({
                 </DropdownMenuLabel>
                 <DropdownMenuRadioItem
                   value="created-asc"
-                  className="focus:bg-quaternary-bg focus:text-primary-text data-[state=checked]:bg-quaternary-bg cursor-pointer rounded-lg px-3 py-2 text-sm"
+                  className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
                 >
                   Oldest First
                 </DropdownMenuRadioItem>
                 <DropdownMenuRadioItem
                   value="created-desc"
-                  className="focus:bg-quaternary-bg focus:text-primary-text data-[state=checked]:bg-quaternary-bg cursor-pointer rounded-lg px-3 py-2 text-sm"
+                  className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
                 >
                   Newest First
                 </DropdownMenuRadioItem>
@@ -772,25 +772,25 @@ export default function DuplicatesTab({
                 </DropdownMenuLabel>
                 <DropdownMenuRadioItem
                   value="cash-desc"
-                  className="focus:bg-quaternary-bg focus:text-primary-text data-[state=checked]:bg-quaternary-bg cursor-pointer rounded-lg px-3 py-2 text-sm"
+                  className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
                 >
                   Cash Value (High to Low)
                 </DropdownMenuRadioItem>
                 <DropdownMenuRadioItem
                   value="cash-asc"
-                  className="focus:bg-quaternary-bg focus:text-primary-text data-[state=checked]:bg-quaternary-bg cursor-pointer rounded-lg px-3 py-2 text-sm"
+                  className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
                 >
                   Cash Value (Low to High)
                 </DropdownMenuRadioItem>
                 <DropdownMenuRadioItem
                   value="duped-desc"
-                  className="focus:bg-quaternary-bg focus:text-primary-text data-[state=checked]:bg-quaternary-bg cursor-pointer rounded-lg px-3 py-2 text-sm"
+                  className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
                 >
                   Duped Value (High to Low)
                 </DropdownMenuRadioItem>
                 <DropdownMenuRadioItem
                   value="duped-asc"
-                  className="focus:bg-quaternary-bg focus:text-primary-text data-[state=checked]:bg-quaternary-bg cursor-pointer rounded-lg px-3 py-2 text-sm"
+                  className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
                 >
                   Duped Value (Low to High)
                 </DropdownMenuRadioItem>
@@ -800,13 +800,13 @@ export default function DuplicatesTab({
                 </DropdownMenuLabel>
                 <DropdownMenuRadioItem
                   value="alpha-asc"
-                  className="focus:bg-quaternary-bg focus:text-primary-text data-[state=checked]:bg-quaternary-bg cursor-pointer rounded-lg px-3 py-2 text-sm"
+                  className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
                 >
                   A-Z
                 </DropdownMenuRadioItem>
                 <DropdownMenuRadioItem
                   value="alpha-desc"
-                  className="focus:bg-quaternary-bg focus:text-primary-text data-[state=checked]:bg-quaternary-bg cursor-pointer rounded-lg px-3 py-2 text-sm"
+                  className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
                 >
                   Z-A
                 </DropdownMenuRadioItem>

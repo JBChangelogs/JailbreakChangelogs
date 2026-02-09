@@ -20,6 +20,13 @@ import { useVirtualizer } from "@tanstack/react-virtual";
 import { DraggableItemCard } from "@/components/dnd/DraggableItemCard";
 import { useMediaQuery } from "@mui/material";
 import { Button } from "../ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface AvailableItemsGridProps {
   items: TradeItem[];
@@ -42,6 +49,32 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
 
   const [filterSort, setFilterSort] = useState<FilterSort>("name-all-items");
   const [valueSort, setValueSort] = useState<ValueSort>("cash-desc");
+  const filterLabels: Record<FilterSort, string> = {
+    "name-all-items": "All Items",
+    "name-body-colors": "Body Colors",
+    "name-textures": "Body Textures",
+    "name-drifts": "Drifts",
+    "name-furnitures": "Furniture",
+    "name-horns": "Horns",
+    "name-hyperchromes": "HyperChromes",
+    "name-limited-items": "Limited Items",
+    "name-rims": "Rims",
+    "name-seasonal-items": "Seasonal Items",
+    "name-spoilers": "Spoilers",
+    "name-tire-stickers": "Tire Stickers",
+    "name-tire-styles": "Tire Styles",
+    "name-vehicles": "Vehicles",
+    "name-weapon-skins": "Weapon Skins",
+    favorites: "Favorites",
+  };
+  const valueSortLabels: Partial<Record<ValueSort, string>> = {
+    "demand-desc": "Demand (High to Low)",
+    "demand-asc": "Demand (Low to High)",
+    "cash-desc": "Cash Value (High to Low)",
+    "cash-asc": "Cash Value (Low to High)",
+    "duped-desc": "Duped Value (High to Low)",
+    "duped-asc": "Duped Value (Low to High)",
+  };
 
   const debouncedSearchQuery = useDebounce(searchQuery, 300);
   const MAX_QUERY_DISPLAY_LENGTH = 120;
@@ -297,58 +330,201 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
 
             {/* Dropdowns - Side by side on desktop */}
             <div className="flex gap-4 lg:col-span-2">
-              <select
-                className="select font-inter bg-primary-bg text-primary-text h-[56px] min-h-[56px] w-full"
-                value={filterSort}
-                onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
-                  const val = e.target.value as FilterSort;
-                  setFilterSort(val);
-                  window.umami?.track("Trading Filter Change", { filter: val });
-                }}
-              >
-                <option value="" disabled>
-                  Select category
-                </option>
-                <option value="name-all-items">All Items</option>
-                <option value="name-body-colors">Body Colors</option>
-                <option value="name-textures">Body Textures</option>
-                <option value="name-drifts">Drifts</option>
-                <option value="name-furnitures">Furniture</option>
-                <option value="name-horns">Horns</option>
-                <option value="name-hyperchromes">HyperChromes</option>
-                <option value="name-limited-items">Limited Items</option>
-                <option value="name-rims">Rims</option>
-                <option value="name-seasonal-items">Seasonal Items</option>
-                <option value="name-spoilers">Spoilers</option>
-                <option value="name-tire-stickers">Tire Stickers</option>
-                <option value="name-tire-styles">Tire Styles</option>
-                <option value="name-vehicles">Vehicles</option>
-                <option value="name-weapon-skins">Weapon Skins</option>
-              </select>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button
+                    type="button"
+                    className="border-border-primary bg-primary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus flex h-[56px] w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all duration-300 focus:ring-1 focus:outline-none"
+                    aria-label="Filter by category"
+                  >
+                    <span className="truncate">
+                      {filterLabels[filterSort] ?? "Select category"}
+                    </span>
+                    <Icon
+                      icon="heroicons:chevron-down"
+                      className="text-secondary-text h-5 w-5"
+                      inline={true}
+                    />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  align="start"
+                  className="border-border-primary bg-primary-bg text-primary-text scrollbar-thin max-h-[320px] w-[var(--radix-popper-anchor-width)] min-w-[var(--radix-popper-anchor-width)] overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
+                >
+                  <DropdownMenuRadioGroup
+                    value={filterSort}
+                    onValueChange={(val) => {
+                      const nextValue = val as FilterSort;
+                      setFilterSort(nextValue);
+                      window.umami?.track("Trading Filter Change", {
+                        filter: nextValue,
+                      });
+                    }}
+                  >
+                    <DropdownMenuRadioItem
+                      value="name-all-items"
+                      className="hover:bg-quaternary-bg focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
+                    >
+                      All Items
+                    </DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem
+                      value="name-body-colors"
+                      className="hover:bg-quaternary-bg focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
+                    >
+                      Body Colors
+                    </DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem
+                      value="name-textures"
+                      className="hover:bg-quaternary-bg focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
+                    >
+                      Body Textures
+                    </DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem
+                      value="name-drifts"
+                      className="hover:bg-quaternary-bg focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
+                    >
+                      Drifts
+                    </DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem
+                      value="name-furnitures"
+                      className="hover:bg-quaternary-bg focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
+                    >
+                      Furniture
+                    </DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem
+                      value="name-horns"
+                      className="hover:bg-quaternary-bg focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
+                    >
+                      Horns
+                    </DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem
+                      value="name-hyperchromes"
+                      className="hover:bg-quaternary-bg focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
+                    >
+                      HyperChromes
+                    </DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem
+                      value="name-limited-items"
+                      className="hover:bg-quaternary-bg focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
+                    >
+                      Limited Items
+                    </DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem
+                      value="name-rims"
+                      className="hover:bg-quaternary-bg focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
+                    >
+                      Rims
+                    </DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem
+                      value="name-seasonal-items"
+                      className="hover:bg-quaternary-bg focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
+                    >
+                      Seasonal Items
+                    </DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem
+                      value="name-spoilers"
+                      className="hover:bg-quaternary-bg focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
+                    >
+                      Spoilers
+                    </DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem
+                      value="name-tire-stickers"
+                      className="hover:bg-quaternary-bg focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
+                    >
+                      Tire Stickers
+                    </DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem
+                      value="name-tire-styles"
+                      className="hover:bg-quaternary-bg focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
+                    >
+                      Tire Styles
+                    </DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem
+                      value="name-vehicles"
+                      className="hover:bg-quaternary-bg focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
+                    >
+                      Vehicles
+                    </DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem
+                      value="name-weapon-skins"
+                      className="hover:bg-quaternary-bg focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
+                    >
+                      Weapon Skins
+                    </DropdownMenuRadioItem>
+                  </DropdownMenuRadioGroup>
+                </DropdownMenuContent>
+              </DropdownMenu>
 
-              <select
-                className="select font-inter bg-primary-bg text-primary-text h-[56px] min-h-[56px] w-full"
-                value={valueSort}
-                onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
-                  const val = e.target.value as ValueSort;
-                  setValueSort(val);
-                  window.umami?.track("Trading Sort Change", { sort: val });
-                }}
-              >
-                <option value="" disabled>
-                  Demand
-                </option>
-                <option value="demand-desc">Demand (High to Low)</option>
-                <option value="demand-asc">Demand (Low to High)</option>
-
-                <option value="" disabled>
-                  Values
-                </option>
-                <option value="cash-desc">Cash Value (High to Low)</option>
-                <option value="cash-asc">Cash Value (Low to High)</option>
-                <option value="duped-desc">Duped Value (High to Low)</option>
-                <option value="duped-asc">Duped Value (Low to High)</option>
-              </select>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button
+                    type="button"
+                    className="border-border-primary bg-primary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus flex h-[56px] w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all duration-300 focus:ring-1 focus:outline-none"
+                    aria-label="Sort items"
+                  >
+                    <span className="truncate">
+                      {valueSortLabels[valueSort] ?? "Sort"}
+                    </span>
+                    <Icon
+                      icon="heroicons:chevron-down"
+                      className="text-secondary-text h-5 w-5"
+                      inline={true}
+                    />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  align="start"
+                  className="border-border-primary bg-primary-bg text-primary-text scrollbar-thin max-h-[320px] w-[var(--radix-popper-anchor-width)] min-w-[var(--radix-popper-anchor-width)] overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
+                >
+                  <DropdownMenuRadioGroup
+                    value={valueSort}
+                    onValueChange={(val) => {
+                      const nextValue = val as ValueSort;
+                      setValueSort(nextValue);
+                      window.umami?.track("Trading Sort Change", {
+                        sort: nextValue,
+                      });
+                    }}
+                  >
+                    <DropdownMenuRadioItem
+                      value="demand-desc"
+                      className="hover:bg-quaternary-bg focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
+                    >
+                      Demand (High to Low)
+                    </DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem
+                      value="demand-asc"
+                      className="hover:bg-quaternary-bg focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
+                    >
+                      Demand (Low to High)
+                    </DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem
+                      value="cash-desc"
+                      className="hover:bg-quaternary-bg focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
+                    >
+                      Cash Value (High to Low)
+                    </DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem
+                      value="cash-asc"
+                      className="hover:bg-quaternary-bg focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
+                    >
+                      Cash Value (Low to High)
+                    </DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem
+                      value="duped-desc"
+                      className="hover:bg-quaternary-bg focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
+                    >
+                      Duped Value (High to Low)
+                    </DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem
+                      value="duped-asc"
+                      className="hover:bg-quaternary-bg focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
+                    >
+                      Duped Value (Low to High)
+                    </DropdownMenuRadioItem>
+                  </DropdownMenuRadioGroup>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           </div>
 

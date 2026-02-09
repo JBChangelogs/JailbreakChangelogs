@@ -339,25 +339,25 @@ const SimilarItems = ({
             >
               <DropdownMenuRadioItem
                 value="creator"
-                className="focus:bg-quaternary-bg focus:text-primary-text data-[state=checked]:bg-quaternary-bg cursor-pointer rounded-lg px-3 py-2 text-sm"
+                className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
               >
                 Sort by Creator
               </DropdownMenuRadioItem>
               <DropdownMenuRadioItem
                 value="similarity"
-                className="focus:bg-quaternary-bg focus:text-primary-text data-[state=checked]:bg-quaternary-bg cursor-pointer rounded-lg px-3 py-2 text-sm"
+                className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
               >
                 Sort by Similarity
               </DropdownMenuRadioItem>
               <DropdownMenuRadioItem
                 value="trading_metrics"
-                className="focus:bg-quaternary-bg focus:text-primary-text data-[state=checked]:bg-quaternary-bg cursor-pointer rounded-lg px-3 py-2 text-sm"
+                className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
               >
                 Sort by Trading Metrics
               </DropdownMenuRadioItem>
               <DropdownMenuRadioItem
                 value="trend"
-                className="focus:bg-quaternary-bg focus:text-primary-text data-[state=checked]:bg-quaternary-bg cursor-pointer rounded-lg px-3 py-2 text-sm"
+                className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
               >
                 Sort by Trend
               </DropdownMenuRadioItem>

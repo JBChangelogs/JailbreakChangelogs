@@ -59,7 +59,7 @@ const SeasonNavigation: React.FC<SeasonNavigationProps> = ({
                 <DropdownMenuRadioItem
                   key={item.season}
                   value={item.season.toString()}
-                  className="focus:bg-quaternary-bg focus:text-primary-text data-[state=checked]:bg-quaternary-bg cursor-pointer rounded-lg px-3 py-2 text-sm"
+                  className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
                 >
                   Season {item.season} - {item.title}
                 </DropdownMenuRadioItem>

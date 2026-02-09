@@ -83,7 +83,7 @@ const ChangelogFilter: React.FC<ChangelogFilterProps> = ({
                   <DropdownMenuRadioItem
                     key={item.id}
                     value={item.id.toString()}
-                    className="focus:bg-quaternary-bg focus:text-primary-text data-[state=checked]:bg-quaternary-bg cursor-pointer rounded-lg px-3 py-2 text-sm"
+                    className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
                   >
                     #{item.id} - {item.title}
                   </DropdownMenuRadioItem>

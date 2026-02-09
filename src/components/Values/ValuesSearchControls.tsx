@@ -327,7 +327,7 @@ export default function ValuesSearchControls({
                         <DropdownMenuRadioItem
                           key={option.value}
                           value={option.value}
-                          className="focus:bg-quaternary-bg focus:text-primary-text data-[state=checked]:bg-quaternary-bg cursor-pointer rounded-lg px-3 py-2 text-sm"
+                          className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
                         >
                           {option.label}
                         </DropdownMenuRadioItem>
@@ -381,7 +381,7 @@ export default function ValuesSearchControls({
                             <DropdownMenuRadioItem
                               key={option.value}
                               value={option.value}
-                              className="focus:bg-quaternary-bg focus:text-primary-text data-[state=checked]:bg-quaternary-bg cursor-pointer rounded-lg px-3 py-2 text-sm"
+                              className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
                             >
                               {option.label}
                             </DropdownMenuRadioItem>

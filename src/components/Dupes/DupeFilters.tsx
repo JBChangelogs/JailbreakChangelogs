@@ -123,7 +123,7 @@ export default function DupeFilters({
               >
                 <DropdownMenuRadioItem
                   value="all"
-                  className="focus:bg-quaternary-bg focus:text-primary-text data-[state=checked]:bg-quaternary-bg cursor-pointer rounded-lg px-3 py-2 text-sm"
+                  className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
                 >
                   All categories
                 </DropdownMenuRadioItem>
@@ -131,7 +131,7 @@ export default function DupeFilters({
                   <DropdownMenuRadioItem
                     key={category}
                     value={category}
-                    className="focus:bg-quaternary-bg focus:text-primary-text data-[state=checked]:bg-quaternary-bg cursor-pointer rounded-lg px-3 py-2 text-sm"
+                    className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
                   >
                     {category}
                   </DropdownMenuRadioItem>
@@ -174,7 +174,7 @@ export default function DupeFilters({
                 {hasDuplicates && (
                   <DropdownMenuRadioItem
                     value="duplicates"
-                    className="focus:bg-quaternary-bg focus:text-primary-text data-[state=checked]:bg-quaternary-bg cursor-pointer rounded-lg px-3 py-2 text-sm"
+                    className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
                   >
                     Group Duplicates
                   </DropdownMenuRadioItem>
@@ -184,13 +184,13 @@ export default function DupeFilters({
                 </DropdownMenuLabel>
                 <DropdownMenuRadioItem
                   value="alpha-asc"
-                  className="focus:bg-quaternary-bg focus:text-primary-text data-[state=checked]:bg-quaternary-bg cursor-pointer rounded-lg px-3 py-2 text-sm"
+                  className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
                 >
                   Name (A to Z)
                 </DropdownMenuRadioItem>
                 <DropdownMenuRadioItem
                   value="alpha-desc"
-                  className="focus:bg-quaternary-bg focus:text-primary-text data-[state=checked]:bg-quaternary-bg cursor-pointer rounded-lg px-3 py-2 text-sm"
+                  className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
                 >
                   Name (Z to A)
                 </DropdownMenuRadioItem>
@@ -200,13 +200,13 @@ export default function DupeFilters({
                 </DropdownMenuLabel>
                 <DropdownMenuRadioItem
                   value="created-desc"
-                  className="focus:bg-quaternary-bg focus:text-primary-text data-[state=checked]:bg-quaternary-bg cursor-pointer rounded-lg px-3 py-2 text-sm"
+                  className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
                 >
                   Logged On (Newest to Oldest)
                 </DropdownMenuRadioItem>
                 <DropdownMenuRadioItem
                   value="created-asc"
-                  className="focus:bg-quaternary-bg focus:text-primary-text data-[state=checked]:bg-quaternary-bg cursor-pointer rounded-lg px-3 py-2 text-sm"
+                  className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
                 >
                   Logged On (Oldest to Newest)
                 </DropdownMenuRadioItem>
@@ -216,13 +216,13 @@ export default function DupeFilters({
                 </DropdownMenuLabel>
                 <DropdownMenuRadioItem
                   value="duped-desc"
-                  className="focus:bg-quaternary-bg focus:text-primary-text data-[state=checked]:bg-quaternary-bg cursor-pointer rounded-lg px-3 py-2 text-sm"
+                  className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
                 >
                   Dupe Value (High to Low)
                 </DropdownMenuRadioItem>
                 <DropdownMenuRadioItem
                   value="duped-asc"
-                  className="focus:bg-quaternary-bg focus:text-primary-text data-[state=checked]:bg-quaternary-bg cursor-pointer rounded-lg px-3 py-2 text-sm"
+                  className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
                 >
                   Dupe Value (Low to High)
                 </DropdownMenuRadioItem>

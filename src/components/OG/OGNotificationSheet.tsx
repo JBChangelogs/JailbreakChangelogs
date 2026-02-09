@@ -459,7 +459,7 @@ export default function OGNotificationSheet({
                           onCheckedChange={(checked) => {
                             if (checked) setSelectedType("all");
                           }}
-                          className="focus:bg-quaternary-bg focus:text-primary-text data-[state=checked]:bg-quaternary-bg cursor-pointer rounded-lg px-3 py-2 text-sm"
+                          className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
                         >
                           All Item Categories
                         </DropdownMenuCheckboxItem>
@@ -472,7 +472,7 @@ export default function OGNotificationSheet({
                               else if (selectedType === type)
                                 setSelectedType("all");
                             }}
-                            className="focus:bg-quaternary-bg focus:text-primary-text data-[state=checked]:bg-quaternary-bg cursor-pointer rounded-lg px-3 py-2 text-sm"
+                            className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
                           >
                             {type}
                           </DropdownMenuCheckboxItem>
