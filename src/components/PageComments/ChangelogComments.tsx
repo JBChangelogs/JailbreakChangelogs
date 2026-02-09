@@ -55,22 +55,6 @@ import DOMPurify from "dompurify";
 import { Pagination } from "@/components/ui/Pagination";
 
 /**
- * Character limits based on the user's supporter tier.
- * 0: Free, 1: Supporter T1, 2: Supporter T2, 3: Supporter T3
- */
-const COMMENT_CHAR_LIMITS = {
-  0: 200, // Free tier
-  1: 400, // Supporter tier 1
-  2: 800, // Supporter tier 2
-  3: 2000, // Supporter tier 3
-} as const;
-
-const getCharLimit = (tier: keyof typeof COMMENT_CHAR_LIMITS): number => {
-  const limit = COMMENT_CHAR_LIMITS[tier];
-  return limit;
-};
-
-/**
  * Checks if a comment is still within its 1-hour edit window.
  * @param commentDate Unix timestamp as a string
  */
@@ -224,8 +208,18 @@ interface CommentApiErrorData {
   flagged?: string[];
   try_again?: number;
   message?: string;
+  character_limit?: number;
+  tier?: number;
+  current_tier?: number;
+  required_tier?: number;
+  required_limit?: number;
   [key: string]: unknown;
 }
+
+const formatErrorTitle = (error?: string) => {
+  if (!error) return "Error";
+  return error.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase());
+};
 
 const handleCommentApiError = (
   data: CommentApiErrorData | null | undefined,
@@ -277,11 +271,7 @@ const handleCommentApiError = (
     const errorTitle =
       data?.error === "internal_server_error"
         ? "Server Error"
-        : data?.error
-          ? data.error
-              .replace(/_/g, " ")
-              .replace(/\b\w/g, (l) => l.toUpperCase())
-          : "Error";
+        : formatErrorTitle(data?.error);
     toast.error(errorTitle, {
       description: data.message || defaultMessage,
     });
@@ -290,9 +280,7 @@ const handleCommentApiError = (
 
   // If we have an error but no message, show the error code
   if (data?.error) {
-    const errorTitle = data.error
-      .replace(/_/g, " ")
-      .replace(/\b\w/g, (l) => l.toUpperCase());
+    const errorTitle = formatErrorTitle(data.error);
     toast.error(errorTitle, {
       description: defaultMessage,
     });
@@ -356,7 +344,96 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
   const itemsPerPage = 10;
 
   // Supporter modal hook for handling tier-based restrictions
-  const { modalState, closeModal, checkCommentLength } = useSupporterModal();
+  const { modalState, closeModal, openModal, COMMENT_CHAR_LIMITS } =
+    useSupporterModal();
+
+  const handleCommentLengthError = useCallback(
+    (
+      data: CommentApiErrorData | null | undefined,
+      status: number,
+      contentLength: number,
+      defaultMessage: string,
+    ) => {
+      const normalizedError =
+        typeof data?.error === "string"
+          ? data.error.replace(/_/g, " ").toLowerCase()
+          : "";
+      const isCharLimitError =
+        status === 400 &&
+        (normalizedError === "character limit exceeded" ||
+          normalizedError === "character limit");
+
+      if (!isCharLimitError) return false;
+
+      toast.error(formatErrorTitle(data?.error), {
+        description: data?.message || defaultMessage,
+      });
+
+      const effectiveTier =
+        currentUserPremiumType > 3 ? 0 : currentUserPremiumType;
+      const currentTier =
+        typeof data?.current_tier === "number"
+          ? data.current_tier
+          : effectiveTier;
+      const requiredTierFromResponse =
+        typeof data?.required_tier === "number"
+          ? data.required_tier
+          : typeof data?.tier === "number"
+            ? data.tier
+            : undefined;
+
+      if (currentTier >= 3) {
+        return true;
+      }
+
+      const tiers = Object.keys(COMMENT_CHAR_LIMITS)
+        .map(Number)
+        .sort((a, b) => a - b) as Array<keyof typeof COMMENT_CHAR_LIMITS>;
+      let requiredTier = requiredTierFromResponse ?? tiers[tiers.length - 1];
+      if (requiredTierFromResponse === undefined) {
+        const limitFromResponse =
+          typeof data?.character_limit === "number"
+            ? data.character_limit
+            : undefined;
+        if (limitFromResponse !== undefined) {
+          for (const tier of tiers) {
+            if (COMMENT_CHAR_LIMITS[tier] === limitFromResponse) {
+              requiredTier = tier;
+              break;
+            }
+          }
+        } else {
+          for (const tier of tiers) {
+            if (contentLength <= COMMENT_CHAR_LIMITS[tier]) {
+              requiredTier = tier;
+              break;
+            }
+          }
+        }
+      }
+
+      openModal({
+        feature: "comment_length",
+        currentTier,
+        requiredTier,
+        currentLimit:
+          typeof data?.character_limit === "number"
+            ? data.character_limit
+            : COMMENT_CHAR_LIMITS[
+                currentTier as keyof typeof COMMENT_CHAR_LIMITS
+              ],
+        requiredLimit:
+          typeof data?.required_limit === "number"
+            ? data.required_limit
+            : COMMENT_CHAR_LIMITS[
+                requiredTier as keyof typeof COMMENT_CHAR_LIMITS
+              ],
+      });
+
+      return true;
+    },
+    [COMMENT_CHAR_LIMITS, currentUserPremiumType, openModal],
+  );
 
   // Set isClient to true on mount to avoid hydration mismatches for browser-only features
   useEffect(() => {
@@ -534,14 +611,6 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
     e.preventDefault();
     if (!isLoggedIn || !newComment.trim() || isSubmittingComment) return;
 
-    // Check if comment length exceeds user's tier limit
-    if (!checkCommentLength(newComment, currentUserPremiumType)) {
-      if (currentUserPremiumType >= 3 && newComment.length > 2000) {
-        toast.error("Comment is too long. Maximum length is 2000 characters.");
-      }
-      return; // Modal will be shown by the hook for lower tiers
-    }
-
     setIsSubmittingComment(true);
 
     try {
@@ -564,6 +633,17 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
         } catch {
           // Fallback if not JSON
           errorData = null;
+        }
+
+        if (
+          handleCommentLengthError(
+            errorData,
+            response.status,
+            newComment.length,
+            "Failed to post comment",
+          )
+        ) {
+          return;
         }
 
         if (handleCommentApiError(errorData, "Failed to post comment")) {
@@ -654,14 +734,6 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
       return;
     }
 
-    // Check if edit content length exceeds user's tier limit
-    if (!checkCommentLength(editContent, currentUserPremiumType)) {
-      if (currentUserPremiumType >= 3 && editContent.length > 2000) {
-        toast.error("Comment is too long. Maximum length is 2000 characters.");
-      }
-      return; // Modal will be shown by the hook for lower tiers
-    }
-
     try {
       const response = await fetch(`/api/comments/edit`, {
         method: "POST",
@@ -682,6 +754,17 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
         } catch {
           // Fallback if not JSON
           errorData = null;
+        }
+
+        if (
+          handleCommentLengthError(
+            errorData,
+            response.status,
+            editContent.length,
+            "Failed to edit comment",
+          )
+        ) {
+          return;
         }
 
         if (handleCommentApiError(errorData, "Failed to edit comment")) {
@@ -863,14 +946,6 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
   const handleSubmitReply = async (parentId: number) => {
     if (!isLoggedIn || !replyContent.trim() || isSubmittingComment) return;
 
-    // Check if reply length exceeds user's tier limit
-    if (!checkCommentLength(replyContent, currentUserPremiumType)) {
-      if (currentUserPremiumType >= 3 && replyContent.length > 2000) {
-        toast.error("Comment is too long. Maximum length is 2000 characters.");
-      }
-      return;
-    }
-
     setIsSubmittingComment(true);
 
     try {
@@ -894,6 +969,17 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
         } catch {
           // Fallback if not JSON
           errorData = null;
+        }
+
+        if (
+          handleCommentLengthError(
+            errorData,
+            response.status,
+            replyContent.length,
+            "Failed to post reply",
+          )
+        ) {
+          return;
         }
 
         if (handleCommentApiError(errorData, "Failed to post reply")) {
@@ -1578,30 +1664,12 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                                       setEditContent(e.target.value)
                                     }
                                     rows={3}
-                                    className={`w-full resize-y rounded border p-3 text-sm focus:outline-none ${
-                                      editContent.length >
-                                      getCharLimit(
-                                        currentUserPremiumType as keyof typeof COMMENT_CHAR_LIMITS,
-                                      )
-                                        ? "border-button-danger bg-form-input text-primary-text focus:border-button-danger"
-                                        : "border-border-primary bg-form-input text-primary-text hover:border-border-focus focus:border-button-info"
-                                    }`}
+                                    className="border-border-primary bg-form-input text-primary-text hover:border-border-focus focus:border-button-info w-full resize-y rounded border p-3 text-sm focus:outline-none"
                                     autoCorrect="off"
                                     autoComplete="off"
                                     spellCheck="false"
                                     autoCapitalize="off"
                                   />
-                                  {editContent.length >
-                                    getCharLimit(
-                                      currentUserPremiumType as keyof typeof COMMENT_CHAR_LIMITS,
-                                    ) && (
-                                    <p className="text-button-danger text-xs">
-                                      Comment is too long. Character limit:{" "}
-                                      {getCharLimit(
-                                        currentUserPremiumType as keyof typeof COMMENT_CHAR_LIMITS,
-                                      )}
-                                    </p>
-                                  )}
                                 </div>
                                 <div className="flex gap-2">
                                   <Button
