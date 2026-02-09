@@ -67,13 +67,6 @@ const testimonials: Testimonial[] = [
     url: "https://www.youtube.com/@ItsSpecter",
   },
   {
-    name: "Not_Josh",
-    role: "Jailbreak YouTuber",
-    quote:
-      "Jailbreak Changelogs is the BEST Jailbreak website, hands down. It offers everything you could possibly need as a Roblox Jailbreak player. For example, it features the most accurate value list / dupe list, robbery / bounty trackers, inventory lookup / OG finder, update changelogs, and so much more. If you're a Jailbreak player, you would be dumb NOT to use this.",
-    url: "https://www.youtube.com/@actuallynotjosh/videos",
-  },
-  {
     name: "Tolokagy",
     role: "Supporter",
     quote:
