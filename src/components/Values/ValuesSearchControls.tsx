@@ -21,6 +21,7 @@ import {
   getFilterDisplayName,
 } from "./valuesFilterOptions";
 import { valueSortGroups, getValueSortLabel } from "./valuesSortOptions";
+import { trackFilterSortEvent } from "@/utils/umami";
 
 interface ValuesSearchControlsProps {
   searchTerm: string;
@@ -200,9 +201,7 @@ export default function ValuesSearchControls({
                           return;
                         }
                         setFilterSort(nextValue);
-                        window.umami?.track("Values Filter Change", {
-                          filter: nextValue,
-                        });
+                        trackFilterSortEvent("values", "filter", nextValue);
                       }}
                     >
                       {filterGroups.map((group, groupIndex) => (
@@ -255,9 +254,7 @@ export default function ValuesSearchControls({
                       onValueChange={(newValue) => {
                         const nextValue = newValue as ValueSort;
                         setValueSort(nextValue);
-                        window.umami?.track("Values Sort Change", {
-                          sort: nextValue,
-                        });
+                        trackFilterSortEvent("values", "sort", nextValue);
                       }}
                     >
                       {valueSortGroups.map((group, groupIndex) => (

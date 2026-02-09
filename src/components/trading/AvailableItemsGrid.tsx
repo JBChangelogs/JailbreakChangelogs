@@ -45,6 +45,7 @@ import {
   valueSortOptions,
 } from "@/components/Values/valuesSortOptions";
 import { useValueSortState } from "@/hooks/useValueSortState";
+import { trackFilterSortEvent } from "@/utils/umami";
 
 interface AvailableItemsGridProps {
   items: TradeItem[];
@@ -359,9 +360,7 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
                     onValueChange={(val) => {
                       const nextValue = val as FilterSort;
                       setFilterSort(nextValue);
-                      window.umami?.track("Trading Filter Change", {
-                        filter: nextValue,
-                      });
+                      trackFilterSortEvent("trading", "filter", nextValue);
                     }}
                   >
                     {availableFilterGroups.map((group, index) => (
@@ -411,9 +410,7 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
                     onValueChange={(val) => {
                       const nextValue = val as ValueSort;
                       setValueSort(nextValue);
-                      window.umami?.track("Trading Sort Change", {
-                        sort: nextValue,
-                      });
+                      trackFilterSortEvent("trading", "sort", nextValue);
                     }}
                   >
                     {valueSortGroups.map((group, index) => (
