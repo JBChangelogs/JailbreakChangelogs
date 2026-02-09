@@ -9,7 +9,7 @@ export async function POST(request: NextRequest) {
 
     // If token is not provided in body, try to get it from cookies
     if (!token) {
-      token = request.cookies.get("token")?.value;
+      token = request.cookies.get("jbcl_token")?.value;
     }
 
     if (!campaign || !token) {

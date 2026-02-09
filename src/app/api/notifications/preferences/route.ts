@@ -62,7 +62,7 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const cookieStore = await cookies();
-    const token = cookieStore.get("token")?.value;
+    const token = cookieStore.get("jbcl_token")?.value;
 
     if (!token || token === "undefined") {
       return NextResponse.json(

@@ -9,7 +9,7 @@ export async function POST(request: Request) {
     proof?: string;
   };
   const cookieStore = await cookies();
-  const token = cookieStore.get("token")?.value;
+  const token = cookieStore.get("jbcl_token")?.value;
   if (!token || !dupe_user || !item_id || !proof) {
     return NextResponse.json({ message: "Bad Request" }, { status: 400 });
   }

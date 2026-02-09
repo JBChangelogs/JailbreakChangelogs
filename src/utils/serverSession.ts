@@ -10,7 +10,7 @@ import type { UserData } from "@/types/auth";
  */
 export async function getCurrentUser(): Promise<UserData | null> {
   const cookieStore = await cookies();
-  const token = cookieStore.get("token")?.value;
+  const token = cookieStore.get("jbcl_token")?.value;
   if (!token || token === "undefined") return null;
 
   const maxRetries = 2; // Keep retries low for session to avoid long hangs
@@ -65,7 +65,7 @@ export async function getCurrentUser(): Promise<UserData | null> {
 export async function hasAuthSessionCookie(): Promise<boolean> {
   try {
     const cookieStore = await cookies();
-    const token = cookieStore.get("token")?.value;
+    const token = cookieStore.get("jbcl_token")?.value;
     return !!token && token !== "undefined";
   } catch {
     return false;

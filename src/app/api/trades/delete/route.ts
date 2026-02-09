@@ -6,7 +6,7 @@ export async function DELETE(request: Request) {
   const url = new URL(request.url);
   const id = url.searchParams.get("id");
   const cookieStore = await cookies();
-  const token = cookieStore.get("token")?.value;
+  const token = cookieStore.get("jbcl_token")?.value;
   if (!token || !id) {
     return NextResponse.json(
       { message: "Unauthorized or missing id" },

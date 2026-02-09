@@ -5,7 +5,7 @@ import { BASE_API_URL } from "@/utils/api";
 export async function POST(request: Request) {
   const { following } = (await request.json()) as { following?: string };
   const cookieStore = await cookies();
-  const token = cookieStore.get("token")?.value;
+  const token = cookieStore.get("jbcl_token")?.value;
   if (!token || !following) {
     return NextResponse.json(
       { message: "Unauthorized or missing following" },

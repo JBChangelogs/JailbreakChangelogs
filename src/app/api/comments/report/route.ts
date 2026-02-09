@@ -8,7 +8,7 @@ export async function POST(request: Request) {
     reason?: string;
   };
   const cookieStore = await cookies();
-  const token = cookieStore.get("token")?.value;
+  const token = cookieStore.get("jbcl_token")?.value;
   if (!token || !comment_id || !reason) {
     return NextResponse.json({ message: "Bad Request" }, { status: 400 });
   }

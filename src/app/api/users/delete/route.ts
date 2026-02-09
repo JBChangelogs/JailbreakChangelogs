@@ -2,10 +2,10 @@ import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { BASE_API_URL } from "@/utils/api";
 
-export async function DELETE() {
+export async function DELETE(request: Request) {
   try {
     const cookieStore = await cookies();
-    const token = cookieStore.get("token")?.value;
+    const token = cookieStore.get("jbcl_token")?.value;
     if (!token)
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
 
@@ -29,13 +29,20 @@ export async function DELETE() {
 
     // Clear auth cookie too
     const res = NextResponse.json({ ok: true });
-    res.cookies.set("token", "", {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      path: "/",
-      maxAge: 0,
-    });
+    const isProd = process.env.RAILWAY_ENVIRONMENT_NAME === "production";
+    const cookieDomain = isProd ? ".jailbreakchangelogs.xyz" : undefined;
+    const cookieParts = [
+      "jbcl_token=",
+      "HttpOnly",
+      "SameSite=Lax",
+      "Path=/",
+      "Max-Age=0",
+      isProd ? "Secure" : "",
+      cookieDomain ? `Domain=${cookieDomain}` : "",
+    ]
+      .filter(Boolean)
+      .join("; ");
+    res.headers.set("Set-Cookie", cookieParts);
     return res;
   } catch {
     return NextResponse.json(

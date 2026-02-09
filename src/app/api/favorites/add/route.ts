@@ -5,7 +5,7 @@ import { BASE_API_URL } from "@/utils/api";
 export async function POST(request: Request) {
   const { item_id } = (await request.json()) as { item_id?: string };
   const cookieStore = await cookies();
-  const token = cookieStore.get("token")?.value;
+  const token = cookieStore.get("jbcl_token")?.value;
   if (!token || !item_id) {
     return NextResponse.json(
       { message: "Unauthorized or missing item_id" },

@@ -5,7 +5,7 @@ import { BASE_API_URL } from "@/utils/api";
 export async function POST(request: Request) {
   const body = await request.json();
   const cookieStore = await cookies();
-  const token = cookieStore.get("token")?.value;
+  const token = cookieStore.get("jbcl_token")?.value;
   if (!token) {
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   }

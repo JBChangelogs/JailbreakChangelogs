@@ -24,15 +24,21 @@ export async function POST(request: Request) {
 
     const user = await resp.json();
 
-    const isProd = process.env.NODE_ENV === "production";
+    const isProd = process.env.RAILWAY_ENVIRONMENT_NAME === "production";
+    const cookieDomain = isProd ? ".jailbreakchangelogs.xyz" : undefined;
     const response = NextResponse.json(user, { status: 200 });
-    response.cookies.set("token", token, {
-      httpOnly: true,
-      secure: isProd,
-      sameSite: "lax",
-      path: "/",
-      maxAge: 60 * 60 * 24 * 30,
-    });
+    const cookieParts = [
+      `jbcl_token=${encodeURIComponent(token)}`,
+      "HttpOnly",
+      "SameSite=Lax",
+      "Path=/",
+      `Max-Age=${60 * 60 * 24 * 30}`,
+      isProd ? "Secure" : "",
+      cookieDomain ? `Domain=${cookieDomain}` : "",
+    ]
+      .filter(Boolean)
+      .join("; ");
+    response.headers.set("Set-Cookie", cookieParts);
     return response;
   } catch {
     return new Response(JSON.stringify({ message: "Login failed" }), {
