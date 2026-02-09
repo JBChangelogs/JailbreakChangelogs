@@ -26,14 +26,14 @@ export default function PrivacyPage() {
           </h1>
         </div>
         <p className="text-primary-text mb-6 text-sm">
-          Last updated: January 25th, 2026
+          Last updated: February 8th, 2026
         </p>
 
         <div className="border-border-primary bg-secondary-bg hover:border-border-focus rounded-lg border p-6 transition-colors">
           <Typography className="text-primary-text">
             This Privacy Policy outlines our commitment to protecting your
-            privacy. We prioritize transparency and do not collect any personal
-            information from users of our website.
+            privacy. We prioritize transparency and collect only the minimum
+            personal information needed for optional account features.
           </Typography>
 
           <div className="mt-6 space-y-6">
@@ -51,6 +51,17 @@ export default function PrivacyPage() {
                 <li>Discord Username and Global Name</li>
                 <li>Discord Banner</li>
               </ul>
+              <Typography className="text-secondary-text mt-4">
+                If you link an email to receive notifications, we request your
+                Discord email address using the Discord OAuth{" "}
+                <strong>email</strong> scope. Your email is used only for
+                sending email notifications and managing your email notification
+                link/unlink status. Email addresses are never returned in user
+                data responses, never displayed in the UI, and are not
+                accessible to other users. We never share email addresses or
+                user data with third-party companies or advertisers for
+                targeting, and we will never do so.
+              </Typography>
             </div>
 
             <div>
