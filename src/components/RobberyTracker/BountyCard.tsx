@@ -72,7 +72,7 @@ export default function BountyCard({
               href={`https://www.roblox.com/users/${bounty.userid}/profile`}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-primary-text hover:text-button-info block truncate text-lg font-semibold transition-colors duration-200"
+              className="text-primary-text hover:text-link block truncate text-lg font-semibold transition-colors duration-200"
             >
               {bounty.display_name}
             </a>

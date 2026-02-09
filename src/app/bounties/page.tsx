@@ -1,6 +1,12 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import {
+  useState,
+  useMemo,
+  useEffect,
+  useRef,
+  type CSSProperties,
+} from "react";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import {
   useRobberyTrackerBountiesWebSocket,
@@ -11,6 +17,8 @@ import { Icon } from "@/components/ui/IconWrapper";
 import ServerBountyGroup from "@/components/RobberyTracker/ServerBountyGroup";
 import RobberyTrackerAuthWrapper from "@/components/RobberyTracker/RobberyTrackerAuthWrapper";
 import ExperimentalFeatureBanner from "@/components/ui/ExperimentalFeatureBanner";
+import { useAuthContext } from "@/contexts/AuthContext";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -22,8 +30,20 @@ import {
 type BountySort = "last_updated" | "highest_total" | "lowest_total";
 
 function BountyTrackerContent() {
-  const { bounties, isConnected, isConnecting, isIdle, error } =
-    useRobberyTrackerBountiesWebSocket(true);
+  const { user } = useAuthContext();
+  const {
+    bounties,
+    isConnected,
+    isConnecting,
+    isIdle,
+    error,
+    requiresManualReconnect,
+    reconnect,
+    isBanned,
+    banRemainingSeconds,
+    reconnectFromBan,
+    checkBanStatus,
+  } = useRobberyTrackerBountiesWebSocket(true, user?.id);
 
   const [searchQuery, setSearchQuery] = useState("");
   const [bountySort, setBountySort] = useState<BountySort>("last_updated");
@@ -96,6 +116,191 @@ function BountyTrackerContent() {
   }, [filteredBounties]);
 
   const hasData = bounties.length > 0;
+
+  const [banCountdownSeconds, setBanCountdownSeconds] = useState<number | null>(
+    null,
+  );
+  const [isCheckingBanStatus, setIsCheckingBanStatus] = useState(false);
+  const banReconnectTriggeredRef = useRef(false);
+
+  useEffect(() => {
+    let resetTimer: NodeJS.Timeout | null = null;
+    let initialTimer: NodeJS.Timeout | null = null;
+
+    if (!isBanned || typeof banRemainingSeconds !== "number") {
+      banReconnectTriggeredRef.current = false;
+      resetTimer = setTimeout(() => {
+        setBanCountdownSeconds(null);
+        setIsCheckingBanStatus(false);
+      }, 0);
+      return;
+    }
+
+    banReconnectTriggeredRef.current = false;
+    initialTimer = setTimeout(() => {
+      setBanCountdownSeconds(Math.max(0, Math.floor(banRemainingSeconds)));
+    }, 0);
+
+    const interval = setInterval(() => {
+      setBanCountdownSeconds((prev) => {
+        if (prev === null) return null;
+        return Math.max(0, prev - 1);
+      });
+    }, 1000);
+
+    return () => {
+      if (initialTimer) clearTimeout(initialTimer);
+      if (resetTimer) clearTimeout(resetTimer);
+      clearInterval(interval);
+    };
+  }, [isBanned, banRemainingSeconds]);
+
+  const banTimeLeft = useMemo(() => {
+    if (banCountdownSeconds === null) return null;
+    const totalSeconds = Math.max(0, banCountdownSeconds);
+    const days = Math.floor(totalSeconds / 86400);
+    const hours = Math.floor((totalSeconds % 86400) / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+    return { days, hours, minutes, seconds };
+  }, [banCountdownSeconds]);
+
+  useEffect(() => {
+    if (
+      isBanned &&
+      (banCountdownSeconds === 0 ||
+        (typeof banRemainingSeconds === "number" &&
+          banRemainingSeconds <= 0)) &&
+      !banReconnectTriggeredRef.current
+    ) {
+      banReconnectTriggeredRef.current = true;
+      if (typeof checkBanStatus === "function") {
+        const beginCheck = setTimeout(() => {
+          setIsCheckingBanStatus(true);
+        }, 0);
+        void Promise.resolve(checkBanStatus()).finally(() => {
+          setTimeout(() => {
+            setIsCheckingBanStatus(false);
+          }, 0);
+        });
+        return () => clearTimeout(beginCheck);
+      } else if (typeof reconnectFromBan === "function") {
+        reconnectFromBan();
+      }
+      return;
+    }
+    if (!isBanned) {
+      banReconnectTriggeredRef.current = false;
+    }
+  }, [
+    isBanned,
+    banCountdownSeconds,
+    banRemainingSeconds,
+    checkBanStatus,
+    reconnectFromBan,
+  ]);
+
+  if (isBanned) {
+    return (
+      <main className="text-primary-text min-h-screen">
+        <div className="container mx-auto flex min-h-screen items-center justify-center px-4 py-8">
+          <div className="border-border-primary bg-secondary-bg w-full max-w-2xl rounded-lg border p-6 text-center shadow-sm">
+            <h2 className="text-primary-text text-2xl font-semibold">
+              You have been temporarily banned
+            </h2>
+            <p className="text-secondary-text mx-auto mt-3 max-w-xl text-base leading-relaxed">
+              Your access to the bounty tracker was suspended due to abusive
+              behavior. Bans are temporary. Please check back later.
+            </p>
+            {banTimeLeft && (
+              <div className="mt-4 flex flex-wrap items-center justify-center gap-4">
+                <div>
+                  <span className="countdown text-primary-text text-3xl font-semibold">
+                    <span
+                      style={{ "--value": banTimeLeft.days } as CSSProperties}
+                      aria-live="polite"
+                      aria-label={`${banTimeLeft.days} days`}
+                    >
+                      {banTimeLeft.days}
+                    </span>
+                  </span>
+                  <span className="text-primary-text ml-1">days</span>
+                </div>
+                <div>
+                  <span className="countdown text-primary-text text-3xl font-semibold">
+                    <span
+                      style={{ "--value": banTimeLeft.hours } as CSSProperties}
+                      aria-live="polite"
+                      aria-label={`${banTimeLeft.hours} hours`}
+                    >
+                      {banTimeLeft.hours}
+                    </span>
+                  </span>
+                  <span className="text-primary-text ml-1">hours</span>
+                </div>
+                <div>
+                  <span className="countdown text-primary-text text-3xl font-semibold">
+                    <span
+                      style={
+                        { "--value": banTimeLeft.minutes } as CSSProperties
+                      }
+                      aria-live="polite"
+                      aria-label={`${banTimeLeft.minutes} minutes`}
+                    >
+                      {banTimeLeft.minutes}
+                    </span>
+                  </span>
+                  <span className="text-primary-text ml-1">mins</span>
+                </div>
+                <div>
+                  <span className="countdown text-primary-text text-3xl font-semibold">
+                    <span
+                      style={
+                        { "--value": banTimeLeft.seconds } as CSSProperties
+                      }
+                      aria-live="polite"
+                      aria-label={`${banTimeLeft.seconds} seconds`}
+                    >
+                      {banTimeLeft.seconds}
+                    </span>
+                  </span>
+                  <span className="text-primary-text ml-1">secs</span>
+                </div>
+              </div>
+            )}
+            {isCheckingBanStatus && (
+              <div className="text-secondary-text mt-4 flex items-center justify-center gap-3 text-sm">
+                <div className="border-primary-border border-t-primary-accent h-5 w-5 animate-spin rounded-full border-2" />
+                <span>Checking ban status...</span>
+              </div>
+            )}
+          </div>
+        </div>
+      </main>
+    );
+  }
+
+  if (requiresManualReconnect) {
+    return (
+      <main className="text-primary-text min-h-screen">
+        <div className="container mx-auto flex min-h-screen items-center justify-center px-4 py-8">
+          <div className="border-border-primary bg-secondary-bg w-full max-w-2xl rounded-lg border p-6 text-center shadow-sm">
+            <h2 className="text-primary-text text-2xl font-semibold">
+              Connected from another device/tab
+            </h2>
+            <p className="text-secondary-text mx-auto mt-3 max-w-xl text-base leading-relaxed">
+              This tab was disconnected because your account connected
+              elsewhere. Click reconnect to take over the live tracker from this
+              tab.
+            </p>
+            <div className="mt-6">
+              <Button onClick={reconnect}>Reconnect Here</Button>
+            </div>
+          </div>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main className="text-primary-text min-h-screen">

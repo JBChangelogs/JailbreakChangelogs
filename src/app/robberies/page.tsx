@@ -1,6 +1,12 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import {
+  useState,
+  useMemo,
+  useEffect,
+  useRef,
+  type CSSProperties,
+} from "react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import { useRobberyTrackerWebSocket } from "@/hooks/useRobberyTrackerWebSocket";
@@ -14,6 +20,7 @@ import ExperimentalFeatureBanner from "@/components/ui/ExperimentalFeatureBanner
 import { Button } from "@/components/ui/button";
 import NitroRobberiesTopAd from "@/components/Ads/NitroRobberiesTopAd";
 import NitroRobberiesRailAd from "@/components/Ads/NitroRobberiesRailAd";
+import { useAuthContext } from "@/contexts/AuthContext";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -57,6 +64,7 @@ const ROBBERY_TYPE_TABS = ROBBERY_TYPES.filter(
   .sort((a, b) => a.name.localeCompare(b.name));
 
 function RobberyTrackerContent() {
+  const { user } = useAuthContext();
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
@@ -81,7 +89,12 @@ function RobberyTrackerContent() {
     isConnecting: robberiesConnecting,
     isIdle: robberiesIdle,
     error: robberiesError,
-  } = useRobberyTrackerWebSocket(activeView === "robberies");
+    requiresManualReconnect: robberiesRequiresManualReconnect,
+    reconnect: reconnectRobberies,
+    isBanned: robberiesBanned,
+    banRemainingSeconds: robberiesBanRemainingSeconds,
+    checkBanStatus: checkRobberiesBanStatus,
+  } = useRobberyTrackerWebSocket(activeView === "robberies", user?.id);
 
   const {
     mansions,
@@ -89,7 +102,12 @@ function RobberyTrackerContent() {
     isConnecting: mansionsConnecting,
     isIdle: mansionsIdle,
     error: mansionsError,
-  } = useRobberyTrackerMansionsWebSocket(activeView === "mansions");
+    requiresManualReconnect: mansionsRequiresManualReconnect,
+    reconnect: reconnectMansions,
+    isBanned: mansionsBanned,
+    banRemainingSeconds: mansionsBanRemainingSeconds,
+    checkBanStatus: checkMansionsBanStatus,
+  } = useRobberyTrackerMansionsWebSocket(activeView === "mansions", user?.id);
 
   const {
     airdrops,
@@ -97,7 +115,12 @@ function RobberyTrackerContent() {
     isConnecting: airdropsConnecting,
     isIdle: airdropsIdle,
     error: airdropsError,
-  } = useRobberyTrackerAirdropsWebSocket(activeView === "airdrops");
+    requiresManualReconnect: airdropsRequiresManualReconnect,
+    reconnect: reconnectAirdrops,
+    isBanned: airdropsBanned,
+    banRemainingSeconds: airdropsBanRemainingSeconds,
+    checkBanStatus: checkAirdropsBanStatus,
+  } = useRobberyTrackerAirdropsWebSocket(activeView === "airdrops", user?.id);
 
   const isConnecting =
     activeView === "robberies"
@@ -126,6 +149,41 @@ function RobberyTrackerContent() {
       : activeView === "mansions"
         ? mansionsError
         : airdropsError;
+
+  const requiresManualReconnect =
+    activeView === "robberies"
+      ? robberiesRequiresManualReconnect
+      : activeView === "mansions"
+        ? mansionsRequiresManualReconnect
+        : airdropsRequiresManualReconnect;
+
+  const isBanned =
+    activeView === "robberies"
+      ? robberiesBanned
+      : activeView === "mansions"
+        ? mansionsBanned
+        : airdropsBanned;
+
+  const banRemainingSeconds =
+    activeView === "robberies"
+      ? robberiesBanRemainingSeconds
+      : activeView === "mansions"
+        ? mansionsBanRemainingSeconds
+        : airdropsBanRemainingSeconds;
+
+  const handleManualReconnect =
+    activeView === "robberies"
+      ? reconnectRobberies
+      : activeView === "mansions"
+        ? reconnectMansions
+        : reconnectAirdrops;
+
+  const handleBanStatusCheck =
+    activeView === "robberies"
+      ? checkRobberiesBanStatus
+      : activeView === "mansions"
+        ? checkMansionsBanStatus
+        : checkAirdropsBanStatus;
 
   const hasData =
     activeView === "robberies"
@@ -355,6 +413,178 @@ function RobberyTrackerContent() {
     const hard = filteredAirdrops.filter((a) => a.color === "Red").length;
     return { total, easy, medium, hard };
   }, [filteredAirdrops]);
+
+  const [banCountdownSeconds, setBanCountdownSeconds] = useState<number | null>(
+    null,
+  );
+  const [isCheckingBanStatus, setIsCheckingBanStatus] = useState(false);
+  const banReconnectTriggeredRef = useRef(false);
+
+  useEffect(() => {
+    let resetTimer: NodeJS.Timeout | null = null;
+    let initialTimer: NodeJS.Timeout | null = null;
+
+    if (!isBanned || typeof banRemainingSeconds !== "number") {
+      banReconnectTriggeredRef.current = false;
+      resetTimer = setTimeout(() => {
+        setBanCountdownSeconds(null);
+        setIsCheckingBanStatus(false);
+      }, 0);
+      return;
+    }
+
+    banReconnectTriggeredRef.current = false;
+    initialTimer = setTimeout(() => {
+      setBanCountdownSeconds(Math.max(0, Math.floor(banRemainingSeconds)));
+    }, 0);
+
+    const interval = setInterval(() => {
+      setBanCountdownSeconds((prev) => {
+        if (prev === null) return null;
+        return Math.max(0, prev - 1);
+      });
+    }, 1000);
+
+    return () => {
+      if (initialTimer) clearTimeout(initialTimer);
+      if (resetTimer) clearTimeout(resetTimer);
+      clearInterval(interval);
+    };
+  }, [isBanned, banRemainingSeconds]);
+
+  const banTimeLeft = useMemo(() => {
+    if (banCountdownSeconds === null) return null;
+    const totalSeconds = Math.max(0, banCountdownSeconds);
+    const days = Math.floor(totalSeconds / 86400);
+    const hours = Math.floor((totalSeconds % 86400) / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+    return { days, hours, minutes, seconds };
+  }, [banCountdownSeconds]);
+
+  useEffect(() => {
+    if (isBanned && banCountdownSeconds === 0) {
+      if (banReconnectTriggeredRef.current) return;
+      banReconnectTriggeredRef.current = true;
+      if (typeof handleBanStatusCheck === "function") {
+        const beginCheck = setTimeout(() => {
+          setIsCheckingBanStatus(true);
+        }, 0);
+        void Promise.resolve(handleBanStatusCheck()).finally(() => {
+          setTimeout(() => {
+            setIsCheckingBanStatus(false);
+          }, 0);
+        });
+        return () => clearTimeout(beginCheck);
+      }
+      return;
+    }
+    if (!isBanned) {
+      banReconnectTriggeredRef.current = false;
+    }
+  }, [isBanned, banCountdownSeconds, handleBanStatusCheck]);
+
+  if (isBanned) {
+    return (
+      <main className="text-primary-text min-h-screen">
+        <div className="container mx-auto flex min-h-screen items-center justify-center px-4 py-8">
+          <div className="border-border-primary bg-secondary-bg w-full max-w-2xl rounded-lg border p-6 text-center shadow-sm">
+            <h2 className="text-primary-text text-2xl font-semibold">
+              You have been temporarily banned
+            </h2>
+            <p className="text-secondary-text mx-auto mt-3 max-w-xl text-base leading-relaxed">
+              Your access to the robbery tracker was suspended due to abusive
+              behavior. Bans are temporary. Please check back later.
+            </p>
+            {banTimeLeft && (
+              <div className="mt-4 flex flex-wrap items-center justify-center gap-4">
+                <div>
+                  <span className="countdown text-primary-text text-3xl font-semibold">
+                    <span
+                      style={{ "--value": banTimeLeft.days } as CSSProperties}
+                      aria-live="polite"
+                      aria-label={`${banTimeLeft.days} days`}
+                    >
+                      {banTimeLeft.days}
+                    </span>
+                  </span>
+                  <span className="text-primary-text ml-1">days</span>
+                </div>
+                <div>
+                  <span className="countdown text-primary-text text-3xl font-semibold">
+                    <span
+                      style={{ "--value": banTimeLeft.hours } as CSSProperties}
+                      aria-live="polite"
+                      aria-label={`${banTimeLeft.hours} hours`}
+                    >
+                      {banTimeLeft.hours}
+                    </span>
+                  </span>
+                  <span className="text-primary-text ml-1">hours</span>
+                </div>
+                <div>
+                  <span className="countdown text-primary-text text-3xl font-semibold">
+                    <span
+                      style={
+                        { "--value": banTimeLeft.minutes } as CSSProperties
+                      }
+                      aria-live="polite"
+                      aria-label={`${banTimeLeft.minutes} minutes`}
+                    >
+                      {banTimeLeft.minutes}
+                    </span>
+                  </span>
+                  <span className="text-primary-text ml-1">mins</span>
+                </div>
+                <div>
+                  <span className="countdown text-primary-text text-3xl font-semibold">
+                    <span
+                      style={
+                        { "--value": banTimeLeft.seconds } as CSSProperties
+                      }
+                      aria-live="polite"
+                      aria-label={`${banTimeLeft.seconds} seconds`}
+                    >
+                      {banTimeLeft.seconds}
+                    </span>
+                  </span>
+                  <span className="text-primary-text ml-1">secs</span>
+                </div>
+              </div>
+            )}
+            {isCheckingBanStatus && (
+              <div className="text-secondary-text mt-4 flex items-center justify-center gap-3 text-sm">
+                <div className="border-primary-border border-t-primary-accent h-5 w-5 animate-spin rounded-full border-2" />
+                <span>Checking ban status...</span>
+              </div>
+            )}
+          </div>
+        </div>
+      </main>
+    );
+  }
+
+  if (requiresManualReconnect) {
+    return (
+      <main className="text-primary-text min-h-screen">
+        <div className="container mx-auto flex min-h-screen items-center justify-center px-4 py-8">
+          <div className="border-border-primary bg-secondary-bg w-full max-w-2xl rounded-lg border p-6 text-center shadow-sm">
+            <h2 className="text-primary-text text-2xl font-semibold">
+              Connected from another device/tab
+            </h2>
+            <p className="text-secondary-text mx-auto mt-3 max-w-xl text-base leading-relaxed">
+              This tab was disconnected because your account connected
+              elsewhere. Click reconnect to take over the live tracker from this
+              tab.
+            </p>
+            <div className="mt-6">
+              <Button onClick={handleManualReconnect}>Reconnect Here</Button>
+            </div>
+          </div>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main className="text-primary-text min-h-screen">
@@ -746,7 +976,7 @@ function RobberyTrackerContent() {
         <NitroRobberiesTopAd className="mb-6" />
 
         {/* Loading State - only show when no data */}
-        {!isConnected && !hasData && (
+        {!isConnected && !hasData && !requiresManualReconnect && (
           <div className="flex min-h-screen flex-col items-center justify-start py-20 pt-24">
             <div className="text-center">
               <div className="border-primary-border border-t-primary-accent mb-4 inline-block h-12 w-12 animate-spin rounded-full border-4" />
@@ -758,7 +988,7 @@ function RobberyTrackerContent() {
         )}
 
         {/* Show stale data warning if disconnected */}
-        {!isConnected && hasData && (
+        {!isConnected && hasData && !requiresManualReconnect && (
           <div className="bg-secondary-bg border-border-primary mb-4 rounded-lg border p-4 shadow-sm">
             <div className="flex items-start gap-3">
               <div>
