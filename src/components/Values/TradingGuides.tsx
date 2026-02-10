@@ -5,6 +5,7 @@ import { YouTubeEmbed } from "@next/third-parties/google";
 import { Icon } from "@/components/ui/IconWrapper";
 import { demandOrder, trendOrder } from "@/utils/values";
 import { ValueSort } from "@/types";
+import { trendDescriptions } from "@/utils/tradingDefinitions";
 
 interface TradingGuidesProps {
   valueSort: ValueSort;
@@ -18,24 +19,6 @@ export default function TradingGuides({
   onScrollToSearch,
 }: TradingGuidesProps) {
   const [isExpanded, setIsExpanded] = useState(false);
-
-  const trendDescriptions: Record<string, string> = {
-    Dropping:
-      "Items which are consistently getting larger underpays from base overtime.",
-    Unstable:
-      "Items which inconsistently yet occasionally get a varying overpay/underpay from base.",
-    Hoarded:
-      "Items that have a significant amount of circulation in the hands of a conglomerate or an individual.",
-    Manipulated: "Items that only receive its value due to manipulation.",
-    Stable:
-      "Items which get a consistent amount of value. (Consistent underpay/base/overpay)",
-    Recovering:
-      "Items which have recently dropped significantly in value which are beginning to gradually increase in demand.",
-    Rising:
-      "Items which are consistently getting larger overpays from base overtime.",
-    Hyped:
-      "Items which are experiencing a significant, but temporary, spike in demand which is driven by the community",
-  };
 
   const tradingTerms = [
     {
