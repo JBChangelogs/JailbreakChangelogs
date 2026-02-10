@@ -29,17 +29,41 @@ function useLocationHash() {
   );
 }
 
+function useMobileSheetOpen() {
+  return useSyncExternalStore(
+    (onStoreChange) => {
+      if (typeof window === "undefined") {
+        return () => {};
+      }
+      const handler = () => onStoreChange();
+      window.addEventListener("jb-sheet-toggle", handler);
+      return () => {
+        window.removeEventListener("jb-sheet-toggle", handler);
+      };
+    },
+    () =>
+      typeof document === "undefined"
+        ? ""
+        : (document.body?.dataset.mobileSheetOpen ?? ""),
+    () => "",
+  );
+}
+
 export default function NitroBottomAnchor() {
   const { user } = useAuthContext();
   const createdRef = useRef(false);
   const pathname = usePathname();
   const hash = useLocationHash();
   const isSmallScreen = useMediaQuery("(max-width: 425px)");
+  const isSheetScreen = useMediaQuery("(max-width: 1024px)");
+  const mobileSheetState = useMobileSheetOpen();
+  const isMobileSheetOpen = mobileSheetState === "true";
 
   const disableAnchor = useMemo(
     () =>
-      isSmallScreen && pathname === "/values" && hash === "#hyper-pity-calc",
-    [isSmallScreen, pathname, hash],
+      (isSheetScreen && isMobileSheetOpen) ||
+      (isSmallScreen && pathname === "/values" && hash === "#hyper-pity-calc"),
+    [isSheetScreen, isMobileSheetOpen, isSmallScreen, pathname, hash],
   );
 
   useEffect(() => {

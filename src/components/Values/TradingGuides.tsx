@@ -280,6 +280,10 @@ export default function TradingGuides({
                   Please don&apos;t 100% rely on the value list, use your own
                   judgment as well
                 </li>
+                <li>
+                  If an item&apos;s duped value is marked as &quot;N/A&quot;, it
+                  means the duped value is the same as the clean value
+                </li>
               </ul>
 
               <h3 className="text-primary-text mb-4 text-xl font-semibold">
