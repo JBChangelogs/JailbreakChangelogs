@@ -118,8 +118,8 @@ export default function CategoryIcons({
               }
               className={`order-(--mobile-order) flex cursor-pointer items-center gap-3 rounded-lg border-2 p-3 transition-all sm:order-0 sm:p-4 ${
                 isSelected
-                  ? "bg-primary-bg ring-border-focus ring-2"
-                  : "bg-primary-bg"
+                  ? "bg-tertiary-bg ring-border-focus ring-2"
+                  : "bg-tertiary-bg"
               }`}
               style={
                 {

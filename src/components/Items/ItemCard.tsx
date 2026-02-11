@@ -313,7 +313,7 @@ export default function ItemCard({
   return (
     <div className="w-full">
       <div
-        className={`group border-border-primary bg-secondary-bg hover:border-border-focus relative cursor-pointer overflow-hidden rounded-lg border-2 transition-all duration-300 hover:shadow-lg`}
+        className="group border-border-card bg-secondary-bg relative cursor-pointer overflow-hidden rounded-lg border-2 transition-all duration-300 hover:shadow-lg"
         role="button"
         tabIndex={0}
         aria-haspopup="dialog"
@@ -526,7 +526,7 @@ export default function ItemCard({
           </div>
 
           <div className="space-y-1 pb-2 sm:space-y-2">
-            <div className="bg-primary-bg flex items-center justify-between rounded-lg p-1 sm:p-2.5">
+            <div className="border-border-card bg-tertiary-bg flex items-center justify-between rounded-lg border p-1 sm:p-2.5">
               <div className="flex items-center gap-1 sm:gap-2">
                 <span className="text-secondary-text text-xs font-medium whitespace-nowrap sm:text-xs">
                   Cash Value
@@ -556,7 +556,7 @@ export default function ItemCard({
               </span>
             </div>
 
-            <div className="bg-primary-bg flex items-center justify-between rounded-lg p-1 sm:p-2.5">
+            <div className="border-border-card bg-tertiary-bg flex items-center justify-between rounded-lg border p-1 sm:p-2.5">
               <div className="flex items-center gap-1 sm:gap-2">
                 <span className="text-secondary-text text-xs font-medium whitespace-nowrap sm:text-xs">
                   Duped Value
@@ -586,7 +586,7 @@ export default function ItemCard({
               </span>
             </div>
 
-            <div className="bg-primary-bg flex items-center justify-between rounded-lg p-1 sm:p-2.5">
+            <div className="border-border-card bg-tertiary-bg flex items-center justify-between rounded-lg border p-1 sm:p-2.5">
               <div className="flex items-center gap-1 sm:gap-2">
                 <span className="text-secondary-text text-xs font-medium whitespace-nowrap sm:text-xs">
                   Demand
@@ -600,7 +600,7 @@ export default function ItemCard({
             </div>
 
             {isValuesPage && (
-              <div className="bg-primary-bg flex items-center justify-between rounded-lg p-1 sm:p-2.5">
+              <div className="border-border-card bg-tertiary-bg flex items-center justify-between rounded-lg border p-1 sm:p-2.5">
                 <div className="flex items-center gap-1 sm:gap-2">
                   <span className="text-secondary-text text-xs font-medium whitespace-nowrap sm:text-xs">
                     Trend
@@ -702,7 +702,7 @@ export default function ItemCard({
                 Values
               </div>
               <div className="mt-2 space-y-2">
-                <div className="bg-primary-bg flex items-center justify-between rounded-lg p-2">
+                <div className="border-border-card bg-tertiary-bg flex items-center justify-between rounded-lg border p-2">
                   <span className="text-secondary-text text-xs font-medium">
                     Cash Value
                   </span>
@@ -736,7 +736,7 @@ export default function ItemCard({
                     No recent Cash Value change noted.
                   </p>
                 )}
-                <div className="bg-primary-bg flex items-center justify-between rounded-lg p-2">
+                <div className="border-border-card bg-tertiary-bg flex items-center justify-between rounded-lg border p-2">
                   <span className="text-secondary-text text-xs font-medium">
                     Duped Value
                   </span>
@@ -784,7 +784,7 @@ export default function ItemCard({
                 Trading Signals
               </div>
               <div className="mt-2 space-y-2">
-                <div className="bg-primary-bg flex items-start justify-between gap-3 rounded-lg p-2">
+                <div className="border-border-card bg-tertiary-bg flex items-start justify-between gap-3 rounded-lg border p-2">
                   <div>
                     <div className="text-secondary-text text-xs font-medium">
                       Demand
@@ -799,7 +799,7 @@ export default function ItemCard({
                     {demandLabel}
                   </span>
                 </div>
-                <div className="bg-primary-bg flex items-start justify-between gap-3 rounded-lg p-2">
+                <div className="border-border-card bg-tertiary-bg flex items-start justify-between gap-3 rounded-lg border p-2">
                   <div>
                     <div className="text-secondary-text text-xs font-medium">
                       Trend
@@ -824,7 +824,7 @@ export default function ItemCard({
                 <div className="text-primary-text text-xs font-semibold tracking-wide uppercase">
                   Item Notes
                 </div>
-                <div className="bg-primary-bg mt-2 rounded-lg p-2">
+                <div className="border-border-card bg-tertiary-bg mt-2 rounded-lg border p-2">
                   <p className="text-secondary-text text-xs">
                     {currentItemData.notes}
                   </p>

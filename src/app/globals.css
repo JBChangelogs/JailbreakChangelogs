@@ -3,6 +3,18 @@
 @plugin "daisyui";
 @import "tw-animate-css";
 
+/* NitroPay CCPA link styling in footer */
+.ccpa-footer [data-ccpa-link] a,
+.ccpa-footer [data-ccpa-link] a span {
+  color: var(--color-secondary-text) !important;
+  text-decoration: none;
+}
+.ccpa-footer [data-ccpa-link] a:hover,
+.ccpa-footer [data-ccpa-link] a:hover span {
+  color: var(--color-secondary-text) !important;
+  text-decoration: underline;
+}
+
 @theme {
   /* DARK THEME - Default (current theme) */
   /* Background Colors - Comprehensive Gray Scale */
@@ -53,6 +65,7 @@
     8%,
     20%
   ); /* Primary borders - Card outlines */
+  --color-border-card: hsl(214, 8%, 30%); /* Card borders - Slight contrast */
   --color-border-secondary: hsl(
     214,
     6%,
@@ -276,6 +289,7 @@
 
   /* Border and Separator Colors - Light theme */
   --color-border-primary: hsl(214, 8%, 80%); /* Primary borders - Light gray */
+  --color-border-card: hsl(214, 7%, 86%); /* Card borders - Slight contrast */
   --color-border-secondary: hsl(
     214,
     6%,

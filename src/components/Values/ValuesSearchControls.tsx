@@ -284,7 +284,7 @@ export default function ValuesSearchControls({
           </div>
 
           <div className="w-full">
-            <div className="border-border-primary bg-secondary-bg hover:border-border-focus rounded-lg border px-3 py-2">
+            <div className="border-border-card bg-secondary-bg rounded-lg border px-3 py-2">
               <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex items-center gap-2">
                   <span className="text-secondary-text text-xs">

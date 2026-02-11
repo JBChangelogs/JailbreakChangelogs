@@ -335,7 +335,7 @@ export default function ItemDetailsClient({
             </div>
 
             <div
-              className="bg-secondary-bg mt-4 rounded-lg p-4 shadow-lg"
+              className="bg-tertiary-bg mt-4 rounded-lg p-4 shadow-lg"
               style={{
                 border: "2px solid",
                 borderImage: "linear-gradient(45deg, #076bb6, #ca4a0d) 1",
@@ -600,7 +600,7 @@ export default function ItemDetailsClient({
             {activeTab === 1 && (
               <div className="mb-8 space-y-6">
                 {/* Chart Sub-tabs */}
-                <div className="bg-secondary-bg rounded-lg p-4">
+                <div className="border-border-card bg-secondary-bg rounded-lg border p-4">
                   <div role="tablist" className="tabs">
                     <button
                       role="tab"

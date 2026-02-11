@@ -3,6 +3,7 @@
 import { Typography } from "@mui/material";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import { Icon } from "@/components/ui/IconWrapper";
+import CCPAHandler from "@/components/Home/CCPAHandler";
 
 export default function PrivacyPage() {
   return (
@@ -209,6 +210,7 @@ export default function PrivacyPage() {
                 Requests&quot; section above.
               </Typography>
               <Typography className="text-secondary-text">
+                <CCPAHandler />
                 <span data-ccpa-link="1"></span>
               </Typography>
             </div>

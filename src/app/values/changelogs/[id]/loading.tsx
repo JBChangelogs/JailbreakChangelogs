@@ -2,11 +2,11 @@ import { Skeleton } from "@mui/material";
 
 export default function Loading() {
   return (
-    <main className="mb-8 min-h-screen">
+    <main className="mt-8 mb-8 min-h-screen">
       <div className="container mx-auto px-4">
         <div className="space-y-6">
           {/* Header Skeleton */}
-          <div className="border-border-primary bg-secondary-bg hover:border-border-focus rounded-lg border p-6">
+          <div className="border-border-card bg-secondary-bg rounded-lg border p-6">
             <Skeleton
               variant="text"
               width="60%"
@@ -41,7 +41,7 @@ export default function Loading() {
           </div>
 
           {/* Search and Filters Skeleton */}
-          <div className="border-border-primary hover:border-border-focus rounded-lg border p-4">
+          <div className="border-border-card bg-secondary-bg rounded-lg border p-4">
             <div className="flex flex-col gap-4 sm:flex-row">
               <Skeleton
                 variant="rectangular"
@@ -63,7 +63,7 @@ export default function Loading() {
             {[...Array(6)].map((_, i) => (
               <div
                 key={i}
-                className="border-border-primary hover:border-border-focus rounded-lg border p-4"
+                className="border-border-card bg-secondary-bg rounded-lg border p-4"
               >
                 <div className="mb-4 flex items-center gap-3">
                   <Skeleton
@@ -101,7 +101,7 @@ export default function Loading() {
                     className="bg-secondary-bg"
                   />
                 </div>
-                <div className="border-border-primary hover:border-border-focus flex items-center justify-between border-t pt-4">
+                <div className="border-border-card flex items-center justify-between border-t pt-4">
                   <Skeleton
                     variant="circular"
                     width={24}

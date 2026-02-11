@@ -296,21 +296,19 @@ const SimilarItems = ({
           <div className="bg-button-info/20 flex h-8 w-8 items-center justify-center rounded-lg">
             <Icon
               icon="heroicons-outline:sparkles"
-              className="text-button-info h-5 w-5"
+              className="text-link h-5 w-5"
             />
           </div>
-          <div className="flex items-center gap-2">
-            <h3 className="text-primary-text text-xl font-semibold">
-              Similar Items
-            </h3>
-          </div>
+          <h3 className="text-primary-text text-xl font-semibold">
+            Similar Items
+          </h3>
         </div>
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button
               type="button"
-              className="border-border-primary bg-primary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus flex h-[56px] w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all duration-300 focus:ring-1 focus:outline-none"
+              className="border-border-card bg-tertiary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 flex h-[56px] w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all duration-300 focus:ring-1 focus:outline-none"
               aria-label="Sort similar items"
             >
               <span className="truncate">
@@ -331,7 +329,7 @@ const SimilarItems = ({
           </DropdownMenuTrigger>
           <DropdownMenuContent
             align="start"
-            className="border-border-primary bg-primary-bg text-primary-text scrollbar-thin max-h-[240px] w-[var(--radix-popper-anchor-width)] min-w-[var(--radix-popper-anchor-width)] overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
+            className="border-border-card bg-tertiary-bg text-primary-text scrollbar-thin max-h-[240px] w-[var(--radix-popper-anchor-width)] min-w-[var(--radix-popper-anchor-width)] overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
           >
             <DropdownMenuRadioGroup
               value={sortBy}
@@ -371,7 +369,7 @@ const SimilarItems = ({
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-3">
           {[...Array(6)].map((_, i) => (
             <div key={i} className="animate-pulse">
-              <div className="border-border-primary bg-secondary-bg hover:border-border-focus mb-3 aspect-video rounded-lg border"></div>
+              <div className="border-border-card bg-tertiary-bg mb-3 aspect-video rounded-lg border"></div>
               <div className="bg-secondary-bg mb-2 h-4 w-3/4 rounded"></div>
               <div className="bg-secondary-bg h-4 w-1/2 rounded"></div>
             </div>
@@ -415,7 +413,7 @@ const SimilarItems = ({
               className="group block"
               prefetch={false}
             >
-              <div className="border-border-primary bg-primary-bg hover:border-border-focus relative overflow-hidden rounded-lg border transition-all duration-300">
+              <div className="border-border-card bg-tertiary-bg relative overflow-hidden rounded-lg border transition-all duration-300">
                 {/* Media Section */}
                 <div className="relative aspect-video w-full overflow-hidden">
                   {isVideoItem(item.name) ? (
@@ -442,7 +440,7 @@ const SimilarItems = ({
                 <div className="flex flex-1 flex-col space-y-2 p-3">
                   {/* Item Name */}
                   <div className="flex items-center justify-between">
-                    <h3 className="text-primary-text hover:text-link line-clamp-2 text-sm leading-tight font-semibold transition-colors">
+                    <h3 className="text-primary-text group-hover:text-link line-clamp-2 text-sm leading-tight font-semibold transition-colors">
                       {item.name}
                     </h3>
                   </div>
@@ -468,7 +466,7 @@ const SimilarItems = ({
                   {/* Values Section */}
                   <div className="space-y-1">
                     {/* Cash Value */}
-                    <div className="bg-secondary-bg flex items-center justify-between rounded-lg p-1.5">
+                    <div className="border-border-card bg-secondary-bg flex items-center justify-between rounded-lg border p-1.5">
                       <span className="text-secondary-text text-[10px] font-medium">
                         Cash
                       </span>
@@ -478,7 +476,7 @@ const SimilarItems = ({
                     </div>
 
                     {/* Duped Value */}
-                    <div className="bg-secondary-bg flex items-center justify-between rounded-lg p-1.5">
+                    <div className="border-border-card bg-secondary-bg flex items-center justify-between rounded-lg border p-1.5">
                       <span className="text-secondary-text text-[10px] font-medium">
                         Duped
                       </span>
@@ -488,7 +486,7 @@ const SimilarItems = ({
                     </div>
 
                     {/* Demand */}
-                    <div className="bg-secondary-bg flex items-center justify-between rounded-lg p-1.5">
+                    <div className="border-border-card bg-secondary-bg flex items-center justify-between rounded-lg border p-1.5">
                       <span className="text-secondary-text text-[10px] font-medium">
                         Demand
                       </span>
@@ -501,7 +499,7 @@ const SimilarItems = ({
 
                     {/* Trend */}
                     {item.trend && (
-                      <div className="bg-secondary-bg flex items-center justify-between rounded-lg p-1.5">
+                      <div className="border-border-card bg-secondary-bg flex items-center justify-between rounded-lg border p-1.5">
                         <span className="text-secondary-text text-[10px] font-medium">
                           Trend
                         </span>

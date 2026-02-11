@@ -32,22 +32,19 @@ export default function ItemValues({
   const hasNoPrice = price === "N/A";
 
   return (
-    <div className="border-border-primary bg-secondary-bg hover:shadow-card-shadow mb-8 space-y-6 rounded-lg border p-6 shadow-lg transition-all duration-200">
+    <div className="border-border-card bg-secondary-bg hover:shadow-card-shadow mb-8 space-y-6 rounded-lg border p-6 shadow-lg transition-all duration-200">
       <div className="flex items-center gap-3">
         <div className="bg-button-info/20 flex h-10 w-10 items-center justify-center rounded-lg">
-          <Icon
-            icon="heroicons:banknotes"
-            className="text-button-info h-6 w-6"
-          />
+          <Icon icon="heroicons:banknotes" className="text-link h-6 w-6" />
         </div>
         <h3 className="text-primary-text text-2xl font-bold">Item Values</h3>
       </div>
 
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
         {/* Cash Value */}
-        <div className="border-border-primary bg-primary-bg rounded-lg border p-4">
+        <div className="border-border-card bg-tertiary-bg rounded-lg border p-4">
           <div className="mb-2 flex items-center gap-2">
-            <h4 className="text-tertiary-text text-sm font-semibold tracking-wide uppercase">
+            <h4 className="text-secondary-text text-sm font-semibold tracking-wide uppercase">
               Cash Value
             </h4>
             {(() => {
@@ -76,9 +73,9 @@ export default function ItemValues({
         </div>
 
         {/* Duped Value */}
-        <div className="border-border-primary bg-primary-bg rounded-lg border p-4">
+        <div className="border-border-card bg-tertiary-bg rounded-lg border p-4">
           <div className="mb-2 flex items-center gap-2">
-            <h4 className="text-tertiary-text text-sm font-semibold tracking-wide uppercase">
+            <h4 className="text-secondary-text text-sm font-semibold tracking-wide uppercase">
               Duped Value
             </h4>
             {(() => {
@@ -107,9 +104,9 @@ export default function ItemValues({
         </div>
 
         {/* Original Price */}
-        <div className="border-border-primary bg-primary-bg rounded-lg border p-4">
+        <div className="border-border-card bg-tertiary-bg rounded-lg border p-4">
           <div className="mb-2 flex items-center gap-2">
-            <h4 className="text-tertiary-text text-sm font-semibold tracking-wide uppercase">
+            <h4 className="text-secondary-text text-sm font-semibold tracking-wide uppercase">
               Original Price
             </h4>
           </div>
@@ -140,9 +137,9 @@ export default function ItemValues({
 
         {/* Vehicle Health - Only show for vehicles */}
         {type.toLowerCase() === "vehicle" && (
-          <div className="border-border-primary bg-primary-bg rounded-lg border p-4">
+          <div className="border-border-card bg-tertiary-bg rounded-lg border p-4">
             <div className="mb-2 flex items-center gap-2">
-              <h4 className="text-tertiary-text text-sm font-semibold tracking-wide uppercase">
+              <h4 className="text-secondary-text text-sm font-semibold tracking-wide uppercase">
                 Vehicle Health
               </h4>
             </div>
@@ -153,9 +150,9 @@ export default function ItemValues({
         )}
 
         {/* Item Demand */}
-        <div className="border-border-primary bg-primary-bg rounded-lg border p-4">
+        <div className="border-border-card bg-tertiary-bg rounded-lg border p-4">
           <div className="mb-2 flex items-center gap-2">
-            <h4 className="text-tertiary-text text-sm font-semibold tracking-wide uppercase">
+            <h4 className="text-secondary-text text-sm font-semibold tracking-wide uppercase">
               Item Demand
             </h4>
           </div>
@@ -167,9 +164,9 @@ export default function ItemValues({
         </div>
 
         {/* Item Trend */}
-        <div className="border-border-primary bg-primary-bg rounded-lg border p-4">
+        <div className="border-border-card bg-tertiary-bg rounded-lg border p-4">
           <div className="mb-2 flex items-center gap-2">
-            <h4 className="text-tertiary-text text-sm font-semibold tracking-wide uppercase">
+            <h4 className="text-secondary-text text-sm font-semibold tracking-wide uppercase">
               Trend
             </h4>
           </div>
@@ -185,9 +182,9 @@ export default function ItemValues({
 
       {/* Item Notes - Full width */}
       {notes && notes.trim() !== "" && (
-        <div className="border-border-primary bg-primary-bg rounded-lg border p-4">
+        <div className="border-border-card bg-tertiary-bg rounded-lg border p-4">
           <div className="mb-2 flex items-center gap-2">
-            <h4 className="text-tertiary-text text-sm font-semibold tracking-wide uppercase">
+            <h4 className="text-secondary-text text-sm font-semibold tracking-wide uppercase">
               Item Notes
             </h4>
           </div>

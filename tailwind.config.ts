@@ -40,6 +40,7 @@ const config: Config = {
 
         // Border Colors
         "border-primary": "var(--color-border-primary)",
+        "border-card": "var(--color-border-card)",
         "border-secondary": "var(--color-border-secondary)",
         "border-tertiary": "var(--color-border-tertiary)",
         "border-focus": "var(--color-border-focus)",

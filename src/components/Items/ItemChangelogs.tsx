@@ -396,7 +396,7 @@ export default function ItemChangelogs({
             </div>
 
             <div className="modal-content px-6 pt-3 pb-6">
-              <div className="border-border-primary bg-primary-bg mb-4 flex rounded-lg border">
+              <div className="border-border-card bg-primary-bg mb-4 flex rounded-lg border">
                 <button
                   onClick={() => setVotersTab("up")}
                   className={`flex-1 cursor-pointer rounded-l-lg py-3 text-sm font-semibold transition-colors ${
@@ -461,7 +461,7 @@ export default function ItemChangelogs({
                   ).map((voter: VoteRecord) => (
                     <div
                       key={voter.id}
-                      className="border-border-primary bg-primary-bg hover:border-border-focus flex items-center gap-4 rounded-lg border px-4 py-3 transition-colors"
+                      className="border-border-card bg-tertiary-bg flex items-center gap-4 rounded-lg border px-4 py-3 transition-colors"
                     >
                       <div className="ring-border-primary relative h-10 w-10 shrink-0 overflow-hidden rounded-full ring-2">
                         <DefaultAvatar />
@@ -513,7 +513,7 @@ export default function ItemChangelogs({
       </Dialog>
 
       {/* Central Changelogs Information Banner */}
-      <div className="border-border-primary bg-secondary-bg hover:border-border-focus mb-6 rounded-lg border p-6 shadow-lg">
+      <div className="border-border-card bg-secondary-bg mb-6 rounded-lg border p-6 shadow-lg">
         <div className="flex items-start gap-4">
           <div className="flex-1">
             <h3 className="text-primary-text mb-2 text-lg font-semibold">
@@ -546,7 +546,7 @@ export default function ItemChangelogs({
         </div>
       </div>
 
-      <div className="border-border-primary bg-secondary-bg hover:border-border-focus mb-4 rounded-lg border p-3">
+      <div className="border-border-card bg-secondary-bg mb-4 rounded-lg border p-3">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex flex-wrap items-center gap-2">
             <span className="border-primary-text text-primary-text flex items-center rounded-full border bg-transparent px-1.5 py-0.5 text-[10px] sm:px-2 sm:py-1 sm:text-xs">
@@ -638,7 +638,7 @@ export default function ItemChangelogs({
                     transform: `translateY(${virtualItem.start}px)`,
                   }}
                 >
-                  <div className="border-border-primary bg-secondary-bg hover:border-border-focus m-2 overflow-hidden rounded-lg border p-4 transition-colors">
+                  <div className="border-border-card bg-secondary-bg m-2 overflow-hidden rounded-lg border p-4 transition-colors">
                     {change.suggestion_data && (
                       <div className="mb-2 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
                         <div className="flex items-center gap-2">
@@ -652,7 +652,7 @@ export default function ItemChangelogs({
 
                     {change.suggestion_data && (
                       <>
-                        <div className="border-border-primary bg-primary-bg hover:shadow-card-shadow mt-2 rounded-lg border p-5 shadow-lg transition-all duration-200">
+                        <div className="border-border-card bg-tertiary-bg mt-2 rounded-lg border p-5 shadow-lg transition-all duration-200">
                           <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                             <div className="flex items-center gap-3">
                               {change.suggestion_data.metadata?.avatar_hash && (
@@ -674,7 +674,7 @@ export default function ItemChangelogs({
                                 </div>
                               )}
                               <div className="flex flex-col">
-                                <span className="text-tertiary-text text-xs font-semibold tracking-wide uppercase">
+                                <span className="text-secondary-text text-xs font-semibold tracking-wide uppercase">
                                   Suggested by
                                 </span>
                                 <a
@@ -688,7 +688,7 @@ export default function ItemChangelogs({
                               </div>
                             </div>
                             <div className="flex items-center justify-center">
-                              <div className="border-border-primary flex items-center justify-center overflow-hidden rounded-lg border">
+                              <div className="border-border-card flex items-center justify-center overflow-hidden rounded-lg border">
                                 <button
                                   type="button"
                                   onClick={() =>
@@ -805,7 +805,7 @@ export default function ItemChangelogs({
                             </div>
                           )}
 
-                          <div className="text-tertiary-text text-xs font-semibold tracking-wide uppercase">
+                          <div className="text-secondary-text text-xs font-semibold tracking-wide uppercase">
                             Suggested on{" "}
                             {formatCustomDate(
                               change.suggestion_data.created_at * 1000,
@@ -885,7 +885,7 @@ export default function ItemChangelogs({
                                   </div>
                                   <div className="grid grid-cols-2 gap-6">
                                     <div className="min-w-0">
-                                      <div className="text-tertiary-text mb-2 flex items-center gap-2 text-xs font-semibold tracking-wide uppercase">
+                                      <div className="text-secondary-text mb-2 flex items-center gap-2 text-xs font-semibold tracking-wide uppercase">
                                         <Icon
                                           icon="mdi:minus-circle"
                                           className="text-button-danger h-4 w-4"
@@ -995,7 +995,7 @@ export default function ItemChangelogs({
                                       })()}
                                     </div>
                                     <div className="min-w-0">
-                                      <div className="text-tertiary-text mb-2 flex items-center gap-2 text-xs font-semibold tracking-wide uppercase">
+                                      <div className="text-secondary-text mb-2 flex items-center gap-2 text-xs font-semibold tracking-wide uppercase">
                                         <Icon
                                           icon="mdi:plus-circle"
                                           className="text-button-success h-4 w-4"

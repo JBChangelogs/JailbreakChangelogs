@@ -627,7 +627,7 @@ export default function ChangelogDetailsClient({
                 {paginatedChanges.map((change) => (
                   <div
                     key={change.change_id}
-                    className="border-border-primary bg-secondary-bg hover:border-border-focus overflow-hidden rounded-lg border p-4 transition-colors"
+                    className="border-border-card bg-secondary-bg overflow-hidden rounded-lg border p-4 transition-colors"
                   >
                     {/* Suggestion # Pill */}
                     {change.suggestion && (
@@ -702,7 +702,7 @@ export default function ChangelogDetailsClient({
 
                     {/* Suggestion Data - Show First if Exists */}
                     {change.suggestion && (
-                      <div className="border-border-primary bg-primary-bg hover:shadow-card-shadow mt-2 rounded-lg border p-5 shadow-lg transition-all duration-200">
+                      <div className="border-border-card bg-tertiary-bg mt-2 rounded-lg border p-5 shadow-lg transition-all duration-200">
                         <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                           <div className="flex min-w-0 items-center gap-3">
                             {change.suggestion.metadata?.avatar_hash && (
@@ -724,7 +724,7 @@ export default function ChangelogDetailsClient({
                               </div>
                             )}
                             <div className="flex min-w-0 flex-col">
-                              <span className="text-tertiary-text text-xs font-semibold tracking-wide uppercase">
+                              <span className="text-secondary-text text-xs font-semibold tracking-wide uppercase">
                                 Suggested by
                               </span>
                               <a
@@ -738,7 +738,7 @@ export default function ChangelogDetailsClient({
                             </div>
                           </div>
                           <div className="flex shrink-0 items-center justify-center">
-                            <div className="border-border-primary flex items-center justify-center overflow-hidden rounded-lg border">
+                            <div className="border-border-card flex items-center justify-center overflow-hidden rounded-lg border">
                               <button
                                 type="button"
                                 onClick={() => {
@@ -839,7 +839,7 @@ export default function ChangelogDetailsClient({
                           </ReactMarkdown>
                         </div>
 
-                        <div className="text-tertiary-text text-xs font-semibold tracking-wide uppercase">
+                        <div className="text-secondary-text text-xs font-semibold tracking-wide uppercase">
                           Suggested on{" "}
                           {formatMessageDate(
                             change.suggestion.created_at * 1000,
@@ -914,7 +914,7 @@ export default function ChangelogDetailsClient({
                                   </div>
                                   <div className="grid grid-cols-2 gap-6">
                                     <div className="min-w-0">
-                                      <div className="text-tertiary-text mb-2 flex items-center gap-2 text-xs font-semibold tracking-wide uppercase">
+                                      <div className="text-secondary-text mb-2 flex items-center gap-2 text-xs font-semibold tracking-wide uppercase">
                                         <Icon
                                           icon="mdi:minus-circle"
                                           className="text-button-danger h-4 w-4"
@@ -1008,7 +1008,7 @@ export default function ChangelogDetailsClient({
                                       })()}
                                     </div>
                                     <div className="min-w-0">
-                                      <div className="text-tertiary-text mb-2 flex items-center gap-2 text-xs font-semibold tracking-wide uppercase">
+                                      <div className="text-secondary-text mb-2 flex items-center gap-2 text-xs font-semibold tracking-wide uppercase">
                                         <Icon
                                           icon="mdi:plus-circle"
                                           className="text-button-success h-4 w-4"
@@ -1185,7 +1185,7 @@ export default function ChangelogDetailsClient({
               </div>
 
               <div className="modal-content px-6 pt-3 pb-6">
-                <div className="border-border-primary bg-primary-bg mb-4 flex rounded-lg border">
+                <div className="border-border-card bg-primary-bg mb-4 flex rounded-lg border">
                   <button
                     onClick={() => setVotersTab("up")}
                     className={`flex-1 cursor-pointer rounded-l-lg py-3 text-sm font-semibold transition-colors ${
@@ -1250,7 +1250,7 @@ export default function ChangelogDetailsClient({
                     ).map((voter: VoteRecord) => (
                       <div
                         key={voter.id}
-                        className="border-border-primary bg-primary-bg hover:border-border-focus flex items-center gap-4 rounded-lg border px-4 py-3 transition-colors"
+                        className="border-border-card bg-tertiary-bg flex items-center gap-4 rounded-lg border px-4 py-3 transition-colors"
                       >
                         <div className="ring-border-primary relative h-10 w-10 shrink-0 overflow-hidden rounded-full ring-2">
                           <DefaultAvatar />

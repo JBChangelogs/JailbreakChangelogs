@@ -364,7 +364,7 @@ export default function ValuesChangelogPage() {
               {[...Array(10)].map((_, i) => (
                 <div
                   key={i}
-                  className="border-border-primary bg-secondary-bg hover:border-border-focus rounded-lg border p-4"
+                  className="border-border-card bg-tertiary-bg rounded-lg border p-4"
                 >
                   <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
                     <div>
@@ -390,7 +390,7 @@ export default function ValuesChangelogPage() {
             <div className="text-button-danger mt-8 text-center">{error}</div>
           ) : (
             <>
-              <div className="border-border-primary bg-secondary-bg mb-6 rounded-lg border p-5">
+              <div className="border-border-card bg-secondary-bg mb-6 rounded-lg border p-5">
                 <div className="mb-4">
                   <h2 className="text-primary-text text-lg font-semibold">
                     Weekly Summary
@@ -404,7 +404,7 @@ export default function ValuesChangelogPage() {
                     {[...Array(3)].map((_, i) => (
                       <div
                         key={`summary-skeleton-${i}`}
-                        className="border-border-primary bg-secondary-bg rounded-lg border p-4"
+                        className="border-border-card bg-tertiary-bg rounded-lg border p-4"
                       >
                         <Skeleton variant="text" width={160} height={20} />
                         <Skeleton
@@ -418,7 +418,7 @@ export default function ValuesChangelogPage() {
                   </div>
                 ) : (
                   <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
-                    <div className="border-border-primary bg-tertiary-bg rounded-lg border p-4">
+                    <div className="border-border-card bg-tertiary-bg rounded-lg border p-4">
                       <p className="text-secondary-text text-xs tracking-wide uppercase">
                         Total Changelogs
                       </p>
@@ -426,7 +426,7 @@ export default function ValuesChangelogPage() {
                         {weeklySummary?.total_changelogs ?? "?"}
                       </p>
                     </div>
-                    <div className="border-border-primary bg-tertiary-bg rounded-lg border p-4">
+                    <div className="border-border-card bg-tertiary-bg rounded-lg border p-4">
                       <p className="text-secondary-text text-xs tracking-wide uppercase">
                         Total Changes
                       </p>
@@ -434,7 +434,7 @@ export default function ValuesChangelogPage() {
                         {weeklySummary?.total_changes ?? "?"}
                       </p>
                     </div>
-                    <div className="border-border-primary bg-tertiary-bg rounded-lg border p-4">
+                    <div className="border-border-card bg-tertiary-bg rounded-lg border p-4">
                       <p className="text-secondary-text text-xs tracking-wide uppercase">
                         Avg Changes
                       </p>
@@ -456,7 +456,7 @@ export default function ValuesChangelogPage() {
                               setSelectedSummaryItem(item);
                               setIsSummarySheetOpen(true);
                             }}
-                            className="border-border-primary bg-tertiary-bg hover:border-border-focus group cursor-pointer rounded-lg border p-3 text-left transition"
+                            className="border-border-card bg-tertiary-bg group cursor-pointer rounded-lg border p-3 text-left transition"
                           >
                             <div className="flex items-center justify-between gap-2">
                               <div>
@@ -527,7 +527,7 @@ export default function ValuesChangelogPage() {
               </div>
 
               {/* Virtualized changelogs container */}
-              <div className="border-border-primary bg-secondary-bg rounded-lg border">
+              <div className="border-border-card bg-secondary-bg rounded-lg border">
                 <div
                   ref={parentRef}
                   className="scrollbar-thin scrollbar-track-transparent scrollbar-thumb-border-primary hover:scrollbar-thumb-border-focus h-240 overflow-y-auto"
@@ -589,19 +589,19 @@ export default function ValuesChangelogPage() {
                                     key={changelog.id}
                                     href={`/values/changelogs/${changelog.id}`}
                                     prefetch={false}
-                                    className="block"
+                                    className="group block"
                                   >
                                     <div
-                                      className={`rounded-lg border p-4 transition-all duration-200 hover:translate-y-[-2px] hover:shadow-lg ${
+                                      className={`rounded-lg border p-4 transition-all duration-200 ${
                                         isLatest
                                           ? "from-button-info/10 to-button-info-hover/10 shadow-button-info/20 border-button-info bg-linear-to-r shadow-lg"
-                                          : "border-border-primary bg-primary-bg hover:border-border-focus"
+                                          : "border-border-card bg-tertiary-bg"
                                       }`}
                                     >
                                       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
                                         <div>
                                           <div className="flex items-center gap-2">
-                                            <h3 className="text-primary-text text-lg font-semibold">
+                                            <h3 className="text-primary-text group-hover:text-link text-lg font-semibold transition-colors">
                                               Changelog #{changelog.id}
                                             </h3>
                                             {isLatest && (
@@ -644,7 +644,7 @@ export default function ValuesChangelogPage() {
               <>
                 <SheetHeader className="text-left">
                   <div className="flex items-start gap-3">
-                    <div className="bg-primary-bg border-border-primary relative h-14 w-14 shrink-0 overflow-hidden rounded-lg border">
+                    <div className="bg-primary-bg border-border-card relative h-14 w-14 shrink-0 overflow-hidden rounded-lg border">
                       <Image
                         src={getItemImagePath(
                           selectedSummaryItem.type,
@@ -749,7 +749,7 @@ export default function ValuesChangelogPage() {
                       ).map((change) => (
                         <div
                           key={`summary-change-${change.id}`}
-                          className="border-border-primary bg-secondary-bg rounded-lg border p-3 text-xs"
+                          className="border-border-card bg-secondary-bg rounded-lg border p-3 text-xs"
                         >
                           {change.fields.length ? (
                             <div className="space-y-4">

@@ -1100,7 +1100,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
 
   return (
     <div className="space-y-2 sm:space-y-3">
-      <div className="border-border-primary bg-tertiary-bg rounded-lg border p-2 sm:p-3">
+      <div className="border-border-card bg-tertiary-bg rounded-lg border p-2 sm:p-3">
         <div className="flex flex-col gap-4">
           <div>
             <h2
@@ -1138,7 +1138,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                 className={`w-full resize-y rounded border p-3 text-sm focus:outline-none ${
                   !isLoggedIn
                     ? "border-secondary-bg bg-primary-bg text-primary-text placeholder-secondary-text cursor-not-allowed"
-                    : "border-border-primary bg-form-input text-primary-text placeholder-secondary-text hover:border-border-focus focus:border-button-info"
+                    : "border-border-card bg-form-input text-primary-text placeholder-secondary-text focus:border-button-info"
                 }`}
                 autoCorrect="off"
                 autoComplete="off"
@@ -1448,7 +1448,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                               />
                             </div>
                           ) : hideRecent ? (
-                            <div className="ring-tertiary-text/20 border-border-primary bg-primary-bg flex h-10 w-10 items-center justify-center rounded-full border ring-2">
+                            <div className="ring-tertiary-text/20 border-border-card bg-primary-bg flex h-10 w-10 items-center justify-center rounded-full border ring-2">
                               {/* Lock icon for hidden users */}
                               <svg
                                 className="text-secondary-text h-5 w-5"
@@ -1664,7 +1664,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                                       setEditContent(e.target.value)
                                     }
                                     rows={3}
-                                    className="border-border-primary bg-form-input text-primary-text hover:border-border-focus focus:border-button-info w-full resize-y rounded border p-3 text-sm focus:outline-none"
+                                    className="border-border-card bg-form-input text-primary-text focus:border-button-info w-full resize-y rounded border p-3 text-sm focus:outline-none"
                                     autoCorrect="off"
                                     autoComplete="off"
                                     spellCheck="false"
@@ -1813,7 +1813,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                                   setReplyContent(e.target.value)
                                 }
                                 rows={2}
-                                className="border-border-primary bg-form-input text-primary-text placeholder-secondary-text focus:border-button-info w-full resize-y rounded border p-2 text-sm focus:outline-none"
+                                className="border-border-card bg-form-input text-primary-text placeholder-secondary-text focus:border-button-info w-full resize-y rounded border p-2 text-sm focus:outline-none"
                                 placeholder="Write a reply..."
                                 autoCorrect="off"
                                 autoComplete="off"

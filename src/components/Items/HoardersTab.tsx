@@ -209,7 +209,7 @@ export default function HoardersTab({ itemName, itemType }: HoardersTabProps) {
       {filteredHoarders.length > 0 && (
         <div
           ref={parentRef}
-          className="scrollbar-thin scrollbar-track-transparent scrollbar-thumb-border-primary hover:scrollbar-thumb-border-focus bg-secondary-bg max-h-[600px] overflow-y-auto rounded-lg pr-2"
+          className="scrollbar-thin scrollbar-track-transparent scrollbar-thumb-border-primary hover:scrollbar-thumb-border-focus border-border-card bg-secondary-bg max-h-[600px] overflow-y-auto rounded-lg border pr-2"
           style={{
             scrollbarWidth: "thin",
             scrollbarColor: "var(--color-border-primary) transparent",
@@ -276,7 +276,7 @@ export default function HoardersTab({ itemName, itemType }: HoardersTabProps) {
                       <Link
                         href={`/inventories/${hoarder.user_id}`}
                         prefetch={false}
-                        className="text-primary-text hover:text-link-hover truncate text-sm font-bold transition-colors hover:underline sm:text-lg"
+                        className="text-primary-text hover:text-link-hover truncate text-sm font-bold transition-colors sm:text-lg"
                       >
                         {displayName}
                       </Link>
