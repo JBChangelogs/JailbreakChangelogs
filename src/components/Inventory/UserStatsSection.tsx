@@ -455,7 +455,7 @@ export default function UserStatsSection({
         className={`mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 ${(currentData.duplicates?.length ?? 0) > 0 ? "lg:grid-cols-3" : ""}`}
       >
         {/* Inventory Value */}
-        <div className="border-border-primary bg-primary-bg rounded-lg border p-4 text-center">
+        <div className="border-border-card bg-tertiary-bg rounded-lg border p-4 text-center">
           <div className="text-secondary-text mb-2 flex items-center justify-center gap-1.5 text-sm">
             {showNonOgOnly ? "Non-OG Inventory Value" : "Total Inventory Value"}
             <Tooltip>
@@ -510,7 +510,7 @@ export default function UserStatsSection({
         </div>
 
         {/* Total Networth */}
-        <div className="border-border-primary bg-primary-bg rounded-lg border p-4 text-center">
+        <div className="border-border-card bg-tertiary-bg rounded-lg border p-4 text-center">
           <div className="text-secondary-text mb-2 flex items-center justify-center gap-1.5 text-sm">
             {showNonOgOnly ? "Non-OG Networth" : "Total Networth"}
             <Tooltip>
@@ -567,7 +567,7 @@ export default function UserStatsSection({
           (currentData &&
             currentData.duplicates &&
             currentData.duplicates.length > 0)) && (
-          <div className="border-border-primary bg-primary-bg rounded-lg border p-4 text-center">
+          <div className="border-border-card bg-tertiary-bg rounded-lg border p-4 text-center">
             <div className="text-secondary-text mb-2 flex items-center justify-center gap-1.5 text-sm">
               {showNonOgOnly ? "Non-OG Duped Value" : "Total Duped Value"}
               <Tooltip>
@@ -656,7 +656,7 @@ export default function UserStatsSection({
                 if (!gamepassInfo) return null;
 
                 const GamepassContent = () => (
-                  <div className="hover:border-primary/50 hover:bg-primary/5 group border-border-primary bg-primary-bg flex items-center gap-3 rounded-lg border px-3 py-2 text-sm transition-all duration-200">
+                  <div className="group border-border-card bg-tertiary-bg flex items-center gap-3 rounded-lg border px-3 py-2 text-sm transition-all duration-200">
                     <div className="relative h-8 w-8 shrink-0">
                       <Image
                         src={`https://assets.jailbreakchangelogs.xyz/assets/images/gamepasses/${gamepassInfo.image}.webp`}
@@ -667,7 +667,7 @@ export default function UserStatsSection({
                         onError={handleImageError}
                       />
                     </div>
-                    <span className="group-hover:text-primary text-primary-text text-sm font-medium transition-colors">
+                    <span className="text-primary-text group-hover:text-link text-sm font-medium transition-colors">
                       {gamepassInfo.displayName}
                     </span>
                     {gamepassInfo.link && (
@@ -708,7 +708,7 @@ export default function UserStatsSection({
       )}
 
       {/* Collapsible Metadata Section */}
-      <div className="border-border-primary bg-primary-bg overflow-hidden rounded-lg border text-sm">
+      <div className="border-border-card bg-tertiary-bg overflow-hidden rounded-lg border text-sm">
         <button
           onClick={() => setIsMetadataExpanded(!isMetadataExpanded)}
           className="flex w-full cursor-pointer items-center justify-between px-4 py-3 transition-colors"
@@ -727,7 +727,7 @@ export default function UserStatsSection({
             isMetadataExpanded ? "max-h-[500px]" : "max-h-0"
           }`}
         >
-          <div className="border-border-primary border-t px-4 py-3">
+          <div className="border-border-card border-t px-4 py-3">
             <div className="space-y-2">
               <div className="flex gap-2">
                 <span className="text-secondary-text min-w-[100px]">

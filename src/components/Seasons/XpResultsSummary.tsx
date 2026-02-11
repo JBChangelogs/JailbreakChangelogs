@@ -203,7 +203,7 @@ export default function XpResultsSummary({
   return (
     <div className="space-y-6">
       {/* Main Status Card */}
-      <div className="border-border-primary bg-secondary-bg hover:border-border-focus rounded-lg border p-6">
+      <div className="border-border-card bg-secondary-bg rounded-lg border p-6">
         {/* XP Mode Toggle */}
         <div className="mb-6 overflow-x-auto">
           <div role="tablist" className="tabs min-w-max">
@@ -407,12 +407,12 @@ export default function XpResultsSummary({
       </div>
 
       {/* Important Dates */}
-      <div className="border-border-primary bg-secondary-bg hover:border-border-focus rounded-lg border p-6">
+      <div className="border-border-card bg-secondary-bg rounded-lg border p-6">
         <h3 className="text-primary-text mb-4 text-xl font-semibold">
           Important Season Dates
         </h3>
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-          <div className="border-border-primary bg-primary-bg hover:border-border-focus rounded-lg border p-4">
+          <div className="border-border-card bg-tertiary-bg rounded-lg border p-4">
             <div className="text-center">
               <div className="text-primary-text text-lg font-semibold">
                 Double XP Starts
@@ -425,7 +425,7 @@ export default function XpResultsSummary({
               </div>
             </div>
           </div>
-          <div className="border-border-primary bg-primary-bg hover:border-border-focus rounded-lg border p-4">
+          <div className="border-border-card bg-tertiary-bg rounded-lg border p-4">
             <div className="text-center">
               <div className="text-primary-text text-lg font-semibold">
                 Season Ends

@@ -424,7 +424,7 @@ export default function DuplicatesTab({
   return (
     <div>
       {/* Stats Summary */}
-      <div className="border-border-primary bg-secondary-bg shadow-card-shadow mb-6 rounded-lg border p-6">
+      <div className="border-border-card bg-secondary-bg mb-6 rounded-lg border p-6">
         <h2 className="text-primary-text mb-4 text-xl font-semibold">
           Top Items by Copies
         </h2>
@@ -438,7 +438,7 @@ export default function DuplicatesTab({
               value={leaderboardSearch}
               onChange={(e) => setLeaderboardSearch(e.target.value)}
               maxLength={MAX_SEARCH_LENGTH}
-              className="border-border-primary bg-tertiary-bg text-primary-text placeholder-secondary-text focus:border-button-info min-h-[48px] w-full rounded-lg border px-4 py-2 pr-10 pl-10 transition-all duration-300 focus:outline-none"
+              className="border-border-card bg-tertiary-bg text-primary-text placeholder-secondary-text focus:border-button-info min-h-[48px] w-full rounded-lg border px-4 py-2 pr-10 pl-10 transition-all duration-300 focus:outline-none"
             />
             <Icon
               icon="heroicons:magnifying-glass"
@@ -460,7 +460,7 @@ export default function DuplicatesTab({
               <DropdownMenuTrigger asChild>
                 <button
                   type="button"
-                  className="border-border-primary bg-tertiary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus flex h-[48px] w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all duration-300 focus:ring-1 focus:outline-none"
+                  className="border-border-card bg-tertiary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 flex h-[48px] w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all duration-300 focus:ring-1 focus:outline-none"
                   aria-label="Filter leaderboard by category"
                 >
                   <span className="truncate">
@@ -477,7 +477,7 @@ export default function DuplicatesTab({
               </DropdownMenuTrigger>
               <DropdownMenuContent
                 align="start"
-                className="border-border-primary bg-tertiary-bg text-primary-text scrollbar-thin max-h-[280px] w-[var(--radix-popper-anchor-width)] min-w-[var(--radix-popper-anchor-width)] overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
+                className="border-border-card bg-tertiary-bg text-primary-text scrollbar-thin max-h-[280px] w-[var(--radix-popper-anchor-width)] min-w-[var(--radix-popper-anchor-width)] overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
               >
                 <DropdownMenuRadioGroup
                   value={selectedLeaderboardCategoryValue}
@@ -528,7 +528,7 @@ export default function DuplicatesTab({
           filteredLeaderboardItems.length > 0 && (
             <div
               ref={parentRef}
-              className="scrollbar-thin scrollbar-track-transparent scrollbar-thumb-border-primary hover:scrollbar-thumb-border-focus border-border-primary bg-tertiary-bg max-h-96 overflow-y-auto rounded-lg border"
+              className="scrollbar-thin scrollbar-track-transparent scrollbar-thumb-border-primary hover:scrollbar-thumb-border-focus border-border-card bg-tertiary-bg max-h-96 overflow-y-auto rounded-lg border"
               style={{
                 scrollbarWidth: "thin",
                 scrollbarColor: "var(--color-border-primary) transparent",
@@ -557,7 +557,7 @@ export default function DuplicatesTab({
                         width: "100%",
                         transform: `translateY(${virtualItem.start}px)`,
                       }}
-                      className={`border-border-primary hover:bg-primary-bg/10 flex items-center justify-between p-3 transition-colors ${
+                      className={`border-border-card hover:bg-primary-bg/10 flex items-center justify-between p-3 transition-colors ${
                         virtualItem.index !==
                         filteredLeaderboardItems.length - 1
                           ? "border-b"
@@ -613,7 +613,7 @@ export default function DuplicatesTab({
 
         {/* No results message for leaderboard search */}
         {leaderboardSearch && filteredLeaderboardItems.length === 0 && (
-          <div className="border-border-primary bg-tertiary-bg rounded-lg border p-4 text-center">
+          <div className="border-border-card bg-tertiary-bg rounded-lg border p-4 text-center">
             <p className="text-secondary-text text-sm">
               No items found matching &quot;{leaderboardSearch}&quot;
             </p>
@@ -630,7 +630,7 @@ export default function DuplicatesTab({
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             maxLength={MAX_SEARCH_LENGTH}
-            className="border-border-primary bg-secondary-bg text-primary-text placeholder-secondary-text focus:border-button-info min-h-[56px] w-full rounded-lg border px-4 py-3 pr-10 pl-10 transition-all duration-300 focus:outline-none"
+            className="border-border-card bg-secondary-bg text-primary-text placeholder-secondary-text focus:border-button-info min-h-[56px] w-full rounded-lg border px-4 py-3 pr-10 pl-10 transition-all duration-300 focus:outline-none"
           />
           <Icon
             icon="heroicons:magnifying-glass"
@@ -653,7 +653,7 @@ export default function DuplicatesTab({
             <DropdownMenuTrigger asChild>
               <button
                 type="button"
-                className="border-border-primary bg-secondary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus flex h-[56px] w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all duration-300 focus:ring-1 focus:outline-none"
+                className="border-border-card bg-secondary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 flex h-[56px] w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all duration-300 focus:ring-1 focus:outline-none"
                 aria-label="Filter by category"
               >
                 <span className="truncate">
@@ -670,7 +670,7 @@ export default function DuplicatesTab({
             </DropdownMenuTrigger>
             <DropdownMenuContent
               align="start"
-              className="border-border-primary bg-secondary-bg text-primary-text scrollbar-thin max-h-[320px] w-[var(--radix-popper-anchor-width)] min-w-[var(--radix-popper-anchor-width)] overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
+              className="border-border-card bg-secondary-bg text-primary-text scrollbar-thin max-h-[320px] w-[var(--radix-popper-anchor-width)] min-w-[var(--radix-popper-anchor-width)] overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
             >
               <DropdownMenuRadioGroup
                 value={selectedCategoryValue}
@@ -708,7 +708,7 @@ export default function DuplicatesTab({
             <DropdownMenuTrigger asChild>
               <button
                 type="button"
-                className="border-border-primary bg-secondary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus flex h-[56px] w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all duration-300 focus:ring-1 focus:outline-none"
+                className="border-border-card bg-secondary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 flex h-[56px] w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all duration-300 focus:ring-1 focus:outline-none"
                 aria-label="Sort items"
               >
                 <span className="truncate">
@@ -723,7 +723,7 @@ export default function DuplicatesTab({
             </DropdownMenuTrigger>
             <DropdownMenuContent
               align="start"
-              className="border-border-primary bg-secondary-bg text-primary-text scrollbar-thin max-h-[320px] w-[var(--radix-popper-anchor-width)] min-w-[var(--radix-popper-anchor-width)] overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
+              className="border-border-card bg-secondary-bg text-primary-text scrollbar-thin max-h-[320px] w-[var(--radix-popper-anchor-width)] min-w-[var(--radix-popper-anchor-width)] overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
             >
               <DropdownMenuRadioGroup
                 value={sortOrder}
@@ -845,7 +845,7 @@ export default function DuplicatesTab({
       )}
 
       {/* Cards container with secondary background */}
-      <div className="bg-secondary-bg rounded-lg p-4">
+      <div className="border-border-card bg-secondary-bg rounded-lg border p-4">
         {/* Use InventoryItemsGrid - same as InventoryItems tab */}
         <InventoryItemsGrid
           filteredItems={filteredAndSortedItems.map((item) => {

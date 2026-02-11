@@ -104,7 +104,7 @@ export default function ConnectedBotsPolling() {
             </span>
           </div>
         </div>
-        <div className="border-border-primary bg-secondary-bg shadow-card-shadow rounded-lg border p-4">
+        <div className="border-border-card bg-secondary-bg rounded-lg border p-4">
           <div className="mb-4 space-y-2">
             <div className="bg-button-secondary h-4 w-32 animate-pulse rounded"></div>
             <div className="bg-button-secondary h-4 w-40 animate-pulse rounded"></div>
@@ -114,7 +114,7 @@ export default function ConnectedBotsPolling() {
             {[1, 2, 3].map((i) => (
               <div
                 key={i}
-                className="border-border-primary bg-primary-bg rounded-lg border p-3"
+                className="border-border-card bg-tertiary-bg rounded-lg border p-3"
               >
                 <div className="flex items-center gap-3">
                   <div className="bg-button-secondary h-8 w-8 animate-pulse rounded-full"></div>
@@ -148,7 +148,7 @@ export default function ConnectedBotsPolling() {
             </span>
           </div>
         </div>
-        <div className="border-border-primary bg-secondary-bg shadow-card-shadow rounded-lg border p-4">
+        <div className="border-border-card bg-secondary-bg rounded-lg border p-4">
           <div className="py-8 text-center">
             <div className="text-secondary-text mb-2 text-lg font-medium">
               {pollingStopped ? "Bots offline" : "No bots active"}
@@ -177,7 +177,7 @@ export default function ConnectedBotsPolling() {
           </span>
         </div>
       </div>
-      <div className="border-border-primary bg-secondary-bg shadow-card-shadow rounded-lg border p-4">
+      <div className="border-border-card bg-secondary-bg rounded-lg border p-4">
         {isLoading && !botsData ? (
           <div className="space-y-2">
             <div className="mb-4 space-y-2">
@@ -189,7 +189,7 @@ export default function ConnectedBotsPolling() {
               {[1, 2].map((i) => (
                 <div
                   key={i}
-                  className="border-border-primary bg-primary-bg rounded-lg border p-3"
+                  className="border-border-card bg-tertiary-bg rounded-lg border p-3"
                 >
                   <div className="flex items-center gap-3">
                     <div className="bg-button-secondary h-8 w-8 animate-pulse rounded-full"></div>
@@ -351,7 +351,7 @@ function BotStatusCard({
   else if (bot.method === 2) methodText = "Main Game";
 
   return (
-    <div className="border-border-primary bg-primary-bg rounded-lg border p-3">
+    <div className="border-border-card bg-tertiary-bg rounded-lg border p-3">
       <div className="flex items-start gap-3">
         <div className="bg-tertiary-bg flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full">
           <Image

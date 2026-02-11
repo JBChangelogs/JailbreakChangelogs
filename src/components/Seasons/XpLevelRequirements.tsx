@@ -2,6 +2,7 @@
 
 import { Season } from "@/types/seasons";
 import XpLevelProgressBar from "./XpLevelProgressBar";
+import { Icon } from "@/components/ui/IconWrapper";
 
 interface XpLevelRequirementsProps {
   season: Season;
@@ -76,22 +77,14 @@ export default function XpLevelRequirements({
   const maxTotalXp = levelRequirements[levelRequirements.length - 1].totalXp;
 
   return (
-    <div className="border-border-primary bg-secondary-bg hover:border-border-focus mb-8 rounded-lg border p-6">
+    <div className="border-border-card bg-secondary-bg mb-8 rounded-lg border p-6">
       <div className="mb-6 flex items-center gap-3">
-        <div className="to-button-info/80 from-button-info flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br">
-          <svg
-            className="text-form-button-text h-6 w-6"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M13 10V3L4 14h7v7l9-11h-7z"
-            />
-          </svg>
+        <div className="bg-button-info/10 flex h-10 w-10 items-center justify-center rounded-lg">
+          <Icon
+            icon="heroicons:bolt"
+            className="text-link h-6 w-6"
+            inline={true}
+          />
         </div>
         <div>
           <h2 className="text-primary-text text-2xl font-bold">

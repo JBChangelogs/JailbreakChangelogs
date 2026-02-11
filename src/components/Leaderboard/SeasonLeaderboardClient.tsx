@@ -142,7 +142,7 @@ export default function SeasonLeaderboardClient({
           </div>
 
           {/* Virtualized leaderboard container */}
-          <div className="border-border-primary bg-secondary-bg hover:border-border-focus hover:shadow-card-shadow rounded-lg border p-4 transition-colors duration-200 hover:shadow-lg">
+          <div className="border-border-card bg-secondary-bg rounded-lg border p-4">
             <div
               ref={parentRef}
               className="scrollbar-thin scrollbar-track-transparent scrollbar-thumb-border-primary hover:scrollbar-thumb-border-focus h-[48rem] overflow-y-auto pr-2"
@@ -190,10 +190,10 @@ export default function SeasonLeaderboardClient({
                         }}
                       >
                         <div
-                          className={`mb-4 rounded-lg border p-3 transition-colors ${
+                          className={`mb-4 rounded-lg border p-3 ${
                             originalRank <= 3
                               ? ""
-                              : "border-border-primary bg-primary-bg hover:border-border-focus"
+                              : "border-border-card bg-tertiary-bg"
                           }`}
                           style={{
                             ...(originalRank === 1 && {
@@ -295,7 +295,7 @@ export default function SeasonLeaderboardClient({
           )}
         </div>
       ) : (
-        <div className="border-border-primary bg-secondary-bg hover:border-border-focus hover:shadow-card-shadow rounded-lg border p-8 text-center transition-colors duration-200 hover:shadow-lg">
+        <div className="border-border-card bg-secondary-bg rounded-lg border p-8 text-center">
           <p className="text-secondary-text">
             No season leaderboard data available at this time.
           </p>

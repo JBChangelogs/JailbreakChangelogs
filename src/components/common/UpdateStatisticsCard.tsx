@@ -36,7 +36,7 @@ const UpdateStatisticsCard: React.FC<UpdateStatisticsCardProps> = ({
     <div>
       <button
         onClick={() => setIsExpanded((prev) => !prev)}
-        className="border-border-primary bg-primary-bg hover:border-border-focus hover:bg-primary-bg flex w-full cursor-pointer items-center justify-between rounded-lg border p-4 transition-colors"
+        className="border-border-card bg-tertiary-bg flex w-full cursor-pointer items-center justify-between rounded-lg border p-4 transition-colors"
       >
         <h3 className="text-primary-text text-lg font-semibold">
           View Update Statistics
@@ -57,7 +57,7 @@ const UpdateStatisticsCard: React.FC<UpdateStatisticsCardProps> = ({
       </button>
 
       {isExpanded && (
-        <div className="border-border-primary bg-primary-bg mt-2 rounded-lg border p-4">
+        <div className="border-border-card bg-tertiary-bg mt-2 rounded-lg border p-4">
           <div className="text-secondary-text space-y-1 text-sm">
             {yearStats.map(({ year, count }) => (
               <p key={year}>

@@ -291,7 +291,7 @@ const MoneyHistoryChart = ({ initialData = [] }: MoneyHistoryChartProps) => {
   };
 
   return (
-    <div className="bg-secondary-bg mb-8 space-y-8 rounded-lg p-4">
+    <div className="border-border-card bg-secondary-bg mb-8 space-y-8 rounded-lg border p-4">
       <div>
         {/* Chart Update Notice */}
         <div className="mb-4">

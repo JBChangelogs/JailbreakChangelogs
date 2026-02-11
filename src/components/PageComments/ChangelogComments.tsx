@@ -1098,9 +1098,14 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
     }
   };
 
+  const containerBgClass =
+    type === "trade" ? "bg-tertiary-bg" : "bg-secondary-bg";
+
   return (
     <div className="space-y-2 sm:space-y-3">
-      <div className="border-border-card bg-tertiary-bg rounded-lg border p-2 sm:p-3">
+      <div
+        className={`border-border-card ${containerBgClass} rounded-lg border p-2 sm:p-3`}
+      >
         <div className="flex flex-col gap-4">
           <div>
             <h2

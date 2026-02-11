@@ -121,7 +121,7 @@ export const TotalSimilarItems: React.FC<TotalSimilarItemsProps> = ({
     : -1;
 
   return (
-    <div className="bg-primary-bg rounded-lg p-8 transition-colors duration-200">
+    <div className="border-border-card bg-secondary-bg rounded-lg border p-8">
       {/* Header Section */}
       <div className="mb-8">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -130,7 +130,7 @@ export const TotalSimilarItems: React.FC<TotalSimilarItemsProps> = ({
           </div>
           <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto sm:justify-end">
             {enableDemandSort && (
-              <div className="border-primary/10 bg-primary-bg flex w-full flex-col overflow-hidden rounded-lg border sm:w-auto sm:flex-row">
+              <div className="border-border-card bg-secondary-bg flex w-full flex-col overflow-hidden rounded-lg border sm:w-auto sm:flex-row">
                 <button
                   onClick={() => setSortMode("diff")}
                   className={`cursor-pointer px-4 py-2 text-sm font-medium transition-all duration-200 ${
@@ -196,7 +196,7 @@ export const TotalSimilarItems: React.FC<TotalSimilarItemsProps> = ({
                 prefetch={false}
                 className="group"
               >
-                <div className="bg-primary-bg overflow-hidden rounded-xl transition-all duration-200 hover:shadow-lg">
+                <div className="border-border-card bg-tertiary-bg overflow-hidden rounded-xl border">
                   {/* Image Section */}
                   <div className="relative aspect-video">
                     <Image
@@ -209,7 +209,7 @@ export const TotalSimilarItems: React.FC<TotalSimilarItemsProps> = ({
                   </div>
 
                   {/* Content Section */}
-                  <div className="bg-secondary-bg space-y-4 p-6">
+                  <div className="bg-tertiary-bg space-y-4 p-6">
                     {/* Header */}
                     <div className="flex items-start justify-between gap-3">
                       <h4 className="text-primary-text group-hover:text-link line-clamp-2 text-base font-semibold transition-colors">
@@ -249,7 +249,7 @@ export const TotalSimilarItems: React.FC<TotalSimilarItemsProps> = ({
                     </div>
 
                     {/* Comparison Section */}
-                    <div className="border-border-primary space-y-2 border-t pt-3">
+                    <div className="border-border-card space-y-2 border-t pt-3">
                       {/* Value Comparison */}
                       {diff === 0 ? (
                         <div className="flex items-center gap-2">

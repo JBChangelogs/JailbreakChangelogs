@@ -105,7 +105,7 @@ export default function XpCalculatorForm({
     : "Select your level";
 
   return (
-    <div className="border-border-primary bg-secondary-bg hover:border-border-focus mb-8 rounded-lg border p-6">
+    <div className="border-border-card bg-secondary-bg mb-8 rounded-lg border p-6">
       <h2 className="text-primary-text mb-6 text-2xl font-semibold">
         🎯 XP Progress Calculator
       </h2>
@@ -202,7 +202,7 @@ export default function XpCalculatorForm({
         </div>
       </div>
 
-      <div className="border-border-primary bg-primary-bg mb-6 rounded-lg border p-4">
+      <div className="border-border-card bg-tertiary-bg mb-6 rounded-lg border p-4">
         <p className="text-secondary-text mb-3 text-xs">
           These options apply to the entire remaining season.
         </p>

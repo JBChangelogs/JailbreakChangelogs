@@ -94,7 +94,7 @@ const TimelineContent: React.FC<TimelineContentProps> = ({ changelogs }) => {
               prefetch={false}
               className={`group relative z-10 ml-8 w-full md:ml-0 md:w-[calc(45%-2rem)]`}
             >
-              <motion.div className="border-border-primary bg-secondary-bg overflow-hidden rounded-lg border">
+              <motion.div className="border-border-card bg-secondary-bg overflow-hidden rounded-lg border">
                 {changelog.image_url && (
                   <div className="relative aspect-video w-full">
                     <div className="bg-primary-bg absolute inset-0 flex items-center justify-center">

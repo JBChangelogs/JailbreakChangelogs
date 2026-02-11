@@ -12,7 +12,7 @@ function OfficialBotsSkeleton() {
       <h2 className="text-primary-text mb-4 text-xl font-bold">
         Official Scan Bots
       </h2>
-      <div className="border-border-primary bg-secondary-bg shadow-card-shadow rounded-lg border p-4">
+      <div className="border-border-card bg-secondary-bg rounded-lg border p-4">
         <div className="mb-3">
           <p className="text-secondary-text text-sm">
             These are our official inventory scanning bots. Only these accounts
@@ -23,7 +23,7 @@ function OfficialBotsSkeleton() {
           {Array.from({ length: 3 }).map((_, index) => (
             <div
               key={index}
-              className="border-border-primary bg-tertiary-bg flex flex-col gap-3 rounded-lg border p-3 sm:flex-row sm:items-center"
+              className="border-border-card bg-tertiary-bg flex flex-col gap-3 rounded-lg border p-3 sm:flex-row sm:items-center"
             >
               <div className="flex items-center gap-3">
                 <div className="bg-status-success text-form-button-text flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold">
@@ -42,7 +42,7 @@ function OfficialBotsSkeleton() {
             </div>
           ))}
         </div>
-        <div className="bg-button-info/10 border-border-primary mt-4 rounded-lg border p-4 shadow-sm">
+        <div className="bg-button-info/10 border-border-card mt-4 rounded-lg border p-4">
           <div className="relative z-10">
             <span className="text-primary-text text-base font-bold">
               Security Notice
@@ -73,7 +73,7 @@ function OfficialBotsContent() {
         <h2 className="text-primary-text mb-4 text-xl font-bold">
           Official Scan Bots
         </h2>
-        <div className="border-border-primary bg-secondary-bg shadow-card-shadow rounded-lg border p-4">
+        <div className="border-border-card bg-secondary-bg rounded-lg border p-4">
           <div className="text-secondary-text text-center">
             Failed to load official bots. Please try again later.
           </div>
@@ -93,7 +93,7 @@ function OfficialBotsContent() {
       <h2 className="text-primary-text mb-4 text-xl font-bold">
         Official Scan Bots
       </h2>
-      <div className="border-border-primary bg-secondary-bg shadow-card-shadow rounded-lg border p-4">
+      <div className="border-border-card bg-secondary-bg rounded-lg border p-4">
         <div className="mb-3">
           <p className="text-secondary-text text-sm">
             These are our official inventory scanning bots. Only these accounts
@@ -113,7 +113,7 @@ function OfficialBotsContent() {
             return (
               <div
                 key={botId}
-                className="border-border-primary bg-tertiary-bg flex flex-col gap-3 rounded-lg border p-3 sm:flex-row sm:items-center"
+                className="border-border-card bg-tertiary-bg flex flex-col gap-3 rounded-lg border p-3 sm:flex-row sm:items-center"
               >
                 <div className="flex items-center gap-3">
                   <div className="bg-status-success text-form-button-text flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold">
@@ -169,7 +169,7 @@ function OfficialBotsContent() {
             );
           })}
         </div>
-        <div className="bg-button-info/10 border-border-primary mt-4 rounded-lg border p-4 shadow-sm">
+        <div className="bg-button-info/10 border-border-card mt-4 rounded-lg border p-4">
           <div className="relative z-10">
             <span className="text-primary-text text-base font-bold">
               Security Notice

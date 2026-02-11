@@ -260,7 +260,11 @@
     4%,
     95%
   ); /* Card background - Very light gray */
-  --color-tertiary-bg: hsl(0, 0%, 96%); /* Elevated surfaces - Light gray */
+  --color-tertiary-bg: hsl(
+    220,
+    8%,
+    92%
+  ); /* Elevated surfaces - Cool light gray */
   --color-quaternary-bg: hsl(
     0,
     0%,

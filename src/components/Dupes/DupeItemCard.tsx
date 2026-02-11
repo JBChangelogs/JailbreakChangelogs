@@ -48,7 +48,7 @@ export default function DupeItemCard({
   isDuplicate = false,
   robloxId,
   ownerLabel = "ORIGINAL OWNER",
-  bgClass = "bg-primary-bg",
+  bgClass = "bg-tertiary-bg",
   isDupedItem = false,
 }: DupeItemCardProps) {
   const dupedValue = getDupedValueForItem(itemData, item);
@@ -69,10 +69,10 @@ export default function DupeItemCard({
 
   return (
     <div
-      className={`text-primary-text hover:shadow-card-shadow relative flex cursor-pointer flex-col rounded-lg p-3 transition-all duration-200 ${
+      className={`text-primary-text relative flex cursor-pointer flex-col rounded-lg border p-3 transition-all duration-200 ${
         isDupedItem
-          ? "bg-button-danger/10 border-button-danger hover:border-button-danger border"
-          : `${bgClass} border-border-primary hover:border-border-focus border`
+          ? "bg-button-danger/10 border-button-danger"
+          : "border-border-card bg-tertiary-bg"
       }`}
       onClick={() => onCardClick(item)}
     >

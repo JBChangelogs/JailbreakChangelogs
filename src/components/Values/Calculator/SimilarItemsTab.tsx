@@ -58,7 +58,7 @@ export const SimilarItemsTab: React.FC<SimilarItemsTabProps> = ({
   // Check if both sides are empty
   if (offeringItems.length === 0 && requestingItems.length === 0) {
     return (
-      <div className="border-border-primary bg-secondary-bg hover:border-border-focus rounded-lg border p-4">
+      <div className="border-border-card bg-secondary-bg rounded-lg border p-4">
         <EmptyState
           message={
             'Go to the "Browse Items" tab to select items and see similar items near your total.'
@@ -191,7 +191,7 @@ export const SimilarItemsTab: React.FC<SimilarItemsTabProps> = ({
       </div>
 
       {/* Range controls */}
-      <div className="border-border-primary bg-secondary-bg hover:border-border-focus hover:shadow-card-shadow mb-4 rounded-lg border p-4 transition-colors duration-200 hover:shadow-lg">
+      <div className="border-border-card bg-secondary-bg mb-4 rounded-lg border p-4">
         <div className="flex flex-col gap-3">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-2">
@@ -218,7 +218,7 @@ export const SimilarItemsTab: React.FC<SimilarItemsTabProps> = ({
                   }
                   setRangeInput(val.toLocaleString());
                 }}
-                className="border-border-primary bg-primary-bg text-primary-text focus:border-button-info h-7 w-24 rounded border px-2 text-[11px] focus:outline-none"
+                className="border-border-card bg-primary-bg text-primary-text focus:border-button-info h-7 w-24 rounded border px-2 text-[11px] focus:outline-none"
                 placeholder="Range"
               />
             </div>

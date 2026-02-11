@@ -64,7 +64,7 @@ export default function ChangelogsClient({
           <div
             key={changelog.id}
             onClick={() => router.push(`/changelogs/${changelog.id}`)}
-            className="border-border-primary bg-secondary-bg hover:bg-primary-bg cursor-pointer rounded-lg border p-6 transition-colors duration-200"
+            className="border-border-card bg-tertiary-bg hover:shadow-card-shadow cursor-pointer rounded-lg border p-6 transition-all duration-200 hover:shadow-lg"
           >
             <div className="flex items-start justify-between">
               <div className="flex-1">

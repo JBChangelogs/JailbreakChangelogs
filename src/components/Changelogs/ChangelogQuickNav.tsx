@@ -1,5 +1,9 @@
 import React from "react";
-import { Tooltip } from "@mui/material";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { Icon } from "@/components/ui/IconWrapper";
 
 interface ChangelogQuickNavProps {
@@ -29,25 +33,13 @@ const ChangelogQuickNav: React.FC<ChangelogQuickNavProps> = ({
           />
           <div className="flex flex-col items-start">
             <span className="text-primary-text text-sm">Previous</span>
-            <Tooltip
-              title={prevChangelog.title}
-              placement="top"
-              arrow
-              slotProps={{
-                tooltip: {
-                  sx: {
-                    backgroundColor: "var(--color-secondary-bg)",
-                    color: "var(--color-primary-text)",
-                    "& .MuiTooltip-arrow": {
-                      color: "var(--color-secondary-bg)",
-                    },
-                  },
-                },
-              }}
-            >
-              <span className="text-link group-hover:text-link-hover line-clamp-1 max-w-[300px] cursor-help text-base font-medium">
-                {prevChangelog.title}
-              </span>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span className="text-link group-hover:text-link-hover line-clamp-1 max-w-[300px] cursor-help text-base font-medium">
+                  {prevChangelog.title}
+                </span>
+              </TooltipTrigger>
+              <TooltipContent>{prevChangelog.title}</TooltipContent>
             </Tooltip>
           </div>
         </button>
@@ -63,25 +55,13 @@ const ChangelogQuickNav: React.FC<ChangelogQuickNavProps> = ({
         >
           <div className="flex flex-col items-end">
             <span className="text-primary-text text-sm">Next</span>
-            <Tooltip
-              title={nextChangelog.title}
-              placement="top"
-              arrow
-              slotProps={{
-                tooltip: {
-                  sx: {
-                    backgroundColor: "var(--color-secondary-bg)",
-                    color: "var(--color-primary-text)",
-                    "& .MuiTooltip-arrow": {
-                      color: "var(--color-secondary-bg)",
-                    },
-                  },
-                },
-              }}
-            >
-              <span className="text-link group-hover:text-link-hover line-clamp-1 max-w-[300px] cursor-help text-base font-medium">
-                {nextChangelog.title}
-              </span>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span className="text-link group-hover:text-link-hover line-clamp-1 max-w-[300px] cursor-help text-base font-medium">
+                  {nextChangelog.title}
+                </span>
+              </TooltipTrigger>
+              <TooltipContent>{nextChangelog.title}</TooltipContent>
             </Tooltip>
           </div>
           <Icon

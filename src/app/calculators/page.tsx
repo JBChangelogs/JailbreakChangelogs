@@ -94,7 +94,7 @@ export default function CalculatorsPage() {
 
       <div className="mb-8">
         <h1 className="text-primary-text mb-4 text-4xl font-bold">
-          Jailbreak Calculators
+          Jailbreak Changelogs Calculators
         </h1>
         <p className="text-secondary-text text-lg">
           Access our calculators in one place. From trading values to season
