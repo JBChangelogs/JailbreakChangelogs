@@ -274,7 +274,7 @@ export default function FavoritesTab({
   if (loading) {
     return (
       <div className="space-y-6">
-        <div className="border-border-card rounded-lg border p-4">
+        <div className="border-border-card rounded-t-none rounded-b-lg border p-4">
           <div className="mb-3 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <h2 className="text-primary-text text-lg font-semibold">
@@ -316,7 +316,7 @@ export default function FavoritesTab({
   if (error) {
     return (
       <div className="space-y-6">
-        <div className="border-border-card rounded-lg border p-4">
+        <div className="border-border-card rounded-t-none rounded-b-lg border p-4">
           <div className="mb-3 flex items-center gap-2">
             <h2 className="text-primary-text text-lg font-semibold">
               Favorited Items [{favorites.length}]
@@ -331,7 +331,7 @@ export default function FavoritesTab({
   if (shouldHideFavorites) {
     return (
       <div className="space-y-6">
-        <div className="border-border-card rounded-lg border p-4">
+        <div className="border-border-card rounded-t-none rounded-b-lg border p-4">
           <div className="mb-3 flex items-center gap-2">
             <h2 className="text-primary-text text-lg font-semibold">
               Favorited Items
@@ -360,7 +360,7 @@ export default function FavoritesTab({
 
   return (
     <div className="space-y-6" id="favorites-section">
-      <div className="border-border-card rounded-lg border p-4">
+      <div className="border-border-card rounded-t-none rounded-b-lg border p-4">
         <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-2">
             <h2 className="text-primary-text text-lg font-semibold">

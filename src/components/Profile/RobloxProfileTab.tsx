@@ -73,7 +73,7 @@ export default function RobloxProfileTab({
   return (
     <div className="space-y-6">
       {/* Roblox Profile Card */}
-      <div className="border-border-card rounded-lg border p-4">
+      <div className="border-border-card rounded-t-none rounded-b-lg border p-4">
         <div className="mb-4 flex items-center gap-2">
           <h2 className="text-primary-text text-lg font-semibold">
             Roblox Profile

@@ -310,7 +310,7 @@ function ProfileOverflowTabs({
   return (
     <div className="overflow-x-auto">
       <Tabs value={String(value)} onValueChange={(v) => onChange(Number(v))}>
-        <TabsList>
+        <TabsList noBottomRadius>
           {labels.map((label, idx) => (
             <TabsTrigger
               key={label}

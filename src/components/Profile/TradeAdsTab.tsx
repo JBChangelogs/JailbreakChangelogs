@@ -267,7 +267,7 @@ export default function TradeAdsTab({
   if (error) {
     return (
       <div className="space-y-6">
-        <div className="border-border-card rounded-lg border p-4">
+        <div className="border-border-card rounded-t-none rounded-b-lg border p-4">
           <div className="mb-3 flex items-center gap-2">
             <h2 className="text-primary-text text-lg font-semibold">
               Trade Ads
@@ -281,7 +281,7 @@ export default function TradeAdsTab({
 
   return (
     <div className="space-y-6">
-      <div className="border-border-card rounded-lg border p-4">
+      <div className="border-border-card rounded-t-none rounded-b-lg border p-4">
         <div className="mb-3 flex items-center gap-2">
           <h2 className="text-primary-text text-lg font-semibold">
             Trade Ads [{tradeAds.length}]

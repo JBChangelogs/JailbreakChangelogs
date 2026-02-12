@@ -124,7 +124,7 @@ export default function AboutTab({
   return (
     <div className="space-y-6">
       {/* About Me Section */}
-      <div className="border-border-card rounded-lg border p-4">
+      <div className="border-border-card rounded-t-none rounded-b-lg border p-4">
         <div className="mb-3 flex items-center gap-2">
           <h2 className="text-primary-text text-lg font-semibold">About Me</h2>
           {currentUserId === user.id && !isEditingBio && (

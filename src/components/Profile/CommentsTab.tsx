@@ -17,7 +17,6 @@ interface CommentData {
   item_type: string;
   user_id: string;
   edited_at: number | null;
-  owner?: string;
   parent_id?: number | null;
 }
 
@@ -187,7 +186,7 @@ export default function CommentsTab({
   if (error) {
     return (
       <div className="space-y-6">
-        <div className="border-border-card rounded-lg border p-4">
+        <div className="border-border-card rounded-t-none rounded-b-lg border p-4">
           <div className="mb-3 flex items-center gap-2">
             <h2 className="text-primary-text text-lg font-semibold">
               Recent Comments [{profileComments.length}]
@@ -202,7 +201,7 @@ export default function CommentsTab({
   if (shouldHideComments) {
     return (
       <div className="space-y-6">
-        <div className="border-border-card rounded-lg border p-4">
+        <div className="border-border-card rounded-t-none rounded-b-lg border p-4">
           <div className="mb-3 flex items-center gap-2">
             <h2 className="text-primary-text text-lg font-semibold">
               Recent Comments
@@ -231,7 +230,7 @@ export default function CommentsTab({
 
   return (
     <div className="space-y-6" id="comments-section">
-      <div className="border-border-card rounded-lg border p-4">
+      <div className="border-border-card rounded-t-none rounded-b-lg border p-4">
         <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-2">
             <h2 className="text-primary-text text-lg font-semibold">

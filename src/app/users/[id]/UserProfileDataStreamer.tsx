@@ -14,7 +14,7 @@ interface CommentData {
   item_type: string;
   user_id: string;
   edited_at: number | null;
-  owner: string;
+  parent_id?: number | null;
 }
 
 interface Server {

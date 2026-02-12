@@ -7,14 +7,21 @@ import { cn } from "@/lib/utils";
 
 const Tabs = TabsPrimitive.Root;
 
+interface TabsListProps extends React.ComponentPropsWithoutRef<
+  typeof TabsPrimitive.List
+> {
+  noBottomRadius?: boolean;
+}
+
 const TabsList = React.forwardRef<
   React.ComponentRef<typeof TabsPrimitive.List>,
-  React.ComponentPropsWithoutRef<typeof TabsPrimitive.List>
->(({ className, ...props }, ref) => (
+  TabsListProps
+>(({ className, noBottomRadius = false, ...props }, ref) => (
   <TabsPrimitive.List
     ref={ref}
     className={cn(
-      "border-border-card bg-tertiary-bg text-secondary-text inline-flex h-auto min-w-max items-center justify-start gap-1 rounded-lg border p-1",
+      "border-border-card bg-tertiary-bg text-secondary-text inline-flex h-auto min-w-max items-center justify-start gap-1 border p-1",
+      noBottomRadius ? "rounded-t-lg rounded-b-none" : "rounded-lg",
       className,
     )}
     {...props}
