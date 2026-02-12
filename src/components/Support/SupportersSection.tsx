@@ -18,6 +18,21 @@ const EXCLUDED_IDS = [
   "1361726772374147112",
 ];
 
+function sample<T>(data: T[], size: number): T[] {
+  // create a shallow copy so we dont mutate the original data
+  const result = [...data];
+  const count = Math.min(size, result.length); // cap size to data length so it never overflows
+
+  // fisher-yates style shuffle
+  for (let i = 0; i < count; i++) {
+    const j = i + Math.floor(Math.random() * (result.length - i));
+    [result[i], result[j]] = [result[j], result[i]]; // swap ith and jth elements in result array
+  }
+
+  // return the first n elements which are now randomly populated
+  return result.slice(0, count);
+}
+
 export default function SupportersSection({
   supporters,
 }: SupportersSectionProps) {
@@ -34,18 +49,29 @@ export default function SupportersSection({
         supporter.premiumtype <= 3,
     );
 
+    const maxSupporters = 15; // load 15 supporters only. W performance
+
     // Separate supporters by tier
-    const tier3 = validSupporters
-      .filter((s) => s.premiumtype === 3)
-      .sort((a, b) => parseInt(b.created_at) - parseInt(a.created_at));
+    const tier3 = sample(
+      validSupporters
+        .filter((s) => s.premiumtype === 3)
+        .sort((a, b) => parseInt(b.created_at) - parseInt(a.created_at)),
+      maxSupporters,
+    );
 
-    const tier2 = validSupporters
-      .filter((s) => s.premiumtype === 2)
-      .sort((a, b) => parseInt(b.created_at) - parseInt(a.created_at));
+    const tier2 = sample(
+      validSupporters
+        .filter((s) => s.premiumtype === 2)
+        .sort((a, b) => parseInt(b.created_at) - parseInt(a.created_at)),
+      maxSupporters,
+    );
 
-    const tier1 = validSupporters
-      .filter((s) => s.premiumtype === 1)
-      .sort((a, b) => parseInt(b.created_at) - parseInt(a.created_at));
+    const tier1 = sample(
+      validSupporters
+        .filter((s) => s.premiumtype === 1)
+        .sort((a, b) => parseInt(b.created_at) - parseInt(a.created_at)),
+      maxSupporters,
+    );
 
     return {
       tier3Supporters: tier3,
