@@ -49,7 +49,7 @@ export default function UserProfileSection({
   getHasVerifiedBadge,
   currentData,
 }: UserProfileSectionProps) {
-  const { user, isAuthenticated, setShowLoginModal } = useAuthContext();
+  const { user, isAuthenticated, setLoginModal } = useAuthContext();
   const { modalState, openModal, closeModal } = useSupporterModal();
   const scanWebSocket = useScanWebSocket(currentData?.user_id || "");
   const scanCompletedRef = useRef(false);
@@ -494,11 +494,7 @@ export default function UserProfileSection({
                   ) : (
                     <Button
                       onClick={() => {
-                        setShowLoginModal(true);
-                        const event = new CustomEvent("setLoginTab", {
-                          detail: 1,
-                        });
-                        window.dispatchEvent(event);
+                        setLoginModal({ open: true, tab: "roblox" });
                       }}
                       size="sm"
                     >

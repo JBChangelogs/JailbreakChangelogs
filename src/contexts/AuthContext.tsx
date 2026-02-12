@@ -44,6 +44,11 @@ const trackUserStatus = (isAuthenticated: boolean, action?: string) => {
 interface AuthContextType extends AuthState {
   login: (token: string) => Promise<AuthResponse>;
   logout: () => Promise<void>;
+  loginModalTab: "discord" | "roblox";
+  setLoginModal: (config: {
+    open: boolean;
+    tab?: "discord" | "roblox";
+  }) => void;
   showLoginModal: boolean;
   setShowLoginModal: (show: boolean) => void;
 }
@@ -64,7 +69,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
     error: null,
   });
   const [showLoginModal, setShowLoginModal] = useState(false);
+  const [loginModalTab, setLoginModalTab] = useState<"discord" | "roblox">(
+    "discord",
+  );
   const isUserActiveRef = useRef(true);
+  const tokenAuthProcessedRef = useRef(false);
 
   const initializeAuth = useCallback(async () => {
     try {
@@ -321,63 +330,110 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   }, [authState.isAuthenticated, authState.isLoading]);
 
-  const handleLogin = async (token: string): Promise<AuthResponse> => {
-    try {
-      setAuthState((prev) => ({ ...prev, isLoading: true }));
-      const response = await handleTokenAuth(token);
+  const handleLogin = useCallback(
+    async (token: string): Promise<AuthResponse> => {
+      try {
+        setAuthState((prev) => ({ ...prev, isLoading: true }));
+        const response = await handleTokenAuth(token);
 
-      if (response.success && response.data) {
-        setAuthState({
-          isAuthenticated: true,
-          user: response.data,
-          isLoading: false,
-          error: null,
-        });
+        if (response.success && response.data) {
+          setAuthState({
+            isAuthenticated: true,
+            user: response.data,
+            isLoading: false,
+            error: null,
+          });
 
-        // Track user status in Clarity
-        trackUserStatus(true);
+          // Track user status in Clarity
+          trackUserStatus(true);
 
-        // Check for campaign and count visit after successful login
-        const campaign = getStoredCampaign();
-        if (campaign) {
-          try {
-            await countCampaignVisit(campaign, token);
-            toast.success("Campaign visit recorded!", {
-              duration: 3000,
-            });
-          } catch (e) {
-            console.error("Campaign visit error during login:", e);
+          // Check for campaign and count visit after successful login
+          const campaign = getStoredCampaign();
+          if (campaign) {
+            try {
+              await countCampaignVisit(campaign, token);
+              toast.success("Campaign visit recorded!", {
+                duration: 3000,
+              });
+            } catch (e) {
+              console.error("Campaign visit error during login:", e);
+            }
+            clearStoredCampaign();
           }
-          clearStoredCampaign();
+        } else {
+          setAuthState({
+            isAuthenticated: false,
+            user: null,
+            isLoading: false,
+            error: response.error || "Login failed",
+          });
+
+          // Track user status in Clarity
+          trackUserStatus(false);
         }
-      } else {
+
+        return response;
+      } catch (err) {
+        console.error("Login error:", err);
+        const errorMessage =
+          err instanceof Error ? err.message : "Login failed";
         setAuthState({
           isAuthenticated: false,
           user: null,
           isLoading: false,
-          error: response.error || "Login failed",
+          error: errorMessage,
         });
 
         // Track user status in Clarity
         trackUserStatus(false);
+        return { success: false, error: errorMessage };
       }
+    },
+    [],
+  );
 
-      return response;
-    } catch (err) {
-      console.error("Login error:", err);
-      const errorMessage = err instanceof Error ? err.message : "Login failed";
-      setAuthState({
-        isAuthenticated: false,
-        user: null,
-        isLoading: false,
-        error: errorMessage,
-      });
+  const clearTokenFromUrl = useCallback(() => {
+    if (typeof window === "undefined") return;
 
-      // Track user status in Clarity
-      trackUserStatus(false);
-      return { success: false, error: errorMessage };
+    const currentUrl = new URL(window.location.href);
+    if (!currentUrl.searchParams.has("token")) return;
+
+    currentUrl.searchParams.delete("token");
+    window.history.replaceState({}, "", currentUrl.toString());
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined" || tokenAuthProcessedRef.current) {
+      return;
     }
-  };
+
+    const token = new URL(window.location.href).searchParams.get("token");
+    if (!token) {
+      return;
+    }
+
+    tokenAuthProcessedRef.current = true;
+    const tokenLoginTimeout = setTimeout(() => {
+      handleLogin(token)
+        .then((response) => {
+          clearTokenFromUrl();
+          if (response.success) {
+            setShowLoginModal(false);
+          } else {
+            tokenAuthProcessedRef.current = false;
+          }
+        })
+        .catch((error) => {
+          console.error("Authentication error:", error);
+          clearTokenFromUrl();
+          tokenAuthProcessedRef.current = false;
+        });
+    }, 0);
+
+    return () => {
+      clearTimeout(tokenLoginTimeout);
+    };
+  }, [handleLogin, clearTokenFromUrl]);
 
   const handleLogout = async () => {
     try {
@@ -398,10 +454,22 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   };
 
+  const setLoginModal = useCallback(
+    ({ open, tab }: { open: boolean; tab?: "discord" | "roblox" }) => {
+      if (tab) {
+        setLoginModalTab(tab);
+      }
+      setShowLoginModal(open);
+    },
+    [],
+  );
+
   const contextValue: AuthContextType = {
     ...authState,
     login: handleLogin,
     logout: handleLogout,
+    loginModalTab,
+    setLoginModal,
     showLoginModal,
     setShowLoginModal,
   };

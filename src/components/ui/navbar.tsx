@@ -313,6 +313,7 @@ export const NavbarModern = ({
   const pathname = usePathname();
   const {
     setShowLoginModal,
+    setLoginModal,
     user: authUser,
     isAuthenticated,
     logout,
@@ -920,11 +921,7 @@ export const NavbarModern = ({
                         <button
                           className="text-primary-text hover:bg-button-info-hover hover:text-form-button-text flex w-full items-center gap-3 px-4 py-2 text-left text-sm transition-colors"
                           onClick={() => {
-                            setShowLoginModal(true);
-                            const event = new CustomEvent("setLoginTab", {
-                              detail: 1,
-                            });
-                            window.dispatchEvent(event);
+                            setLoginModal({ open: true, tab: "roblox" });
                           }}
                         >
                           <RobloxIcon className="h-4 w-4" />

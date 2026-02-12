@@ -11,7 +11,6 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useSupporterModal } from "@/hooks/useSupporterModal";
 import SupporterModal from "../Modals/SupporterModal";
-import LoginModalWrapper from "../Auth/LoginModalWrapper";
 import { Icon } from "../ui/IconWrapper";
 import { Button as UiButton } from "@/components/ui/button";
 import {
@@ -74,8 +73,7 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
   );
   const router = useRouter();
   const { modalState, closeModal, checkTradeAdDuration } = useSupporterModal();
-  const [loginModalOpen, setLoginModalOpen] = useState(false);
-  const { isAuthenticated, user } = useAuthContext();
+  const { isAuthenticated, user, setLoginModal } = useAuthContext();
 
   // Drag and drop state
   const [activeItem, setActiveItem] = useState<TradeItem | null>(null);
@@ -328,11 +326,7 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
       !userData?.roblox_join_date
     ) {
       toast.error("You must link a Roblox account first to create trade ads.");
-      setLoginModalOpen(true);
-      // Set Roblox tab (tab index 1)
-      setTimeout(() => {
-        window.dispatchEvent(new CustomEvent("setLoginTab", { detail: 1 }));
-      }, 100);
+      setLoginModal({ open: true, tab: "roblox" });
       return;
     }
 
@@ -553,10 +547,6 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
   return (
     <DndContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
       <>
-        <LoginModalWrapper
-          open={loginModalOpen}
-          onClose={() => setLoginModalOpen(false)}
-        />
         <div className="space-y-6">
           <ConfirmDialog
             isOpen={showRestoreModal}

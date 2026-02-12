@@ -52,7 +52,7 @@ export default function OGNotificationSheet({
   isOpen,
   onClose,
 }: OGNotificationSheetProps) {
-  const { user, setShowLoginModal } = useAuthContext();
+  const { user, setLoginModal } = useAuthContext();
   const isMobile = useMediaQuery("(max-width:1024px)");
 
   // State management
@@ -413,16 +413,10 @@ export default function OGNotificationSheet({
                 <Button
                   onClick={() => {
                     onClose();
-                    setShowLoginModal(true);
-                    if (isAuthenticated) {
-                      // Trigger the Roblox link tab (index 1) in the login modal
-                      setTimeout(() => {
-                        const event = new CustomEvent("setLoginTab", {
-                          detail: 1,
-                        });
-                        window.dispatchEvent(event);
-                      }, 0);
-                    }
+                    setLoginModal({
+                      open: true,
+                      tab: isAuthenticated ? "roblox" : "discord",
+                    });
                   }}
                   className="shadow-button-info/20 h-[56px] w-full text-base font-bold shadow-lg"
                 >

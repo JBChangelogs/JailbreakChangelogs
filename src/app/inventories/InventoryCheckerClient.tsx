@@ -28,7 +28,6 @@ import { useScanWebSocket } from "@/hooks/useScanWebSocket";
 import { useSupporterModal } from "@/hooks/useSupporterModal";
 import SupporterModal from "@/components/Modals/SupporterModal";
 import ScanInventoryModal from "@/components/Modals/ScanInventoryModal";
-import LoginModalWrapper from "@/components/Auth/LoginModalWrapper";
 import {
   showScanLoadingToast,
   updateScanLoadingToast,
@@ -107,10 +106,9 @@ export default function InventoryCheckerClient({
   const { getId } = useUsernameToId();
 
   // Auth context and scan functionality
-  const { user, isAuthenticated } = useAuthContext();
+  const { user, isAuthenticated, setLoginModal } = useAuthContext();
   const scanWebSocket = useScanWebSocket(robloxId || "");
   const { modalState, openModal, closeModal } = useSupporterModal();
-  const [loginModalOpen, setLoginModalOpen] = useState(false);
   const [showScanModal, setShowScanModal] = useState(false);
 
   // Check if current user is viewing their own inventory
@@ -610,12 +608,6 @@ export default function InventoryCheckerClient({
   return (
     <ThemeProvider theme={{}}>
       <div className="space-y-6">
-        {/* Login Modal Wrapper */}
-        <LoginModalWrapper
-          open={loginModalOpen}
-          onClose={() => setLoginModalOpen(false)}
-        />
-
         {/* Search Form */}
         <SearchForm
           searchId={searchId}
@@ -881,11 +873,7 @@ export default function InventoryCheckerClient({
                           <button
                             type="button"
                             onClick={() => {
-                              setLoginModalOpen(true);
-                              const event = new CustomEvent("setLoginTab", {
-                                detail: 1,
-                              });
-                              window.dispatchEvent(event);
+                              setLoginModal({ open: true, tab: "roblox" });
                             }}
                             className="text-button-info hover:text-button-info-hover cursor-pointer font-semibold underline transition-colors"
                           >
@@ -898,7 +886,7 @@ export default function InventoryCheckerClient({
                           <button
                             type="button"
                             onClick={() => {
-                              setLoginModalOpen(true);
+                              setLoginModal({ open: true });
                             }}
                             className="text-button-info hover:text-button-info-hover cursor-pointer font-semibold underline transition-colors"
                           >

@@ -10,7 +10,7 @@ import dynamic from "next/dynamic";
 import { useState, useCallback, useEffect } from "react";
 import { logout, trackLogoutSource } from "@/utils/auth";
 import { toast } from "sonner";
-import LoginModalWrapper from "../Auth/LoginModalWrapper";
+import LoginModal from "../Auth/LoginModal";
 import EscapeLoginModal from "../Auth/EscapeLoginModal";
 import { useEscapeLogin } from "@/utils/escapeLogin";
 import { UserAvatar } from "@/utils/avatar";
@@ -151,12 +151,7 @@ export default function Header() {
     setNotificationTimeoutId(timeoutId);
   };
 
-  const {
-    showLoginModal,
-    setShowLoginModal,
-    user: authUser,
-    isAuthenticated,
-  } = useAuthContext();
+  const { setLoginModal, user: authUser, isAuthenticated } = useAuthContext();
   const { resolvedTheme } = useTheme();
   const userData = isAuthenticated ? authUser : null;
   useEscapeLogin();
@@ -290,9 +285,7 @@ export default function Header() {
             <div
               onClick={() => {
                 handleDrawerToggle();
-                setShowLoginModal(true);
-                const event = new CustomEvent("setLoginTab", { detail: 1 });
-                window.dispatchEvent(event);
+                setLoginModal({ open: true, tab: "roblox" });
               }}
               className="hover:bg-button-info-hover/10 flex cursor-pointer items-center gap-3 px-4 py-3 transition-colors"
             >
@@ -345,7 +338,7 @@ export default function Header() {
         <div className="px-4 py-3">
           <Button
             onClick={() => {
-              setShowLoginModal(true);
+              setLoginModal({ open: true });
               handleDrawerToggle();
             }}
           >
@@ -1034,10 +1027,7 @@ export default function Header() {
         </>
       </div>
 
-      <LoginModalWrapper
-        open={showLoginModal}
-        onClose={() => setShowLoginModal(false)}
-      />
+      <LoginModal />
 
       {/* EscapeLoginModal - Desktop only (no Escape key on mobile) */}
       <div className="hidden xl:block">

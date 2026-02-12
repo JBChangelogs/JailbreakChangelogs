@@ -15,7 +15,7 @@ export default function ScanOptionSection({
   variant = "main",
   isOwnInventory = false,
 }: ScanOptionSectionProps) {
-  const { user, isAuthenticated, setShowLoginModal } = useAuthContext();
+  const { user, isAuthenticated, setLoginModal } = useAuthContext();
   const backgroundClass =
     variant === "main" ? "bg-secondary-bg" : "bg-secondary-bg";
   const borderClass = "border-border-card";
@@ -117,9 +117,7 @@ export default function ScanOptionSection({
             ) : (
               <Button
                 onClick={() => {
-                  setShowLoginModal(true);
-                  const event = new CustomEvent("setLoginTab", { detail: 1 });
-                  window.dispatchEvent(event);
+                  setLoginModal({ open: true, tab: "roblox" });
                 }}
                 size="sm"
               >

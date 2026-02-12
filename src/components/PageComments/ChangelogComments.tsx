@@ -44,7 +44,6 @@ import { useAuthContext } from "@/contexts/AuthContext";
 import { UserData } from "@/types/auth";
 import Link from "next/link";
 import ReportCommentModal from "./ReportCommentModal";
-import LoginModalWrapper from "../Auth/LoginModalWrapper";
 import SupporterModal from "../Modals/SupporterModal";
 import { useSupporterModal } from "@/hooks/useSupporterModal";
 import { UserDetailsTooltip } from "@/components/ui/UserDetailsTooltip";
@@ -306,7 +305,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
   const [isClient, setIsClient] = useState(false);
 
   // --- Auth & User State ---
-  const { isAuthenticated, user } = useAuthContext();
+  const { isAuthenticated, user, setLoginModal } = useAuthContext();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [currentUserPremiumType, setCurrentUserPremiumType] =
@@ -329,7 +328,6 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
   const [reportingCommentId, setReportingCommentId] = useState<number | null>(
     null,
   );
-  const [loginModalOpen, setLoginModalOpen] = useState(false);
   const [isSubmittingComment, setIsSubmittingComment] = useState(false);
   const [isRefreshingComments, setIsRefreshingComments] = useState(false);
 
@@ -1048,7 +1046,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
   const handleReportClick = (commentId: number) => {
     if (!isAuthenticated) {
       toast.error("You must be logged in to report comments");
-      setLoginModalOpen(true);
+      setLoginModal({ open: true });
       return;
     }
 
@@ -1180,7 +1178,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                   !isLoggedIn
                     ? (e) => {
                         e.preventDefault();
-                        setLoginModalOpen(true);
+                        setLoginModal({ open: true });
                       }
                     : undefined
                 }
@@ -1906,11 +1904,6 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
             : ""
         }
         commentId={reportingCommentId || 0}
-      />
-
-      <LoginModalWrapper
-        open={loginModalOpen}
-        onClose={() => setLoginModalOpen(false)}
       />
 
       {/* Supporter Modal */}

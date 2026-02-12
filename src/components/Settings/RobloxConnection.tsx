@@ -2,9 +2,9 @@ import { useState } from "react";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { Icon } from "@/components/ui/IconWrapper";
 import { toast } from "sonner";
-import LoginModalWrapper from "../Auth/LoginModalWrapper";
 import { safeGetJSON, safeSetJSON } from "@/utils/safeStorage";
 import { UserData } from "@/types/auth";
+import { useAuthContext } from "@/contexts/AuthContext";
 
 interface RobloxConnectionProps {
   userData: {
@@ -16,7 +16,7 @@ interface RobloxConnectionProps {
 export const RobloxConnection = ({ userData }: RobloxConnectionProps) => {
   const [open, setOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [loginModalOpen, setLoginModalOpen] = useState(false);
+  const { setLoginModal } = useAuthContext();
 
   const handleOpen = () => setOpen(true);
   const handleClose = () => {
@@ -111,8 +111,7 @@ export const RobloxConnection = ({ userData }: RobloxConnectionProps) => {
       ) : (
         <button
           onClick={() => {
-            setLoginModalOpen(true);
-            window.dispatchEvent(new CustomEvent("setLoginTab", { detail: 1 }));
+            setLoginModal({ open: true, tab: "roblox" });
           }}
           className="bg-button-info text-form-button-text hover:bg-button-info-hover inline-flex items-center gap-2 rounded-md px-4 py-2 text-sm font-semibold uppercase transition-colors"
         >
@@ -132,16 +131,6 @@ export const RobloxConnection = ({ userData }: RobloxConnectionProps) => {
           Connect Roblox Account
         </button>
       )}
-
-      <LoginModalWrapper
-        open={loginModalOpen}
-        onClose={() => setLoginModalOpen(false)}
-      />
-
-      <LoginModalWrapper
-        open={loginModalOpen}
-        onClose={() => setLoginModalOpen(false)}
-      />
 
       <ConfirmDialog
         isOpen={open}
