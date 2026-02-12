@@ -6,7 +6,7 @@ export default function Loading() {
     <main className="mb-8 min-h-screen">
       <div className="container mx-auto px-4">
         {/* Header skeleton */}
-        <div className="border-border-primary bg-secondary-bg hover:border-border-focus mb-8 rounded-lg border p-6">
+        <div className="border-border-card bg-secondary-bg mb-8 rounded-lg border p-6">
           <div className="mb-4 flex items-center justify-between">
             <Skeleton
               variant="text"
@@ -35,7 +35,7 @@ export default function Loading() {
             {[...Array(8)].map((_, i) => (
               <div
                 key={i}
-                className="border-border-primary bg-secondary-bg hover:border-border-focus rounded-lg border p-2"
+                className="border-border-card bg-secondary-bg rounded-lg border p-2"
               >
                 <Skeleton
                   variant="rounded"
@@ -77,7 +77,7 @@ export default function Loading() {
             {[...Array(8)].map((_, i) => (
               <div
                 key={i}
-                className="border-border-primary bg-secondary-bg hover:border-border-focus rounded-lg border p-1"
+                className="border-border-card bg-secondary-bg rounded-lg border p-1"
               >
                 <Skeleton
                   variant="rounded"
@@ -103,7 +103,7 @@ export default function Loading() {
             <div className="flex flex-col gap-4 lg:flex-row lg:gap-4">
               {/* Search input skeleton */}
               <div className="w-full lg:w-1/3">
-                <div className="border-border-primary bg-secondary-bg hover:border-border-focus rounded-lg border p-2">
+                <div className="border-border-card bg-secondary-bg rounded-lg border p-2">
                   <Skeleton
                     variant="rounded"
                     width="100%"
@@ -117,7 +117,7 @@ export default function Loading() {
               <div className="flex flex-col gap-4 lg:flex-1 lg:flex-row lg:gap-4">
                 {/* Filter dropdown skeleton */}
                 <div className="w-full lg:w-1/2">
-                  <div className="border-border-primary bg-secondary-bg hover:border-border-focus rounded-lg border p-2">
+                  <div className="border-border-card bg-secondary-bg rounded-lg border p-2">
                     <Skeleton
                       variant="rounded"
                       width="100%"
@@ -129,7 +129,7 @@ export default function Loading() {
 
                 {/* Sort dropdown skeleton */}
                 <div className="w-full lg:w-1/2">
-                  <div className="border-border-primary bg-secondary-bg hover:border-border-focus rounded-lg border p-2">
+                  <div className="border-border-card bg-secondary-bg rounded-lg border p-2">
                     <Skeleton
                       variant="rounded"
                       width="100%"
@@ -143,7 +143,7 @@ export default function Loading() {
 
             {/* Value range slider skeleton */}
             <div className="w-full">
-              <div className="border-border-primary bg-secondary-bg hover:border-border-focus rounded-lg border p-3">
+              <div className="border-border-card bg-secondary-bg rounded-lg border p-3">
                 <Skeleton
                   variant="rounded"
                   width="100%"
@@ -176,7 +176,7 @@ export default function Loading() {
 
         {/* Pagination skeleton */}
         <div className="mt-8 flex justify-center">
-          <div className="border-border-primary bg-secondary-bg hover:border-border-focus rounded-lg border p-2">
+          <div className="border-border-card bg-secondary-bg rounded-lg border p-2">
             <Skeleton
               variant="rounded"
               width={300}

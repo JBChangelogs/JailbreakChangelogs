@@ -38,7 +38,7 @@ const AnimatedThemeToggler = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="border-border-primary bg-secondary-bg text-secondary-text hover:bg-quaternary-bg hover:text-primary-text flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg border transition-all duration-200 hover:scale-105 active:scale-95">
+      <div className="border-border-card bg-secondary-bg text-secondary-text hover:bg-quaternary-bg hover:text-primary-text flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg border transition-all duration-200 hover:scale-105 active:scale-95">
         <div className="h-5 w-5" />
       </div>
     ),
@@ -120,7 +120,7 @@ export const MenuItem = ({
                 transition={menuTransition}
                 layoutId="active"
                 layout
-                className="border-border-primary bg-secondary-bg overflow-hidden rounded-2xl border backdrop-blur-sm"
+                className="border-border-card bg-secondary-bg overflow-hidden rounded-2xl border backdrop-blur-sm"
               >
                 <motion.div layout className="flex flex-col gap-1 px-2 py-3">
                   {children}
@@ -202,7 +202,7 @@ export const Badge = ({
     "rounded border px-1.5 py-0.5 text-[10px] font-semibold uppercase";
   const variantClasses =
     variant === "new"
-      ? "bg-button-info border-border-primary text-form-button-text"
+      ? "bg-button-info border-border-card text-form-button-text"
       : "bg-button-info text-form-button-text";
 
   return <span className={`${baseClasses} ${variantClasses}`}>{children}</span>;
@@ -313,6 +313,7 @@ export const NavbarModern = ({
   const pathname = usePathname();
   const {
     setShowLoginModal,
+    setLoginModal,
     user: authUser,
     isAuthenticated,
     logout,
@@ -343,7 +344,7 @@ export const NavbarModern = ({
   return (
     <div
       className={cn(
-        "bg-primary-bg/75 border-border-primary border-b backdrop-blur-lg",
+        "bg-primary-bg/75 border-border-card border-b backdrop-blur-lg",
         className,
       )}
     >
@@ -418,6 +419,9 @@ export const NavbarModern = ({
             <HoveredLink href="/values/calculator" setActive={setActive}>
               Value Calculator
             </HoveredLink>
+            <HoveredLink href="/trading" setActive={setActive}>
+              Trade Ads
+            </HoveredLink>
             <HoveredLink href="/dupes" setActive={setActive}>
               <div className="flex items-center gap-2">
                 <span>Dupe Finder</span>
@@ -425,9 +429,6 @@ export const NavbarModern = ({
                   <Badge variant="coming-soon">Coming Soon</Badge>
                 )}
               </div>
-            </HoveredLink>
-            <HoveredLink href="/trading" setActive={setActive}>
-              Trade Ads
             </HoveredLink>
             <HoveredLink href="/inventories" setActive={setActive}>
               <div className="flex items-center gap-2">
@@ -456,16 +457,10 @@ export const NavbarModern = ({
               Money Leaderboard
             </HoveredLink>
             <HoveredLink href="/robberies" setActive={setActive}>
-              <div className="flex items-center gap-2">
-                <span>Robbery Tracker</span>
-                <Badge variant="new">Beta</Badge>
-              </div>
+              Robbery Tracker
             </HoveredLink>
             <HoveredLink href="/bounties" setActive={setActive}>
-              <div className="flex items-center gap-2">
-                <span>Bounty Tracker</span>
-                <Badge variant="new">Beta</Badge>
-              </div>
+              Bounty Tracker
             </HoveredLink>
             <HoveredLink href="/servers" setActive={setActive}>
               Private Servers
@@ -507,7 +502,7 @@ export const NavbarModern = ({
                 <PopoverTrigger asChild>
                   <button
                     suppressHydrationWarning={true}
-                    className="border-border-primary bg-secondary-bg text-secondary-text hover:bg-quaternary-bg hover:text-primary-text relative flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg border transition-all duration-200 hover:scale-105 active:scale-95"
+                    className="border-border-card bg-secondary-bg text-secondary-text hover:bg-quaternary-bg hover:text-primary-text relative flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg border transition-all duration-200 hover:scale-105 active:scale-95"
                   >
                     <Icon
                       icon="mingcute:notification-line"
@@ -844,7 +839,7 @@ export const NavbarModern = ({
           <Tooltip>
             <TooltipTrigger asChild>
               <Link href="/supporting">
-                <button className="border-border-primary bg-secondary-bg text-secondary-text hover:bg-quaternary-bg hover:text-primary-text flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg border transition-all duration-200 hover:scale-105 active:scale-95">
+                <button className="border-border-card bg-secondary-bg text-secondary-text hover:bg-quaternary-bg hover:text-primary-text flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg border transition-all duration-200 hover:scale-105 active:scale-95">
                   <Image
                     src="/logos/kofi_symbol.svg"
                     alt="Ko-fi"
@@ -887,7 +882,7 @@ export const NavbarModern = ({
               <AnimatePresence>
                 {userMenuOpen && (
                   <motion.div
-                    className="border-border-primary bg-secondary-bg absolute right-0 z-1300 mt-0 w-64 rounded-lg border py-2 shadow-lg backdrop-blur-sm"
+                    className="border-border-card bg-secondary-bg absolute right-0 z-1300 mt-0 w-64 rounded-lg border py-2 shadow-lg backdrop-blur-sm"
                     initial={{ opacity: 0, scale: 0.85, y: 10 }}
                     animate={{ opacity: 1, scale: 1, y: 0 }}
                     exit={{ opacity: 0, scale: 0.85, y: 10 }}
@@ -926,11 +921,7 @@ export const NavbarModern = ({
                         <button
                           className="text-primary-text hover:bg-button-info-hover hover:text-form-button-text flex w-full items-center gap-3 px-4 py-2 text-left text-sm transition-colors"
                           onClick={() => {
-                            setShowLoginModal(true);
-                            const event = new CustomEvent("setLoginTab", {
-                              detail: 1,
-                            });
-                            window.dispatchEvent(event);
+                            setLoginModal({ open: true, tab: "roblox" });
                           }}
                         >
                           <RobloxIcon className="h-4 w-4" />

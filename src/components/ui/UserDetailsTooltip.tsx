@@ -63,7 +63,7 @@ export const UserDetailsTooltip: React.FC<UserDetailsTooltipProps> = ({
             <Link
               href={`/users/${user.id}`}
               prefetch={false}
-              className="text-secondary-text hover:text-primary-text block text-sm transition-colors"
+              className="text-secondary-text hover:text-link block text-sm transition-colors"
             >
               @{user.username}
             </Link>
@@ -75,7 +75,7 @@ export const UserDetailsTooltip: React.FC<UserDetailsTooltipProps> = ({
                 href={`https://discord.com/users/${user.id}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-primary-text bg-tertiary-bg/40 border-border-primary hover:bg-quaternary-bg/60 inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium shadow-sm transition-all"
+                className="text-primary-text bg-tertiary-bg/40 border-border-card hover:bg-quaternary-bg/60 inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium shadow-sm transition-all"
               >
                 <DiscordIcon className="h-3.5 w-3.5" />
                 Discord
@@ -86,7 +86,7 @@ export const UserDetailsTooltip: React.FC<UserDetailsTooltipProps> = ({
                   href={`https://www.roblox.com/users/${user.roblox_id}/profile`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-primary-text bg-tertiary-bg/40 border-border-primary hover:bg-quaternary-bg/60 inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium shadow-sm transition-all"
+                  className="text-primary-text bg-tertiary-bg/40 border-border-card hover:bg-quaternary-bg/60 inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium shadow-sm transition-all"
                 >
                   <RobloxIcon className="h-3.5 w-3.5" />
                   Roblox

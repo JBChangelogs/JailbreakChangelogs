@@ -47,13 +47,13 @@ export default function Error({
             <div className="flex flex-col justify-center gap-3 sm:flex-row">
               <button
                 onClick={reset}
-                className="border-border-primary bg-button-info text-form-button-text hover:border-border-focus hover:bg-button-info-hover rounded-lg border px-6 py-3 font-medium transition-colors"
+                className="border-border-card bg-button-info text-form-button-text hover:border-border-focus hover:bg-button-info-hover rounded-lg border px-6 py-3 font-medium transition-colors"
               >
                 Try again
               </button>
               <Link
                 href="/values/changelogs"
-                className="border-border-primary bg-secondary-bg text-primary-text hover:border-border-focus hover:bg-quaternary-bg rounded-lg border px-6 py-3 text-center font-medium transition-colors"
+                className="border-border-card bg-secondary-bg text-primary-text hover:border-border-focus hover:bg-quaternary-bg rounded-lg border px-6 py-3 text-center font-medium transition-colors"
               >
                 View all changelogs
               </Link>

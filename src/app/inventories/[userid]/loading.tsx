@@ -18,15 +18,15 @@ export default function Loading() {
 
       {/* Stats skeleton */}
       <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-3">
-        <div className="border-border-primary bg-secondary-bg shadow-card-shadow rounded-lg border p-4">
+        <div className="border-border-card bg-secondary-bg shadow-card-shadow rounded-lg border p-4">
           <div className="bg-button-secondary mb-2 h-8 animate-pulse rounded"></div>
           <div className="bg-button-secondary h-4 w-24 animate-pulse rounded"></div>
         </div>
-        <div className="border-border-primary bg-secondary-bg shadow-card-shadow rounded-lg border p-4">
+        <div className="border-border-card bg-secondary-bg shadow-card-shadow rounded-lg border p-4">
           <div className="bg-button-secondary mb-2 h-8 animate-pulse rounded"></div>
           <div className="bg-button-secondary h-4 w-24 animate-pulse rounded"></div>
         </div>
-        <div className="border-border-primary bg-secondary-bg shadow-card-shadow rounded-lg border p-4">
+        <div className="border-border-card bg-secondary-bg shadow-card-shadow rounded-lg border p-4">
           <div className="bg-button-secondary mb-2 h-8 animate-pulse rounded"></div>
           <div className="bg-button-secondary h-4 w-24 animate-pulse rounded"></div>
         </div>

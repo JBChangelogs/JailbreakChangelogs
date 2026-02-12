@@ -111,7 +111,7 @@ export default function RobberyPlayersModal({
           </div>
 
           {/* Tabs */}
-          <div className="border-border-primary border-b px-6">
+          <div className="border-border-card border-b px-6">
             <div role="tablist" className="tabs flex gap-2">
               <button
                 role="tab"
@@ -160,7 +160,7 @@ export default function RobberyPlayersModal({
                 {filteredPlayers.map((player) => (
                   <div
                     key={player.user_id}
-                    className="border-border-primary bg-primary-bg flex items-center gap-3 rounded-lg border p-3"
+                    className="border-border-card bg-tertiary-bg flex items-center gap-3 rounded-lg border p-3"
                   >
                     {/* Avatar */}
                     <div className="bg-tertiary-bg h-10 w-10 shrink-0 overflow-hidden rounded-full">
@@ -188,15 +188,15 @@ export default function RobberyPlayersModal({
                           href={`https://www.roblox.com/users/${player.user_id}/profile`}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-primary-text hover:text-button-info truncate font-medium transition-colors"
+                          className="text-primary-text hover:text-link truncate font-medium transition-colors"
                         >
                           {getUserDisplay(player.user_id)}
                         </a>
                         <span
-                          className={`rounded px-1.5 py-0.5 text-xs font-medium ${
+                          className={`text-primary-text inline-flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl ${
                             player.team === "Police"
-                              ? "text-primary-text border border-blue-500/30 bg-blue-500/20"
-                              : "text-primary-text border border-red-500/30 bg-red-500/20"
+                              ? "border-blue-500/30 bg-blue-500/20"
+                              : "border-red-500/30 bg-red-500/20"
                           }`}
                         >
                           {player.team === "Police" ? "Police" : "Criminal"}

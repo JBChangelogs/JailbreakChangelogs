@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Box, Chip, Skeleton, Divider } from "@mui/material";
+import { Box, Skeleton, Divider } from "@mui/material";
 import { Button } from "@/components/ui/button";
 import { Pagination } from "@/components/ui/Pagination";
 
@@ -197,7 +197,7 @@ export default function FavoritesTab({
         href={itemUrl}
         className="group block"
       >
-        <Box className="border-border-primary bg-primary-bg hover:border-border-focus rounded-lg border p-3 shadow-sm transition-colors">
+        <Box className="border-border-card bg-tertiary-bg rounded-lg border p-3 shadow-sm transition-colors">
           <div className="mb-2 flex items-center">
             <div className="relative mr-3 h-16 w-16 shrink-0 overflow-hidden rounded-md md:h-18 md:w-32">
               {isVideo ? (
@@ -224,7 +224,7 @@ export default function FavoritesTab({
                 {isLoadingItem ? (
                   <Skeleton variant="text" width="80%" height={20} />
                 ) : (
-                  <span className="text-primary-text group-hover:text-button-info font-medium transition-colors">
+                  <span className="text-primary-text group-hover:text-link font-medium transition-colors">
                     {itemName}
                   </span>
                 )}
@@ -235,23 +235,14 @@ export default function FavoritesTab({
                     {isLoadingItem ? (
                       <Skeleton variant="rounded" width={80} height={20} />
                     ) : (
-                      <Chip
-                        label={itemType}
-                        size="small"
-                        variant="outlined"
-                        sx={{
-                          backgroundColor: getCategoryColor(itemType) + "20", // Add 20% opacity
+                      <span
+                        className="text-primary-text bg-tertiary-bg/40 inline-flex h-6 w-fit items-center rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl"
+                        style={{
                           borderColor: getCategoryColor(itemType),
-                          color: "var(--color-primary-text)",
-                          fontSize: "0.65rem",
-                          height: "20px",
-                          fontWeight: "medium",
-                          "&:hover": {
-                            borderColor: getCategoryColor(itemType),
-                            backgroundColor: getCategoryColor(itemType) + "30", // Slightly more opacity on hover
-                          },
                         }}
-                      />
+                      >
+                        {itemType}
+                      </span>
                     )}
                   </div>
                 )}
@@ -283,10 +274,9 @@ export default function FavoritesTab({
   if (loading) {
     return (
       <div className="space-y-6">
-        <div className="border-border-primary rounded-lg border p-4">
+        <div className="border-border-card rounded-lg border p-4">
           <div className="mb-3 flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Icon icon="mdi:heart" className="text-button-info" />
               <h2 className="text-primary-text text-lg font-semibold">
                 Favorited Items
               </h2>
@@ -326,9 +316,8 @@ export default function FavoritesTab({
   if (error) {
     return (
       <div className="space-y-6">
-        <div className="border-border-primary rounded-lg border p-4">
+        <div className="border-border-card rounded-lg border p-4">
           <div className="mb-3 flex items-center gap-2">
-            <Icon icon="mdi:heart" className="text-button-info" />
             <h2 className="text-primary-text text-lg font-semibold">
               Favorited Items [{favorites.length}]
             </h2>
@@ -342,9 +331,8 @@ export default function FavoritesTab({
   if (shouldHideFavorites) {
     return (
       <div className="space-y-6">
-        <div className="border-border-primary rounded-lg border p-4">
+        <div className="border-border-card rounded-lg border p-4">
           <div className="mb-3 flex items-center gap-2">
-            <Icon icon="mdi:heart" className="text-button-info" />
             <h2 className="text-primary-text text-lg font-semibold">
               Favorited Items
             </h2>
@@ -372,10 +360,9 @@ export default function FavoritesTab({
 
   return (
     <div className="space-y-6" id="favorites-section">
-      <div className="border-border-primary rounded-lg border p-4">
+      <div className="border-border-card rounded-lg border p-4">
         <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-2">
-            <Icon icon="mdi:heart" className="text-button-info" />
             <h2 className="text-primary-text text-lg font-semibold">
               Favorited Items [{favorites.length}]
             </h2>

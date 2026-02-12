@@ -121,20 +121,20 @@ export default function AirdropCard({ airdrop }: AirdropCardProps) {
     switch (airdrop.color) {
       case "Brown":
         return (
-          <div className="text-primary-text flex items-center gap-1.5 rounded-full bg-amber-700/20 px-3 py-1">
-            <span className="text-sm font-medium">Easy</span>
+          <div className="text-primary-text inline-flex h-6 items-center gap-1.5 rounded-lg border border-amber-700/30 bg-amber-700/20 px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl">
+            <span>Easy</span>
           </div>
         );
       case "Blue":
         return (
-          <div className="text-primary-text flex items-center gap-1.5 rounded-full bg-blue-500/20 px-3 py-1">
-            <span className="text-sm font-medium">Medium</span>
+          <div className="text-primary-text inline-flex h-6 items-center gap-1.5 rounded-lg border border-blue-500/30 bg-blue-500/20 px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl">
+            <span>Medium</span>
           </div>
         );
       case "Red":
         return (
-          <div className="text-primary-text flex items-center gap-1.5 rounded-full bg-red-500/20 px-3 py-1">
-            <span className="text-sm font-medium">Hard</span>
+          <div className="text-primary-text inline-flex h-6 items-center gap-1.5 rounded-lg border border-red-500/30 bg-red-500/20 px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl">
+            <span>Hard</span>
           </div>
         );
       default:
@@ -146,7 +146,7 @@ export default function AirdropCard({ airdrop }: AirdropCardProps) {
   const mapImageUrl = `${INVENTORY_API_URL}/map/airdrop?x=${airdrop.x}&z=${airdrop.z}`;
 
   return (
-    <div className="border-border-primary bg-secondary-bg hover:border-border-focus flex flex-col overflow-hidden rounded-lg border transition-all duration-200 hover:shadow-lg">
+    <div className="border-border-card bg-secondary-bg flex flex-col overflow-hidden rounded-lg border transition-all duration-200 hover:shadow-lg">
       {/* Image */}
       <div className="bg-secondary-background relative aspect-video w-full shrink-0 overflow-hidden">
         <Image
@@ -249,10 +249,9 @@ export default function AirdropCard({ airdrop }: AirdropCardProps) {
         </div>
 
         {/* Footer with Last Update */}
-        <div className="border-border-primary mt-4 border-t pt-3">
-          <div className="text-primary-text flex items-center justify-center gap-1.5 text-xs font-medium">
-            <Icon icon="mdi:clock" className="text-tertiary-text h-3.5 w-3.5" />
-            <span>Last update: {relativeTime || "Just now"}</span>
+        <div className="border-border-card mt-4 border-t pt-3">
+          <div className="text-primary-text flex items-center justify-center text-xs font-medium">
+            <span>Logged {relativeTime || "Just now"}</span>
           </div>
         </div>
       </div>

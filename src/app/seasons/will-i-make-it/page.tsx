@@ -53,7 +53,7 @@ export default async function WillIMakeItPage() {
         {/* Season Info & Calculator Info Side by Side */}
         <div className="mb-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
           {/* Season Info & Countdown Section */}
-          <div className="border-border-primary bg-secondary-bg hover:border-border-focus rounded-lg border p-6">
+          <div className="border-border-card bg-secondary-bg rounded-lg border p-6">
             <XpImportantDates
               season={season.season}
               title={season.title}
@@ -65,7 +65,7 @@ export default async function WillIMakeItPage() {
           </div>
 
           {/* Calculator Info Section */}
-          <div className="border-border-primary bg-secondary-bg hover:border-border-focus rounded-lg border p-4">
+          <div className="border-border-card bg-secondary-bg rounded-lg border p-4">
             <h3 className="text-primary-text mb-3 flex items-center gap-2 text-lg font-semibold">
               <Icon
                 icon="emojione:light-bulb"

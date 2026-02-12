@@ -59,7 +59,7 @@ export default function DupeFinderClient({
 
       {/* Error Display */}
       {error && !initialData && (
-        <div className="border-border-primary bg-secondary-bg shadow-card-shadow rounded-lg border p-6">
+        <div className="border-border-card bg-secondary-bg rounded-lg border p-6">
           <div className="text-center">
             <div className="mb-4 flex justify-center">
               <div className="bg-status-error/10 rounded-full p-3">

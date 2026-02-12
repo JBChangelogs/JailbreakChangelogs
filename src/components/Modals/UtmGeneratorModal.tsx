@@ -93,7 +93,7 @@ export const UtmGeneratorModal: React.FC<UtmGeneratorModalProps> = ({
       />
 
       <div className="fixed inset-0 flex items-center justify-center p-4">
-        <DialogPanel className="border-border-primary bg-secondary-bg w-full max-w-lg rounded-2xl border shadow-xl">
+        <DialogPanel className="border-border-card bg-secondary-bg w-full max-w-lg rounded-2xl border shadow-xl">
           <div className="border-border-secondary flex items-center justify-between border-b px-6 py-4">
             <div>
               <h2 className="text-primary-text text-xl font-bold">

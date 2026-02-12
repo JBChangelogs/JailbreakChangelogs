@@ -172,13 +172,21 @@ export default function RobberyCard({ robbery }: RobberyCardProps) {
 
   // Get status badge
   const getStatusBadge = () => {
+    if (isTrainNearClose) {
+      return (
+        <div className="text-primary-text border-status-warning/30 bg-status-warning/20 inline-flex h-6 items-center gap-1.5 rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl">
+          <span>Closing Soon</span>
+        </div>
+      );
+    }
+
     // Special handling for Mansion robberies
     if (robbery.marker_name === "Mansion") {
       switch (robbery.status) {
         case 1:
           return (
-            <div className="bg-status-success/20 text-primary-text flex items-center gap-1.5 rounded-full px-3 py-1">
-              <span className="text-sm font-medium">Open</span>
+            <div className="text-primary-text border-status-success/30 bg-status-success/20 inline-flex h-6 items-center gap-1.5 rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl">
+              <span>Open</span>
             </div>
           );
         case 2:
@@ -201,14 +209,14 @@ export default function RobberyCard({ robbery }: RobberyCardProps) {
     switch (robbery.status) {
       case 1:
         return (
-          <div className="bg-status-success/20 text-primary-text flex items-center gap-1.5 rounded-full px-3 py-1">
-            <span className="text-sm font-medium">Open</span>
+          <div className="text-primary-text border-status-success/30 bg-status-success/20 inline-flex h-6 items-center gap-1.5 rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl">
+            <span>Open</span>
           </div>
         );
       case 2:
         return (
-          <div className="bg-status-warning/20 text-primary-text flex items-center gap-1.5 rounded-full px-3 py-1">
-            <span className="text-sm font-medium">In Progress</span>
+          <div className="text-primary-text border-status-warning/30 bg-status-warning/20 inline-flex h-6 items-center gap-1.5 rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl">
+            <span>In Progress</span>
           </div>
         );
       case 3:
@@ -231,7 +239,7 @@ export default function RobberyCard({ robbery }: RobberyCardProps) {
   const players = robbery.server?.players || [];
 
   return (
-    <div className="border-border-primary bg-secondary-bg hover:border-border-focus flex flex-col overflow-hidden rounded-lg border transition-all duration-200 hover:shadow-lg">
+    <div className="border-border-card bg-secondary-bg flex flex-col overflow-hidden rounded-lg border transition-all duration-200 hover:shadow-lg">
       {/* Image */}
       <div className="bg-secondary-background relative aspect-video w-full shrink-0 overflow-hidden">
         <Image src={imageUrl} alt={displayName} fill className="object-cover" />
@@ -247,19 +255,6 @@ export default function RobberyCard({ robbery }: RobberyCardProps) {
           {getStatusBadge()}
         </div>
 
-        {/* Train Warning Badge */}
-        {isTrainNearClose && (
-          <div className="bg-status-warning/20 border-status-warning/30 mb-3 flex items-center gap-1.5 rounded-lg border px-3 py-2">
-            <Icon
-              icon="heroicons:exclamation-triangle"
-              className="text-status-warning h-4 w-4"
-            />
-            <span className="text-primary-text text-sm font-medium">
-              Robbery closing soon!
-            </span>
-          </div>
-        )}
-
         {/* Details */}
         <div className="text-secondary-text space-y-2 text-sm">
           {robbery.metadata?.casino_code && (
@@ -269,7 +264,7 @@ export default function RobberyCard({ robbery }: RobberyCardProps) {
                 onClick={() =>
                   handleCopyCasinoCode(robbery.metadata!.casino_code!)
                 }
-                className="bg-button-info/10 hover:bg-button-info/20 text-primary-accent group flex cursor-pointer items-center gap-2 rounded px-2 py-0.5 font-mono text-base font-semibold transition-colors"
+                className="text-primary-text border-button-info/30 bg-button-info/20 hover:bg-button-info/30 group inline-flex h-6 cursor-pointer items-center gap-1.5 rounded-lg border px-2.5 font-mono text-xs leading-none font-medium shadow-2xl backdrop-blur-xl transition-colors"
                 title="Click to copy code"
               >
                 {robbery.metadata.casino_code}
@@ -361,10 +356,9 @@ export default function RobberyCard({ robbery }: RobberyCardProps) {
         </div>
 
         {/* Footer with Last Update */}
-        <div className="border-border-primary mt-4 border-t pt-3">
-          <div className="text-primary-text flex items-center justify-center gap-1.5 text-xs font-medium">
-            <Icon icon="mdi:clock" className="text-tertiary-text h-3.5 w-3.5" />
-            <span>Last update: {relativeTime || "Just now"}</span>
+        <div className="border-border-card mt-4 border-t pt-3">
+          <div className="text-primary-text flex items-center justify-center text-xs font-medium">
+            <span>Logged {relativeTime || "Just now"}</span>
           </div>
         </div>
       </div>

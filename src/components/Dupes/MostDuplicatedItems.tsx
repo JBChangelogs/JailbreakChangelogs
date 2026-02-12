@@ -22,7 +22,7 @@ export default function MostDuplicatedItems({
 
   return (
     <div className="mt-6">
-      <div className="border-border-primary bg-secondary-bg shadow-card-shadow mb-6 rounded-lg border p-6">
+      <div className="border-border-card bg-secondary-bg mb-6 rounded-lg border p-6">
         <h2 className="text-primary-text mb-4 text-xl font-semibold">
           Top 10 Most Tracked Item Duplicates
         </h2>
@@ -37,7 +37,7 @@ export default function MostDuplicatedItems({
               return (
                 <div
                   key={`${item.name}-${item.type}-${index}`}
-                  className="border-border-primary bg-tertiary-bg flex items-center justify-between rounded-lg border p-3"
+                  className="border-border-card bg-tertiary-bg flex items-center justify-between rounded-lg border p-3"
                 >
                   <div className="flex min-w-0 flex-1 items-center gap-3">
                     <span className="text-primary-text w-6 shrink-0 text-sm font-bold">
@@ -52,10 +52,9 @@ export default function MostDuplicatedItems({
                         {item.name}
                       </Link>
                       <span
-                        className="text-primary-text flex w-fit items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-medium"
+                        className="text-primary-text bg-tertiary-bg/40 inline-flex h-6 w-fit items-center gap-1.5 rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl"
                         style={{
                           borderColor: categoryColor,
-                          backgroundColor: categoryColor + "20",
                         }}
                       >
                         {(() => {

@@ -422,7 +422,7 @@ const ServerList: React.FC<{
           {[1, 2, 3, 4, 5, 6].map((i) => (
             <div
               key={i}
-              className="border-border-primary bg-secondary-bg hover:border-border-focus rounded-lg border p-4 sm:p-6"
+              className="border-border-card bg-secondary-bg hover:border-border-focus rounded-lg border p-4 sm:p-6"
             >
               <div className="mb-4 flex flex-col gap-3">
                 <div className="flex items-center space-x-2">
@@ -486,7 +486,7 @@ const ServerList: React.FC<{
                   />
                 </div>
 
-                <div className="border-border-primary bg-primary-bg hover:border-border-focus rounded-lg border p-3 sm:p-4">
+                <div className="border-border-card bg-primary-bg hover:border-border-focus rounded-lg border p-3 sm:p-4">
                   <Skeleton
                     variant="text"
                     width={100}
@@ -532,7 +532,7 @@ const ServerList: React.FC<{
 
   if (sortedServers.length === 0) {
     return (
-      <div className="border-border-primary bg-secondary-bg hover:border-border-focus rounded-lg border p-8 text-center">
+      <div className="border-border-card bg-secondary-bg hover:border-border-focus rounded-lg border p-8 text-center">
         <Icon
           icon="heroicons-outline:shield-check"
           className="text-button-info mx-auto mb-4 h-12 w-12"
@@ -568,7 +568,7 @@ const ServerList: React.FC<{
                 <DropdownMenuTrigger asChild>
                   <button
                     type="button"
-                    className="border-border-primary bg-secondary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus flex h-[40px] w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all focus:ring-1 focus:outline-none"
+                    className="border-border-card bg-secondary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus flex h-[40px] w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all focus:ring-1 focus:outline-none"
                     aria-label="Select sort option"
                   >
                     <span className="truncate">{sortLabel}</span>
@@ -580,7 +580,7 @@ const ServerList: React.FC<{
                 </DropdownMenuTrigger>
                 <DropdownMenuContent
                   align="start"
-                  className="border-border-primary bg-secondary-bg text-primary-text scrollbar-thin max-h-[240px] w-[var(--radix-popper-anchor-width)] min-w-[var(--radix-popper-anchor-width)] overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
+                  className="border-border-card bg-secondary-bg text-primary-text scrollbar-thin max-h-[240px] w-[var(--radix-popper-anchor-width)] min-w-[var(--radix-popper-anchor-width)] overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
                 >
                   <DropdownMenuRadioGroup
                     value={sortOption}
@@ -651,7 +651,7 @@ const ServerList: React.FC<{
           return (
             <div
               key={server.id}
-              className={`border-border-primary hover:border-border-focus rounded-lg border p-4 sm:p-6 ${
+              className={`border-border-card rounded-lg border p-4 sm:p-6 ${
                 isSupporter ? "" : "bg-secondary-bg"
               }`}
               style={getBackgroundStyle()}
@@ -827,7 +827,7 @@ const ServerList: React.FC<{
                 </div>
 
                 {server.rules && (
-                  <div className="border-border-primary bg-primary-bg rounded-lg border p-3 sm:p-4">
+                  <div className="border-border-card bg-tertiary-bg rounded-lg border p-3 sm:p-4">
                     <h4 className="text-primary-text mb-2 text-sm font-medium">
                       Rules:
                     </h4>

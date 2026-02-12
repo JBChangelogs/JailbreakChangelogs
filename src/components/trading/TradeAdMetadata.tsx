@@ -17,9 +17,9 @@ interface TradeAdMetadataProps {
 const getStatusColor = (status: string) => {
   switch (status) {
     case "Pending":
-      return "bg-button-info/10 text-primary-text border-button-info/20";
+      return "text-primary-text border-border-card bg-tertiary-bg/40 rounded-lg border px-2.5 py-1 shadow-2xl backdrop-blur-xl";
     case "Completed":
-      return "bg-status-success/10 text-primary-text border-status-success/20";
+      return "text-primary-text border-border-card bg-tertiary-bg/40 rounded-lg border px-2.5 py-1 shadow-2xl backdrop-blur-xl";
     case "Expired":
       return "bg-status-error/10 text-status-error border-status-error/20";
     default:
@@ -34,10 +34,12 @@ export default function TradeAdMetadata({
 }: TradeAdMetadataProps) {
   const createdRelative = useRealTimeRelativeDate(created_at);
   const expiresRelative = useRealTimeRelativeDate(expires);
+  const createdDisplay = createdRelative || "unknown";
+  const expiresDisplay = expires ? expiresRelative || "unknown" : "";
   return (
     <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
       <span
-        className={`rounded-full border px-3 py-1 text-sm font-medium ${getStatusColor(status)}`}
+        className={`inline-flex items-center text-sm font-medium ${status === "Pending" || status === "Completed" ? "" : "rounded-full border px-3 py-1"} ${getStatusColor(status)}`}
         aria-label={`Trade status: ${status}`}
       >
         {status}
@@ -45,7 +47,7 @@ export default function TradeAdMetadata({
       <div className="text-secondary-text flex items-center gap-2 text-sm">
         <Tooltip>
           <TooltipTrigger asChild>
-            <span className="cursor-help">Created {createdRelative}</span>
+            <span className="cursor-help">Created {createdDisplay}</span>
           </TooltipTrigger>
           <TooltipContent
             side="top"
@@ -59,7 +61,7 @@ export default function TradeAdMetadata({
             <span>•</span>
             <Tooltip>
               <TooltipTrigger asChild>
-                <span className="cursor-help">Expires {expiresRelative}</span>
+                <span className="cursor-help">Expires {expiresDisplay}</span>
               </TooltipTrigger>
               <TooltipContent
                 side="top"

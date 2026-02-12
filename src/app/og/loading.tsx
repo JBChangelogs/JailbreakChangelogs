@@ -21,7 +21,7 @@ export default function OGFinderLoading() {
 
       <div className="space-y-6">
         {/* Search Input Skeleton */}
-        <div className="border-border-primary bg-secondary-bg shadow-card-shadow rounded-lg border p-6">
+        <div className="border-border-card bg-secondary-bg shadow-card-shadow rounded-lg border p-6">
           <div className="flex flex-col gap-4 sm:flex-row">
             <div className="bg-button-secondary h-12 flex-1 animate-pulse rounded-lg"></div>
             <div className="bg-button-secondary h-12 w-full animate-pulse rounded-lg sm:w-32"></div>
@@ -33,7 +33,7 @@ export default function OGFinderLoading() {
           {[1, 2, 3].map((i) => (
             <div
               key={i}
-              className="border-border-primary bg-secondary-bg shadow-card-shadow rounded-lg border p-4"
+              className="border-border-card bg-secondary-bg shadow-card-shadow rounded-lg border p-4"
             >
               <div className="bg-button-secondary mb-2 h-8 w-24 animate-pulse rounded"></div>
               <div className="bg-button-secondary h-4 w-32 animate-pulse rounded"></div>
@@ -42,7 +42,7 @@ export default function OGFinderLoading() {
         </div>
 
         {/* FAQ Section Skeleton */}
-        <div className="border-border-primary bg-secondary-bg shadow-card-shadow mt-8 rounded-lg border p-6">
+        <div className="border-border-card bg-secondary-bg shadow-card-shadow mt-8 rounded-lg border p-6">
           <div className="space-y-4">
             <div className="bg-button-secondary h-6 w-48 animate-pulse rounded"></div>
             <div className="space-y-3">

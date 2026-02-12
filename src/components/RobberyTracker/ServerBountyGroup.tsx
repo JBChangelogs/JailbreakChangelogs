@@ -73,9 +73,9 @@ export default function ServerBountyGroup({
   }, [jobId, fetchRegionData]);
 
   return (
-    <div className="border-border-primary flex flex-col overflow-hidden rounded-xl border">
+    <div className="border-border-card flex flex-col overflow-hidden rounded-xl border">
       {/* Header Section */}
-      <div className="bg-secondary-bg border-border-primary flex flex-col gap-4 border-b p-4 lg:flex-row lg:items-center lg:justify-between">
+      <div className="bg-tertiary-bg border-border-card flex flex-col gap-4 border-b p-4 lg:flex-row lg:items-center lg:justify-between">
         {/* Left Side: Stats */}
         <div className="flex flex-col gap-2">
           {/* Total Value & Counts */}
@@ -177,14 +177,13 @@ export default function ServerBountyGroup({
 
           {/* Last Update */}
           <div className="text-secondary-text flex items-center gap-1.5 text-xs">
-            <Icon icon="mdi:clock" className="h-3 w-3" />
-            <span>Last update: {relativeTime || "Just now"}</span>
+            <span>Logged {relativeTime || "Just now"}</span>
           </div>
         </div>
       </div>
 
       {/* Content Section: Bounties Grid */}
-      <div className="bg-tertiary-bg/5 p-4">
+      <div className="bg-secondary-bg p-4">
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {bounties.map((bounty, index) => (
             <BountyCard

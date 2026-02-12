@@ -265,11 +265,11 @@ export default function TradeAds({
           className="mt-6"
         >
           {activeTab === "view" && (
-            <div className="mb-8 rounded-lg border p-6 text-center">
-              <h3 className="text-tertiary-text mb-4 text-lg font-medium">
+            <div className="border-border-card bg-secondary-bg mb-8 rounded-lg border p-6 text-center">
+              <h3 className="text-secondary-text mb-4 text-lg font-medium">
                 No Trade Ads Available
               </h3>
-              <p className="text-tertiary-text/70 mb-8">
+              <p className="text-secondary-text mb-8">
                 This page seems empty at the moment.
               </p>
               <div className="flex justify-center gap-4">
@@ -391,7 +391,7 @@ export default function TradeAds({
                   setSearchQuery(e.target.value);
                   setPage(1); // Reset to first page when searching
                 }}
-                className="border-border-primary bg-secondary-bg text-primary-text placeholder-secondary-text focus:border-button-info w-full rounded-lg border px-4 py-3 pr-16 transition-all duration-300 focus:outline-none"
+                className="border-border-card bg-secondary-bg text-primary-text placeholder-secondary-text focus:border-button-info w-full rounded-lg border px-4 py-3 pr-16 transition-all duration-300 focus:outline-none"
               />
               {/* Right side controls container */}
               <div className="absolute top-1/2 right-3 flex -translate-y-1/2 items-center gap-2">
@@ -443,7 +443,7 @@ export default function TradeAds({
               )}
             {displayTradeAds.length === 0 ? (
               !isSystemError && searchQuery.trim() ? (
-                <div className="border-border-primary mb-8 rounded-lg border p-6 text-center">
+                <div className="border-border-card mb-8 rounded-lg border p-6 text-center">
                   <h3 className="text-secondary-text mb-4 text-lg font-medium">
                     No Trade Ads Match Your Search
                   </h3>
@@ -453,7 +453,7 @@ export default function TradeAds({
                   </p>
                 </div>
               ) : (
-                <div className="border-border-primary bg-secondary-bg mb-8 flex min-h-[50vh] flex-col items-center justify-center rounded-lg border p-12 text-center">
+                <div className="border-border-card bg-secondary-bg mb-8 flex min-h-[50vh] flex-col items-center justify-center rounded-lg border p-12 text-center">
                   <Icon
                     icon="mdi:face-sad-outline"
                     className="text-link mb-4 h-16 w-16 opacity-50"
@@ -548,7 +548,7 @@ export default function TradeAds({
             )}
             {displayTradeAds.length === 0 ? (
               isSystemError ? (
-                <div className="border-border-primary bg-secondary-bg mb-8 flex min-h-[50vh] flex-col items-center justify-center rounded-lg border p-12 text-center">
+                <div className="border-border-card bg-secondary-bg mb-8 flex min-h-[50vh] flex-col items-center justify-center rounded-lg border p-12 text-center">
                   <Icon
                     icon="mdi:face-sad-outline"
                     className="text-link mb-4 h-16 w-16 opacity-50"
@@ -561,11 +561,11 @@ export default function TradeAds({
                   </p>
                 </div>
               ) : (
-                <div className="border-border-primary mb-8 rounded-lg border p-6 text-center">
-                  <h3 className="text-tertiary-text mb-4 text-lg font-medium">
+                <div className="border-border-card bg-secondary-bg mb-8 rounded-lg border p-6 text-center">
+                  <h3 className="text-secondary-text mb-4 text-lg font-medium">
                     No Supporter Trade Ads Available
                   </h3>
-                  <p className="text-tertiary-text/70 mb-8">
+                  <p className="text-secondary-text mb-8">
                     There are currently no trade ads from Supporters.
                   </p>
                   <Button onClick={() => handleTabChange("view")}>
@@ -690,11 +690,11 @@ export default function TradeAds({
                 </div>
                 {filteredUserTradeAds.length === 0 ? (
                   userTradeAds.length === 0 ? (
-                    <div className="border-border-primary mb-8 rounded-lg border p-6 text-center">
-                      <h3 className="text-tertiary-text mb-4 text-lg font-medium">
+                    <div className="border-border-card bg-secondary-bg mb-8 rounded-lg border p-6 text-center">
+                      <h3 className="text-secondary-text mb-4 text-lg font-medium">
                         No Trade Ads Yet
                       </h3>
-                      <p className="text-tertiary-text/70 mb-8">
+                      <p className="text-secondary-text mb-8">
                         You haven&apos;t created any trade ads yet.
                       </p>
                       <Button onClick={() => handleTabChange("create")}>
@@ -702,11 +702,11 @@ export default function TradeAds({
                       </Button>
                     </div>
                   ) : (
-                    <div className="border-border-primary mb-8 rounded-lg border p-6 text-center">
-                      <h3 className="text-tertiary-text mb-4 text-lg font-medium">
+                    <div className="border-border-card bg-secondary-bg mb-8 rounded-lg border p-6 text-center">
+                      <h3 className="text-secondary-text mb-4 text-lg font-medium">
                         No Trade Ads Match Your Search
                       </h3>
-                      <p className="text-tertiary-text/70">
+                      <p className="text-secondary-text">
                         No trade ads found containing &quot;{searchQuery}&quot;.
                         Try adjusting your search query.
                       </p>

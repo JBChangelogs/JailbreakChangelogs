@@ -3,9 +3,9 @@ import { Skeleton } from "@mui/material";
 
 export const TradeAdDetailsSkeleton: React.FC = () => {
   return (
-    <div className="border-border-primary bg-secondary-bg rounded-lg border">
+    <div className="border-border-card bg-secondary-bg rounded-lg border">
       {/* Header */}
-      <div className="border-border-primary border-b p-6">
+      <div className="border-border-card border-b p-6">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div className="flex-1">
             <div className="mb-3 flex items-center gap-2">
@@ -86,7 +86,7 @@ export const TradeAdDetailsSkeleton: React.FC = () => {
         </div>
 
         {/* Tabs */}
-        <div className="border-border-primary bg-secondary-bg hover:border-border-focus mb-6 rounded-lg border">
+        <div className="border-border-card bg-secondary-bg mb-6 rounded-lg border">
           <div className="px-6 py-4">
             <div className="flex space-x-8">
               <Skeleton variant="text" width={60} height={40} />

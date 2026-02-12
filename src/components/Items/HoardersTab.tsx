@@ -163,7 +163,7 @@ export default function HoardersTab({ itemName, itemType }: HoardersTabProps) {
           placeholder="Search hoarders..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="border-border-primary bg-secondary-bg text-primary-text placeholder-tertiary-text focus:border-border-focus w-full rounded-lg border px-4 py-3 pr-10 pl-10 font-medium transition-all duration-300 focus:outline-none"
+          className="border-border-card bg-secondary-bg text-primary-text placeholder-tertiary-text focus:border-border-focus w-full rounded-lg border px-4 py-3 pr-10 pl-10 font-medium transition-all duration-300 focus:outline-none"
         />
         <Icon
           icon="heroicons:magnifying-glass"
@@ -198,7 +198,7 @@ export default function HoardersTab({ itemName, itemType }: HoardersTabProps) {
           </p>
           <button
             onClick={() => setSearchTerm("")}
-            className="border-border-primary bg-button-info text-primary-text hover:bg-button-info-hover mt-4 rounded-lg border px-4 py-2 text-sm font-medium transition-colors hover:cursor-pointer"
+            className="border-border-card bg-button-info text-primary-text hover:bg-button-info-hover mt-4 rounded-lg border px-4 py-2 text-sm font-medium transition-colors hover:cursor-pointer"
           >
             Clear search
           </button>
@@ -209,7 +209,7 @@ export default function HoardersTab({ itemName, itemType }: HoardersTabProps) {
       {filteredHoarders.length > 0 && (
         <div
           ref={parentRef}
-          className="scrollbar-thin scrollbar-track-transparent scrollbar-thumb-border-primary hover:scrollbar-thumb-border-focus bg-secondary-bg max-h-[600px] overflow-y-auto rounded-lg pr-2"
+          className="scrollbar-thin scrollbar-track-transparent scrollbar-thumb-border-primary hover:scrollbar-thumb-border-focus border-border-card bg-secondary-bg max-h-[600px] overflow-y-auto rounded-lg border pr-2"
           style={{
             scrollbarWidth: "thin",
             scrollbarColor: "var(--color-border-primary) transparent",
@@ -276,7 +276,7 @@ export default function HoardersTab({ itemName, itemType }: HoardersTabProps) {
                       <Link
                         href={`/inventories/${hoarder.user_id}`}
                         prefetch={false}
-                        className="text-primary-text hover:text-link-hover truncate text-sm font-bold transition-colors hover:underline sm:text-lg"
+                        className="text-primary-text hover:text-link-hover truncate text-sm font-bold transition-colors sm:text-lg"
                       >
                         {displayName}
                       </Link>

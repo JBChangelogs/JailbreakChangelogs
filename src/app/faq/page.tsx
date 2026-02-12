@@ -188,7 +188,7 @@ export default function FAQPage() {
                 </Typography>
               </AccordionSummary>
               <AccordionDetails
-                sx={{ backgroundColor: "var(--color-primary-bg)" }}
+                sx={{ backgroundColor: "var(--color-tertiary-bg)" }}
               >
                 <Typography
                   className="text-secondary-text"

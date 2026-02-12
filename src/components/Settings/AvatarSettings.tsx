@@ -333,7 +333,7 @@ export const AvatarSettings = ({
               sx={{
                 "& .MuiOutlinedInput-root": {
                   "& fieldset": {
-                    borderColor: "var(--color-border-primary)",
+                    borderColor: "var(--color-border-card)",
                   },
                   "&:hover fieldset": {
                     borderColor: "var(--color-button-info)",

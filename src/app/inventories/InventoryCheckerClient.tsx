@@ -28,7 +28,6 @@ import { useScanWebSocket } from "@/hooks/useScanWebSocket";
 import { useSupporterModal } from "@/hooks/useSupporterModal";
 import SupporterModal from "@/components/Modals/SupporterModal";
 import ScanInventoryModal from "@/components/Modals/ScanInventoryModal";
-import LoginModalWrapper from "@/components/Auth/LoginModalWrapper";
 import {
   showScanLoadingToast,
   updateScanLoadingToast,
@@ -107,10 +106,9 @@ export default function InventoryCheckerClient({
   const { getId } = useUsernameToId();
 
   // Auth context and scan functionality
-  const { user, isAuthenticated } = useAuthContext();
+  const { user, isAuthenticated, setLoginModal } = useAuthContext();
   const scanWebSocket = useScanWebSocket(robloxId || "");
   const { modalState, openModal, closeModal } = useSupporterModal();
-  const [loginModalOpen, setLoginModalOpen] = useState(false);
   const [showScanModal, setShowScanModal] = useState(false);
 
   // Check if current user is viewing their own inventory
@@ -610,12 +608,6 @@ export default function InventoryCheckerClient({
   return (
     <ThemeProvider theme={{}}>
       <div className="space-y-6">
-        {/* Login Modal Wrapper */}
-        <LoginModalWrapper
-          open={loginModalOpen}
-          onClose={() => setLoginModalOpen(false)}
-        />
-
         {/* Search Form */}
         <SearchForm
           searchId={searchId}
@@ -627,7 +619,7 @@ export default function InventoryCheckerClient({
 
         {isLoading || externalIsLoading ? (
           /* Loading Skeleton for User Data */
-          <div className="border-border-primary bg-secondary-bg min-h-[200px] rounded-lg border p-6 shadow-sm">
+          <div className="border-border-card bg-secondary-bg min-h-[200px] rounded-lg border p-6 shadow-sm">
             <div className="animate-pulse space-y-4">
               <div className="flex items-center gap-4">
                 <div className="bg-button-secondary h-16 w-16 rounded-full"></div>
@@ -642,7 +634,7 @@ export default function InventoryCheckerClient({
           <>
             {/* Error Display */}
             {error && !initialData && (
-              <div className="border-border-primary bg-secondary-bg shadow-card-shadow rounded-lg border p-6">
+              <div className="border-border-card bg-secondary-bg rounded-lg border p-6">
                 <div className="text-center">
                   <div className="mb-4 flex justify-center">
                     <div className="bg-status-error/10 rounded-full p-3">
@@ -663,7 +655,7 @@ export default function InventoryCheckerClient({
 
                   {/* Show scan option for profile owner or login prompt for others */}
                   {isOwnInventory ? (
-                    <div className="border-border-primary bg-secondary-bg shadow-card-shadow mt-4 rounded-lg border p-4">
+                    <div className="border-border-card bg-secondary-bg mt-4 rounded-lg border p-4">
                       <div className="space-y-3">
                         <p className="text-primary-text mb-3 text-center text-sm">
                           Your inventory hasn&apos;t been scanned yet.
@@ -864,7 +856,7 @@ export default function InventoryCheckerClient({
                       </div>
                     </div>
                   ) : (
-                    <div className="border-border-primary bg-primary-bg shadow-card-shadow mt-4 rounded-lg border p-4">
+                    <div className="border-border-card bg-primary-bg mt-4 rounded-lg border p-4">
                       <p className="text-primary-text mb-1 text-sm font-medium">
                         Looking for your inventory?
                       </p>
@@ -881,11 +873,7 @@ export default function InventoryCheckerClient({
                           <button
                             type="button"
                             onClick={() => {
-                              setLoginModalOpen(true);
-                              const event = new CustomEvent("setLoginTab", {
-                                detail: 1,
-                              });
-                              window.dispatchEvent(event);
+                              setLoginModal({ open: true, tab: "roblox" });
                             }}
                             className="text-button-info hover:text-button-info-hover cursor-pointer font-semibold underline transition-colors"
                           >
@@ -898,7 +886,7 @@ export default function InventoryCheckerClient({
                           <button
                             type="button"
                             onClick={() => {
-                              setLoginModalOpen(true);
+                              setLoginModal({ open: true });
                             }}
                             className="text-button-info hover:text-button-info-hover cursor-pointer font-semibold underline transition-colors"
                           >

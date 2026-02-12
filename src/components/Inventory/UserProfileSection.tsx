@@ -49,7 +49,7 @@ export default function UserProfileSection({
   getHasVerifiedBadge,
   currentData,
 }: UserProfileSectionProps) {
-  const { user, isAuthenticated, setShowLoginModal } = useAuthContext();
+  const { user, isAuthenticated, setLoginModal } = useAuthContext();
   const { modalState, openModal, closeModal } = useSupporterModal();
   const scanWebSocket = useScanWebSocket(currentData?.user_id || "");
   const scanCompletedRef = useRef(false);
@@ -204,7 +204,7 @@ export default function UserProfileSection({
   ]);
 
   return (
-    <div className="bg-primary-bg mb-6 flex flex-col gap-4 rounded-lg p-4 xl:flex-row xl:items-start xl:justify-between">
+    <div className="border-border-card bg-tertiary-bg mb-6 flex flex-col gap-4 rounded-lg border p-4 xl:flex-row xl:items-start xl:justify-between">
       {/* Avatar and User Info */}
       <div className="flex items-center gap-4">
         {/* Avatar */}
@@ -232,7 +232,7 @@ export default function UserProfileSection({
               )}
             </span>
           </h3>
-          <p className="text-primary-text text-sm wrap-break-word">
+          <p className="text-primary-text text-sm wrap-break-word opacity-75">
             @{getUsername(userId)}
           </p>
 
@@ -246,13 +246,13 @@ export default function UserProfileSection({
                     href={`https://discord.com/users/${userConnectionData.id}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="bg-tertiary-bg/40 border-border-primary text-primary-text inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium shadow-sm transition-opacity hover:opacity-80"
+                    className="bg-tertiary-bg/40 border-border-card text-primary-text inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium transition-opacity hover:opacity-80"
                   >
                     <DiscordIcon className="text-border-focus h-3.5 w-3.5 shrink-0" />
                     <span className="text-sm font-semibold">Discord</span>
                   </Link>
                 </TooltipTrigger>
-                <TooltipContent>Visit Discord Profile</TooltipContent>
+                <TooltipContent>Discord profile</TooltipContent>
               </Tooltip>
             )}
 
@@ -263,13 +263,13 @@ export default function UserProfileSection({
                   href={`https://www.roblox.com/users/${userId}/profile`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="bg-tertiary-bg/40 border-border-primary text-primary-text inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium shadow-sm transition-opacity hover:opacity-80"
+                  className="bg-tertiary-bg/40 border-border-card text-primary-text inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium transition-opacity hover:opacity-80"
                 >
                   <RobloxIcon className="h-3.5 w-3.5 shrink-0" />
                   <span className="text-sm font-semibold">Roblox</span>
                 </Link>
               </TooltipTrigger>
-              <TooltipContent>Visit Roblox Profile</TooltipContent>
+              <TooltipContent>Roblox profile</TooltipContent>
             </Tooltip>
 
             {/* Website Profile */}
@@ -279,7 +279,7 @@ export default function UserProfileSection({
                   <Link
                     href={`/users/${userConnectionData.id}`}
                     prefetch={false}
-                    className="bg-tertiary-bg/40 border-border-primary text-primary-text inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium shadow-sm transition-opacity hover:opacity-80"
+                    className="bg-tertiary-bg/40 border-border-card text-primary-text inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium transition-opacity hover:opacity-80"
                   >
                     <Image
                       src="https://assets.jailbreakchangelogs.xyz/assets/logos/JBCL_Short_Transparent.webp"
@@ -291,7 +291,7 @@ export default function UserProfileSection({
                     <span className="text-sm font-semibold">Website</span>
                   </Link>
                 </TooltipTrigger>
-                <TooltipContent>Visit Website Profile</TooltipContent>
+                <TooltipContent>JBCL profile</TooltipContent>
               </Tooltip>
             )}
           </div>
@@ -446,11 +446,11 @@ export default function UserProfileSection({
       ) : (
         /* Show login prompt for potential profile owner */
         <div className="mt-4 flex flex-col gap-3 xl:mt-0 xl:shrink-0">
-          <div className="border-border-primary bg-secondary-bg shadow-card-shadow rounded-lg border p-4">
+          <div className="border-border-card bg-secondary-bg rounded-lg border p-4">
             <div className="flex items-start gap-3">
               <div className="shrink-0">
                 <svg
-                  className="text-button-info mt-0.5 h-5 w-5"
+                  className="text-link mt-0.5 h-5 w-5"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -494,11 +494,7 @@ export default function UserProfileSection({
                   ) : (
                     <Button
                       onClick={() => {
-                        setShowLoginModal(true);
-                        const event = new CustomEvent("setLoginTab", {
-                          detail: 1,
-                        });
-                        window.dispatchEvent(event);
+                        setLoginModal({ open: true, tab: "roblox" });
                       }}
                       size="sm"
                     >

@@ -194,9 +194,9 @@ const AddServerModal: React.FC<AddServerModalProps> = ({
       />
 
       <div className="fixed inset-0 flex items-center justify-center p-4">
-        <DialogPanel className="border-border-primary bg-secondary-bg hover:border-border-focus relative w-full max-w-md rounded-lg border shadow-xl">
+        <DialogPanel className="border-border-card bg-secondary-bg hover:border-border-focus relative w-full max-w-md rounded-lg border shadow-xl">
           {/* Header */}
-          <div className="border-border-primary flex items-center border-b p-4">
+          <div className="border-border-card flex items-center border-b p-4">
             <h2 className="text-primary-text text-xl font-semibold">
               {editingServer ? "Edit Server" : "Add New Server"}
             </h2>
@@ -217,7 +217,7 @@ const AddServerModal: React.FC<AddServerModalProps> = ({
                   type="text"
                   value={link}
                   onChange={(e) => setLink(e.target.value)}
-                  className="border-border-primary bg-primary-bg text-primary-text placeholder-secondary-text hover:border-border-focus focus:border-button-info w-full rounded-md border px-3 py-2 focus:outline-none"
+                  className="border-border-card bg-primary-bg text-primary-text placeholder-secondary-text hover:border-border-focus focus:border-button-info w-full rounded-md border px-3 py-2 focus:outline-none"
                   placeholder="https://www.roblox.com/share?code=..."
                 />
                 <p className="text-secondary-text mt-1 text-sm">
@@ -238,7 +238,7 @@ const AddServerModal: React.FC<AddServerModalProps> = ({
                   onChange={(e) => handleRulesChange(e.target.value)}
                   rows={4}
                   maxLength={MAX_RULES_LENGTH}
-                  className="border-border-primary bg-primary-bg text-primary-text placeholder-secondary-text hover:border-border-focus focus:border-button-info w-full rounded-md border px-3 py-2 focus:outline-none"
+                  className="border-border-card bg-primary-bg text-primary-text placeholder-secondary-text hover:border-border-focus focus:border-button-info w-full rounded-md border px-3 py-2 focus:outline-none"
                   placeholder="What are the rules for this server?"
                 />
                 <p className="text-secondary-text mt-1 text-sm">
@@ -467,7 +467,7 @@ const AddServerModal: React.FC<AddServerModalProps> = ({
               </div>
 
               {/* Actions */}
-              <div className="border-border-primary mt-8 flex justify-end space-x-4 border-t pt-6">
+              <div className="border-border-card mt-8 flex justify-end space-x-4 border-t pt-6">
                 <Button onClick={onClose} variant="ghost" size="md">
                   Cancel
                 </Button>

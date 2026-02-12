@@ -191,13 +191,13 @@ export default function TradeHistoryList({
                   <div className="border-tertiary-text/60 w-full border-t-2 border-dashed"></div>
                 </div>
                 <div className="relative flex justify-center">
-                  <span className="bg-primary-bg text-secondary-text border-border-primary rounded-full border px-3 text-xs font-medium">
+                  <span className="bg-primary-bg text-secondary-text border-border-card rounded-full border px-3 text-xs font-medium">
                     History Diverges Here
                   </span>
                 </div>
               </div>
             )}
-            <div className="bg-secondary-bg border-border-primary hover:border-border-focus flex flex-col gap-3 rounded-lg border p-3 shadow-sm transition-all sm:flex-row sm:items-center">
+            <div className="border-border-card bg-tertiary-bg flex flex-col gap-3 rounded-lg border p-3 sm:flex-row sm:items-center">
               <div className="flex min-w-0 flex-1 items-center gap-3">
                 <div className="shrink-0">
                   <div className="bg-tertiary-bg relative h-10 w-10 overflow-hidden rounded-full">
@@ -241,7 +241,7 @@ export default function TradeHistoryList({
                   </a>
                 </div>
               </div>
-              <div className="text-tertiary-text text-xs sm:shrink-0 sm:text-right sm:text-sm">
+              <div className="bg-secondary-bg text-primary-text rounded-md px-2 py-1 text-xs sm:shrink-0 sm:text-right sm:text-sm">
                 {new Date(owner.TradeTime * 1000).toLocaleDateString("en-US", {
                   month: "short",
                   day: "numeric",

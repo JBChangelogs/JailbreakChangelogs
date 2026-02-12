@@ -52,7 +52,7 @@ export const CalculatorValueComparison: React.FC<
   const difference = offeringTotal - requestingTotal;
 
   return (
-    <div className="border-border-primary bg-secondary-bg hover:border-border-focus hover:shadow-card-shadow overflow-x-auto rounded-lg border p-8 transition-colors duration-200 hover:shadow-lg">
+    <div className="border-border-card bg-secondary-bg overflow-x-auto rounded-lg border p-8">
       {/* Header */}
       <div className="mb-8">
         <h3 className="text-primary-text mb-2 text-2xl font-bold">
@@ -85,7 +85,7 @@ export const CalculatorValueComparison: React.FC<
 
       {/* Overall Difference */}
       <div className="mt-8">
-        <div className="from-primary/3 to-primary/5 rounded-xl bg-linear-to-r p-6">
+        <div className="border-border-card bg-tertiary-bg rounded-xl border p-6">
           <h4 className="text-primary-text mb-4 text-lg font-semibold">
             Overall Difference
           </h4>
@@ -94,29 +94,20 @@ export const CalculatorValueComparison: React.FC<
               Value Difference
             </span>
             <div className="flex items-center gap-3">
-              <span
-                className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-base font-semibold ${
-                  difference < 0
-                    ? "bg-status-success text-white"
-                    : difference > 0
-                      ? "bg-status-error text-white"
-                      : "bg-secondary-bg/50 text-primary-text"
-                }`}
-              >
-                {difference !== 0 &&
-                  (difference < 0 ? (
-                    <Icon
-                      icon="famicons:arrow-up"
-                      className="text-white"
-                      inline={true}
-                    />
-                  ) : (
-                    <Icon
-                      icon="famicons:arrow-down"
-                      className="text-white"
-                      inline={true}
-                    />
-                  ))}
+              {difference !== 0 && (
+                <Icon
+                  icon={
+                    difference < 0 ? "famicons:arrow-up" : "famicons:arrow-down"
+                  }
+                  className={
+                    difference < 0
+                      ? "text-status-success h-5 w-5"
+                      : "text-status-error h-5 w-5"
+                  }
+                  inline={true}
+                />
+              )}
+              <span className="text-primary-text text-xl font-bold">
                 {formatCurrencyValue(Math.abs(difference))}
               </span>
             </div>

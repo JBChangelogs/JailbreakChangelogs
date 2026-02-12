@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { DiscordIcon } from "@/components/Icons/DiscordIcon";
 import Link from "next/link";
 import { Icon } from "@/components/ui/IconWrapper";
@@ -33,9 +33,9 @@ interface TradeAdCardProps {
 const getStatusColor = (status: string) => {
   switch (status) {
     case "Pending":
-      return "bg-button-info/10 text-primary-text border-button-info/20";
+      return "text-primary-text border-border-card bg-tertiary-bg/40 rounded-lg border px-2.5 py-1 shadow-2xl backdrop-blur-xl";
     case "Completed":
-      return "bg-status-success/10 text-primary-text border-status-success/20";
+      return "text-primary-text border-border-card bg-tertiary-bg/40 rounded-lg border px-2.5 py-1 shadow-2xl backdrop-blur-xl";
     case "Expired":
       return "bg-status-error/10 text-status-error border-status-error/20";
     default:
@@ -53,6 +53,11 @@ export const TradeAdCard: React.FC<TradeAdCardProps> = ({
 }) => {
   const [isDeleting, setIsDeleting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [hasHydrated, setHasHydrated] = useState(false);
+
+  useEffect(() => {
+    setHasHydrated(true);
+  }, []);
 
   const handleDelete = async () => {
     if (!onDelete) return;
@@ -67,6 +72,12 @@ export const TradeAdCard: React.FC<TradeAdCardProps> = ({
 
   const createdRelative = useRealTimeRelativeDate(trade.created_at);
   const expiresRelative = useRealTimeRelativeDate(trade.expires);
+  const createdDisplay = hasHydrated ? createdRelative || "unknown" : "unknown";
+  const expiresDisplay = trade.expires
+    ? hasHydrated
+      ? expiresRelative || "unknown"
+      : "unknown"
+    : "";
 
   const discordChannelId = "1398359394726449352";
   const discordGuildId = "1286064050135896064";
@@ -86,7 +97,7 @@ export const TradeAdCard: React.FC<TradeAdCardProps> = ({
 
   // Border colors for different supporter tiers
   const getBorderClass = () => {
-    if (!isSupporter) return "border-border-primary";
+    if (!isSupporter) return "border-border-card";
     switch (supporterTier) {
       case 1:
         return "border-[var(--color-supporter-bronze-border)]";
@@ -95,7 +106,7 @@ export const TradeAdCard: React.FC<TradeAdCardProps> = ({
       case 3:
         return "border-[var(--color-supporter-gold-border)]";
       default:
-        return "border-border-primary";
+        return "border-border-card";
     }
   };
 
@@ -117,7 +128,7 @@ export const TradeAdCard: React.FC<TradeAdCardProps> = ({
 
   return (
     <div
-      className={`${isSupporter ? "" : "bg-secondary-bg"} hover:border-border-focus rounded-lg border p-4 transition-colors ${getBorderClass()} ${isSupporter ? "shadow-lg" : ""}`}
+      className={`${isSupporter ? "" : "bg-secondary-bg"} rounded-lg border p-4 transition-colors ${getBorderClass()} ${isSupporter ? "shadow-lg" : ""}`}
       style={getBackgroundStyle()}
       tabIndex={0}
       role="region"
@@ -206,7 +217,7 @@ export const TradeAdCard: React.FC<TradeAdCardProps> = ({
 
         <div className="mt-4 flex items-center justify-between">
           <span
-            className={`rounded-full border px-2 py-1 text-xs font-medium ${getStatusColor(trade.status)}`}
+            className={`inline-flex items-center text-xs font-medium ${trade.status === "Pending" || trade.status === "Completed" ? "" : "rounded-full border px-2 py-1"} ${getStatusColor(trade.status)}`}
             aria-label={`Trade status: ${trade.status}`}
           >
             {trade.status}
@@ -250,7 +261,7 @@ export const TradeAdCard: React.FC<TradeAdCardProps> = ({
         <div className="text-secondary-text mt-4 text-xs">
           <Tooltip>
             <TooltipTrigger asChild>
-              <span className="cursor-help">Created {createdRelative}</span>
+              <span className="cursor-help">Created {createdDisplay}</span>
             </TooltipTrigger>
             <TooltipContent
               side="top"
@@ -265,7 +276,7 @@ export const TradeAdCard: React.FC<TradeAdCardProps> = ({
               <Tooltip>
                 <TooltipTrigger asChild>
                   <span className="ml-2 cursor-help">
-                    Expires {expiresRelative}
+                    Expires {expiresDisplay}
                   </span>
                 </TooltipTrigger>
                 <TooltipContent

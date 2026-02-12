@@ -112,7 +112,7 @@ export default function InventoryBreakdownModal({
           <div className="modal-content flex-1 overflow-y-auto p-6">
             {/* Networth Summary */}
             <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <div className="border-border-primary bg-primary-bg rounded-lg border p-4 text-center">
+              <div className="border-border-card bg-primary-bg rounded-lg border p-4 text-center">
                 <div className="text-secondary-text mb-1 text-sm">
                   Total Networth
                 </div>
@@ -120,7 +120,7 @@ export default function InventoryBreakdownModal({
                   ${formatNetworth(networth)}
                 </div>
               </div>
-              <div className="border-border-primary bg-primary-bg rounded-lg border p-4 text-center">
+              <div className="border-border-card bg-primary-bg rounded-lg border p-4 text-center">
                 <div className="text-secondary-text mb-1 text-sm">
                   Total Items
                 </div>
@@ -136,13 +136,13 @@ export default function InventoryBreakdownModal({
             {money !== undefined && inventoryValue !== undefined && (
               <div className="mb-6">
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                  <div className="border-border-primary bg-primary-bg rounded-lg border p-4 text-center">
+                  <div className="border-border-card bg-primary-bg rounded-lg border p-4 text-center">
                     <div className="text-secondary-text mb-1 text-sm">Cash</div>
                     <div className="text-button-success text-lg font-bold">
                       ${formatNetworth(money)}
                     </div>
                   </div>
-                  <div className="border-border-primary bg-primary-bg rounded-lg border p-4 text-center">
+                  <div className="border-border-card bg-primary-bg rounded-lg border p-4 text-center">
                     <div className="text-secondary-text mb-1 text-sm">
                       Inventory Value
                     </div>
@@ -198,7 +198,7 @@ export default function InventoryBreakdownModal({
                         return (
                           <div
                             key={category}
-                            className="border-border-primary bg-primary-bg flex items-center justify-between gap-2 rounded border p-2 text-sm"
+                            className="border-border-card bg-primary-bg flex items-center justify-between gap-2 rounded border p-2 text-sm"
                           >
                             <div className="flex items-center gap-2">
                               {categoryIcon ? (
@@ -248,14 +248,14 @@ export default function InventoryBreakdownModal({
               duplicatesValue !== null &&
               duplicatesPercentages &&
               Object.keys(duplicatesPercentages).length > 0 && (
-                <div className="border-border-primary mb-4 border-t pt-4">
+                <div className="border-border-card mb-4 border-t pt-4">
                   <h4 className="text-primary-text mb-3 text-sm font-semibold">
                     Duplicates Breakdown
                   </h4>
 
                   {/* Duplicates Summary */}
                   <div className="mb-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
-                    <div className="border-border-primary bg-primary-bg rounded-lg border p-4 text-center">
+                    <div className="border-border-card bg-primary-bg rounded-lg border p-4 text-center">
                       <div className="text-secondary-text mb-1 text-sm">
                         Duplicated Items
                       </div>
@@ -263,7 +263,7 @@ export default function InventoryBreakdownModal({
                         {formatInventoryCount(duplicatesCount)}
                       </div>
                     </div>
-                    <div className="border-border-primary bg-primary-bg rounded-lg border p-4 text-center">
+                    <div className="border-border-card bg-primary-bg rounded-lg border p-4 text-center">
                       <div className="text-secondary-text mb-1 text-sm">
                         Duplicates Value
                       </div>
@@ -309,7 +309,7 @@ export default function InventoryBreakdownModal({
                         return (
                           <div
                             key={category}
-                            className="border-border-primary bg-primary-bg flex items-center justify-between gap-2 rounded border p-2 text-sm"
+                            className="border-border-card bg-primary-bg flex items-center justify-between gap-2 rounded border p-2 text-sm"
                           >
                             <div className="flex items-center gap-2">
                               {categoryIcon ? (

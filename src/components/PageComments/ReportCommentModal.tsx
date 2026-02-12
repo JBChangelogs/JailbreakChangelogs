@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { Dialog, DialogPanel } from "@headlessui/react";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { toast } from "sonner";
-import LoginModalWrapper from "../Auth/LoginModalWrapper";
 import { Button } from "../ui/button";
 
 interface ReportCommentModalProps {
@@ -29,13 +28,12 @@ const ReportCommentModal: React.FC<ReportCommentModalProps> = ({
   commentId,
 }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { isAuthenticated } = useAuthContext();
-  const [loginModalOpen, setLoginModalOpen] = useState(false);
+  const { isAuthenticated, setLoginModal } = useAuthContext();
 
   const handleSubmit = async () => {
     if (!isAuthenticated) {
       toast.error("You must be logged in to report comments");
-      setLoginModalOpen(true);
+      setLoginModal({ open: true });
       return;
     }
 
@@ -81,7 +79,7 @@ const ReportCommentModal: React.FC<ReportCommentModalProps> = ({
                   value={reportReason}
                   onChange={handleReasonChange}
                   placeholder="Please provide a reason for reporting this comment..."
-                  className="border-border-primary bg-form-input text-primary-text hover:border-border-focus focus:border-button-info min-h-[120px] w-full resize-y rounded border p-3 text-sm focus:outline-none"
+                  className="border-border-card bg-form-input text-primary-text hover:border-border-focus focus:border-button-info min-h-[120px] w-full resize-y rounded border p-3 text-sm focus:outline-none"
                 />
                 <div
                   className={`absolute right-2 bottom-2 text-xs ${reportReason.length >= MAX_REASON_LENGTH ? "text-button-danger" : "text-secondary-text"}`}
@@ -111,10 +109,6 @@ const ReportCommentModal: React.FC<ReportCommentModalProps> = ({
           </DialogPanel>
         </div>
       </Dialog>
-      <LoginModalWrapper
-        open={loginModalOpen}
-        onClose={() => setLoginModalOpen(false)}
-      />
     </>
   );
 };

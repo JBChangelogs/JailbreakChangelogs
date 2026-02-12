@@ -56,7 +56,7 @@ export default function InventoryItemsGrid({
       <div className="space-y-4">
         {Array.from({ length: 6 }).map((_, index) => (
           <div key={index} className="animate-pulse">
-            <div className="border-border-primary bg-secondary-bg rounded-lg border p-4">
+            <div className="border-border-card bg-secondary-bg rounded-lg border p-4">
               <div className="flex items-start gap-4">
                 <div className="bg-surface-bg h-16 w-16 rounded-lg"></div>
                 <div className="flex-1 space-y-2">

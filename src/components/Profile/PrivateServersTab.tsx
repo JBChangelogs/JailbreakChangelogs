@@ -34,7 +34,7 @@ const PrivateServersTab: React.FC<PrivateServersTabProps> = ({
 
   if (!servers || servers.length === 0) {
     return (
-      <div className="border-border-primary rounded-lg border p-8 text-center">
+      <div className="border-border-card rounded-lg border p-8 text-center">
         <Icon
           icon="heroicons-outline:shield-check"
           className="text-button-info mx-auto mb-4 h-12 w-12"
@@ -55,12 +55,8 @@ const PrivateServersTab: React.FC<PrivateServersTabProps> = ({
 
   return (
     <div className="space-y-6">
-      <div className="border-border-primary rounded-lg border p-4">
+      <div className="border-border-card rounded-lg border p-4">
         <div className="mb-3 flex items-center gap-2">
-          <Icon
-            icon="heroicons-outline:shield-check"
-            className="text-button-info h-5 w-5"
-          />
           <h2 className="text-primary-text text-lg font-semibold">
             Private Servers [{servers.length}]
           </h2>
@@ -69,13 +65,13 @@ const PrivateServersTab: React.FC<PrivateServersTabProps> = ({
           {servers.map((server, index) => (
             <div
               key={server.id}
-              className="border-border-primary bg-primary-bg hover:border-border-focus rounded-lg border p-4 transition-colors sm:p-6"
+              className="border-border-card bg-tertiary-bg rounded-lg border p-4 transition-colors sm:p-6"
             >
               <div className="mb-4 flex flex-col gap-3">
                 <div className="flex items-center space-x-2">
                   <Icon
                     icon="heroicons-outline:shield-check"
-                    className="text-button-info h-5 w-5"
+                    className="text-link h-5 w-5"
                   />
                   <span className="text-primary-text">Server #{index + 1}</span>
                 </div>
@@ -121,7 +117,7 @@ const PrivateServersTab: React.FC<PrivateServersTabProps> = ({
                       : formatProfileDate(server.expires)}
                   </span>
                 </div>
-                <div className="border-border-primary bg-secondary-bg rounded-lg border p-3 sm:p-4">
+                <div className="border-border-card bg-secondary-bg rounded-lg border p-3 sm:p-4">
                   <h3 className="text-primary-text mb-2 text-sm font-semibold">
                     Server Rules
                   </h3>

@@ -14,7 +14,7 @@ import {
 import Link from "next/link";
 import { Icon } from "@/components/ui/IconWrapper";
 import { formatFullValue } from "@/utils/values";
-import { getCategoryColor } from "@/utils/categoryIcons";
+import { getCategoryColor, getCategoryIcon } from "@/utils/categoryIcons";
 import { getTrendColor, getDemandColor } from "@/utils/badgeColors";
 import {
   DropdownMenu,
@@ -289,28 +289,26 @@ const SimilarItems = ({
   ]);
 
   return (
-    <div className="border-border-primary bg-secondary-bg hover:shadow-card-shadow space-y-6 rounded-lg border p-6 shadow-lg transition-all duration-200">
+    <div className="border-border-card bg-secondary-bg hover:shadow-card-shadow space-y-6 rounded-lg border p-6 shadow-lg transition-all duration-200">
       {/* Header Section */}
       <div className="space-y-4">
         <div className="flex items-center gap-3">
           <div className="bg-button-info/20 flex h-8 w-8 items-center justify-center rounded-lg">
             <Icon
               icon="heroicons-outline:sparkles"
-              className="text-button-info h-5 w-5"
+              className="text-link h-5 w-5"
             />
           </div>
-          <div className="flex items-center gap-2">
-            <h3 className="text-primary-text text-xl font-semibold">
-              Similar Items
-            </h3>
-          </div>
+          <h3 className="text-primary-text text-xl font-semibold">
+            Similar Items
+          </h3>
         </div>
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button
               type="button"
-              className="border-border-primary bg-primary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus flex h-[56px] w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all duration-300 focus:ring-1 focus:outline-none"
+              className="border-border-card bg-tertiary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 flex h-[56px] w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all duration-300 focus:ring-1 focus:outline-none"
               aria-label="Sort similar items"
             >
               <span className="truncate">
@@ -331,7 +329,7 @@ const SimilarItems = ({
           </DropdownMenuTrigger>
           <DropdownMenuContent
             align="start"
-            className="border-border-primary bg-primary-bg text-primary-text scrollbar-thin max-h-[240px] w-[var(--radix-popper-anchor-width)] min-w-[var(--radix-popper-anchor-width)] overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
+            className="border-border-card bg-tertiary-bg text-primary-text scrollbar-thin max-h-[240px] w-[var(--radix-popper-anchor-width)] min-w-[var(--radix-popper-anchor-width)] overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
           >
             <DropdownMenuRadioGroup
               value={sortBy}
@@ -371,7 +369,7 @@ const SimilarItems = ({
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-3">
           {[...Array(6)].map((_, i) => (
             <div key={i} className="animate-pulse">
-              <div className="border-border-primary bg-secondary-bg hover:border-border-focus mb-3 aspect-video rounded-lg border"></div>
+              <div className="border-border-card bg-tertiary-bg mb-3 aspect-video rounded-lg border"></div>
               <div className="bg-secondary-bg mb-2 h-4 w-3/4 rounded"></div>
               <div className="bg-secondary-bg h-4 w-1/2 rounded"></div>
             </div>
@@ -415,7 +413,7 @@ const SimilarItems = ({
               className="group block"
               prefetch={false}
             >
-              <div className="border-border-primary bg-primary-bg hover:border-border-focus relative overflow-hidden rounded-lg border transition-all duration-300">
+              <div className="border-border-card bg-tertiary-bg relative overflow-hidden rounded-lg border transition-all duration-300">
                 {/* Media Section */}
                 <div className="relative aspect-video w-full overflow-hidden">
                   {isVideoItem(item.name) ? (
@@ -442,7 +440,7 @@ const SimilarItems = ({
                 <div className="flex flex-1 flex-col space-y-2 p-3">
                   {/* Item Name */}
                   <div className="flex items-center justify-between">
-                    <h3 className="text-primary-text hover:text-link line-clamp-2 text-sm leading-tight font-semibold transition-colors">
+                    <h3 className="text-primary-text group-hover:text-link line-clamp-2 text-sm leading-tight font-semibold transition-colors">
                       {item.name}
                     </h3>
                   </div>
@@ -450,16 +448,24 @@ const SimilarItems = ({
                   {/* Type Badge */}
                   <div className="flex flex-wrap gap-1">
                     <span
-                      className="text-primary-text flex items-center rounded-full border px-1.5 py-0.5 text-[10px] font-medium"
+                      className="text-primary-text bg-tertiary-bg/40 inline-flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl"
                       style={{
                         borderColor: getCategoryColor(item.type),
-                        backgroundColor: getCategoryColor(item.type) + "20", // Add 20% opacity
                       }}
                     >
+                      {(() => {
+                        const categoryIcon = getCategoryIcon(item.type);
+                        return categoryIcon ? (
+                          <categoryIcon.Icon
+                            className="mr-1.5 h-3 w-3"
+                            style={{ color: getCategoryColor(item.type) }}
+                          />
+                        ) : null;
+                      })()}
                       {item.type}
                     </span>
                     {(item.tradable === 0 || item.tradable === false) && (
-                      <span className="border-primary-text text-primary-text flex items-center rounded-full border bg-transparent px-1.5 py-0.5 text-[10px]">
+                      <span className="text-primary-text border-border-card bg-tertiary-bg/40 inline-flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl">
                         {item.id === 713 ? "Reference Only" : "Non-Tradable"}
                       </span>
                     )}
@@ -468,32 +474,32 @@ const SimilarItems = ({
                   {/* Values Section */}
                   <div className="space-y-1">
                     {/* Cash Value */}
-                    <div className="bg-secondary-bg flex items-center justify-between rounded-lg p-1.5">
+                    <div className="border-border-card bg-secondary-bg flex items-center justify-between rounded-lg border p-1.5">
                       <span className="text-secondary-text text-[10px] font-medium">
                         Cash
                       </span>
-                      <span className="bg-button-info text-form-button-text rounded-lg px-1.5 py-0.5 text-[9px] font-bold">
+                      <span className="bg-button-info text-form-button-text inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold">
                         {formatFullValue(item.cash_value)}
                       </span>
                     </div>
 
                     {/* Duped Value */}
-                    <div className="bg-secondary-bg flex items-center justify-between rounded-lg p-1.5">
+                    <div className="border-border-card bg-secondary-bg flex items-center justify-between rounded-lg border p-1.5">
                       <span className="text-secondary-text text-[10px] font-medium">
                         Duped
                       </span>
-                      <span className="bg-button-info text-form-button-text rounded-lg px-1.5 py-0.5 text-[9px] font-bold">
+                      <span className="bg-button-info text-form-button-text inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold">
                         {formatFullValue(item.duped_value)}
                       </span>
                     </div>
 
                     {/* Demand */}
-                    <div className="bg-secondary-bg flex items-center justify-between rounded-lg p-1.5">
+                    <div className="border-border-card bg-secondary-bg flex items-center justify-between rounded-lg border p-1.5">
                       <span className="text-secondary-text text-[10px] font-medium">
                         Demand
                       </span>
                       <span
-                        className={`${getDemandColor(item.demand)} rounded-lg px-1.5 py-0.5 text-[9px] font-bold whitespace-nowrap`}
+                        className={`${getDemandColor(item.demand)} inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold whitespace-nowrap`}
                       >
                         {item.demand === "N/A" ? "Unknown" : item.demand}
                       </span>
@@ -501,12 +507,12 @@ const SimilarItems = ({
 
                     {/* Trend */}
                     {item.trend && (
-                      <div className="bg-secondary-bg flex items-center justify-between rounded-lg p-1.5">
+                      <div className="border-border-card bg-secondary-bg flex items-center justify-between rounded-lg border p-1.5">
                         <span className="text-secondary-text text-[10px] font-medium">
                           Trend
                         </span>
                         <span
-                          className={`${getTrendColor(item.trend)} rounded-lg px-1.5 py-0.5 text-[9px] font-bold whitespace-nowrap`}
+                          className={`${getTrendColor(item.trend)} inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold whitespace-nowrap`}
                         >
                           {item.trend === "N/A" ? "Unknown" : item.trend}
                         </span>

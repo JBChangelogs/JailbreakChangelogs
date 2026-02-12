@@ -37,7 +37,7 @@ export const ClearConfirmModal: React.FC<ClearConfirmModalProps> = ({
         onClick={onClose}
       />
       <div className="fixed inset-0 flex items-center justify-center p-4">
-        <div className="modal-container border-border-primary bg-secondary-bg mx-auto w-full max-w-sm rounded-lg border p-6 shadow-lg">
+        <div className="modal-container border-border-card bg-secondary-bg mx-auto w-full max-w-sm rounded-lg border p-6 shadow-lg">
           <div className="modal-header text-primary-text mb-2 text-xl font-bold">
             Clear Calculator?
           </div>

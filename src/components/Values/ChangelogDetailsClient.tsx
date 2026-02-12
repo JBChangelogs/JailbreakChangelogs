@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { Chip, useMediaQuery } from "@mui/material";
+import { useMediaQuery } from "@mui/material";
 import { Pagination } from "@/components/ui/Pagination";
 import { Dialog } from "@headlessui/react";
 import { Masonry } from "@mui/lab";
@@ -16,7 +16,7 @@ import {
   isVideoItem,
   getVideoPath,
 } from "@/utils/images";
-import { getCategoryColor } from "@/utils/categoryIcons";
+import { getCategoryColor, getCategoryIcon } from "@/utils/categoryIcons";
 import { formatMessageDate } from "@/utils/timestamp";
 import { formatFullValue, formatPrice } from "@/utils/values";
 import ReactMarkdown from "react-markdown";
@@ -458,7 +458,7 @@ export default function ChangelogDetailsClient({
               placeholder="Search changes..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="border-border-primary bg-secondary-bg text-primary-text placeholder-secondary-text hover:border-border-focus focus:border-button-info w-full rounded-lg border px-4 py-2 pr-10 pl-10 transition-all duration-300 focus:outline-none"
+              className="border-border-card bg-secondary-bg text-primary-text placeholder-secondary-text hover:border-border-focus focus:border-button-info w-full rounded-lg border px-4 py-2 pr-10 pl-10 transition-all duration-300 focus:outline-none"
             />
             <Icon
               icon="heroicons:magnifying-glass"
@@ -488,7 +488,7 @@ export default function ChangelogDetailsClient({
                 <DropdownMenuTrigger asChild>
                   <button
                     type="button"
-                    className="border-border-primary bg-secondary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus flex h-[56px] w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all duration-300 focus:ring-1 focus:outline-none"
+                    className="border-border-card bg-secondary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus flex h-[56px] w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all duration-300 focus:ring-1 focus:outline-none"
                     aria-label="Filter by item type"
                   >
                     <span className="truncate">{selectedType}</span>
@@ -501,7 +501,7 @@ export default function ChangelogDetailsClient({
                 </DropdownMenuTrigger>
                 <DropdownMenuContent
                   align="start"
-                  className="border-border-primary bg-secondary-bg text-primary-text scrollbar-thin max-h-[320px] w-[var(--radix-popper-anchor-width)] min-w-[var(--radix-popper-anchor-width)] overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
+                  className="border-border-card bg-secondary-bg text-primary-text scrollbar-thin max-h-[320px] w-[var(--radix-popper-anchor-width)] min-w-[var(--radix-popper-anchor-width)] overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
                 >
                   <DropdownMenuRadioGroup
                     value={selectedType}
@@ -538,7 +538,7 @@ export default function ChangelogDetailsClient({
                 <DropdownMenuTrigger asChild>
                   <button
                     type="button"
-                    className="border-border-primary bg-secondary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus flex h-[56px] w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all duration-300 focus:ring-1 focus:outline-none"
+                    className="border-border-card bg-secondary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus flex h-[56px] w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all duration-300 focus:ring-1 focus:outline-none"
                     aria-label="Filter by suggestion type"
                   >
                     <span className="truncate">
@@ -559,7 +559,7 @@ export default function ChangelogDetailsClient({
                 </DropdownMenuTrigger>
                 <DropdownMenuContent
                   align="start"
-                  className="border-border-primary bg-secondary-bg text-primary-text scrollbar-thin max-h-[320px] w-[var(--radix-popper-anchor-width)] min-w-[var(--radix-popper-anchor-width)] overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
+                  className="border-border-card bg-secondary-bg text-primary-text scrollbar-thin max-h-[320px] w-[var(--radix-popper-anchor-width)] min-w-[var(--radix-popper-anchor-width)] overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
                 >
                   <DropdownMenuRadioGroup
                     value={selectedSuggestionType}
@@ -627,13 +627,13 @@ export default function ChangelogDetailsClient({
                 {paginatedChanges.map((change) => (
                   <div
                     key={change.change_id}
-                    className="border-border-primary bg-secondary-bg hover:border-border-focus overflow-hidden rounded-lg border p-4 transition-colors"
+                    className="border-border-card bg-secondary-bg overflow-hidden rounded-lg border p-4 transition-colors"
                   >
                     {/* Suggestion # Pill */}
                     {change.suggestion && (
                       <div className="mb-2 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
                         <div className="flex items-center gap-2">
-                          <span className="border-primary-text text-primary-text flex items-center rounded-full border bg-transparent px-1.5 py-0.5 text-[10px] sm:px-2 sm:py-1 sm:text-xs">
+                          <span className="text-primary-text border-border-card bg-tertiary-bg/40 inline-flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl">
                             Suggestion #{change.suggestion.id}
                           </span>
                         </div>
@@ -677,32 +677,34 @@ export default function ChangelogDetailsClient({
                           >
                             {change.item.name}
                           </Link>
-                          <Chip
-                            label={change.item.type}
-                            size="small"
-                            variant="outlined"
-                            sx={{
-                              backgroundColor:
-                                getCategoryColor(change.item.type) + "20", // Add 20% opacity
+                          <span
+                            className="text-primary-text bg-tertiary-bg/40 mt-1 inline-flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl"
+                            style={{
                               borderColor: getCategoryColor(change.item.type),
-                              color: "var(--color-primary-text)",
-                              fontSize: "0.75rem",
-                              marginTop: "4px",
-                              fontWeight: "medium",
-                              "&:hover": {
-                                borderColor: getCategoryColor(change.item.type),
-                                backgroundColor:
-                                  getCategoryColor(change.item.type) + "30", // Slightly more opacity on hover
-                              },
                             }}
-                          />
+                          >
+                            {(() => {
+                              const categoryIcon = getCategoryIcon(
+                                change.item.type,
+                              );
+                              return categoryIcon ? (
+                                <categoryIcon.Icon
+                                  className="mr-1.5 h-3 w-3"
+                                  style={{
+                                    color: getCategoryColor(change.item.type),
+                                  }}
+                                />
+                              ) : null;
+                            })()}
+                            {change.item.type}
+                          </span>
                         </div>
                       </div>
                     </div>
 
                     {/* Suggestion Data - Show First if Exists */}
                     {change.suggestion && (
-                      <div className="border-border-primary bg-primary-bg hover:shadow-card-shadow mt-2 rounded-lg border p-5 shadow-lg transition-all duration-200">
+                      <div className="border-border-card bg-tertiary-bg mt-2 rounded-lg border p-5 shadow-lg transition-all duration-200">
                         <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                           <div className="flex min-w-0 items-center gap-3">
                             {change.suggestion.metadata?.avatar_hash && (
@@ -724,7 +726,7 @@ export default function ChangelogDetailsClient({
                               </div>
                             )}
                             <div className="flex min-w-0 flex-col">
-                              <span className="text-tertiary-text text-xs font-semibold tracking-wide uppercase">
+                              <span className="text-secondary-text text-xs font-semibold tracking-wide uppercase">
                                 Suggested by
                               </span>
                               <a
@@ -738,7 +740,7 @@ export default function ChangelogDetailsClient({
                             </div>
                           </div>
                           <div className="flex shrink-0 items-center justify-center">
-                            <div className="border-border-primary flex items-center justify-center overflow-hidden rounded-lg border">
+                            <div className="border-border-card flex items-center justify-center overflow-hidden rounded-lg border">
                               <button
                                 type="button"
                                 onClick={() => {
@@ -839,7 +841,7 @@ export default function ChangelogDetailsClient({
                           </ReactMarkdown>
                         </div>
 
-                        <div className="text-tertiary-text text-xs font-semibold tracking-wide uppercase">
+                        <div className="text-secondary-text text-xs font-semibold tracking-wide uppercase">
                           Suggested on{" "}
                           {formatMessageDate(
                             change.suggestion.created_at * 1000,
@@ -904,7 +906,7 @@ export default function ChangelogDetailsClient({
                               <div className="flex items-start gap-2 overflow-hidden">
                                 <div className="min-w-0 flex-1">
                                   <div className="text-primary-text mb-3 text-lg font-bold capitalize">
-                                    <span className="border-primary-text text-primary-text mb-2 inline-flex items-center rounded-full border bg-transparent px-1.5 py-0.5 text-[10px] sm:px-2 sm:py-1 sm:text-xs">
+                                    <span className="text-primary-text border-border-card bg-tertiary-bg/40 mb-2 inline-flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl">
                                       {formatSuggestionTypeLabel(
                                         change.suggestion?.metadata
                                           ?.suggestion_type,
@@ -914,7 +916,7 @@ export default function ChangelogDetailsClient({
                                   </div>
                                   <div className="grid grid-cols-2 gap-6">
                                     <div className="min-w-0">
-                                      <div className="text-tertiary-text mb-2 flex items-center gap-2 text-xs font-semibold tracking-wide uppercase">
+                                      <div className="text-secondary-text mb-2 flex items-center gap-2 text-xs font-semibold tracking-wide uppercase">
                                         <Icon
                                           icon="mdi:minus-circle"
                                           className="text-button-danger h-4 w-4"
@@ -1008,7 +1010,7 @@ export default function ChangelogDetailsClient({
                                       })()}
                                     </div>
                                     <div className="min-w-0">
-                                      <div className="text-tertiary-text mb-2 flex items-center gap-2 text-xs font-semibold tracking-wide uppercase">
+                                      <div className="text-secondary-text mb-2 flex items-center gap-2 text-xs font-semibold tracking-wide uppercase">
                                         <Icon
                                           icon="mdi:plus-circle"
                                           className="text-button-success h-4 w-4"
@@ -1185,7 +1187,7 @@ export default function ChangelogDetailsClient({
               </div>
 
               <div className="modal-content px-6 pt-3 pb-6">
-                <div className="border-border-primary bg-primary-bg mb-4 flex rounded-lg border">
+                <div className="border-border-card bg-primary-bg mb-4 flex rounded-lg border">
                   <button
                     onClick={() => setVotersTab("up")}
                     className={`flex-1 cursor-pointer rounded-l-lg py-3 text-sm font-semibold transition-colors ${
@@ -1250,7 +1252,7 @@ export default function ChangelogDetailsClient({
                     ).map((voter: VoteRecord) => (
                       <div
                         key={voter.id}
-                        className="border-border-primary bg-primary-bg hover:border-border-focus flex items-center gap-4 rounded-lg border px-4 py-3 transition-colors"
+                        className="border-border-card bg-tertiary-bg flex items-center gap-4 rounded-lg border px-4 py-3 transition-colors"
                       >
                         <div className="ring-border-primary relative h-10 w-10 shrink-0 overflow-hidden rounded-full ring-2">
                           <DefaultAvatar />

@@ -1,4 +1,4 @@
-import { Box, Typography, Divider, Chip, Skeleton } from "@mui/material";
+import { Box, Typography, Divider, Skeleton } from "@mui/material";
 import {
   Tooltip,
   TooltipContent,
@@ -26,7 +26,13 @@ interface CommentProps {
   item_type: string;
   user_id: string;
   edited_at: number | null;
-  owner: string;
+  owner?: string;
+  parent_id?: number | null;
+  parentComment?: {
+    id: number;
+    author: string;
+    content: string;
+  } | null;
   changelogDetails?: unknown;
   itemDetails?: unknown;
   seasonDetails?: unknown;
@@ -50,6 +56,8 @@ export default function Comment({
   item_type,
   item_id,
   edited_at,
+  parent_id,
+  parentComment,
   changelogDetails: propChangelogDetails,
   itemDetails: propItemDetails,
   seasonDetails: propSeasonDetails,
@@ -266,7 +274,7 @@ export default function Comment({
       prefetch={false}
       className="group block"
     >
-      <Box className="border-border-primary bg-primary-bg hover:border-border-focus rounded-lg border p-3 shadow-sm transition-colors">
+      <Box className="border-border-card bg-tertiary-bg rounded-lg border p-3 shadow-sm transition-colors">
         <div className="mb-2 flex">
           {renderThumbnail()}
           <div className="min-w-0 flex-1">
@@ -274,7 +282,7 @@ export default function Comment({
             {getItemName() ? (
               <Typography
                 variant="body2"
-                className="text-primary-text group-hover:text-button-info mb-1 font-medium transition-colors"
+                className="text-primary-text group-hover:text-link mb-1 font-medium transition-colors"
                 sx={{
                   maxWidth: "100%",
                   overflow: "hidden",
@@ -292,26 +300,38 @@ export default function Comment({
 
             {/* Badge Second */}
             <div className="mb-2">
-              <Chip
-                label={contentType}
-                size="small"
-                variant="outlined"
-                sx={{
-                  backgroundColor: getCategoryColor(item_type) + "20", // Add 20% opacity
+              <span
+                className="text-primary-text bg-tertiary-bg/40 inline-flex h-6 w-fit items-center rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl"
+                style={{
                   borderColor: getCategoryColor(item_type),
-                  color: "var(--color-primary-text)",
-                  fontSize: "0.65rem",
-                  height: "20px",
-                  fontWeight: "medium",
-                  "&:hover": {
-                    borderColor: getCategoryColor(item_type),
-                    backgroundColor: getCategoryColor(item_type) + "30", // Slightly more opacity on hover
-                  },
                 }}
-              />
+              >
+                {contentType}
+              </span>
             </div>
 
             {/* Comment Content Third */}
+            {typeof parent_id === "number" && (
+              <div className="bg-primary-bg/40 border-border-card mb-2 rounded-md border px-2 py-1">
+                <Typography
+                  variant="caption"
+                  className="text-secondary-text block truncate text-[11px] font-medium"
+                >
+                  Reply to{" "}
+                  {parentComment?.author
+                    ? `@${parentComment.author}`
+                    : `comment #${parent_id}`}
+                </Typography>
+                {parentComment?.content && (
+                  <Typography
+                    variant="caption"
+                    className="text-secondary-text/80 block truncate text-[11px]"
+                  >
+                    {parentComment.content}
+                  </Typography>
+                )}
+              </div>
+            )}
             <Typography
               variant="body2"
               className="text-secondary-text wrap-break-word whitespace-pre-wrap"

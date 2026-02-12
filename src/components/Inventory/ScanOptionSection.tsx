@@ -15,14 +15,14 @@ export default function ScanOptionSection({
   variant = "main",
   isOwnInventory = false,
 }: ScanOptionSectionProps) {
-  const { user, isAuthenticated, setShowLoginModal } = useAuthContext();
+  const { user, isAuthenticated, setLoginModal } = useAuthContext();
   const backgroundClass =
     variant === "main" ? "bg-secondary-bg" : "bg-secondary-bg";
-  const borderClass = "border-border-primary";
+  const borderClass = "border-border-card";
 
   return (
     <div
-      className={`${backgroundClass} ${!isOwnInventory ? `mb-6 rounded-lg border ${borderClass} shadow-card-shadow p-4` : ""}`}
+      className={`${backgroundClass} ${!isOwnInventory ? `mb-6 rounded-lg border ${borderClass} p-4` : ""}`}
     >
       <div
         className={`flex items-start gap-3 ${isOwnInventory ? "justify-center" : ""}`}
@@ -30,7 +30,7 @@ export default function ScanOptionSection({
         {!isOwnInventory && (
           <div className="shrink-0">
             <svg
-              className="text-button-info mt-0.5 h-5 w-5"
+              className="text-link mt-0.5 h-5 w-5"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -117,9 +117,7 @@ export default function ScanOptionSection({
             ) : (
               <Button
                 onClick={() => {
-                  setShowLoginModal(true);
-                  const event = new CustomEvent("setLoginTab", { detail: 1 });
-                  window.dispatchEvent(event);
+                  setLoginModal({ open: true, tab: "roblox" });
                 }}
                 size="sm"
               >

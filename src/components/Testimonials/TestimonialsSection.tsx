@@ -191,7 +191,7 @@ export default function TestimonialsSection() {
               href={testimonial.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="border-border-primary bg-secondary-bg hover:border-border-focus hover:shadow-card-shadow flex flex-col rounded-xl border p-6 shadow-md transition-all duration-200"
+              className="border-border-card bg-secondary-bg hover:bg-quaternary-bg group flex flex-col rounded-xl border p-6 shadow-md transition-all duration-200"
             >
               <div className="mb-4 flex items-start gap-4">
                 <div className="shrink-0">
@@ -207,10 +207,10 @@ export default function TestimonialsSection() {
                   />
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-card-headline hover:text-link mb-1 font-bold transition-colors">
+                  <h3 className="text-card-headline group-hover:text-link mb-1 font-bold transition-colors">
                     {testimonial.name}
                   </h3>
-                  <p className="text-primary-text text-sm">
+                  <p className="text-primary-text bg-tertiary-bg/40 border-border-card inline-flex h-6 w-fit items-center rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl">
                     {testimonial.role}
                   </p>
                 </div>

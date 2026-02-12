@@ -78,7 +78,7 @@ export default function RobberyTrackerAuthWrapper({
 
     return (
       <div className="container mx-auto flex min-h-screen items-center justify-center px-4 py-8">
-        <div className="border-border-primary bg-secondary-bg w-full max-w-2xl rounded-lg border p-6 text-center shadow-sm">
+        <div className="border-border-card bg-secondary-bg w-full max-w-2xl rounded-lg border p-6 text-center shadow-sm">
           <h2 className="text-primary-text text-2xl font-semibold">
             Login required
           </h2>

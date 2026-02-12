@@ -20,7 +20,11 @@ import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { useIsAuthenticated } from "@/contexts/AuthContext";
 import { usePathname } from "next/navigation";
-import { CategoryIconBadge, getCategoryColor } from "@/utils/categoryIcons";
+import {
+  CategoryIconBadge,
+  getCategoryColor,
+  getCategoryIcon,
+} from "@/utils/categoryIcons";
 import { Icon } from "@/components/ui/IconWrapper";
 import {
   Tooltip,
@@ -313,7 +317,7 @@ export default function ItemCard({
   return (
     <div className="w-full">
       <div
-        className={`group border-border-primary bg-secondary-bg hover:border-border-focus relative cursor-pointer overflow-hidden rounded-lg border-2 transition-all duration-300 hover:shadow-lg`}
+        className="group border-border-card bg-secondary-bg relative cursor-pointer overflow-hidden rounded-lg border-2 transition-all duration-300 hover:shadow-lg"
         role="button"
         tabIndex={0}
         aria-haspopup="dialog"
@@ -343,7 +347,7 @@ export default function ItemCard({
           </div>
           <button
             onClick={handleFavoriteClick}
-            className={`bg-secondary-bg/80 border-border-primary hover:border-border-focus absolute top-2 left-2 z-10 cursor-pointer rounded-full border p-1.5 transition-opacity ${
+            className={`bg-secondary-bg/80 border-border-card hover:border-border-focus absolute top-2 left-2 z-10 cursor-pointer rounded-full border p-1.5 transition-opacity ${
               isHovered ? "opacity-100" : "opacity-0"
             } hover:bg-secondary-bg`}
             title={isFavorited ? "Remove from favorites" : "Add to favorites"}
@@ -450,16 +454,15 @@ export default function ItemCard({
 
           <div className="flex flex-wrap gap-1 pb-2 sm:gap-2">
             <span
-              className="text-primary-text flex items-center rounded-full border px-1.5 py-0.5 text-[10px] font-medium sm:px-2 sm:py-1 sm:text-xs"
+              className="text-primary-text bg-tertiary-bg/40 flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl"
               style={{
                 borderColor: getCategoryColor(item.type),
-                backgroundColor: getCategoryColor(item.type) + "20", // Add 20% opacity
               }}
             >
               {item.type}
             </span>
             {currentItemData.tradable === 0 && (
-              <span className="border-primary-text text-primary-text hidden items-center rounded-full border bg-transparent px-2 py-0.5 text-xs sm:flex sm:py-1">
+              <span className="text-primary-text border-border-card bg-tertiary-bg/40 hidden h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl sm:inline-flex">
                 {currentItemData.id === 713 ? "Reference Only" : "Non-Tradable"}
               </span>
             )}
@@ -476,7 +479,7 @@ export default function ItemCard({
                     <Tooltip key="cash-change">
                       <TooltipTrigger asChild>
                         <span
-                          className={`inline-flex items-center gap-0.5 rounded-full px-1.5 py-0.5 text-[10px] font-semibold sm:px-2 sm:py-1 sm:text-xs ${
+                          className={`inline-flex h-6 items-center gap-0.5 rounded-lg px-2 text-xs leading-none font-semibold ${
                             isPositive
                               ? "bg-status-success text-white"
                               : "bg-status-error text-white"
@@ -503,7 +506,7 @@ export default function ItemCard({
                     <Tooltip key="duped-change">
                       <TooltipTrigger asChild>
                         <span
-                          className={`inline-flex items-center gap-0.5 rounded-full px-1.5 py-0.5 text-[10px] font-semibold sm:px-2 sm:py-1 sm:text-xs ${
+                          className={`inline-flex h-6 items-center gap-0.5 rounded-lg px-2 text-xs leading-none font-semibold ${
                             isPositive
                               ? "bg-status-success text-white"
                               : "bg-status-error text-white"
@@ -526,7 +529,7 @@ export default function ItemCard({
           </div>
 
           <div className="space-y-1 pb-2 sm:space-y-2">
-            <div className="bg-primary-bg flex items-center justify-between rounded-lg p-1 sm:p-2.5">
+            <div className="border-border-card bg-tertiary-bg flex items-center justify-between rounded-lg border p-1 sm:p-2.5">
               <div className="flex items-center gap-1 sm:gap-2">
                 <span className="text-secondary-text text-xs font-medium whitespace-nowrap sm:text-xs">
                   Cash Value
@@ -549,14 +552,14 @@ export default function ItemCard({
                     return null;
                   })()}
               </div>
-              <span className="bg-button-info text-form-button-text rounded-lg px-0.5 py-0.5 text-[9px] font-bold shadow-sm min-[401px]:px-2 min-[401px]:py-1 min-[401px]:text-xs min-[480px]:px-3 min-[480px]:py-1.5">
+              <span className="bg-button-info text-form-button-text inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold shadow-sm min-[480px]:px-3">
                 {isMobile
                   ? currentItemData.cash_value
                   : formatFullValue(currentItemData.cash_value)}
               </span>
             </div>
 
-            <div className="bg-primary-bg flex items-center justify-between rounded-lg p-1 sm:p-2.5">
+            <div className="border-border-card bg-tertiary-bg flex items-center justify-between rounded-lg border p-1 sm:p-2.5">
               <div className="flex items-center gap-1 sm:gap-2">
                 <span className="text-secondary-text text-xs font-medium whitespace-nowrap sm:text-xs">
                   Duped Value
@@ -579,35 +582,35 @@ export default function ItemCard({
                     return null;
                   })()}
               </div>
-              <span className="bg-button-info text-form-button-text rounded-lg px-0.5 py-0.5 text-[9px] font-bold shadow-sm min-[401px]:px-2 min-[401px]:py-1 min-[401px]:text-xs min-[480px]:px-3 min-[480px]:py-1.5">
+              <span className="bg-button-info text-form-button-text inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold shadow-sm min-[480px]:px-3">
                 {isMobile
                   ? currentItemData.duped_value
                   : formatFullValue(currentItemData.duped_value)}
               </span>
             </div>
 
-            <div className="bg-primary-bg flex items-center justify-between rounded-lg p-1 sm:p-2.5">
+            <div className="border-border-card bg-tertiary-bg flex items-center justify-between rounded-lg border p-1 sm:p-2.5">
               <div className="flex items-center gap-1 sm:gap-2">
                 <span className="text-secondary-text text-xs font-medium whitespace-nowrap sm:text-xs">
                   Demand
                 </span>
               </div>
               <span
-                className={`${getDemandColor(currentItemData.demand)} rounded-lg px-0.5 py-0.5 text-[9px] font-bold whitespace-nowrap shadow-sm min-[401px]:px-2 min-[401px]:py-1 min-[401px]:text-xs min-[480px]:px-3 min-[480px]:py-1.5`}
+                className={`${getDemandColor(currentItemData.demand)} inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold whitespace-nowrap shadow-sm min-[480px]:px-3`}
               >
                 {demandLabel}
               </span>
             </div>
 
             {isValuesPage && (
-              <div className="bg-primary-bg flex items-center justify-between rounded-lg p-1 sm:p-2.5">
+              <div className="border-border-card bg-tertiary-bg flex items-center justify-between rounded-lg border p-1 sm:p-2.5">
                 <div className="flex items-center gap-1 sm:gap-2">
                   <span className="text-secondary-text text-xs font-medium whitespace-nowrap sm:text-xs">
                     Trend
                   </span>
                 </div>
                 <span
-                  className={`${getTrendColor(currentItemData.trend || "N/A")} rounded-lg px-0.5 py-0.5 text-[9px] font-bold whitespace-nowrap shadow-sm min-[401px]:px-2 min-[401px]:py-1 min-[401px]:text-xs min-[480px]:px-3 min-[480px]:py-1.5`}
+                  className={`${getTrendColor(currentItemData.trend || "N/A")} inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold whitespace-nowrap shadow-sm min-[480px]:px-3`}
                 >
                   {trendLabel}
                 </span>
@@ -641,7 +644,7 @@ export default function ItemCard({
         >
           <SheetHeader className="text-left">
             <div className="flex items-start gap-3">
-              <div className="bg-primary-bg border-border-primary relative h-14 w-14 shrink-0 overflow-hidden rounded-lg border">
+              <div className="bg-primary-bg border-border-card relative h-14 w-14 shrink-0 overflow-hidden rounded-lg border">
                 <Image
                   src={getItemImagePath(item.type, item.name, isValuesPage)}
                   alt={item.name}
@@ -655,38 +658,38 @@ export default function ItemCard({
                 <SheetTitle className="truncate">{item.name}</SheetTitle>
                 <div className="mt-2 flex flex-wrap items-center gap-2">
                   <span
-                    className="text-primary-text flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] leading-none font-medium"
+                    className="text-primary-text bg-tertiary-bg/40 flex h-6 items-center gap-1.5 rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl"
                     style={{
                       borderColor: getCategoryColor(item.type),
-                      backgroundColor: getCategoryColor(item.type) + "20",
                     }}
                   >
-                    <CategoryIconBadge
-                      type={item.type}
-                      isLimited={false}
-                      isSeasonal={false}
-                      className="h-3 w-3"
-                    />
+                    {(() => {
+                      const categoryIcon = getCategoryIcon(item.type);
+                      return categoryIcon ? (
+                        <categoryIcon.Icon
+                          className="h-3 w-3"
+                          style={{ color: getCategoryColor(item.type) }}
+                        />
+                      ) : null;
+                    })()}
                     {item.type}
                   </span>
                   {currentItemData.is_limited === 1 && (
-                    <span className="border-primary-text text-primary-text inline-flex items-center gap-1 rounded-full border bg-transparent px-2 py-0.5 text-[10px] leading-none font-medium">
-                      <CategoryIconBadge
-                        type={item.type}
-                        isLimited={true}
-                        isSeasonal={false}
+                    <span className="text-primary-text border-border-card bg-tertiary-bg/40 inline-flex h-6 items-center gap-1.5 rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl">
+                      <Icon
+                        icon="mdi:clock"
                         className="h-3 w-3"
+                        style={{ color: "#ffd700" }}
                       />
                       Limited
                     </span>
                   )}
                   {currentItemData.is_seasonal === 1 && (
-                    <span className="border-primary-text text-primary-text inline-flex items-center gap-1 rounded-full border bg-transparent px-2 py-0.5 text-[10px] leading-none font-medium">
-                      <CategoryIconBadge
-                        type={item.type}
-                        isLimited={false}
-                        isSeasonal={true}
+                    <span className="text-primary-text border-border-card bg-tertiary-bg/40 inline-flex h-6 items-center gap-1.5 rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl">
+                      <Icon
+                        icon="noto-v1:snowflake"
                         className="h-3 w-3"
+                        style={{ color: "#40c0e7" }}
                       />
                       Seasonal
                     </span>
@@ -702,11 +705,11 @@ export default function ItemCard({
                 Values
               </div>
               <div className="mt-2 space-y-2">
-                <div className="bg-primary-bg flex items-center justify-between rounded-lg p-2">
+                <div className="border-border-card bg-tertiary-bg flex items-center justify-between rounded-lg border p-2">
                   <span className="text-secondary-text text-xs font-medium">
                     Cash Value
                   </span>
-                  <span className="bg-button-info text-form-button-text rounded-lg px-2 py-1 text-xs font-bold shadow-sm">
+                  <span className="bg-button-info text-form-button-text inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold shadow-sm">
                     {formatFullValue(currentItemData.cash_value)}
                   </span>
                 </div>
@@ -736,11 +739,11 @@ export default function ItemCard({
                     No recent Cash Value change noted.
                   </p>
                 )}
-                <div className="bg-primary-bg flex items-center justify-between rounded-lg p-2">
+                <div className="border-border-card bg-tertiary-bg flex items-center justify-between rounded-lg border p-2">
                   <span className="text-secondary-text text-xs font-medium">
                     Duped Value
                   </span>
-                  <span className="bg-button-info text-form-button-text rounded-lg px-2 py-1 text-xs font-bold shadow-sm">
+                  <span className="bg-button-info text-form-button-text inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold shadow-sm">
                     {formatFullValue(currentItemData.duped_value)}
                   </span>
                 </div>
@@ -784,7 +787,7 @@ export default function ItemCard({
                 Trading Signals
               </div>
               <div className="mt-2 space-y-2">
-                <div className="bg-primary-bg flex items-start justify-between gap-3 rounded-lg p-2">
+                <div className="border-border-card bg-tertiary-bg flex items-start justify-between gap-3 rounded-lg border p-2">
                   <div>
                     <div className="text-secondary-text text-xs font-medium">
                       Demand
@@ -794,12 +797,12 @@ export default function ItemCard({
                     </p>
                   </div>
                   <span
-                    className={`${getDemandColor(currentItemData.demand)} rounded-lg px-2 py-1 text-xs font-bold whitespace-nowrap shadow-sm`}
+                    className={`${getDemandColor(currentItemData.demand)} inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold whitespace-nowrap shadow-sm`}
                   >
                     {demandLabel}
                   </span>
                 </div>
-                <div className="bg-primary-bg flex items-start justify-between gap-3 rounded-lg p-2">
+                <div className="border-border-card bg-tertiary-bg flex items-start justify-between gap-3 rounded-lg border p-2">
                   <div>
                     <div className="text-secondary-text text-xs font-medium">
                       Trend
@@ -812,7 +815,7 @@ export default function ItemCard({
                     </p>
                   </div>
                   <span
-                    className={`${getTrendColor(currentItemData.trend || "N/A")} rounded-lg px-2 py-1 text-xs font-bold whitespace-nowrap shadow-sm`}
+                    className={`${getTrendColor(currentItemData.trend || "N/A")} inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold whitespace-nowrap shadow-sm`}
                   >
                     {trendLabel}
                   </span>
@@ -824,7 +827,7 @@ export default function ItemCard({
                 <div className="text-primary-text text-xs font-semibold tracking-wide uppercase">
                   Item Notes
                 </div>
-                <div className="bg-primary-bg mt-2 rounded-lg p-2">
+                <div className="border-border-card bg-tertiary-bg mt-2 rounded-lg border p-2">
                   <p className="text-secondary-text text-xs">
                     {currentItemData.notes}
                   </p>

@@ -1,28 +1,15 @@
 import Link from "next/link";
 import { getRandomBackgroundImage } from "@/utils/fisherYatesShuffle";
-import CCPAHandler from "@/components/Home/CCPAHandler";
 import { Icon } from "../components/ui/IconWrapper";
 import HeroBackgroundCarousel from "@/components/Home/HeroBackgroundCarousel";
 import NitroHomepageAd from "@/components/Ads/NitroHomepageAd";
 import { Button } from "@/components/ui/button";
-
-// Extend Window interface for USP API (CCPA)
-declare global {
-  interface Window {
-    __uspapi?: (
-      command: string,
-      version: number,
-      callback?: () => void,
-    ) => void;
-  }
-}
 
 export default function Home() {
   const initialImage = getRandomBackgroundImage();
 
   return (
     <main className="bg-primary-bg min-h-screen">
-      <CCPAHandler />
       {/* Hero Section */}
       <section className="relative py-20">
         {/* Background Image */}
@@ -76,7 +63,7 @@ export default function Home() {
       </section>
 
       {/* Popular Pages CTA Section */}
-      <section className="bg-secondary-bg/50 py-16">
+      <section className="bg-secondary-bg py-16">
         <div className="container mx-auto px-4">
           <div className="mb-12 text-center">
             <h2 className="text-primary-text mb-4 text-3xl font-bold">
@@ -90,7 +77,7 @@ export default function Home() {
             <Link
               href="/values"
               prefetch={false}
-              className="group border-border-primary bg-secondary-bg hover:border-border-focus flex items-center gap-4 rounded-xl border p-6 transition-all duration-200 hover:shadow-lg"
+              className="group border-border-card bg-tertiary-bg flex items-center gap-4 rounded-xl border p-6 transition-all duration-200 hover:shadow-lg"
             >
               <div className="bg-button-info/10 flex h-14 w-14 shrink-0 items-center justify-center rounded-lg">
                 <Icon
@@ -100,7 +87,7 @@ export default function Home() {
                 />
               </div>
               <div className="flex-1">
-                <h3 className="text-card-headline mb-1 text-lg font-bold">
+                <h3 className="text-card-headline group-hover:text-link mb-1 text-lg font-bold transition-colors">
                   Item Values
                 </h3>
                 <p className="text-card-paragraph text-sm">
@@ -117,7 +104,7 @@ export default function Home() {
             <Link
               href="/trading"
               prefetch={false}
-              className="group border-border-primary bg-secondary-bg hover:border-border-focus flex items-center gap-4 rounded-xl border p-6 transition-all duration-200 hover:shadow-lg"
+              className="group border-border-card bg-tertiary-bg flex items-center gap-4 rounded-xl border p-6 transition-all duration-200 hover:shadow-lg"
             >
               <div className="bg-button-info/10 flex h-14 w-14 shrink-0 items-center justify-center rounded-lg">
                 <Icon
@@ -127,7 +114,7 @@ export default function Home() {
                 />
               </div>
               <div className="flex-1">
-                <h3 className="text-card-headline mb-1 text-lg font-bold">
+                <h3 className="text-card-headline group-hover:text-link mb-1 text-lg font-bold transition-colors">
                   Trade Ads
                 </h3>
                 <p className="text-card-paragraph text-sm">
@@ -144,7 +131,7 @@ export default function Home() {
             <Link
               href="/calculators"
               prefetch={false}
-              className="group border-border-primary bg-secondary-bg hover:border-border-focus flex items-center gap-4 rounded-xl border p-6 transition-all duration-200 hover:shadow-lg"
+              className="group border-border-card bg-tertiary-bg flex items-center gap-4 rounded-xl border p-6 transition-all duration-200 hover:shadow-lg"
             >
               <div className="bg-button-info/10 flex h-14 w-14 shrink-0 items-center justify-center rounded-lg">
                 <Icon
@@ -154,7 +141,7 @@ export default function Home() {
                 />
               </div>
               <div className="flex-1">
-                <h3 className="text-card-headline mb-1 text-lg font-bold">
+                <h3 className="text-card-headline group-hover:text-link mb-1 text-lg font-bold transition-colors">
                   Calculators
                 </h3>
                 <p className="text-card-paragraph text-sm">
@@ -171,7 +158,7 @@ export default function Home() {
             <Link
               href="/dupes"
               prefetch={false}
-              className="group border-border-primary bg-secondary-bg hover:border-border-focus flex items-center gap-4 rounded-xl border p-6 transition-all duration-200 hover:shadow-lg"
+              className="group border-border-card bg-tertiary-bg flex items-center gap-4 rounded-xl border p-6 transition-all duration-200 hover:shadow-lg"
             >
               <div className="bg-button-info/10 flex h-14 w-14 shrink-0 items-center justify-center rounded-lg">
                 <Icon
@@ -181,7 +168,7 @@ export default function Home() {
                 />
               </div>
               <div className="flex-1">
-                <h3 className="text-card-headline mb-1 text-lg font-bold">
+                <h3 className="text-card-headline group-hover:text-link mb-1 text-lg font-bold transition-colors">
                   Dupe Finder
                 </h3>
                 <p className="text-card-paragraph text-sm">
@@ -215,7 +202,7 @@ export default function Home() {
             <Link
               href="/changelogs"
               prefetch={false}
-              className="group border-border-primary bg-secondary-bg hover:border-border-focus hover:shadow-card-shadow relative block overflow-hidden rounded-xl border p-8 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
+              className="group border-border-card bg-tertiary-bg hover:shadow-card-shadow relative block overflow-hidden rounded-xl border p-8 transition-all duration-300 hover:shadow-xl"
             >
               <div className="mb-4 flex items-center gap-3">
                 <div className="bg-button-info/10 flex h-10 w-10 shrink-0 items-center justify-center rounded-lg">
@@ -225,7 +212,7 @@ export default function Home() {
                     inline={true}
                   />
                 </div>
-                <h3 className="text-card-headline text-xl font-bold">
+                <h3 className="text-card-headline group-hover:text-link text-xl font-bold transition-colors">
                   Changelogs
                 </h3>
               </div>
@@ -247,7 +234,7 @@ export default function Home() {
             <Link
               href="/seasons"
               prefetch={false}
-              className="group border-border-primary bg-secondary-bg hover:border-border-focus hover:shadow-card-shadow relative block overflow-hidden rounded-xl border p-8 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
+              className="group border-border-card bg-tertiary-bg hover:shadow-card-shadow relative block overflow-hidden rounded-xl border p-8 transition-all duration-300 hover:shadow-xl"
             >
               <div className="mb-4 flex items-center gap-3">
                 <div className="bg-button-info/10 flex h-10 w-10 shrink-0 items-center justify-center rounded-lg">
@@ -257,7 +244,7 @@ export default function Home() {
                     inline={true}
                   />
                 </div>
-                <h3 className="text-card-headline text-xl font-bold">
+                <h3 className="text-card-headline group-hover:text-link text-xl font-bold transition-colors">
                   Seasons & Rewards
                 </h3>
               </div>
@@ -279,7 +266,7 @@ export default function Home() {
             <Link
               href="/values"
               prefetch={false}
-              className="group border-border-primary bg-secondary-bg hover:border-border-focus hover:shadow-card-shadow relative block overflow-hidden rounded-xl border p-8 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
+              className="group border-border-card bg-tertiary-bg hover:shadow-card-shadow relative block overflow-hidden rounded-xl border p-8 transition-all duration-300 hover:shadow-xl"
             >
               <div className="mb-4 flex items-center gap-3">
                 <div className="bg-button-info/10 flex h-10 w-10 shrink-0 items-center justify-center rounded-lg">
@@ -289,7 +276,7 @@ export default function Home() {
                     inline={true}
                   />
                 </div>
-                <h3 className="text-card-headline text-xl font-bold">
+                <h3 className="text-card-headline group-hover:text-link text-xl font-bold transition-colors">
                   Item Values
                 </h3>
               </div>
@@ -311,7 +298,7 @@ export default function Home() {
             <Link
               href="/trading"
               prefetch={false}
-              className="group border-border-primary bg-secondary-bg hover:border-border-focus hover:shadow-card-shadow relative block overflow-hidden rounded-xl border p-8 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
+              className="group border-border-card bg-tertiary-bg hover:shadow-card-shadow relative block overflow-hidden rounded-xl border p-8 transition-all duration-300 hover:shadow-xl"
             >
               <div className="mb-4 flex items-center gap-3">
                 <div className="bg-button-info/10 flex h-10 w-10 shrink-0 items-center justify-center rounded-lg">
@@ -321,7 +308,7 @@ export default function Home() {
                     inline={true}
                   />
                 </div>
-                <h3 className="text-card-headline text-xl font-bold">
+                <h3 className="text-card-headline group-hover:text-link text-xl font-bold transition-colors">
                   Trade Ads
                 </h3>
               </div>
@@ -343,7 +330,7 @@ export default function Home() {
             <Link
               href="/inventories"
               prefetch={false}
-              className="group border-border-primary bg-secondary-bg hover:border-border-focus hover:shadow-card-shadow relative block overflow-hidden rounded-xl border p-8 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
+              className="group border-border-card bg-tertiary-bg hover:shadow-card-shadow relative block overflow-hidden rounded-xl border p-8 transition-all duration-300 hover:shadow-xl"
             >
               <div className="mb-4 flex items-center gap-3">
                 <div className="bg-button-info/10 flex h-10 w-10 shrink-0 items-center justify-center rounded-lg">
@@ -353,7 +340,7 @@ export default function Home() {
                     inline={true}
                   />
                 </div>
-                <h3 className="text-card-headline text-xl font-bold">
+                <h3 className="text-card-headline group-hover:text-link text-xl font-bold transition-colors">
                   Inventory Checker
                 </h3>
               </div>
@@ -375,7 +362,7 @@ export default function Home() {
             <Link
               href="/dupes"
               prefetch={false}
-              className="group border-border-primary bg-secondary-bg hover:border-border-focus hover:shadow-card-shadow relative block overflow-hidden rounded-xl border p-8 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
+              className="group border-border-card bg-tertiary-bg hover:shadow-card-shadow relative block overflow-hidden rounded-xl border p-8 transition-all duration-300 hover:shadow-xl"
             >
               <div className="mb-4 flex items-center gap-3">
                 <div className="bg-button-info/10 flex h-10 w-10 shrink-0 items-center justify-center rounded-lg">
@@ -385,7 +372,7 @@ export default function Home() {
                     inline={true}
                   />
                 </div>
-                <h3 className="text-card-headline text-xl font-bold">
+                <h3 className="text-card-headline group-hover:text-link text-xl font-bold transition-colors">
                   Dupe Detection
                 </h3>
               </div>
@@ -407,7 +394,7 @@ export default function Home() {
             <Link
               href="/og"
               prefetch={false}
-              className="group border-border-primary bg-secondary-bg hover:border-border-focus hover:shadow-card-shadow relative block overflow-hidden rounded-xl border p-8 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
+              className="group border-border-card bg-tertiary-bg hover:shadow-card-shadow relative block overflow-hidden rounded-xl border p-8 transition-all duration-300 hover:shadow-xl"
             >
               <div className="mb-4 flex items-center gap-3">
                 <div className="bg-button-info/10 flex h-10 w-10 shrink-0 items-center justify-center rounded-lg">
@@ -417,7 +404,7 @@ export default function Home() {
                     inline={true}
                   />
                 </div>
-                <h3 className="text-card-headline text-xl font-bold">
+                <h3 className="text-card-headline group-hover:text-link text-xl font-bold transition-colors">
                   OG Finder
                 </h3>
               </div>
@@ -439,7 +426,7 @@ export default function Home() {
             <Link
               href="/leaderboard/money"
               prefetch={false}
-              className="group border-border-primary bg-secondary-bg hover:border-border-focus hover:shadow-card-shadow relative block overflow-hidden rounded-xl border p-8 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
+              className="group border-border-card bg-tertiary-bg hover:shadow-card-shadow relative block overflow-hidden rounded-xl border p-8 transition-all duration-300 hover:shadow-xl"
             >
               <div className="mb-4 flex items-center gap-3">
                 <div className="bg-button-info/10 flex h-10 w-10 shrink-0 items-center justify-center rounded-lg">
@@ -449,7 +436,7 @@ export default function Home() {
                     inline={true}
                   />
                 </div>
-                <h3 className="text-card-headline text-xl font-bold">
+                <h3 className="text-card-headline group-hover:text-link text-xl font-bold transition-colors">
                   Leaderboards
                 </h3>
               </div>
@@ -471,7 +458,7 @@ export default function Home() {
             <Link
               href="/calculators"
               prefetch={false}
-              className="group border-border-primary bg-secondary-bg hover:border-border-focus hover:shadow-card-shadow relative block overflow-hidden rounded-xl border p-8 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
+              className="group border-border-card bg-tertiary-bg hover:shadow-card-shadow relative block overflow-hidden rounded-xl border p-8 transition-all duration-300 hover:shadow-xl"
             >
               <div className="mb-4 flex items-center gap-3">
                 <div className="bg-button-info/10 flex h-10 w-10 shrink-0 items-center justify-center rounded-lg">
@@ -481,7 +468,7 @@ export default function Home() {
                     inline={true}
                   />
                 </div>
-                <h3 className="text-card-headline text-xl font-bold">
+                <h3 className="text-card-headline group-hover:text-link text-xl font-bold transition-colors">
                   Calculators
                 </h3>
               </div>
@@ -503,7 +490,7 @@ export default function Home() {
             <Link
               href="/servers"
               prefetch={false}
-              className="group border-border-primary bg-secondary-bg hover:border-border-focus hover:shadow-card-shadow relative block overflow-hidden rounded-xl border p-8 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
+              className="group border-border-card bg-tertiary-bg hover:shadow-card-shadow relative block overflow-hidden rounded-xl border p-8 transition-all duration-300 hover:shadow-xl"
             >
               <div className="mb-4 flex items-center gap-3">
                 <div className="bg-button-info/10 flex h-10 w-10 shrink-0 items-center justify-center rounded-lg">
@@ -513,7 +500,7 @@ export default function Home() {
                     inline={true}
                   />
                 </div>
-                <h3 className="text-card-headline text-xl font-bold">
+                <h3 className="text-card-headline group-hover:text-link text-xl font-bold transition-colors">
                   Private Servers
                 </h3>
               </div>
@@ -535,7 +522,7 @@ export default function Home() {
             <Link
               href="/users"
               prefetch={false}
-              className="group border-border-primary bg-secondary-bg hover:border-border-focus hover:shadow-card-shadow relative block overflow-hidden rounded-xl border p-8 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
+              className="group border-border-card bg-tertiary-bg hover:shadow-card-shadow relative block overflow-hidden rounded-xl border p-8 transition-all duration-300 hover:shadow-xl"
             >
               <div className="mb-4 flex items-center gap-3">
                 <div className="bg-button-info/10 flex h-10 w-10 shrink-0 items-center justify-center rounded-lg">
@@ -545,7 +532,7 @@ export default function Home() {
                     inline={true}
                   />
                 </div>
-                <h3 className="text-card-headline text-xl font-bold">
+                <h3 className="text-card-headline group-hover:text-link text-xl font-bold transition-colors">
                   User Profiles
                 </h3>
               </div>
@@ -567,7 +554,7 @@ export default function Home() {
             <Link
               href="/bot"
               prefetch={false}
-              className="group border-border-primary bg-secondary-bg hover:border-border-focus hover:shadow-card-shadow relative block overflow-hidden rounded-xl border p-8 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
+              className="group border-border-card bg-tertiary-bg hover:shadow-card-shadow relative block overflow-hidden rounded-xl border p-8 transition-all duration-300 hover:shadow-xl"
             >
               <div className="mb-4 flex items-center gap-3">
                 <div className="bg-button-info/10 flex h-10 w-10 shrink-0 items-center justify-center rounded-lg">
@@ -577,7 +564,7 @@ export default function Home() {
                     inline={true}
                   />
                 </div>
-                <h3 className="text-card-headline text-xl font-bold">
+                <h3 className="text-card-headline group-hover:text-link text-xl font-bold transition-colors">
                   Discord Bot
                 </h3>
               </div>
@@ -595,13 +582,6 @@ export default function Home() {
               </div>
             </Link>
           </div>
-        </div>
-      </section>
-
-      {/* CCPA Compliance */}
-      <section className="bg-secondary-bg/30 py-8">
-        <div className="container mx-auto px-4 text-center">
-          <span data-ccpa-link="1"></span>
         </div>
       </section>
     </main>

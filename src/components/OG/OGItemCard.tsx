@@ -83,11 +83,7 @@ export default function OGItemCard({
 
   return (
     <div
-      className={`border-border-primary text-primary-text hover:shadow-card-shadow relative flex min-h-[400px] cursor-pointer flex-col rounded-lg border p-3 transition-all duration-200 ${
-        isOriginalOwner
-          ? "bg-status-success/10 border-status-success hover:border-status-success"
-          : "bg-primary-bg hover:border-border-focus"
-      }`}
+      className="border-border-card bg-tertiary-bg text-primary-text hover:shadow-card-shadow relative flex min-h-[400px] cursor-pointer flex-col rounded-lg border p-3 transition-all duration-200"
       onClick={() => onCardClick(item)}
     >
       {/* Duplicate Indicator */}
@@ -120,10 +116,9 @@ export default function OGItemCard({
         </h2>
         <div className="flex items-center gap-2">
           <span
-            className="text-primary-text flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-medium"
+            className="text-primary-text bg-tertiary-bg/40 flex h-6 items-center gap-1.5 rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl"
             style={{
               borderColor: getCategoryColor(item.categoryTitle),
-              backgroundColor: getCategoryColor(item.categoryTitle) + "20", // Add 20% opacity
             }}
           >
             {(() => {
@@ -200,7 +195,7 @@ export default function OGItemCard({
               </div>
             </TooltipTrigger>
             <TooltipContent>
-              {item.uniqueCirculation.toLocaleString()}
+              Monthly unique: {item.uniqueCirculation.toLocaleString()}
             </TooltipContent>
           </Tooltip>
         </div>
@@ -249,7 +244,7 @@ export default function OGItemCard({
                 </div>
               </TooltipTrigger>
               <TooltipContent>
-                {formatFullValue(itemData.duped_value)}
+                Duped value: {formatFullValue(itemData.duped_value)}
               </TooltipContent>
             </Tooltip>
           </div>

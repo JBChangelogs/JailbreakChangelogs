@@ -28,6 +28,7 @@ import {
   DropdownMenuRadioItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import { Masonry } from "@mui/lab";
 
@@ -488,7 +489,7 @@ function RobberyTrackerContent() {
     return (
       <main className="text-primary-text min-h-screen">
         <div className="container mx-auto flex min-h-screen items-center justify-center px-4 py-8">
-          <div className="border-border-primary bg-secondary-bg w-full max-w-2xl rounded-lg border p-6 text-center shadow-sm">
+          <div className="border-border-card bg-secondary-bg w-full max-w-2xl rounded-lg border p-6 text-center shadow-sm">
             <h2 className="text-primary-text text-2xl font-semibold">
               You have been temporarily banned
             </h2>
@@ -568,7 +569,7 @@ function RobberyTrackerContent() {
     return (
       <main className="text-primary-text min-h-screen">
         <div className="container mx-auto flex min-h-screen items-center justify-center px-4 py-8">
-          <div className="border-border-primary bg-secondary-bg w-full max-w-2xl rounded-lg border p-6 text-center shadow-sm">
+          <div className="border-border-card bg-secondary-bg w-full max-w-2xl rounded-lg border p-6 text-center shadow-sm">
             <h2 className="text-primary-text text-2xl font-semibold">
               Connected from another device/tab
             </h2>
@@ -617,7 +618,7 @@ function RobberyTrackerContent() {
                   placeholder="Search robberies..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="border-border-primary bg-secondary-bg text-primary-text placeholder-secondary-text hover:border-border-focus focus:border-button-info w-full rounded-lg border px-4 py-4 pr-10 pl-10 transition-all focus:outline-none"
+                  className="border-border-card bg-secondary-bg text-primary-text placeholder-secondary-text hover:border-border-focus focus:border-button-info h-[56px] w-full rounded-lg border px-4 py-2 pr-10 pl-10 transition-all focus:outline-none"
                 />
                 {searchQuery && (
                   <button
@@ -639,7 +640,7 @@ function RobberyTrackerContent() {
                   <DropdownMenuTrigger asChild>
                     <button
                       type="button"
-                      className="border-border-primary bg-secondary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus flex h-[56px] w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all focus:ring-1 focus:outline-none"
+                      className="border-border-card bg-secondary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus flex h-[56px] w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all focus:ring-1 focus:outline-none"
                       aria-label="Filter by server size"
                     >
                       <span className="truncate">{serverSizeLabel}</span>
@@ -651,7 +652,7 @@ function RobberyTrackerContent() {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent
                     align="start"
-                    className="border-border-primary bg-secondary-bg text-primary-text scrollbar-thin max-h-[240px] w-[var(--radix-popper-anchor-width)] min-w-[var(--radix-popper-anchor-width)] overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
+                    className="border-border-card bg-secondary-bg text-primary-text scrollbar-thin max-h-[240px] w-[var(--radix-popper-anchor-width)] min-w-[var(--radix-popper-anchor-width)] overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
                   >
                     <DropdownMenuRadioGroup
                       value={serverSize}
@@ -689,7 +690,7 @@ function RobberyTrackerContent() {
                     <DropdownMenuTrigger asChild>
                       <button
                         type="button"
-                        className="border-border-primary bg-secondary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus flex h-[56px] w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all focus:ring-1 focus:outline-none"
+                        className="border-border-card bg-secondary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus flex h-[56px] w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all focus:ring-1 focus:outline-none"
                         aria-label="Sort by difficulty"
                       >
                         <span className="truncate">{difficultySortLabel}</span>
@@ -701,7 +702,7 @@ function RobberyTrackerContent() {
                     </DropdownMenuTrigger>
                     <DropdownMenuContent
                       align="start"
-                      className="border-border-primary bg-secondary-bg text-primary-text scrollbar-thin max-h-[240px] w-[var(--radix-popper-anchor-width)] min-w-[var(--radix-popper-anchor-width)] overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
+                      className="border-border-card bg-secondary-bg text-primary-text scrollbar-thin max-h-[240px] w-[var(--radix-popper-anchor-width)] min-w-[var(--radix-popper-anchor-width)] overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
                     >
                       <DropdownMenuRadioGroup
                         value={difficultySort}
@@ -735,7 +736,7 @@ function RobberyTrackerContent() {
                     <DropdownMenuTrigger asChild>
                       <button
                         type="button"
-                        className="border-border-primary bg-secondary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus flex h-[56px] w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all focus:ring-1 focus:outline-none"
+                        className="border-border-card bg-secondary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus flex h-[56px] w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all focus:ring-1 focus:outline-none"
                         aria-label="Sort by name"
                       >
                         <span className="truncate">{nameSortLabel}</span>
@@ -747,7 +748,7 @@ function RobberyTrackerContent() {
                     </DropdownMenuTrigger>
                     <DropdownMenuContent
                       align="start"
-                      className="border-border-primary bg-secondary-bg text-primary-text scrollbar-thin max-h-[240px] w-[var(--radix-popper-anchor-width)] min-w-[var(--radix-popper-anchor-width)] overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
+                      className="border-border-card bg-secondary-bg text-primary-text scrollbar-thin max-h-[240px] w-[var(--radix-popper-anchor-width)] min-w-[var(--radix-popper-anchor-width)] overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
                     >
                       <DropdownMenuRadioGroup
                         value={nameSort}
@@ -779,7 +780,7 @@ function RobberyTrackerContent() {
                   <DropdownMenuTrigger asChild>
                     <button
                       type="button"
-                      className="border-border-primary bg-secondary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus flex h-[56px] w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all focus:ring-1 focus:outline-none"
+                      className="border-border-card bg-secondary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus flex h-[56px] w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all focus:ring-1 focus:outline-none"
                       aria-label="Sort by time"
                     >
                       <span className="truncate">{timeSortLabel}</span>
@@ -791,7 +792,7 @@ function RobberyTrackerContent() {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent
                     align="start"
-                    className="border-border-primary bg-secondary-bg text-primary-text scrollbar-thin max-h-[240px] w-[var(--radix-popper-anchor-width)] min-w-[var(--radix-popper-anchor-width)] overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
+                    className="border-border-card bg-secondary-bg text-primary-text scrollbar-thin max-h-[240px] w-[var(--radix-popper-anchor-width)] min-w-[var(--radix-popper-anchor-width)] overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
                   >
                     <DropdownMenuRadioGroup
                       value={timeSort}
@@ -945,32 +946,18 @@ function RobberyTrackerContent() {
 
         {/* Main View Toggle */}
         <div className="mb-6 overflow-x-auto">
-          <div role="tablist" className="tabs tabs-boxed bg-transparent p-0">
-            <button
-              role="tab"
-              aria-selected={activeView === "robberies"}
-              onClick={() => handleViewChange("robberies")}
-              className={`tab ${activeView === "robberies" ? "tab-active" : ""}`}
-            >
-              Robberies
-            </button>
-            <button
-              role="tab"
-              aria-selected={activeView === "mansions"}
-              onClick={() => handleViewChange("mansions")}
-              className={`tab ${activeView === "mansions" ? "tab-active" : ""}`}
-            >
-              Mansions
-            </button>
-            <button
-              role="tab"
-              aria-selected={activeView === "airdrops"}
-              onClick={() => handleViewChange("airdrops")}
-              className={`tab ${activeView === "airdrops" ? "tab-active" : ""}`}
-            >
-              Airdrops
-            </button>
-          </div>
+          <Tabs
+            value={activeView}
+            onValueChange={(value) =>
+              handleViewChange(value as "robberies" | "mansions" | "airdrops")
+            }
+          >
+            <TabsList>
+              <TabsTrigger value="robberies">Robberies</TabsTrigger>
+              <TabsTrigger value="mansions">Mansions</TabsTrigger>
+              <TabsTrigger value="airdrops">Airdrops</TabsTrigger>
+            </TabsList>
+          </Tabs>
         </div>
 
         <NitroRobberiesTopAd className="mb-6" />
@@ -989,7 +976,7 @@ function RobberyTrackerContent() {
 
         {/* Show stale data warning if disconnected */}
         {!isConnected && hasData && !requiresManualReconnect && (
-          <div className="bg-secondary-bg border-border-primary mb-4 rounded-lg border p-4 shadow-sm">
+          <div className="border-border-card bg-secondary-bg mb-4 rounded-lg border p-4 shadow-sm">
             <div className="flex items-start gap-3">
               <div>
                 <span className="text-primary-text text-base font-bold">
@@ -1152,32 +1139,22 @@ function RobberyTrackerContent() {
               <>
                 {/* Airdrop Location Tabs */}
                 <div className="mb-6 overflow-x-auto">
-                  <div role="tablist" className="tabs flex min-w-max flex-wrap">
-                    <button
-                      role="tab"
-                      aria-selected={activeAirdropLocation === "all"}
-                      onClick={() => setActiveAirdropLocation("all")}
-                      className={`tab ${activeAirdropLocation === "all" ? "tab-active" : ""}`}
-                    >
-                      All Locations
-                    </button>
-                    <button
-                      role="tab"
-                      aria-selected={activeAirdropLocation === "CactusValley"}
-                      onClick={() => setActiveAirdropLocation("CactusValley")}
-                      className={`tab ${activeAirdropLocation === "CactusValley" ? "tab-active" : ""}`}
-                    >
-                      Cactus Valley
-                    </button>
-                    <button
-                      role="tab"
-                      aria-selected={activeAirdropLocation === "Dunes"}
-                      onClick={() => setActiveAirdropLocation("Dunes")}
-                      className={`tab ${activeAirdropLocation === "Dunes" ? "tab-active" : ""}`}
-                    >
-                      Dunes
-                    </button>
-                  </div>
+                  <Tabs
+                    value={activeAirdropLocation}
+                    onValueChange={(value) =>
+                      setActiveAirdropLocation(
+                        value as "all" | "CactusValley" | "Dunes",
+                      )
+                    }
+                  >
+                    <TabsList>
+                      <TabsTrigger value="all">All Locations</TabsTrigger>
+                      <TabsTrigger value="CactusValley">
+                        Cactus Valley
+                      </TabsTrigger>
+                      <TabsTrigger value="Dunes">Dunes</TabsTrigger>
+                    </TabsList>
+                  </Tabs>
                 </div>
 
                 {/* Airdrop Statistics */}

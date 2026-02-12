@@ -9,6 +9,7 @@ import FavoritesTab from "./FavoritesTab";
 import RobloxProfileTab from "./RobloxProfileTab";
 import PrivateServersTab from "./PrivateServersTab";
 import { UserSettings } from "@/types/auth";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface User {
   id: string;
@@ -49,7 +50,8 @@ interface CommentData {
   item_type: string;
   user_id: string;
   edited_at: number | null;
-  owner: string;
+  owner?: string;
+  parent_id?: number | null;
 }
 
 interface Server {
@@ -205,7 +207,7 @@ export default function ProfileTabs({
     return () => window.removeEventListener("hashchange", handleHashChange);
   }, [user?.roblox_id]);
 
-  const handleChange = (event: React.SyntheticEvent, newValue: number) => {
+  const handleChange = (newValue: number) => {
     setValue(newValue);
     const hasRobloxConnection = Boolean(user?.roblox_id);
     // Update hash based on selected tab
@@ -234,9 +236,7 @@ export default function ProfileTabs({
     <div className="w-full">
       <ProfileOverflowTabs
         value={value}
-        onChange={(e, idx) =>
-          handleChange(e as unknown as React.SyntheticEvent, idx)
-        }
+        onChange={(idx) => handleChange(idx)}
         hasRobloxConnection={hasRobloxConnection}
       />
       <TabPanel value={value} index={0}>
@@ -296,7 +296,7 @@ function ProfileOverflowTabs({
   hasRobloxConnection,
 }: {
   value: number;
-  onChange: (e: React.SyntheticEvent, v: number) => void;
+  onChange: (v: number) => void;
   hasRobloxConnection: boolean;
 }) {
   const labels = [
@@ -309,21 +309,20 @@ function ProfileOverflowTabs({
 
   return (
     <div className="overflow-x-auto">
-      <div role="tablist" className="tabs min-w-max">
-        {labels.map((label, idx) => (
-          <button
-            key={label}
-            role="tab"
-            aria-selected={value === idx}
-            aria-controls={`profile-tabpanel-${idx}`}
-            id={`profile-tab-${idx}`}
-            onClick={(e) => onChange(e as unknown as React.SyntheticEvent, idx)}
-            className={`tab ${value === idx ? "tab-active" : ""}`}
-          >
-            {label}
-          </button>
-        ))}
-      </div>
+      <Tabs value={String(value)} onValueChange={(v) => onChange(Number(v))}>
+        <TabsList>
+          {labels.map((label, idx) => (
+            <TabsTrigger
+              key={label}
+              value={String(idx)}
+              aria-controls={`profile-tabpanel-${idx}`}
+              id={`profile-tab-${idx}`}
+            >
+              {label}
+            </TabsTrigger>
+          ))}
+        </TabsList>
+      </Tabs>
     </div>
   );
 }

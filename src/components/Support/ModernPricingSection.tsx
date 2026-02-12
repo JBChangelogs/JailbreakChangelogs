@@ -181,7 +181,7 @@ export default function ModernPricingSection() {
             </p>
           </div>
 
-          <div className="border-border-primary mt-6 overflow-hidden rounded-lg border p-0.5">
+          <div className="border-border-card mt-6 overflow-hidden rounded-lg border p-0.5">
             <div className="flex sm:-mx-0.5">
               <Button
                 onClick={() => setIsYearly(false)}
@@ -210,7 +210,7 @@ export default function ModernPricingSection() {
               className={`hover:bg-quaternary-bg transform rounded-lg px-6 py-4 transition-all duration-500 ${
                 tier.recommended
                   ? "border-button-info bg-secondary-bg border-2"
-                  : "border-border-primary bg-secondary-bg border"
+                  : "border-border-card bg-secondary-bg border"
               } ${
                 highlightedTier === tier.tierNumber
                   ? "ring-warning ring-opacity-75 scale-110 ring-4"
@@ -334,7 +334,7 @@ export default function ModernPricingSection() {
                   {isYearly ? "Support with Robux" : "Support with Ko-fi"}
                 </Button>
               ) : (
-                <div className="border-border-primary bg-primary-bg text-primary-text mt-10 w-full rounded-md border px-4 py-2 text-center font-medium tracking-wide capitalize">
+                <div className="border-border-card bg-primary-bg text-primary-text mt-10 w-full rounded-md border px-4 py-2 text-center font-medium tracking-wide capitalize">
                   Already included
                 </div>
               )}
@@ -343,7 +343,7 @@ export default function ModernPricingSection() {
         </div>
 
         {/* Important Information Section */}
-        <div className="bg-button-info/10 border-border-primary mt-8 rounded-lg border p-6">
+        <div className="bg-button-info/10 border-border-card mt-8 rounded-lg border p-6">
           <h3 className="text-primary-text mb-4 text-lg font-semibold">
             Important Information
           </h3>
@@ -409,7 +409,7 @@ export default function ModernPricingSection() {
 
         {/* Support Methods */}
         <div className="support-methods-section mt-12 grid gap-8 md:grid-cols-3">
-          <div className="border-border-primary bg-secondary-bg flex flex-col items-center justify-center rounded-lg border p-6 text-center">
+          <div className="border-border-card bg-secondary-bg flex flex-col items-center justify-center rounded-lg border p-6 text-center">
             <h3 className="text-primary-text mb-4 text-lg font-semibold">
               Ko-fi Donations
             </h3>
@@ -432,7 +432,7 @@ export default function ModernPricingSection() {
             </a>
           </div>
 
-          <div className="border-border-primary bg-secondary-bg flex flex-col items-center justify-center rounded-lg border p-6 text-center">
+          <div className="border-border-card bg-secondary-bg flex flex-col items-center justify-center rounded-lg border p-6 text-center">
             <h3 className="text-primary-text mb-4 text-lg font-semibold">
               Roblox Donations
             </h3>
@@ -455,12 +455,12 @@ export default function ModernPricingSection() {
             </a>
           </div>
 
-          <div className="border-border-primary bg-secondary-bg rounded-lg border p-6 text-center">
+          <div className="border-border-card bg-secondary-bg rounded-lg border p-6 text-center">
             <h3 className="text-primary-text mb-4 text-lg font-semibold">
               Crypto Donations
             </h3>
             <div className="space-y-4">
-              <div className="border-border-primary bg-surface-bg rounded-lg border p-4">
+              <div className="border-border-card bg-surface-bg rounded-lg border p-4">
                 <div className="text-primary-text mb-2 flex items-center justify-center gap-2">
                   <Icon
                     icon="logos:bitcoin"
@@ -496,7 +496,7 @@ export default function ModernPricingSection() {
                 </div>
               </div>
 
-              <div className="border-border-primary bg-surface-bg rounded-lg border p-4">
+              <div className="border-border-card bg-surface-bg rounded-lg border p-4">
                 <div className="text-primary-text mb-2 flex items-center justify-center gap-2">
                   <Icon
                     icon="logos:ethereum"
@@ -532,7 +532,7 @@ export default function ModernPricingSection() {
                 </div>
               </div>
 
-              <div className="border-border-primary bg-surface-bg rounded-lg border p-4">
+              <div className="border-border-card bg-surface-bg rounded-lg border p-4">
                 <div className="text-primary-text mb-2 flex items-center justify-center gap-2">
                   <Icon
                     icon="token-branded:ltc"
@@ -572,7 +572,7 @@ export default function ModernPricingSection() {
         </div>
 
         {/* Long-term Sponsor Section */}
-        <div className="border-border-primary bg-secondary-bg mt-4 rounded-lg border p-4">
+        <div className="border-border-card bg-secondary-bg mt-4 rounded-lg border p-4">
           <div className="text-center">
             <h3 className="text-primary-text mb-2 text-lg font-semibold">
               Want to become a long-term sponsor?

@@ -1,5 +1,6 @@
 import ImageModal from "@/components/ui/ImageModal";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Season } from "@/types/seasons";
 import { Icon } from "@/components/ui/IconWrapper";
 import {
@@ -105,7 +106,7 @@ export default function XpCalculatorForm({
     : "Select your level";
 
   return (
-    <div className="border-border-primary bg-secondary-bg hover:border-border-focus mb-8 rounded-lg border p-6">
+    <div className="border-border-card bg-secondary-bg mb-8 rounded-lg border p-6">
       <h2 className="text-primary-text mb-6 text-2xl font-semibold">
         🎯 XP Progress Calculator
       </h2>
@@ -135,7 +136,7 @@ export default function XpCalculatorForm({
             <DropdownMenuTrigger asChild>
               <button
                 type="button"
-                className="border-border-primary bg-primary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus flex h-[56px] w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all duration-300 focus:ring-1 focus:outline-none"
+                className="border-border-card bg-primary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus flex h-[56px] w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all duration-300 focus:ring-1 focus:outline-none"
                 aria-label="Select your level"
               >
                 <span className="truncate">{currentLevelLabel}</span>
@@ -148,7 +149,7 @@ export default function XpCalculatorForm({
             </DropdownMenuTrigger>
             <DropdownMenuContent
               align="start"
-              className="border-border-primary bg-primary-bg text-primary-text scrollbar-thin max-h-[280px] w-[var(--radix-popper-anchor-width)] min-w-[var(--radix-popper-anchor-width)] overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
+              className="border-border-card bg-primary-bg text-primary-text scrollbar-thin max-h-[280px] w-[var(--radix-popper-anchor-width)] min-w-[var(--radix-popper-anchor-width)] overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
             >
               <DropdownMenuRadioGroup
                 value={currentLevel ? currentLevel.toString() : ""}
@@ -202,28 +203,28 @@ export default function XpCalculatorForm({
         </div>
       </div>
 
-      <div className="border-border-primary bg-primary-bg mb-6 rounded-lg border p-4">
+      <div className="border-border-card bg-tertiary-bg mb-6 rounded-lg border p-4">
         <p className="text-secondary-text mb-3 text-xs">
           These options apply to the entire remaining season.
         </p>
         <div className="space-y-3">
           <label className="text-primary-text flex cursor-pointer items-center gap-3">
-            <input
-              type="checkbox"
+            <Checkbox
               checked={includeDailyXp}
-              onChange={(e) => onIncludeDailyXpChange(e.target.checked)}
-              className="text-button-info focus:ring-button-info h-4 w-4 cursor-pointer rounded"
+              onCheckedChange={(checked) =>
+                onIncludeDailyXpChange(checked === true)
+              }
             />
             <div className="flex-1">
               <span className="font-medium">Include Daily XP</span>
             </div>
           </label>
           <label className="text-primary-text flex cursor-pointer items-center gap-3">
-            <input
-              type="checkbox"
+            <Checkbox
               checked={includeContracts}
-              onChange={(e) => onIncludeContractsChange(e.target.checked)}
-              className="text-button-info focus:ring-button-info h-4 w-4 cursor-pointer rounded"
+              onCheckedChange={(checked) =>
+                onIncludeContractsChange(checked === true)
+              }
             />
             <div className="flex-1">
               <span className="font-medium">Include Weekly Contracts</span>

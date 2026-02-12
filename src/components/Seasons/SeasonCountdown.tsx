@@ -146,7 +146,7 @@ const SeasonCountdown: React.FC<SeasonCountdownProps> = ({
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="border-border-primary bg-primary-bg hover:border-border-focus rounded-lg border p-4">
+      <div className="border-border-card bg-tertiary-bg rounded-lg border p-4">
         <div className="flex flex-col gap-2">
           <div className="flex items-center gap-2">
             <span className="text-primary-text text-lg font-semibold">
@@ -221,7 +221,7 @@ const SeasonCountdown: React.FC<SeasonCountdownProps> = ({
       </div>
 
       {nextSeasonStatus && (
-        <div className="border-border-primary bg-primary-bg hover:border-border-focus rounded-lg border p-4">
+        <div className="border-border-card bg-tertiary-bg rounded-lg border p-4">
           <div className="flex flex-col gap-2">
             <div className="flex items-center gap-2">
               <span className="text-primary-text text-lg font-semibold">

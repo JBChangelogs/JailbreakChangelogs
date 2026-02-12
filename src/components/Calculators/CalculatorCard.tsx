@@ -20,7 +20,7 @@ interface CalculatorCardProps {
 export default function CalculatorCard({ calculator }: CalculatorCardProps) {
   return (
     <Link href={calculator.href} className="group">
-      <div className="border-border-primary bg-secondary-bg hover:border-border-focus hover:shadow-card-shadow h-full rounded-lg border p-6 transition-colors duration-200 hover:shadow-lg">
+      <div className="border-border-card bg-secondary-bg h-full rounded-lg border p-6 transition-colors duration-200 hover:shadow-lg">
         <div className="mb-4 flex items-center gap-2">
           <div
             className={`${calculator.color} flex h-8 w-8 items-center justify-center rounded-lg`}

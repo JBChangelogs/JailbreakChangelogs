@@ -6,8 +6,9 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { UserAvatar } from "@/utils/avatar";
-import { TradeUserTooltip } from "./TradeUserTooltip";
+import { UserDetailsTooltip } from "@/components/ui/UserDetailsTooltip";
 import RobloxTradeUser from "./RobloxTradeUser";
+import type { UserData } from "@/types/auth";
 
 interface TradeUserProfileProps {
   user: {
@@ -31,7 +32,7 @@ interface TradeUserProfileProps {
 export default function TradeUserProfile({ user }: TradeUserProfileProps) {
   return (
     <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center">
-      <div className="border-border-primary bg-primary-bg w-fit rounded-lg border p-4">
+      <div className="border-border-card bg-primary-bg w-fit rounded-lg border p-4">
         <div className="flex flex-col items-start gap-6 sm:flex-row sm:items-center">
           {/* Discord Profile */}
           <div className="flex items-center gap-4">
@@ -59,7 +60,7 @@ export default function TradeUserProfile({ user }: TradeUserProfileProps) {
                     <span className="text-primary-text text-xs">Discord</span>
                   </div>
                 </div>
-                <Tooltip>
+                <Tooltip delayDuration={0}>
                   <TooltipTrigger asChild>
                     <Link
                       href={`/users/${user.id}`}
@@ -72,10 +73,10 @@ export default function TradeUserProfile({ user }: TradeUserProfileProps) {
                     </Link>
                   </TooltipTrigger>
                   <TooltipContent
-                    side="bottom"
-                    className="bg-secondary-bg text-primary-text max-w-[400px] min-w-[300px] border-none shadow-[var(--color-card-shadow)]"
+                    side="top"
+                    className="max-w-sm min-w-[300px] p-0"
                   >
-                    <TradeUserTooltip user={user} />
+                    <UserDetailsTooltip user={user as UserData} />
                   </TooltipContent>
                 </Tooltip>
                 <div className="text-secondary-text text-sm">

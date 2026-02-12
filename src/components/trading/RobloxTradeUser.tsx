@@ -5,7 +5,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import { RobloxIcon } from "@/components/Icons/RobloxIcon";
-import { TradeUserTooltip } from "./TradeUserTooltip";
+import { UserDetailsTooltip } from "../ui/UserDetailsTooltip";
+import type { UserData } from "@/types/auth";
 
 interface RobloxTradeUserProps {
   user: {
@@ -61,7 +62,7 @@ export default function RobloxTradeUser({
           </div>
         )}
         <div className="flex flex-col">
-          <Tooltip>
+          <Tooltip delayDuration={0}>
             <TooltipTrigger asChild>
               <Link
                 href={`https://www.roblox.com/users/${user.roblox_id}/profile`}
@@ -72,11 +73,8 @@ export default function RobloxTradeUser({
                 {user.roblox_display_name || user.roblox_username}
               </Link>
             </TooltipTrigger>
-            <TooltipContent
-              side="bottom"
-              className="bg-secondary-bg text-primary-text max-w-[400px] min-w-[300px] border-none shadow-[var(--color-card-shadow)]"
-            >
-              <TradeUserTooltip user={user} />
+            <TooltipContent side="top" className="max-w-sm min-w-[300px] p-0">
+              <UserDetailsTooltip user={user as UserData} />
             </TooltipContent>
           </Tooltip>
           {user.roblox_display_name && (

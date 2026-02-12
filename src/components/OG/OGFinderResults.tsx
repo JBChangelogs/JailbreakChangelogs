@@ -442,7 +442,7 @@ export default function OGFinderResults({
 
       {/* Error Display */}
       {error && (
-        <div className="border-border-primary bg-secondary-bg shadow-card-shadow rounded-lg border p-6">
+        <div className="border-border-card bg-secondary-bg rounded-lg border p-6">
           <div className="text-center">
             <div className="mb-4 flex justify-center">
               <div className="bg-status-error/10 rounded-full p-3">
@@ -464,7 +464,7 @@ export default function OGFinderResults({
       {!error &&
         (!initialData?.results || initialData.results.length === 0) && (
           <>
-            <div className="border-border-primary bg-secondary-bg shadow-card-shadow rounded-lg border p-6">
+            <div className="border-border-card bg-secondary-bg rounded-lg border p-6">
               <div className="text-center">
                 <div className="mb-4 flex justify-center">
                   <div className="bg-status-error/10 rounded-full p-3">
@@ -513,7 +513,7 @@ export default function OGFinderResults({
           />
 
           {/* Items Grid */}
-          <div className="border-border-primary bg-secondary-bg shadow-card-shadow rounded-lg border p-6">
+          <div className="border-border-card bg-secondary-bg rounded-lg border p-6">
             <h2 className="text-primary-text mb-4 text-xl font-semibold">
               OG Items
             </h2>

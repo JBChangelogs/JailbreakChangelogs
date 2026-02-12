@@ -58,14 +58,14 @@ export default function DupeStats({
   })();
 
   return (
-    <div className="border-border-primary bg-secondary-bg shadow-card-shadow rounded-lg border p-6">
+    <div className="border-border-card bg-secondary-bg rounded-lg border p-6">
       <h2 className="text-primary-text mb-4 text-xl font-semibold">
         Duplicate Statistics
       </h2>
 
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
         {/* Total Items */}
-        <div className="border-border-primary bg-tertiary-bg rounded-lg border p-4">
+        <div className="border-border-card bg-tertiary-bg rounded-lg border p-4">
           <p className="text-secondary-text text-sm">Total Items</p>
           <p className="text-primary-text text-2xl font-bold">
             {duplicateStats.totalItems}
@@ -73,7 +73,7 @@ export default function DupeStats({
         </div>
 
         {/* Unique Items */}
-        <div className="border-border-primary bg-tertiary-bg rounded-lg border p-4">
+        <div className="border-border-card bg-tertiary-bg rounded-lg border p-4">
           <p className="text-secondary-text text-sm">Unique Items</p>
           <p className="text-primary-text text-2xl font-bold">
             {duplicateStats.uniqueItems}
@@ -81,7 +81,7 @@ export default function DupeStats({
         </div>
 
         {/* Duplicate Items */}
-        <div className="border-border-primary bg-tertiary-bg rounded-lg border p-4">
+        <div className="border-border-card bg-tertiary-bg rounded-lg border p-4">
           <p className="text-secondary-text text-sm">Duplicate Items</p>
           <p className="text-primary-text text-2xl font-bold">
             {duplicateStats.duplicateCount}
@@ -89,7 +89,7 @@ export default function DupeStats({
         </div>
 
         {/* Total Duplicates */}
-        <div className="border-border-primary bg-tertiary-bg rounded-lg border p-4">
+        <div className="border-border-card bg-tertiary-bg rounded-lg border p-4">
           <p className="text-secondary-text text-sm">Total Duplicates</p>
           <p className="text-primary-text text-2xl font-bold">
             {duplicateStats.totalDuplicates}
@@ -98,7 +98,7 @@ export default function DupeStats({
       </div>
 
       {/* Dupe Value */}
-      <div className="border-border-primary bg-tertiary-bg mt-4 rounded-lg border p-4">
+      <div className="border-border-card bg-tertiary-bg mt-4 rounded-lg border p-4">
         <div className="flex items-center justify-between">
           <div>
             <p className="text-secondary-text text-sm">Total Dupe Value</p>

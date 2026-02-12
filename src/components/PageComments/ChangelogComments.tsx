@@ -44,7 +44,6 @@ import { useAuthContext } from "@/contexts/AuthContext";
 import { UserData } from "@/types/auth";
 import Link from "next/link";
 import ReportCommentModal from "./ReportCommentModal";
-import LoginModalWrapper from "../Auth/LoginModalWrapper";
 import SupporterModal from "../Modals/SupporterModal";
 import { useSupporterModal } from "@/hooks/useSupporterModal";
 import { UserDetailsTooltip } from "@/components/ui/UserDetailsTooltip";
@@ -306,7 +305,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
   const [isClient, setIsClient] = useState(false);
 
   // --- Auth & User State ---
-  const { isAuthenticated, user } = useAuthContext();
+  const { isAuthenticated, user, setLoginModal } = useAuthContext();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [currentUserPremiumType, setCurrentUserPremiumType] =
@@ -329,7 +328,6 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
   const [reportingCommentId, setReportingCommentId] = useState<number | null>(
     null,
   );
-  const [loginModalOpen, setLoginModalOpen] = useState(false);
   const [isSubmittingComment, setIsSubmittingComment] = useState(false);
   const [isRefreshingComments, setIsRefreshingComments] = useState(false);
 
@@ -1048,7 +1046,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
   const handleReportClick = (commentId: number) => {
     if (!isAuthenticated) {
       toast.error("You must be logged in to report comments");
-      setLoginModalOpen(true);
+      setLoginModal({ open: true });
       return;
     }
 
@@ -1098,9 +1096,14 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
     }
   };
 
+  const containerBgClass =
+    type === "trade" ? "bg-tertiary-bg" : "bg-secondary-bg";
+
   return (
     <div className="space-y-2 sm:space-y-3">
-      <div className="border-border-primary bg-tertiary-bg rounded-lg border p-2 sm:p-3">
+      <div
+        className={`border-border-card ${containerBgClass} rounded-lg border p-2 sm:p-3`}
+      >
         <div className="flex flex-col gap-4">
           <div>
             <h2
@@ -1138,7 +1141,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                 className={`w-full resize-y rounded border p-3 text-sm focus:outline-none ${
                   !isLoggedIn
                     ? "border-secondary-bg bg-primary-bg text-primary-text placeholder-secondary-text cursor-not-allowed"
-                    : "border-border-primary bg-form-input text-primary-text placeholder-secondary-text hover:border-border-focus focus:border-button-info"
+                    : "border-border-card bg-form-input text-primary-text placeholder-secondary-text focus:border-button-info"
                 }`}
                 autoCorrect="off"
                 autoComplete="off"
@@ -1175,7 +1178,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                   !isLoggedIn
                     ? (e) => {
                         e.preventDefault();
-                        setLoginModalOpen(true);
+                        setLoginModal({ open: true });
                       }
                     : undefined
                 }
@@ -1448,7 +1451,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                               />
                             </div>
                           ) : hideRecent ? (
-                            <div className="ring-tertiary-text/20 border-border-primary bg-primary-bg flex h-10 w-10 items-center justify-center rounded-full border ring-2">
+                            <div className="ring-tertiary-text/20 border-border-card bg-primary-bg flex h-10 w-10 items-center justify-center rounded-full border ring-2">
                               {/* Lock icon for hidden users */}
                               <svg
                                 className="text-secondary-text h-5 w-5"
@@ -1664,7 +1667,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                                       setEditContent(e.target.value)
                                     }
                                     rows={3}
-                                    className="border-border-primary bg-form-input text-primary-text hover:border-border-focus focus:border-button-info w-full resize-y rounded border p-3 text-sm focus:outline-none"
+                                    className="border-border-card bg-form-input text-primary-text focus:border-button-info w-full resize-y rounded border p-3 text-sm focus:outline-none"
                                     autoCorrect="off"
                                     autoComplete="off"
                                     spellCheck="false"
@@ -1813,7 +1816,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                                   setReplyContent(e.target.value)
                                 }
                                 rows={2}
-                                className="border-border-primary bg-form-input text-primary-text placeholder-secondary-text focus:border-button-info w-full resize-y rounded border p-2 text-sm focus:outline-none"
+                                className="border-border-card bg-form-input text-primary-text placeholder-secondary-text focus:border-button-info w-full resize-y rounded border p-2 text-sm focus:outline-none"
                                 placeholder="Write a reply..."
                                 autoCorrect="off"
                                 autoComplete="off"
@@ -1901,11 +1904,6 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
             : ""
         }
         commentId={reportingCommentId || 0}
-      />
-
-      <LoginModalWrapper
-        open={loginModalOpen}
-        onClose={() => setLoginModalOpen(false)}
       />
 
       {/* Supporter Modal */}

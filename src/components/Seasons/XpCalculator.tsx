@@ -319,7 +319,7 @@ export default function XpCalculator({ season }: XpCalculatorProps) {
   // If season has ended, show a different UI
   if (seasonHasEnded) {
     return (
-      <div className="border-border-primary bg-secondary-bg hover:border-border-focus mb-8 rounded-lg border p-6">
+      <div className="border-border-card bg-secondary-bg hover:border-border-focus mb-8 rounded-lg border p-6">
         <div className="text-center">
           <div className="mb-4">
             <div className="to-button-danger/80 from-button-danger mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-linear-to-br">
@@ -345,7 +345,7 @@ export default function XpCalculator({ season }: XpCalculatorProps) {
             </p>
           </div>
 
-          <div className="border-border-primary bg-primary-bg hover:border-border-focus rounded-lg border p-4">
+          <div className="border-border-card bg-primary-bg hover:border-border-focus rounded-lg border p-4">
             <div className="mb-3 flex items-center justify-center gap-3">
               <svg
                 className="text-button-info h-5 w-5"

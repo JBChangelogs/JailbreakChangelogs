@@ -8,7 +8,7 @@ import { Icon } from "@/components/ui/IconWrapper";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import CreatorLink from "@/components/Items/CreatorLink";
 import ItemValues from "@/components/Items/ItemValues";
-import { getCategoryColor } from "@/utils/categoryIcons";
+import { getCategoryColor, getCategoryIcon } from "@/utils/categoryIcons";
 import NitroItemsVideoPlayer from "@/components/Ads/NitroItemsVideoPlayer";
 import NitroItemMobileAd from "@/components/Ads/NitroItemMobileAd";
 import {
@@ -17,6 +17,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const ItemValueChart = dynamic(
   () => import("@/components/Items/ItemValueChart"),
@@ -64,7 +65,7 @@ const ItemDetailsTabs = React.memo(
     onChange,
   }: {
     value: number;
-    onChange: (e: React.SyntheticEvent, v: number) => void;
+    onChange: (v: number) => void;
   }) {
     const labels = [
       "Details",
@@ -78,23 +79,22 @@ const ItemDetailsTabs = React.memo(
 
     return (
       <div className="overflow-x-auto">
-        <div role="tablist" className="tabs min-w-max">
-          {labels.map((label, idx) => (
-            <button
-              key={label}
-              role="tab"
-              aria-selected={value === idx}
-              aria-controls={`item-tabpanel-${idx}`}
-              id={`item-tab-${idx}`}
-              onClick={(e) =>
-                onChange(e as unknown as React.SyntheticEvent, idx)
-              }
-              className={`tab ${value === idx ? "tab-active" : ""}`}
-            >
-              {label}
-            </button>
-          ))}
-        </div>
+        <Tabs
+          value={String(value)}
+          onValueChange={(tabValue) => onChange(Number(tabValue))}
+        >
+          <TabsList>
+            {labels.map((label, idx) => (
+              <TabsTrigger
+                key={label}
+                value={String(idx)}
+                id={`item-tab-${idx}`}
+              >
+                {label}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+        </Tabs>
       </div>
     );
   },
@@ -208,7 +208,7 @@ export default function ItemDetailsClient({
     }
   };
 
-  const handleTabChange = (_: React.SyntheticEvent, newValue: number) => {
+  const handleTabChange = (newValue: number) => {
     setActiveTab(newValue);
     const searchParams = new URLSearchParams(window.location.search);
 
@@ -334,15 +334,8 @@ export default function ItemDetailsClient({
               <NitroItemsVideoPlayer className="min-h-[180px] w-full max-w-xs sm:max-w-sm md:max-w-md" />
             </div>
 
-            <div
-              className="bg-secondary-bg mt-4 rounded-lg p-4 shadow-lg"
-              style={{
-                border: "2px solid",
-                borderImage: "linear-gradient(45deg, #076bb6, #ca4a0d) 1",
-                borderRadius: "8px",
-              }}
-            >
-              <div className="text-center">
+            <div className="mt-4 rounded-lg bg-linear-to-br from-[#076bb6] to-[#ca4a0d] p-[2px] shadow-lg">
+              <div className="bg-tertiary-bg rounded-[calc(0.5rem-2px)] p-4 text-center">
                 <div className="mb-3 flex justify-center">
                   <a
                     href="https://discord.com/invite/baHCsb8N5A"
@@ -397,26 +390,44 @@ export default function ItemDetailsClient({
               </p>
               <div className="mt-2 flex flex-wrap gap-2">
                 <span
-                  className="text-primary-text flex items-center rounded-full border px-2 py-1 text-xs font-medium"
+                  className="text-primary-text bg-tertiary-bg/40 inline-flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl"
                   style={{
                     borderColor: getCategoryColor(currentItem.type),
-                    backgroundColor: getCategoryColor(currentItem.type) + "20", // Add 20% opacity
                   }}
                 >
+                  {(() => {
+                    const categoryIcon = getCategoryIcon(currentItem.type);
+                    return categoryIcon ? (
+                      <categoryIcon.Icon
+                        className="mr-1.5 h-3 w-3"
+                        style={{ color: getCategoryColor(currentItem.type) }}
+                      />
+                    ) : null;
+                  })()}
                   {currentItem.type}
                 </span>
                 {currentItem.is_limited === 1 && (
-                  <span className="border-primary-text text-primary-text flex items-center rounded-full border bg-transparent px-2 py-1 text-xs">
+                  <span className="text-primary-text border-border-card bg-tertiary-bg/40 inline-flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl">
+                    <Icon
+                      icon="mdi:clock"
+                      className="mr-1.5 h-3 w-3"
+                      style={{ color: "#ffd700" }}
+                    />
                     Limited
                   </span>
                 )}
                 {currentItem.is_seasonal === 1 && (
-                  <span className="border-primary-text text-primary-text flex items-center rounded-full border bg-transparent px-2 py-1 text-xs">
+                  <span className="text-primary-text border-border-card bg-tertiary-bg/40 inline-flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl">
+                    <Icon
+                      icon="noto-v1:snowflake"
+                      className="mr-1.5 h-3 w-3"
+                      style={{ color: "#40c0e7" }}
+                    />
                     Seasonal
                   </span>
                 )}
                 {currentItem.tradable === 0 && (
-                  <span className="border-primary-text text-primary-text flex items-center rounded-full border bg-transparent px-2 py-1 text-xs">
+                  <span className="text-primary-text border-border-card bg-tertiary-bg/40 inline-flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl">
                     {currentItem.id === 713 ? "Reference Only" : "Non-Tradable"}
                   </span>
                 )}
@@ -600,27 +611,20 @@ export default function ItemDetailsClient({
             {activeTab === 1 && (
               <div className="mb-8 space-y-6">
                 {/* Chart Sub-tabs */}
-                <div className="bg-secondary-bg rounded-lg p-4">
-                  <div role="tablist" className="tabs">
-                    <button
-                      role="tab"
-                      aria-selected={activeChartTab === 0}
-                      onClick={() => setActiveChartTab(0)}
-                      className={`tab ${activeChartTab === 0 ? "tab-active" : ""}`}
-                    >
-                      Value History
-                    </button>
-                    {item.id !== 587 && (
-                      <button
-                        role="tab"
-                        aria-selected={activeChartTab === 1}
-                        onClick={() => setActiveChartTab(1)}
-                        className={`tab ${activeChartTab === 1 ? "tab-active" : ""}`}
-                      >
-                        Trading Metrics
-                      </button>
-                    )}
-                  </div>
+                <div className="border-border-card bg-secondary-bg rounded-lg border p-4">
+                  <Tabs
+                    value={String(activeChartTab)}
+                    onValueChange={(tabValue) =>
+                      setActiveChartTab(Number(tabValue))
+                    }
+                  >
+                    <TabsList>
+                      <TabsTrigger value="0">Value History</TabsTrigger>
+                      {item.id !== 587 && (
+                        <TabsTrigger value="1">Trading Metrics</TabsTrigger>
+                      )}
+                    </TabsList>
+                  </Tabs>
 
                   {/* Chart Update Notice */}
                   <div className="mt-4 mb-4">

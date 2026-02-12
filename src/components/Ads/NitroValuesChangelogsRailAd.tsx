@@ -1,14 +1,15 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { useAuthContext } from "@/contexts/AuthContext";
+import { useSafeAuthContext } from "@/contexts/AuthContext";
 import { registerAdInstance, removeAdReference } from "@/utils/nitroAds";
 
 const AD_ID_SMALL = "np-values-changelogs-rail";
 const AD_ID_WIDE = "np-values-changelogs-rail-wide";
 
 export default function NitroValuesChangelogsRailAd() {
-  const { user } = useAuthContext();
+  const authContext = useSafeAuthContext();
+  const user = authContext?.user;
   const createdRef = useRef(false);
 
   useEffect(() => {

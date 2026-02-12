@@ -52,7 +52,7 @@ export default function OGNotificationSheet({
   isOpen,
   onClose,
 }: OGNotificationSheetProps) {
-  const { user, setShowLoginModal } = useAuthContext();
+  const { user, setLoginModal } = useAuthContext();
   const isMobile = useMediaQuery("(max-width:1024px)");
 
   // State management
@@ -353,8 +353,8 @@ export default function OGNotificationSheet({
 
           {/* User Info - Show Roblox data if available */}
           {user?.roblox_id && (
-            <div className="border-border-primary bg-primary-bg/40 mt-6 flex shrink-0 items-center gap-3 rounded-xl border p-3">
-              <div className="bg-tertiary-bg border-border-primary relative h-12 w-12 shrink-0 overflow-hidden rounded-full border-2">
+            <div className="border-border-card bg-tertiary-bg mt-6 flex shrink-0 items-center gap-3 rounded-xl border p-3">
+              <div className="bg-tertiary-bg border-border-card relative h-12 w-12 shrink-0 overflow-hidden rounded-full border-2">
                 {!avatarError ? (
                   <Image
                     src={`${process.env.NEXT_PUBLIC_INVENTORY_API_URL}/proxy/users/${user.roblox_id}/avatar-headshot`}
@@ -413,16 +413,10 @@ export default function OGNotificationSheet({
                 <Button
                   onClick={() => {
                     onClose();
-                    setShowLoginModal(true);
-                    if (isAuthenticated) {
-                      // Trigger the Roblox link tab (index 1) in the login modal
-                      setTimeout(() => {
-                        const event = new CustomEvent("setLoginTab", {
-                          detail: 1,
-                        });
-                        window.dispatchEvent(event);
-                      }, 0);
-                    }
+                    setLoginModal({
+                      open: true,
+                      tab: isAuthenticated ? "roblox" : "discord",
+                    });
                   }}
                   className="shadow-button-info/20 h-[56px] w-full text-base font-bold shadow-lg"
                 >
@@ -445,7 +439,7 @@ export default function OGNotificationSheet({
                         placeholder="Search items..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        className="border-border-primary bg-primary-bg text-primary-text placeholder:text-secondary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus w-full rounded-xl border py-4 pr-11 pl-11 text-sm transition-all duration-300 focus:ring-1 focus:outline-none"
+                        className="border-border-card bg-primary-bg text-primary-text placeholder:text-secondary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus w-full rounded-xl border py-4 pr-11 pl-11 text-sm transition-all duration-300 focus:ring-1 focus:outline-none"
                       />
                       <Icon
                         icon="heroicons:magnifying-glass"
@@ -467,7 +461,7 @@ export default function OGNotificationSheet({
                       <DropdownMenuTrigger asChild>
                         <button
                           type="button"
-                          className="border-border-primary bg-primary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus flex h-[56px] w-full items-center justify-between rounded-xl border px-4 py-2 text-sm transition-all duration-300 focus:ring-1 focus:outline-none"
+                          className="border-border-card bg-primary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus flex h-[56px] w-full items-center justify-between rounded-xl border px-4 py-2 text-sm transition-all duration-300 focus:ring-1 focus:outline-none"
                           aria-label="Select item category"
                         >
                           <span className="truncate">{currentTypeLabel}</span>
@@ -481,7 +475,7 @@ export default function OGNotificationSheet({
                       <DropdownMenuContent
                         align="start"
                         container={sheetContentRef.current}
-                        className="border-border-primary bg-primary-bg text-primary-text scrollbar-thin max-h-[280px] w-[var(--radix-popper-anchor-width)] min-w-[var(--radix-popper-anchor-width)] overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
+                        className="border-border-card bg-primary-bg text-primary-text scrollbar-thin max-h-[280px] w-[var(--radix-popper-anchor-width)] min-w-[var(--radix-popper-anchor-width)] overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
                       >
                         <DropdownMenuCheckboxItem
                           checked={selectedType === "all"}
@@ -612,11 +606,7 @@ export default function OGNotificationSheet({
       <div
         key={item.id}
         className={cn(
-          "group flex w-full items-center justify-between rounded-xl border p-4 text-left transition-all duration-300",
-          "bg-tertiary-bg/50",
-          isNotified
-            ? "border-button-info"
-            : "border-border-primary hover:border-button-info",
+          "border-border-card bg-tertiary-bg group flex w-full items-center justify-between rounded-xl border p-4 text-left transition-all duration-300",
           processingItemId !== null && "opacity-50",
         )}
       >
@@ -643,10 +633,9 @@ export default function OGNotificationSheet({
           </p>
           <div className="mt-1 flex flex-wrap gap-2">
             <span
-              className="text-primary-text flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-[10px] font-bold"
+              className="text-primary-text bg-tertiary-bg/40 inline-flex h-6 items-center gap-1.5 rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl"
               style={{
-                borderColor: `${getCategoryColor(item.type)}40`,
-                backgroundColor: `${getCategoryColor(item.type)}15`,
+                borderColor: getCategoryColor(item.type),
               }}
             >
               {categoryIcon && (
@@ -672,7 +661,7 @@ export default function OGNotificationSheet({
               checked={isNotified}
               readOnly
               disabled={processingItemId !== null}
-              className="text-button-info focus:ring-button-info bg-primary-bg border-border-primary h-4 w-4 cursor-pointer rounded disabled:cursor-not-allowed"
+              className="text-button-info focus:ring-button-info bg-primary-bg border-border-card h-4 w-4 cursor-pointer rounded disabled:cursor-not-allowed"
             />
           )}
         </div>

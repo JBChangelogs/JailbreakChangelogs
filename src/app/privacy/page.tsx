@@ -3,6 +3,7 @@
 import { Typography } from "@mui/material";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import { Icon } from "@/components/ui/IconWrapper";
+import CCPAHandler from "@/components/Home/CCPAHandler";
 
 export default function PrivacyPage() {
   return (
@@ -29,7 +30,7 @@ export default function PrivacyPage() {
           Last updated: February 8th, 2026
         </p>
 
-        <div className="border-border-primary bg-secondary-bg hover:border-border-focus rounded-lg border p-6 transition-colors">
+        <div className="border-border-card bg-secondary-bg rounded-lg border p-6 transition-colors">
           <Typography className="text-primary-text">
             This Privacy Policy outlines our commitment to protecting your
             privacy. We prioritize transparency and collect only the minimum
@@ -209,6 +210,7 @@ export default function PrivacyPage() {
                 Requests&quot; section above.
               </Typography>
               <Typography className="text-secondary-text">
+                <CCPAHandler />
                 <span data-ccpa-link="1"></span>
               </Typography>
             </div>

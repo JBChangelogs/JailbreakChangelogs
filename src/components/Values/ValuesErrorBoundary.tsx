@@ -56,7 +56,7 @@ class ValuesErrorBoundary extends React.Component<
       }
 
       return (
-        <div className="border-border-primary bg-secondary-bg rounded-lg border p-6 text-center">
+        <div className="border-border-card bg-secondary-bg rounded-lg border p-6 text-center">
           <h2 className="text-primary-text mb-4 text-xl font-semibold">
             Something went wrong
           </h2>
@@ -66,7 +66,7 @@ class ValuesErrorBoundary extends React.Component<
           </p>
           <button
             onClick={this.resetError}
-            className="border-border-primary bg-button-info text-form-button-text hover:border-border-focus hover:bg-button-info-hover rounded-lg border px-4 py-2 focus:outline-none"
+            className="border-border-card bg-button-info text-form-button-text hover:border-border-focus hover:bg-button-info-hover rounded-lg border px-4 py-2 focus:outline-none"
           >
             Try Again
           </button>

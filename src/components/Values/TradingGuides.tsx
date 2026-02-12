@@ -216,7 +216,7 @@ export default function TradingGuides({
           }
           setIsExpanded(newExpanded);
         }}
-        className="border-border-primary bg-primary-bg hover:border-border-focus hover:bg-primary-bg mb-4 flex w-full cursor-pointer items-center justify-between rounded-lg border p-4 transition-colors"
+        className="border-border-card bg-tertiary-bg mb-4 flex w-full cursor-pointer items-center justify-between rounded-lg border p-4 transition-colors"
       >
         <div className="flex items-center gap-3">
           <h3 className="text-primary-text text-xl font-semibold">
@@ -277,7 +277,7 @@ export default function TradingGuides({
                   <button
                     key={demand}
                     onClick={() => handleDemandClick(demand)}
-                    className={`bg-primary-bg flex cursor-pointer items-center gap-3 rounded-lg border-2 px-4 py-2 transition-all focus:outline-none ${
+                    className={`bg-tertiary-bg flex cursor-pointer items-center gap-3 rounded-lg border-2 px-4 py-2 transition-all focus:outline-none ${
                       valueSort === getDemandValue(demand) ? "ring-2" : ""
                     }`}
                     style={
@@ -302,7 +302,7 @@ export default function TradingGuides({
 
             {/* Video positioned at top right */}
             <div className="flex flex-col items-center lg:items-end">
-              <div className="border-border-primary bg-tertiary-bg w-full max-w-[400px] overflow-hidden rounded-xl border shadow-lg">
+              <div className="border-border-card bg-tertiary-bg w-full max-w-[400px] overflow-hidden rounded-xl border shadow-lg">
                 <YouTubeEmbed
                   videoid="Yn38fUrV7zo"
                   height={225}
@@ -323,13 +323,13 @@ export default function TradingGuides({
               <h3 className="text-primary-text mb-4 text-xl font-semibold">
                 Trend Levels Guide
               </h3>
-              <div className="border-border-primary bg-tertiary-bg mb-4 max-h-[400px] overflow-y-auto rounded-lg border p-4 sm:max-h-none sm:border-0 sm:bg-transparent sm:p-0">
+              <div className="border-border-card bg-tertiary-bg mb-4 max-h-[400px] overflow-y-auto rounded-lg border p-4 sm:max-h-none sm:border-0 sm:bg-transparent sm:p-0">
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                   {trendOrder.map((trend) => (
                     <button
                       key={trend}
                       onClick={() => handleTrendClick(trend)}
-                      className={`bg-primary-bg hover:bg-opacity-80 flex cursor-pointer flex-col items-start gap-2 rounded-xl border-2 p-3 text-left transition-all focus:outline-none ${
+                      className={`bg-tertiary-bg hover:bg-opacity-80 flex cursor-pointer flex-col items-start gap-2 rounded-xl border-2 p-3 text-left transition-all focus:outline-none ${
                         valueSort === getTrendValue(trend) ? "ring-2" : ""
                       }`}
                       style={
@@ -358,7 +358,7 @@ export default function TradingGuides({
               <h3 className="text-primary-text mb-4 text-xl font-semibold">
                 Common Trading Terms
               </h3>
-              <div className="border-border-primary bg-tertiary-bg max-h-[300px] overflow-y-auto rounded-lg border p-4">
+              <div className="border-border-card bg-tertiary-bg max-h-[300px] overflow-y-auto rounded-lg border p-4">
                 <div className="grid grid-cols-1 gap-x-8 gap-y-4 md:grid-cols-2">
                   {tradingTerms.map((item) => (
                     <div

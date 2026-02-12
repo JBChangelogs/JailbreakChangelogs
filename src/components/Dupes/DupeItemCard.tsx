@@ -48,7 +48,6 @@ export default function DupeItemCard({
   isDuplicate = false,
   robloxId,
   ownerLabel = "ORIGINAL OWNER",
-  bgClass = "bg-primary-bg",
   isDupedItem = false,
 }: DupeItemCardProps) {
   const dupedValue = getDupedValueForItem(itemData, item);
@@ -69,10 +68,10 @@ export default function DupeItemCard({
 
   return (
     <div
-      className={`text-primary-text hover:shadow-card-shadow relative flex cursor-pointer flex-col rounded-lg p-3 transition-all duration-200 ${
+      className={`text-primary-text relative flex cursor-pointer flex-col rounded-lg border p-3 transition-all duration-200 ${
         isDupedItem
-          ? "bg-button-danger/10 border-button-danger hover:border-button-danger border"
-          : `${bgClass} border-border-primary hover:border-border-focus border`
+          ? "bg-button-danger/10 border-button-danger"
+          : "border-border-card bg-tertiary-bg"
       }`}
       onClick={() => onCardClick(item)}
     >
@@ -102,10 +101,9 @@ export default function DupeItemCard({
         </h2>
         <div className="flex items-center gap-2">
           <span
-            className="text-primary-text flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-medium"
+            className="text-primary-text bg-tertiary-bg/40 flex h-6 items-center gap-1.5 rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl"
             style={{
               borderColor: getCategoryColor(item.categoryTitle),
-              backgroundColor: getCategoryColor(item.categoryTitle) + "20", // Add 20% opacity
             }}
           >
             {(() => {
@@ -191,7 +189,7 @@ export default function DupeItemCard({
               </div>
             </TooltipTrigger>
             <TooltipContent>
-              {item.uniqueCirculation.toLocaleString()}
+              Monthly unique: {item.uniqueCirculation.toLocaleString()}
             </TooltipContent>
           </Tooltip>
         </div>
@@ -206,6 +204,7 @@ export default function DupeItemCard({
               </div>
             </TooltipTrigger>
             <TooltipContent>
+              Monthly traded:{" "}
               {itemData?.metadata?.TimesTraded
                 ? itemData.metadata.TimesTraded.toLocaleString()
                 : "N/A"}
@@ -229,6 +228,7 @@ export default function DupeItemCard({
               </div>
             </TooltipTrigger>
             <TooltipContent>
+              Duped value:{" "}
               {dupedValue > 0 ? `$${dupedValue.toLocaleString()}` : "N/A"}
             </TooltipContent>
           </Tooltip>
@@ -272,16 +272,9 @@ export default function DupeItemCard({
         </div>
         <div>
           <div className="text-secondary-text text-sm">LOGGED ON</div>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <div className="text-primary-text cursor-help text-xl font-bold">
-                {formatDateOnly(item.logged_at)}
-              </div>
-            </TooltipTrigger>
-            <TooltipContent>
-              {new Date(item.logged_at * 1000).toLocaleString()}
-            </TooltipContent>
-          </Tooltip>
+          <div className="text-primary-text text-xl font-bold">
+            {formatDateOnly(item.logged_at)}
+          </div>
         </div>
       </div>
 

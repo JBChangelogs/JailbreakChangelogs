@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { Dialog, DialogTitle } from "@headlessui/react";
 import { Icon } from "@/components/ui/IconWrapper";
 import Image from "next/image";
-import { getCategoryColor } from "@/utils/categoryIcons";
+import { getCategoryColor, getCategoryIcon } from "@/utils/categoryIcons";
 import { VerifiedBadgeIcon } from "@/components/Icons/VerifiedBadgeIcon";
 import { RobloxUser } from "@/types";
 import { Button } from "@/components/ui/button";
@@ -192,8 +192,8 @@ export default function TradeHistoryModal({
       />
 
       <div className="fixed inset-0 flex items-center justify-center p-4">
-        <div className="border-border-primary bg-secondary-bg mx-auto flex max-h-[80vh] w-full max-w-4xl flex-col overflow-hidden rounded-lg border">
-          <div className="border-border-primary border-b p-4 sm:p-6">
+        <div className="border-border-card bg-secondary-bg mx-auto flex max-h-[80vh] w-full max-w-4xl flex-col overflow-hidden rounded-lg border">
+          <div className="border-border-card border-b p-4 sm:p-6">
             <div className="flex items-start justify-between gap-4">
               <div className="min-w-0 flex-1">
                 <DialogTitle className="text-primary-text text-lg font-semibold sm:text-xl">
@@ -209,13 +209,24 @@ export default function TradeHistoryModal({
                 <div className="mt-2 flex flex-wrap items-center gap-2">
                   {item.categoryTitle && (
                     <span
-                      className="text-primary-text flex w-fit items-center rounded-full border px-2 py-0.5 text-xs font-medium"
+                      className="text-primary-text bg-tertiary-bg/40 inline-flex h-6 w-fit items-center gap-1.5 rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl"
                       style={{
                         borderColor: getCategoryColor(item.categoryTitle),
-                        backgroundColor:
-                          getCategoryColor(item.categoryTitle) + "20",
                       }}
                     >
+                      {(() => {
+                        const categoryIcon = getCategoryIcon(
+                          item.categoryTitle,
+                        );
+                        return categoryIcon ? (
+                          <categoryIcon.Icon
+                            className="h-3 w-3"
+                            style={{
+                              color: getCategoryColor(item.categoryTitle),
+                            }}
+                          />
+                        ) : null;
+                      })()}
                       {item.categoryTitle}
                     </span>
                   )}
@@ -232,7 +243,7 @@ export default function TradeHistoryModal({
             </div>
 
             {item.id && (pathname?.startsWith("/dupes") || isDupeTab) && (
-              <div className="bg-button-info/10 border-button-info mx-4 mt-2 mb-0 flex flex-col items-center justify-between gap-4 rounded-lg border p-3 sm:mx-6 sm:flex-row">
+              <div className="bg-button-info/10 border-border-card mx-4 mt-2 mb-0 flex flex-col items-center justify-between gap-4 rounded-lg border p-3 sm:mx-6 sm:flex-row">
                 <div className="flex items-start gap-2">
                   <div className="text-sm">
                     <p className="text-primary-text font-semibold">
@@ -297,7 +308,7 @@ export default function TradeHistoryModal({
                     return (
                       <div
                         key={`${userId}-${owner.TradeTime}-${index}`}
-                        className="border-border-primary bg-primary-bg flex flex-col gap-3 rounded-lg border p-3 sm:flex-row sm:items-center"
+                        className="border-border-card bg-tertiary-bg flex flex-col gap-3 rounded-lg border p-3 sm:flex-row sm:items-center"
                       >
                         <div className="flex min-w-0 flex-1 items-center gap-3">
                           <div className="shrink-0">
@@ -343,7 +354,7 @@ export default function TradeHistoryModal({
                             </a>
                           </div>
                         </div>
-                        <div className="text-tertiary-text text-xs sm:shrink-0 sm:text-right sm:text-sm">
+                        <div className="text-secondary-text text-xs sm:shrink-0 sm:text-right sm:text-sm">
                           {new Date(owner.TradeTime * 1000).toLocaleDateString(
                             "en-US",
                             {

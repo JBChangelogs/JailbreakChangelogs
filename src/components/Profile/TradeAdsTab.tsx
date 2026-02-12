@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { CircularProgress, Box, Chip, Skeleton } from "@mui/material";
+import { CircularProgress, Box, Skeleton } from "@mui/material";
 import {
   Tooltip,
   TooltipContent,
@@ -52,6 +52,19 @@ interface TradeAd {
   status: string;
 }
 
+const getStatusColor = (status: string) => {
+  switch (status) {
+    case "Pending":
+      return "text-primary-text border-border-card bg-tertiary-bg/40";
+    case "Completed":
+      return "text-primary-text border-border-card bg-tertiary-bg/40";
+    case "Expired":
+      return "text-status-error border-status-error/20 bg-status-error/10";
+    default:
+      return "text-secondary-text border-secondary-text/20 bg-secondary-text/10";
+  }
+};
+
 interface TradeAdsTabProps {
   userId: string;
   tradeAds?: TradeAd[];
@@ -95,7 +108,7 @@ export default function TradeAdsTab({
     return (
       <div
         key={item.id}
-        className="border-border-primary bg-primary-bg hover:border-border-focus rounded-lg border p-3 shadow-sm transition-colors"
+        className="border-border-card bg-tertiary-bg rounded-lg border p-3 shadow-sm transition-colors"
       >
         <div className="mb-2 flex items-center">
           <div className="relative mr-3 h-16 w-16 shrink-0 overflow-hidden rounded-md md:h-18 md:w-32">
@@ -125,7 +138,7 @@ export default function TradeAdsTab({
               ) : (
                 <Link
                   href={itemUrl}
-                  className="text-primary-text hover:text-button-info font-medium transition-colors"
+                  className="text-primary-text hover:text-link font-medium transition-colors"
                 >
                   {displayName}
                 </Link>
@@ -136,23 +149,14 @@ export default function TradeAdsTab({
                 {isLoadingAdditionalData ? (
                   <Skeleton variant="rounded" width={80} height={20} />
                 ) : (
-                  <Chip
-                    label={item.type}
-                    size="small"
-                    variant="outlined"
-                    sx={{
-                      backgroundColor: getCategoryColor(item.type) + "20", // Add 20% opacity
+                  <span
+                    className="text-primary-text bg-tertiary-bg/40 inline-flex h-6 w-fit items-center rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl"
+                    style={{
                       borderColor: getCategoryColor(item.type),
-                      color: "var(--color-primary-text)",
-                      fontSize: "0.65rem",
-                      height: "20px",
-                      fontWeight: "medium",
-                      "&:hover": {
-                        borderColor: getCategoryColor(item.type),
-                        backgroundColor: getCategoryColor(item.type) + "30", // Slightly more opacity on hover
-                      },
                     }}
-                  />
+                  >
+                    {item.type}
+                  </span>
                 )}
               </div>
               <div className="space-y-1">
@@ -176,31 +180,19 @@ export default function TradeAdsTab({
     return (
       <div
         key={ad.id}
-        className="bg-secondary-bg/30 border-border-primary mb-6 rounded-lg border p-5 shadow-sm"
+        className="border-border-card bg-tertiary-bg mb-6 rounded-lg border p-5 shadow-sm"
       >
         <div className="mb-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Icon
-              icon="heroicons:arrows-right-left"
-              className="text-button-info h-6 w-6"
-            />
             <Link
               href={`/trading/ad/${ad.id}`}
-              className="text-primary-text hover:text-button-info text-xl font-bold transition-colors"
+              className="text-primary-text hover:text-link text-xl font-bold transition-colors"
             >
               Trade Ad #{ad.id}
             </Link>
           </div>
           <div
-            className={`rounded-full border px-3 py-1 text-sm font-medium ${
-              ad.status === "Pending"
-                ? "bg-button-info/10 border-button-info/20 text-primary-text"
-                : ad.status === "Completed"
-                  ? "bg-status-success/10 border-status-success/20 text-primary-text"
-                  : ad.status === "Expired"
-                    ? "bg-status-error/10 border-status-error/20 text-status-error"
-                    : "bg-secondary-text/10 border-secondary-text/20 text-secondary-text"
-            }`}
+            className={`inline-flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl ${getStatusColor(ad.status)}`}
           >
             {ad.status}
           </div>
@@ -208,8 +200,8 @@ export default function TradeAdsTab({
 
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
           {/* Offering Section */}
-          <div className="border-status-success/20 bg-status-success/10 rounded-lg border p-4">
-            <h3 className="text-status-success mb-4 text-lg font-bold">
+          <div className="border-border-card bg-secondary-bg rounded-lg border p-4">
+            <h3 className="text-primary-text mb-4 text-lg font-bold">
               Offering
             </h3>
             {ad.offering.length > 0 ? (
@@ -220,8 +212,8 @@ export default function TradeAdsTab({
           </div>
 
           {/* Requesting Section */}
-          <div className="border-status-error/20 bg-status-error/10 rounded-lg border p-4">
-            <h3 className="text-status-error mb-4 text-lg font-bold">
+          <div className="border-border-card bg-secondary-bg rounded-lg border p-4">
+            <h3 className="text-primary-text mb-4 text-lg font-bold">
               Requesting
             </h3>
             {ad.requesting.length > 0 ? (
@@ -232,19 +224,23 @@ export default function TradeAdsTab({
           </div>
         </div>
 
-        <div className="border-border-primary text-secondary-text mt-6 flex flex-wrap items-center gap-2 border-t pt-4 text-sm">
+        <div className="border-border-card text-secondary-text mt-6 flex flex-wrap items-center gap-2 border-t pt-4 text-sm">
           <Tooltip>
             <TooltipTrigger asChild>
-              <span className="cursor-help">Created {ad.createdTime}</span>
+              <span className="text-secondary-text cursor-help">
+                Created {ad.createdTime}
+              </span>
             </TooltipTrigger>
             <TooltipContent>{formatCustomDate(ad.created_at)}</TooltipContent>
           </Tooltip>
           {ad.expires && (
             <>
-              <span className="text-tertiary-text">|</span>
+              <span className="text-secondary-text">|</span>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <span className="cursor-help">Expires {ad.expiresTime}</span>
+                  <span className="text-secondary-text cursor-help">
+                    Expires {ad.expiresTime}
+                  </span>
                 </TooltipTrigger>
                 <TooltipContent>{formatCustomDate(ad.expires)}</TooltipContent>
               </Tooltip>
@@ -271,12 +267,8 @@ export default function TradeAdsTab({
   if (error) {
     return (
       <div className="space-y-6">
-        <div className="border-border-primary rounded-lg border p-4">
+        <div className="border-border-card rounded-lg border p-4">
           <div className="mb-3 flex items-center gap-2">
-            <Icon
-              icon="heroicons:arrows-right-left"
-              className="text-button-info"
-            />
             <h2 className="text-primary-text text-lg font-semibold">
               Trade Ads
             </h2>
@@ -289,12 +281,8 @@ export default function TradeAdsTab({
 
   return (
     <div className="space-y-6">
-      <div className="border-border-primary rounded-lg border p-4">
+      <div className="border-border-card rounded-lg border p-4">
         <div className="mb-3 flex items-center gap-2">
-          <Icon
-            icon="heroicons:arrows-right-left"
-            className="text-button-info"
-          />
           <h2 className="text-primary-text text-lg font-semibold">
             Trade Ads [{tradeAds.length}]
           </h2>

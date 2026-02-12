@@ -2,18 +2,14 @@ import React from "react";
 import { TradeItem } from "@/types/trading";
 import Image from "next/image";
 import Link from "next/link";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { Tooltip, TooltipTrigger } from "@/components/ui/tooltip";
 import {
   getItemImagePath,
   handleImageError,
   isVideoItem,
   getVideoPath,
 } from "@/utils/images";
-import { TradeAdTooltip } from "./TradeAdTooltip";
+import TradeItemHoverTooltip from "./TradeItemHoverTooltip";
 
 interface TradeItemsImagesProps {
   offering: TradeItem[];
@@ -67,7 +63,10 @@ export default function TradeItemsImages({
         </h2>
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
           {groupItems(offering).map((item) => (
-            <Tooltip key={`${item.id}-${item.name}-${item.type}`}>
+            <Tooltip
+              key={`${item.id}-${item.name}-${item.type}`}
+              delayDuration={0}
+            >
               <TooltipTrigger asChild>
                 <Link
                   href={`/item/${item.type.toLowerCase()}/${item.base_name || item.name}`}
@@ -93,6 +92,7 @@ export default function TradeItemsImages({
                       alt={item.name}
                       fill
                       className="object-cover"
+                      draggable={false}
                       onError={handleImageError}
                     />
                   )}
@@ -103,18 +103,14 @@ export default function TradeItemsImages({
                   )}
                 </Link>
               </TooltipTrigger>
-              <TooltipContent
+              <TradeItemHoverTooltip
                 side="bottom"
-                className="bg-secondary-bg text-primary-text max-w-[400px] min-w-[300px] border-none shadow-[var(--color-card-shadow)]"
-              >
-                <TradeAdTooltip
-                  item={{
-                    ...item,
-                    base_name: item.base_name || item.name,
-                    name: item.name,
-                  }}
-                />
-              </TooltipContent>
+                item={{
+                  ...item,
+                  base_name: item.base_name || item.name,
+                  name: item.name,
+                }}
+              />
             </Tooltip>
           ))}
         </div>
@@ -127,7 +123,10 @@ export default function TradeItemsImages({
         </h2>
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
           {groupItems(requesting).map((item) => (
-            <Tooltip key={`${item.id}-${item.name}-${item.type}`}>
+            <Tooltip
+              key={`${item.id}-${item.name}-${item.type}`}
+              delayDuration={0}
+            >
               <TooltipTrigger asChild>
                 <Link
                   href={`/item/${item.type.toLowerCase()}/${item.base_name || item.name}`}
@@ -153,6 +152,7 @@ export default function TradeItemsImages({
                       alt={item.name}
                       fill
                       className="object-cover"
+                      draggable={false}
                       onError={handleImageError}
                     />
                   )}
@@ -163,18 +163,14 @@ export default function TradeItemsImages({
                   )}
                 </Link>
               </TooltipTrigger>
-              <TooltipContent
+              <TradeItemHoverTooltip
                 side="bottom"
-                className="bg-secondary-bg text-primary-text max-w-[400px] min-w-[300px] border-none shadow-[var(--color-card-shadow)]"
-              >
-                <TradeAdTooltip
-                  item={{
-                    ...item,
-                    base_name: item.base_name || item.name,
-                    name: item.name,
-                  }}
-                />
-              </TooltipContent>
+                item={{
+                  ...item,
+                  base_name: item.base_name || item.name,
+                  name: item.name,
+                }}
+              />
             </Tooltip>
           ))}
         </div>

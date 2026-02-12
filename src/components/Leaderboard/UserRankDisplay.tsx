@@ -51,7 +51,7 @@ export default function UserRankDisplay() {
 
   if (isLoading) {
     return (
-      <div className="border-border-primary bg-secondary-bg hover:border-border-focus mb-6 rounded-lg border p-4">
+      <div className="border-border-card bg-secondary-bg mb-6 rounded-lg border p-4">
         <div className="flex items-center justify-between">
           <div>
             <h3 className="text-primary-text text-lg font-semibold">
@@ -85,7 +85,7 @@ export default function UserRankDisplay() {
           {formatRelativeDate(userRank.updated_at)})
         </span>
       </div>
-      <div className="border-border-primary bg-secondary-bg hover:border-border-focus rounded-lg border p-3 shadow-sm sm:p-4">
+      <div className="border-border-card bg-secondary-bg rounded-lg border p-3 shadow-sm sm:p-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2 sm:space-x-3">
             <div className="text-primary-text flex h-7 min-w-[2.5rem] items-center justify-center rounded-full px-1 text-xs font-bold sm:h-8 sm:min-w-[3rem] sm:px-2">
@@ -97,10 +97,10 @@ export default function UserRankDisplay() {
                 alt={`${user.roblox_display_name} avatar`}
                 width={32}
                 height={32}
-                className="h-7 w-7 rounded-full sm:h-8 sm:w-8"
+                className="border-border-card bg-secondary-bg h-7 w-7 rounded-full border sm:h-8 sm:w-8"
               />
             ) : (
-              <div className="h-7 w-7 rounded-full sm:h-8 sm:w-8" />
+              <div className="border-border-card bg-secondary-bg h-7 w-7 rounded-full border sm:h-8 sm:w-8" />
             )}
             <div className="flex min-w-0 flex-1 flex-col">
               <a

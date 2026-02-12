@@ -99,7 +99,7 @@ const ChangelogContent: React.FC<ChangelogContentProps> = ({
               <div className="flex flex-wrap gap-2">
                 {contentInfo.mediaTypeCounts.video > 0 && (
                   <span
-                    className={`rounded-full px-2 py-0.5 text-xs ${getBadgeColor("video")} text-white`}
+                    className={`inline-flex h-6 items-center rounded-lg px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl ${getBadgeColor("video")} text-white`}
                   >
                     {contentInfo.mediaTypeCounts.video}{" "}
                     {contentInfo.mediaTypeCounts.video === 1
@@ -109,7 +109,7 @@ const ChangelogContent: React.FC<ChangelogContentProps> = ({
                 )}
                 {contentInfo.mediaTypeCounts.audio > 0 && (
                   <span
-                    className={`rounded-full px-2 py-0.5 text-xs ${getBadgeColor("audio")} text-white`}
+                    className={`inline-flex h-6 items-center rounded-lg px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl ${getBadgeColor("audio")} text-white`}
                   >
                     {contentInfo.mediaTypeCounts.audio}{" "}
                     {contentInfo.mediaTypeCounts.audio === 1
@@ -119,7 +119,7 @@ const ChangelogContent: React.FC<ChangelogContentProps> = ({
                 )}
                 {contentInfo.mediaTypeCounts.image > 0 && (
                   <span
-                    className={`rounded-full px-2 py-0.5 text-xs ${getBadgeColor("image")} text-white`}
+                    className={`inline-flex h-6 items-center rounded-lg px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl ${getBadgeColor("image")} text-white`}
                   >
                     {contentInfo.mediaTypeCounts.image}{" "}
                     {contentInfo.mediaTypeCounts.image === 1
@@ -129,7 +129,7 @@ const ChangelogContent: React.FC<ChangelogContentProps> = ({
                 )}
                 {contentInfo.mentionCount > 0 && (
                   <span
-                    className={`rounded-full px-2 py-0.5 text-xs ${getBadgeColor("mentions")} text-white`}
+                    className={`inline-flex h-6 items-center rounded-lg px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl ${getBadgeColor("mentions")} text-white`}
                   >
                     {contentInfo.mentionCount}{" "}
                     {contentInfo.mentionCount === 1 ? "Mention" : "Mentions"}

@@ -110,7 +110,7 @@ export default function InventoryFilters({
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             maxLength={MAX_SEARCH_LENGTH}
-            className="border-border-primary bg-primary-bg text-primary-text placeholder-secondary-text focus:border-button-info min-h-[56px] w-full rounded-lg border px-4 py-3 pr-10 pl-10 transition-all duration-300 focus:outline-none"
+            className="border-border-card bg-primary-bg text-primary-text placeholder-secondary-text focus:border-button-info min-h-[56px] w-full rounded-lg border px-4 py-3 pr-10 pl-10 transition-all duration-300 focus:outline-none"
           />
           <Icon
             icon="heroicons:magnifying-glass"
@@ -133,7 +133,7 @@ export default function InventoryFilters({
             <DropdownMenuTrigger asChild>
               <button
                 type="button"
-                className="border-border-primary bg-primary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus flex h-[56px] w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all duration-300 focus:ring-1 focus:outline-none"
+                className="border-border-card bg-primary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus flex h-[56px] w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all duration-300 focus:ring-1 focus:outline-none"
                 aria-label="Filter by category"
               >
                 <span className="truncate">
@@ -150,7 +150,7 @@ export default function InventoryFilters({
             </DropdownMenuTrigger>
             <DropdownMenuContent
               align="start"
-              className="border-border-primary bg-primary-bg text-primary-text scrollbar-thin max-h-[320px] w-[var(--radix-popper-anchor-width)] min-w-[var(--radix-popper-anchor-width)] overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
+              className="border-border-card bg-primary-bg text-primary-text scrollbar-thin max-h-[320px] w-[var(--radix-popper-anchor-width)] min-w-[var(--radix-popper-anchor-width)] overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
             >
               <DropdownMenuRadioGroup
                 value={selectedCategoryValue}
@@ -191,7 +191,7 @@ export default function InventoryFilters({
             <DropdownMenuTrigger asChild>
               <button
                 type="button"
-                className="border-border-primary bg-primary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus flex h-[56px] w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all duration-300 focus:ring-1 focus:outline-none"
+                className="border-border-card bg-primary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus flex h-[56px] w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all duration-300 focus:ring-1 focus:outline-none"
                 aria-label="Sort items"
               >
                 <span className="truncate">
@@ -206,7 +206,7 @@ export default function InventoryFilters({
             </DropdownMenuTrigger>
             <DropdownMenuContent
               align="start"
-              className="border-border-primary bg-primary-bg text-primary-text scrollbar-thin max-h-[320px] w-[var(--radix-popper-anchor-width)] min-w-[var(--radix-popper-anchor-width)] overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
+              className="border-border-card bg-primary-bg text-primary-text scrollbar-thin max-h-[320px] w-[var(--radix-popper-anchor-width)] min-w-[var(--radix-popper-anchor-width)] overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
             >
               <DropdownMenuRadioGroup
                 value={sortOrder}
@@ -295,7 +295,7 @@ export default function InventoryFilters({
 
       {/* Advanced Filters Section */}
       {showAdvancedFilters && (
-        <div className="bg-primary-bg/50 border-border-primary rounded-lg border p-4">
+        <div className="bg-primary-bg/50 border-border-card rounded-lg border p-4">
           <div className="flex flex-col gap-4">
             {/* Owner Type Radio Group */}
             <div className="flex flex-col gap-2">

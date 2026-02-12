@@ -20,7 +20,7 @@ export const CustomButtonGroup: React.FC<CustomButtonGroupProps> = ({
   return (
     <div
       role="group"
-      className={`border-border-primary inline-flex w-fit rounded-lg border ${className}`}
+      className={`border-border-card inline-flex w-fit rounded-lg border ${className}`}
     >
       {children}
     </div>
@@ -36,7 +36,7 @@ export const CustomButton: React.FC<CustomButtonProps> = ({
 }) => {
   const baseClasses = `
     px-3 py-2 text-sm font-medium transition-all duration-200
-    border-r border-border-primary last:border-r-0
+    border-r border-border-card last:border-r-0
     first:rounded-l-md last:rounded-r-md
     focus:outline-none focus:ring-2 focus:ring-button-info focus:ring-opacity-50
   `;

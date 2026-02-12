@@ -10,9 +10,6 @@ import {
   safeGetJSON,
   safeSetJSON,
 } from "@/utils/safeStorage";
-import { DndContext, DragEndEvent, DragStartEvent } from "@dnd-kit/core";
-import { CustomDragOverlay } from "@/components/dnd/DragOverlay";
-import { toast } from "sonner";
 import NitroCalculatorAd from "@/components/Ads/NitroCalculatorAd";
 
 // Import extracted components and utilities
@@ -53,9 +50,6 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
       return currentMax;
     }, 10_000_000);
   }, [initialItems]);
-
-  // Drag and drop state
-  const [activeItem, setActiveItem] = useState<TradeItem | null>(null);
 
   useLockBodyScroll(showClearConfirmModal);
 
@@ -321,213 +315,175 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
     }
   };
 
-  // Drag and drop handlers
-  const handleDragStart = (event: DragStartEvent) => {
-    const { active } = event;
-    if (active.data.current?.type === "item-card") {
-      setActiveItem(active.data.current.item as TradeItem);
-    }
-  };
-
-  const handleDragEnd = (event: DragEndEvent) => {
-    const { active, over } = event;
-    setActiveItem(null);
-
-    if (!over) return;
-
-    const item = active.data.current?.item as TradeItem;
-    if (!item) return;
-
-    // Determine which side to add to based on drop zone
-    let side: "offering" | "requesting" | null = null;
-    if (over.id === "offering-drop-zone") {
-      side = "offering";
-    } else if (over.id === "requesting-drop-zone") {
-      side = "requesting";
-    }
-
-    if (side) {
-      const success = handleAddItem(item, side);
-      if (success) {
-        toast.success(`Added ${item.name} to ${side} items`);
-      }
-    }
-  };
-
   return (
-    <DndContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
-      <div className="space-y-6">
-        {/* Restore Modal */}
-        <ConfirmDialog
-          isOpen={showRestoreModal}
-          onClose={() => setShowRestoreModal(false)}
-          title="Restore Calculator Items?"
-          message="Do you want to restore your previously added items or start a new calculation?"
-          confirmText="Restore Items"
-          cancelText="Start New"
-          onConfirm={handleRestoreItems}
-          confirmVariant="default"
+    <div className="space-y-6">
+      {/* Restore Modal */}
+      <ConfirmDialog
+        isOpen={showRestoreModal}
+        onClose={() => setShowRestoreModal(false)}
+        title="Restore Calculator Items?"
+        message="Do you want to restore your previously added items or start a new calculation?"
+        confirmText="Restore Items"
+        cancelText="Start New"
+        onConfirm={handleRestoreItems}
+        confirmVariant="default"
+      />
+
+      {/* Clear Confirmation Modal */}
+      <ClearConfirmModal
+        isOpen={showClearConfirmModal}
+        onClose={() => setShowClearConfirmModal(false)}
+        offeringItems={offeringItems}
+        requestingItems={requestingItems}
+        setOfferingItems={setOfferingItems}
+        setRequestingItems={setRequestingItems}
+        saveItemsToLocalStorage={saveItemsToLocalStorage}
+        handleStartNew={handleStartNew}
+      />
+
+      {/* Trade Sides */}
+      <div className="space-y-4">
+        <ActionButtons
+          onSwapSides={handleSwapSides}
+          onClearSides={handleClearSides}
         />
 
-        {/* Clear Confirmation Modal */}
-        <ClearConfirmModal
-          isOpen={showClearConfirmModal}
-          onClose={() => setShowClearConfirmModal(false)}
-          offeringItems={offeringItems}
-          requestingItems={requestingItems}
-          setOfferingItems={setOfferingItems}
-          setRequestingItems={setRequestingItems}
-          saveItemsToLocalStorage={saveItemsToLocalStorage}
-          handleStartNew={handleStartNew}
-        />
-
-        {/* Trade Sides */}
-        <div className="space-y-4">
-          <ActionButtons
-            onSwapSides={handleSwapSides}
-            onClearSides={handleClearSides}
+        {/* Trade Panels */}
+        <div className="space-y-6 md:flex md:space-y-0 md:space-x-6">
+          <TradeSidePanel
+            side="offering"
+            items={offeringItems}
+            onRemoveItem={(instanceId) =>
+              handleRemoveItem(instanceId, "offering")
+            }
+            onValueTypeChange={(id, valueType, instanceId) =>
+              updateItemValueType(id, valueType, "offering", instanceId)
+            }
+            getSelectedValueString={getSelectedValueString}
+            getSelectedValueType={getSelectedValueType}
+            onMirror={() => handleMirrorItems("offering")}
+            totals={calculateTotals(offeringItems)}
           />
-
-          {/* Trade Panels */}
-          <div className="space-y-6 md:flex md:space-y-0 md:space-x-6">
-            <TradeSidePanel
-              side="offering"
-              items={offeringItems}
-              onRemoveItem={(instanceId) =>
-                handleRemoveItem(instanceId, "offering")
-              }
-              onValueTypeChange={(id, valueType, instanceId) =>
-                updateItemValueType(id, valueType, "offering", instanceId)
-              }
-              getSelectedValueString={getSelectedValueString}
-              getSelectedValueType={getSelectedValueType}
-              onMirror={() => handleMirrorItems("offering")}
-              totals={calculateTotals(offeringItems)}
-            />
-            <TradeSidePanel
-              side="requesting"
-              items={requestingItems}
-              onRemoveItem={(instanceId) =>
-                handleRemoveItem(instanceId, "requesting")
-              }
-              onValueTypeChange={(id, valueType, instanceId) =>
-                updateItemValueType(id, valueType, "requesting", instanceId)
-              }
-              getSelectedValueString={getSelectedValueString}
-              getSelectedValueType={getSelectedValueType}
-              onMirror={() => handleMirrorItems("requesting")}
-              totals={calculateTotals(requestingItems)}
-            />
-          </div>
+          <TradeSidePanel
+            side="requesting"
+            items={requestingItems}
+            onRemoveItem={(instanceId) =>
+              handleRemoveItem(instanceId, "requesting")
+            }
+            onValueTypeChange={(id, valueType, instanceId) =>
+              updateItemValueType(id, valueType, "requesting", instanceId)
+            }
+            getSelectedValueString={getSelectedValueString}
+            getSelectedValueType={getSelectedValueType}
+            onMirror={() => handleMirrorItems("requesting")}
+            totals={calculateTotals(requestingItems)}
+          />
         </div>
-
-        {/* Ad Section */}
-        <NitroCalculatorAd className="mb-8 flex justify-center" />
-
-        {/* Tabs */}
-        <div className="overflow-x-auto">
-          <div role="tablist" className="tabs min-w-max">
-            <button
-              role="tab"
-              aria-selected={activeTab === "items"}
-              aria-controls="calculator-tabpanel-items"
-              id="calculator-tab-items"
-              onClick={() => handleTabChange("items")}
-              className={`tab ${activeTab === "items" ? "tab-active" : ""}`}
-            >
-              Browse Items
-            </button>
-            <button
-              role="tab"
-              aria-selected={activeTab === "similar"}
-              aria-controls="calculator-tabpanel-similar"
-              id="calculator-tab-similar"
-              onClick={() => handleTabChange("similar")}
-              className={`tab ${activeTab === "similar" ? "tab-active" : ""}`}
-            >
-              Similar by Total
-            </button>
-            <button
-              role="tab"
-              aria-selected={activeTab === "values"}
-              aria-controls="calculator-tabpanel-values"
-              id="calculator-tab-values"
-              onClick={() => handleTabChange("values")}
-              className={`tab ${activeTab === "values" ? "tab-active" : ""}`}
-            >
-              Value Comparison
-            </button>
-          </div>
-        </div>
-
-        {/* Tab Content */}
-        <div
-          role="tabpanel"
-          hidden={activeTab !== "items"}
-          id="calculator-tabpanel-items"
-          aria-labelledby="calculator-tab-items"
-        >
-          {activeTab === "items" && (
-            <div className="mb-8">
-              <AvailableItemsGrid
-                items={initialItems.filter((i) => !i.is_sub)}
-                onSelect={handleAddItem}
-                selectedItems={[...offeringItems, ...requestingItems]}
-                requireAuth={false}
-              />
-            </div>
-          )}
-        </div>
-
-        <div
-          role="tabpanel"
-          hidden={activeTab !== "values"}
-          id="calculator-tabpanel-values"
-          aria-labelledby="calculator-tab-values"
-        >
-          {activeTab === "values" && (
-            <div className="mb-8">
-              <CalculatorValueComparison
-                offering={offeringItems}
-                requesting={requestingItems}
-                getSelectedValueString={getSelectedValueString}
-                getSelectedValue={getSelectedValue}
-                getSelectedValueType={getSelectedValueType}
-                onBrowseItems={() => handleTabChange("items")}
-              />
-            </div>
-          )}
-        </div>
-
-        <div
-          role="tabpanel"
-          hidden={activeTab !== "similar"}
-          id="calculator-tabpanel-similar"
-          aria-labelledby="calculator-tab-similar"
-        >
-          {activeTab === "similar" && (
-            <div className="mb-8">
-              <SimilarItemsTab
-                offeringItems={offeringItems}
-                requestingItems={requestingItems}
-                totalBasis={totalBasis}
-                setTotalBasis={setTotalBasis}
-                offeringSimilarItemsRange={offeringSimilarItemsRange}
-                requestingSimilarItemsRange={requestingSimilarItemsRange}
-                setOfferingSimilarItemsRange={setOfferingSimilarItemsRange}
-                setRequestingSimilarItemsRange={setRequestingSimilarItemsRange}
-                MAX_SIMILAR_ITEMS_RANGE={DYNAMIC_MAX_VALUE}
-                initialItems={initialItems}
-                getSelectedValue={getSelectedValue}
-                onBrowseItems={() => handleTabChange("items")}
-              />
-            </div>
-          )}
-        </div>
-
-        {/* Drag Overlay */}
-        <CustomDragOverlay item={activeItem} />
       </div>
-    </DndContext>
+
+      {/* Ad Section */}
+      <NitroCalculatorAd className="mb-8 flex justify-center" />
+
+      {/* Tabs */}
+      <div className="overflow-x-auto">
+        <div role="tablist" className="tabs min-w-max">
+          <button
+            role="tab"
+            aria-selected={activeTab === "items"}
+            aria-controls="calculator-tabpanel-items"
+            id="calculator-tab-items"
+            onClick={() => handleTabChange("items")}
+            className={`tab ${activeTab === "items" ? "tab-active" : ""}`}
+          >
+            Browse Items
+          </button>
+          <button
+            role="tab"
+            aria-selected={activeTab === "similar"}
+            aria-controls="calculator-tabpanel-similar"
+            id="calculator-tab-similar"
+            onClick={() => handleTabChange("similar")}
+            className={`tab ${activeTab === "similar" ? "tab-active" : ""}`}
+          >
+            Similar by Total
+          </button>
+          <button
+            role="tab"
+            aria-selected={activeTab === "values"}
+            aria-controls="calculator-tabpanel-values"
+            id="calculator-tab-values"
+            onClick={() => handleTabChange("values")}
+            className={`tab ${activeTab === "values" ? "tab-active" : ""}`}
+          >
+            Value Comparison
+          </button>
+        </div>
+      </div>
+
+      {/* Tab Content */}
+      <div
+        role="tabpanel"
+        hidden={activeTab !== "items"}
+        id="calculator-tabpanel-items"
+        aria-labelledby="calculator-tab-items"
+      >
+        {activeTab === "items" && (
+          <div className="mb-8">
+            <AvailableItemsGrid
+              items={initialItems.filter((i) => !i.is_sub)}
+              onSelect={handleAddItem}
+              selectedItems={[...offeringItems, ...requestingItems]}
+              requireAuth={false}
+            />
+          </div>
+        )}
+      </div>
+
+      <div
+        role="tabpanel"
+        hidden={activeTab !== "values"}
+        id="calculator-tabpanel-values"
+        aria-labelledby="calculator-tab-values"
+      >
+        {activeTab === "values" && (
+          <div className="mb-8">
+            <CalculatorValueComparison
+              offering={offeringItems}
+              requesting={requestingItems}
+              getSelectedValueString={getSelectedValueString}
+              getSelectedValue={getSelectedValue}
+              getSelectedValueType={getSelectedValueType}
+              onBrowseItems={() => handleTabChange("items")}
+            />
+          </div>
+        )}
+      </div>
+
+      <div
+        role="tabpanel"
+        hidden={activeTab !== "similar"}
+        id="calculator-tabpanel-similar"
+        aria-labelledby="calculator-tab-similar"
+      >
+        {activeTab === "similar" && (
+          <div className="mb-8">
+            <SimilarItemsTab
+              offeringItems={offeringItems}
+              requestingItems={requestingItems}
+              totalBasis={totalBasis}
+              setTotalBasis={setTotalBasis}
+              offeringSimilarItemsRange={offeringSimilarItemsRange}
+              requestingSimilarItemsRange={requestingSimilarItemsRange}
+              setOfferingSimilarItemsRange={setOfferingSimilarItemsRange}
+              setRequestingSimilarItemsRange={setRequestingSimilarItemsRange}
+              MAX_SIMILAR_ITEMS_RANGE={DYNAMIC_MAX_VALUE}
+              initialItems={initialItems}
+              getSelectedValue={getSelectedValue}
+              onBrowseItems={() => handleTabChange("items")}
+            />
+          </div>
+        )}
+      </div>
+    </div>
   );
 };

@@ -1,4 +1,5 @@
 import React from "react";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface TradeAdTabsProps {
   activeTab: "view" | "supporter" | "create" | "myads";
@@ -11,50 +12,45 @@ export const TradeAdTabs: React.FC<TradeAdTabsProps> = ({
   onTabChange,
   hasTradeAds,
 }) => (
-  <div className="overflow-x-auto">
-    <div role="tablist" className="tabs min-w-max">
-      <button
-        role="tab"
-        aria-selected={activeTab === "view"}
-        aria-controls="trading-tabpanel-view"
-        id="trading-tab-view"
-        onClick={() => onTabChange("view")}
-        className={`tab ${activeTab === "view" ? "tab-active" : ""}`}
-      >
-        View Trade Ads
-      </button>
-      <button
-        role="tab"
-        aria-selected={activeTab === "supporter"}
-        aria-controls="trading-tabpanel-supporter"
-        id="trading-tab-supporter"
-        onClick={() => onTabChange("supporter")}
-        className={`tab ${activeTab === "supporter" ? "tab-active" : ""}`}
-      >
-        Supporter Ads
-      </button>
-      {hasTradeAds && (
-        <button
-          role="tab"
-          aria-selected={activeTab === "myads"}
-          aria-controls="trading-tabpanel-myads"
-          id="trading-tab-myads"
-          onClick={() => onTabChange("myads")}
-          className={`tab ${activeTab === "myads" ? "tab-active" : ""}`}
+  <Tabs
+    value={activeTab}
+    onValueChange={(value) =>
+      onTabChange(value as "view" | "supporter" | "create" | "myads")
+    }
+  >
+    <div className="overflow-x-auto">
+      <TabsList>
+        <TabsTrigger
+          value="view"
+          id="trading-tab-view"
+          aria-controls="trading-tabpanel-view"
         >
-          My Trade Ads
-        </button>
-      )}
-      <button
-        role="tab"
-        aria-selected={activeTab === "create"}
-        aria-controls="trading-tabpanel-create"
-        id="trading-tab-create"
-        onClick={() => onTabChange("create")}
-        className={`tab ${activeTab === "create" ? "tab-active" : ""}`}
-      >
-        Create Trade Ad
-      </button>
+          View Trade Ads
+        </TabsTrigger>
+        <TabsTrigger
+          value="supporter"
+          id="trading-tab-supporter"
+          aria-controls="trading-tabpanel-supporter"
+        >
+          Supporter Ads
+        </TabsTrigger>
+        {hasTradeAds && (
+          <TabsTrigger
+            value="myads"
+            id="trading-tab-myads"
+            aria-controls="trading-tabpanel-myads"
+          >
+            My Trade Ads
+          </TabsTrigger>
+        )}
+        <TabsTrigger
+          value="create"
+          id="trading-tab-create"
+          aria-controls="trading-tabpanel-create"
+        >
+          Create Trade Ad
+        </TabsTrigger>
+      </TabsList>
     </div>
-  </div>
+  </Tabs>
 );

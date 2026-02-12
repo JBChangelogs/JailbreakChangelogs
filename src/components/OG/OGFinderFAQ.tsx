@@ -71,7 +71,7 @@ const faqs = [
 
 const OGFinderFAQ: React.FC = () => {
   return (
-    <div className="border-border-primary bg-secondary-bg hover:border-border-focus mt-8 rounded-lg border p-6">
+    <div className="border-border-card bg-secondary-bg hover:border-border-focus mt-8 rounded-lg border p-6">
       <h3 className="text-primary-text mb-4 text-xl font-semibold">
         Frequently Asked Questions
       </h3>

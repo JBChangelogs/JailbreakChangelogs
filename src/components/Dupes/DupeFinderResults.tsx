@@ -347,7 +347,7 @@ export default function DupeFinderResults({
       />
 
       {/* Items Grid */}
-      <div className="border-border-primary bg-secondary-bg shadow-card-shadow rounded-lg border p-6">
+      <div className="border-border-card bg-secondary-bg rounded-lg border p-6">
         <h2 className="text-primary-text mb-4 text-xl font-semibold">
           Duplicate Items
         </h2>

@@ -51,12 +51,12 @@ export default function BountyCard({
   const players = bounty.server?.players || [];
 
   return (
-    <div className="border-border-primary bg-secondary-bg hover:border-border-focus flex flex-col overflow-hidden rounded-lg border transition-all duration-200 hover:shadow-lg">
+    <div className="border-border-card bg-secondary-bg flex flex-col overflow-hidden rounded-lg border transition-all duration-200 hover:shadow-lg">
       {/* Header */}
       <div className="bg-tertiary-bg p-4">
         <div className="mb-3 flex items-center gap-3">
           {/* Avatar */}
-          <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-full">
+          <div className="border-border-card relative h-12 w-12 shrink-0 overflow-hidden rounded-full border">
             <Image
               src={getAvatarUrl(bounty.userid)}
               alt={bounty.display_name}
@@ -100,7 +100,7 @@ export default function BountyCard({
               <Icon icon="heroicons:cube" className="h-4 w-4" />
               Inventory ({bounty.inventory.length} items)
             </div>
-            <div className="flex flex-wrap gap-1.5">
+            <div className="bg-secondary-bg flex flex-wrap gap-1.5 rounded-lg p-2">
               {bounty.inventory.map((item, index) => (
                 <span
                   key={`${item}-${index}`}
@@ -141,7 +141,7 @@ export default function BountyCard({
 
         {/* Footer with Last Update - Only show if not simplified */}
         {!simplified && (
-          <div className="border-border-primary mt-4 border-t pt-3">
+          <div className="border-border-card mt-4 border-t pt-3">
             <div className="text-primary-text flex items-center justify-center gap-1.5 text-xs font-medium">
               <Icon
                 icon="mdi:clock"

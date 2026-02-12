@@ -88,7 +88,7 @@ const ItemRow: React.FC<ItemRowProps> = ({ item, side, isFirst = false }) => {
 
   return (
     <div
-      className="bg-tertiary-bg border-border-primary hover:border-border-focus rounded-lg border p-4 transition-colors hover:cursor-pointer"
+      className="bg-tertiary-bg border-border-card rounded-lg border p-4 transition-colors hover:cursor-pointer"
       onClick={toggleExpanded}
     >
       {/* Main Item Info */}
@@ -164,7 +164,7 @@ const ItemRow: React.FC<ItemRowProps> = ({ item, side, isFirst = false }) => {
 
       {/* Expanded Details */}
       {isExpanded && (
-        <div className="border-border-primary mt-4 border-t pt-4">
+        <div className="border-border-card mt-4 border-t pt-4">
           <div className="space-y-2">
             {/* Cash Value */}
             <div className="bg-secondary-bg flex items-center justify-between rounded-lg p-2">

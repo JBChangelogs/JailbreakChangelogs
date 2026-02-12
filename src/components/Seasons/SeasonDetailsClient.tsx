@@ -135,7 +135,7 @@ export default function SeasonDetailsClient({
 
               {/* Go to Current Season - Only show when not on latest */}
               {season.season !== latestSeasonNumber && (
-                <div className="border-button-info bg-secondary-bg mb-6 rounded-lg border p-4">
+                <div className="border-border-card bg-secondary-bg mb-6 rounded-lg border p-4">
                   <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                     <div className="flex-1">
                       <h3 className="text-primary-text mb-2 text-lg font-semibold">
@@ -166,7 +166,7 @@ export default function SeasonDetailsClient({
 
               {/* XP Calculator Button - Only show for highest season */}
               {season.season === latestSeasonNumber && (
-                <div className="border-button-info bg-secondary-bg mb-6 rounded-lg border p-4">
+                <div className="border-border-card bg-secondary-bg mb-6 rounded-lg border p-4">
                   <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                     <div className="flex-1">
                       <h3 className="text-primary-text mb-2 text-lg font-semibold">
@@ -190,7 +190,7 @@ export default function SeasonDetailsClient({
 
               {/* Weekly Contracts Promo - Only show for highest season */}
               {season.season === latestSeasonNumber && (
-                <div className="border-button-info bg-secondary-bg mb-6 rounded-lg border p-4">
+                <div className="border-border-card bg-secondary-bg mb-6 rounded-lg border p-4">
                   <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                     <div className="flex-1">
                       <h3 className="text-primary-text mb-2 text-lg font-semibold">
@@ -210,7 +210,7 @@ export default function SeasonDetailsClient({
               )}
 
               <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
-                <div className="border-border-primary bg-secondary-bg hover:border-border-focus rounded-lg border p-4">
+                <div className="border-border-card bg-secondary-bg rounded-lg border p-4">
                   <h3 className="text-primary-text mb-2 font-semibold">
                     Start Date
                   </h3>
@@ -218,7 +218,7 @@ export default function SeasonDetailsClient({
                     {startDate ? formatProfileDate(startDate.getTime()) : "TBD"}
                   </p>
                 </div>
-                <div className="border-border-primary bg-secondary-bg hover:border-border-focus rounded-lg border p-4">
+                <div className="border-border-card bg-secondary-bg rounded-lg border p-4">
                   <h3 className="text-primary-text mb-2 font-semibold">
                     End Date
                   </h3>
@@ -226,7 +226,7 @@ export default function SeasonDetailsClient({
                     {endDate ? formatProfileDate(endDate.getTime()) : "TBD"}
                   </p>
                 </div>
-                <div className="border-border-primary bg-secondary-bg hover:border-border-focus rounded-lg border p-4">
+                <div className="border-border-card bg-secondary-bg rounded-lg border p-4">
                   <h3 className="text-primary-text mb-2 font-semibold">
                     Duration
                   </h3>
@@ -279,7 +279,7 @@ export default function SeasonDetailsClient({
                   .map((reward) => (
                     <div
                       key={reward.id}
-                      className="border-border-primary bg-secondary-bg hover:border-border-focus rounded-lg border p-4"
+                      className="border-border-card bg-secondary-bg rounded-lg border p-4"
                     >
                       <div className="mb-2 flex items-center justify-between">
                         <h3 className="text-primary-text font-semibold">
@@ -287,12 +287,12 @@ export default function SeasonDetailsClient({
                         </h3>
                         <div className="flex gap-2">
                           {reward.bonus === "True" && (
-                            <span className="border-primary-text text-primary-text rounded-full border bg-transparent px-2 py-1 text-xs font-medium">
+                            <span className="text-primary-text border-border-card bg-tertiary-bg/40 inline-flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl">
                               Bonus
                             </span>
                           )}
                           {reward.exclusive === "True" && (
-                            <span className="border-primary-text text-primary-text rounded-full border bg-transparent px-2 py-1 text-xs font-medium">
+                            <span className="text-primary-text border-border-card bg-tertiary-bg/40 inline-flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl">
                               Exclusive
                             </span>
                           )}

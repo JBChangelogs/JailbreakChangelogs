@@ -15,15 +15,17 @@ import {
   formatFullValue,
 } from "@/utils/values";
 import { getDemandColor, getTrendColor } from "@/utils/badgeColors";
-import { CategoryIconBadge, getCategoryColor } from "@/utils/categoryIcons";
-import { TradeAdErrorModal } from "./TradeAdErrorModal";
+import {
+  CategoryIconBadge,
+  getCategoryColor,
+  getCategoryIcon,
+} from "@/utils/categoryIcons";
 import { Icon } from "../ui/IconWrapper";
 import Image from "next/image";
 import Link from "next/link";
 import { FilterSort, ValueSort } from "@/types";
 import { useDebounce } from "@/hooks/useDebounce";
 import { useVirtualizer } from "@tanstack/react-virtual";
-import { DraggableItemCard } from "@/components/dnd/DraggableItemCard";
 import { useMediaQuery } from "@mui/material";
 import { Button } from "../ui/button";
 import {
@@ -63,8 +65,7 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
   const isMobile = useMediaQuery("(max-width:640px)");
   const parentRef = useRef<HTMLDivElement>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [showErrorModal, setShowErrorModal] = useState(false);
-  const [validationErrors, setValidationErrors] = useState<string[]>([]);
+  const lastErrorToastAtRef = useRef<number>(0);
 
   const supportedFilterSorts = useMemo(
     () =>
@@ -131,8 +132,19 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
 
   useEffect(() => {
     const handleShowError = (event: CustomEvent) => {
-      setValidationErrors(event.detail.errors);
-      setShowErrorModal(true);
+      const now = Date.now();
+      const errors: string[] = Array.isArray(event.detail?.errors)
+        ? event.detail.errors
+        : [];
+      if (errors.length === 0) return;
+
+      // Avoid spamming toasts if multiple errors fire at once.
+      if (now - lastErrorToastAtRef.current < 300) return;
+      lastErrorToastAtRef.current = now;
+
+      errors.forEach((error) => {
+        toast.error(error);
+      });
     };
 
     const element = document.querySelector(
@@ -258,7 +270,7 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
     if (isXs) return 1;
     if (isSm) return 2;
     if (isMd) return 3;
-    if (isLg) return 5;
+    if (isLg) return 6;
     return 6;
   };
 
@@ -291,19 +303,10 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
     }
   };
 
-  // Get the correct item to drag based on selected variant
-  // Get the correct item to drag (no variants supported anymore)
-  const getItemForDrag = (item: TradeItem): TradeItem => {
-    return {
-      ...item,
-      base_name: item.name,
-    };
-  };
-
   return (
     <>
       <div className="space-y-4" data-component="available-items-grid">
-        <div className="border-border-primary bg-secondary-bg hover:border-border-focus hover:shadow-card-shadow rounded-lg border p-1 pt-4 transition-colors duration-200 sm:p-2">
+        <div className="border-border-card bg-secondary-bg hover:shadow-card-shadow rounded-lg border p-1 pt-4 transition-colors duration-200 sm:p-2">
           <div className="mb-4 grid grid-cols-1 gap-4 lg:grid-cols-3">
             {/* Search - Takes up full width on mobile, 1/3 on desktop */}
             <div className="relative lg:col-span-1">
@@ -317,7 +320,7 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
                   placeholder="Search items by name or type..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="border-border-primary bg-primary-bg text-primary-text placeholder-secondary-text hover:border-border-focus hover:bg-primary-bg focus:border-button-info min-h-[56px] w-full rounded-lg border px-4 py-3 pr-10 pl-10 transition-all duration-300 focus:outline-none"
+                  className="border-border-card bg-primary-bg text-primary-text placeholder-secondary-text hover:bg-primary-bg focus:border-button-info min-h-[56px] w-full rounded-lg border px-4 py-3 pr-10 pl-10 transition-all duration-300 focus:outline-none"
                 />
                 {searchQuery && (
                   <button
@@ -340,7 +343,7 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
                 <DropdownMenuTrigger asChild>
                   <button
                     type="button"
-                    className="border-border-primary bg-primary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus flex h-[56px] w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all duration-300 focus:ring-1 focus:outline-none"
+                    className="border-border-card bg-primary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 flex h-[56px] w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all duration-300 focus:ring-1 focus:outline-none"
                     aria-label="Filter by category"
                   >
                     <span className="truncate">{filterLabel}</span>
@@ -353,7 +356,7 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
                 </DropdownMenuTrigger>
                 <DropdownMenuContent
                   align="start"
-                  className="border-border-primary bg-primary-bg text-primary-text scrollbar-thin max-h-[320px] w-[var(--radix-popper-anchor-width)] min-w-[var(--radix-popper-anchor-width)] overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
+                  className="border-border-card bg-primary-bg text-primary-text scrollbar-thin max-h-[320px] w-[var(--radix-popper-anchor-width)] min-w-[var(--radix-popper-anchor-width)] overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
                 >
                   <DropdownMenuRadioGroup
                     value={filterSort}
@@ -390,7 +393,7 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
                 <DropdownMenuTrigger asChild>
                   <button
                     type="button"
-                    className="border-border-primary bg-primary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus flex h-[56px] w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all duration-300 focus:ring-1 focus:outline-none"
+                    className="border-border-card bg-primary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 flex h-[56px] w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all duration-300 focus:ring-1 focus:outline-none"
                     aria-label="Sort items"
                   >
                     <span className="truncate">{sortLabel}</span>
@@ -403,7 +406,7 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
                 </DropdownMenuTrigger>
                 <DropdownMenuContent
                   align="start"
-                  className="border-border-primary bg-primary-bg text-primary-text scrollbar-thin max-h-[320px] w-[var(--radix-popper-anchor-width)] min-w-[var(--radix-popper-anchor-width)] overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
+                  className="border-border-card bg-primary-bg text-primary-text scrollbar-thin max-h-[320px] w-[var(--radix-popper-anchor-width)] min-w-[var(--radix-popper-anchor-width)] overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
                 >
                   <DropdownMenuRadioGroup
                     value={valueSort}
@@ -438,27 +441,16 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
             </div>
           </div>
 
-          {/* Helpful tip about drag and drop */}
+          {/* Helpful tip about keyboard shortcuts */}
           <div className="mb-4 text-center">
             <div className="text-secondary-text hidden flex-col items-center justify-center gap-1 text-xs lg:flex">
-              <div className="flex items-center gap-1">
+              <div className="flex items-center gap-2">
                 <Icon
                   icon="emojione:light-bulb"
                   className="text-sm text-yellow-500"
                 />
-                Helpful tips: Drag and drop items to{" "}
-                <span className="text-status-success font-semibold">
-                  Offering
-                </span>{" "}
-                or{" "}
-                <span className="text-status-error font-semibold">
-                  Requesting
-                </span>{" "}
-                sides
-              </div>
-              <div className="flex items-center gap-2">
                 <span>Or use keyboard shortcuts on item names:</span>
-                <kbd className="kbd kbd-sm border-border-primary bg-tertiary-bg text-primary-text">
+                <kbd className="kbd kbd-sm border-border-card bg-tertiary-bg text-primary-text">
                   Shift
                 </kbd>
                 <span>+ Click for</span>
@@ -466,7 +458,7 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
                   Offering
                 </span>
                 <span>•</span>
-                <kbd className="kbd kbd-sm border-border-primary bg-tertiary-bg text-primary-text">
+                <kbd className="kbd kbd-sm border-border-card bg-tertiary-bg text-primary-text">
                   Ctrl
                 </kbd>
                 <span>+ Click for</span>
@@ -537,212 +529,221 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
                         }}
                       >
                         {rowItems.map((item) => (
-                          <DraggableItemCard
+                          <div
                             key={item.id}
-                            item={getItemForDrag(item)}
-                            disabled={item.tradable !== 1}
+                            className={`group border-border-card bg-tertiary-bg flex w-full flex-col rounded-lg border text-left transition-colors ${
+                              item.tradable === 1
+                                ? ""
+                                : "cursor-not-allowed opacity-50"
+                            }`}
                           >
-                            <div
-                              className={`group border-border-primary bg-primary-bg flex w-full flex-col rounded-lg border text-left transition-colors ${
-                                item.tradable === 1
-                                  ? "hover:border-border-focus"
-                                  : "cursor-not-allowed opacity-50"
-                              }`}
-                            >
-                              <div className="relative mb-2 aspect-4/3 overflow-hidden rounded-md">
-                                {isVideoItem(item.name) ? (
-                                  <video
-                                    src={getVideoPath(item.type, item.name)}
-                                    className="h-full w-full object-cover"
-                                    muted
-                                    playsInline
-                                    loop
-                                    autoPlay
-                                  />
-                                ) : (
-                                  <Image
-                                    src={getItemImagePath(
-                                      item.type,
-                                      item.name,
-                                      true,
-                                    )}
-                                    alt={item.name}
-                                    className="h-full w-full object-cover"
-                                    onError={handleImageError}
-                                    fill
-                                  />
-                                )}
-                                <div className="absolute top-2 right-2 z-5">
-                                  <CategoryIconBadge
-                                    type={item.type}
-                                    isLimited={item.is_limited === 1}
-                                    isSeasonal={item.is_seasonal === 1}
-                                    className="h-4 w-4"
-                                  />
-                                </div>
+                            <div className="relative mb-2 aspect-4/3 overflow-hidden rounded-md">
+                              {isVideoItem(item.name) ? (
+                                <video
+                                  src={getVideoPath(item.type, item.name)}
+                                  className="h-full w-full object-cover"
+                                  muted
+                                  playsInline
+                                  loop
+                                  autoPlay
+                                />
+                              ) : (
+                                <Image
+                                  src={getItemImagePath(
+                                    item.type,
+                                    item.name,
+                                    true,
+                                  )}
+                                  alt={item.name}
+                                  className="h-full w-full object-cover"
+                                  draggable={false}
+                                  onError={handleImageError}
+                                  fill
+                                />
+                              )}
+                              <div className="absolute top-2 left-2 z-5">
+                                <CategoryIconBadge
+                                  type={item.type}
+                                  isLimited={item.is_limited === 1}
+                                  isSeasonal={item.is_seasonal === 1}
+                                  className="h-4 w-4"
+                                />
                               </div>
-                              <div className="flex grow flex-col p-2">
-                                <div className="space-y-1.5">
-                                  <Link
-                                    href={`/item/${encodeURIComponent(item.type.toLowerCase())}/${encodeURIComponent(item.name)}`}
-                                    prefetch={false}
-                                    className="text-primary-text hover:text-link max-w-full cursor-pointer text-sm font-semibold transition-colors"
-                                    onClick={(e) => {
-                                      if (item.tradable !== 1) return;
+                            </div>
+                            <div className="flex grow flex-col p-2">
+                              <div className="space-y-1.5">
+                                <Link
+                                  href={`/item/${encodeURIComponent(item.type.toLowerCase())}/${encodeURIComponent(item.name)}`}
+                                  prefetch={false}
+                                  className="text-primary-text hover:text-link max-w-full cursor-pointer text-sm font-semibold transition-colors"
+                                  onClick={(e) => {
+                                    if (item.tradable !== 1) return;
 
-                                      // Shift+Click = Add to Offering
-                                      if (e.shiftKey) {
-                                        e.preventDefault();
-                                        e.stopPropagation();
-                                        handleAddItem(item, "offering");
-                                      }
-                                      // Ctrl+Click (or Cmd+Click on Mac) = Add to Requesting
-                                      else if (e.ctrlKey || e.metaKey) {
-                                        e.preventDefault();
-                                        e.stopPropagation();
-                                        handleAddItem(item, "requesting");
-                                      }
+                                    // Shift+Click = Add to Offering
+                                    if (e.shiftKey) {
+                                      e.preventDefault();
+                                      e.stopPropagation();
+                                      handleAddItem(item, "offering");
+                                    }
+                                    // Ctrl+Click (or Cmd+Click on Mac) = Add to Requesting
+                                    else if (e.ctrlKey || e.metaKey) {
+                                      e.preventDefault();
+                                      e.stopPropagation();
+                                      handleAddItem(item, "requesting");
+                                    }
+                                  }}
+                                >
+                                  {item.name}
+                                </Link>
+                                <div className="flex flex-wrap items-center gap-1.5">
+                                  <span
+                                    className="text-primary-text bg-tertiary-bg/40 inline-flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl"
+                                    style={{
+                                      borderColor: getCategoryColor(item.type),
                                     }}
                                   >
-                                    {item.name}
-                                  </Link>
-                                  <div className="flex flex-wrap items-center gap-1.5">
-                                    <span
-                                      className="text-primary-text flex items-center rounded-full border px-2 py-0.5 text-xs font-medium"
-                                      style={{
-                                        borderColor: getCategoryColor(
-                                          item.type,
-                                        ),
-                                        backgroundColor:
-                                          getCategoryColor(item.type) + "20", // Add 20% opacity
-                                      }}
-                                    >
-                                      {item.type}
+                                    {(() => {
+                                      const categoryIcon = getCategoryIcon(
+                                        item.type,
+                                      );
+                                      return categoryIcon ? (
+                                        <categoryIcon.Icon
+                                          className="mr-1.5 h-3 w-3"
+                                          style={{
+                                            color: getCategoryColor(item.type),
+                                          }}
+                                        />
+                                      ) : null;
+                                    })()}
+                                    {item.type}
+                                  </span>
+                                  {item.is_limited === 1 && (
+                                    <span className="text-primary-text border-border-card bg-tertiary-bg/40 inline-flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl">
+                                      <Icon
+                                        icon="mdi:clock"
+                                        className="mr-1.5 h-3 w-3"
+                                        style={{ color: "#ffd700" }}
+                                      />
+                                      Limited
                                     </span>
-                                    {item.is_limited === 1 && (
-                                      <span className="border-primary-text text-primary-text flex items-center rounded-full border bg-transparent px-2 py-0.5 text-xs">
-                                        Limited
-                                      </span>
-                                    )}
-                                    {item.is_seasonal === 1 && (
-                                      <span className="border-primary-text text-primary-text flex items-center rounded-full border bg-transparent px-2 py-0.5 text-xs">
-                                        Seasonal
-                                      </span>
-                                    )}
-                                    {item.tradable !== 1 && (
-                                      <span className="rounded-full bg-red-500 px-2 py-0.5 text-xs text-white">
-                                        Not Tradable
-                                      </span>
-                                    )}
-                                  </div>
-                                  {item.tradable === 1 && (
-                                    <>
-                                      <div className="text-secondary-text space-y-1 text-xs">
-                                        <div className="flex items-center justify-between rounded-lg bg-linear-to-r p-1.5">
-                                          <span className="text-secondary-text text-xs font-medium whitespace-nowrap">
-                                            Cash
-                                          </span>
-                                          <span className="bg-button-info text-form-button-text rounded-lg px-2 py-0.5 text-xs font-bold shadow-sm">
-                                            {(() => {
-                                              if (
-                                                item.cash_value === null ||
-                                                item.cash_value === "N/A"
-                                              )
-                                                return "N/A";
-                                              return isMobile
-                                                ? item.cash_value
-                                                : formatFullValue(
-                                                    item.cash_value,
-                                                  );
-                                            })()}
-                                          </span>
-                                        </div>
-                                        <div className="flex items-center justify-between rounded-lg bg-linear-to-r p-1.5">
-                                          <span className="text-secondary-text text-xs font-medium whitespace-nowrap">
-                                            Duped
-                                          </span>
-                                          <span className="bg-button-info text-form-button-text rounded-lg px-2 py-0.5 text-xs font-bold shadow-sm">
-                                            {(() => {
-                                              if (
-                                                item.duped_value === null ||
-                                                item.duped_value === "N/A"
-                                              )
-                                                return "N/A";
-                                              return isMobile
-                                                ? item.duped_value
-                                                : formatFullValue(
-                                                    item.duped_value,
-                                                  );
-                                            })()}
-                                          </span>
-                                        </div>
-                                        <div className="flex items-center justify-between rounded-lg bg-linear-to-r p-1.5">
-                                          <span className="text-secondary-text text-xs font-medium whitespace-nowrap">
-                                            Demand
-                                          </span>
-                                          {(() => {
-                                            const d = item.demand ?? "N/A";
-                                            return (
-                                              <span
-                                                className={`${getDemandColor(d)} rounded-lg px-2 py-0.5 text-xs font-bold shadow-sm`}
-                                              >
-                                                {d === "N/A" ? "Unknown" : d}
-                                              </span>
-                                            );
-                                          })()}
-                                        </div>
-                                        <div className="flex items-center justify-between rounded-lg bg-linear-to-r p-1.5">
-                                          <span className="text-secondary-text text-xs font-medium whitespace-nowrap">
-                                            Trend
-                                          </span>
-                                          <span
-                                            className={`${getTrendColor(
-                                              item.trend || "N/A",
-                                            )} rounded-lg px-2 py-0.5 text-xs font-bold shadow-sm`}
-                                          >
-                                            {(() => {
-                                              const trend = item.trend;
-                                              return !trend || trend === "N/A"
-                                                ? "Unknown"
-                                                : trend;
-                                            })()}
-                                          </span>
-                                        </div>
-                                      </div>
-                                    </>
+                                  )}
+                                  {item.is_seasonal === 1 && (
+                                    <span className="text-primary-text border-border-card bg-tertiary-bg/40 inline-flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl">
+                                      <Icon
+                                        icon="noto-v1:snowflake"
+                                        className="mr-1.5 h-3 w-3"
+                                        style={{ color: "#40c0e7" }}
+                                      />
+                                      Seasonal
+                                    </span>
+                                  )}
+                                  {item.tradable !== 1 && (
+                                    <span className="inline-flex h-6 items-center rounded-lg bg-red-500 px-2.5 text-xs leading-none font-medium text-white">
+                                      Not Tradable
+                                    </span>
                                   )}
                                 </div>
                                 {item.tradable === 1 && (
-                                  <div className="mt-auto flex gap-2 pt-2">
-                                    <Button
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        e.preventDefault();
-                                        handleAddItem(item, "offering");
-                                      }}
-                                      variant="success"
-                                      size="sm"
-                                      className="flex-1"
-                                    >
-                                      Offer
-                                    </Button>
-                                    <Button
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        e.preventDefault();
-                                        handleAddItem(item, "requesting");
-                                      }}
-                                      variant="destructive"
-                                      size="sm"
-                                      className="flex-1"
-                                    >
-                                      Request
-                                    </Button>
+                                  <div className="text-secondary-text space-y-1 text-xs">
+                                    <div className="bg-secondary-bg flex items-center justify-between rounded-lg p-1.5">
+                                      <span className="text-secondary-text text-xs font-medium whitespace-nowrap">
+                                        Cash
+                                      </span>
+                                      <span className="bg-button-info text-form-button-text inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold shadow-sm">
+                                        {(() => {
+                                          if (
+                                            item.cash_value === null ||
+                                            item.cash_value === "N/A"
+                                          )
+                                            return "N/A";
+                                          return isMobile
+                                            ? item.cash_value
+                                            : formatFullValue(item.cash_value);
+                                        })()}
+                                      </span>
+                                    </div>
+                                    <div className="bg-secondary-bg flex items-center justify-between rounded-lg p-1.5">
+                                      <span className="text-secondary-text text-xs font-medium whitespace-nowrap">
+                                        Duped
+                                      </span>
+                                      <span className="bg-button-info text-form-button-text inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold shadow-sm">
+                                        {(() => {
+                                          if (
+                                            item.duped_value === null ||
+                                            item.duped_value === "N/A"
+                                          )
+                                            return "N/A";
+                                          return isMobile
+                                            ? item.duped_value
+                                            : formatFullValue(item.duped_value);
+                                        })()}
+                                      </span>
+                                    </div>
+                                    <div className="bg-secondary-bg flex items-center justify-between rounded-lg p-1.5">
+                                      <span className="text-secondary-text text-xs font-medium whitespace-nowrap">
+                                        Demand
+                                      </span>
+                                      {(() => {
+                                        const d = item.demand ?? "N/A";
+                                        return (
+                                          <span
+                                            className={`${getDemandColor(d)} inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold shadow-sm`}
+                                          >
+                                            {d === "N/A" ? "Unknown" : d}
+                                          </span>
+                                        );
+                                      })()}
+                                    </div>
+                                    <div className="bg-secondary-bg flex items-center justify-between rounded-lg p-1.5">
+                                      <span className="text-secondary-text text-xs font-medium whitespace-nowrap">
+                                        Trend
+                                      </span>
+                                      <span
+                                        className={`${getTrendColor(
+                                          item.trend || "N/A",
+                                        )} inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold shadow-sm`}
+                                      >
+                                        {(() => {
+                                          const trend = item.trend;
+                                          return !trend || trend === "N/A"
+                                            ? "Unknown"
+                                            : trend;
+                                        })()}
+                                      </span>
+                                    </div>
                                   </div>
                                 )}
                               </div>
+                              {item.tradable === 1 && (
+                                <div className="mt-auto flex gap-2 pt-2">
+                                  <Button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      e.preventDefault();
+                                      handleAddItem(item, "offering");
+                                    }}
+                                    variant="success"
+                                    size="sm"
+                                    className="flex-1"
+                                  >
+                                    Offer
+                                  </Button>
+                                  <Button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      e.preventDefault();
+                                      handleAddItem(item, "requesting");
+                                    }}
+                                    variant="destructive"
+                                    size="sm"
+                                    className="flex-1"
+                                  >
+                                    Request
+                                  </Button>
+                                </div>
+                              )}
                             </div>
-                          </DraggableItemCard>
+                          </div>
                         ))}
                       </div>
                     </div>
@@ -752,12 +753,6 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
             )}
           </div>
         </div>
-
-        <TradeAdErrorModal
-          isOpen={showErrorModal}
-          onClose={() => setShowErrorModal(false)}
-          errors={validationErrors}
-        />
       </div>
     </>
   );

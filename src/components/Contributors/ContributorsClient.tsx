@@ -15,9 +15,13 @@ export default function ContributorsClient({
 }: ContributorsClientProps) {
   const [activeFilter, setActiveFilter] = useState("All");
 
-  const filteredUsers = usersWithFlags.filter(
-    (user) => user.id !== "1327206739665489930",
-  );
+  const filteredUsers = usersWithFlags.filter((user) => {
+    if (user.id === "1327206739665489930") return false;
+    if (user.id === "1436084098564096042") return false;
+    return !user.flags.some(
+      (flag) => flag.flag === "is_badimo" && flag.enabled,
+    );
+  });
 
   const getUserRoles = (user: UserWithFlags): string[] => {
     const enabledFlags = user.flags.filter((flag) => flag.enabled);
@@ -30,7 +34,6 @@ export default function ContributorsClient({
       is_vt: "Value Team",
       is_contributor: "Contributor",
       is_tester: "Tester",
-      is_badimo: "Badimo",
     };
 
     const sortedFlags = enabledFlags.sort((a, b) => a.index - b.index);
@@ -51,7 +54,6 @@ export default function ContributorsClient({
       is_vt: "Value Team",
       is_contributor: "Contributor",
       is_tester: "Tester",
-      is_badimo: "Badimo",
     };
 
     return flagToRole[highestPriorityFlag.flag] || "Member";
@@ -65,7 +67,6 @@ export default function ContributorsClient({
   const valueTeam: (UserWithFlags & { role: string })[] = [];
   const testers: (UserWithFlags & { role: string })[] = [];
   const contributors: (UserWithFlags & { role: string })[] = [];
-  const badimo: (UserWithFlags & { role: string })[] = [];
 
   filteredUsers.forEach((user) => {
     const roles = getUserRoles(user);
@@ -97,9 +98,6 @@ export default function ContributorsClient({
           break;
         case "Contributor":
           contributors.push(userWithRole);
-          break;
-        case "Badimo":
-          badimo.push(userWithRole);
           break;
       }
     });
@@ -142,7 +140,6 @@ export default function ContributorsClient({
   const sortedValueTeam = sortByHierarchy(valueTeam);
   const sortedTesters = sortByHierarchy(testers);
   const sortedContributors = sortByHierarchy(contributors);
-  const sortedBadimo = sortByHierarchy(badimo);
 
   const allTeam = filteredUsers
     .map((user) => ({
@@ -169,7 +166,6 @@ export default function ContributorsClient({
     { key: "Owner", label: "Owner" },
     { key: "Developer", label: "Developer" },
     { key: "Partner", label: "Partner" },
-    { key: "Badimo", label: "Badimo" },
     { key: "Tester", label: "Tester" },
     { key: "Graphic Designer", label: "Graphic Designer" },
     { key: "Contributor", label: "Contributor" },
@@ -215,9 +211,6 @@ export default function ContributorsClient({
         usersToShow = sortedContributors;
         staticContributorsToShow = staticContributors;
         break;
-      case "Badimo":
-        usersToShow = sortedBadimo;
-        break;
       default:
         usersToShow = allTeam;
         staticContributorsToShow = staticContributors;
@@ -236,7 +229,7 @@ export default function ContributorsClient({
   ) => (
     <div
       key={user.id}
-      className="group hover:bg-button-info flex transform cursor-pointer flex-col items-center rounded-xl p-8 transition-colors duration-300"
+      className="border-border-card bg-secondary-bg group hover:bg-quaternary-bg flex transform cursor-pointer flex-col items-center rounded-xl border p-8 transition-colors duration-300"
     >
       <Link
         href={`/users/${user.id}`}
@@ -263,12 +256,12 @@ export default function ContributorsClient({
             premiumType={user.premiumtype}
           />
         </div>
-        <h1 className="text-primary-text group-hover:text-form-button-text mt-4 text-2xl font-semibold capitalize transition-colors duration-300">
+        <h1 className="text-primary-text group-hover:text-link mt-4 text-2xl font-semibold capitalize transition-colors duration-300">
           {user.global_name && user.global_name !== "None"
             ? user.global_name
             : user.username}
         </h1>
-        <p className="text-secondary-text group-hover:text-form-button-text mt-2 capitalize opacity-80 transition-colors duration-300">
+        <p className="text-secondary-text mt-2 capitalize opacity-80 transition-colors duration-300">
           {user.roles ? user.roles.join(", ") : role || user.role}
         </p>
       </Link>
@@ -278,7 +271,7 @@ export default function ContributorsClient({
   const renderStaticContributor = (contrib: (typeof staticContributors)[0]) => (
     <div
       key={contrib.key}
-      className="group hover:bg-button-info flex transform cursor-pointer flex-col items-center rounded-xl p-8 transition-colors duration-300"
+      className="border-border-card bg-secondary-bg group hover:bg-quaternary-bg flex transform cursor-pointer flex-col items-center rounded-xl border p-8 transition-colors duration-300"
     >
       <a
         href={contrib.link}
@@ -303,10 +296,10 @@ export default function ContributorsClient({
             style={{ objectFit: "cover", width: "100%", height: "100%" }}
           />
         </div>
-        <h1 className="text-primary-text group-hover:text-form-button-text mt-4 text-2xl font-semibold capitalize transition-colors duration-300">
+        <h1 className="text-primary-text group-hover:text-link mt-4 text-2xl font-semibold capitalize transition-colors duration-300">
           {contrib.name}
         </h1>
-        <p className="text-secondary-text group-hover:text-form-button-text mt-2 capitalize opacity-80 transition-colors duration-300">
+        <p className="text-secondary-text mt-2 capitalize opacity-80 transition-colors duration-300">
           {contrib.role}
         </p>
       </a>

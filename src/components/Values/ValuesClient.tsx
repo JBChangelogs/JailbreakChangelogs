@@ -206,7 +206,7 @@ export default function ValuesClient({
           }
         }
       `}</style>
-      <div className="border-border-primary bg-secondary-bg mb-8 rounded-lg border p-6">
+      <div className="border-border-card bg-secondary-bg mb-8 rounded-lg border p-6">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-start">
           <div className="flex-1">
             <div className="mb-4 flex items-center justify-between">

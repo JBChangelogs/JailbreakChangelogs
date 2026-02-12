@@ -31,7 +31,7 @@ const SeasonHeader: React.FC<SeasonHeaderProps> = ({
   nextSeason,
 }) => {
   return (
-    <div className="border-border-primary bg-secondary-bg mb-8 rounded-lg border p-6">
+    <div className="border-border-card bg-secondary-bg mb-8 rounded-lg border p-6">
       <div className="mb-4">
         <h2 className="text-primary-text text-2xl font-semibold">
           Roblox Jailbreak Season Archives

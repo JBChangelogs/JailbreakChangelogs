@@ -188,30 +188,32 @@ export const EmailNotificationSettings = ({
       <div className="flex flex-col gap-4">
         {/* Toggle Section */}
         {/* ... existing code ... */}
-        <Field className="flex items-center justify-between gap-4">
-          <div className="flex flex-col">
-            <Label className="text-primary-text flex items-center gap-2 text-base font-medium">
-              <Icon icon="heroicons:envelope" className="h-5 w-5" />
-              Email Notifications
-            </Label>
-            <Description className="text-secondary-text mt-1 text-sm">
-              Receive important updates and notifications via email.
-            </Description>
+        <Field className="w-full">
+          <div className="mb-1 flex w-full items-center justify-between gap-4">
+            <div className="min-w-0 flex-1">
+              <Label className="text-primary-text flex items-center gap-2 text-base font-medium">
+                <Icon icon="heroicons:envelope" className="h-5 w-5" />
+                Email Notifications
+              </Label>
+              <Description className="text-secondary-text mt-1 text-sm">
+                Receive important updates and notifications via email.
+              </Description>
+            </div>
+            <Switch
+              checked={enabled}
+              onChange={handleToggle}
+              disabled={loading || !userData}
+              className={`group relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full transition-colors focus:outline-none ${
+                enabled ? "bg-button-info" : "bg-button-secondary"
+              } ${loading || !userData ? "cursor-not-allowed opacity-50" : ""}`}
+            >
+              <span
+                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                  enabled ? "translate-x-6" : "translate-x-1"
+                }`}
+              />
+            </Switch>
           </div>
-          <Switch
-            checked={enabled}
-            onChange={handleToggle}
-            disabled={loading || !userData}
-            className={`group relative inline-flex h-6 w-11 cursor-pointer items-center rounded-full transition-colors focus:outline-none ${
-              enabled ? "bg-button-info" : "bg-button-secondary"
-            } ${loading || !userData ? "cursor-not-allowed opacity-50" : ""}`}
-          >
-            <span
-              className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                enabled ? "translate-x-6" : "translate-x-1"
-              }`}
-            />
-          </Switch>
         </Field>
 
         {/* Link/Unlink Email Button */}

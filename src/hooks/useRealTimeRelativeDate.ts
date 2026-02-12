@@ -11,9 +11,7 @@ import { formatRelativeDate } from "@/utils/timestamp";
 export const useRealTimeRelativeDate = (
   timestamp: string | number | null | undefined,
 ) => {
-  const [relativeTime, setRelativeTime] = useState<string>(() =>
-    timestamp ? formatRelativeDate(timestamp) : "",
-  );
+  const [, setTick] = useState(() => Date.now());
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const isVisibleRef = useRef<boolean>(true);
 
@@ -22,10 +20,10 @@ export const useRealTimeRelativeDate = (
       return;
     }
 
-    const updateTime = () => {
+    const updateTick = () => {
       // Only update if the component is visible
       if (isVisibleRef.current) {
-        setRelativeTime(formatRelativeDate(timestamp));
+        setTick(Date.now());
       }
     };
 
@@ -34,15 +32,12 @@ export const useRealTimeRelativeDate = (
       isVisibleRef.current = !document.hidden;
       if (isVisibleRef.current) {
         // Update immediately when becoming visible
-        updateTime();
+        updateTick();
       }
     };
 
-    // Update immediately
-    updateTime();
-
     // Set up interval for updates
-    intervalRef.current = setInterval(updateTime, 1000);
+    intervalRef.current = setInterval(updateTick, 1000);
 
     // Listen for visibility changes
     document.addEventListener("visibilitychange", handleVisibilityChange);
@@ -56,5 +51,9 @@ export const useRealTimeRelativeDate = (
     };
   }, [timestamp]);
 
-  return relativeTime;
+  if (!timestamp) {
+    return "";
+  }
+
+  return formatRelativeDate(timestamp);
 };
