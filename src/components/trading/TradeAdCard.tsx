@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { DiscordIcon } from "@/components/Icons/DiscordIcon";
 import Link from "next/link";
 import { Icon } from "@/components/ui/IconWrapper";
@@ -33,9 +33,9 @@ interface TradeAdCardProps {
 const getStatusColor = (status: string) => {
   switch (status) {
     case "Pending":
-      return "bg-button-info/10 text-primary-text border-button-info/20";
+      return "text-primary-text border-border-card bg-tertiary-bg/40 rounded-lg border px-2.5 py-1 shadow-2xl backdrop-blur-xl";
     case "Completed":
-      return "bg-status-success/10 text-primary-text border-status-success/20";
+      return "text-primary-text border-border-card bg-tertiary-bg/40 rounded-lg border px-2.5 py-1 shadow-2xl backdrop-blur-xl";
     case "Expired":
       return "bg-status-error/10 text-status-error border-status-error/20";
     default:
@@ -53,6 +53,11 @@ export const TradeAdCard: React.FC<TradeAdCardProps> = ({
 }) => {
   const [isDeleting, setIsDeleting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [hasHydrated, setHasHydrated] = useState(false);
+
+  useEffect(() => {
+    setHasHydrated(true);
+  }, []);
 
   const handleDelete = async () => {
     if (!onDelete) return;
@@ -67,9 +72,11 @@ export const TradeAdCard: React.FC<TradeAdCardProps> = ({
 
   const createdRelative = useRealTimeRelativeDate(trade.created_at);
   const expiresRelative = useRealTimeRelativeDate(trade.expires);
-  const createdDisplay = createdRelative || formatCustomDate(trade.created_at);
+  const createdDisplay = hasHydrated ? createdRelative || "unknown" : "unknown";
   const expiresDisplay = trade.expires
-    ? expiresRelative || formatCustomDate(trade.expires)
+    ? hasHydrated
+      ? expiresRelative || "unknown"
+      : "unknown"
     : "";
 
   const discordChannelId = "1398359394726449352";
@@ -210,7 +217,7 @@ export const TradeAdCard: React.FC<TradeAdCardProps> = ({
 
         <div className="mt-4 flex items-center justify-between">
           <span
-            className={`rounded-full border px-2 py-1 text-xs font-medium ${getStatusColor(trade.status)}`}
+            className={`inline-flex items-center text-xs font-medium ${trade.status === "Pending" || trade.status === "Completed" ? "" : "rounded-full border px-2 py-1"} ${getStatusColor(trade.status)}`}
             aria-label={`Trade status: ${trade.status}`}
           >
             {trade.status}

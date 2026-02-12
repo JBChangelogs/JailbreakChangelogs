@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { CircularProgress, Box, Chip, Skeleton } from "@mui/material";
+import { CircularProgress, Box, Skeleton } from "@mui/material";
 import {
   Tooltip,
   TooltipContent,
@@ -55,13 +55,13 @@ interface TradeAd {
 const getStatusColor = (status: string) => {
   switch (status) {
     case "Pending":
-      return "bg-button-info/10 text-primary-text border-button-info/20";
+      return "text-primary-text border-border-card bg-tertiary-bg/40";
     case "Completed":
-      return "bg-status-success/10 text-primary-text border-status-success/20";
+      return "text-primary-text border-border-card bg-tertiary-bg/40";
     case "Expired":
-      return "bg-status-error/10 text-status-error border-status-error/20";
+      return "text-status-error border-status-error/20 bg-status-error/10";
     default:
-      return "bg-secondary-text/10 text-secondary-text border-secondary-text/20";
+      return "text-secondary-text border-secondary-text/20 bg-secondary-text/10";
   }
 };
 
@@ -149,23 +149,14 @@ export default function TradeAdsTab({
                 {isLoadingAdditionalData ? (
                   <Skeleton variant="rounded" width={80} height={20} />
                 ) : (
-                  <Chip
-                    label={item.type}
-                    size="small"
-                    variant="outlined"
-                    sx={{
-                      backgroundColor: getCategoryColor(item.type) + "20", // Add 20% opacity
+                  <span
+                    className="text-primary-text bg-tertiary-bg/40 inline-flex h-6 w-fit items-center rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl"
+                    style={{
                       borderColor: getCategoryColor(item.type),
-                      color: "var(--color-primary-text)",
-                      fontSize: "0.65rem",
-                      height: "20px",
-                      fontWeight: "medium",
-                      "&:hover": {
-                        borderColor: getCategoryColor(item.type),
-                        backgroundColor: getCategoryColor(item.type) + "30", // Slightly more opacity on hover
-                      },
                     }}
-                  />
+                  >
+                    {item.type}
+                  </span>
                 )}
               </div>
               <div className="space-y-1">
@@ -195,13 +186,13 @@ export default function TradeAdsTab({
           <div className="flex items-center gap-3">
             <Link
               href={`/trading/ad/${ad.id}`}
-              className="text-primary-text hover:text-button-info text-xl font-bold transition-colors"
+              className="text-primary-text hover:text-link text-xl font-bold transition-colors"
             >
               Trade Ad #{ad.id}
             </Link>
           </div>
           <div
-            className={`rounded-full border px-3 py-1 text-sm font-medium ${getStatusColor(ad.status)}`}
+            className={`inline-flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl ${getStatusColor(ad.status)}`}
           >
             {ad.status}
           </div>
@@ -236,16 +227,20 @@ export default function TradeAdsTab({
         <div className="border-border-card text-secondary-text mt-6 flex flex-wrap items-center gap-2 border-t pt-4 text-sm">
           <Tooltip>
             <TooltipTrigger asChild>
-              <span className="cursor-help">Created {ad.createdTime}</span>
+              <span className="text-secondary-text cursor-help">
+                Created {ad.createdTime}
+              </span>
             </TooltipTrigger>
             <TooltipContent>{formatCustomDate(ad.created_at)}</TooltipContent>
           </Tooltip>
           {ad.expires && (
             <>
-              <span className="text-tertiary-text">|</span>
+              <span className="text-secondary-text">|</span>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <span className="cursor-help">Expires {ad.expiresTime}</span>
+                  <span className="text-secondary-text cursor-help">
+                    Expires {ad.expiresTime}
+                  </span>
                 </TooltipTrigger>
                 <TooltipContent>{formatCustomDate(ad.expires)}</TooltipContent>
               </Tooltip>

@@ -549,12 +549,12 @@ export default function ItemChangelogs({
       <div className="border-border-card bg-secondary-bg mb-4 rounded-lg border p-3">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="border-primary-text text-primary-text flex items-center rounded-full border bg-transparent px-1.5 py-0.5 text-[10px] sm:px-2 sm:py-1 sm:text-xs">
+            <span className="text-primary-text border-border-card bg-tertiary-bg/40 inline-flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl">
               {displayableChanges.length} change
               {displayableChanges.length !== 1 ? "s" : ""}
             </span>
             {suggestionsCount > 0 && (
-              <span className="border-primary-text text-primary-text flex items-center rounded-full border bg-transparent px-1.5 py-0.5 text-[10px] sm:px-2 sm:py-1 sm:text-xs">
+              <span className="text-primary-text border-border-card bg-tertiary-bg/40 inline-flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl">
                 {suggestionsCount} suggestion{suggestionsCount !== 1 ? "s" : ""}
               </span>
             )}
@@ -562,7 +562,7 @@ export default function ItemChangelogs({
           <Button
             onClick={toggleSortOrder}
             size="sm"
-            className="w-full sm:w-auto"
+            className="text-primary-text border-border-card bg-tertiary-bg/40 hover:bg-quaternary-bg/30 h-6 w-full rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl sm:w-auto"
           >
             {sortOrder === "newest" ? (
               <Icon icon="heroicons-outline:arrow-down" inline={true} />
@@ -642,7 +642,7 @@ export default function ItemChangelogs({
                     {change.suggestion_data && (
                       <div className="mb-2 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
                         <div className="flex items-center gap-2">
-                          <span className="border-primary-text text-primary-text flex items-center rounded-full border bg-transparent px-1.5 py-0.5 text-[10px] sm:px-2 sm:py-1 sm:text-xs">
+                          <span className="text-primary-text border-border-card bg-tertiary-bg/40 inline-flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl">
                             Suggestion #{change.suggestion_data.id}
                           </span>
                         </div>
@@ -776,7 +776,7 @@ export default function ItemChangelogs({
                                         onClick={() =>
                                           toggleReasonExpansion(suggestionId)
                                         }
-                                        className="text-button-info hover:text-button-info-hover ml-1 inline-flex cursor-pointer items-center gap-1 text-sm font-medium transition-colors hover:underline"
+                                        className="text-link hover:text-link-hover ml-1 inline-flex cursor-pointer items-center gap-1 text-sm font-medium transition-colors hover:underline"
                                       >
                                         {isExpanded ? (
                                           <>
@@ -875,7 +875,7 @@ export default function ItemChangelogs({
                               <div className="flex items-start gap-2 overflow-hidden">
                                 <div className="min-w-0 flex-1">
                                   <div className="text-primary-text mb-3 text-lg font-bold capitalize">
-                                    <span className="border-primary-text text-primary-text mb-2 inline-flex items-center rounded-full border bg-transparent px-1.5 py-0.5 text-[10px] sm:px-2 sm:py-1 sm:text-xs">
+                                    <span className="text-primary-text border-border-card bg-tertiary-bg/40 mb-2 inline-flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl">
                                       {formatSuggestionTypeLabel(
                                         change.suggestion_data?.metadata
                                           ?.suggestion_type,

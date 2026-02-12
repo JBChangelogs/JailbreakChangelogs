@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { Chip, useMediaQuery } from "@mui/material";
+import { useMediaQuery } from "@mui/material";
 import { Pagination } from "@/components/ui/Pagination";
 import { Dialog } from "@headlessui/react";
 import { Masonry } from "@mui/lab";
@@ -16,7 +16,7 @@ import {
   isVideoItem,
   getVideoPath,
 } from "@/utils/images";
-import { getCategoryColor } from "@/utils/categoryIcons";
+import { getCategoryColor, getCategoryIcon } from "@/utils/categoryIcons";
 import { formatMessageDate } from "@/utils/timestamp";
 import { formatFullValue, formatPrice } from "@/utils/values";
 import ReactMarkdown from "react-markdown";
@@ -633,7 +633,7 @@ export default function ChangelogDetailsClient({
                     {change.suggestion && (
                       <div className="mb-2 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
                         <div className="flex items-center gap-2">
-                          <span className="border-primary-text text-primary-text flex items-center rounded-full border bg-transparent px-1.5 py-0.5 text-[10px] sm:px-2 sm:py-1 sm:text-xs">
+                          <span className="text-primary-text border-border-card bg-tertiary-bg/40 inline-flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl">
                             Suggestion #{change.suggestion.id}
                           </span>
                         </div>
@@ -677,25 +677,27 @@ export default function ChangelogDetailsClient({
                           >
                             {change.item.name}
                           </Link>
-                          <Chip
-                            label={change.item.type}
-                            size="small"
-                            variant="outlined"
-                            sx={{
-                              backgroundColor:
-                                getCategoryColor(change.item.type) + "20", // Add 20% opacity
+                          <span
+                            className="text-primary-text bg-tertiary-bg/40 mt-1 inline-flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl"
+                            style={{
                               borderColor: getCategoryColor(change.item.type),
-                              color: "var(--color-primary-text)",
-                              fontSize: "0.75rem",
-                              marginTop: "4px",
-                              fontWeight: "medium",
-                              "&:hover": {
-                                borderColor: getCategoryColor(change.item.type),
-                                backgroundColor:
-                                  getCategoryColor(change.item.type) + "30", // Slightly more opacity on hover
-                              },
                             }}
-                          />
+                          >
+                            {(() => {
+                              const categoryIcon = getCategoryIcon(
+                                change.item.type,
+                              );
+                              return categoryIcon ? (
+                                <categoryIcon.Icon
+                                  className="mr-1.5 h-3 w-3"
+                                  style={{
+                                    color: getCategoryColor(change.item.type),
+                                  }}
+                                />
+                              ) : null;
+                            })()}
+                            {change.item.type}
+                          </span>
                         </div>
                       </div>
                     </div>
@@ -904,7 +906,7 @@ export default function ChangelogDetailsClient({
                               <div className="flex items-start gap-2 overflow-hidden">
                                 <div className="min-w-0 flex-1">
                                   <div className="text-primary-text mb-3 text-lg font-bold capitalize">
-                                    <span className="border-primary-text text-primary-text mb-2 inline-flex items-center rounded-full border bg-transparent px-1.5 py-0.5 text-[10px] sm:px-2 sm:py-1 sm:text-xs">
+                                    <span className="text-primary-text border-border-card bg-tertiary-bg/40 mb-2 inline-flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl">
                                       {formatSuggestionTypeLabel(
                                         change.suggestion?.metadata
                                           ?.suggestion_type,

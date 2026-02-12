@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { formatRelativeDate } from "@/utils/timestamp";
 
 /**
@@ -11,7 +11,7 @@ import { formatRelativeDate } from "@/utils/timestamp";
 export const useRealTimeRelativeDate = (
   timestamp: string | number | null | undefined,
 ) => {
-  const [tick, setTick] = useState(() => Date.now());
+  const [, setTick] = useState(() => Date.now());
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const isVisibleRef = useRef<boolean>(true);
 
@@ -51,13 +51,9 @@ export const useRealTimeRelativeDate = (
     };
   }, [timestamp]);
 
-  const relativeTime = useMemo(() => {
-    if (!timestamp) {
-      return "";
-    }
+  if (!timestamp) {
+    return "";
+  }
 
-    return formatRelativeDate(timestamp);
-  }, [timestamp, tick]);
-
-  return relativeTime;
+  return formatRelativeDate(timestamp);
 };

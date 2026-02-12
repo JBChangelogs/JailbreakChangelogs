@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { Dialog, DialogTitle } from "@headlessui/react";
 import { Icon } from "@/components/ui/IconWrapper";
 import Image from "next/image";
-import { getCategoryColor } from "@/utils/categoryIcons";
+import { getCategoryColor, getCategoryIcon } from "@/utils/categoryIcons";
 import { VerifiedBadgeIcon } from "@/components/Icons/VerifiedBadgeIcon";
 import { RobloxUser } from "@/types";
 import { Button } from "@/components/ui/button";
@@ -209,13 +209,24 @@ export default function TradeHistoryModal({
                 <div className="mt-2 flex flex-wrap items-center gap-2">
                   {item.categoryTitle && (
                     <span
-                      className="text-primary-text flex w-fit items-center rounded-full border px-2 py-0.5 text-xs font-medium"
+                      className="text-primary-text bg-tertiary-bg/40 inline-flex h-6 w-fit items-center gap-1.5 rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl"
                       style={{
                         borderColor: getCategoryColor(item.categoryTitle),
-                        backgroundColor:
-                          getCategoryColor(item.categoryTitle) + "20",
                       }}
                     >
+                      {(() => {
+                        const categoryIcon = getCategoryIcon(
+                          item.categoryTitle,
+                        );
+                        return categoryIcon ? (
+                          <categoryIcon.Icon
+                            className="h-3 w-3"
+                            style={{
+                              color: getCategoryColor(item.categoryTitle),
+                            }}
+                          />
+                        ) : null;
+                      })()}
                       {item.categoryTitle}
                     </span>
                   )}

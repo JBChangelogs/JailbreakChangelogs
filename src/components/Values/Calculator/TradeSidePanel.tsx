@@ -1,6 +1,5 @@
 import React from "react";
 import { TradeItem } from "@/types/trading";
-import { DroppableZone } from "@/components/dnd/DroppableZone";
 import { Icon } from "../../ui/IconWrapper";
 import { CalculatorItemGrid } from "./CalculatorItemGrid";
 import { Button } from "../../ui/button";
@@ -41,13 +40,10 @@ export const TradeSidePanel: React.FC<TradeSidePanelProps> = ({
   const isOffering = side === "offering";
   const sideColor = isOffering ? "status-success" : "status-error";
   const sideLabel = isOffering ? "Offering" : "Requesting";
-  const dropZoneId = `${side}-drop-zone`;
 
   return (
-    <DroppableZone
-      id={dropZoneId}
+    <div
       className={`border-${sideColor} bg-secondary-bg flex-1 rounded-lg border p-4 transition-colors`}
-      activeClassName={`border-${sideColor}/80 bg-${sideColor}/5 ring-2 ring-${sideColor}/50`}
     >
       <div className="mb-4 flex items-center justify-between">
         <div className="flex items-center gap-2">
@@ -92,6 +88,6 @@ export const TradeSidePanel: React.FC<TradeSidePanelProps> = ({
           {totals.breakdown.duped.formatted}
         </span>
       </div>
-    </DroppableZone>
+    </div>
   );
 };

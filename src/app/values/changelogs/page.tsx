@@ -12,7 +12,7 @@ import { formatMessageDate } from "@/utils/timestamp";
 import { Icon } from "@/components/ui/IconWrapper";
 import { Button } from "@/components/ui/button";
 import { useVirtualizer } from "@tanstack/react-virtual";
-import { getCategoryColor } from "@/utils/categoryIcons";
+import { getCategoryColor, getCategoryIcon } from "@/utils/categoryIcons";
 import { getDemandColor, getTrendColor } from "@/utils/badgeColors";
 import { formatFullValue } from "@/utils/values";
 import { getItemImagePath, handleImageError } from "@/utils/images";
@@ -465,18 +465,29 @@ export default function ValuesChangelogPage() {
                                 </p>
                                 <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
                                   <span
-                                    className="text-primary-text rounded-full border px-2 py-0.5 text-[10px] leading-none font-medium"
+                                    className="text-primary-text bg-tertiary-bg/40 inline-flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl"
                                     style={{
                                       borderColor: getCategoryColor(item.type),
-                                      backgroundColor:
-                                        getCategoryColor(item.type) + "20",
                                     }}
                                   >
+                                    {(() => {
+                                      const categoryIcon = getCategoryIcon(
+                                        item.type,
+                                      );
+                                      return categoryIcon ? (
+                                        <categoryIcon.Icon
+                                          className="mr-1.5 h-3 w-3"
+                                          style={{
+                                            color: getCategoryColor(item.type),
+                                          }}
+                                        />
+                                      ) : null;
+                                    })()}
                                     {item.type}
                                   </span>
                                 </div>
                               </div>
-                              <span className="text-secondary-text text-xs font-medium">
+                              <span className="text-primary-text border-border-card bg-tertiary-bg/40 inline-flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl">
                                 {item.count} changes
                               </span>
                             </div>
@@ -490,7 +501,7 @@ export default function ValuesChangelogPage() {
                                   .map((field) => (
                                     <span
                                       key={`${item.id}-${field}`}
-                                      className="border-primary-text text-primary-text inline-flex items-center rounded-full border bg-transparent px-1.5 py-0.5 text-[10px]"
+                                      className="text-primary-text border-border-card bg-tertiary-bg/40 inline-flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl"
                                     >
                                       {field}
                                     </span>
@@ -508,7 +519,11 @@ export default function ValuesChangelogPage() {
                 <p className="text-secondary-text mb-2 md:mb-0">
                   Total Changelogs: {changelogs.length}
                 </p>
-                <Button onClick={toggleSortOrder} size="sm">
+                <Button
+                  onClick={toggleSortOrder}
+                  size="sm"
+                  className="text-primary-text border-border-card bg-tertiary-bg/40 hover:bg-quaternary-bg/30 h-6 rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl"
+                >
                   {sortOrder === "newest" ? (
                     <Icon
                       icon="heroicons-outline:arrow-down"
@@ -664,15 +679,28 @@ export default function ValuesChangelogPage() {
                       </SheetTitle>
                       <div className="mt-2 flex flex-wrap items-center gap-2">
                         <span
-                          className="text-primary-text rounded-full border px-2 py-0.5 text-[10px] leading-none font-medium"
+                          className="text-primary-text bg-tertiary-bg/40 inline-flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl"
                           style={{
                             borderColor: getCategoryColor(
                               selectedSummaryItem.type,
                             ),
-                            backgroundColor:
-                              getCategoryColor(selectedSummaryItem.type) + "20",
                           }}
                         >
+                          {(() => {
+                            const categoryIcon = getCategoryIcon(
+                              selectedSummaryItem.type,
+                            );
+                            return categoryIcon ? (
+                              <categoryIcon.Icon
+                                className="mr-1.5 h-3 w-3"
+                                style={{
+                                  color: getCategoryColor(
+                                    selectedSummaryItem.type,
+                                  ),
+                                }}
+                              />
+                            ) : null;
+                          })()}
                           {selectedSummaryItem.type}
                         </span>
                       </div>
@@ -759,7 +787,7 @@ export default function ValuesChangelogPage() {
                                   className="text-primary-text"
                                 >
                                   <div className="text-primary-text mb-2 text-sm font-semibold capitalize">
-                                    <span className="border-primary-text text-primary-text inline-flex items-center rounded-full border bg-transparent px-1.5 py-0.5 text-[10px]">
+                                    <span className="text-primary-text border-border-card bg-tertiary-bg/40 inline-flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl">
                                       {field.label}
                                     </span>
                                   </div>

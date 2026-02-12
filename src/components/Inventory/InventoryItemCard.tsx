@@ -92,10 +92,9 @@ export default function InventoryItemCard({
         </h2>
         <div className="flex items-center gap-2">
           <span
-            className="text-primary-text flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-medium"
+            className="text-primary-text bg-tertiary-bg/40 flex h-6 items-center gap-1.5 rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl"
             style={{
               borderColor: getCategoryColor(item.categoryTitle),
-              backgroundColor: getCategoryColor(item.categoryTitle) + "20", // Add 20% opacity
             }}
           >
             {(() => {
@@ -172,7 +171,7 @@ export default function InventoryItemCard({
               </div>
             </TooltipTrigger>
             <TooltipContent>
-              {item.uniqueCirculation.toLocaleString()}
+              Monthly unique: {item.uniqueCirculation.toLocaleString()}
             </TooltipContent>
           </Tooltip>
         </div>
@@ -221,7 +220,7 @@ export default function InventoryItemCard({
                 </div>
               </TooltipTrigger>
               <TooltipContent>
-                {formatFullValue(itemData.duped_value)}
+                Duped value: {formatFullValue(itemData.duped_value)}
               </TooltipContent>
             </Tooltip>
           </div>

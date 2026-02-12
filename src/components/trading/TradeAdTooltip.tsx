@@ -31,10 +31,9 @@ export const TradeAdTooltip: React.FC<TradeAdTooltipProps> = ({ item }) => {
         <div className="space-y-2 text-sm">
           <div className="flex items-center gap-2">
             <span
-              className="text-primary-text flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-medium"
+              className="text-primary-text bg-tertiary-bg/40 flex h-6 items-center gap-1.5 rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl"
               style={{
                 borderColor: getCategoryColor(item.type),
-                backgroundColor: getCategoryColor(item.type) + "20", // Add 20% opacity
               }}
             >
               {(() => {
@@ -49,12 +48,12 @@ export const TradeAdTooltip: React.FC<TradeAdTooltipProps> = ({ item }) => {
               {item.type}
             </span>
             {item.is_limited === 1 && (
-              <span className="border-primary-text text-primary-text flex items-center rounded-full border bg-transparent px-2 py-0.5 text-xs">
+              <span className="text-primary-text border-border-card bg-tertiary-bg/40 flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl">
                 Limited
               </span>
             )}
             {item.is_seasonal === 1 && (
-              <span className="border-primary-text text-primary-text flex items-center rounded-full border bg-transparent px-2 py-0.5 text-xs">
+              <span className="text-primary-text border-border-card bg-tertiary-bg/40 flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl">
                 Seasonal
               </span>
             )}
@@ -63,7 +62,7 @@ export const TradeAdTooltip: React.FC<TradeAdTooltipProps> = ({ item }) => {
             <span className="text-secondary-text text-xs tracking-wider uppercase">
               Cash:
             </span>
-            <span className="bg-button-info text-form-button-text rounded-full px-2 py-0.5 text-xs font-semibold whitespace-nowrap">
+            <span className="bg-button-info text-form-button-text inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-semibold whitespace-nowrap">
               {item.cash_value === null || item.cash_value === "N/A"
                 ? "N/A"
                 : formatFullValue(item.cash_value)}
@@ -73,7 +72,7 @@ export const TradeAdTooltip: React.FC<TradeAdTooltipProps> = ({ item }) => {
             <span className="text-secondary-text text-xs tracking-wider uppercase">
               Duped:
             </span>
-            <span className="bg-button-info text-form-button-text rounded-full px-2 py-0.5 text-xs font-semibold whitespace-nowrap">
+            <span className="bg-button-info text-form-button-text inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-semibold whitespace-nowrap">
               {item.duped_value === null || item.duped_value === "N/A"
                 ? "N/A"
                 : formatFullValue(item.duped_value)}
@@ -84,7 +83,7 @@ export const TradeAdTooltip: React.FC<TradeAdTooltipProps> = ({ item }) => {
               Demand:
             </span>
             <span
-              className={`${getDemandColor(demand)} rounded-full px-2 py-0.5 text-xs font-semibold whitespace-nowrap`}
+              className={`${getDemandColor(demand)} inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-semibold whitespace-nowrap`}
             >
               {demand === "N/A" ? "Unknown" : demand}
             </span>
@@ -94,7 +93,7 @@ export const TradeAdTooltip: React.FC<TradeAdTooltipProps> = ({ item }) => {
               Trend:
             </span>
             <span
-              className={`${getTrendColor(trend || "N/A")} rounded-full px-2 py-0.5 text-xs font-semibold whitespace-nowrap`}
+              className={`${getTrendColor(trend || "N/A")} inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-semibold whitespace-nowrap`}
             >
               {!trend || trend === "N/A" ? "Unknown" : trend}
             </span>

@@ -92,6 +92,7 @@ export default function TradeItemsImages({
                       alt={item.name}
                       fill
                       className="object-cover"
+                      draggable={false}
                       onError={handleImageError}
                     />
                   )}
@@ -151,6 +152,7 @@ export default function TradeItemsImages({
                       alt={item.name}
                       fill
                       className="object-cover"
+                      draggable={false}
                       onError={handleImageError}
                     />
                   )}

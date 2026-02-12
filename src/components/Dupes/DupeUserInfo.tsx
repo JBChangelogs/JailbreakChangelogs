@@ -96,7 +96,7 @@ export default function DupeUserInfo({
                       <span className="text-sm font-semibold">Discord</span>
                     </Link>
                   </TooltipTrigger>
-                  <TooltipContent>Visit Discord Profile</TooltipContent>
+                  <TooltipContent>Discord profile</TooltipContent>
                 </Tooltip>
               )}
 
@@ -113,7 +113,7 @@ export default function DupeUserInfo({
                     <span className="text-sm font-semibold">Roblox</span>
                   </Link>
                 </TooltipTrigger>
-                <TooltipContent>Visit Roblox Profile</TooltipContent>
+                <TooltipContent>Roblox profile</TooltipContent>
               </Tooltip>
 
               {/* Website Profile */}
@@ -135,7 +135,7 @@ export default function DupeUserInfo({
                       <span className="text-sm font-semibold">Website</span>
                     </Link>
                   </TooltipTrigger>
-                  <TooltipContent>Visit Website Profile</TooltipContent>
+                  <TooltipContent>JBCL profile</TooltipContent>
                 </Tooltip>
               )}
             </div>
@@ -156,7 +156,9 @@ export default function DupeUserInfo({
                   {dupeItemsCount.toLocaleString()}
                 </div>
               </TooltipTrigger>
-              <TooltipContent>{dupeItemsCount.toLocaleString()}</TooltipContent>
+              <TooltipContent>
+                Dupe items found: {dupeItemsCount.toLocaleString()}
+              </TooltipContent>
             </Tooltip>
           </div>
           <div className="border-border-card bg-tertiary-bg rounded-lg border p-4 text-center">
@@ -182,7 +184,7 @@ export default function DupeUserInfo({
                 </div>
               </TooltipTrigger>
               <TooltipContent>
-                ${totalDupedValue.toLocaleString()}
+                Total duped value: ${totalDupedValue.toLocaleString()}
               </TooltipContent>
             </Tooltip>
           </div>

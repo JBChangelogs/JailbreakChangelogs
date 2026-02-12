@@ -1,96 +1,60 @@
 export default function Loading() {
+  const teams = ["Criminal", "Police"] as const;
+
   return (
     <div className="min-h-screen">
       <div className="container mx-auto px-4 py-8">
-        <div className="bg-secondary-bg mb-6 h-6 w-40 rounded" />
-        <div className="bg-secondary-bg mb-2 h-10 w-72 rounded" />
-        <div className="bg-secondary-bg mb-8 h-5 w-96 rounded" />
-        {/* Criminal Contracts Skeleton */}
-        <div className="space-y-6">
-          {/* Team Header */}
+        <div className="space-y-12">
           <div className="text-center">
-            <div className="relative inline-block">
-              <div className="bg-button-info absolute inset-0 rounded-2xl opacity-30 blur-lg"></div>
-              <div className="from-button-info to-button-info-hover relative rounded-2xl bg-linear-to-r px-8 py-4 shadow-2xl">
-                <div className="flex items-center justify-center gap-4"></div>
-              </div>
+            <div className="border-border-card bg-secondary-bg text-secondary-text inline-flex h-8 items-center rounded-full border px-4 text-sm">
+              <div className="bg-tertiary-bg h-4 w-44 animate-pulse rounded" />
             </div>
           </div>
 
-          {/* Contracts Grid */}
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {Array.from({ length: 3 }).map((_, i) => (
-              <div
-                key={i}
-                className="hover:shadow-3xl group border-border-card hover:border-border-focus relative flex flex-col overflow-hidden rounded-2xl border shadow-2xl transition-all duration-300 hover:scale-105"
-              >
-                {/* Contract Header */}
-                <div className="bg-secondary-bg px-4 py-3"></div>
-
-                {/* Contract Body */}
-                <div className="bg-secondary-bg relative flex flex-1 flex-col px-4 py-6">
-                  <div className="relative z-10 flex h-full flex-col">
-                    {/* Task Description */}
-                    <div className="mb-4 flex flex-1 items-center justify-center">
-                      <div className="text-center"></div>
-                    </div>
-
-                    {/* Reward Section */}
-                    <div className="mt-auto">
-                      <div className="relative">
-                        <div className="bg-primary-bg absolute inset-0 rounded-xl opacity-50 blur-sm"></div>
-                        <div className="border-border-card bg-primary-bg hover:border-border-focus relative rounded-xl border px-4 py-3 shadow-lg"></div>
-                      </div>
+          {teams.map((team) => (
+            <div key={team} className="space-y-6">
+              <div className="text-center">
+                <div className="relative inline-block">
+                  <div className="border-border-card bg-secondary-bg rounded-2xl border px-8 py-4">
+                    <div className="flex items-center justify-center gap-4">
+                      <div className="bg-tertiary-bg h-8 w-8 animate-pulse rounded-full sm:h-10 sm:w-10" />
+                      <div className="bg-tertiary-bg h-8 w-56 animate-pulse rounded" />
                     </div>
                   </div>
                 </div>
               </div>
-            ))}
-          </div>
-        </div>
 
-        {/* Police Contracts Skeleton */}
-        <div className="mt-12 space-y-6">
-          {/* Team Header */}
-          <div className="text-center">
-            <div className="relative inline-block">
-              <div className="bg-button-info absolute inset-0 rounded-2xl opacity-30 blur-lg"></div>
-              <div className="from-button-info to-button-info-hover relative rounded-2xl bg-linear-to-r px-8 py-4 shadow-2xl">
-                <div className="flex items-center justify-center gap-4"></div>
-              </div>
-            </div>
-          </div>
-
-          {/* Contracts Grid */}
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {Array.from({ length: 3 }).map((_, i) => (
-              <div
-                key={i + 3}
-                className="hover:shadow-3xl group border-border-card hover:border-border-focus relative flex flex-col overflow-hidden rounded-2xl border shadow-2xl transition-all duration-300 hover:scale-105"
-              >
-                {/* Contract Header */}
-                <div className="bg-secondary-bg px-4 py-3"></div>
-
-                {/* Contract Body */}
-                <div className="bg-secondary-bg relative flex flex-1 flex-col px-4 py-6">
-                  <div className="relative z-10 flex h-full flex-col">
-                    {/* Task Description */}
-                    <div className="mb-4 flex flex-1 items-center justify-center">
-                      <div className="text-center"></div>
+              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                {Array.from({ length: 3 }).map((_, i) => (
+                  <div
+                    key={`${team}-${i}`}
+                    className="border-border-card bg-secondary-bg relative flex flex-col overflow-hidden rounded-2xl border"
+                  >
+                    <div className="px-4 py-3">
+                      <div className="bg-tertiary-bg h-8 w-40 animate-pulse rounded" />
                     </div>
 
-                    {/* Reward Section */}
-                    <div className="mt-auto">
-                      <div className="relative">
-                        <div className="bg-primary-bg absolute inset-0 rounded-xl opacity-50 blur-sm"></div>
-                        <div className="border-border-card bg-primary-bg hover:border-border-focus relative rounded-xl border px-4 py-3 shadow-lg"></div>
+                    <div className="relative flex flex-1 flex-col px-4 py-6">
+                      <div className="flex h-full flex-col">
+                        <div className="mb-4 flex flex-1 items-center justify-center">
+                          <div className="space-y-2 text-center">
+                            <div className="bg-tertiary-bg h-6 w-52 animate-pulse rounded" />
+                            <div className="bg-tertiary-bg mx-auto h-6 w-44 animate-pulse rounded" />
+                          </div>
+                        </div>
+
+                        <div className="mt-auto">
+                          <div className="border-border-card bg-tertiary-bg rounded-xl border px-4 py-3">
+                            <div className="bg-secondary-bg h-8 w-full animate-pulse rounded" />
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
+                ))}
               </div>
-            ))}
-          </div>
+            </div>
+          ))}
         </div>
       </div>
     </div>

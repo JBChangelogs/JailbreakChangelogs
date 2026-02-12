@@ -121,20 +121,20 @@ export default function AirdropCard({ airdrop }: AirdropCardProps) {
     switch (airdrop.color) {
       case "Brown":
         return (
-          <div className="text-primary-text flex items-center gap-1.5 rounded-full bg-amber-700/20 px-3 py-1">
-            <span className="text-sm font-medium">Easy</span>
+          <div className="text-primary-text inline-flex h-6 items-center gap-1.5 rounded-lg border border-amber-700/30 bg-amber-700/20 px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl">
+            <span>Easy</span>
           </div>
         );
       case "Blue":
         return (
-          <div className="text-primary-text flex items-center gap-1.5 rounded-full bg-blue-500/20 px-3 py-1">
-            <span className="text-sm font-medium">Medium</span>
+          <div className="text-primary-text inline-flex h-6 items-center gap-1.5 rounded-lg border border-blue-500/30 bg-blue-500/20 px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl">
+            <span>Medium</span>
           </div>
         );
       case "Red":
         return (
-          <div className="text-primary-text flex items-center gap-1.5 rounded-full bg-red-500/20 px-3 py-1">
-            <span className="text-sm font-medium">Hard</span>
+          <div className="text-primary-text inline-flex h-6 items-center gap-1.5 rounded-lg border border-red-500/30 bg-red-500/20 px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl">
+            <span>Hard</span>
           </div>
         );
       default:

@@ -57,19 +57,6 @@ export default function CategoryIcons({
   };
 
   const categories = [
-    getCategoryData("body colors", "name-body-colors", "Body Colors"),
-    getCategoryData("drifts", "name-drifts", "Drifts"),
-    getCategoryData("furniture", "name-furnitures", "Furniture"),
-    getCategoryData("horns", "name-horns", "Horns"),
-    getCategoryData("hyperchromes", "name-hyperchromes", "HyperChromes"),
-    {
-      id: "name-limited-items",
-      name: "Limited",
-      icon: "mdi:clock",
-      iconComponent: null,
-      bgColor: "rgba(18, 78, 102, 0.1)",
-      iconColor: "#ffd700",
-    },
     {
       id: "favorites",
       name: "My Favorites",
@@ -85,7 +72,18 @@ export default function CategoryIcons({
         handleCategoryClick("favorites");
       },
     },
+    getCategoryData("vehicles", "name-vehicles", "Vehicles"),
+    getCategoryData("hyperchromes", "name-hyperchromes", "HyperChromes"),
     getCategoryData("rims", "name-rims", "Rims"),
+    getCategoryData("textures", "name-textures", "Textures"),
+    getCategoryData("spoilers", "name-spoilers", "Spoilers"),
+    getCategoryData("tire styles", "name-tire-styles", "Tire Styles"),
+    getCategoryData("tire stickers", "name-tire-stickers", "Tire Stickers"),
+    getCategoryData("horns", "name-horns", "Horns"),
+    getCategoryData("body colors", "name-body-colors", "Body Colors"),
+    getCategoryData("drifts", "name-drifts", "Drifts"),
+    getCategoryData("weapon skins", "name-weapon-skins", "Weapon Skins"),
+    getCategoryData("furniture", "name-furnitures", "Furniture"),
     {
       id: "name-seasonal-items",
       name: "Seasonal",
@@ -94,18 +92,20 @@ export default function CategoryIcons({
       bgColor: "rgba(64, 192, 231, 0.1)",
       iconColor: "#40c0e7",
     },
-    getCategoryData("spoilers", "name-spoilers", "Spoilers"),
-    getCategoryData("textures", "name-textures", "Textures"),
-    getCategoryData("tire stickers", "name-tire-stickers", "Tire Stickers"),
-    getCategoryData("tire styles", "name-tire-styles", "Tire Styles"),
-    getCategoryData("vehicles", "name-vehicles", "Vehicles"),
-    getCategoryData("weapon skins", "name-weapon-skins", "Weapon Skins"),
+    {
+      id: "name-limited-items",
+      name: "Limited",
+      icon: "mdi:clock",
+      iconComponent: null,
+      bgColor: "rgba(18, 78, 102, 0.1)",
+      iconColor: "#ffd700",
+    },
   ];
 
   return (
     <div className="mb-8">
       <h3 className="text-primary-text mb-6 text-2xl font-bold">Categories</h3>
-      <div className="scrollbar-thin scrollbar-track-transparent scrollbar-thumb-border-primary hover:scrollbar-thumb-border-focus grid max-h-96 grid-cols-1 gap-4 overflow-y-auto py-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+      <div className="scrollbar-thin scrollbar-track-transparent scrollbar-thumb-border-primary hover:scrollbar-thumb-border-focus grid max-h-96 grid-cols-1 gap-4 overflow-y-auto p-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
         {categories.map((category) => {
           const isSelected = selectedFilter === category.id;
           const mobileOrder = mobileOrderMap[category.id] || 99;

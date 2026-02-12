@@ -52,10 +52,9 @@ export default function MostDuplicatedItems({
                         {item.name}
                       </Link>
                       <span
-                        className="text-primary-text flex w-fit items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-medium"
+                        className="text-primary-text bg-tertiary-bg/40 inline-flex h-6 w-fit items-center gap-1.5 rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl"
                         style={{
                           borderColor: categoryColor,
-                          backgroundColor: categoryColor + "20",
                         }}
                       >
                         {(() => {

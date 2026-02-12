@@ -639,10 +639,9 @@ export default function OGNotificationSheet({
           </p>
           <div className="mt-1 flex flex-wrap gap-2">
             <span
-              className="text-primary-text flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-[10px] font-bold"
+              className="text-primary-text bg-tertiary-bg/40 inline-flex h-6 items-center gap-1.5 rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl"
               style={{
-                borderColor: `${getCategoryColor(item.type)}40`,
-                backgroundColor: `${getCategoryColor(item.type)}15`,
+                borderColor: getCategoryColor(item.type),
               }}
             >
               {categoryIcon && (

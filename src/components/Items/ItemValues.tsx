@@ -53,7 +53,7 @@ export default function ItemValues({
                 const isPositive = cashChange.difference > 0;
                 return (
                   <span
-                    className={`inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-semibold ${
+                    className={`inline-flex h-6 items-center gap-1 rounded-lg px-2 text-xs leading-none font-semibold ${
                       isPositive
                         ? "bg-status-success text-white"
                         : "bg-status-error text-white"
@@ -84,7 +84,7 @@ export default function ItemValues({
                 const isPositive = dupedChange.difference > 0;
                 return (
                   <span
-                    className={`inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-semibold ${
+                    className={`inline-flex h-6 items-center gap-1 rounded-lg px-2 text-xs leading-none font-semibold ${
                       isPositive
                         ? "bg-status-success text-white"
                         : "bg-status-error text-white"
@@ -157,7 +157,7 @@ export default function ItemValues({
             </h4>
           </div>
           <span
-            className={`${getDemandColor(demand)} inline-block rounded-lg px-3 py-2 text-lg font-bold`}
+            className={`${getDemandColor(demand)} inline-flex h-8 items-center rounded-lg px-3 text-lg leading-none font-bold`}
           >
             {demand === "N/A" ? "Unknown" : demand}
           </span>
@@ -171,7 +171,7 @@ export default function ItemValues({
             </h4>
           </div>
           <span
-            className={`${getTrendColor(trend || "N/A")} inline-block rounded-lg px-3 py-2 text-lg font-bold`}
+            className={`${getTrendColor(trend || "N/A")} inline-flex h-8 items-center rounded-lg px-3 text-lg leading-none font-bold`}
           >
             {!trend || trend === "Unknown" || trend === "N/A"
               ? "Unknown"

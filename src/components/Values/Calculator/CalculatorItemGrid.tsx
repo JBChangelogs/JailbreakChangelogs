@@ -2,13 +2,9 @@ import React from "react";
 import { TradeItem } from "@/types/trading";
 import Image from "next/image";
 import { getItemImagePath, handleImageError } from "@/utils/images";
-import { TradeAdTooltip } from "../../trading/TradeAdTooltip";
+import TradeItemHoverTooltip from "../../trading/TradeItemHoverTooltip";
 
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { Tooltip, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface CalculatorItemGridProps {
   items: TradeItem[];
@@ -105,7 +101,7 @@ export const CalculatorItemGrid: React.FC<CalculatorItemGridProps> = ({
             return (
               <div key={item.instanceId} className="group relative">
                 {/* Item Image Container - Click to Remove */}
-                <Tooltip>
+                <Tooltip delayDuration={0}>
                   <TooltipTrigger asChild>
                     <div
                       className="relative aspect-square cursor-pointer overflow-hidden rounded-lg"
@@ -121,22 +117,19 @@ export const CalculatorItemGrid: React.FC<CalculatorItemGridProps> = ({
                         alt={item.name}
                         fill
                         className="object-cover"
+                        draggable={false}
                         onError={handleImageError}
                       />
                     </div>
                   </TooltipTrigger>
-                  <TooltipContent
+                  <TradeItemHoverTooltip
                     side="right"
-                    className="bg-primary-bg text-primary-text border-stroke max-w-[400px] min-w-[300px] border"
-                  >
-                    <TradeAdTooltip
-                      item={{
-                        ...item,
-                        name: displayName,
-                        base_name: item.base_name || item.name,
-                      }}
-                    />
-                  </TooltipContent>
+                    item={{
+                      ...item,
+                      name: displayName,
+                      base_name: item.base_name || item.name,
+                    }}
+                  />
                 </Tooltip>
 
                 {/* Item Name */}

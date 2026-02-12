@@ -28,6 +28,7 @@ import {
   DropdownMenuRadioItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import { Masonry } from "@mui/lab";
 
@@ -617,7 +618,7 @@ function RobberyTrackerContent() {
                   placeholder="Search robberies..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="border-border-card bg-secondary-bg text-primary-text placeholder-secondary-text hover:border-border-focus focus:border-button-info w-full rounded-lg border px-4 py-4 pr-10 pl-10 transition-all focus:outline-none"
+                  className="border-border-card bg-secondary-bg text-primary-text placeholder-secondary-text hover:border-border-focus focus:border-button-info h-[56px] w-full rounded-lg border px-4 py-2 pr-10 pl-10 transition-all focus:outline-none"
                 />
                 {searchQuery && (
                   <button
@@ -945,32 +946,18 @@ function RobberyTrackerContent() {
 
         {/* Main View Toggle */}
         <div className="mb-6 overflow-x-auto">
-          <div role="tablist" className="tabs tabs-boxed bg-transparent p-0">
-            <button
-              role="tab"
-              aria-selected={activeView === "robberies"}
-              onClick={() => handleViewChange("robberies")}
-              className={`tab ${activeView === "robberies" ? "tab-active" : ""}`}
-            >
-              Robberies
-            </button>
-            <button
-              role="tab"
-              aria-selected={activeView === "mansions"}
-              onClick={() => handleViewChange("mansions")}
-              className={`tab ${activeView === "mansions" ? "tab-active" : ""}`}
-            >
-              Mansions
-            </button>
-            <button
-              role="tab"
-              aria-selected={activeView === "airdrops"}
-              onClick={() => handleViewChange("airdrops")}
-              className={`tab ${activeView === "airdrops" ? "tab-active" : ""}`}
-            >
-              Airdrops
-            </button>
-          </div>
+          <Tabs
+            value={activeView}
+            onValueChange={(value) =>
+              handleViewChange(value as "robberies" | "mansions" | "airdrops")
+            }
+          >
+            <TabsList>
+              <TabsTrigger value="robberies">Robberies</TabsTrigger>
+              <TabsTrigger value="mansions">Mansions</TabsTrigger>
+              <TabsTrigger value="airdrops">Airdrops</TabsTrigger>
+            </TabsList>
+          </Tabs>
         </div>
 
         <NitroRobberiesTopAd className="mb-6" />
@@ -1152,32 +1139,22 @@ function RobberyTrackerContent() {
               <>
                 {/* Airdrop Location Tabs */}
                 <div className="mb-6 overflow-x-auto">
-                  <div role="tablist" className="tabs flex min-w-max flex-wrap">
-                    <button
-                      role="tab"
-                      aria-selected={activeAirdropLocation === "all"}
-                      onClick={() => setActiveAirdropLocation("all")}
-                      className={`tab ${activeAirdropLocation === "all" ? "tab-active" : ""}`}
-                    >
-                      All Locations
-                    </button>
-                    <button
-                      role="tab"
-                      aria-selected={activeAirdropLocation === "CactusValley"}
-                      onClick={() => setActiveAirdropLocation("CactusValley")}
-                      className={`tab ${activeAirdropLocation === "CactusValley" ? "tab-active" : ""}`}
-                    >
-                      Cactus Valley
-                    </button>
-                    <button
-                      role="tab"
-                      aria-selected={activeAirdropLocation === "Dunes"}
-                      onClick={() => setActiveAirdropLocation("Dunes")}
-                      className={`tab ${activeAirdropLocation === "Dunes" ? "tab-active" : ""}`}
-                    >
-                      Dunes
-                    </button>
-                  </div>
+                  <Tabs
+                    value={activeAirdropLocation}
+                    onValueChange={(value) =>
+                      setActiveAirdropLocation(
+                        value as "all" | "CactusValley" | "Dunes",
+                      )
+                    }
+                  >
+                    <TabsList>
+                      <TabsTrigger value="all">All Locations</TabsTrigger>
+                      <TabsTrigger value="CactusValley">
+                        Cactus Valley
+                      </TabsTrigger>
+                      <TabsTrigger value="Dunes">Dunes</TabsTrigger>
+                    </TabsList>
+                  </Tabs>
                 </div>
 
                 {/* Airdrop Statistics */}

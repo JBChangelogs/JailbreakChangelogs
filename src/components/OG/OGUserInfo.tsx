@@ -90,7 +90,7 @@ export default function OGUserInfo({
                     <span className="text-sm font-semibold">Discord</span>
                   </Link>
                 </TooltipTrigger>
-                <TooltipContent>Visit Discord Profile</TooltipContent>
+                <TooltipContent>Discord profile</TooltipContent>
               </Tooltip>
             )}
 
@@ -107,7 +107,7 @@ export default function OGUserInfo({
                   <span className="text-sm font-semibold">Roblox</span>
                 </Link>
               </TooltipTrigger>
-              <TooltipContent>Visit Roblox Profile</TooltipContent>
+              <TooltipContent>Roblox profile</TooltipContent>
             </Tooltip>
 
             {/* Website Profile */}
@@ -129,7 +129,7 @@ export default function OGUserInfo({
                     <span className="text-sm font-semibold">Website</span>
                   </Link>
                 </TooltipTrigger>
-                <TooltipContent>Visit Website Profile</TooltipContent>
+                <TooltipContent>JBCL profile</TooltipContent>
               </Tooltip>
             )}
           </div>

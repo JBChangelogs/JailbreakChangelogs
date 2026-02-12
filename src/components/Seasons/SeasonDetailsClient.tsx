@@ -287,12 +287,12 @@ export default function SeasonDetailsClient({
                         </h3>
                         <div className="flex gap-2">
                           {reward.bonus === "True" && (
-                            <span className="border-primary-text text-primary-text rounded-full border bg-transparent px-2 py-1 text-xs font-medium">
+                            <span className="text-primary-text border-border-card bg-tertiary-bg/40 inline-flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl">
                               Bonus
                             </span>
                           )}
                           {reward.exclusive === "True" && (
-                            <span className="border-primary-text text-primary-text rounded-full border bg-transparent px-2 py-1 text-xs font-medium">
+                            <span className="text-primary-text border-border-card bg-tertiary-bg/40 inline-flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl">
                               Exclusive
                             </span>
                           )}

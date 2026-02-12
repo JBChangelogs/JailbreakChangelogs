@@ -1,4 +1,4 @@
-import { Box, Typography, Divider, Chip, Skeleton } from "@mui/material";
+import { Box, Typography, Divider, Skeleton } from "@mui/material";
 import {
   Tooltip,
   TooltipContent,
@@ -300,23 +300,14 @@ export default function Comment({
 
             {/* Badge Second */}
             <div className="mb-2">
-              <Chip
-                label={contentType}
-                size="small"
-                variant="outlined"
-                sx={{
-                  backgroundColor: getCategoryColor(item_type) + "20", // Add 20% opacity
+              <span
+                className="text-primary-text bg-tertiary-bg/40 inline-flex h-6 w-fit items-center rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl"
+                style={{
                   borderColor: getCategoryColor(item_type),
-                  color: "var(--color-primary-text)",
-                  fontSize: "0.65rem",
-                  height: "20px",
-                  fontWeight: "medium",
-                  "&:hover": {
-                    borderColor: getCategoryColor(item_type),
-                    backgroundColor: getCategoryColor(item_type) + "30", // Slightly more opacity on hover
-                  },
                 }}
-              />
+              >
+                {contentType}
+              </span>
             </div>
 
             {/* Comment Content Third */}

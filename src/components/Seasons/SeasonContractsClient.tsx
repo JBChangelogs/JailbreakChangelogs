@@ -87,11 +87,9 @@ export default function SeasonContractsClient({
                 {/* Season Pass Corner Badge */}
                 {c.reqseasonpass && (
                   <div className="absolute top-3 right-3 z-10">
-                    <div className="relative">
-                      <span className="bg-tertiary-bg text-primary-text relative rounded-full px-3 py-1 text-xs font-bold">
-                        Season Pass
-                      </span>
-                    </div>
+                    <span className="text-primary-text border-border-card bg-tertiary-bg/40 inline-flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl">
+                      Season Pass
+                    </span>
                   </div>
                 )}
 

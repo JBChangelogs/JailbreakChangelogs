@@ -198,6 +198,7 @@ export const ItemGrid: React.FC<ItemGridProps> = ({
                               alt={item.name}
                               fill
                               className="object-cover"
+                              draggable={false}
                               onError={handleImageError}
                             />
                           )}

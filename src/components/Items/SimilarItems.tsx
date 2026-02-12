@@ -14,7 +14,7 @@ import {
 import Link from "next/link";
 import { Icon } from "@/components/ui/IconWrapper";
 import { formatFullValue } from "@/utils/values";
-import { getCategoryColor } from "@/utils/categoryIcons";
+import { getCategoryColor, getCategoryIcon } from "@/utils/categoryIcons";
 import { getTrendColor, getDemandColor } from "@/utils/badgeColors";
 import {
   DropdownMenu,
@@ -448,16 +448,24 @@ const SimilarItems = ({
                   {/* Type Badge */}
                   <div className="flex flex-wrap gap-1">
                     <span
-                      className="text-primary-text flex items-center rounded-full border px-1.5 py-0.5 text-[10px] font-medium"
+                      className="text-primary-text bg-tertiary-bg/40 inline-flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl"
                       style={{
                         borderColor: getCategoryColor(item.type),
-                        backgroundColor: getCategoryColor(item.type) + "20", // Add 20% opacity
                       }}
                     >
+                      {(() => {
+                        const categoryIcon = getCategoryIcon(item.type);
+                        return categoryIcon ? (
+                          <categoryIcon.Icon
+                            className="mr-1.5 h-3 w-3"
+                            style={{ color: getCategoryColor(item.type) }}
+                          />
+                        ) : null;
+                      })()}
                       {item.type}
                     </span>
                     {(item.tradable === 0 || item.tradable === false) && (
-                      <span className="border-primary-text text-primary-text flex items-center rounded-full border bg-transparent px-1.5 py-0.5 text-[10px]">
+                      <span className="text-primary-text border-border-card bg-tertiary-bg/40 inline-flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl">
                         {item.id === 713 ? "Reference Only" : "Non-Tradable"}
                       </span>
                     )}
@@ -470,7 +478,7 @@ const SimilarItems = ({
                       <span className="text-secondary-text text-[10px] font-medium">
                         Cash
                       </span>
-                      <span className="bg-button-info text-form-button-text rounded-lg px-1.5 py-0.5 text-[9px] font-bold">
+                      <span className="bg-button-info text-form-button-text inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold">
                         {formatFullValue(item.cash_value)}
                       </span>
                     </div>
@@ -480,7 +488,7 @@ const SimilarItems = ({
                       <span className="text-secondary-text text-[10px] font-medium">
                         Duped
                       </span>
-                      <span className="bg-button-info text-form-button-text rounded-lg px-1.5 py-0.5 text-[9px] font-bold">
+                      <span className="bg-button-info text-form-button-text inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold">
                         {formatFullValue(item.duped_value)}
                       </span>
                     </div>
@@ -491,7 +499,7 @@ const SimilarItems = ({
                         Demand
                       </span>
                       <span
-                        className={`${getDemandColor(item.demand)} rounded-lg px-1.5 py-0.5 text-[9px] font-bold whitespace-nowrap`}
+                        className={`${getDemandColor(item.demand)} inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold whitespace-nowrap`}
                       >
                         {item.demand === "N/A" ? "Unknown" : item.demand}
                       </span>
@@ -504,7 +512,7 @@ const SimilarItems = ({
                           Trend
                         </span>
                         <span
-                          className={`${getTrendColor(item.trend)} rounded-lg px-1.5 py-0.5 text-[9px] font-bold whitespace-nowrap`}
+                          className={`${getTrendColor(item.trend)} inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold whitespace-nowrap`}
                         >
                           {item.trend === "N/A" ? "Unknown" : item.trend}
                         </span>

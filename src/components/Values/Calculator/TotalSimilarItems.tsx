@@ -204,6 +204,7 @@ export const TotalSimilarItems: React.FC<TotalSimilarItemsProps> = ({
                       alt={displayName}
                       fill
                       className="object-cover"
+                      draggable={false}
                       onError={handleImageError}
                     />
                   </div>

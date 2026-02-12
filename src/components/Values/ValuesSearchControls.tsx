@@ -177,6 +177,7 @@ export default function ValuesSearchControls({
                   <DropdownMenuTrigger asChild>
                     <button
                       type="button"
+                      id="values-filter-menu-trigger"
                       className="border-border-card bg-secondary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus flex h-[56px] min-h-[56px] w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all duration-300 focus:ring-1 focus:outline-none"
                       aria-label="Select category"
                     >
@@ -234,6 +235,7 @@ export default function ValuesSearchControls({
                   <DropdownMenuTrigger asChild>
                     <button
                       type="button"
+                      id="values-sort-menu-trigger"
                       className="border-border-card bg-secondary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus flex h-[56px] min-h-[56px] w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all duration-300 focus:ring-1 focus:outline-none"
                       aria-label="Select sort"
                     >

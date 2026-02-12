@@ -63,7 +63,7 @@ export const UserDetailsTooltip: React.FC<UserDetailsTooltipProps> = ({
             <Link
               href={`/users/${user.id}`}
               prefetch={false}
-              className="text-secondary-text hover:text-primary-text block text-sm transition-colors"
+              className="text-secondary-text hover:text-link block text-sm transition-colors"
             >
               @{user.username}
             </Link>

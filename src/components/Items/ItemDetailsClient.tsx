@@ -8,7 +8,7 @@ import { Icon } from "@/components/ui/IconWrapper";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import CreatorLink from "@/components/Items/CreatorLink";
 import ItemValues from "@/components/Items/ItemValues";
-import { getCategoryColor } from "@/utils/categoryIcons";
+import { getCategoryColor, getCategoryIcon } from "@/utils/categoryIcons";
 import NitroItemsVideoPlayer from "@/components/Ads/NitroItemsVideoPlayer";
 import NitroItemMobileAd from "@/components/Ads/NitroItemMobileAd";
 import {
@@ -334,15 +334,8 @@ export default function ItemDetailsClient({
               <NitroItemsVideoPlayer className="min-h-[180px] w-full max-w-xs sm:max-w-sm md:max-w-md" />
             </div>
 
-            <div
-              className="bg-tertiary-bg mt-4 rounded-lg p-4 shadow-lg"
-              style={{
-                border: "2px solid",
-                borderImage: "linear-gradient(45deg, #076bb6, #ca4a0d) 1",
-                borderRadius: "8px",
-              }}
-            >
-              <div className="text-center">
+            <div className="mt-4 rounded-lg bg-linear-to-br from-[#076bb6] to-[#ca4a0d] p-[2px] shadow-lg">
+              <div className="bg-tertiary-bg rounded-[calc(0.5rem-2px)] p-4 text-center">
                 <div className="mb-3 flex justify-center">
                   <a
                     href="https://discord.com/invite/baHCsb8N5A"
@@ -397,26 +390,44 @@ export default function ItemDetailsClient({
               </p>
               <div className="mt-2 flex flex-wrap gap-2">
                 <span
-                  className="text-primary-text flex items-center rounded-full border px-2 py-1 text-xs font-medium"
+                  className="text-primary-text bg-tertiary-bg/40 inline-flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl"
                   style={{
                     borderColor: getCategoryColor(currentItem.type),
-                    backgroundColor: getCategoryColor(currentItem.type) + "20", // Add 20% opacity
                   }}
                 >
+                  {(() => {
+                    const categoryIcon = getCategoryIcon(currentItem.type);
+                    return categoryIcon ? (
+                      <categoryIcon.Icon
+                        className="mr-1.5 h-3 w-3"
+                        style={{ color: getCategoryColor(currentItem.type) }}
+                      />
+                    ) : null;
+                  })()}
                   {currentItem.type}
                 </span>
                 {currentItem.is_limited === 1 && (
-                  <span className="border-primary-text text-primary-text flex items-center rounded-full border bg-transparent px-2 py-1 text-xs">
+                  <span className="text-primary-text border-border-card bg-tertiary-bg/40 inline-flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl">
+                    <Icon
+                      icon="mdi:clock"
+                      className="mr-1.5 h-3 w-3"
+                      style={{ color: "#ffd700" }}
+                    />
                     Limited
                   </span>
                 )}
                 {currentItem.is_seasonal === 1 && (
-                  <span className="border-primary-text text-primary-text flex items-center rounded-full border bg-transparent px-2 py-1 text-xs">
+                  <span className="text-primary-text border-border-card bg-tertiary-bg/40 inline-flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl">
+                    <Icon
+                      icon="noto-v1:snowflake"
+                      className="mr-1.5 h-3 w-3"
+                      style={{ color: "#40c0e7" }}
+                    />
                     Seasonal
                   </span>
                 )}
                 {currentItem.tradable === 0 && (
-                  <span className="border-primary-text text-primary-text flex items-center rounded-full border bg-transparent px-2 py-1 text-xs">
+                  <span className="text-primary-text border-border-card bg-tertiary-bg/40 inline-flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl">
                     {currentItem.id === 713 ? "Reference Only" : "Non-Tradable"}
                   </span>
                 )}
