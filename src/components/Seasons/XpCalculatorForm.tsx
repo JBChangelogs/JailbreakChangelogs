@@ -1,5 +1,6 @@
 import ImageModal from "@/components/ui/ImageModal";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Season } from "@/types/seasons";
 import { Icon } from "@/components/ui/IconWrapper";
 import {
@@ -208,22 +209,22 @@ export default function XpCalculatorForm({
         </p>
         <div className="space-y-3">
           <label className="text-primary-text flex cursor-pointer items-center gap-3">
-            <input
-              type="checkbox"
+            <Checkbox
               checked={includeDailyXp}
-              onChange={(e) => onIncludeDailyXpChange(e.target.checked)}
-              className="text-button-info focus:ring-button-info h-4 w-4 cursor-pointer rounded"
+              onCheckedChange={(checked) =>
+                onIncludeDailyXpChange(checked === true)
+              }
             />
             <div className="flex-1">
               <span className="font-medium">Include Daily XP</span>
             </div>
           </label>
           <label className="text-primary-text flex cursor-pointer items-center gap-3">
-            <input
-              type="checkbox"
+            <Checkbox
               checked={includeContracts}
-              onChange={(e) => onIncludeContractsChange(e.target.checked)}
-              className="text-button-info focus:ring-button-info h-4 w-4 cursor-pointer rounded"
+              onCheckedChange={(checked) =>
+                onIncludeContractsChange(checked === true)
+              }
             />
             <div className="flex-1">
               <span className="font-medium">Include Weekly Contracts</span>

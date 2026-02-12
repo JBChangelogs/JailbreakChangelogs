@@ -353,6 +353,7 @@ function LoginModalInner({ open, onClose }: LoginModalProps) {
                         >
                           <Checkbox
                             id="join-discord"
+                            className="border-primary-text"
                             checked={joinDiscord}
                             onCheckedChange={(checked) =>
                               setJoinDiscord(checked === true)

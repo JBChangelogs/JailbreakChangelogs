@@ -204,8 +204,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
     startAuthInterval();
 
     // Listen for auth state changes to update local state
-    const handleAuthChange = (event: CustomEvent) => {
-      const userData = event.detail;
+    const handleAuthChange: EventListener = (event) => {
+      const userData = (event as CustomEvent<UserData | null>).detail;
       if (userData) {
         setAuthState({
           isAuthenticated: true,
@@ -227,10 +227,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       }
     };
 
-    window.addEventListener(
-      "authStateChanged",
-      handleAuthChange as EventListener,
-    );
+    window.addEventListener("authStateChanged", handleAuthChange);
 
     return () => {
       if (authInterval) {
@@ -245,10 +242,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         document.removeEventListener(event, markUserActive, true);
       });
 
-      window.removeEventListener(
-        "authStateChanged",
-        handleAuthChange as EventListener,
-      );
+      window.removeEventListener("authStateChanged", handleAuthChange);
     };
   }, [initializeAuth]);
 
