@@ -12,6 +12,7 @@ import { storeCampaign } from "@/utils/campaign";
 import { useSearchParams } from "next/navigation";
 import { hasAuthSessionCookie } from "@/utils/serverSession";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -191,13 +192,12 @@ function LoginModalInner({ open, onClose }: LoginModalProps) {
             className="relative z-10"
           >
             <DialogContent
+              className="border-border-card bg-primary-bg/75 backdrop-blur-lg"
               sx={{
                 p: 3,
-                backgroundColor: "var(--color-secondary-bg)",
                 borderRadius: "16px",
-                border: "1px solid var(--color-border-primary)",
-                boxShadow: "var(--color-card-shadow)",
-                backdropFilter: "blur(12px)",
+                border: "1px solid var(--color-border-card)",
+                boxShadow: "none",
               }}
             >
               <motion.div
@@ -231,20 +231,19 @@ function LoginModalInner({ open, onClose }: LoginModalProps) {
                     <Tab
                       icon={
                         <Image
-                          src="/logos/discord/Discord_Logo.webp"
+                          src={
+                            resolvedTheme === "dark"
+                              ? "/logos/discord/Discord_Logo.webp"
+                              : "/logos/discord/Discord_Logo_Dark.webp"
+                          }
                           alt="Discord"
-                          width={120}
+                          width={132}
                           height={36}
                           draggable={false}
-                          className="opacity-70 transition-opacity"
+                          className="transition-opacity"
                         />
                       }
                       iconPosition="top"
-                      sx={{
-                        "&.Mui-selected .opacity-70": {
-                          opacity: 1,
-                        },
-                      }}
                     />
                     {!campaign && (
                       <Tab
@@ -256,18 +255,13 @@ function LoginModalInner({ open, onClose }: LoginModalProps) {
                                 : "/logos/roblox/Roblox_Logo_Dark.webp"
                             }
                             alt="Roblox"
-                            width={120}
+                            width={112}
                             height={36}
                             draggable={false}
-                            className="opacity-70 transition-opacity"
+                            className="transition-opacity"
                           />
                         }
                         iconPosition="top"
-                        sx={{
-                          "&.Mui-selected .opacity-70": {
-                            opacity: 1,
-                          },
-                        }}
                       />
                     )}
                   </Tabs>
@@ -331,7 +325,7 @@ function LoginModalInner({ open, onClose }: LoginModalProps) {
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.3, duration: 0.4 }}
                     >
-                      <p className="text-tertiary-text mb-4 text-xs">
+                      <p className="text-primary-text mb-4 text-xs">
                         By continuing, you agree to our{" "}
                         <a
                           href="/tos"
@@ -353,12 +347,16 @@ function LoginModalInner({ open, onClose }: LoginModalProps) {
                         .
                       </p>
                       <div className="mb-4 flex justify-center">
-                        <label className="flex cursor-pointer items-center space-x-2">
-                          <input
-                            type="checkbox"
+                        <label
+                          htmlFor="join-discord"
+                          className="border-border-card bg-tertiary-bg hover:bg-quaternary-bg inline-flex cursor-pointer items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors select-none"
+                        >
+                          <Checkbox
+                            id="join-discord"
                             checked={joinDiscord}
-                            onChange={(e) => setJoinDiscord(e.target.checked)}
-                            className="text-button-info focus:ring-button-info h-4 w-4 cursor-pointer rounded"
+                            onCheckedChange={(checked) =>
+                              setJoinDiscord(checked === true)
+                            }
                           />
                           <span className="text-primary-text text-sm">
                             Join our Discord server
@@ -428,7 +426,7 @@ function LoginModalInner({ open, onClose }: LoginModalProps) {
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.3, duration: 0.4 }}
                       >
-                        <p className="text-tertiary-text mb-4 text-xs">
+                        <p className="text-primary-text mb-4 text-xs">
                           By continuing, you agree to our{" "}
                           <a
                             href="/tos"

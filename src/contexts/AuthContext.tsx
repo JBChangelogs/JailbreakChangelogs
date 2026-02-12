@@ -260,6 +260,33 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
     const urlParams = new URLSearchParams(window.location.search);
     const campaign = urlParams.get("campaign");
+    const loginParam = urlParams.get("login");
+    const shouldOpenLoginFromUrl =
+      loginParam !== null &&
+      loginParam.toLowerCase() !== "false" &&
+      loginParam !== "0";
+
+    if (shouldOpenLoginFromUrl && !authState.isAuthenticated) {
+      setTimeout(() => {
+        setShowLoginModal(true);
+      }, 0);
+
+      // Clear login param after opening to avoid reopening on refresh/navigation
+      const currentUrl = new URL(window.location.href);
+      currentUrl.searchParams.delete("login");
+      window.history.replaceState({}, "", currentUrl.toString());
+    } else if (shouldOpenLoginFromUrl && authState.isAuthenticated) {
+      toast.info("You are already logged in", {
+        duration: 3000,
+      });
+
+      // Delay cleanup slightly so the toast reliably renders first
+      setTimeout(() => {
+        const currentUrl = new URL(window.location.href);
+        currentUrl.searchParams.delete("login");
+        window.history.replaceState({}, "", currentUrl.toString());
+      }, 1000);
+    }
 
     if (campaign) {
       if (authState.isAuthenticated) {
