@@ -447,6 +447,13 @@ export default function Header() {
         Value Calculator
       </Link>
       <Link
+        href="/trading"
+        onClick={handleDrawerToggle}
+        className="hover:bg-button-info-hover/10 text-primary-text cursor-pointer px-8 py-2 transition-colors"
+      >
+        Trade Ads
+      </Link>
+      <Link
         href="/dupes"
         onClick={handleDrawerToggle}
         className="hover:bg-button-info-hover/10 text-primary-text cursor-pointer px-8 py-2 transition-colors"
@@ -461,13 +468,6 @@ export default function Header() {
             </span>
           )}
         </Box>
-      </Link>
-      <Link
-        href="/trading"
-        onClick={handleDrawerToggle}
-        className="hover:bg-button-info-hover/10 text-primary-text cursor-pointer px-8 py-2 transition-colors"
-      >
-        Trade Ads
       </Link>
       <Link
         href="/inventories"
@@ -526,24 +526,14 @@ export default function Header() {
         onClick={handleDrawerToggle}
         className="hover:bg-button-info-hover/10 text-primary-text cursor-pointer px-8 py-2 transition-colors"
       >
-        <Box className="flex flex-wrap items-center gap-1">
-          <span>Robbery Tracker</span>
-          <span className="bg-button-info text-form-button-text rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase">
-            Beta
-          </span>
-        </Box>
+        Robbery Tracker
       </Link>
       <Link
         href="/bounties"
         onClick={handleDrawerToggle}
         className="hover:bg-button-info-hover/10 text-primary-text cursor-pointer px-8 py-2 transition-colors"
       >
-        <Box className="flex flex-wrap items-center gap-1">
-          <span>Bounty Tracker</span>
-          <span className="bg-button-info text-form-button-text rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase">
-            Beta
-          </span>
-        </Box>
+        Bounty Tracker
       </Link>
       <Link
         href="/servers"

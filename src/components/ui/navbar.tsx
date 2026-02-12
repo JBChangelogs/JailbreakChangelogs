@@ -418,6 +418,9 @@ export const NavbarModern = ({
             <HoveredLink href="/values/calculator" setActive={setActive}>
               Value Calculator
             </HoveredLink>
+            <HoveredLink href="/trading" setActive={setActive}>
+              Trade Ads
+            </HoveredLink>
             <HoveredLink href="/dupes" setActive={setActive}>
               <div className="flex items-center gap-2">
                 <span>Dupe Finder</span>
@@ -425,9 +428,6 @@ export const NavbarModern = ({
                   <Badge variant="coming-soon">Coming Soon</Badge>
                 )}
               </div>
-            </HoveredLink>
-            <HoveredLink href="/trading" setActive={setActive}>
-              Trade Ads
             </HoveredLink>
             <HoveredLink href="/inventories" setActive={setActive}>
               <div className="flex items-center gap-2">
@@ -456,16 +456,10 @@ export const NavbarModern = ({
               Money Leaderboard
             </HoveredLink>
             <HoveredLink href="/robberies" setActive={setActive}>
-              <div className="flex items-center gap-2">
-                <span>Robbery Tracker</span>
-                <Badge variant="new">Beta</Badge>
-              </div>
+              Robbery Tracker
             </HoveredLink>
             <HoveredLink href="/bounties" setActive={setActive}>
-              <div className="flex items-center gap-2">
-                <span>Bounty Tracker</span>
-                <Badge variant="new">Beta</Badge>
-              </div>
+              Bounty Tracker
             </HoveredLink>
             <HoveredLink href="/servers" setActive={setActive}>
               Private Servers
