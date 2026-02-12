@@ -353,8 +353,8 @@ export default function OGNotificationSheet({
 
           {/* User Info - Show Roblox data if available */}
           {user?.roblox_id && (
-            <div className="border-border-primary bg-primary-bg/40 mt-6 flex shrink-0 items-center gap-3 rounded-xl border p-3">
-              <div className="bg-tertiary-bg border-border-primary relative h-12 w-12 shrink-0 overflow-hidden rounded-full border-2">
+            <div className="border-border-card bg-tertiary-bg mt-6 flex shrink-0 items-center gap-3 rounded-xl border p-3">
+              <div className="bg-tertiary-bg border-border-card relative h-12 w-12 shrink-0 overflow-hidden rounded-full border-2">
                 {!avatarError ? (
                   <Image
                     src={`${process.env.NEXT_PUBLIC_INVENTORY_API_URL}/proxy/users/${user.roblox_id}/avatar-headshot`}
@@ -612,11 +612,7 @@ export default function OGNotificationSheet({
       <div
         key={item.id}
         className={cn(
-          "group flex w-full items-center justify-between rounded-xl border p-4 text-left transition-all duration-300",
-          "bg-tertiary-bg/50",
-          isNotified
-            ? "border-button-info"
-            : "border-border-primary hover:border-button-info",
+          "border-border-card bg-tertiary-bg group flex w-full items-center justify-between rounded-xl border p-4 text-left transition-all duration-300",
           processingItemId !== null && "opacity-50",
         )}
       >

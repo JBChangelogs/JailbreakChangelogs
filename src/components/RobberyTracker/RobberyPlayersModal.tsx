@@ -160,7 +160,7 @@ export default function RobberyPlayersModal({
                 {filteredPlayers.map((player) => (
                   <div
                     key={player.user_id}
-                    className="border-border-primary bg-primary-bg flex items-center gap-3 rounded-lg border p-3"
+                    className="border-border-card bg-tertiary-bg flex items-center gap-3 rounded-lg border p-3"
                   >
                     {/* Avatar */}
                     <div className="bg-tertiary-bg h-10 w-10 shrink-0 overflow-hidden rounded-full">
@@ -188,7 +188,7 @@ export default function RobberyPlayersModal({
                           href={`https://www.roblox.com/users/${player.user_id}/profile`}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-primary-text hover:text-button-info truncate font-medium transition-colors"
+                          className="text-primary-text hover:text-link truncate font-medium transition-colors"
                         >
                           {getUserDisplay(player.user_id)}
                         </a>

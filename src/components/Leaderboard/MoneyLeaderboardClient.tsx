@@ -166,7 +166,7 @@ export default function MoneyLeaderboardClient({
           <MoneyLeaderboardSearch onSearch={handleSearch} />
 
           {/* Virtualized leaderboard container with fixed height for performance */}
-          <div className="border-border-primary bg-secondary-bg hover:border-border-focus hover:shadow-card-shadow mt-6 rounded-lg border p-4 transition-colors duration-200 hover:shadow-lg">
+          <div className="border-border-card bg-secondary-bg shadow-card-shadow mt-6 rounded-lg border p-4">
             <div
               ref={parentRef}
               className="scrollbar-thin scrollbar-track-transparent scrollbar-thumb-border-primary hover:scrollbar-thumb-border-focus h-[48rem] overflow-y-auto pr-2"
@@ -219,10 +219,10 @@ export default function MoneyLeaderboardClient({
                         }}
                       >
                         <div
-                          className={`mb-4 rounded-lg border p-3 transition-colors ${
+                          className={`mb-3 rounded-lg border p-3 transition-colors ${
                             originalRank <= 3
                               ? ""
-                              : "border-border-primary bg-primary-bg hover:border-border-focus"
+                              : "border-border-card bg-tertiary-bg"
                           }`}
                           style={{
                             ...(originalRank === 1 && {
@@ -273,7 +273,7 @@ export default function MoneyLeaderboardClient({
                                   alt={`${userDisplay} avatar`}
                                   width={32}
                                   height={32}
-                                  className="bg-tertiary-bg h-7 w-7 rounded-full sm:h-8 sm:w-8"
+                                  className="border-border-card bg-tertiary-bg h-7 w-7 rounded-full border sm:h-8 sm:w-8"
                                   onError={() => {
                                     setAvatarErrorMap((prev) => ({
                                       ...prev,
@@ -282,7 +282,7 @@ export default function MoneyLeaderboardClient({
                                   }}
                                 />
                               ) : (
-                                <div className="bg-tertiary-bg h-7 w-7 rounded-full sm:h-8 sm:w-8">
+                                <div className="border-border-card bg-tertiary-bg h-7 w-7 rounded-full border sm:h-8 sm:w-8">
                                   <DefaultAvatar />
                                 </div>
                               )}
@@ -321,7 +321,7 @@ export default function MoneyLeaderboardClient({
           </div>
         </div>
       ) : (
-        <div className="border-border-primary bg-secondary-bg hover:border-border-focus hover:shadow-card-shadow rounded-lg border p-8 text-center transition-colors duration-200 hover:shadow-lg">
+        <div className="border-border-primary bg-secondary-bg shadow-card-shadow rounded-lg border p-8 text-center">
           <p className="text-secondary-text">
             No money leaderboard data available at this time.
           </p>

@@ -197,7 +197,7 @@ export default function FavoritesTab({
         href={itemUrl}
         className="group block"
       >
-        <Box className="border-border-primary bg-primary-bg hover:border-border-focus rounded-lg border p-3 shadow-sm transition-colors">
+        <Box className="border-border-card bg-tertiary-bg rounded-lg border p-3 shadow-sm transition-colors">
           <div className="mb-2 flex items-center">
             <div className="relative mr-3 h-16 w-16 shrink-0 overflow-hidden rounded-md md:h-18 md:w-32">
               {isVideo ? (
@@ -224,7 +224,7 @@ export default function FavoritesTab({
                 {isLoadingItem ? (
                   <Skeleton variant="text" width="80%" height={20} />
                 ) : (
-                  <span className="text-primary-text group-hover:text-button-info font-medium transition-colors">
+                  <span className="text-primary-text group-hover:text-link font-medium transition-colors">
                     {itemName}
                   </span>
                 )}
@@ -286,7 +286,6 @@ export default function FavoritesTab({
         <div className="border-border-primary rounded-lg border p-4">
           <div className="mb-3 flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Icon icon="mdi:heart" className="text-button-info" />
               <h2 className="text-primary-text text-lg font-semibold">
                 Favorited Items
               </h2>
@@ -328,7 +327,6 @@ export default function FavoritesTab({
       <div className="space-y-6">
         <div className="border-border-primary rounded-lg border p-4">
           <div className="mb-3 flex items-center gap-2">
-            <Icon icon="mdi:heart" className="text-button-info" />
             <h2 className="text-primary-text text-lg font-semibold">
               Favorited Items [{favorites.length}]
             </h2>
@@ -344,7 +342,6 @@ export default function FavoritesTab({
       <div className="space-y-6">
         <div className="border-border-primary rounded-lg border p-4">
           <div className="mb-3 flex items-center gap-2">
-            <Icon icon="mdi:heart" className="text-button-info" />
             <h2 className="text-primary-text text-lg font-semibold">
               Favorited Items
             </h2>
@@ -375,7 +372,6 @@ export default function FavoritesTab({
       <div className="border-border-primary rounded-lg border p-4">
         <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-2">
-            <Icon icon="mdi:heart" className="text-button-info" />
             <h2 className="text-primary-text text-lg font-semibold">
               Favorited Items [{favorites.length}]
             </h2>

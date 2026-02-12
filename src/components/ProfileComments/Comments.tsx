@@ -266,7 +266,7 @@ export default function Comment({
       prefetch={false}
       className="group block"
     >
-      <Box className="border-border-primary bg-primary-bg hover:border-border-focus rounded-lg border p-3 shadow-sm transition-colors">
+      <Box className="border-border-card bg-tertiary-bg rounded-lg border p-3 shadow-sm transition-colors">
         <div className="mb-2 flex">
           {renderThumbnail()}
           <div className="min-w-0 flex-1">
@@ -274,7 +274,7 @@ export default function Comment({
             {getItemName() ? (
               <Typography
                 variant="body2"
-                className="text-primary-text group-hover:text-button-info mb-1 font-medium transition-colors"
+                className="text-primary-text group-hover:text-link mb-1 font-medium transition-colors"
                 sx={{
                   maxWidth: "100%",
                   overflow: "hidden",

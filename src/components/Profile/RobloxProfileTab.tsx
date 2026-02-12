@@ -75,7 +75,6 @@ export default function RobloxProfileTab({
       {/* Roblox Profile Card */}
       <div className="border-border-primary rounded-lg border p-4">
         <div className="mb-4 flex items-center gap-2">
-          <RobloxIcon className="text-button-info h-6 w-6" />
           <h2 className="text-primary-text text-lg font-semibold">
             Roblox Profile
           </h2>
@@ -83,7 +82,7 @@ export default function RobloxProfileTab({
 
         <div className="flex flex-col items-center gap-6 md:flex-row md:items-start">
           {/* Roblox Avatar */}
-          <div className="border-button-info bg-primary-bg relative h-32 w-32 overflow-hidden rounded-lg border-2">
+          <div className="border-border-card bg-tertiary-bg relative h-32 w-32 overflow-hidden rounded-lg border-2">
             {!imageError && user.roblox_avatar ? (
               <>
                 {isLoading && (

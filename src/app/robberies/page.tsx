@@ -488,7 +488,7 @@ function RobberyTrackerContent() {
     return (
       <main className="text-primary-text min-h-screen">
         <div className="container mx-auto flex min-h-screen items-center justify-center px-4 py-8">
-          <div className="border-border-primary bg-secondary-bg w-full max-w-2xl rounded-lg border p-6 text-center shadow-sm">
+          <div className="border-border-card bg-secondary-bg w-full max-w-2xl rounded-lg border p-6 text-center shadow-sm">
             <h2 className="text-primary-text text-2xl font-semibold">
               You have been temporarily banned
             </h2>
@@ -568,7 +568,7 @@ function RobberyTrackerContent() {
     return (
       <main className="text-primary-text min-h-screen">
         <div className="container mx-auto flex min-h-screen items-center justify-center px-4 py-8">
-          <div className="border-border-primary bg-secondary-bg w-full max-w-2xl rounded-lg border p-6 text-center shadow-sm">
+          <div className="border-border-card bg-secondary-bg w-full max-w-2xl rounded-lg border p-6 text-center shadow-sm">
             <h2 className="text-primary-text text-2xl font-semibold">
               Connected from another device/tab
             </h2>
@@ -989,7 +989,7 @@ function RobberyTrackerContent() {
 
         {/* Show stale data warning if disconnected */}
         {!isConnected && hasData && !requiresManualReconnect && (
-          <div className="bg-secondary-bg border-border-primary mb-4 rounded-lg border p-4 shadow-sm">
+          <div className="border-border-card bg-secondary-bg mb-4 rounded-lg border p-4 shadow-sm">
             <div className="flex items-start gap-3">
               <div>
                 <span className="text-primary-text text-base font-bold">

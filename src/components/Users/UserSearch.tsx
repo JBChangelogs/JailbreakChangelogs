@@ -273,31 +273,13 @@ export default function UserSearch() {
           </div>
         ) : (
           users.map((user) => {
-            // Border color based on supporter tier
-            const premiumType = user.premiumtype ?? 0;
-            const isSupporter = premiumType >= 1 && premiumType <= 3;
-
-            const getBorderClass = () => {
-              if (!isSupporter) return "border-border-primary";
-              switch (premiumType) {
-                case 1:
-                  return "border-[var(--color-supporter-bronze-border)]";
-                case 2:
-                  return "border-[var(--color-supporter-silver-border)]";
-                case 3:
-                  return "border-[var(--color-supporter-gold-border)]";
-                default:
-                  return "border-border-primary";
-              }
-            };
-
             return (
               <Tooltip key={user.id} delayDuration={0}>
                 <TooltipTrigger asChild>
                   <Link
                     href={`/users/${user.id}`}
                     prefetch={false}
-                    className={`${getBorderClass()} group bg-secondary-bg hover:border-border-focus relative block rounded-lg border p-4 shadow-md transition-colors`}
+                    className="border-border-card group bg-secondary-bg relative block rounded-lg border p-4 shadow-md transition-colors"
                   >
                     {user.settings?.hide_presence !== 1 &&
                       user.presence?.status === "Online" && (

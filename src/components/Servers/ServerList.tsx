@@ -651,7 +651,7 @@ const ServerList: React.FC<{
           return (
             <div
               key={server.id}
-              className={`border-border-primary hover:border-border-focus rounded-lg border p-4 sm:p-6 ${
+              className={`border-border-card rounded-lg border p-4 sm:p-6 ${
                 isSupporter ? "" : "bg-secondary-bg"
               }`}
               style={getBackgroundStyle()}
@@ -827,7 +827,7 @@ const ServerList: React.FC<{
                 </div>
 
                 {server.rules && (
-                  <div className="border-border-primary bg-primary-bg rounded-lg border p-3 sm:p-4">
+                  <div className="border-border-card bg-tertiary-bg rounded-lg border p-3 sm:p-4">
                     <h4 className="text-primary-text mb-2 text-sm font-medium">
                       Rules:
                     </h4>

@@ -434,7 +434,7 @@ export default function UserProfileClient({
       <main className="min-h-screen">
         <div className="container mx-auto mb-8 max-w-7xl">
           <Breadcrumb loading={true} />
-          <div className="border-border-primary overflow-hidden rounded-lg border shadow-md">
+          <div className="border-border-card overflow-hidden rounded-lg border shadow-md">
             {/* Banner skeleton */}
             <Skeleton variant="rectangular" height={256} />
 
@@ -521,7 +521,7 @@ export default function UserProfileClient({
       <main className="min-h-screen pb-8">
         <div className="container mx-auto">
           <Breadcrumb userData={user} />
-          <div className="border-border-primary bg-secondary-bg overflow-hidden rounded-lg border shadow-md">
+          <div className="border-border-card bg-secondary-bg overflow-hidden rounded-lg border shadow-md">
             <div className="p-8">
               <div className="flex flex-col items-center justify-center space-y-6">
                 <div className="relative -mt-6">
@@ -591,7 +591,7 @@ export default function UserProfileClient({
       <LinSuperIdol userId={userId} />
       <div className="container mx-auto max-w-7xl">
         <Breadcrumb userData={user} />
-        <div className="border-border-primary bg-secondary-bg overflow-hidden rounded-lg border shadow-md">
+        <div className="border-border-card bg-secondary-bg overflow-hidden rounded-lg border shadow-md">
           {/* Banner Section */}
           <Banner
             userId={user.id}

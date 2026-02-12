@@ -83,11 +83,7 @@ export default function OGItemCard({
 
   return (
     <div
-      className={`border-border-primary text-primary-text hover:shadow-card-shadow relative flex min-h-[400px] cursor-pointer flex-col rounded-lg border p-3 transition-all duration-200 ${
-        isOriginalOwner
-          ? "bg-status-success/10 border-status-success hover:border-status-success"
-          : "bg-primary-bg hover:border-border-focus"
-      }`}
+      className="border-border-card bg-tertiary-bg text-primary-text hover:shadow-card-shadow relative flex min-h-[400px] cursor-pointer flex-col rounded-lg border p-3 transition-all duration-200"
       onClick={() => onCardClick(item)}
     >
       {/* Duplicate Indicator */}

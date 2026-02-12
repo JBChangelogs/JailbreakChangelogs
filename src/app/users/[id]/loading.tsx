@@ -6,7 +6,7 @@ export default function UserProfileLoading() {
     <main className="min-h-screen">
       <div className="container mx-auto mb-8 max-w-7xl">
         <Breadcrumb loading={true} />
-        <div className="overflow-hidden rounded-lg border shadow-md">
+        <div className="border-border-card overflow-hidden rounded-lg border shadow-md">
           {/* Banner skeleton */}
           <Skeleton variant="rectangular" height={256} />
 

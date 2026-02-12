@@ -2,7 +2,7 @@ import { Skeleton } from "@mui/material";
 
 export default function UserCardSkeleton() {
   return (
-    <div className="group border-border-primary bg-secondary-bg hover:border-border-focus relative block rounded-lg border p-4 shadow-md transition-colors">
+    <div className="border-border-card group bg-secondary-bg relative block rounded-lg border p-4 shadow-md transition-colors">
       <div className="flex items-center space-x-3">
         <Skeleton variant="circular" width={48} height={48} />
         <div className="min-w-0 flex-1">

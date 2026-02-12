@@ -33,13 +33,13 @@ export default function OGUserInfo({
   originalItemsCount,
 }: OGUserInfoProps) {
   return (
-    <div className="border-border-primary bg-secondary-bg shadow-card-shadow rounded-lg border p-6">
+    <div className="border-border-card bg-secondary-bg rounded-lg border p-6">
       <h2 className="text-primary-text mb-4 text-xl font-semibold">
         User Information
       </h2>
 
       {/* Roblox User Profile */}
-      <div className="border-border-primary bg-primary-bg mb-6 flex flex-col gap-4 rounded-lg border p-4 sm:flex-row sm:items-center">
+      <div className="border-border-card bg-tertiary-bg mb-6 flex flex-col gap-4 rounded-lg border p-4 lg:flex-row lg:items-center lg:justify-between">
         <div className="bg-tertiary-bg relative h-16 w-16 shrink-0 overflow-hidden rounded-full">
           <Image
             src={getUserAvatar(robloxId)}
@@ -84,7 +84,7 @@ export default function OGUserInfo({
                     href={`https://discord.com/users/${userConnectionData.id}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="bg-tertiary-bg/40 border-border-primary text-primary-text inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium shadow-sm transition-opacity hover:opacity-80"
+                    className="bg-tertiary-bg/40 border-border-card text-primary-text inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium transition-opacity hover:opacity-80"
                   >
                     <DiscordIcon className="text-border-focus h-3.5 w-3.5 shrink-0" />
                     <span className="text-sm font-semibold">Discord</span>
@@ -101,7 +101,7 @@ export default function OGUserInfo({
                   href={`https://www.roblox.com/users/${robloxId}/profile`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="bg-tertiary-bg/40 border-border-primary text-primary-text inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium shadow-sm transition-opacity hover:opacity-80"
+                  className="bg-tertiary-bg/40 border-border-card text-primary-text inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium transition-opacity hover:opacity-80"
                 >
                   <RobloxIcon className="h-3.5 w-3.5 shrink-0" />
                   <span className="text-sm font-semibold">Roblox</span>
@@ -117,7 +117,7 @@ export default function OGUserInfo({
                   <Link
                     href={`/users/${userConnectionData.id}`}
                     prefetch={false}
-                    className="bg-tertiary-bg/40 border-border-primary text-primary-text inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium shadow-sm transition-opacity hover:opacity-80"
+                    className="bg-tertiary-bg/40 border-border-card text-primary-text inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium transition-opacity hover:opacity-80"
                   >
                     <Image
                       src="https://assets.jailbreakchangelogs.xyz/assets/logos/JBCL_Short_Transparent.webp"

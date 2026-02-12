@@ -642,7 +642,7 @@ export default function InventoryCheckerClient({
           <>
             {/* Error Display */}
             {error && !initialData && (
-              <div className="border-border-primary bg-secondary-bg shadow-card-shadow rounded-lg border p-6">
+              <div className="border-border-card bg-secondary-bg rounded-lg border p-6">
                 <div className="text-center">
                   <div className="mb-4 flex justify-center">
                     <div className="bg-status-error/10 rounded-full p-3">
@@ -663,7 +663,7 @@ export default function InventoryCheckerClient({
 
                   {/* Show scan option for profile owner or login prompt for others */}
                   {isOwnInventory ? (
-                    <div className="border-border-primary bg-secondary-bg shadow-card-shadow mt-4 rounded-lg border p-4">
+                    <div className="border-border-card bg-secondary-bg mt-4 rounded-lg border p-4">
                       <div className="space-y-3">
                         <p className="text-primary-text mb-3 text-center text-sm">
                           Your inventory hasn&apos;t been scanned yet.
@@ -864,7 +864,7 @@ export default function InventoryCheckerClient({
                       </div>
                     </div>
                   ) : (
-                    <div className="border-border-primary bg-primary-bg shadow-card-shadow mt-4 rounded-lg border p-4">
+                    <div className="border-border-card bg-primary-bg mt-4 rounded-lg border p-4">
                       <p className="text-primary-text mb-1 text-sm font-medium">
                         Looking for your inventory?
                       </p>

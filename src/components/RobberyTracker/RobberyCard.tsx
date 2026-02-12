@@ -231,7 +231,7 @@ export default function RobberyCard({ robbery }: RobberyCardProps) {
   const players = robbery.server?.players || [];
 
   return (
-    <div className="border-border-primary bg-secondary-bg hover:border-border-focus flex flex-col overflow-hidden rounded-lg border transition-all duration-200 hover:shadow-lg">
+    <div className="border-border-card bg-secondary-bg flex flex-col overflow-hidden rounded-lg border transition-all duration-200 hover:shadow-lg">
       {/* Image */}
       <div className="bg-secondary-background relative aspect-video w-full shrink-0 overflow-hidden">
         <Image src={imageUrl} alt={displayName} fill className="object-cover" />
@@ -362,9 +362,8 @@ export default function RobberyCard({ robbery }: RobberyCardProps) {
 
         {/* Footer with Last Update */}
         <div className="border-border-primary mt-4 border-t pt-3">
-          <div className="text-primary-text flex items-center justify-center gap-1.5 text-xs font-medium">
-            <Icon icon="mdi:clock" className="text-tertiary-text h-3.5 w-3.5" />
-            <span>Last update: {relativeTime || "Just now"}</span>
+          <div className="text-primary-text flex items-center justify-center text-xs font-medium">
+            <span>Logged {relativeTime || "Just now"}</span>
           </div>
         </div>
       </div>
