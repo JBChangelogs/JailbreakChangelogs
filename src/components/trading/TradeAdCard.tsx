@@ -86,7 +86,7 @@ export const TradeAdCard: React.FC<TradeAdCardProps> = ({
 
   // Border colors for different supporter tiers
   const getBorderClass = () => {
-    if (!isSupporter) return "border-border-primary";
+    if (!isSupporter) return "border-border-card";
     switch (supporterTier) {
       case 1:
         return "border-[var(--color-supporter-bronze-border)]";
@@ -95,7 +95,7 @@ export const TradeAdCard: React.FC<TradeAdCardProps> = ({
       case 3:
         return "border-[var(--color-supporter-gold-border)]";
       default:
-        return "border-border-primary";
+        return "border-border-card";
     }
   };
 
@@ -117,7 +117,7 @@ export const TradeAdCard: React.FC<TradeAdCardProps> = ({
 
   return (
     <div
-      className={`${isSupporter ? "" : "bg-secondary-bg"} hover:border-border-focus rounded-lg border p-4 transition-colors ${getBorderClass()} ${isSupporter ? "shadow-lg" : ""}`}
+      className={`${isSupporter ? "" : "bg-secondary-bg"} rounded-lg border p-4 transition-colors ${getBorderClass()} ${isSupporter ? "shadow-lg" : ""}`}
       style={getBackgroundStyle()}
       tabIndex={0}
       role="region"

@@ -31,7 +31,7 @@ interface TradeUserProfileProps {
 export default function TradeUserProfile({ user }: TradeUserProfileProps) {
   return (
     <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center">
-      <div className="border-border-primary bg-primary-bg w-fit rounded-lg border p-4">
+      <div className="border-border-card bg-primary-bg w-fit rounded-lg border p-4">
         <div className="flex flex-col items-start gap-6 sm:flex-row sm:items-center">
           {/* Discord Profile */}
           <div className="flex items-center gap-4">

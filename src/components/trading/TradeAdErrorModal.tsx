@@ -40,7 +40,7 @@ export const TradeAdErrorModal: React.FC<TradeAdErrorModalProps> = ({
           <div className="modal-footer flex justify-end gap-2 px-6 py-4">
             <button
               onClick={onClose}
-              className="border-border-primary bg-button-info text-primary-text hover:border-border-focus hover:bg-button-info-hover rounded-lg border px-4 py-2 text-sm font-medium focus:outline-none"
+              className="border-border-card bg-button-info text-primary-text hover:bg-button-info-hover rounded-lg border px-4 py-2 text-sm font-medium focus:outline-none"
             >
               Close
             </button>

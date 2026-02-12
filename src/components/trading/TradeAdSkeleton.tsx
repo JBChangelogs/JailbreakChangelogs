@@ -5,7 +5,7 @@ export const TradeAdSkeleton: React.FC = () => (
   <div className="mt-8">
     <div className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
       {[...Array(3)].map((_, i) => (
-        <div key={i} className="rounded-lg border p-4">
+        <div key={i} className="border-border-card rounded-lg border p-4">
           {/* User Info Skeleton */}
           <div className="mb-4 flex items-center space-x-3">
             <Skeleton variant="circular" width={40} height={40} />
@@ -69,7 +69,7 @@ export const TradeAdSkeleton: React.FC = () => (
           </div>
 
           {/* Buttons Skeleton */}
-          <div className="mt-4 space-y-2 border-t pt-4">
+          <div className="border-border-card mt-4 space-y-2 border-t pt-4">
             <Skeleton variant="rounded" width="100%" height={40} />
             <Skeleton variant="rounded" width="100%" height={40} />
           </div>

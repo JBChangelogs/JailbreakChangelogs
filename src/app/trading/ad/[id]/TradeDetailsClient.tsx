@@ -164,7 +164,7 @@ export default function TradeDetailsClient({
       <Breadcrumb />
       <div className="container mx-auto mb-16">
         {/* Trade Card */}
-        <div className="border-border-primary bg-secondary-bg rounded-lg border">
+        <div className="border-border-card bg-secondary-bg rounded-lg border">
           {/* Header */}
           <div className="p-6">
             <div className="flex flex-col gap-4">

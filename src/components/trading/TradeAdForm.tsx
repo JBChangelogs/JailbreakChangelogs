@@ -530,7 +530,7 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
 
   if (!isAuthenticated) {
     return (
-      <div className="border-border-primary bg-secondary-bg hover:border-border-focus mb-8 rounded-lg border p-6 text-center transition-colors">
+      <div className="border-border-card bg-secondary-bg mb-8 rounded-lg border p-6 text-center transition-colors">
         <h3 className="text-secondary-text mb-4 text-lg font-medium">
           Create Trade Ads
         </h3>
@@ -652,7 +652,7 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
 
           {/* Expiration Time Selection */}
           {!editMode && (
-            <div className="bg-button-info/10 border-border-primary mb-2 flex items-start gap-4 rounded-lg border p-4 shadow-sm">
+            <div className="bg-button-info/10 border-border-card mb-2 flex items-start gap-4 rounded-lg border p-4 shadow-sm">
               <div className="relative z-10">
                 <span className="text-primary-text text-base font-bold">
                   Trade Ad Expiration
@@ -696,7 +696,7 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
 
           {/* Status Selection (Edit Mode Only) */}
           {editMode && tradeAd && (
-            <div className="border-border-primary bg-secondary-bg mt-4 rounded-lg border p-4">
+            <div className="border-border-card bg-secondary-bg mt-4 rounded-lg border p-4">
               <h3 className="text-tertiary-text mb-4 font-medium">
                 Trade Status
               </h3>
@@ -781,7 +781,7 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
                 className="text-sm text-yellow-500"
               />
               Helpful tip: Hold{" "}
-              <kbd className="kbd kbd-sm border-border-primary bg-tertiary-bg text-primary-text">
+              <kbd className="kbd kbd-sm border-border-card bg-tertiary-bg text-primary-text">
                 Shift
               </kbd>{" "}
               while clicking Clear to clear both sides instantly without
