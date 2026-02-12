@@ -46,7 +46,7 @@ function computeSampledTiers(supporters: Supporter[]) {
   );
 
   const seed = parseInt(
-    new Date().toISOString().slice(0, 16).replace(/[-T:]/g, ""), // seed format: YYYYMMDDHHmm
+    new Date().toISOString().slice(0, 13).replace(/[-T:]/g, ""), // seed format: YYYYMMDDHH
   );
 
   return {
