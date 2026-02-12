@@ -26,7 +26,13 @@ interface CommentProps {
   item_type: string;
   user_id: string;
   edited_at: number | null;
-  owner: string;
+  owner?: string;
+  parent_id?: number | null;
+  parentComment?: {
+    id: number;
+    author: string;
+    content: string;
+  } | null;
   changelogDetails?: unknown;
   itemDetails?: unknown;
   seasonDetails?: unknown;
@@ -50,6 +56,8 @@ export default function Comment({
   item_type,
   item_id,
   edited_at,
+  parent_id,
+  parentComment,
   changelogDetails: propChangelogDetails,
   itemDetails: propItemDetails,
   seasonDetails: propSeasonDetails,
@@ -312,6 +320,27 @@ export default function Comment({
             </div>
 
             {/* Comment Content Third */}
+            {typeof parent_id === "number" && (
+              <div className="bg-primary-bg/40 border-border-card mb-2 rounded-md border px-2 py-1">
+                <Typography
+                  variant="caption"
+                  className="text-secondary-text block truncate text-[11px] font-medium"
+                >
+                  Reply to{" "}
+                  {parentComment?.author
+                    ? `@${parentComment.author}`
+                    : `comment #${parent_id}`}
+                </Typography>
+                {parentComment?.content && (
+                  <Typography
+                    variant="caption"
+                    className="text-secondary-text/80 block truncate text-[11px]"
+                  >
+                    {parentComment.content}
+                  </Typography>
+                )}
+              </div>
+            )}
             <Typography
               variant="body2"
               className="text-secondary-text wrap-break-word whitespace-pre-wrap"

@@ -54,7 +54,7 @@ export const CalculatorItemGrid: React.FC<CalculatorItemGridProps> = ({
 
     return (
       <div
-        className={`border-border-primary bg-tertiary-bg hover:border-border-focus cursor-pointer rounded-lg border-2 border-dashed p-6 text-center transition-colors ${borderColor}`}
+        className={`border-border-card bg-tertiary-bg hover:border-border-focus cursor-pointer rounded-lg border-2 border-dashed p-6 text-center transition-colors ${borderColor}`}
         onClick={handleClick}
         role="button"
         tabIndex={0}
@@ -147,7 +147,7 @@ export const CalculatorItemGrid: React.FC<CalculatorItemGridProps> = ({
                 </div>
 
                 <div className="mt-2 flex flex-col items-center gap-1">
-                  <div className="bg-secondary-bg border-border-primary inline-flex rounded-lg border p-0.5">
+                  <div className="bg-secondary-bg border-border-card inline-flex rounded-lg border p-0.5">
                     <button
                       type="button"
                       onClick={(e) => {

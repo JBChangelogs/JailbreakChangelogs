@@ -156,7 +156,8 @@ interface CommentData {
   item_type: string;
   user_id: string;
   edited_at: number | null;
-  owner: string;
+  owner?: string;
+  parent_id?: number | null;
 }
 
 interface Server {
@@ -780,7 +781,7 @@ export default function UserProfileClient({
                                 href={`https://discord.com/users/${user.id}`}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="bg-tertiary-bg/40 border-border-primary text-primary-text inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium shadow-sm transition-opacity hover:opacity-80"
+                                className="bg-tertiary-bg/40 border-border-card text-primary-text inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium shadow-sm transition-opacity hover:opacity-80"
                               >
                                 <DiscordIcon className="text-border-focus h-3.5 w-3.5 shrink-0" />
                                 <span className="text-sm font-semibold">
@@ -800,7 +801,7 @@ export default function UserProfileClient({
                                   href={`https://www.roblox.com/users/${user.roblox_id}/profile`}
                                   target="_blank"
                                   rel="noopener noreferrer"
-                                  className="bg-tertiary-bg/40 border-border-primary text-primary-text inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium shadow-sm transition-opacity hover:opacity-80"
+                                  className="bg-tertiary-bg/40 border-border-card text-primary-text inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium shadow-sm transition-opacity hover:opacity-80"
                                 >
                                   <RobloxIcon className="h-3.5 w-3.5 shrink-0" />
                                   <span className="text-sm font-semibold">

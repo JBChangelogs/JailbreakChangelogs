@@ -16,7 +16,7 @@ export default function SupportersSectionLoading() {
               {[1, 2, 3, 4].map((card) => (
                 <div
                   key={card}
-                  className="border-border-primary bg-secondary-bg shrink-0 rounded-xl border p-6 shadow-md"
+                  className="border-border-card bg-secondary-bg shrink-0 rounded-xl border p-6 shadow-md"
                   style={{ width: "280px" }}
                 >
                   <div className="flex flex-col items-center space-y-4">

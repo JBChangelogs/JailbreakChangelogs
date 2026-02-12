@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { CircularProgress, Box, Chip } from "@mui/material";
+import { CircularProgress, Box } from "@mui/material";
 import { Button } from "@/components/ui/button";
 import { Pagination } from "@/components/ui/Pagination";
 import Comment from "../ProfileComments/Comments";
@@ -17,7 +17,8 @@ interface CommentData {
   item_type: string;
   user_id: string;
   edited_at: number | null;
-  owner: string;
+  owner?: string;
+  parent_id?: number | null;
 }
 
 interface CommentsTabProps {
@@ -32,9 +33,6 @@ interface CommentsTabProps {
   sharedItemDetails?: Record<string, unknown>;
 }
 
-// Main filter categories
-const MAIN_CATEGORIES = ["changelog", "season", "trade", "inventory"];
-
 export default function CommentsTab({
   comments,
   loading,
@@ -45,7 +43,7 @@ export default function CommentsTab({
   sharedItemDetails = {},
 }: CommentsTabProps) {
   const [currentPage, setCurrentPage] = useState(1);
-  const [activeFilter, setActiveFilter] = useState<string | null>(null);
+  const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
   const [sortOrder, setSortOrder] = useState<"newest" | "oldest">("newest");
   const [commentDetails, setCommentDetails] = useState<{
     changelogs: Record<string, unknown>;
@@ -57,6 +55,11 @@ export default function CommentsTab({
   const [detailsLoading, setDetailsLoading] = useState(false);
   const commentsPerPage = 6;
 
+  // Trades are temporary, so exclude trade comments from profile history.
+  const profileComments = comments.filter(
+    (comment) => comment.item_type.toLowerCase() !== "trade",
+  );
+
   // Check if comments should be hidden
   const shouldHideComments =
     settings?.show_recent_comments === 0 && currentUserId !== userId;
@@ -64,7 +67,7 @@ export default function CommentsTab({
   // Fetch comment details when comments are loaded
   useEffect(() => {
     if (
-      comments.length > 0 &&
+      profileComments.length > 0 &&
       Object.keys(commentDetails.changelogs).length === 0 &&
       Object.keys(commentDetails.items).length === 0 &&
       Object.keys(commentDetails.seasons).length === 0 &&
@@ -72,7 +75,7 @@ export default function CommentsTab({
       Object.keys(commentDetails.inventories).length === 0
     ) {
       // Check if we already have some item details from shared cache
-      const commentsNeedingDetails = comments.filter((comment) => {
+      const commentsNeedingDetails = profileComments.filter((comment) => {
         const itemId = comment.item_id.toString();
         return !sharedItemDetails[itemId];
       });
@@ -105,29 +108,44 @@ export default function CommentsTab({
 
       fetchDetails();
     }
-  }, [comments, commentDetails, sharedItemDetails]);
+  }, [profileComments, commentDetails, sharedItemDetails]);
 
   // Sort comments based on selected order
-  const sortedComments = [...comments].sort((a, b) => {
+  const sortedComments = [...profileComments].sort((a, b) => {
     return sortOrder === "newest"
       ? parseInt(b.date) - parseInt(a.date)
       : parseInt(a.date) - parseInt(b.date);
   });
 
-  // Filter comments based on selected filter
-  const filteredComments = activeFilter
-    ? activeFilter === "item"
-      ? // For "item" filter, show all types that aren't in the main categories
-        sortedComments.filter(
-          (comment) =>
-            !MAIN_CATEGORIES.includes(comment.item_type.toLowerCase()),
+  const commentsById = new Map(
+    sortedComments.map((comment) => [comment.id, comment]),
+  );
+
+  const commentTypeOptions = [
+    { value: "changelog", label: "Changelog" },
+    { value: "season", label: "Season" },
+    { value: "inventory", label: "Inventory" },
+    { value: "item", label: "Item" },
+  ];
+
+  // Filter comments based on selected types (multi-select)
+  const filteredComments =
+    selectedTypes.length > 0
+      ? sortedComments.filter((comment) =>
+          selectedTypes.some((selectedType) => {
+            const commentType = comment.item_type.toLowerCase();
+            if (selectedType === "item") {
+              return (
+                commentType !== "changelog" &&
+                commentType !== "season" &&
+                commentType !== "inventory" &&
+                commentType !== "trade"
+              );
+            }
+            return commentType === selectedType;
+          }),
         )
-      : // For specific filters, show only that type (case-insensitive)
-        sortedComments.filter(
-          (comment) =>
-            comment.item_type.toLowerCase() === activeFilter.toLowerCase(),
-        )
-    : sortedComments;
+      : sortedComments;
 
   // Get current page comments
   const indexOfLastComment = currentPage * commentsPerPage;
@@ -146,14 +164,11 @@ export default function CommentsTab({
     // Remove the scroll behavior
   };
 
-  // Handle filter change
-  const handleFilterChange = (type: string) => {
-    if (activeFilter === type) {
-      setActiveFilter(null); // Toggle off if already active
-    } else {
-      setActiveFilter(type);
-    }
-    setCurrentPage(1); // Reset to first page when filter changes
+  const toggleTypeFilter = (type: string) => {
+    setSelectedTypes((prev) =>
+      prev.includes(type) ? prev.filter((t) => t !== type) : [...prev, type],
+    );
+    setCurrentPage(1);
   };
 
   if (loading) {
@@ -172,10 +187,10 @@ export default function CommentsTab({
   if (error) {
     return (
       <div className="space-y-6">
-        <div className="border-border-primary rounded-lg border p-4">
+        <div className="border-border-card rounded-lg border p-4">
           <div className="mb-3 flex items-center gap-2">
             <h2 className="text-primary-text text-lg font-semibold">
-              Recent Comments [{comments.length}]
+              Recent Comments [{profileComments.length}]
             </h2>
           </div>
           <p className="text-status-error">Error: {error}</p>
@@ -187,7 +202,7 @@ export default function CommentsTab({
   if (shouldHideComments) {
     return (
       <div className="space-y-6">
-        <div className="border-border-primary rounded-lg border p-4">
+        <div className="border-border-card rounded-lg border p-4">
           <div className="mb-3 flex items-center gap-2">
             <h2 className="text-primary-text text-lg font-semibold">
               Recent Comments
@@ -216,15 +231,11 @@ export default function CommentsTab({
 
   return (
     <div className="space-y-6" id="comments-section">
-      <div className="border-border-primary rounded-lg border p-4">
+      <div className="border-border-card rounded-lg border p-4">
         <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-2">
             <h2 className="text-primary-text text-lg font-semibold">
-              Recent{" "}
-              {activeFilter
-                ? `${activeFilter.charAt(0).toUpperCase() + activeFilter.slice(1)} `
-                : ""}
-              Comments [{filteredComments.length}]
+              Recent Comments [{filteredComments.length}]
             </h2>
           </div>
           <Button
@@ -244,92 +255,59 @@ export default function CommentsTab({
           </Button>
         </div>
 
-        {comments.length === 0 ? (
+        {profileComments.length === 0 ? (
           <p className="text-primary-text italic">No comments yet</p>
         ) : (
           <>
-            {/* Filter chips */}
-            <div className="mb-4 flex flex-wrap gap-2">
-              {/* Main category filters */}
-              {MAIN_CATEGORIES.map((type) => (
-                <Chip
-                  key={type}
-                  label={type.charAt(0).toUpperCase() + type.slice(1)}
-                  onClick={() => handleFilterChange(type)}
-                  variant={activeFilter === type ? "filled" : "outlined"}
-                  sx={{
-                    backgroundColor:
-                      activeFilter === type
-                        ? "var(--color-button-info)"
-                        : "transparent",
-                    borderColor:
-                      activeFilter === type
-                        ? "var(--color-button-info)"
-                        : "var(--color-secondary-text)",
-                    color:
-                      activeFilter === type
-                        ? "var(--color-form-button-text)"
-                        : "var(--color-primary-text)",
-                    "&:hover": {
-                      backgroundColor:
-                        activeFilter === type
-                          ? "var(--color-button-info-hover)"
-                          : "var(--color-button-info)",
-                      borderColor:
-                        activeFilter === type
-                          ? "var(--color-button-info-hover)"
-                          : "var(--color-button-info)",
-                      color:
-                        activeFilter === type
-                          ? "var(--color-form-button-text)"
-                          : "var(--color-primary-text)",
-                    },
-                  }}
-                />
-              ))}
-
-              {/* "Item" filter for all other types */}
-              <Chip
-                key="item"
-                label="Items"
-                onClick={() => handleFilterChange("item")}
-                variant={activeFilter === "item" ? "filled" : "outlined"}
-                sx={{
-                  backgroundColor:
-                    activeFilter === "item"
-                      ? "var(--color-button-info)"
-                      : "transparent",
-                  borderColor:
-                    activeFilter === "item"
-                      ? "var(--color-button-info)"
-                      : "var(--color-secondary-text)",
-                  color:
-                    activeFilter === "item"
-                      ? "var(--color-form-button-text)"
-                      : "var(--color-primary-text)",
-                  "&:hover": {
-                    backgroundColor:
-                      activeFilter === "item"
-                        ? "var(--color-button-info-hover)"
-                        : "var(--color-button-info)",
-                    borderColor:
-                      activeFilter === "item"
-                        ? "var(--color-button-info-hover)"
-                        : "var(--color-button-info)",
-                    color:
-                      activeFilter === "item"
-                        ? "var(--color-form-button-text)"
-                        : "var(--color-primary-text)",
-                  },
-                }}
-              />
+            {/* Multi-select type filters */}
+            <div className="mb-4">
+              <div className="mb-3 flex items-center justify-between">
+                <p className="text-secondary-text text-sm font-medium">
+                  Filter by Comment Type{" "}
+                  {selectedTypes.length > 0 && (
+                    <span className="text-primary-text">
+                      ({selectedTypes.length} selected)
+                    </span>
+                  )}
+                </p>
+                {selectedTypes.length > 0 && (
+                  <button
+                    onClick={() => {
+                      setSelectedTypes([]);
+                      setCurrentPage(1);
+                    }}
+                    className="text-link hover:text-link-hover cursor-pointer text-sm font-medium transition-colors"
+                  >
+                    Clear Filters
+                  </button>
+                )}
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {commentTypeOptions.map((typeOption) => {
+                  const isSelected = selectedTypes.includes(typeOption.value);
+                  return (
+                    <Button
+                      key={typeOption.value}
+                      onClick={() => toggleTypeFilter(typeOption.value)}
+                      variant={isSelected ? "default" : "secondary"}
+                      size="sm"
+                      className="gap-2"
+                    >
+                      {isSelected && (
+                        <Icon icon="heroicons:check" className="h-4 w-4" />
+                      )}
+                      <span>{typeOption.label}</span>
+                    </Button>
+                  );
+                })}
+              </div>
             </div>
 
             <div className="space-y-4">
               {currentComments.length === 0 ? (
                 <p className="text-primary-text italic">
-                  {activeFilter
-                    ? `No ${activeFilter === "item" ? "item" : activeFilter} comments yet`
+                  {selectedTypes.length > 0
+                    ? `No comments found for selected type${selectedTypes.length > 1 ? "s" : ""}`
                     : "No comments yet"}
                 </p>
               ) : (
@@ -338,6 +316,11 @@ export default function CommentsTab({
                     <Comment
                       key={comment.id}
                       {...comment}
+                      parentComment={
+                        typeof comment.parent_id === "number"
+                          ? commentsById.get(comment.parent_id) || null
+                          : null
+                      }
                       changelogDetails={
                         commentDetails.changelogs[comment.item_id.toString()]
                       }

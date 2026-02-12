@@ -220,7 +220,7 @@ export default function HyperchromeCalculatorModal({
           </div>
 
           <div className="mb-4">
-            <details className="border-border-primary bg-tertiary-bg hover:border-border-focus rounded-lg border p-4">
+            <details className="border-border-card bg-tertiary-bg hover:border-border-focus rounded-lg border p-4">
               <summary className="text-secondary-text cursor-pointer text-sm font-bold tracking-wider uppercase">
                 Pities and Chances
               </summary>
@@ -249,7 +249,7 @@ export default function HyperchromeCalculatorModal({
               <div className="mt-3 overflow-x-auto">
                 <table className="text-primary-text min-w-full text-xs">
                   <thead className="text-secondary-text">
-                    <tr className="border-border-primary border-b">
+                    <tr className="border-border-card border-b">
                       <th className="px-2 py-2 text-left font-semibold">
                         Level
                       </th>
@@ -271,7 +271,7 @@ export default function HyperchromeCalculatorModal({
                     {referenceRows.map((row) => (
                       <tr
                         key={row.level}
-                        className="border-border-primary/60 border-b last:border-b-0"
+                        className="border-border-card/60 border-b last:border-b-0"
                       >
                         <td className="px-2 py-2 font-semibold">{row.level}</td>
                         <td className="px-2 py-2">{row.probability}</td>
@@ -287,7 +287,7 @@ export default function HyperchromeCalculatorModal({
           </div>
 
           <div className="mb-4">
-            <details className="border-border-primary bg-tertiary-bg hover:border-border-focus rounded-lg border p-4">
+            <details className="border-border-card bg-tertiary-bg hover:border-border-focus rounded-lg border p-4">
               <summary className="text-secondary-text cursor-pointer text-sm font-bold tracking-wider uppercase">
                 Hyperchrome Colors by Robbery
               </summary>
@@ -343,7 +343,7 @@ export default function HyperchromeCalculatorModal({
                 id="level"
                 min={0}
                 max={4}
-                className="border-border-primary bg-form-input text-primary-text hover:border-border-focus focus:border-button-info w-full rounded border p-3 text-sm focus:outline-none"
+                className="border-border-card bg-form-input text-primary-text hover:border-border-focus focus:border-button-info w-full rounded border p-3 text-sm focus:outline-none"
                 placeholder="Enter your hyperchrome level (0-4)"
                 value={level}
                 onChange={(e) => setLevel(e.target.value)}
@@ -373,7 +373,7 @@ export default function HyperchromeCalculatorModal({
                 min={0}
                 max={100}
                 step="any"
-                className="border-border-primary bg-form-input text-primary-text hover:border-border-focus focus:border-button-info w-full rounded border p-3 text-sm focus:outline-none"
+                className="border-border-card bg-form-input text-primary-text hover:border-border-focus focus:border-button-info w-full rounded border p-3 text-sm focus:outline-none"
                 placeholder={`Enter your current ${isSmallServer ? "small" : "big"} server pity %`}
                 value={pity}
                 onChange={(e) => setPity(e.target.value)}
@@ -389,7 +389,7 @@ export default function HyperchromeCalculatorModal({
 
           {hasCalculated && step === 2 && resultOtherPity && (
             <div className="mb-4">
-              <div className="border-border-primary bg-tertiary-bg hover:border-border-focus rounded-lg border p-4">
+              <div className="border-border-card bg-tertiary-bg hover:border-border-focus rounded-lg border p-4">
                 <div className="mb-3 flex items-center justify-between">
                   <div className="text-secondary-text text-sm font-bold tracking-wider uppercase">
                     Result
@@ -483,7 +483,7 @@ export default function HyperchromeCalculatorModal({
           )}
           {hasCalculated && step === 2 && resultOtherPity && (
             <div className="mb-4">
-              <div className="border-border-primary bg-tertiary-bg hover:border-border-focus rounded-lg border p-4">
+              <div className="border-border-card bg-tertiary-bg hover:border-border-focus rounded-lg border p-4">
                 <div className="text-secondary-text mb-3 text-sm font-bold tracking-wider uppercase">
                   Alternative Level Calculations
                 </div>

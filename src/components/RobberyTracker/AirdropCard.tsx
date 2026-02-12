@@ -249,7 +249,7 @@ export default function AirdropCard({ airdrop }: AirdropCardProps) {
         </div>
 
         {/* Footer with Last Update */}
-        <div className="border-border-primary mt-4 border-t pt-3">
+        <div className="border-border-card mt-4 border-t pt-3">
           <div className="text-primary-text flex items-center justify-center text-xs font-medium">
             <span>Logged {relativeTime || "Just now"}</span>
           </div>

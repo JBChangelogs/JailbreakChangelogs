@@ -1,6 +1,7 @@
 "use server";
 
 import { fetchChangelog, fetchItemById, BASE_API_URL } from "@/utils/api";
+import { fetchWithRetry } from "@/utils/fetchWithRetry";
 
 async function fetchSeason(id: string) {
   try {
@@ -20,8 +21,14 @@ async function fetchSeason(id: string) {
 
 export async function fetchFavoritesData(userId: string) {
   try {
-    const response = await fetch(
+    const response = await fetchWithRetry(
       `${BASE_API_URL}/favorites/get?user=${userId}`,
+      undefined,
+      {
+        maxRetries: 3,
+        initialDelayMs: 800,
+        timeoutMs: 10000,
+      },
     );
 
     if (!response.ok) {
@@ -56,8 +63,14 @@ export async function fetchFavoriteItemDetails(
         if (isSubItem) {
           // For sub-items, use the sub-items endpoint
           const [parentId] = favorite.item_id.split("-");
-          const response = await fetch(
+          const response = await fetchWithRetry(
             `${BASE_API_URL}/items/get/sub?parent_id=${parentId}`,
+            undefined,
+            {
+              maxRetries: 3,
+              initialDelayMs: 800,
+              timeoutMs: 10000,
+            },
           );
           if (response.ok) {
             const itemDetails = await response.json();

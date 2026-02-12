@@ -164,7 +164,7 @@ export default function UserSearch() {
             value={searchQuery}
             onChange={handleInputChange}
             placeholder="Search by ID or username..."
-            className="border-border-primary bg-secondary-bg text-primary-text placeholder-secondary-text focus:border-button-info w-full rounded-lg border px-4 py-3 pr-16 transition-all duration-300 focus:outline-none"
+            className="border-border-card bg-secondary-bg text-primary-text placeholder-secondary-text focus:border-button-info w-full rounded-lg border px-4 py-3 pr-16 transition-all duration-300 focus:outline-none"
             disabled={isLoading}
             required
           />

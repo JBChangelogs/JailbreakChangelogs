@@ -627,7 +627,7 @@ export default function InventoryCheckerClient({
 
         {isLoading || externalIsLoading ? (
           /* Loading Skeleton for User Data */
-          <div className="border-border-primary bg-secondary-bg min-h-[200px] rounded-lg border p-6 shadow-sm">
+          <div className="border-border-card bg-secondary-bg min-h-[200px] rounded-lg border p-6 shadow-sm">
             <div className="animate-pulse space-y-4">
               <div className="flex items-center gap-4">
                 <div className="bg-button-secondary h-16 w-16 rounded-full"></div>

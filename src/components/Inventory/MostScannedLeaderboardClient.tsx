@@ -123,7 +123,7 @@ export default function MostScannedLeaderboardClient({
         <h2 className="text-primary-text mb-4 text-xl font-bold">
           Most Scanned Players
         </h2>
-        <div className="border-border-primary bg-secondary-bg shadow-card-shadow rounded-lg border p-6">
+        <div className="border-border-card bg-secondary-bg shadow-card-shadow rounded-lg border p-6">
           <div className="text-center">
             <div className="mb-4 flex justify-center">
               <div className="bg-status-error/10 rounded-full p-3">
@@ -171,7 +171,7 @@ export default function MostScannedLeaderboardClient({
               placeholder="Search by username or ID..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="border-border-primary bg-secondary-bg text-primary-text placeholder-secondary-text hover:border-border-focus focus:border-button-info w-full rounded-lg border px-4 py-2 pr-10 pl-10 transition-all duration-300 focus:outline-none"
+              className="border-border-card bg-secondary-bg text-primary-text placeholder-secondary-text hover:border-border-focus focus:border-button-info w-full rounded-lg border px-4 py-2 pr-10 pl-10 transition-all duration-300 focus:outline-none"
             />
             <Icon
               icon="heroicons:magnifying-glass"
@@ -191,7 +191,7 @@ export default function MostScannedLeaderboardClient({
       )}
 
       {/* Virtualized leaderboard container */}
-      <div className="border-border-primary bg-secondary-bg shadow-card-shadow rounded-lg border p-4">
+      <div className="border-border-card bg-secondary-bg shadow-card-shadow rounded-lg border p-4">
         <div
           ref={parentRef}
           className="scrollbar-thin scrollbar-track-transparent scrollbar-thumb-border-primary hover:scrollbar-thumb-border-focus max-h-[32rem] overflow-y-auto pr-2"
@@ -243,7 +243,7 @@ export default function MostScannedLeaderboardClient({
                       className={`mb-3 flex flex-col gap-3 rounded-lg border p-3 transition-colors sm:flex-row sm:items-center ${
                         index <= 2
                           ? ""
-                          : "border-border-primary bg-primary-bg hover:border-border-focus"
+                          : "border-border-card bg-primary-bg hover:border-border-focus"
                       }`}
                       style={{
                         ...(index === 0 && {

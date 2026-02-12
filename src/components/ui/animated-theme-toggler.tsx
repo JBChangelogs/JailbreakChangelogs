@@ -107,7 +107,7 @@ export const AnimatedThemeToggler = ({
       type="button"
       onClick={toggleTheme}
       className={cn(
-        "border-border-primary bg-secondary-bg text-secondary-text hover:bg-quaternary-bg hover:text-primary-text flex cursor-pointer items-center justify-center rounded-lg border transition-all duration-200 hover:scale-105 active:scale-95",
+        "border-border-card bg-secondary-bg text-secondary-text hover:bg-quaternary-bg hover:text-primary-text flex cursor-pointer items-center justify-center rounded-lg border transition-all duration-200 hover:scale-105 active:scale-95",
         size === "sm" ? "h-8 w-8" : "h-10 w-10",
         className,
       )}

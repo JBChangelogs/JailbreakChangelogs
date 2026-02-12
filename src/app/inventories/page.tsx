@@ -79,12 +79,12 @@ function LeaderboardSkeleton() {
   return (
     <div className="mt-8">
       <div className="bg-button-secondary mb-4 h-6 w-64 animate-pulse rounded"></div>
-      <div className="border-border-primary bg-secondary-bg shadow-card-shadow rounded-lg border p-4">
+      <div className="border-border-card bg-secondary-bg shadow-card-shadow rounded-lg border p-4">
         <div className="max-h-128 space-y-3 overflow-y-auto pr-2">
           {[1, 2, 3, 4, 5].map((i) => (
             <div
               key={i}
-              className="border-border-primary bg-tertiary-bg flex flex-col gap-3 rounded-lg border p-3 sm:flex-row sm:items-center"
+              className="border-border-card bg-tertiary-bg flex flex-col gap-3 rounded-lg border p-3 sm:flex-row sm:items-center"
             >
               <div className="flex items-center gap-3">
                 <div className="bg-button-secondary h-8 w-8 animate-pulse rounded-full"></div>

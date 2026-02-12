@@ -289,7 +289,7 @@ const SimilarItems = ({
   ]);
 
   return (
-    <div className="border-border-primary bg-secondary-bg hover:shadow-card-shadow space-y-6 rounded-lg border p-6 shadow-lg transition-all duration-200">
+    <div className="border-border-card bg-secondary-bg hover:shadow-card-shadow space-y-6 rounded-lg border p-6 shadow-lg transition-all duration-200">
       {/* Header Section */}
       <div className="space-y-4">
         <div className="flex items-center gap-3">

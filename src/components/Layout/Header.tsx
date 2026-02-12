@@ -28,7 +28,7 @@ const AnimatedThemeToggler = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="border-border-primary bg-secondary-bg text-secondary-text hover:bg-quaternary-bg hover:text-primary-text flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg border transition-all duration-200 hover:scale-105 active:scale-95">
+      <div className="border-border-card bg-secondary-bg text-secondary-text hover:bg-quaternary-bg hover:text-primary-text flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg border transition-all duration-200 hover:scale-105 active:scale-95">
         <div className="h-4 w-4" />
       </div>
     ),
@@ -557,7 +557,7 @@ export default function Header() {
         Testimonials
       </Link>
 
-      <div className="border-border-primary my-4 border-t" />
+      <div className="border-border-card my-4 border-t" />
     </div>
   );
   return (
@@ -596,7 +596,7 @@ export default function Header() {
               position="static"
               color="transparent"
               elevation={0}
-              className="bg-primary-bg/75 border-border-primary border-b backdrop-blur-lg"
+              className="bg-primary-bg/75 border-border-card border-b backdrop-blur-lg"
             >
               <Toolbar className="flex items-center justify-between">
                 <Box className="flex items-center">
@@ -642,7 +642,7 @@ export default function Header() {
                     <PopoverTrigger asChild>
                       <button
                         suppressHydrationWarning={true}
-                        className="border-border-primary bg-secondary-bg text-secondary-text hover:bg-quaternary-bg hover:text-primary-text relative flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg border transition-all duration-200 hover:scale-105 active:scale-95"
+                        className="border-border-card bg-secondary-bg text-secondary-text hover:bg-quaternary-bg hover:text-primary-text relative flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg border transition-all duration-200 hover:scale-105 active:scale-95"
                         aria-label="Notifications"
                       >
                         <Icon
@@ -992,7 +992,7 @@ export default function Header() {
                     className="flex items-center justify-center"
                   >
                     <button
-                      className="border-border-primary bg-secondary-bg text-secondary-text hover:bg-quaternary-bg hover:text-primary-text flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg border transition-all duration-200 hover:scale-105 active:scale-95"
+                      className="border-border-card bg-secondary-bg text-secondary-text hover:bg-quaternary-bg hover:text-primary-text flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg border transition-all duration-200 hover:scale-105 active:scale-95"
                       aria-label="Support us"
                     >
                       <Image

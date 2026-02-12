@@ -191,7 +191,7 @@ export default function TradeHistoryList({
                   <div className="border-tertiary-text/60 w-full border-t-2 border-dashed"></div>
                 </div>
                 <div className="relative flex justify-center">
-                  <span className="bg-primary-bg text-secondary-text border-border-primary rounded-full border px-3 text-xs font-medium">
+                  <span className="bg-primary-bg text-secondary-text border-border-card rounded-full border px-3 text-xs font-medium">
                     History Diverges Here
                   </span>
                 </div>

@@ -158,7 +158,7 @@ export default function SupporterModal({
       <div className="fixed inset-0 flex items-center justify-center p-4">
         <DialogPanel className="modal-container border-button-info bg-secondary-bg mx-auto flex max-h-[60vh] w-full max-w-2xl flex-col overflow-hidden rounded-lg border shadow-lg sm:max-h-[75vh]">
           {/* Header */}
-          <div className="modal-header border-border-primary flex items-center justify-between border-b p-6">
+          <div className="modal-header border-border-card flex items-center justify-between border-b p-6">
             <div className="flex items-center gap-3">
               <div className="bg-button-info rounded-lg p-2">
                 <Icon
@@ -199,7 +199,7 @@ export default function SupporterModal({
               </p>
 
               {featureInfo.current && (
-                <div className="border-border-primary bg-tertiary-bg rounded-lg border p-4">
+                <div className="border-border-card bg-tertiary-bg rounded-lg border p-4">
                   <span className="text-primary-text text-sm font-medium">
                     {featureInfo.current}
                   </span>
@@ -356,14 +356,14 @@ export default function SupporterModal({
                 variant="ghost"
                 size="lg"
                 onClick={onClose}
-                className="border-border-primary bg-tertiary-bg text-secondary-text hover:bg-primary-bg hover:text-primary-text border"
+                className="border-border-card bg-tertiary-bg text-secondary-text hover:bg-primary-bg hover:text-primary-text border"
               >
                 Maybe Later
               </Button>
             </div>
 
             {/* Footer Note */}
-            <div className="border-border-primary bg-tertiary-bg mt-4 rounded-lg border p-3">
+            <div className="border-border-card bg-tertiary-bg mt-4 rounded-lg border p-3">
               <p className="text-secondary-text text-center text-xs">
                 All supporter purchases are one-time only and non-refundable!
                 Once you redeem your code, you keep the perks forever.

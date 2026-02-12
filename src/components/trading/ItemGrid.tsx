@@ -1,10 +1,6 @@
 import React from "react";
 import Image from "next/image";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { Tooltip, TooltipTrigger } from "@/components/ui/tooltip";
 import { TradeItem } from "@/types/trading";
 import {
   getItemImagePath,
@@ -12,7 +8,7 @@ import {
   isVideoItem,
   getVideoPath,
 } from "@/utils/images";
-import { TradeAdTooltip } from "./TradeAdTooltip";
+import TradeItemHoverTooltip from "./TradeItemHoverTooltip";
 
 interface ItemGridProps {
   items: TradeItem[];
@@ -177,7 +173,7 @@ export const ItemGrid: React.FC<ItemGridProps> = ({
                       : "cursor-help"
                 }`}
               >
-                <Tooltip>
+                <Tooltip delayDuration={0}>
                   <TooltipTrigger asChild>
                     <div
                       onClick={() => {
@@ -221,18 +217,13 @@ export const ItemGrid: React.FC<ItemGridProps> = ({
                       </div>
                     </div>
                   </TooltipTrigger>
-                  <TooltipContent
-                    side="bottom"
-                    className="bg-secondary-bg text-primary-text max-w-[400px] min-w-[300px] border-none shadow-[var(--color-card-shadow)]"
-                  >
-                    <TradeAdTooltip
-                      item={{
-                        ...item,
-                        name: displayName,
-                        base_name: originalItem?.data?.name || item.name,
-                      }}
-                    />
-                  </TooltipContent>
+                  <TradeItemHoverTooltip
+                    item={{
+                      ...item,
+                      name: displayName,
+                      base_name: originalItem?.data?.name || item.name,
+                    }}
+                  />
                 </Tooltip>
               </div>
             );

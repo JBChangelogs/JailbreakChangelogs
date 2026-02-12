@@ -54,7 +54,7 @@ export default function RetryErrorDisplay({
   const isFailed = retryCount >= maxRetries;
 
   return (
-    <div className="border-border-primary bg-secondary-bg shadow-card-shadow rounded-lg border p-6 text-center">
+    <div className="border-border-card bg-secondary-bg shadow-card-shadow rounded-lg border p-6 text-center">
       {/* Spinning icon or offline status */}
       <div className="mb-4 flex justify-center">
         <div className="relative">

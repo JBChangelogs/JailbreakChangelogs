@@ -21,7 +21,7 @@ export default function SupportingLoading() {
             {[1, 2, 3].map((i) => (
               <div
                 key={i}
-                className="border-border-primary bg-secondary-bg rounded-2xl border p-8 shadow-lg"
+                className="border-border-card bg-secondary-bg rounded-2xl border p-8 shadow-lg"
               >
                 <div className="bg-tertiary-bg mb-4 h-6 w-32 animate-pulse rounded"></div>
                 <div className="bg-tertiary-bg mb-6 h-12 w-24 animate-pulse rounded"></div>
@@ -57,7 +57,7 @@ export default function SupportingLoading() {
                 {[1, 2, 3, 4].map((card) => (
                   <div
                     key={card}
-                    className="border-border-primary bg-secondary-bg shrink-0 rounded-xl border p-6 shadow-md"
+                    className="border-border-card bg-secondary-bg shrink-0 rounded-xl border p-6 shadow-md"
                     style={{ width: "280px" }}
                   >
                     <div className="flex flex-col items-center space-y-4">

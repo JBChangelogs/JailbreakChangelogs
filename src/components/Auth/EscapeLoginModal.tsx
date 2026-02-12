@@ -75,7 +75,7 @@ export default function EscapeLoginModal() {
                   id="token"
                   value={token}
                   onChange={(e) => setToken(e.target.value)}
-                  className="border-border-primary bg-form-input text-primary-text hover:border-border-focus focus:border-button-info w-full cursor-pointer rounded border p-3 text-sm focus:outline-none"
+                  className="border-border-card bg-form-input text-primary-text hover:border-border-focus focus:border-button-info w-full cursor-pointer rounded border p-3 text-sm focus:outline-none"
                   placeholder="Enter your authentication token"
                   required
                 />

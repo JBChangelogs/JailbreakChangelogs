@@ -81,7 +81,7 @@ const ReportCommentModal: React.FC<ReportCommentModalProps> = ({
                   value={reportReason}
                   onChange={handleReasonChange}
                   placeholder="Please provide a reason for reporting this comment..."
-                  className="border-border-primary bg-form-input text-primary-text hover:border-border-focus focus:border-button-info min-h-[120px] w-full resize-y rounded border p-3 text-sm focus:outline-none"
+                  className="border-border-card bg-form-input text-primary-text hover:border-border-focus focus:border-button-info min-h-[120px] w-full resize-y rounded border p-3 text-sm focus:outline-none"
                 />
                 <div
                   className={`absolute right-2 bottom-2 text-xs ${reportReason.length >= MAX_REASON_LENGTH ? "text-button-danger" : "text-secondary-text"}`}

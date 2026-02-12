@@ -111,7 +111,7 @@ export default function RobberyPlayersModal({
           </div>
 
           {/* Tabs */}
-          <div className="border-border-primary border-b px-6">
+          <div className="border-border-card border-b px-6">
             <div role="tablist" className="tabs flex gap-2">
               <button
                 role="tab"

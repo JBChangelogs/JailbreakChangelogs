@@ -38,7 +38,7 @@ export default async function DevChangelogPage() {
   return (
     <div className="bg-primary-bg min-h-screen">
       {/* Header */}
-      <div className="border-border-primary border-b">
+      <div className="border-border-card border-b">
         <div className="mx-auto max-w-5xl px-4 py-12 sm:px-6 lg:px-8">
           <div className="text-center">
             <h1 className="text-primary-text mb-4 text-4xl font-bold sm:text-5xl">
@@ -86,7 +86,7 @@ export default async function DevChangelogPage() {
               <div className="relative">
                 {/* Timeline line */}
                 <div
-                  className="border-border-primary absolute top-0 left-0 hidden h-full border-l-2 md:block"
+                  className="border-border-card absolute top-0 left-0 hidden h-full border-l-2 md:block"
                   style={{ left: "1.5rem" }}
                 />
 

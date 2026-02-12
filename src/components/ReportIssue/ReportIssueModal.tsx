@@ -97,7 +97,7 @@ export default function ReportIssueModal({
                   id="title"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  className="border-border-primary bg-form-input text-primary-text hover:border-border-focus focus:border-button-info w-full rounded border p-3 text-sm focus:outline-none"
+                  className="border-border-card bg-form-input text-primary-text hover:border-border-focus focus:border-button-info w-full rounded border p-3 text-sm focus:outline-none"
                   placeholder="Brief description of the issue"
                   required
                 />
@@ -120,7 +120,7 @@ export default function ReportIssueModal({
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   rows={4}
-                  className="border-border-primary bg-form-input text-primary-text hover:border-border-focus focus:border-button-info min-h-[120px] w-full resize-y rounded border p-3 text-sm focus:outline-none"
+                  className="border-border-card bg-form-input text-primary-text hover:border-border-focus focus:border-button-info min-h-[120px] w-full resize-y rounded border p-3 text-sm focus:outline-none"
                   placeholder="Detailed description of the issue"
                   required
                 />

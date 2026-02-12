@@ -141,7 +141,7 @@ export default function BountyCard({
 
         {/* Footer with Last Update - Only show if not simplified */}
         {!simplified && (
-          <div className="border-border-primary mt-4 border-t pt-3">
+          <div className="border-border-card mt-4 border-t pt-3">
             <div className="text-primary-text flex items-center justify-center gap-1.5 text-xs font-medium">
               <Icon
                 icon="mdi:clock"

@@ -149,7 +149,7 @@ export const SimilarItemsTab: React.FC<SimilarItemsTabProps> = ({
 
       {/* Basis Selector */}
       <div className="mb-4 flex justify-center sm:justify-start">
-        <div className="border-border-primary bg-secondary-bg hover:border-border-focus inline-flex gap-1 rounded-lg border p-1">
+        <div className="border-border-card bg-secondary-bg hover:border-border-focus inline-flex gap-1 rounded-lg border p-1">
           <Button
             onClick={() => setTotalBasis("offering")}
             variant={totalBasis === "offering" ? "success" : "ghost"}

@@ -57,7 +57,7 @@ export default function SupportersSection({
   const renderSupporterCard = (supporter: Supporter) => (
     <div
       key={supporter.id}
-      className="border-border-primary bg-secondary-bg hover:border-border-focus hover:shadow-card-shadow shrink-0 rounded-xl border p-6 shadow-md transition-all duration-200"
+      className="border-border-card bg-secondary-bg hover:border-border-focus hover:shadow-card-shadow shrink-0 rounded-xl border p-6 shadow-md transition-all duration-200"
       style={{ width: "280px" }}
     >
       <div className="flex flex-col items-center space-y-4">

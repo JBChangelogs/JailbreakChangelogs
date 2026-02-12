@@ -66,6 +66,7 @@ import {
   DuplicateVariantsResponse,
 } from "@/types";
 import { UserData } from "@/types/auth";
+import { fetchWithRetry } from "@/utils/fetchWithRetry";
 
 export const BASE_API_URL =
   process.env.NEXT_PHASE === "phase-production-build" ||
@@ -487,12 +488,20 @@ export async function fetchItem(
 
 export async function fetchItemById(id: string): Promise<ItemDetails | null> {
   try {
-    const response = await fetch(`${BASE_API_URL}/items/get?id=${id}`, {
-      headers: {
-        "User-Agent": "JailbreakChangelogs-ItemDetails/1.0",
+    const response = await fetchWithRetry(
+      `${BASE_API_URL}/items/get?id=${id}`,
+      {
+        headers: {
+          "User-Agent": "JailbreakChangelogs-ItemDetails/1.0",
+        },
+        next: { revalidate: 3600 },
       },
-      next: { revalidate: 3600 },
-    });
+      {
+        maxRetries: 3,
+        initialDelayMs: 800,
+        timeoutMs: 10000,
+      },
+    );
 
     if (!response.ok) {
       return null;

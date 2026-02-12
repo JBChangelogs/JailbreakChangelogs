@@ -208,7 +208,7 @@ export default function ValuesItemsGrid({
 
       <div className="mb-8 grid grid-cols-1 gap-4 min-[375px]:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {displayedItems.length === 0 ? (
-          <div className="border-border-primary bg-secondary-bg hover:border-border-focus col-span-full mb-4 rounded-lg border p-8 text-center transition-colors">
+          <div className="border-border-card bg-secondary-bg hover:border-border-focus col-span-full mb-4 rounded-lg border p-8 text-center transition-colors">
             <p className="text-secondary-text text-lg">
               {rangeFilteredItems.length === 0 && items.length > 0
                 ? `No items found in the selected value range (${appliedMinValue.toLocaleString()} - ${

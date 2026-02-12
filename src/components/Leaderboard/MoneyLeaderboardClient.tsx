@@ -321,7 +321,7 @@ export default function MoneyLeaderboardClient({
           </div>
         </div>
       ) : (
-        <div className="border-border-primary bg-secondary-bg shadow-card-shadow rounded-lg border p-8 text-center">
+        <div className="border-border-card bg-secondary-bg shadow-card-shadow rounded-lg border p-8 text-center">
           <p className="text-secondary-text">
             No money leaderboard data available at this time.
           </p>

@@ -66,7 +66,7 @@ export default async function DupeFinderPage({ params }: DupeFinderPageProps) {
         Enter a Roblox ID or username to check for any duped items associated
         with that name.
       </p>
-      <div className="bg-button-info/10 border-border-primary text-primary-text mb-6 rounded-lg border p-4 text-sm">
+      <div className="bg-button-info/10 border-border-card text-primary-text mb-6 rounded-lg border p-4 text-sm">
         If you believe an item is incorrectly flagged, you can report the false
         dupe by opening a support ticket in our{" "}
         <Link
@@ -84,7 +84,7 @@ export default async function DupeFinderPage({ params }: DupeFinderPageProps) {
       <PremiumAwareLayout>
         <Suspense
           fallback={
-            <div className="border-border-primary bg-secondary-bg shadow-card-shadow rounded-lg border p-6">
+            <div className="border-border-card bg-secondary-bg shadow-card-shadow rounded-lg border p-6">
               <div className="animate-pulse space-y-4">
                 <div className="flex items-center gap-4">
                   <div className="bg-surface-bg h-16 w-16 rounded-full"></div>

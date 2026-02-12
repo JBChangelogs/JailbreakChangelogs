@@ -12,7 +12,7 @@ interface TimelineHeaderProps {
 
 const TimelineHeader: React.FC<TimelineHeaderProps> = ({ changelogs }) => {
   return (
-    <div className="border-border-primary bg-secondary-bg mb-8 rounded-lg border p-6">
+    <div className="border-border-card bg-secondary-bg mb-8 rounded-lg border p-6">
       <h2 className="text-secondary-text mb-4 text-2xl font-semibold">
         Roblox Jailbreak Timeline
       </h2>

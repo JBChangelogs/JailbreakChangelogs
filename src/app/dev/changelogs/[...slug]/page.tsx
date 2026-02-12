@@ -76,7 +76,7 @@ export default async function ChangelogEntryPage({ params }: PageProps) {
   return (
     <div className="bg-primary-bg min-h-screen">
       {/* Header */}
-      <div className="border-border-primary border-b">
+      <div className="border-border-card border-b">
         <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
           <Link
             href="/dev/changelogs"
@@ -253,7 +253,7 @@ export default async function ChangelogEntryPage({ params }: PageProps) {
               details: ({ className, ...props }) => (
                 <details
                   {...props}
-                  className={`bg-secondary-bg/50 border-border-primary my-4 rounded-lg border p-4 ${className || ""}`}
+                  className={`bg-secondary-bg/50 border-border-card my-4 rounded-lg border p-4 ${className || ""}`}
                 />
               ),
               summary: ({ className, ...props }) => (

@@ -145,7 +145,7 @@ export default function ValuesSearchControls({
                   placeholder={`Search ${getFilterDisplayName(filterSort)}...`}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className={`border-border-primary bg-secondary-bg text-primary-text placeholder-secondary-text hover:border-border-focus h-[56px] w-full rounded-lg border px-4 pr-10 pl-10 transition-all duration-300 focus:outline-none ${
+                  className={`border-border-card bg-secondary-bg text-primary-text placeholder-secondary-text hover:border-border-focus h-[56px] w-full rounded-lg border px-4 pr-10 pl-10 transition-all duration-300 focus:outline-none ${
                     isSearchHighlighted
                       ? "bg-button-info/10 shadow-button-info/20 border-button-info shadow-lg"
                       : isItemIdSearch
@@ -177,7 +177,7 @@ export default function ValuesSearchControls({
                   <DropdownMenuTrigger asChild>
                     <button
                       type="button"
-                      className="border-border-primary bg-secondary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus flex h-[56px] min-h-[56px] w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all duration-300 focus:ring-1 focus:outline-none"
+                      className="border-border-card bg-secondary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus flex h-[56px] min-h-[56px] w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all duration-300 focus:ring-1 focus:outline-none"
                       aria-label="Select category"
                     >
                       <span className="truncate">{filterLabel}</span>
@@ -190,7 +190,7 @@ export default function ValuesSearchControls({
                   </DropdownMenuTrigger>
                   <DropdownMenuContent
                     align="start"
-                    className="border-border-primary bg-secondary-bg text-primary-text scrollbar-thin max-h-[320px] w-[var(--radix-popper-anchor-width)] min-w-[var(--radix-popper-anchor-width)] overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
+                    className="border-border-card bg-secondary-bg text-primary-text scrollbar-thin max-h-[320px] w-[var(--radix-popper-anchor-width)] min-w-[var(--radix-popper-anchor-width)] overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
                   >
                     <DropdownMenuRadioGroup
                       value={filterSort}
@@ -234,7 +234,7 @@ export default function ValuesSearchControls({
                   <DropdownMenuTrigger asChild>
                     <button
                       type="button"
-                      className="border-border-primary bg-secondary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus flex h-[56px] min-h-[56px] w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all duration-300 focus:ring-1 focus:outline-none"
+                      className="border-border-card bg-secondary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus flex h-[56px] min-h-[56px] w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all duration-300 focus:ring-1 focus:outline-none"
                       aria-label="Select sort"
                     >
                       <span className="truncate">{sortLabel}</span>
@@ -247,7 +247,7 @@ export default function ValuesSearchControls({
                   </DropdownMenuTrigger>
                   <DropdownMenuContent
                     align="start"
-                    className="border-border-primary bg-secondary-bg text-primary-text scrollbar-thin max-h-[360px] w-[var(--radix-popper-anchor-width)] min-w-[var(--radix-popper-anchor-width)] overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
+                    className="border-border-card bg-secondary-bg text-primary-text scrollbar-thin max-h-[360px] w-[var(--radix-popper-anchor-width)] min-w-[var(--radix-popper-anchor-width)] overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
                   >
                     <DropdownMenuRadioGroup
                       value={valueSort}
@@ -314,7 +314,7 @@ export default function ValuesSearchControls({
                         setAppliedMaxValue(localRange[1]);
                         setMinInput(val.toLocaleString());
                       }}
-                      className="border-border-primary bg-primary-bg text-primary-text focus:border-button-info h-7 w-20 rounded border px-2 text-[11px] focus:outline-none"
+                      className="border-border-card bg-primary-bg text-primary-text focus:border-button-info h-7 w-20 rounded border px-2 text-[11px] focus:outline-none"
                       placeholder="Min"
                     />
                     <span className="text-secondary-text text-xs">-</span>
@@ -342,7 +342,7 @@ export default function ValuesSearchControls({
                         setAppliedMaxValue(val);
                         setMaxInput(val.toLocaleString());
                       }}
-                      className="border-border-primary bg-primary-bg text-primary-text focus:border-button-info h-7 w-20 rounded border px-2 text-[11px] focus:outline-none"
+                      className="border-border-card bg-primary-bg text-primary-text focus:border-button-info h-7 w-20 rounded border px-2 text-[11px] focus:outline-none"
                       placeholder="Max"
                     />
                   </div>
@@ -397,11 +397,11 @@ export default function ValuesSearchControls({
               className="text-sm text-yellow-500"
             />
             Helpful tip: Press{" "}
-            <kbd className="kbd kbd-sm border-border-primary bg-tertiary-bg text-primary-text">
+            <kbd className="kbd kbd-sm border-border-card bg-tertiary-bg text-primary-text">
               Ctrl
             </kbd>
             {" + "}
-            <kbd className="kbd kbd-sm border-border-primary bg-tertiary-bg text-primary-text">
+            <kbd className="kbd kbd-sm border-border-card bg-tertiary-bg text-primary-text">
               F
             </kbd>{" "}
             to quickly focus the search

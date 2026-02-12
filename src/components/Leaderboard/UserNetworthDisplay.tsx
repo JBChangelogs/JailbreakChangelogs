@@ -47,7 +47,7 @@ export default function UserNetworthDisplay() {
 
   if (isLoading) {
     return (
-      <div className="border-border-primary bg-secondary-bg hover:border-border-focus mb-6 rounded-lg border p-4">
+      <div className="border-border-card bg-secondary-bg hover:border-border-focus mb-6 rounded-lg border p-4">
         <div className="flex items-center justify-between">
           <div>
             <h3 className="text-primary-text text-lg font-semibold">
@@ -94,7 +94,7 @@ export default function UserNetworthDisplay() {
       </div>
 
       <div
-        className="border-border-primary bg-secondary-bg hover:border-border-focus mb-0 cursor-pointer rounded-lg border p-3 transition-all duration-200 hover:shadow-lg"
+        className="border-border-card bg-secondary-bg hover:border-border-focus mb-0 cursor-pointer rounded-lg border p-3 transition-all duration-200 hover:shadow-lg"
         onClick={() => setIsBreakdownModalOpen(true)}
         role="button"
         tabIndex={0}

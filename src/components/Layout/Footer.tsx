@@ -44,7 +44,7 @@ export default function Footer({ githubUrl, versionInfo }: FooterProps) {
   }, []);
 
   return (
-    <footer className="border-border-primary bg-secondary-bg w-full border-t py-8 pb-0">
+    <footer className="border-border-card bg-secondary-bg w-full border-t py-8 pb-0">
       <div className="w-full px-4">
         <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
           {/* Resources */}
@@ -178,7 +178,7 @@ export default function Footer({ githubUrl, versionInfo }: FooterProps) {
           </div>
         </div>
 
-        <div className="border-border-primary mt-12 flex flex-wrap items-center gap-3 border-t pt-8">
+        <div className="border-border-card mt-12 flex flex-wrap items-center gap-3 border-t pt-8">
           <Tooltip>
             <TooltipTrigger asChild>
               <a

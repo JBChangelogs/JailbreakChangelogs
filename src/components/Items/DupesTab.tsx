@@ -135,7 +135,7 @@ export default function DupesTab({ itemId }: DupesTabProps) {
           placeholder="Search by name or ID..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="border-border-primary bg-secondary-bg text-primary-text placeholder-tertiary-text focus:border-border-focus w-full rounded-lg border px-4 py-3 pr-10 pl-10 font-medium transition-all duration-300 focus:outline-none"
+          className="border-border-card bg-secondary-bg text-primary-text placeholder-tertiary-text focus:border-border-focus w-full rounded-lg border px-4 py-3 pr-10 pl-10 font-medium transition-all duration-300 focus:outline-none"
         />
         <Icon
           icon="heroicons:magnifying-glass"
@@ -170,7 +170,7 @@ export default function DupesTab({ itemId }: DupesTabProps) {
           </p>
           <button
             onClick={() => setSearchTerm("")}
-            className="border-border-primary bg-button-info text-primary-text hover:bg-button-info-hover mt-4 rounded-lg border px-4 py-2 text-sm font-medium transition-colors hover:cursor-pointer"
+            className="border-border-card bg-button-info text-primary-text hover:bg-button-info-hover mt-4 rounded-lg border px-4 py-2 text-sm font-medium transition-colors hover:cursor-pointer"
           >
             Clear search
           </button>

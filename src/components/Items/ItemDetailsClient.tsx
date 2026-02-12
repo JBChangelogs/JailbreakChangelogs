@@ -17,6 +17,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const ItemValueChart = dynamic(
   () => import("@/components/Items/ItemValueChart"),
@@ -64,7 +65,7 @@ const ItemDetailsTabs = React.memo(
     onChange,
   }: {
     value: number;
-    onChange: (e: React.SyntheticEvent, v: number) => void;
+    onChange: (v: number) => void;
   }) {
     const labels = [
       "Details",
@@ -78,23 +79,22 @@ const ItemDetailsTabs = React.memo(
 
     return (
       <div className="overflow-x-auto">
-        <div role="tablist" className="tabs min-w-max">
-          {labels.map((label, idx) => (
-            <button
-              key={label}
-              role="tab"
-              aria-selected={value === idx}
-              aria-controls={`item-tabpanel-${idx}`}
-              id={`item-tab-${idx}`}
-              onClick={(e) =>
-                onChange(e as unknown as React.SyntheticEvent, idx)
-              }
-              className={`tab ${value === idx ? "tab-active" : ""}`}
-            >
-              {label}
-            </button>
-          ))}
-        </div>
+        <Tabs
+          value={String(value)}
+          onValueChange={(tabValue) => onChange(Number(tabValue))}
+        >
+          <TabsList>
+            {labels.map((label, idx) => (
+              <TabsTrigger
+                key={label}
+                value={String(idx)}
+                id={`item-tab-${idx}`}
+              >
+                {label}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+        </Tabs>
       </div>
     );
   },
@@ -208,7 +208,7 @@ export default function ItemDetailsClient({
     }
   };
 
-  const handleTabChange = (_: React.SyntheticEvent, newValue: number) => {
+  const handleTabChange = (newValue: number) => {
     setActiveTab(newValue);
     const searchParams = new URLSearchParams(window.location.search);
 
@@ -601,26 +601,19 @@ export default function ItemDetailsClient({
               <div className="mb-8 space-y-6">
                 {/* Chart Sub-tabs */}
                 <div className="border-border-card bg-secondary-bg rounded-lg border p-4">
-                  <div role="tablist" className="tabs">
-                    <button
-                      role="tab"
-                      aria-selected={activeChartTab === 0}
-                      onClick={() => setActiveChartTab(0)}
-                      className={`tab ${activeChartTab === 0 ? "tab-active" : ""}`}
-                    >
-                      Value History
-                    </button>
-                    {item.id !== 587 && (
-                      <button
-                        role="tab"
-                        aria-selected={activeChartTab === 1}
-                        onClick={() => setActiveChartTab(1)}
-                        className={`tab ${activeChartTab === 1 ? "tab-active" : ""}`}
-                      >
-                        Trading Metrics
-                      </button>
-                    )}
-                  </div>
+                  <Tabs
+                    value={String(activeChartTab)}
+                    onValueChange={(tabValue) =>
+                      setActiveChartTab(Number(tabValue))
+                    }
+                  >
+                    <TabsList>
+                      <TabsTrigger value="0">Value History</TabsTrigger>
+                      {item.id !== 587 && (
+                        <TabsTrigger value="1">Trading Metrics</TabsTrigger>
+                      )}
+                    </TabsList>
+                  </Tabs>
 
                   {/* Chart Update Notice */}
                   <div className="mt-4 mb-4">

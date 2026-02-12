@@ -343,7 +343,7 @@ export default function ItemCard({
           </div>
           <button
             onClick={handleFavoriteClick}
-            className={`bg-secondary-bg/80 border-border-primary hover:border-border-focus absolute top-2 left-2 z-10 cursor-pointer rounded-full border p-1.5 transition-opacity ${
+            className={`bg-secondary-bg/80 border-border-card hover:border-border-focus absolute top-2 left-2 z-10 cursor-pointer rounded-full border p-1.5 transition-opacity ${
               isHovered ? "opacity-100" : "opacity-0"
             } hover:bg-secondary-bg`}
             title={isFavorited ? "Remove from favorites" : "Add to favorites"}
@@ -641,7 +641,7 @@ export default function ItemCard({
         >
           <SheetHeader className="text-left">
             <div className="flex items-start gap-3">
-              <div className="bg-primary-bg border-border-primary relative h-14 w-14 shrink-0 overflow-hidden rounded-lg border">
+              <div className="bg-primary-bg border-border-card relative h-14 w-14 shrink-0 overflow-hidden rounded-lg border">
                 <Image
                   src={getItemImagePath(item.type, item.name, isValuesPage)}
                   alt={item.name}

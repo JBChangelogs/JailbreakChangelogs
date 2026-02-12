@@ -36,7 +36,7 @@ export default function ScanInventoryModal({
   if (!siteKey) {
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-        <div className="bg-secondary-bg border-border-primary w-full max-w-md rounded-lg border p-6">
+        <div className="bg-secondary-bg border-border-card w-full max-w-md rounded-lg border p-6">
           <h2 className="text-primary-text mb-4 text-xl font-semibold">
             Configuration Error
           </h2>
@@ -58,7 +58,7 @@ export default function ScanInventoryModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="bg-secondary-bg border-border-primary shadow-card-shadow w-full max-w-md rounded-lg border p-6">
+      <div className="bg-secondary-bg border-border-card shadow-card-shadow w-full max-w-md rounded-lg border p-6">
         <h2 className="text-primary-text mb-2 text-xl font-semibold">
           Verify You&apos;re Human
         </h2>

@@ -115,7 +115,7 @@ export default function OGFinderClient({
                 value={searchId}
                 onChange={(e) => setSearchId(e.target.value)}
                 placeholder="Search by ID or username..."
-                className="border-border-primary bg-secondary-bg text-primary-text placeholder-secondary-text focus:border-button-info w-full rounded-lg border px-4 py-3 pr-16 transition-all duration-300 focus:outline-none"
+                className="border-border-card bg-secondary-bg text-primary-text placeholder-secondary-text focus:border-button-info w-full rounded-lg border px-4 py-3 pr-16 transition-all duration-300 focus:outline-none"
                 disabled={isLoading}
                 required
               />
@@ -210,7 +210,7 @@ export default function OGFinderClient({
 
       {/* Error Display */}
       {error && !initialData && (
-        <div className="border-border-primary bg-secondary-bg shadow-card-shadow rounded-lg border p-6">
+        <div className="border-border-card bg-secondary-bg shadow-card-shadow rounded-lg border p-6">
           <div className="text-center">
             <div className="mb-4 flex justify-center">
               <div className="bg-status-error/10 rounded-full p-3">

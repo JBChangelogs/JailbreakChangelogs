@@ -25,7 +25,7 @@ export default async function SeasonLeaderboardPage() {
           <Breadcrumb />
 
           <div className="flex min-h-[60vh] items-center justify-center">
-            <div className="border-border-primary bg-secondary-bg max-w-2xl rounded-lg border p-12 text-center">
+            <div className="border-border-card bg-secondary-bg max-w-2xl rounded-lg border p-12 text-center">
               {/* Icon */}
               <div className="mb-8">
                 <div className="border-button-info/30 bg-button-info/20 mx-auto flex h-20 w-20 items-center justify-center rounded-full border">

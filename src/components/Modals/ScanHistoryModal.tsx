@@ -26,7 +26,7 @@ function ScanEntry({
   const relativeTime = useRealTimeRelativeDate(scan.created_at);
 
   return (
-    <div className="border-border-primary bg-form-input rounded border p-4">
+    <div className="border-border-card bg-form-input rounded border p-4">
       <div>
         <h3 className="text-primary-text font-medium">Scan #{scanNumber}</h3>
         <p className="text-secondary-text text-sm">

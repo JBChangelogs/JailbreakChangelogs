@@ -52,7 +52,7 @@ export default function ItemActionModal({
       <div className="fixed inset-0 flex items-center justify-center p-4">
         <DialogPanel className="modal-container border-button-info bg-secondary-bg mx-auto max-h-[80vh] w-full max-w-sm overflow-hidden rounded-lg border shadow-lg sm:max-w-md">
           {/* Modal Header */}
-          <div className="modal-header border-border-primary text-primary-text hover:border-border-focus px-4 py-4 text-lg font-semibold sm:px-6 sm:text-xl">
+          <div className="modal-header border-border-card text-primary-text hover:border-border-focus px-4 py-4 text-lg font-semibold sm:px-6 sm:text-xl">
             <div className="flex items-start justify-between gap-4 sm:items-center">
               <div className="min-w-0 flex-1">
                 <DialogTitle className="text-primary-text text-lg font-semibold sm:text-xl">
@@ -77,7 +77,7 @@ export default function ItemActionModal({
               {/* View Item Page */}
               <button
                 onClick={handleViewItemPage}
-                className="border-border-primary bg-primary-bg text-primary-text flex w-full cursor-pointer items-center gap-3 rounded-lg border p-3 text-left transition-colors sm:p-4"
+                className="border-border-card bg-primary-bg text-primary-text flex w-full cursor-pointer items-center gap-3 rounded-lg border p-3 text-left transition-colors sm:p-4"
               >
                 <div>
                   <div className="text-sm font-medium sm:text-base">
@@ -93,7 +93,7 @@ export default function ItemActionModal({
               {hasTradeHistory ? (
                 <button
                   onClick={handleViewTradeHistory}
-                  className="border-border-primary bg-primary-bg text-primary-text flex w-full cursor-pointer items-center gap-3 rounded-lg border p-3 text-left transition-colors sm:p-4"
+                  className="border-border-card bg-primary-bg text-primary-text flex w-full cursor-pointer items-center gap-3 rounded-lg border p-3 text-left transition-colors sm:p-4"
                 >
                   <div>
                     <div className="font-medium">View Ownership History</div>
@@ -103,7 +103,7 @@ export default function ItemActionModal({
                   </div>
                 </button>
               ) : (
-                <div className="border-border-primary bg-primary-bg text-tertiary-text flex w-full cursor-not-allowed items-center gap-3 rounded-lg border p-3 text-left sm:p-4">
+                <div className="border-border-card bg-primary-bg text-tertiary-text flex w-full cursor-not-allowed items-center gap-3 rounded-lg border p-3 text-left sm:p-4">
                   <div>
                     <div className="font-medium">No Ownership History</div>
                     <div className="text-quaternary-text text-sm">

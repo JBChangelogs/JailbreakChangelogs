@@ -181,7 +181,7 @@ export const UserAvatar = ({
   const wrapperClassName = showBadge ? className : undefined;
   const innerClassName = !showBadge ? className : undefined;
 
-  const innerDivCommonClass = `relative ${
+  const innerDivCommonClass = `relative border border-border-card ${
     finalShape === "circle"
       ? "rounded-full"
       : finalShape === "square" && premiumType === 3

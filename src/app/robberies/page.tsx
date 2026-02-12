@@ -617,7 +617,7 @@ function RobberyTrackerContent() {
                   placeholder="Search robberies..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="border-border-primary bg-secondary-bg text-primary-text placeholder-secondary-text hover:border-border-focus focus:border-button-info w-full rounded-lg border px-4 py-4 pr-10 pl-10 transition-all focus:outline-none"
+                  className="border-border-card bg-secondary-bg text-primary-text placeholder-secondary-text hover:border-border-focus focus:border-button-info w-full rounded-lg border px-4 py-4 pr-10 pl-10 transition-all focus:outline-none"
                 />
                 {searchQuery && (
                   <button
@@ -639,7 +639,7 @@ function RobberyTrackerContent() {
                   <DropdownMenuTrigger asChild>
                     <button
                       type="button"
-                      className="border-border-primary bg-secondary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus flex h-[56px] w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all focus:ring-1 focus:outline-none"
+                      className="border-border-card bg-secondary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus flex h-[56px] w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all focus:ring-1 focus:outline-none"
                       aria-label="Filter by server size"
                     >
                       <span className="truncate">{serverSizeLabel}</span>
@@ -651,7 +651,7 @@ function RobberyTrackerContent() {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent
                     align="start"
-                    className="border-border-primary bg-secondary-bg text-primary-text scrollbar-thin max-h-[240px] w-[var(--radix-popper-anchor-width)] min-w-[var(--radix-popper-anchor-width)] overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
+                    className="border-border-card bg-secondary-bg text-primary-text scrollbar-thin max-h-[240px] w-[var(--radix-popper-anchor-width)] min-w-[var(--radix-popper-anchor-width)] overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
                   >
                     <DropdownMenuRadioGroup
                       value={serverSize}
@@ -689,7 +689,7 @@ function RobberyTrackerContent() {
                     <DropdownMenuTrigger asChild>
                       <button
                         type="button"
-                        className="border-border-primary bg-secondary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus flex h-[56px] w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all focus:ring-1 focus:outline-none"
+                        className="border-border-card bg-secondary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus flex h-[56px] w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all focus:ring-1 focus:outline-none"
                         aria-label="Sort by difficulty"
                       >
                         <span className="truncate">{difficultySortLabel}</span>
@@ -701,7 +701,7 @@ function RobberyTrackerContent() {
                     </DropdownMenuTrigger>
                     <DropdownMenuContent
                       align="start"
-                      className="border-border-primary bg-secondary-bg text-primary-text scrollbar-thin max-h-[240px] w-[var(--radix-popper-anchor-width)] min-w-[var(--radix-popper-anchor-width)] overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
+                      className="border-border-card bg-secondary-bg text-primary-text scrollbar-thin max-h-[240px] w-[var(--radix-popper-anchor-width)] min-w-[var(--radix-popper-anchor-width)] overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
                     >
                       <DropdownMenuRadioGroup
                         value={difficultySort}
@@ -735,7 +735,7 @@ function RobberyTrackerContent() {
                     <DropdownMenuTrigger asChild>
                       <button
                         type="button"
-                        className="border-border-primary bg-secondary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus flex h-[56px] w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all focus:ring-1 focus:outline-none"
+                        className="border-border-card bg-secondary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus flex h-[56px] w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all focus:ring-1 focus:outline-none"
                         aria-label="Sort by name"
                       >
                         <span className="truncate">{nameSortLabel}</span>
@@ -747,7 +747,7 @@ function RobberyTrackerContent() {
                     </DropdownMenuTrigger>
                     <DropdownMenuContent
                       align="start"
-                      className="border-border-primary bg-secondary-bg text-primary-text scrollbar-thin max-h-[240px] w-[var(--radix-popper-anchor-width)] min-w-[var(--radix-popper-anchor-width)] overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
+                      className="border-border-card bg-secondary-bg text-primary-text scrollbar-thin max-h-[240px] w-[var(--radix-popper-anchor-width)] min-w-[var(--radix-popper-anchor-width)] overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
                     >
                       <DropdownMenuRadioGroup
                         value={nameSort}
@@ -779,7 +779,7 @@ function RobberyTrackerContent() {
                   <DropdownMenuTrigger asChild>
                     <button
                       type="button"
-                      className="border-border-primary bg-secondary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus flex h-[56px] w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all focus:ring-1 focus:outline-none"
+                      className="border-border-card bg-secondary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus flex h-[56px] w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all focus:ring-1 focus:outline-none"
                       aria-label="Sort by time"
                     >
                       <span className="truncate">{timeSortLabel}</span>
@@ -791,7 +791,7 @@ function RobberyTrackerContent() {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent
                     align="start"
-                    className="border-border-primary bg-secondary-bg text-primary-text scrollbar-thin max-h-[240px] w-[var(--radix-popper-anchor-width)] min-w-[var(--radix-popper-anchor-width)] overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
+                    className="border-border-card bg-secondary-bg text-primary-text scrollbar-thin max-h-[240px] w-[var(--radix-popper-anchor-width)] min-w-[var(--radix-popper-anchor-width)] overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
                   >
                     <DropdownMenuRadioGroup
                       value={timeSort}

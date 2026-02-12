@@ -75,7 +75,7 @@ export default function ServerBountyGroup({
   return (
     <div className="border-border-card flex flex-col overflow-hidden rounded-xl border">
       {/* Header Section */}
-      <div className="bg-tertiary-bg border-border-primary flex flex-col gap-4 border-b p-4 lg:flex-row lg:items-center lg:justify-between">
+      <div className="bg-tertiary-bg border-border-card flex flex-col gap-4 border-b p-4 lg:flex-row lg:items-center lg:justify-between">
         {/* Left Side: Stats */}
         <div className="flex flex-col gap-2">
           {/* Total Value & Counts */}

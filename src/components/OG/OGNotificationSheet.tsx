@@ -445,7 +445,7 @@ export default function OGNotificationSheet({
                         placeholder="Search items..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        className="border-border-primary bg-primary-bg text-primary-text placeholder:text-secondary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus w-full rounded-xl border py-4 pr-11 pl-11 text-sm transition-all duration-300 focus:ring-1 focus:outline-none"
+                        className="border-border-card bg-primary-bg text-primary-text placeholder:text-secondary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus w-full rounded-xl border py-4 pr-11 pl-11 text-sm transition-all duration-300 focus:ring-1 focus:outline-none"
                       />
                       <Icon
                         icon="heroicons:magnifying-glass"
@@ -467,7 +467,7 @@ export default function OGNotificationSheet({
                       <DropdownMenuTrigger asChild>
                         <button
                           type="button"
-                          className="border-border-primary bg-primary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus flex h-[56px] w-full items-center justify-between rounded-xl border px-4 py-2 text-sm transition-all duration-300 focus:ring-1 focus:outline-none"
+                          className="border-border-card bg-primary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus flex h-[56px] w-full items-center justify-between rounded-xl border px-4 py-2 text-sm transition-all duration-300 focus:ring-1 focus:outline-none"
                           aria-label="Select item category"
                         >
                           <span className="truncate">{currentTypeLabel}</span>
@@ -481,7 +481,7 @@ export default function OGNotificationSheet({
                       <DropdownMenuContent
                         align="start"
                         container={sheetContentRef.current}
-                        className="border-border-primary bg-primary-bg text-primary-text scrollbar-thin max-h-[280px] w-[var(--radix-popper-anchor-width)] min-w-[var(--radix-popper-anchor-width)] overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
+                        className="border-border-card bg-primary-bg text-primary-text scrollbar-thin max-h-[280px] w-[var(--radix-popper-anchor-width)] min-w-[var(--radix-popper-anchor-width)] overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
                       >
                         <DropdownMenuCheckboxItem
                           checked={selectedType === "all"}
@@ -668,7 +668,7 @@ export default function OGNotificationSheet({
               checked={isNotified}
               readOnly
               disabled={processingItemId !== null}
-              className="text-button-info focus:ring-button-info bg-primary-bg border-border-primary h-4 w-4 cursor-pointer rounded disabled:cursor-not-allowed"
+              className="text-button-info focus:ring-button-info bg-primary-bg border-border-card h-4 w-4 cursor-pointer rounded disabled:cursor-not-allowed"
             />
           )}
         </div>

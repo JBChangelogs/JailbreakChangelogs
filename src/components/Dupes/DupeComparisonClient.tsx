@@ -61,7 +61,7 @@ function VariantColumn({
         {title}
       </h2>
 
-      <div className="bg-secondary-bg border-border-primary relative flex flex-col rounded-lg border p-4">
+      <div className="bg-secondary-bg border-border-card relative flex flex-col rounded-lg border p-4">
         {/* Owner Info */}
         <div className="my-4 flex flex-col items-center gap-2 text-center">
           <div className="text-secondary-text text-xs font-bold tracking-wider uppercase">
@@ -72,7 +72,7 @@ function VariantColumn({
             prefetch={false}
             className="group flex items-center gap-2"
           >
-            <div className="bg-tertiary-bg border-border-primary relative h-10 w-10 shrink-0 overflow-hidden rounded-full border transition-colors">
+            <div className="bg-tertiary-bg border-border-card relative h-10 w-10 shrink-0 overflow-hidden rounded-full border transition-colors">
               <Image
                 src={getUserAvatar(item.user_id || "")}
                 alt="Owner Avatar"
@@ -93,7 +93,7 @@ function VariantColumn({
         </div>
 
         {/* Logged Date */}
-        <div className="border-border-primary mt-2 border-t pt-3 text-center">
+        <div className="border-border-card mt-2 border-t pt-3 text-center">
           <div className="text-secondary-text mb-1 text-xs uppercase">
             Logged On
           </div>
@@ -107,7 +107,7 @@ function VariantColumn({
         </div>
       </div>
 
-      <div className="border-border-primary mt-4 border-t pt-4">
+      <div className="border-border-card mt-4 border-t pt-4">
         <h3 className="text-primary-text mb-3 text-lg font-bold">
           Ownership History ({item.history?.length || 0})
         </h3>
@@ -231,7 +231,7 @@ export default function DupeComparisonClient({
         <div className="flex justify-start">
           <Link
             href={`/dupes/${originalOwnerId}`}
-            className="border-border-primary bg-secondary-bg text-primary-text hover:bg-tertiary-bg flex cursor-pointer items-center gap-2 rounded-lg border px-4 py-2 text-sm font-medium transition-colors"
+            className="border-border-card bg-secondary-bg text-primary-text hover:bg-tertiary-bg flex cursor-pointer items-center gap-2 rounded-lg border px-4 py-2 text-sm font-medium transition-colors"
           >
             <Icon icon="mdi:arrow-left" className="h-5 w-5" />
             Back to Player Dupes
@@ -240,7 +240,7 @@ export default function DupeComparisonClient({
       )}
 
       {/* Shared Summary Header */}
-      <div className="bg-secondary-bg border-border-primary mx-auto max-w-3xl rounded-xl border p-6 text-center shadow-sm">
+      <div className="bg-secondary-bg border-border-card mx-auto max-w-3xl rounded-xl border p-6 text-center shadow-sm">
         <Link
           href={`/item/${duplicateItem.categoryTitle}/${duplicateItem.title}`}
           className="group mb-2 inline-flex items-center justify-center gap-3 transition-opacity"
@@ -257,7 +257,7 @@ export default function DupeComparisonClient({
 
         <div className="flex flex-col items-center gap-8 md:flex-row md:justify-center">
           {/* Shared Image */}
-          <div className="bg-secondary-bg border-border-primary relative h-40 w-full shrink-0 overflow-hidden rounded-lg border md:w-64">
+          <div className="bg-secondary-bg border-border-card relative h-40 w-full shrink-0 overflow-hidden rounded-lg border md:w-64">
             <div className="absolute top-2 left-2 z-10">
               <CategoryIconBadge
                 type={duplicateItem.categoryTitle}

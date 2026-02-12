@@ -413,7 +413,7 @@ export default function DuplicatesTab({
 
   if (multiCopyStats.uniqueItemsWithCopies === 0) {
     return (
-      <div className="border-border-primary bg-secondary-bg rounded-lg border p-8 text-center">
+      <div className="border-border-card bg-secondary-bg rounded-lg border p-8 text-center">
         <p className="text-secondary-text">
           No items with multiple copies found in this inventory.
         </p>

@@ -296,7 +296,7 @@ export default function RedeemPage() {
                   id="code"
                   value={code}
                   onChange={(e) => setCode(e.target.value)}
-                  className={`border-border-primary bg-secondary-bg text-primary-text hover:border-border-focus w-full rounded-lg border px-6 py-3 text-lg transition-colors focus:ring-2 focus:outline-none ${
+                  className={`border-border-card bg-secondary-bg text-primary-text hover:border-border-focus w-full rounded-lg border px-6 py-3 text-lg transition-colors focus:ring-2 focus:outline-none ${
                     message?.type === "error"
                       ? "border-button-danger focus:ring-button-danger"
                       : "focus:border-button-info focus:ring-button-info"
@@ -568,7 +568,7 @@ export default function RedeemPage() {
               </li>
             </ol>
 
-            <div className="bg-button-info/10 border-border-primary mt-8 rounded border p-4 shadow-sm">
+            <div className="bg-button-info/10 border-border-card mt-8 rounded border p-4 shadow-sm">
               <div className="mb-2 flex items-start gap-4">
                 <div className="relative z-10">
                   <span className="text-primary-text text-base font-bold">
@@ -587,7 +587,7 @@ export default function RedeemPage() {
               </div>
             </div>
 
-            <div className="border-border-primary mt-4 border-t pt-4">
+            <div className="border-border-card mt-4 border-t pt-4">
               <p className="text-secondary-text mb-6 text-lg">
                 Thank you for supporting us!
               </p>
@@ -649,7 +649,7 @@ export default function RedeemPage() {
             </p>
           )}
 
-          <div className="border-border-primary bg-tertiary-bg mb-6 rounded-lg border p-3">
+          <div className="border-border-card bg-tertiary-bg mb-6 rounded-lg border p-3">
             <p className="text-secondary-text text-sm">
               <span className="font-medium">Code:</span>{" "}
               <code className="text-primary-text break-all">{code}</code>
@@ -702,7 +702,7 @@ export default function RedeemPage() {
             </div>
 
             <div className="relative text-center">
-              <div className="bg-secondary-bg/50 border-border-primary mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full border">
+              <div className="bg-secondary-bg/50 border-border-card mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full border">
                 {redeemedResult &&
                 redeemedResult.premiumtype >= 1 &&
                 redeemedResult.premiumtype <= 3 ? (

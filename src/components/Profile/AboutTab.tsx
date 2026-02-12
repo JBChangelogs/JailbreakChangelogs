@@ -124,7 +124,7 @@ export default function AboutTab({
   return (
     <div className="space-y-6">
       {/* About Me Section */}
-      <div className="border-border-primary rounded-lg border p-4">
+      <div className="border-border-card rounded-lg border p-4">
         <div className="mb-3 flex items-center gap-2">
           <h2 className="text-primary-text text-lg font-semibold">About Me</h2>
           {currentUserId === user.id && !isEditingBio && (
@@ -151,7 +151,7 @@ export default function AboutTab({
                 value={newBio}
                 onChange={handleBioChange}
                 placeholder="Write something about yourself..."
-                className="border-border-primary bg-form-input text-primary-text hover:border-border-focus focus:border-button-info min-h-[120px] w-full resize-y rounded border p-3 text-sm focus:outline-none"
+                className="border-border-card bg-form-input text-primary-text hover:border-border-focus focus:border-button-info min-h-[120px] w-full resize-y rounded border p-3 text-sm focus:outline-none"
                 maxLength={MAX_BIO_LENGTH}
                 style={{ wordWrap: "break-word", overflowWrap: "break-word" }}
               />

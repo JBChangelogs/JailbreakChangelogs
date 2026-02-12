@@ -233,7 +233,7 @@ export default function TradeAdsTab({
           </div>
         </div>
 
-        <div className="border-border-primary text-secondary-text mt-6 flex flex-wrap items-center gap-2 border-t pt-4 text-sm">
+        <div className="border-border-card text-secondary-text mt-6 flex flex-wrap items-center gap-2 border-t pt-4 text-sm">
           <Tooltip>
             <TooltipTrigger asChild>
               <span className="cursor-help">Created {ad.createdTime}</span>
@@ -272,7 +272,7 @@ export default function TradeAdsTab({
   if (error) {
     return (
       <div className="space-y-6">
-        <div className="border-border-primary rounded-lg border p-4">
+        <div className="border-border-card rounded-lg border p-4">
           <div className="mb-3 flex items-center gap-2">
             <h2 className="text-primary-text text-lg font-semibold">
               Trade Ads
@@ -286,7 +286,7 @@ export default function TradeAdsTab({
 
   return (
     <div className="space-y-6">
-      <div className="border-border-primary rounded-lg border p-4">
+      <div className="border-border-card rounded-lg border p-4">
         <div className="mb-3 flex items-center gap-2">
           <h2 className="text-primary-text text-lg font-semibold">
             Trade Ads [{tradeAds.length}]

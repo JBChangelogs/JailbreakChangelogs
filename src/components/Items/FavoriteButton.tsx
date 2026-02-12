@@ -67,7 +67,7 @@ export default function FavoriteButton({
     <button
       onClick={handleFavoriteClick}
       disabled={isLoading}
-      className="bg-secondary-bg/80 border-border-primary hover:border-border-focus hover:bg-secondary-bg flex cursor-pointer items-center gap-1.5 rounded-full border px-2 py-1.5 transition-opacity disabled:opacity-50"
+      className="bg-secondary-bg/80 border-border-card hover:border-border-focus hover:bg-secondary-bg flex cursor-pointer items-center gap-1.5 rounded-full border px-2 py-1.5 transition-opacity disabled:opacity-50"
       title={isFavorited ? "Remove from favorites" : "Add to favorites"}
     >
       {isFavorited ? (

@@ -34,7 +34,7 @@ const PrivateServersTab: React.FC<PrivateServersTabProps> = ({
 
   if (!servers || servers.length === 0) {
     return (
-      <div className="border-border-primary rounded-lg border p-8 text-center">
+      <div className="border-border-card rounded-lg border p-8 text-center">
         <Icon
           icon="heroicons-outline:shield-check"
           className="text-button-info mx-auto mb-4 h-12 w-12"
@@ -55,7 +55,7 @@ const PrivateServersTab: React.FC<PrivateServersTabProps> = ({
 
   return (
     <div className="space-y-6">
-      <div className="border-border-primary rounded-lg border p-4">
+      <div className="border-border-card rounded-lg border p-4">
         <div className="mb-3 flex items-center gap-2">
           <h2 className="text-primary-text text-lg font-semibold">
             Private Servers [{servers.length}]

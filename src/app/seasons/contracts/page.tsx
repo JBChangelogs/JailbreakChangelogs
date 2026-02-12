@@ -31,7 +31,7 @@ export default async function SeasonContractsPage() {
           <Breadcrumb />
 
           <div className="flex min-h-[60vh] items-center justify-center">
-            <div className="border-border-primary bg-secondary-bg max-w-2xl rounded-lg border p-12 text-center">
+            <div className="border-border-card bg-secondary-bg max-w-2xl rounded-lg border p-12 text-center">
               {/* Icon */}
               <div className="mb-8">
                 <div className="bg-button-info/20 border-button-info/30 mx-auto flex h-20 w-20 items-center justify-center rounded-full border">
@@ -99,7 +99,7 @@ export default async function SeasonContractsPage() {
 
           {/* Enhanced Empty State */}
           <div className="flex min-h-[60vh] items-center justify-center">
-            <div className="border-border-primary bg-secondary-bg max-w-2xl rounded-lg border p-12 text-center">
+            <div className="border-border-card bg-secondary-bg max-w-2xl rounded-lg border p-12 text-center">
               {/* Icon */}
               <div className="mb-8">
                 <div className="bg-button-info/20 border-button-info/30 mx-auto flex h-20 w-20 items-center justify-center rounded-full border">

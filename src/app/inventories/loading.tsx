@@ -20,11 +20,11 @@ export default function InventoryCheckerLoading() {
 
       {/* Scan Options Skeleton */}
       <div className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-2">
-        <div className="border-border-primary bg-secondary-bg h-32 rounded-xl border p-6 shadow-sm">
+        <div className="border-border-card bg-secondary-bg h-32 rounded-xl border p-6 shadow-sm">
           <div className="bg-button-secondary mb-4 h-6 w-32 animate-pulse rounded"></div>
           <div className="bg-button-secondary h-10 w-full animate-pulse rounded"></div>
         </div>
-        <div className="border-border-primary bg-secondary-bg hidden h-32 rounded-xl border p-6 shadow-sm md:block">
+        <div className="border-border-card bg-secondary-bg hidden h-32 rounded-xl border p-6 shadow-sm md:block">
           <div className="bg-button-secondary mb-4 h-6 w-32 animate-pulse rounded"></div>
           <div className="bg-button-secondary h-10 w-full animate-pulse rounded"></div>
         </div>
@@ -34,7 +34,7 @@ export default function InventoryCheckerLoading() {
         {/* Main Interface Skeleton */}
         <div className="space-y-6">
           {/* Search Form */}
-          <div className="border-border-primary bg-secondary-bg shadow-card-shadow rounded-lg border p-6">
+          <div className="border-border-card bg-secondary-bg shadow-card-shadow rounded-lg border p-6">
             <div className="flex flex-col gap-4 sm:flex-row">
               <div className="bg-button-secondary h-12 flex-1 animate-pulse rounded-lg"></div>
               <div className="bg-button-secondary h-12 w-full animate-pulse rounded-lg sm:w-32"></div>
@@ -47,7 +47,7 @@ export default function InventoryCheckerLoading() {
           {[1, 2, 3].map((i) => (
             <div
               key={i}
-              className="border-border-primary bg-secondary-bg shadow-card-shadow rounded-lg border p-4"
+              className="border-border-card bg-secondary-bg shadow-card-shadow rounded-lg border p-4"
             >
               <div className="bg-button-secondary mb-2 h-8 w-24 animate-pulse rounded"></div>
               <div className="bg-button-secondary h-4 w-32 animate-pulse rounded"></div>
@@ -58,12 +58,12 @@ export default function InventoryCheckerLoading() {
         {/* Leaderboard Skeleton */}
         <div className="mt-8">
           <div className="bg-button-secondary mb-4 h-6 w-64 animate-pulse rounded"></div>
-          <div className="border-border-primary bg-secondary-bg shadow-card-shadow rounded-lg border p-4">
+          <div className="border-border-card bg-secondary-bg shadow-card-shadow rounded-lg border p-4">
             <div className="space-y-3">
               {[...Array(5)].map((_, i) => (
                 <div
                   key={i}
-                  className="border-border-primary bg-tertiary-bg flex flex-col gap-3 rounded-lg border p-3 sm:flex-row sm:items-center"
+                  className="border-border-card bg-tertiary-bg flex flex-col gap-3 rounded-lg border p-3 sm:flex-row sm:items-center"
                 >
                   <div className="flex items-center gap-3">
                     <div className="bg-button-secondary h-8 w-8 animate-pulse rounded-full"></div>

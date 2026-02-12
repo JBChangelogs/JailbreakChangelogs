@@ -43,7 +43,7 @@ export default function SeasonHeader({ latestSeason }: SeasonHeaderProps) {
       </div>
 
       {seasonEnded && (
-        <div className="bg-button-info/10 border-border-primary mb-2 flex w-fit items-center gap-4 rounded-lg border p-4 shadow-sm">
+        <div className="bg-button-info/10 border-border-card mb-2 flex w-fit items-center gap-4 rounded-lg border p-4 shadow-sm">
           <Icon icon="line-md:calendar" className="text-primary-text h-6 w-6" />
           <span className="text-primary-text font-bold">
             This season has ended. These are the final rankings.

@@ -89,7 +89,7 @@ export default function FloatingDropdown({
         {...getReferenceProps({ onClick: handleClick })}
         className={`flex w-full items-center justify-between rounded-lg border px-3 py-2 transition-colors ${
           buttonClassName ||
-          "border-border-primary bg-secondary-bg text-primary-text hover:border-border-focus cursor-pointer text-xs sm:text-sm"
+          "border-border-card bg-secondary-bg text-primary-text hover:border-border-focus cursor-pointer text-xs sm:text-sm"
         }`}
       >
         <span className="truncate">{displayLabel}</span>
@@ -111,7 +111,7 @@ export default function FloatingDropdown({
             style={floatingStyles}
             {...getFloatingProps()}
             className={`bg-secondary-bg z-50 rounded-lg border shadow-lg ${
-              menuClassName || "border-border-primary"
+              menuClassName || "border-border-card"
             }`}
           >
             <div className="max-h-60 overflow-y-auto">

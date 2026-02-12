@@ -1,7 +1,7 @@
 import React from "react";
 import Link from "next/link";
 import { TradeItem } from "@/types/trading";
-import { CategoryIconBadge, getCategoryColor } from "@/utils/categoryIcons";
+import { getCategoryColor, getCategoryIcon } from "@/utils/categoryIcons";
 import { formatFullValue } from "@/utils/values";
 import { getDemandColor, getTrendColor } from "@/utils/badgeColors";
 
@@ -19,13 +19,6 @@ export const TradeAdTooltip: React.FC<TradeAdTooltipProps> = ({ item }) => {
       <div className="min-w-0 flex-1">
         <div className="mb-2 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <CategoryIconBadge
-              type={item.type}
-              isLimited={item.is_limited === 1}
-              isSeasonal={item.is_seasonal === 1}
-              preferItemType={true}
-              className="h-5 w-5"
-            />
             <Link
               href={`/item/${item.type.toLowerCase()}/${item.name}`}
               prefetch={false}
@@ -38,12 +31,21 @@ export const TradeAdTooltip: React.FC<TradeAdTooltipProps> = ({ item }) => {
         <div className="space-y-2 text-sm">
           <div className="flex items-center gap-2">
             <span
-              className="text-primary-text flex items-center rounded-full border px-2 py-0.5 text-xs font-medium"
+              className="text-primary-text flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-medium"
               style={{
                 borderColor: getCategoryColor(item.type),
                 backgroundColor: getCategoryColor(item.type) + "20", // Add 20% opacity
               }}
             >
+              {(() => {
+                const categoryIcon = getCategoryIcon(item.type);
+                return categoryIcon ? (
+                  <categoryIcon.Icon
+                    className="h-3 w-3"
+                    style={{ color: getCategoryColor(item.type) }}
+                  />
+                ) : null;
+              })()}
               {item.type}
             </span>
             {item.is_limited === 1 && (

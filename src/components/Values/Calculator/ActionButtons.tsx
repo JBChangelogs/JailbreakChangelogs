@@ -49,7 +49,7 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
             className="text-sm text-yellow-500"
           />
           Helpful tip: Hold{" "}
-          <kbd className="kbd kbd-sm border-border-primary bg-tertiary-bg text-primary-text">
+          <kbd className="kbd kbd-sm border-border-card bg-tertiary-bg text-primary-text">
             Shift
           </kbd>{" "}
           while clicking Clear to clear both sides instantly without

@@ -9,7 +9,7 @@ export default function ExperimentalFeatureBanner({
 }: ExperimentalFeatureBannerProps) {
   return (
     <div
-      className={`bg-button-info/10 border-border-primary mb-2 flex items-start gap-4 rounded-lg border p-4 shadow-sm ${className}`}
+      className={`bg-button-info/10 border-border-card mb-2 flex items-start gap-4 rounded-lg border p-4 shadow-sm ${className}`}
     >
       <div className="relative z-10">
         <span className="text-primary-text text-base font-bold">
