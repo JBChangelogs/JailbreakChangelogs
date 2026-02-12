@@ -14,3 +14,4 @@ maxRestartRetries = 10
 NODE_ENV = "production"
 PORT = "8080"
 NEXT_TELEMETRY_DISABLED = "1"
+RAILPACK_NODE_VERSION = "24.0.0"
