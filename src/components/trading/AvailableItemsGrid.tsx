@@ -16,7 +16,6 @@ import {
 } from "@/utils/values";
 import { getDemandColor, getTrendColor } from "@/utils/badgeColors";
 import { CategoryIconBadge, getCategoryColor } from "@/utils/categoryIcons";
-import { TradeAdErrorModal } from "./TradeAdErrorModal";
 import { Icon } from "../ui/IconWrapper";
 import Image from "next/image";
 import Link from "next/link";
@@ -63,8 +62,7 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
   const isMobile = useMediaQuery("(max-width:640px)");
   const parentRef = useRef<HTMLDivElement>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [showErrorModal, setShowErrorModal] = useState(false);
-  const [validationErrors, setValidationErrors] = useState<string[]>([]);
+  const lastErrorToastAtRef = useRef<number>(0);
 
   const supportedFilterSorts = useMemo(
     () =>
@@ -131,8 +129,19 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
 
   useEffect(() => {
     const handleShowError = (event: CustomEvent) => {
-      setValidationErrors(event.detail.errors);
-      setShowErrorModal(true);
+      const now = Date.now();
+      const errors: string[] = Array.isArray(event.detail?.errors)
+        ? event.detail.errors
+        : [];
+      if (errors.length === 0) return;
+
+      // Avoid spamming toasts if multiple errors fire at once.
+      if (now - lastErrorToastAtRef.current < 300) return;
+      lastErrorToastAtRef.current = now;
+
+      errors.forEach((error) => {
+        toast.error(error);
+      });
     };
 
     const element = document.querySelector(
@@ -752,12 +761,6 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
             )}
           </div>
         </div>
-
-        <TradeAdErrorModal
-          isOpen={showErrorModal}
-          onClose={() => setShowErrorModal(false)}
-          errors={validationErrors}
-        />
       </div>
     </>
   );

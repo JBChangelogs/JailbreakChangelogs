@@ -67,6 +67,10 @@ export const TradeAdCard: React.FC<TradeAdCardProps> = ({
 
   const createdRelative = useRealTimeRelativeDate(trade.created_at);
   const expiresRelative = useRealTimeRelativeDate(trade.expires);
+  const createdDisplay = createdRelative || formatCustomDate(trade.created_at);
+  const expiresDisplay = trade.expires
+    ? expiresRelative || formatCustomDate(trade.expires)
+    : "";
 
   const discordChannelId = "1398359394726449352";
   const discordGuildId = "1286064050135896064";
@@ -250,7 +254,7 @@ export const TradeAdCard: React.FC<TradeAdCardProps> = ({
         <div className="text-secondary-text mt-4 text-xs">
           <Tooltip>
             <TooltipTrigger asChild>
-              <span className="cursor-help">Created {createdRelative}</span>
+              <span className="cursor-help">Created {createdDisplay}</span>
             </TooltipTrigger>
             <TooltipContent
               side="top"
@@ -265,7 +269,7 @@ export const TradeAdCard: React.FC<TradeAdCardProps> = ({
               <Tooltip>
                 <TooltipTrigger asChild>
                   <span className="ml-2 cursor-help">
-                    Expires {expiresRelative}
+                    Expires {expiresDisplay}
                   </span>
                 </TooltipTrigger>
                 <TooltipContent

@@ -3,7 +3,7 @@ import { useAuthContext } from "@/contexts/AuthContext";
 import { TradeItem, TradeAd } from "@/types/trading";
 import { UserData } from "@/types/auth";
 import { ItemGrid } from "./ItemGrid";
-import { Button, Skeleton, Tooltip } from "@mui/material";
+import { Skeleton, Tooltip } from "@mui/material";
 import { toast } from "sonner";
 import { AvailableItemsGrid } from "./AvailableItemsGrid";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
@@ -13,6 +13,14 @@ import { useSupporterModal } from "@/hooks/useSupporterModal";
 import SupporterModal from "../Modals/SupporterModal";
 import LoginModalWrapper from "../Auth/LoginModalWrapper";
 import { Icon } from "../ui/IconWrapper";
+import { Button as UiButton } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   safeLocalStorage,
   safeGetJSON,
@@ -41,6 +49,7 @@ const PREMIUM_TIERS: UserPremiumTier[] = [
   { tier: 2, name: "Supporter 2", durations: [6, 12, 24] },
   { tier: 3, name: "Supporter 3", durations: [6, 12, 24, 48] },
 ];
+const EXPIRATION_OPTIONS = [6, 12, 24, 48];
 
 export const TradeAdForm: React.FC<TradeAdFormProps> = ({
   onSuccess,
@@ -663,32 +672,51 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
                   <br />
                   <Link
                     href="/supporting"
-                    className="hover:text-button-info underline transition-colors"
+                    className="hover:text-link underline transition-colors"
                   >
                     Become a Supporter
                   </Link>
                 </div>
                 <div className="mt-3">
-                  <select
-                    className="select bg-secondary-bg text-primary-text h-[56px] min-h-[56px] w-full"
-                    value={expirationHours || ""}
-                    onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
-                      const value = e.target.value;
-                      if (value === "") {
-                        setExpirationHours(null);
-                      } else {
-                        setExpirationHours(parseInt(value));
-                      }
-                    }}
-                  >
-                    <option value="" disabled>
-                      Select expiration...
-                    </option>
-                    <option value="6">6 hours</option>
-                    <option value="12">12 hours</option>
-                    <option value="24">24 hours</option>
-                    <option value="48">48 hours</option>
-                  </select>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <button
+                        type="button"
+                        className="bg-secondary-bg text-primary-text border-border-card hover:border-border-focus focus-visible:ring-border-focus flex h-[56px] w-full items-center justify-between rounded-lg border px-4 transition-colors focus-visible:ring-2 focus-visible:outline-none"
+                      >
+                        <span>
+                          {expirationHours
+                            ? `${expirationHours} hours`
+                            : "Select expiration..."}
+                        </span>
+                        <Icon
+                          icon="lucide:chevron-down"
+                          className="text-secondary-text h-4 w-4"
+                          inline={true}
+                        />
+                      </button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent
+                      className="w-[var(--radix-dropdown-menu-trigger-width)]"
+                      align="start"
+                    >
+                      <DropdownMenuRadioGroup
+                        value={expirationHours?.toString() ?? ""}
+                        onValueChange={(value) =>
+                          setExpirationHours(value ? parseInt(value, 10) : null)
+                        }
+                      >
+                        {EXPIRATION_OPTIONS.map((hours) => (
+                          <DropdownMenuRadioItem
+                            key={hours}
+                            value={hours.toString()}
+                          >
+                            {hours} hours
+                          </DropdownMenuRadioItem>
+                        ))}
+                      </DropdownMenuRadioGroup>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </div>
               </div>
             </div>
@@ -734,17 +762,13 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
                 },
               }}
             >
-              <Button
-                variant="contained"
-                onClick={handleSwapSides}
-                className="bg-button-info text-form-button-text hover:bg-button-info-hover"
-              >
+              <UiButton onClick={handleSwapSides} variant="default">
                 <Icon
                   icon="heroicons:arrows-right-left"
                   className="mr-1 h-5 w-5"
                 />
                 Swap Sides
-              </Button>
+              </UiButton>
             </Tooltip>
             <Tooltip
               title="Clear all items (hold Shift to clear both sides instantly)"
@@ -762,14 +786,10 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
                 },
               }}
             >
-              <Button
-                variant="contained"
-                onClick={handleClearSides}
-                className="hover:bg-status-error-hover bg-status-error text-form-button-text"
-              >
+              <UiButton onClick={handleClearSides} variant="destructive">
                 <Icon icon="heroicons-outline:trash" className="mr-1 h-5 w-5" />
                 Clear
-              </Button>
+              </UiButton>
             </Tooltip>
           </div>
 
@@ -819,24 +839,24 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
                     },
                   }}
                 >
-                  <Button
-                    variant="outlined"
+                  <UiButton
                     onClick={() => handleMirrorItems("offering")}
-                    size="small"
-                    className="bg-status-success/15 hover:bg-status-success/25 border-status-success text-primary-text hover:border-status-success"
+                    size="sm"
+                    className="bg-status-success/15 text-primary-text hover:bg-status-success/25"
                   >
                     <Icon
                       icon="heroicons:arrows-right-left"
                       className="mr-1 h-4 w-4"
                     />
                     Mirror
-                  </Button>
+                  </UiButton>
                 </Tooltip>
               </div>
               <ItemGrid
                 items={offeringItems}
                 title="Offering"
                 onRemove={(id) => handleRemoveItem(id, "offering")}
+                disableInteraction={submitting}
               />
               <div className="text-secondary-text/70 mt-4 flex flex-col flex-wrap items-start gap-2 text-xs sm:flex-row sm:items-center sm:gap-3 sm:text-sm">
                 <span>
@@ -886,24 +906,24 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
                     },
                   }}
                 >
-                  <Button
-                    variant="outlined"
+                  <UiButton
                     onClick={() => handleMirrorItems("requesting")}
-                    size="small"
-                    className="bg-status-error/15 hover:bg-status-error/25 border-status-error text-primary-text hover:border-status-error"
+                    size="sm"
+                    className="bg-status-error/15 text-primary-text hover:bg-status-error/25"
                   >
                     <Icon
                       icon="heroicons:arrows-right-left"
                       className="mr-1 h-4 w-4"
                     />
                     Mirror
-                  </Button>
+                  </UiButton>
                 </Tooltip>
               </div>
               <ItemGrid
                 items={requestingItems}
                 title="Requesting"
                 onRemove={(id) => handleRemoveItem(id, "requesting")}
+                disableInteraction={submitting}
               />
               <div className="text-secondary-text/70 mt-4 flex flex-col flex-wrap items-start gap-2 text-xs sm:flex-row sm:items-center sm:gap-3 sm:text-sm">
                 <span>
@@ -925,7 +945,7 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
 
           {/* Submit Button */}
           <div className="flex flex-col justify-end gap-3 sm:flex-row">
-            <button
+            <UiButton
               onClick={() => {
                 if (editMode) {
                   window.history.pushState(null, "", window.location.pathname);
@@ -938,21 +958,16 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
                 }
               }}
               disabled={
-                !editMode &&
-                offeringItems.length === 0 &&
-                requestingItems.length === 0
+                submitting ||
+                (!editMode &&
+                  offeringItems.length === 0 &&
+                  requestingItems.length === 0)
               }
-              className={`flex items-center gap-2 rounded-md border px-4 py-2 text-sm font-medium transition-colors ${
-                !editMode &&
-                offeringItems.length === 0 &&
-                requestingItems.length === 0
-                  ? "border-button-secondary bg-button-secondary text-secondary-text cursor-not-allowed"
-                  : "border-button-secondary bg-button-secondary text-secondary-text hover:bg-button-secondary-hover cursor-pointer"
-              }`}
+              variant="secondary"
             >
               {editMode ? "Cancel" : "Clear Trade Ad"}
-            </button>
-            <button
+            </UiButton>
+            <UiButton
               onClick={() => {
                 if (!editMode && expirationHours === null) {
                   toast.error(
@@ -963,11 +978,7 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
                 handleSubmit();
               }}
               disabled={submitting}
-              className={`flex items-center gap-2 rounded-md border px-4 py-2 text-sm font-medium transition-colors ${
-                submitting
-                  ? "border-button-info-disabled bg-button-info-disabled text-form-button-text cursor-progress"
-                  : "border-button-info bg-button-info text-form-button-text hover:bg-button-info-hover cursor-pointer"
-              }`}
+              className={submitting ? "cursor-progress" : undefined}
               {...(!editMode && { "data-umami-event": "Trade Offer Posted" })}
             >
               {submitting
@@ -977,7 +988,7 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
                 : editMode
                   ? "Update Trade Ad"
                   : "Create Trade Ad"}
-            </button>
+            </UiButton>
           </div>
 
           {/* Available Items Grid */}

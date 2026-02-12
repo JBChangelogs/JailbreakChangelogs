@@ -18,6 +18,7 @@ interface ItemGridProps {
   items: TradeItem[];
   title: string;
   onRemove?: (itemId: number) => void;
+  disableInteraction?: boolean;
 }
 
 interface ItemWithData {
@@ -78,6 +79,7 @@ export const ItemGrid: React.FC<ItemGridProps> = ({
   items,
   title,
   onRemove,
+  disableInteraction = false,
 }) => {
   if (items.length === 0) {
     const isOffering = title.toLowerCase() === "offering";
@@ -87,8 +89,13 @@ export const ItemGrid: React.FC<ItemGridProps> = ({
 
     return (
       <div
-        className={`hover:bg-secondary-bg cursor-pointer rounded-lg border-2 border-dashed p-6 text-center transition-colors ${borderColor}`}
+        className={`rounded-lg border-2 border-dashed p-6 text-center transition-colors ${borderColor} ${
+          disableInteraction
+            ? "cursor-not-allowed opacity-60"
+            : "hover:bg-secondary-bg cursor-pointer"
+        }`}
         onClick={() => {
+          if (disableInteraction) return;
           // Scroll to items grid after a short delay to ensure tab switch completes
           setTimeout(() => {
             const itemsGrid = document.querySelector(
@@ -102,6 +109,7 @@ export const ItemGrid: React.FC<ItemGridProps> = ({
         role="button"
         tabIndex={0}
         onKeyDown={(e) => {
+          if (disableInteraction) return;
           if (e.key === "Enter" || e.key === " ") {
             e.preventDefault();
             // Scroll to items grid after a short delay to ensure tab switch completes
@@ -159,10 +167,24 @@ export const ItemGrid: React.FC<ItemGridProps> = ({
               : item.name;
 
             return (
-              <div key={`${item.id}`} className="group relative cursor-help">
+              <div
+                key={`${item.id}`}
+                className={`group relative ${
+                  disableInteraction
+                    ? "cursor-not-allowed opacity-60"
+                    : onRemove
+                      ? "cursor-pointer"
+                      : "cursor-help"
+                }`}
+              >
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <div>
+                    <div
+                      onClick={() => {
+                        if (disableInteraction || !onRemove) return;
+                        onRemove(item.id);
+                      }}
+                    >
                       <div className="relative aspect-square">
                         <div className="relative h-full w-full overflow-hidden rounded-lg">
                           {isVideoItem(item.name) ? (
@@ -187,32 +209,6 @@ export const ItemGrid: React.FC<ItemGridProps> = ({
                             <div className="bg-button-info/90 border-button-info text-form-button-text absolute top-1 right-1 z-5 rounded-full border px-1.5 py-0.5 text-xs">
                               ×{item.count}
                             </div>
-                          )}
-                          {/* Remove button - positioned in top-left corner */}
-                          {onRemove && (
-                            <button
-                              type="button"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                onRemove(item.id);
-                              }}
-                              className="text-form-button-text absolute top-1 left-1 z-10 flex h-6 w-6 cursor-pointer items-center justify-center rounded-full bg-red-600/90 transition-colors hover:bg-red-700"
-                              aria-label="Remove item"
-                            >
-                              <svg
-                                className="h-4 w-4"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth={2}
-                                  d="M6 18L18 6M6 6l12 12"
-                                />
-                              </svg>
-                            </button>
                           )}
                         </div>
                       </div>
