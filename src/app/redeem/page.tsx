@@ -479,7 +479,7 @@ export default function RedeemPage() {
           </div>
 
           {/* Right Column - Instructions */}
-          <div className="border-border-primary bg-secondary-bg rounded-lg border p-4 sm:p-8">
+          <div className="border-border-card bg-secondary-bg rounded-lg border p-4 sm:p-8">
             <h2 className="text-primary-text mb-6 text-2xl font-semibold">
               How to Get a Code
             </h2>

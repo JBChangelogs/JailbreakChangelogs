@@ -38,7 +38,7 @@ export default function BotPage() {
             {/* Achievement Banner */}
             <div className="mx-auto mb-8 max-w-2xl">
               <div className="from-tertiary via-tertiary to-tertiary relative overflow-hidden rounded-xl bg-linear-to-r p-1">
-                <div className="border-border-primary bg-secondary-bg rounded-lg border p-4">
+                <div className="border-border-card bg-tertiary-bg rounded-lg border p-4">
                   <div className="flex flex-col items-center gap-3 text-center md:flex-row md:justify-center">
                     <div className="flex items-center gap-2">
                       <div>
@@ -92,14 +92,16 @@ export default function BotPage() {
           </h2>
           <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
             {/* Feature 1 - Inventory Commands */}
-            <div className="border-border-primary bg-secondary-bg hover:border-border-focus hover:shadow-card-shadow rounded-lg border p-6 transition-colors duration-200 hover:shadow-lg">
-              <div className="mb-4 flex items-center gap-2">
-                <Icon
-                  icon="mdi:console"
-                  className="text-link h-6 w-6"
-                  inline={true}
-                />
-                <h3 className="text-card-headline text-xl font-semibold">
+            <div className="border-border-card bg-tertiary-bg group rounded-lg border p-6 transition-colors duration-200 hover:shadow-lg">
+              <div className="mb-4 flex items-center gap-3">
+                <div className="bg-button-info/10 flex h-10 w-10 shrink-0 items-center justify-center rounded-lg">
+                  <Icon
+                    icon="mdi:console"
+                    className="text-link h-6 w-6"
+                    inline={true}
+                  />
+                </div>
+                <h3 className="text-card-headline group-hover:text-link text-xl font-semibold transition-colors">
                   Inventory Commands
                 </h3>
               </div>
@@ -111,14 +113,16 @@ export default function BotPage() {
             </div>
 
             {/* Feature 2 - OG Finder */}
-            <div className="border-border-primary bg-secondary-bg hover:border-border-focus hover:shadow-card-shadow rounded-lg border p-6 transition-colors duration-200 hover:shadow-lg">
-              <div className="mb-4 flex items-center gap-2">
-                <Icon
-                  icon="mdi:lightning-bolt"
-                  className="text-link h-6 w-6"
-                  inline={true}
-                />
-                <h3 className="text-card-headline text-xl font-semibold">
+            <div className="border-border-card bg-tertiary-bg group rounded-lg border p-6 transition-colors duration-200 hover:shadow-lg">
+              <div className="mb-4 flex items-center gap-3">
+                <div className="bg-button-info/10 flex h-10 w-10 shrink-0 items-center justify-center rounded-lg">
+                  <Icon
+                    icon="mdi:lightning-bolt"
+                    className="text-link h-6 w-6"
+                    inline={true}
+                  />
+                </div>
+                <h3 className="text-card-headline group-hover:text-link text-xl font-semibold transition-colors">
                   OG Finder
                 </h3>
               </div>
@@ -130,14 +134,16 @@ export default function BotPage() {
             </div>
 
             {/* Feature 3 - Dupe Detection */}
-            <div className="border-border-primary bg-secondary-bg hover:border-border-focus hover:shadow-card-shadow rounded-lg border p-6 transition-colors duration-200 hover:shadow-lg">
-              <div className="mb-4 flex items-center gap-2">
-                <Icon
-                  icon="mdi:swap-horizontal"
-                  className="text-link h-6 w-6"
-                  inline={true}
-                />
-                <h3 className="text-card-headline text-xl font-semibold">
+            <div className="border-border-card bg-tertiary-bg group rounded-lg border p-6 transition-colors duration-200 hover:shadow-lg">
+              <div className="mb-4 flex items-center gap-3">
+                <div className="bg-button-info/10 flex h-10 w-10 shrink-0 items-center justify-center rounded-lg">
+                  <Icon
+                    icon="mdi:swap-horizontal"
+                    className="text-link h-6 w-6"
+                    inline={true}
+                  />
+                </div>
+                <h3 className="text-card-headline group-hover:text-link text-xl font-semibold transition-colors">
                   Dupe Detection
                 </h3>
               </div>
@@ -148,14 +154,16 @@ export default function BotPage() {
             </div>
 
             {/* Feature 4 - Season Tracking */}
-            <div className="border-border-primary bg-secondary-bg hover:border-border-focus hover:shadow-card-shadow rounded-lg border p-6 transition-colors duration-200 hover:shadow-lg">
-              <div className="mb-4 flex items-center gap-2">
-                <Icon
-                  icon="mdi:calendar"
-                  className="text-link h-6 w-6"
-                  inline={true}
-                />
-                <h3 className="text-card-headline text-xl font-semibold">
+            <div className="border-border-card bg-tertiary-bg group rounded-lg border p-6 transition-colors duration-200 hover:shadow-lg">
+              <div className="mb-4 flex items-center gap-3">
+                <div className="bg-button-info/10 flex h-10 w-10 shrink-0 items-center justify-center rounded-lg">
+                  <Icon
+                    icon="mdi:calendar"
+                    className="text-link h-6 w-6"
+                    inline={true}
+                  />
+                </div>
+                <h3 className="text-card-headline group-hover:text-link text-xl font-semibold transition-colors">
                   Season Tracking
                 </h3>
               </div>
@@ -166,14 +174,16 @@ export default function BotPage() {
             </div>
 
             {/* Feature 5 - Changelog History */}
-            <div className="border-border-primary bg-secondary-bg hover:border-border-focus hover:shadow-card-shadow rounded-lg border p-6 transition-colors duration-200 hover:shadow-lg">
-              <div className="mb-4 flex items-center gap-2">
-                <Icon
-                  icon="mdi:file-document"
-                  className="text-link h-6 w-6"
-                  inline={true}
-                />
-                <h3 className="text-card-headline text-xl font-semibold">
+            <div className="border-border-card bg-tertiary-bg group rounded-lg border p-6 transition-colors duration-200 hover:shadow-lg">
+              <div className="mb-4 flex items-center gap-3">
+                <div className="bg-button-info/10 flex h-10 w-10 shrink-0 items-center justify-center rounded-lg">
+                  <Icon
+                    icon="mdi:file-document"
+                    className="text-link h-6 w-6"
+                    inline={true}
+                  />
+                </div>
+                <h3 className="text-card-headline group-hover:text-link text-xl font-semibold transition-colors">
                   Changelog History
                 </h3>
               </div>
@@ -184,14 +194,16 @@ export default function BotPage() {
             </div>
 
             {/* Feature 6 - Trade Features */}
-            <div className="border-border-primary bg-secondary-bg hover:border-border-focus hover:shadow-card-shadow rounded-lg border p-6 transition-colors duration-200 hover:shadow-lg">
-              <div className="mb-4 flex items-center gap-2">
-                <Icon
-                  icon="mdi:chat"
-                  className="text-link h-6 w-6"
-                  inline={true}
-                />
-                <h3 className="text-card-headline text-xl font-semibold">
+            <div className="border-border-card bg-tertiary-bg group rounded-lg border p-6 transition-colors duration-200 hover:shadow-lg">
+              <div className="mb-4 flex items-center gap-3">
+                <div className="bg-button-info/10 flex h-10 w-10 shrink-0 items-center justify-center rounded-lg">
+                  <Icon
+                    icon="mdi:chat"
+                    className="text-link h-6 w-6"
+                    inline={true}
+                  />
+                </div>
+                <h3 className="text-card-headline group-hover:text-link text-xl font-semibold transition-colors">
                   Trade Features
                 </h3>
               </div>

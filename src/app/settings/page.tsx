@@ -274,7 +274,7 @@ export default function SettingsPage() {
                 borderRadius: 3,
                 backgroundColor: "var(--color-secondary-bg)",
                 backgroundImage: "none",
-                border: "1px solid var(--color-border-primary)",
+                border: "1px solid var(--color-border-card)",
               }}
             >
               <Skeleton
@@ -308,7 +308,7 @@ export default function SettingsPage() {
                   backgroundColor: "var(--color-secondary-bg)",
                   borderRadius: 3,
                   backgroundImage: "none",
-                  border: "1px solid var(--color-border-primary)",
+                  border: "1px solid var(--color-border-card)",
                 }}
               >
                 <Box
@@ -421,7 +421,7 @@ export default function SettingsPage() {
               p: 2,
               borderRadius: 3,
               backgroundImage: "none",
-              border: "1px solid var(--color-border-primary)",
+              border: "1px solid var(--color-border-card)",
             }}
           >
             <Typography
@@ -508,7 +508,7 @@ export default function SettingsPage() {
                   color: "var(--color-primary-text)",
                   borderRadius: 3,
                   backgroundImage: "none",
-                  border: "1px solid var(--color-border-primary)",
+                  border: "1px solid var(--color-border-card)",
                   ...(highlightSetting ===
                     category.replace(/\s+/g, "_").toLowerCase() && showHighlight
                     ? {
@@ -751,7 +751,7 @@ export default function SettingsPage() {
               color: "var(--color-primary-text)",
               borderRadius: 3,
               backgroundImage: "none",
-              border: "1px solid var(--color-border-primary)",
+              border: "1px solid var(--color-border-card)",
               ...(highlightSetting === "notifications" && showHighlight
                 ? {
                     backgroundColor:
@@ -910,7 +910,7 @@ export default function SettingsPage() {
               color: "var(--color-primary-text)",
               borderRadius: 3,
               backgroundImage: "none",
-              border: "1px solid var(--color-border-primary)",
+              border: "1px solid var(--color-border-card)",
             }}
           >
             <Typography
@@ -943,7 +943,7 @@ export default function SettingsPage() {
               color: "var(--color-primary-text)",
               borderRadius: 3,
               backgroundImage: "none",
-              border: "1px solid var(--color-border-primary)",
+              border: "1px solid var(--color-border-card)",
             }}
           >
             <Typography
@@ -974,7 +974,7 @@ export default function SettingsPage() {
               p: 3,
               backgroundColor: "var(--color-secondary-bg)",
               color: "var(--color-primary-text)",
-              border: "1px solid var(--color-border-primary)",
+              border: "1px solid var(--color-border-card)",
               borderRadius: 3,
               backgroundImage: "none",
               position: "relative",

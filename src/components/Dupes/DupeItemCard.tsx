@@ -48,7 +48,6 @@ export default function DupeItemCard({
   isDuplicate = false,
   robloxId,
   ownerLabel = "ORIGINAL OWNER",
-  bgClass = "bg-tertiary-bg",
   isDupedItem = false,
 }: DupeItemCardProps) {
   const dupedValue = getDupedValueForItem(itemData, item);

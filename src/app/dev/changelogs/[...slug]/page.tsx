@@ -109,7 +109,7 @@ export default async function ChangelogEntryPage({ params }: PageProps) {
                 className="text-secondary-text text-sm"
               />
               {entry.version && entry.version !== "Unreleased" && (
-                <span className="bg-status-info/10 text-status-info rounded-full px-3 py-1 text-sm font-medium">
+                <span className="bg-status-info/10 text-link rounded-full px-3 py-1 text-sm font-medium">
                   v{entry.version}
                 </span>
               )}
@@ -229,6 +229,12 @@ export default async function ChangelogEntryPage({ params }: PageProps) {
             remarkPlugins={[remarkGfm]}
             rehypePlugins={[rehypeRaw, rehypeSanitize]}
             components={{
+              a: ({ className, ...props }) => (
+                <a
+                  {...props}
+                  className={`text-link hover:text-link-hover transition-colors ${className || ""}`}
+                />
+              ),
               li: ({ children, className, ...props }) => {
                 return (
                   <li

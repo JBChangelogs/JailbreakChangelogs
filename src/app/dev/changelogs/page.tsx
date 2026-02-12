@@ -27,6 +27,7 @@ export default async function DevChangelogPage() {
       description: entry.description,
       date: entry.date,
       version: entry.version !== "Unreleased" ? entry.version : undefined,
+      htmlUrl: entry.htmlUrl,
       authorLogin: entry.authorLogin,
       authorAvatarUrl: entry.authorAvatarUrl,
       isPrerelease: entry.isPrerelease,
@@ -109,10 +110,10 @@ export default async function DevChangelogPage() {
 
                         {/* Content card */}
                         <div
-                          className={`rounded-lg border p-6 shadow-lg transition-all duration-200 hover:shadow-xl ${
+                          className={`group rounded-lg border p-6 shadow-lg transition-all duration-200 hover:shadow-xl ${
                             isLatest
                               ? "from-button-info/10 to-button-info-hover/10 shadow-button-info/20 border-button-info bg-linear-to-r"
-                              : "bg-secondary-bg border-border-primary hover:border-button-info"
+                              : "bg-secondary-bg border-border-card"
                           }`}
                         >
                           {/* Header */}
@@ -120,7 +121,7 @@ export default async function DevChangelogPage() {
                             <div className="flex-1">
                               <Link href={page.url} className="group">
                                 <div className="flex items-center gap-2">
-                                  <h2 className="text-primary-text group-hover:text-button-info mb-2 text-2xl font-bold transition-colors">
+                                  <h2 className="text-primary-text hover:text-link mb-2 text-2xl font-bold transition-colors">
                                     {page.data.title}
                                   </h2>
                                   {isLatest && (
@@ -141,7 +142,7 @@ export default async function DevChangelogPage() {
                               />
                               <div className="flex flex-wrap items-center justify-end gap-2">
                                 {page.data.version && (
-                                  <span className="bg-status-info/10 text-status-info rounded-full px-3 py-1 text-sm font-medium transition-colors">
+                                  <span className="bg-status-info/10 text-link rounded-full px-3 py-1 text-sm font-medium transition-colors">
                                     v{page.data.version as string}
                                   </span>
                                 )}
@@ -167,9 +168,14 @@ export default async function DevChangelogPage() {
                                       className="h-5 w-5 rounded-full"
                                     />
                                   )}
-                                  <span className="text-secondary-text text-xs">
+                                  <a
+                                    href={`https://github.com/${page.data.authorLogin as string}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-secondary-text hover:text-link text-xs transition-colors"
+                                  >
                                     @{page.data.authorLogin as string}
-                                  </span>
+                                  </a>
                                 </div>
                               )}
                             </div>
@@ -178,7 +184,7 @@ export default async function DevChangelogPage() {
                           {/* Read more link */}
                           <Link
                             href={page.url}
-                            className="text-button-info hover:text-button-info/80 inline-flex items-center text-sm font-medium transition-colors"
+                            className="text-link hover:text-link-hover inline-flex items-center text-sm font-medium transition-colors"
                           >
                             Read full changelog
                             <svg

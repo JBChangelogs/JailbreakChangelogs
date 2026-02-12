@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { getRandomBackgroundImage } from "@/utils/fisherYatesShuffle";
-import CCPAHandler from "@/components/Home/CCPAHandler";
 import { Icon } from "../components/ui/IconWrapper";
 import HeroBackgroundCarousel from "@/components/Home/HeroBackgroundCarousel";
 import NitroHomepageAd from "@/components/Ads/NitroHomepageAd";
