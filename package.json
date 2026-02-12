@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "next dev --port 5500",
+    "dev": "next dev -p 5500",
     "build": "next build",
     "build:analyze": "ANALYZE=true next build",
     "analyze": "next experimental-analyze",

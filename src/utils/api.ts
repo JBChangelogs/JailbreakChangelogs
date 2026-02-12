@@ -481,6 +481,9 @@ export async function fetchItem(
     const data = await response.json();
     return data as ItemDetails;
   } catch (err) {
+    if (err instanceof Error && err.name === "AbortError") {
+      return null;
+    }
     console.error("[SERVER] Error fetching item:", err);
     return null;
   }
@@ -510,6 +513,9 @@ export async function fetchItemById(id: string): Promise<ItemDetails | null> {
     const data = await response.json();
     return data as ItemDetails;
   } catch (err) {
+    if (err instanceof Error && err.name === "AbortError") {
+      return null;
+    }
     console.error("[SERVER] Error fetching item by ID:", err);
     return null;
   }
