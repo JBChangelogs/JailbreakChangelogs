@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import UserAvatar from "@/components/Users/UserAvatarClient";
 import { Supporter } from "@/utils/api";
@@ -11,6 +11,7 @@ interface SupportersSectionProps {
   supporters: Supporter[];
 }
 
+const MAX_SUPPORTERS_PER_TIER = 15;
 const EXCLUDED_IDS = [
   "1019539798383398946",
   "659865209741246514",
@@ -18,40 +19,69 @@ const EXCLUDED_IDS = [
   "1361726772374147112",
 ];
 
+function seededRandom(seed: number) {
+  const x = Math.sin(seed) * 10000;
+  return x - Math.floor(x);
+}
+
+function sample<T>(data: T[], size: number, seed: number = 0xdeadbeef): T[] {
+  // create a shallow copy so we dont mutate the original data
+  const result = [...data];
+  const count = Math.min(size, result.length); // cap size to data length so it never overflows
+
+  // fisher-yates style shuffle
+  for (let i = 0; i < count; i++) {
+    const j = i + Math.floor(seededRandom(seed + i) * (result.length - i));
+    [result[i], result[j]] = [result[j], result[i]]; // swap ith and jth elements in result array
+  }
+
+  // return the first n elements which are now randomly populated
+  return result.slice(0, count);
+}
+
+function computeSampledTiers(supporters: Supporter[]) {
+  const validSupporters = supporters.filter(
+    (s) =>
+      !EXCLUDED_IDS.includes(s.id) && s.premiumtype >= 1 && s.premiumtype <= 3,
+  );
+
+  const seed = parseInt(
+    new Date().toISOString().slice(0, 13).replace(/[-T:]/g, ""), // seed format: YYYYMMDDHH
+  );
+
+  return {
+    tier3Supporters: sample(
+      validSupporters.filter((s) => s.premiumtype === 3),
+      MAX_SUPPORTERS_PER_TIER,
+      seed,
+    ),
+    tier2Supporters: sample(
+      validSupporters.filter((s) => s.premiumtype === 2),
+      MAX_SUPPORTERS_PER_TIER,
+      seed,
+    ),
+    tier1Supporters: sample(
+      validSupporters.filter((s) => s.premiumtype === 1),
+      MAX_SUPPORTERS_PER_TIER,
+      seed,
+    ),
+  };
+}
+
 export default function SupportersSection({
   supporters,
 }: SupportersSectionProps) {
   const BADGE_BASE_URL =
     "https://assets.jailbreakchangelogs.xyz/assets/website_icons";
 
-  // Filter and separate supporters by tier using useMemo
-  const { tier3Supporters, tier2Supporters, tier1Supporters } = useMemo(() => {
-    // Filter supporters to only include valid premium types (1, 2, or 3)
-    const validSupporters = supporters.filter(
-      (supporter) =>
-        !EXCLUDED_IDS.includes(supporter.id) &&
-        supporter.premiumtype >= 1 &&
-        supporter.premiumtype <= 3,
-    );
+  const [sampledTiers, setSampledTiers] = useState<{
+    tier3Supporters: Supporter[];
+    tier2Supporters: Supporter[];
+    tier1Supporters: Supporter[];
+  }>(() => computeSampledTiers(supporters));
 
-    // Separate supporters by tier
-    const tier3 = validSupporters
-      .filter((s) => s.premiumtype === 3)
-      .sort((a, b) => parseInt(b.created_at) - parseInt(a.created_at));
-
-    const tier2 = validSupporters
-      .filter((s) => s.premiumtype === 2)
-      .sort((a, b) => parseInt(b.created_at) - parseInt(a.created_at));
-
-    const tier1 = validSupporters
-      .filter((s) => s.premiumtype === 1)
-      .sort((a, b) => parseInt(b.created_at) - parseInt(a.created_at));
-
-    return {
-      tier3Supporters: tier3,
-      tier2Supporters: tier2,
-      tier1Supporters: tier1,
-    };
+  useEffect(() => {
+    setSampledTiers(computeSampledTiers(supporters));
   }, [supporters]);
 
   const renderSupporterCard = (supporter: Supporter) => (
@@ -144,9 +174,9 @@ export default function SupportersSection({
   };
 
   const hasAnySupporters =
-    tier3Supporters.length > 0 ||
-    tier2Supporters.length > 0 ||
-    tier1Supporters.length > 0;
+    sampledTiers.tier3Supporters.length > 0 ||
+    sampledTiers.tier2Supporters.length > 0 ||
+    sampledTiers.tier1Supporters.length > 0;
 
   if (!hasAnySupporters) {
     return null;
@@ -161,17 +191,17 @@ export default function SupportersSection({
 
       <div className="container mx-auto px-4">
         {renderTierSection(
-          tier3Supporters,
+          sampledTiers.tier3Supporters,
           "Supporter III",
           "bg-linear-to-r from-[#FFD700] to-[#DAA520]",
         )}
         {renderTierSection(
-          tier2Supporters,
+          sampledTiers.tier2Supporters,
           "Supporter II",
           "bg-linear-to-r from-[#C0C0C0] to-[#A9A9A9]",
         )}
         {renderTierSection(
-          tier1Supporters,
+          sampledTiers.tier1Supporters,
           "Supporter I",
           "bg-linear-to-r from-[#CD7F32] to-[#B87333]",
         )}
