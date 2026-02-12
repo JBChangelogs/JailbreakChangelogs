@@ -9,8 +9,6 @@ import {
 import { CommentData } from "@/utils/api";
 import { UserData } from "@/types/auth";
 import dynamic from "next/dynamic";
-import ChangelogSummary from "./ChangelogSummary";
-import { isFeatureEnabled } from "@/utils/featureFlags";
 
 // Dynamic imports for heavy components
 const ChangelogMediaEmbed = dynamic(() => import("./ChangelogMediaEmbed"), {
@@ -138,15 +136,6 @@ const ChangelogContent: React.FC<ChangelogContentProps> = ({
               </div>
             )}
           </div>
-
-          {/* AI Summary */}
-          {isFeatureEnabled("AI_SUMMARY") && (
-            <ChangelogSummary
-              changelogId={changelogId}
-              title={title}
-              content={sections}
-            />
-          )}
 
           <div className="prose prose-invert max-w-none">
             {parsedSections.map((section, sectionIndex) => (
