@@ -4,6 +4,7 @@ import { TradeItem } from "@/types/trading";
 import { getCategoryColor, getCategoryIcon } from "@/utils/categoryIcons";
 import { formatFullValue } from "@/utils/values";
 import { getDemandColor, getTrendColor } from "@/utils/badgeColors";
+import { Icon } from "@/components/ui/IconWrapper";
 
 interface TradeAdTooltipProps {
   item: TradeItem;
@@ -55,6 +56,17 @@ export const TradeAdTooltip: React.FC<TradeAdTooltipProps> = ({ item }) => {
             {item.is_seasonal === 1 && (
               <span className="text-primary-text border-border-card bg-tertiary-bg/40 flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl">
                 Seasonal
+              </span>
+            )}
+            {item.isDuped && (
+              <span className="border-status-error bg-status-error/90 text-form-button-text flex h-6 items-center rounded-md border px-2.5 text-xs leading-none font-semibold">
+                Duped
+              </span>
+            )}
+            {item.isOG && (
+              <span className="text-primary-text bg-tertiary-bg/40 border-border-card inline-flex h-6 items-center gap-1.5 rounded-lg border px-2.5 text-xs leading-none font-medium shadow-sm">
+                <Icon icon="mdi:star-four-points" className="h-3.5 w-3.5" />
+                OG
               </span>
             )}
           </div>

@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from "react";
 import { TradeAd } from "@/types/trading";
-import { UserData } from "@/types/auth";
 import { TradeItem } from "@/types/trading";
 import { TradeAdCard } from "./TradeAdCard";
 import { TradeAdTabs } from "./TradeAdTabs";
@@ -17,7 +16,7 @@ import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { useAuthContext } from "@/contexts/AuthContext";
 
 interface TradeAdsProps {
-  initialTradeAds: (TradeAd & { user: UserData | null })[];
+  initialTradeAds: TradeAd[];
   initialItems?: TradeItem[];
 }
 
@@ -26,8 +25,7 @@ export default function TradeAds({
   initialItems = [],
 }: TradeAdsProps) {
   const { user } = useAuthContext();
-  const [tradeAds, setTradeAds] =
-    useState<(TradeAd & { user: UserData | null })[]>(initialTradeAds);
+  const [tradeAds, setTradeAds] = useState<TradeAd[]>(initialTradeAds);
   const [items] = useState<TradeItem[]>(initialItems);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<
@@ -332,9 +330,7 @@ export default function TradeAds({
     activeTab === "supporter" ? supporterTradeAds : sortedTradeAds;
 
   // Helper function to filter trade ads by search query
-  const filterTradeAdsBySearch = (
-    trades: (TradeAd & { user: UserData | null })[],
-  ) => {
+  const filterTradeAdsBySearch = (trades: TradeAd[]) => {
     if (!searchQuery.trim()) return trades;
 
     const query = searchQuery.toLowerCase().trim();
@@ -468,7 +464,7 @@ export default function TradeAds({
               )
             ) : (
               <Masonry
-                columns={{ xs: 1, sm: 2, md: 2, lg: 3 }}
+                columns={{ xs: 1, sm: 1, md: 2, lg: 2, xl: 2 }}
                 spacing={2}
                 sx={{
                   width: "auto",
@@ -576,7 +572,7 @@ export default function TradeAds({
             ) : (
               <>
                 <Masonry
-                  columns={{ xs: 1, sm: 2, md: 2, lg: 3 }}
+                  columns={{ xs: 1, sm: 1, md: 2, lg: 2, xl: 2 }}
                   spacing={2}
                   sx={{
                     width: "auto",
@@ -714,7 +710,7 @@ export default function TradeAds({
                   )
                 ) : (
                   <Masonry
-                    columns={{ xs: 1, sm: 2, md: 2, lg: 3 }}
+                    columns={{ xs: 1, sm: 1, md: 2, lg: 2, xl: 2 }}
                     spacing={2}
                     sx={{
                       width: "auto",

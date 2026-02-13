@@ -3,8 +3,7 @@ import TradingDescription from "@/components/trading/TradingDescription";
 import DiscordTradeAdBanner from "@/components/trading/DiscordTradeAdBanner";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import TradeAds from "@/components/trading/TradeAds";
-import { fetchTradeAds, fetchUsersBatch, fetchItems } from "@/utils/api";
-import type { TradeAd } from "@/types/trading";
+import { fetchTradeAds, fetchItems } from "@/utils/api";
 import Loading from "./loading";
 
 export const dynamic = "force-dynamic";
@@ -26,21 +25,11 @@ export default function TradingPage() {
 
 async function TradeAdsWrapper() {
   const tradeAds = await fetchTradeAds();
-  const userIds = [
-    ...new Set(tradeAds.map((trade: TradeAd) => trade.author)),
-  ] as string[];
-  const userMap = await fetchUsersBatch(userIds);
-  const tradeAdsWithUsers = tradeAds.map((trade: TradeAd) => ({
-    ...trade,
-    user: userMap[trade.author] || null,
-  }));
   const items = await fetchItems();
   const tradeItems = items.map((item) => ({
     ...item,
     is_sub: false,
     side: undefined,
   }));
-  return (
-    <TradeAds initialTradeAds={tradeAdsWithUsers} initialItems={tradeItems} />
-  );
+  return <TradeAds initialTradeAds={tradeAds} initialItems={tradeItems} />;
 }
