@@ -83,12 +83,13 @@ const ItemDetailsTabs = React.memo(
           value={String(value)}
           onValueChange={(tabValue) => onChange(Number(tabValue))}
         >
-          <TabsList>
+          <TabsList fullWidth>
             {labels.map((label, idx) => (
               <TabsTrigger
                 key={label}
                 value={String(idx)}
                 id={`item-tab-${idx}`}
+                fullWidth
               >
                 {label}
               </TabsTrigger>

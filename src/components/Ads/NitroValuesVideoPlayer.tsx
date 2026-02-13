@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { useAuthContext } from "@/contexts/AuthContext";
+import { cn } from "@/lib/utils";
 
 type NitroAdsWithRemove = {
   createAd?: (id: string, config: typeof VALUES_CONFIG) => Promise<void>;
@@ -91,11 +92,13 @@ export default function NitroValuesVideoPlayer({ className }: Props) {
 
   // Apply min-height to prevent CLS
   return (
-    <div
-      id={SLOT_ID}
-      ref={containerRef}
-      className={className}
-      style={{ minHeight: "250px" }}
-    />
+    <div className={cn("w-full overflow-x-hidden", className)}>
+      <div
+        id={SLOT_ID}
+        ref={containerRef}
+        className="mx-auto max-w-full"
+        style={{ minHeight: "250px" }}
+      />
+    </div>
   );
 }

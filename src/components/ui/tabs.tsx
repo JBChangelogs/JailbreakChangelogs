@@ -11,16 +11,18 @@ interface TabsListProps extends React.ComponentPropsWithoutRef<
   typeof TabsPrimitive.List
 > {
   noBottomRadius?: boolean;
+  fullWidth?: boolean;
 }
 
 const TabsList = React.forwardRef<
   React.ComponentRef<typeof TabsPrimitive.List>,
   TabsListProps
->(({ className, noBottomRadius = false, ...props }, ref) => (
+>(({ className, noBottomRadius = false, fullWidth = false, ...props }, ref) => (
   <TabsPrimitive.List
     ref={ref}
     className={cn(
       "border-border-card bg-tertiary-bg text-secondary-text inline-flex h-auto min-w-max items-center justify-start gap-1 border p-1",
+      fullWidth && "w-full min-w-0",
       noBottomRadius ? "rounded-t-lg rounded-b-none" : "rounded-lg",
       className,
     )}
@@ -29,14 +31,21 @@ const TabsList = React.forwardRef<
 ));
 TabsList.displayName = TabsPrimitive.List.displayName;
 
+interface TabsTriggerProps extends React.ComponentPropsWithoutRef<
+  typeof TabsPrimitive.Trigger
+> {
+  fullWidth?: boolean;
+}
+
 const TabsTrigger = React.forwardRef<
   React.ComponentRef<typeof TabsPrimitive.Trigger>,
-  React.ComponentPropsWithoutRef<typeof TabsPrimitive.Trigger>
->(({ className, ...props }, ref) => (
+  TabsTriggerProps
+>(({ className, fullWidth = false, ...props }, ref) => (
   <TabsPrimitive.Trigger
     ref={ref}
     className={cn(
       "ring-offset-background focus-visible:ring-ring text-secondary-text hover:text-primary-text hover:bg-quaternary-bg data-[state=active]:bg-secondary-bg data-[state=active]:text-primary-text inline-flex cursor-pointer items-center justify-center rounded-md px-3 py-2 text-sm font-medium whitespace-nowrap transition-all focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50",
+      fullWidth && "flex-1",
       className,
     )}
     {...props}

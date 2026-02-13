@@ -305,7 +305,7 @@ export default function RobberyCard({ robbery }: RobberyCardProps) {
 
           <div className="flex items-center justify-between">
             <span className="text-secondary-text">Server Time:</span>
-            <span className="font-mono">
+            <span className="text-primary-text font-mono">
               {formatServerTime(robbery.server_time)}
             </span>
           </div>
