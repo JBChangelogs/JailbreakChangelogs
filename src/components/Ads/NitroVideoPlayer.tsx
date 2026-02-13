@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import { useAuthContext } from "@/contexts/AuthContext";
 
@@ -15,6 +15,26 @@ export default function NitroVideoPlayer() {
   const { user } = useAuthContext();
   const pathname = usePathname();
   const createdRef = useRef(false);
+  const [hasMobileSheetOpen, setHasMobileSheetOpen] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const syncSheetState = () => {
+      const w = window as Window & { __jbMobileSheetOpenCount?: number };
+      const count = w.__jbMobileSheetOpenCount ?? 0;
+      const isOpen =
+        count > 0 || document.body.dataset.mobileSheetOpen === "true";
+      setHasMobileSheetOpen(isOpen);
+    };
+
+    syncSheetState();
+    window.addEventListener("jb-sheet-toggle", syncSheetState);
+
+    return () => {
+      window.removeEventListener("jb-sheet-toggle", syncSheetState);
+    };
+  }, []);
 
   useEffect(() => {
     const tier = user?.premiumtype ?? 0;
@@ -26,7 +46,7 @@ export default function NitroVideoPlayer() {
     const hasDedicatedVideoNcPlayer = false;
 
     const shouldSuppressFloatingPlayer =
-      isSupporter || hasDedicatedVideoNcPlayer;
+      isSupporter || hasDedicatedVideoNcPlayer || hasMobileSheetOpen;
 
     const removeFloatingPlayer = () => {
       const el = document.getElementById(VIDEO_PLAYER_ID);
@@ -91,7 +111,7 @@ export default function NitroVideoPlayer() {
     ).catch(() => {
       createdRef.current = false;
     });
-  }, [user?.premiumtype, pathname]);
+  }, [user?.premiumtype, pathname, hasMobileSheetOpen]);
 
   return null;
 }

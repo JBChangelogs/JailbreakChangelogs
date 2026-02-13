@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Image from "next/image";
+import { Switch } from "@headlessui/react";
 import { Icon } from "../ui/IconWrapper";
 import { Sheet, SheetContent } from "../ui/sheet";
 import {
@@ -23,6 +24,20 @@ export default function HyperchromeCalculatorModal({
   open,
   onClose,
 }: HyperchromeCalculatorModalProps) {
+  const setMobileSheetOpen = (isOpen: boolean) => {
+    if (typeof window === "undefined") return;
+    const w = window as Window & { __jbMobileSheetOpenCount?: number };
+    const current = w.__jbMobileSheetOpenCount ?? 0;
+    const next = isOpen ? current + 1 : Math.max(0, current - 1);
+    w.__jbMobileSheetOpenCount = next;
+    if (next > 0) {
+      document.body.dataset.mobileSheetOpen = "true";
+    } else {
+      delete document.body.dataset.mobileSheetOpen;
+    }
+    window.dispatchEvent(new Event("jb-sheet-toggle"));
+  };
+
   const hyperchromeRobberyImages = [
     { name: "HyperRed", robbery: "Tomb" },
     { name: "HyperOrange", robbery: "Museum" },
@@ -83,7 +98,6 @@ export default function HyperchromeCalculatorModal({
   const [mounted, setMounted] = useState(false);
   const [level, setLevel] = useState<string>("");
   const [pity, setPity] = useState<string>("");
-  const [step, setStep] = useState(1);
   const [hasCalculated, setHasCalculated] = useState(false);
   const [resultRobberiesNeeded, setResultRobberiesNeeded] = useState<number>(0);
   const [resultOtherPity, setResultOtherPity] = useState<Record<
@@ -103,7 +117,6 @@ export default function HyperchromeCalculatorModal({
     // reset when closing
     setLevel("");
     setPity("");
-    setStep(1);
     setHasCalculated(false);
     setResultRobberiesNeeded(0);
     setResultOtherPity(null);
@@ -113,16 +126,6 @@ export default function HyperchromeCalculatorModal({
     setIsSmallServer(false);
     onClose();
   }, [onClose]);
-
-  const handleNext = () => {
-    const parsedLevel = parseInt(level);
-    if (isNaN(parsedLevel) || parsedLevel < 0 || parsedLevel > 4) {
-      toast.error("Please enter a valid level (0-4)");
-      return;
-    }
-    setHasCalculated(false);
-    setStep(2);
-  };
 
   const handleCalculate = () => {
     const parsedLevel = parseInt(level);
@@ -180,6 +183,16 @@ export default function HyperchromeCalculatorModal({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isSmallServer]);
 
+  useEffect(() => {
+    setMobileSheetOpen(open);
+
+    return () => {
+      if (open) {
+        setMobileSheetOpen(false);
+      }
+    };
+  }, [open]);
+
   if (!mounted) return null;
 
   return (
@@ -205,22 +218,13 @@ export default function HyperchromeCalculatorModal({
               Answer a few questions to calculate robberies needed to reach the
               next level.
             </p>
-            <div className="text-secondary-text mt-2 flex items-center justify-between text-sm">
-              <span>Step {step} of 2</span>
-              {hasCalculated && (
-                <Button
-                  size="sm"
-                  onClick={() => setIsSmallServer(!isSmallServer)}
-                >
-                  <Icon icon="heroicons:arrows-right-left" />
-                  Switch to {isSmallServer ? "Big Server" : "Small Server"}
-                </Button>
-              )}
+            <div className="text-secondary-text mt-2 text-sm">
+              Enter your level and current pity, then calculate.
             </div>
           </div>
 
           <div className="mb-4">
-            <details className="border-border-card bg-tertiary-bg hover:border-border-focus rounded-lg border p-4">
+            <details className="border-border-card bg-tertiary-bg rounded-lg border p-4">
               <summary className="text-secondary-text cursor-pointer text-sm font-bold tracking-wider uppercase">
                 Pities and Chances
               </summary>
@@ -287,7 +291,7 @@ export default function HyperchromeCalculatorModal({
           </div>
 
           <div className="mb-4">
-            <details className="border-border-card bg-tertiary-bg hover:border-border-focus rounded-lg border p-4">
+            <details className="border-border-card bg-tertiary-bg rounded-lg border p-4">
               <summary className="text-secondary-text cursor-pointer text-sm font-bold tracking-wider uppercase">
                 Hyperchrome Colors by Robbery
               </summary>
@@ -327,69 +331,85 @@ export default function HyperchromeCalculatorModal({
             </details>
           </div>
 
-          {step === 1 && (
-            <div className="mb-4">
-              <label
-                htmlFor="level"
-                className="text-secondary-text mb-1 text-xs tracking-wider uppercase"
+          <div className="mb-4">
+            <label
+              htmlFor="level"
+              className="text-secondary-text mb-1 text-xs tracking-wider uppercase"
+            >
+              Hyperchrome Level
+            </label>
+            <div className="text-secondary-text mb-2 text-xs">
+              Level 0 means you have no hyperchrome yet.
+            </div>
+            <input
+              type="number"
+              id="level"
+              min={0}
+              max={4}
+              className="border-border-card bg-form-input text-primary-text focus:border-button-info w-full rounded border p-3 text-sm focus:outline-none"
+              placeholder="Enter your hyperchrome level (0-4)"
+              value={level}
+              onChange={(e) => setLevel(e.target.value)}
+            />
+          </div>
+
+          <div className="mb-4">
+            <label
+              htmlFor="pity"
+              className="text-secondary-text mb-2 block text-xs tracking-wider uppercase"
+            >
+              Current {isSmallServer ? "Small" : "Big"} Server Pity
+            </label>
+            <input
+              type="number"
+              id="pity"
+              min={0}
+              max={100}
+              step="any"
+              className="border-border-card bg-form-input text-primary-text focus:border-button-info w-full rounded border p-3 text-sm focus:outline-none"
+              placeholder={`Enter your current ${isSmallServer ? "small" : "big"} server pity %`}
+              value={pity}
+              onChange={(e) => setPity(e.target.value)}
+            />
+            <div className="text-secondary-text mt-2 text-xs">
+              {isSmallServer
+                ? "Reaching 66.6% in a small server is equivalent to 100% in a big server, guaranteeing an instant level-up!"
+                : "Big server pity is the baseline; reaching 100% guarantees an instant level-up."}
+            </div>
+            <div className="mt-4 flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <span className="text-secondary-text text-xs tracking-wider uppercase">
+                  Small Server
+                </span>
+                <Switch
+                  checked={isSmallServer}
+                  onChange={setIsSmallServer}
+                  className={`relative inline-flex h-6 w-11 cursor-pointer items-center rounded-full transition-colors focus:outline-none ${
+                    isSmallServer ? "bg-button-info" : "bg-button-secondary"
+                  }`}
+                  aria-label="Toggle small server mode"
+                >
+                  <span
+                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                      isSmallServer ? "translate-x-6" : "translate-x-1"
+                    }`}
+                  />
+                </Switch>
+              </div>
+              <Button
+                size="sm"
+                type="button"
+                onClick={handleCalculate}
+                data-umami-event="Hyper Pity Calculate"
               >
-                Hyperchrome Level
-              </label>
-              <div className="text-secondary-text mb-2 text-xs">
-                Level 0 means you have no hyperchrome yet.
-              </div>
-              <input
-                type="number"
-                id="level"
-                min={0}
-                max={4}
-                className="border-border-card bg-form-input text-primary-text hover:border-border-focus focus:border-button-info w-full rounded border p-3 text-sm focus:outline-none"
-                placeholder="Enter your hyperchrome level (0-4)"
-                value={level}
-                onChange={(e) => setLevel(e.target.value)}
-              />
+                Calculate
+              </Button>
             </div>
-          )}
+          </div>
 
-          {step === 2 && !hasCalculated && (
+          {hasCalculated && resultOtherPity && (
             <div className="mb-4">
-              <div className="mb-2 flex items-center justify-between gap-4">
-                <label
-                  htmlFor="pity"
-                  className="text-secondary-text text-xs tracking-wider uppercase"
-                >
-                  Current {isSmallServer ? "Small" : "Big"} Server Pity
-                </label>
-                <Button
-                  size="sm"
-                  onClick={() => setIsSmallServer(!isSmallServer)}
-                >
-                  Switch to {isSmallServer ? "Big Server" : "Small Server"}
-                </Button>
-              </div>
-              <input
-                type="number"
-                id="pity"
-                min={0}
-                max={100}
-                step="any"
-                className="border-border-card bg-form-input text-primary-text hover:border-border-focus focus:border-button-info w-full rounded border p-3 text-sm focus:outline-none"
-                placeholder={`Enter your current ${isSmallServer ? "small" : "big"} server pity %`}
-                value={pity}
-                onChange={(e) => setPity(e.target.value)}
-              />
-              {isSmallServer && (
-                <div className="text-secondary-text mt-2 text-xs">
-                  Reaching 66.6% in a small server is equivalent to 100% in a
-                  big server, guaranteeing an instant level-up!
-                </div>
-              )}
-            </div>
-          )}
-
-          {hasCalculated && step === 2 && resultOtherPity && (
-            <div className="mb-4">
-              <div className="border-border-card bg-tertiary-bg hover:border-border-focus rounded-lg border p-4">
+              <div className="border-border-card bg-tertiary-bg rounded-lg border p-4">
                 <div className="mb-3 flex items-center justify-between">
                   <div className="text-secondary-text text-sm font-bold tracking-wider uppercase">
                     Result
@@ -397,8 +417,8 @@ export default function HyperchromeCalculatorModal({
                   <div
                     className={`rounded-full px-2 py-0.5 text-[10px] font-bold tracking-wider uppercase ${
                       isSmallServer
-                        ? "bg-amber-500/10 text-amber-500"
-                        : "bg-blue-500/10 text-blue-500"
+                        ? "text-primary-text bg-amber-500/10"
+                        : "text-primary-text bg-blue-500/10"
                     }`}
                   >
                     {isSmallServer
@@ -407,7 +427,7 @@ export default function HyperchromeCalculatorModal({
                   </div>
                 </div>
 
-                <div className="bg-primary-bg mb-4 rounded-lg p-5">
+                <div className="border-border-card bg-secondary-bg mb-4 rounded-lg border p-5">
                   <div className="mb-2 flex items-center justify-center gap-3">
                     <div className="text-primary-text text-4xl font-black">
                       {resultRobberiesNeeded}
@@ -429,7 +449,7 @@ export default function HyperchromeCalculatorModal({
                   </div>
                 </div>
 
-                <div className="border-warning/30 bg-primary-bg mb-4 rounded-lg border p-4">
+                <div className="border-border-card bg-secondary-bg mb-4 rounded-lg border p-4">
                   <div className="flex items-start gap-3">
                     <Icon
                       icon="emojione:light-bulb"
@@ -481,9 +501,9 @@ export default function HyperchromeCalculatorModal({
               </div>
             </div>
           )}
-          {hasCalculated && step === 2 && resultOtherPity && (
+          {hasCalculated && resultOtherPity && (
             <div className="mb-4">
-              <div className="border-border-card bg-tertiary-bg hover:border-border-focus rounded-lg border p-4">
+              <div className="border-border-card bg-tertiary-bg rounded-lg border p-4">
                 <div className="text-secondary-text mb-3 text-sm font-bold tracking-wider uppercase">
                   Alternative Level Calculations
                 </div>
@@ -507,7 +527,7 @@ export default function HyperchromeCalculatorModal({
                     return (
                       <div
                         key={lvlNum}
-                        className="bg-primary-bg rounded-lg p-3 text-center"
+                        className="border-border-card bg-secondary-bg rounded-lg border p-3 text-center"
                       >
                         <div className="text-primary-text text-lg font-bold">
                           Level {lvlNum}
@@ -522,36 +542,6 @@ export default function HyperchromeCalculatorModal({
               </div>
             </div>
           )}
-        </div>
-
-        <div className="modal-footer flex shrink-0 justify-end gap-2 px-6 py-4">
-          {step > 1 && (
-            <Button
-              variant="ghost"
-              onClick={() => {
-                if (hasCalculated) {
-                  setHasCalculated(false);
-                } else {
-                  setStep((s) => Math.max(1, s - 1));
-                }
-              }}
-            >
-              Back
-            </Button>
-          )}
-          {step < 2 ? (
-            <Button type="button" onClick={handleNext}>
-              Next
-            </Button>
-          ) : !hasCalculated ? (
-            <Button
-              type="button"
-              onClick={handleCalculate}
-              data-umami-event="Hyper Pity Calculate"
-            >
-              Calculate
-            </Button>
-          ) : null}
         </div>
       </SheetContent>
     </Sheet>
