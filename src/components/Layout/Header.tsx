@@ -407,7 +407,7 @@ export default function Header() {
         All Calculators
       </Link>
       <Link
-        href="/values#hyper-pity-calc"
+        href="/calculators/hyperchrome-pity"
         onClick={handleDrawerToggle}
         className="hover:bg-button-info-hover/10 text-primary-text cursor-pointer px-8 py-2 transition-colors"
       >

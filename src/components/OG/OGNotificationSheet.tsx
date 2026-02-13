@@ -24,7 +24,7 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useMediaQuery } from "@mui/material";
+import { Checkbox } from "@/components/ui/checkbox";
 
 /**
  * Item type for partial items list
@@ -53,7 +53,6 @@ export default function OGNotificationSheet({
   onClose,
 }: OGNotificationSheetProps) {
   const { user, setLoginModal } = useAuthContext();
-  const isMobile = useMediaQuery("(max-width:1024px)");
 
   // State management
   const [items, setItems] = useState<PartialItem[]>([]);
@@ -67,22 +66,6 @@ export default function OGNotificationSheet({
 
   const { modalState, openModal, closeModal } = useSupporterModal();
   const sheetContentRef = useRef<HTMLDivElement | null>(null);
-
-  const setMobileSheetOpen = (open: boolean) => {
-    if (typeof window === "undefined" || typeof document === "undefined") {
-      return;
-    }
-    const w = window as Window & { __jbMobileSheetOpenCount?: number };
-    const current = w.__jbMobileSheetOpenCount ?? 0;
-    const next = Math.max(0, current + (open ? 1 : -1));
-    w.__jbMobileSheetOpenCount = next;
-    if (next > 0) {
-      document.body.dataset.mobileSheetOpen = "true";
-    } else {
-      delete document.body.dataset.mobileSheetOpen;
-    }
-    window.dispatchEvent(new Event("jb-sheet-toggle"));
-  };
 
   /**
    * Fetches the partial items list from the API
@@ -136,17 +119,6 @@ export default function OGNotificationSheet({
       setIsLoadingNotifications(false);
     }
   }, [user?.roblox_id]);
-
-  useEffect(() => {
-    if (!isMobile) return;
-    if (isOpen) {
-      setMobileSheetOpen(true);
-      return () => {
-        setMobileSheetOpen(false);
-      };
-    }
-    return undefined;
-  }, [isMobile, isOpen]);
 
   // Fetch items when sheet opens
   useEffect(() => {
@@ -649,19 +621,15 @@ export default function OGNotificationSheet({
           </div>
         </div>
 
-        <div
-          className="relative flex shrink-0 cursor-pointer items-center"
-          onClick={() => toggleNotification(item)}
-        >
+        <div className="relative flex shrink-0 items-center">
           {isProcessing ? (
             <div className="border-button-info h-4 w-4 animate-spin rounded-full border-2 border-t-transparent" />
           ) : (
-            <input
-              type="checkbox"
+            <Checkbox
               checked={isNotified}
-              readOnly
+              onCheckedChange={() => toggleNotification(item)}
               disabled={processingItemId !== null}
-              className="text-button-info focus:ring-button-info bg-primary-bg border-border-card h-4 w-4 cursor-pointer rounded disabled:cursor-not-allowed"
+              aria-label={`Toggle notification for ${item.name}`}
             />
           )}
         </div>
