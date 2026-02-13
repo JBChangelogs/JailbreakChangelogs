@@ -278,8 +278,8 @@ export default function ItemDetailsClient({
                   <Image
                     src={getItemImagePath(item.type, item.name)}
                     alt={item.name}
-                    width={854}
-                    height={480}
+                    width={2560}
+                    height={1440}
                     fetchPriority="high"
                     className={`h-full w-full object-cover transition-opacity duration-300 ${
                       isHovered ? "opacity-0" : "opacity-100"
@@ -301,8 +301,8 @@ export default function ItemDetailsClient({
                 <Image
                   src={getItemImagePath(item.type, item.name)}
                   alt={item.name}
-                  width={854}
-                  height={480}
+                  width={2560}
+                  height={1440}
                   fetchPriority="high"
                   className="h-full w-full object-cover"
                   onError={handleImageError}
@@ -456,7 +456,7 @@ export default function ItemDetailsClient({
                 currentItem.metadata &&
                 Object.keys(currentItem.metadata).length > 0 && (
                   <div className="mt-3">
-                    <div className="border-border-card bg-secondary-bg rounded-md border px-2 py-2">
+                    <div className="border-border-card bg-secondary-bg rounded-md border p-4">
                       <div className="text-primary-text text-xs font-semibold tracking-wide uppercase">
                         Official Trading Metrics
                       </div>

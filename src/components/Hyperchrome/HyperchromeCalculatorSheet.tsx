@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Image from "next/image";
 import { Switch } from "@headlessui/react";
 import { Icon } from "../ui/IconWrapper";
@@ -51,14 +51,14 @@ export default function HyperchromeCalculatorModal({
     { name: "HyperPink", robbery: "Crown Jewel" },
   ];
   const hyperchromeBorderColors: Record<string, string> = {
-    HyperRed: "#ef4444",
-    HyperOrange: "#f97316",
-    HyperYellow: "#f59e0b",
-    HyperGreen: "#22c55e",
-    HyperDiamond: "#60a5fa",
-    HyperBlue: "#3b82f6",
-    HyperPurple: "#a855f7",
-    HyperPink: "#ec4899",
+    HyperRed: "hsl(358, 99%, 53%)",
+    HyperOrange: "hsl(45, 87%, 66%)",
+    HyperYellow: "hsl(57, 99%, 59%)",
+    HyperGreen: "hsl(119, 100%, 60%)",
+    HyperDiamond: "hsl(180, 99%, 51%)",
+    HyperBlue: "hsl(275, 99%, 52%)",
+    HyperPurple: "hsl(296, 88%, 78%)",
+    HyperPink: "hsl(327, 93%, 54%)",
   };
   const referenceRows = [
     {
@@ -110,8 +110,6 @@ export default function HyperchromeCalculatorModal({
   const [resultPity, setResultPity] = useState<number>(0);
   const [resultTipRobberies, setResultTipRobberies] = useState<number>(0);
   const [isSmallServer, setIsSmallServer] = useState(false);
-  const [isColorsOpen, setIsColorsOpen] = useState(false);
-  const colorsSectionRef = useRef<HTMLDetailsElement | null>(null);
 
   useEffect(() => {
     setMounted(true);
@@ -247,163 +245,7 @@ export default function HyperchromeCalculatorModal({
         </div>
       )}
 
-      <div className="modal-content flex-1 overflow-y-auto p-6">
-        <div className="mb-4">
-          <div className={sectionTitleClass}>Pities and Chances</div>
-          <div
-            className={`text-primary-text/80 mt-3 space-y-2 ${bodyTextClass}`}
-          >
-            <p>
-              <span className="font-semibold">HyperChromes</span> are the rarest
-              rewards from the bonus roulette. They come in{" "}
-              <button
-                type="button"
-                onClick={() => {
-                  setIsColorsOpen((prev) => {
-                    const next = !prev;
-                    if (next) {
-                      setTimeout(() => {
-                        const el = colorsSectionRef.current;
-                        if (!el || typeof window === "undefined") return;
-
-                        const headerOffset = 96;
-                        const elementTop =
-                          el.getBoundingClientRect().top + window.scrollY;
-                        const targetTop = Math.max(
-                          0,
-                          elementTop - headerOffset,
-                        );
-
-                        window.scrollTo({
-                          top: targetTop,
-                          behavior: "smooth",
-                        });
-                      }, 0);
-                    }
-                    return next;
-                  });
-                }}
-                className="text-link hover:text-link-hover cursor-pointer underline-offset-2 hover:underline"
-              >
-                8 different colors
-              </button>
-              , with most major robberies yielding a different color.
-            </p>
-            <p>
-              Players start with a Level 1 HyperChrome after their first
-              successful roll, which can level up to a maximum of Level 5 as
-              they roll more of that color. The chance of getting one is below
-              1% at base rates and depends on its current level. Level 5
-              HyperChromes cannot be leveled further.
-            </p>
-            <p>
-              Upon failing to obtain or evolve a HyperChrome, their pity to that
-              color is increased by a small percentage (the higher the level,
-              the smaller the percentage). The pity to a HyperColor can be
-              viewed as a percentage underneath the bonus roll, provided it is
-              above 10%, otherwise, no number is shown. If their pity reaches
-              100% or above, the player is guaranteed to obtain or evolve their
-              HyperChrome.
-            </p>
-            <p>
-              Upon successfully obtaining or evolving a HyperChrome from a bonus
-              roll (either through chance or through pity), the player&apos;s
-              pity for that color is reset to 0. Trading for a HyperChrome does
-              not reset the pity.
-            </p>
-            <p className="text-primary-text/70">
-              Below is a table containing the approximate probabilities and
-              pities for each level. The odds are lesser and pities require more
-              in small (0-8 players) and private servers.
-            </p>
-          </div>
-          <div className="mt-3 overflow-x-auto">
-            <table
-              className={`text-primary-text min-w-full ${asPage ? "text-sm" : "text-xs"}`}
-            >
-              <thead className="text-secondary-text">
-                <tr className="border-border-card border-b">
-                  <th className="px-2 py-2 text-left font-semibold">Level</th>
-                  <th className="px-2 py-2 text-left font-semibold">
-                    Probability
-                  </th>
-                  <th className="px-2 py-2 text-left font-semibold">
-                    Pity Amount
-                  </th>
-                  <th className="px-2 py-2 text-left font-semibold">
-                    Small Probability
-                  </th>
-                  <th className="px-2 py-2 text-left font-semibold">
-                    Small Pity
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {referenceRows.map((row) => (
-                  <tr
-                    key={row.level}
-                    className="border-border-card/60 border-b last:border-b-0"
-                  >
-                    <td className="px-2 py-2 font-semibold">{row.level}</td>
-                    <td className="px-2 py-2">{row.probability}</td>
-                    <td className="px-2 py-2">{row.pity}</td>
-                    <td className="px-2 py-2">{row.smallProbability}</td>
-                    <td className="px-2 py-2">{row.smallPity}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <div className="mb-4">
-          <details
-            ref={colorsSectionRef}
-            open={isColorsOpen}
-            onToggle={(e) => setIsColorsOpen(e.currentTarget.open)}
-            className="border-border-card bg-tertiary-bg rounded-lg border p-4"
-          >
-            <summary className="text-secondary-text cursor-pointer text-sm font-bold tracking-wider uppercase">
-              Hyperchrome Colors by Robbery
-            </summary>
-            <div className="text-primary-text/70 mt-2 text-xs">
-              Each robbery drops a specific HyperChrome color.
-            </div>
-            <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
-              {hyperchromeRobberyImages.map((item) => {
-                const imageSrc = `https://assets.jailbreakchangelogs.xyz/assets/images/items/hyperchromes/jars/${item.name}.webp`;
-                return (
-                  <div
-                    key={item.name}
-                    className="bg-secondary-bg flex items-center gap-3 rounded-lg border p-3 text-left"
-                    style={{
-                      borderColor:
-                        hyperchromeBorderColors[item.name] ?? "#ffffff1a",
-                    }}
-                  >
-                    <div className="relative h-14 w-14 shrink-0">
-                      <Image
-                        src={imageSrc}
-                        alt={item.name}
-                        fill
-                        className="object-contain"
-                      />
-                    </div>
-                    <div className="min-w-0">
-                      <div className="text-primary-text text-sm font-semibold">
-                        {item.name}
-                      </div>
-                      <div className="text-secondary-text text-xs leading-snug">
-                        {item.robbery}
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </details>
-        </div>
-
+      <div className="flex flex-1 flex-col overflow-y-auto p-6">
         <div className="mb-4">
           <label htmlFor="level" className={inputLabelClass}>
             Hyperchrome Level
@@ -491,6 +333,123 @@ export default function HyperchromeCalculatorModal({
             >
               Calculate
             </Button>
+          </div>
+        </div>
+
+        <div className="mb-4">
+          <div className={sectionTitleClass}>Pities and Chances</div>
+          <div className={`text-primary-text mt-3 space-y-2 ${bodyTextClass}`}>
+            <p>
+              <span className="font-semibold">HyperChromes</span> are the rarest
+              rewards from the bonus roulette. They come in{" "}
+              <span className="text-link">8 different colors</span>, with most
+              major robberies yielding a different color.
+            </p>
+            <p>
+              Players start with a Level 1 HyperChrome after their first
+              successful roll, which can level up to a maximum of Level 5 as
+              they roll more of that color. The chance of getting one is below
+              1% at base rates and depends on its current level. Level 5
+              HyperChromes cannot be leveled further.
+            </p>
+            <p>
+              Upon failing to obtain or evolve a HyperChrome, their pity to that
+              color is increased by a small percentage (the higher the level,
+              the smaller the percentage). The pity to a HyperColor can be
+              viewed as a percentage underneath the bonus roll, provided it is
+              above 10%, otherwise, no number is shown. If their pity reaches
+              100% or above, the player is guaranteed to obtain or evolve their
+              HyperChrome.
+            </p>
+            <p>
+              Upon successfully obtaining or evolving a HyperChrome from a bonus
+              roll (either through chance or through pity), the player&apos;s
+              pity for that color is reset to 0. Trading for a HyperChrome does
+              not reset the pity.
+            </p>
+            <p className="text-primary-text">
+              Below is a table containing the approximate probabilities and
+              pities for each level. The odds are lesser and pities require more
+              in small (0-8 players) and private servers.
+            </p>
+          </div>
+          <div className="mt-3 overflow-x-auto">
+            <table
+              className={`text-primary-text min-w-full ${asPage ? "text-sm" : "text-xs"}`}
+            >
+              <thead className="text-secondary-text">
+                <tr className="border-border-card border-b">
+                  <th className="px-2 py-2 text-left font-semibold">Level</th>
+                  <th className="px-2 py-2 text-left font-semibold">
+                    Probability
+                  </th>
+                  <th className="px-2 py-2 text-left font-semibold">
+                    Pity Amount
+                  </th>
+                  <th className="px-2 py-2 text-left font-semibold">
+                    Small Probability
+                  </th>
+                  <th className="px-2 py-2 text-left font-semibold">
+                    Small Pity
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {referenceRows.map((row) => (
+                  <tr
+                    key={row.level}
+                    className="border-border-card/60 border-b last:border-b-0"
+                  >
+                    <td className="px-2 py-2 font-semibold">{row.level}</td>
+                    <td className="px-2 py-2">{row.probability}</td>
+                    <td className="px-2 py-2">{row.pity}</td>
+                    <td className="px-2 py-2">{row.smallProbability}</td>
+                    <td className="px-2 py-2">{row.smallPity}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div className="mb-4">
+          <div className="text-secondary-text text-sm font-bold tracking-wider uppercase">
+            Hyperchrome Colors by Robbery
+          </div>
+          <div className={`text-primary-text mt-2 ${bodyTextClass}`}>
+            Each robbery drops a specific HyperChrome color.
+          </div>
+          <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {hyperchromeRobberyImages.map((item) => {
+              const imageSrc = `https://assets.jailbreakchangelogs.xyz/assets/images/items/hyperchromes/jars/${item.name}.webp`;
+              return (
+                <div
+                  key={item.name}
+                  className="bg-secondary-bg flex items-center gap-3 rounded-lg border-2 p-3 text-left sm:p-4"
+                  style={{
+                    borderColor:
+                      hyperchromeBorderColors[item.name] ?? "#ffffff1a",
+                  }}
+                >
+                  <div className="relative h-12 w-12 shrink-0 sm:h-14 sm:w-14">
+                    <Image
+                      src={imageSrc}
+                      alt={item.name}
+                      fill
+                      className="object-contain"
+                    />
+                  </div>
+                  <div className="min-w-0">
+                    <div className="text-primary-text text-sm font-semibold sm:text-base">
+                      {item.name}
+                    </div>
+                    <div className="text-secondary-text text-xs leading-snug sm:text-sm">
+                      {item.robbery}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
 

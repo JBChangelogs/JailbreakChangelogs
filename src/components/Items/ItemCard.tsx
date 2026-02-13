@@ -19,7 +19,7 @@ import { getDemandColor, getTrendColor } from "@/utils/badgeColors";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { useIsAuthenticated } from "@/contexts/AuthContext";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   CategoryIconBadge,
   getCategoryColor,
@@ -94,6 +94,7 @@ export default function ItemCard({
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const pathname = usePathname();
+  const router = useRouter();
   const isValuesPage = pathname === "/values";
   const isAuthenticated = useIsAuthenticated();
   const wasSheetOpenRef = useRef(false);
@@ -107,6 +108,10 @@ export default function ItemCard({
         e.target.closest("a") ||
         e.target.closest(".dropdown"))
     ) {
+      return;
+    }
+    if (isValuesPage && e.shiftKey) {
+      router.push(itemUrl);
       return;
     }
     setIsSheetOpen(true);
@@ -366,7 +371,8 @@ export default function ItemCard({
       >
         <div
           ref={mediaRef}
-          className="aspect-h-1 aspect-w-1 bg-primary-bg relative w-full overflow-hidden rounded-t-lg"
+          className="bg-primary-bg relative w-full overflow-hidden rounded-t-lg"
+          style={{ aspectRatio: isValuesPage ? "854 / 480" : "1 / 1" }}
         >
           <div className="absolute top-2 right-2 z-10 flex gap-2">
             <CategoryIconBadge
@@ -866,7 +872,7 @@ export default function ItemCard({
               </div>
             )}
           </div>
-          <div className="bg-primary-bg/60 border-secondary-text mt-4 border-t pt-3 text-center">
+          <div className="border-secondary-text mt-4 border-t pt-3 text-center">
             <div className="text-secondary-text text-xs">
               {currentItemData.last_updated
                 ? `Last updated: ${formatCustomDate(
