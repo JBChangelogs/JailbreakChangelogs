@@ -241,7 +241,7 @@ export default function TradeHistoryList({
                   </a>
                 </div>
               </div>
-              <div className="text-primary-text px-2 py-1 text-xs sm:shrink-0 sm:text-right sm:text-sm">
+              <div className="text-secondary-text text-xs sm:shrink-0 sm:text-right sm:text-sm">
                 {new Date(owner.TradeTime * 1000).toLocaleDateString("en-US", {
                   month: "short",
                   day: "numeric",

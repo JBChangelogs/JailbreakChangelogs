@@ -5,10 +5,14 @@ import Image from "next/image";
 import Link from "next/link";
 import { DupeFinderItem, Item, RobloxUser } from "@/types";
 import { useBatchUserData } from "@/hooks/useBatchUserData";
-import { getDupedValueForItem } from "@/utils/dupeUtils";
 import TradeHistoryModal from "@/components/Modals/TradeHistoryModal";
 import { Icon } from "@/components/ui/IconWrapper";
-import { CategoryIconBadge } from "@/utils/categoryIcons";
+import {
+  CategoryIconBadge,
+  getCategoryColor,
+  getCategoryIcon,
+} from "@/utils/categoryIcons";
+import { formatCustomDate } from "@/utils/timestamp";
 import TradeHistoryList from "./TradeHistoryList";
 import {
   getItemImagePath,
@@ -18,7 +22,6 @@ import {
   getVideoPath,
   handleImageError,
 } from "@/utils/images";
-import { bangers } from "@/app/fonts";
 
 interface DupeComparisonClientProps {
   ogItem: DupeFinderItem;
@@ -240,30 +243,15 @@ export default function DupeComparisonClient({
       )}
 
       {/* Shared Summary Header */}
-      <div className="bg-secondary-bg border-border-card mx-auto max-w-3xl rounded-xl border p-6 text-center shadow-sm">
-        <Link
-          href={`/item/${duplicateItem.categoryTitle}/${duplicateItem.title}`}
-          className="group mb-2 inline-flex items-center justify-center gap-3 transition-opacity"
-        >
-          <h2
-            className={`${bangers.className} text-primary-text group-hover:text-link-hover text-3xl tracking-wide transition-colors`}
-          >
-            {sharedItemData.name}
-          </h2>
-        </Link>
-        <div className="text-secondary-text mb-6 text-sm">
-          Comparison of two known duplicates of this item.
-        </div>
-
-        <div className="flex flex-col items-center gap-8 md:flex-row md:justify-center">
-          {/* Shared Image */}
-          <div className="bg-secondary-bg border-border-card relative h-40 w-full shrink-0 overflow-hidden rounded-lg border md:w-64">
+      <div className="bg-secondary-bg border-border-card mx-auto max-w-4xl rounded-xl border p-6 text-center shadow-sm">
+        <div className="mb-6 flex flex-col items-center gap-6 md:flex-row md:items-stretch md:text-left">
+          <div className="bg-secondary-bg border-border-card relative h-40 w-full shrink-0 overflow-hidden rounded-lg border md:h-auto md:w-64">
             <div className="absolute top-2 left-2 z-10">
               <CategoryIconBadge
                 type={duplicateItem.categoryTitle}
                 isLimited={sharedItemData.is_limited === 1}
                 isSeasonal={sharedItemData.is_seasonal === 1}
-                preferItemType={true} // Shows item type icon if available
+                preferItemType={true}
                 className="h-5 w-5"
               />
             </div>
@@ -324,52 +312,109 @@ export default function DupeComparisonClient({
               />
             )}
           </div>
-
-          {/* Shared Stats */}
-          <div className="grid grid-cols-2 gap-x-8 gap-y-6 text-left">
-            <div>
-              <div className="text-secondary-text mb-1 text-xs font-bold tracking-wider uppercase">
-                Monthly Unique
-              </div>
-              <div className="text-primary-text text-xl font-bold">
-                {sharedItemData?.metadata?.UniqueCirculation
-                  ? sharedItemData.metadata.UniqueCirculation.toLocaleString()
-                  : "N/A"}
-              </div>
-            </div>
-            <div>
-              <div className="text-secondary-text mb-1 text-xs font-bold tracking-wider uppercase">
-                Monthly Traded
-              </div>
-              <div className="text-primary-text text-xl font-bold">
-                {sharedItemData?.metadata?.TimesTraded
-                  ? sharedItemData.metadata.TimesTraded.toLocaleString()
-                  : "N/A"}
-              </div>
-            </div>
-            <div>
-              <div className="text-secondary-text mb-1 text-xs font-bold tracking-wider uppercase">
-                Status
-              </div>
-              <div className="text-primary-text text-xl font-bold">
-                {sharedItemData?.is_limited === 1
-                  ? "Limited"
-                  : sharedItemData?.is_seasonal === 1
-                    ? "Seasonal"
-                    : "N/A"}
-              </div>
-            </div>
-            <div>
-              <div className="text-secondary-text mb-1 text-xs font-bold tracking-wider uppercase">
-                Duped Value
-              </div>
-              <div className="text-primary-text text-xl font-bold">
+          <div className="flex-1">
+            <Link
+              href={`/item/${duplicateItem.categoryTitle}/${duplicateItem.title}`}
+              className="group mb-3 inline-flex items-center justify-center gap-3 transition-opacity md:justify-start"
+            >
+              <h2 className="text-primary-text group-hover:text-link-hover text-3xl font-bold transition-colors">
+                {sharedItemData.name}
+              </h2>
+            </Link>
+            <div className="mb-2 flex flex-wrap items-center justify-center gap-2 md:justify-start">
+              <span
+                className="text-primary-text bg-tertiary-bg/40 flex h-6 items-center gap-1.5 rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl"
+                style={{
+                  borderColor: getCategoryColor(duplicateItem.categoryTitle),
+                }}
+              >
                 {(() => {
-                  const val = getDupedValueForItem(sharedItemData);
-                  return val > 0 ? `$${val.toLocaleString()}` : "N/A";
+                  const categoryIcon = getCategoryIcon(
+                    duplicateItem.categoryTitle,
+                  );
+                  return categoryIcon ? (
+                    <categoryIcon.Icon
+                      className="h-3 w-3"
+                      style={{
+                        color: getCategoryColor(duplicateItem.categoryTitle),
+                      }}
+                    />
+                  ) : null;
                 })()}
-              </div>
+                {duplicateItem.categoryTitle}
+              </span>
+              {sharedItemData.is_limited === 1 && (
+                <span className="text-primary-text border-border-card bg-tertiary-bg/40 inline-flex h-6 items-center gap-1.5 rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl">
+                  <Icon icon="mdi:clock" className="h-3 w-3 text-[#ffd700]" />
+                  Limited
+                </span>
+              )}
+              {sharedItemData.is_seasonal === 1 && (
+                <span className="text-primary-text border-border-card bg-tertiary-bg/40 inline-flex h-6 items-center gap-1.5 rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl">
+                  <Icon
+                    icon="noto-v1:snowflake"
+                    className="h-3 w-3 text-[#40c0e7]"
+                  />
+                  Seasonal
+                </span>
+              )}
             </div>
+            {sharedItemData.metadata &&
+              Object.keys(sharedItemData.metadata).length > 0 && (
+                <div className="bg-tertiary-bg border-border-card mt-5 rounded-md border px-2 py-2">
+                  <div className="text-primary-text text-xs font-semibold tracking-wide uppercase">
+                    Official Trading Metrics
+                  </div>
+                  <div className="text-secondary-text text-xs">
+                    by Badimo •{" "}
+                    {sharedItemData.metadata.LastUpdated
+                      ? `updated ${formatCustomDate(sharedItemData.metadata.LastUpdated)}`
+                      : "unknown date"}
+                  </div>
+                  <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-3">
+                    {typeof sharedItemData.metadata.TimesTraded ===
+                      "number" && (
+                      <div className="border-border-card bg-secondary-bg rounded-md border p-3">
+                        <div className="text-secondary-text text-xs">
+                          Times Traded
+                        </div>
+                        <div className="text-primary-text text-lg font-semibold">
+                          {sharedItemData.metadata.TimesTraded.toLocaleString()}
+                        </div>
+                      </div>
+                    )}
+                    {typeof sharedItemData.metadata.UniqueCirculation ===
+                      "number" && (
+                      <div className="border-border-card bg-secondary-bg rounded-md border p-3">
+                        <div className="text-secondary-text text-xs">
+                          Unique Circulation
+                        </div>
+                        <div className="text-primary-text text-lg font-semibold">
+                          {sharedItemData.metadata.UniqueCirculation.toLocaleString()}
+                        </div>
+                      </div>
+                    )}
+                    {typeof sharedItemData.metadata.DemandMultiple ===
+                      "number" && (
+                      <div className="border-border-card bg-secondary-bg rounded-md border p-3">
+                        <div className="text-secondary-text text-xs">
+                          Demand Multiple
+                        </div>
+                        <div className="text-primary-text text-lg font-semibold">
+                          {sharedItemData.metadata.DemandMultiple.toLocaleString()}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+          </div>
+        </div>
+        <div className="bg-button-info/10 border-border-card text-secondary-text mx-auto flex max-w-2xl items-start gap-4 rounded-lg border p-4 text-sm shadow-sm">
+          <div>
+            <span className="text-primary-text font-bold">Note:</span> We only
+            show 2 copies here. Item 1 can change over time as more duplicates
+            are found.
           </div>
         </div>
       </div>
