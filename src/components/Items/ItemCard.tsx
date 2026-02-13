@@ -60,6 +60,20 @@ const setMobileSheetOpen = (isOpen: boolean) => {
   window.dispatchEvent(new Event("jb-sheet-toggle"));
 };
 
+const setItemSheetOpen = (isOpen: boolean) => {
+  if (typeof window === "undefined" || typeof document === "undefined") return;
+  const w = window as Window & { __jbItemSheetOpenCount?: number };
+  const current = w.__jbItemSheetOpenCount ?? 0;
+  const next = Math.max(0, current + (isOpen ? 1 : -1));
+  w.__jbItemSheetOpenCount = next;
+  if (next > 0) {
+    document.body.dataset.itemSheetOpen = "true";
+  } else {
+    delete document.body.dataset.itemSheetOpen;
+  }
+  window.dispatchEvent(new Event("jb-sheet-toggle"));
+};
+
 interface ItemCardProps {
   item: Item;
   isFavorited: boolean;
@@ -83,6 +97,7 @@ export default function ItemCard({
   const isValuesPage = pathname === "/values";
   const isAuthenticated = useIsAuthenticated();
   const wasSheetOpenRef = useRef(false);
+  const wasItemSheetOpenRef = useRef(false);
 
   const handleCardClick = (e: React.MouseEvent) => {
     // Don't navigate if clicking on interactive elements
@@ -151,6 +166,18 @@ export default function ItemCard({
   }, [isHovered, item.type]);
 
   useEffect(() => {
+    if (isSheetOpen && !wasItemSheetOpenRef.current) {
+      setItemSheetOpen(true);
+      wasItemSheetOpenRef.current = true;
+      return;
+    }
+    if (!isSheetOpen && wasItemSheetOpenRef.current) {
+      setItemSheetOpen(false);
+      wasItemSheetOpenRef.current = false;
+    }
+  }, [isSheetOpen]);
+
+  useEffect(() => {
     if (!isSheetScreen) return;
     if (isSheetOpen && !wasSheetOpenRef.current) {
       setMobileSheetOpen(true);
@@ -165,6 +192,10 @@ export default function ItemCard({
 
   useEffect(() => {
     return () => {
+      if (wasItemSheetOpenRef.current) {
+        setItemSheetOpen(false);
+        wasItemSheetOpenRef.current = false;
+      }
       if (wasSheetOpenRef.current) {
         setMobileSheetOpen(false);
         wasSheetOpenRef.current = false;
@@ -640,7 +671,7 @@ export default function ItemCard({
       <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
         <SheetContent
           side={isMobile ? "bottom" : "right"}
-          className="flex h-full max-h-screen flex-col"
+          className="z-[4000] flex h-full max-h-screen flex-col"
         >
           <SheetHeader className="text-left">
             <div className="flex items-start gap-3">

@@ -75,10 +75,10 @@ const SheetContent = React.forwardRef<
           Navigation Menu
         </SheetPrimitive.Title>
         {children}
-        <SheetPrimitive.Close className="ring-offset-background focus:ring-ring data-[state=open]:bg-secondary absolute top-4 right-4 cursor-pointer rounded-sm opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-none disabled:pointer-events-none">
+        <SheetPrimitive.Close className="ring-offset-background focus:ring-ring data-[state=open]:bg-secondary absolute top-4 right-4 inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-md opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-none disabled:pointer-events-none">
           <Icon
             icon="material-symbols:close"
-            className="text-primary-text h-4 w-4"
+            className="text-primary-text h-5 w-5"
             inline={true}
           />
           <span className="sr-only">Close</span>

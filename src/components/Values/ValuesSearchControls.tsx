@@ -170,9 +170,9 @@ export default function ValuesSearchControls({
             </div>
 
             {/* Filter and Sort dropdowns */}
-            <div className="flex flex-col gap-4 lg:flex-1 lg:flex-row lg:gap-4">
+            <div className="grid w-full grid-cols-2 gap-4 lg:flex lg:flex-1 lg:flex-row lg:gap-4">
               {/* Filter dropdown */}
-              <div className="w-full lg:w-1/2">
+              <div className="col-span-1 w-full lg:w-1/2">
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <button
@@ -230,7 +230,7 @@ export default function ValuesSearchControls({
               </div>
 
               {/* Sort dropdown */}
-              <div className="w-full lg:w-1/2">
+              <div className="col-span-1 w-full lg:w-1/2">
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <button

@@ -332,7 +332,7 @@ function BountyTrackerContent() {
                   placeholder="Search by player name, ID, or item..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="border-border-card bg-secondary-bg text-primary-text placeholder-secondary-text hover:border-border-focus focus:border-button-info w-full rounded-lg border px-4 py-4 pr-10 pl-10 transition-all focus:outline-none"
+                  className="border-border-card bg-secondary-bg text-primary-text placeholder-secondary-text hover:border-border-focus focus:border-button-info h-[56px] w-full rounded-lg border px-4 py-2 pr-10 pl-10 text-sm transition-all focus:outline-none"
                 />
                 {searchQuery && (
                   <button

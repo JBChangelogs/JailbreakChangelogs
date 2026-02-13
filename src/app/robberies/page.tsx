@@ -633,9 +633,9 @@ function RobberyTrackerContent() {
             </div>
 
             {/* Filter Dropdowns */}
-            <div className="flex flex-col gap-4 lg:flex-1 lg:flex-row lg:gap-4">
+            <div className="grid w-full grid-cols-2 gap-4 lg:flex lg:flex-1 lg:flex-row lg:gap-4">
               {/* Server Size Filter */}
-              <div className="w-full lg:w-1/3">
+              <div className="col-span-1 w-full lg:w-1/3">
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <button
@@ -684,7 +684,7 @@ function RobberyTrackerContent() {
               </div>
 
               {/* Name Sort or Difficulty Sort Dropdown */}
-              <div className="w-full lg:w-1/3">
+              <div className="col-span-1 w-full lg:w-1/3">
                 {activeView === "airdrops" ? (
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
@@ -775,7 +775,7 @@ function RobberyTrackerContent() {
               </div>
 
               {/* Time Sort Dropdown */}
-              <div className="w-full lg:w-1/3">
+              <div className="col-span-full w-full lg:col-span-1 lg:w-1/3">
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <button
@@ -952,10 +952,16 @@ function RobberyTrackerContent() {
               handleViewChange(value as "robberies" | "mansions" | "airdrops")
             }
           >
-            <TabsList>
-              <TabsTrigger value="robberies">Robberies</TabsTrigger>
-              <TabsTrigger value="mansions">Mansions</TabsTrigger>
-              <TabsTrigger value="airdrops">Airdrops</TabsTrigger>
+            <TabsList fullWidth>
+              <TabsTrigger value="robberies" fullWidth>
+                Robberies
+              </TabsTrigger>
+              <TabsTrigger value="mansions" fullWidth>
+                Mansions
+              </TabsTrigger>
+              <TabsTrigger value="airdrops" fullWidth>
+                Airdrops
+              </TabsTrigger>
             </TabsList>
           </Tabs>
         </div>
@@ -1147,12 +1153,16 @@ function RobberyTrackerContent() {
                       )
                     }
                   >
-                    <TabsList>
-                      <TabsTrigger value="all">All Locations</TabsTrigger>
-                      <TabsTrigger value="CactusValley">
+                    <TabsList fullWidth>
+                      <TabsTrigger value="all" fullWidth>
+                        All Locations
+                      </TabsTrigger>
+                      <TabsTrigger value="CactusValley" fullWidth>
                         Cactus Valley
                       </TabsTrigger>
-                      <TabsTrigger value="Dunes">Dunes</TabsTrigger>
+                      <TabsTrigger value="Dunes" fullWidth>
+                        Dunes
+                      </TabsTrigger>
                     </TabsList>
                   </Tabs>
                 </div>

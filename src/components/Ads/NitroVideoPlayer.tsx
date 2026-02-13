@@ -1,8 +1,10 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef, useSyncExternalStore } from "react";
+import { useMediaQuery } from "@mui/material";
 import { usePathname } from "next/navigation";
 import { useAuthContext } from "@/contexts/AuthContext";
+import { removeAdReference } from "@/utils/nitroAds";
 
 const VIDEO_PLAYER_ID = "np-video-player";
 
@@ -11,10 +13,60 @@ type NitroAdsWithRemove = {
   removeAd?: (id: string) => void;
 };
 
+function useMobileSheetOpen() {
+  return useSyncExternalStore(
+    (onStoreChange) => {
+      if (typeof window === "undefined") {
+        return () => {};
+      }
+      const handler = () => onStoreChange();
+      window.addEventListener("jb-sheet-toggle", handler);
+      return () => {
+        window.removeEventListener("jb-sheet-toggle", handler);
+      };
+    },
+    () =>
+      typeof document === "undefined"
+        ? ""
+        : (document.body?.dataset.mobileSheetOpen ?? ""),
+    () => "",
+  );
+}
+
+function useItemSheetOpen() {
+  return useSyncExternalStore(
+    (onStoreChange) => {
+      if (typeof window === "undefined") {
+        return () => {};
+      }
+      const handler = () => onStoreChange();
+      window.addEventListener("jb-sheet-toggle", handler);
+      return () => {
+        window.removeEventListener("jb-sheet-toggle", handler);
+      };
+    },
+    () =>
+      typeof document === "undefined"
+        ? ""
+        : (document.body?.dataset.itemSheetOpen ?? ""),
+    () => "",
+  );
+}
+
 export default function NitroVideoPlayer() {
   const { user } = useAuthContext();
   const pathname = usePathname();
   const createdRef = useRef(false);
+  const isSheetScreen = useMediaQuery("(max-width: 1024px)");
+  const mobileSheetState = useMobileSheetOpen();
+  const itemSheetState = useItemSheetOpen();
+  const isMobileSheetOpen = mobileSheetState === "true";
+  const isItemSheetOpen = itemSheetState === "true";
+
+  const disableFloatingPlayer = useMemo(
+    () => isItemSheetOpen || (isSheetScreen && isMobileSheetOpen),
+    [isItemSheetOpen, isSheetScreen, isMobileSheetOpen],
+  );
 
   useEffect(() => {
     const tier = user?.premiumtype ?? 0;
@@ -26,7 +78,7 @@ export default function NitroVideoPlayer() {
     const hasDedicatedVideoNcPlayer = false;
 
     const shouldSuppressFloatingPlayer =
-      isSupporter || hasDedicatedVideoNcPlayer;
+      isSupporter || hasDedicatedVideoNcPlayer || disableFloatingPlayer;
 
     const removeFloatingPlayer = () => {
       const el = document.getElementById(VIDEO_PLAYER_ID);
@@ -38,6 +90,7 @@ export default function NitroVideoPlayer() {
         | NitroAdsWithRemove
         | undefined;
       nitroAds?.removeAd?.(VIDEO_PLAYER_ID);
+      removeAdReference(VIDEO_PLAYER_ID);
 
       createdRef.current = false;
     };
@@ -57,10 +110,14 @@ export default function NitroVideoPlayer() {
       observer.observe(document.body, {
         childList: true,
         subtree: true,
+        attributes: true,
       });
+
+      const interval = window.setInterval(removeFloatingPlayer, 250);
 
       return () => {
         observer.disconnect();
+        window.clearInterval(interval);
       };
     }
 
@@ -91,7 +148,7 @@ export default function NitroVideoPlayer() {
     ).catch(() => {
       createdRef.current = false;
     });
-  }, [user?.premiumtype, pathname]);
+  }, [user?.premiumtype, pathname, disableFloatingPlayer]);
 
   return null;
 }
