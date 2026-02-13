@@ -456,7 +456,7 @@ export default function ItemDetailsClient({
                 currentItem.metadata &&
                 Object.keys(currentItem.metadata).length > 0 && (
                   <div className="mt-3">
-                    <div className="border-button-info/30 bg-button-info/10 rounded-md border px-2 py-2">
+                    <div className="border-border-card bg-secondary-bg rounded-md border px-2 py-2">
                       <div className="text-primary-text text-xs font-semibold tracking-wide uppercase">
                         Official Trading Metrics
                       </div>
@@ -469,7 +469,7 @@ export default function ItemDetailsClient({
                       <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-3">
                         {typeof currentItem.metadata.TimesTraded ===
                           "number" && (
-                          <div className="border-button-info/30 rounded-md border p-3">
+                          <div className="border-border-card bg-tertiary-bg rounded-md border p-3">
                             <div className="text-secondary-text text-xs">
                               Times Traded
                             </div>
@@ -480,7 +480,7 @@ export default function ItemDetailsClient({
                         )}
                         {typeof currentItem.metadata.UniqueCirculation ===
                           "number" && (
-                          <div className="border-button-info/30 rounded-md border p-3">
+                          <div className="border-border-card bg-tertiary-bg rounded-md border p-3">
                             <div className="text-secondary-text flex items-center gap-1 text-xs">
                               Unique Circulation
                               <Tooltip>
@@ -505,7 +505,7 @@ export default function ItemDetailsClient({
                         )}
                         {typeof currentItem.metadata.DemandMultiple ===
                           "number" && (
-                          <div className="border-button-info/30 rounded-md border p-3">
+                          <div className="border-border-card bg-tertiary-bg rounded-md border p-3">
                             <div className="text-secondary-text text-xs">
                               Demand Multiple
                             </div>
@@ -619,10 +619,14 @@ export default function ItemDetailsClient({
                       setActiveChartTab(Number(tabValue))
                     }
                   >
-                    <TabsList>
-                      <TabsTrigger value="0">Value History</TabsTrigger>
+                    <TabsList fullWidth>
+                      <TabsTrigger value="0" fullWidth>
+                        Value History
+                      </TabsTrigger>
                       {item.id !== 587 && (
-                        <TabsTrigger value="1">Trading Metrics</TabsTrigger>
+                        <TabsTrigger value="1" fullWidth>
+                          Trading Metrics
+                        </TabsTrigger>
                       )}
                     </TabsList>
                   </Tabs>
