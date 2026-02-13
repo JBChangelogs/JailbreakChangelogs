@@ -215,6 +215,48 @@ interface CommentApiErrorData {
   [key: string]: unknown;
 }
 
+const normalizeEditedCommentPayload = (
+  payload: unknown,
+): Partial<CommentData> | null => {
+  if (!payload || typeof payload !== "object") return null;
+
+  const typedPayload = payload as Record<string, unknown>;
+  const candidate =
+    (typedPayload.comment as Record<string, unknown> | undefined) ||
+    (typedPayload.data as Record<string, unknown> | undefined) ||
+    typedPayload;
+
+  if (!candidate || typeof candidate !== "object") return null;
+
+  const normalized: Partial<CommentData> = {};
+
+  if (typeof candidate.content === "string") {
+    normalized.content = candidate.content;
+  }
+  if (
+    candidate.edited_at === null ||
+    candidate.edited_at === undefined ||
+    typeof candidate.edited_at === "string" ||
+    typeof candidate.edited_at === "number"
+  ) {
+    normalized.edited_at =
+      typeof candidate.edited_at === "number"
+        ? candidate.edited_at.toString()
+        : (candidate.edited_at as CommentData["edited_at"]);
+  }
+  if (typeof candidate.date === "string") {
+    normalized.date = candidate.date;
+  }
+  if (typeof candidate.author === "string") {
+    normalized.author = candidate.author;
+  }
+  if (typeof candidate.user_id === "string") {
+    normalized.user_id = candidate.user_id;
+  }
+
+  return Object.keys(normalized).length > 0 ? normalized : null;
+};
+
 const formatErrorTitle = (error?: string) => {
   if (!error) return "Error";
   return error.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase());
@@ -316,6 +358,9 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
   const [replyingToId, setReplyingToId] = useState<number | null>(null);
   const [replyContent, setReplyContent] = useState("");
   const [editingCommentId, setEditingCommentId] = useState<number | null>(null);
+  const [updatingCommentId, setUpdatingCommentId] = useState<number | null>(
+    null,
+  );
   const [editContent, setEditContent] = useState("");
   const [expandedComments, setExpandedComments] = useState<Set<number>>(
     new Set(),
@@ -718,21 +763,26 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
    * Submits an edit for an existing comment.
    */
   const handleEditComment = async (commentId: number) => {
-    if (!editContent.trim()) return;
+    if (!editContent.trim() || updatingCommentId === commentId) return;
 
     // Find the original comment to compare content
-    const originalComment = filteredComments.find((c) => c.id === commentId);
+    const originalComment = comments.find((c) => c.id === commentId);
     if (!originalComment) return;
 
+    const normalizedEditContent = cleanCommentText(editContent);
+    const normalizedOriginalContent = cleanCommentText(originalComment.content);
+
     // Check if content has actually changed
-    if (cleanCommentText(editContent) === originalComment.content) {
-      // No changes made, just close the edit mode
-      setEditingCommentId(null);
-      setEditContent("");
+    if (normalizedEditContent === normalizedOriginalContent) {
+      toast.error("No Changes Detected", {
+        description: "Edit the comment before clicking update.",
+      });
       return;
     }
 
     try {
+      setUpdatingCommentId(commentId);
+
       const response = await fetch(`/api/comments/edit`, {
         method: "POST",
         headers: {
@@ -740,7 +790,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
         },
         body: JSON.stringify({
           id: commentId,
-          content: cleanCommentText(editContent),
+          content: normalizedEditContent,
           item_type: type,
         }),
       });
@@ -777,16 +827,36 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
         return;
       }
 
-      const updatedComment = await response.json();
+      const updatedCommentResponse = await response.json();
+      const normalizedUpdate = normalizeEditedCommentPayload(
+        updatedCommentResponse,
+      );
 
       toast.success("Comment edited successfully.");
       setEditingCommentId(null);
       setEditContent("");
 
-      // Visually update the comment instead of refetching
+      // Merge server response into the existing comment, preserving required fields
       setComments((prev) =>
-        prev.map((c) => (c.id === commentId ? { ...updatedComment } : c)),
+        prev.map((c) => {
+          if (c.id !== commentId) return c;
+
+          return {
+            ...c,
+            ...(normalizedUpdate || {}),
+            // Fallback to local edited content if upstream omitted it.
+            content: normalizedUpdate?.content ?? normalizedEditContent,
+            // Ensure edited state is visible immediately even if API omits edited_at.
+            edited_at:
+              normalizedUpdate?.edited_at !== undefined
+                ? normalizedUpdate.edited_at
+                : Math.floor(Date.now() / 1000).toString(),
+          };
+        }),
       );
+
+      // Keep local state synced with canonical backend shape for replies/comments.
+      refreshCommentsFromServer(true);
 
       // Track comment edit
       if (typeof window !== "undefined" && window.umami) {
@@ -796,6 +866,8 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
       toast.error(
         err instanceof Error ? err.message : "Failed to edit comment",
       );
+    } finally {
+      setUpdatingCommentId(null);
     }
   };
 
@@ -1666,6 +1738,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                                     onChange={(e) =>
                                       setEditContent(e.target.value)
                                     }
+                                    disabled={updatingCommentId === comment.id}
                                     rows={3}
                                     className="border-border-card bg-form-input text-primary-text focus:border-button-info w-full resize-y rounded border p-3 text-sm focus:outline-none"
                                     autoCorrect="off"
@@ -1680,13 +1753,27 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                                     onClick={() =>
                                       handleEditComment(comment.id)
                                     }
-                                    disabled={!editContent.trim()}
+                                    disabled={
+                                      !editContent.trim() ||
+                                      updatingCommentId === comment.id
+                                    }
                                   >
-                                    Update
+                                    {updatingCommentId === comment.id ? (
+                                      <>
+                                        <CircularProgress
+                                          size={16}
+                                          className="text-form-button-text"
+                                        />
+                                        Updating...
+                                      </>
+                                    ) : (
+                                      "Update"
+                                    )}
                                   </Button>
                                   <Button
                                     size="sm"
                                     variant="ghost"
+                                    disabled={updatingCommentId === comment.id}
                                     onClick={() => {
                                       setEditingCommentId(null);
                                       setEditContent("");
