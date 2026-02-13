@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useMemo } from "react";
 import { use } from "react";
+import { useRouter } from "next/navigation";
 import { Icon } from "@/components/ui/IconWrapper";
 import { Item, FilterSort, FavoriteItem } from "@/types";
 import { sortAndFilterItems, parseCashValue } from "@/utils/values";
@@ -10,7 +11,6 @@ import { fetchUserFavorites } from "@/utils/api";
 import { useDebounce } from "@/hooks/useDebounce";
 import { useAuthContext } from "@/contexts/AuthContext";
 import TradingGuides from "./TradingGuides";
-import HyperchromeCalculatorModal from "@/components/Hyperchrome/HyperchromeCalculatorSheet";
 import ValuesSearchControls from "./ValuesSearchControls";
 import ValuesItemsGrid from "./ValuesItemsGrid";
 import ValuesErrorBoundary from "./ValuesErrorBoundary";
@@ -21,6 +21,7 @@ import NitroValuesVideoPlayer from "@/components/Ads/NitroValuesVideoPlayer";
 import NitroValuesRailAd from "@/components/Ads/NitroValuesRailAd";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { toast } from "sonner";
 
 interface ValuesClientProps {
   itemsPromise: Promise<Item[]>;
@@ -31,6 +32,7 @@ export default function ValuesClient({
   itemsPromise,
   lastUpdatedPromise,
 }: ValuesClientProps) {
+  const router = useRouter();
   const { user } = useAuthContext();
 
   const items = use(itemsPromise);
@@ -83,7 +85,6 @@ export default function ValuesClient({
   const [appliedMinValue, setAppliedMinValue] = useState<number>(0);
   const [appliedMaxValue, setAppliedMaxValue] =
     useState<number>(DYNAMIC_MAX_VALUE);
-  const [showSheet, setShowSheet] = useState(false);
 
   const handleCategorySelect = (filter: FilterSort) => {
     if (filterSort === filter) {
@@ -126,37 +127,11 @@ export default function ValuesClient({
   }, [user]);
 
   useEffect(() => {
-    const syncFromHash = () => {
-      setShowSheet(window.location.hash === "#hyper-pity-calc");
-    };
+    if (window.location.hash !== "#hyper-pity-calc") return;
 
-    syncFromHash();
-    window.addEventListener("hashchange", syncFromHash);
-
-    return () => {
-      window.removeEventListener("hashchange", syncFromHash);
-    };
-  }, []);
-
-  const handleOpenHcModal = () => {
-    setShowSheet(true);
-    window.history.replaceState(
-      null,
-      "",
-      window.location.pathname + window.location.search + "#hyper-pity-calc",
-    );
-  };
-
-  const handleCloseHcModal = () => {
-    setShowSheet(false);
-    if (window.location.hash === "#hyper-pity-calc") {
-      window.history.replaceState(
-        null,
-        "",
-        window.location.pathname + window.location.search,
-      );
-    }
-  };
+    toast.message("Hyperchrome Pity Calculator moved to /calculators.");
+    router.replace("/calculators/hyperchrome-pity");
+  }, [router]);
 
   useEffect(() => {
     const updateSortedItems = async () => {
@@ -237,8 +212,10 @@ export default function ValuesClient({
                   Dupe Finder
                 </Link>
               </Button>
-              <Button onClick={handleOpenHcModal}>
-                Hyperchrome Pity Calculator
+              <Button asChild>
+                <Link href="/calculators/hyperchrome-pity" prefetch={false}>
+                  Hyperchrome Pity Calculator
+                </Link>
               </Button>
             </div>
 
@@ -276,11 +253,6 @@ export default function ValuesClient({
           }}
         />
       </div>
-
-      <HyperchromeCalculatorModal
-        open={showSheet}
-        onClose={handleCloseHcModal}
-      />
 
       <ValuesSearchControls
         searchTerm={searchTerm}

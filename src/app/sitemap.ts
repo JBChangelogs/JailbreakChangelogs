@@ -103,6 +103,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "monthly" as const,
     },
     {
+      url: `${BASE_URL}/calculators/hyperchrome-pity`,
+      lastModified: new Date().toISOString(),
+      priority: 0.7,
+      changeFrequency: "monthly" as const,
+    },
+    {
       url: `${BASE_URL}/users`,
       lastModified: new Date().toISOString(),
       priority: 0.7,

@@ -71,7 +71,7 @@ const calculators = [
     title: "Hyperchrome Pity Calculator",
     description:
       "Calculate robberies needed to reach the next Hyperchrome level. Track your pity progress and plan your grinding strategy.",
-    href: "/values#hyper-pity-calc",
+    href: "/calculators/hyperchrome-pity",
     icon: "material-symbols:auto-awesome",
     category: "Progression",
     features: [

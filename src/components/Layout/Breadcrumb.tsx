@@ -220,6 +220,12 @@ export default function Breadcrumb({ userData, loading }: BreadcrumbProps) {
             href: "/calculators",
           };
         }
+        if (index === 1 && segment === "hyperchrome-pity") {
+          return {
+            label: "Hyperchrome Pity",
+            href: "/calculators/hyperchrome-pity",
+          };
+        }
       }
 
       // Special handling for settings route

@@ -2,32 +2,10 @@
 
 import { useEffect, useRef, useMemo, useSyncExternalStore } from "react";
 import { useMediaQuery } from "@mui/material";
-import { usePathname } from "next/navigation";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { registerAdInstance, removeAdReference } from "@/utils/nitroAds";
 
 const ANCHOR_ID = "np-bottom-anchor";
-
-function useLocationHash() {
-  return useSyncExternalStore(
-    (onStoreChange) => {
-      if (typeof window === "undefined") {
-        return () => {};
-      }
-
-      const handler = () => onStoreChange();
-      window.addEventListener("hashchange", handler);
-      window.addEventListener("popstate", handler);
-
-      return () => {
-        window.removeEventListener("hashchange", handler);
-        window.removeEventListener("popstate", handler);
-      };
-    },
-    () => (typeof window === "undefined" ? "" : window.location.hash),
-    () => "",
-  );
-}
 
 function useMobileSheetOpen() {
   return useSyncExternalStore(
@@ -52,18 +30,13 @@ function useMobileSheetOpen() {
 export default function NitroBottomAnchor() {
   const { user } = useAuthContext();
   const createdRef = useRef(false);
-  const pathname = usePathname();
-  const hash = useLocationHash();
-  const isSmallScreen = useMediaQuery("(max-width: 425px)");
   const isSheetScreen = useMediaQuery("(max-width: 1024px)");
   const mobileSheetState = useMobileSheetOpen();
   const isMobileSheetOpen = mobileSheetState === "true";
 
   const disableAnchor = useMemo(
-    () =>
-      (isSheetScreen && isMobileSheetOpen) ||
-      (isSmallScreen && pathname === "/values" && hash === "#hyper-pity-calc"),
-    [isSheetScreen, isMobileSheetOpen, isSmallScreen, pathname, hash],
+    () => isSheetScreen && isMobileSheetOpen,
+    [isSheetScreen, isMobileSheetOpen],
   );
 
   useEffect(() => {
