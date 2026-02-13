@@ -244,8 +244,11 @@ export default function DupeComparisonClient({
 
       {/* Shared Summary Header */}
       <div className="bg-secondary-bg border-border-card mx-auto max-w-4xl rounded-xl border p-6 text-center shadow-sm">
-        <div className="mb-6 flex flex-col items-center gap-6 md:flex-row md:items-stretch md:text-left">
-          <div className="bg-secondary-bg border-border-card relative h-40 w-full shrink-0 overflow-hidden rounded-lg border md:h-auto md:w-64">
+        <div className="mb-6 flex flex-col items-center gap-6 md:flex-row md:items-center md:text-left">
+          <div
+            className="bg-secondary-bg border-border-card relative w-full shrink-0 overflow-hidden rounded-lg border md:w-64"
+            style={{ aspectRatio: "854 / 480" }}
+          >
             <div className="absolute top-2 left-2 z-10">
               <CategoryIconBadge
                 type={duplicateItem.categoryTitle}
@@ -361,7 +364,7 @@ export default function DupeComparisonClient({
             </div>
             {sharedItemData.metadata &&
               Object.keys(sharedItemData.metadata).length > 0 && (
-                <div className="bg-tertiary-bg border-border-card mt-5 rounded-md border px-2 py-2">
+                <div className="bg-tertiary-bg border-border-card mt-5 rounded-md border p-4">
                   <div className="text-primary-text text-xs font-semibold tracking-wide uppercase">
                     Official Trading Metrics
                   </div>

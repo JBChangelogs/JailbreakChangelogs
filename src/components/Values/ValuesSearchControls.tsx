@@ -392,7 +392,7 @@ export default function ValuesSearchControls({
             </div>
           </div>
 
-          {/* Helpful tip about Ctrl+F */}
+          {/* Helpful tips about shortcuts */}
           <div className="text-secondary-text mt-2 hidden items-center gap-1 text-xs lg:flex">
             <Icon
               icon="emojione:light-bulb"
@@ -406,7 +406,11 @@ export default function ValuesSearchControls({
             <kbd className="kbd kbd-sm border-border-card bg-tertiary-bg text-primary-text">
               F
             </kbd>{" "}
-            to quickly focus the search
+            to quickly focus the search, or use{" "}
+            <kbd className="kbd kbd-sm border-border-card bg-tertiary-bg text-primary-text">
+              Shift
+            </kbd>{" "}
+            + click on an item card to open item details directly.
           </div>
         </div>
       </div>
