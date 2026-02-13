@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Dialog, DialogPanel } from "@headlessui/react";
 import { useEscapeLogin } from "@/utils/escapeLogin";
 import { Button } from "@/components/ui/button";
@@ -10,26 +10,6 @@ export default function EscapeLoginModal() {
   const [token, setToken] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-
-  useEffect(() => {
-    if (showModal) {
-      const fetchToken = async () => {
-        try {
-          const response = await fetch("/api/auth/token");
-          if (response.ok) {
-            const data = await response.json();
-            if (data.token) {
-              setToken(data.token);
-            }
-          }
-        } catch (error) {
-          console.error("Failed to fetch token:", error);
-        }
-      };
-
-      fetchToken();
-    }
-  }, [showModal]);
 
   const handleClose = () => {
     setShowModal(false);
