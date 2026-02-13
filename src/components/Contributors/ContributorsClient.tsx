@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { UserWithFlags } from "@/utils/api";
 import UserAvatar from "@/components/Users/UserAvatarClient";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface ContributorsClientProps {
   usersWithFlags: UserWithFlags[];
@@ -226,47 +227,53 @@ export default function ContributorsClient({
       primaryRole?: string;
     },
     role?: string,
-  ) => (
-    <div
-      key={user.id}
-      className="border-border-card bg-secondary-bg group hover:bg-quaternary-bg flex transform cursor-pointer flex-col items-center rounded-xl border p-8 transition-colors duration-300"
-    >
-      <Link
-        href={`/users/${user.id}`}
-        prefetch={false}
-        className="flex flex-col items-center"
+  ) => {
+    const avatarContainerShapeClass =
+      user.premiumtype === 3 ? "rounded-sm" : "rounded-full";
+
+    return (
+      <div
+        key={user.id}
+        className="border-border-card bg-secondary-bg group hover:bg-quaternary-bg flex transform cursor-pointer flex-col items-center rounded-xl border p-8 transition-colors duration-300"
       >
-        <div
-          className="relative shrink-0 overflow-hidden rounded-full"
-          style={{
-            width: 128,
-            height: 128,
-            minWidth: 128,
-            minHeight: 128,
-          }}
+        <Link
+          href={`/users/${user.id}`}
+          prefetch={false}
+          className="flex flex-col items-center"
         >
-          <UserAvatar
-            userId={user.id}
-            avatarHash={user.avatar || null}
-            username={user.username}
-            size={32}
-            showBadge={false}
-            custom_avatar={user.custom_avatar}
-            settings={user.settings}
-            premiumType={user.premiumtype}
-          />
-        </div>
-        <h1 className="text-primary-text group-hover:text-link mt-4 text-2xl font-semibold capitalize transition-colors duration-300">
-          {user.global_name && user.global_name !== "None"
-            ? user.global_name
-            : user.username}
-        </h1>
-        <p className="text-secondary-text mt-2 capitalize opacity-80 transition-colors duration-300">
-          {user.roles ? user.roles.join(", ") : role || user.role}
-        </p>
-      </Link>
-    </div>
-  );
+          <div
+            className={`border-border-card relative shrink-0 overflow-hidden border ${avatarContainerShapeClass}`}
+            style={{
+              width: 128,
+              height: 128,
+              minWidth: 128,
+              minHeight: 128,
+            }}
+          >
+            <UserAvatar
+              userId={user.id}
+              avatarHash={user.avatar || null}
+              username={user.username}
+              size={32}
+              showBadge={false}
+              className="border-0"
+              custom_avatar={user.custom_avatar}
+              settings={user.settings}
+              premiumType={user.premiumtype}
+            />
+          </div>
+          <h1 className="text-primary-text group-hover:text-link mt-4 text-2xl font-semibold capitalize transition-colors duration-300">
+            {user.global_name && user.global_name !== "None"
+              ? user.global_name
+              : user.username}
+          </h1>
+          <p className="text-secondary-text mt-2 capitalize opacity-80 transition-colors duration-300">
+            {user.roles ? user.roles.join(", ") : role || user.role}
+          </p>
+        </Link>
+      </div>
+    );
+  };
 
   const renderStaticContributor = (contrib: (typeof staticContributors)[0]) => (
     <div
@@ -280,7 +287,7 @@ export default function ContributorsClient({
         className="flex flex-col items-center"
       >
         <div
-          className="relative shrink-0 overflow-hidden rounded-full"
+          className="border-border-card relative shrink-0 overflow-hidden rounded-full border"
           style={{
             width: 128,
             height: 128,
@@ -322,22 +329,20 @@ export default function ContributorsClient({
 
         {/* Filter Buttons */}
         <div className="mb-8 flex items-center justify-center">
-          <div className="scrollbar-hide border-button-info bg-secondary-bg flex items-center overflow-x-auto rounded-xl border p-1">
-            <div className="flex min-w-max items-center">
-              {filters.map((filter) => (
-                <button
-                  key={filter.key}
-                  onClick={() => setActiveFilter(filter.key)}
-                  className={`shrink-0 cursor-pointer rounded-xl px-3 py-2 text-xs font-medium whitespace-nowrap capitalize transition-colors duration-300 md:px-6 md:py-3 md:text-sm ${
-                    activeFilter === filter.key
-                      ? "bg-button-info text-form-button-text"
-                      : "text-secondary-text hover:bg-quaternary-bg hover:text-primary-text"
-                  }`}
-                >
-                  {filter.label}
-                </button>
-              ))}
-            </div>
+          <div className="scrollbar-hide w-full overflow-x-auto">
+            <Tabs
+              className="w-full"
+              value={activeFilter}
+              onValueChange={(value) => setActiveFilter(value)}
+            >
+              <TabsList fullWidth>
+                {filters.map((filter) => (
+                  <TabsTrigger key={filter.key} value={filter.key} fullWidth>
+                    {filter.label}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+            </Tabs>
           </div>
         </div>
 

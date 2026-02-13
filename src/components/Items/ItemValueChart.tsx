@@ -4,11 +4,13 @@ import { useEffect, useState, useRef, use } from "react";
 import { Skeleton } from "@mui/material";
 import { toast } from "sonner";
 import { useTheme } from "@/contexts/ThemeContext";
-import {
-  CustomButtonGroup,
-  CustomButton,
-} from "@/components/ui/CustomButtonGroup";
 import { Button } from "@/components/ui/button";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Tooltip as UiTooltip,
+  TooltipContent as UiTooltipContent,
+  TooltipTrigger as UiTooltipTrigger,
+} from "@/components/ui/tooltip";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -65,6 +67,17 @@ interface ItemValueChartProps {
   showOnlyTradingMetrics?: boolean;
 }
 
+type DateRange = "1w" | "1m" | "3m" | "6m" | "1y" | "all";
+
+const DATE_RANGE_OPTIONS: { value: DateRange; label: string }[] = [
+  { value: "1w", label: "1W" },
+  { value: "1m", label: "1M" },
+  { value: "3m", label: "3M" },
+  { value: "6m", label: "6M" },
+  { value: "1y", label: "1Y" },
+  { value: "all", label: "All" },
+];
+
 const ItemValueChart = ({
   historyPromise,
   hideTradingMetrics = false,
@@ -75,9 +88,7 @@ const ItemValueChart = ({
   const history: ValueHistory[] = historyData || [];
   const loading = false;
 
-  const [dateRange, setDateRange] = useState<"1w" | "1m" | "6m" | "1y" | "all">(
-    "all",
-  );
+  const [dateRange, setDateRange] = useState<DateRange>("all");
 
   const chartRef = useRef<ChartJS<"line">>(null);
   const tradingChartRef = useRef<ChartJS<"line">>(null);
@@ -121,7 +132,7 @@ const ItemValueChart = ({
             className="bg-secondary-bg"
           />
           <div className="flex gap-2">
-            {["1w", "1m", "6m", "1y", "all"].map((range) => (
+            {DATE_RANGE_OPTIONS.map(({ value: range }) => (
               <Skeleton
                 key={range}
                 variant="rounded"
@@ -226,14 +237,29 @@ const ItemValueChart = ({
 
   // Get the oldest date in the history
   const oldestDate = new Date(parseInt(sortedHistory[0].date) * 1000);
-  const now = new Date();
+  const getRelativeDate = ({
+    days = 0,
+    months = 0,
+    years = 0,
+  }: {
+    days?: number;
+    months?: number;
+    years?: number;
+  }) => {
+    const date = new Date();
+    if (days) date.setDate(date.getDate() - days);
+    if (months) date.setMonth(date.getMonth() - months);
+    if (years) date.setFullYear(date.getFullYear() - years);
+    return date;
+  };
 
   // Calculate available ranges
   const ranges = {
-    "1w": new Date(now.setDate(now.getDate() - 7)),
-    "1m": new Date(now.setMonth(now.getMonth() - 1)),
-    "6m": new Date(now.setMonth(now.getMonth() - 6)),
-    "1y": new Date(now.setFullYear(now.getFullYear() - 1)),
+    "1w": getRelativeDate({ days: 7 }),
+    "1m": getRelativeDate({ months: 1 }),
+    "3m": getRelativeDate({ months: 3 }),
+    "6m": getRelativeDate({ months: 6 }),
+    "1y": getRelativeDate({ years: 1 }),
     all: new Date(0),
   };
 
@@ -250,7 +276,7 @@ const ItemValueChart = ({
   };
 
   // Handle date range change
-  const handleDateRangeChange = (range: "1w" | "1m" | "6m" | "1y" | "all") => {
+  const handleDateRangeChange = (range: DateRange) => {
     if (!hasDataForRange(range)) {
       toast.error("No data available for this time range");
       return;
@@ -567,49 +593,42 @@ const ItemValueChart = ({
   };
 
   return (
-    <div className="mb-8 space-y-8 rounded-lg p-2">
+    <div className="space-y-8">
       {/* Value History Chart */}
       {!showOnlyTradingMetrics && (
         <div>
           {shouldShowValueChart && (
             <div className="mb-2 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-end">
-              <CustomButtonGroup>
-                <CustomButton
-                  onClick={() => handleDateRangeChange("1w")}
-                  selected={dateRange === "1w"}
-                  disabled={!hasDataForRange("1w")}
-                >
-                  1W
-                </CustomButton>
-                <CustomButton
-                  onClick={() => handleDateRangeChange("1m")}
-                  selected={dateRange === "1m"}
-                  disabled={!hasDataForRange("1m")}
-                >
-                  1M
-                </CustomButton>
-                <CustomButton
-                  onClick={() => handleDateRangeChange("6m")}
-                  selected={dateRange === "6m"}
-                  disabled={!hasDataForRange("6m")}
-                >
-                  6M
-                </CustomButton>
-                <CustomButton
-                  onClick={() => handleDateRangeChange("1y")}
-                  selected={dateRange === "1y"}
-                  disabled={!hasDataForRange("1y")}
-                >
-                  1Y
-                </CustomButton>
-                <CustomButton
-                  onClick={() => handleDateRangeChange("all")}
-                  selected={dateRange === "all"}
-                  disabled={!hasDataForRange("all")}
-                >
-                  All
-                </CustomButton>
-              </CustomButtonGroup>
+              <Tabs
+                className="w-full"
+                value={dateRange}
+                onValueChange={(value) =>
+                  handleDateRangeChange(value as DateRange)
+                }
+              >
+                <TabsList fullWidth>
+                  {DATE_RANGE_OPTIONS.map(({ value, label }) =>
+                    !hasDataForRange(value) ? (
+                      <UiTooltip key={value}>
+                        <UiTooltipTrigger asChild>
+                          <span className="inline-flex flex-1 cursor-not-allowed">
+                            <TabsTrigger value={value} fullWidth disabled>
+                              {label}
+                            </TabsTrigger>
+                          </span>
+                        </UiTooltipTrigger>
+                        <UiTooltipContent side="top">
+                          No value history data available for {label}.
+                        </UiTooltipContent>
+                      </UiTooltip>
+                    ) : (
+                      <TabsTrigger key={value} value={value} fullWidth>
+                        {label}
+                      </TabsTrigger>
+                    ),
+                  )}
+                </TabsList>
+              </Tabs>
             </div>
           )}
           {shouldShowValueChart ? (
@@ -658,43 +677,36 @@ const ItemValueChart = ({
         tradingData.length > 0 && (
           <div>
             <div className="mb-2 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-end">
-              <CustomButtonGroup>
-                <CustomButton
-                  onClick={() => handleDateRangeChange("1w")}
-                  selected={dateRange === "1w"}
-                  disabled={!hasTradingDataForRange("1w")}
-                >
-                  1W
-                </CustomButton>
-                <CustomButton
-                  onClick={() => handleDateRangeChange("1m")}
-                  selected={dateRange === "1m"}
-                  disabled={!hasTradingDataForRange("1m")}
-                >
-                  1M
-                </CustomButton>
-                <CustomButton
-                  onClick={() => handleDateRangeChange("6m")}
-                  selected={dateRange === "6m"}
-                  disabled={!hasTradingDataForRange("6m")}
-                >
-                  6M
-                </CustomButton>
-                <CustomButton
-                  onClick={() => handleDateRangeChange("1y")}
-                  selected={dateRange === "1y"}
-                  disabled={!hasTradingDataForRange("1y")}
-                >
-                  1Y
-                </CustomButton>
-                <CustomButton
-                  onClick={() => handleDateRangeChange("all")}
-                  selected={dateRange === "all"}
-                  disabled={!hasTradingDataForRange("all")}
-                >
-                  All
-                </CustomButton>
-              </CustomButtonGroup>
+              <Tabs
+                className="w-full"
+                value={dateRange}
+                onValueChange={(value) =>
+                  handleDateRangeChange(value as DateRange)
+                }
+              >
+                <TabsList fullWidth>
+                  {DATE_RANGE_OPTIONS.map(({ value, label }) =>
+                    !hasTradingDataForRange(value) ? (
+                      <UiTooltip key={value}>
+                        <UiTooltipTrigger asChild>
+                          <span className="inline-flex flex-1 cursor-not-allowed">
+                            <TabsTrigger value={value} fullWidth disabled>
+                              {label}
+                            </TabsTrigger>
+                          </span>
+                        </UiTooltipTrigger>
+                        <UiTooltipContent side="top">
+                          No trading metrics data available for {label}.
+                        </UiTooltipContent>
+                      </UiTooltip>
+                    ) : (
+                      <TabsTrigger key={value} value={value} fullWidth>
+                        {label}
+                      </TabsTrigger>
+                    ),
+                  )}
+                </TabsList>
+              </Tabs>
             </div>
             <div className="h-[350px]">
               <Line

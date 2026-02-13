@@ -485,7 +485,7 @@ export default function ItemCard({
 
           <div className="flex flex-wrap gap-1 pb-2 sm:gap-2">
             <span
-              className="text-primary-text bg-tertiary-bg/40 flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl"
+              className="text-primary-text bg-tertiary-bg/40 flex h-5 items-center rounded-lg border px-2 text-[10px] leading-none font-medium shadow-2xl backdrop-blur-xl sm:h-6 sm:px-2.5 sm:text-xs"
               style={{
                 borderColor: getCategoryColor(item.type),
               }}
@@ -510,7 +510,7 @@ export default function ItemCard({
                     <Tooltip key="cash-change">
                       <TooltipTrigger asChild>
                         <span
-                          className={`inline-flex h-6 items-center gap-0.5 rounded-lg px-2 text-xs leading-none font-semibold ${
+                          className={`inline-flex h-5 items-center gap-0.5 rounded-lg px-1.5 text-[10px] leading-none font-semibold sm:h-6 sm:px-2 sm:text-xs ${
                             isPositive
                               ? "bg-status-success text-white"
                               : "bg-status-error text-white"
@@ -537,7 +537,7 @@ export default function ItemCard({
                     <Tooltip key="duped-change">
                       <TooltipTrigger asChild>
                         <span
-                          className={`inline-flex h-6 items-center gap-0.5 rounded-lg px-2 text-xs leading-none font-semibold ${
+                          className={`inline-flex h-5 items-center gap-0.5 rounded-lg px-1.5 text-[10px] leading-none font-semibold sm:h-6 sm:px-2 sm:text-xs ${
                             isPositive
                               ? "bg-status-success text-white"
                               : "bg-status-error text-white"
