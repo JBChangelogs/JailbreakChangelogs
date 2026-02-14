@@ -19,6 +19,7 @@ import { ClearConfirmModal } from "./ClearConfirmModal";
 import { ActionButtons } from "./ActionButtons";
 import { TradeSidePanel } from "./TradeSidePanel";
 import { SimilarItemsTab } from "./SimilarItemsTab";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface CalculatorFormProps {
   initialItems?: TradeItem[];
@@ -386,38 +387,39 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
 
       {/* Tabs */}
       <div className="overflow-x-auto">
-        <div role="tablist" className="tabs min-w-max">
-          <button
-            role="tab"
-            aria-selected={activeTab === "items"}
-            aria-controls="calculator-tabpanel-items"
-            id="calculator-tab-items"
-            onClick={() => handleTabChange("items")}
-            className={`tab ${activeTab === "items" ? "tab-active" : ""}`}
-          >
-            Browse Items
-          </button>
-          <button
-            role="tab"
-            aria-selected={activeTab === "similar"}
-            aria-controls="calculator-tabpanel-similar"
-            id="calculator-tab-similar"
-            onClick={() => handleTabChange("similar")}
-            className={`tab ${activeTab === "similar" ? "tab-active" : ""}`}
-          >
-            Similar by Total
-          </button>
-          <button
-            role="tab"
-            aria-selected={activeTab === "values"}
-            aria-controls="calculator-tabpanel-values"
-            id="calculator-tab-values"
-            onClick={() => handleTabChange("values")}
-            className={`tab ${activeTab === "values" ? "tab-active" : ""}`}
-          >
-            Value Comparison
-          </button>
-        </div>
+        <Tabs
+          value={activeTab}
+          onValueChange={(v) =>
+            handleTabChange(v as "items" | "values" | "similar")
+          }
+        >
+          <TabsList fullWidth>
+            <TabsTrigger
+              value="items"
+              fullWidth
+              aria-controls="calculator-tabpanel-items"
+              id="calculator-tab-items"
+            >
+              Browse Items
+            </TabsTrigger>
+            <TabsTrigger
+              value="similar"
+              fullWidth
+              aria-controls="calculator-tabpanel-similar"
+              id="calculator-tab-similar"
+            >
+              Similar by Total
+            </TabsTrigger>
+            <TabsTrigger
+              value="values"
+              fullWidth
+              aria-controls="calculator-tabpanel-values"
+              id="calculator-tab-values"
+            >
+              Value Comparison
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
       </div>
 
       {/* Tab Content */}

@@ -55,8 +55,8 @@ export default function RobloxTradeUser({
       <div className="min-w-0">
         {showBadge && (
           <div className="mb-1 flex items-center gap-2">
-            <div className="bg-secondary-bg flex items-center gap-1.5 rounded px-1.5 py-0.5">
-              <RobloxIcon className="text-button-info h-3 w-3" />
+            <div className="text-primary-text bg-tertiary-bg/40 border-border-card inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium shadow-sm">
+              <RobloxIcon className="h-3.5 w-3.5" />
               <span className="text-primary-text text-xs">Roblox</span>
             </div>
           </div>

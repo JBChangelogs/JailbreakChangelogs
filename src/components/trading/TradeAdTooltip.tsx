@@ -4,6 +4,7 @@ import { TradeItem } from "@/types/trading";
 import { getCategoryColor, getCategoryIcon } from "@/utils/categoryIcons";
 import { formatFullValue } from "@/utils/values";
 import { getDemandColor, getTrendColor } from "@/utils/badgeColors";
+import { Icon } from "@/components/ui/IconWrapper";
 
 interface TradeAdTooltipProps {
   item: TradeItem;
@@ -12,6 +13,7 @@ interface TradeAdTooltipProps {
 export const TradeAdTooltip: React.FC<TradeAdTooltipProps> = ({ item }) => {
   const demand = item.demand ?? item.data?.demand ?? "N/A";
   const trend = item.trend ?? item.data?.trend ?? null;
+  const selectedType = "isDuped" in item && item.isDuped ? "Duped" : "Clean";
 
   return (
     <div className="p-4">
@@ -48,15 +50,28 @@ export const TradeAdTooltip: React.FC<TradeAdTooltipProps> = ({ item }) => {
               {item.type}
             </span>
             {item.is_limited === 1 && (
-              <span className="text-primary-text border-border-card bg-tertiary-bg/40 flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl">
+              <span className="text-primary-text border-border-card bg-tertiary-bg/40 flex h-6 items-center gap-1.5 rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl">
+                <Icon
+                  icon="mdi:clock"
+                  className="h-3 w-3"
+                  style={{ color: "#ffd700" }}
+                />
                 Limited
               </span>
             )}
             {item.is_seasonal === 1 && (
-              <span className="text-primary-text border-border-card bg-tertiary-bg/40 flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl">
+              <span className="text-primary-text border-border-card bg-tertiary-bg/40 flex h-6 items-center gap-1.5 rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl">
+                <Icon
+                  icon="noto-v1:snowflake"
+                  className="h-3 w-3"
+                  style={{ color: "#40c0e7" }}
+                />
                 Seasonal
               </span>
             )}
+            <span className="text-primary-text border-border-card bg-tertiary-bg/40 flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl">
+              {selectedType}
+            </span>
           </div>
           <div className="flex items-center gap-2">
             <span className="text-secondary-text text-xs tracking-wider uppercase">

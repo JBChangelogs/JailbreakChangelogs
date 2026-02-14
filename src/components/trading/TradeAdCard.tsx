@@ -178,13 +178,13 @@ export const TradeAdCard: React.FC<TradeAdCardProps> = ({
 
         {/* Make Offer and View Details*/}
         <div className="mt-4 pt-0">
-          <div className="flex flex-row gap-2">
+          <div className="flex flex-wrap gap-2">
             {trade.status === "Pending" && trade.author !== currentUserId && (
               <Button
                 onClick={() => onMakeOffer(trade.id)}
                 disabled={offerStatus?.loading}
                 variant={offerStatus?.success ? "success" : "default"}
-                className="flex-1"
+                className="min-w-[10.5rem] flex-1"
               >
                 <Icon icon="heroicons:chat-bubble-left" />
                 {offerStatus?.loading
@@ -194,7 +194,7 @@ export const TradeAdCard: React.FC<TradeAdCardProps> = ({
                     : "Make Offer"}
               </Button>
             )}
-            <Button asChild className="flex-1">
+            <Button asChild className="min-w-[10.5rem] flex-1">
               <Link href={`/trading/ad/${trade.id}`}>
                 <Icon icon="heroicons:magnifying-glass" />
                 View Details

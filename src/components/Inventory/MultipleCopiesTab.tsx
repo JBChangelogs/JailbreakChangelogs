@@ -4,6 +4,7 @@ import { useState, useRef, useMemo } from "react";
 import Link from "next/link";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { Icon } from "@/components/ui/IconWrapper";
+import { useDebounce } from "@/hooks/useDebounce";
 import InventoryItemsGrid from "./InventoryItemsGrid";
 import { Item, RobloxUser } from "@/types";
 import { InventoryItem } from "@/app/inventories/types";
@@ -57,6 +58,8 @@ export default function DuplicatesTab({
   const [sortOrder, setSortOrder] = useState<SortOrder>("count-desc");
   const parentRef = useRef<HTMLDivElement>(null);
   const MAX_SEARCH_LENGTH = 50;
+  const debouncedSearchTerm = useDebounce(searchTerm, 250);
+  const debouncedLeaderboardSearch = useDebounce(leaderboardSearch, 250);
   const selectedLeaderboardCategoryValue = selectedLeaderboardCategory || "all";
   const selectedCategoryValue = selectedCategory || "all";
   const sortLabels: Record<SortOrder, string> = {
@@ -122,25 +125,25 @@ export default function DuplicatesTab({
   );
 
   // Count duplicates across entire inventory (including items from duplicates array)
-  const duplicateCounts = (() => {
+  const duplicateCounts = useMemo(() => {
     const counts = new Map<string, number>();
     mergedInventoryData.forEach((item) => {
       const key = `${item.categoryTitle}-${item.title}`;
       counts.set(key, (counts.get(key) || 0) + 1);
     });
     return counts;
-  })();
+  }, [mergedInventoryData]);
 
   // Filter to only show items with multiple copies
-  const itemsWithMultipleCopies = (() => {
+  const itemsWithMultipleCopies = useMemo(() => {
     return mergedInventoryData.filter((item) => {
       const key = `${item.categoryTitle}-${item.title}`;
       return (duplicateCounts.get(key) || 0) > 1;
     });
-  })();
+  }, [duplicateCounts, mergedInventoryData]);
 
   // Create a map to track the order of duplicates based on creation date (only for items with multiple copies)
-  const duplicateOrders = (() => {
+  const duplicateOrders = useMemo(() => {
     const orders = new Map<string, number>();
 
     // Group items by name (only from itemsWithMultipleCopies)
@@ -165,10 +168,10 @@ export default function DuplicatesTab({
     });
 
     return orders;
-  })();
+  }, [itemsWithMultipleCopies]);
 
   // Calculate stats
-  const multiCopyStats = (() => {
+  const multiCopyStats = useMemo(() => {
     const uniqueItems = new Set<string>();
     let totalCopies = 0;
     const itemCopyCounts: Array<{
@@ -181,7 +184,8 @@ export default function DuplicatesTab({
       if (count > 1) {
         uniqueItems.add(key);
         totalCopies += count;
-        const [category, title] = key.split("-");
+        const [category, ...titleParts] = key.split("-");
+        const title = titleParts.join("-");
         itemCopyCounts.push({ title, category, count });
       }
     });
@@ -201,10 +205,10 @@ export default function DuplicatesTab({
         : null,
       allDuplicateItems: itemCopyCounts.slice(0, 100),
     };
-  })();
+  }, [duplicateCounts]);
 
   // Get available categories from items with multiple copies
-  const availableCategories = (() => {
+  const availableCategories = useMemo(() => {
     const categories = new Set<string>();
     itemsWithMultipleCopies.forEach((item) => {
       if (item.categoryTitle) {
@@ -212,7 +216,11 @@ export default function DuplicatesTab({
       }
     });
     return Array.from(categories).sort();
-  })();
+  }, [itemsWithMultipleCopies]);
+
+  const itemDataById = useMemo(() => {
+    return new Map(itemsData.map((item) => [item.id, item]));
+  }, [itemsData]);
 
   // Filter leaderboard items based on search and category
   const filteredLeaderboardItems = useMemo(() => {
@@ -225,7 +233,7 @@ export default function DuplicatesTab({
       );
     }
 
-    if (!leaderboardSearch.trim()) {
+    if (!debouncedLeaderboardSearch.trim()) {
       return items;
     }
 
@@ -237,9 +245,9 @@ export default function DuplicatesTab({
       return (str.match(/[a-z]+|[0-9]+/gi) || []).map((s) => s.toLowerCase());
     };
 
-    const searchNormalized = normalize(leaderboardSearch);
-    const searchTokens = tokenize(leaderboardSearch);
-    const searchAlphaNum = splitAlphaNum(leaderboardSearch);
+    const searchNormalized = normalize(debouncedLeaderboardSearch);
+    const searchTokens = tokenize(debouncedLeaderboardSearch);
+    const searchAlphaNum = splitAlphaNum(debouncedLeaderboardSearch);
 
     function isTokenSubsequence(searchTokens: string[], nameTokens: string[]) {
       let i = 0,
@@ -268,7 +276,7 @@ export default function DuplicatesTab({
     });
   }, [
     multiCopyStats.allDuplicateItems,
-    leaderboardSearch,
+    debouncedLeaderboardSearch,
     selectedLeaderboardCategory,
   ]);
 
@@ -292,11 +300,11 @@ export default function DuplicatesTab({
   };
 
   // Filter and sort items (same logic as InventoryItems)
-  const filteredAndSortedItems = (() => {
+  const filteredAndSortedItems = useMemo(() => {
     let filtered = [...itemsWithMultipleCopies];
 
     // Filter by search term
-    if (searchTerm.trim()) {
+    if (debouncedSearchTerm.trim()) {
       const normalize = (str: string) =>
         str.toLowerCase().replace(/[^a-z0-9]/g, "");
       const tokenize = (str: string) =>
@@ -305,9 +313,9 @@ export default function DuplicatesTab({
         return (str.match(/[a-z]+|[0-9]+/gi) || []).map((s) => s.toLowerCase());
       };
 
-      const searchNormalized = normalize(searchTerm);
-      const searchTokens = tokenize(searchTerm);
-      const searchAlphaNum = splitAlphaNum(searchTerm);
+      const searchNormalized = normalize(debouncedSearchTerm);
+      const searchTokens = tokenize(debouncedSearchTerm);
+      const searchAlphaNum = splitAlphaNum(debouncedSearchTerm);
 
       function isTokenSubsequence(
         searchTokens: string[],
@@ -325,7 +333,7 @@ export default function DuplicatesTab({
       }
 
       filtered = filtered.filter((item) => {
-        const itemData = itemsData.find((data) => data.id === item.item_id);
+        const itemData = itemDataById.get(item.item_id);
         if (!itemData) return false;
 
         const titleNormalized = normalize(item.title);
@@ -359,8 +367,8 @@ export default function DuplicatesTab({
 
     // Sort items
     filtered.sort((a, b) => {
-      const aData = itemsData.find((data) => data.id === a.item_id);
-      const bData = itemsData.find((data) => data.id === b.item_id);
+      const aData = itemDataById.get(a.item_id);
+      const bData = itemDataById.get(b.item_id);
 
       switch (sortOrder) {
         case "count-desc":
@@ -409,7 +417,14 @@ export default function DuplicatesTab({
     });
 
     return filtered;
-  })();
+  }, [
+    debouncedSearchTerm,
+    selectedCategory,
+    sortOrder,
+    itemsWithMultipleCopies,
+    itemDataById,
+    duplicateCounts,
+  ]);
 
   if (multiCopyStats.uniqueItemsWithCopies === 0) {
     return (
@@ -528,7 +543,7 @@ export default function DuplicatesTab({
           filteredLeaderboardItems.length > 0 && (
             <div
               ref={parentRef}
-              className="scrollbar-thin scrollbar-track-transparent scrollbar-thumb-border-primary hover:scrollbar-thumb-border-focus border-border-card bg-tertiary-bg max-h-96 overflow-y-auto rounded-lg border"
+              className="scrollbar-thin scrollbar-track-transparent scrollbar-thumb-border-primary hover:scrollbar-thumb-border-focus max-h-96 overflow-y-auto rounded-lg"
               style={{
                 scrollbarWidth: "thin",
                 scrollbarColor: "var(--color-border-primary) transparent",
@@ -543,7 +558,13 @@ export default function DuplicatesTab({
               >
                 {virtualizer.getVirtualItems().map((virtualItem) => {
                   const item = filteredLeaderboardItems[virtualItem.index];
-                  const rank = virtualItem.index + 1;
+                  const originalIndex =
+                    multiCopyStats.allDuplicateItems.findIndex(
+                      (leaderboardItem) =>
+                        leaderboardItem.category === item.category &&
+                        leaderboardItem.title === item.title,
+                    );
+                  const rank = originalIndex + 1;
 
                   return (
                     <div
@@ -557,51 +578,88 @@ export default function DuplicatesTab({
                         width: "100%",
                         transform: `translateY(${virtualItem.start}px)`,
                       }}
-                      className={`border-border-card hover:bg-primary-bg/10 flex items-center justify-between p-3 transition-colors ${
-                        virtualItem.index !==
-                        filteredLeaderboardItems.length - 1
-                          ? "border-b"
-                          : ""
-                      }`}
                     >
-                      <div className="flex min-w-0 flex-1 items-center gap-3">
-                        <span className="text-primary-text w-6 shrink-0 text-sm font-bold">
-                          #{rank}
-                        </span>
-                        <div className="flex min-w-0 flex-col gap-1">
-                          <Link
-                            href={`/item/${encodeURIComponent(item.category.toLowerCase())}/${encodeURIComponent(item.title)}`}
-                            prefetch={false}
-                            className="text-primary-text hover:text-link truncate text-sm font-semibold transition-colors"
-                          >
-                            {item.title}
-                          </Link>
+                      <div
+                        className={`mb-3 flex items-center justify-between rounded-lg border p-3 transition-colors ${
+                          rank <= 3
+                            ? "hover:!bg-quaternary-bg"
+                            : "border-border-card bg-tertiary-bg hover:bg-quaternary-bg"
+                        }`}
+                        style={{
+                          ...(rank === 1 && {
+                            background:
+                              "linear-gradient(to right, hsl(45, 100%, 50%, 0.2), hsl(45, 100%, 45%, 0.2))",
+                            borderColor: "hsl(45, 100%, 50%, 0.5)",
+                          }),
+                          ...(rank === 2 && {
+                            background:
+                              "linear-gradient(to right, hsl(0, 0%, 75%, 0.2), hsl(0, 0%, 65%, 0.2))",
+                            borderColor: "hsl(0, 0%, 75%, 0.5)",
+                          }),
+                          ...(rank === 3 && {
+                            background:
+                              "linear-gradient(to right, hsl(30, 100%, 50%, 0.2), hsl(30, 100%, 45%, 0.2))",
+                            borderColor: "hsl(30, 100%, 50%, 0.5)",
+                          }),
+                        }}
+                      >
+                        <div className="flex min-w-0 flex-1 items-center gap-3">
                           <span
-                            className="text-primary-text bg-tertiary-bg/40 inline-flex h-6 w-fit items-center gap-1.5 rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl"
+                            className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-bold ${
+                              rank <= 3 ? "text-black" : "text-primary-text"
+                            }`}
                             style={{
-                              borderColor: getCategoryColor(item.category),
+                              ...(rank === 1 && {
+                                background:
+                                  "linear-gradient(to right, hsl(45, 100%, 50%), hsl(45, 100%, 45%))",
+                              }),
+                              ...(rank === 2 && {
+                                background:
+                                  "linear-gradient(to right, hsl(0, 0%, 75%), hsl(0, 0%, 65%))",
+                              }),
+                              ...(rank === 3 && {
+                                background:
+                                  "linear-gradient(to right, hsl(30, 100%, 50%), hsl(30, 100%, 45%))",
+                              }),
                             }}
                           >
-                            {(() => {
-                              const categoryIcon = getCategoryIcon(
-                                item.category,
-                              );
-                              return categoryIcon ? (
-                                <categoryIcon.Icon
-                                  className="h-3 w-3"
-                                  style={{
-                                    color: getCategoryColor(item.category),
-                                  }}
-                                />
-                              ) : null;
-                            })()}
-                            {item.category}
+                            #{rank}
                           </span>
+                          <div className="flex min-w-0 flex-col gap-1">
+                            <Link
+                              href={`/item/${encodeURIComponent(item.category.toLowerCase())}/${encodeURIComponent(item.title)}`}
+                              prefetch={false}
+                              className="text-primary-text hover:text-link truncate text-sm font-semibold transition-colors"
+                            >
+                              {item.title}
+                            </Link>
+                            <span
+                              className="text-primary-text bg-tertiary-bg/40 inline-flex h-6 w-fit items-center gap-1.5 rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl"
+                              style={{
+                                borderColor: getCategoryColor(item.category),
+                              }}
+                            >
+                              {(() => {
+                                const categoryIcon = getCategoryIcon(
+                                  item.category,
+                                );
+                                return categoryIcon ? (
+                                  <categoryIcon.Icon
+                                    className="h-3 w-3"
+                                    style={{
+                                      color: getCategoryColor(item.category),
+                                    }}
+                                  />
+                                ) : null;
+                              })()}
+                              {item.category}
+                            </span>
+                          </div>
                         </div>
+                        <span className="text-primary-text ml-2 text-sm font-bold whitespace-nowrap">
+                          {item.count}x
+                        </span>
                       </div>
-                      <span className="text-primary-text ml-2 text-sm font-bold whitespace-nowrap">
-                        {item.count}x
-                      </span>
                     </div>
                   );
                 })}

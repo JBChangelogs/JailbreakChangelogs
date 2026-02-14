@@ -56,7 +56,7 @@ export default async function InventoriesPage() {
       <ScanOptionSection variant="main" />
 
       <PremiumAwareLayout>
-        <InventoryCheckerClient />
+        <InventoryCheckerClient key="inventories-root" />
 
         <Suspense fallback={<StatsSkeleton />}>
           <StatsPolling />

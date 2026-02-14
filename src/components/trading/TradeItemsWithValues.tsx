@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { TradeItem } from "@/types/trading";
 import Link from "next/link";
 import { Icon } from "@/components/ui/IconWrapper";
-import { getCategoryColor } from "@/utils/categoryIcons";
+import { getCategoryColor, getCategoryIcon } from "@/utils/categoryIcons";
 import { getDemandColor, getTrendColor } from "@/utils/badgeColors";
 
 interface TradeItemsWithValuesProps {
@@ -75,11 +75,10 @@ const formatFullValue = (value: number): string => {
 
 interface ItemRowProps {
   item: TradeItem & { count: number };
-  side: "offering" | "requesting";
   isFirst?: boolean;
 }
 
-const ItemRow: React.FC<ItemRowProps> = ({ item, side, isFirst = false }) => {
+const ItemRow: React.FC<ItemRowProps> = ({ item, isFirst = false }) => {
   const [isExpanded, setIsExpanded] = useState(isFirst);
 
   const toggleExpanded = () => {
@@ -88,17 +87,12 @@ const ItemRow: React.FC<ItemRowProps> = ({ item, side, isFirst = false }) => {
 
   return (
     <div
-      className="bg-tertiary-bg border-border-card rounded-lg border p-4 transition-colors hover:cursor-pointer"
+      className="bg-tertiary-bg rounded-lg p-4 transition-colors hover:cursor-pointer"
       onClick={toggleExpanded}
     >
       {/* Main Item Info */}
       <div className="flex items-center justify-between">
         <div className="flex flex-1 items-center gap-3">
-          <div
-            className={`h-2 w-2 shrink-0 rounded-full ${
-              side === "offering" ? "bg-status-success" : "bg-status-error"
-            }`}
-          ></div>
           <div className="min-w-0 flex-1">
             <div className="flex items-center justify-between">
               <Link
@@ -117,21 +111,39 @@ const ItemRow: React.FC<ItemRowProps> = ({ item, side, isFirst = false }) => {
                 </span>
               )}
               <span
-                className="text-primary-text flex items-center rounded-lg border px-2 py-1 text-xs font-medium"
+                className="text-primary-text bg-tertiary-bg/40 flex h-6 items-center gap-1.5 rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl"
                 style={{
                   borderColor: getCategoryColor(item.type),
-                  backgroundColor: getCategoryColor(item.type) + "20", // Add 20% opacity
                 }}
               >
+                {(() => {
+                  const categoryIcon = getCategoryIcon(item.type);
+                  return categoryIcon ? (
+                    <categoryIcon.Icon
+                      className="h-3 w-3"
+                      style={{ color: getCategoryColor(item.type) }}
+                    />
+                  ) : null;
+                })()}
                 {item.type}
               </span>
               {(item.is_limited === 1 || item.data?.is_limited === 1) && (
-                <span className="border-primary-text text-primary-text rounded-lg border bg-transparent px-2 py-1 text-xs font-medium">
+                <span className="text-primary-text border-border-card bg-tertiary-bg/40 inline-flex h-6 items-center gap-1.5 rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl">
+                  <Icon
+                    icon="mdi:clock"
+                    className="h-3 w-3"
+                    style={{ color: "#ffd700" }}
+                  />
                   Limited
                 </span>
               )}
               {(item.is_seasonal === 1 || item.data?.is_seasonal === 1) && (
-                <span className="border-primary-text text-primary-text rounded-lg border bg-transparent px-2 py-1 text-xs font-medium">
+                <span className="text-primary-text border-border-card bg-tertiary-bg/40 inline-flex h-6 items-center gap-1.5 rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl">
+                  <Icon
+                    icon="noto-v1:snowflake"
+                    className="h-3 w-3"
+                    style={{ color: "#40c0e7" }}
+                  />
                   Seasonal
                 </span>
               )}
@@ -164,14 +176,14 @@ const ItemRow: React.FC<ItemRowProps> = ({ item, side, isFirst = false }) => {
 
       {/* Expanded Details */}
       {isExpanded && (
-        <div className="border-border-card mt-4 border-t pt-4">
+        <div className="mt-4 pt-4">
           <div className="space-y-2">
             {/* Cash Value */}
             <div className="bg-secondary-bg flex items-center justify-between rounded-lg p-2">
               <span className="text-secondary-text text-xs font-medium">
                 Cash Value
               </span>
-              <span className="bg-button-info text-form-button-text rounded-lg px-2 py-1 text-xs font-bold">
+              <span className="bg-button-info text-form-button-text inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold whitespace-nowrap shadow-sm min-[480px]:px-3">
                 {item.cash_value === null || item.cash_value === "N/A"
                   ? "N/A"
                   : formatFullValue(parseCurrencyValue(item.cash_value))}
@@ -183,7 +195,7 @@ const ItemRow: React.FC<ItemRowProps> = ({ item, side, isFirst = false }) => {
               <span className="text-secondary-text text-xs font-medium">
                 Duped Value
               </span>
-              <span className="bg-button-info text-form-button-text rounded-lg px-2 py-1 text-xs font-bold">
+              <span className="bg-button-info text-form-button-text inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold whitespace-nowrap shadow-sm min-[480px]:px-3">
                 {item.duped_value === null || item.duped_value === "N/A"
                   ? "N/A"
                   : formatFullValue(parseCurrencyValue(item.duped_value))}
@@ -196,7 +208,7 @@ const ItemRow: React.FC<ItemRowProps> = ({ item, side, isFirst = false }) => {
                 Demand
               </span>
               <span
-                className={`${getDemandColor(item.demand || "N/A")} rounded-lg px-2 py-1 text-xs font-bold`}
+                className={`${getDemandColor(item.demand || "N/A")} inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold whitespace-nowrap shadow-sm min-[480px]:px-3`}
               >
                 {item.demand || "N/A"}
               </span>
@@ -208,7 +220,7 @@ const ItemRow: React.FC<ItemRowProps> = ({ item, side, isFirst = false }) => {
                 Trend
               </span>
               <span
-                className={`${getTrendColor(item.trend || "N/A")} rounded-lg px-2 py-1 text-xs font-bold`}
+                className={`${getTrendColor(item.trend || "N/A")} inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold whitespace-nowrap shadow-sm min-[480px]:px-3`}
               >
                 {item.trend || "N/A"}
               </span>
@@ -258,10 +270,10 @@ export default function TradeItemsWithValues({
                   Offering Side
                 </h3>
               </div>
-              <span className="bg-status-success/20 border-status-success/30 text-primary-text hidden rounded-full border px-3 py-1 text-xs font-medium sm:block">
+              <span className="text-primary-text border-status-success/40 bg-status-success/15 hidden h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl sm:inline-flex">
                 Offering
               </span>
-              <span className="border-primary-text text-primary-text rounded-full border bg-transparent px-3 py-1 text-xs font-medium">
+              <span className="text-primary-text border-border-card bg-tertiary-bg/40 inline-flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl">
                 {offeringItems.reduce((sum, item) => sum + item.count, 0)} item
                 {offeringItems.reduce((sum, item) => sum + item.count, 0) !== 1
                   ? "s"
@@ -271,19 +283,18 @@ export default function TradeItemsWithValues({
           </div>
 
           {/* Items Container */}
-          <div className="bg-tertiary-bg space-y-4 rounded-xl p-6">
+          <div className="space-y-4">
             {offeringItems.map((item, index) => (
               <ItemRow
                 key={`${item.id}-${item.name}-${item.type}`}
                 item={item}
-                side="offering"
                 isFirst={index === 0}
               />
             ))}
           </div>
 
           {/* Offering Total */}
-          <div className="bg-primary-bg mt-4 rounded-lg p-4">
+          <div className="border-border-card bg-tertiary-bg mt-4 rounded-lg border p-4">
             <div className="flex items-center justify-between">
               <span className="text-primary-text font-semibold">Total</span>
               <div className="text-right">
@@ -308,10 +319,10 @@ export default function TradeItemsWithValues({
                   Requesting Side
                 </h3>
               </div>
-              <span className="bg-status-error/20 border-status-error/30 text-primary-text hidden rounded-full border px-3 py-1 text-xs font-medium sm:block">
+              <span className="text-primary-text border-status-error/40 bg-status-error/15 hidden h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl sm:inline-flex">
                 Requesting
               </span>
-              <span className="border-primary-text text-primary-text rounded-full border bg-transparent px-3 py-1 text-xs font-medium">
+              <span className="text-primary-text border-border-card bg-tertiary-bg/40 inline-flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl">
                 {requestingItems.reduce((sum, item) => sum + item.count, 0)}{" "}
                 item
                 {requestingItems.reduce((sum, item) => sum + item.count, 0) !==
@@ -323,19 +334,18 @@ export default function TradeItemsWithValues({
           </div>
 
           {/* Items Container */}
-          <div className="bg-tertiary-bg space-y-4 rounded-xl p-6">
+          <div className="space-y-4">
             {requestingItems.map((item, index) => (
               <ItemRow
                 key={`${item.id}-${item.name}-${item.type}`}
                 item={item}
-                side="requesting"
                 isFirst={index === 0}
               />
             ))}
           </div>
 
           {/* Requesting Total */}
-          <div className="bg-primary-bg mt-4 rounded-lg p-4">
+          <div className="border-border-card bg-tertiary-bg mt-4 rounded-lg border p-4">
             <div className="flex items-center justify-between">
               <span className="text-primary-text font-semibold">Total</span>
               <div className="text-right">
@@ -352,7 +362,7 @@ export default function TradeItemsWithValues({
       </div>
 
       {/* Overall Difference */}
-      <div className="bg-primary-bg rounded-xl p-6">
+      <div className="border-border-card bg-tertiary-bg rounded-xl border p-6">
         <h4 className="text-primary-text mb-4 text-lg font-semibold">
           Overall Difference
         </h4>
@@ -361,15 +371,7 @@ export default function TradeItemsWithValues({
             <span className="text-secondary-text text-base">
               Cash Value Difference
             </span>
-            <span
-              className={`inline-flex items-center justify-center gap-2 rounded-full px-4 py-2 text-base font-semibold ${
-                cashDifference < 0
-                  ? "bg-status-success text-white"
-                  : cashDifference > 0
-                    ? "bg-status-error text-white"
-                    : "bg-primary-bg text-primary-text"
-              }`}
-            >
+            <span className="text-primary-text text-base font-semibold">
               {cashDifference !== 0 && (cashDifference < 0 ? "↑" : "↓")}
               {formatFullValue(Math.abs(cashDifference))}
             </span>
@@ -378,15 +380,7 @@ export default function TradeItemsWithValues({
             <span className="text-secondary-text text-base">
               Duped Value Difference
             </span>
-            <span
-              className={`inline-flex items-center justify-center gap-2 rounded-full px-4 py-2 text-base font-semibold ${
-                dupedDifference < 0
-                  ? "bg-status-success text-white"
-                  : dupedDifference > 0
-                    ? "bg-status-error text-white"
-                    : "bg-primary-bg text-primary-text"
-              }`}
-            >
+            <span className="text-primary-text text-base font-semibold">
               {dupedDifference !== 0 && (dupedDifference < 0 ? "↑" : "↓")}
               {formatFullValue(Math.abs(dupedDifference))}
             </span>

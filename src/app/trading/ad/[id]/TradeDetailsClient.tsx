@@ -19,6 +19,7 @@ import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { useAuthContext } from "@/contexts/AuthContext";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import {
   Tooltip,
@@ -238,15 +239,16 @@ export default function TradeDetailsClient({
                         )}
                         {/* View in Discord Button */}
                         {trade.message_id && (
-                          <a
-                            href={`https://discord.com/channels/${discordGuildId}/${discordChannelId}/${trade.message_id}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="bg-button-info text-form-button-text hover:bg-button-info-hover flex items-center gap-1 rounded-lg px-3 py-1 text-sm transition-colors"
-                          >
-                            <DiscordIcon className="h-4 w-4" />
-                            View in Discord
-                          </a>
+                          <Button asChild size="sm">
+                            <a
+                              href={`https://discord.com/channels/${discordGuildId}/${discordChannelId}/${trade.message_id}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              <DiscordIcon className="h-4 w-4" />
+                              View in Discord
+                            </a>
+                          </Button>
                         )}
                       </div>
                     </div>
@@ -272,30 +274,33 @@ export default function TradeDetailsClient({
               requesting={trade.requesting}
             />
 
-            {/* Tabs - DaisyUI style */}
+            {/* Tabs */}
             <div className="overflow-x-auto">
-              <div role="tablist" className="tabs min-w-max">
-                <button
-                  role="tab"
-                  aria-selected={activeTab === "items"}
-                  aria-controls="trade-details-tabpanel-items"
-                  id="trade-details-tab-items"
-                  onClick={() => setActiveTab("items")}
-                  className={`tab ${activeTab === "items" ? "tab-active" : ""}`}
-                >
-                  Items & Values
-                </button>
-                <button
-                  role="tab"
-                  aria-selected={activeTab === "comments"}
-                  aria-controls="trade-details-tabpanel-comments"
-                  id="trade-details-tab-comments"
-                  onClick={() => setActiveTab("comments")}
-                  className={`tab ${activeTab === "comments" ? "tab-active" : ""}`}
-                >
-                  Comments
-                </button>
-              </div>
+              <Tabs
+                value={activeTab}
+                onValueChange={(value) =>
+                  setActiveTab(value as "items" | "comments")
+                }
+              >
+                <TabsList fullWidth>
+                  <TabsTrigger
+                    value="items"
+                    fullWidth
+                    aria-controls="trade-details-tabpanel-items"
+                    id="trade-details-tab-items"
+                  >
+                    Items & Values
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="comments"
+                    fullWidth
+                    aria-controls="trade-details-tabpanel-comments"
+                    id="trade-details-tab-comments"
+                  >
+                    Comments
+                  </TabsTrigger>
+                </TabsList>
+              </Tabs>
             </div>
             {/* Tab Content */}
             <div className="mt-6">

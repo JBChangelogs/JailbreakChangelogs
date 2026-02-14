@@ -38,6 +38,7 @@ function UserDataLoadingFallback({
       robloxUsers={{}}
       userConnectionData={null}
       currentSeason={currentSeason}
+      isLoading={true}
       initialComments={initialComments}
       initialCommentUserMap={initialCommentUserMap}
       items={items}

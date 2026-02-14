@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Icon } from "@/components/ui/IconWrapper";
 import { Button } from "@/components/ui/button";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ThemeProvider } from "@mui/material";
 import React from "react";
 import { fetchMissingRobloxData } from "./actions";
@@ -116,6 +117,11 @@ export default function InventoryCheckerClient({
 
   // Use refreshed data if available, otherwise use initial data
   const currentData = initialData;
+
+  // Keep search input in sync when route/context changes.
+  useEffect(() => {
+    setSearchId(originalSearchTerm || robloxId || "");
+  }, [originalSearchTerm, robloxId]);
 
   // Extract all user IDs from inventory data for batch fetching
   const allUserIds = useMemo(() => {
@@ -1160,21 +1166,27 @@ function InventoryOverflowTabs({
 
   return (
     <div className="overflow-x-auto">
-      <div role="tablist" className="tabs min-w-max">
-        {labels.map((label, idx) => (
-          <button
-            key={label}
-            role="tab"
-            aria-selected={value === idx}
-            aria-controls={`inventory-tabpanel-${idx}`}
-            id={`inventory-tab-${idx}`}
-            onClick={(e) => onChange(e as unknown as React.SyntheticEvent, idx)}
-            className={`tab ${value === idx ? "tab-active" : ""}`}
-          >
-            {label}
-          </button>
-        ))}
-      </div>
+      <Tabs
+        value={String(value)}
+        onValueChange={(nextValue) =>
+          onChange({} as React.SyntheticEvent, Number(nextValue))
+        }
+      >
+        <TabsList fullWidth>
+          {labels.map((label, idx) => (
+            <TabsTrigger
+              key={label}
+              value={String(idx)}
+              fullWidth
+              aria-controls={`inventory-tabpanel-${idx}`}
+              id={`inventory-tab-${idx}`}
+              className="text-xs sm:text-sm"
+            >
+              {label}
+            </TabsTrigger>
+          ))}
+        </TabsList>
+      </Tabs>
     </div>
   );
 }

@@ -596,7 +596,7 @@ export default function UserStatsSection({
         <div className="mt-4">
           <div className="mb-2 flex items-center justify-between">
             <h3 className="text-primary-text text-sm font-medium">
-              Owned Passes ({currentData.gamepasses.length})
+              Owned Gamepasses ({currentData.gamepasses.length})
             </h3>
           </div>
           <div className="flex flex-wrap gap-2">

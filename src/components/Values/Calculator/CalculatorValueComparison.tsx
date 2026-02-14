@@ -52,9 +52,9 @@ export const CalculatorValueComparison: React.FC<
   const difference = offeringTotal - requestingTotal;
 
   return (
-    <div className="border-border-card bg-secondary-bg overflow-x-auto rounded-lg border p-8">
+    <div className="border-border-card bg-secondary-bg space-y-8 rounded-lg border p-6 sm:p-8">
       {/* Header */}
-      <div className="mb-8">
+      <div>
         <h3 className="text-primary-text mb-2 text-2xl font-bold">
           Value Comparison
         </h3>
@@ -84,33 +84,31 @@ export const CalculatorValueComparison: React.FC<
       </div>
 
       {/* Overall Difference */}
-      <div className="mt-8">
-        <div className="border-border-card bg-tertiary-bg rounded-xl border p-6">
-          <h4 className="text-primary-text mb-4 text-lg font-semibold">
-            Overall Difference
-          </h4>
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <span className="text-secondary-text text-base">
-              Value Difference
+      <div className="border-border-card bg-tertiary-bg rounded-xl border p-6">
+        <h4 className="text-primary-text mb-4 text-lg font-semibold">
+          Overall Difference
+        </h4>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <span className="text-secondary-text text-base">
+            Value Difference
+          </span>
+          <div className="flex items-center gap-3">
+            {difference !== 0 && (
+              <Icon
+                icon={
+                  difference < 0 ? "famicons:arrow-up" : "famicons:arrow-down"
+                }
+                className={
+                  difference < 0
+                    ? "text-status-success h-5 w-5"
+                    : "text-status-error h-5 w-5"
+                }
+                inline={true}
+              />
+            )}
+            <span className="text-primary-text text-xl font-bold">
+              {formatCurrencyValue(Math.abs(difference))}
             </span>
-            <div className="flex items-center gap-3">
-              {difference !== 0 && (
-                <Icon
-                  icon={
-                    difference < 0 ? "famicons:arrow-up" : "famicons:arrow-down"
-                  }
-                  className={
-                    difference < 0
-                      ? "text-status-success h-5 w-5"
-                      : "text-status-error h-5 w-5"
-                  }
-                  inline={true}
-                />
-              )}
-              <span className="text-primary-text text-xl font-bold">
-                {formatCurrencyValue(Math.abs(difference))}
-              </span>
-            </div>
           </div>
         </div>
       </div>

@@ -66,8 +66,13 @@ export default async function InventoryCheckerPage({
 
       <PremiumAwareLayout>
         <Suspense
+          key={`inventory-detail-${userid}`}
           fallback={
-            <InventoryCheckerClient robloxId={userid} isLoading={true} />
+            <InventoryCheckerClient
+              key={`inventory-detail-fallback-${userid}`}
+              robloxId={userid}
+              isLoading={true}
+            />
           }
         >
           <InventoryDataStreamer robloxId={userid} />
