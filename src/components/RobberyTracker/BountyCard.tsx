@@ -98,13 +98,14 @@ export default function BountyCard({
           <div className="mb-3">
             <div className="text-secondary-text mb-2 flex items-center gap-2 text-sm font-medium">
               <Icon icon="heroicons:cube" className="h-4 w-4" />
-              Inventory ({bounty.inventory.length} items)
+              Inventory ({bounty.inventory.length}{" "}
+              {bounty.inventory.length === 1 ? "item" : "items"})
             </div>
             <div className="bg-secondary-bg flex flex-wrap gap-1.5 rounded-lg p-2">
               {bounty.inventory.map((item, index) => (
                 <span
                   key={`${item}-${index}`}
-                  className="bg-secondary-background text-secondary-text rounded px-2 py-1 text-xs"
+                  className="text-primary-text bg-tertiary-bg/40 border-border-card inline-flex items-center rounded-lg border px-2.5 py-1.5 text-xs font-medium shadow-sm"
                 >
                   {item}
                 </span>

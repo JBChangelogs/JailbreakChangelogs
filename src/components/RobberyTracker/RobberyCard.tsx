@@ -208,6 +208,17 @@ export default function RobberyCard({ robbery }: RobberyCardProps) {
     // Default handling for other robberies
     switch (robbery.status) {
       case 1:
+        if (robbery.marker_name === "CargoPlane" && planeCountdown) {
+          return (
+            <div className="text-primary-text border-status-warning/30 bg-status-warning/20 inline-flex h-6 items-center gap-1.5 rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl">
+              <span>
+                {planeCountdown.includes("Took off")
+                  ? planeCountdown
+                  : `Takes off in ${planeCountdown}`}
+              </span>
+            </div>
+          );
+        }
         return (
           <div className="text-primary-text border-status-success/30 bg-status-success/20 inline-flex h-6 items-center gap-1.5 rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl">
             <span>Open</span>
@@ -285,20 +296,6 @@ export default function RobberyCard({ robbery }: RobberyCardProps) {
                 <span className="text-secondary-text">Closes In:</span>
                 <span className="text-primary-text font-mono font-semibold">
                   {casinoCountdown}
-                </span>
-              </div>
-            )}
-
-          {/* Cargo Plane Countdown */}
-          {robbery.marker_name === "CargoPlane" &&
-            robbery.metadata?.plane_time &&
-            planeCountdown && (
-              <div className="flex items-center justify-between">
-                <span className="text-secondary-text">Plane Status:</span>
-                <span className="text-primary-text font-mono font-semibold">
-                  {planeCountdown.includes("Took off")
-                    ? planeCountdown
-                    : `Flying off in ${planeCountdown}`}
                 </span>
               </div>
             )}

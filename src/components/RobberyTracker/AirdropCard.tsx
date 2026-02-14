@@ -165,7 +165,6 @@ export default function AirdropCard({ airdrop }: AirdropCardProps) {
             <h3 className="text-primary-text text-lg font-semibold">
               {airdrop.location.replace(/([A-Z])/g, " $1").trim()} Airdrop
             </h3>
-            <p className="text-secondary-text text-sm">{airdrop.color} Crate</p>
           </div>
           {getDifficultyBadge()}
         </div>
@@ -206,18 +205,6 @@ export default function AirdropCard({ airdrop }: AirdropCardProps) {
             </span>
           </div>
 
-          {/* View Map Button */}
-          <Button
-            onClick={() => setIsMapModalOpen(true)}
-            variant="default"
-            className="mt-2 w-full"
-            data-umami-event="View Airdrop Map"
-            data-umami-event-location={airdrop.location}
-          >
-            <Icon icon="heroicons:map-pin" className="h-4 w-4" />
-            View Location
-          </Button>
-
           {/* Join Server Button */}
           {jobId && (
             <Button asChild variant="default" className="mt-2 w-full">
@@ -234,6 +221,18 @@ export default function AirdropCard({ airdrop }: AirdropCardProps) {
               </a>
             </Button>
           )}
+
+          {/* View Map Button */}
+          <Button
+            onClick={() => setIsMapModalOpen(true)}
+            variant="default"
+            className="mt-2 w-full"
+            data-umami-event="View Airdrop Map"
+            data-umami-event-location={airdrop.location}
+          >
+            <Icon icon="heroicons:map-pin" className="h-4 w-4" />
+            View Location
+          </Button>
 
           {/* View Players Button */}
           {players.length > 0 && (
