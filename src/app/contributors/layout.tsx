@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://jailbreakchangelogs.xyz"),
-  title: "Jailbreak Changelogs Contributors - Meet Our Team",
+  title: "Meet the Team",
   description:
     "Meet the team behind Jailbreak Changelogs. Our contributors, value list managers, and team members who help keep the platform running smoothly.",
   alternates: {

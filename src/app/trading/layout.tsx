@@ -2,11 +2,14 @@ import React from "react";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Create Trade Ad | Jailbreak Changelogs",
+  title: {
+    template: "%s | Jailbreak Changelogs",
+    default: "View Trade Ads | Jailbreak Changelogs",
+  },
   description:
     "Browse and create trade offers. Find the best deals and connect with other traders.",
   openGraph: {
-    title: "Create Trade Ad | Jailbreak Changelogs",
+    title: "View Trade Ads | Jailbreak Changelogs",
     description:
       "Browse and create trade offers. Find the best deals and connect with other traders.",
     type: "website",
@@ -21,7 +24,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Create Trade Ad | Jailbreak Changelogs",
+    title: "View Trade Ads | Jailbreak Changelogs",
     description:
       "Browse and create trade offers. Find the best deals and connect with other traders.",
     images: [

@@ -1,6 +1,9 @@
 export const metadata = {
   metadataBase: new URL("https://jailbreakchangelogs.xyz"),
-  title: "User Search - Find Community Members",
+  title: {
+    template: "%s | Jailbreak Changelogs",
+    default: "Users",
+  },
   description:
     "Search for users on Jailbreak Changelogs and manage your own profile. Engage with the community through comments and track your contributions!",
   alternates: {

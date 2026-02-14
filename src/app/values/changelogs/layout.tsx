@@ -2,7 +2,7 @@ import { Metadata } from "next";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://jailbreakchangelogs.xyz"),
-  title: "Roblox Jailbreak Values Changelogs & History",
+  title: "Value Changelog History",
   description:
     "Track every value change, price adjustment, and item modification in Jailbreak Changelogs. View comprehensive changelog history for all tradeable items.",
   alternates: {

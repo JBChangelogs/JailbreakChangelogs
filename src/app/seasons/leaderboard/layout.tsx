@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 export async function generateMetadata(): Promise<Metadata> {
   return {
     metadataBase: new URL("https://jailbreakchangelogs.xyz"),
-    title: "Season Leaderboard - Jailbreak Changelogs",
+    title: "Season Leaderboard",
     description:
       "View the top 25 players in the current Roblox Jailbreak season ranked by their total experience and see who's leading the season",
     alternates: {

@@ -2,7 +2,7 @@ import { Metadata } from "next";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://jailbreakchangelogs.xyz"),
-  title: "Will I Make It to Level 10? | Jailbreak Seasons Calculator",
+  title: "Will I Make It to Level 10?",
   description:
     "Calculate your chances of reaching level 10 in the current Jailbreak season. Track your XP progress and see if you'll make it to the top rewards!",
   alternates: {

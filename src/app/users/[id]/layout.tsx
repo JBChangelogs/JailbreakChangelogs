@@ -64,14 +64,14 @@ export async function generateMetadata({
     if (!user) {
       return {
         metadataBase: new URL("https://jailbreakchangelogs.xyz"),
-        title: "User Not Found | Changelogs",
+        title: "User Not Found",
         description:
           "This user profile could not be found on Jailbreak Changelogs.",
         alternates: {
           canonical: `/users/${userId}`,
         },
         openGraph: {
-          title: "User Not Found | Changelogs",
+          title: "User Not Found",
           description:
             "This user profile could not be found on Jailbreak Changelogs.",
           type: "website",
@@ -88,7 +88,7 @@ export async function generateMetadata({
         },
         twitter: {
           card: "summary_large_image",
-          title: "User Not Found | Changelogs",
+          title: "User Not Found",
           description:
             "This user profile could not be found on Jailbreak Changelogs.",
           images: [
@@ -106,8 +106,8 @@ export async function generateMetadata({
     const username = user.username;
 
     const titleFormat = username
-      ? `${displayName}'s (@${username}) Profile | Changelogs`
-      : `${displayName}'s Profile | Changelogs`;
+      ? `${displayName}'s (@${username}) Profile`
+      : `${displayName}'s Profile`;
 
     return {
       metadataBase: new URL("https://jailbreakchangelogs.xyz"),
@@ -153,13 +153,13 @@ export async function generateMetadata({
         .trim();
       return {
         metadataBase: new URL("https://jailbreakchangelogs.xyz"),
-        title: "Private Profile | Changelogs",
+        title: "Private Profile",
         description: privateMessage || "This user's profile is private.",
         alternates: {
           canonical: `/users/${userId}`,
         },
         openGraph: {
-          title: "Private Profile | Changelogs",
+          title: "Private Profile",
           description: privateMessage || "This user's profile is private.",
           type: "website",
           url: "https://jailbreakchangelogs.xyz/users",
@@ -175,7 +175,7 @@ export async function generateMetadata({
         },
         twitter: {
           card: "summary_large_image",
-          title: "Private Profile | Changelogs",
+          title: "Private Profile",
           description: privateMessage || "This user's profile is private.",
           images: [
             "https://assets.jailbreakchangelogs.xyz/assets/logos/embeds/JBCL_Embed_Graphic.png",
@@ -195,13 +195,13 @@ export async function generateMetadata({
       const bannedMessage = error.message.replace("BANNED_USER:", "").trim();
       return {
         metadataBase: new URL("https://jailbreakchangelogs.xyz"),
-        title: "User Banned | Changelogs",
+        title: "User Banned",
         description: bannedMessage,
         alternates: {
           canonical: `/users/${userId}`,
         },
         openGraph: {
-          title: "User Banned | Changelogs",
+          title: "User Banned",
           description: bannedMessage,
           type: "website",
           url: "https://jailbreakchangelogs.xyz/users",
@@ -217,7 +217,7 @@ export async function generateMetadata({
         },
         twitter: {
           card: "summary_large_image",
-          title: "User Banned | Changelogs",
+          title: "User Banned",
           description: bannedMessage,
           images: [
             "https://assets.jailbreakchangelogs.xyz/assets/logos/embeds/JBCL_Embed_Graphic.png",
@@ -229,14 +229,14 @@ export async function generateMetadata({
     // Fallback for other errors (including NOT_FOUND)
     return {
       metadataBase: new URL("https://jailbreakchangelogs.xyz"),
-      title: "User Not Found | Changelogs",
+      title: "User Not Found",
       description:
         "This user profile could not be found on Jailbreak Changelogs.",
       alternates: {
         canonical: `/users/${userId}`,
       },
       openGraph: {
-        title: "User Not Found | Changelogs",
+        title: "User Not Found",
         description:
           "This user profile could not be found on Jailbreak Changelogs.",
         type: "website",
@@ -253,7 +253,7 @@ export async function generateMetadata({
       },
       twitter: {
         card: "summary_large_image",
-        title: "User Not Found | Changelogs",
+        title: "User Not Found",
         description:
           "This user profile could not be found on Jailbreak Changelogs.",
         images: [

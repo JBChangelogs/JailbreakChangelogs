@@ -1,7 +1,7 @@
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Weekly Contracts | Jailbreak Seasons",
+  title: "Weekly Contracts",
   description: "Check the latest weekly contracts for Roblox Jailbreak.",
   alternates: { canonical: "/seasons/contracts" },
   openGraph: {

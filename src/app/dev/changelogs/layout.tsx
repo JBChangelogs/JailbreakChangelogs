@@ -2,10 +2,7 @@ import { siteConfig } from "@/lib/site";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: {
-    default: "Development Changelog",
-    template: `%s | ${siteConfig.name}`,
-  },
+  title: "Development Changelog",
   description: siteConfig.description,
   openGraph: {
     title: "Development Changelog",

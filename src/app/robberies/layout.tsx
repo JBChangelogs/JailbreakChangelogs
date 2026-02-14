@@ -1,7 +1,7 @@
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Robbery LIVE Tracker | Jailbreak Changelogs",
+  title: "Robbery LIVE Tracker",
   description:
     "Track live status of robberies, mansions, and airdrops in Roblox Jailbreak. Get real-time updates on open stores and upcoming events.",
   alternates: {

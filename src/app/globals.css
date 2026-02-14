@@ -19,11 +19,11 @@
   /* DARK THEME - Default (current theme) */
   /* Background Colors - Comprehensive Gray Scale */
   --color-primary-bg: #121317; /* Main page background */
-  --color-secondary-bg: hsl(216, 6%, 15%); /* Card background - Cards, modals */
+  --color-secondary-bg: #161719; /* Card background - Cards, modals */
   --color-tertiary-bg: hsl(
     220,
-    5%,
-    20%
+    6%,
+    14%
   ); /* Elevated surfaces - Dropdowns, tooltips */
   --color-quaternary-bg: hsl(
     225,

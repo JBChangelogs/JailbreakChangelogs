@@ -9,14 +9,14 @@ export async function generateMetadata(): Promise<Metadata> {
 
   return {
     metadataBase: new URL("https://jailbreakchangelogs.xyz"),
-    title: "Dupe Finder - Jailbreak Changelogs",
+    title: "Dupe Finder",
     description:
       "Find and check for duplicated items in Roblox Jailbreak inventories. Use our dupe finder tool to identify potential duplicate items in your or other players' inventories.",
     alternates: {
       canonical: "/dupes",
     },
     openGraph: {
-      title: "Dupe Finder - Jailbreak Changelogs",
+      title: "Dupe Finder | Jailbreak Changelogs",
       description:
         "Find and check for duplicated items in Roblox Jailbreak inventories. Use our dupe finder tool to identify potential duplicate items in your or other players' inventories.",
       images: [
@@ -33,7 +33,7 @@ export async function generateMetadata(): Promise<Metadata> {
     },
     twitter: {
       card: "summary_large_image",
-      title: "Dupe Finder - Jailbreak Changelogs",
+      title: "Dupe Finder | Jailbreak Changelogs",
       description:
         "Find and check for duplicated items in Roblox Jailbreak inventories. Use our dupe finder tool to identify potential duplicate items in your or other players' inventories.",
       images: [

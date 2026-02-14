@@ -9,7 +9,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
   return {
     metadataBase: new URL("https://jailbreakchangelogs.xyz"),
-    title: "OG Finder - Jailbreak Changelogs",
+    title: "OG Finder",
     description:
       "Find original items owned by any player. Discover who originally owned specific items in Jailbreak and track their trade history.",
     alternates: {

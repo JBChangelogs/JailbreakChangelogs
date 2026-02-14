@@ -2,14 +2,14 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://jailbreakchangelogs.xyz"),
-  title: "Jailbreak Changelogs Privacy Policy",
+  title: "Privacy Policy",
   description:
     "Learn about how we protect your privacy and handle your data at Jailbreak Changelogs. Our privacy policy outlines our commitment to transparency and data protection.",
   alternates: {
     canonical: "/privacy",
   },
   openGraph: {
-    title: "Jailbreak Changelogs Privacy Policy",
+    title: "Privacy Policy",
     description:
       "Learn about how we protect your privacy and handle your data at Jailbreak Changelogs. Our privacy policy outlines our commitment to transparency and data protection.",
     images: [
@@ -26,7 +26,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Jailbreak Changelogs Privacy Policy",
+    title: "Privacy Policy",
     description:
       "Learn about how we protect your privacy and handle your data at Jailbreak Changelogs. Our privacy policy outlines our commitment to transparency and data protection.",
     images: [

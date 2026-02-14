@@ -9,7 +9,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
   return {
     metadataBase: new URL("https://jailbreakchangelogs.xyz"),
-    title: "Duplicate Comparison - Jailbreak Changelogs",
+    title: "Duplicate Comparison",
     description:
       "Compare duplicate item variants side-by-side to analyze ownership history and identify potential mass-duped items.",
     alternates: {

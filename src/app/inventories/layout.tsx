@@ -9,7 +9,7 @@ export async function generateMetadata(): Promise<Metadata> {
   }
 
   return {
-    title: "Inventory Checker - Jailbreak Changelogs",
+    title: "Inventory Checker",
     description: "Check any player's Jailbreak inventory and stats",
     metadataBase: new URL("https://jailbreakchangelogs.xyz"),
     alternates: {

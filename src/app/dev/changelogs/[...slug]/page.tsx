@@ -55,7 +55,7 @@ export async function generateMetadata({
   const title = entry.title || entry.version;
 
   return {
-    title: `${title} | Development Changelog`,
+    title: `${title} | Jailbreak Changelogs`,
     description: entry.description,
     alternates: {
       canonical: `/dev/changelogs/${slug.join("/")}`,

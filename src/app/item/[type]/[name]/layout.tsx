@@ -197,7 +197,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const isFallbackImage = finalImageUrl === FALLBACK_IMAGE;
     return {
       metadataBase: new URL("https://jailbreakchangelogs.xyz"),
-      title: `${item.name} (${item.type}) | Roblox Jailbreak`,
+      title: `${item.name} (${item.type})`,
       description:
         item.description && item.description !== "N/A"
           ? `${item.description.slice(0, 155)}...`

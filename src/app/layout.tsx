@@ -46,18 +46,18 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     metadataBase: new URL("https://jailbreakchangelogs.xyz"),
     title: {
-      template: "%s",
-      default: "Latest Updates & Patch Notes | Changelogs",
+      template: "%s | Jailbreak Changelogs",
+      default: "Jailbreak Changelogs",
     },
     description:
-      "Stay up to date with the latest Roblox Jailbreak updates, patch notes, and changes. Track new features, bug fixes, and game improvements.",
+      "Your all-in-one Roblox Jailbreak platform for changelogs and game update tracking, values, trading, inventory lookups, OG item tracking, dupe detection, and more.",
     alternates: {
       canonical: "/",
     },
     openGraph: {
-      title: "Latest Updates & Patch Notes | Changelogs",
+      title: "Jailbreak Changelogs",
       description:
-        "Stay up to date with the latest Roblox Jailbreak updates, patch notes, and changes. Track new features, bug fixes, and game improvements.",
+        "Your all-in-one Roblox Jailbreak platform for changelogs and game update tracking, values, trading, inventory lookups, OG item tracking, dupe detection, and more.",
       images: [
         {
           url: "https://assets.jailbreakchangelogs.xyz/assets/logos/embeds/JBCL_Embed_Graphic.png",
@@ -73,9 +73,9 @@ export async function generateMetadata(): Promise<Metadata> {
     },
     twitter: {
       card: "summary_large_image",
-      title: "Latest Updates & Patch Notes | Changelogs",
+      title: "Jailbreak Changelogs",
       description:
-        "Stay up to date with the latest Roblox Jailbreak updates, patch notes, and changes. Track new features, bug fixes, and game improvements.",
+        "Your all-in-one Roblox Jailbreak platform for changelogs and game update tracking, values, trading, inventory lookups, OG item tracking, dupe detection, and more.",
       images: [
         "https://assets.jailbreakchangelogs.xyz/assets/logos/embeds/JBCL_Embed_Graphic.png",
       ],

@@ -2407,3 +2407,85 @@ export async function clearNotificationHistory(): Promise<boolean> {
     return false;
   }
 }
+
+export interface HomepageStats {
+  total_users: number;
+  total_trades: number;
+  total_changelogs: number;
+  total_seasons: number;
+  total_comments: number;
+  total_items: number;
+  total_item_changes: number;
+  total_value_suggestions: number;
+}
+
+export interface HomepageImpactStats {
+  items_tracked: number;
+  users_scanned: number;
+  total_duplicates: number;
+}
+
+export async function fetchHomepageStats(): Promise<HomepageStats | null> {
+  try {
+    const response = await fetch(`${BASE_API_URL}/stats/homepage`, {
+      next: { revalidate: 10800 }, // Revalidate every 3 hours
+      headers: {
+        "User-Agent": "JailbreakChangelogs-HomepageStats/1.0",
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch homepage stats: ${response.status}`);
+    }
+
+    return (await response.json()) as HomepageStats;
+  } catch (error) {
+    console.error("[SERVER] Error fetching homepage stats:", error);
+    return null;
+  }
+}
+
+export async function fetchHomepageImpactStats(): Promise<HomepageImpactStats | null> {
+  try {
+    const [countResponse, duplicatesResponse] = await Promise.all([
+      fetch(`${INVENTORY_API_URL}/items/count`, {
+        next: { revalidate: 10800 }, // Revalidate every 3 hours
+        headers: {
+          "User-Agent": "JailbreakChangelogs-HomepageImpactStats/1.0",
+          "X-Source": INVENTORY_API_SOURCE_HEADER,
+        },
+      }),
+      fetch(`${INVENTORY_API_URL}/items/duplicates/count`, {
+        next: { revalidate: 10800 }, // Revalidate every 3 hours
+        headers: {
+          "User-Agent": "JailbreakChangelogs-HomepageImpactStats/1.0",
+          "X-Source": INVENTORY_API_SOURCE_HEADER,
+        },
+      }),
+    ]);
+
+    if (!countResponse.ok) {
+      throw new Error(`Failed to fetch items/count: ${countResponse.status}`);
+    }
+
+    if (!duplicatesResponse.ok) {
+      throw new Error(
+        `Failed to fetch items/duplicates/count: ${duplicatesResponse.status}`,
+      );
+    }
+
+    const counts = (await countResponse.json()) as ItemCountStats;
+    const duplicates = (await duplicatesResponse.json()) as {
+      total_duplicates: number;
+    };
+
+    return {
+      items_tracked: counts.item_count ?? 0,
+      users_scanned: counts.user_count ?? 0,
+      total_duplicates: duplicates.total_duplicates ?? 0,
+    };
+  } catch (error) {
+    console.error("[SERVER] Error fetching homepage impact stats:", error);
+    return null;
+  }
+}

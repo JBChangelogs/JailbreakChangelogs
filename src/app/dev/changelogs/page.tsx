@@ -6,7 +6,7 @@ import { getCachedChangelogEntries } from "@/lib/changelog-parser";
 import { ChangelogDate } from "@/components/Changelogs/ChangelogDate";
 
 export const metadata: Metadata = {
-  title: `Development Changelog | ${siteConfig.name}`,
+  title: "Development Changelog",
   description: siteConfig.description,
   alternates: {
     canonical: "/dev/changelogs",
