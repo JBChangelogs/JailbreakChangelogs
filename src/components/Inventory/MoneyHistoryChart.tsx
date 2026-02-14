@@ -1,78 +1,63 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useId } from "react";
 import { Skeleton } from "@mui/material";
-import { useTheme } from "@/contexts/ThemeContext";
+import { Icon } from "@/components/ui/IconWrapper";
 import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend,
-  TimeScale,
-  ChartOptions,
-  TooltipItem,
-  ChartData,
-  Filler,
-} from "chart.js";
-import { Line } from "react-chartjs-2";
-import "chartjs-adapter-date-fns";
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  Area,
+  AreaChart,
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Legend as RechartsLegend,
+  Rectangle,
+  ResponsiveContainer,
+  XAxis,
+  YAxis,
+} from "recharts";
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+  type ChartConfig,
+} from "@/components/ui/chart";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MoneyHistory } from "@/utils/api";
-
-// Register ChartJS components
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend,
-  TimeScale,
-  Filler,
-);
 
 interface MoneyHistoryChartProps {
   userId: string;
   initialData?: MoneyHistory[];
 }
 
+type DateRange = "10" | "25" | "50" | "all";
+type ChartType = "area" | "bar";
+
+const DATE_RANGE_OPTIONS: { value: DateRange; label: string }[] = [
+  { value: "10", label: "Last 10 scans" },
+  { value: "25", label: "Last 25 scans" },
+  { value: "50", label: "Last 50 scans" },
+  { value: "all", label: "All scans" },
+];
+
 const MoneyHistoryChart = ({ initialData = [] }: MoneyHistoryChartProps) => {
   const [history, setHistory] = useState<MoneyHistory[]>(initialData);
+  const [dateRange, setDateRange] = useState<DateRange>("all");
+  const [chartType, setChartType] = useState<ChartType>("area");
   const [loading] = useState(false);
+  const chartId = useId().replace(/:/g, "");
+  const moneyGradientId = `fill-money-${chartId}`;
 
   // Update history when initialData changes
   useEffect(() => {
     setHistory(initialData);
   }, [initialData]);
-  const chartRef = useRef<ChartJS<"line">>(null);
-  const { theme } = useTheme();
-
-  // Text color derived from current theme (stable reference)
-  const textColor = theme === "light" ? "#1a1a1a" : "#fffffe";
-
-  useEffect(() => {
-    // Dynamically import and register zoom plugin on client side
-    const loadZoomPlugin = async () => {
-      const zoomPlugin = (await import("chartjs-plugin-zoom")).default;
-      ChartJS.register(zoomPlugin);
-    };
-    loadZoomPlugin();
-  }, []);
-
-  // Update chart colors when theme changes
-  useEffect(() => {
-    if (chartRef.current) {
-      const chart = chartRef.current;
-      chart.options.scales!.x!.ticks!.color = textColor;
-      chart.options.scales!.y!.ticks!.color = textColor;
-      chart.options.plugins!.legend!.labels!.color = textColor;
-      chart.update();
-    }
-  }, [textColor]);
 
   if (loading) {
     return (
@@ -164,131 +149,128 @@ const MoneyHistoryChart = ({ initialData = [] }: MoneyHistoryChartProps) => {
     (a, b) => a.updated_at - b.updated_at,
   );
 
-  // Use all data without filtering
-  const filteredData = sortedHistory;
-
-  const chartData: ChartData<"line"> = {
-    labels: filteredData.map((item) => new Date(item.updated_at * 1000)),
-    datasets: [
-      {
-        label: "Money",
-        data: filteredData.map((item) => item.money),
-        borderColor: "#10b981",
-        backgroundColor: "rgba(16, 185, 129, 0.2)",
-        borderWidth: 4,
-        fill: true,
-        cubicInterpolationMode: "monotone",
-        tension: 0.5,
-        pointRadius: 0,
-        pointHoverRadius: 6,
-        pointHoverBackgroundColor: "#fffffe",
-        pointHoverBorderColor: "#10b981",
-        pointHoverBorderWidth: 2,
-        spanGaps: false,
-      },
-    ],
+  const scanWindows: Record<DateRange, number | null> = {
+    "10": 10,
+    "25": 25,
+    "50": 50,
+    all: null,
   };
 
-  const options: ChartOptions<"line"> = {
-    responsive: true,
-    maintainAspectRatio: false,
-    interaction: {
-      mode: "index" as const,
-      intersect: false,
-    },
-    plugins: {
-      legend: {
-        position: "top" as const,
-        labels: {
-          color: textColor,
-        },
-      },
-      zoom: {
-        pan: {
-          enabled: true,
-          mode: "x",
-        },
-        zoom: {
-          wheel: {
-            enabled: true,
-          },
-          pinch: {
-            enabled: true,
-          },
-          mode: "x",
-        },
-        limits: {
-          x: { min: "original", max: "original", minRange: 3600 * 1000 * 24 }, // Minimum 1 day range
-        },
-      },
-      tooltip: {
-        enabled: true,
-        mode: "index" as const,
-        intersect: false,
-        backgroundColor: textColor === "#1a1a1a" ? "#fffffe" : "#16161a",
-        titleColor: textColor,
-        bodyColor: theme === "light" ? "#6b7280" : "#94a1b2",
-        borderWidth: 1,
-        padding: 10,
-        callbacks: {
-          title: function (context: TooltipItem<"line">[]) {
-            const x = context[0].parsed.x;
-            if (x === null || x === undefined) {
-              return "Unknown Date";
-            }
-            const date = new Date(x);
-            return date.toLocaleDateString("en-US", {
-              month: "short",
-              day: "numeric",
-              year: "numeric",
-            });
-          },
-          label: function (context: TooltipItem<"line">) {
-            const y = context.parsed.y;
-            if (y === null || y === undefined) {
-              return `${context.dataset.label}: N/A`;
-            }
-            return `${context.dataset.label}: ${y.toLocaleString()}`;
-          },
-        },
-      },
-    },
-    scales: {
-      x: {
-        type: "time",
-        time: {
-          unit: "day" as const,
-          displayFormats: {
-            day: "MMM dd",
-          },
-        },
-        border: {
-          color: "transparent",
-        },
-        grid: {
-          display: false,
-        },
-        ticks: {
-          color: textColor,
-          display: false,
-        },
-      },
-      y: {
-        border: {
-          color: "transparent",
-        },
-        grid: {
-          color: "rgba(148, 161, 178, 0.3)",
-        },
-        ticks: {
-          color: textColor,
-          callback: function (tickValue: number | string) {
-            return formatValue(Number(tickValue));
-          },
-        },
-      },
-    },
+  const handleDateRangeChange = (range: DateRange) => {
+    setDateRange(range);
   };
+
+  const selectedWindow = scanWindows[dateRange];
+  const filteredData =
+    selectedWindow === null
+      ? sortedHistory
+      : sortedHistory.slice(-selectedWindow);
+
+  // Keep time ordering stable if multiple scans share the same second.
+  const dedupedData = filteredData.reduce<MoneyHistory[]>((acc, item) => {
+    const last = acc[acc.length - 1];
+    if (last && last.updated_at === item.updated_at) {
+      acc[acc.length - 1] = item;
+    } else {
+      acc.push(item);
+    }
+    return acc;
+  }, []);
+
+  const moneyChartConfig = {
+    money: {
+      label: "Money",
+      color: "#10b981",
+    },
+  } satisfies ChartConfig;
+
+  const moneyChartData = dedupedData.map((item) => ({
+    timestamp: item.updated_at * 1000,
+    money: item.money,
+  }));
+
+  const aggregateByWindow = <T,>(
+    data: T[],
+    maxBars: number,
+    reducer: (chunk: T[]) => T,
+  ): T[] => {
+    if (data.length <= maxBars) return data;
+    const windowSize = Math.ceil(data.length / maxBars);
+    const aggregated: T[] = [];
+    for (let i = 0; i < data.length; i += windowSize) {
+      aggregated.push(reducer(data.slice(i, i + windowSize)));
+    }
+    return aggregated;
+  };
+
+  const avg = (values: number[]) =>
+    values.length === 0
+      ? 0
+      : values.reduce((sum, value) => sum + value, 0) / values.length;
+
+  const barMoneyChartData = aggregateByWindow(moneyChartData, 36, (chunk) => ({
+    timestamp: chunk[chunk.length - 1].timestamp,
+    money: avg(chunk.map((entry) => entry.money)),
+  }));
+
+  const getNiceStep = (maxValue: number, targetTicks = 6) => {
+    if (maxValue <= 0) return 1;
+    const roughStep = maxValue / (targetTicks - 1);
+    const magnitude = 10 ** Math.floor(Math.log10(roughStep));
+    const fraction = roughStep / magnitude;
+
+    let niceFraction = 1;
+    if (fraction <= 1) niceFraction = 1;
+    else if (fraction <= 2) niceFraction = 2;
+    else if (fraction <= 5) niceFraction = 5;
+    else niceFraction = 10;
+
+    return niceFraction * magnitude;
+  };
+
+  const moneyAxisMax = (() => {
+    if (moneyChartData.length === 0) return 1;
+    const maxPoint = Math.max(...moneyChartData.map((point) => point.money));
+    const step = getNiceStep(maxPoint);
+    return (Math.floor(maxPoint / step) + 1) * step;
+  })();
+
+  const getRangeLabel = (rangeData: typeof moneyChartData) => {
+    if (rangeData.length === 0) return null;
+    const first = new Date(rangeData[0].timestamp);
+    const last = new Date(rangeData[rangeData.length - 1].timestamp);
+    const format = (date: Date) =>
+      date.toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      });
+    return `${format(first)} - ${format(last)}`;
+  };
+
+  const getTrendSummary = (rangeData: typeof moneyChartData) => {
+    const points = rangeData.map((entry) => entry.money);
+    if (points.length < 2) return null;
+
+    const start = points[0];
+    const end = points[points.length - 1];
+    const delta = end - start;
+    const rawPercent = start > 0 ? (delta / start) * 100 : 0;
+    const absPercent = Math.abs(rawPercent);
+    const meaningfulThresholdPercent = 1;
+    const isMeaningful = absPercent >= meaningfulThresholdPercent;
+    const direction = delta > 0 ? "up" : delta < 0 ? "down" : "flat";
+    const percent = absPercent.toFixed(1);
+
+    return { direction, percent, isMeaningful };
+  };
+
+  const moneyTrend = getTrendSummary(moneyChartData);
+  const moneyRangeLabel = getRangeLabel(moneyChartData);
+
+  const currentDateRangeLabel =
+    DATE_RANGE_OPTIONS.find((option) => option.value === dateRange)?.label ??
+    "All time";
 
   return (
     <div className="border-border-card bg-secondary-bg mb-8 space-y-8 rounded-lg border p-4">
@@ -305,17 +287,325 @@ const MoneyHistoryChart = ({ initialData = [] }: MoneyHistoryChartProps) => {
           </div>
         </div>
 
-        <div className="h-[350px]">
-          <Line ref={chartRef} data={chartData} options={options} />
-        </div>
-        <div className="mt-2 flex justify-end">
-          <button
-            onClick={() => chartRef.current?.resetZoom()}
-            className="bg-button-info hover:bg-button-info-hover inline-flex cursor-pointer items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors"
+        <div className="mb-4 grid grid-cols-2 gap-2">
+          <Tabs
+            className="w-full"
+            value={chartType}
+            onValueChange={(value) => setChartType(value as ChartType)}
           >
-            Reset Zoom
-          </button>
+            <TabsList className="h-10 w-full" fullWidth>
+              <TabsTrigger value="area" className="h-[34px] px-3" fullWidth>
+                Line
+              </TabsTrigger>
+              <TabsTrigger value="bar" className="h-[34px] px-3" fullWidth>
+                Bar
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                type="button"
+                className="border-border-card bg-tertiary-bg text-primary-text hover:border-border-focus inline-flex h-10 w-full items-center justify-between rounded-lg border px-3 text-sm transition-colors"
+                aria-label="Select chart date range"
+              >
+                <span>{currentDateRangeLabel}</span>
+                <Icon
+                  icon="heroicons:chevron-down"
+                  className="text-secondary-text h-4 w-4"
+                  inline={true}
+                />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
+              align="end"
+              className="w-[var(--radix-dropdown-menu-trigger-width)]"
+            >
+              <DropdownMenuRadioGroup
+                value={dateRange}
+                onValueChange={(value) =>
+                  handleDateRangeChange(value as DateRange)
+                }
+              >
+                {DATE_RANGE_OPTIONS.map(({ value, label }) => (
+                  <DropdownMenuRadioItem key={value} value={value}>
+                    {label}
+                  </DropdownMenuRadioItem>
+                ))}
+              </DropdownMenuRadioGroup>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
+
+        <div className="h-[350px]">
+          <ChartContainer config={moneyChartConfig} className="h-full w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              {chartType === "area" ? (
+                <AreaChart
+                  accessibilityLayer
+                  data={moneyChartData}
+                  margin={{ left: 6, right: 6 }}
+                >
+                  <defs>
+                    <linearGradient
+                      id={moneyGradientId}
+                      x1="0"
+                      y1="0"
+                      x2="0"
+                      y2="1"
+                    >
+                      <stop
+                        offset="5%"
+                        stopColor="var(--color-money)"
+                        stopOpacity={0.45}
+                      />
+                      <stop
+                        offset="95%"
+                        stopColor="var(--color-money)"
+                        stopOpacity={0.04}
+                      />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid
+                    vertical={false}
+                    stroke="var(--color-border-card)"
+                    strokeOpacity={0.5}
+                  />
+                  <XAxis
+                    dataKey="timestamp"
+                    type="number"
+                    scale="time"
+                    domain={["dataMin", "dataMax"]}
+                    tickLine={false}
+                    axisLine={false}
+                    tick={false}
+                  />
+                  <YAxis
+                    tickLine={false}
+                    axisLine={false}
+                    tickMargin={8}
+                    width={56}
+                    domain={[0, moneyAxisMax]}
+                    tick={{
+                      fill: "var(--color-secondary-text)",
+                      fontSize: 12,
+                    }}
+                    tickFormatter={(tickValue: number) =>
+                      formatValue(Number(tickValue))
+                    }
+                  />
+                  <ChartTooltip
+                    cursor={false}
+                    content={
+                      <ChartTooltipContent
+                        className="min-w-[12rem] px-3 py-2"
+                        formatter={(value) => (
+                          <div className="flex w-full items-center justify-between gap-3">
+                            <span className="text-secondary-text flex items-center gap-2">
+                              <span
+                                className="h-2.5 w-2.5 shrink-0 rounded-[2px]"
+                                style={{
+                                  backgroundColor: "var(--color-money)",
+                                }}
+                              />
+                              Money
+                            </span>
+                            <span className="text-primary-text font-mono font-semibold tabular-nums">
+                              {value === null || value === undefined
+                                ? "N/A"
+                                : Number(value).toLocaleString()}
+                            </span>
+                          </div>
+                        )}
+                        labelFormatter={(_, payload) => {
+                          const row = payload?.[0]?.payload as
+                            | { timestamp?: number | string }
+                            | undefined;
+                          const timestamp =
+                            typeof row?.timestamp === "number"
+                              ? row.timestamp
+                              : Number(row?.timestamp);
+                          if (!Number.isFinite(timestamp)) {
+                            return "Unknown Date";
+                          }
+                          return new Date(timestamp).toLocaleDateString(
+                            "en-US",
+                            {
+                              month: "short",
+                              day: "numeric",
+                              year: "numeric",
+                            },
+                          );
+                        }}
+                      />
+                    }
+                  />
+                  <RechartsLegend
+                    verticalAlign="bottom"
+                    formatter={(value) => (
+                      <span style={{ color: "var(--color-secondary-text)" }}>
+                        {value}
+                      </span>
+                    )}
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="money"
+                    name="Money"
+                    fill={`url(#${moneyGradientId})`}
+                    fillOpacity={1}
+                    stroke="var(--color-money)"
+                    strokeWidth={3}
+                    dot={false}
+                    activeDot={{
+                      r: 5,
+                      fill: "var(--color-secondary-bg)",
+                      stroke: "var(--color-money)",
+                      strokeWidth: 2,
+                    }}
+                  />
+                </AreaChart>
+              ) : (
+                <BarChart
+                  accessibilityLayer
+                  data={barMoneyChartData}
+                  margin={{ left: 6, right: 6 }}
+                >
+                  <CartesianGrid
+                    vertical={false}
+                    stroke="var(--color-border-card)"
+                    strokeOpacity={0.5}
+                  />
+                  <XAxis
+                    dataKey="timestamp"
+                    tickLine={false}
+                    axisLine={false}
+                    tick={false}
+                  />
+                  <YAxis
+                    tickLine={false}
+                    axisLine={false}
+                    tickMargin={8}
+                    width={56}
+                    domain={[0, moneyAxisMax]}
+                    tick={{
+                      fill: "var(--color-secondary-text)",
+                      fontSize: 12,
+                    }}
+                    tickFormatter={(tickValue: number) =>
+                      formatValue(Number(tickValue))
+                    }
+                  />
+                  <ChartTooltip
+                    cursor={false}
+                    content={
+                      <ChartTooltipContent
+                        className="min-w-[12rem] px-3 py-2"
+                        formatter={(value) => (
+                          <div className="flex w-full items-center justify-between gap-3">
+                            <span className="text-secondary-text flex items-center gap-2">
+                              <span
+                                className="h-2.5 w-2.5 shrink-0 rounded-[2px]"
+                                style={{
+                                  backgroundColor: "var(--color-money)",
+                                }}
+                              />
+                              Money
+                            </span>
+                            <span className="text-primary-text font-mono font-semibold tabular-nums">
+                              {value === null || value === undefined
+                                ? "N/A"
+                                : Number(value).toLocaleString()}
+                            </span>
+                          </div>
+                        )}
+                        labelFormatter={(_, payload) => {
+                          const row = payload?.[0]?.payload as
+                            | { timestamp?: number | string }
+                            | undefined;
+                          const timestamp =
+                            typeof row?.timestamp === "number"
+                              ? row.timestamp
+                              : Number(row?.timestamp);
+                          if (!Number.isFinite(timestamp)) {
+                            return "Unknown Date";
+                          }
+                          return new Date(timestamp).toLocaleDateString(
+                            "en-US",
+                            {
+                              month: "short",
+                              day: "numeric",
+                              year: "numeric",
+                            },
+                          );
+                        }}
+                      />
+                    }
+                  />
+                  <RechartsLegend
+                    verticalAlign="bottom"
+                    formatter={(value) => (
+                      <span style={{ color: "var(--color-secondary-text)" }}>
+                        {value}
+                      </span>
+                    )}
+                  />
+                  <Bar
+                    dataKey="money"
+                    name="Money"
+                    fill="var(--color-money)"
+                    fillOpacity={0.7}
+                    radius={[6, 6, 0, 0]}
+                    activeBar={({ ...props }) => (
+                      <Rectangle
+                        {...props}
+                        fillOpacity={0.8}
+                        stroke="var(--color-money)"
+                        strokeDasharray="4 4"
+                      />
+                    )}
+                  />
+                </BarChart>
+              )}
+            </ResponsiveContainer>
+          </ChartContainer>
+        </div>
+        {(moneyTrend || moneyRangeLabel) && (
+          <div className="mt-3 space-y-1 text-sm">
+            {moneyTrend && (
+              <div
+                className="flex items-center gap-1.5 font-medium"
+                style={{
+                  color: !moneyTrend.isMeaningful
+                    ? "var(--color-secondary-text)"
+                    : moneyTrend.direction === "up"
+                      ? "var(--color-form-success)"
+                      : "var(--color-button-danger)",
+                }}
+              >
+                <span>
+                  {!moneyTrend.isMeaningful
+                    ? "Money: No meaningful trend"
+                    : `Money: Trending ${moneyTrend.direction} by ${moneyTrend.percent}%`}
+                </span>
+                <Icon
+                  icon={
+                    !moneyTrend.isMeaningful
+                      ? "heroicons:minus-20-solid"
+                      : moneyTrend.direction === "up"
+                        ? "heroicons:arrow-trending-up-20-solid"
+                        : "heroicons:arrow-trending-down-20-solid"
+                  }
+                  className="h-4 w-4"
+                  inline={true}
+                />
+              </div>
+            )}
+            {moneyRangeLabel && (
+              <div className="text-secondary-text">{moneyRangeLabel}</div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

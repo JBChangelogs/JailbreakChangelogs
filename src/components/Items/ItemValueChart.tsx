@@ -1,46 +1,35 @@
 "use client";
 
-import { useEffect, useState, useRef, use } from "react";
+import { useState, use, useId } from "react";
 import { Skeleton } from "@mui/material";
 import { toast } from "sonner";
-import { useTheme } from "@/contexts/ThemeContext";
-import { Button } from "@/components/ui/button";
+import { Icon } from "@/components/ui/IconWrapper";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
-  Tooltip as UiTooltip,
-  TooltipContent as UiTooltipContent,
-  TooltipTrigger as UiTooltipTrigger,
-} from "@/components/ui/tooltip";
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+  type ChartConfig,
+} from "@/components/ui/chart";
 import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend,
-  TimeScale,
-  ChartOptions,
-  TooltipItem,
-  ChartData,
-  Filler,
-} from "chart.js";
-import { Line } from "react-chartjs-2";
-import "chartjs-adapter-date-fns";
-
-// Register ChartJS components
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend,
-  TimeScale,
-  Filler,
-);
+  Area,
+  AreaChart,
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Legend as RechartsLegend,
+  Rectangle,
+  ResponsiveContainer,
+  XAxis,
+  YAxis,
+} from "recharts";
 
 export interface ValueHistory {
   id: string;
@@ -68,14 +57,15 @@ interface ItemValueChartProps {
 }
 
 type DateRange = "1w" | "1m" | "3m" | "6m" | "1y" | "all";
+type ChartType = "area" | "bar";
 
 const DATE_RANGE_OPTIONS: { value: DateRange; label: string }[] = [
-  { value: "1w", label: "1W" },
-  { value: "1m", label: "1M" },
-  { value: "3m", label: "3M" },
-  { value: "6m", label: "6M" },
-  { value: "1y", label: "1Y" },
-  { value: "all", label: "All" },
+  { value: "1w", label: "1 week" },
+  { value: "1m", label: "1 month" },
+  { value: "3m", label: "3 months" },
+  { value: "6m", label: "6 months" },
+  { value: "1y", label: "1 year" },
+  { value: "all", label: "All time" },
 ];
 
 const ItemValueChart = ({
@@ -89,37 +79,13 @@ const ItemValueChart = ({
   const loading = false;
 
   const [dateRange, setDateRange] = useState<DateRange>("all");
-
-  const chartRef = useRef<ChartJS<"line">>(null);
-  const tradingChartRef = useRef<ChartJS<"line">>(null);
-  const { theme } = useTheme();
-  const textColor = theme === "light" ? "#1a1a1a" : "#fffffe";
-
-  useEffect(() => {
-    const loadZoomPlugin = async () => {
-      const zoomPlugin = (await import("chartjs-plugin-zoom")).default;
-      ChartJS.register(zoomPlugin);
-    };
-    loadZoomPlugin();
-  }, []);
-
-  // Update chart colors when theme changes
-  useEffect(() => {
-    if (chartRef.current) {
-      const chart = chartRef.current;
-      chart.options.scales!.x!.ticks!.color = textColor;
-      chart.options.scales!.y!.ticks!.color = textColor;
-      chart.options.plugins!.legend!.labels!.color = textColor;
-      chart.update();
-    }
-    if (tradingChartRef.current) {
-      const chart = tradingChartRef.current;
-      chart.options.scales!.x!.ticks!.color = textColor;
-      chart.options.scales!.y!.ticks!.color = textColor;
-      chart.options.plugins!.legend!.labels!.color = textColor;
-      chart.update();
-    }
-  }, [textColor]);
+  const [valueChartType, setValueChartType] = useState<ChartType>("area");
+  const [tradingChartType, setTradingChartType] = useState<ChartType>("area");
+  const chartId = useId().replace(/:/g, "");
+  const cashGradientId = `fill-cash-${chartId}`;
+  const dupedGradientId = `fill-duped-${chartId}`;
+  const tradedGradientId = `fill-traded-${chartId}`;
+  const circulationGradientId = `fill-circulation-${chartId}`;
 
   if (loading) {
     return (
@@ -316,281 +282,201 @@ const ItemValueChart = ({
   const shouldShowValueChart =
     hasNumericFor(cashSeries) || hasNumericFor(dupedSeries);
 
-  const chartData: ChartData<"line"> = {
-    labels: filteredData.map((item) => new Date(parseInt(item.date) * 1000)),
-    datasets: [
-      {
-        label: "Cash Value",
-        data: cashSeries,
-        borderColor: "#2462cd",
-        backgroundColor: "rgba(36, 98, 205, 0.2)",
-        borderWidth: 4,
-        fill: true,
-        tension: 0.5,
-        pointRadius: 0,
-        pointHoverRadius: 6,
-        pointHoverBackgroundColor: "#fffffe",
-        pointHoverBorderColor: "#2462cd",
-        pointHoverBorderWidth: 2,
-        spanGaps: false,
-      },
-      {
-        label: "Duped Value",
-        data: dupedSeries,
-        borderColor: "#ed4f4f",
-        backgroundColor: "rgba(237, 79, 79, 0.2)",
-        borderWidth: 4,
-        fill: true,
-        tension: 0.5,
-        pointRadius: 0,
-        pointHoverRadius: 6,
-        pointHoverBackgroundColor: "#fffffe",
-        pointHoverBorderColor: "#ed4f4f",
-        pointHoverBorderWidth: 2,
-        spanGaps: false,
-      },
-    ],
+  const valueChartConfig = {
+    cash: {
+      label: "Cash Value",
+      color: "#2462cd",
+    },
+    duped: {
+      label: "Duped Value",
+      color: "#ed4f4f",
+    },
+  } satisfies ChartConfig;
+
+  const valueChartData = filteredData.map((item) => ({
+    timestamp: parseInt(item.date) * 1000,
+    cash: parseRawValue(item.cash_value),
+    duped: parseRawValue(item.duped_value),
+  }));
+
+  const aggregateByWindow = <T,>(
+    data: T[],
+    maxBars: number,
+    reducer: (chunk: T[]) => T,
+  ): T[] => {
+    if (data.length <= maxBars) return data;
+    const windowSize = Math.ceil(data.length / maxBars);
+    const aggregated: T[] = [];
+    for (let i = 0; i < data.length; i += windowSize) {
+      aggregated.push(reducer(data.slice(i, i + windowSize)));
+    }
+    return aggregated;
   };
 
-  // Trading metrics chart data
-  const tradingChartData: ChartData<"line"> = {
-    labels: tradingData.map((item) => new Date(parseInt(item.date) * 1000)),
-    datasets: [
-      {
-        label: "Times Traded",
-        data: tradingData.map((item) => item.metadata?.TimesTraded || 0),
-        borderColor: "#10b981",
-        backgroundColor: "rgba(16, 185, 129, 0.2)",
-        borderWidth: 4,
-        fill: true,
-        tension: 0.5,
-        pointRadius: 0,
-        pointHoverRadius: 6,
-        pointHoverBackgroundColor: "#fffffe",
-        pointHoverBorderColor: "#10b981",
-        pointHoverBorderWidth: 2,
-        yAxisID: "y",
-      },
-      {
-        label: "Unique Circulation",
-        data: tradingData.map((item) => item.metadata?.UniqueCirculation || 0),
-        borderColor: "#f59e0b",
-        backgroundColor: "rgba(245, 158, 11, 0.2)",
-        borderWidth: 4,
-        fill: true,
-        tension: 0.5,
-        pointRadius: 0,
-        pointHoverRadius: 6,
-        pointHoverBackgroundColor: "#fffffe",
-        pointHoverBorderColor: "#f59e0b",
-        pointHoverBorderWidth: 2,
-        yAxisID: "y",
-      },
-    ],
+  const avg = (values: number[]) =>
+    values.length === 0
+      ? 0
+      : values.reduce((sum, value) => sum + value, 0) / values.length;
+
+  const avgNullable = (values: Array<number | null>) => {
+    const numeric = values.filter(
+      (value): value is number => value !== null && value !== undefined,
+    );
+    if (numeric.length === 0) return null;
+    return avg(numeric);
   };
 
-  const options: ChartOptions<"line"> = {
-    responsive: true,
-    maintainAspectRatio: false,
-    interaction: {
-      mode: "index" as const,
-      intersect: false,
-    },
-    plugins: {
-      legend: {
-        position: "top" as const,
-        labels: {
-          color: textColor,
-        },
-      },
-      zoom: {
-        pan: {
-          enabled: true,
-          mode: "x",
-        },
-        zoom: {
-          wheel: {
-            enabled: true,
-          },
-          pinch: {
-            enabled: true,
-          },
-          mode: "x",
-        },
-        limits: {
-          x: { min: "original", max: "original", minRange: 3600 * 1000 * 24 }, // Minimum 1 day range
-        },
-      },
-      tooltip: {
-        enabled: true,
-        mode: "index" as const,
-        intersect: false,
-        backgroundColor: textColor === "#1a1a1a" ? "#fffffe" : "#16161a",
-        titleColor: textColor,
-        bodyColor: theme === "light" ? "#6b7280" : "#94a1b2",
-        borderWidth: 1,
-        padding: 10,
-        callbacks: {
-          title: function (context: TooltipItem<"line">[]) {
-            const x = context[0].parsed.x;
-            if (x === null || x === undefined) {
-              return "Unknown Date";
-            }
-            const date = new Date(x);
-            return date.toLocaleDateString("en-US", {
-              month: "short",
-              day: "numeric",
-              year: "numeric",
-            });
-          },
-          label: function (context: TooltipItem<"line">) {
-            const y = context.parsed.y;
-            if (y === null || y === undefined) {
-              return `${context.dataset.label}: N/A`;
-            }
-            return `${context.dataset.label}: ${y.toLocaleString()}`;
-          },
-        },
-      },
-    },
-    scales: {
-      x: {
-        type: "time",
-        time: {
-          unit: "day" as const,
-          displayFormats: {
-            day: "MMM dd",
-          },
-        },
-        border: {
-          color: "transparent",
-        },
-        grid: {
-          display: false,
-        },
-        ticks: {
-          color: textColor,
-          display: false,
-        },
-      },
-      y: {
-        border: {
-          color: "transparent",
-        },
-        grid: {
-          color: "rgba(148, 161, 178, 0.3)",
-        },
-        ticks: {
-          color: textColor,
-          callback: function (tickValue: number | string) {
-            return formatValue(Number(tickValue));
-          },
-        },
-      },
-    },
+  const barValueChartData = aggregateByWindow(valueChartData, 36, (chunk) => ({
+    timestamp: chunk[chunk.length - 1].timestamp,
+    cash: avgNullable(chunk.map((entry) => entry.cash)),
+    duped: avgNullable(chunk.map((entry) => entry.duped)),
+  }));
+
+  const valuePoints = valueChartData.flatMap((point) =>
+    [point.cash, point.duped].filter(
+      (value): value is number => value !== null && value !== undefined,
+    ),
+  );
+
+  const getNiceStep = (maxValue: number, targetTicks = 6) => {
+    if (maxValue <= 0) return 1;
+    const roughStep = maxValue / (targetTicks - 1);
+    const magnitude = 10 ** Math.floor(Math.log10(roughStep));
+    const fraction = roughStep / magnitude;
+
+    let niceFraction = 1;
+    if (fraction <= 1) niceFraction = 1;
+    else if (fraction <= 2) niceFraction = 2;
+    else if (fraction <= 5) niceFraction = 5;
+    else niceFraction = 10;
+
+    return niceFraction * magnitude;
   };
 
-  // Trading metrics chart options
-  const tradingOptions: ChartOptions<"line"> = {
-    responsive: true,
-    maintainAspectRatio: false,
-    interaction: {
-      mode: "index" as const,
-      intersect: false,
-    },
-    plugins: {
-      legend: {
-        position: "top" as const,
-        labels: {
-          color: textColor,
-        },
-      },
-      zoom: {
-        pan: {
-          enabled: true,
-          mode: "x",
-        },
-        zoom: {
-          wheel: {
-            enabled: true,
-          },
-          pinch: {
-            enabled: true,
-          },
-          mode: "x",
-        },
-        limits: {
-          x: { min: "original", max: "original", minRange: 3600 * 1000 * 24 }, // Minimum 1 day range
-        },
-      },
-      tooltip: {
-        enabled: true,
-        mode: "index" as const,
-        intersect: false,
-        backgroundColor: textColor === "#1a1a1a" ? "#fffffe" : "#16161a",
-        titleColor: textColor,
-        bodyColor: theme === "light" ? "#6b7280" : "#94a1b2",
-        borderWidth: 1,
-        padding: 10,
-        callbacks: {
-          title: function (context: TooltipItem<"line">[]) {
-            const x = context[0].parsed.x;
-            if (x === null || x === undefined) {
-              return "Unknown Date";
-            }
-            const date = new Date(x);
-            return date.toLocaleDateString("en-US", {
-              month: "short",
-              day: "numeric",
-              year: "numeric",
-            });
-          },
-          label: function (context: TooltipItem<"line">) {
-            const y = context.parsed.y;
-            if (y === null || y === undefined) {
-              return `${context.dataset.label}: N/A`;
-            }
-            return `${context.dataset.label}: ${y.toLocaleString()}`;
-          },
-        },
-      },
-    },
-    scales: {
-      x: {
-        type: "time",
-        time: {
-          unit: "day" as const,
-          displayFormats: {
-            day: "MMM dd",
-          },
-        },
-        border: {
-          color: "transparent",
-        },
-        grid: {
-          display: false,
-        },
-        ticks: {
-          color: textColor,
-          display: false,
-        },
-      },
-      y: {
-        border: {
-          color: "transparent",
-        },
-        grid: {
-          color: "rgba(148, 161, 178, 0.3)",
-        },
-        ticks: {
-          color: textColor,
-          callback: function (tickValue: number | string) {
-            return Number(tickValue).toLocaleString();
-          },
-        },
-      },
-    },
+  const valueAxisMax = (() => {
+    if (valuePoints.length === 0) return 1;
+    const maxPoint = Math.max(...valuePoints);
+    const step = getNiceStep(maxPoint);
+    return (Math.floor(maxPoint / step) + 1) * step;
+  })();
+
+  const getRangeLabel = (rangeData: typeof valueChartData) => {
+    if (rangeData.length === 0) return null;
+    const first = new Date(rangeData[0].timestamp);
+    const last = new Date(rangeData[rangeData.length - 1].timestamp);
+    const format = (date: Date) =>
+      date.toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      });
+    return `${format(first)} - ${format(last)}`;
   };
+
+  const getTrendSummary = (
+    rangeData: typeof valueChartData,
+    key: "cash" | "duped",
+  ) => {
+    const points = rangeData
+      .map((entry) => entry[key])
+      .filter(
+        (value): value is number => value !== null && value !== undefined,
+      );
+
+    if (points.length < 2) return null;
+
+    const start = points[0];
+    const end = points[points.length - 1];
+    const delta = end - start;
+    const rawPercent = start > 0 ? (delta / start) * 100 : 0;
+    const absPercent = Math.abs(rawPercent);
+    const meaningfulThresholdPercent = 1;
+    const isMeaningful = absPercent >= meaningfulThresholdPercent;
+    const direction = delta > 0 ? "up" : delta < 0 ? "down" : "flat";
+    const percent = absPercent.toFixed(1);
+
+    return { direction, percent, isMeaningful };
+  };
+
+  const cashTrend = getTrendSummary(valueChartData, "cash");
+  const dupedTrend = getTrendSummary(valueChartData, "duped");
+  const valueRangeLabel = getRangeLabel(valueChartData);
+
+  const tradingChartConfig = {
+    traded: {
+      label: "Times Traded",
+      color: "#10b981",
+    },
+    circulation: {
+      label: "Unique Circulation",
+      color: "#f59e0b",
+    },
+  } satisfies ChartConfig;
+
+  const tradingChartData = tradingData.map((item) => ({
+    timestamp: parseInt(item.date) * 1000,
+    traded: item.metadata?.TimesTraded ?? 0,
+    circulation: item.metadata?.UniqueCirculation ?? 0,
+  }));
+
+  const barTradingChartData = aggregateByWindow(
+    tradingChartData,
+    36,
+    (chunk) => ({
+      timestamp: chunk[chunk.length - 1].timestamp,
+      traded: avg(chunk.map((entry) => entry.traded)),
+      circulation: avg(chunk.map((entry) => entry.circulation)),
+    }),
+  );
+
+  const getTradingTrendSummary = (
+    rangeData: typeof tradingChartData,
+    key: "traded" | "circulation",
+  ) => {
+    const points = rangeData
+      .map((entry) => entry[key])
+      .filter(
+        (value): value is number => value !== null && value !== undefined,
+      );
+
+    if (points.length < 2) return null;
+
+    const start = points[0];
+    const end = points[points.length - 1];
+    const delta = end - start;
+    const rawPercent = start > 0 ? (delta / start) * 100 : 0;
+    const absPercent = Math.abs(rawPercent);
+    const meaningfulThresholdPercent = 1;
+    const isMeaningful = absPercent >= meaningfulThresholdPercent;
+    const direction = delta > 0 ? "up" : delta < 0 ? "down" : "flat";
+    const percent = absPercent.toFixed(1);
+
+    return { direction, percent, isMeaningful };
+  };
+
+  const getTradingRangeLabel = (rangeData: typeof tradingChartData) => {
+    if (rangeData.length === 0) return null;
+    const first = new Date(rangeData[0].timestamp);
+    const last = new Date(rangeData[rangeData.length - 1].timestamp);
+    const format = (date: Date) =>
+      date.toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      });
+    return `${format(first)} - ${format(last)}`;
+  };
+
+  const tradedTrend = getTradingTrendSummary(tradingChartData, "traded");
+  const circulationTrend = getTradingTrendSummary(
+    tradingChartData,
+    "circulation",
+  );
+  const tradingRangeLabel = getTradingRangeLabel(tradingChartData);
+
+  const currentDateRangeLabel =
+    DATE_RANGE_OPTIONS.find((option) => option.value === dateRange)?.label ??
+    "All";
 
   return (
     <div className="space-y-8">
@@ -598,49 +484,458 @@ const ItemValueChart = ({
       {!showOnlyTradingMetrics && (
         <div>
           {shouldShowValueChart && (
-            <div className="mb-2 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-end">
+            <div className="mb-4 grid grid-cols-2 gap-2">
               <Tabs
                 className="w-full"
-                value={dateRange}
-                onValueChange={(value) =>
-                  handleDateRangeChange(value as DateRange)
-                }
+                value={valueChartType}
+                onValueChange={(value) => setValueChartType(value as ChartType)}
               >
-                <TabsList fullWidth>
-                  {DATE_RANGE_OPTIONS.map(({ value, label }) =>
-                    !hasDataForRange(value) ? (
-                      <UiTooltip key={value}>
-                        <UiTooltipTrigger asChild>
-                          <span className="inline-flex flex-1 cursor-not-allowed">
-                            <TabsTrigger value={value} fullWidth disabled>
-                              {label}
-                            </TabsTrigger>
-                          </span>
-                        </UiTooltipTrigger>
-                        <UiTooltipContent side="top">
-                          No value history data available for {label}.
-                        </UiTooltipContent>
-                      </UiTooltip>
-                    ) : (
-                      <TabsTrigger key={value} value={value} fullWidth>
-                        {label}
-                      </TabsTrigger>
-                    ),
-                  )}
+                <TabsList className="h-10 w-full" fullWidth>
+                  <TabsTrigger value="area" className="h-[34px] px-3" fullWidth>
+                    Line
+                  </TabsTrigger>
+                  <TabsTrigger value="bar" className="h-[34px] px-3" fullWidth>
+                    Bar
+                  </TabsTrigger>
                 </TabsList>
               </Tabs>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button
+                    type="button"
+                    className="border-border-card bg-tertiary-bg text-primary-text hover:border-border-focus inline-flex h-10 w-full items-center justify-between rounded-lg border px-3 text-sm transition-colors"
+                    aria-label="Select chart date range"
+                  >
+                    <span>{currentDateRangeLabel}</span>
+                    <Icon
+                      icon="heroicons:chevron-down"
+                      className="text-secondary-text h-4 w-4"
+                      inline={true}
+                    />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  align="end"
+                  className="w-[var(--radix-dropdown-menu-trigger-width)]"
+                >
+                  <DropdownMenuRadioGroup
+                    value={dateRange}
+                    onValueChange={(value) =>
+                      handleDateRangeChange(value as DateRange)
+                    }
+                  >
+                    {DATE_RANGE_OPTIONS.map(({ value, label }) => (
+                      <DropdownMenuRadioItem key={value} value={value}>
+                        {label}
+                      </DropdownMenuRadioItem>
+                    ))}
+                  </DropdownMenuRadioGroup>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           )}
           {shouldShowValueChart ? (
             <>
               <div className="h-[350px]">
-                <Line ref={chartRef} data={chartData} options={options} />
+                <ChartContainer
+                  config={valueChartConfig}
+                  className="h-full w-full"
+                >
+                  <ResponsiveContainer width="100%" height="100%">
+                    {valueChartType === "area" ? (
+                      <AreaChart
+                        accessibilityLayer
+                        data={valueChartData}
+                        margin={{ left: 6, right: 6 }}
+                      >
+                        <defs>
+                          <linearGradient
+                            id={cashGradientId}
+                            x1="0"
+                            y1="0"
+                            x2="0"
+                            y2="1"
+                          >
+                            <stop
+                              offset="5%"
+                              stopColor="var(--color-cash)"
+                              stopOpacity={0.45}
+                            />
+                            <stop
+                              offset="95%"
+                              stopColor="var(--color-cash)"
+                              stopOpacity={0.04}
+                            />
+                          </linearGradient>
+                          <linearGradient
+                            id={dupedGradientId}
+                            x1="0"
+                            y1="0"
+                            x2="0"
+                            y2="1"
+                          >
+                            <stop
+                              offset="5%"
+                              stopColor="var(--color-duped)"
+                              stopOpacity={0.45}
+                            />
+                            <stop
+                              offset="95%"
+                              stopColor="var(--color-duped)"
+                              stopOpacity={0.04}
+                            />
+                          </linearGradient>
+                        </defs>
+                        <CartesianGrid
+                          vertical={false}
+                          stroke="var(--color-border-card)"
+                          strokeOpacity={0.5}
+                        />
+                        <XAxis
+                          dataKey="timestamp"
+                          type="number"
+                          scale="time"
+                          domain={["dataMin", "dataMax"]}
+                          tickLine={false}
+                          axisLine={false}
+                          tick={false}
+                        />
+                        <YAxis
+                          tickLine={false}
+                          axisLine={false}
+                          tickMargin={8}
+                          width={56}
+                          domain={[0, valueAxisMax]}
+                          tick={{
+                            fill: "var(--color-secondary-text)",
+                            fontSize: 12,
+                          }}
+                          tickFormatter={(tickValue: number) =>
+                            formatValue(Number(tickValue))
+                          }
+                        />
+                        <ChartTooltip
+                          cursor={false}
+                          content={
+                            <ChartTooltipContent
+                              className="min-w-[12rem] px-3 py-2"
+                              formatter={(value, name, item) => {
+                                const rawName = String(
+                                  name ?? "",
+                                ).toLowerCase();
+                                const isCash =
+                                  rawName === "cash" ||
+                                  rawName.includes("cash");
+                                const isDuped =
+                                  rawName === "duped" ||
+                                  rawName.includes("duped");
+                                const displayName = isCash
+                                  ? "Cash Value"
+                                  : isDuped
+                                    ? "Duped Value"
+                                    : String(name ?? "Value");
+                                const indicatorColor =
+                                  item.color ||
+                                  (isCash
+                                    ? "var(--color-cash)"
+                                    : "var(--color-duped)");
+
+                                return (
+                                  <div className="flex w-full items-center justify-between gap-3">
+                                    <span className="text-secondary-text flex items-center gap-2">
+                                      <span
+                                        className="h-2.5 w-2.5 shrink-0 rounded-[2px]"
+                                        style={{
+                                          backgroundColor: indicatorColor,
+                                        }}
+                                      />
+                                      {displayName}
+                                    </span>
+                                    <span className="text-primary-text font-mono font-semibold tabular-nums">
+                                      {value === null || value === undefined
+                                        ? "N/A"
+                                        : Number(value).toLocaleString()}
+                                    </span>
+                                  </div>
+                                );
+                              }}
+                              labelFormatter={(_, payload) => {
+                                const row = payload?.[0]?.payload as
+                                  | { timestamp?: number | string }
+                                  | undefined;
+                                const timestamp =
+                                  typeof row?.timestamp === "number"
+                                    ? row.timestamp
+                                    : Number(row?.timestamp);
+                                if (!Number.isFinite(timestamp)) {
+                                  return "Unknown Date";
+                                }
+                                return new Date(timestamp).toLocaleDateString(
+                                  "en-US",
+                                  {
+                                    month: "short",
+                                    day: "numeric",
+                                    year: "numeric",
+                                  },
+                                );
+                              }}
+                            />
+                          }
+                        />
+                        <RechartsLegend
+                          verticalAlign="bottom"
+                          formatter={(value) => (
+                            <span
+                              style={{ color: "var(--color-secondary-text)" }}
+                            >
+                              {value}
+                            </span>
+                          )}
+                        />
+                        <Area
+                          type="natural"
+                          dataKey="cash"
+                          name="Cash Value"
+                          fill={`url(#${cashGradientId})`}
+                          fillOpacity={1}
+                          stroke="var(--color-cash)"
+                          strokeWidth={3}
+                          dot={false}
+                          connectNulls={false}
+                          activeDot={{
+                            r: 5,
+                            fill: "var(--color-secondary-bg)",
+                            stroke: "var(--color-cash)",
+                            strokeWidth: 2,
+                          }}
+                        />
+                        <Area
+                          type="natural"
+                          dataKey="duped"
+                          name="Duped Value"
+                          fill={`url(#${dupedGradientId})`}
+                          fillOpacity={1}
+                          stroke="var(--color-duped)"
+                          strokeWidth={3}
+                          dot={false}
+                          connectNulls={false}
+                          activeDot={{
+                            r: 5,
+                            fill: "var(--color-secondary-bg)",
+                            stroke: "var(--color-duped)",
+                            strokeWidth: 2,
+                          }}
+                        />
+                      </AreaChart>
+                    ) : (
+                      <BarChart
+                        accessibilityLayer
+                        data={barValueChartData}
+                        margin={{ left: 6, right: 6 }}
+                      >
+                        <CartesianGrid
+                          vertical={false}
+                          stroke="var(--color-border-card)"
+                          strokeOpacity={0.5}
+                        />
+                        <XAxis
+                          dataKey="timestamp"
+                          tickLine={false}
+                          axisLine={false}
+                          tick={false}
+                        />
+                        <YAxis
+                          tickLine={false}
+                          axisLine={false}
+                          tickMargin={8}
+                          width={56}
+                          domain={[0, valueAxisMax]}
+                          tick={{
+                            fill: "var(--color-secondary-text)",
+                            fontSize: 12,
+                          }}
+                          tickFormatter={(tickValue: number) =>
+                            formatValue(Number(tickValue))
+                          }
+                        />
+                        <ChartTooltip
+                          cursor={false}
+                          content={
+                            <ChartTooltipContent
+                              className="min-w-[12rem] px-3 py-2"
+                              formatter={(value, name, item) => {
+                                const rawName = String(
+                                  name ?? "",
+                                ).toLowerCase();
+                                const isCash =
+                                  rawName === "cash" ||
+                                  rawName.includes("cash");
+                                const isDuped =
+                                  rawName === "duped" ||
+                                  rawName.includes("duped");
+                                const displayName = isCash
+                                  ? "Cash Value"
+                                  : isDuped
+                                    ? "Duped Value"
+                                    : String(name ?? "Value");
+                                const indicatorColor =
+                                  item.color ||
+                                  (isCash
+                                    ? "var(--color-cash)"
+                                    : "var(--color-duped)");
+
+                                return (
+                                  <div className="flex w-full items-center justify-between gap-3">
+                                    <span className="text-secondary-text flex items-center gap-2">
+                                      <span
+                                        className="h-2.5 w-2.5 shrink-0 rounded-[2px]"
+                                        style={{
+                                          backgroundColor: indicatorColor,
+                                        }}
+                                      />
+                                      {displayName}
+                                    </span>
+                                    <span className="text-primary-text font-mono font-semibold tabular-nums">
+                                      {value === null || value === undefined
+                                        ? "N/A"
+                                        : Number(value).toLocaleString()}
+                                    </span>
+                                  </div>
+                                );
+                              }}
+                              labelFormatter={(_, payload) => {
+                                const row = payload?.[0]?.payload as
+                                  | { timestamp?: number | string }
+                                  | undefined;
+                                const timestamp =
+                                  typeof row?.timestamp === "number"
+                                    ? row.timestamp
+                                    : Number(row?.timestamp);
+                                if (!Number.isFinite(timestamp)) {
+                                  return "Unknown Date";
+                                }
+                                return new Date(timestamp).toLocaleDateString(
+                                  "en-US",
+                                  {
+                                    month: "short",
+                                    day: "numeric",
+                                    year: "numeric",
+                                  },
+                                );
+                              }}
+                            />
+                          }
+                        />
+                        <RechartsLegend
+                          verticalAlign="bottom"
+                          formatter={(value) => (
+                            <span
+                              style={{ color: "var(--color-secondary-text)" }}
+                            >
+                              {value}
+                            </span>
+                          )}
+                        />
+                        <Bar
+                          dataKey="cash"
+                          name="Cash Value"
+                          fill="var(--color-cash)"
+                          fillOpacity={0.7}
+                          radius={[6, 6, 0, 0]}
+                          activeBar={({ ...props }) => (
+                            <Rectangle
+                              {...props}
+                              fillOpacity={0.8}
+                              stroke="var(--color-cash)"
+                              strokeDasharray="4 4"
+                            />
+                          )}
+                        />
+                        <Bar
+                          dataKey="duped"
+                          name="Duped Value"
+                          fill="var(--color-duped)"
+                          fillOpacity={0.7}
+                          radius={[6, 6, 0, 0]}
+                          activeBar={({ ...props }) => (
+                            <Rectangle
+                              {...props}
+                              fillOpacity={0.8}
+                              stroke="var(--color-duped)"
+                              strokeDasharray="4 4"
+                            />
+                          )}
+                        />
+                      </BarChart>
+                    )}
+                  </ResponsiveContainer>
+                </ChartContainer>
               </div>
-              <div className="mt-2 flex justify-end">
-                <Button onClick={() => chartRef.current?.resetZoom()}>
-                  Reset Zoom
-                </Button>
-              </div>
+              {(cashTrend || dupedTrend || valueRangeLabel) && (
+                <div className="mt-3 space-y-1 text-sm">
+                  {cashTrend && (
+                    <div
+                      className="flex items-center gap-1.5 font-medium"
+                      style={{
+                        color: !cashTrend.isMeaningful
+                          ? "var(--color-secondary-text)"
+                          : cashTrend.direction === "up"
+                            ? "var(--color-form-success)"
+                            : "var(--color-button-danger)",
+                      }}
+                    >
+                      <span>
+                        {!cashTrend.isMeaningful
+                          ? "Cash: No meaningful trend"
+                          : `Cash: Trending ${cashTrend.direction} by ${cashTrend.percent}%`}
+                      </span>
+                      <Icon
+                        icon={
+                          !cashTrend.isMeaningful
+                            ? "heroicons:minus-20-solid"
+                            : cashTrend.direction === "up"
+                              ? "heroicons:arrow-trending-up-20-solid"
+                              : "heroicons:arrow-trending-down-20-solid"
+                        }
+                        className="h-4 w-4"
+                        inline={true}
+                      />
+                    </div>
+                  )}
+                  {dupedTrend && (
+                    <div
+                      className="flex items-center gap-1.5 font-medium"
+                      style={{
+                        color: !dupedTrend.isMeaningful
+                          ? "var(--color-secondary-text)"
+                          : dupedTrend.direction === "up"
+                            ? "var(--color-form-success)"
+                            : "var(--color-button-danger)",
+                      }}
+                    >
+                      <span>
+                        {!dupedTrend.isMeaningful
+                          ? "Duped: No meaningful trend"
+                          : `Duped: Trending ${dupedTrend.direction} by ${dupedTrend.percent}%`}
+                      </span>
+                      <Icon
+                        icon={
+                          !dupedTrend.isMeaningful
+                            ? "heroicons:minus-20-solid"
+                            : dupedTrend.direction === "up"
+                              ? "heroicons:arrow-trending-up-20-solid"
+                              : "heroicons:arrow-trending-down-20-solid"
+                        }
+                        className="h-4 w-4"
+                        inline={true}
+                      />
+                    </div>
+                  )}
+                  {valueRangeLabel && (
+                    <div className="text-secondary-text">{valueRangeLabel}</div>
+                  )}
+                </div>
+              )}
             </>
           ) : (
             <div className="bg-secondary-bg rounded-lg p-8 text-center">
@@ -676,50 +971,445 @@ const ItemValueChart = ({
         !showOnlyValueHistory &&
         tradingData.length > 0 && (
           <div>
-            <div className="mb-2 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-end">
+            <div className="mb-4 grid grid-cols-2 gap-2">
               <Tabs
                 className="w-full"
-                value={dateRange}
+                value={tradingChartType}
                 onValueChange={(value) =>
-                  handleDateRangeChange(value as DateRange)
+                  setTradingChartType(value as ChartType)
                 }
               >
-                <TabsList fullWidth>
-                  {DATE_RANGE_OPTIONS.map(({ value, label }) =>
-                    !hasTradingDataForRange(value) ? (
-                      <UiTooltip key={value}>
-                        <UiTooltipTrigger asChild>
-                          <span className="inline-flex flex-1 cursor-not-allowed">
-                            <TabsTrigger value={value} fullWidth disabled>
-                              {label}
-                            </TabsTrigger>
-                          </span>
-                        </UiTooltipTrigger>
-                        <UiTooltipContent side="top">
-                          No trading metrics data available for {label}.
-                        </UiTooltipContent>
-                      </UiTooltip>
-                    ) : (
-                      <TabsTrigger key={value} value={value} fullWidth>
-                        {label}
-                      </TabsTrigger>
-                    ),
-                  )}
+                <TabsList className="h-10 w-full" fullWidth>
+                  <TabsTrigger value="area" className="h-[34px] px-3" fullWidth>
+                    Line
+                  </TabsTrigger>
+                  <TabsTrigger value="bar" className="h-[34px] px-3" fullWidth>
+                    Bar
+                  </TabsTrigger>
                 </TabsList>
               </Tabs>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button
+                    type="button"
+                    className="border-border-card bg-tertiary-bg text-primary-text hover:border-border-focus inline-flex h-10 w-full items-center justify-between rounded-lg border px-3 text-sm transition-colors"
+                    aria-label="Select chart date range"
+                  >
+                    <span>{currentDateRangeLabel}</span>
+                    <Icon
+                      icon="heroicons:chevron-down"
+                      className="text-secondary-text h-4 w-4"
+                      inline={true}
+                    />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  align="end"
+                  className="w-[var(--radix-dropdown-menu-trigger-width)]"
+                >
+                  <DropdownMenuRadioGroup
+                    value={dateRange}
+                    onValueChange={(value) => {
+                      if (!hasTradingDataForRange(value as DateRange)) {
+                        toast.error(
+                          "No trading metrics data for this time range",
+                        );
+                        return;
+                      }
+                      setDateRange(value as DateRange);
+                    }}
+                  >
+                    {DATE_RANGE_OPTIONS.map(({ value, label }) => (
+                      <DropdownMenuRadioItem key={value} value={value}>
+                        {label}
+                      </DropdownMenuRadioItem>
+                    ))}
+                  </DropdownMenuRadioGroup>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
             <div className="h-[350px]">
-              <Line
-                ref={tradingChartRef}
-                data={tradingChartData}
-                options={tradingOptions}
-              />
+              <ChartContainer
+                config={tradingChartConfig}
+                className="h-full w-full"
+              >
+                <ResponsiveContainer width="100%" height="100%">
+                  {tradingChartType === "area" ? (
+                    <AreaChart
+                      accessibilityLayer
+                      data={tradingChartData}
+                      margin={{ left: 6, right: 6 }}
+                    >
+                      <defs>
+                        <linearGradient
+                          id={tradedGradientId}
+                          x1="0"
+                          y1="0"
+                          x2="0"
+                          y2="1"
+                        >
+                          <stop
+                            offset="5%"
+                            stopColor="var(--color-traded)"
+                            stopOpacity={0.35}
+                          />
+                          <stop
+                            offset="95%"
+                            stopColor="var(--color-traded)"
+                            stopOpacity={0.05}
+                          />
+                        </linearGradient>
+                        <linearGradient
+                          id={circulationGradientId}
+                          x1="0"
+                          y1="0"
+                          x2="0"
+                          y2="1"
+                        >
+                          <stop
+                            offset="5%"
+                            stopColor="var(--color-circulation)"
+                            stopOpacity={0.35}
+                          />
+                          <stop
+                            offset="95%"
+                            stopColor="var(--color-circulation)"
+                            stopOpacity={0.05}
+                          />
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid
+                        vertical={false}
+                        stroke="var(--color-border-card)"
+                        strokeOpacity={0.5}
+                      />
+                      <XAxis
+                        dataKey="timestamp"
+                        type="number"
+                        scale="time"
+                        domain={["dataMin", "dataMax"]}
+                        tickLine={false}
+                        axisLine={false}
+                        tick={false}
+                      />
+                      <YAxis
+                        tickLine={false}
+                        axisLine={false}
+                        tickMargin={8}
+                        width={72}
+                        tick={{
+                          fill: "var(--color-secondary-text)",
+                          fontSize: 12,
+                        }}
+                        tickFormatter={(tickValue: number) =>
+                          Number(tickValue).toLocaleString()
+                        }
+                      />
+                      <ChartTooltip
+                        cursor={false}
+                        content={
+                          <ChartTooltipContent
+                            className="min-w-[12rem] px-3 py-2"
+                            formatter={(value, name, item) => {
+                              const rawName = String(name ?? "").toLowerCase();
+                              const isTraded =
+                                rawName === "traded" ||
+                                rawName.includes("traded");
+                              const displayName = isTraded
+                                ? "Times Traded"
+                                : "Unique Circulation";
+                              const indicatorColor =
+                                item.color ||
+                                (isTraded
+                                  ? "var(--color-traded)"
+                                  : "var(--color-circulation)");
+
+                              return (
+                                <div className="flex w-full items-center justify-between gap-3">
+                                  <span className="text-secondary-text flex items-center gap-2">
+                                    <span
+                                      className="h-2.5 w-2.5 shrink-0 rounded-[2px]"
+                                      style={{
+                                        backgroundColor: indicatorColor,
+                                      }}
+                                    />
+                                    {displayName}
+                                  </span>
+                                  <span className="text-primary-text font-mono font-semibold tabular-nums">
+                                    {value === null || value === undefined
+                                      ? "N/A"
+                                      : Number(value).toLocaleString()}
+                                  </span>
+                                </div>
+                              );
+                            }}
+                            labelFormatter={(_, payload) => {
+                              const row = payload?.[0]?.payload as
+                                | { timestamp?: number | string }
+                                | undefined;
+                              const timestamp =
+                                typeof row?.timestamp === "number"
+                                  ? row.timestamp
+                                  : Number(row?.timestamp);
+                              if (!Number.isFinite(timestamp)) {
+                                return "Unknown Date";
+                              }
+                              return new Date(timestamp).toLocaleDateString(
+                                "en-US",
+                                {
+                                  month: "short",
+                                  day: "numeric",
+                                  year: "numeric",
+                                },
+                              );
+                            }}
+                          />
+                        }
+                      />
+                      <RechartsLegend
+                        verticalAlign="bottom"
+                        formatter={(value) => (
+                          <span
+                            style={{ color: "var(--color-secondary-text)" }}
+                          >
+                            {value}
+                          </span>
+                        )}
+                      />
+                      <Area
+                        type="natural"
+                        dataKey="traded"
+                        name="Times Traded"
+                        fill={`url(#${tradedGradientId})`}
+                        fillOpacity={1}
+                        stroke="var(--color-traded)"
+                        strokeWidth={3}
+                        dot={false}
+                        activeDot={{
+                          r: 5,
+                          fill: "var(--color-secondary-bg)",
+                          stroke: "var(--color-traded)",
+                          strokeWidth: 2,
+                        }}
+                      />
+                      <Area
+                        type="natural"
+                        dataKey="circulation"
+                        name="Unique Circulation"
+                        fill={`url(#${circulationGradientId})`}
+                        fillOpacity={1}
+                        stroke="var(--color-circulation)"
+                        strokeWidth={3}
+                        dot={false}
+                        activeDot={{
+                          r: 5,
+                          fill: "var(--color-secondary-bg)",
+                          stroke: "var(--color-circulation)",
+                          strokeWidth: 2,
+                        }}
+                      />
+                    </AreaChart>
+                  ) : (
+                    <BarChart
+                      accessibilityLayer
+                      data={barTradingChartData}
+                      margin={{ left: 6, right: 6 }}
+                    >
+                      <CartesianGrid
+                        vertical={false}
+                        stroke="var(--color-border-card)"
+                        strokeOpacity={0.5}
+                      />
+                      <XAxis
+                        dataKey="timestamp"
+                        tickLine={false}
+                        axisLine={false}
+                        tick={false}
+                      />
+                      <YAxis
+                        tickLine={false}
+                        axisLine={false}
+                        tickMargin={8}
+                        width={72}
+                        tick={{
+                          fill: "var(--color-secondary-text)",
+                          fontSize: 12,
+                        }}
+                        tickFormatter={(tickValue: number) =>
+                          Number(tickValue).toLocaleString()
+                        }
+                      />
+                      <ChartTooltip
+                        cursor={false}
+                        content={
+                          <ChartTooltipContent
+                            className="min-w-[12rem] px-3 py-2"
+                            formatter={(value, name, item) => {
+                              const rawName = String(name ?? "").toLowerCase();
+                              const isTraded =
+                                rawName === "traded" ||
+                                rawName.includes("traded");
+                              const displayName = isTraded
+                                ? "Times Traded"
+                                : "Unique Circulation";
+                              const indicatorColor =
+                                item.color ||
+                                (isTraded
+                                  ? "var(--color-traded)"
+                                  : "var(--color-circulation)");
+
+                              return (
+                                <div className="flex w-full items-center justify-between gap-3">
+                                  <span className="text-secondary-text flex items-center gap-2">
+                                    <span
+                                      className="h-2.5 w-2.5 shrink-0 rounded-[2px]"
+                                      style={{
+                                        backgroundColor: indicatorColor,
+                                      }}
+                                    />
+                                    {displayName}
+                                  </span>
+                                  <span className="text-primary-text font-mono font-semibold tabular-nums">
+                                    {value === null || value === undefined
+                                      ? "N/A"
+                                      : Number(value).toLocaleString()}
+                                  </span>
+                                </div>
+                              );
+                            }}
+                            labelFormatter={(_, payload) => {
+                              const row = payload?.[0]?.payload as
+                                | { timestamp?: number | string }
+                                | undefined;
+                              const timestamp =
+                                typeof row?.timestamp === "number"
+                                  ? row.timestamp
+                                  : Number(row?.timestamp);
+                              if (!Number.isFinite(timestamp)) {
+                                return "Unknown Date";
+                              }
+                              return new Date(timestamp).toLocaleDateString(
+                                "en-US",
+                                {
+                                  month: "short",
+                                  day: "numeric",
+                                  year: "numeric",
+                                },
+                              );
+                            }}
+                          />
+                        }
+                      />
+                      <RechartsLegend
+                        verticalAlign="bottom"
+                        formatter={(value) => (
+                          <span
+                            style={{ color: "var(--color-secondary-text)" }}
+                          >
+                            {value}
+                          </span>
+                        )}
+                      />
+                      <Bar
+                        dataKey="traded"
+                        name="Times Traded"
+                        fill="var(--color-traded)"
+                        fillOpacity={0.7}
+                        radius={[6, 6, 0, 0]}
+                        activeBar={({ ...props }) => (
+                          <Rectangle
+                            {...props}
+                            fillOpacity={0.8}
+                            stroke="var(--color-traded)"
+                            strokeDasharray="4 4"
+                          />
+                        )}
+                      />
+                      <Bar
+                        dataKey="circulation"
+                        name="Unique Circulation"
+                        fill="var(--color-circulation)"
+                        fillOpacity={0.7}
+                        radius={[6, 6, 0, 0]}
+                        activeBar={({ ...props }) => (
+                          <Rectangle
+                            {...props}
+                            fillOpacity={0.8}
+                            stroke="var(--color-circulation)"
+                            strokeDasharray="4 4"
+                          />
+                        )}
+                      />
+                    </BarChart>
+                  )}
+                </ResponsiveContainer>
+              </ChartContainer>
             </div>
-            <div className="mt-2 flex justify-end">
-              <Button onClick={() => tradingChartRef.current?.resetZoom()}>
-                Reset Zoom
-              </Button>
-            </div>
+            {(tradedTrend || circulationTrend || tradingRangeLabel) && (
+              <div className="mt-3 space-y-1 text-sm">
+                {tradedTrend && (
+                  <div
+                    className="flex items-center gap-1.5 font-medium"
+                    style={{
+                      color: !tradedTrend.isMeaningful
+                        ? "var(--color-secondary-text)"
+                        : tradedTrend.direction === "up"
+                          ? "var(--color-form-success)"
+                          : "var(--color-button-danger)",
+                    }}
+                  >
+                    <span>
+                      {!tradedTrend.isMeaningful
+                        ? "Times Traded: No meaningful trend"
+                        : `Times Traded: Trending ${tradedTrend.direction} by ${tradedTrend.percent}%`}
+                    </span>
+                    <Icon
+                      icon={
+                        !tradedTrend.isMeaningful
+                          ? "heroicons:minus-20-solid"
+                          : tradedTrend.direction === "up"
+                            ? "heroicons:arrow-trending-up-20-solid"
+                            : "heroicons:arrow-trending-down-20-solid"
+                      }
+                      className="h-4 w-4"
+                      inline={true}
+                    />
+                  </div>
+                )}
+                {circulationTrend && (
+                  <div
+                    className="flex items-center gap-1.5 font-medium"
+                    style={{
+                      color: !circulationTrend.isMeaningful
+                        ? "var(--color-secondary-text)"
+                        : circulationTrend.direction === "up"
+                          ? "var(--color-form-success)"
+                          : "var(--color-button-danger)",
+                    }}
+                  >
+                    <span>
+                      {!circulationTrend.isMeaningful
+                        ? "Unique Circulation: No meaningful trend"
+                        : `Unique Circulation: Trending ${circulationTrend.direction} by ${circulationTrend.percent}%`}
+                    </span>
+                    <Icon
+                      icon={
+                        !circulationTrend.isMeaningful
+                          ? "heroicons:minus-20-solid"
+                          : circulationTrend.direction === "up"
+                            ? "heroicons:arrow-trending-up-20-solid"
+                            : "heroicons:arrow-trending-down-20-solid"
+                      }
+                      className="h-4 w-4"
+                      inline={true}
+                    />
+                  </div>
+                )}
+                {tradingRangeLabel && (
+                  <div className="text-secondary-text">{tradingRangeLabel}</div>
+                )}
+              </div>
+            )}
           </div>
         )}
 
