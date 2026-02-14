@@ -4,6 +4,7 @@ import UserProfileClient from "./UserProfileClient";
 import { UserSettings, UserFlag } from "@/types/auth";
 import { ProfileDataService } from "@/services/profileDataService";
 import { logError } from "@/services/logger";
+import { getCurrentUser } from "@/utils/serverSession";
 
 interface CommentData {
   id: number;
@@ -192,7 +193,35 @@ async function AdditionalDataFetcher({
 async function UserProfileDataFetcher({ userId }: { userId: string }) {
   try {
     // Fetch main user data first (this is fast and essential)
-    const userData = await fetchUserById(userId);
+    let userData: User | null = null;
+
+    try {
+      userData = await fetchUserById(userId);
+    } catch (error: unknown) {
+      const isPrivateProfileError =
+        error &&
+        typeof error === "object" &&
+        "message" in error &&
+        typeof error.message === "string" &&
+        error.message.startsWith("PRIVATE_PROFILE:");
+
+      if (!isPrivateProfileError) {
+        throw error;
+      }
+
+      const currentUser = await getCurrentUser();
+
+      // Owners should always be able to view their own profile, even if profile_public=0.
+      if (currentUser?.id === userId) {
+        userData = {
+          ...currentUser,
+          banner: currentUser.banner ?? undefined,
+          custom_banner: currentUser.custom_banner ?? undefined,
+        };
+      } else {
+        throw error;
+      }
+    }
 
     if (!userData) {
       throw new Error("User not found");
