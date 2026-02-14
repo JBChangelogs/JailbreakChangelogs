@@ -317,7 +317,10 @@ export default function InventoryBreakdown({
         </div>
 
         <div className="xl:col-span-4">
-          <div className="border-border-card bg-secondary-bg rounded-lg border p-4 xl:sticky xl:top-4">
+          <div
+            className="inventory-breakdown-sticky-card border-border-card bg-secondary-bg rounded-lg border p-4"
+            style={{ top: "calc(var(--header-height, 0px) + 16px)" }}
+          >
             <div className="mb-2 text-center">
               <div className="text-primary-text text-sm font-semibold">
                 Category Pie Chart
@@ -509,7 +512,10 @@ export default function InventoryBreakdown({
             </div>
 
             <div className="xl:col-span-4">
-              <div className="border-border-card bg-secondary-bg rounded-lg border p-4 xl:sticky xl:top-4">
+              <div
+                className="inventory-breakdown-sticky-card border-border-card bg-secondary-bg rounded-lg border p-4"
+                style={{ top: "calc(var(--header-height, 0px) + 16px)" }}
+              >
                 <div className="mb-2 text-center">
                   <div className="text-primary-text text-sm font-semibold">
                     Duplicates Pie Chart

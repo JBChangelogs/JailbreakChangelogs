@@ -65,7 +65,7 @@
     8%,
     20%
   ); /* Primary borders - Card outlines */
-  --color-border-card: hsl(214, 8%, 30%); /* Card borders - Slight contrast */
+  --color-border-card: hsl(214, 8%, 22%); /* Card borders - Slight contrast */
   --color-border-secondary: hsl(
     214,
     6%,
@@ -758,4 +758,11 @@
   background-color: var(--color-secondary-bg);
   color: var(--color-primary-text);
   font-weight: 600;
+}
+
+@media (min-width: 1440px) {
+  .inventory-breakdown-sticky-card {
+    position: sticky;
+    height: fit-content;
+  }
 }
