@@ -315,7 +315,7 @@ export default async function Home() {
                     />
                   </a>
                   <h2 className="text-xl font-bold text-white md:text-2xl">
-                    And by the Jailbreak Community
+                    And loved by the Jailbreak Community
                   </h2>
                 </div>
               </div>
