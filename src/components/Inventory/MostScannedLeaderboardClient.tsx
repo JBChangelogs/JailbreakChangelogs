@@ -8,6 +8,7 @@ import { useVirtualizer } from "@tanstack/react-virtual";
 import { useQuery } from "@tanstack/react-query";
 import { fetchLeaderboardUserData } from "@/app/leaderboard/actions";
 import { Icon } from "@/components/ui/IconWrapper";
+import { Button } from "@/components/ui/button";
 import { DefaultAvatar } from "@/utils/avatar";
 
 interface UserScan {
@@ -331,13 +332,18 @@ export default function MostScannedLeaderboardClient({
                               scans
                             </div>
                           </div>
-                          <Link
-                            href={`/inventories/${user.user_id}`}
-                            prefetch={false}
-                            className="bg-button-info text-form-button-text hover:bg-button-info-hover focus:ring-border-focus active:bg-button-info-active mt-1 shrink-0 cursor-pointer rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors duration-200 focus:ring-2 focus:outline-none"
+                          <Button
+                            asChild
+                            size="sm"
+                            className="mt-1 shrink-0 text-xs"
                           >
-                            View Inventory
-                          </Link>
+                            <Link
+                              href={`/inventories/${user.user_id}`}
+                              prefetch={false}
+                            >
+                              View Inventory
+                            </Link>
+                          </Button>
                         </div>
                       </div>
                     </div>

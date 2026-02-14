@@ -51,6 +51,7 @@ import {
   PopoverTrigger,
   PopoverContent,
 } from "@/components/ui/popover";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { UtmGeneratorModal } from "@/components/Modals/UtmGeneratorModal";
 
 const menuTransition = {
@@ -594,38 +595,42 @@ export const NavbarModern = ({
               {/* Tabs */}
               {isAuthenticated && (
                 <div className="border-border-secondary border-b">
-                  <div role="tablist" className="tabs flex w-full">
-                    <button
-                      role="tab"
-                      aria-selected={notificationTab === "unread"}
-                      onClick={() => {
-                        setNotificationTab("unread");
-                        setNotificationPage(1);
-                        setMarkedAsSeen(new Set()); // Clear marked state
-                        setIsLoadingNotifications(true); // Show loading immediately
-                        setNotifications(null); // Clear old notifications
+                  <Tabs
+                    value={notificationTab}
+                    onValueChange={(value) => {
+                      if (value !== "unread" && value !== "history") return;
+                      setNotificationTab(value);
+                      setNotificationPage(1);
+                      setMarkedAsSeen(new Set()); // Clear marked state
+                      setIsLoadingNotifications(true); // Show loading immediately
+                      setNotifications(null); // Clear old notifications
+                      if (value === "unread") {
                         fetchUnreadWithDebounce(1, 5);
-                      }}
-                      className={`tab flex-1 ${notificationTab === "unread" ? "tab-active" : ""}`}
+                        return;
+                      }
+                      fetchHistoryWithDebounce(1, 5);
+                    }}
+                  >
+                    <TabsList
+                      className="w-full rounded-none border-0 p-0"
+                      fullWidth
                     >
-                      Unread
-                    </button>
-                    <button
-                      role="tab"
-                      aria-selected={notificationTab === "history"}
-                      onClick={() => {
-                        setNotificationTab("history");
-                        setNotificationPage(1);
-                        setMarkedAsSeen(new Set()); // Clear marked state
-                        setIsLoadingNotifications(true); // Show loading immediately
-                        setNotifications(null); // Clear old notifications
-                        fetchHistoryWithDebounce(1, 5);
-                      }}
-                      className={`tab flex-1 ${notificationTab === "history" ? "tab-active" : ""}`}
-                    >
-                      History
-                    </button>
-                  </div>
+                      <TabsTrigger
+                        value="unread"
+                        fullWidth
+                        className="rounded-none data-[state=active]:shadow-none"
+                      >
+                        Unread
+                      </TabsTrigger>
+                      <TabsTrigger
+                        value="history"
+                        fullWidth
+                        className="rounded-none data-[state=active]:shadow-none"
+                      >
+                        History
+                      </TabsTrigger>
+                    </TabsList>
+                  </Tabs>
                 </div>
               )}
 

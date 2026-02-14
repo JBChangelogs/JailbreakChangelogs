@@ -47,6 +47,7 @@ import {
   PopoverTrigger,
   PopoverContent,
 } from "@/components/ui/popover";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   fetchNotificationHistory,
   fetchUnreadNotifications,
@@ -58,6 +59,7 @@ import {
 import { formatCompactDateTime } from "@/utils/timestamp";
 import { parseNotificationUrl } from "@/utils/notificationUrl";
 import { UtmGeneratorModal } from "@/components/Modals/UtmGeneratorModal";
+import { useOptimizedRealTimeRelativeDate } from "@/hooks/useSharedTimer";
 
 const UnreadNotificationBadge = ({ count }: { count: number }) => {
   if (count === 0) return null;
@@ -78,14 +80,25 @@ const UnreadNotificationBadge = ({ count }: { count: number }) => {
 
 const NotificationTimestamp = ({
   timestamp,
+  notificationId,
 }: {
   timestamp: string | number;
+  notificationId: number;
 }) => {
   const timestampString =
     typeof timestamp === "string" ? timestamp : timestamp.toString();
   const timestampNumber =
     typeof timestamp === "number" ? timestamp : Number.parseInt(timestamp, 10);
   const hasValidNumber = Number.isFinite(timestampNumber);
+  const relativeTime = useOptimizedRealTimeRelativeDate(
+    timestampString,
+    `mobile-notification-${notificationId}`,
+  );
+  const isWithin24Hours =
+    relativeTime === "just now" ||
+    relativeTime.includes("second") ||
+    relativeTime.includes("minute") ||
+    relativeTime.includes("hour");
 
   const absoluteTime = hasValidNumber
     ? formatCompactDateTime(timestampNumber)
@@ -93,7 +106,7 @@ const NotificationTimestamp = ({
 
   return (
     <p className="text-secondary-text mt-1 text-right text-xs">
-      <span>{absoluteTime}</span>
+      <span>{isWithin24Hours ? relativeTime : absoluteTime}</span>
     </p>
   );
 };
@@ -732,38 +745,44 @@ export default function Header() {
                       {/* Tabs */}
                       {isAuthenticated && (
                         <div className="border-border-secondary border-b">
-                          <div role="tablist" className="tabs flex w-full">
-                            <button
-                              role="tab"
-                              aria-selected={notificationTab === "unread"}
-                              onClick={() => {
-                                setNotificationTab("unread");
-                                setNotificationPage(1);
-                                setMarkedAsSeen(new Set()); // Clear marked state
-                                setIsLoadingNotifications(true); // Show loading immediately
-                                setNotifications(null); // Clear old notifications
+                          <Tabs
+                            value={notificationTab}
+                            onValueChange={(value) => {
+                              if (value !== "unread" && value !== "history") {
+                                return;
+                              }
+                              setNotificationTab(value);
+                              setNotificationPage(1);
+                              setMarkedAsSeen(new Set()); // Clear marked state
+                              setIsLoadingNotifications(true); // Show loading immediately
+                              setNotifications(null); // Clear old notifications
+                              if (value === "unread") {
                                 fetchUnreadWithDebounce(1, 5);
-                              }}
-                              className={`tab flex-1 ${notificationTab === "unread" ? "tab-active" : ""}`}
+                                return;
+                              }
+                              fetchHistoryWithDebounce(1, 5);
+                            }}
+                          >
+                            <TabsList
+                              className="w-full rounded-none border-0 p-0"
+                              fullWidth
                             >
-                              Unread
-                            </button>
-                            <button
-                              role="tab"
-                              aria-selected={notificationTab === "history"}
-                              onClick={() => {
-                                setNotificationTab("history");
-                                setNotificationPage(1);
-                                setMarkedAsSeen(new Set()); // Clear marked state
-                                setIsLoadingNotifications(true); // Show loading immediately
-                                setNotifications(null); // Clear old notifications
-                                fetchHistoryWithDebounce(1, 5);
-                              }}
-                              className={`tab flex-1 ${notificationTab === "history" ? "tab-active" : ""}`}
-                            >
-                              History
-                            </button>
-                          </div>
+                              <TabsTrigger
+                                value="unread"
+                                fullWidth
+                                className="rounded-none data-[state=active]:shadow-none"
+                              >
+                                Unread
+                              </TabsTrigger>
+                              <TabsTrigger
+                                value="history"
+                                fullWidth
+                                className="rounded-none data-[state=active]:shadow-none"
+                              >
+                                History
+                              </TabsTrigger>
+                            </TabsList>
+                          </Tabs>
                         </div>
                       )}
 
@@ -942,6 +961,7 @@ export default function Header() {
                                       )}
                                       <NotificationTimestamp
                                         timestamp={notif.last_updated}
+                                        notificationId={notif.id}
                                       />
                                     </div>
                                   </div>
