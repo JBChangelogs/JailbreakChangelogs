@@ -9,6 +9,7 @@ import { useTheme } from "@/contexts/ThemeContext";
 import { Icon } from "@/components/ui/IconWrapper";
 import ImageModal from "@/components/ui/ImageModal";
 import { Button } from "@/components/ui/button";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface SupporterTier {
   name: string;
@@ -154,7 +155,7 @@ export default function ModernPricingSection() {
   return (
     <section className="bg-primary-bg">
       <div className="container mx-auto px-4 pt-2 pb-8 sm:px-6">
-        <div className="sm:flex sm:items-center sm:justify-between">
+        <div>
           <div>
             <h2 className="text-primary-text text-2xl font-bold lg:text-3xl">
               Support Jailbreak Changelogs
@@ -180,28 +181,22 @@ export default function ModernPricingSection() {
               . No subscriptions. No recurring fees. Keep perks forever.
             </p>
           </div>
-
-          <div className="border-border-card mt-6 overflow-hidden rounded-lg border p-0.5">
-            <div className="flex sm:-mx-0.5">
-              <Button
-                onClick={() => setIsYearly(false)}
-                variant={!isYearly ? "default" : "ghost"}
-                className={`w-1/2 sm:w-auto ${!isYearly ? "text-white" : "text-secondary-text bg-secondary-bg hover:bg-quaternary-bg"}`}
-                size="sm"
-              >
-                Ko-fi
-              </Button>
-              <Button
-                onClick={() => setIsYearly(true)}
-                variant={isYearly ? "default" : "ghost"}
-                className={`w-1/2 sm:w-auto ${isYearly ? "text-white" : "text-secondary-text bg-secondary-bg hover:bg-quaternary-bg"}`}
-                size="sm"
-              >
-                Roblox
-              </Button>
-            </div>
-          </div>
         </div>
+
+        <Tabs
+          value={isYearly ? "roblox" : "kofi"}
+          onValueChange={(value) => setIsYearly(value === "roblox")}
+          className="mt-6 w-full"
+        >
+          <TabsList fullWidth className="w-full">
+            <TabsTrigger value="kofi" fullWidth>
+              Ko-fi
+            </TabsTrigger>
+            <TabsTrigger value="roblox" fullWidth>
+              Roblox
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
 
         <div className="-mx-6 mt-16 grid gap-6 sm:grid-cols-2 sm:gap-8 lg:grid-cols-4">
           {supporterTiers.map((tier) => (

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import type { Metadata } from "next";
 import { getRandomBackgroundImage } from "@/utils/fisherYatesShuffle";
 import { fetchHomepageImpactStats, fetchHomepageStats } from "@/utils/api";
@@ -8,6 +9,14 @@ import HeroBackgroundCarousel from "@/components/Home/HeroBackgroundCarousel";
 import NitroHomepageAd from "@/components/Ads/NitroHomepageAd";
 import CountUpNumber from "@/components/Home/CountUpNumber";
 import { Button } from "@/components/ui/button";
+import {
+  testimonials,
+  type Testimonial,
+} from "@/components/Testimonials/testimonialsData";
+import {
+  TESTIMONIALS_BASE_URL,
+  highlightBrandName,
+} from "@/components/Testimonials/testimonialText";
 
 export const metadata: Metadata = {
   title: {
@@ -158,6 +167,17 @@ type HeroStatCard = {
   suffix?: string;
 };
 
+const BADIMO_TESTIMONIAL_NAME = "Badimo";
+
+const pickRandomTestimonials = (items: Testimonial[], count: number) => {
+  const shuffled = [...items];
+  for (let i = shuffled.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled.slice(0, count);
+};
+
 export default async function Home() {
   const initialImage = getRandomBackgroundImage();
   const [impactStats, homepageStats] = await Promise.all([
@@ -213,6 +233,20 @@ export default async function Home() {
       suffix: " and counting",
     },
   ];
+
+  const badimoTestimonial = testimonials.find(
+    (testimonial) => testimonial.name === BADIMO_TESTIMONIAL_NAME,
+  );
+  const communityTestimonials = testimonials.filter(
+    (testimonial) => testimonial.name !== BADIMO_TESTIMONIAL_NAME,
+  );
+  const featuredCommunityTestimonials = pickRandomTestimonials(
+    communityTestimonials,
+    2,
+  );
+  const featuredTestimonials = badimoTestimonial
+    ? [badimoTestimonial, ...featuredCommunityTestimonials]
+    : featuredCommunityTestimonials;
 
   return (
     <main className="bg-primary-bg min-h-screen">
@@ -296,7 +330,7 @@ export default async function Home() {
             </div>
 
             <div className="pt-6 md:col-span-2">
-              <div className="mb-4">
+              <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
                 <div>
                   <p className="text-link text-xs font-semibold tracking-[0.2em] uppercase">
                     Trusted by Badimo
@@ -318,7 +352,59 @@ export default async function Home() {
                     And loved by the Jailbreak Community
                   </h2>
                 </div>
+                <Button
+                  asChild
+                  variant="outline"
+                  className="hidden border-white/55 bg-black/50 text-white shadow-[0_2px_12px_rgba(0,0,0,0.4)] hover:bg-black/60 hover:text-white md:inline-flex"
+                >
+                  <Link href="/testimonials" prefetch={false}>
+                    View All Testimonials
+                  </Link>
+                </Button>
               </div>
+              <div className="mb-4 hidden grid-cols-1 items-start gap-3 md:grid md:grid-cols-2 lg:grid-cols-3">
+                {featuredTestimonials.map((testimonial) => (
+                  <blockquote
+                    key={testimonial.name}
+                    className="flex flex-col rounded-2xl border border-white/20 bg-white/10 p-4 text-left backdrop-blur-xl"
+                  >
+                    <p className="text-sm leading-relaxed text-white/90">
+                      &ldquo;{highlightBrandName(testimonial.quote)}&rdquo;
+                    </p>
+                    <footer className="mt-auto flex items-center gap-3 pt-4">
+                      <Image
+                        src={`${TESTIMONIALS_BASE_URL}/${testimonial.name}.webp`}
+                        alt={testimonial.name}
+                        width={40}
+                        height={40}
+                        className={`h-10 w-10 object-contain ${
+                          testimonial.name !== BADIMO_TESTIMONIAL_NAME
+                            ? "rounded-full"
+                            : ""
+                        }`}
+                        loading="lazy"
+                      />
+                      <div>
+                        <p className="text-sm font-bold text-white">
+                          {testimonial.name}
+                        </p>
+                        <p className="text-xs text-white/80">
+                          {testimonial.role}
+                        </p>
+                      </div>
+                    </footer>
+                  </blockquote>
+                ))}
+              </div>
+              <Button
+                asChild
+                variant="outline"
+                className="mb-4 border-white/55 bg-black/50 text-white shadow-[0_2px_12px_rgba(0,0,0,0.4)] hover:bg-black/60 hover:text-white md:hidden"
+              >
+                <Link href="/testimonials" prefetch={false}>
+                  View Testimonials
+                </Link>
+              </Button>
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-5">
                 {legacyStats.map((stat) => (
                   <div key={stat.label} className={heroStatCardClass}>

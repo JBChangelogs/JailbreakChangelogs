@@ -30,8 +30,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-import { Masonry } from "@mui/lab";
-
 type NameSort = "a-z" | "z-a";
 type TimeSort = "newest" | "oldest";
 type ServerSize = "all" | "big" | "small";
@@ -1060,23 +1058,14 @@ function RobberyTrackerContent() {
 
                 {/* Robberies Grid */}
                 {filteredRobberies.length > 0 ? (
-                  <Masonry
-                    columns={{ xs: 1, sm: 2, md: 2, lg: 3, xl: 4 }}
-                    spacing={3}
-                    sx={{
-                      width: "auto",
-                      margin: 0,
-                      overflow: "hidden",
-                      transition: "height 0.2s ease-in-out",
-                    }}
-                  >
+                  <div className="grid grid-cols-1 items-start gap-6 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                     {filteredRobberies.map((robbery) => (
                       <RobberyCard
                         key={`${robbery.marker_name}-${robbery.server?.job_id || robbery.job_id}-${robbery.timestamp}`}
                         robbery={robbery}
                       />
                     ))}
-                  </Masonry>
+                  </div>
                 ) : (
                   <div className="flex min-h-screen flex-col items-center justify-start py-12 pt-24 text-center">
                     <Icon
@@ -1107,23 +1096,14 @@ function RobberyTrackerContent() {
               <>
                 {/* Mansions Grid */}
                 {filteredMansions.length > 0 ? (
-                  <Masonry
-                    columns={{ xs: 1, sm: 2, md: 2, lg: 3, xl: 4 }}
-                    spacing={3}
-                    sx={{
-                      width: "auto",
-                      margin: 0,
-                      overflow: "hidden",
-                      transition: "height 0.2s ease-in-out",
-                    }}
-                  >
+                  <div className="grid grid-cols-1 items-start gap-6 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                     {filteredMansions.map((robbery) => (
                       <RobberyCard
                         key={`${robbery.marker_name}-${robbery.server?.job_id || robbery.job_id}-${robbery.timestamp}`}
                         robbery={robbery}
                       />
                     ))}
-                  </Masonry>
+                  </div>
                 ) : (
                   <div className="flex min-h-screen flex-col items-center justify-start py-12 pt-24 text-center">
                     <Icon
@@ -1212,23 +1192,14 @@ function RobberyTrackerContent() {
 
                 {/* Airdrops Grid */}
                 {filteredAirdrops.length > 0 ? (
-                  <Masonry
-                    columns={{ xs: 1, sm: 2, md: 2, lg: 3, xl: 4 }}
-                    spacing={3}
-                    sx={{
-                      width: "auto",
-                      margin: 0,
-                      overflow: "hidden",
-                      transition: "height 0.2s ease-in-out",
-                    }}
-                  >
+                  <div className="grid grid-cols-1 items-start gap-6 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                     {filteredAirdrops.map((airdrop, index) => (
                       <AirdropCard
                         key={`${airdrop.location}-${airdrop.color}-${airdrop.server?.job_id || index}-${airdrop.timestamp}`}
                         airdrop={airdrop}
                       />
                     ))}
-                  </Masonry>
+                  </div>
                 ) : (
                   <div className="flex min-h-screen flex-col items-center justify-start py-12 pt-24 text-center">
                     <Icon
