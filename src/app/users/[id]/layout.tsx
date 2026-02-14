@@ -34,7 +34,8 @@ export async function generateViewport({
       typeof error === "object" &&
       "message" in error &&
       typeof error.message === "string" &&
-      (error.message.startsWith("BANNED_USER:") ||
+      (error.message.startsWith("PRIVATE_PROFILE:") ||
+        error.message.startsWith("BANNED_USER:") ||
         error.message.startsWith("NOT_FOUND:"))
     ) {
       return {};
@@ -139,6 +140,50 @@ export async function generateMetadata({
       },
     };
   } catch (error: unknown) {
+    // Check if this is a banned user error
+    if (
+      error &&
+      typeof error === "object" &&
+      "message" in error &&
+      typeof error.message === "string" &&
+      error.message.startsWith("PRIVATE_PROFILE:")
+    ) {
+      const privateMessage = error.message
+        .replace("PRIVATE_PROFILE:", "")
+        .trim();
+      return {
+        metadataBase: new URL("https://jailbreakchangelogs.xyz"),
+        title: "Private Profile | Changelogs",
+        description: privateMessage || "This user's profile is private.",
+        alternates: {
+          canonical: `/users/${userId}`,
+        },
+        openGraph: {
+          title: "Private Profile | Changelogs",
+          description: privateMessage || "This user's profile is private.",
+          type: "website",
+          url: "https://jailbreakchangelogs.xyz/users",
+          siteName: "Jailbreak Changelogs",
+          images: [
+            {
+              url: "https://assets.jailbreakchangelogs.xyz/assets/logos/embeds/JBCL_Embed_Graphic.png",
+              width: 2400,
+              height: 1260,
+              alt: "Jailbreak Changelogs Banner",
+            },
+          ],
+        },
+        twitter: {
+          card: "summary_large_image",
+          title: "Private Profile | Changelogs",
+          description: privateMessage || "This user's profile is private.",
+          images: [
+            "https://assets.jailbreakchangelogs.xyz/assets/logos/embeds/JBCL_Embed_Graphic.png",
+          ],
+        },
+      };
+    }
+
     // Check if this is a banned user error
     if (
       error &&

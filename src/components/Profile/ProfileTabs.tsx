@@ -308,15 +308,20 @@ function ProfileOverflowTabs({
   ];
 
   return (
-    <div className="overflow-x-auto">
-      <Tabs value={String(value)} onValueChange={(v) => onChange(Number(v))}>
-        <TabsList noBottomRadius>
+    <div className="w-full">
+      <Tabs
+        value={String(value)}
+        onValueChange={(v) => onChange(Number(v))}
+        className="w-full"
+      >
+        <TabsList noBottomRadius fullWidth className="w-full">
           {labels.map((label, idx) => (
             <TabsTrigger
               key={label}
               value={String(idx)}
               aria-controls={`profile-tabpanel-${idx}`}
               id={`profile-tab-${idx}`}
+              fullWidth
             >
               {label}
             </TabsTrigger>

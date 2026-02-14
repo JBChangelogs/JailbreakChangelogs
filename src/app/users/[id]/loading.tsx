@@ -15,11 +15,7 @@ export default function UserProfileLoading() {
             <div className="flex flex-col items-center gap-3 md:flex-row md:items-start md:gap-6">
               {/* Avatar skeleton - matches UserAvatar component structure */}
               <div className="relative -mt-16 md:-mt-24">
-                <div className="relative">
-                  <Skeleton variant="circular" width={96} height={96} />
-                  {/* Badge skeleton to account for dynamic badge loading - positioned like MUI Badge */}
-                  <div className="absolute right-0 bottom-0 h-4 w-4 translate-x-1 translate-y-1 transform rounded-full border-2" />
-                </div>
+                <Skeleton variant="circular" width={96} height={96} />
               </div>
 
               <div className="w-full flex-1 text-center md:text-left">
@@ -56,7 +52,7 @@ export default function UserProfileLoading() {
 
           {/* Tabs skeleton */}
           <div className="mt-2 md:mt-6">
-            <div className="border-b">
+            <div className="border-border-card border-b">
               <div className="flex gap-4 overflow-x-auto p-2">
                 <Skeleton variant="rounded" width={80} height={32} />
                 <Skeleton variant="rounded" width={80} height={32} />

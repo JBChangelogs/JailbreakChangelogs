@@ -208,10 +208,41 @@ async function UserProfileDataFetcher({ userId }: { userId: string }) {
       </Suspense>
     );
   } catch (error: unknown) {
-    logError("Error fetching user profile data", error, {
-      component: "UserProfileDataStreamer",
-      action: "fetch_user_profile",
-    });
+    const errorMessage =
+      error &&
+      typeof error === "object" &&
+      "message" in error &&
+      typeof error.message === "string"
+        ? error.message
+        : "";
+
+    if (
+      !(
+        errorMessage.startsWith("PRIVATE_PROFILE:") ||
+        errorMessage.startsWith("BANNED_USER:")
+      )
+    ) {
+      logError("Error fetching user profile data", error, {
+        component: "UserProfileDataStreamer",
+        action: "fetch_user_profile",
+      });
+    }
+
+    // Handle private profile errors
+    if (
+      error &&
+      typeof error === "object" &&
+      "message" in error &&
+      typeof error.message === "string" &&
+      error.message.startsWith("PRIVATE_PROFILE:")
+    ) {
+      return (
+        <UserProfileClient
+          userId={userId}
+          error={{ message: error.message, code: 403 }}
+        />
+      );
+    }
 
     // Handle banned user errors
     if (

@@ -156,7 +156,12 @@ async function OGFinderDataFetcher({ robloxId }: { robloxId: string }) {
       return {};
     }),
     fetchUserByRobloxId(actualRobloxId).catch((error) => {
-      console.error("Failed to fetch user connection data:", error);
+      if (
+        !(error instanceof Error) ||
+        !error.message.startsWith("PRIVATE_PROFILE:")
+      ) {
+        console.error("Failed to fetch user connection data:", error);
+      }
       return null;
     }),
     fetchItems().catch((error) => {

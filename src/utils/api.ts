@@ -82,6 +82,113 @@ export const ENABLE_WS_SCAN = process.env.NEXT_PUBLIC_ENABLE_WS_SCAN === "true";
 export const INVENTORY_API_SOURCE_HEADER = process.env
   .NEXT_PUBLIC_INVENTORY_API_SOURCE_HEADER as string;
 
+const USER_BANNED_FALLBACK_MESSAGE =
+  "This user is banned from Jailbreak Changelogs.";
+const USER_PRIVATE_PROFILE_FALLBACK_MESSAGE = "This user's profile is private.";
+const USER_ACCESS_ERROR_PREFIXES = [
+  "PRIVATE_PROFILE:",
+  "BANNED_USER:",
+] as const;
+
+function getErrorMessageFromResponse(data: unknown, fallback: string): string {
+  if (!data || typeof data !== "object") {
+    return fallback;
+  }
+
+  const record = data as Record<string, unknown>;
+  const detail = record.detail;
+  const message = record.message;
+  const error = record.error;
+
+  if (typeof detail === "string" && detail.trim()) return detail;
+  if (typeof message === "string" && message.trim()) return message;
+  if (typeof error === "string" && error.trim()) return error;
+
+  if (Array.isArray(detail) && detail.length > 0) {
+    const first = detail[0];
+    if (typeof first === "string" && first.trim()) return first;
+    if (first && typeof first === "object") {
+      const firstMessage = (first as Record<string, unknown>).message;
+      if (typeof firstMessage === "string" && firstMessage.trim()) {
+        return firstMessage;
+      }
+    }
+  }
+
+  if (detail && typeof detail === "object") {
+    const detailMessage = (detail as Record<string, unknown>).message;
+    if (typeof detailMessage === "string" && detailMessage.trim()) {
+      return detailMessage;
+    }
+  }
+
+  return fallback;
+}
+
+function isPrivateProfileResponse(
+  data: unknown,
+  errorMessage: string,
+): boolean {
+  if (
+    typeof errorMessage === "string" &&
+    errorMessage.toLowerCase().includes("profile is private")
+  ) {
+    return true;
+  }
+
+  try {
+    const raw = JSON.stringify(data).toLowerCase();
+    return raw.includes("profile is private");
+  } catch {
+    return false;
+  }
+}
+
+function getPrivateProfileMessage(data: unknown, errorMessage: string): string {
+  if (
+    typeof errorMessage === "string" &&
+    errorMessage.toLowerCase().includes("profile is private")
+  ) {
+    return errorMessage;
+  }
+
+  try {
+    const raw = JSON.stringify(data);
+    const privatePattern = /this user(?:'s)? profile is private\.?/i;
+    if (privatePattern.test(raw)) {
+      return "This user's profile is private.";
+    }
+  } catch {
+    // Ignore JSON stringify failures and use fallback below.
+  }
+
+  return USER_PRIVATE_PROFILE_FALLBACK_MESSAGE;
+}
+
+function hasMessagePrefix(
+  error: unknown,
+  prefixes: readonly string[],
+): error is Error {
+  return (
+    error instanceof Error &&
+    prefixes.some((prefix) => error.message.startsWith(prefix))
+  );
+}
+
+function throwUserAccessErrorFrom403(data: unknown): never {
+  const errorMessage = getErrorMessageFromResponse(
+    data,
+    USER_BANNED_FALLBACK_MESSAGE,
+  );
+
+  if (isPrivateProfileResponse(data, errorMessage)) {
+    const privateMessage = getPrivateProfileMessage(data, errorMessage);
+    throw new Error(`PRIVATE_PROFILE: ${privateMessage}`);
+  }
+
+  throw new Error(`BANNED_USER: ${errorMessage}`);
+}
+
 export const fetchUsers = async () => {
   const response = await fetch(`${BASE_API_URL}/users/list`, {
     headers: {
@@ -94,7 +201,7 @@ export const fetchUsers = async () => {
 
 export const fetchPaginatedUsers = async (
   page: number = 1,
-  size: number = 21,
+  size: number = 30,
 ) => {
   const response = await fetch(
     `/api/users/paginated?page=${page}&size=${size}`,
@@ -112,7 +219,7 @@ export const fetchPaginatedUsers = async (
   return data;
 };
 
-export const searchUsers = async (username: string, limit: number = 21) => {
+export const searchUsers = async (username: string, limit: number = 30) => {
   const response = await fetch(
     `/api/users/search?username=${encodeURIComponent(username)}&limit=${limit}`,
     {
@@ -144,9 +251,7 @@ export async function fetchUserById(id: string) {
     if (!response.ok) {
       // Handle banned users specifically without logging the error response
       if (response.status === 403) {
-        const errorMessage =
-          data.detail || "This user is banned from Jailbreak Changelogs.";
-        throw new Error(`BANNED_USER: ${errorMessage}`);
+        throwUserAccessErrorFrom403(data);
       }
 
       // Handle 404 errors specifically
@@ -171,7 +276,9 @@ export async function fetchUserById(id: string) {
 
     return data;
   } catch (error) {
-    console.error("Error fetching user by ID:", error);
+    if (!hasMessagePrefix(error, USER_ACCESS_ERROR_PREFIXES)) {
+      console.error("Error fetching user by ID:", error);
+    }
 
     // Re-throw BANNED_USER and NOT_FOUND errors so calling code can handle them
     if (
@@ -179,7 +286,7 @@ export async function fetchUserById(id: string) {
       typeof error === "object" &&
       "message" in error &&
       typeof error.message === "string" &&
-      (error.message.startsWith("BANNED_USER:") ||
+      (hasMessagePrefix(error, USER_ACCESS_ERROR_PREFIXES) ||
         error.message.startsWith("NOT_FOUND:"))
     ) {
       throw error;
@@ -218,9 +325,7 @@ export async function fetchUserByIdForOG(id: string) {
     if (!response.ok) {
       // Handle banned users specifically without logging the error response
       if (response.status === 403) {
-        const errorMessage =
-          data.detail || "This user is banned from Jailbreak Changelogs.";
-        throw new Error(`BANNED_USER: ${errorMessage}`);
+        throwUserAccessErrorFrom403(data);
       }
 
       // Log error response for other types of errors
@@ -240,7 +345,9 @@ export async function fetchUserByIdForOG(id: string) {
 
     return data;
   } catch (error) {
-    console.error("Error fetching user by ID for OG:", error);
+    if (!hasMessagePrefix(error, USER_ACCESS_ERROR_PREFIXES)) {
+      console.error("Error fetching user by ID for OG:", error);
+    }
 
     // Re-throw BANNED_USER errors so calling code can handle them
     if (
@@ -248,7 +355,7 @@ export async function fetchUserByIdForOG(id: string) {
       typeof error === "object" &&
       "message" in error &&
       typeof error.message === "string" &&
-      error.message.startsWith("BANNED_USER:")
+      hasMessagePrefix(error, USER_ACCESS_ERROR_PREFIXES)
     ) {
       throw error;
     }
@@ -274,9 +381,7 @@ export async function fetchUserByIdForMetadata(id: string) {
     if (!response.ok) {
       // Handle banned users specifically without logging the error response
       if (response.status === 403) {
-        const errorMessage =
-          data.detail || "This user is banned from Jailbreak Changelogs.";
-        throw new Error(`BANNED_USER: ${errorMessage}`);
+        throwUserAccessErrorFrom403(data);
       }
 
       // Handle 404 errors specifically
@@ -301,7 +406,9 @@ export async function fetchUserByIdForMetadata(id: string) {
 
     return data;
   } catch (error) {
-    console.error("Error fetching user by ID for metadata:", error);
+    if (!hasMessagePrefix(error, USER_ACCESS_ERROR_PREFIXES)) {
+      console.error("Error fetching user by ID for metadata:", error);
+    }
 
     // Re-throw BANNED_USER and NOT_FOUND errors so calling code can handle them
     if (
@@ -309,7 +416,7 @@ export async function fetchUserByIdForMetadata(id: string) {
       typeof error === "object" &&
       "message" in error &&
       typeof error.message === "string" &&
-      (error.message.startsWith("BANNED_USER:") ||
+      (hasMessagePrefix(error, USER_ACCESS_ERROR_PREFIXES) ||
         error.message.startsWith("NOT_FOUND:"))
     ) {
       throw error;
@@ -334,9 +441,7 @@ export async function fetchUserByRobloxId(robloxId: string) {
     if (!response.ok) {
       // Handle banned users specifically without logging the error response
       if (response.status === 403) {
-        const errorMessage =
-          data.detail || "This user is banned from Jailbreak Changelogs.";
-        throw new Error(`BANNED_USER: ${errorMessage}`);
+        throwUserAccessErrorFrom403(data);
       }
 
       // Log error response for other types of errors (skip 404s as they're expected)
@@ -358,18 +463,22 @@ export async function fetchUserByRobloxId(robloxId: string) {
 
     return data;
   } catch (error) {
-    // Only log non-404 errors as 404 means user doesn't exist in our database (expected)
-    if (error instanceof Error && !error.message.includes("404")) {
+    // Only log non-404/non-private errors as those are expected in some flows.
+    if (
+      error instanceof Error &&
+      !error.message.includes("404") &&
+      !hasMessagePrefix(error, USER_ACCESS_ERROR_PREFIXES)
+    ) {
       console.error("Error fetching user by Roblox ID:", error);
     }
 
-    // Re-throw BANNED_USER errors so calling code can handle them
+    // Re-throw PRIVATE_PROFILE/BANNED_USER errors so calling code can handle them
     if (
       error &&
       typeof error === "object" &&
       "message" in error &&
       typeof error.message === "string" &&
-      error.message.startsWith("BANNED_USER:")
+      hasMessagePrefix(error, USER_ACCESS_ERROR_PREFIXES)
     ) {
       throw error;
     }

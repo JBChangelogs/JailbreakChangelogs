@@ -32,7 +32,7 @@ export default function UserSearch() {
   const [total, setTotal] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const fetchTimeoutIdRef = useRef<NodeJS.Timeout | null>(null);
-  const usersPerPage = 21;
+  const usersPerPage = 30;
 
   const currentUserId = user?.id ?? null;
 

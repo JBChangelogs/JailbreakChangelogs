@@ -504,6 +504,58 @@ export default function UserProfileClient({
   }
 
   if (errorCode) {
+    const hasPrivateProfilePrefix =
+      !!errorState && errorState.startsWith("PRIVATE_PROFILE:");
+    const isPrivateProfileError =
+      errorCode === 403 &&
+      (hasPrivateProfilePrefix ||
+        (!!errorState &&
+          errorState.toLowerCase().includes("profile is private")));
+    const privateProfileMessage = hasPrivateProfilePrefix
+      ? errorState.replace("PRIVATE_PROFILE:", "").trim()
+      : errorState;
+
+    // Render dedicated private-profile UI for private profile errors.
+    if (isPrivateProfileError) {
+      return (
+        <main className="min-h-screen pb-8">
+          <div className="container mx-auto max-w-7xl">
+            <Breadcrumb />
+            <div className="border-border-card bg-secondary-bg overflow-hidden rounded-lg border shadow-md">
+              <div className="flex min-h-[65vh] items-center justify-center p-8">
+                <div className="flex flex-col items-center justify-center space-y-6">
+                  <div className="w-full max-w-md rounded-lg p-6 text-center">
+                    <div className="mb-4 flex items-center justify-center space-x-3">
+                      <svg
+                        className="text-primary-text h-6 w-6"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                        />
+                      </svg>
+                      <h2 className="text-primary-text text-lg font-semibold">
+                        Private Profile
+                      </h2>
+                    </div>
+                    <p className="text-secondary-text">
+                      {privateProfileMessage ||
+                        "This user has chosen to keep their profile private"}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+      );
+    }
+
     // Handle 403 and 404 errors by calling notFound() to trigger the custom not-found page
     if (errorCode === 403 || errorCode === 404) {
       notFound();
@@ -666,7 +718,7 @@ export default function UserProfileClient({
                             Online
                           </p>
                         ) : user.last_seen === null ? (
-                          <div className="mt-2 mb-2 rounded-lg p-4">
+                          <div className="bg-tertiary-bg mt-2 mb-2 rounded-lg p-4">
                             <p className="text-secondary-text mb-1 text-sm font-medium">
                               Are you the owner of this profile?
                             </p>
@@ -780,12 +832,10 @@ export default function UserProfileClient({
                                 href={`https://discord.com/users/${user.id}`}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="bg-tertiary-bg/40 border-border-card text-primary-text inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium shadow-sm transition-opacity hover:opacity-80"
+                                className="text-primary-text bg-tertiary-bg/40 border-border-card hover:bg-quaternary-bg/60 inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium shadow-sm transition-all"
                               >
-                                <DiscordIcon className="text-border-focus h-3.5 w-3.5 shrink-0" />
-                                <span className="text-sm font-semibold">
-                                  Discord
-                                </span>
+                                <DiscordIcon className="h-3.5 w-3.5" />
+                                Discord
                               </Link>
                             </TooltipTrigger>
                             <TooltipContent>
@@ -800,12 +850,10 @@ export default function UserProfileClient({
                                   href={`https://www.roblox.com/users/${user.roblox_id}/profile`}
                                   target="_blank"
                                   rel="noopener noreferrer"
-                                  className="bg-tertiary-bg/40 border-border-card text-primary-text inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium shadow-sm transition-opacity hover:opacity-80"
+                                  className="text-primary-text bg-tertiary-bg/40 border-border-card hover:bg-quaternary-bg/60 inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium shadow-sm transition-all"
                                 >
-                                  <RobloxIcon className="h-3.5 w-3.5 shrink-0" />
-                                  <span className="text-sm font-semibold">
-                                    Roblox
-                                  </span>
+                                  <RobloxIcon className="h-3.5 w-3.5" />
+                                  Roblox
                                 </Link>
                               </TooltipTrigger>
                               <TooltipContent>

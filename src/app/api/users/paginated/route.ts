@@ -13,13 +13,17 @@ export async function GET(request: Request) {
     // Get page and size from query params
     const { searchParams } = new URL(request.url);
     const page = searchParams.get("page") || "1";
-    const size = searchParams.get("size") || "21";
+    const rawSize = parseInt(searchParams.get("size") || "30", 10);
+    const size = Math.min(
+      Math.max(Number.isNaN(rawSize) ? 30 : rawSize, 1),
+      30,
+    );
     const fields =
       "id,username,global_name,avatar,usernumber,premiumtype,created_at,settings,presence,roblox_id,roblox_username,roblox_display_name,custom_avatar,roblox_avatar,roblox_join_date,flags";
 
     const url = new URL(`${BASE_API_URL}/users/paginated`);
     url.searchParams.set("page", page);
-    url.searchParams.set("size", size);
+    url.searchParams.set("size", size.toString());
     url.searchParams.set("fields", fields);
 
     const response = await fetch(url.toString(), {

@@ -13,7 +13,11 @@ export async function GET(request: Request) {
     // Get username and limit from query params
     const { searchParams } = new URL(request.url);
     const username = searchParams.get("username");
-    const limit = searchParams.get("limit") || "21";
+    const rawLimit = parseInt(searchParams.get("limit") || "30", 10);
+    const limit = Math.min(
+      Math.max(Number.isNaN(rawLimit) ? 30 : rawLimit, 1),
+      30,
+    );
 
     if (!username) {
       return NextResponse.json(
@@ -27,7 +31,7 @@ export async function GET(request: Request) {
 
     const url = new URL(`${BASE_API_URL}/users/search`);
     url.searchParams.set("username", username);
-    url.searchParams.set("limit", limit);
+    url.searchParams.set("limit", limit.toString());
     url.searchParams.set("fields", fields);
 
     const response = await fetch(url.toString(), {

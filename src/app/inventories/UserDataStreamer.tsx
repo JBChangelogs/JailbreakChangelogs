@@ -79,10 +79,15 @@ async function UserDataFetcher({
   // Fetch connection data directly for the main user (like OG finder does)
   const userConnectionData = await fetchUserByRobloxId(robloxId).catch(
     (error) => {
-      logError("Failed to fetch user connection data", error, {
-        component: "INVENTORY",
-        action: "fetch_connection",
-      });
+      if (
+        !(error instanceof Error) ||
+        !error.message.startsWith("PRIVATE_PROFILE:")
+      ) {
+        logError("Failed to fetch user connection data", error, {
+          component: "INVENTORY",
+          action: "fetch_connection",
+        });
+      }
       return null;
     },
   );
