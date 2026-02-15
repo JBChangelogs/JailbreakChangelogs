@@ -48,6 +48,51 @@ import { CategoryIconBadge } from "@/utils/categoryIcons";
 import { convertUrlsToLinks } from "@/utils/urlConverter";
 import { ItemDetails } from "@/types";
 
+interface ItemMetadataEntry {
+  id: number;
+  season?: number;
+  level?: number;
+}
+
+let itemMetadataPromise: Promise<Map<number, ItemMetadataEntry>> | null = null;
+
+const fetchItemMetadataById = async (): Promise<
+  Map<number, ItemMetadataEntry>
+> => {
+  if (itemMetadataPromise) {
+    return itemMetadataPromise;
+  }
+
+  itemMetadataPromise = fetch(
+    "https://assets.jailbreakchangelogs.xyz/assets/items/metadata/metadata.json",
+  )
+    .then(async (response) => {
+      if (!response.ok) {
+        throw new Error(`Failed to fetch item metadata: ${response.status}`);
+      }
+
+      const data = (await response.json()) as ItemMetadataEntry[];
+      const metadataMap = new Map<number, ItemMetadataEntry>();
+
+      for (const entry of data) {
+        if (typeof entry.id !== "number") continue;
+        metadataMap.set(entry.id, {
+          id: entry.id,
+          season: typeof entry.season === "number" ? entry.season : undefined,
+          level: typeof entry.level === "number" ? entry.level : undefined,
+        });
+      }
+
+      return metadataMap;
+    })
+    .catch((error) => {
+      itemMetadataPromise = null;
+      throw error;
+    });
+
+  return itemMetadataPromise;
+};
+
 interface ItemDetailsClientProps {
   item: ItemDetails;
   initialFavoriteCount?: number | null;
@@ -116,6 +161,9 @@ export default function ItemDetailsClient({
   const [visibleLength, setVisibleLength] = useState(500);
   const [activeTab, setActiveTab] = useState(0);
   const [activeChartTab, setActiveChartTab] = useState(0);
+  const [itemMetadata, setItemMetadata] = useState<ItemMetadataEntry | null>(
+    null,
+  );
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
 
@@ -162,6 +210,24 @@ export default function ItemDetailsClient({
       setTimeout(() => setActiveTab(0), 0);
     }
   }, []);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    fetchItemMetadataById()
+      .then((metadataById) => {
+        if (!isMounted) return;
+        setItemMetadata(metadataById.get(item.id) ?? null);
+      })
+      .catch((error) => {
+        console.error("Error loading item metadata:", error);
+        if (isMounted) setItemMetadata(null);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [item.id]);
 
   const handleHornClick = () => {
     if (!audioRef.current) {
@@ -236,6 +302,15 @@ export default function ItemDetailsClient({
   };
 
   const currentItem = item;
+  const requirementsTooltipText =
+    typeof itemMetadata?.season === "number" &&
+    typeof itemMetadata?.level === "number"
+      ? `Unlocked in Season ${itemMetadata.season} at Level ${itemMetadata.level}.`
+      : typeof itemMetadata?.season === "number"
+        ? `Unlocked in Season ${itemMetadata.season}.`
+        : typeof itemMetadata?.level === "number"
+          ? `Unlocked at Level ${itemMetadata.level}.`
+          : "";
 
   return (
     <main className="min-h-screen">
@@ -426,6 +501,26 @@ export default function ItemDetailsClient({
                     />
                     Seasonal
                   </span>
+                )}
+                {(typeof itemMetadata?.season === "number" ||
+                  typeof itemMetadata?.level === "number") && (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <div className="flex cursor-help items-center gap-1">
+                        {typeof itemMetadata?.season === "number" && (
+                          <span className="bg-button-info text-form-button-text inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold shadow-sm">
+                            S{itemMetadata.season}
+                          </span>
+                        )}
+                        {typeof itemMetadata?.level === "number" && (
+                          <span className="bg-status-success text-form-button-text inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold shadow-sm">
+                            L{itemMetadata.level}
+                          </span>
+                        )}
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent>{requirementsTooltipText}</TooltipContent>
+                  </Tooltip>
                 )}
                 {currentItem.tradable === 0 && (
                   <span className="text-primary-text border-border-card bg-tertiary-bg/40 inline-flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl">

@@ -43,6 +43,51 @@ import {
   trendDescriptions,
 } from "@/utils/tradingDefinitions";
 
+interface ItemMetadataEntry {
+  id: number;
+  season?: number;
+  level?: number;
+}
+
+let itemMetadataPromise: Promise<Map<number, ItemMetadataEntry>> | null = null;
+
+const fetchItemMetadataById = async (): Promise<
+  Map<number, ItemMetadataEntry>
+> => {
+  if (itemMetadataPromise) {
+    return itemMetadataPromise;
+  }
+
+  itemMetadataPromise = fetch(
+    "https://assets.jailbreakchangelogs.xyz/assets/items/metadata/metadata.json",
+  )
+    .then(async (response) => {
+      if (!response.ok) {
+        throw new Error(`Failed to fetch item metadata: ${response.status}`);
+      }
+
+      const data = (await response.json()) as ItemMetadataEntry[];
+      const metadataMap = new Map<number, ItemMetadataEntry>();
+
+      for (const entry of data) {
+        if (typeof entry.id !== "number") continue;
+        metadataMap.set(entry.id, {
+          id: entry.id,
+          season: typeof entry.season === "number" ? entry.season : undefined,
+          level: typeof entry.level === "number" ? entry.level : undefined,
+        });
+      }
+
+      return metadataMap;
+    })
+    .catch((error) => {
+      itemMetadataPromise = null;
+      throw error;
+    });
+
+  return itemMetadataPromise;
+};
+
 const demandNote =
   "Demand levels are ranked from lowest to highest. Items with higher demand are generally easier to trade and may have better values.";
 
@@ -96,6 +141,9 @@ export default function ItemCard({
   const pathname = usePathname();
   const router = useRouter();
   const isValuesPage = pathname === "/values";
+  const [itemMetadata, setItemMetadata] = useState<ItemMetadataEntry | null>(
+    null,
+  );
   const isAuthenticated = useIsAuthenticated();
   const wasSheetOpenRef = useRef(false);
   const wasItemSheetOpenRef = useRef(false);
@@ -207,6 +255,26 @@ export default function ItemCard({
       }
     };
   }, []);
+
+  useEffect(() => {
+    if (!isValuesPage) return;
+
+    let isMounted = true;
+
+    fetchItemMetadataById()
+      .then((metadataById) => {
+        if (!isMounted) return;
+        setItemMetadata(metadataById.get(item.id) ?? null);
+      })
+      .catch((error) => {
+        console.error("Error loading item metadata:", error);
+        if (isMounted) setItemMetadata(null);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [isValuesPage, item.id]);
 
   const handleFavoriteClick = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -337,6 +405,16 @@ export default function ItemCard({
   const dupedChange = isValuesPage
     ? getValueChange(item.recent_changes, "duped_value")
     : null;
+  const visibleItemMetadata = isValuesPage ? itemMetadata : null;
+  const requirementsTooltipText =
+    typeof visibleItemMetadata?.season === "number" &&
+    typeof visibleItemMetadata?.level === "number"
+      ? `Unlocked in Season ${visibleItemMetadata.season} at Level ${visibleItemMetadata.level}.`
+      : typeof visibleItemMetadata?.season === "number"
+        ? `Unlocked in Season ${visibleItemMetadata.season}.`
+        : typeof visibleItemMetadata?.level === "number"
+          ? `Unlocked at Level ${visibleItemMetadata.level}.`
+          : "";
 
   const formatChange = (difference: number) => {
     const diff = Math.abs(difference);
@@ -353,7 +431,7 @@ export default function ItemCard({
   return (
     <div className="w-full">
       <div
-        className="group border-border-card bg-secondary-bg relative cursor-pointer overflow-hidden rounded-lg border-2 transition-all duration-300 hover:shadow-lg"
+        className="group border-border-card border-b-border-card bg-secondary-bg relative cursor-pointer overflow-hidden rounded-lg border-2 transition-all duration-300 hover:shadow-lg"
         role="button"
         tabIndex={0}
         aria-haspopup="dialog"
@@ -371,7 +449,7 @@ export default function ItemCard({
       >
         <div
           ref={mediaRef}
-          className="bg-primary-bg relative w-full overflow-hidden rounded-t-lg"
+          className="bg-tertiary-bg relative w-full overflow-hidden rounded-t-lg"
           style={{ aspectRatio: isValuesPage ? "854 / 480" : "1 / 1" }}
         >
           <div className="absolute top-2 right-2 z-10 flex gap-2">
@@ -382,6 +460,27 @@ export default function ItemCard({
               className="h-4 w-4 sm:h-5 sm:w-5"
             />
           </div>
+          {isValuesPage &&
+            (typeof visibleItemMetadata?.season === "number" ||
+              typeof visibleItemMetadata?.level === "number") && (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="absolute right-2 bottom-2 z-10 flex cursor-help items-center gap-1">
+                    {typeof visibleItemMetadata?.season === "number" && (
+                      <span className="bg-button-info text-form-button-text inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold shadow-sm">
+                        S{visibleItemMetadata.season}
+                      </span>
+                    )}
+                    {typeof visibleItemMetadata?.level === "number" && (
+                      <span className="bg-status-success text-form-button-text inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold shadow-sm">
+                        L{visibleItemMetadata.level}
+                      </span>
+                    )}
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent>{requirementsTooltipText}</TooltipContent>
+              </Tooltip>
+            )}
           <button
             onClick={handleFavoriteClick}
             className={`bg-secondary-bg/80 border-border-card hover:border-border-focus absolute top-2 left-2 z-10 cursor-pointer rounded-full border p-1.5 transition-opacity ${
@@ -655,7 +754,7 @@ export default function ItemCard({
             )}
           </div>
 
-          <div className="border-secondary-text text-secondary-text mt-auto border-t pt-1 text-[10px] sm:pt-2 sm:text-xs">
+          <div className="border-border-card text-secondary-text mt-auto border-t pt-1 text-[10px] sm:pt-2 sm:text-xs">
             {currentItemData.last_updated ? (
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -695,7 +794,7 @@ export default function ItemCard({
                 <SheetTitle className="truncate">{item.name}</SheetTitle>
                 <div className="mt-2 flex flex-wrap items-center gap-2">
                   <span
-                    className="text-primary-text bg-tertiary-bg/40 flex h-6 items-center gap-1.5 rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl"
+                    className="text-primary-text bg-tertiary-bg/40 inline-flex h-6 items-center gap-1 rounded-lg border px-2 text-xs leading-none font-semibold shadow-2xl backdrop-blur-xl"
                     style={{
                       borderColor: getCategoryColor(item.type),
                     }}
@@ -712,7 +811,7 @@ export default function ItemCard({
                     {item.type}
                   </span>
                   {currentItemData.is_limited === 1 && (
-                    <span className="text-primary-text border-border-card bg-tertiary-bg/40 inline-flex h-6 items-center gap-1.5 rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl">
+                    <span className="text-primary-text border-border-card bg-tertiary-bg/40 inline-flex h-6 items-center gap-1 rounded-lg border px-2 text-xs leading-none font-semibold shadow-2xl backdrop-blur-xl">
                       <Icon
                         icon="mdi:clock"
                         className="h-3 w-3"
@@ -722,7 +821,7 @@ export default function ItemCard({
                     </span>
                   )}
                   {currentItemData.is_seasonal === 1 && (
-                    <span className="text-primary-text border-border-card bg-tertiary-bg/40 inline-flex h-6 items-center gap-1.5 rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl">
+                    <span className="text-primary-text border-border-card bg-tertiary-bg/40 inline-flex h-6 items-center gap-1 rounded-lg border px-2 text-xs leading-none font-semibold shadow-2xl backdrop-blur-xl">
                       <Icon
                         icon="noto-v1:snowflake"
                         className="h-3 w-3"
@@ -731,6 +830,30 @@ export default function ItemCard({
                       Seasonal
                     </span>
                   )}
+                  {isValuesPage &&
+                    (typeof visibleItemMetadata?.season === "number" ||
+                      typeof visibleItemMetadata?.level === "number") && (
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <div className="flex cursor-help items-center gap-1">
+                            {typeof visibleItemMetadata?.season ===
+                              "number" && (
+                              <span className="bg-button-info text-form-button-text inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold shadow-sm">
+                                S{visibleItemMetadata.season}
+                              </span>
+                            )}
+                            {typeof visibleItemMetadata?.level === "number" && (
+                              <span className="bg-status-success text-form-button-text inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold shadow-sm">
+                                L{visibleItemMetadata.level}
+                              </span>
+                            )}
+                          </div>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          {requirementsTooltipText}
+                        </TooltipContent>
+                      </Tooltip>
+                    )}
                 </div>
               </div>
             </div>
