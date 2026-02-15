@@ -54,6 +54,8 @@ export async function fetchWithRetry(
         retryOnStatuses.includes(response.status) &&
         attempt < maxRetries
       ) {
+        // Prevent retaining unread bodies/sockets when retrying.
+        response.body?.cancel();
         const delayMs = initialDelayMs * Math.pow(2, attempt);
         await sleep(delayMs);
         continue;
