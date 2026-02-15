@@ -4,6 +4,10 @@ import { Icon } from "@/components/ui/IconWrapper";
 import Link from "next/link";
 import Image from "next/image";
 import { getAllowedFileExtensions } from "@/config/settings";
+import {
+  HIDE_ADS_REQUIRED_TIER,
+  SUPPORTER_TIER_NAMES,
+} from "@/config/supporter";
 import { Button } from "@/components/ui/button";
 
 interface SupporterModalProps {
@@ -69,9 +73,11 @@ const getFeatureDescription = (
       return {
         title: "Hide Ads",
         description:
-          "You're trying to hide ads. Hiding ads is a supporter perk. Upgrade to Supporter I or higher to remove advertisements and support the site.",
+          "You're trying to hide ads. Hiding ads is a supporter perk. Upgrade to Supporter II or higher to remove advertisements and support the site.",
         current: `Current tier: ${currentLimit ?? "Free"}`,
-        required: `Required: ${requiredLimit ?? "Supporter I"}`,
+        required: `Required: ${
+          requiredLimit ?? SUPPORTER_TIER_NAMES[HIDE_ADS_REQUIRED_TIER]
+        }`,
       };
     case "comment_length":
       const requiredText = `${requiredLimit} characters`;
@@ -304,6 +310,12 @@ export default function SupporterModal({
                               <span className="text-secondary-text block">
                                 Upload and Use Custom Banners (
                                 {getAllowedFileExtensions()})
+                              </span>
+                            );
+                          } else if (feature === "hide_ads") {
+                            return (
+                              <span className="text-secondary-text block">
+                                Hide ads across the site
                               </span>
                             );
                           } else if (feature === "inventory_scan") {

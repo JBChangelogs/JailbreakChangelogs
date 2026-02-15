@@ -18,6 +18,7 @@ import { ThemeProvider as CustomThemeProvider } from "@/contexts/ThemeContext";
 import SurveyProvider from "@/components/Survey/SurveyProvider";
 import { AuthProvider } from "@/contexts/AuthContext";
 import NitroAnchorCloseSupporterModal from "@/components/Ads/NitroAnchorCloseSupporterModal";
+import NitroVideoCloseSupporterModal from "@/components/Ads/NitroVideoCloseSupporterModal";
 import NitroBottomAnchor from "@/components/Ads/NitroBottomAnchor";
 import NitroVideoPlayer from "@/components/Ads/NitroVideoPlayer";
 import AdErrorBoundary from "@/components/Ads/AdErrorBoundary";
@@ -188,6 +189,7 @@ export default async function RootLayout({
                         <NitroBottomAnchor />
                         <NitroVideoPlayer />
                         <NitroAnchorCloseSupporterModal />
+                        <NitroVideoCloseSupporterModal />
                       </AdErrorBoundary>
                       <SurveyProvider>
                         <div
@@ -324,6 +326,7 @@ export default async function RootLayout({
                   <NitroBottomAnchor />
                   <NitroVideoPlayer />
                   <NitroAnchorCloseSupporterModal />
+                  <NitroVideoCloseSupporterModal />
                   <SurveyProvider>
                     <div className="flex min-h-screen flex-col">
                       <Suspense

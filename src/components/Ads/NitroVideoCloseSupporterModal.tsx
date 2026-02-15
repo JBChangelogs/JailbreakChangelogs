@@ -9,11 +9,9 @@ import {
 import { useSupporterModal } from "@/hooks/useSupporterModal";
 import SupporterModal from "@/components/Modals/SupporterModal";
 
-function isLikelyNitroAnchorCloseClick(target: EventTarget | null): boolean {
+function isLikelyNitroVideoCloseClick(target: EventTarget | null): boolean {
   if (!target) return false;
 
-  // Clicks may originate from nested SVG/path elements or even text nodes.
-  // Normalize to an Element that supports closest().
   const el =
     target instanceof Element
       ? target
@@ -22,10 +20,10 @@ function isLikelyNitroAnchorCloseClick(target: EventTarget | null): boolean {
         : null;
 
   if (!el) return false;
-  return !!el.closest("#np-bottom-anchor-close");
+  return !!el.closest(".nitro-floating-closer");
 }
 
-export default function NitroAnchorCloseSupporterModal() {
+export default function NitroVideoCloseSupporterModal() {
   const { user } = useAuthContext();
   const tier = user?.premiumtype ?? 0;
   const isSupporter = tier >= HIDE_ADS_REQUIRED_TIER && tier <= 3;
@@ -35,9 +33,9 @@ export default function NitroAnchorCloseSupporterModal() {
     if (isSupporter) return;
 
     const handler = (e: Event) => {
-      if (!isLikelyNitroAnchorCloseClick(e.target)) return;
+      if (!isLikelyNitroVideoCloseClick(e.target)) return;
 
-      // Block Nitro's close action for non-supporters.
+      // Block Nitro floating close action for non-supporters.
       e.preventDefault();
       e.stopPropagation();
       e.stopImmediatePropagation();
