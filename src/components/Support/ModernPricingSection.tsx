@@ -313,14 +313,13 @@ export default function ModernPricingSection() {
               {tier.name !== "Free" ? (
                 <Button
                   onClick={() => {
-                    const targetElement = document.querySelector(
-                      ".support-methods-section",
-                    ) as HTMLElement;
+                    const targetElement = document.getElementById(
+                      "important-information",
+                    );
                     if (targetElement) {
-                      const elementTop = targetElement.offsetTop;
-                      window.scrollTo({
-                        top: elementTop - 80,
+                      targetElement.scrollIntoView({
                         behavior: "smooth",
+                        block: "start",
                       });
                     }
                   }}
@@ -338,67 +337,108 @@ export default function ModernPricingSection() {
         </div>
 
         {/* Important Information Section */}
-        <div className="bg-button-info/10 border-border-card mt-8 rounded-lg border p-6">
+        <div
+          id="important-information"
+          className="bg-button-info/10 border-border-card mt-8 scroll-mt-24 rounded-lg border p-6"
+        >
           <h3 className="text-primary-text mb-4 text-lg font-semibold">
             Important Information
           </h3>
-          <div className="text-secondary-text space-y-2">
-            <p>
-              <strong>One-time purchases:</strong> All supporter purchases are
-              one-time only and non-refundable! Once you redeem your code, you
-              keep the perks forever.
-            </p>
-            <p>
-              <strong>Ko-fi Supporters:</strong> If you&apos;re buying a
-              supporter tier using{" "}
-              <a
-                href="https://ko-fi.com/jbchangelogs"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-link hover:text-link-hover font-semibold underline transition-colors"
-              >
-                Ko-fi
-              </a>
-              ,{" "}
-              <span className="font-bold">
-                ensure your Discord user ID is in parenthesis inside your
-                message
-              </span>{" "}
-              (e.g.,{" "}
-              <code className="bg-surface-bg rounded px-1">
-                Hello there! (1019539798383398946)
-              </code>
-              ).
-            </p>
-            <p>
-              <Link
-                href="/redeem"
-                className="text-link hover:text-link-hover underline transition-colors"
-              >
-                After purchase, redeem your code here
-              </Link>
-              .
-            </p>
-            <p>
-              <strong>Need help?</strong> Didn&apos;t receive a code? Need
-              assistance with your donation? Reach out to us at{" "}
-              <a
-                href="mailto:support@jailbreakchangelogs.xyz"
-                className="text-link hover:text-link-hover font-semibold underline transition-colors"
-              >
-                support@jailbreakchangelogs.xyz
-              </a>{" "}
-              or join our{" "}
-              <a
-                href="https://discord.jailbreakchangelogs.xyz"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-link hover:text-link-hover underline"
-              >
-                Discord
-              </a>{" "}
-              for assistance.
-            </p>
+
+          <div className="grid gap-2">
+            <div className="bg-primary-bg/60 border-border-card rounded-lg border p-4">
+              <p className="text-primary-text text-sm font-semibold">
+                One-time Purchases
+              </p>
+              <p className="text-secondary-text mt-1 text-sm">
+                All supporter purchases are one-time and non-refundable. Once
+                you redeem your code, you keep the perks forever.
+              </p>
+            </div>
+
+            <div className="bg-primary-bg/60 border-border-card rounded-lg border p-4">
+              <p className="text-primary-text text-sm font-semibold">
+                Ko-fi Supporters
+              </p>
+              <p className="text-secondary-text mt-1 text-sm">
+                Buying a tier with{" "}
+                <a
+                  href="https://ko-fi.com/jbchangelogs"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-link hover:text-link-hover font-semibold underline transition-colors"
+                >
+                  Ko-fi
+                </a>
+                ? Link your Discord account in{" "}
+                <a
+                  href="https://ko-fi.com/Discord/Settings"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-link hover:text-link-hover font-semibold underline transition-colors"
+                >
+                  Ko-fi Discord Settings
+                </a>{" "}
+                for automatic code delivery.
+              </p>
+              <p className="text-secondary-text mt-2 text-sm">
+                Prefer not to link accounts? Put your Discord user ID in
+                parentheses in your thank-you message, for example{" "}
+                <code className="bg-surface-bg rounded px-1">
+                  Hello there! (1019539798383398946)
+                </code>
+                .{" "}
+                <a
+                  href="https://support.discord.com/hc/en-us/articles/206346498-Where-can-I-find-my-User-Server-Message-ID"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-link hover:text-link-hover font-semibold underline transition-colors"
+                >
+                  Need help locating your Discord ID?
+                </a>
+                .
+              </p>
+            </div>
+
+            <div className="bg-primary-bg/60 border-border-card rounded-lg border p-4">
+              <p className="text-primary-text text-sm font-semibold">
+                After You Purchase
+              </p>
+              <p className="text-secondary-text mt-1 text-sm">
+                <Link
+                  href="/redeem"
+                  className="text-link hover:text-link-hover font-semibold underline transition-colors"
+                >
+                  Redeem your code here
+                </Link>{" "}
+                to activate your supporter tier.
+              </p>
+            </div>
+
+            <div className="bg-primary-bg/60 border-border-card rounded-lg border p-4">
+              <p className="text-primary-text text-sm font-semibold">
+                Need Help?
+              </p>
+              <p className="text-secondary-text mt-1 text-sm">
+                Didn&apos;t receive a code or need donation help? Join our{" "}
+                <a
+                  href="https://discord.jailbreakchangelogs.xyz"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-link hover:text-link-hover font-semibold underline transition-colors"
+                >
+                  Discord
+                </a>{" "}
+                or email{" "}
+                <a
+                  href="mailto:support@jailbreakchangelogs.xyz"
+                  className="text-link hover:text-link-hover font-semibold underline transition-colors"
+                >
+                  support@jailbreakchangelogs.xyz
+                </a>
+                .
+              </p>
+            </div>
           </div>
         </div>
 
@@ -408,6 +448,9 @@ export default function ModernPricingSection() {
             <h3 className="text-primary-text mb-4 text-lg font-semibold">
               Ko-fi Donations
             </h3>
+            <p className="text-secondary-text mb-4 text-sm">
+              Pay with card/PayPal on Ko-fi for USD supporter purchases.
+            </p>
             <div className="flex flex-1 items-center justify-center">
               <ImageModal
                 src={kofiImagePath}
@@ -431,6 +474,9 @@ export default function ModernPricingSection() {
             <h3 className="text-primary-text mb-4 text-lg font-semibold">
               Roblox Donations
             </h3>
+            <p className="text-secondary-text mb-4 text-sm">
+              Pay with Robux through Roblox for supporter perks.
+            </p>
             <div className="flex flex-1 items-center justify-center">
               <ImageModal
                 src={robloxImagePath}
@@ -454,33 +500,36 @@ export default function ModernPricingSection() {
             <h3 className="text-primary-text mb-4 text-lg font-semibold">
               Crypto Donations
             </h3>
+            <p className="text-secondary-text mb-4 text-sm">
+              Send BTC, ETH, or LTC directly to support with crypto.
+            </p>
             <div className="space-y-4">
               <div className="border-border-card bg-surface-bg rounded-lg border p-4">
                 <div className="text-primary-text mb-2 flex items-center justify-center gap-2">
                   <Icon
-                    icon="logos:bitcoin"
+                    icon="token-branded:ltc"
                     className="h-4 w-4"
                     inline={true}
                   />
-                  <span className="font-semibold">Bitcoin (BTC)</span>
+                  <span className="font-semibold">Litecoin (LTC)</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <code className="text-secondary-text flex-1 text-xs break-all">
-                    {CRYPTO_ADDRESSES.BTC}
+                    {CRYPTO_ADDRESSES.LTC}
                     <button
                       onClick={() =>
-                        copyToClipboard(CRYPTO_ADDRESSES.BTC, "BTC")
+                        copyToClipboard(CRYPTO_ADDRESSES.LTC, "LTC")
                       }
                       className="text-button-info hover:text-button-info-hover ml-1 cursor-pointer transition-colors"
                       title={
-                        copiedAddress === "BTC"
+                        copiedAddress === "LTC"
                           ? "Copied!"
-                          : "Copy Bitcoin address"
+                          : "Copy Litecoin address"
                       }
                     >
                       <Icon
                         icon={
-                          copiedAddress === "BTC"
+                          copiedAddress === "LTC"
                             ? "heroicons:check"
                             : "heroicons:clipboard"
                         }
@@ -530,29 +579,29 @@ export default function ModernPricingSection() {
               <div className="border-border-card bg-surface-bg rounded-lg border p-4">
                 <div className="text-primary-text mb-2 flex items-center justify-center gap-2">
                   <Icon
-                    icon="token-branded:ltc"
+                    icon="logos:bitcoin"
                     className="h-4 w-4"
                     inline={true}
                   />
-                  <span className="font-semibold">Litecoin (LTC)</span>
+                  <span className="font-semibold">Bitcoin (BTC)</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <code className="text-secondary-text flex-1 text-xs break-all">
-                    {CRYPTO_ADDRESSES.LTC}
+                    {CRYPTO_ADDRESSES.BTC}
                     <button
                       onClick={() =>
-                        copyToClipboard(CRYPTO_ADDRESSES.LTC, "LTC")
+                        copyToClipboard(CRYPTO_ADDRESSES.BTC, "BTC")
                       }
                       className="text-button-info hover:text-button-info-hover ml-1 cursor-pointer transition-colors"
                       title={
-                        copiedAddress === "LTC"
+                        copiedAddress === "BTC"
                           ? "Copied!"
-                          : "Copy Litecoin address"
+                          : "Copy Bitcoin address"
                       }
                     >
                       <Icon
                         icon={
-                          copiedAddress === "LTC"
+                          copiedAddress === "BTC"
                             ? "heroicons:check"
                             : "heroicons:clipboard"
                         }
