@@ -39,11 +39,13 @@ interface NetworthHistoryChartProps {
 type DateRange = "10" | "25" | "50" | "all";
 type ChartType = "area" | "bar";
 
-const DATE_RANGE_OPTIONS: { value: DateRange; label: string }[] = [
+const BASE_DATE_RANGE_OPTIONS: {
+  value: Exclude<DateRange, "all">;
+  label: string;
+}[] = [
   { value: "10", label: "Last 10 scans" },
   { value: "25", label: "Last 25 scans" },
   { value: "50", label: "Last 50 scans" },
-  { value: "all", label: "All scans" },
 ];
 
 const NetworthHistoryChart = ({
@@ -70,15 +72,17 @@ const NetworthHistoryChart = ({
             className="bg-secondary-bg"
           />
           <div className="flex gap-2">
-            {DATE_RANGE_OPTIONS.map(({ value }) => (
-              <Skeleton
-                key={value}
-                variant="rounded"
-                width={60}
-                height={32}
-                className="bg-secondary-bg"
-              />
-            ))}
+            {[...BASE_DATE_RANGE_OPTIONS, { value: "all" as const }].map(
+              ({ value }) => (
+                <Skeleton
+                  key={value}
+                  variant="rounded"
+                  width={60}
+                  height={32}
+                  className="bg-secondary-bg"
+                />
+              ),
+            )}
           </div>
         </div>
         <div className="relative">
@@ -149,6 +153,14 @@ const NetworthHistoryChart = ({
   const sortedHistory = [...filteredHistory].sort(
     (a, b) => a.snapshot_time - b.snapshot_time,
   );
+  const allScansLabel =
+    sortedHistory.length > 0
+      ? `Last ${sortedHistory.length.toLocaleString()} scans`
+      : "All available scans";
+  const dateRangeOptions: { value: DateRange; label: string }[] = [
+    ...BASE_DATE_RANGE_OPTIONS,
+    { value: "all", label: allScansLabel },
+  ];
 
   const scanWindows: Record<DateRange, number | null> = {
     "10": 10,
@@ -271,8 +283,8 @@ const NetworthHistoryChart = ({
   const networthTrend = getTrendSummary(networthChartData);
   const networthRangeLabel = getRangeLabel(networthChartData);
   const currentDateRangeLabel =
-    DATE_RANGE_OPTIONS.find((option) => option.value === dateRange)?.label ??
-    "All scans";
+    dateRangeOptions.find((option) => option.value === dateRange)?.label ??
+    "All available scans";
 
   return (
     <div className="border-border-card bg-secondary-bg mb-8 space-y-8 rounded-lg border p-4">
@@ -326,7 +338,7 @@ const NetworthHistoryChart = ({
                 value={dateRange}
                 onValueChange={(value) => setDateRange(value as DateRange)}
               >
-                {DATE_RANGE_OPTIONS.map(({ value, label }) => (
+                {dateRangeOptions.map(({ value, label }) => (
                   <DropdownMenuRadioItem key={value} value={value}>
                     {label}
                   </DropdownMenuRadioItem>

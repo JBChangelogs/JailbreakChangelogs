@@ -254,7 +254,7 @@ export default function OGItemCard({
           <div className="text-secondary-text text-sm">CURRENT OWNER</div>
           <div className="text-xl font-bold">
             <div className="flex items-center justify-center gap-2">
-              <div className="bg-tertiary-bg relative h-8 w-8 shrink-0 overflow-hidden rounded-full">
+              <div className="border-border-card bg-tertiary-bg relative h-8 w-8 shrink-0 overflow-hidden rounded-full border">
                 <Image
                   src={getUserAvatar(item.user_id)}
                   alt="Owner Avatar"

@@ -200,7 +200,7 @@ export default function TradeHistoryList({
             <div className="border-border-card bg-tertiary-bg flex flex-col gap-3 rounded-lg border p-3 sm:flex-row sm:items-center">
               <div className="flex min-w-0 flex-1 items-center gap-3">
                 <div className="shrink-0">
-                  <div className="bg-tertiary-bg relative h-10 w-10 overflow-hidden rounded-full">
+                  <div className="border-border-card bg-tertiary-bg relative h-10 w-10 overflow-hidden rounded-full border">
                     <Image
                       src={getUserAvatar(userId)}
                       alt="User Avatar"

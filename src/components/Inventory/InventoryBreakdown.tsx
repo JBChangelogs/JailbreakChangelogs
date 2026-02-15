@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { getCategoryColor, getCategoryIcon } from "@/utils/categoryIcons";
 import { UserNetworthData } from "@/utils/api";
 import { Icon } from "@/components/ui/IconWrapper";
@@ -22,23 +21,9 @@ interface InventoryBreakdownProps {
   username: string;
 }
 
-const MIN_PIE_LABEL_PERCENT = 1;
-
 export default function InventoryBreakdown({
   networthData,
 }: InventoryBreakdownProps) {
-  const [isMobile, setIsMobile] = useState(false);
-
-  useEffect(() => {
-    const mediaQuery = window.matchMedia("(max-width: 639px)");
-    const updateMobileState = () => setIsMobile(mediaQuery.matches);
-
-    updateMobileState();
-    mediaQuery.addEventListener("change", updateMobileState);
-
-    return () => mediaQuery.removeEventListener("change", updateMobileState);
-  }, []);
-
   // Get the latest networth data
   const latestData =
     networthData && networthData.length > 0 ? networthData[0] : null;
@@ -220,7 +205,7 @@ export default function InventoryBreakdown({
 
           <div className="border-border-card bg-secondary-bg rounded-lg border p-4">
             <h4 className="text-primary-text mb-3 text-sm font-semibold">
-              Category Breakdown
+              Inventory Breakdown
             </h4>
             {Object.keys(percentages).length > 0 ? (
               <>
@@ -323,7 +308,7 @@ export default function InventoryBreakdown({
           >
             <div className="mb-2 text-center">
               <div className="text-primary-text text-sm font-semibold">
-                Category Pie Chart
+                Inventory Breakdown Pie Chart
               </div>
             </div>
             <ChartContainer
@@ -379,25 +364,9 @@ export default function InventoryBreakdown({
                   data={categoryChartData}
                   dataKey="value"
                   nameKey="category"
-                  innerRadius={70}
-                  outerRadius={110}
+                  innerRadius="58%"
+                  outerRadius="88%"
                   strokeWidth={2}
-                  labelLine={
-                    isMobile
-                      ? false
-                      : {
-                          stroke: "var(--color-secondary-text)",
-                          strokeWidth: 1,
-                          opacity: 0.7,
-                        }
-                  }
-                  label={({ name, value }) => {
-                    if (isMobile) return "";
-                    const percent = Number(value);
-                    if (!Number.isFinite(percent)) return "";
-                    if (percent < MIN_PIE_LABEL_PERCENT) return "";
-                    return `${name} ${formatPercentage(percent)}%`;
-                  }}
                 >
                   {categoryChartData.map((entry) => (
                     <Cell key={entry.category} fill={entry.fill} />
@@ -405,6 +374,21 @@ export default function InventoryBreakdown({
                 </Pie>
               </PieChart>
             </ChartContainer>
+            <div className="mt-3 flex flex-wrap items-center justify-center gap-x-4 gap-y-2">
+              {categoryChartData.map((entry) => (
+                <div
+                  key={entry.category}
+                  className="flex items-center gap-2 text-sm"
+                >
+                  <span
+                    className="h-3 w-3 shrink-0 rounded-full"
+                    style={{ backgroundColor: entry.fill }}
+                    aria-hidden="true"
+                  />
+                  <span className="text-primary-text">{entry.category}</span>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </div>
@@ -419,7 +403,7 @@ export default function InventoryBreakdown({
             <div className="xl:col-span-8">
               <div className="border-border-card bg-secondary-bg space-y-4 rounded-lg border p-4">
                 <h4 className="text-primary-text text-sm font-semibold">
-                  Duplicates Breakdown
+                  Duplicate Inventory Breakdown
                 </h4>
                 <div className="bg-tertiary-bg flex h-8 w-full overflow-hidden rounded-lg">
                   {sortedDuplicateEntries.map(([category, percentage]) => (
@@ -518,7 +502,7 @@ export default function InventoryBreakdown({
               >
                 <div className="mb-2 text-center">
                   <div className="text-primary-text text-sm font-semibold">
-                    Duplicates Pie Chart
+                    Duplicate Inventory Breakdown Pie Chart
                   </div>
                 </div>
                 <ChartContainer
@@ -576,25 +560,9 @@ export default function InventoryBreakdown({
                       data={duplicatesChartData}
                       dataKey="value"
                       nameKey="category"
-                      innerRadius={70}
-                      outerRadius={110}
+                      innerRadius="58%"
+                      outerRadius="88%"
                       strokeWidth={2}
-                      labelLine={
-                        isMobile
-                          ? false
-                          : {
-                              stroke: "var(--color-secondary-text)",
-                              strokeWidth: 1,
-                              opacity: 0.7,
-                            }
-                      }
-                      label={({ name, value }) => {
-                        if (isMobile) return "";
-                        const percent = Number(value);
-                        if (!Number.isFinite(percent)) return "";
-                        if (percent < MIN_PIE_LABEL_PERCENT) return "";
-                        return `${name} ${formatPercentage(percent)}%`;
-                      }}
                     >
                       {duplicatesChartData.map((entry) => (
                         <Cell key={entry.category} fill={entry.fill} />
@@ -602,6 +570,23 @@ export default function InventoryBreakdown({
                     </Pie>
                   </PieChart>
                 </ChartContainer>
+                <div className="mt-3 flex flex-wrap items-center justify-center gap-x-4 gap-y-2">
+                  {duplicatesChartData.map((entry) => (
+                    <div
+                      key={entry.category}
+                      className="flex items-center gap-2 text-sm"
+                    >
+                      <span
+                        className="h-3 w-3 shrink-0 rounded-full"
+                        style={{ backgroundColor: entry.fill }}
+                        aria-hidden="true"
+                      />
+                      <span className="text-primary-text">
+                        {entry.category}
+                      </span>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           </div>

@@ -40,7 +40,7 @@ export default function OGUserInfo({
 
       {/* Roblox User Profile */}
       <div className="border-border-card bg-tertiary-bg mb-6 flex flex-col gap-4 rounded-lg border p-4 lg:flex-row lg:items-center lg:justify-between">
-        <div className="bg-tertiary-bg relative h-16 w-16 shrink-0 overflow-hidden rounded-full">
+        <div className="border-border-card bg-tertiary-bg relative h-16 w-16 shrink-0 overflow-hidden rounded-full border">
           <Image
             src={getUserAvatar(robloxId)}
             alt="Roblox Avatar"

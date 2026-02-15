@@ -237,7 +237,7 @@ export default function ConnectedBotsPolling() {
                   <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-2">
                     <div className="flex items-center gap-2">
                       <span className="text-secondary-text">Last Updated:</span>
-                      <div className="bg-tertiary-bg flex h-6 w-6 items-center justify-center overflow-hidden rounded-full">
+                      <div className="border-border-card bg-tertiary-bg flex h-6 w-6 items-center justify-center overflow-hidden rounded-full border">
                         <Image
                           src={`${process.env.NEXT_PUBLIC_INVENTORY_API_URL}/proxy/users/${queueInfo.last_dequeue!.user_id}/avatar-headshot`}
                           alt="Last processed user avatar"
@@ -353,7 +353,7 @@ function BotStatusCard({
   return (
     <div className="border-border-card bg-tertiary-bg rounded-lg border p-3">
       <div className="flex items-start gap-3">
-        <div className="bg-tertiary-bg flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full">
+        <div className="border-border-card bg-tertiary-bg flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full border">
           <Image
             src={avatarUrl}
             alt={`${displayName} avatar`}

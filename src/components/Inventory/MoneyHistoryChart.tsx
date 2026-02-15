@@ -39,11 +39,13 @@ interface MoneyHistoryChartProps {
 type DateRange = "10" | "25" | "50" | "all";
 type ChartType = "area" | "bar";
 
-const DATE_RANGE_OPTIONS: { value: DateRange; label: string }[] = [
+const BASE_DATE_RANGE_OPTIONS: {
+  value: Exclude<DateRange, "all">;
+  label: string;
+}[] = [
   { value: "10", label: "Last 10 scans" },
   { value: "25", label: "Last 25 scans" },
   { value: "50", label: "Last 50 scans" },
-  { value: "all", label: "All scans" },
 ];
 
 const MoneyHistoryChart = ({ initialData = [] }: MoneyHistoryChartProps) => {
@@ -148,6 +150,14 @@ const MoneyHistoryChart = ({ initialData = [] }: MoneyHistoryChartProps) => {
   const sortedHistory = [...history].sort(
     (a, b) => a.updated_at - b.updated_at,
   );
+  const allScansLabel =
+    sortedHistory.length > 0
+      ? `Last ${sortedHistory.length.toLocaleString()} scans`
+      : "All available scans";
+  const dateRangeOptions: { value: DateRange; label: string }[] = [
+    ...BASE_DATE_RANGE_OPTIONS,
+    { value: "all", label: allScansLabel },
+  ];
 
   const scanWindows: Record<DateRange, number | null> = {
     "10": 10,
@@ -269,8 +279,8 @@ const MoneyHistoryChart = ({ initialData = [] }: MoneyHistoryChartProps) => {
   const moneyRangeLabel = getRangeLabel(moneyChartData);
 
   const currentDateRangeLabel =
-    DATE_RANGE_OPTIONS.find((option) => option.value === dateRange)?.label ??
-    "All time";
+    dateRangeOptions.find((option) => option.value === dateRange)?.label ??
+    "All available scans";
 
   return (
     <div className="border-border-card bg-secondary-bg mb-8 space-y-8 rounded-lg border p-4">
@@ -327,7 +337,7 @@ const MoneyHistoryChart = ({ initialData = [] }: MoneyHistoryChartProps) => {
                   handleDateRangeChange(value as DateRange)
                 }
               >
-                {DATE_RANGE_OPTIONS.map(({ value, label }) => (
+                {dateRangeOptions.map(({ value, label }) => (
                   <DropdownMenuRadioItem key={value} value={value}>
                     {label}
                   </DropdownMenuRadioItem>

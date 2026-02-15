@@ -233,7 +233,7 @@ export default function InventoryItemCard({
               <span className="text-primary-text text-xl font-bold">???</span>
             ) : originalOwnerInfo ? (
               <div className="flex items-center justify-center gap-2">
-                <div className="bg-tertiary-bg relative h-8 w-8 shrink-0 overflow-hidden rounded-full">
+                <div className="border-border-card bg-tertiary-bg relative h-8 w-8 shrink-0 overflow-hidden rounded-full border">
                   <Image
                     src={getUserAvatar(
                       isOriginalOwner ? userId : originalOwnerInfo.value,

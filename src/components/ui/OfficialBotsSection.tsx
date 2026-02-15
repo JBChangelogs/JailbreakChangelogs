@@ -125,7 +125,7 @@ function OfficialBotsContent() {
                   </div>
 
                   {/* Bot Avatar */}
-                  <div className="bg-tertiary-bg h-10 w-10 shrink-0 overflow-hidden rounded-full">
+                  <div className="border-border-card bg-tertiary-bg h-10 w-10 shrink-0 overflow-hidden rounded-full border">
                     <Image
                       src={avatarUrl}
                       alt={`${displayName}'s avatar`}

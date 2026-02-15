@@ -201,11 +201,6 @@ export default function TradeHistoryModal({
                     ? `${username}'s ${item.title} ownership history`
                     : `${item.title}'s Ownership History`}
                 </DialogTitle>
-                {tradeHistoryUserIds.length > 0 && (
-                  <p className="text-secondary-text mt-1 text-sm">
-                    History of {tradeHistoryUserIds.length} owners
-                  </p>
-                )}
                 <div className="mt-2 flex flex-wrap items-center gap-2">
                   {item.categoryTitle && (
                     <span
@@ -231,6 +226,11 @@ export default function TradeHistoryModal({
                     </span>
                   )}
                 </div>
+                {tradeHistoryUserIds.length > 0 && (
+                  <p className="text-secondary-text mt-1 text-sm">
+                    History of {tradeHistoryUserIds.length} owners
+                  </p>
+                )}
               </div>
 
               <button
