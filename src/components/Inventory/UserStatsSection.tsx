@@ -12,6 +12,7 @@ import XpProgressBar from "./XpProgressBar";
 import Image from "next/image";
 import ScanHistoryModal from "../Modals/ScanHistoryModal";
 import { Icon } from "../ui/IconWrapper";
+import { Switch } from "../ui/switch";
 
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 const gamepassData = {
@@ -279,25 +280,17 @@ export default function UserStatsSection({
           >
             Only Non-OG
           </label>
-          <button
+          <Switch
             id="non-og-toggle"
-            onClick={() => {
-              const newValue = !showNonOgOnly;
+            checked={showNonOgOnly}
+            onCheckedChange={(checked) => {
+              const newValue = checked;
               setShowNonOgOnly(newValue);
               window.umami?.track("Inventory UserStats Non-OG Toggle", {
                 active: newValue,
               });
             }}
-            className={`relative inline-flex h-6 w-11 cursor-pointer items-center rounded-full transition-colors focus:outline-none ${
-              showNonOgOnly ? "bg-button-info" : "bg-button-secondary"
-            }`}
-          >
-            <span
-              className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                showNonOgOnly ? "translate-x-6" : "translate-x-1"
-              }`}
-            />
-          </button>
+          />
         </div>
       )}
 

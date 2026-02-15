@@ -17,7 +17,6 @@ import {
   BarChart,
   CartesianGrid,
   Legend as RechartsLegend,
-  Rectangle,
   ResponsiveContainer,
   XAxis,
   YAxis,
@@ -154,8 +153,11 @@ const MoneyHistoryChart = ({ initialData = [] }: MoneyHistoryChartProps) => {
     sortedHistory.length > 0
       ? `Last ${sortedHistory.length.toLocaleString()} scans`
       : "All available scans";
+  const availableDateRangeOptions = BASE_DATE_RANGE_OPTIONS.filter(
+    ({ value }) => Number(value) <= sortedHistory.length,
+  );
   const dateRangeOptions: { value: DateRange; label: string }[] = [
-    ...BASE_DATE_RANGE_OPTIONS,
+    ...availableDateRangeOptions,
     { value: "all", label: allScansLabel },
   ];
 
@@ -170,7 +172,11 @@ const MoneyHistoryChart = ({ initialData = [] }: MoneyHistoryChartProps) => {
     setDateRange(range);
   };
 
-  const selectedWindow = scanWindows[dateRange];
+  const effectiveDateRange: DateRange =
+    dateRange !== "all" && Number(dateRange) > sortedHistory.length
+      ? "all"
+      : dateRange;
+  const selectedWindow = scanWindows[effectiveDateRange];
   const filteredData =
     selectedWindow === null
       ? sortedHistory
@@ -279,8 +285,8 @@ const MoneyHistoryChart = ({ initialData = [] }: MoneyHistoryChartProps) => {
   const moneyRangeLabel = getRangeLabel(moneyChartData);
 
   const currentDateRangeLabel =
-    dateRangeOptions.find((option) => option.value === dateRange)?.label ??
-    "All available scans";
+    dateRangeOptions.find((option) => option.value === effectiveDateRange)
+      ?.label ?? "All available scans";
 
   return (
     <div className="border-border-card bg-secondary-bg mb-8 space-y-8 rounded-lg border p-4">
@@ -332,7 +338,7 @@ const MoneyHistoryChart = ({ initialData = [] }: MoneyHistoryChartProps) => {
               className="w-[var(--radix-dropdown-menu-trigger-width)]"
             >
               <DropdownMenuRadioGroup
-                value={dateRange}
+                value={effectiveDateRange}
                 onValueChange={(value) =>
                   handleDateRangeChange(value as DateRange)
                 }
@@ -507,7 +513,10 @@ const MoneyHistoryChart = ({ initialData = [] }: MoneyHistoryChartProps) => {
                     }
                   />
                   <ChartTooltip
-                    cursor={false}
+                    cursor={{
+                      fill: "#6b7280",
+                      fillOpacity: 0.28,
+                    }}
                     content={
                       <ChartTooltipContent
                         className="min-w-[12rem] px-3 py-2"
@@ -566,14 +575,6 @@ const MoneyHistoryChart = ({ initialData = [] }: MoneyHistoryChartProps) => {
                     fill="var(--color-money)"
                     fillOpacity={0.7}
                     radius={[6, 6, 0, 0]}
-                    activeBar={({ ...props }) => (
-                      <Rectangle
-                        {...props}
-                        fillOpacity={0.8}
-                        stroke="var(--color-money)"
-                        strokeDasharray="4 4"
-                      />
-                    )}
                   />
                 </BarChart>
               )}

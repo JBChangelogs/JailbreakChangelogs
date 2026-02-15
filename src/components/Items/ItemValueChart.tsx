@@ -25,7 +25,6 @@ import {
   BarChart,
   CartesianGrid,
   Legend as RechartsLegend,
-  Rectangle,
   ResponsiveContainer,
   XAxis,
   YAxis,
@@ -759,7 +758,10 @@ const ItemValueChart = ({
                           }
                         />
                         <ChartTooltip
-                          cursor={false}
+                          cursor={{
+                            fill: "#6b7280",
+                            fillOpacity: 0.28,
+                          }}
                           content={
                             <ChartTooltipContent
                               className="min-w-[12rem] px-3 py-2"
@@ -842,14 +844,6 @@ const ItemValueChart = ({
                           fill="var(--color-cash)"
                           fillOpacity={0.7}
                           radius={[6, 6, 0, 0]}
-                          activeBar={({ ...props }) => (
-                            <Rectangle
-                              {...props}
-                              fillOpacity={0.8}
-                              stroke="var(--color-cash)"
-                              strokeDasharray="4 4"
-                            />
-                          )}
                         />
                         <Bar
                           dataKey="duped"
@@ -857,14 +851,6 @@ const ItemValueChart = ({
                           fill="var(--color-duped)"
                           fillOpacity={0.7}
                           radius={[6, 6, 0, 0]}
-                          activeBar={({ ...props }) => (
-                            <Rectangle
-                              {...props}
-                              fillOpacity={0.8}
-                              stroke="var(--color-duped)"
-                              strokeDasharray="4 4"
-                            />
-                          )}
                         />
                       </BarChart>
                     )}
@@ -1240,7 +1226,10 @@ const ItemValueChart = ({
                         }
                       />
                       <ChartTooltip
-                        cursor={false}
+                        cursor={{
+                          fill: "#6b7280",
+                          fillOpacity: 0.28,
+                        }}
                         content={
                           <ChartTooltipContent
                             className="min-w-[12rem] px-3 py-2"
@@ -1316,14 +1305,6 @@ const ItemValueChart = ({
                         fill="var(--color-traded)"
                         fillOpacity={0.7}
                         radius={[6, 6, 0, 0]}
-                        activeBar={({ ...props }) => (
-                          <Rectangle
-                            {...props}
-                            fillOpacity={0.8}
-                            stroke="var(--color-traded)"
-                            strokeDasharray="4 4"
-                          />
-                        )}
                       />
                       <Bar
                         dataKey="circulation"
@@ -1331,14 +1312,6 @@ const ItemValueChart = ({
                         fill="var(--color-circulation)"
                         fillOpacity={0.7}
                         radius={[6, 6, 0, 0]}
-                        activeBar={({ ...props }) => (
-                          <Rectangle
-                            {...props}
-                            fillOpacity={0.8}
-                            stroke="var(--color-circulation)"
-                            strokeDasharray="4 4"
-                          />
-                        )}
                       />
                     </BarChart>
                   )}
