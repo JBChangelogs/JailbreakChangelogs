@@ -1,11 +1,12 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Switch, Field, Label, Description } from "@headlessui/react";
+import { Field, Label, Description } from "@headlessui/react";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/IconWrapper";
 import { toast } from "sonner";
 import { UserData } from "@/types/auth";
+import { Switch } from "@/components/ui/switch";
 
 interface EmailNotificationSettingsProps {
   userData: UserData | null;
@@ -201,18 +202,9 @@ export const EmailNotificationSettings = ({
             </div>
             <Switch
               checked={enabled}
-              onChange={handleToggle}
+              onCheckedChange={handleToggle}
               disabled={loading || !userData}
-              className={`group relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full transition-colors focus:outline-none ${
-                enabled ? "bg-button-info" : "bg-button-secondary"
-              } ${loading || !userData ? "cursor-not-allowed opacity-50" : ""}`}
-            >
-              <span
-                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                  enabled ? "translate-x-6" : "translate-x-1"
-                }`}
-              />
-            </Switch>
+            />
           </div>
         </Field>
 

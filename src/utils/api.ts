@@ -238,14 +238,11 @@ export const searchUsers = async (username: string, limit: number = 30) => {
 
 export async function fetchUserById(id: string) {
   try {
-    const response = await fetch(
-      `${BASE_API_URL}/users/get?id=${id}&nocache=true`,
-      {
-        headers: {
-          "User-Agent": "JailbreakChangelogs-UserProfile/1.0",
-        },
+    const response = await fetch(`${BASE_API_URL}/users/get?id=${id}`, {
+      headers: {
+        "User-Agent": "JailbreakChangelogs-UserProfile/1.0",
       },
-    );
+    });
     const data = await response.json();
 
     if (!response.ok) {
@@ -429,7 +426,7 @@ export async function fetchUserByIdForMetadata(id: string) {
 export async function fetchUserByRobloxId(robloxId: string) {
   try {
     const response = await fetch(
-      `${BASE_API_URL}/users/get/roblox?id=${robloxId}&nocache=true`,
+      `${BASE_API_URL}/users/get/roblox?id=${robloxId}`,
       {
         headers: {
           "User-Agent": "JailbreakChangelogs-UserProfile/1.0",

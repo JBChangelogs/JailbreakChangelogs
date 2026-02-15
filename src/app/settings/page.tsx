@@ -4,17 +4,6 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { UserData } from "@/types/auth";
 import {
-  Container,
-  Typography,
-  Box,
-  FormGroup,
-  Paper,
-  Divider,
-  Button,
-  Skeleton,
-  Grid,
-} from "@mui/material";
-import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
@@ -61,10 +50,14 @@ export default function SettingsPage() {
   const [notificationPrefsError, setNotificationPrefsError] = useState<
     string | null
   >(null);
+  const [isAvatarUploading, setIsAvatarUploading] = useState(false);
+  const [isBannerUploading, setIsBannerUploading] = useState(false);
 
   // Derive state from props instead of setting in useEffect
   const userData = user;
   const loading = isLoading;
+  const cardClassName =
+    "border-border-card bg-secondary-bg rounded-xl border shadow-md";
 
   useEffect(() => {
     // Check for highlight parameter in URL
@@ -258,95 +251,43 @@ export default function SettingsPage() {
 
   if (loading || settingsLoading) {
     return (
-      <Container maxWidth="lg" sx={{ minHeight: "100vh", py: 4 }}>
-        <Grid container spacing={4}>
+      <div className="mx-auto min-h-screen w-full max-w-6xl px-4 py-4 sm:px-6 lg:px-8">
+        <div className="settings-loading-layout">
           {/* Sidebar Skeleton */}
-          <Grid
-            size={{ xs: 12, lg: 3 }}
-            sx={{
-              display: { xs: "none", lg: "block" },
-            }}
-          >
-            <Paper
-              elevation={1}
-              sx={{
-                p: 2,
-                borderRadius: 3,
-                backgroundColor: "var(--color-secondary-bg)",
-                backgroundImage: "none",
-                border: "1px solid var(--color-border-card)",
-              }}
-            >
-              <Skeleton
-                variant="text"
-                width="60%"
-                height={32}
-                sx={{ mb: 2, mx: 2 }}
-              />
+          <div className="settings-loading-sidebar">
+            <div className={`${cardClassName} p-4`}>
+              <div className="bg-tertiary-bg mx-2 mb-2 h-8 w-3/5 animate-pulse rounded-md" />
               {[1, 2, 3, 4, 5, 6].map((i) => (
-                <Box key={i} sx={{ px: 2, py: 1.5 }}>
-                  <Skeleton
-                    variant="rectangular"
-                    width="100%"
-                    height={36}
-                    sx={{ borderRadius: 2 }}
-                  />
-                </Box>
+                <div key={i} className="px-2 py-1.5">
+                  <div className="bg-tertiary-bg h-9 w-full animate-pulse rounded-md" />
+                </div>
               ))}
-            </Paper>
-          </Grid>
+            </div>
+          </div>
 
           {/* Content Skeleton */}
-          <Grid size={{ xs: 12, lg: 9 }}>
+          <div className="settings-loading-content">
             {[1, 2, 3].map((i) => (
-              <Paper
-                key={i}
-                elevation={1}
-                sx={{
-                  mb: 4,
-                  p: 3,
-                  backgroundColor: "var(--color-secondary-bg)",
-                  borderRadius: 3,
-                  backgroundImage: "none",
-                  border: "1px solid var(--color-border-card)",
-                }}
-              >
-                <Box
-                  sx={{ display: "flex", alignItems: "center", gap: 2, mb: 3 }}
-                >
-                  <Skeleton variant="circular" width={32} height={32} />
-                  <Skeleton variant="text" width="40%" height={40} />
-                </Box>
+              <div key={i} className={`${cardClassName} mb-8 p-6`}>
+                <div className="mb-3 flex items-center gap-2">
+                  <div className="bg-tertiary-bg h-8 w-8 animate-pulse rounded-full" />
+                  <div className="bg-tertiary-bg h-10 w-2/5 animate-pulse rounded-md" />
+                </div>
 
-                <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+                <div className="flex flex-col gap-2">
                   {[1, 2, 3].map((j) => (
-                    <Box key={j}>
-                      <Skeleton
-                        variant="text"
-                        width="30%"
-                        height={28}
-                        sx={{ mb: 1 }}
-                      />
-                      <Skeleton
-                        variant="text"
-                        width="80%"
-                        height={20}
-                        sx={{ mb: 2 }}
-                      />
-                      <Skeleton
-                        variant="rectangular"
-                        width={44}
-                        height={24}
-                        sx={{ borderRadius: 10 }}
-                      />
-                    </Box>
+                    <div key={j}>
+                      <div className="bg-tertiary-bg mb-1 h-7 w-[30%] animate-pulse rounded-md" />
+                      <div className="bg-tertiary-bg mb-2 h-5 w-[80%] animate-pulse rounded-md" />
+                      <div className="bg-tertiary-bg h-6 w-11 animate-pulse rounded-lg" />
+                    </div>
                   ))}
-                </Box>
-              </Paper>
+                </div>
+              </div>
             ))}
-          </Grid>
-        </Grid>
-      </Container>
+          </div>
+        </div>
+      </div>
     );
   }
 
@@ -395,49 +336,34 @@ export default function SettingsPage() {
     }
   });
 
+  const categoryOrder = ["Appearance", "Privacy"];
+  const orderedCategories = Object.keys(settingsByCategory).sort((a, b) => {
+    const indexA = categoryOrder.indexOf(a);
+    const indexB = categoryOrder.indexOf(b);
+
+    if (indexA === -1 && indexB === -1) return a.localeCompare(b);
+    if (indexA === -1) return 1;
+    if (indexB === -1) return -1;
+    return indexA - indexB;
+  });
+
+  const isSettingEnabled = (value: unknown) =>
+    value === 1 || value === "1" || value === true;
+
   return (
-    <Container maxWidth="lg" sx={{ minHeight: "100vh", py: 4 }}>
-      <Box sx={{ mt: -2, mb: 0 }}>
+    <div className="mx-auto min-h-screen w-full max-w-6xl px-4 py-4 sm:px-6 lg:px-8">
+      <div className="-mt-2 mb-0">
         <Breadcrumb />
-      </Box>
-      <Grid container spacing={4} sx={{ mt: 2 }} alignItems="flex-start">
+      </div>
+      <div className="settings-layout mt-4">
         {/* Sidebar Navigation */}
-        <Grid
-          size={{ xs: 12, lg: 3 }}
-          sx={{
-            display: { xs: "none", lg: "block" },
-            position: "sticky",
-            top: "100px",
-            height: "fit-content",
-          }}
-        >
-          <Paper
-            elevation={1}
-            sx={{
-              display: "flex",
-              flexDirection: "column",
-              gap: 0.5,
-              backgroundColor: "var(--color-secondary-bg)",
-              p: 2,
-              borderRadius: 3,
-              backgroundImage: "none",
-              border: "1px solid var(--color-border-card)",
-            }}
-          >
-            <Typography
-              variant="overline"
-              sx={{
-                px: 2,
-                mb: 1,
-                color: "var(--color-primary-text)",
-                fontWeight: "bold",
-                letterSpacing: "0.1em",
-              }}
-            >
+        <div className="settings-sidebar">
+          <div className={`${cardClassName} flex flex-col gap-0.5 p-4`}>
+            <p className="text-primary-text mb-1 px-2 text-xs font-bold tracking-[0.1em] uppercase">
               Navigation
-            </Typography>
+            </p>
             {[
-              ...Object.keys(settingsByCategory).map((cat) => ({
+              ...orderedCategories.map((cat) => ({
                 id: cat.replace(/\s+/g, "_").toLowerCase(),
                 title: cat,
                 icon:
@@ -466,58 +392,46 @@ export default function SettingsPage() {
                 icon: "heroicons:exclamation-triangle",
               },
             ].map((section) => (
-              <Button
+              <button
                 key={section.id}
+                type="button"
                 onClick={() => {
                   const el = document.getElementById(section.id);
-                  el?.scrollIntoView({ behavior: "smooth", block: "center" });
+                  el?.scrollIntoView({
+                    behavior: "smooth",
+                    block: section.id === "notifications" ? "start" : "center",
+                  });
                 }}
-                sx={{
-                  justifyContent: "flex-start",
-                  color: "var(--color-primary-text)",
-                  textTransform: "none",
-                  fontWeight: 500,
-                  py: 1,
-                  px: 2,
-                  borderRadius: 2,
-                  "&:hover": {
-                    backgroundColor: "var(--color-quaternary-bg)",
-                    color: "var(--color-primary-text)",
-                  },
-                }}
-                startIcon={<Icon icon={section.icon} className="h-5 w-5" />}
+                className="text-primary-text hover:bg-quaternary-bg hover:text-primary-text w-full cursor-pointer rounded-md px-2 py-2 text-left text-sm font-medium transition-colors"
               >
-                {section.title}
-              </Button>
+                <span className="flex items-center">
+                  <Icon icon={section.icon} className="mr-2 h-5 w-5 shrink-0" />
+                  {section.title}
+                </span>
+              </button>
             ))}
-          </Paper>
-        </Grid>
+          </div>
+        </div>
 
         {/* Settings Content */}
-        <Grid size={{ xs: 12, lg: 9 }}>
-          {Object.entries(settingsByCategory).map(([category, settingKeys]) => {
+        <div className="settings-content">
+          {orderedCategories.map((category) => {
+            const settingKeys = settingsByCategory[category];
             return (
-              <Paper
+              <div
                 key={category}
                 id={category.replace(/\s+/g, "_").toLowerCase()}
-                elevation={1}
-                sx={{
-                  mb: 4,
-                  p: 3,
-                  backgroundColor: "var(--color-secondary-bg)",
-                  color: "var(--color-primary-text)",
-                  borderRadius: 3,
-                  backgroundImage: "none",
-                  border: "1px solid var(--color-border-card)",
-                  ...(highlightSetting ===
+                className={`${cardClassName} text-primary-text mb-8 p-6`}
+                style={
+                  highlightSetting ===
                     category.replace(/\s+/g, "_").toLowerCase() && showHighlight
                     ? {
                         backgroundColor:
                           "color-mix(in srgb, var(--color-button-info), transparent 80%)",
                         transition: "background-color 0.5s ease",
                       }
-                    : {}),
-                }}
+                    : undefined
+                }
                 ref={(el) => {
                   if (
                     highlightSetting ===
@@ -534,18 +448,7 @@ export default function SettingsPage() {
                   }
                 }}
               >
-                <Typography
-                  variant="h6"
-                  component="h2"
-                  gutterBottom
-                  sx={{
-                    fontWeight: "bold",
-                    color: "var(--color-primary-text)",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 1.5,
-                  }}
-                >
+                <h2 className="text-primary-text mb-2 flex items-center gap-1.5 text-xl font-bold">
                   <Icon
                     icon={
                       category === "Privacy"
@@ -584,25 +487,29 @@ export default function SettingsPage() {
                       </TooltipContent>
                     </Tooltip>
                   )}
-                </Typography>
-                <Divider sx={{ mb: 2 }} />
-                <FormGroup>
+                </h2>
+                <div className="border-border-card mb-2 border-t" />
+                <div>
                   {settingKeys.map((key) => {
                     const typedKey = key as keyof typeof settings;
                     const isHighlighted =
                       highlightSetting === key && showHighlight;
+                    const isAppearanceToggle =
+                      key === "avatar_discord" || key === "banner_discord";
+                    const isAppearanceUploadBusy =
+                      isAvatarUploading || isBannerUploading;
                     return (
-                      <Box
+                      <div
                         key={key}
-                        sx={{
-                          ...(isHighlighted
+                        style={
+                          isHighlighted
                             ? {
                                 backgroundColor:
                                   "color-mix(in srgb, var(--color-button-info), transparent 80%)",
                                 transition: "background-color 0.5s ease",
                               }
-                            : {}),
-                        }}
+                            : undefined
+                        }
                         ref={(el) => {
                           if (isHighlighted && el) {
                             // Scroll the highlighted setting into view after a short delay
@@ -620,35 +527,39 @@ export default function SettingsPage() {
                           value={settings[typedKey]}
                           config={settingsConfig[key as SettingKey]}
                           onChange={handleSettingChange}
-                          disabled={false}
+                          disabled={
+                            isAppearanceToggle && isAppearanceUploadBusy
+                          }
                           userData={userData}
                         />
                         {category === "Appearance" &&
                           key === "banner_discord" &&
-                          settings[typedKey] === 0 && (
+                          !isSettingEnabled(settings[typedKey]) && (
                             <BannerSettings
                               userData={userData}
                               onBannerUpdate={handleBannerUpdate}
+                              onUploadStateChange={setIsBannerUploading}
                             />
                           )}
                         {category === "Appearance" &&
                           key === "avatar_discord" &&
-                          settings[typedKey] === 0 && (
+                          !isSettingEnabled(settings[typedKey]) && (
                             <AvatarSettings
                               userData={userData}
                               onAvatarUpdate={handleAvatarUpdate}
+                              onUploadStateChange={setIsAvatarUploading}
                             />
                           )}
-                      </Box>
+                      </div>
                     );
                   })}
-                </FormGroup>
+                </div>
                 {category === "Appearance" &&
-                  (settings.banner_discord === 0 ||
-                    settings.avatar_discord === 0) && (
+                  (!isSettingEnabled(settings.banner_discord) ||
+                    !isSettingEnabled(settings.avatar_discord)) && (
                     <>
-                      <Divider sx={{ my: 2 }} />
-                      <Box sx={{ display: "flex", gap: 1.5, flexWrap: "wrap" }}>
+                      <div className="border-border-card my-2 border-t" />
+                      <div className="flex flex-wrap gap-1.5">
                         <CustomButton
                           variant="default"
                           size="sm"
@@ -734,32 +645,25 @@ export default function SettingsPage() {
                           />
                           vgy.me
                         </CustomButton>
-                      </Box>
+                      </div>
                     </>
                   )}
-              </Paper>
+              </div>
             );
           })}
 
-          <Paper
+          <div
             id="notifications"
-            elevation={1}
-            sx={{
-              mb: 4,
-              p: 3,
-              backgroundColor: "var(--color-secondary-bg)",
-              color: "var(--color-primary-text)",
-              borderRadius: 3,
-              backgroundImage: "none",
-              border: "1px solid var(--color-border-card)",
-              ...(highlightSetting === "notifications" && showHighlight
+            className={`${cardClassName} text-primary-text mb-8 scroll-mt-24 p-6`}
+            style={
+              highlightSetting === "notifications" && showHighlight
                 ? {
                     backgroundColor:
                       "color-mix(in srgb, var(--color-button-info), transparent 80%)",
                     transition: "background-color 0.5s ease",
                   }
-                : {}),
-            }}
+                : undefined
+            }
             ref={(el) => {
               if (highlightSetting === "notifications" && showHighlight && el) {
                 // Scroll the highlighted section into view after a short delay
@@ -772,18 +676,7 @@ export default function SettingsPage() {
               }
             }}
           >
-            <Typography
-              variant="h6"
-              component="h2"
-              gutterBottom
-              sx={{
-                fontWeight: "bold",
-                color: "var(--color-primary-text)",
-                display: "flex",
-                alignItems: "center",
-                gap: 1.5,
-              }}
-            >
+            <h2 className="text-primary-text mb-2 flex items-center gap-1.5 text-xl font-bold">
               <Icon icon="heroicons:bell" className="h-6 w-6" />
               Notification Preferences
               {userData?.flags?.some((f) => f.flag === "is_owner") && (
@@ -812,66 +705,55 @@ export default function SettingsPage() {
                   </TooltipContent>
                 </Tooltip>
               )}
-            </Typography>
-            <Divider sx={{ mb: 2 }} />
+            </h2>
+            <div className="border-border-card mb-2 border-t" />
 
             <EmailNotificationSettings userData={userData} />
-            <Divider sx={{ mb: 2, opacity: 0.5 }} />
+            <div className="border-border-card mb-2 border-t opacity-50" />
 
             {notificationPrefsError && (
-              <Typography
-                variant="body2"
-                sx={{
-                  mb: 2,
-                  color:
-                    notificationPrefsError === "Authentication required"
-                      ? "var(--color-primary-text)"
-                      : "var(--color-button-danger)",
-                }}
+              <p
+                className={`mb-2 text-sm ${
+                  notificationPrefsError === "Authentication required"
+                    ? "text-primary-text"
+                    : "text-button-danger"
+                }`}
               >
                 {notificationPrefsError === "Authentication required"
                   ? "Try refresh the page"
                   : notificationPrefsError}
-              </Typography>
+              </p>
             )}
 
             {notificationPrefsLoading ? (
-              <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+              <div className="flex flex-col gap-2">
                 {[1, 2, 3].map((i) => (
-                  <Box
-                    key={i}
-                    sx={{ display: "flex", alignItems: "center", gap: 2 }}
-                  >
-                    <Skeleton variant="rectangular" width={40} height={24} />
-                    <Box sx={{ flex: 1 }}>
-                      <Skeleton
-                        variant="text"
-                        width="60%"
-                        height={24}
-                        sx={{ mb: 1 }}
-                      />
-                      <Skeleton variant="text" width="80%" height={20} />
-                    </Box>
-                  </Box>
+                  <div key={i} className="flex items-center gap-2">
+                    <div className="bg-tertiary-bg h-6 w-10 animate-pulse rounded-md" />
+                    <div className="flex-1">
+                      <div className="bg-tertiary-bg mb-1 h-6 w-[60%] animate-pulse rounded-md" />
+                      <div className="bg-tertiary-bg h-5 w-[80%] animate-pulse rounded-md" />
+                    </div>
+                  </div>
                 ))}
-              </Box>
+              </div>
             ) : (
-              <FormGroup>
+              <div>
                 {(notificationPrefs ?? []).map((pref) => {
                   const isHighlighted =
                     highlightSetting === pref.title && showHighlight;
                   return (
-                    <Box
+                    <div
                       key={pref.title}
-                      sx={{
-                        ...(isHighlighted
+                      style={
+                        isHighlighted
                           ? {
                               backgroundColor:
                                 "color-mix(in srgb, var(--color-button-info), transparent 80%)",
                               transition: "background-color 0.5s ease",
                             }
-                          : {}),
-                      }}
+                          : undefined
+                      }
                       ref={(el) => {
                         if (isHighlighted && el) {
                           setTimeout(() => {
@@ -893,132 +775,59 @@ export default function SettingsPage() {
                         description="Toggle whether you receive this notification"
                         userData={userData}
                       />
-                    </Box>
+                    </div>
                   );
                 })}
-              </FormGroup>
+              </div>
             )}
-          </Paper>
+          </div>
 
-          <Paper
+          <div
             id="connections"
-            elevation={1}
-            sx={{
-              mb: 4,
-              p: 3,
-              backgroundColor: "var(--color-secondary-bg)",
-              color: "var(--color-primary-text)",
-              borderRadius: 3,
-              backgroundImage: "none",
-              border: "1px solid var(--color-border-card)",
-            }}
+            className={`${cardClassName} text-primary-text mb-8 p-6`}
           >
-            <Typography
-              variant="h6"
-              component="h2"
-              gutterBottom
-              sx={{
-                fontWeight: "bold",
-                color: "var(--color-primary-text)",
-                display: "flex",
-                alignItems: "center",
-                gap: 1.5,
-                mb: 2,
-              }}
-            >
+            <h2 className="text-primary-text mb-2 flex items-center gap-1.5 text-xl font-bold">
               <Icon icon="heroicons:link" className="h-6 w-6" />
               Account Connections
-            </Typography>
-            <Divider sx={{ mb: 2 }} />
+            </h2>
+            <div className="border-border-card mb-2 border-t" />
             <RobloxConnection userData={userData} />
-          </Paper>
+          </div>
 
-          <Paper
+          <div
             id="export"
-            elevation={1}
-            sx={{
-              mb: 4,
-              p: 3,
-              backgroundColor: "var(--color-secondary-bg)",
-              color: "var(--color-primary-text)",
-              borderRadius: 3,
-              backgroundImage: "none",
-              border: "1px solid var(--color-border-card)",
-            }}
+            className={`${cardClassName} text-primary-text mb-8 p-6`}
           >
-            <Typography
-              variant="h6"
-              component="h2"
-              gutterBottom
-              sx={{
-                fontWeight: "bold",
-                color: "var(--color-primary-text)",
-                display: "flex",
-                alignItems: "center",
-                gap: 1.5,
-                mb: 2,
-              }}
-            >
+            <h2 className="text-primary-text mb-2 flex items-center gap-1.5 text-xl font-bold">
               <Icon icon="heroicons:arrow-down-tray" className="h-6 w-6" />
               Export Data
-            </Typography>
-            <Divider sx={{ mb: 2 }} />
+            </h2>
+            <div className="border-border-card mb-2 border-t" />
             <ExportInventoryData />
-          </Paper>
+          </div>
 
-          <Paper
+          <div
             id="danger"
-            elevation={1}
-            sx={{
-              mb: 4,
-              p: 3,
-              backgroundColor: "var(--color-secondary-bg)",
-              color: "var(--color-primary-text)",
-              border: "1px solid var(--color-border-card)",
-              borderRadius: 3,
-              backgroundImage: "none",
-              position: "relative",
-              "&::before": {
-                content: '""',
-                position: "absolute",
-                top: 0,
-                left: 0,
-                right: 0,
-                height: "4px",
-                background: "var(--color-button-danger)",
-                borderRadius: "2px 2px 0 0",
-              },
-            }}
+            className={`${cardClassName} text-primary-text relative mb-8 p-6`}
           >
-            <Typography
-              variant="h6"
-              component="h2"
-              gutterBottom
-              sx={{
-                fontWeight: "bold",
-                color: "var(--color-button-danger)",
-                display: "flex",
-                alignItems: "center",
-                gap: 1.5,
-                mb: 2,
-              }}
-            >
+            <div className="bg-button-danger absolute top-0 right-0 left-0 h-1 rounded-t-xl" />
+            <h2 className="text-button-danger mb-2 flex items-center gap-1.5 text-xl font-bold">
               <Icon
                 icon="heroicons:exclamation-triangle"
                 className="h-6 w-6"
                 style={{ color: "var(--color-button-danger)" }}
               />
               Danger Zone
-            </Typography>
-            <Divider
-              sx={{
-                mb: 2,
-                bgcolor: "var(--color-button-danger)",
+            </h2>
+            <div
+              className="mb-2 border-t"
+              style={{
+                borderColor: "var(--color-button-danger)",
                 opacity: 0.3,
               }}
             />
             <DeleteAccount />
-          </Paper>
+          </div>
 
           {/* Supporter Modal */}
           <SupporterModal
@@ -1030,8 +839,42 @@ export default function SettingsPage() {
             currentLimit={modalState.currentLimit}
             requiredLimit={modalState.requiredLimit}
           />
-        </Grid>
-      </Grid>
-    </Container>
+        </div>
+      </div>
+      <style jsx>{`
+        .settings-layout,
+        .settings-loading-layout {
+          display: block;
+        }
+
+        .settings-sidebar,
+        .settings-loading-sidebar {
+          display: none;
+        }
+
+        .settings-content,
+        .settings-loading-content {
+          width: 100%;
+        }
+
+        @media (min-width: 1200px) {
+          .settings-layout,
+          .settings-loading-layout {
+            display: grid;
+            grid-template-columns: minmax(0, 3fr) minmax(0, 9fr);
+            gap: 2rem;
+            align-items: start;
+          }
+
+          .settings-sidebar,
+          .settings-loading-sidebar {
+            display: block;
+            position: sticky;
+            top: 100px;
+            height: fit-content;
+          }
+        }
+      `}</style>
+    </div>
   );
 }

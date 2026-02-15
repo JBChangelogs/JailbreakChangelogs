@@ -21,7 +21,7 @@ export async function getCurrentUser(): Promise<UserData | null> {
 
     try {
       const response = await fetch(
-        `${BASE_API_URL}/users/get/token?token=${encodeURIComponent(token)}&nocache=true`,
+        `${BASE_API_URL}/users/get/token?token=${encodeURIComponent(token)}`,
         {
           cache: "no-store",
           signal: controller.signal,

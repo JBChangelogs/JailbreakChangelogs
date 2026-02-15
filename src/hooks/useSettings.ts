@@ -61,6 +61,11 @@ export const useSettings = (
       }
     }
 
+    const displayName = settingsConfig[name]?.displayName || name;
+    const loadingToast = toast.loading("Updating Setting", {
+      description: `Saving "${displayName}"...`,
+    });
+
     try {
       // Update local state immediately for better UX
       const newSettings = { ...settings, [name]: value } as UserSettings;
@@ -89,11 +94,7 @@ export const useSettings = (
       // Make API call to persist the change
       await updateSettings(updatedSettings);
 
-      // Don't overwrite with server response since backend returns stale data
-      // Keep the optimistic update instead
-      // setSettings(serverSettings);
-
-      // Update local storage with our optimistic update (not server response)
+      // Persist optimistic state as final local state
       const finalUser = {
         ...userData,
         settings: newSettings,
@@ -106,8 +107,8 @@ export const useSettings = (
       );
 
       // Show success toast
-      const displayName = settingsConfig[name]?.displayName || name;
       toast.success("Setting Updated", {
+        id: loadingToast,
         description: `"${displayName}" has been ${value === 1 ? "enabled" : "disabled"}.`,
       });
 
@@ -117,7 +118,7 @@ export const useSettings = (
       console.error("Error updating settings:", error);
       const errorMessage =
         error instanceof Error ? error.message : "Failed to update settings";
-      toast.error(errorMessage);
+      toast.error(errorMessage, { id: loadingToast });
 
       // Revert local state on error - clear optimistic update
       setOptimisticSettings(null);

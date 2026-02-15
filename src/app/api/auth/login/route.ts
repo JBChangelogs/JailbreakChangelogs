@@ -12,7 +12,7 @@ export async function POST(request: Request) {
     }
 
     const resp = await fetch(
-      `${BASE_API_URL}/users/get/token?token=${encodeURIComponent(token)}&nocache=true`,
+      `${BASE_API_URL}/users/get/token?token=${encodeURIComponent(token)}`,
       { cache: "no-store" },
     );
     if (!resp.ok) {

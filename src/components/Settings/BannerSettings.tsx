@@ -21,11 +21,13 @@ import { validateFile } from "@/utils/fileValidation";
 interface BannerSettingsProps {
   userData: UserData;
   onBannerUpdate: (newBannerUrl: string) => void;
+  onUploadStateChange?: (isUploading: boolean) => void;
 }
 
 export const BannerSettings = ({
   userData,
   onBannerUpdate,
+  onUploadStateChange,
 }: BannerSettingsProps) => {
   const BADGE_BASE_URL =
     "https://assets.jailbreakchangelogs.xyz/assets/website_icons";
@@ -37,6 +39,10 @@ export const BannerSettings = ({
 
   // Supporter modal hook
   const { modalState, closeModal, checkBannerAccess } = useSupporterModal();
+
+  useEffect(() => {
+    onUploadStateChange?.(isUploading);
+  }, [isUploading, onUploadStateChange]);
 
   const validateBannerUrl = useCallback((url: string) => {
     setBannerError(null);
@@ -328,7 +334,11 @@ export const BannerSettings = ({
               value={customBannerUrl}
               onChange={handleCustomBannerChange}
               variant="outlined"
-              disabled={!userData?.premiumtype || userData.premiumtype < 2}
+              disabled={
+                !userData?.premiumtype ||
+                userData.premiumtype < 2 ||
+                isUploading
+              }
               error={!!bannerError}
               helperText={bannerError}
               sx={{
@@ -345,6 +355,16 @@ export const BannerSettings = ({
                   },
                   backgroundColor: "var(--color-tertiary-bg)",
                   height: "40px",
+                },
+                "& .MuiOutlinedInput-root.Mui-disabled": {
+                  backgroundColor:
+                    "color-mix(in srgb, var(--color-tertiary-bg), black 12%)",
+                  opacity: 0.7,
+                  cursor: "not-allowed",
+                  "& fieldset": {
+                    borderColor:
+                      "color-mix(in srgb, var(--color-border-card), white 12%)",
+                  },
                 },
                 "& .MuiInputBase-input": {
                   color: "var(--color-primary-text)",
@@ -373,8 +393,11 @@ export const BannerSettings = ({
             sx={{
               display: "flex",
               gap: 1,
-              flexDirection: { xs: "column", sm: "row" },
+              flexDirection: "row",
               width: { xs: "100%", sm: "auto" },
+              "@media (max-width:359px)": {
+                flexDirection: "column",
+              },
             }}
           >
             <Button
@@ -382,7 +405,7 @@ export const BannerSettings = ({
               size="md"
               asChild
               className={cn(
-                "min-w-full flex-1 sm:min-w-[120px] sm:flex-none",
+                "flex-1 sm:min-w-[120px] sm:flex-none",
                 (!userData?.premiumtype ||
                   userData.premiumtype < 2 ||
                   isUploading) &&
@@ -434,7 +457,7 @@ export const BannerSettings = ({
                 isUploading
               }
               className={cn(
-                "min-w-full flex-1 sm:min-w-[100px] sm:flex-none",
+                "flex-1 sm:min-w-[100px] sm:flex-none",
                 (!userData?.premiumtype || userData.premiumtype < 2) &&
                   "opacity-50",
               )}

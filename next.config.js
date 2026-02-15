@@ -105,6 +105,33 @@ const nextConfig = {
           },
         ],
       },
+      {
+        source: "/users/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "no-store, no-cache, must-revalidate",
+          },
+        ],
+      },
+      {
+        source: "/settings",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "no-store, no-cache, must-revalidate",
+          },
+        ],
+      },
+      {
+        source: "/settings/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "no-store, no-cache, must-revalidate",
+          },
+        ],
+      },
     ];
   },
 };

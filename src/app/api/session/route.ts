@@ -1,15 +1,20 @@
 import { getCurrentUser } from "@/utils/serverSession";
+import { NextResponse } from "next/server";
+
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 export async function GET() {
   const user = await getCurrentUser();
+  const headers = {
+    "content-type": "application/json",
+    "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
+    Pragma: "no-cache",
+    Expires: "0",
+  };
+
   if (!user) {
-    return new Response(JSON.stringify({ user: null }), {
-      status: 200,
-      headers: { "content-type": "application/json" },
-    });
+    return NextResponse.json({ user: null }, { status: 200, headers });
   }
-  return new Response(JSON.stringify({ user }), {
-    status: 200,
-    headers: { "content-type": "application/json" },
-  });
+  return NextResponse.json({ user }, { status: 200, headers });
 }

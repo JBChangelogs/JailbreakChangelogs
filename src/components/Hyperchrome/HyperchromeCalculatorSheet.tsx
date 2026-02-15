@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Image from "next/image";
-import { Switch } from "@headlessui/react";
 import { Icon } from "../ui/IconWrapper";
 import { Sheet, SheetContent } from "../ui/sheet";
 import {
@@ -17,6 +16,7 @@ import {
 } from "@/utils/hyperchrome";
 import { toast } from "sonner";
 import { Button } from "../ui/button";
+import { Switch } from "@/components/ui/switch";
 
 interface HyperchromeCalculatorProps {
   open?: boolean;
@@ -326,18 +326,9 @@ export default function HyperchromeCalculatorModal({
               </span>
               <Switch
                 checked={isSmallServer}
-                onChange={setIsSmallServer}
-                className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full transition-colors focus:outline-none ${
-                  isSmallServer ? "bg-button-info" : "bg-button-secondary"
-                }`}
+                onCheckedChange={setIsSmallServer}
                 aria-label="Toggle small server mode"
-              >
-                <span
-                  className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                    isSmallServer ? "translate-x-6" : "translate-x-1"
-                  }`}
-                />
-              </Switch>
+              ></Switch>
             </div>
             <Button
               size="md"

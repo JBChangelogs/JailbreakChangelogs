@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { cn } from "@/lib/utils";
-import { Box, TextField, Typography } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 
@@ -21,11 +21,13 @@ import { validateFile } from "@/utils/fileValidation";
 interface AvatarSettingsProps {
   userData: UserData;
   onAvatarUpdate: (newAvatarUrl: string) => void;
+  onUploadStateChange?: (isUploading: boolean) => void;
 }
 
 export const AvatarSettings = ({
   userData,
   onAvatarUpdate,
+  onUploadStateChange,
 }: AvatarSettingsProps) => {
   const BADGE_BASE_URL =
     "https://assets.jailbreakchangelogs.xyz/assets/website_icons";
@@ -37,6 +39,10 @@ export const AvatarSettings = ({
 
   // Supporter modal hook
   const { modalState, closeModal, checkAvatarAccess } = useSupporterModal();
+
+  useEffect(() => {
+    onUploadStateChange?.(isUploading);
+  }, [isUploading, onUploadStateChange]);
 
   const validateAvatarUrl = useCallback((url: string) => {
     setAvatarError(null);
@@ -316,9 +322,8 @@ export const AvatarSettings = ({
           }}
         >
           <Box sx={{ flex: 1, mb: { xs: 1, sm: 0 } }}>
-            <TextField
-              fullWidth
-              size="small"
+            <input
+              type="url"
               placeholder={
                 userData?.premiumtype && userData.premiumtype >= 2
                   ? "Your custom avatar URL here"
@@ -326,54 +331,33 @@ export const AvatarSettings = ({
               }
               value={customAvatarUrl}
               onChange={handleCustomAvatarChange}
-              variant="outlined"
-              disabled={!userData?.premiumtype || userData.premiumtype < 2}
-              error={!!avatarError}
-              helperText={avatarError}
-              sx={{
-                "& .MuiOutlinedInput-root": {
-                  "& fieldset": {
-                    borderColor: "var(--color-border-card)",
-                  },
-                  "&:hover fieldset": {
-                    borderColor: "var(--color-button-info)",
-                  },
-                  "&.Mui-focused fieldset": {
-                    borderColor: "var(--color-button-info)",
-                    borderWidth: "1px",
-                  },
-                  backgroundColor: "var(--color-tertiary-bg)",
-                  height: "40px",
-                },
-                "& .MuiInputBase-input": {
-                  color: "var(--color-primary-text)",
-                  "&::placeholder": {
-                    color: "var(--color-tertiary-text)",
-                    opacity: 1,
-                  },
-                },
-                "& .MuiInputBase-input.Mui-disabled": {
-                  color: "var(--color-primary-text) !important",
-                  WebkitTextFillColor: "var(--color-primary-text) !important",
-                  cursor: "not-allowed",
-                  "&::placeholder": {
-                    color: "var(--color-tertiary-text) !important",
-                    opacity: 1,
-                  },
-                },
-                "& .MuiFormHelperText-root": {
-                  marginTop: "4px",
-                  color: "var(--color-button-danger) !important",
-                },
-              }}
+              disabled={
+                !userData?.premiumtype ||
+                userData.premiumtype < 2 ||
+                isUploading
+              }
+              className={cn(
+                "border-border-card bg-tertiary-bg text-primary-text placeholder:text-tertiary-text h-10 w-full rounded-md border px-3 text-sm transition-colors outline-none",
+                "focus:border-button-info",
+                (!userData?.premiumtype ||
+                  userData.premiumtype < 2 ||
+                  isUploading) &&
+                  "cursor-not-allowed border-[color-mix(in_srgb,var(--color-border-card),white_12%)] bg-[color-mix(in_srgb,var(--color-tertiary-bg),black_12%)] opacity-70",
+              )}
             />
+            {avatarError && (
+              <p className="text-button-danger mt-1 text-xs">{avatarError}</p>
+            )}
           </Box>
           <Box
             sx={{
               display: "flex",
               gap: 1,
-              flexDirection: { xs: "column", sm: "row" },
+              flexDirection: "row",
               width: { xs: "100%", sm: "auto" },
+              "@media (max-width:359px)": {
+                flexDirection: "column",
+              },
             }}
           >
             <Button
@@ -381,7 +365,7 @@ export const AvatarSettings = ({
               size="md"
               asChild
               className={cn(
-                "min-w-full flex-1 sm:min-w-[120px] sm:flex-none",
+                "flex-1 sm:min-w-[120px] sm:flex-none",
                 (!userData?.premiumtype ||
                   userData.premiumtype < 2 ||
                   isUploading) &&
@@ -433,7 +417,7 @@ export const AvatarSettings = ({
                 isUploading
               }
               className={cn(
-                "min-w-full flex-1 sm:min-w-[100px] sm:flex-none",
+                "flex-1 sm:min-w-[100px] sm:flex-none",
                 (!userData?.premiumtype || userData.premiumtype < 2) &&
                   "opacity-50",
               )}
