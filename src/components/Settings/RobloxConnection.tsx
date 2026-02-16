@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { safeGetJSON, safeSetJSON } from "@/utils/safeStorage";
 import { UserData } from "@/types/auth";
 import { useAuthContext } from "@/contexts/AuthContext";
+import { Button } from "@/components/ui/button";
 
 interface RobloxConnectionProps {
   userData: {
@@ -102,18 +103,16 @@ export const RobloxConnection = ({ userData }: RobloxConnectionProps) => {
       </div>
 
       {userData.roblox_username ? (
-        <button
-          onClick={handleOpen}
-          className="bg-button-info text-form-button-text hover:bg-button-info-hover cursor-pointer rounded-md px-4 py-2 text-sm font-semibold uppercase transition-colors"
-        >
+        <Button onClick={handleOpen} size="md" className="text-sm uppercase">
           Disconnect Roblox
-        </button>
+        </Button>
       ) : (
-        <button
+        <Button
           onClick={() => {
             setLoginModal({ open: true, tab: "roblox" });
           }}
-          className="bg-button-info text-form-button-text hover:bg-button-info-hover inline-flex items-center gap-2 rounded-md px-4 py-2 text-sm font-semibold uppercase transition-colors"
+          size="md"
+          className="text-sm uppercase"
         >
           <svg
             className="h-5 w-5"
@@ -129,7 +128,7 @@ export const RobloxConnection = ({ userData }: RobloxConnectionProps) => {
             />
           </svg>
           Connect Roblox Account
-        </button>
+        </Button>
       )}
 
       <ConfirmDialog

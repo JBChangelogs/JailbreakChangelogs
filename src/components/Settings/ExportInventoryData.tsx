@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
 
 export const ExportInventoryData = () => {
   const [loading, setLoading] = useState(false);
@@ -47,13 +48,14 @@ export const ExportInventoryData = () => {
         </p>
       </div>
 
-      <button
+      <Button
         onClick={handleExport}
         disabled={loading}
-        className="bg-button-info text-form-button-text hover:bg-button-info-hover disabled:bg-button-info disabled:text-form-button-text inline-flex cursor-pointer items-center gap-2 rounded-md px-4 py-2 text-sm font-semibold uppercase transition-colors disabled:cursor-not-allowed disabled:opacity-60"
+        size="md"
+        className="text-sm uppercase"
       >
         {loading ? "Scheduling Export..." : "Export Data"}
-      </button>
+      </Button>
     </div>
   );
 };
