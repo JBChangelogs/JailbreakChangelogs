@@ -383,7 +383,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
       </div>
 
       {/* Ad Section */}
-      <NitroCalculatorAd className="mb-8 flex justify-center" />
+      <NitroCalculatorAd className="mb-8" />
 
       {/* Tabs */}
       <div className="overflow-x-auto">

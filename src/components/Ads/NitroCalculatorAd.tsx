@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { useAuthContext } from "@/contexts/AuthContext";
+import { cn } from "@/lib/utils";
 
 type NitroAdsWithRemove = {
   createAd?: (id: string, config: typeof CALCULATOR_CONFIG) => Promise<void>;
@@ -11,21 +12,11 @@ type NitroAdsWithRemove = {
 const SLOT_ID = "np-value-calc";
 
 const CALCULATOR_CONFIG = {
-  sizes: [
-    ["970", "250"],
-    ["970", "90"],
-    ["728", "90"],
-    ["320", "50"],
-    ["320", "100"],
-  ],
-  report: {
-    enabled: true,
-    icon: true,
-    wording: "Report Ad",
-    position: "top-right",
+  format: "video-nc",
+  video: {
+    mobile: "compact",
+    hidePlaylist: true,
   },
-  mediaQuery:
-    "(min-width: 1025px), (min-width: 768px) and (max-width: 1024px), (min-width: 320px) and (max-width: 767px)",
 };
 
 interface Props {
@@ -85,5 +76,11 @@ export default function NitroCalculatorAd({ className }: Props) {
     return null;
   }
 
-  return <div id={SLOT_ID} ref={containerRef} className={className} />;
+  return (
+    <div className={cn("mx-auto w-full max-w-sm", className)}>
+      <div className="bg-secondary-background relative aspect-video w-full shrink-0 overflow-hidden rounded-lg">
+        <div id={SLOT_ID} ref={containerRef} className="h-full w-full" />
+      </div>
+    </div>
+  );
 }

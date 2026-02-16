@@ -226,7 +226,7 @@ export default function ValuesClient({
             )}
           </div>
 
-          <NitroValuesVideoPlayer className="min-h-[210px] w-full max-w-full self-center lg:max-w-xs lg:self-start" />
+          <NitroValuesVideoPlayer className="w-full self-center lg:self-start" />
         </div>
 
         <CategoryIcons

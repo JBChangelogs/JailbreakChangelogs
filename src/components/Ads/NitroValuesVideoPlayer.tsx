@@ -9,22 +9,14 @@ type NitroAdsWithRemove = {
   removeAd?: (id: string) => void;
 };
 
-const SLOT_ID = "np-values-header";
+const SLOT_ID = "values-header-video";
 
 const VALUES_CONFIG = {
-  sizes: [
-    ["300", "250"],
-    ["320", "100"],
-    ["320", "50"],
-  ],
-  report: {
-    enabled: true,
-    icon: true,
-    wording: "Report Ad",
-    position: "top-right",
+  format: "video-nc",
+  video: {
+    mobile: "compact",
+    hidePlaylist: true,
   },
-  mediaQuery:
-    "(min-width: 1025px), (min-width: 768px) and (max-width: 1024px), (min-width: 320px) and (max-width: 767px)",
 };
 
 interface Props {
@@ -90,15 +82,11 @@ export default function NitroValuesVideoPlayer({ className }: Props) {
     return null;
   }
 
-  // Apply min-height to prevent CLS
   return (
-    <div className={cn("w-full overflow-x-hidden", className)}>
-      <div
-        id={SLOT_ID}
-        ref={containerRef}
-        className="mx-auto max-w-full"
-        style={{ minHeight: "250px" }}
-      />
+    <div className={cn("mx-auto w-full max-w-sm", className)}>
+      <div className="bg-secondary-background relative aspect-video w-full shrink-0 overflow-hidden rounded-lg">
+        <div id={SLOT_ID} ref={containerRef} className="h-full w-full" />
+      </div>
     </div>
   );
 }

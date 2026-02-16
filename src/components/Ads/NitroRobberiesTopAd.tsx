@@ -11,19 +11,11 @@ type NitroAdsWithRemove = {
 const SLOT_ID = "np-robberies-top";
 
 const CONFIG = {
-  sizes: [
-    ["728", "90"],
-    ["970", "90"],
-    ["320", "50"],
-    ["320", "100"],
-  ],
-  report: {
-    enabled: true,
-    icon: true,
-    wording: "Report Ad",
-    position: "top-right",
+  format: "video-nc",
+  video: {
+    mobile: "compact",
+    hidePlaylist: true,
   },
-  mediaQuery: "(min-width: 1025px)",
 };
 
 interface Props {
@@ -83,10 +75,10 @@ export default function NitroRobberiesTopAd({ className }: Props) {
   }
 
   return (
-    <div
-      id={SLOT_ID}
-      ref={containerRef}
-      className={`flex justify-center ${className || ""}`}
-    />
+    <div className={`mx-auto w-full max-w-sm ${className || ""}`}>
+      <div className="bg-secondary-background relative aspect-video w-full shrink-0 overflow-hidden rounded-lg">
+        <div id={SLOT_ID} ref={containerRef} className="h-full w-full" />
+      </div>
+    </div>
   );
 }
