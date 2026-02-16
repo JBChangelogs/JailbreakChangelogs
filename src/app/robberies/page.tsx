@@ -60,8 +60,8 @@ const ROBBERY_TYPES = [
 const ROBBERY_COMBO_PRESETS = [
   {
     id: "double-bank",
-    label: "Double Bank",
-    description: "Rising + Crater open",
+    label: "Crater + Rising City Bank",
+    description: "Crater + Rising open",
     types: ["Bank", "Bank2"],
   },
   {
@@ -1240,6 +1240,10 @@ function RobberyTrackerContent() {
                         <Button
                           key={type.marker_name}
                           onClick={() => {
+                            if (robberyFilterMode === "all") {
+                              setRobberyFilterMode("any");
+                              setSelectedComboPresetIds([]);
+                            }
                             setSelectedRobberyTypes((prev) =>
                               prev.includes(type.marker_name)
                                 ? prev.filter((t) => t !== type.marker_name)
@@ -1315,6 +1319,16 @@ function RobberyTrackerContent() {
                           <Button
                             key={preset.id}
                             onClick={() => {
+                              if (
+                                robberyFilterMode === "all" &&
+                                selectedComboPresetIds.length === 1 &&
+                                selectedComboPresetIds.includes(preset.id)
+                              ) {
+                                setRobberyFilterMode("any");
+                                setSelectedComboPresetIds([]);
+                                return;
+                              }
+
                               setRobberyFilterMode("all");
                               setSelectedRobberyTypes([]);
                               setSelectedComboPresetIds((prev) => {
@@ -1358,6 +1372,7 @@ function RobberyTrackerContent() {
                       {filteredRobberyCombos.map((combo) => (
                         <RobberyComboCard
                           key={`${combo.comboId}-${combo.serverId}`}
+                          comboId={combo.comboId}
                           serverId={combo.serverId}
                           robberies={combo.robberies}
                           comboLabel={combo.comboLabel}

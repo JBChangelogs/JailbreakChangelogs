@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import { Icon } from "@/components/ui/IconWrapper";
 import { Button } from "@/components/ui/button";
 import {
@@ -12,12 +13,14 @@ import { useServerRegions } from "@/hooks/useServerRegions";
 import RobberyPlayersModal from "./RobberyPlayersModal";
 
 interface RobberyComboCardProps {
+  comboId: string;
   serverId: string;
   robberies: RobberyData[];
   comboLabel: string;
 }
 
 export default function RobberyComboCard({
+  comboId,
   serverId,
   robberies,
   comboLabel,
@@ -38,6 +41,13 @@ export default function RobberyComboCard({
 
   const firstRobbery = sortedRobberies[0];
   const players = firstRobbery?.server?.players || [];
+  const comboImageUrls: Record<string, string> = {
+    "museum-power":
+      "https://assets.jailbreakchangelogs.xyz/assets/images/robberies/combos/Power_Museum_Combo.webp",
+    "double-bank":
+      "https://assets.jailbreakchangelogs.xyz/assets/images/robberies/combos/Bank_Combo.webp",
+  };
+  const comboImageUrl = comboImageUrls[comboId];
 
   useEffect(() => {
     if (!serverId) return;
@@ -56,18 +66,74 @@ export default function RobberyComboCard({
     return `${hours12.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")} ${period}`;
   };
 
+  const getStatusBadgeClass = (status: number) => {
+    switch (status) {
+      case 1:
+        return "text-primary-text border-status-success/30 bg-status-success/20";
+      case 2:
+        return "text-primary-text border-status-warning/30 bg-status-warning/20";
+      case 3:
+        return "text-primary-text border-border-card bg-tertiary-bg";
+      default:
+        return "text-primary-text border-border-card bg-tertiary-bg";
+    }
+  };
+
+  const getStatusText = (status: number) => {
+    switch (status) {
+      case 1:
+        return "Open";
+      case 2:
+        return "In Progress";
+      case 3:
+        return "Closed";
+      default:
+        return "Unknown";
+    }
+  };
+
+  const uniqueStatuses = Array.from(
+    new Set(sortedRobberies.map((r) => r.status)),
+  );
+  const isAllOpen = uniqueStatuses.length === 1 && uniqueStatuses[0] === 1;
+  const isAllInProgress =
+    uniqueStatuses.length === 1 && uniqueStatuses[0] === 2;
+  const comboHeaderStatusText = isAllOpen ? "All Open" : "All In Progress";
+  const comboHeaderStatusClass = isAllOpen
+    ? getStatusBadgeClass(1)
+    : getStatusBadgeClass(2);
+
   return (
     <div className="border-border-card bg-secondary-bg flex flex-col overflow-hidden rounded-lg border transition-all duration-200 hover:shadow-lg">
-      <div className="bg-tertiary-bg border-border-card flex items-center justify-between border-b px-4 py-3">
-        <div className="flex items-center gap-2">
-          <Icon icon="heroicons:bolt" className="h-4 w-4 text-yellow-400" />
-          <h3 className="text-primary-text text-base font-semibold">
+      <div className="bg-secondary-background relative aspect-video w-full shrink-0 overflow-hidden">
+        {comboImageUrl ? (
+          <Image
+            src={comboImageUrl}
+            alt={comboLabel}
+            fill
+            className="object-cover"
+          />
+        ) : (
+          <div className="bg-tertiary-bg border-border-card text-primary-text flex h-full items-center justify-center border-b text-base font-semibold">
             {comboLabel}
-          </h3>
-        </div>
+          </div>
+        )}
       </div>
 
       <div className="flex grow flex-col p-4">
+        <div className="mb-3 flex items-start justify-between">
+          <h3 className="text-primary-text text-lg font-semibold">
+            {comboLabel}
+          </h3>
+          {(isAllOpen || isAllInProgress) && (
+            <span
+              className={`${comboHeaderStatusClass} inline-flex h-6 items-center rounded-lg border px-2.5 text-xs font-medium`}
+            >
+              {comboHeaderStatusText}
+            </span>
+          )}
+        </div>
+
         <div className="mb-4 space-y-2">
           {sortedRobberies.map((robbery) => (
             <div
@@ -77,8 +143,10 @@ export default function RobberyComboCard({
               <span className="text-primary-text text-sm font-medium">
                 {robbery.name}
               </span>
-              <span className="text-primary-text border-status-success/30 bg-status-success/20 inline-flex h-6 items-center rounded-lg border px-2.5 text-xs font-medium">
-                Open
+              <span
+                className={`${getStatusBadgeClass(robbery.status)} inline-flex h-6 items-center rounded-lg border px-2.5 text-xs font-medium`}
+              >
+                {getStatusText(robbery.status)}
               </span>
             </div>
           ))}
