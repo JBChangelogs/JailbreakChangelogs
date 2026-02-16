@@ -924,7 +924,7 @@ export const NavbarModern = ({
                     <div className="py-1">
                       {!userData.roblox_id && (
                         <button
-                          className="text-primary-text hover:bg-button-info-hover hover:text-form-button-text flex w-full items-center gap-3 px-4 py-2 text-left text-sm transition-colors"
+                          className="text-primary-text hover:bg-button-info-hover hover:text-form-button-text flex w-full cursor-pointer items-center gap-3 px-4 py-2 text-left text-sm transition-colors"
                           onClick={() => {
                             setLoginModal({ open: true, tab: "roblox" });
                           }}
