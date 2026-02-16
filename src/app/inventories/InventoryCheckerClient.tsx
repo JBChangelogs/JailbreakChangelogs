@@ -114,6 +114,9 @@ export default function InventoryCheckerClient({
 
   // Check if current user is viewing their own inventory
   const isOwnInventory = isAuthenticated && user?.roblox_id === robloxId;
+  const isInventoryNotFoundError = Boolean(
+    error?.includes("Inventory not found for this user."),
+  );
 
   // Use refreshed data if available, otherwise use initial data
   const currentData = initialData;
@@ -655,13 +658,15 @@ export default function InventoryCheckerClient({
                       ? "Server Error"
                       : "Unable to Load Inventory"}
                   </h3>
-                  <p className="text-secondary-text mb-4 wrap-break-word">
-                    {error}
-                  </p>
+                  {!isInventoryNotFoundError && (
+                    <p className="text-secondary-text mb-4 wrap-break-word">
+                      {error}
+                    </p>
+                  )}
 
                   {/* Show scan option for profile owner or login prompt for others */}
                   {isOwnInventory ? (
-                    <div className="border-border-card bg-secondary-bg mt-4 rounded-lg border p-4">
+                    <div className="border-border-card bg-tertiary-bg mt-4 rounded-lg border p-4">
                       <div className="space-y-3">
                         <p className="text-primary-text mb-3 text-center text-sm">
                           Your inventory hasn&apos;t been scanned yet.
@@ -862,44 +867,86 @@ export default function InventoryCheckerClient({
                       </div>
                     </div>
                   ) : (
-                    <div className="border-border-card bg-primary-bg mt-4 rounded-lg border p-4">
-                      <p className="text-primary-text mb-1 text-sm font-medium">
-                        Looking for your inventory?
-                      </p>
-                      {isAuthenticated && user?.roblox_id ? (
-                        <Link
-                          href={`/inventories/${user.roblox_id}`}
-                          prefetch={false}
-                          className="bg-button-info text-form-button-text hover:bg-button-info-hover mt-2 inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors"
-                        >
-                          View My Inventory
-                        </Link>
-                      ) : isAuthenticated ? (
-                        <p className="text-secondary-text text-sm">
-                          <button
+                    <div className="border-border-card bg-tertiary-bg mt-4 rounded-lg border p-4">
+                      {isInventoryNotFoundError ? (
+                        <>
+                          <p className="text-primary-text mb-1 text-sm font-medium">
+                            No saved inventory found for this user.
+                          </p>
+                          <p className="text-secondary-text text-sm">
+                            Try searching another username.
+                          </p>
+                          <Button
                             type="button"
+                            size="sm"
+                            variant="secondary"
+                            className="mt-2"
                             onClick={() => {
-                              setLoginModal({ open: true, tab: "roblox" });
+                              setSearchId("");
+                              window.scrollTo({ top: 0, behavior: "smooth" });
+                              const searchInput = document.getElementById(
+                                "searchInput",
+                              ) as HTMLInputElement | null;
+                              searchInput?.focus();
                             }}
-                            className="text-button-info hover:text-button-info-hover cursor-pointer font-semibold underline transition-colors"
                           >
-                            Connect your Roblox account
-                          </button>{" "}
-                          to request a scan.
-                        </p>
+                            Search Another User
+                          </Button>
+                          {isAuthenticated && user?.roblox_id && (
+                            <div className="border-border-card mt-4 border-t pt-4">
+                              <p className="text-primary-text mb-1 text-sm font-medium">
+                                Looking for your inventory?
+                              </p>
+                              <Button asChild size="sm" className="mt-2">
+                                <Link
+                                  href={`/inventories/${user.roblox_id}`}
+                                  prefetch={false}
+                                >
+                                  View My Inventory
+                                </Link>
+                              </Button>
+                            </div>
+                          )}
+                        </>
                       ) : (
-                        <p className="text-secondary-text text-sm">
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setLoginModal({ open: true });
-                            }}
-                            className="text-button-info hover:text-button-info-hover cursor-pointer font-semibold underline transition-colors"
-                          >
-                            Login and connect Roblox
-                          </button>{" "}
-                          to request a scan.
-                        </p>
+                        <>
+                          <p className="text-primary-text mb-1 text-sm font-medium">
+                            Looking for your inventory?
+                          </p>
+                          {isAuthenticated && user?.roblox_id ? (
+                            <Button asChild size="sm" className="mt-2">
+                              <Link
+                                href={`/inventories/${user.roblox_id}`}
+                                prefetch={false}
+                              >
+                                View My Inventory
+                              </Link>
+                            </Button>
+                          ) : (
+                            <>
+                              <p className="text-secondary-text text-sm">
+                                Login to request a scan.
+                              </p>
+                              <Button
+                                type="button"
+                                size="sm"
+                                className="mt-2"
+                                onClick={() => {
+                                  if (isAuthenticated) {
+                                    setLoginModal({
+                                      open: true,
+                                      tab: "roblox",
+                                    });
+                                  } else {
+                                    setLoginModal({ open: true });
+                                  }
+                                }}
+                              >
+                                Login
+                              </Button>
+                            </>
+                          )}
+                        </>
                       )}
                     </div>
                   )}

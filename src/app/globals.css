@@ -19,12 +19,8 @@
   /* DARK THEME - Default (current theme) */
   /* Background Colors - Comprehensive Gray Scale */
   --color-primary-bg: #121317; /* Main page background */
-  --color-secondary-bg: #161719; /* Card background - Cards, modals */
-  --color-tertiary-bg: hsl(
-    220,
-    6%,
-    14%
-  ); /* Elevated surfaces - Dropdowns, tooltips */
+  --color-secondary-bg: #17181d; /* Card background - Cards, modals */
+  --color-tertiary-bg: #1c1e24; /* Elevated surfaces - Dropdowns, tooltips */
   --color-quaternary-bg: hsl(
     225,
     4%,
@@ -254,16 +250,16 @@
 /* LIGHT THEME - Applied when .light class is present */
 .light {
   /* Background Colors - Light theme */
-  --color-primary-bg: hsl(0, 0%, 100%); /* Main page background - White */
+  --color-primary-bg: #ffffff; /* Main page background - White */
   --color-secondary-bg: hsl(
     240,
-    4%,
-    95%
+    5%,
+    94%
   ); /* Card background - Very light gray */
   --color-tertiary-bg: hsl(
     220,
     8%,
-    92%
+    91%
   ); /* Elevated surfaces - Cool light gray */
   --color-quaternary-bg: hsl(
     0,
