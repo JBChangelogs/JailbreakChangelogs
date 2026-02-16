@@ -569,6 +569,9 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
           throw new Error(result.error || "Failed to fetch user data");
         }
 
+        const resolvedIds = new Set(Object.keys(result.data || {}));
+        const unresolvedIds = usersToFetch.filter((id) => !resolvedIds.has(id));
+
         setUserData((prev) => {
           const newState = { ...prev };
           Object.entries(result.data || {}).forEach(([userId, user]) => {
@@ -576,6 +579,18 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
           });
           return newState;
         });
+
+        // Prevent endless retries when upstream returns partial/empty data
+        // for requested IDs (common when some users are missing or API fails soft).
+        if (unresolvedIds.length > 0) {
+          setFailedUserData((prev) => {
+            const newSet = new Set(prev);
+            unresolvedIds.forEach((userId) => {
+              newSet.add(userId);
+            });
+            return newSet;
+          });
+        }
       } catch (error) {
         console.error("Error fetching user data:", error);
         setFailedUserData((prev) => {

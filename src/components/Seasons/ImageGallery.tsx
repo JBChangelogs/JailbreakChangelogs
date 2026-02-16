@@ -25,7 +25,7 @@ interface ImageGalleryProps {
 export default function ImageGallery({ rewards }: ImageGalleryProps) {
   const plugin = Autoplay({
     delay: 4000,
-    stopOnInteraction: true,
+    stopOnInteraction: false,
     stopOnMouseEnter: true,
     stopOnFocusIn: true,
   });
@@ -82,8 +82,14 @@ export default function ImageGallery({ rewards }: ImageGalleryProps) {
             </CarouselItem>
           ))}
         </CarouselContent>
-        <CarouselPrevious className="cursor-pointer" />
-        <CarouselNext className="cursor-pointer" />
+        <CarouselPrevious
+          variant="ghost"
+          className="top-1/2 left-2 z-10 h-8 w-8 -translate-y-1/2 rounded-full bg-black/50 text-white hover:bg-black/70"
+        />
+        <CarouselNext
+          variant="ghost"
+          className="top-1/2 right-2 z-10 h-8 w-8 -translate-y-1/2 rounded-full bg-black/50 text-white hover:bg-black/70"
+        />
       </Carousel>
     </div>
   );
