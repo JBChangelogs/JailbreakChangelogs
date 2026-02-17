@@ -319,7 +319,7 @@ export default function XpCalculator({ season }: XpCalculatorProps) {
   // If season has ended, show a different UI
   if (seasonHasEnded) {
     return (
-      <div className="border-border-card bg-secondary-bg hover:border-border-focus mb-8 rounded-lg border p-6">
+      <div className="border-border-card bg-secondary-bg mb-8 rounded-lg border p-6">
         <div className="text-center">
           <div className="mb-4">
             <div className="to-button-danger/80 from-button-danger mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-linear-to-br">
@@ -345,26 +345,13 @@ export default function XpCalculator({ season }: XpCalculatorProps) {
             </p>
           </div>
 
-          <div className="border-border-card bg-primary-bg hover:border-border-focus rounded-lg border p-4">
-            <div className="mb-3 flex items-center justify-center gap-3">
-              <svg
-                className="text-button-info h-5 w-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M13 10V3L4 14h7v7l9-11h-7z"
-                />
-              </svg>
-              <span className="text-button-info font-semibold">
+          <div className="border-border-card bg-tertiary-bg rounded-lg border p-4">
+            <div className="mb-3 flex items-center justify-center">
+              <span className="text-primary-text font-semibold">
                 Check Back Soon!
               </span>
             </div>
-            <p className="bg-primary-bg text-secondary-text text-sm">
+            <p className="bg-tertiary-bg text-secondary-text text-sm">
               The XP calculator will be available again when Season{" "}
               {season.season + 1} begins.
             </p>
