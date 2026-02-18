@@ -156,8 +156,14 @@ export default function ItemDetailsClient({
   favoriteButtonSlot,
 }: ItemDetailsClientProps) {
   "use memo";
+  const isBlueBird = item.id === 919;
+  const blueBirdDefaultImage =
+    "https://assets.jailbreakchangelogs.xyz/assets/images/items/vehicles/BlueBird.webp";
+  const blueBirdRaisedImage =
+    "https://assets.jailbreakchangelogs.xyz/assets/images/items/vehicles/BlueBird_1.webp";
   const [isPlaying, setIsPlaying] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
+  const [isBlueBirdRaised, setIsBlueBirdRaised] = useState(false);
   const [visibleLength, setVisibleLength] = useState(500);
   const [activeTab, setActiveTab] = useState(0);
   const [activeChartTab, setActiveChartTab] = useState(0);
@@ -189,6 +195,17 @@ export default function ItemDetailsClient({
       }
     }
   }, [isHovered, item?.type]);
+
+  useEffect(() => {
+    if (!isBlueBird) return;
+    const interval = window.setInterval(() => {
+      setIsBlueBirdRaised((prev) => !prev);
+    }, 2200);
+
+    return () => {
+      window.clearInterval(interval);
+    };
+  }, [isBlueBird]);
 
   const INITIAL_DESCRIPTION_LENGTH = 500;
 
@@ -338,7 +355,31 @@ export default function ItemDetailsClient({
                 {favoriteButtonSlot}
               </div>
 
-              {isVideoItem(item.name) ? (
+              {isBlueBird ? (
+                <div className="relative h-full w-full overflow-hidden">
+                  <Image
+                    src={
+                      isBlueBirdRaised
+                        ? blueBirdRaisedImage
+                        : blueBirdDefaultImage
+                    }
+                    alt={`${item.name} (active variant)`}
+                    width={2560}
+                    height={1440}
+                    fetchPriority="high"
+                    loading="eager"
+                    className="h-full w-full object-cover"
+                    onError={handleImageError}
+                  />
+                  <div className="pointer-events-none absolute right-4 bottom-4 left-4">
+                    <div className="text-right text-xs font-semibold tracking-wide text-white">
+                      <span className="drop-shadow-[0_1px_2px_rgba(0,0,0,0.9)]">
+                        {isBlueBirdRaised ? "LOWERED MODE" : "RAISED MODE"}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              ) : isVideoItem(item.name) ? (
                 <video
                   ref={videoRef}
                   src={getVideoPath(item.type, item.name)}
