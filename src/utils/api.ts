@@ -76,6 +76,7 @@ export const BASE_API_URL =
 
 export const PUBLIC_API_URL = process.env.NEXT_PUBLIC_API_URL;
 export const INVENTORY_API_URL = process.env.NEXT_PUBLIC_INVENTORY_API_URL;
+export const WS_URL = process.env.NEXT_PUBLIC_WS_URL as string;
 export const INVENTORY_WS_URL = process.env
   .NEXT_PUBLIC_INVENTORY_WS_URL as string;
 export const ENABLE_WS_SCAN = process.env.NEXT_PUBLIC_ENABLE_WS_SCAN === "true";

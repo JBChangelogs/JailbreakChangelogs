@@ -205,6 +205,22 @@ export default function Header() {
     }
   }, [pathname, isAuthenticated, fetchUnreadCount]);
 
+  useEffect(() => {
+    if (!isAuthenticated) return;
+
+    const handleNotificationReceived = () => {
+      fetchUnreadCount();
+    };
+
+    window.addEventListener("notificationReceived", handleNotificationReceived);
+    return () => {
+      window.removeEventListener(
+        "notificationReceived",
+        handleNotificationReceived,
+      );
+    };
+  }, [isAuthenticated, fetchUnreadCount]);
+
   const desktopHeaderRef = useRef<HTMLDivElement>(null);
   const mobileHeaderRef = useRef<HTMLDivElement>(null);
 

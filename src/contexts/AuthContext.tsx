@@ -16,7 +16,6 @@ import {
   handleTokenAuth,
   trackLogoutSource,
 } from "@/utils/auth";
-// Removed hasValidToken import - using session API instead
 import {
   getStoredCampaign,
   clearStoredCampaign,
@@ -25,6 +24,7 @@ import {
 } from "@/utils/campaign";
 import { safeGetJSON } from "@/utils/safeStorage";
 import { toast } from "sonner";
+import { useRealtimeNotificationsWebSocket } from "@/hooks/useRealtimeNotificationsWebSocket";
 
 // Helper function to track user status in Clarity
 const trackUserStatus = (isAuthenticated: boolean, action?: string) => {
@@ -74,6 +74,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
   );
   const isUserActiveRef = useRef(true);
   const tokenAuthProcessedRef = useRef(false);
+
+  useRealtimeNotificationsWebSocket(
+    authState.isAuthenticated && !authState.isLoading,
+  );
 
   const initializeAuth = useCallback(async () => {
     try {
