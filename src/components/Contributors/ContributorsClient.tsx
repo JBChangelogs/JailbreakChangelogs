@@ -318,7 +318,7 @@ export default function ContributorsClient({
   return (
     <div className="bg-primary-bg">
       <div className="container mx-auto px-6 py-10">
-        <h1 className="text-primary-text text-center text-2xl font-semibold capitalize lg:text-3xl">
+        <h1 className="text-primary-text text-center text-2xl font-semibold lg:text-3xl">
           Meet the <span className="text-button-info">team</span>
         </h1>
 

@@ -237,29 +237,19 @@ export const UserBadges = ({
   const handleBadimoBadgeClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     const badimoFlag = sortedFlags.find((f) => f.flag === "is_badimo");
-    toast(
-      () => (
-        <div className="flex items-center gap-2">
+    toast.success(
+      badimoFlag?.description || "This user is an official Badimo developer",
+      {
+        duration: 4000,
+        icon: (
           <Image
             src="https://assets.jailbreakchangelogs.xyz/assets/images/badimo_transparent.png"
             alt="Badimo"
             width={20}
             height={20}
-            className="h-5 w-5 object-contain"
+            className="object-contain"
           />
-          <span>
-            {badimoFlag?.description ||
-              "This user is an official Badimo developer"}
-          </span>
-        </div>
-      ),
-      {
-        duration: 4000,
-        style: {
-          background: "linear-gradient(to right, #111827, #1F2937)",
-          color: "white",
-          fontWeight: "600",
-        },
+        ),
       },
     );
   };

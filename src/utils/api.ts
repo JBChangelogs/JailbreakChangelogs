@@ -80,6 +80,8 @@ export const WS_URL = process.env.NEXT_PUBLIC_WS_URL as string;
 export const INVENTORY_WS_URL = process.env
   .NEXT_PUBLIC_INVENTORY_WS_URL as string;
 export const ENABLE_WS_SCAN = process.env.NEXT_PUBLIC_ENABLE_WS_SCAN === "true";
+export const ENABLE_REALTIME_NOTIFICATIONS_WS =
+  process.env.NEXT_PUBLIC_ENABLE_REALTIME_NOTIFICATIONS_WS === "true";
 export const INVENTORY_API_SOURCE_HEADER = process.env
   .NEXT_PUBLIC_INVENTORY_API_SOURCE_HEADER as string;
 

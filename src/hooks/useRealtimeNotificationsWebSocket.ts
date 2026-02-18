@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef } from "react";
 import { toast } from "sonner";
-import { WS_URL } from "@/utils/api";
+import { ENABLE_REALTIME_NOTIFICATIONS_WS, WS_URL } from "@/utils/api";
 import { parseNotificationUrl } from "@/utils/notificationUrl";
 
 interface RealtimeNotificationContent {
@@ -45,6 +45,8 @@ function getReconnectDelay(attempt: number): number {
 }
 
 export function useRealtimeNotificationsWebSocket(enabled: boolean): void {
+  const isRealtimeNotificationsEnabled =
+    enabled && ENABLE_REALTIME_NOTIFICATIONS_WS;
   const wsRef = useRef<WebSocket | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const lastSoundPlayedAtRef = useRef(0);
@@ -90,11 +92,11 @@ export function useRealtimeNotificationsWebSocket(enabled: boolean): void {
   }, [closeForIdle]);
 
   useEffect(() => {
-    enabledRef.current = enabled;
-  }, [enabled]);
+    enabledRef.current = isRealtimeNotificationsEnabled;
+  }, [isRealtimeNotificationsEnabled]);
 
   useEffect(() => {
-    if (!enabled) {
+    if (!isRealtimeNotificationsEnabled) {
       if (reconnectTimeoutRef.current) {
         clearTimeout(reconnectTimeoutRef.current);
         reconnectTimeoutRef.current = null;
@@ -423,5 +425,5 @@ export function useRealtimeNotificationsWebSocket(enabled: boolean): void {
       disableAutoReconnectRef.current = false;
       handshakeRetryAttemptsRef.current = 0;
     };
-  }, [enabled, ensureAudio, resetIdleTimer]);
+  }, [isRealtimeNotificationsEnabled, ensureAudio, resetIdleTimer]);
 }

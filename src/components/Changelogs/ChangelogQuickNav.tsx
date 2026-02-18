@@ -35,7 +35,7 @@ const ChangelogQuickNav: React.FC<ChangelogQuickNavProps> = ({
             <span className="text-primary-text text-sm">Previous</span>
             <Tooltip>
               <TooltipTrigger asChild>
-                <span className="text-link group-hover:text-link-hover line-clamp-1 max-w-[300px] cursor-help text-base font-medium">
+                <span className="text-link group-hover:text-link-hover max-w-[300px] cursor-help truncate text-left text-base font-medium">
                   {prevChangelog.title}
                 </span>
               </TooltipTrigger>
@@ -57,7 +57,7 @@ const ChangelogQuickNav: React.FC<ChangelogQuickNavProps> = ({
             <span className="text-primary-text text-sm">Next</span>
             <Tooltip>
               <TooltipTrigger asChild>
-                <span className="text-link group-hover:text-link-hover line-clamp-1 max-w-[300px] cursor-help text-base font-medium">
+                <span className="text-link group-hover:text-link-hover max-w-[300px] cursor-help truncate text-right text-base font-medium">
                   {nextChangelog.title}
                 </span>
               </TooltipTrigger>
