@@ -16,7 +16,9 @@ interface RealtimeNotificationMessage {
   action?: string;
   code?: number;
   message?: string;
+  total_notifications?: number;
   data?: {
+    total_notifications?: number;
     type?: string;
     data?: RealtimeNotificationContent;
   };
@@ -26,6 +28,7 @@ const PING_INTERVAL_MS = 30000;
 const IDLE_TIMEOUT_MS = 120000;
 const MAX_RECONNECT_DELAY_MS = 15000;
 const SOUND_COOLDOWN_MS = 800;
+const MAX_HANDSHAKE_RETRIES = 3;
 
 function getRealtimeWsUrl(): string | null {
   const baseUrl = WS_URL?.replace(/\/+$/, "");
@@ -51,6 +54,9 @@ export function useRealtimeNotificationsWebSocket(enabled: boolean): void {
   const reconnectAttemptsRef = useRef(0);
   const enabledRef = useRef(enabled);
   const isIdleRef = useRef(false);
+  const openedForAttemptRef = useRef(false);
+  const disableAutoReconnectRef = useRef(false);
+  const handshakeRetryAttemptsRef = useRef(0);
 
   const closeForIdle = useCallback(() => {
     isIdleRef.current = true;
@@ -107,6 +113,9 @@ export function useRealtimeNotificationsWebSocket(enabled: boolean): void {
       }
       reconnectAttemptsRef.current = 0;
       isIdleRef.current = false;
+      openedForAttemptRef.current = false;
+      disableAutoReconnectRef.current = false;
+      handshakeRetryAttemptsRef.current = 0;
       return;
     }
 
@@ -131,6 +140,9 @@ export function useRealtimeNotificationsWebSocket(enabled: boolean): void {
       if (unmounted || !enabledRef.current) {
         return;
       }
+      if (disableAutoReconnectRef.current) {
+        return;
+      }
 
       if (
         wsRef.current?.readyState === WebSocket.OPEN ||
@@ -150,8 +162,17 @@ export function useRealtimeNotificationsWebSocket(enabled: boolean): void {
 
         const ws = new WebSocket(wsUrl);
         wsRef.current = ws;
+        openedForAttemptRef.current = false;
 
         ws.addEventListener("open", () => {
+          window.dispatchEvent(
+            new CustomEvent("realtimeNotificationsConnection", {
+              detail: { connected: true },
+            }),
+          );
+          openedForAttemptRef.current = true;
+          disableAutoReconnectRef.current = false;
+          handshakeRetryAttemptsRef.current = 0;
           isIdleRef.current = false;
           reconnectAttemptsRef.current = 0;
           resetIdleTimer();
@@ -255,7 +276,13 @@ export function useRealtimeNotificationsWebSocket(enabled: boolean): void {
 
             window.dispatchEvent(
               new CustomEvent("notificationReceived", {
-                detail: payload.data.data,
+                detail: {
+                  total_notifications:
+                    payload.total_notifications ??
+                    payload.data?.total_notifications,
+                  data: payload.data.data,
+                  type: payload.data.type,
+                },
               }),
             );
           } catch (error) {
@@ -267,6 +294,11 @@ export function useRealtimeNotificationsWebSocket(enabled: boolean): void {
         });
 
         ws.addEventListener("close", (event) => {
+          window.dispatchEvent(
+            new CustomEvent("realtimeNotificationsConnection", {
+              detail: { connected: false },
+            }),
+          );
           if (pingIntervalRef.current) {
             clearInterval(pingIntervalRef.current);
             pingIntervalRef.current = null;
@@ -286,6 +318,31 @@ export function useRealtimeNotificationsWebSocket(enabled: boolean): void {
           }
 
           if (isIdleRef.current || event.reason === "idle-timeout") {
+            return;
+          }
+
+          // Handshake rejection (e.g. HTTP 403) typically surfaces as close 1006
+          // without ever reaching "open". Retry with capped exponential backoff.
+          if (!openedForAttemptRef.current && event.code === 1006) {
+            handshakeRetryAttemptsRef.current += 1;
+            const attempt = handshakeRetryAttemptsRef.current;
+
+            if (
+              attempt <= MAX_HANDSHAKE_RETRIES &&
+              !unmounted &&
+              enabledRef.current
+            ) {
+              const delay = getReconnectDelay(attempt);
+              reconnectTimeoutRef.current = setTimeout(connect, delay);
+              return;
+            }
+
+            disableAutoReconnectRef.current = true;
+            toast.error("Live notifications offline", {
+              id: "realtime-notifications-error:handshake-rejected",
+              description:
+                "Couldn't connect after 3 attempts. Refresh to try again.",
+            });
             return;
           }
 
@@ -362,6 +419,9 @@ export function useRealtimeNotificationsWebSocket(enabled: boolean): void {
       lastSoundPlayedAtRef.current = 0;
       reconnectAttemptsRef.current = 0;
       isIdleRef.current = false;
+      openedForAttemptRef.current = false;
+      disableAutoReconnectRef.current = false;
+      handshakeRetryAttemptsRef.current = 0;
     };
   }, [enabled, ensureAudio, resetIdleTimer]);
 }

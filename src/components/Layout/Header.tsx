@@ -7,7 +7,7 @@ import { AppBar, Toolbar, Box, Typography } from "@mui/material";
 import { Pagination } from "@/components/ui/Pagination";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import dynamic from "next/dynamic";
-import { useState, useCallback, useEffect } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { logout, trackLogoutSource } from "@/utils/auth";
 import { toast } from "sonner";
 import LoginModal from "../Auth/LoginModal";
@@ -18,7 +18,6 @@ import { RobloxIcon } from "@/components/Icons/RobloxIcon";
 import { isFeatureEnabled } from "@/utils/featureFlags";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { useTheme } from "@/contexts/ThemeContext";
-import { useRef } from "react";
 
 const AnimatedThemeToggler = dynamic(
   () =>
@@ -55,6 +54,7 @@ import {
   clearUnreadNotifications,
   clearNotificationHistory,
   NotificationHistory,
+  NotificationItem,
 } from "@/utils/api";
 import { formatCompactDateTime } from "@/utils/timestamp";
 import { parseNotificationUrl } from "@/utils/notificationUrl";
@@ -132,6 +132,12 @@ export default function Header() {
   const [notificationTimeoutId, setNotificationTimeoutId] =
     useState<NodeJS.Timeout | null>(null);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [isRealtimeConnected, setIsRealtimeConnected] = useState(false);
+  const [wsHistoryNotifications, setWsHistoryNotifications] = useState<
+    NotificationItem[]
+  >([]);
+  const hasWsUnreadSeedRef = useRef(false);
+  const wsNotificationIdRef = useRef(-1);
 
   // Debounced notification fetching functions
   const fetchUnreadWithDebounce = (page: number, limit: number) => {
@@ -169,47 +175,69 @@ export default function Header() {
   const userData = isAuthenticated ? authUser : null;
   useEscapeLogin();
 
-  const fetchUnreadCount = useCallback(async () => {
-    if (!isAuthenticated) {
-      setUnreadCount(0);
-      return;
-    }
-
-    try {
-      const response = await fetch("/api/notifications/unread", {
-        cache: "no-store",
-      });
-      if (response.ok) {
-        const data = await response.json();
-        setUnreadCount(data.unread_count || 0);
-      } else {
-        setUnreadCount(0);
-      }
-    } catch (error) {
-      console.error("Error fetching unread count:", error);
-      setUnreadCount(0);
-    }
-  }, [isAuthenticated]);
-
-  useEffect(() => {
-    setTimeout(() => {
-      fetchUnreadCount();
-    }, 0);
-  }, [fetchUnreadCount]);
-
-  useEffect(() => {
-    if (isAuthenticated) {
-      setTimeout(() => {
-        fetchUnreadCount();
-      }, 0);
-    }
-  }, [pathname, isAuthenticated, fetchUnreadCount]);
-
   useEffect(() => {
     if (!isAuthenticated) return;
 
-    const handleNotificationReceived = () => {
-      fetchUnreadCount();
+    const handleNotificationReceived = (event: Event) => {
+      const detail = (
+        event as CustomEvent<{
+          total_notifications?: unknown;
+          data?: {
+            title?: string;
+            description?: string;
+            link?: string;
+            metadata?: Record<string, unknown> | null;
+          };
+        }>
+      ).detail;
+      const totalNotifications =
+        typeof detail?.total_notifications === "number"
+          ? detail.total_notifications
+          : null;
+      const wsNotification = detail?.data;
+
+      setUnreadCount((prev) => {
+        if (totalNotifications !== null && !hasWsUnreadSeedRef.current) {
+          hasWsUnreadSeedRef.current = true;
+          return Math.max(0, totalNotifications);
+        }
+        return Math.max(0, prev + 1);
+      });
+
+      if (
+        wsNotification &&
+        typeof wsNotification.title === "string" &&
+        typeof wsNotification.description === "string" &&
+        typeof wsNotification.link === "string"
+      ) {
+        const title = wsNotification.title;
+        const description = wsNotification.description;
+        const now = Date.now();
+        const normalizedLink = wsNotification.link.trim();
+        const key = `${title}|${description}|${normalizedLink}`;
+
+        setWsHistoryNotifications((prev) => {
+          const exists = prev.some(
+            (item) =>
+              `${item.title}|${item.description}|${item.link.trim()}` === key,
+          );
+          if (exists) return prev;
+
+          const nextItem: NotificationItem = {
+            id: wsNotificationIdRef.current--,
+            user_id: authUser?.id || "",
+            title,
+            description,
+            link: normalizedLink,
+            metadata: wsNotification.metadata ?? null,
+            seen: 1,
+            seen_at: now,
+            last_updated: now,
+          };
+
+          return [nextItem, ...prev].slice(0, 100);
+        });
+      }
     };
 
     window.addEventListener("notificationReceived", handleNotificationReceived);
@@ -219,7 +247,75 @@ export default function Header() {
         handleNotificationReceived,
       );
     };
-  }, [isAuthenticated, fetchUnreadCount]);
+  }, [isAuthenticated, authUser?.id]);
+
+  useEffect(() => {
+    if (isAuthenticated) return;
+    const timeoutId = setTimeout(() => {
+      setWsHistoryNotifications([]);
+      wsNotificationIdRef.current = -1;
+      hasWsUnreadSeedRef.current = false;
+      setUnreadCount(0);
+      setIsRealtimeConnected(false);
+    }, 0);
+
+    return () => {
+      clearTimeout(timeoutId);
+    };
+  }, [isAuthenticated]);
+
+  useEffect(() => {
+    if (!isAuthenticated) return;
+
+    const handleConnectionChange = (event: Event) => {
+      const detail = (event as CustomEvent<{ connected?: boolean }>).detail;
+      const connected = detail?.connected === true;
+      setIsRealtimeConnected(connected);
+      if (!connected) {
+        setUnreadCount(0);
+        hasWsUnreadSeedRef.current = false;
+      }
+    };
+
+    window.addEventListener(
+      "realtimeNotificationsConnection",
+      handleConnectionChange,
+    );
+
+    return () => {
+      window.removeEventListener(
+        "realtimeNotificationsConnection",
+        handleConnectionChange,
+      );
+    };
+  }, [isAuthenticated]);
+
+  const displayNotifications = useMemo(() => {
+    if (!notifications) return null;
+    if (notificationTab !== "history" || wsHistoryNotifications.length === 0) {
+      return notifications;
+    }
+
+    const apiKeys = new Set(
+      notifications.items.map(
+        (item) => `${item.title}|${item.description}|${item.link.trim()}`,
+      ),
+    );
+    const wsOnlyItems = wsHistoryNotifications.filter(
+      (item) =>
+        !apiKeys.has(`${item.title}|${item.description}|${item.link.trim()}`),
+    );
+
+    if (wsOnlyItems.length === 0) {
+      return notifications;
+    }
+
+    return {
+      ...notifications,
+      items: [...wsOnlyItems, ...notifications.items],
+      total: notifications.total + wsOnlyItems.length,
+    };
+  }, [notifications, notificationTab, wsHistoryNotifications]);
 
   const desktopHeaderRef = useRef<HTMLDivElement>(null);
   const mobileHeaderRef = useRef<HTMLDivElement>(null);
@@ -597,10 +693,9 @@ export default function Header() {
         <div className="relative z-10">
           <NavbarModern
             unreadCount={unreadCount}
+            isRealtimeConnected={isRealtimeConnected}
             setUnreadCount={setUnreadCount}
-            fetchUnreadCount={async () => {
-              await fetchUnreadCount();
-            }}
+            wsHistoryNotifications={wsHistoryNotifications}
           />
         </div>
       </div>
@@ -672,7 +767,7 @@ export default function Header() {
                           className="text-primary-text h-4 w-4"
                           inline={true}
                         />
-                        {isAuthenticated && (
+                        {isAuthenticated && isRealtimeConnected && (
                           <UnreadNotificationBadge count={unreadCount} />
                         )}
                       </button>
@@ -687,74 +782,79 @@ export default function Header() {
                       <div className="border-border-secondary border-b px-4 py-3">
                         <div className="flex items-center justify-between">
                           <h3 className="text-primary-text font-semibold">
-                            {notifications
-                              ? `${notifications.total} ${notificationTab === "unread" ? "Unread " : ""}Notification${notifications.total !== 1 ? "s" : ""}`
+                            {displayNotifications
+                              ? `${displayNotifications.total} ${notificationTab === "unread" ? "Unread " : ""}Notification${displayNotifications.total !== 1 ? "s" : ""}`
                               : `0 ${notificationTab === "unread" ? "Unread " : ""}Notifications`}
                           </h3>
-                          {notifications && notifications.total > 0 && (
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <button
-                                  onClick={async () => {
-                                    const success =
+                          {displayNotifications &&
+                            displayNotifications.total > 0 && (
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <button
+                                    onClick={async () => {
+                                      const success =
+                                        notificationTab === "unread"
+                                          ? await clearUnreadNotifications()
+                                          : await clearNotificationHistory();
+                                      if (success) {
+                                        toast.success(
+                                          notificationTab === "unread"
+                                            ? "Cleared all unread notifications"
+                                            : "Cleared notification history",
+                                          {
+                                            duration: 2000,
+                                          },
+                                        );
+                                        // Refetch to update the list
+                                        setIsLoadingNotifications(true);
+                                        const data =
+                                          notificationTab === "unread"
+                                            ? await fetchUnreadNotifications(
+                                                1,
+                                                5,
+                                              )
+                                            : await fetchNotificationHistory(
+                                                1,
+                                                5,
+                                              );
+                                        setNotifications(data);
+                                        setNotificationPage(1);
+                                        setIsLoadingNotifications(false);
+                                        if (notificationTab === "unread") {
+                                          setUnreadCount(0);
+                                        }
+                                      } else {
+                                        toast.error(
+                                          notificationTab === "unread"
+                                            ? "Failed to clear unread notifications"
+                                            : "Failed to clear notification history",
+                                          {
+                                            duration: 3000,
+                                          },
+                                        );
+                                      }
+                                    }}
+                                    data-umami-event={
                                       notificationTab === "unread"
-                                        ? await clearUnreadNotifications()
-                                        : await clearNotificationHistory();
-                                    if (success) {
-                                      toast.success(
-                                        notificationTab === "unread"
-                                          ? "Cleared all unread notifications"
-                                          : "Cleared notification history",
-                                        {
-                                          duration: 2000,
-                                        },
-                                      );
-                                      // Refetch to update the list
-                                      setIsLoadingNotifications(true);
-                                      const data =
-                                        notificationTab === "unread"
-                                          ? await fetchUnreadNotifications(1, 5)
-                                          : await fetchNotificationHistory(
-                                              1,
-                                              5,
-                                            );
-                                      setNotifications(data);
-                                      setNotificationPage(1);
-                                      setIsLoadingNotifications(false);
-                                      // Refresh unread count
-                                      fetchUnreadCount();
-                                    } else {
-                                      toast.error(
-                                        notificationTab === "unread"
-                                          ? "Failed to clear unread notifications"
-                                          : "Failed to clear notification history",
-                                        {
-                                          duration: 3000,
-                                        },
-                                      );
+                                        ? "Clear Unread Notifications"
+                                        : "Clear Notification History"
                                     }
-                                  }}
-                                  data-umami-event={
-                                    notificationTab === "unread"
-                                      ? "Clear Unread Notifications"
-                                      : "Clear Notification History"
-                                  }
-                                  className="text-secondary-text cursor-pointer transition-colors hover:text-red-500"
-                                >
-                                  <Icon
-                                    icon="si:bin-fill"
-                                    className="h-5 w-5"
-                                    inline={true}
-                                  />
-                                </button>
-                              </TooltipTrigger>
-                              <TooltipContent>
-                                {notificationTab === "unread"
-                                  ? "Clear Unread"
-                                  : "Clear History"}
-                              </TooltipContent>
-                            </Tooltip>
-                          )}
+                                    className="text-secondary-text cursor-pointer transition-colors hover:text-red-500"
+                                  >
+                                    <Icon
+                                      icon="si:bin-fill"
+                                      className="h-5 w-5"
+                                      inline={true}
+                                    />
+                                  </button>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  {notificationTab === "unread"
+                                    ? "Clear Unread"
+                                    : "Clear History"}
+                                </TooltipContent>
+                              </Tooltip>
+                            )}
                         </div>
                       </div>
 
@@ -833,10 +933,11 @@ export default function Header() {
                               You must be logged in to view notifications
                             </p>
                           </div>
-                        ) : notifications && notifications.items.length > 0 ? (
+                        ) : displayNotifications &&
+                          displayNotifications.items.length > 0 ? (
                           <>
                             <div className="py-2">
-                              {notifications.items.map((notif) => {
+                              {displayNotifications.items.map((notif) => {
                                 // Check if link domain is whitelisted and extract URL info
                                 const urlInfo = parseNotificationUrl(
                                   notif.link,
@@ -852,85 +953,91 @@ export default function Header() {
                                         <p className="text-primary-text flex-1 text-sm font-semibold wrap-break-word whitespace-normal">
                                           {notif.title}
                                         </p>
-                                        {notificationTab === "unread" && (
-                                          <Tooltip>
-                                            <TooltipTrigger asChild>
-                                              <button
-                                                onClick={async () => {
-                                                  // Optimistically remove from UI
-                                                  setNotifications((prev) => {
-                                                    if (!prev) return prev;
-                                                    return {
-                                                      ...prev,
-                                                      items: prev.items.filter(
-                                                        (n) =>
-                                                          n.id !== notif.id,
-                                                      ),
-                                                      total: prev.total - 1,
-                                                    };
-                                                  });
+                                        {notificationTab === "unread" &&
+                                          notif.id > 0 && (
+                                            <Tooltip>
+                                              <TooltipTrigger asChild>
+                                                <button
+                                                  onClick={async () => {
+                                                    // Optimistically remove from UI
+                                                    setNotifications((prev) => {
+                                                      if (!prev) return prev;
+                                                      return {
+                                                        ...prev,
+                                                        items:
+                                                          prev.items.filter(
+                                                            (n) =>
+                                                              n.id !== notif.id,
+                                                          ),
+                                                        total: prev.total - 1,
+                                                      };
+                                                    });
 
-                                                  // Update unread count immediately
-                                                  setUnreadCount((prev) =>
-                                                    Math.max(0, prev - 1),
-                                                  );
-
-                                                  // Mark as seen for visual feedback
-                                                  setMarkedAsSeen((prev) =>
-                                                    new Set(prev).add(notif.id),
-                                                  );
-
-                                                  toast.success(
-                                                    "Marked as read",
-                                                    {
-                                                      duration: 2000,
-                                                    },
-                                                  );
-
-                                                  // Call API in background
-                                                  const success =
-                                                    await markNotificationAsSeen(
-                                                      notif.id,
+                                                    // Update unread count immediately
+                                                    setUnreadCount((prev) =>
+                                                      Math.max(0, prev - 1),
                                                     );
 
-                                                  if (!success) {
-                                                    // Revert on failure
-                                                    toast.error(
-                                                      "Failed to mark as read",
+                                                    // Mark as seen for visual feedback
+                                                    setMarkedAsSeen((prev) =>
+                                                      new Set(prev).add(
+                                                        notif.id,
+                                                      ),
+                                                    );
+
+                                                    toast.success(
+                                                      "Marked as read",
                                                       {
                                                         duration: 2000,
                                                       },
                                                     );
-                                                    // Refetch to restore state
-                                                    const data =
-                                                      await fetchUnreadNotifications(
-                                                        notificationPage,
-                                                        5,
+
+                                                    // Call API in background
+                                                    const success =
+                                                      await markNotificationAsSeen(
+                                                        notif.id,
                                                       );
-                                                    setNotifications(data);
-                                                    fetchUnreadCount();
-                                                  }
-                                                }}
-                                                className={`shrink-0 cursor-pointer rounded-full p-1 transition-all ${
-                                                  markedAsSeen.has(notif.id)
-                                                    ? "bg-green-500/20 text-green-500"
-                                                    : "bg-secondary-bg text-secondary-text hover:bg-tertiary-bg hover:text-primary-text"
-                                                }`}
-                                                data-umami-event="Mark Notification Read"
-                                                aria-label="Mark as seen"
-                                              >
-                                                <Icon
-                                                  icon="proicons:checkmark"
-                                                  className="h-4 w-4"
-                                                  inline={true}
-                                                />
-                                              </button>
-                                            </TooltipTrigger>
-                                            <TooltipContent>
-                                              Mark As Read
-                                            </TooltipContent>
-                                          </Tooltip>
-                                        )}
+
+                                                    if (!success) {
+                                                      // Revert on failure
+                                                      toast.error(
+                                                        "Failed to mark as read",
+                                                        {
+                                                          duration: 2000,
+                                                        },
+                                                      );
+                                                      // Refetch list to restore state
+                                                      const data =
+                                                        await fetchUnreadNotifications(
+                                                          notificationPage,
+                                                          5,
+                                                        );
+                                                      setNotifications(data);
+                                                      setUnreadCount(
+                                                        (prev) => prev + 1,
+                                                      );
+                                                    }
+                                                  }}
+                                                  className={`shrink-0 cursor-pointer rounded-full p-1 transition-all ${
+                                                    markedAsSeen.has(notif.id)
+                                                      ? "bg-green-500/20 text-green-500"
+                                                      : "bg-secondary-bg text-secondary-text hover:bg-tertiary-bg hover:text-primary-text"
+                                                  }`}
+                                                  data-umami-event="Mark Notification Read"
+                                                  aria-label="Mark as seen"
+                                                >
+                                                  <Icon
+                                                    icon="proicons:checkmark"
+                                                    className="h-4 w-4"
+                                                    inline={true}
+                                                  />
+                                                </button>
+                                              </TooltipTrigger>
+                                              <TooltipContent>
+                                                Mark As Read
+                                              </TooltipContent>
+                                            </Tooltip>
+                                          )}
                                       </div>
                                       <p className="text-secondary-text mt-1 text-xs wrap-break-word whitespace-normal">
                                         {notif.description}
@@ -984,10 +1091,10 @@ export default function Header() {
                                 );
                               })}
                             </div>
-                            {notifications.total_pages > 1 && (
+                            {displayNotifications.total_pages > 1 && (
                               <div className="border-border-secondary flex justify-center border-t py-3">
                                 <Pagination
-                                  count={notifications.total_pages}
+                                  count={displayNotifications.total_pages}
                                   page={notificationPage}
                                   onChange={(_event, value) => {
                                     setNotificationPage(value);

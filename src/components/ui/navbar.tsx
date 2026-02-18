@@ -24,6 +24,7 @@ import {
   clearUnreadNotifications,
   clearNotificationHistory,
   NotificationHistory,
+  NotificationItem,
 } from "@/utils/api";
 import { formatCustomDate } from "@/utils/timestamp";
 import { useOptimizedRealTimeRelativeDate } from "@/hooks/useSharedTimer";
@@ -256,13 +257,15 @@ const NotificationTimestamp = ({
 export const NavbarModern = ({
   className,
   unreadCount,
+  isRealtimeConnected,
   setUnreadCount,
-  fetchUnreadCount,
+  wsHistoryNotifications,
 }: {
   className?: string;
   unreadCount: number;
+  isRealtimeConnected: boolean;
   setUnreadCount: React.Dispatch<React.SetStateAction<number>>;
-  fetchUnreadCount: () => Promise<void>;
+  wsHistoryNotifications: NotificationItem[];
 }) => {
   const [active, setActive] = useState<string | null>(null);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
@@ -341,6 +344,33 @@ export const NavbarModern = ({
       console.error("Logout error:", err);
     }
   };
+
+  const displayNotifications = React.useMemo(() => {
+    if (!notifications) return null;
+    if (notificationTab !== "history" || wsHistoryNotifications.length === 0) {
+      return notifications;
+    }
+
+    const apiKeys = new Set(
+      notifications.items.map(
+        (item) => `${item.title}|${item.description}|${item.link.trim()}`,
+      ),
+    );
+    const wsOnlyItems = wsHistoryNotifications.filter(
+      (item) =>
+        !apiKeys.has(`${item.title}|${item.description}|${item.link.trim()}`),
+    );
+
+    if (wsOnlyItems.length === 0) {
+      return notifications;
+    }
+
+    return {
+      ...notifications,
+      items: [...wsOnlyItems, ...notifications.items],
+      total: notifications.total + wsOnlyItems.length,
+    };
+  }, [notifications, notificationTab, wsHistoryNotifications]);
 
   return (
     <div
@@ -510,7 +540,7 @@ export const NavbarModern = ({
                       className="text-primary-text h-5 w-5"
                       inline={true}
                     />
-                    {isAuthenticated && (
+                    {isAuthenticated && isRealtimeConnected && (
                       <UnreadNotificationBadge count={unreadCount} />
                     )}
                   </button>
@@ -524,11 +554,11 @@ export const NavbarModern = ({
               <div className="border-border-secondary border-b px-4 py-3">
                 <div className="flex items-center justify-between">
                   <h3 className="text-primary-text font-semibold">
-                    {notifications
-                      ? `${notifications.total} ${notificationTab === "unread" ? "Unread " : ""}Notification${notifications.total !== 1 ? "s" : ""}`
+                    {displayNotifications
+                      ? `${displayNotifications.total} ${notificationTab === "unread" ? "Unread " : ""}Notification${displayNotifications.total !== 1 ? "s" : ""}`
                       : `0 ${notificationTab === "unread" ? "Unread " : ""}Notifications`}
                   </h3>
-                  {notifications && notifications.total > 0 && (
+                  {displayNotifications && displayNotifications.total > 0 && (
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <button
@@ -555,8 +585,9 @@ export const NavbarModern = ({
                               setNotifications(data);
                               setNotificationPage(1);
                               setIsLoadingNotifications(false);
-                              // Refresh unread count
-                              fetchUnreadCount();
+                              if (notificationTab === "unread") {
+                                setUnreadCount(0);
+                              }
                             } else {
                               toast.error(
                                 notificationTab === "unread"
@@ -665,10 +696,11 @@ export const NavbarModern = ({
                       You must be logged in to view notifications
                     </p>
                   </div>
-                ) : notifications && notifications.items.length > 0 ? (
+                ) : displayNotifications &&
+                  displayNotifications.items.length > 0 ? (
                   <>
                     <div className="py-2">
-                      {notifications.items.map((notif) => {
+                      {displayNotifications.items.map((notif) => {
                         // Check if link domain is whitelisted and extract URL info
                         const urlInfo = parseNotificationUrl(notif.link);
 
@@ -733,7 +765,7 @@ export const NavbarModern = ({
                                               5,
                                             );
                                           setNotifications(data);
-                                          fetchUnreadCount();
+                                          setUnreadCount((prev) => prev + 1);
                                         }
                                       }}
                                       className={`shrink-0 cursor-pointer rounded-full p-1 transition-all ${
@@ -806,10 +838,10 @@ export const NavbarModern = ({
                         );
                       })}
                     </div>
-                    {notifications.total_pages > 1 && (
+                    {displayNotifications.total_pages > 1 && (
                       <div className="border-border-secondary flex justify-center border-t py-3">
                         <Pagination
-                          count={notifications.total_pages}
+                          count={displayNotifications.total_pages}
                           page={notificationPage}
                           siblingCount={0}
                           onChange={(_event, value) => {
