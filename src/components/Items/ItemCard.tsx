@@ -158,7 +158,7 @@ export default function ItemCard({
     ) {
       return;
     }
-    if (isValuesPage && e.shiftKey) {
+    if (isValuesPage) {
       router.push(itemUrl);
       return;
     }
@@ -434,15 +434,19 @@ export default function ItemCard({
         className="group border-border-card border-b-border-card bg-secondary-bg relative cursor-pointer overflow-hidden rounded-lg border-2 transition-all duration-300 hover:shadow-lg"
         role="button"
         tabIndex={0}
-        aria-haspopup="dialog"
-        aria-expanded={isSheetOpen}
-        aria-label={`Open ${item.name} details`}
+        aria-haspopup={isValuesPage ? undefined : "dialog"}
+        aria-expanded={isValuesPage ? undefined : isSheetOpen}
+        aria-label={`${isValuesPage ? "View" : "Open"} ${item.name} details`}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
         onClick={handleCardClick}
         onKeyDown={(event) => {
           if (event.key === "Enter" || event.key === " ") {
             event.preventDefault();
+            if (isValuesPage) {
+              router.push(itemUrl);
+              return;
+            }
             setIsSheetOpen(true);
           }
         }}
@@ -775,7 +779,7 @@ export default function ItemCard({
       </div>
       <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
         <SheetContent
-          side={isMobile ? "bottom" : "right"}
+          side={isMobile ? "bottom" : isValuesPage ? "top" : "right"}
           className="z-[4000] flex h-full max-h-screen flex-col"
         >
           <SheetHeader className="text-left">
