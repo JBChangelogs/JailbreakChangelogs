@@ -13,17 +13,16 @@ import { useOptimizedRealTimeRelativeDate } from "@/hooks/useSharedTimer";
 import { formatCustomDate } from "@/utils/timestamp";
 import Image from "next/image";
 import Link from "next/link";
-import {
-  handleImageError,
-  getItemImagePath,
-  isVideoItem,
-  getVideoPath,
-} from "@/utils/images";
+import { handleImageError, isVideoItem, getVideoPath } from "@/utils/images";
 import { getCategoryColor } from "@/utils/categoryIcons";
 import { Icon } from "@/components/ui/IconWrapper";
+import {
+  getTradeItemDetailHref,
+  getTradeItemImagePath,
+} from "@/utils/tradeItems";
 
 interface TradeItem {
-  id: number;
+  id: number | string;
   name: string;
   type: string;
   creator: string;
@@ -103,7 +102,7 @@ export default function TradeAdsTab({
   const renderTradeItem = (item: TradeItem, totalItems: number) => {
     const isVideo = isVideoItem(item.name);
     const displayName = item.name;
-    const itemUrl = `/item/${item.type.toLowerCase()}/${item.name}`;
+    const itemUrl = getTradeItemDetailHref(item);
 
     return (
       <div
@@ -123,7 +122,7 @@ export default function TradeAdsTab({
               />
             ) : (
               <Image
-                src={getItemImagePath(item.type, item.name)}
+                src={getTradeItemImagePath(item)}
                 alt={displayName}
                 fill
                 className="object-cover"
@@ -135,13 +134,17 @@ export default function TradeAdsTab({
             <div className="flex items-start justify-between">
               {isLoadingAdditionalData ? (
                 <Skeleton variant="text" width="80%" height={20} />
-              ) : (
+              ) : itemUrl ? (
                 <Link
                   href={itemUrl}
                   className="text-primary-text hover:text-link font-medium transition-colors"
                 >
                   {displayName}
                 </Link>
+              ) : (
+                <span className="text-primary-text font-medium">
+                  {displayName}
+                </span>
               )}
             </div>
             <div className="text-secondary-text text-xs">

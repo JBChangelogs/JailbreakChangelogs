@@ -111,6 +111,31 @@ const NotificationTimestamp = ({
   );
 };
 
+const getNotificationType = (
+  notification:
+    | NotificationItem
+    | {
+        type?: unknown;
+        metadata?: Record<string, unknown> | null;
+      },
+): string | null => {
+  if (typeof notification.type === "string" && notification.type.trim()) {
+    return notification.type.trim().toLowerCase();
+  }
+
+  const metadata = notification.metadata;
+  if (!metadata || typeof metadata !== "object") {
+    return null;
+  }
+
+  const metadataType = metadata.type;
+  if (typeof metadataType === "string" && metadataType.trim()) {
+    return metadataType.trim().toLowerCase();
+  }
+
+  return null;
+};
+
 export default function Header() {
   const pathname = usePathname();
   const isCollabPage =
@@ -182,7 +207,9 @@ export default function Header() {
       const detail = (
         event as CustomEvent<{
           total_notifications?: unknown;
+          type?: unknown;
           data?: {
+            type?: unknown;
             title?: string;
             description?: string;
             link?: string;
@@ -195,14 +222,24 @@ export default function Header() {
           ? detail.total_notifications
           : null;
       const wsNotification = detail?.data;
+      const notificationType = getNotificationType({
+        type: detail?.type ?? detail?.data?.type,
+        metadata: wsNotification?.metadata ?? null,
+      });
+      const isBroadcast = notificationType === "broadcast";
 
       setUnreadCount((prev) => {
+        if (isBroadcast) return prev;
         if (totalNotifications !== null && !hasWsUnreadSeedRef.current) {
           hasWsUnreadSeedRef.current = true;
           return Math.max(0, totalNotifications);
         }
         return Math.max(0, prev + 1);
       });
+
+      if (isBroadcast) {
+        return;
+      }
 
       if (
         wsNotification &&
@@ -226,6 +263,7 @@ export default function Header() {
           const nextItem: NotificationItem = {
             id: wsNotificationIdRef.current--,
             user_id: authUser?.id || "",
+            type: notificationType ?? undefined,
             title,
             description,
             link: normalizedLink,
@@ -310,10 +348,14 @@ export default function Header() {
       return notifications;
     }
 
+    const wsOnlyCountedItems = wsOnlyItems.filter(
+      (item) => getNotificationType(item) !== "broadcast",
+    );
+
     return {
       ...notifications,
       items: [...wsOnlyItems, ...notifications.items],
-      total: notifications.total + wsOnlyItems.length,
+      total: notifications.total + wsOnlyCountedItems.length,
     };
   }, [notifications, notificationTab, wsHistoryNotifications]);
 

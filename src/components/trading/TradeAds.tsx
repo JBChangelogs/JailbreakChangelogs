@@ -2,22 +2,21 @@
 
 import React, { useState, useEffect } from "react";
 import { TradeAd } from "@/types/trading";
-import { UserData } from "@/types/auth";
 import { TradeItem } from "@/types/trading";
 import { TradeAdCard } from "./TradeAdCard";
 import { TradeAdTabs } from "./TradeAdTabs";
 import { Pagination } from "@/components/ui/Pagination";
 import { Button } from "@/components/ui/button";
-import { Masonry } from "@mui/lab";
 import { Icon } from "@/components/ui/IconWrapper";
 import { deleteTradeAd } from "@/utils/trading";
 import { toast } from "sonner";
 import { TradeAdForm } from "./TradeAdForm";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { useAuthContext } from "@/contexts/AuthContext";
+import { tradeItemIdsEqual } from "@/utils/tradeItems";
 
 interface TradeAdsProps {
-  initialTradeAds: (TradeAd & { user: UserData | null })[];
+  initialTradeAds: TradeAd[];
   initialItems?: TradeItem[];
 }
 
@@ -26,8 +25,7 @@ export default function TradeAds({
   initialItems = [],
 }: TradeAdsProps) {
   const { user } = useAuthContext();
-  const [tradeAds, setTradeAds] =
-    useState<(TradeAd & { user: UserData | null })[]>(initialTradeAds);
+  const [tradeAds, setTradeAds] = useState<TradeAd[]>(initialTradeAds);
   const [items] = useState<TradeItem[]>(initialItems);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<
@@ -43,13 +41,236 @@ export default function TradeAds({
   const [searchQuery, setSearchQuery] = useState<string>("");
   const itemsPerPage = 9;
 
+  const normalizeCreatedTrade = (raw: unknown): TradeAd | null => {
+    if (!raw || typeof raw !== "object") return null;
+    const payload = raw as Record<string, unknown>;
+    const nestedTradeCandidate =
+      (payload.trade as Record<string, unknown> | undefined) ||
+      (payload.data as Record<string, unknown> | undefined) ||
+      (payload.result as Record<string, unknown> | undefined) ||
+      (payload.ad as Record<string, unknown> | undefined);
+    const trade = nestedTradeCandidate ?? payload;
+    const now = Math.floor(Date.now() / 1000);
+
+    const toEpoch = (value: unknown, fallback: number): number => {
+      if (typeof value === "number" && Number.isFinite(value)) return value;
+      if (typeof value === "string") {
+        const parsed = Number(value);
+        if (Number.isFinite(parsed)) return parsed;
+      }
+      return fallback;
+    };
+
+    const resolveItemsInput = (key: "offering" | "requesting"): unknown =>
+      trade[key] ?? payload[key];
+
+    const normalizeItems = (itemsInput: unknown): TradeItem[] => {
+      if (!Array.isArray(itemsInput)) return [];
+
+      return itemsInput.flatMap((entry, index) => {
+        if (!entry || typeof entry !== "object") return [];
+        const item = entry as Record<string, unknown>;
+        const amount = Math.max(1, Number(item.amount) || 1);
+        const rawId = item.id;
+        const parsedId = Number(rawId);
+        const fallbackId = -(index + 1);
+        const id = Number.isFinite(parsedId) ? parsedId : fallbackId;
+
+        const info =
+          item.info && typeof item.info === "object"
+            ? (item.info as Record<string, unknown>)
+            : null;
+
+        const normalized: TradeItem = {
+          id,
+          instanceId: String(rawId ?? id),
+          name:
+            typeof item.name === "string" && item.name.trim()
+              ? item.name
+              : "Unknown Item",
+          type:
+            typeof item.type === "string" && item.type.trim()
+              ? item.type
+              : "Unknown",
+          cash_value:
+            typeof info?.cash_value === "string" ? info.cash_value : "N/A",
+          duped_value:
+            typeof info?.duped_value === "string" ? info.duped_value : "N/A",
+          is_limited: null,
+          is_seasonal: null,
+          tradable: 1,
+          trend: typeof info?.trend === "string" ? info.trend : "N/A",
+          demand: typeof info?.demand === "string" ? info.demand : "N/A",
+          isDuped: !!item.duped,
+          isOG: !!item.og,
+        };
+
+        return Array.from({ length: amount }, () => normalized);
+      });
+    };
+
+    const createdAt = toEpoch(trade.created_at ?? payload.created_at, now);
+    const expiresAt = toEpoch(
+      trade.expires ?? payload.expires,
+      createdAt + 24 * 3600,
+    );
+    const rawUser =
+      ((trade.user as Record<string, unknown> | undefined) ??
+        (payload.user as Record<string, unknown> | undefined)) &&
+      typeof (
+        (trade.user as Record<string, unknown> | undefined) ??
+        (payload.user as Record<string, unknown> | undefined)
+      ) === "object"
+        ? (((trade.user as Record<string, unknown> | undefined) ??
+            (payload.user as Record<string, unknown> | undefined)) as Record<
+            string,
+            unknown
+          >)
+        : {};
+
+    const parsedTradeId = Number(trade.id ?? payload.id);
+    const tradeId = Number.isFinite(parsedTradeId) ? parsedTradeId : now;
+
+    const normalizedTrade: TradeAd = {
+      id: tradeId,
+      note:
+        typeof trade.note === "string"
+          ? trade.note
+          : typeof payload.note === "string"
+            ? payload.note
+            : "",
+      requesting: normalizeItems(resolveItemsInput("requesting")),
+      offering: normalizeItems(resolveItemsInput("offering")),
+      author:
+        typeof rawUser.id === "string" ? rawUser.id : (currentUserId ?? ""),
+      created_at: createdAt,
+      expires: expiresAt,
+      expired: expiresAt <= now ? 1 : 0,
+      status:
+        typeof trade.status === "string"
+          ? trade.status
+          : typeof payload.status === "string"
+            ? payload.status
+            : "Pending",
+      message_id:
+        typeof trade.message_id === "string"
+          ? trade.message_id
+          : typeof payload.message_id === "string"
+            ? payload.message_id
+            : null,
+      user:
+        typeof rawUser.id === "string"
+          ? {
+              id: rawUser.id,
+              username:
+                typeof rawUser.username === "string"
+                  ? rawUser.username
+                  : "Unknown",
+              global_name:
+                typeof rawUser.global_name === "string"
+                  ? rawUser.global_name
+                  : undefined,
+              roblox_id:
+                typeof rawUser.roblox_id === "string"
+                  ? rawUser.roblox_id
+                  : user?.roblox_id,
+              roblox_username:
+                typeof rawUser.roblox_username === "string"
+                  ? rawUser.roblox_username
+                  : user?.roblox_username,
+              roblox_display_name:
+                typeof rawUser.roblox_display_name === "string"
+                  ? rawUser.roblox_display_name
+                  : user?.roblox_display_name,
+              roblox_avatar:
+                typeof rawUser.roblox_avatar === "string"
+                  ? rawUser.roblox_avatar
+                  : user?.roblox_avatar,
+              premiumtype:
+                typeof rawUser.premiumtype === "number"
+                  ? rawUser.premiumtype
+                  : (user?.premiumtype ?? 0),
+              usernumber:
+                typeof rawUser.usernumber === "number"
+                  ? rawUser.usernumber
+                  : user?.usernumber,
+            }
+          : user
+            ? {
+                id: user.id,
+                username: user.username,
+                global_name: user.global_name,
+                roblox_id: user.roblox_id,
+                roblox_username: user.roblox_username,
+                roblox_display_name: user.roblox_display_name,
+                roblox_avatar: user.roblox_avatar,
+                premiumtype: user.premiumtype,
+                usernumber: user.usernumber,
+              }
+            : undefined,
+    };
+
+    return normalizedTrade;
+  };
+
+  const handleCreateSuccess = (createdTradeRaw?: unknown) => {
+    const fetchRecentTradeAds = async (): Promise<TradeAd[]> => {
+      const response = await fetch("/api/trades/recent?limit=12", {
+        cache: "no-store",
+      });
+      if (!response.ok) {
+        throw new Error("Failed to fetch recent trades");
+      }
+
+      const data = (await response.json()) as unknown;
+      if (!Array.isArray(data)) return [];
+
+      return data
+        .map((entry) => normalizeCreatedTrade(entry))
+        .filter((entry): entry is TradeAd => entry !== null);
+    };
+
+    void (async () => {
+      try {
+        const recentTrades = await fetchRecentTradeAds();
+        if (recentTrades.length > 0) {
+          setTradeAds(recentTrades);
+        } else {
+          const normalized = normalizeCreatedTrade(createdTradeRaw);
+          if (normalized) {
+            setTradeAds((prev) => {
+              const withoutDuplicate = prev.filter(
+                (ad) => ad.id !== normalized.id,
+              );
+              return [normalized, ...withoutDuplicate];
+            });
+          }
+        }
+      } catch {
+        const normalized = normalizeCreatedTrade(createdTradeRaw);
+        if (normalized) {
+          setTradeAds((prev) => {
+            const withoutDuplicate = prev.filter(
+              (ad) => ad.id !== normalized.id,
+            );
+            return [normalized, ...withoutDuplicate];
+          });
+        }
+      }
+    })();
+
+    window.history.pushState(null, "", window.location.pathname);
+    setActiveTab("view");
+    setSelectedTradeAd(null);
+  };
+
   // Get current user ID from auth state
   const currentUserId = user?.id || null;
 
   const getDemandForItem = (it: TradeItem): string | undefined => {
     if (it.demand) return it.demand;
     if (it.data?.demand) return it.data.demand;
-    const match = items.find((base) => base.id === it.id);
+    const match = items.find((base) => tradeItemIdsEqual(base.id, it.id));
     if (!match) return undefined;
     return match.demand;
   };
@@ -58,7 +279,7 @@ export default function TradeAds({
     if (it.trend && it.trend !== "N/A") return it.trend;
     const dataTrend = it.data?.trend;
     if (dataTrend && dataTrend !== "N/A") return dataTrend;
-    const match = items.find((base) => base.id === it.id);
+    const match = items.find((base) => tradeItemIdsEqual(base.id, it.id));
     if (!match) return undefined;
     return match.trend ?? undefined;
   };
@@ -66,11 +287,21 @@ export default function TradeAds({
   const refreshTradeAds = async () => {
     try {
       setError(null);
-
-      // Clear the hash before reloading to avoid staying on create/myads tabs
-      window.location.hash = "";
-      // Simple refresh - just reload the page to get fresh server-side data
-      window.location.reload();
+      const response = await fetch("/api/trades/recent?limit=12", {
+        cache: "no-store",
+      });
+      if (!response.ok) {
+        throw new Error("Failed to refresh trade ads");
+      }
+      const data = (await response.json()) as unknown;
+      if (!Array.isArray(data)) {
+        setTradeAds([]);
+        return;
+      }
+      const normalized = data
+        .map((entry) => normalizeCreatedTrade(entry))
+        .filter((entry): entry is TradeAd => entry !== null);
+      setTradeAds(normalized);
     } catch (err) {
       console.error("Error refreshing trade ads:", err);
       setError("Failed to refresh trade ads");
@@ -235,11 +466,6 @@ export default function TradeAds({
     setPage(1); // Reset to first page when changing sort order
   };
 
-  const handleEditTrade = (trade: TradeAd) => {
-    setSelectedTradeAd(trade);
-    setActiveTab("myads");
-  };
-
   if (error) {
     return (
       <div className="mt-8 text-center">
@@ -291,12 +517,7 @@ export default function TradeAds({
         >
           {activeTab === "create" && (
             <TradeAdForm
-              onSuccess={() => {
-                refreshTradeAds();
-                window.history.pushState(null, "", window.location.pathname);
-                setActiveTab("view");
-                setSelectedTradeAd(null);
-              }}
+              onSuccess={handleCreateSuccess}
               editMode={false}
               items={items}
             />
@@ -332,9 +553,7 @@ export default function TradeAds({
     activeTab === "supporter" ? supporterTradeAds : sortedTradeAds;
 
   // Helper function to filter trade ads by search query
-  const filterTradeAdsBySearch = (
-    trades: (TradeAd & { user: UserData | null })[],
-  ) => {
+  const filterTradeAdsBySearch = (trades: TradeAd[]) => {
     if (!searchQuery.trim()) return trades;
 
     const query = searchQuery.toLowerCase().trim();
@@ -467,16 +686,7 @@ export default function TradeAds({
                 </div>
               )
             ) : (
-              <Masonry
-                columns={{ xs: 1, sm: 2, md: 2, lg: 3 }}
-                spacing={2}
-                sx={{
-                  width: "auto",
-                  margin: 0,
-                  overflow: "hidden",
-                  transition: "height 0.2s ease-in-out",
-                }}
-              >
+              <div className="space-y-4">
                 {currentPageItems.map((trade) => {
                   const enrichedTrade: TradeAd = {
                     ...trade,
@@ -499,11 +709,10 @@ export default function TradeAds({
                       offerStatus={offerStatuses[trade.id]}
                       currentUserId={currentUserId}
                       onDelete={() => handleDeleteTrade(trade.id)}
-                      onEdit={() => handleEditTrade(trade)}
                     />
                   );
                 })}
-              </Masonry>
+              </div>
             )}
             {totalPages > 1 && (
               <div className="mt-8 mb-8 flex justify-center">
@@ -575,16 +784,7 @@ export default function TradeAds({
               )
             ) : (
               <>
-                <Masonry
-                  columns={{ xs: 1, sm: 2, md: 2, lg: 3 }}
-                  spacing={2}
-                  sx={{
-                    width: "auto",
-                    margin: 0,
-                    overflow: "hidden",
-                    transition: "height 0.2s ease-in-out",
-                  }}
-                >
+                <div className="space-y-4">
                   {currentPageItems.map((trade) => {
                     const enrichedTrade: TradeAd = {
                       ...trade,
@@ -607,11 +807,10 @@ export default function TradeAds({
                         offerStatus={offerStatuses[trade.id]}
                         currentUserId={currentUserId}
                         onDelete={() => handleDeleteTrade(trade.id)}
-                        onEdit={() => handleEditTrade(trade)}
                       />
                     );
                   })}
-                </Masonry>
+                </div>
                 {totalPages > 1 && (
                   <div className="mt-8 mb-8 flex justify-center">
                     <Pagination
@@ -636,12 +835,7 @@ export default function TradeAds({
       >
         {activeTab === "create" && (
           <TradeAdForm
-            onSuccess={() => {
-              refreshTradeAds();
-              window.history.pushState(null, "", window.location.pathname);
-              setActiveTab("view");
-              setSelectedTradeAd(null);
-            }}
+            onSuccess={handleCreateSuccess}
             editMode={false}
             items={items}
           />
@@ -713,16 +907,7 @@ export default function TradeAds({
                     </div>
                   )
                 ) : (
-                  <Masonry
-                    columns={{ xs: 1, sm: 2, md: 2, lg: 3 }}
-                    spacing={2}
-                    sx={{
-                      width: "auto",
-                      margin: 0,
-                      overflow: "hidden",
-                      transition: "height 0.2s ease-in-out",
-                    }}
-                  >
+                  <div className="space-y-4">
                     {filteredUserTradeAds.map((trade) => {
                       const enrichedTrade: TradeAd = {
                         ...trade,
@@ -745,11 +930,10 @@ export default function TradeAds({
                           offerStatus={offerStatuses[trade.id]}
                           currentUserId={currentUserId}
                           onDelete={() => handleDeleteTrade(trade.id)}
-                          onEdit={() => handleEditTrade(trade)}
                         />
                       );
                     })}
-                  </Masonry>
+                  </div>
                 )}
               </>
             )}

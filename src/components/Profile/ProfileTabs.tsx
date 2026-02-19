@@ -81,7 +81,7 @@ interface FavoriteItem {
 }
 
 interface TradeItem {
-  id: number;
+  id: number | string;
   name: string;
   type: string;
   creator: string;

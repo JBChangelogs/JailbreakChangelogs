@@ -48,13 +48,13 @@ async function TradeDetailsWrapper({
   };
 
   const items: Item[] = await fetchItems();
-  const findDemand = (id: number): string | undefined => {
-    const match = items.find((i) => i.id === id);
+  const findDemand = (id: number | string): string | undefined => {
+    const match = items.find((i) => String(i.id) === String(id));
     if (!match) return undefined;
     return match.demand;
   };
-  const findTrend = (id: number): string | undefined => {
-    const match = items.find((i) => i.id === id);
+  const findTrend = (id: number | string): string | undefined => {
+    const match = items.find((i) => String(i.id) === String(id));
     if (!match) return undefined;
     return match.trend ?? undefined;
   };

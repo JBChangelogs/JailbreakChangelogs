@@ -38,6 +38,7 @@ export interface TradeItem {
   };
   demand?: string;
   isDuped?: boolean;
+  isOG?: boolean;
   instanceId?: string;
 }
 
@@ -46,6 +47,7 @@ export interface TradeAd {
   requesting: TradeItem[];
   offering: TradeItem[];
   author: string;
+  note?: string;
   created_at: number;
   expires: number;
   expired: number;
@@ -62,6 +64,7 @@ export interface TradeAd {
     roblox_avatar?: string;
     accent_color?: string;
     custom_avatar?: string;
+    usernumber?: number;
     premiumtype?: number;
     settings?: {
       avatar_discord: number;

@@ -1,21 +1,15 @@
 import { NextResponse } from "next/server";
-import { cookies } from "next/headers";
 import { BASE_API_URL } from "@/utils/api";
 
 export async function DELETE(request: Request) {
   const url = new URL(request.url);
   const id = url.searchParams.get("id");
-  const cookieStore = await cookies();
-  const token = cookieStore.get("jbcl_token")?.value;
-  if (!token || !id) {
-    return NextResponse.json(
-      { message: "Unauthorized or missing id" },
-      { status: 400 },
-    );
+  if (!id) {
+    return NextResponse.json({ message: "Missing id" }, { status: 400 });
   }
 
   const upstream = await fetch(
-    `${BASE_API_URL}/trades/delete?id=${encodeURIComponent(id)}&token=${encodeURIComponent(token)}`,
+    `${BASE_API_URL}/trades/v2/${encodeURIComponent(id)}/delete`,
     {
       method: "DELETE",
       cache: "no-store",

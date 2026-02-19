@@ -254,6 +254,31 @@ const NotificationTimestamp = ({
   );
 };
 
+const getNotificationType = (
+  notification:
+    | NotificationItem
+    | {
+        type?: unknown;
+        metadata?: Record<string, unknown> | null;
+      },
+): string | null => {
+  if (typeof notification.type === "string" && notification.type.trim()) {
+    return notification.type.trim().toLowerCase();
+  }
+
+  const metadata = notification.metadata;
+  if (!metadata || typeof metadata !== "object") {
+    return null;
+  }
+
+  const metadataType = metadata.type;
+  if (typeof metadataType === "string" && metadataType.trim()) {
+    return metadataType.trim().toLowerCase();
+  }
+
+  return null;
+};
+
 export const NavbarModern = ({
   className,
   unreadCount,
@@ -365,10 +390,14 @@ export const NavbarModern = ({
       return notifications;
     }
 
+    const wsOnlyCountedItems = wsOnlyItems.filter(
+      (item) => getNotificationType(item) !== "broadcast",
+    );
+
     return {
       ...notifications,
       items: [...wsOnlyItems, ...notifications.items],
-      total: notifications.total + wsOnlyItems.length,
+      total: notifications.total + wsOnlyCountedItems.length,
     };
   }, [notifications, notificationTab, wsHistoryNotifications]);
 

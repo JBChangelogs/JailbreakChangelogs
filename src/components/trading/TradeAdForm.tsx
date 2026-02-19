@@ -5,7 +5,6 @@ import { UserData } from "@/types/auth";
 import { ItemGrid } from "./ItemGrid";
 import { Skeleton, Tooltip } from "@mui/material";
 import { toast } from "sonner";
-import { AvailableItemsGrid } from "./AvailableItemsGrid";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -28,9 +27,11 @@ import {
 import { DndContext, DragEndEvent, DragStartEvent } from "@dnd-kit/core";
 import { DroppableZone } from "@/components/dnd/DroppableZone";
 import { CustomDragOverlay } from "@/components/dnd/DragOverlay";
+import { isCustomTradeItem, tradeItemIdsEqual } from "@/utils/tradeItems";
+import TradeItemPickerV2 from "./TradeItemPickerV2";
 
 interface TradeAdFormProps {
-  onSuccess?: () => void;
+  onSuccess?: (createdTrade?: unknown) => void;
   editMode?: boolean;
   tradeAd?: TradeAd;
   items?: TradeItem[];
@@ -49,6 +50,40 @@ const PREMIUM_TIERS: UserPremiumTier[] = [
   { tier: 3, name: "Supporter 3", durations: [6, 12, 24, 48] },
 ];
 const EXPIRATION_OPTIONS = [6, 12, 24, 48];
+const MAX_TRADE_NOTE_LENGTH = 300;
+
+const CUSTOM_TRADE_TYPES = [
+  { id: "adds", label: "Adds" },
+  { id: "overpays", label: "Overpays" },
+  { id: "upgrades", label: "Upgrades" },
+  { id: "downgrades", label: "Downgrades" },
+  { id: "collectors", label: "Collectors" },
+  { id: "rares", label: "Rares" },
+  { id: "demands", label: "Demands" },
+  { id: "og owners", label: "OG Owners" },
+] as const;
+
+interface TradeFormDraft {
+  offering: TradeItem[];
+  requesting: TradeItem[];
+  note?: string;
+}
+
+interface V2CreateTradeItem {
+  id: string;
+  amount: number;
+  duped?: boolean;
+  og?: boolean;
+  name?: string | null;
+  type?: string | null;
+  info?: {
+    cash_value: string | null;
+    duped_value: string | null;
+    trend: string | null;
+    demand: string | null;
+    notes: string | null;
+  } | null;
+}
 
 export const TradeAdForm: React.FC<TradeAdFormProps> = ({
   onSuccess,
@@ -67,6 +102,7 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
   const [showRestoreModal, setShowRestoreModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [showClearConfirmModal, setShowClearConfirmModal] = useState(false);
+  const [tradeNote, setTradeNote] = useState("");
   const [userData, setUserData] = useState<UserData | null>(null);
   const [selectedTradeAd, setSelectedTradeAd] = useState<TradeAd | undefined>(
     tradeAd,
@@ -77,6 +113,92 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
 
   // Drag and drop state
   const [activeItem, setActiveItem] = useState<TradeItem | null>(null);
+  const customTradeTypeSet: Set<string> = new Set(
+    CUSTOM_TRADE_TYPES.map((type) => type.id),
+  );
+
+  const getTradeItemIdentifier = (item: TradeItem): string =>
+    item.instanceId ? String(item.instanceId) : String(item.id);
+
+  const hasCustomOnSide = (sideItems: TradeItem[], customId: string): boolean =>
+    sideItems.some(
+      (item) =>
+        isCustomTradeItem(item) && getTradeItemIdentifier(item) === customId,
+    );
+
+  const createCustomTradeItem = (
+    customId: string,
+    side: "offering" | "requesting",
+  ): TradeItem => {
+    const customIndex = CUSTOM_TRADE_TYPES.findIndex(
+      (type) => type.id === customId,
+    );
+    return {
+      id: -10000 - Math.max(customIndex, 0),
+      instanceId: customId,
+      name:
+        CUSTOM_TRADE_TYPES.find((type) => type.id === customId)?.label ??
+        customId,
+      type: "Custom",
+      cash_value: "N/A",
+      duped_value: "N/A",
+      is_limited: null,
+      is_seasonal: null,
+      tradable: 1,
+      trend: "N/A",
+      demand: "N/A",
+      isDuped: false,
+      isOG: false,
+      side,
+    };
+  };
+
+  const buildV2CreateItems = (
+    selectedItems: TradeItem[],
+  ): V2CreateTradeItem[] => {
+    const grouped = new Map<string, V2CreateTradeItem>();
+
+    selectedItems.forEach((item) => {
+      const identifier = getTradeItemIdentifier(item);
+      const isCustom =
+        customTradeTypeSet.has(identifier) || isCustomTradeItem(item);
+      const key = isCustom
+        ? `custom:${identifier}`
+        : `${identifier}:${item.isDuped ? 1 : 0}:${item.isOG ? 1 : 0}`;
+
+      const existing = grouped.get(key);
+      if (existing) {
+        existing.amount += 1;
+        return;
+      }
+
+      grouped.set(
+        key,
+        isCustom
+          ? {
+              id: identifier,
+              amount: 1,
+            }
+          : {
+              id: identifier,
+              amount: 1,
+              duped: !!item.isDuped,
+              og: !!item.isOG,
+              name: item.name ?? item.data?.name ?? null,
+              type: item.type ?? item.data?.type ?? null,
+              info: {
+                cash_value: item.cash_value ?? item.data?.cash_value ?? null,
+                duped_value: item.duped_value ?? item.data?.duped_value ?? null,
+                trend: item.trend ?? item.data?.trend ?? null,
+                demand: item.demand ?? item.data?.demand ?? null,
+                notes: null,
+              },
+            },
+      );
+    });
+
+    return Array.from(grouped.values());
+  };
 
   const parseValueString = (valStr: string | number | undefined): number => {
     if (valStr === undefined || valStr === null) return 0;
@@ -118,10 +240,11 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
   const saveItemsToLocalStorage = (
     offering: TradeItem[],
     requesting: TradeItem[],
+    note: string = tradeNote,
   ) => {
     if (editMode) return; // Don't save to localStorage when editing
     if (isAuthenticated) {
-      safeSetJSON("tradeAdFormItems", { offering, requesting });
+      safeSetJSON("tradeAdFormItems", { offering, requesting, note });
     }
   };
 
@@ -140,6 +263,7 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
     if (editMode && tradeAd) {
       setOfferingItems(tradeAd.offering);
       setRequestingItems(tradeAd.requesting);
+      setTradeNote(tradeAd.note ?? "");
       if (tradeAd.expires) {
         setExpirationHours(tradeAd.expires);
       }
@@ -148,18 +272,20 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
       // Only clear items when switching to create mode
       setOfferingItems([]);
       setRequestingItems([]);
+      setTradeNote("");
       setExpirationHours(null); // <-- explicitly clear in create mode
 
       if (!isAuthenticated) return;
 
       try {
-        const storedItems = safeGetJSON("tradeAdFormItems", {
+        const storedItems = safeGetJSON<TradeFormDraft>("tradeAdFormItems", {
           offering: [],
           requesting: [],
+          note: "",
         });
         if (storedItems) {
-          const { offering = [], requesting = [] } = storedItems;
-          if (offering.length > 0 || requesting.length > 0) {
+          const { offering = [], requesting = [], note = "" } = storedItems;
+          if (offering.length > 0 || requesting.length > 0 || note.length > 0) {
             setShowRestoreModal(true);
           }
         }
@@ -172,14 +298,16 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
 
   const handleRestoreItems = () => {
     try {
-      const storedItems = safeGetJSON("tradeAdFormItems", {
+      const storedItems = safeGetJSON<TradeFormDraft>("tradeAdFormItems", {
         offering: [],
         requesting: [],
+        note: "",
       });
       if (storedItems) {
-        const { offering = [], requesting = [] } = storedItems;
+        const { offering = [], requesting = [], note = "" } = storedItems;
         setOfferingItems(offering || []);
         setRequestingItems(requesting || []);
+        setTradeNote(note || "");
       }
     } catch (error) {
       console.error("Failed to restore items from localStorage:", error);
@@ -192,6 +320,7 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
     safeLocalStorage.removeItem("tradeAdFormItems");
     setOfferingItems([]);
     setRequestingItems([]);
+    setTradeNote("");
     setShowRestoreModal(false);
     setShowClearConfirmModal(false);
   };
@@ -201,6 +330,16 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
     side: "offering" | "requesting",
   ): boolean => {
     const currentItems = side === "offering" ? offeringItems : requestingItems;
+    const itemIdentifier = getTradeItemIdentifier(item);
+    if (
+      isCustomTradeItem(item) &&
+      customTradeTypeSet.has(itemIdentifier) &&
+      hasCustomOnSide(currentItems, itemIdentifier)
+    ) {
+      toast.error(`"${item.name}" can only be added once on the ${side} side`);
+      return false;
+    }
+
     if (currentItems.length >= 8) {
       toast.error(`Maximum of 8 items allowed for ${side}`);
       return false;
@@ -209,13 +348,24 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
     if (side === "offering") {
       const newOfferingItems = [...offeringItems, item];
       setOfferingItems(newOfferingItems);
-      saveItemsToLocalStorage(newOfferingItems, requestingItems);
+      saveItemsToLocalStorage(newOfferingItems, requestingItems, tradeNote);
     } else {
       const newRequestingItems = [...requestingItems, item];
       setRequestingItems(newRequestingItems);
-      saveItemsToLocalStorage(offeringItems, newRequestingItems);
+      saveItemsToLocalStorage(offeringItems, newRequestingItems, tradeNote);
     }
     return true;
+  };
+
+  const handleAddCustomType = (
+    customId: string,
+    side: "offering" | "requesting",
+  ) => {
+    const customItem = createCustomTradeItem(customId, side);
+    const success = handleAddItem(customItem, side);
+    if (success) {
+      toast.success(`Added ${customItem.name} to ${side}`);
+    }
   };
 
   // Drag and drop handlers
@@ -254,28 +404,32 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
   };
 
   const handleRemoveItem = (
-    itemId: number,
+    itemId: number | string,
     side: "offering" | "requesting",
   ) => {
     if (side === "offering") {
-      const index = offeringItems.findIndex((item) => item.id === itemId);
+      const index = offeringItems.findIndex((item) =>
+        tradeItemIdsEqual(item.id, itemId),
+      );
       if (index !== -1) {
         const newOfferingItems = [
           ...offeringItems.slice(0, index),
           ...offeringItems.slice(index + 1),
         ];
         setOfferingItems(newOfferingItems);
-        saveItemsToLocalStorage(newOfferingItems, requestingItems);
+        saveItemsToLocalStorage(newOfferingItems, requestingItems, tradeNote);
       }
     } else {
-      const index = requestingItems.findIndex((item) => item.id === itemId);
+      const index = requestingItems.findIndex((item) =>
+        tradeItemIdsEqual(item.id, itemId),
+      );
       if (index !== -1) {
         const newRequestingItems = [
           ...requestingItems.slice(0, index),
           ...requestingItems.slice(index + 1),
         ];
         setRequestingItems(newRequestingItems);
-        saveItemsToLocalStorage(offeringItems, newRequestingItems);
+        saveItemsToLocalStorage(offeringItems, newRequestingItems, tradeNote);
       }
     }
   };
@@ -283,6 +437,7 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
   const handleSwapSides = () => {
     setOfferingItems(requestingItems);
     setRequestingItems(offeringItems);
+    saveItemsToLocalStorage(requestingItems, offeringItems, tradeNote);
   };
 
   const handleClearSides = (event?: React.MouseEvent) => {
@@ -302,19 +457,33 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
 
     if (targetSide === "offering") {
       setOfferingItems(sourceItems);
+      saveItemsToLocalStorage(sourceItems, requestingItems, tradeNote);
     } else {
       setRequestingItems(sourceItems);
+      saveItemsToLocalStorage(offeringItems, sourceItems, tradeNote);
     }
   };
 
   const handleSubmit = async () => {
     const errors: string[] = [];
+    const trimmedNote = tradeNote.trim();
 
     if (offeringItems.length === 0) {
       errors.push("You must add at least one item to offer");
     }
+    const offeringActualItems = offeringItems.filter(
+      (item) => !isCustomTradeItem(item),
+    );
+    if (offeringActualItems.length === 0) {
+      errors.push("Offering must include at least one actual item");
+    }
     if (requestingItems.length === 0) {
       errors.push("You must add at least one item to request");
+    }
+    if (tradeNote.length > MAX_TRADE_NOTE_LENGTH) {
+      errors.push(
+        `Trade note must be ${MAX_TRADE_NOTE_LENGTH} characters or less`,
+      );
     }
 
     // Require all fields
@@ -331,6 +500,7 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
     }
 
     if (errors.length > 0) {
+      errors.forEach((error) => toast.error(error));
       const availableItemsGrid = document.querySelector(
         '[data-component="available-items-grid"]',
       );
@@ -362,22 +532,51 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
         ? `/api/trades/update?id=${tradeAd?.id}`
         : `/api/trades/add`;
       const method = "POST";
+      const createPayload = {
+        offering: buildV2CreateItems(offeringItems),
+        requesting: buildV2CreateItems(requestingItems),
+        note: trimmedNote.length > 0 ? trimmedNote : null,
+        expiration: expirationHours!,
+      };
 
       const response = await fetch(endpoint, {
         method,
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          offering: offeringItems.map((item) => String(item.id)).join(","),
-          requesting: requestingItems.map((item) => String(item.id)).join(","),
-          // owner injected by BFF via cookie
-          ...(editMode ? {} : { expiration: expirationHours! }),
-          ...(editMode && selectedTradeAd
-            ? { status: selectedTradeAd.status }
-            : {}),
-        }),
+        body: JSON.stringify(
+          editMode
+            ? {
+                offering: offeringItems
+                  .map((item) => String(item.id))
+                  .join(","),
+                requesting: requestingItems
+                  .map((item) => String(item.id))
+                  .join(","),
+                note: trimmedNote,
+                status: selectedTradeAd?.status,
+              }
+            : createPayload,
+        ),
       });
+      let responseMessage: string | null = null;
+      let responseBody: unknown = null;
+      try {
+        const responseData = (await response.clone().json()) as {
+          message?: string;
+          error?: string;
+          detail?: string;
+        };
+        responseBody = responseData;
+        responseMessage =
+          responseData.message ||
+          responseData.detail ||
+          responseData.error ||
+          null;
+      } catch {
+        responseMessage = null;
+        responseBody = null;
+      }
 
       if (response.status === 409) {
         toast.error(
@@ -400,7 +599,10 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
         return;
       } else if (!response.ok) {
         throw new Error(
-          editMode ? "Failed to update trade ad" : "Failed to create trade ad",
+          responseMessage ||
+            (editMode
+              ? "Failed to update trade ad"
+              : "Failed to create trade ad"),
         );
       } else {
         toast.success(
@@ -411,22 +613,25 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
         safeLocalStorage.removeItem("tradeAdFormItems");
         setOfferingItems([]);
         setRequestingItems([]);
+        setTradeNote("");
 
         if (userData?.settings?.dms_allowed !== 1 && !editMode) {
           setShowSuccessModal(true);
         } else {
           if (onSuccess) {
-            onSuccess();
+            onSuccess(editMode ? undefined : responseBody);
           }
         }
       }
     } catch (err) {
       console.error("Error with trade ad:", err);
-      toast.error(
-        editMode
-          ? "Failed to update trade ad. Please try again."
-          : "Failed to create trade ad. Please try again.",
-      );
+      const errorMessage =
+        err instanceof Error && err.message
+          ? err.message
+          : editMode
+            ? "Failed to update trade ad. Please try again."
+            : "Failed to create trade ad. Please try again.";
+      toast.error(errorMessage);
     } finally {
       setSubmitting(false);
     }
@@ -595,7 +800,11 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
                         if (requestingItems.length === 0) {
                           safeLocalStorage.removeItem("tradeAdFormItems");
                         } else {
-                          saveItemsToLocalStorage([], requestingItems);
+                          saveItemsToLocalStorage(
+                            [],
+                            requestingItems,
+                            tradeNote,
+                          );
                         }
                         setShowClearConfirmModal(false);
                       }}
@@ -609,7 +818,7 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
                         if (offeringItems.length === 0) {
                           safeLocalStorage.removeItem("tradeAdFormItems");
                         } else {
-                          saveItemsToLocalStorage(offeringItems, []);
+                          saveItemsToLocalStorage(offeringItems, [], tradeNote);
                         }
                         setShowClearConfirmModal(false);
                       }}
@@ -733,6 +942,37 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
               </select>
             </div>
           )}
+
+          {/* Trade Note */}
+          <div className="border-border-card bg-secondary-bg rounded-lg border p-4">
+            <div className="mb-2 flex items-center justify-between">
+              <h3 className="text-primary-text font-medium">Trade Note</h3>
+              <span
+                className={`text-xs ${
+                  tradeNote.length > MAX_TRADE_NOTE_LENGTH
+                    ? "text-status-error"
+                    : "text-secondary-text"
+                }`}
+              >
+                {tradeNote.length}/{MAX_TRADE_NOTE_LENGTH}
+              </span>
+            </div>
+            <textarea
+              value={tradeNote}
+              onChange={(event) => {
+                const nextNote = event.target.value;
+                setTradeNote(nextNote);
+                saveItemsToLocalStorage(
+                  offeringItems,
+                  requestingItems,
+                  nextNote,
+                );
+              }}
+              rows={3}
+              placeholder="Add a note for your trade ad..."
+              className="bg-tertiary-bg border-border-card text-primary-text focus:ring-border-focus w-full rounded-lg border px-3 py-2 text-sm outline-none focus:ring-2"
+            />
+          </div>
 
           {/* Action Buttons */}
           <div className="flex items-center justify-center gap-3">
@@ -981,15 +1221,17 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
             </UiButton>
           </div>
 
-          {/* Available Items Grid */}
-          <div className="mb-8">
-            <AvailableItemsGrid
-              items={items}
-              onSelect={handleAddItem}
-              selectedItems={[...offeringItems, ...requestingItems]}
-              onCreateTradeAd={handleSubmit}
-            />
-          </div>
+          {/* Trade Item Picker */}
+          <TradeItemPickerV2
+            items={items}
+            onSelect={handleAddItem}
+            onAddCustomType={handleAddCustomType}
+            customTypes={CUSTOM_TRADE_TYPES.map((customType) => ({
+              id: customType.id,
+              label: customType.label,
+            }))}
+            selectedItems={[...offeringItems, ...requestingItems]}
+          />
         </div>
 
         {/* Drag Overlay */}

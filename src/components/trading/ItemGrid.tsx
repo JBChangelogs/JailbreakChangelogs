@@ -2,18 +2,14 @@ import React from "react";
 import Image from "next/image";
 import { Tooltip, TooltipTrigger } from "@/components/ui/tooltip";
 import { TradeItem } from "@/types/trading";
-import {
-  getItemImagePath,
-  handleImageError,
-  isVideoItem,
-  getVideoPath,
-} from "@/utils/images";
+import { handleImageError, isVideoItem, getVideoPath } from "@/utils/images";
 import TradeItemHoverTooltip from "./TradeItemHoverTooltip";
+import { getTradeItemImagePath, tradeItemIdsEqual } from "@/utils/tradeItems";
 
 interface ItemGridProps {
   items: TradeItem[];
   title: string;
-  onRemove?: (itemId: number) => void;
+  onRemove?: (itemId: number | string) => void;
   disableInteraction?: boolean;
 }
 
@@ -157,7 +153,9 @@ export const ItemGrid: React.FC<ItemGridProps> = ({
       >
         <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-4">
           {groupItems(items).map((item) => {
-            const originalItem = items.find((i) => i.id === item.id);
+            const originalItem = items.find((i) =>
+              tradeItemIdsEqual(i.id, item.id),
+            );
             const displayName = originalItem
               ? getDisplayName(originalItem)
               : item.name;
@@ -194,7 +192,7 @@ export const ItemGrid: React.FC<ItemGridProps> = ({
                             />
                           ) : (
                             <Image
-                              src={getItemImagePath(item.type, item.name, true)}
+                              src={getTradeItemImagePath(item, true)}
                               alt={item.name}
                               fill
                               className="object-cover"

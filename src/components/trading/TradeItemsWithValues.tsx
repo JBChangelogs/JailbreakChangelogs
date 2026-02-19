@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Icon } from "@/components/ui/IconWrapper";
 import { getCategoryColor, getCategoryIcon } from "@/utils/categoryIcons";
 import { getDemandColor, getTrendColor } from "@/utils/badgeColors";
+import { getTradeItemDetailHref } from "@/utils/tradeItems";
 
 interface TradeItemsWithValuesProps {
   offering: TradeItem[];
@@ -80,6 +81,7 @@ interface ItemRowProps {
 
 const ItemRow: React.FC<ItemRowProps> = ({ item, isFirst = false }) => {
   const [isExpanded, setIsExpanded] = useState(isFirst);
+  const itemHref = getTradeItemDetailHref(item);
 
   const toggleExpanded = () => {
     setIsExpanded(!isExpanded);
@@ -95,14 +97,20 @@ const ItemRow: React.FC<ItemRowProps> = ({ item, isFirst = false }) => {
         <div className="flex flex-1 items-center gap-3">
           <div className="min-w-0 flex-1">
             <div className="flex items-center justify-between">
-              <Link
-                href={`/item/${item.type.toLowerCase()}/${item.base_name || item.name}`}
-                prefetch={false}
-                className="text-primary-text hover:text-link font-medium transition-colors"
-                onClick={(e) => e.stopPropagation()}
-              >
-                {item.name}
-              </Link>
+              {itemHref ? (
+                <Link
+                  href={itemHref}
+                  prefetch={false}
+                  className="text-primary-text hover:text-link font-medium transition-colors"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  {item.name}
+                </Link>
+              ) : (
+                <span className="text-primary-text font-medium">
+                  {item.name}
+                </span>
+              )}
             </div>
             <div className="mt-1 flex flex-wrap items-center gap-2">
               {item.count > 1 && (

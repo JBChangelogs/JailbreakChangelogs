@@ -3,13 +3,12 @@ import { TradeItem } from "@/types/trading";
 import Image from "next/image";
 import Link from "next/link";
 import { Tooltip, TooltipTrigger } from "@/components/ui/tooltip";
-import {
-  getItemImagePath,
-  handleImageError,
-  isVideoItem,
-  getVideoPath,
-} from "@/utils/images";
+import { handleImageError, isVideoItem, getVideoPath } from "@/utils/images";
 import TradeItemHoverTooltip from "./TradeItemHoverTooltip";
+import {
+  getTradeItemDetailHref,
+  getTradeItemImagePath,
+} from "@/utils/tradeItems";
 
 interface TradeItemsImagesProps {
   offering: TradeItem[];
@@ -68,40 +67,54 @@ export default function TradeItemsImages({
               delayDuration={0}
             >
               <TooltipTrigger asChild>
-                <Link
-                  href={`/item/${item.type.toLowerCase()}/${item.base_name || item.name}`}
-                  prefetch={false}
-                  className="hover:ring-button-info relative aspect-square h-32 w-32 overflow-hidden rounded-lg transition-all hover:ring-2"
-                >
-                  {isVideoItem(item.name) ? (
-                    <video
-                      src={getVideoPath(item.type, item.base_name || item.name)}
-                      className="h-full w-full object-cover"
-                      muted
-                      playsInline
-                      loop
-                      autoPlay
-                    />
-                  ) : (
-                    <Image
-                      src={getItemImagePath(
-                        item.type,
-                        item.base_name || item.name,
-                        true,
-                      )}
-                      alt={item.name}
-                      fill
-                      className="object-cover"
-                      draggable={false}
-                      onError={handleImageError}
-                    />
-                  )}
-                  {item.count > 1 && (
-                    <span className="border-button-info/20 bg-button-info absolute top-2 right-2 rounded-full border px-2.5 py-1 text-sm text-white">
-                      ×{item.count}
-                    </span>
-                  )}
-                </Link>
+                <div className="h-32 w-32">
+                  {(() => {
+                    const itemHref = getTradeItemDetailHref(item);
+                    const itemContent = (
+                      <div className="hover:ring-button-info relative aspect-square h-32 w-32 overflow-hidden rounded-lg transition-all hover:ring-2">
+                        {isVideoItem(item.name) ? (
+                          <video
+                            src={getVideoPath(
+                              item.type,
+                              item.base_name || item.name,
+                            )}
+                            className="h-full w-full object-cover"
+                            muted
+                            playsInline
+                            loop
+                            autoPlay
+                          />
+                        ) : (
+                          <Image
+                            src={getTradeItemImagePath(item, true)}
+                            alt={item.name}
+                            fill
+                            className="object-cover"
+                            draggable={false}
+                            onError={handleImageError}
+                          />
+                        )}
+                        {item.count > 1 && (
+                          <span className="border-button-info/20 bg-button-info absolute top-2 right-2 rounded-full border px-2.5 py-1 text-sm text-white">
+                            ×{item.count}
+                          </span>
+                        )}
+                      </div>
+                    );
+
+                    return itemHref ? (
+                      <Link
+                        href={itemHref}
+                        prefetch={false}
+                        className="block h-full w-full"
+                      >
+                        {itemContent}
+                      </Link>
+                    ) : (
+                      itemContent
+                    );
+                  })()}
+                </div>
               </TooltipTrigger>
               <TradeItemHoverTooltip
                 side="bottom"
@@ -128,40 +141,54 @@ export default function TradeItemsImages({
               delayDuration={0}
             >
               <TooltipTrigger asChild>
-                <Link
-                  href={`/item/${item.type.toLowerCase()}/${item.base_name || item.name}`}
-                  prefetch={false}
-                  className="hover:ring-button-info relative aspect-square h-32 w-32 overflow-hidden rounded-lg transition-all hover:ring-2"
-                >
-                  {isVideoItem(item.name) ? (
-                    <video
-                      src={getVideoPath(item.type, item.base_name || item.name)}
-                      className="h-full w-full object-cover"
-                      muted
-                      playsInline
-                      loop
-                      autoPlay
-                    />
-                  ) : (
-                    <Image
-                      src={getItemImagePath(
-                        item.type,
-                        item.base_name || item.name,
-                        true,
-                      )}
-                      alt={item.name}
-                      fill
-                      className="object-cover"
-                      draggable={false}
-                      onError={handleImageError}
-                    />
-                  )}
-                  {item.count > 1 && (
-                    <span className="border-button-info/20 bg-button-info absolute top-2 right-2 rounded-full border px-2.5 py-1 text-sm text-white">
-                      ×{item.count}
-                    </span>
-                  )}
-                </Link>
+                <div className="h-32 w-32">
+                  {(() => {
+                    const itemHref = getTradeItemDetailHref(item);
+                    const itemContent = (
+                      <div className="hover:ring-button-info relative aspect-square h-32 w-32 overflow-hidden rounded-lg transition-all hover:ring-2">
+                        {isVideoItem(item.name) ? (
+                          <video
+                            src={getVideoPath(
+                              item.type,
+                              item.base_name || item.name,
+                            )}
+                            className="h-full w-full object-cover"
+                            muted
+                            playsInline
+                            loop
+                            autoPlay
+                          />
+                        ) : (
+                          <Image
+                            src={getTradeItemImagePath(item, true)}
+                            alt={item.name}
+                            fill
+                            className="object-cover"
+                            draggable={false}
+                            onError={handleImageError}
+                          />
+                        )}
+                        {item.count > 1 && (
+                          <span className="border-button-info/20 bg-button-info absolute top-2 right-2 rounded-full border px-2.5 py-1 text-sm text-white">
+                            ×{item.count}
+                          </span>
+                        )}
+                      </div>
+                    );
+
+                    return itemHref ? (
+                      <Link
+                        href={itemHref}
+                        prefetch={false}
+                        className="block h-full w-full"
+                      >
+                        {itemContent}
+                      </Link>
+                    ) : (
+                      itemContent
+                    );
+                  })()}
+                </div>
               </TooltipTrigger>
               <TradeItemHoverTooltip
                 side="bottom"

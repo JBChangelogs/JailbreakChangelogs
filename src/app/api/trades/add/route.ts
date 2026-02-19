@@ -1,23 +1,30 @@
 import { NextResponse } from "next/server";
-import { cookies } from "next/headers";
 import { BASE_API_URL } from "@/utils/api";
 
 export async function POST(request: Request) {
   const body = await request.json();
-  const cookieStore = await cookies();
-  const token = cookieStore.get("jbcl_token")?.value;
-  if (!token) {
-    return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
-  }
 
-  const upstream = await fetch(`${BASE_API_URL}/trades/add`, {
+  const upstream = await fetch(`${BASE_API_URL}/trades/v2/create`, {
     method: "POST",
     headers: { "content-type": "application/json" },
-    body: JSON.stringify({ ...body, owner: token }),
+    body: JSON.stringify(body),
     cache: "no-store",
   });
 
   const text = await upstream.text();
+  const parseUpstreamError = (raw: string): string | null => {
+    if (!raw) return null;
+    try {
+      const parsed = JSON.parse(raw) as {
+        message?: string;
+        error?: string;
+        detail?: string;
+      };
+      return parsed.message || parsed.detail || parsed.error || null;
+    } catch {
+      return null;
+    }
+  };
 
   if (!upstream.ok) {
     // Don't log 404 or 403 as errors
@@ -29,8 +36,11 @@ export async function POST(request: Request) {
         : text.slice(0, 100);
       console.error("Trade add failed:", loggedText);
     }
+    const upstreamMessage = parseUpstreamError(text);
     return NextResponse.json(
-      { message: "Failed to add trade" },
+      {
+        message: upstreamMessage || "Failed to add trade",
+      },
       { status: upstream.status },
     );
   }

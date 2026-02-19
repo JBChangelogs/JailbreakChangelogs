@@ -5,6 +5,7 @@ import { getCategoryColor, getCategoryIcon } from "@/utils/categoryIcons";
 import { formatFullValue } from "@/utils/values";
 import { getDemandColor, getTrendColor } from "@/utils/badgeColors";
 import { Icon } from "@/components/ui/IconWrapper";
+import { getTradeItemDetailHref } from "@/utils/tradeItems";
 
 interface TradeAdTooltipProps {
   item: TradeItem;
@@ -13,7 +14,7 @@ interface TradeAdTooltipProps {
 export const TradeAdTooltip: React.FC<TradeAdTooltipProps> = ({ item }) => {
   const demand = item.demand ?? item.data?.demand ?? "N/A";
   const trend = item.trend ?? item.data?.trend ?? null;
-  const selectedType = "isDuped" in item && item.isDuped ? "Duped" : "Clean";
+  const itemHref = getTradeItemDetailHref(item);
 
   return (
     <div className="p-4">
@@ -21,13 +22,19 @@ export const TradeAdTooltip: React.FC<TradeAdTooltipProps> = ({ item }) => {
       <div className="min-w-0 flex-1">
         <div className="mb-2 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Link
-              href={`/item/${item.type.toLowerCase()}/${item.name}`}
-              prefetch={false}
-              className="link-text hover:text-link-hover truncate text-lg font-semibold transition-colors"
-            >
-              {item.name}
-            </Link>
+            {itemHref ? (
+              <Link
+                href={itemHref}
+                prefetch={false}
+                className="link-text hover:text-link-hover truncate text-lg font-semibold transition-colors"
+              >
+                {item.name}
+              </Link>
+            ) : (
+              <span className="link-text truncate text-lg font-semibold">
+                {item.name}
+              </span>
+            )}
           </div>
         </div>
         <div className="space-y-2 text-sm">
@@ -50,28 +57,26 @@ export const TradeAdTooltip: React.FC<TradeAdTooltipProps> = ({ item }) => {
               {item.type}
             </span>
             {item.is_limited === 1 && (
-              <span className="text-primary-text border-border-card bg-tertiary-bg/40 flex h-6 items-center gap-1.5 rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl">
-                <Icon
-                  icon="mdi:clock"
-                  className="h-3 w-3"
-                  style={{ color: "#ffd700" }}
-                />
+              <span className="text-primary-text border-border-card bg-tertiary-bg/40 flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl">
                 Limited
               </span>
             )}
             {item.is_seasonal === 1 && (
-              <span className="text-primary-text border-border-card bg-tertiary-bg/40 flex h-6 items-center gap-1.5 rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl">
-                <Icon
-                  icon="noto-v1:snowflake"
-                  className="h-3 w-3"
-                  style={{ color: "#40c0e7" }}
-                />
+              <span className="text-primary-text border-border-card bg-tertiary-bg/40 flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl">
                 Seasonal
               </span>
             )}
-            <span className="text-primary-text border-border-card bg-tertiary-bg/40 flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl">
-              {selectedType}
-            </span>
+            {item.isDuped && (
+              <span className="border-status-error bg-status-error/90 text-form-button-text flex h-6 items-center rounded-md border px-2.5 text-xs leading-none font-semibold">
+                Duped
+              </span>
+            )}
+            {item.isOG && (
+              <span className="text-primary-text bg-tertiary-bg/40 border-border-card inline-flex h-6 items-center gap-1.5 rounded-lg border px-2.5 text-xs leading-none font-medium shadow-sm">
+                <Icon icon="mdi:star-four-points" className="h-3.5 w-3.5" />
+                OG
+              </span>
+            )}
           </div>
           <div className="flex items-center gap-2">
             <span className="text-secondary-text text-xs tracking-wider uppercase">
