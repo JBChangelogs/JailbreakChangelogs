@@ -18,9 +18,10 @@ export const TradeAdTabs: React.FC<TradeAdTabsProps> = ({
       onTabChange(value as "view" | "supporter" | "create" | "myads")
     }
   >
-    <div className="overflow-x-auto">
-      <TabsList>
+    <div className="w-full overflow-x-auto">
+      <TabsList fullWidth className="w-full min-w-0">
         <TabsTrigger
+          fullWidth
           value="view"
           id="trading-tab-view"
           aria-controls="trading-tabpanel-view"
@@ -28,6 +29,7 @@ export const TradeAdTabs: React.FC<TradeAdTabsProps> = ({
           View Trade Ads
         </TabsTrigger>
         <TabsTrigger
+          fullWidth
           value="supporter"
           id="trading-tab-supporter"
           aria-controls="trading-tabpanel-supporter"
@@ -36,6 +38,7 @@ export const TradeAdTabs: React.FC<TradeAdTabsProps> = ({
         </TabsTrigger>
         {hasTradeAds && (
           <TabsTrigger
+            fullWidth
             value="myads"
             id="trading-tab-myads"
             aria-controls="trading-tabpanel-myads"
@@ -44,6 +47,7 @@ export const TradeAdTabs: React.FC<TradeAdTabsProps> = ({
           </TabsTrigger>
         )}
         <TabsTrigger
+          fullWidth
           value="create"
           id="trading-tab-create"
           aria-controls="trading-tabpanel-create"

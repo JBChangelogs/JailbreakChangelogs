@@ -50,7 +50,7 @@ const PREMIUM_TIERS: UserPremiumTier[] = [
   { tier: 3, name: "Supporter 3", durations: [6, 12, 24, 48] },
 ];
 const EXPIRATION_OPTIONS = [6, 12, 24, 48];
-const MAX_TRADE_NOTE_LENGTH = 300;
+const MAX_TRADE_NOTE_LENGTH = 350;
 
 const CUSTOM_TRADE_TYPES = [
   { id: "adds", label: "Adds" },
@@ -404,13 +404,17 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
   };
 
   const handleRemoveItem = (
-    itemId: number | string,
+    itemToRemove: TradeItem,
     side: "offering" | "requesting",
   ) => {
+    const removePredicate = (item: TradeItem) =>
+      tradeItemIdsEqual(item.id, itemToRemove.id) &&
+      !!item.isDuped === !!itemToRemove.isDuped &&
+      !!item.isOG === !!itemToRemove.isOG &&
+      getTradeItemIdentifier(item) === getTradeItemIdentifier(itemToRemove);
+
     if (side === "offering") {
-      const index = offeringItems.findIndex((item) =>
-        tradeItemIdsEqual(item.id, itemId),
-      );
+      const index = offeringItems.findIndex(removePredicate);
       if (index !== -1) {
         const newOfferingItems = [
           ...offeringItems.slice(0, index),
@@ -420,9 +424,7 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
         saveItemsToLocalStorage(newOfferingItems, requestingItems, tradeNote);
       }
     } else {
-      const index = requestingItems.findIndex((item) =>
-        tradeItemIdsEqual(item.id, itemId),
-      );
+      const index = requestingItems.findIndex(removePredicate);
       if (index !== -1) {
         const newRequestingItems = [
           ...requestingItems.slice(0, index),
@@ -480,12 +482,6 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
     if (requestingItems.length === 0) {
       errors.push("You must add at least one item to request");
     }
-    if (tradeNote.length > MAX_TRADE_NOTE_LENGTH) {
-      errors.push(
-        `Trade note must be ${MAX_TRADE_NOTE_LENGTH} characters or less`,
-      );
-    }
-
     // Require all fields
     if (
       !userData?.roblox_id ||
@@ -1085,7 +1081,7 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
               <ItemGrid
                 items={offeringItems}
                 title="Offering"
-                onRemove={(id) => handleRemoveItem(id, "offering")}
+                onRemove={(item) => handleRemoveItem(item, "offering")}
                 disableInteraction={submitting}
               />
               <div className="text-secondary-text/70 mt-4 flex flex-col flex-wrap items-start gap-2 text-xs sm:flex-row sm:items-center sm:gap-3 sm:text-sm">
@@ -1152,7 +1148,7 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
               <ItemGrid
                 items={requestingItems}
                 title="Requesting"
-                onRemove={(id) => handleRemoveItem(id, "requesting")}
+                onRemove={(item) => handleRemoveItem(item, "requesting")}
                 disableInteraction={submitting}
               />
               <div className="text-secondary-text/70 mt-4 flex flex-col flex-wrap items-start gap-2 text-xs sm:flex-row sm:items-center sm:gap-3 sm:text-sm">

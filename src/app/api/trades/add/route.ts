@@ -1,12 +1,32 @@
 import { NextResponse } from "next/server";
+import { cookies } from "next/headers";
 import { BASE_API_URL } from "@/utils/api";
 
 export async function POST(request: Request) {
+  if (!BASE_API_URL) {
+    return NextResponse.json(
+      { message: "Trade API is not configured" },
+      { status: 500 },
+    );
+  }
+
   const body = await request.json();
+  const shouldSendAuthHeader = process.env.NODE_ENV === "development";
+  const headers: Record<string, string> = {
+    "content-type": "application/json",
+  };
+  if (shouldSendAuthHeader) {
+    const cookieStore = await cookies();
+    const token = cookieStore.get("jbcl_token")?.value;
+    if (!token) {
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+    }
+    headers.Authorization = token;
+  }
 
   const upstream = await fetch(`${BASE_API_URL}/trades/v2/create`, {
     method: "POST",
-    headers: { "content-type": "application/json" },
+    headers,
     body: JSON.stringify(body),
     cache: "no-store",
   });
@@ -27,19 +47,28 @@ export async function POST(request: Request) {
   };
 
   if (!upstream.ok) {
+    const upstreamContentType =
+      upstream.headers.get("content-type") || "application/octet-stream";
+    const trimmedText = text.trim();
+    const isHtml =
+      trimmedText.startsWith("<!DOCTYPE") || trimmedText.startsWith("<html");
+
     // Don't log 404 or 403 as errors
-    if (upstream.status !== 404 && upstream.status !== 403) {
-      const isHtml =
-        text.trim().startsWith("<!DOCTYPE") || text.trim().startsWith("<html");
-      const loggedText = isHtml
-        ? `HTML Error Page (Status ${upstream.status})`
-        : text.slice(0, 100);
-      console.error("Trade add failed:", loggedText);
+    if (upstreamContentType.includes("application/json")) {
+      return new NextResponse(text, {
+        status: upstream.status,
+        headers: { "content-type": upstreamContentType },
+      });
     }
+
     const upstreamMessage = parseUpstreamError(text);
     return NextResponse.json(
       {
-        message: upstreamMessage || "Failed to add trade",
+        message:
+          upstreamMessage ||
+          (isHtml
+            ? "Trade service returned an unexpected response."
+            : "Failed to add trade"),
       },
       { status: upstream.status },
     );

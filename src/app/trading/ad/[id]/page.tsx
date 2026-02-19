@@ -1,6 +1,6 @@
 import React, { Suspense } from "react";
 import { notFound } from "next/navigation";
-import { fetchTradeAd, fetchUsersBatch, fetchComments } from "@/utils/api";
+import { fetchTradeAd, fetchComments } from "@/utils/api";
 import { fetchItems } from "@/utils/api";
 import type { Item } from "@/types";
 import TradeDetailsClient from "./TradeDetailsClient";
@@ -39,13 +39,7 @@ async function TradeDetailsWrapper({
     notFound();
   }
 
-  const tradeCast = trade as TradeAd;
-  // Fetch user data for the trade author
-  const userMap = await fetchUsersBatch([tradeCast.author]);
-  const tradeWithUser: TradeAd = {
-    ...tradeCast,
-    user: userMap[tradeCast.author],
-  };
+  const tradeWithUser = trade as TradeAd;
 
   const items: Item[] = await fetchItems();
   const findDemand = (id: number | string): string | undefined => {

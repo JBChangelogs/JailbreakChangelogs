@@ -81,6 +81,7 @@ const ServerList: React.FC<{
   const [loadingUsers, setLoadingUsers] = React.useState<
     Record<string, boolean>
   >({});
+  const failedUserIdsRef = React.useRef<Set<string>>(new Set());
   const [isAddModalOpen, setIsAddModalOpen] = React.useState(false);
   const [editingServer, setEditingServer] = React.useState<Server | null>(null);
   const [deleteModalOpen, setDeleteModalOpen] = React.useState(false);
@@ -160,20 +161,26 @@ const ServerList: React.FC<{
 
   // Pagination calculation
   const totalPages = Math.ceil(sortedServers.length / itemsPerPage);
-  const startIndex = (page - 1) * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
-  const currentServers = sortedServers.slice(startIndex, endIndex);
+  const currentServers = React.useMemo(() => {
+    const startIndex = (page - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    return sortedServers.slice(startIndex, endIndex);
+  }, [sortedServers, page, itemsPerPage]);
+
+  const currentOwnerIds = React.useMemo(
+    () => [...new Set(currentServers.map((server) => server.owner))],
+    [currentServers],
+  );
 
   // Fetch user data for visible servers
   React.useEffect(() => {
     const fetchVisibleUsers = async () => {
-      const uniqueOwnerIds = [
-        ...new Set(currentServers.map((server) => server.owner)),
-      ];
-
       // Filter out user IDs that we already have data for or are currently loading
-      const idsToFetch = uniqueOwnerIds.filter(
-        (id) => !userData[id] && !loadingUsers[id],
+      const idsToFetch = currentOwnerIds.filter(
+        (id) =>
+          !userData[id] &&
+          !loadingUsers[id] &&
+          !failedUserIdsRef.current.has(id),
       );
 
       if (idsToFetch.length === 0) return;
@@ -206,6 +213,14 @@ const ServerList: React.FC<{
           );
 
           setUserData((prev) => ({ ...prev, ...newUserDataMap }));
+
+          // Avoid retry loops for IDs the API did not resolve in this response.
+          const resolvedIds = new Set(Object.keys(newUserDataMap));
+          idsToFetch.forEach((id) => {
+            if (!resolvedIds.has(id)) {
+              failedUserIdsRef.current.add(id);
+            }
+          });
         }
       } catch (err) {
         console.error("Error fetching user data:", err);
@@ -220,7 +235,7 @@ const ServerList: React.FC<{
     };
 
     fetchVisibleUsers();
-  }, [currentServers, userData, loadingUsers]); // Dependencies ensure we fetch when page changes or servers update
+  }, [currentOwnerIds, userData, loadingUsers]); // Dependencies ensure we fetch when page changes or servers update
 
   // Handle page change
   const handlePageChange = (

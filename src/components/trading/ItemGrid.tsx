@@ -4,12 +4,16 @@ import { Tooltip, TooltipTrigger } from "@/components/ui/tooltip";
 import { TradeItem } from "@/types/trading";
 import { handleImageError, isVideoItem, getVideoPath } from "@/utils/images";
 import TradeItemHoverTooltip from "./TradeItemHoverTooltip";
-import { getTradeItemImagePath, tradeItemIdsEqual } from "@/utils/tradeItems";
+import {
+  getTradeItemImagePath,
+  isCustomTradeItem,
+  tradeItemIdsEqual,
+} from "@/utils/tradeItems";
 
 interface ItemGridProps {
   items: TradeItem[];
   title: string;
-  onRemove?: (itemId: number | string) => void;
+  onRemove?: (item: TradeItem) => void;
   disableInteraction?: boolean;
 }
 
@@ -48,7 +52,7 @@ const groupItems = (items: TradeItem[]) => {
   const grouped = items.reduce(
     (acc, item) => {
       const itemData = getItemData(item);
-      const key = `${item.id}`;
+      const key = `${item.id}:${item.isDuped ? 1 : 0}:${item.isOG ? 1 : 0}`;
 
       if (!acc[key]) {
         acc[key] = {
@@ -159,6 +163,66 @@ export const ItemGrid: React.FC<ItemGridProps> = ({
             const displayName = originalItem
               ? getDisplayName(originalItem)
               : item.name;
+            const shouldShowTooltip = !isCustomTradeItem(item);
+
+            const content = (
+              <div
+                onClick={() => {
+                  if (disableInteraction || !onRemove) return;
+                  onRemove(item);
+                }}
+              >
+                <div className="relative aspect-square">
+                  <div className="relative h-full w-full overflow-hidden rounded-lg">
+                    {isVideoItem(item.name) ? (
+                      <video
+                        src={getVideoPath(item.type, item.name)}
+                        className="h-full w-full object-cover"
+                        muted
+                        playsInline
+                        loop
+                        autoPlay
+                      />
+                    ) : (
+                      <Image
+                        src={getTradeItemImagePath(item, true)}
+                        alt={item.name}
+                        fill
+                        className="object-cover"
+                        draggable={false}
+                        onError={handleImageError}
+                      />
+                    )}
+                    {item.count > 1 && (
+                      <div className="bg-button-info/90 border-button-info text-form-button-text absolute top-1 right-1 z-5 rounded-full border px-1.5 py-0.5 text-xs">
+                        ×{item.count}
+                      </div>
+                    )}
+                    {(item.isDuped || item.isOG) && (
+                      <div className="absolute bottom-1 left-1 z-5 flex gap-1">
+                        {item.isDuped && (
+                          <span className="bg-status-error/90 text-form-button-text rounded px-1.5 py-0.5 text-[10px] leading-none font-semibold">
+                            Duped
+                          </span>
+                        )}
+                        {item.isOG && (
+                          <span className="bg-tertiary-bg/80 text-primary-text rounded px-1 py-0.5 text-[9px] leading-none font-semibold">
+                            OG
+                          </span>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Item Name */}
+                <div className="mt-2 text-center">
+                  <p className="text-primary-text hover:text-link line-clamp-2 text-xs font-medium transition-colors">
+                    {displayName}
+                  </p>
+                </div>
+              </div>
+            );
 
             return (
               <div
@@ -168,62 +232,25 @@ export const ItemGrid: React.FC<ItemGridProps> = ({
                     ? "cursor-not-allowed opacity-60"
                     : onRemove
                       ? "cursor-pointer"
-                      : "cursor-help"
+                      : shouldShowTooltip
+                        ? "cursor-help"
+                        : "cursor-default"
                 }`}
               >
-                <Tooltip delayDuration={0}>
-                  <TooltipTrigger asChild>
-                    <div
-                      onClick={() => {
-                        if (disableInteraction || !onRemove) return;
-                        onRemove(item.id);
+                {shouldShowTooltip ? (
+                  <Tooltip delayDuration={0}>
+                    <TooltipTrigger asChild>{content}</TooltipTrigger>
+                    <TradeItemHoverTooltip
+                      item={{
+                        ...item,
+                        name: displayName,
+                        base_name: originalItem?.data?.name || item.name,
                       }}
-                    >
-                      <div className="relative aspect-square">
-                        <div className="relative h-full w-full overflow-hidden rounded-lg">
-                          {isVideoItem(item.name) ? (
-                            <video
-                              src={getVideoPath(item.type, item.name)}
-                              className="h-full w-full object-cover"
-                              muted
-                              playsInline
-                              loop
-                              autoPlay
-                            />
-                          ) : (
-                            <Image
-                              src={getTradeItemImagePath(item, true)}
-                              alt={item.name}
-                              fill
-                              className="object-cover"
-                              draggable={false}
-                              onError={handleImageError}
-                            />
-                          )}
-                          {item.count > 1 && (
-                            <div className="bg-button-info/90 border-button-info text-form-button-text absolute top-1 right-1 z-5 rounded-full border px-1.5 py-0.5 text-xs">
-                              ×{item.count}
-                            </div>
-                          )}
-                        </div>
-                      </div>
-
-                      {/* Item Name */}
-                      <div className="mt-2 text-center">
-                        <p className="text-primary-text hover:text-link line-clamp-2 text-xs font-medium transition-colors">
-                          {displayName}
-                        </p>
-                      </div>
-                    </div>
-                  </TooltipTrigger>
-                  <TradeItemHoverTooltip
-                    item={{
-                      ...item,
-                      name: displayName,
-                      base_name: originalItem?.data?.name || item.name,
-                    }}
-                  />
-                </Tooltip>
+                    />
+                  </Tooltip>
+                ) : (
+                  content
+                )}
               </div>
             );
           })}

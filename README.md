@@ -1,7 +1,7 @@
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/jailbreakchangelogs)
 [![GPLv3 License](https://img.shields.io/badge/License-GPL%20v3-yellow.svg)](./LICENSE)
 [![Discord](https://img.shields.io/discord/1286064050135896064?logo=discord&logoColor=white&label=discord&color=4d3dff)](https://discord.jailbreakchangelogs.xyz)
-[![Better Stack Badge](https://uptime.betterstack.com/status-badges/v3/monitor/1ofdv.svg)](https://status.jailbreakchangelogs.xyz)
+[![Better Stack Badge](https://uptime.jailbreakchangelogs.xyz/api/badge/3/status)](https://status.jailbreakchangelogs.xyz)
 
 [![Dependabot Updates](https://github.com/JBChangelogs/JailbreakChangelogs/actions/workflows/dependabot/dependabot-updates/badge.svg?branch=main)](https://github.com/JBChangelogs/JailbreakChangelogs/actions/workflows/dependabot/dependabot-updates)
 [![CodeQL](https://github.com/JBChangelogs/JailbreakChangelogs/actions/workflows/github-code-scanning/codeql/badge.svg?branch=main)](https://github.com/JBChangelogs/JailbreakChangelogs/actions/workflows/github-code-scanning/codeql)

@@ -82,35 +82,40 @@ const TradeSidePreview = ({
         {previewItems.map((item) => {
           const itemHref = getTradeItemDetailHref(item);
           const itemText = (
-            <div className="group bg-tertiary-bg border-border-card relative h-24 w-24 overflow-hidden rounded-lg border sm:h-28 sm:w-28 lg:h-32 lg:w-32">
-              <Image
-                src={getTradeItemImagePath(item, true)}
-                alt={item.name}
-                fill
-                className="object-cover"
-                onError={handleImageError}
-                draggable={false}
-              />
-              {item.count > 1 && (
-                <div className="bg-button-info/90 border-button-info text-form-button-text absolute top-1 right-1 z-5 rounded-full border px-1.5 py-0.5 text-[10px] leading-none">
-                  x{item.count}
-                </div>
-              )}
-              {(item.isDuped || item.isOG) && (
-                <div className="absolute bottom-1 left-1 z-5 flex gap-1">
-                  {item.isDuped && (
-                    <span className="bg-status-error/90 text-form-button-text rounded px-1.5 py-0.5 text-[10px] leading-none font-semibold">
-                      Duped
-                    </span>
-                  )}
-                  {item.isOG && (
-                    <span className="bg-tertiary-bg/80 text-primary-text rounded px-1 py-0.5 text-[9px] leading-none font-semibold">
-                      OG
-                    </span>
-                  )}
-                </div>
-              )}
-              <div className="pointer-events-none absolute inset-0 bg-black/10 opacity-0 transition-opacity group-hover:opacity-100" />
+            <div className="w-24 sm:w-28 lg:w-32">
+              <div className="group bg-tertiary-bg border-border-card relative h-24 w-24 overflow-hidden rounded-lg border sm:h-28 sm:w-28 lg:h-32 lg:w-32">
+                <Image
+                  src={getTradeItemImagePath(item, true)}
+                  alt={item.name}
+                  fill
+                  className="object-cover"
+                  onError={handleImageError}
+                  draggable={false}
+                />
+                {item.count > 1 && (
+                  <div className="bg-button-info/90 border-button-info text-form-button-text absolute top-1 right-1 z-5 rounded-full border px-1.5 py-0.5 text-[10px] leading-none">
+                    x{item.count}
+                  </div>
+                )}
+                {(item.isDuped || item.isOG) && (
+                  <div className="absolute bottom-1 left-1 z-5 flex gap-1">
+                    {item.isDuped && (
+                      <span className="bg-status-error/90 text-form-button-text rounded px-1.5 py-0.5 text-[10px] leading-none font-semibold">
+                        Duped
+                      </span>
+                    )}
+                    {item.isOG && (
+                      <span className="bg-tertiary-bg/80 text-primary-text rounded px-1 py-0.5 text-[9px] leading-none font-semibold">
+                        OG
+                      </span>
+                    )}
+                  </div>
+                )}
+                <div className="pointer-events-none absolute inset-0 bg-black/10 opacity-0 transition-opacity group-hover:opacity-100" />
+              </div>
+              <p className="text-primary-text mt-1 line-clamp-2 text-center text-xs leading-tight font-medium break-words whitespace-normal">
+                {item.name}
+              </p>
               <div className="sr-only">
                 {item.name} ({item.type})
               </div>

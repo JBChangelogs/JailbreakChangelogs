@@ -441,14 +441,15 @@ export default function TradeAds({
   };
 
   const handleDeleteTrade = async (tradeId: number) => {
+    const toastId = toast.loading("Deleting trade ad...");
     try {
       // Remove the trade from the list immediately to prevent UI flicker
       setTradeAds((prevAds) => prevAds.filter((ad) => ad.id !== tradeId));
       await deleteTradeAd(tradeId);
-      toast.success("Trade ad deleted successfully");
+      toast.success("Trade ad deleted successfully", { id: toastId });
     } catch (error) {
       console.error("Error deleting trade ad:", error);
-      toast.error("Failed to delete trade ad");
+      toast.error("Failed to delete trade ad", { id: toastId });
       // Refresh the trade ads list to ensure consistency
       refreshTradeAds();
     }

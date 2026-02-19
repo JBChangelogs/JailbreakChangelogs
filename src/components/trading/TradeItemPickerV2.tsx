@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { TradeItem } from "@/types/trading";
-import { useMediaQuery } from "@mui/material";
+import { toast } from "sonner";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Icon } from "@/components/ui/IconWrapper";
 import { CategoryIconBadge } from "@/utils/categoryIcons";
@@ -18,6 +18,7 @@ import {
 import { handleImageError } from "@/utils/images";
 
 type TradeSide = "offering" | "requesting";
+type ItemCondition = "clean" | "duped" | "og";
 
 interface CustomTypeOption {
   id: string;
@@ -32,7 +33,7 @@ interface TradeItemPickerV2Props {
   onAddCustomType: (customId: string, side: TradeSide) => void;
 }
 
-const ITEMS_PER_PAGE = 24;
+const ITEMS_PER_PAGE = 28;
 
 const parseCurrencyToNumber = (value?: string | null): number => {
   if (!value || value === "N/A") return 0;
@@ -40,19 +41,6 @@ const parseCurrencyToNumber = (value?: string | null): number => {
   if (clean.endsWith("m")) return Number.parseFloat(clean) * 1_000_000;
   if (clean.endsWith("k")) return Number.parseFloat(clean) * 1_000;
   return Number.parseFloat(clean) || 0;
-};
-
-const formatValue = (value?: string | null): string => {
-  if (!value || value === "N/A") return "N/A";
-  return parseCurrencyToNumber(value).toLocaleString();
-};
-
-const formatCompactValue = (value?: string | null): string => {
-  if (!value || value === "N/A") return "N/A";
-  return new Intl.NumberFormat("en-US", {
-    notation: "compact",
-    maximumFractionDigits: 1,
-  }).format(parseCurrencyToNumber(value));
 };
 
 export default function TradeItemPickerV2({
@@ -64,8 +52,23 @@ export default function TradeItemPickerV2({
 }: TradeItemPickerV2Props) {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeSide, setActiveSide] = useState<TradeSide>("offering");
+  const [itemConditionsBySide, setItemConditionsBySide] = useState<
+    Record<TradeSide, Record<string, ItemCondition>>
+  >({
+    offering: {},
+    requesting: {},
+  });
   const [page, setPage] = useState(1);
-  const isMobile = useMediaQuery("(max-width:640px)");
+  const getConditionFlags = (condition: ItemCondition) => {
+    switch (condition) {
+      case "duped":
+        return { duped: true, og: false };
+      case "og":
+        return { duped: false, og: true };
+      default:
+        return { duped: false, og: false };
+    }
+  };
 
   const selectedCustomBySide = useMemo(() => {
     const offering = new Set<string>();
@@ -128,7 +131,7 @@ export default function TradeItemPickerV2({
         </Tabs>
       </div>
 
-      <div className="mb-4 grid grid-cols-4 gap-2 md:grid-cols-8">
+      <div className="mb-4 flex flex-wrap justify-center gap-3 md:gap-4">
         {customTypes.map((customType) => {
           const selectedOnSide =
             activeSide === "offering"
@@ -141,12 +144,12 @@ export default function TradeItemPickerV2({
               type="button"
               onClick={() => onAddCustomType(customType.id, activeSide)}
               disabled={selectedOnSide}
-              className={`border-border-card bg-tertiary-bg hover:border-border-focus flex cursor-pointer flex-col items-center gap-1 rounded-lg border p-2 transition-colors ${
+              className={`border-border-card bg-secondary-bg hover:bg-tertiary-bg flex aspect-square h-20 w-20 cursor-pointer items-center justify-center rounded-lg border p-2 transition-colors md:h-24 md:w-24 ${
                 selectedOnSide ? "opacity-50" : ""
               }`}
               title={customType.label}
             >
-              <div className="relative h-16 w-16 overflow-hidden rounded md:h-18 md:w-18">
+              <div className="relative aspect-square w-full overflow-hidden rounded">
                 <Image
                   src={getTradeItemImagePath({
                     id: customType.id,
@@ -189,7 +192,7 @@ export default function TradeItemPickerV2({
         </div>
       </div>
 
-      <div className="mb-3 flex items-center justify-between">
+      <div className="mb-3 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-secondary-text text-sm">
           Total Items: {filteredItems.length}
         </p>
@@ -211,88 +214,159 @@ export default function TradeItemPickerV2({
         </div>
       )}
 
-      <div className="mb-8 grid grid-cols-1 gap-4 min-[375px]:grid-cols-2 md:grid-cols-3 lg:grid-cols-6">
-        {pagedItems.map((item) => (
-          <button
-            key={`${item.id}-${item.name}`}
-            type="button"
-            className="border-border-card bg-tertiary-bg hover:bg-quaternary-bg cursor-pointer rounded-lg border p-3 text-left transition-colors"
-            onClick={() =>
-              onSelect(
-                {
-                  ...item,
-                  base_name: item.base_name || item.name,
-                  side: activeSide,
-                },
-                activeSide,
-              )
-            }
-          >
-            {(() => {
-              const itemHref = getTradeItemDetailHref(item);
-              return (
-                <div className="mb-2 flex items-center justify-between gap-2">
-                  {itemHref ? (
-                    <Link
-                      href={itemHref}
-                      prefetch={false}
-                      className="text-primary-text hover:text-link truncate text-xs font-medium transition-colors sm:text-sm"
-                      onClick={(event) => event.stopPropagation()}
-                    >
-                      {item.name}
-                    </Link>
-                  ) : (
-                    <p className="text-primary-text truncate text-xs font-medium sm:text-sm">
-                      {item.name}
-                    </p>
-                  )}
-                </div>
+      <div className="mb-8 grid grid-cols-2 gap-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-7">
+        {pagedItems.map((item) => {
+          const itemKey = getTradeItemIdentifier(item);
+          const condition =
+            itemConditionsBySide[activeSide]?.[itemKey] || "clean";
+          const flags = getConditionFlags(condition);
+
+          const addToSide = () => {
+            const added = onSelect(
+              {
+                ...item,
+                base_name: item.base_name || item.name,
+                isDuped: flags.duped,
+                isOG: flags.og,
+                side: activeSide,
+              },
+              activeSide,
+            );
+            if (added) {
+              const variantLabel =
+                condition === "clean"
+                  ? ""
+                  : condition === "duped"
+                    ? " [Duped]"
+                    : " [OG]";
+              toast.success(
+                `Added ${item.name}${variantLabel} to ${activeSide} items`,
               );
-            })()}
-            <div className="relative mb-2 aspect-square w-full overflow-hidden rounded-lg">
-              <Image
-                src={getTradeItemImagePath(item, true)}
-                alt={item.name}
-                fill
-                className="object-cover"
-                onError={handleImageError}
-              />
-              <div className="absolute top-2 right-2 z-10">
-                <CategoryIconBadge
-                  type={item.type}
-                  isLimited={item.is_limited === 1}
-                  isSeasonal={item.is_seasonal === 1}
-                  preferItemType={true}
-                  className="h-4 w-4 sm:h-5 sm:w-5"
+            }
+          };
+
+          return (
+            <div
+              key={`${item.id}-${item.name}`}
+              role="button"
+              tabIndex={0}
+              className="border-border-card bg-secondary-bg hover:bg-tertiary-bg w-full cursor-pointer rounded-lg border p-1.5 text-left transition-colors md:p-2"
+              onClick={addToSide}
+              onKeyDown={(event) => {
+                if (event.key === "Enter" || event.key === " ") {
+                  event.preventDefault();
+                  addToSide();
+                }
+              }}
+            >
+              {(() => {
+                const itemHref = getTradeItemDetailHref(item);
+                return (
+                  <div className="mb-2">
+                    {itemHref ? (
+                      <Link
+                        href={itemHref}
+                        prefetch={false}
+                        className="text-primary-text hover:text-link mb-1 block truncate text-xs font-medium transition-colors"
+                        onClick={(event) => event.stopPropagation()}
+                      >
+                        {item.name}
+                      </Link>
+                    ) : (
+                      <p className="text-primary-text mb-1 truncate text-xs font-medium">
+                        {item.name}
+                      </p>
+                    )}
+                    <div className="flex items-center gap-1">
+                      <button
+                        type="button"
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          setItemConditionsBySide((prev) => ({
+                            ...prev,
+                            [activeSide]: {
+                              ...prev[activeSide],
+                              [itemKey]: "clean",
+                            },
+                          }));
+                        }}
+                        className={`cursor-pointer rounded border px-1.5 py-0.5 text-[10px] font-medium transition-colors ${
+                          condition === "clean"
+                            ? "bg-tertiary-bg border-border-focus text-primary-text"
+                            : "bg-tertiary-bg border-border-card text-secondary-text"
+                        }`}
+                      >
+                        Clean
+                      </button>
+                      <button
+                        type="button"
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          setItemConditionsBySide((prev) => ({
+                            ...prev,
+                            [activeSide]: {
+                              ...prev[activeSide],
+                              [itemKey]: "duped",
+                            },
+                          }));
+                        }}
+                        className={`cursor-pointer rounded border px-1.5 py-0.5 text-[10px] font-medium transition-colors ${
+                          condition === "duped"
+                            ? "bg-tertiary-bg border-border-focus text-primary-text"
+                            : "bg-tertiary-bg border-border-card text-secondary-text"
+                        }`}
+                      >
+                        Duped
+                      </button>
+                      <button
+                        type="button"
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          setItemConditionsBySide((prev) => ({
+                            ...prev,
+                            [activeSide]: {
+                              ...prev[activeSide],
+                              [itemKey]: "og",
+                            },
+                          }));
+                        }}
+                        className={`cursor-pointer rounded border px-1.5 py-0.5 text-[10px] font-medium transition-colors ${
+                          condition === "og"
+                            ? "bg-tertiary-bg border-border-focus text-primary-text"
+                            : "bg-tertiary-bg border-border-card text-secondary-text"
+                        }`}
+                      >
+                        OG
+                      </button>
+                    </div>
+                  </div>
+                );
+              })()}
+              <div className="relative mb-1.5 aspect-square w-full overflow-hidden rounded-lg">
+                <Image
+                  src={getTradeItemImagePath(item, true)}
+                  alt={item.name}
+                  fill
+                  className="object-cover"
+                  onError={handleImageError}
                 />
+                <div className="absolute top-2 right-2 z-10">
+                  <CategoryIconBadge
+                    type={item.type}
+                    isLimited={item.is_limited === 1}
+                    isSeasonal={item.is_seasonal === 1}
+                    preferItemType={true}
+                    className="h-4 w-4 sm:h-5 sm:w-5"
+                  />
+                </div>
               </div>
             </div>
-            <div className="bg-secondary-bg flex items-center justify-between rounded-lg p-2">
-              <span className="text-secondary-text text-xs font-medium">
-                Cash
-              </span>
-              <span className="bg-button-info text-form-button-text inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold whitespace-nowrap shadow-sm min-[480px]:px-3">
-                {isMobile
-                  ? formatCompactValue(item.cash_value)
-                  : formatValue(item.cash_value)}
-              </span>
-            </div>
-            <div className="bg-secondary-bg mt-1 flex items-center justify-between rounded-lg p-2">
-              <span className="text-secondary-text text-xs font-medium">
-                Duped
-              </span>
-              <span className="bg-button-info text-form-button-text inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold whitespace-nowrap shadow-sm min-[480px]:px-3">
-                {isMobile
-                  ? formatCompactValue(item.duped_value)
-                  : formatValue(item.duped_value)}
-              </span>
-            </div>
-          </button>
-        ))}
+          );
+        })}
       </div>
 
       {totalPages > 1 && (
-        <div className="mt-2 flex justify-center">
+        <div className="mt-2 mb-8 flex justify-center">
           <Pagination
             count={totalPages}
             page={currentPage}
