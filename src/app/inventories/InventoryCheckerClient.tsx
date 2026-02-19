@@ -9,7 +9,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ThemeProvider } from "@mui/material";
 import React from "react";
 import { fetchMissingRobloxData } from "./actions";
-import { ENABLE_WS_SCAN } from "@/utils/api";
+import { ENABLE_WS_SCAN, INVENTORY_API_URL } from "@/utils/api";
 import { RobloxUser, Item } from "@/types";
 import { InventoryData, InventoryItem, UserConnectionData } from "./types";
 import { useAuthContext } from "@/contexts/AuthContext";
@@ -92,6 +92,7 @@ export default function InventoryCheckerClient({
   const [showHistoryModal, setShowHistoryModal] = useState(false);
   const forceShowErrorHandledRef = useRef<boolean>(false);
   const lastShownErrorRef = useRef<string | null>(null);
+  const lastShownSuccessRef = useRef<string | null>(null);
   const [robloxUsers, setRobloxUsers] = useState<Record<string, RobloxUser>>(
     initialRobloxUsers || {},
   );
@@ -102,6 +103,13 @@ export default function InventoryCheckerClient({
   const [moneyHistoryData] = useState<MoneyHistory[]>(initialMoneyHistoryData);
   const [activeTab, setActiveTab] = useState(0);
   const [showNonOgOnly, setShowNonOgOnly] = useState(false);
+  const [queuePosition, setQueuePosition] = useState<{
+    position: number;
+    delay: number;
+  } | null>(null);
+  const [isLoadingQueuePosition, setIsLoadingQueuePosition] = useState(false);
+  const [queueStatusMessage, setQueueStatusMessage] =
+    useState<string>("Not in queue");
 
   const router = useRouter();
   const { getId } = useUsernameToId();
@@ -309,6 +317,44 @@ export default function InventoryCheckerClient({
     resetForceShowError: scanResetForceShowError,
   } = scanWebSocket;
 
+  const fetchQueuePosition = useCallback(async () => {
+    if (!INVENTORY_API_URL || !robloxId) return;
+
+    setIsLoadingQueuePosition(true);
+    try {
+      const response = await fetch(
+        `/api/inventories/queue/position?id=${encodeURIComponent(robloxId)}`,
+        { cache: "no-store" },
+      );
+      if (!response.ok) {
+        throw new Error(`Queue request failed: ${response.status}`);
+      }
+
+      const data = await response.json();
+      if (
+        typeof data.position === "number" &&
+        Number.isFinite(data.position) &&
+        typeof data.delay === "number" &&
+        Number.isFinite(data.delay)
+      ) {
+        setQueuePosition({
+          position: data.position,
+          delay: data.delay,
+        });
+        setQueueStatusMessage("");
+      } else {
+        setQueuePosition(null);
+        setQueueStatusMessage(data.error || "Not in queue");
+      }
+    } catch (queueError) {
+      console.error("Error fetching queue position:", queueError);
+      setQueuePosition(null);
+      setQueueStatusMessage("Failed to fetch queue position");
+    } finally {
+      setIsLoadingQueuePosition(false);
+    }
+  }, [robloxId]);
+
   // Handle scan status updates (for error state scanning)
   useEffect(() => {
     if (!isOwnInventory) {
@@ -325,6 +371,7 @@ export default function InventoryCheckerClient({
 
     if (scanStatus === "connecting") {
       lastShownErrorRef.current = null;
+      lastShownSuccessRef.current = null;
       showScanLoadingToast("Connecting to scan service...");
     }
 
@@ -340,14 +387,20 @@ export default function InventoryCheckerClient({
       }
     }
 
-    if (
-      scanStatus === "completed" &&
-      scanMessage &&
-      scanMessage.includes("Added to queue")
-    ) {
-      lastShownErrorRef.current = null;
-      dismissScanLoadingToast();
-      showScanSuccessToast(scanMessage);
+    if (scanStatus === "completed") {
+      const successKey = `${scanStatus}:${scanMessage ?? "success"}`;
+      if (lastShownSuccessRef.current !== successKey) {
+        lastShownSuccessRef.current = successKey;
+        lastShownErrorRef.current = null;
+        dismissScanLoadingToast();
+
+        const successMessage =
+          scanMessage || "Scan request submitted successfully.";
+
+        showScanSuccessToast(successMessage);
+      }
+
+      fetchQueuePosition();
     }
 
     if (scanStatus === "error") {
@@ -443,6 +496,7 @@ export default function InventoryCheckerClient({
     isOwnInventory,
     error,
     initialData,
+    fetchQueuePosition,
     openModal,
     user?.premiumtype,
   ]);
@@ -863,6 +917,34 @@ export default function InventoryCheckerClient({
                               )}
                             </Button>
                           </div>
+                          <div className="flex items-center justify-center gap-2">
+                            <p className="text-secondary-text text-xs">
+                              {isLoadingQueuePosition ? (
+                                "Checking queue position..."
+                              ) : queuePosition ? (
+                                <span className="text-primary-text font-medium">
+                                  Queue Position: #
+                                  {queuePosition.position.toLocaleString()} (
+                                  {Math.max(1, Math.round(queuePosition.delay))}{" "}
+                                  min est.)
+                                </span>
+                              ) : (
+                                queueStatusMessage || "Not in queue"
+                              )}
+                            </p>
+                            <button
+                              type="button"
+                              onClick={fetchQueuePosition}
+                              disabled={isLoadingQueuePosition}
+                              aria-label="Refresh queue position"
+                              className="text-secondary-text hover:text-primary-text cursor-pointer rounded p-0.5 transition-colors hover:bg-white/10 disabled:opacity-50"
+                            >
+                              <Icon
+                                icon="material-symbols:refresh"
+                                className={`h-4 w-4 ${isLoadingQueuePosition ? "animate-spin" : ""}`}
+                              />
+                            </button>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -876,6 +958,34 @@ export default function InventoryCheckerClient({
                           <p className="text-secondary-text text-sm">
                             Try searching another username.
                           </p>
+                          <div className="mt-3 flex items-center gap-2">
+                            <p className="text-secondary-text text-xs">
+                              {isLoadingQueuePosition ? (
+                                "Checking queue position..."
+                              ) : queuePosition ? (
+                                <span className="text-primary-text font-medium">
+                                  Queue Position: #
+                                  {queuePosition.position.toLocaleString()} (
+                                  {Math.max(1, Math.round(queuePosition.delay))}{" "}
+                                  min est.)
+                                </span>
+                              ) : (
+                                queueStatusMessage || "Not in queue"
+                              )}
+                            </p>
+                            <button
+                              type="button"
+                              onClick={fetchQueuePosition}
+                              disabled={isLoadingQueuePosition}
+                              aria-label="Refresh queue position"
+                              className="text-secondary-text hover:text-primary-text cursor-pointer rounded p-0.5 transition-colors hover:bg-white/10 disabled:opacity-50"
+                            >
+                              <Icon
+                                icon="material-symbols:refresh"
+                                className={`h-4 w-4 ${isLoadingQueuePosition ? "animate-spin" : ""}`}
+                              />
+                            </button>
+                          </div>
                           <Button
                             type="button"
                             size="sm"

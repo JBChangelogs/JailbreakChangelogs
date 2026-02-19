@@ -63,6 +63,11 @@ export function showScanSuccessToast(
       description,
       duration: 4000,
     });
+  } else {
+    toast.success(message, {
+      description,
+      duration: 4000,
+    });
   }
   activeScanLoadingToast = null;
 }

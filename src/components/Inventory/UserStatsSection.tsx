@@ -229,11 +229,21 @@ export default function UserStatsSection({
         setQueuePosition(null);
       } else if (response.ok) {
         const data = await response.json();
-        setQueuePosition({
-          position: data.position,
-          delay: data.delay,
-        });
-        setQueueError(null);
+        if (
+          typeof data.position === "number" &&
+          Number.isFinite(data.position) &&
+          typeof data.delay === "number" &&
+          Number.isFinite(data.delay)
+        ) {
+          setQueuePosition({
+            position: data.position,
+            delay: data.delay,
+          });
+          setQueueError(null);
+        } else {
+          setQueueError(data.error || "User not found in queue");
+          setQueuePosition(null);
+        }
       } else {
         throw new Error(`Failed to fetch queue position: ${response.status}`);
       }

@@ -36,8 +36,21 @@ export async function GET(request: NextRequest) {
     if (response.status === 404) {
       const data = await response.json().catch(() => ({}));
       return NextResponse.json(
-        { error: data.error || "User not found in queue" },
-        { status: 404 },
+        {
+          position: null,
+          delay: null,
+          in_queue: false,
+          error: data.error || "User not found in queue",
+        },
+        {
+          status: 200,
+          headers: {
+            "Cache-Control":
+              "no-store, no-cache, must-revalidate, proxy-revalidate",
+            Pragma: "no-cache",
+            Expires: "0",
+          },
+        },
       );
     }
 
