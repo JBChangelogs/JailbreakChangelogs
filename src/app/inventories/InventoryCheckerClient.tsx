@@ -110,6 +110,7 @@ export default function InventoryCheckerClient({
   const [isLoadingQueuePosition, setIsLoadingQueuePosition] = useState(false);
   const [queueStatusMessage, setQueueStatusMessage] =
     useState<string>("Not in queue");
+  const hasAutoFetchedQueueRef = useRef(false);
 
   const router = useRouter();
   const { getId } = useUsernameToId();
@@ -354,6 +355,22 @@ export default function InventoryCheckerClient({
       setIsLoadingQueuePosition(false);
     }
   }, [robloxId]);
+
+  useEffect(() => {
+    const shouldFetchOnLoad =
+      Boolean(robloxId) && Boolean(error) && !initialData;
+    if (!shouldFetchOnLoad) {
+      hasAutoFetchedQueueRef.current = false;
+      return;
+    }
+
+    if (hasAutoFetchedQueueRef.current) {
+      return;
+    }
+
+    hasAutoFetchedQueueRef.current = true;
+    fetchQueuePosition();
+  }, [robloxId, error, initialData, fetchQueuePosition]);
 
   // Handle scan status updates (for error state scanning)
   useEffect(() => {
@@ -924,9 +941,7 @@ export default function InventoryCheckerClient({
                               ) : queuePosition ? (
                                 <span className="text-primary-text font-medium">
                                   Queue Position: #
-                                  {queuePosition.position.toLocaleString()} (
-                                  {Math.max(1, Math.round(queuePosition.delay))}{" "}
-                                  min est.)
+                                  {queuePosition.position.toLocaleString()}
                                 </span>
                               ) : (
                                 queueStatusMessage || "Not in queue"
@@ -958,16 +973,14 @@ export default function InventoryCheckerClient({
                           <p className="text-secondary-text text-sm">
                             Try searching another username.
                           </p>
-                          <div className="mt-3 flex items-center gap-2">
+                          <div className="mt-3 flex items-center justify-center gap-2 text-center">
                             <p className="text-secondary-text text-xs">
                               {isLoadingQueuePosition ? (
                                 "Checking queue position..."
                               ) : queuePosition ? (
                                 <span className="text-primary-text font-medium">
                                   Queue Position: #
-                                  {queuePosition.position.toLocaleString()} (
-                                  {Math.max(1, Math.round(queuePosition.delay))}{" "}
-                                  min est.)
+                                  {queuePosition.position.toLocaleString()}
                                 </span>
                               ) : (
                                 queueStatusMessage || "Not in queue"

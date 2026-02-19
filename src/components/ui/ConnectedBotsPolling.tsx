@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useBotsPollingQuery } from "@/hooks/useBotsPollingQuery";
 import {
   useRobloxBotsDataQuery,
@@ -13,9 +14,11 @@ import Image from "next/image";
 import Link from "next/link";
 import RetryErrorDisplay from "./RetryErrorDisplay";
 import { Icon } from "@iconify/react";
+import { Tabs, TabsList, TabsTrigger } from "./tabs";
 
 export default function ConnectedBotsPolling() {
   "use memo";
+  const [botFilter, setBotFilter] = useState<"all" | "main" | "trade">("all");
   const {
     data: pollingData,
     error: pollingError,
@@ -55,6 +58,14 @@ export default function ConnectedBotsPolling() {
       return b.last_heartbeat - a.last_heartbeat;
     });
   })();
+
+  const filteredBots = allBots.filter((bot) => {
+    if (botFilter === "main") return bot.method === 2;
+    if (botFilter === "trade") return bot.method === 1;
+    return true;
+  });
+  const tradeWorldBotsCount = allBots.filter((bot) => bot.method === 1).length;
+  const mainGameBotsCount = allBots.filter((bot) => bot.method === 2).length;
 
   const error = pollingError?.message || null;
   const isLoading = isPollingLoading || isBotDataLoading;
@@ -166,7 +177,7 @@ export default function ConnectedBotsPolling() {
 
   return (
     <div className="mt-6">
-      <div className="mb-4 flex items-center gap-3">
+      <div className="mb-0 flex items-center gap-3">
         <h2 className="text-secondary-text text-xl font-bold">
           Connected Bots
         </h2>
@@ -176,6 +187,32 @@ export default function ConnectedBotsPolling() {
             LIVE
           </span>
         </div>
+      </div>
+      <div className="text-secondary-text mb-2 flex flex-wrap items-center gap-2 text-sm">
+        <span>
+          <span className="font-semibold">
+            {allBots.length.toLocaleString()}
+          </span>{" "}
+          bots
+        </span>
+        <span className="text-tertiary-text" aria-hidden="true">
+          |
+        </span>
+        <span>
+          <span className="font-semibold">
+            {mainGameBotsCount.toLocaleString()}
+          </span>{" "}
+          main game bots
+        </span>
+        <span className="text-tertiary-text" aria-hidden="true">
+          |
+        </span>
+        <span>
+          <span className="font-semibold">
+            {tradeWorldBotsCount.toLocaleString()}
+          </span>{" "}
+          trade world bots
+        </span>
       </div>
       <div className="border-border-card bg-secondary-bg rounded-lg border p-4">
         {isLoading && !botsData ? (
@@ -308,14 +345,53 @@ export default function ConnectedBotsPolling() {
               </div>
             )}
 
+            <div className="mb-3">
+              <Tabs
+                value={botFilter}
+                onValueChange={(v) =>
+                  setBotFilter(v as "all" | "main" | "trade")
+                }
+              >
+                <TabsList className="h-9 w-full" fullWidth>
+                  <TabsTrigger
+                    value="all"
+                    className="h-8 px-3 text-xs"
+                    fullWidth
+                  >
+                    All
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="main"
+                    className="h-8 px-3 text-xs"
+                    fullWidth
+                  >
+                    Main Game
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="trade"
+                    className="h-8 px-3 text-xs"
+                    fullWidth
+                  >
+                    Trade World
+                  </TabsTrigger>
+                </TabsList>
+              </Tabs>
+            </div>
+
             <div className="max-h-60 space-y-2 overflow-y-auto">
-              {allBots.map((bot: ConnectedBot) => (
-                <BotStatusCard
-                  key={bot.id}
-                  bot={bot}
-                  usersData={botRobloxData?.usersData || null}
-                />
-              ))}
+              {filteredBots.length > 0 ? (
+                filteredBots.map((bot: ConnectedBot) => (
+                  <BotStatusCard
+                    key={bot.id}
+                    bot={bot}
+                    usersData={botRobloxData?.usersData || null}
+                  />
+                ))
+              ) : (
+                <div className="text-secondary-text rounded-lg border border-dashed p-3 text-sm">
+                  No bots active in this mode.
+                </div>
+              )}
             </div>
           </>
         )}
@@ -334,6 +410,7 @@ function BotStatusCard({
   const userData = usersData?.[bot.id];
   const displayName =
     userData?.displayName || userData?.name || `Bot ${bot.id}`;
+  const botUsername = userData?.name || bot.id;
 
   const relativeTime = useOptimizedRealTimeRelativeDate(
     bot.last_heartbeat,
@@ -349,11 +426,18 @@ function BotStatusCard({
   let methodText = "";
   if (bot.method === 1) methodText = "Trade World";
   else if (bot.method === 2) methodText = "Main Game";
+  const trackerUrl = bot.current_job
+    ? `https://tracker.jailbreakchangelogs.xyz/?jobid=${encodeURIComponent(bot.current_job)}&utm_source=website&utm_campaign=Connected_Bots&utm_term=${encodeURIComponent(botUsername)}`
+    : null;
+  const canJoinServer = bot.method === 2 && Boolean(trackerUrl);
 
   return (
     <div className="border-border-card bg-tertiary-bg rounded-lg border p-3">
       <div className="flex items-start gap-3">
-        <div className="border-border-card bg-tertiary-bg flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full border">
+        <div
+          className="bg-tertiary-bg flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full border-2"
+          style={{ borderColor: "var(--color-status-success-vibrant)" }}
+        >
           <Image
             src={avatarUrl}
             alt={`${displayName} avatar`}
@@ -393,10 +477,31 @@ function BotStatusCard({
           </div>
 
           <div className="space-y-0.5">
+            <div
+              className="text-xs font-medium"
+              style={{ color: "var(--color-status-success-vibrant)" }}
+            >
+              Online
+            </div>
             {bot.current_job && (
-              <div className="text-secondary-text truncate text-xs">
-                <span className="font-semibold">Latest Job:</span>{" "}
-                <span className="font-mono">{bot.current_job}</span>
+              <div className="text-secondary-text text-xs">
+                <span className="font-semibold">Last Server:</span>{" "}
+                {canJoinServer && trackerUrl ? (
+                  <a
+                    href={trackerUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-link hover:text-link-hover text-xs font-medium underline-offset-4 transition-colors hover:underline"
+                  >
+                    Join Server
+                    <Icon
+                      icon="material-symbols:open-in-new-rounded"
+                      className="inline-block h-3.5 w-3.5 align-text-bottom"
+                    />
+                  </a>
+                ) : (
+                  <span className="font-mono text-xs">{bot.current_job}</span>
+                )}
               </div>
             )}
 

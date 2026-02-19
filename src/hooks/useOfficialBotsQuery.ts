@@ -9,9 +9,7 @@ export function useOfficialBotsQuery() {
     queryFn: async () => {
       const bots = await fetchOfficialScanBots();
       const sortedBots = [...bots].sort((a, b) => {
-        const aName = (a.username || "").toLowerCase();
-        const bName = (b.username || "").toLowerCase();
-        return aName.localeCompare(bName);
+        return b.userId - a.userId;
       });
       // Avatars are now handled client-side with direct URLs
       return {
