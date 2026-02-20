@@ -21,6 +21,8 @@ interface Props {
 
 import NitroItemRailAd from "@/components/Ads/NitroItemRailAd";
 
+export const revalidate = 300; // Revalidate every 5 minutes
+
 export default async function ItemDetailsPage({ params }: Props) {
   const { type, name } = await params;
   const item = await fetchItem(type, name);

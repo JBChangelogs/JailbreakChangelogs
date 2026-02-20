@@ -4,7 +4,7 @@ import { fetchItems, fetchLastUpdated } from "@/utils/api";
 import ValuesClient from "@/components/Values/ValuesClient";
 import Loading from "./loading";
 
-export const revalidate = 120; // Revalidate every 2 minutes
+export const revalidate = 300; // Revalidate every 5 minutes
 
 export default async function ValuesPage() {
   const itemsPromise = fetchItems();

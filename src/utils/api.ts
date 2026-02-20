@@ -576,7 +576,7 @@ export async function fetchItem(
         headers: {
           "User-Agent": "JailbreakChangelogs-ItemDetails/1.0",
         },
-        next: { revalidate: 3600 },
+        next: { revalidate: 300 }, // Cache for 5 minutes
       },
     );
 
@@ -603,7 +603,7 @@ export async function fetchItemById(id: string): Promise<ItemDetails | null> {
         headers: {
           "User-Agent": "JailbreakChangelogs-ItemDetails/1.0",
         },
-        next: { revalidate: 3600 },
+        next: { revalidate: 300 }, // Cache for 5 minutes
       },
       {
         maxRetries: 3,
@@ -692,7 +692,7 @@ export async function fetchItemChanges(id: string) {
       headers: {
         "User-Agent": "JailbreakChangelogs-Changelogs/1.0",
       },
-      next: { revalidate: 3600 },
+      next: { revalidate: 300 }, // Cache for 5 minutes
     });
     if (response.status === 404) {
       return [] as unknown[];
@@ -1224,7 +1224,7 @@ export async function fetchItemHistory(id: string) {
       headers: {
         "User-Agent": "JailbreakChangelogs-ValueHistory/1.0",
       },
-      next: { revalidate: 3600 },
+      next: { revalidate: 300 }, // Cache for 5 minutes
     });
 
     if (response.status === 404) {
