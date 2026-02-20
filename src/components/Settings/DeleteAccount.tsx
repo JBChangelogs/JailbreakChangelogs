@@ -88,6 +88,7 @@ export const DeleteAccount = () => {
         isOpen={open}
         onClose={handleClose}
         onConfirm={handleDelete}
+        closeOnConfirm={false}
         title="Delete Account"
         confirmText={
           !showFinalWarning
