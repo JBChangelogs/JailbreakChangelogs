@@ -18,6 +18,7 @@ interface ConfirmDialogProps {
     | "ghost"
     | "link";
   confirmDisabled?: boolean;
+  closeOnConfirm?: boolean;
   children?: React.ReactNode;
 }
 
@@ -31,6 +32,7 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   cancelText = "Cancel",
   confirmVariant = "destructive",
   confirmDisabled = false,
+  closeOnConfirm = true,
   children,
 }) => {
   return (
@@ -60,8 +62,9 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
             </Button>
             <Button
               onClick={() => {
+                if (confirmDisabled) return;
                 onConfirm();
-                if (!confirmDisabled) onClose();
+                if (closeOnConfirm) onClose();
               }}
               variant={confirmVariant}
               size="sm"

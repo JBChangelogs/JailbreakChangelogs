@@ -18,5 +18,10 @@
     "season": 30,
     "start_date": 1766185200,
     "end_date": 1771304400
+  },
+  {
+    "season": 31,
+    "start_date": 1771624800,
+    "end_date": 1776747600
   }
 ]
