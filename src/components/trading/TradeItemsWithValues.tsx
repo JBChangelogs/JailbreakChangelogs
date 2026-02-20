@@ -30,7 +30,7 @@ const groupItems = (items: TradeItem[]) => {
   const grouped = items.reduce(
     (acc, item) => {
       const itemData = getItemData(item);
-      const key = `${item.id}-${itemData.name}-${itemData.type}`;
+      const key = `${item.id}-${itemData.name}-${itemData.type}-${item.isDuped ? "duped" : "clean"}-${item.isOG ? "og" : "regular"}`;
       if (!acc[key]) {
         acc[key] = { ...itemData, count: 1 };
       } else {
@@ -294,7 +294,7 @@ export default function TradeItemsWithValues({
           <div className="space-y-4">
             {offeringItems.map((item, index) => (
               <ItemRow
-                key={`${item.id}-${item.name}-${item.type}`}
+                key={`${item.id}-${item.name}-${item.type}-${item.isDuped ? "duped" : "clean"}-${item.isOG ? "og" : "regular"}`}
                 item={item}
                 isFirst={index === 0}
               />
@@ -345,7 +345,7 @@ export default function TradeItemsWithValues({
           <div className="space-y-4">
             {requestingItems.map((item, index) => (
               <ItemRow
-                key={`${item.id}-${item.name}-${item.type}`}
+                key={`${item.id}-${item.name}-${item.type}-${item.isDuped ? "duped" : "clean"}-${item.isOG ? "og" : "regular"}`}
                 item={item}
                 isFirst={index === 0}
               />

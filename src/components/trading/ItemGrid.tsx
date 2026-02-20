@@ -226,7 +226,7 @@ export const ItemGrid: React.FC<ItemGridProps> = ({
 
             return (
               <div
-                key={`${item.id}`}
+                key={`${item.id}:${item.name}:${item.isDuped ? "duped" : "clean"}:${item.isOG ? "og" : "regular"}`}
                 className={`group relative ${
                   disableInteraction
                     ? "cursor-not-allowed opacity-60"

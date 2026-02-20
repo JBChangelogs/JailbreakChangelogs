@@ -11,14 +11,32 @@ import { Icon } from "@/components/ui/IconWrapper";
 import { deleteTradeAd } from "@/utils/trading";
 import { toast } from "sonner";
 import { TradeAdForm } from "./TradeAdForm";
-import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { useAuthContext } from "@/contexts/AuthContext";
-import { tradeItemIdsEqual } from "@/utils/tradeItems";
+import { isCustomTradeItem, tradeItemIdsEqual } from "@/utils/tradeItems";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface TradeAdsProps {
   initialTradeAds: TradeAd[];
   initialItems?: TradeItem[];
 }
+
+const CUSTOM_TYPE_OPTIONS = [
+  { id: "adds", label: "Adds" },
+  { id: "overpays", label: "Overpays" },
+  { id: "upgrades", label: "Upgrades" },
+  { id: "downgrades", label: "Downgrades" },
+  { id: "collectors", label: "Collectors" },
+  { id: "rares", label: "Rares" },
+  { id: "demands", label: "Demands" },
+  { id: "og owners", label: "OG Owners" },
+] as const;
 
 export default function TradeAds({
   initialTradeAds,
@@ -31,14 +49,19 @@ export default function TradeAds({
   const [activeTab, setActiveTab] = useState<
     "view" | "supporter" | "create" | "myads"
   >("view");
-  const [offerStatuses, setOfferStatuses] = useState<
-    Record<number, { loading: boolean; error: string | null; success: boolean }>
-  >({});
   const [page, setPage] = useState(1);
   const [sortOrder, setSortOrder] = useState<"newest" | "oldest">("newest");
   const [selectedTradeAd, setSelectedTradeAd] = useState<TradeAd | null>(null);
-  const [showOfferConfirm, setShowOfferConfirm] = useState<number | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>("");
+  const [searchScope, setSearchScope] = useState<
+    "all" | "offering" | "requesting"
+  >("all");
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+  const [vehicleOnly, setVehicleOnly] = useState(false);
+  const [customTypeFilter, setCustomTypeFilter] = useState<string>("all");
+  const [customTypeMatchMode, setCustomTypeMatchMode] = useState<
+    "contains" | "only"
+  >("contains");
   const itemsPerPage = 9;
 
   const normalizeCreatedTrade = (raw: unknown): TradeAd | null => {
@@ -349,97 +372,6 @@ export default function TradeAds({
     }
   };
 
-  const handleMakeOffer = async (tradeId: number) => {
-    try {
-      setOfferStatuses((prev) => ({
-        ...prev,
-        [tradeId]: { loading: true, error: null, success: false },
-      }));
-
-      if (!currentUserId) {
-        toast.error("You must be logged in to make an offer", {
-          duration: 3000,
-        });
-        setOfferStatuses((prev) => ({
-          ...prev,
-          [tradeId]: {
-            loading: false,
-            error: "You must be logged in to make an offer",
-            success: false,
-          },
-        }));
-        return;
-      }
-
-      const response = await fetch("/api/trades/offer", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ id: tradeId }),
-      });
-
-      if (response.status === 409) {
-        toast.error("You have already made an offer for this trade", {
-          duration: 3000,
-        });
-        setOfferStatuses((prev) => ({
-          ...prev,
-          [tradeId]: {
-            loading: false,
-            error: "You have already made an offer for this trade",
-            success: false,
-          },
-        }));
-      } else if (response.status === 403) {
-        toast.error("The trade owner's settings do not allow direct messages", {
-          duration: 3000,
-        });
-        setOfferStatuses((prev) => ({
-          ...prev,
-          [tradeId]: {
-            loading: false,
-            error: "The trade owner's settings do not allow direct messages",
-            success: false,
-          },
-        }));
-      } else if (!response.ok) {
-        throw new Error("Failed to create offer");
-      } else {
-        toast.success("Offer sent successfully!", {
-          duration: 3000,
-        });
-        setOfferStatuses((prev) => ({
-          ...prev,
-          [tradeId]: {
-            loading: false,
-            error: null,
-            success: true,
-          },
-        }));
-      }
-    } catch (err) {
-      console.error("Error creating offer:", err);
-      toast.error("Failed to create offer. Please try again.", {
-        duration: 3000,
-      });
-      setOfferStatuses((prev) => ({
-        ...prev,
-        [tradeId]: {
-          loading: false,
-          error: "Failed to create offer. Please try again.",
-          success: false,
-        },
-      }));
-    } finally {
-      setShowOfferConfirm(null);
-    }
-  };
-
-  const handleOfferClick = async (tradeId: number) => {
-    setShowOfferConfirm(tradeId);
-  };
-
   const handleDeleteTrade = async (tradeId: number) => {
     const toastId = toast.loading("Deleting trade ad...");
     try {
@@ -553,26 +485,94 @@ export default function TradeAds({
   const baseDisplayTradeAds =
     activeTab === "supporter" ? supporterTradeAds : sortedTradeAds;
 
+  const normalizeItemName = (item: TradeItem): string =>
+    (item.data?.name || item.name || "").toLowerCase().trim();
+
+  const isVehicleItem = (item: TradeItem): boolean => {
+    const rawType = item.data?.type || item.type || "";
+    const normalizedType = rawType.toLowerCase();
+    return normalizedType.includes("vehicle") || normalizedType.includes("car");
+  };
+
+  const getFilteredSideItems = (sideItems: TradeItem[]) =>
+    vehicleOnly ? sideItems.filter(isVehicleItem) : sideItems;
+
+  const getCustomTypeId = (item: TradeItem): string | null => {
+    if (!isCustomTradeItem(item)) {
+      return null;
+    }
+
+    const candidate = (
+      item.instanceId ||
+      item.id ||
+      item.data?.name ||
+      item.name ||
+      ""
+    )
+      .toString()
+      .toLowerCase()
+      .replace(/[_-]+/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+
+    if (candidate === "og owner" || candidate === "og owners") {
+      return "og owners";
+    }
+
+    return CUSTOM_TYPE_OPTIONS.some((option) => option.id === candidate)
+      ? candidate
+      : null;
+  };
+
+  const sideMatchesQuery = (sideItems: TradeItem[], query: string): boolean => {
+    const filteredItems = getFilteredSideItems(sideItems);
+    const customMatchedItems =
+      customTypeFilter === "all"
+        ? filteredItems
+        : filteredItems.filter(
+            (item) => getCustomTypeId(item) === customTypeFilter,
+          );
+
+    if (customTypeFilter !== "all" && customTypeMatchMode === "only") {
+      if (filteredItems.length === 0 || customMatchedItems.length === 0) {
+        return false;
+      }
+      if (customMatchedItems.length !== filteredItems.length) {
+        return false;
+      }
+    }
+
+    const candidateItems =
+      customTypeFilter === "all" ? filteredItems : customMatchedItems;
+
+    if (!query) {
+      if (customTypeFilter !== "all") {
+        return candidateItems.length > 0;
+      }
+      return candidateItems.length > 0 || !vehicleOnly;
+    }
+
+    return candidateItems.some((item) =>
+      normalizeItemName(item).includes(query),
+    );
+  };
+
   // Helper function to filter trade ads by search query
   const filterTradeAdsBySearch = (trades: TradeAd[]) => {
-    if (!searchQuery.trim()) return trades;
-
     const query = searchQuery.toLowerCase().trim();
 
     return trades.filter((trade) => {
-      // Check offering items
-      const offeringMatches = trade.offering.some((item) => {
-        const itemName = (item.data?.name || item.name || "").toLowerCase();
-        return itemName.includes(query);
-      });
+      if (searchScope === "offering") {
+        return sideMatchesQuery(trade.offering, query);
+      }
+      if (searchScope === "requesting") {
+        return sideMatchesQuery(trade.requesting, query);
+      }
 
-      // Check requesting items
-      const requestingMatches = trade.requesting.some((item) => {
-        const itemName = (item.data?.name || item.name || "").toLowerCase();
-        return itemName.includes(query);
-      });
-
-      return offeringMatches || requestingMatches;
+      return (
+        sideMatchesQuery(trade.offering, query) ||
+        sideMatchesQuery(trade.requesting, query)
+      );
     });
   };
 
@@ -581,6 +581,90 @@ export default function TradeAds({
 
   // Filter user trade ads by search query
   const filteredUserTradeAds = filterTradeAdsBySearch(userTradeAds);
+  const customTypeFilterActive = customTypeFilter !== "all";
+  const hasActiveFilters = Boolean(
+    searchQuery.trim() ||
+    searchScope !== "all" ||
+    vehicleOnly ||
+    customTypeFilterActive,
+  );
+  const searchScopeLabel =
+    searchScope === "all"
+      ? "Both Sides"
+      : searchScope === "offering"
+        ? "Offering Only"
+        : "Requesting Only";
+  const selectedCustomTypeLabel =
+    CUSTOM_TYPE_OPTIONS.find((option) => option.id === customTypeFilter)
+      ?.label ?? "All Custom Types";
+  const MAX_SUMMARY_SEARCH_LENGTH = 40;
+  const trimmedSearchQuery = searchQuery.trim();
+  const displaySummarySearchQuery =
+    trimmedSearchQuery.length > MAX_SUMMARY_SEARCH_LENGTH
+      ? `${trimmedSearchQuery.slice(0, MAX_SUMMARY_SEARCH_LENGTH)}...`
+      : trimmedSearchQuery;
+  const advancedFilterCount =
+    Number(vehicleOnly) +
+    Number(customTypeFilterActive) +
+    Number(customTypeFilterActive && customTypeMatchMode === "only");
+  const clearAllFilters = () => {
+    setSearchQuery("");
+    setSearchScope("all");
+    setVehicleOnly(false);
+    setCustomTypeFilter("all");
+    setCustomTypeMatchMode("contains");
+    setPage(1);
+  };
+  const filterSummaryParts: string[] = [];
+  if (trimmedSearchQuery) {
+    filterSummaryParts.push(`Search: "${displaySummarySearchQuery}"`);
+  }
+  if (searchScope !== "all") {
+    filterSummaryParts.push(searchScopeLabel);
+  }
+  if (vehicleOnly) {
+    filterSummaryParts.push("Vehicles Only");
+  }
+  if (customTypeFilterActive) {
+    filterSummaryParts.push(
+      `Custom: ${selectedCustomTypeLabel} (${customTypeMatchMode === "only" ? "Only" : "Contains"})`,
+    );
+  }
+  const activeFiltersSummary = filterSummaryParts.join(" • ");
+  const activeFilterChips: Array<{
+    key: string;
+    label: string;
+    onRemove: () => void;
+  }> = [];
+  if (searchScope !== "all") {
+    activeFilterChips.push({
+      key: "scope",
+      label: searchScopeLabel,
+      onRemove: () => setSearchScope("all"),
+    });
+  }
+  if (vehicleOnly) {
+    activeFilterChips.push({
+      key: "vehicle",
+      label: "Vehicles Only",
+      onRemove: () => setVehicleOnly(false),
+    });
+  }
+  if (customTypeFilterActive) {
+    activeFilterChips.push({
+      key: "custom-type",
+      label: `Custom: ${selectedCustomTypeLabel}`,
+      onRemove: () => {
+        setCustomTypeFilter("all");
+        setCustomTypeMatchMode("contains");
+      },
+    });
+    activeFilterChips.push({
+      key: "custom-mode",
+      label: customTypeMatchMode === "only" ? "Only" : "Contains",
+      onRemove: () => setCustomTypeMatchMode("contains"),
+    });
+  }
 
   // Calculate pagination
   const totalPages = Math.ceil(displayTradeAds.length / itemsPerPage);
@@ -589,7 +673,7 @@ export default function TradeAds({
   const currentPageItems = displayTradeAds.slice(startIndex, endIndex);
 
   return (
-    <div className="mt-8">
+    <div className="mt-8 mb-8">
       <TradeAdTabs
         activeTab={activeTab}
         onTabChange={handleTabChange}
@@ -602,35 +686,217 @@ export default function TradeAds({
         activeTab === "myads") &&
         !isSystemError && (
           <div className="mt-6">
-            <div className="relative flex items-center">
-              <input
-                type="text"
-                placeholder="Search for items in trade ads (e.g., Torpedo)"
-                value={searchQuery}
-                onChange={(e) => {
-                  setSearchQuery(e.target.value);
-                  setPage(1); // Reset to first page when searching
-                }}
-                className="border-border-card bg-secondary-bg text-primary-text placeholder-secondary-text focus:border-button-info w-full rounded-lg border px-4 py-3 pr-16 transition-all duration-300 focus:outline-none"
-              />
-              {/* Right side controls container */}
-              <div className="absolute top-1/2 right-3 flex -translate-y-1/2 items-center gap-2">
-                {/* Clear button - only show when there's text */}
-                {searchQuery && (
+            <div className="flex flex-col gap-3">
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+                <div className="relative flex-1">
+                  <input
+                    type="text"
+                    placeholder="Search trade ads (e.g., Torpedo)"
+                    value={searchQuery}
+                    onChange={(e) => {
+                      setSearchQuery(e.target.value);
+                      setPage(1); // Reset to first page when searching
+                    }}
+                    className="border-border-card bg-secondary-bg text-primary-text placeholder-secondary-text focus:border-button-info w-full rounded-lg border px-4 py-3 pr-16 transition-all duration-300 focus:outline-none"
+                  />
+                  {/* Right side controls container */}
+                  <div className="absolute top-1/2 right-3 flex -translate-y-1/2 items-center gap-2">
+                    {/* Clear button - only show when there's text */}
+                    {searchQuery && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSearchQuery("");
+                          setPage(1);
+                        }}
+                        className="text-secondary-text hover:text-primary-text cursor-pointer transition-colors"
+                        aria-label="Clear search"
+                      >
+                        <Icon icon="heroicons:x-mark" className="h-5 w-5" />
+                      </button>
+                    )}
+                  </div>
+                </div>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button
+                      type="button"
+                      className="border-border-card bg-secondary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus inline-flex h-[56px] w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all duration-300 focus:ring-1 focus:outline-none sm:w-56"
+                      aria-label="Search side"
+                    >
+                      <span>{searchScopeLabel}</span>
+                      <Icon
+                        icon="heroicons:chevron-down"
+                        className="text-secondary-text h-5 w-5"
+                        inline={true}
+                      />
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent
+                    align="start"
+                    className="w-[var(--radix-dropdown-menu-trigger-width)]"
+                  >
+                    <DropdownMenuRadioGroup
+                      value={searchScope}
+                      onValueChange={(value) => {
+                        setSearchScope(
+                          value as "all" | "offering" | "requesting",
+                        );
+                        setPage(1);
+                      }}
+                    >
+                      <DropdownMenuRadioItem value="all">
+                        Both Sides
+                      </DropdownMenuRadioItem>
+                      <DropdownMenuRadioItem value="offering">
+                        Offering Only
+                      </DropdownMenuRadioItem>
+                      <DropdownMenuRadioItem value="requesting">
+                        Requesting Only
+                      </DropdownMenuRadioItem>
+                    </DropdownMenuRadioGroup>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+              <div className="flex items-center gap-3">
+                <Button
+                  size="sm"
+                  className="w-fit"
+                  onClick={() => setShowAdvancedFilters((prev) => !prev)}
+                >
+                  <Icon
+                    icon="rivet-icons:filter"
+                    className="h-4 w-4"
+                    inline={true}
+                  />
+                  Filter
+                  {advancedFilterCount > 0 ? ` (${advancedFilterCount})` : ""}
+                </Button>
+                {hasActiveFilters && (
                   <button
                     type="button"
-                    onClick={() => {
-                      setSearchQuery("");
-                      setPage(1);
-                    }}
-                    className="text-secondary-text hover:text-primary-text cursor-pointer transition-colors"
-                    aria-label="Clear search"
+                    onClick={clearAllFilters}
+                    className="text-link hover:text-link-hover cursor-pointer text-sm font-medium transition-colors"
                   >
-                    <Icon icon="heroicons:x-mark" className="h-5 w-5" />
+                    Clear Filters
                   </button>
                 )}
               </div>
             </div>
+            {showAdvancedFilters && (
+              <div className="border-border-card bg-secondary-bg mt-3 grid grid-cols-1 gap-3 rounded-xl border p-3 sm:grid-cols-2 lg:grid-cols-3">
+                <label className="border-border-card bg-tertiary-bg text-primary-text flex cursor-pointer items-center gap-2 rounded-lg border px-3 py-2 text-sm">
+                  <Checkbox
+                    checked={vehicleOnly}
+                    onCheckedChange={(checked) => {
+                      setVehicleOnly(checked === true);
+                      setPage(1);
+                    }}
+                  />
+                  Vehicles Only
+                </label>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button
+                      type="button"
+                      className="border-border-card bg-tertiary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus inline-flex h-[56px] w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all duration-300 focus:ring-1 focus:outline-none"
+                      aria-label="Filter custom types"
+                    >
+                      <span>{selectedCustomTypeLabel}</span>
+                      <Icon
+                        icon="heroicons:chevron-down"
+                        className="text-secondary-text h-5 w-5"
+                        inline={true}
+                      />
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent
+                    align="start"
+                    className="w-[var(--radix-dropdown-menu-trigger-width)]"
+                  >
+                    <DropdownMenuRadioGroup
+                      value={customTypeFilter}
+                      onValueChange={(value) => {
+                        setCustomTypeFilter(value);
+                        if (value === "all") {
+                          setCustomTypeMatchMode("contains");
+                        }
+                        setPage(1);
+                      }}
+                    >
+                      <DropdownMenuRadioItem value="all">
+                        All Custom Types
+                      </DropdownMenuRadioItem>
+                      {CUSTOM_TYPE_OPTIONS.map((option) => (
+                        <DropdownMenuRadioItem
+                          key={option.id}
+                          value={option.id}
+                        >
+                          {option.label}
+                        </DropdownMenuRadioItem>
+                      ))}
+                    </DropdownMenuRadioGroup>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+                {customTypeFilterActive && (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <button
+                        type="button"
+                        className="border-border-card bg-tertiary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus inline-flex h-[56px] w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all duration-300 focus:ring-1 focus:outline-none"
+                        aria-label="Custom type match mode"
+                      >
+                        <span>
+                          {customTypeMatchMode === "only" ? "Only" : "Contains"}
+                        </span>
+                        <Icon
+                          icon="heroicons:chevron-down"
+                          className="text-secondary-text h-5 w-5"
+                          inline={true}
+                        />
+                      </button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent
+                      align="start"
+                      className="w-[var(--radix-dropdown-menu-trigger-width)]"
+                    >
+                      <DropdownMenuRadioGroup
+                        value={customTypeMatchMode}
+                        onValueChange={(value) => {
+                          setCustomTypeMatchMode(value as "contains" | "only");
+                          setPage(1);
+                        }}
+                      >
+                        <DropdownMenuRadioItem value="contains">
+                          Contains
+                        </DropdownMenuRadioItem>
+                        <DropdownMenuRadioItem value="only">
+                          Only
+                        </DropdownMenuRadioItem>
+                      </DropdownMenuRadioGroup>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                )}
+              </div>
+            )}
+            {activeFilterChips.length > 0 && (
+              <div className="mt-3 flex flex-wrap items-center gap-2">
+                {activeFilterChips.map((chip) => (
+                  <button
+                    key={chip.key}
+                    type="button"
+                    onClick={() => {
+                      chip.onRemove();
+                      setPage(1);
+                    }}
+                    className="border-border-card bg-secondary-bg text-primary-text hover:border-border-focus inline-flex items-center gap-1 rounded-full border px-3 py-1 text-xs transition-colors"
+                  >
+                    <span>{chip.label}</span>
+                    <Icon icon="heroicons:x-mark" className="h-3.5 w-3.5" />
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         )}
 
@@ -645,11 +911,12 @@ export default function TradeAds({
         {activeTab === "view" && (
           <>
             {!isSystemError &&
-              (displayTradeAds.length > 0 || searchQuery.trim()) && (
+              (displayTradeAds.length > 0 || hasActiveFilters) && (
                 <div className="mb-4 flex items-center justify-between">
                   <p className="text-secondary-text">
                     Showing {displayTradeAds.length}{" "}
                     {displayTradeAds.length === 1 ? "trade ad" : "trade ads"}
+                    {activeFiltersSummary ? ` • ${activeFiltersSummary}` : ""}
                   </p>
                   <Button onClick={toggleSortOrder} size="sm">
                     {sortOrder === "newest" ? (
@@ -662,14 +929,13 @@ export default function TradeAds({
                 </div>
               )}
             {displayTradeAds.length === 0 ? (
-              !isSystemError && searchQuery.trim() ? (
-                <div className="border-border-card mb-8 rounded-lg border p-6 text-center">
+              !isSystemError && hasActiveFilters ? (
+                <div className="border-border-card bg-secondary-bg mb-8 rounded-lg border p-6 text-center">
                   <h3 className="text-secondary-text mb-4 text-lg font-medium">
-                    No Trade Ads Match Your Search
+                    No Trade Ads Match Your Filters
                   </h3>
                   <p className="text-secondary-text">
-                    No trade ads found containing &quot;{searchQuery}&quot;. Try
-                    adjusting your search query.
+                    Try changing search text or filter options.
                   </p>
                 </div>
               ) : (
@@ -706,8 +972,6 @@ export default function TradeAds({
                     <TradeAdCard
                       key={trade.id}
                       trade={enrichedTrade}
-                      onMakeOffer={() => handleOfferClick(trade.id)}
-                      offerStatus={offerStatuses[trade.id]}
                       currentUserId={currentUserId}
                       onDelete={() => handleDeleteTrade(trade.id)}
                     />
@@ -745,6 +1009,7 @@ export default function TradeAds({
                   {displayTradeAds.length === 1
                     ? "supporter trade ad"
                     : "supporter trade ads"}
+                  {activeFiltersSummary ? ` • ${activeFiltersSummary}` : ""}
                 </p>
                 <Button onClick={toggleSortOrder} size="sm">
                   {sortOrder === "newest" ? (
@@ -804,8 +1069,6 @@ export default function TradeAds({
                       <TradeAdCard
                         key={trade.id}
                         trade={enrichedTrade}
-                        onMakeOffer={() => handleOfferClick(trade.id)}
-                        offerStatus={offerStatuses[trade.id]}
                         currentUserId={currentUserId}
                         onDelete={() => handleDeleteTrade(trade.id)}
                       />
@@ -873,6 +1136,7 @@ export default function TradeAds({
                     {filteredUserTradeAds.length === 1
                       ? "trade ad"
                       : "trade ads"}
+                    {activeFiltersSummary ? ` • ${activeFiltersSummary}` : ""}
                   </p>
                   <Button onClick={toggleSortOrder} size="sm">
                     {sortOrder === "newest" ? (
@@ -899,11 +1163,10 @@ export default function TradeAds({
                   ) : (
                     <div className="border-border-card bg-secondary-bg mb-8 rounded-lg border p-6 text-center">
                       <h3 className="text-secondary-text mb-4 text-lg font-medium">
-                        No Trade Ads Match Your Search
+                        No Trade Ads Match Your Filters
                       </h3>
                       <p className="text-secondary-text">
-                        No trade ads found containing &quot;{searchQuery}&quot;.
-                        Try adjusting your search query.
+                        Try changing search text or filter options.
                       </p>
                     </div>
                   )
@@ -927,8 +1190,6 @@ export default function TradeAds({
                         <TradeAdCard
                           key={trade.id}
                           trade={enrichedTrade}
-                          onMakeOffer={() => handleOfferClick(trade.id)}
-                          offerStatus={offerStatuses[trade.id]}
                           currentUserId={currentUserId}
                           onDelete={() => handleDeleteTrade(trade.id)}
                         />
@@ -941,24 +1202,6 @@ export default function TradeAds({
           </>
         )}
       </div>
-
-      {/* Offer Confirmation Dialog */}
-      <ConfirmDialog
-        isOpen={showOfferConfirm !== null}
-        onClose={() => setShowOfferConfirm(null)}
-        onConfirm={() =>
-          showOfferConfirm !== null && handleMakeOffer(showOfferConfirm)
-        }
-        title="Make Trade Offer"
-        message={
-          showOfferConfirm !== null
-            ? `Are you sure you want to make an offer for Trade #${showOfferConfirm}? This will notify ${tradeAds.find((t) => t.id === showOfferConfirm)?.user?.username || "the trade owner"} about your interest in trading for their ${tradeAds.find((t) => t.id === showOfferConfirm)?.offering.length || 0} items.`
-            : ""
-        }
-        confirmText="Make Offer"
-        cancelText="Cancel"
-        confirmVariant="default"
-      />
     </div>
   );
 }

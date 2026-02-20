@@ -80,6 +80,7 @@ const TradeSidePreview = ({
       </div>
       <div className="flex flex-wrap gap-2">
         {previewItems.map((item) => {
+          const itemKey = `${item.id}-${item.name}-${item.type}-${item.isDuped ? "duped" : "clean"}-${item.isOG ? "og" : "regular"}`;
           const itemHref = getTradeItemDetailHref(item);
           const itemText = (
             <div className="w-24 sm:w-28 lg:w-32">
@@ -124,20 +125,14 @@ const TradeSidePreview = ({
 
           if (!itemHref) {
             return (
-              <div
-                key={`${item.id}-${item.name}-${item.type}`}
-                className="w-auto"
-              >
+              <div key={itemKey} className="w-auto">
                 {itemText}
               </div>
             );
           }
 
           return (
-            <Tooltip
-              key={`${item.id}-${item.name}-${item.type}`}
-              delayDuration={0}
-            >
+            <Tooltip key={itemKey} delayDuration={0}>
               <TooltipTrigger asChild>
                 <a href={itemHref} className="inline-block w-auto">
                   {itemText}

@@ -13,13 +13,6 @@ import SupporterModal from "../Modals/SupporterModal";
 import { Icon } from "../ui/IconWrapper";
 import { Button as UiButton } from "@/components/ui/button";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
   safeLocalStorage,
   safeGetJSON,
   safeSetJSON,
@@ -50,7 +43,6 @@ const PREMIUM_TIERS: UserPremiumTier[] = [
   { tier: 3, name: "Supporter 3", durations: [6, 12, 24, 48] },
 ];
 const EXPIRATION_OPTIONS = [6, 12, 24, 48];
-const MAX_TRADE_NOTE_LENGTH = 350;
 
 const CUSTOM_TRADE_TYPES = [
   { id: "adds", label: "Adds" },
@@ -223,17 +215,30 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
   };
 
   const calculateTotals = (items: TradeItem[]) => {
-    let totalCash = 0;
-    let totalDuped = 0;
+    let cleanCount = 0;
+    let dupedCount = 0;
+    let cleanTotal = 0;
+    let dupedTotal = 0;
 
     items.forEach((item) => {
-      totalCash += parseValueString(item.cash_value);
-      totalDuped += parseValueString(item.duped_value);
+      const cleanValue = parseValueString(item.cash_value);
+      const dupedValue = parseValueString(item.duped_value);
+      if (item.isDuped) {
+        dupedCount += 1;
+        dupedTotal += dupedValue;
+        return;
+      }
+
+      cleanCount += 1;
+      cleanTotal += cleanValue;
     });
 
     return {
-      cashValue: formatTotalValue(String(totalCash)),
-      dupedValue: formatTotalValue(String(totalDuped)),
+      totalValue: formatTotalValue(String(cleanTotal + dupedTotal)),
+      cleanCount,
+      cleanValue: formatTotalValue(String(cleanTotal)),
+      dupedCount,
+      dupedValue: formatTotalValue(String(dupedTotal)),
     };
   };
 
@@ -745,6 +750,9 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
     );
   }
 
+  const offeringTotals = calculateTotals(offeringItems);
+  const requestingTotals = calculateTotals(requestingItems);
+
   return (
     <DndContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
       <>
@@ -856,10 +864,11 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
 
           {/* Expiration Time Selection */}
           {!editMode && (
-            <div className="bg-button-info/10 border-border-card mb-2 flex items-start gap-4 rounded-lg border p-4 shadow-sm">
+            <div className="bg-secondary-bg border-border-card mb-2 flex items-start gap-4 rounded-lg border p-4 shadow-sm">
               <div className="relative z-10">
                 <span className="text-primary-text text-base font-bold">
-                  Trade Ad Expiration
+                  Trade Ad Expiration{" "}
+                  <span className="text-status-error">*</span>
                 </span>
                 <div className="text-secondary-text mt-1">
                   How long should your trade ad be visible? Supporters can
@@ -867,51 +876,62 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
                   <br />
                   <Link
                     href="/supporting"
-                    className="hover:text-link underline transition-colors"
+                    className="text-link hover:text-link underline transition-colors"
                   >
                     Become a Supporter
                   </Link>
                 </div>
                 <div className="mt-3">
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <button
-                        type="button"
-                        className="bg-secondary-bg text-primary-text border-border-card hover:border-border-focus focus-visible:ring-border-focus flex h-[56px] w-full items-center justify-between rounded-lg border px-4 transition-colors focus-visible:ring-2 focus-visible:outline-none"
-                      >
-                        <span>
-                          {expirationHours
-                            ? `${expirationHours} hours`
-                            : "Select expiration..."}
-                        </span>
-                        <Icon
-                          icon="lucide:chevron-down"
-                          className="text-secondary-text h-4 w-4"
-                          inline={true}
-                        />
-                      </button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent
-                      className="w-[var(--radix-dropdown-menu-trigger-width)]"
-                      align="start"
-                    >
-                      <DropdownMenuRadioGroup
-                        value={expirationHours?.toString() ?? ""}
-                        onValueChange={(value) =>
-                          setExpirationHours(value ? parseInt(value, 10) : null)
-                        }
-                      >
-                        {EXPIRATION_OPTIONS.map((hours) => (
-                          <DropdownMenuRadioItem
-                            key={hours}
-                            value={hours.toString()}
-                          >
-                            {hours} hours
-                          </DropdownMenuRadioItem>
-                        ))}
-                      </DropdownMenuRadioGroup>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                  <div className="grid grid-cols-2 gap-2">
+                    {EXPIRATION_OPTIONS.map((hours) => {
+                      const optionId = `expiration-${hours}`;
+                      const isSelected = expirationHours === hours;
+                      const isAllowed =
+                        userPremiumTier.durations.includes(hours);
+
+                      return (
+                        <label
+                          key={hours}
+                          htmlFor={optionId}
+                          className={`rounded-lg border px-3 py-2 transition-colors ${
+                            isSelected
+                              ? "border-button-info bg-button-info/10"
+                              : "border-border-card bg-secondary-bg hover:border-border-focus"
+                          } ${!isAllowed ? "opacity-70" : ""} cursor-pointer`}
+                        >
+                          <div className="flex items-center justify-between gap-2">
+                            <div className="flex items-center gap-2">
+                              <input
+                                id={optionId}
+                                type="radio"
+                                name="trade-expiration"
+                                checked={isSelected}
+                                onChange={() => {
+                                  if (
+                                    checkTradeAdDuration(
+                                      hours,
+                                      userData?.premiumtype || 0,
+                                    )
+                                  ) {
+                                    setExpirationHours(hours);
+                                  }
+                                }}
+                                className="accent-button-info h-4 w-4"
+                              />
+                              <span className="text-primary-text text-sm font-medium">
+                                {hours} hours
+                              </span>
+                            </div>
+                            {!isAllowed && (
+                              <span className="text-secondary-text text-xs">
+                                Locked
+                              </span>
+                            )}
+                          </div>
+                        </label>
+                      );
+                    })}
+                  </div>
                 </div>
               </div>
             </div>
@@ -941,17 +961,17 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
 
           {/* Trade Note */}
           <div className="border-border-card bg-secondary-bg rounded-lg border p-4">
-            <div className="mb-2 flex items-center justify-between">
-              <h3 className="text-primary-text font-medium">Trade Note</h3>
-              <span
-                className={`text-xs ${
-                  tradeNote.length > MAX_TRADE_NOTE_LENGTH
-                    ? "text-status-error"
-                    : "text-secondary-text"
-                }`}
-              >
-                {tradeNote.length}/{MAX_TRADE_NOTE_LENGTH}
-              </span>
+            <div className="mb-1">
+              <div>
+                <h3 className="text-primary-text font-medium">
+                  Trade Note{" "}
+                  <span className="text-secondary-text">(optional)</span>
+                </h3>
+                <p className="text-secondary-text mt-1 text-xs">
+                  Trade notes help others better understand your ad. Adding a
+                  short note is encouraged.
+                </p>
+              </div>
             </div>
             <textarea
               value={tradeNote}
@@ -965,7 +985,7 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
                 );
               }}
               rows={3}
-              placeholder="Add a note for your trade ad..."
+              placeholder="Optional: add key details so others can quickly understand your trade."
               className="bg-tertiary-bg border-border-card text-primary-text focus:ring-border-focus w-full rounded-lg border px-3 py-2 text-sm outline-none focus:ring-2"
             />
           </div>
@@ -1026,7 +1046,6 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
                 icon="emojione:light-bulb"
                 className="text-sm text-yellow-500"
               />
-              Helpful tip: Hold{" "}
               <kbd className="kbd kbd-sm border-border-card bg-tertiary-bg text-primary-text">
                 Shift
               </kbd>{" "}
@@ -1088,15 +1107,16 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
                 <span>
                   Total:{" "}
                   <span className="text-secondary-text font-bold">
-                    {calculateTotals(offeringItems).cashValue}
+                    {offeringTotals.totalValue}
                   </span>
                 </span>
                 <span className="border-status-success/20 bg-status-success/80 text-form-button-text inline-flex items-center rounded-full border px-2 py-0.5">
-                  {offeringItems.length} clean •{" "}
-                  {calculateTotals(offeringItems).cashValue}
+                  {offeringTotals.cleanCount} clean •{" "}
+                  {offeringTotals.cleanValue}
                 </span>
                 <span className="border-status-error/20 bg-status-error/80 text-form-button-text inline-flex items-center rounded-full border px-2 py-0.5">
-                  0 duped • 0
+                  {offeringTotals.dupedCount} duped •{" "}
+                  {offeringTotals.dupedValue}
                 </span>
               </div>
             </DroppableZone>
@@ -1155,15 +1175,16 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
                 <span>
                   Total:{" "}
                   <span className="text-secondary-text font-bold">
-                    {calculateTotals(requestingItems).cashValue}
+                    {requestingTotals.totalValue}
                   </span>
                 </span>
                 <span className="border-status-success/20 bg-status-success/80 text-form-button-text inline-flex items-center rounded-full border px-2 py-0.5">
-                  {requestingItems.length} clean •{" "}
-                  {calculateTotals(requestingItems).cashValue}
+                  {requestingTotals.cleanCount} clean •{" "}
+                  {requestingTotals.cleanValue}
                 </span>
                 <span className="border-status-error/20 bg-status-error/80 text-form-button-text inline-flex items-center rounded-full border px-2 py-0.5">
-                  0 duped • 0
+                  {requestingTotals.dupedCount} duped •{" "}
+                  {requestingTotals.dupedValue}
                 </span>
               </div>
             </DroppableZone>

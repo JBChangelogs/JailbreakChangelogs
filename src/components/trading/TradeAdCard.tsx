@@ -15,6 +15,7 @@ import { UserBadges } from "@/components/Profile/UserBadges";
 import {
   getTradeItemDetailHref,
   getTradeItemImagePath,
+  isCustomTradeItem,
 } from "@/utils/tradeItems";
 
 import {
@@ -25,12 +26,6 @@ import {
 
 interface TradeAdCardProps {
   trade: TradeAd;
-  onMakeOffer: (tradeId: number) => Promise<void>;
-  offerStatus?: {
-    loading: boolean;
-    error: string | null;
-    success: boolean;
-  };
   currentUserId: string | null;
   onDelete?: () => void;
 }
@@ -63,6 +58,24 @@ const groupTradeItems = (items: TradeItem[]) => {
   };
 };
 
+const parseTradeValue = (value: string | number | null | undefined): number => {
+  if (value === null || value === undefined) return 0;
+  const normalized = String(value).trim().toLowerCase().replace(/,/g, "");
+  if (!normalized || normalized === "n/a") return 0;
+  if (normalized.endsWith("m")) {
+    return (parseFloat(normalized.slice(0, -1)) || 0) * 1_000_000;
+  }
+  if (normalized.endsWith("k")) {
+    return (parseFloat(normalized.slice(0, -1)) || 0) * 1_000;
+  }
+  return parseFloat(normalized) || 0;
+};
+
+const formatTradeValue = (value: number): string => {
+  if (!Number.isFinite(value)) return "0";
+  return Math.round(value).toLocaleString();
+};
+
 const TradeSidePreview = ({
   title,
   items,
@@ -72,6 +85,16 @@ const TradeSidePreview = ({
 }) => {
   const grouped = groupTradeItems(items);
   const previewItems = grouped.items;
+  const standardItems = items.filter((item) => !isCustomTradeItem(item));
+  const hasStandardItems = standardItems.length > 0;
+  const cashTotal = standardItems.reduce((sum, item) => {
+    if (item.isDuped) return sum;
+    return sum + parseTradeValue(item.cash_value);
+  }, 0);
+  const dupedTotal = standardItems.reduce((sum, item) => {
+    if (!item.isDuped) return sum;
+    return sum + parseTradeValue(item.duped_value);
+  }, 0);
 
   return (
     <section className="overflow-hidden">
@@ -80,7 +103,10 @@ const TradeSidePreview = ({
       </div>
       <div className="flex flex-wrap gap-2">
         {previewItems.map((item) => {
+          const itemKey = `${item.id}-${item.name}-${item.type}-${item.isDuped ? "duped" : "clean"}-${item.isOG ? "og" : "regular"}`;
           const itemHref = getTradeItemDetailHref(item);
+          const itemDisplayName =
+            item.count > 1 ? `${item.name} (x${item.count})` : item.name;
           const itemText = (
             <div className="w-24 sm:w-28 lg:w-32">
               <div className="group bg-tertiary-bg border-border-card relative h-24 w-24 overflow-hidden rounded-lg border sm:h-28 sm:w-28 lg:h-32 lg:w-32">
@@ -114,30 +140,24 @@ const TradeSidePreview = ({
                 <div className="pointer-events-none absolute inset-0 bg-black/10 opacity-0 transition-opacity group-hover:opacity-100" />
               </div>
               <p className="text-primary-text mt-1 line-clamp-2 text-center text-xs leading-tight font-medium break-words whitespace-normal">
-                {item.name}
+                {itemDisplayName}
               </p>
               <div className="sr-only">
-                {item.name} ({item.type})
+                {itemDisplayName} ({item.type})
               </div>
             </div>
           );
 
           if (!itemHref) {
             return (
-              <div
-                key={`${item.id}-${item.name}-${item.type}`}
-                className="w-auto"
-              >
+              <div key={itemKey} className="w-auto">
                 {itemText}
               </div>
             );
           }
 
           return (
-            <Tooltip
-              key={`${item.id}-${item.name}-${item.type}`}
-              delayDuration={0}
-            >
+            <Tooltip key={itemKey} delayDuration={0}>
               <TooltipTrigger asChild>
                 <Link href={itemHref} className="inline-block w-auto">
                   {itemText}
@@ -159,14 +179,22 @@ const TradeSidePreview = ({
           <p className="text-secondary-text text-xs">No items listed</p>
         )}
       </div>
+      {hasStandardItems && (
+        <div className="mt-3 flex flex-wrap items-center gap-2 text-xs sm:text-sm">
+          <span className="border-status-success/20 bg-status-success/80 text-form-button-text inline-flex items-center rounded-full border px-2 py-0.5">
+            Cash: {formatTradeValue(cashTotal)}
+          </span>
+          <span className="border-status-error/20 bg-status-error/80 text-form-button-text inline-flex items-center rounded-full border px-2 py-0.5">
+            Duped: {formatTradeValue(dupedTotal)}
+          </span>
+        </div>
+      )}
     </section>
   );
 };
 
 export const TradeAdCard: React.FC<TradeAdCardProps> = ({
   trade,
-  onMakeOffer,
-  offerStatus,
   currentUserId,
   onDelete,
 }) => {
@@ -286,10 +314,15 @@ export const TradeAdCard: React.FC<TradeAdCardProps> = ({
             </div>
           </div>
           <div className="flex shrink-0 items-center gap-2">
-            <Button asChild size="sm">
+            <Button
+              asChild
+              size="sm"
+              className="px-2 sm:px-3"
+              aria-label="View trade details"
+            >
               <Link href={`/trading/ad/${trade.id}`}>
                 <Icon icon="heroicons:magnifying-glass" />
-                Details
+                <span className="hidden sm:inline">Details</span>
               </Link>
             </Button>
             {trade.author === currentUserId && (
@@ -302,9 +335,15 @@ export const TradeAdCard: React.FC<TradeAdCardProps> = ({
                 disabled={isDeleting}
                 variant="destructive"
                 size="sm"
+                className="px-2 sm:px-3"
+                aria-label={
+                  isDeleting ? "Deleting trade ad" : "Delete trade ad"
+                }
               >
                 <Icon icon="heroicons-outline:trash" />
-                {isDeleting ? "Deleting..." : "Delete"}
+                <span className="hidden sm:inline">
+                  {isDeleting ? "Deleting..." : "Delete"}
+                </span>
               </Button>
             )}
           </div>
@@ -346,23 +385,6 @@ export const TradeAdCard: React.FC<TradeAdCardProps> = ({
         </div>
 
         <div className="mt-4 pt-0">
-          <div className="flex flex-row gap-2">
-            {trade.expired !== 1 && trade.author !== currentUserId && (
-              <Button
-                onClick={() => onMakeOffer(trade.id)}
-                disabled={offerStatus?.loading}
-                variant={offerStatus?.success ? "success" : "default"}
-                className="flex-1"
-              >
-                <Icon icon="heroicons:chat-bubble-left" />
-                {offerStatus?.loading
-                  ? "Making Offer..."
-                  : offerStatus?.success
-                    ? "Offer Sent!"
-                    : "Make Offer"}
-              </Button>
-            )}
-          </div>
           {trade.message_id && (
             <Button asChild className="mt-2 w-full">
               <a

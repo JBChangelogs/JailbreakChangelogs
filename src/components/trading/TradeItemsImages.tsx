@@ -35,7 +35,7 @@ const groupItems = (items: TradeItem[]) => {
   const grouped = items.reduce(
     (acc, item) => {
       const itemData = getItemData(item);
-      const key = `${item.id}-${itemData.name}-${itemData.type}`;
+      const key = `${item.id}-${itemData.name}-${itemData.type}-${item.isDuped ? "duped" : "clean"}-${item.isOG ? "og" : "regular"}`;
       if (!acc[key]) {
         acc[key] = { ...itemData, count: 1 };
       } else {
@@ -63,7 +63,7 @@ export default function TradeItemsImages({
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
           {groupItems(offering).map((item) => (
             <Tooltip
-              key={`${item.id}-${item.name}-${item.type}`}
+              key={`${item.id}-${item.name}-${item.type}-${item.isDuped ? "duped" : "clean"}-${item.isOG ? "og" : "regular"}`}
               delayDuration={0}
             >
               <TooltipTrigger asChild>
@@ -137,7 +137,7 @@ export default function TradeItemsImages({
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
           {groupItems(requesting).map((item) => (
             <Tooltip
-              key={`${item.id}-${item.name}-${item.type}`}
+              key={`${item.id}-${item.name}-${item.type}-${item.isDuped ? "duped" : "clean"}-${item.isOG ? "og" : "regular"}`}
               delayDuration={0}
             >
               <TooltipTrigger asChild>

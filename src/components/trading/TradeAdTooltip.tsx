@@ -4,7 +4,6 @@ import { TradeItem } from "@/types/trading";
 import { getCategoryColor, getCategoryIcon } from "@/utils/categoryIcons";
 import { formatFullValue } from "@/utils/values";
 import { getDemandColor, getTrendColor } from "@/utils/badgeColors";
-import { Icon } from "@/components/ui/IconWrapper";
 import { getTradeItemDetailHref } from "@/utils/tradeItems";
 
 interface TradeAdTooltipProps {
@@ -72,8 +71,7 @@ export const TradeAdTooltip: React.FC<TradeAdTooltipProps> = ({ item }) => {
               </span>
             )}
             {item.isOG && (
-              <span className="text-primary-text bg-tertiary-bg/40 border-border-card inline-flex h-6 items-center gap-1.5 rounded-lg border px-2.5 text-xs leading-none font-medium shadow-sm">
-                <Icon icon="mdi:star-four-points" className="h-3.5 w-3.5" />
+              <span className="text-primary-text bg-tertiary-bg/40 border-border-card inline-flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium shadow-sm">
                 OG
               </span>
             )}
