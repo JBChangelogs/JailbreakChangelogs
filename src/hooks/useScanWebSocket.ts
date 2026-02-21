@@ -52,6 +52,7 @@ export function useScanWebSocket(userId: string): UseScanWebSocketReturn {
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const heartbeatIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const scanningTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const scanningLongWaitTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const reconnectAttemptsRef = useRef<number>(0);
   const connectRef = useRef<(() => void) | null>(null);
 
@@ -66,6 +67,42 @@ export function useScanWebSocket(userId: string): UseScanWebSocketReturn {
     connectionStartTime: 0,
     compressionEnabled: false,
   });
+
+  const clearScanTimers = useCallback(() => {
+    if (scanningTimeoutRef.current) {
+      clearTimeout(scanningTimeoutRef.current);
+      scanningTimeoutRef.current = null;
+    }
+
+    if (scanningLongWaitTimeoutRef.current) {
+      clearTimeout(scanningLongWaitTimeoutRef.current);
+      scanningLongWaitTimeoutRef.current = null;
+    }
+  }, []);
+
+  const startScanTimers = useCallback(() => {
+    clearScanTimers();
+
+    scanningLongWaitTimeoutRef.current = setTimeout(() => {
+      setMessage(
+        "Scanning is taking a bit longer than usual. Thanks for your patience.",
+      );
+      setProgress(undefined);
+      setPhase("scanning");
+    }, 120000); // 2 minutes
+
+    scanningTimeoutRef.current = setTimeout(() => {
+      setError(
+        "This scan took too long to complete. Please try again in a moment.",
+      );
+      setStatus("error");
+      setPhase("error");
+
+      if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+        wsRef.current.close();
+      }
+    }, 180000); // 3 minutes
+  }, [clearScanTimers]);
 
   const connect = useCallback(() => {
     if (wsRef.current?.readyState === WebSocket.OPEN) {
@@ -104,16 +141,7 @@ export function useScanWebSocket(userId: string): UseScanWebSocketReturn {
         ws.send(JSON.stringify({ action: "request" }));
         setStatus("scanning");
         setPhase("requested");
-
-        // Start scanning timeout (3 minutes)
-        scanningTimeoutRef.current = setTimeout(() => {
-          setError("Scanning timeout - please try again");
-          setStatus("error");
-
-          if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
-            wsRef.current.close();
-          }
-        }, 180000); // 3 minutes
+        startScanTimers();
 
         heartbeatIntervalRef.current = setInterval(() => {
           if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
@@ -176,18 +204,7 @@ export function useScanWebSocket(userId: string): UseScanWebSocketReturn {
             setProgress(10);
 
             if (scanningTimeoutRef.current) {
-              clearTimeout(scanningTimeoutRef.current);
-              scanningTimeoutRef.current = setTimeout(() => {
-                setError("Scanning timeout - please try again");
-                setStatus("error");
-
-                if (
-                  wsRef.current &&
-                  wsRef.current.readyState === WebSocket.OPEN
-                ) {
-                  wsRef.current.close();
-                }
-              }, 180000); // 3 minutes
+              startScanTimers();
             }
           } else if (data.action === "update") {
             setStatus("scanning");
@@ -229,18 +246,7 @@ export function useScanWebSocket(userId: string): UseScanWebSocketReturn {
               setPhase("user_found");
 
               if (scanningTimeoutRef.current) {
-                clearTimeout(scanningTimeoutRef.current);
-                scanningTimeoutRef.current = setTimeout(() => {
-                  setError("Scanning timeout - please try again");
-                  setStatus("error");
-
-                  if (
-                    wsRef.current &&
-                    wsRef.current.readyState === WebSocket.OPEN
-                  ) {
-                    wsRef.current.close();
-                  }
-                }, 180000); // 3 minutes
+                startScanTimers();
               }
             } else if (
               data.message &&
@@ -251,18 +257,7 @@ export function useScanWebSocket(userId: string): UseScanWebSocketReturn {
               setPhase("bot_joined");
 
               if (scanningTimeoutRef.current) {
-                clearTimeout(scanningTimeoutRef.current);
-                scanningTimeoutRef.current = setTimeout(() => {
-                  setError("Scanning timeout - please try again");
-                  setStatus("error");
-
-                  if (
-                    wsRef.current &&
-                    wsRef.current.readyState === WebSocket.OPEN
-                  ) {
-                    wsRef.current.close();
-                  }
-                }, 180000); // 3 minutes
+                startScanTimers();
               }
             } else if (
               data.message &&
@@ -325,8 +320,7 @@ export function useScanWebSocket(userId: string): UseScanWebSocketReturn {
             setMessage("Scan completed successfully!");
 
             if (scanningTimeoutRef.current) {
-              clearTimeout(scanningTimeoutRef.current);
-              scanningTimeoutRef.current = null;
+              clearScanTimers();
             }
           }
         } catch (err) {
@@ -344,10 +338,7 @@ export function useScanWebSocket(userId: string): UseScanWebSocketReturn {
           heartbeatIntervalRef.current = null;
         }
 
-        if (scanningTimeoutRef.current) {
-          clearTimeout(scanningTimeoutRef.current);
-          scanningTimeoutRef.current = null;
-        }
+        clearScanTimers();
 
         if (
           status === "scanning" &&
@@ -398,7 +389,7 @@ export function useScanWebSocket(userId: string): UseScanWebSocketReturn {
       setStatus("error");
       setPhase("error");
     }
-  }, [userId, status, turnstileToken]);
+  }, [userId, status, turnstileToken, clearScanTimers, startScanTimers]);
 
   useEffect(() => {
     connectRef.current = connect;
@@ -447,10 +438,7 @@ export function useScanWebSocket(userId: string): UseScanWebSocketReturn {
       heartbeatIntervalRef.current = null;
     }
 
-    if (scanningTimeoutRef.current) {
-      clearTimeout(scanningTimeoutRef.current);
-      scanningTimeoutRef.current = null;
-    }
+    clearScanTimers();
 
     reconnectAttemptsRef.current = 0;
     setStatus("idle");
@@ -460,7 +448,7 @@ export function useScanWebSocket(userId: string): UseScanWebSocketReturn {
     setProgress(undefined);
     setError(undefined);
     setExpiresAt(undefined);
-  }, []);
+  }, [clearScanTimers]);
 
   const resetForceShowError = useCallback(() => {
     setForceShowError(false);
