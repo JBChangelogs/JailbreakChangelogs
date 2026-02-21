@@ -22,6 +22,10 @@ import {
   showScanSuccessToast,
   showScanErrorToast,
 } from "@/utils/scanToasts";
+import {
+  formatScanProgressMessage,
+  getScanActiveButtonLabel,
+} from "@/utils/scanProgressMessage";
 import { Button } from "../ui/button";
 
 import {
@@ -59,6 +63,8 @@ export default function UserProfileSection({
   // Check if current user is viewing their own inventory
   const isOwnInventory =
     isAuthenticated && user?.roblox_id === currentData?.user_id;
+  const shouldBypassTurnstile =
+    Boolean(user?.flags?.some((f) => f.flag === "is_owner")) || false;
 
   const handleScanClick = () => {
     if (
@@ -92,31 +98,28 @@ export default function UserProfileSection({
     }
 
     if (scanWebSocket.status === "scanning" && !scanCompletedRef.current) {
-      if (
-        scanWebSocket.message &&
-        scanWebSocket.message.includes("User found")
-      ) {
-        updateScanLoadingToast("User found in game!");
-      } else if (
-        scanWebSocket.message &&
-        scanWebSocket.message.includes("Bot joined server")
-      ) {
-        updateScanLoadingToast("Bot joined server, scanning...");
-      } else if (scanWebSocket.message) {
-        updateScanLoadingToast(`Scanning: ${scanWebSocket.message}`);
-      } else if (scanWebSocket.progress !== undefined) {
-        updateScanLoadingToast(`Scanning... ${scanWebSocket.progress}%`);
-      }
+      updateScanLoadingToast(
+        formatScanProgressMessage(
+          scanWebSocket.phase,
+          scanWebSocket.message,
+          scanWebSocket.progress,
+        ),
+      );
     }
 
     if (
       scanWebSocket.status === "completed" &&
-      scanWebSocket.message &&
-      scanWebSocket.message.includes("Added to queue") &&
+      scanWebSocket.phase === "queued" &&
       !scanCompletedRef.current
     ) {
       scanCompletedRef.current = true;
-      showScanSuccessToast(scanWebSocket.message);
+      showScanSuccessToast(
+        formatScanProgressMessage(
+          scanWebSocket.phase,
+          scanWebSocket.message,
+          scanWebSocket.progress,
+        ),
+      );
     }
 
     if (scanWebSocket.status === "error") {
@@ -128,10 +131,7 @@ export default function UserProfileSection({
         showScanErrorToast(
           "No scan bots are currently online. Please try again later.",
         );
-      } else if (
-        scanWebSocket.message &&
-        scanWebSocket.message.includes("User not found in game")
-      ) {
+      } else if (scanWebSocket.phase === "failed_not_in_server") {
         showScanErrorToast(
           "User not found in game. Please join a trade server and try again.",
         );
@@ -195,6 +195,7 @@ export default function UserProfileSection({
     }
   }, [
     scanWebSocket.message,
+    scanWebSocket.phase,
     scanWebSocket.status,
     scanWebSocket.error,
     scanWebSocket.progress,
@@ -375,18 +376,10 @@ export default function UserProfileSection({
                       d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                     />
                   </svg>
-                  {scanWebSocket.message &&
-                  scanWebSocket.message.includes("Bot joined server")
-                    ? "Scanning..."
-                    : scanWebSocket.message &&
-                        scanWebSocket.message.includes("Retrying")
-                      ? "Retrying..."
-                      : scanWebSocket.message &&
-                          scanWebSocket.message.includes(
-                            "You will be scanned when you join",
-                          )
-                        ? "Processing..."
-                        : scanWebSocket.message || "Processing..."}
+                  {getScanActiveButtonLabel(
+                    scanWebSocket.phase,
+                    scanWebSocket.message,
+                  )}
                 </>
               ) : scanWebSocket.status === "completed" ? (
                 <>
@@ -528,6 +521,7 @@ export default function UserProfileSection({
           scanWebSocket.status === "scanning" ||
           scanWebSocket.status === "connecting"
         }
+        bypassTurnstile={shouldBypassTurnstile}
       />
     </div>
   );

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { INVENTORY_WS_URL, ENABLE_WS_SCAN } from "@/utils/api";
+import type { ScanPhase } from "@/utils/scanProgressMessage";
 
 /**
  * WebSocket hook for managing inventory scan operations
@@ -24,6 +25,7 @@ interface ScanStatus {
 
 interface UseScanWebSocketReturn {
   status: ScanStatus["status"];
+  phase: ScanPhase | undefined;
   message: string | undefined;
   progress: number | undefined;
   error: string | undefined;
@@ -37,6 +39,7 @@ interface UseScanWebSocketReturn {
 
 export function useScanWebSocket(userId: string): UseScanWebSocketReturn {
   const [status, setStatus] = useState<ScanStatus["status"]>("idle");
+  const [phase, setPhase] = useState<ScanPhase | undefined>(undefined);
   const [message, setMessage] = useState<string | undefined>();
   const [progress, setProgress] = useState<number | undefined>();
   const [error, setError] = useState<string | undefined>();
@@ -70,6 +73,7 @@ export function useScanWebSocket(userId: string): UseScanWebSocketReturn {
     }
 
     setStatus("connecting");
+    setPhase("connecting");
     setError(undefined);
 
     try {
@@ -99,6 +103,7 @@ export function useScanWebSocket(userId: string): UseScanWebSocketReturn {
 
         ws.send(JSON.stringify({ action: "request" }));
         setStatus("scanning");
+        setPhase("requested");
 
         // Start scanning timeout (3 minutes)
         scanningTimeoutRef.current = setTimeout(() => {
@@ -144,6 +149,7 @@ export function useScanWebSocket(userId: string): UseScanWebSocketReturn {
           // If attempt exceeds total_attempts, use attempt as the max to show accurate progress
           if (data.error && data.attempt && data.total_attempts) {
             setStatus("scanning");
+            setPhase("retrying");
             const maxAttempts = Math.max(data.attempt, data.total_attempts, 15);
             setMessage(
               `${data.error} - Retrying (${data.attempt}/${maxAttempts})`,
@@ -156,6 +162,7 @@ export function useScanWebSocket(userId: string): UseScanWebSocketReturn {
             setError(data.error);
             setExpiresAt(data.expires_at || undefined);
             setStatus("error");
+            setPhase("error");
             return;
           }
 
@@ -164,6 +171,7 @@ export function useScanWebSocket(userId: string): UseScanWebSocketReturn {
 
           if (data.action === "request_response") {
             setStatus("scanning");
+            setPhase("requested");
             setMessage(data.status || "Scan requested successfully");
             setProgress(10);
 
@@ -183,6 +191,7 @@ export function useScanWebSocket(userId: string): UseScanWebSocketReturn {
             }
           } else if (data.action === "update") {
             setStatus("scanning");
+            setPhase("scanning");
             setMessage(data.message || "Scanning in progress...");
 
             if (
@@ -197,6 +206,7 @@ export function useScanWebSocket(userId: string): UseScanWebSocketReturn {
                 "User not found in game. Please join a trade server and try again.",
               );
               setStatus("error");
+              setPhase("failed_not_in_server");
 
               setTimeout(() => {
                 if (
@@ -216,6 +226,7 @@ export function useScanWebSocket(userId: string): UseScanWebSocketReturn {
             ) {
               setMessage(data.message);
               setProgress(50);
+              setPhase("user_found");
 
               if (scanningTimeoutRef.current) {
                 clearTimeout(scanningTimeoutRef.current);
@@ -237,6 +248,7 @@ export function useScanWebSocket(userId: string): UseScanWebSocketReturn {
             ) {
               setMessage(data.message);
               setProgress(75);
+              setPhase("bot_joined");
 
               if (scanningTimeoutRef.current) {
                 clearTimeout(scanningTimeoutRef.current);
@@ -268,6 +280,7 @@ export function useScanWebSocket(userId: string): UseScanWebSocketReturn {
               setMessage(formattedMessage);
               setProgress(100);
               setStatus("completed");
+              setPhase("queued");
 
               setTimeout(() => {
                 if (wsRef.current) {
@@ -284,20 +297,30 @@ export function useScanWebSocket(userId: string): UseScanWebSocketReturn {
                 if (position === 1) {
                   setProgress(60);
                   setMessage("Currently being scanned...");
+                  setPhase("scanning");
                 } else {
                   setProgress(40);
                   setMessage(`Position ${position} in queue`);
+                  setPhase("queued");
                 }
               }
             }
           } else if (data.action === "status") {
             setStatus(data.status || "scanning");
-            setMessage(data.message || "Scanning...");
+            if (data.status === "completed" || data.completed) {
+              setPhase("completed");
+            } else if (data.status === "error") {
+              setPhase("error");
+            }
+            if (typeof data.message === "string" && data.message.trim()) {
+              setMessage(data.message);
+            }
             return;
           }
 
           if (data.status === "completed" || data.completed) {
             setStatus("completed");
+            setPhase("completed");
             setProgress(100);
             setMessage("Scan completed successfully!");
 
@@ -336,6 +359,7 @@ export function useScanWebSocket(userId: string): UseScanWebSocketReturn {
               reconnectAttemptsRef.current++;
 
               setMessage(`Reconnecting... (${reconnectAttemptsRef.current}/2)`);
+              setPhase("retrying");
 
               reconnectTimeoutRef.current = setTimeout(() => {
                 connectRef.current?.();
@@ -343,10 +367,12 @@ export function useScanWebSocket(userId: string): UseScanWebSocketReturn {
             } else {
               setError("Connection lost - please try again");
               setStatus("error");
+              setPhase("error");
             }
           } else {
             setError(`Connection closed: ${event.reason}`);
             setStatus("error");
+            setPhase("error");
           }
         } else if (
           status !== "completed" &&
@@ -355,6 +381,7 @@ export function useScanWebSocket(userId: string): UseScanWebSocketReturn {
         ) {
           setError("Connection lost");
           setStatus("error");
+          setPhase("error");
         }
       });
 
@@ -362,12 +389,14 @@ export function useScanWebSocket(userId: string): UseScanWebSocketReturn {
         console.error("[SCAN WS] Error:", err);
         setError("WebSocket connection error");
         setStatus("error");
+        setPhase("error");
         setIsConnected(false);
       });
     } catch (err) {
       console.error("[SCAN WS] Connection error:", err);
       setError("Failed to connect to scan service");
       setStatus("error");
+      setPhase("error");
     }
   }, [userId, status, turnstileToken]);
 
@@ -380,12 +409,14 @@ export function useScanWebSocket(userId: string): UseScanWebSocketReturn {
       if (!userId) {
         setError("No user ID provided");
         setStatus("error");
+        setPhase("error");
         return;
       }
 
       if (!ENABLE_WS_SCAN) {
         setError("Inventory scanning is temporarily disabled");
         setStatus("error");
+        setPhase("error");
         setForceShowError(true); // Force error display on next render
         return;
       }
@@ -423,6 +454,7 @@ export function useScanWebSocket(userId: string): UseScanWebSocketReturn {
 
     reconnectAttemptsRef.current = 0;
     setStatus("idle");
+    setPhase(undefined);
     setIsConnected(false);
     setMessage(undefined);
     setProgress(undefined);
@@ -442,6 +474,7 @@ export function useScanWebSocket(userId: string): UseScanWebSocketReturn {
 
   return {
     status,
+    phase,
     message,
     progress,
     error,

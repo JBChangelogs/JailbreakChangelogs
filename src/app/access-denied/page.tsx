@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Icon } from "@/components/ui/IconWrapper";
 import { Button } from "@/components/ui/button";
+import AccessDeniedLoginButton from "@/components/Auth/AccessDeniedLoginButton";
 
 export const metadata: Metadata = {
   title: "Access Restricted",
@@ -33,9 +34,7 @@ export default function AccessDeniedPage() {
         </p>
 
         <div className="flex w-full flex-col gap-3 sm:flex-row">
-          <Button asChild className="w-full sm:w-auto">
-            <a href="/api/auth/discord">Login</a>
-          </Button>
+          <AccessDeniedLoginButton />
           <Button
             asChild
             variant="outline"

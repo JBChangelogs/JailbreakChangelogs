@@ -36,6 +36,10 @@ import {
   showScanSuccessToast,
   showScanErrorToast,
 } from "@/utils/scanToasts";
+import {
+  formatScanProgressMessage,
+  getScanActiveButtonLabel,
+} from "@/utils/scanProgressMessage";
 import dynamic from "next/dynamic";
 import { CommentData, UserNetworthData, MoneyHistory } from "@/utils/api";
 import { UserData } from "@/types/auth";
@@ -123,6 +127,8 @@ export default function InventoryCheckerClient({
 
   // Check if current user is viewing their own inventory
   const isOwnInventory = isAuthenticated && user?.roblox_id === robloxId;
+  const shouldBypassTurnstile =
+    Boolean(user?.flags?.some((f) => f.flag === "is_owner")) || false;
   const isInventoryNotFoundError = Boolean(
     error?.includes("Inventory not found for this user."),
   );
@@ -310,6 +316,7 @@ export default function InventoryCheckerClient({
   // Destructure scanWebSocket properties before useEffect to satisfy exhaustive-deps
   const {
     status: scanStatus,
+    phase: scanPhase,
     message: scanMessage,
     error: scanError,
     progress: scanProgress,
@@ -393,15 +400,9 @@ export default function InventoryCheckerClient({
     }
 
     if (scanStatus === "scanning") {
-      if (scanMessage && scanMessage.includes("User found")) {
-        updateScanLoadingToast("User found in game!");
-      } else if (scanMessage && scanMessage.includes("Bot joined server")) {
-        updateScanLoadingToast("Bot joined server, scanning...");
-      } else if (scanMessage) {
-        updateScanLoadingToast(`Scanning: ${scanMessage}`);
-      } else if (scanProgress !== undefined) {
-        updateScanLoadingToast(`Scanning... ${scanProgress}%`);
-      }
+      updateScanLoadingToast(
+        formatScanProgressMessage(scanPhase, scanMessage, scanProgress),
+      );
     }
 
     if (scanStatus === "completed") {
@@ -436,10 +437,7 @@ export default function InventoryCheckerClient({
           undefined,
           "All scan bots are currently unavailable. Please try again later.",
         );
-      } else if (
-        scanMessage &&
-        scanMessage.includes("User not found in game")
-      ) {
+      } else if (scanPhase === "failed_not_in_server") {
         showScanErrorToast(
           "User not found in game. Please join a trade server and try again.",
         );
@@ -504,6 +502,7 @@ export default function InventoryCheckerClient({
     }
   }, [
     scanStatus,
+    scanPhase,
     scanMessage,
     scanError,
     scanProgress,
@@ -823,23 +822,10 @@ export default function InventoryCheckerClient({
                                       d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                                     />
                                   </svg>
-                                  {scanWebSocket.message &&
-                                  scanWebSocket.message.includes(
-                                    "Bot joined server",
-                                  )
-                                    ? "Scanning..."
-                                    : scanWebSocket.message &&
-                                        scanWebSocket.message.includes(
-                                          "Retrying",
-                                        )
-                                      ? "Retrying..."
-                                      : scanWebSocket.message &&
-                                          scanWebSocket.message.includes(
-                                            "You will be scanned when you join",
-                                          )
-                                        ? "Processing..."
-                                        : scanWebSocket.message ||
-                                          "Processing..."}
+                                  {getScanActiveButtonLabel(
+                                    scanWebSocket.phase,
+                                    scanWebSocket.message,
+                                  )}
                                 </>
                               ) : scanWebSocket.status === "completed" ? (
                                 <>
@@ -1299,6 +1285,7 @@ export default function InventoryCheckerClient({
                 scanWebSocket.status === "scanning" ||
                 scanWebSocket.status === "connecting"
               }
+              bypassTurnstile={shouldBypassTurnstile}
             />
           </>
         )}
