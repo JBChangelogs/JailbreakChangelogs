@@ -2,13 +2,13 @@
 
 import { usePathname } from "next/navigation";
 import Script from "next/script";
+import { useAuthContext } from "@/contexts/AuthContext";
 
-interface AdBlockRecoveryProps {
-  isSupporter: boolean;
-}
-
-const AdBlockRecovery = ({ isSupporter }: AdBlockRecoveryProps) => {
+const AdBlockRecovery = () => {
   const pathname = usePathname();
+  const { user } = useAuthContext();
+  const tier = user?.premiumtype ?? 0;
+  const isSupporter = tier >= 2 && tier <= 3;
 
   if (isSupporter || pathname === "/supporting" || pathname === "/redeem") {
     return null;

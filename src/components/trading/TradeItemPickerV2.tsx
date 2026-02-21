@@ -330,9 +330,9 @@ export default function TradeItemPickerV2({
                   }}
                 >
                   {availableFilterGroups.map((group, index) => (
-                    <Fragment key={group.title}>
+                    <Fragment key={group.label}>
                       <DropdownMenuLabel className="text-secondary-text px-3 py-1 text-xs tracking-widest uppercase">
-                        {group.title}
+                        {group.label}
                       </DropdownMenuLabel>
                       {group.options.map((option) => (
                         <DropdownMenuRadioItem
