@@ -13,6 +13,11 @@ import {
   handleImageError,
 } from "@/utils/images";
 import { getCategoryIcon, getCategoryColor } from "@/utils/categoryIcons";
+import {
+  formatUnlockLevelBadge,
+  formatUnlockRequirementsTooltip,
+  hasUnlockLevel,
+} from "@/utils/itemUnlockPresentation";
 
 import {
   Tooltip,
@@ -51,6 +56,15 @@ export default function DupeItemCard({
   isDupedItem = false,
 }: DupeItemCardProps) {
   const dupedValue = getDupedValueForItem(itemData, item);
+  const displayedSeason =
+    typeof item.season === "number" ? item.season : undefined;
+  const displayedLevel =
+    typeof item.level === "number" ? String(item.level) : undefined;
+  const hasDisplayedLevel = hasUnlockLevel(displayedLevel);
+  const requirementsTooltipText = formatUnlockRequirementsTooltip(
+    displayedSeason,
+    displayedLevel,
+  );
 
   // Helper function to format numbers with commas
   const formatNumber = (num: number) => {
@@ -280,19 +294,28 @@ export default function DupeItemCard({
 
       {/* Season and Level badges - centered like other cards */}
       <div className="border-secondary-text mt-3 flex min-h-[40px] items-center justify-center gap-2 border-t pt-3">
-        {item.season && (
-          <div className="border-button-info bg-button-info flex h-8 w-8 items-center justify-center rounded-full border shadow-lg">
-            <span className="text-form-button-text text-xs font-bold">
-              S{item.season}
-            </span>
-          </div>
-        )}
-        {item.level && (
-          <div className="border-status-success bg-status-success flex h-8 w-8 items-center justify-center rounded-full border shadow-lg">
-            <span className="text-form-button-text text-xs font-bold">
-              L{item.level}
-            </span>
-          </div>
+        {(typeof displayedSeason === "number" || hasDisplayedLevel) && (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div className="flex cursor-help items-center gap-2">
+                {typeof displayedSeason === "number" && (
+                  <div className="border-button-info bg-button-info flex h-8 w-8 items-center justify-center rounded-full border shadow-lg">
+                    <span className="text-form-button-text text-xs font-bold">
+                      S{displayedSeason}
+                    </span>
+                  </div>
+                )}
+                {hasDisplayedLevel && (
+                  <div className="border-status-success bg-status-success flex h-8 w-8 items-center justify-center rounded-full border shadow-lg">
+                    <span className="text-form-button-text text-xs font-bold">
+                      {formatUnlockLevelBadge(displayedLevel)}
+                    </span>
+                  </div>
+                )}
+              </div>
+            </TooltipTrigger>
+            <TooltipContent>{requirementsTooltipText}</TooltipContent>
+          </Tooltip>
         )}
       </div>
     </div>

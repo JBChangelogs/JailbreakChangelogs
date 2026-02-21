@@ -47,51 +47,15 @@ import { useOptimizedRealTimeRelativeDate } from "@/hooks/useSharedTimer";
 import { CategoryIconBadge } from "@/utils/categoryIcons";
 import { convertUrlsToLinks } from "@/utils/urlConverter";
 import { ItemDetails } from "@/types";
-
-interface ItemMetadataEntry {
-  id: number;
-  season?: number;
-  level?: number;
-}
-
-let itemMetadataPromise: Promise<Map<number, ItemMetadataEntry>> | null = null;
-
-const fetchItemMetadataById = async (): Promise<
-  Map<number, ItemMetadataEntry>
-> => {
-  if (itemMetadataPromise) {
-    return itemMetadataPromise;
-  }
-
-  itemMetadataPromise = fetch(
-    "https://assets.jailbreakchangelogs.xyz/assets/items/metadata/metadata.json",
-  )
-    .then(async (response) => {
-      if (!response.ok) {
-        throw new Error(`Failed to fetch item metadata: ${response.status}`);
-      }
-
-      const data = (await response.json()) as ItemMetadataEntry[];
-      const metadataMap = new Map<number, ItemMetadataEntry>();
-
-      for (const entry of data) {
-        if (typeof entry.id !== "number") continue;
-        metadataMap.set(entry.id, {
-          id: entry.id,
-          season: typeof entry.season === "number" ? entry.season : undefined,
-          level: typeof entry.level === "number" ? entry.level : undefined,
-        });
-      }
-
-      return metadataMap;
-    })
-    .catch((error) => {
-      itemMetadataPromise = null;
-      throw error;
-    });
-
-  return itemMetadataPromise;
-};
+import {
+  fetchItemUnlockMetadataById,
+  ItemUnlockMetadataEntry,
+} from "@/utils/itemUnlockMetadata";
+import {
+  formatUnlockLevelBadge,
+  formatUnlockRequirementsTooltip,
+  hasUnlockLevel,
+} from "@/utils/itemUnlockPresentation";
 
 interface ItemDetailsClientProps {
   item: ItemDetails;
@@ -167,9 +131,8 @@ export default function ItemDetailsClient({
   const [visibleLength, setVisibleLength] = useState(500);
   const [activeTab, setActiveTab] = useState(0);
   const [activeChartTab, setActiveChartTab] = useState(0);
-  const [itemMetadata, setItemMetadata] = useState<ItemMetadataEntry | null>(
-    null,
-  );
+  const [itemMetadata, setItemMetadata] =
+    useState<ItemUnlockMetadataEntry | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
 
@@ -231,7 +194,7 @@ export default function ItemDetailsClient({
   useEffect(() => {
     let isMounted = true;
 
-    fetchItemMetadataById()
+    fetchItemUnlockMetadataById()
       .then((metadataById) => {
         if (!isMounted) return;
         setItemMetadata(metadataById.get(item.id) ?? null);
@@ -319,15 +282,12 @@ export default function ItemDetailsClient({
   };
 
   const currentItem = item;
-  const requirementsTooltipText =
-    typeof itemMetadata?.season === "number" &&
-    typeof itemMetadata?.level === "number"
-      ? `Unlocked in Season ${itemMetadata.season} at Level ${itemMetadata.level}.`
-      : typeof itemMetadata?.season === "number"
-        ? `Unlocked in Season ${itemMetadata.season}.`
-        : typeof itemMetadata?.level === "number"
-          ? `Unlocked at Level ${itemMetadata.level}.`
-          : "";
+  const metadataLevel = itemMetadata?.level;
+  const hasMetadataLevel = hasUnlockLevel(metadataLevel);
+  const requirementsTooltipText = formatUnlockRequirementsTooltip(
+    itemMetadata?.season,
+    metadataLevel,
+  );
 
   return (
     <main className="min-h-screen">
@@ -544,7 +504,7 @@ export default function ItemDetailsClient({
                   </span>
                 )}
                 {(typeof itemMetadata?.season === "number" ||
-                  typeof itemMetadata?.level === "number") && (
+                  hasMetadataLevel) && (
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <div className="flex cursor-help items-center gap-1">
@@ -553,9 +513,9 @@ export default function ItemDetailsClient({
                             S{itemMetadata.season}
                           </span>
                         )}
-                        {typeof itemMetadata?.level === "number" && (
+                        {hasMetadataLevel && (
                           <span className="bg-status-success text-form-button-text inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold shadow-sm">
-                            L{itemMetadata.level}
+                            {formatUnlockLevelBadge(metadataLevel)}
                           </span>
                         )}
                       </div>

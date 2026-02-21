@@ -16,6 +16,15 @@ import { formatCustomDate } from "@/utils/timestamp";
 import { useOptimizedRealTimeRelativeDate } from "@/hooks/useSharedTimer";
 import { formatFullValue, getValueChange } from "@/utils/values";
 import { getDemandColor, getTrendColor } from "@/utils/badgeColors";
+import {
+  fetchItemUnlockMetadataById,
+  ItemUnlockMetadataEntry,
+} from "@/utils/itemUnlockMetadata";
+import {
+  formatUnlockLevelBadge,
+  formatUnlockRequirementsTooltip,
+  hasUnlockLevel,
+} from "@/utils/itemUnlockPresentation";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { useIsAuthenticated } from "@/contexts/AuthContext";
@@ -42,51 +51,6 @@ import {
   demandDescriptions,
   trendDescriptions,
 } from "@/utils/tradingDefinitions";
-
-interface ItemMetadataEntry {
-  id: number;
-  season?: number;
-  level?: number;
-}
-
-let itemMetadataPromise: Promise<Map<number, ItemMetadataEntry>> | null = null;
-
-const fetchItemMetadataById = async (): Promise<
-  Map<number, ItemMetadataEntry>
-> => {
-  if (itemMetadataPromise) {
-    return itemMetadataPromise;
-  }
-
-  itemMetadataPromise = fetch(
-    "https://assets.jailbreakchangelogs.xyz/assets/items/metadata/metadata.json",
-  )
-    .then(async (response) => {
-      if (!response.ok) {
-        throw new Error(`Failed to fetch item metadata: ${response.status}`);
-      }
-
-      const data = (await response.json()) as ItemMetadataEntry[];
-      const metadataMap = new Map<number, ItemMetadataEntry>();
-
-      for (const entry of data) {
-        if (typeof entry.id !== "number") continue;
-        metadataMap.set(entry.id, {
-          id: entry.id,
-          season: typeof entry.season === "number" ? entry.season : undefined,
-          level: typeof entry.level === "number" ? entry.level : undefined,
-        });
-      }
-
-      return metadataMap;
-    })
-    .catch((error) => {
-      itemMetadataPromise = null;
-      throw error;
-    });
-
-  return itemMetadataPromise;
-};
 
 const demandNote =
   "Demand levels are ranked from lowest to highest. Items with higher demand are generally easier to trade and may have better values.";
@@ -147,9 +111,8 @@ export default function ItemCard({
   const pathname = usePathname();
   const router = useRouter();
   const isValuesPage = pathname === "/values";
-  const [itemMetadata, setItemMetadata] = useState<ItemMetadataEntry | null>(
-    null,
-  );
+  const [itemMetadata, setItemMetadata] =
+    useState<ItemUnlockMetadataEntry | null>(null);
   const isAuthenticated = useIsAuthenticated();
   const wasSheetOpenRef = useRef(false);
   const wasItemSheetOpenRef = useRef(false);
@@ -278,7 +241,7 @@ export default function ItemCard({
 
     let isMounted = true;
 
-    fetchItemMetadataById()
+    fetchItemUnlockMetadataById()
       .then((metadataById) => {
         if (!isMounted) return;
         setItemMetadata(metadataById.get(item.id) ?? null);
@@ -423,15 +386,12 @@ export default function ItemCard({
     ? getValueChange(item.recent_changes, "duped_value")
     : null;
   const visibleItemMetadata = isValuesPage ? itemMetadata : null;
-  const requirementsTooltipText =
-    typeof visibleItemMetadata?.season === "number" &&
-    typeof visibleItemMetadata?.level === "number"
-      ? `Unlocked in Season ${visibleItemMetadata.season} at Level ${visibleItemMetadata.level}.`
-      : typeof visibleItemMetadata?.season === "number"
-        ? `Unlocked in Season ${visibleItemMetadata.season}.`
-        : typeof visibleItemMetadata?.level === "number"
-          ? `Unlocked at Level ${visibleItemMetadata.level}.`
-          : "";
+  const metadataLevel = visibleItemMetadata?.level;
+  const hasMetadataLevel = hasUnlockLevel(metadataLevel);
+  const requirementsTooltipText = formatUnlockRequirementsTooltip(
+    visibleItemMetadata?.season,
+    metadataLevel,
+  );
 
   const formatChange = (difference: number) => {
     const diff = Math.abs(difference);
@@ -483,7 +443,7 @@ export default function ItemCard({
           </div>
           {isValuesPage &&
             (typeof visibleItemMetadata?.season === "number" ||
-              typeof visibleItemMetadata?.level === "number") && (
+              hasMetadataLevel) && (
               <Tooltip>
                 <TooltipTrigger asChild>
                   <div className="absolute right-2 bottom-2 z-10 flex cursor-help items-center gap-1">
@@ -492,9 +452,9 @@ export default function ItemCard({
                         S{visibleItemMetadata.season}
                       </span>
                     )}
-                    {typeof visibleItemMetadata?.level === "number" && (
+                    {hasMetadataLevel && (
                       <span className="bg-status-success text-form-button-text inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold shadow-sm">
-                        L{visibleItemMetadata.level}
+                        {formatUnlockLevelBadge(metadataLevel)}
                       </span>
                     )}
                   </div>
@@ -876,7 +836,7 @@ export default function ItemCard({
                   )}
                   {isValuesPage &&
                     (typeof visibleItemMetadata?.season === "number" ||
-                      typeof visibleItemMetadata?.level === "number") && (
+                      hasMetadataLevel) && (
                       <Tooltip>
                         <TooltipTrigger asChild>
                           <div className="flex cursor-help items-center gap-1">
@@ -886,9 +846,9 @@ export default function ItemCard({
                                 S{visibleItemMetadata.season}
                               </span>
                             )}
-                            {typeof visibleItemMetadata?.level === "number" && (
+                            {hasMetadataLevel && (
                               <span className="bg-status-success text-form-button-text inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold shadow-sm">
-                                L{visibleItemMetadata.level}
+                                {formatUnlockLevelBadge(metadataLevel)}
                               </span>
                             )}
                           </div>
