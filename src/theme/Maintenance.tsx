@@ -41,6 +41,7 @@ export default function Maintenance() {
       className="relative flex min-h-screen items-center justify-center bg-[url(/backgrounds/v2/background16.webp)] bg-cover bg-center bg-no-repeat"
       style={{ color: "var(--color-secondary-text)" }}
     >
+      <div className="absolute inset-0 z-0 bg-[url('/backgrounds/vignette.png')] bg-cover bg-center bg-no-repeat opacity-70" />
       <div className="absolute inset-0 z-1 bg-black/70" />
 
       <div className="relative z-2 container mx-auto max-w-2xl px-4">

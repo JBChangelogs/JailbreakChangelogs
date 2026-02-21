@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useMemo, useSyncExternalStore } from "react";
 import { useMediaQuery } from "@mui/material";
+import { usePathname } from "next/navigation";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { registerAdInstance, removeAdReference } from "@/utils/nitroAds";
 
@@ -29,6 +30,7 @@ function useMobileSheetOpen() {
 
 export default function NitroBottomAnchor() {
   const { user } = useAuthContext();
+  const pathname = usePathname();
   const createdRef = useRef(false);
   const isSheetScreen = useMediaQuery("(max-width: 1024px)");
   const mobileSheetState = useMobileSheetOpen();
@@ -38,12 +40,13 @@ export default function NitroBottomAnchor() {
     () => isSheetScreen && isMobileSheetOpen,
     [isSheetScreen, isMobileSheetOpen],
   );
+  const isAccessDeniedRoute = pathname === "/access-denied";
 
   useEffect(() => {
     const tier = user?.premiumtype ?? 0;
     const isSupporter = tier >= 2 && tier <= 3;
 
-    if (disableAnchor) {
+    if (disableAnchor || isAccessDeniedRoute) {
       const el = document.getElementById(ANCHOR_ID);
       if (el) {
         el.remove();
@@ -128,7 +131,7 @@ export default function NitroBottomAnchor() {
     return () => {
       removeAdReference(ANCHOR_ID);
     };
-  }, [user?.premiumtype, disableAnchor]);
+  }, [user?.premiumtype, disableAnchor, isAccessDeniedRoute]);
 
   return null;
 }

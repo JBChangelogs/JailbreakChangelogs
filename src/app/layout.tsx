@@ -5,6 +5,7 @@ import Script from "next/script";
 import Image from "next/image";
 import "./globals.css";
 import Header from "@/components/Layout/Header";
+import HideOnAccessDenied from "@/components/Layout/HideOnAccessDenied";
 import MaintenanceBypass from "@/components/Layout/MaintenanceBypass";
 import Footer from "@/components/Layout/Footer";
 import VersionInfoWrapper from "@/components/Layout/VersionInfoWrapper";
@@ -196,26 +197,29 @@ export default async function RootLayout({
                               <div className="bg-primary-bg/75 border-border-card h-16 border-b backdrop-blur-lg" />
                             }
                           >
-                            <Header />
+                            <HideOnAccessDenied>
+                              <Header />
+                            </HideOnAccessDenied>
                           </Suspense>
                           <main className="min-h-screen flex-1">
                             <Suspense>{children}</Suspense>
                           </main>
-                          <Footer
-                            githubUrl={githubUrl}
-                            versionInfo={
-                              <Suspense fallback={<VersionInfoSkeleton />}>
-                                <VersionInfoWrapper />
-                              </Suspense>
-                            }
-                          />
+                          <HideOnAccessDenied>
+                            <Footer
+                              githubUrl={githubUrl}
+                              versionInfo={
+                                <Suspense fallback={<VersionInfoSkeleton />}>
+                                  <VersionInfoWrapper />
+                                </Suspense>
+                              }
+                            />
+                          </HideOnAccessDenied>
                         </div>
                       </SurveyProvider>
                     </AuthProvider>
                   </MaintenanceBypass>
                 </QueryProvider>
               </ThemeProvider>
-              {/* Ad Block Prompt UI - Only shown to non-supporters when ad blocking is detected */}
               <AdBlockPrompt />
             </CustomThemeProvider>
           </AppRouterCacheProvider>
@@ -328,25 +332,28 @@ export default async function RootLayout({
                           <div className="bg-primary-bg/75 border-border-card h-16 border-b backdrop-blur-lg" />
                         }
                       >
-                        <Header />
+                        <HideOnAccessDenied>
+                          <Header />
+                        </HideOnAccessDenied>
                       </Suspense>
                       <main className="min-h-screen flex-1">
                         <Suspense>{children}</Suspense>
                       </main>
-                      <Footer
-                        githubUrl={githubUrl}
-                        versionInfo={
-                          <Suspense fallback={<VersionInfoSkeleton />}>
-                            <VersionInfoWrapper />
-                          </Suspense>
-                        }
-                      />
+                      <HideOnAccessDenied>
+                        <Footer
+                          githubUrl={githubUrl}
+                          versionInfo={
+                            <Suspense fallback={<VersionInfoSkeleton />}>
+                              <VersionInfoWrapper />
+                            </Suspense>
+                          }
+                        />
+                      </HideOnAccessDenied>
                     </div>
                   </SurveyProvider>
                 </AuthProvider>
               </QueryProvider>
             </ThemeProvider>
-            {/* Ad Block Prompt UI - Only shown to non-supporters when ad blocking is detected */}
             <AdBlockPrompt />
           </CustomThemeProvider>
         </AppRouterCacheProvider>

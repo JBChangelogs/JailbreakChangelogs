@@ -5,6 +5,11 @@ import { safeGetJSON } from "@/utils/safeStorage";
 export async function checkMaintenanceMode(): Promise<{
   isMaintenanceMode: boolean;
 }> {
+  // Testing deployments use tester-role proxy gating instead of maintenance UI.
+  if (process.env.RAILWAY_ENVIRONMENT_NAME === "testing") {
+    return { isMaintenanceMode: false };
+  }
+
   const isMaintenanceMode = process.env.NEXT_PUBLIC_MAINTENANCE_MODE === "true";
 
   return {
