@@ -633,6 +633,7 @@ export async function fetchItemById(id: string): Promise<ItemDetails | null> {
 
 export async function fetchChangelogList(): Promise<Changelog[]> {
   const response = await fetch(`${BASE_API_URL}/changelogs/list`, {
+    credentials: "include",
     headers: {
       "User-Agent": "JailbreakChangelogs-Changelogs/1.0",
     },
