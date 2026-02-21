@@ -9,6 +9,7 @@ import React, {
   useCallback,
   useRef,
 } from "react";
+import { usePathname, useRouter } from "next/navigation";
 import { AuthState, AuthResponse, UserData } from "@/types/auth";
 import {
   validateAuth,
@@ -62,6 +63,8 @@ interface AuthProviderProps {
 }
 
 export function AuthProvider({ children }: AuthProviderProps) {
+  const router = useRouter();
+  const pathname = usePathname();
   const [authState, setAuthState] = useState<AuthState>({
     isAuthenticated: false,
     user: null,
@@ -364,6 +367,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
             }
             clearStoredCampaign();
           }
+
+          if (pathname === "/access-denied") {
+            router.replace("/");
+            router.refresh();
+          }
         } else {
           setAuthState({
             isAuthenticated: false,
@@ -393,7 +401,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         return { success: false, error: errorMessage };
       }
     },
-    [],
+    [pathname, router],
   );
 
   const clearTokenFromUrl = useCallback(() => {
@@ -452,6 +460,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
       // Track user status in Clarity
       trackUserStatus(false, "logout");
+      router.refresh();
     } catch (err) {
       console.error("Logout error:", err);
       // Errors are now handled by toast.promise in authLogout()

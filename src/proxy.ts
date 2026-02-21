@@ -71,11 +71,25 @@ async function fetchCurrentUser(token: string): Promise<ProxyUser | null> {
 }
 
 export async function proxy(request: NextRequest) {
-  if (request.nextUrl.pathname === "/access-denied" && !isRoleRestricted()) {
+  const isTestingRestricted = isRoleRestricted();
+  const isAccessDeniedPath = request.nextUrl.pathname === "/access-denied";
+
+  if (isAccessDeniedPath && !isTestingRestricted) {
     return NextResponse.redirect(new URL("/", request.url));
   }
 
-  if (!isRoleRestricted() || isAllowedWithoutTesterRole(request)) {
+  if (isTestingRestricted && isAccessDeniedPath) {
+    const token = request.cookies.get("jbcl_token")?.value;
+    if (token && token !== "undefined") {
+      const user = await fetchCurrentUser(token);
+      if (hasTestingAccess(user)) {
+        return NextResponse.redirect(new URL("/", request.url));
+      }
+    }
+    return NextResponse.next();
+  }
+
+  if (!isTestingRestricted || isAllowedWithoutTesterRole(request)) {
     return NextResponse.next();
   }
 

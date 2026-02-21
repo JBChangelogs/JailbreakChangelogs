@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { TradeAd } from "@/types/trading";
 import { TradeItem } from "@/types/trading";
 import { TradeAdCard } from "./TradeAdCard";
@@ -67,178 +67,182 @@ export default function TradeAds({
     "contains" | "only"
   >("contains");
   const itemsPerPage = 9;
+  const currentUserId = user?.id || null;
 
-  const normalizeCreatedTrade = (raw: unknown): TradeAd | null => {
-    if (!raw || typeof raw !== "object") return null;
-    const payload = raw as Record<string, unknown>;
-    const nestedTradeCandidate =
-      (payload.trade as Record<string, unknown> | undefined) ||
-      (payload.data as Record<string, unknown> | undefined) ||
-      (payload.result as Record<string, unknown> | undefined) ||
-      (payload.ad as Record<string, unknown> | undefined);
-    const trade = nestedTradeCandidate ?? payload;
-    const now = Math.floor(Date.now() / 1000);
+  const normalizeCreatedTrade = useCallback(
+    (raw: unknown): TradeAd | null => {
+      if (!raw || typeof raw !== "object") return null;
+      const payload = raw as Record<string, unknown>;
+      const nestedTradeCandidate =
+        (payload.trade as Record<string, unknown> | undefined) ||
+        (payload.data as Record<string, unknown> | undefined) ||
+        (payload.result as Record<string, unknown> | undefined) ||
+        (payload.ad as Record<string, unknown> | undefined);
+      const trade = nestedTradeCandidate ?? payload;
+      const now = Math.floor(Date.now() / 1000);
 
-    const toEpoch = (value: unknown, fallback: number): number => {
-      if (typeof value === "number" && Number.isFinite(value)) return value;
-      if (typeof value === "string") {
-        const parsed = Number(value);
-        if (Number.isFinite(parsed)) return parsed;
-      }
-      return fallback;
-    };
+      const toEpoch = (value: unknown, fallback: number): number => {
+        if (typeof value === "number" && Number.isFinite(value)) return value;
+        if (typeof value === "string") {
+          const parsed = Number(value);
+          if (Number.isFinite(parsed)) return parsed;
+        }
+        return fallback;
+      };
 
-    const resolveItemsInput = (key: "offering" | "requesting"): unknown =>
-      trade[key] ?? payload[key];
+      const resolveItemsInput = (key: "offering" | "requesting"): unknown =>
+        trade[key] ?? payload[key];
 
-    const normalizeItems = (itemsInput: unknown): TradeItem[] => {
-      if (!Array.isArray(itemsInput)) return [];
+      const normalizeItems = (itemsInput: unknown): TradeItem[] => {
+        if (!Array.isArray(itemsInput)) return [];
 
-      return itemsInput.flatMap((entry, index) => {
-        if (!entry || typeof entry !== "object") return [];
-        const item = entry as Record<string, unknown>;
-        const amount = Math.max(1, Number(item.amount) || 1);
-        const rawId = item.id;
-        const parsedId = Number(rawId);
-        const fallbackId = -(index + 1);
-        const id = Number.isFinite(parsedId) ? parsedId : fallbackId;
+        return itemsInput.flatMap((entry, index) => {
+          if (!entry || typeof entry !== "object") return [];
+          const item = entry as Record<string, unknown>;
+          const amount = Math.max(1, Number(item.amount) || 1);
+          const rawId = item.id;
+          const parsedId = Number(rawId);
+          const fallbackId = -(index + 1);
+          const id = Number.isFinite(parsedId) ? parsedId : fallbackId;
 
-        const info =
-          item.info && typeof item.info === "object"
-            ? (item.info as Record<string, unknown>)
-            : null;
+          const info =
+            item.info && typeof item.info === "object"
+              ? (item.info as Record<string, unknown>)
+              : null;
 
-        const normalized: TradeItem = {
-          id,
-          instanceId: String(rawId ?? id),
-          name:
-            typeof item.name === "string" && item.name.trim()
-              ? item.name
-              : "Unknown Item",
-          type:
-            typeof item.type === "string" && item.type.trim()
-              ? item.type
-              : "Unknown",
-          cash_value:
-            typeof info?.cash_value === "string" ? info.cash_value : "N/A",
-          duped_value:
-            typeof info?.duped_value === "string" ? info.duped_value : "N/A",
-          is_limited: null,
-          is_seasonal: null,
-          tradable: 1,
-          trend: typeof info?.trend === "string" ? info.trend : "N/A",
-          demand: typeof info?.demand === "string" ? info.demand : "N/A",
-          isDuped: !!item.duped,
-          isOG: !!item.og,
-        };
+          const normalized: TradeItem = {
+            id,
+            instanceId: String(rawId ?? id),
+            name:
+              typeof item.name === "string" && item.name.trim()
+                ? item.name
+                : "Unknown Item",
+            type:
+              typeof item.type === "string" && item.type.trim()
+                ? item.type
+                : "Unknown",
+            cash_value:
+              typeof info?.cash_value === "string" ? info.cash_value : "N/A",
+            duped_value:
+              typeof info?.duped_value === "string" ? info.duped_value : "N/A",
+            is_limited: null,
+            is_seasonal: null,
+            tradable: 1,
+            trend: typeof info?.trend === "string" ? info.trend : "N/A",
+            demand: typeof info?.demand === "string" ? info.demand : "N/A",
+            isDuped: !!item.duped,
+            isOG: !!item.og,
+          };
 
-        return Array.from({ length: amount }, () => normalized);
-      });
-    };
+          return Array.from({ length: amount }, () => normalized);
+        });
+      };
 
-    const createdAt = toEpoch(trade.created_at ?? payload.created_at, now);
-    const expiresAt = toEpoch(
-      trade.expires ?? payload.expires,
-      createdAt + 24 * 3600,
-    );
-    const rawUser =
-      ((trade.user as Record<string, unknown> | undefined) ??
-        (payload.user as Record<string, unknown> | undefined)) &&
-      typeof (
-        (trade.user as Record<string, unknown> | undefined) ??
-        (payload.user as Record<string, unknown> | undefined)
-      ) === "object"
-        ? (((trade.user as Record<string, unknown> | undefined) ??
-            (payload.user as Record<string, unknown> | undefined)) as Record<
-            string,
-            unknown
-          >)
-        : {};
+      const createdAt = toEpoch(trade.created_at ?? payload.created_at, now);
+      const expiresAt = toEpoch(
+        trade.expires ?? payload.expires,
+        createdAt + 24 * 3600,
+      );
+      const rawUser =
+        ((trade.user as Record<string, unknown> | undefined) ??
+          (payload.user as Record<string, unknown> | undefined)) &&
+        typeof (
+          (trade.user as Record<string, unknown> | undefined) ??
+          (payload.user as Record<string, unknown> | undefined)
+        ) === "object"
+          ? (((trade.user as Record<string, unknown> | undefined) ??
+              (payload.user as Record<string, unknown> | undefined)) as Record<
+              string,
+              unknown
+            >)
+          : {};
 
-    const parsedTradeId = Number(trade.id ?? payload.id);
-    const tradeId = Number.isFinite(parsedTradeId) ? parsedTradeId : now;
+      const parsedTradeId = Number(trade.id ?? payload.id);
+      const tradeId = Number.isFinite(parsedTradeId) ? parsedTradeId : now;
 
-    const normalizedTrade: TradeAd = {
-      id: tradeId,
-      note:
-        typeof trade.note === "string"
-          ? trade.note
-          : typeof payload.note === "string"
-            ? payload.note
-            : "",
-      requesting: normalizeItems(resolveItemsInput("requesting")),
-      offering: normalizeItems(resolveItemsInput("offering")),
-      author:
-        typeof rawUser.id === "string" ? rawUser.id : (currentUserId ?? ""),
-      created_at: createdAt,
-      expires: expiresAt,
-      expired: expiresAt <= now ? 1 : 0,
-      status:
-        typeof trade.status === "string"
-          ? trade.status
-          : typeof payload.status === "string"
-            ? payload.status
-            : "Pending",
-      message_id:
-        typeof trade.message_id === "string"
-          ? trade.message_id
-          : typeof payload.message_id === "string"
-            ? payload.message_id
-            : null,
-      user:
-        typeof rawUser.id === "string"
-          ? {
-              id: rawUser.id,
-              username:
-                typeof rawUser.username === "string"
-                  ? rawUser.username
-                  : "Unknown",
-              global_name:
-                typeof rawUser.global_name === "string"
-                  ? rawUser.global_name
-                  : undefined,
-              roblox_id:
-                typeof rawUser.roblox_id === "string"
-                  ? rawUser.roblox_id
-                  : user?.roblox_id,
-              roblox_username:
-                typeof rawUser.roblox_username === "string"
-                  ? rawUser.roblox_username
-                  : user?.roblox_username,
-              roblox_display_name:
-                typeof rawUser.roblox_display_name === "string"
-                  ? rawUser.roblox_display_name
-                  : user?.roblox_display_name,
-              roblox_avatar:
-                typeof rawUser.roblox_avatar === "string"
-                  ? rawUser.roblox_avatar
-                  : user?.roblox_avatar,
-              premiumtype:
-                typeof rawUser.premiumtype === "number"
-                  ? rawUser.premiumtype
-                  : (user?.premiumtype ?? 0),
-              usernumber:
-                typeof rawUser.usernumber === "number"
-                  ? rawUser.usernumber
-                  : user?.usernumber,
-            }
-          : user
+      const normalizedTrade: TradeAd = {
+        id: tradeId,
+        note:
+          typeof trade.note === "string"
+            ? trade.note
+            : typeof payload.note === "string"
+              ? payload.note
+              : "",
+        requesting: normalizeItems(resolveItemsInput("requesting")),
+        offering: normalizeItems(resolveItemsInput("offering")),
+        author:
+          typeof rawUser.id === "string" ? rawUser.id : (currentUserId ?? ""),
+        created_at: createdAt,
+        expires: expiresAt,
+        expired: expiresAt <= now ? 1 : 0,
+        status:
+          typeof trade.status === "string"
+            ? trade.status
+            : typeof payload.status === "string"
+              ? payload.status
+              : "Pending",
+        message_id:
+          typeof trade.message_id === "string"
+            ? trade.message_id
+            : typeof payload.message_id === "string"
+              ? payload.message_id
+              : null,
+        user:
+          typeof rawUser.id === "string"
             ? {
-                id: user.id,
-                username: user.username,
-                global_name: user.global_name,
-                roblox_id: user.roblox_id,
-                roblox_username: user.roblox_username,
-                roblox_display_name: user.roblox_display_name,
-                roblox_avatar: user.roblox_avatar,
-                premiumtype: user.premiumtype,
-                usernumber: user.usernumber,
+                id: rawUser.id,
+                username:
+                  typeof rawUser.username === "string"
+                    ? rawUser.username
+                    : "Unknown",
+                global_name:
+                  typeof rawUser.global_name === "string"
+                    ? rawUser.global_name
+                    : undefined,
+                roblox_id:
+                  typeof rawUser.roblox_id === "string"
+                    ? rawUser.roblox_id
+                    : user?.roblox_id,
+                roblox_username:
+                  typeof rawUser.roblox_username === "string"
+                    ? rawUser.roblox_username
+                    : user?.roblox_username,
+                roblox_display_name:
+                  typeof rawUser.roblox_display_name === "string"
+                    ? rawUser.roblox_display_name
+                    : user?.roblox_display_name,
+                roblox_avatar:
+                  typeof rawUser.roblox_avatar === "string"
+                    ? rawUser.roblox_avatar
+                    : user?.roblox_avatar,
+                premiumtype:
+                  typeof rawUser.premiumtype === "number"
+                    ? rawUser.premiumtype
+                    : (user?.premiumtype ?? 0),
+                usernumber:
+                  typeof rawUser.usernumber === "number"
+                    ? rawUser.usernumber
+                    : user?.usernumber,
               }
-            : undefined,
-    };
+            : user
+              ? {
+                  id: user.id,
+                  username: user.username,
+                  global_name: user.global_name,
+                  roblox_id: user.roblox_id,
+                  roblox_username: user.roblox_username,
+                  roblox_display_name: user.roblox_display_name,
+                  roblox_avatar: user.roblox_avatar,
+                  premiumtype: user.premiumtype,
+                  usernumber: user.usernumber,
+                }
+              : undefined,
+      };
 
-    return normalizedTrade;
-  };
+      return normalizedTrade;
+    },
+    [currentUserId, user],
+  );
 
   const handleCreateSuccess = (createdTradeRaw?: unknown) => {
     void (async () => {
@@ -275,9 +279,6 @@ export default function TradeAds({
     setSelectedTradeAd(null);
   };
 
-  // Get current user ID from auth state
-  const currentUserId = user?.id || null;
-
   const getDemandForItem = (it: TradeItem): string | undefined => {
     if (it.demand) return it.demand;
     if (it.data?.demand) return it.data.demand;
@@ -295,21 +296,7 @@ export default function TradeAds({
     return match.trend ?? undefined;
   };
 
-  const refreshTradeAds = async () => {
-    try {
-      setIsTradeAdsLoading(true);
-      setError(null);
-      const recentTrades = await fetchRecentTradeAds();
-      setTradeAds(recentTrades);
-    } catch (err) {
-      console.error("Error refreshing trade ads:", err);
-      setError("Failed to refresh trade ads");
-    } finally {
-      setIsTradeAdsLoading(false);
-    }
-  };
-
-  const fetchRecentTradeAds = async (): Promise<TradeAd[]> => {
+  const fetchRecentTradeAds = useCallback(async (): Promise<TradeAd[]> => {
     const baseUrl = process.env.NEXT_PUBLIC_API_URL;
     if (!baseUrl) {
       throw new Error("NEXT_PUBLIC_API_URL is not configured");
@@ -332,7 +319,21 @@ export default function TradeAds({
     return data
       .map((entry) => normalizeCreatedTrade(entry))
       .filter((entry): entry is TradeAd => entry !== null);
-  };
+  }, [normalizeCreatedTrade]);
+
+  const refreshTradeAds = useCallback(async () => {
+    try {
+      setIsTradeAdsLoading(true);
+      setError(null);
+      const recentTrades = await fetchRecentTradeAds();
+      setTradeAds(recentTrades);
+    } catch (err) {
+      console.error("Error refreshing trade ads:", err);
+      setError("Failed to refresh trade ads");
+    } finally {
+      setIsTradeAdsLoading(false);
+    }
+  }, [fetchRecentTradeAds]);
 
   const userTradeAds = tradeAds.filter(
     (trade) => trade.author === currentUserId,
@@ -341,7 +342,7 @@ export default function TradeAds({
   useEffect(() => {
     if (initialTradeAds.length > 0) return;
     void refreshTradeAds();
-  }, []);
+  }, [initialTradeAds.length, refreshTradeAds]);
 
   useEffect(() => {
     const handleHashChange = () => {
