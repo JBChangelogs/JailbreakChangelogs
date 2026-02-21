@@ -19,6 +19,7 @@ export const deleteTradeAd = async (
         method: "DELETE",
         headers,
         cache: "no-store",
+        credentials: "include",
       },
     );
 

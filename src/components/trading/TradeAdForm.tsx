@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useAuthContext } from "@/contexts/AuthContext";
-import { TradeItem, TradeAd } from "@/types/trading";
+import { TradeItem } from "@/types/trading";
 import { UserData } from "@/types/auth";
 import { ItemGrid } from "./ItemGrid";
 import { Skeleton, Tooltip } from "@mui/material";
@@ -25,8 +25,6 @@ import TradeItemPickerV2 from "./TradeItemPickerV2";
 
 interface TradeAdFormProps {
   onSuccess?: (createdTrade?: unknown) => void;
-  editMode?: boolean;
-  tradeAd?: TradeAd;
   items?: TradeItem[];
 }
 
@@ -61,26 +59,19 @@ interface TradeFormDraft {
   note?: string;
 }
 
-interface V2CreateTradeItem {
-  id: string;
-  amount: number;
-  duped?: boolean;
-  og?: boolean;
-  name?: string | null;
-  type?: string | null;
-  info?: {
-    cash_value: string | null;
-    duped_value: string | null;
-    trend: string | null;
-    demand: string | null;
-    notes: string | null;
-  } | null;
-}
+type V2CreateTradeItem =
+  | {
+      id: string;
+    }
+  | {
+      id: string;
+      amount: number;
+      duped?: boolean;
+      og?: boolean;
+    };
 
 export const TradeAdForm: React.FC<TradeAdFormProps> = ({
   onSuccess,
-  editMode = false,
-  tradeAd,
   items = [],
 }) => {
   const [loading, setLoading] = useState(true);
@@ -96,9 +87,6 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
   const [showClearConfirmModal, setShowClearConfirmModal] = useState(false);
   const [tradeNote, setTradeNote] = useState("");
   const [userData, setUserData] = useState<UserData | null>(null);
-  const [selectedTradeAd, setSelectedTradeAd] = useState<TradeAd | undefined>(
-    tradeAd,
-  );
   const router = useRouter();
   const { modalState, closeModal, checkTradeAdDuration } = useSupporterModal();
   const { isAuthenticated, user, setLoginModal } = useAuthContext();
@@ -160,7 +148,9 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
 
       const existing = grouped.get(key);
       if (existing) {
-        existing.amount += 1;
+        if ("amount" in existing) {
+          existing.amount += 1;
+        }
         return;
       }
 
@@ -169,22 +159,12 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
         isCustom
           ? {
               id: identifier,
-              amount: 1,
             }
           : {
               id: identifier,
               amount: 1,
               duped: !!item.isDuped,
               og: !!item.isOG,
-              name: item.name ?? item.data?.name ?? null,
-              type: item.type ?? item.data?.type ?? null,
-              info: {
-                cash_value: item.cash_value ?? item.data?.cash_value ?? null,
-                duped_value: item.duped_value ?? item.data?.duped_value ?? null,
-                trend: item.trend ?? item.data?.trend ?? null,
-                demand: item.demand ?? item.data?.demand ?? null,
-                notes: null,
-              },
             },
       );
     });
@@ -247,7 +227,6 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
     requesting: TradeItem[],
     note: string = tradeNote,
   ) => {
-    if (editMode) return; // Don't save to localStorage when editing
     if (isAuthenticated) {
       safeSetJSON("tradeAdFormItems", { offering, requesting, note });
     }
@@ -265,41 +244,30 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
   }, [user]);
 
   useEffect(() => {
-    if (editMode && tradeAd) {
-      setOfferingItems(tradeAd.offering);
-      setRequestingItems(tradeAd.requesting);
-      setTradeNote(tradeAd.note ?? "");
-      if (tradeAd.expires) {
-        setExpirationHours(tradeAd.expires);
-      }
-      setSelectedTradeAd(tradeAd);
-    } else if (!editMode) {
-      // Only clear items when switching to create mode
-      setOfferingItems([]);
-      setRequestingItems([]);
-      setTradeNote("");
-      setExpirationHours(null); // <-- explicitly clear in create mode
+    setOfferingItems([]);
+    setRequestingItems([]);
+    setTradeNote("");
+    setExpirationHours(null);
 
-      if (!isAuthenticated) return;
+    if (!isAuthenticated) return;
 
-      try {
-        const storedItems = safeGetJSON<TradeFormDraft>("tradeAdFormItems", {
-          offering: [],
-          requesting: [],
-          note: "",
-        });
-        if (storedItems) {
-          const { offering = [], requesting = [], note = "" } = storedItems;
-          if (offering.length > 0 || requesting.length > 0 || note.length > 0) {
-            setShowRestoreModal(true);
-          }
+    try {
+      const storedItems = safeGetJSON<TradeFormDraft>("tradeAdFormItems", {
+        offering: [],
+        requesting: [],
+        note: "",
+      });
+      if (storedItems) {
+        const { offering = [], requesting = [], note = "" } = storedItems;
+        if (offering.length > 0 || requesting.length > 0 || note.length > 0) {
+          setShowRestoreModal(true);
         }
-      } catch (error) {
-        console.error("Failed to parse stored items from localStorage:", error);
-        safeLocalStorage.removeItem("tradeAdFormItems");
       }
+    } catch (error) {
+      console.error("Failed to parse stored items from localStorage:", error);
+      safeLocalStorage.removeItem("tradeAdFormItems");
     }
-  }, [editMode, tradeAd, userPremiumTier.durations, isAuthenticated]);
+  }, [isAuthenticated]);
 
   const handleRestoreItems = () => {
     try {
@@ -342,11 +310,6 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
       hasCustomOnSide(currentItems, itemIdentifier)
     ) {
       toast.error(`"${item.name}" can only be added once on the ${side} side`);
-      return false;
-    }
-
-    if (currentItems.length >= 8) {
-      toast.error(`Maximum of 8 items allowed for ${side}`);
       return false;
     }
 
@@ -515,10 +478,7 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
     }
 
     // Validate trade ad duration
-    if (
-      !editMode &&
-      !checkTradeAdDuration(expirationHours!, userData?.premiumtype || 0)
-    ) {
+    if (!checkTradeAdDuration(expirationHours!, userData?.premiumtype || 0)) {
       return;
     }
 
@@ -534,9 +494,7 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
         throw new Error("Trade API is not configured");
       }
 
-      const endpoint = editMode
-        ? `${baseUrl}/trades/update?id=${encodeURIComponent(String(tradeAd?.id ?? ""))}`
-        : `${baseUrl}/trades/v2/create`;
+      const endpoint = `${baseUrl}/trades/v2/create`;
       const method = "POST";
       const createPayload = {
         offering: buildV2CreateItems(offeringItems),
@@ -555,43 +513,59 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
       const response = await fetch(endpoint, {
         method,
         headers,
-        body: JSON.stringify(
-          editMode
-            ? {
-                offering: offeringItems
-                  .map((item) => String(item.id))
-                  .join(","),
-                requesting: requestingItems
-                  .map((item) => String(item.id))
-                  .join(","),
-                note: trimmedNote,
-                status: selectedTradeAd?.status,
-                owner: authToken,
-              }
-            : createPayload,
-        ),
+        body: JSON.stringify(createPayload),
         cache: "no-store",
+        credentials: "include",
       });
       let responseMessage: string | null = null;
+      let responseErrorCode: string | null = null;
+      let responseCount: number | null = null;
       let responseBody: unknown = null;
       try {
         const responseData = (await response.clone().json()) as {
           message?: string;
           error?: string;
           detail?: string;
+          count?: number;
         };
         responseBody = responseData;
+        responseErrorCode =
+          typeof responseData.error === "string" ? responseData.error : null;
+        responseCount =
+          typeof responseData.count === "number" ? responseData.count : null;
+        const isLimitCode =
+          responseErrorCode === "requesting_limit" ||
+          responseErrorCode === "offering_limit";
         responseMessage =
           responseData.message ||
           responseData.detail ||
-          responseData.error ||
+          (isLimitCode ? null : responseData.error) ||
           null;
       } catch {
         responseMessage = null;
+        responseErrorCode = null;
+        responseCount = null;
         responseBody = null;
       }
 
-      if (response.status === 409) {
+      if (
+        response.status === 400 &&
+        (responseErrorCode === "requesting_limit" ||
+          responseErrorCode === "offering_limit")
+      ) {
+        const defaultMessage =
+          responseErrorCode === "requesting_limit"
+            ? "You can only request up to 8 items."
+            : "You can only offer up to 8 items.";
+        const message = responseMessage || defaultMessage;
+        const countSuffix =
+          typeof responseCount === "number"
+            ? ` (selected: ${responseCount})`
+            : "";
+        toast.error(`${message}${countSuffix}`);
+        setSubmitting(false);
+        return;
+      } else if (response.status === 409) {
         toast.error(
           "You already have a similar trade ad. Please modify your items or delete your existing trade ad first.",
         );
@@ -611,28 +585,19 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
         setSubmitting(false);
         return;
       } else if (!response.ok) {
-        throw new Error(
-          responseMessage ||
-            (editMode
-              ? "Failed to update trade ad"
-              : "Failed to create trade ad"),
-        );
+        throw new Error(responseMessage || "Failed to create trade ad");
       } else {
-        toast.success(
-          editMode
-            ? "Trade ad updated successfully!"
-            : "Trade ad created successfully!",
-        );
+        toast.success("Trade ad created successfully!");
         safeLocalStorage.removeItem("tradeAdFormItems");
         setOfferingItems([]);
         setRequestingItems([]);
         setTradeNote("");
 
-        if (userData?.settings?.dms_allowed !== 1 && !editMode) {
+        if (userData?.settings?.dms_allowed !== 1) {
           setShowSuccessModal(true);
         } else {
           if (onSuccess) {
-            onSuccess(editMode ? undefined : responseBody);
+            onSuccess(responseBody);
           }
         }
       }
@@ -641,9 +606,7 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
       const errorMessage =
         err instanceof Error && err.message
           ? err.message
-          : editMode
-            ? "Failed to update trade ad. Please try again."
-            : "Failed to create trade ad. Please try again.";
+          : "Failed to create trade ad. Please try again.";
       toast.error(errorMessage);
     } finally {
       setSubmitting(false);
@@ -875,101 +838,75 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
           />
 
           {/* Expiration Time Selection */}
-          {!editMode && (
-            <div className="bg-secondary-bg border-border-card mb-2 flex items-start gap-4 rounded-lg border p-4 shadow-sm">
-              <div className="relative z-10">
-                <span className="text-primary-text text-base font-bold">
-                  Trade Ad Expiration{" "}
-                  <span className="text-status-error">*</span>
-                </span>
-                <div className="text-secondary-text mt-1">
-                  How long should your trade ad be visible? Supporters can
-                  choose longer durations!
-                  <br />
-                  <Link
-                    href="/supporting"
-                    className="text-link hover:text-link underline transition-colors"
-                  >
-                    Become a Supporter
-                  </Link>
-                </div>
-                <div className="mt-3">
-                  <div className="grid grid-cols-2 gap-2">
-                    {EXPIRATION_OPTIONS.map((hours) => {
-                      const optionId = `expiration-${hours}`;
-                      const isSelected = expirationHours === hours;
-                      const isAllowed =
-                        userPremiumTier.durations.includes(hours);
+          <div className="bg-secondary-bg border-border-card mb-2 flex items-start gap-4 rounded-lg border p-4 shadow-sm">
+            <div className="relative z-10">
+              <span className="text-primary-text text-base font-bold">
+                Trade Ad Expiration <span className="text-status-error">*</span>
+              </span>
+              <div className="text-secondary-text mt-1">
+                How long should your trade ad be visible? Supporters can choose
+                longer durations!
+                <br />
+                <Link
+                  href="/supporting"
+                  className="text-link hover:text-link underline transition-colors"
+                >
+                  Become a Supporter
+                </Link>
+              </div>
+              <div className="mt-3">
+                <div className="grid grid-cols-2 gap-2">
+                  {EXPIRATION_OPTIONS.map((hours) => {
+                    const optionId = `expiration-${hours}`;
+                    const isSelected = expirationHours === hours;
+                    const isAllowed = userPremiumTier.durations.includes(hours);
 
-                      return (
-                        <label
-                          key={hours}
-                          htmlFor={optionId}
-                          className={`rounded-lg border px-3 py-2 transition-colors ${
-                            isSelected
-                              ? "border-button-info bg-button-info/10"
-                              : "border-border-card bg-secondary-bg hover:border-border-focus"
-                          } ${!isAllowed ? "opacity-70" : ""} cursor-pointer`}
-                        >
-                          <div className="flex items-center justify-between gap-2">
-                            <div className="flex items-center gap-2">
-                              <input
-                                id={optionId}
-                                type="radio"
-                                name="trade-expiration"
-                                checked={isSelected}
-                                onChange={() => {
-                                  if (
-                                    checkTradeAdDuration(
-                                      hours,
-                                      userData?.premiumtype || 0,
-                                    )
-                                  ) {
-                                    setExpirationHours(hours);
-                                  }
-                                }}
-                                className="accent-button-info h-4 w-4"
-                              />
-                              <span className="text-primary-text text-sm font-medium">
-                                {hours} hours
-                              </span>
-                            </div>
-                            {!isAllowed && (
-                              <span className="text-secondary-text text-xs">
-                                Locked
-                              </span>
-                            )}
+                    return (
+                      <label
+                        key={hours}
+                        htmlFor={optionId}
+                        className={`rounded-lg border px-3 py-2 transition-colors ${
+                          isSelected
+                            ? "border-button-info bg-button-info/10"
+                            : "border-border-card bg-secondary-bg hover:border-border-focus"
+                        } ${!isAllowed ? "opacity-70" : ""} cursor-pointer`}
+                      >
+                        <div className="flex items-center justify-between gap-2">
+                          <div className="flex items-center gap-2">
+                            <input
+                              id={optionId}
+                              type="radio"
+                              name="trade-expiration"
+                              checked={isSelected}
+                              onChange={() => {
+                                if (
+                                  checkTradeAdDuration(
+                                    hours,
+                                    userData?.premiumtype || 0,
+                                  )
+                                ) {
+                                  setExpirationHours(hours);
+                                }
+                              }}
+                              className="accent-button-info h-4 w-4"
+                            />
+                            <span className="text-primary-text text-sm font-medium">
+                              {hours} hours
+                            </span>
                           </div>
-                        </label>
-                      );
-                    })}
-                  </div>
+                          {!isAllowed && (
+                            <span className="text-secondary-text text-xs">
+                              Locked
+                            </span>
+                          )}
+                        </div>
+                      </label>
+                    );
+                  })}
                 </div>
               </div>
             </div>
-          )}
-
-          {/* Status Selection (Edit Mode Only) */}
-          {editMode && tradeAd && (
-            <div className="border-border-card bg-secondary-bg mt-4 rounded-lg border p-4">
-              <h3 className="text-tertiary-text mb-4 font-medium">
-                Trade Status
-              </h3>
-              <select
-                className="select bg-secondary-bg text-primary-text h-[56px] min-h-[56px] w-full"
-                value={selectedTradeAd?.status || tradeAd.status}
-                onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
-                  const status = e.target.value;
-                  setSelectedTradeAd((prev) =>
-                    prev ? { ...prev, status } : { ...tradeAd, status },
-                  );
-                }}
-              >
-                <option value="Pending">Pending</option>
-                <option value="Completed">Completed</option>
-              </select>
-            </div>
-          )}
+          </div>
 
           {/* Trade Note */}
           <div className="border-border-card bg-secondary-bg rounded-lg border p-4">
@@ -1206,29 +1143,21 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
           <div className="flex flex-col justify-end gap-3 sm:flex-row">
             <UiButton
               onClick={() => {
-                if (editMode) {
-                  window.history.pushState(null, "", window.location.pathname);
-                  window.location.hash = "view";
-                } else if (
-                  offeringItems.length > 0 ||
-                  requestingItems.length > 0
-                ) {
+                if (offeringItems.length > 0 || requestingItems.length > 0) {
                   setShowClearConfirmModal(true);
                 }
               }}
               disabled={
                 submitting ||
-                (!editMode &&
-                  offeringItems.length === 0 &&
-                  requestingItems.length === 0)
+                (offeringItems.length === 0 && requestingItems.length === 0)
               }
               variant="secondary"
             >
-              {editMode ? "Cancel" : "Clear Trade Ad"}
+              Clear Trade Ad
             </UiButton>
             <UiButton
               onClick={() => {
-                if (!editMode && expirationHours === null) {
+                if (expirationHours === null) {
                   toast.error(
                     "Please select a trade ad expiration before creating your ad.",
                   );
@@ -1238,15 +1167,9 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
               }}
               disabled={submitting}
               className={submitting ? "cursor-progress" : undefined}
-              {...(!editMode && { "data-umami-event": "Trade Offer Posted" })}
+              data-umami-event="Trade Offer Posted"
             >
-              {submitting
-                ? editMode
-                  ? "Updating Trade Ad..."
-                  : "Creating Trade Ad..."
-                : editMode
-                  ? "Update Trade Ad"
-                  : "Create Trade Ad"}
+              {submitting ? "Creating Trade Ad..." : "Create Trade Ad"}
             </UiButton>
           </div>
 

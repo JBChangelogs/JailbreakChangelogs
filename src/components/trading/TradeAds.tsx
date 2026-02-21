@@ -55,7 +55,6 @@ export default function TradeAds({
   >("view");
   const [page, setPage] = useState(1);
   const [sortOrder, setSortOrder] = useState<"newest" | "oldest">("newest");
-  const [selectedTradeAd, setSelectedTradeAd] = useState<TradeAd | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [searchScope, setSearchScope] = useState<
     "all" | "offering" | "requesting"
@@ -276,7 +275,6 @@ export default function TradeAds({
 
     window.history.pushState(null, "", window.location.pathname);
     setActiveTab("view");
-    setSelectedTradeAd(null);
   };
 
   const getDemandForItem = (it: TradeItem): string | undefined => {
@@ -304,6 +302,7 @@ export default function TradeAds({
 
     const response = await fetch(`${baseUrl}/trades/v2/recent?limit=12`, {
       cache: "no-store",
+      credentials: "include",
       headers: {
         "User-Agent": "JailbreakChangelogs-Trading/2.0",
       },
@@ -471,11 +470,7 @@ export default function TradeAds({
           className="mt-6"
         >
           {activeTab === "create" && (
-            <TradeAdForm
-              onSuccess={handleCreateSuccess}
-              editMode={false}
-              items={items}
-            />
+            <TradeAdForm onSuccess={handleCreateSuccess} items={items} />
           )}
         </div>
       </div>
@@ -1120,11 +1115,7 @@ export default function TradeAds({
         className="mt-6"
       >
         {activeTab === "create" && (
-          <TradeAdForm
-            onSuccess={handleCreateSuccess}
-            editMode={false}
-            items={items}
-          />
+          <TradeAdForm onSuccess={handleCreateSuccess} items={items} />
         )}
       </div>
 
@@ -1138,88 +1129,70 @@ export default function TradeAds({
       >
         {activeTab === "myads" && (
           <>
-            {selectedTradeAd ? (
-              <TradeAdForm
-                onSuccess={() => {
-                  refreshTradeAds();
-                  window.history.pushState(null, "", window.location.pathname);
-                  setActiveTab("view");
-                  setSelectedTradeAd(null);
-                }}
-                editMode={true}
-                tradeAd={selectedTradeAd}
-                items={items}
-              />
-            ) : (
-              <>
-                <div className="mb-4 flex items-center justify-between">
-                  <p className="text-secondary-text">
-                    Showing {filteredUserTradeAds.length}{" "}
-                    {filteredUserTradeAds.length === 1
-                      ? "trade ad"
-                      : "trade ads"}
-                    {activeFiltersSummary ? ` • ${activeFiltersSummary}` : ""}
+            <div className="mb-4 flex items-center justify-between">
+              <p className="text-secondary-text">
+                Showing {filteredUserTradeAds.length}{" "}
+                {filteredUserTradeAds.length === 1 ? "trade ad" : "trade ads"}
+                {activeFiltersSummary ? ` • ${activeFiltersSummary}` : ""}
+              </p>
+              <Button onClick={toggleSortOrder} size="sm">
+                {sortOrder === "newest" ? (
+                  <Icon icon="heroicons-outline:arrow-down" inline={true} />
+                ) : (
+                  <Icon icon="heroicons-outline:arrow-up" inline={true} />
+                )}
+                {sortOrder === "newest" ? "Newest First" : "Oldest First"}
+              </Button>
+            </div>
+            {filteredUserTradeAds.length === 0 ? (
+              userTradeAds.length === 0 ? (
+                <div className="border-border-card bg-secondary-bg mb-8 rounded-lg border p-6 text-center">
+                  <h3 className="text-secondary-text mb-4 text-lg font-medium">
+                    No Trade Ads Yet
+                  </h3>
+                  <p className="text-secondary-text mb-8">
+                    You haven&apos;t created any trade ads yet.
                   </p>
-                  <Button onClick={toggleSortOrder} size="sm">
-                    {sortOrder === "newest" ? (
-                      <Icon icon="heroicons-outline:arrow-down" inline={true} />
-                    ) : (
-                      <Icon icon="heroicons-outline:arrow-up" inline={true} />
-                    )}
-                    {sortOrder === "newest" ? "Newest First" : "Oldest First"}
+                  <Button onClick={() => handleTabChange("create")}>
+                    Create Your First Trade Ad
                   </Button>
                 </div>
-                {filteredUserTradeAds.length === 0 ? (
-                  userTradeAds.length === 0 ? (
-                    <div className="border-border-card bg-secondary-bg mb-8 rounded-lg border p-6 text-center">
-                      <h3 className="text-secondary-text mb-4 text-lg font-medium">
-                        No Trade Ads Yet
-                      </h3>
-                      <p className="text-secondary-text mb-8">
-                        You haven&apos;t created any trade ads yet.
-                      </p>
-                      <Button onClick={() => handleTabChange("create")}>
-                        Create Your First Trade Ad
-                      </Button>
-                    </div>
-                  ) : (
-                    <div className="border-border-card bg-secondary-bg mb-8 rounded-lg border p-6 text-center">
-                      <h3 className="text-secondary-text mb-4 text-lg font-medium">
-                        No Trade Ads Match Your Filters
-                      </h3>
-                      <p className="text-secondary-text">
-                        Try changing search text or filter options.
-                      </p>
-                    </div>
-                  )
-                ) : (
-                  <div className="space-y-4">
-                    {filteredUserTradeAds.map((trade) => {
-                      const enrichedTrade: TradeAd = {
-                        ...trade,
-                        offering: trade.offering.map((it) => ({
-                          ...it,
-                          demand: getDemandForItem(it) || it.demand,
-                          trend: getTrendForItem(it) || it.trend,
-                        })),
-                        requesting: trade.requesting.map((it) => ({
-                          ...it,
-                          demand: getDemandForItem(it) || it.demand,
-                          trend: getTrendForItem(it) || it.trend,
-                        })),
-                      };
-                      return (
-                        <TradeAdCard
-                          key={trade.id}
-                          trade={enrichedTrade}
-                          currentUserId={currentUserId}
-                          onDelete={() => handleDeleteTrade(trade.id)}
-                        />
-                      );
-                    })}
-                  </div>
-                )}
-              </>
+              ) : (
+                <div className="border-border-card bg-secondary-bg mb-8 rounded-lg border p-6 text-center">
+                  <h3 className="text-secondary-text mb-4 text-lg font-medium">
+                    No Trade Ads Match Your Filters
+                  </h3>
+                  <p className="text-secondary-text">
+                    Try changing search text or filter options.
+                  </p>
+                </div>
+              )
+            ) : (
+              <div className="space-y-4">
+                {filteredUserTradeAds.map((trade) => {
+                  const enrichedTrade: TradeAd = {
+                    ...trade,
+                    offering: trade.offering.map((it) => ({
+                      ...it,
+                      demand: getDemandForItem(it) || it.demand,
+                      trend: getTrendForItem(it) || it.trend,
+                    })),
+                    requesting: trade.requesting.map((it) => ({
+                      ...it,
+                      demand: getDemandForItem(it) || it.demand,
+                      trend: getTrendForItem(it) || it.trend,
+                    })),
+                  };
+                  return (
+                    <TradeAdCard
+                      key={trade.id}
+                      trade={enrichedTrade}
+                      currentUserId={currentUserId}
+                      onDelete={() => handleDeleteTrade(trade.id)}
+                    />
+                  );
+                })}
+              </div>
             )}
           </>
         )}
