@@ -274,7 +274,7 @@ export default function TradeDetailsClient({
 
     try {
       setIsDeleting(true);
-      await deleteTradeAd(trade.id);
+      await deleteTradeAd(trade.id, user?.token);
       toast.success("Trade Ad Deleted", {
         description:
           "Your trade ad has been successfully removed from the platform.",

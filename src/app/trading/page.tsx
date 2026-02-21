@@ -3,7 +3,7 @@ import TradingDescription from "@/components/trading/TradingDescription";
 import DiscordTradeAdBanner from "@/components/trading/DiscordTradeAdBanner";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import TradeAds from "@/components/trading/TradeAds";
-import { fetchTradeAds, fetchItems } from "@/utils/api";
+import { fetchItems } from "@/utils/api";
 import Loading from "./loading";
 
 export const dynamic = "force-dynamic";
@@ -24,12 +24,11 @@ export default function TradingPage() {
 }
 
 async function TradeAdsWrapper() {
-  const tradeAds = await fetchTradeAds();
   const items = await fetchItems();
   const tradeItems = items.map((item) => ({
     ...item,
     is_sub: false,
     side: undefined,
   }));
-  return <TradeAds initialTradeAds={tradeAds} initialItems={tradeItems} />;
+  return <TradeAds initialItems={tradeItems} />;
 }

@@ -5,6 +5,7 @@ import { TradeAd } from "@/types/trading";
 import { TradeItem } from "@/types/trading";
 import { TradeAdCard } from "./TradeAdCard";
 import { TradeAdTabs } from "./TradeAdTabs";
+import { TradeAdSkeleton } from "./TradeAdSkeleton";
 import { Pagination } from "@/components/ui/Pagination";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/IconWrapper";
@@ -23,7 +24,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 interface TradeAdsProps {
-  initialTradeAds: TradeAd[];
+  initialTradeAds?: TradeAd[];
   initialItems?: TradeItem[];
 }
 
@@ -39,11 +40,14 @@ const CUSTOM_TYPE_OPTIONS = [
 ] as const;
 
 export default function TradeAds({
-  initialTradeAds,
+  initialTradeAds = [],
   initialItems = [],
 }: TradeAdsProps) {
   const { user } = useAuthContext();
   const [tradeAds, setTradeAds] = useState<TradeAd[]>(initialTradeAds);
+  const [isTradeAdsLoading, setIsTradeAdsLoading] = useState(
+    initialTradeAds.length === 0,
+  );
   const [items] = useState<TradeItem[]>(initialItems);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<
@@ -237,22 +241,6 @@ export default function TradeAds({
   };
 
   const handleCreateSuccess = (createdTradeRaw?: unknown) => {
-    const fetchRecentTradeAds = async (): Promise<TradeAd[]> => {
-      const response = await fetch("/api/trades/recent?limit=12", {
-        cache: "no-store",
-      });
-      if (!response.ok) {
-        throw new Error("Failed to fetch recent trades");
-      }
-
-      const data = (await response.json()) as unknown;
-      if (!Array.isArray(data)) return [];
-
-      return data
-        .map((entry) => normalizeCreatedTrade(entry))
-        .filter((entry): entry is TradeAd => entry !== null);
-    };
-
     void (async () => {
       try {
         const recentTrades = await fetchRecentTradeAds();
@@ -309,31 +297,51 @@ export default function TradeAds({
 
   const refreshTradeAds = async () => {
     try {
+      setIsTradeAdsLoading(true);
       setError(null);
-      const response = await fetch("/api/trades/recent?limit=12", {
-        cache: "no-store",
-      });
-      if (!response.ok) {
-        throw new Error("Failed to refresh trade ads");
-      }
-      const data = (await response.json()) as unknown;
-      if (!Array.isArray(data)) {
-        setTradeAds([]);
-        return;
-      }
-      const normalized = data
-        .map((entry) => normalizeCreatedTrade(entry))
-        .filter((entry): entry is TradeAd => entry !== null);
-      setTradeAds(normalized);
+      const recentTrades = await fetchRecentTradeAds();
+      setTradeAds(recentTrades);
     } catch (err) {
       console.error("Error refreshing trade ads:", err);
       setError("Failed to refresh trade ads");
+    } finally {
+      setIsTradeAdsLoading(false);
     }
+  };
+
+  const fetchRecentTradeAds = async (): Promise<TradeAd[]> => {
+    const baseUrl = process.env.NEXT_PUBLIC_API_URL;
+    if (!baseUrl) {
+      throw new Error("NEXT_PUBLIC_API_URL is not configured");
+    }
+
+    const response = await fetch(`${baseUrl}/trades/v2/recent?limit=12`, {
+      cache: "no-store",
+      headers: {
+        "User-Agent": "JailbreakChangelogs-Trading/2.0",
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to fetch recent trades");
+    }
+
+    const data = (await response.json()) as unknown;
+    if (!Array.isArray(data)) return [];
+
+    return data
+      .map((entry) => normalizeCreatedTrade(entry))
+      .filter((entry): entry is TradeAd => entry !== null);
   };
 
   const userTradeAds = tradeAds.filter(
     (trade) => trade.author === currentUserId,
   );
+
+  useEffect(() => {
+    if (initialTradeAds.length > 0) return;
+    void refreshTradeAds();
+  }, []);
 
   useEffect(() => {
     const handleHashChange = () => {
@@ -377,7 +385,7 @@ export default function TradeAds({
     try {
       // Remove the trade from the list immediately to prevent UI flicker
       setTradeAds((prevAds) => prevAds.filter((ad) => ad.id !== tradeId));
-      await deleteTradeAd(tradeId);
+      await deleteTradeAd(tradeId, user?.token);
       toast.success("Trade ad deleted successfully", { id: toastId });
     } catch (error) {
       console.error("Error deleting trade ad:", error);
@@ -403,6 +411,19 @@ export default function TradeAds({
     return (
       <div className="mt-8 text-center">
         <p className="text-red-500">{error}</p>
+      </div>
+    );
+  }
+
+  if (isTradeAdsLoading) {
+    return (
+      <div className="mt-8">
+        <TradeAdTabs
+          activeTab={activeTab}
+          onTabChange={handleTabChange}
+          hasTradeAds={userTradeAds.length > 0}
+        />
+        <TradeAdSkeleton />
       </div>
     );
   }

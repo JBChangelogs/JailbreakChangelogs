@@ -529,9 +529,14 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
         return;
       }
 
+      const baseUrl = process.env.NEXT_PUBLIC_API_URL;
+      if (!baseUrl) {
+        throw new Error("Trade API is not configured");
+      }
+
       const endpoint = editMode
-        ? `/api/trades/update?id=${tradeAd?.id}`
-        : `/api/trades/add`;
+        ? `${baseUrl}/trades/update?id=${encodeURIComponent(String(tradeAd?.id ?? ""))}`
+        : `${baseUrl}/trades/v2/create`;
       const method = "POST";
       const createPayload = {
         offering: buildV2CreateItems(offeringItems),
@@ -539,12 +544,17 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
         note: trimmedNote.length > 0 ? trimmedNote : null,
         expiration: expirationHours!,
       };
+      const authToken = userData?.token || user?.token;
+      const headers: Record<string, string> = {
+        "Content-Type": "application/json",
+      };
+      if (authToken) {
+        headers.Authorization = authToken;
+      }
 
       const response = await fetch(endpoint, {
         method,
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers,
         body: JSON.stringify(
           editMode
             ? {
@@ -556,9 +566,11 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
                   .join(","),
                 note: trimmedNote,
                 status: selectedTradeAd?.status,
+                owner: authToken,
               }
             : createPayload,
         ),
+        cache: "no-store",
       });
       let responseMessage: string | null = null;
       let responseBody: unknown = null;

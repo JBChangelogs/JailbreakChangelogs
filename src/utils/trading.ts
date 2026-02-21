@@ -1,9 +1,24 @@
-export const deleteTradeAd = async (tradeId: number): Promise<boolean> => {
+export const deleteTradeAd = async (
+  tradeId: number,
+  token?: string,
+): Promise<boolean> => {
   try {
+    const baseUrl = process.env.NEXT_PUBLIC_API_URL;
+    if (!baseUrl) {
+      throw new Error("Trade API is not configured");
+    }
+
+    const headers: Record<string, string> = {};
+    if (token) {
+      headers.Authorization = token;
+    }
+
     const response = await fetch(
-      `/api/trades/delete?id=${encodeURIComponent(String(tradeId))}`,
+      `${baseUrl}/trades/v2/${encodeURIComponent(String(tradeId))}/delete`,
       {
         method: "DELETE",
+        headers,
+        cache: "no-store",
       },
     );
 
