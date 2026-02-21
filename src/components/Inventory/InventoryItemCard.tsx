@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import { InventoryItem } from "@/app/inventories/types";
 import { Item } from "@/types";
 import {
@@ -15,6 +16,15 @@ import {
 import { getCategoryIcon, getCategoryColor } from "@/utils/categoryIcons";
 import { VerifiedBadgeIcon } from "@/components/Icons/VerifiedBadgeIcon";
 import { formatFullValue } from "@/utils/values";
+import {
+  fetchItemUnlockMetadataById,
+  ItemUnlockMetadataEntry,
+} from "@/utils/itemUnlockMetadata";
+import {
+  formatUnlockLevelBadge,
+  formatUnlockRequirementsTooltip,
+  hasUnlockLevel,
+} from "@/utils/itemUnlockPresentation";
 
 import {
   Tooltip,
@@ -53,12 +63,49 @@ export default function InventoryItemCard({
   userId,
   isDupedItem = false,
 }: InventoryItemCardProps) {
+  const [itemUnlockMetadata, setItemUnlockMetadata] =
+    useState<ItemUnlockMetadataEntry | null>(null);
   const isOriginalOwner = item.isOriginalOwner;
   const originalOwnerInfo = item.info.find(
     (info) => info.title === "Original Owner",
   );
   const isDuplicate = duplicateCount > 1;
   const isMissingItem = item.id.startsWith("missing-");
+  const displayedSeason =
+    typeof itemUnlockMetadata?.season === "number"
+      ? itemUnlockMetadata.season
+      : typeof item.season === "number"
+        ? item.season
+        : undefined;
+  const displayedLevel =
+    typeof itemUnlockMetadata?.level === "string"
+      ? itemUnlockMetadata.level
+      : typeof item.level === "number"
+        ? String(item.level)
+        : undefined;
+  const hasDisplayedLevel = hasUnlockLevel(displayedLevel);
+  const requirementsTooltipText = formatUnlockRequirementsTooltip(
+    displayedSeason,
+    displayedLevel,
+  );
+
+  useEffect(() => {
+    let isMounted = true;
+
+    fetchItemUnlockMetadataById()
+      .then((metadataById) => {
+        if (!isMounted) return;
+        setItemUnlockMetadata(metadataById.get(item.item_id) ?? null);
+      })
+      .catch((error) => {
+        console.error("Error loading item unlock metadata:", error);
+        if (isMounted) setItemUnlockMetadata(null);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [item.item_id]);
 
   return (
     <div
@@ -312,19 +359,28 @@ export default function InventoryItemCard({
           <div className="flex justify-center gap-2">
             {!isMissingItem && (
               <>
-                {item.season && (
-                  <div className="border-button-info bg-button-info flex h-8 w-8 items-center justify-center rounded-full border shadow-lg">
-                    <span className="text-form-button-text text-xs font-bold">
-                      S{item.season}
-                    </span>
-                  </div>
-                )}
-                {item.level && (
-                  <div className="border-status-success bg-status-success flex h-8 w-8 items-center justify-center rounded-full border shadow-lg">
-                    <span className="text-form-button-text text-xs font-bold">
-                      L{item.level}
-                    </span>
-                  </div>
+                {(typeof displayedSeason === "number" || hasDisplayedLevel) && (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <div className="flex cursor-help items-center gap-2">
+                        {typeof displayedSeason === "number" && (
+                          <div className="border-button-info bg-button-info flex h-8 w-8 items-center justify-center rounded-full border shadow-lg">
+                            <span className="text-form-button-text text-xs font-bold">
+                              S{displayedSeason}
+                            </span>
+                          </div>
+                        )}
+                        {hasDisplayedLevel && (
+                          <div className="border-status-success bg-status-success flex h-8 w-8 items-center justify-center rounded-full border shadow-lg">
+                            <span className="text-form-button-text text-xs font-bold">
+                              {formatUnlockLevelBadge(displayedLevel)}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent>{requirementsTooltipText}</TooltipContent>
+                  </Tooltip>
                 )}
               </>
             )}

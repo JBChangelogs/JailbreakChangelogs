@@ -10,7 +10,6 @@ import {
   fetchSeason,
   MaxStreamsError,
 } from "@/utils/api";
-import seasonDates from "@/utils/seasonDates.json";
 import { CommentData } from "@/utils/api";
 import { UserData } from "@/types/auth";
 import InventoryCheckerClient from "./InventoryCheckerClient";
@@ -22,12 +21,39 @@ interface InventoryDataStreamerProps {
   initialCommentUserMap?: Record<string, UserData>;
 }
 
+interface SeasonDateRange {
+  season: number;
+  start_date: number;
+  end_date: number;
+}
+
 // Component that fetches inventory data
 async function InventoryDataFetcher({
   robloxId,
   initialComments,
   initialCommentUserMap,
 }: InventoryDataStreamerProps) {
+  let seasonDates: SeasonDateRange[] = [];
+  try {
+    const seasonDatesResponse = await fetch(
+      "https://assets.jailbreakchangelogs.xyz/assets/json/season_dates.json",
+      { cache: "no-store" },
+    );
+    if (seasonDatesResponse.ok) {
+      const seasonDatesData = (await seasonDatesResponse.json()) as unknown;
+      if (Array.isArray(seasonDatesData)) {
+        seasonDates = seasonDatesData as SeasonDateRange[];
+      }
+    } else {
+      console.error(
+        "Failed to fetch season_dates.json:",
+        seasonDatesResponse.status,
+      );
+    }
+  } catch (error) {
+    console.error("Error fetching season_dates.json:", error);
+  }
+
   // Check if the input is a username (not a number) or a Roblox ID
   const isUsername = !/^\d+$/.test(robloxId);
 
