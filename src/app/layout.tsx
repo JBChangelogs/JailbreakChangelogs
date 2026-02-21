@@ -181,6 +181,7 @@ export default async function RootLayout({
                     <AuthProvider>
                       <UmamiIdentity />
                       <AdBlockRecovery />
+                      <AdBlockPrompt />
                       <AdErrorBoundary>
                         <NitroBottomAnchor />
                         <NitroVideoPlayer />
@@ -220,7 +221,6 @@ export default async function RootLayout({
                   </MaintenanceBypass>
                 </QueryProvider>
               </ThemeProvider>
-              <AdBlockPrompt />
             </CustomThemeProvider>
           </AppRouterCacheProvider>
         </body>
@@ -321,6 +321,7 @@ export default async function RootLayout({
                 <AuthProvider>
                   <UmamiIdentity />
                   <AdBlockRecovery />
+                  <AdBlockPrompt />
                   <NitroBottomAnchor />
                   <NitroVideoPlayer />
                   <NitroAnchorCloseSupporterModal />
@@ -354,7 +355,6 @@ export default async function RootLayout({
                 </AuthProvider>
               </QueryProvider>
             </ThemeProvider>
-            <AdBlockPrompt />
           </CustomThemeProvider>
         </AppRouterCacheProvider>
       </body>
