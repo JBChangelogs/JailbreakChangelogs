@@ -34,7 +34,7 @@ export default function AccessDeniedPage() {
 
         <div className="flex w-full flex-col gap-3 sm:flex-row">
           <Button asChild className="w-full sm:w-auto">
-            <a href="/api/auth/discord">Authenticate with Discord</a>
+            <a href="/api/auth/discord">Login</a>
           </Button>
           <Button
             asChild
