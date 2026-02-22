@@ -13,6 +13,7 @@ export async function GET(request: Request) {
     // Get page and size from query params
     const { searchParams } = new URL(request.url);
     const page = searchParams.get("page") || "1";
+    const seed = searchParams.get("seed");
     const rawSize = parseInt(searchParams.get("size") || "30", 10);
     const size = Math.min(
       Math.max(Number.isNaN(rawSize) ? 30 : rawSize, 1),
@@ -24,6 +25,9 @@ export async function GET(request: Request) {
     const url = new URL(`${BASE_API_URL}/users/paginated`);
     url.searchParams.set("page", page);
     url.searchParams.set("size", size.toString());
+    if (seed) {
+      url.searchParams.set("seed", seed);
+    }
     url.searchParams.set("fields", fields);
 
     const response = await fetch(url.toString(), {

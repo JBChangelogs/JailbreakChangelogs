@@ -24,6 +24,7 @@ interface UserAvatarProps {
   shape?: "circle" | "square";
   premiumType?: number;
   className?: string;
+  onlineRingClassName?: string;
 }
 
 export const DefaultAvatar = ({
@@ -71,6 +72,7 @@ const AvatarWrapper = ({
   shape = "circle",
   premiumType,
   className,
+  onlineRingClassName = "ring-4",
 }: {
   children: React.ReactNode;
   isOnline?: boolean;
@@ -79,11 +81,12 @@ const AvatarWrapper = ({
   shape?: "circle" | "square";
   premiumType?: number;
   className?: string;
+  onlineRingClassName?: string;
 }) => {
   if (!showBadge) return <>{children}</>;
 
   const finalShape = premiumType === 3 ? "square" : shape;
-  const ringClass = isOnline && !isHidden ? "ring-4" : "";
+  const ringClass = isOnline && !isHidden ? onlineRingClassName : "";
   const ringStyle =
     isOnline && !isHidden
       ? ({
@@ -122,6 +125,7 @@ export const UserAvatar = ({
   shape = "circle",
   premiumType,
   className,
+  onlineRingClassName,
 }: UserAvatarProps) => {
   const [imageError, setImageError] = useState(false);
   const [customAvatarError, setCustomAvatarError] = useState(false);
@@ -200,6 +204,7 @@ export const UserAvatar = ({
         shape={shape}
         premiumType={premiumType}
         className={wrapperClassName}
+        onlineRingClassName={onlineRingClassName}
       >
         <div
           className={innerDivCommonClass}
@@ -226,6 +231,7 @@ export const UserAvatar = ({
       shape={shape}
       premiumType={premiumType}
       className={wrapperClassName}
+      onlineRingClassName={onlineRingClassName}
     >
       <div
         className={innerDivCommonClass}

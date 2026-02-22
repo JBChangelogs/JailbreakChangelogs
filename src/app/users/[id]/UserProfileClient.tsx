@@ -40,6 +40,12 @@ const FollowingModal = dynamic(
     ssr: false,
   },
 );
+const MessagesModal = dynamic(
+  () => import("@/components/Users/MessagesModal"),
+  {
+    ssr: false,
+  },
+);
 import type { UserFlag } from "@/types/auth";
 
 // Global audio instance to prevent overlapping playback
@@ -301,6 +307,7 @@ export default function UserProfileClient({
   const [commentsError] = useState<string | null>(null);
   const [isFollowersModalOpen, setIsFollowersModalOpen] = useState(false);
   const [isFollowingModalOpen, setIsFollowingModalOpen] = useState(false);
+  const [isMessagesModalOpen, setIsMessagesModalOpen] = useState(false);
   const [privateServers] = useState<Server[]>(
     initialData?.privateServers || [],
   );
@@ -867,7 +874,7 @@ export default function UserProfileClient({
                   </div>
 
                   {/* Action Buttons */}
-                  <div className="mt-1 flex justify-center md:mt-0 md:self-start">
+                  <div className="mt-1 flex justify-center gap-2 md:mt-0 md:self-start">
                     {currentUserId === user.id ? (
                       <Button asChild variant="default" size="md">
                         <Link href="/settings">
@@ -879,58 +886,104 @@ export default function UserProfileClient({
                         </Link>
                       </Button>
                     ) : isAuthenticatedUser && currentUserId ? (
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <span>
-                            <Button
-                              variant={isFollowing ? "secondary" : "default"}
-                              onClick={handleFollow}
-                              disabled={isLoadingFollow}
-                              size="md"
-                            >
-                              <Icon
-                                icon={
-                                  isFollowing
-                                    ? "heroicons:user-minus"
-                                    : "heroicons:user-plus"
-                                }
-                                className="h-5 w-5"
-                              />
-                              {isFollowing ? "Unfollow" : "Follow"}
-                            </Button>
-                          </span>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          {isFollowing
-                            ? "Unfollow this user"
-                            : "Follow this user"}
-                        </TooltipContent>
-                      </Tooltip>
+                      <>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <span>
+                              <Button
+                                variant={isFollowing ? "secondary" : "default"}
+                                onClick={handleFollow}
+                                disabled={isLoadingFollow}
+                                size="md"
+                              >
+                                <Icon
+                                  icon={
+                                    isFollowing
+                                      ? "heroicons:user-minus"
+                                      : "heroicons:user-plus"
+                                  }
+                                  className="h-5 w-5"
+                                />
+                                {isFollowing ? "Unfollow" : "Follow"}
+                              </Button>
+                            </span>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            {isFollowing
+                              ? "Unfollow this user"
+                              : "Follow this user"}
+                          </TooltipContent>
+                        </Tooltip>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <span>
+                              <Button
+                                variant="outline"
+                                size="md"
+                                onClick={() => setIsMessagesModalOpen(true)}
+                              >
+                                <Icon
+                                  icon="heroicons:chat-bubble-left-right"
+                                  className="h-5 w-5"
+                                />
+                                Message
+                              </Button>
+                            </span>
+                          </TooltipTrigger>
+                          <TooltipContent>Message this user</TooltipContent>
+                        </Tooltip>
+                      </>
                     ) : (
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <span>
-                            <Button
-                              variant="default"
-                              size="md"
-                              onClick={() =>
-                                toast.error(
-                                  "You need to be logged in to follow users",
-                                )
-                              }
-                            >
-                              <Icon
-                                icon="heroicons:user-plus"
-                                className="h-5 w-5"
-                              />
-                              Follow
-                            </Button>
-                          </span>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          You need to be logged in to follow users
-                        </TooltipContent>
-                      </Tooltip>
+                      <>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <span>
+                              <Button
+                                variant="default"
+                                size="md"
+                                onClick={() =>
+                                  toast.error(
+                                    "You need to be logged in to follow users",
+                                  )
+                                }
+                              >
+                                <Icon
+                                  icon="heroicons:user-plus"
+                                  className="h-5 w-5"
+                                />
+                                Follow
+                              </Button>
+                            </span>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            You need to be logged in to follow users
+                          </TooltipContent>
+                        </Tooltip>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <span>
+                              <Button
+                                variant="outline"
+                                size="md"
+                                onClick={() =>
+                                  toast.error(
+                                    "You need to be logged in to message users",
+                                  )
+                                }
+                              >
+                                <Icon
+                                  icon="heroicons:chat-bubble-left-right"
+                                  className="h-5 w-5"
+                                />
+                                Message
+                              </Button>
+                            </span>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            You need to be logged in to message users
+                          </TooltipContent>
+                        </Tooltip>
+                      </>
                     )}
                   </div>
                 </div>
@@ -992,6 +1045,38 @@ export default function UserProfileClient({
         }}
         userData={user}
       />
+      {isMessagesModalOpen && (
+        <MessagesModal
+          isOpen={isMessagesModalOpen}
+          onClose={() => setIsMessagesModalOpen(false)}
+          currentUser={
+            currentUser
+              ? {
+                  id: currentUser.id,
+                  username: currentUser.username,
+                  global_name: currentUser.global_name,
+                  avatar: currentUser.avatar,
+                  custom_avatar: currentUser.custom_avatar,
+                  premiumtype: currentUser.premiumtype,
+                  presence: currentUser.presence,
+                  last_seen: currentUser.last_seen,
+                  settings: currentUser.settings,
+                }
+              : null
+          }
+          targetUser={{
+            id: user.id,
+            username: user.username,
+            global_name: user.global_name,
+            avatar: user.avatar,
+            custom_avatar: user.custom_avatar,
+            premiumtype: user.premiumtype,
+            presence: user.presence,
+            last_seen: user.last_seen,
+            settings: user.settings,
+          }}
+        />
+      )}
     </main>
   );
 }

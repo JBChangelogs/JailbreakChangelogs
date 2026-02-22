@@ -18,6 +18,15 @@ import { UserDetailsTooltip } from "../ui/UserDetailsTooltip";
 import { useAuthContext } from "@/contexts/AuthContext";
 import UserCardSkeleton from "./UserCardSkeleton";
 
+interface PaginatedUsersResponse {
+  items?: UserData[];
+  total?: number;
+  page?: number;
+  seed?: number;
+  total_pages?: number;
+  size?: number;
+}
+
 export default function UserSearch() {
   const { user } = useAuthContext();
   const searchParams = useSearchParams();
@@ -30,6 +39,7 @@ export default function UserSearch() {
   const [users, setUsers] = useState<UserData[]>([]);
   const [totalPages, setTotalPages] = useState(0);
   const [total, setTotal] = useState(0);
+  const [paginationSeed, setPaginationSeed] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const fetchTimeoutIdRef = useRef<NodeJS.Timeout | null>(null);
   const usersPerPage = 30;
@@ -76,15 +86,37 @@ export default function UserSearch() {
       fetchTimeoutIdRef.current = setTimeout(async () => {
         setIsLoading(true);
         try {
-          const data = await fetchPaginatedUsers(pageNum, usersPerPage);
+          let effectiveSeed = paginationSeed;
+
+          // If user lands directly on page > 1 without a seed, fetch page 1 first to get one.
+          if (pageNum > 1 && effectiveSeed === null) {
+            const firstPageData = (await fetchPaginatedUsers(
+              1,
+              usersPerPage,
+            )) as PaginatedUsersResponse;
+            if (typeof firstPageData?.seed === "number") {
+              effectiveSeed = firstPageData.seed;
+              setPaginationSeed(firstPageData.seed);
+            }
+          }
+
+          const data = (await fetchPaginatedUsers(
+            pageNum,
+            usersPerPage,
+            pageNum > 1 ? (effectiveSeed ?? undefined) : undefined,
+          )) as PaginatedUsersResponse;
           const items = Array.isArray(data?.items) ? data.items : [];
           const nextTotalPages =
             typeof data?.total_pages === "number" ? data.total_pages : 0;
           const nextTotal = typeof data?.total === "number" ? data.total : 0;
+          const nextSeed = typeof data?.seed === "number" ? data.seed : null;
 
           setUsers(items);
           setTotalPages(nextTotalPages);
           setTotal(nextTotal);
+          if (pageNum === 1 && nextSeed !== null) {
+            setPaginationSeed(nextSeed);
+          }
         } catch (error) {
           console.error("Error fetching users:", error);
           setUsers([]);
@@ -95,7 +127,7 @@ export default function UserSearch() {
         }
       }, 300);
     },
-    [usersPerPage],
+    [paginationSeed, usersPerPage],
   );
 
   // Initial fetch on mount
