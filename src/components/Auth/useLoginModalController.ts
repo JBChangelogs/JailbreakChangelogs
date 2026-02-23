@@ -61,8 +61,9 @@ export function useLoginModalController(): LoginModalController {
     }
 
     try {
-      const currentURL = window.location.href;
-      const oauthRedirect = `/api/oauth/roblox/redirect?redirect=${encodeURIComponent(currentURL)}`;
+      const currentURL = new URL(window.location.href);
+      currentURL.searchParams.set("auth_flow", "roblox-link");
+      const oauthRedirect = `/api/oauth/roblox/redirect?redirect=${encodeURIComponent(currentURL.toString())}`;
 
       toast.loading("Redirecting to Roblox...", {
         duration: 2000,

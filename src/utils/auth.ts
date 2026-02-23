@@ -2,6 +2,8 @@ import { toast } from "sonner";
 import { UserData, AuthResponse } from "../types/auth";
 import { safeLocalStorage, safeSetJSON } from "./safeStorage";
 
+export type TokenAuthFlow = "login" | "roblox-link";
+
 let lastLogoutSource: string = "Unknown";
 let activeLogoutToast: string | number | null = null;
 let activeLoginLoadingToast: string | number | null = null;
@@ -271,7 +273,10 @@ async function performAuthValidation(): Promise<boolean> {
   }
 }
 
-export async function handleTokenAuth(token: string): Promise<AuthResponse> {
+export async function handleTokenAuth(
+  token: string,
+  flow: TokenAuthFlow = "login",
+): Promise<AuthResponse> {
   const loginPromise = (async () => {
     // Create AbortController for request cancellation
     const abortController = new AbortController();
@@ -316,11 +321,20 @@ export async function handleTokenAuth(token: string): Promise<AuthResponse> {
   })();
 
   toast.promise(loginPromise, {
-    loading: "Logging you in...",
-    success: (userData) => ({
-      message: `Welcome back, ${userData.username}!`,
-      description: "You have successfully signed in to your account.",
-    }),
+    loading:
+      flow === "roblox-link"
+        ? "Connecting your Roblox account..."
+        : "Logging you in...",
+    success: (userData) =>
+      flow === "roblox-link"
+        ? {
+            message: "Successfully linked Roblox account",
+            description: `Connected to ${userData.roblox_username || "your Roblox account"}.`,
+          }
+        : {
+            message: `Welcome back, ${userData.username}!`,
+            description: "You have successfully signed in to your account.",
+          },
     error: (error) => ({
       message: "Login failed",
       description:

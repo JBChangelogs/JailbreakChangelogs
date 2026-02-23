@@ -15,6 +15,7 @@ import {
   validateAuth,
   logout as authLogout,
   handleTokenAuth,
+  type TokenAuthFlow,
   trackLogoutSource,
 } from "@/utils/auth";
 import {
@@ -338,10 +339,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }, [authState.isAuthenticated, authState.isLoading]);
 
   const handleLogin = useCallback(
-    async (token: string): Promise<AuthResponse> => {
+    async (
+      token: string,
+      flow: TokenAuthFlow = "login",
+    ): Promise<AuthResponse> => {
       try {
         setAuthState((prev) => ({ ...prev, isLoading: true }));
-        const response = await handleTokenAuth(token);
+        const response = await handleTokenAuth(token, flow);
 
         if (response.success && response.data) {
           setAuthState({
@@ -408,9 +412,16 @@ export function AuthProvider({ children }: AuthProviderProps) {
     if (typeof window === "undefined") return;
 
     const currentUrl = new URL(window.location.href);
-    if (!currentUrl.searchParams.has("token")) return;
+    const hasToken = currentUrl.searchParams.has("token");
+    const hasAuthFlow = currentUrl.searchParams.has("auth_flow");
+    if (!hasToken && !hasAuthFlow) return;
 
-    currentUrl.searchParams.delete("token");
+    if (hasToken) {
+      currentUrl.searchParams.delete("token");
+    }
+    if (hasAuthFlow) {
+      currentUrl.searchParams.delete("auth_flow");
+    }
     window.history.replaceState({}, "", currentUrl.toString());
   }, []);
 
@@ -423,10 +434,15 @@ export function AuthProvider({ children }: AuthProviderProps) {
     if (!token) {
       return;
     }
+    const authFlowParam = new URL(window.location.href).searchParams.get(
+      "auth_flow",
+    );
+    const flow: TokenAuthFlow =
+      authFlowParam === "roblox-link" ? "roblox-link" : "login";
 
     tokenAuthProcessedRef.current = true;
     const tokenLoginTimeout = setTimeout(() => {
-      handleLogin(token)
+      handleLogin(token, flow)
         .then((response) => {
           clearTokenFromUrl();
           if (response.success) {
