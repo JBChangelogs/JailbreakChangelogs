@@ -29,6 +29,7 @@ import {
   ChatEventTitle,
 } from "@/components/chat/chat-event";
 import { useOptimizedRealTimeRelativeDate } from "@/hooks/useSharedTimer";
+import { PUBLIC_API_URL } from "@/utils/api";
 
 type ModalUser = {
   id: string;
@@ -82,6 +83,13 @@ type ApiSendResponse = {
   };
 };
 
+type ApiErrorResponse = {
+  error?: string;
+  detail?: string | { message?: string };
+  message?: string;
+  limit?: number;
+};
+
 interface MessagesModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -107,6 +115,10 @@ function parseMessagesResponse(raw: string): ApiThreadResponse {
     '"$1":"$2"',
   );
   return JSON.parse(normalized) as ApiThreadResponse;
+}
+
+function asId(value: string | number): string {
+  return String(value);
 }
 
 export default function MessagesModal({
@@ -142,12 +154,18 @@ export default function MessagesModal({
     const fetchMessages = async () => {
       try {
         setIsLoading(true);
+        if (!PUBLIC_API_URL) {
+          throw new Error("Public API URL is not configured");
+        }
 
-        const response = await fetch(`/api/messages/${targetId}`, {
-          method: "GET",
-          credentials: "include",
-          cache: "no-store",
-        });
+        const response = await fetch(
+          `${PUBLIC_API_URL}/messages/${encodeURIComponent(targetId)}`,
+          {
+            method: "GET",
+            credentials: "include",
+            cache: "no-store",
+          },
+        );
 
         const rawBody = await response.text();
 
@@ -159,9 +177,9 @@ export default function MessagesModal({
         const threadItems = Array.isArray(data?.items) ? data.items : [];
 
         const mappedMessages: Message[] = threadItems.map((item) => ({
-          id: item.id,
-          senderId: item.sender_id,
-          receiverId: item.receiver_id,
+          id: asId(item.id),
+          senderId: asId(item.sender_id),
+          receiverId: asId(item.receiver_id),
           content: item.content,
           createdAt:
             typeof item.created_at === "number"
@@ -170,7 +188,7 @@ export default function MessagesModal({
         }));
 
         if (!isCancelled) {
-          setMessages(mappedMessages);
+          setMessages(mappedMessages.reverse());
         }
       } catch (error) {
         if (!isCancelled) {
@@ -207,43 +225,82 @@ export default function MessagesModal({
 
     try {
       setIsSending(true);
+      if (!PUBLIC_API_URL) {
+        throw new Error("Public API URL is not configured");
+      }
 
-      const response = await fetch(`/api/messages/${targetId}`, {
-        method: "POST",
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
+      const response = await fetch(
+        `${PUBLIC_API_URL}/messages/${encodeURIComponent(targetId)}`,
+        {
+          method: "POST",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ content: trimmedMessage }),
         },
-        body: JSON.stringify({ content: trimmedMessage }),
-      });
+      );
 
       const rawBody = await response.text();
       const parsedBody = rawBody
-        ? (JSON.parse(
-            rawBody.replace(
-              /"(id|sender_id|receiver_id|recipient_id|user_id)"\s*:\s*(\d{16,})/g,
-              '"$1":"$2"',
-            ),
-          ) as ApiSendResponse)
+        ? (() => {
+            try {
+              return JSON.parse(
+                rawBody.replace(
+                  /"(id|sender_id|receiver_id|recipient_id|user_id)"\s*:\s*(\d{16,})/g,
+                  '"$1":"$2"',
+                ),
+              ) as ApiSendResponse & ApiErrorResponse;
+            } catch {
+              return null;
+            }
+          })()
         : null;
 
+      const detailMessage =
+        parsedBody?.detail && typeof parsedBody.detail === "object"
+          ? parsedBody.detail.message
+          : undefined;
+      const apiErrorMessage =
+        parsedBody?.detail && typeof parsedBody.detail === "string"
+          ? parsedBody.detail
+          : detailMessage && typeof detailMessage === "string"
+            ? detailMessage
+            : parsedBody?.error && typeof parsedBody.error === "string"
+              ? parsedBody.error
+              : parsedBody?.message && typeof parsedBody.message === "string"
+                ? parsedBody.message
+                : rawBody.trim();
+      const combinedTooLongMessage =
+        parsedBody?.error === "message_too_long" &&
+        typeof parsedBody?.limit === "number"
+          ? `Message too long (max ${parsedBody.limit} characters).`
+          : null;
+      const fallbackStatusMessage =
+        response.status === 401 ? "Unauthorized" : "Failed to send message";
+
       if (!response.ok || !parsedBody?.success || !parsedBody.message) {
-        throw new Error("Failed to send message");
+        throw new Error(
+          combinedTooLongMessage || apiErrorMessage || fallbackStatusMessage,
+        );
       }
 
       const sentMessage: Message = {
-        id: parsedBody.message.id,
-        senderId: parsedBody.message.user_id,
-        receiverId: parsedBody.message.recipient_id,
+        id: asId(parsedBody.message.id),
+        senderId: asId(parsedBody.message.user_id),
+        receiverId: asId(parsedBody.message.recipient_id),
         content: parsedBody.message.content,
-        createdAt: Date.now(),
       };
 
-      setMessages((prev) => [sentMessage, ...prev]);
+      setMessages((prev) => [...prev, sentMessage]);
       setDraftMessage("");
     } catch (error) {
       console.error("Error sending message:", error);
-      toast.error("Failed to send message");
+      const message =
+        error instanceof Error && error.message
+          ? error.message
+          : "Failed to send message";
+      toast.error(message);
     } finally {
       setIsSending(false);
     }
@@ -323,7 +380,10 @@ export default function MessagesModal({
                 </div>
               ) : (
                 messages.map((message) => {
-                  const isOwnMessage = message.senderId === currentUser?.id;
+                  const currentUserId = currentUser ? asId(currentUser.id) : "";
+                  const senderId = asId(message.senderId);
+                  const isOwnMessage =
+                    !!currentUserId && senderId === currentUserId;
                   const sender =
                     isOwnMessage && currentUser ? currentUser : targetUser;
 
@@ -383,7 +443,30 @@ export default function MessagesModal({
                   aria-label="Send message"
                   disabled={!draftMessage.trim() || isSending}
                 >
-                  <Icon icon="heroicons:paper-airplane" className="h-4 w-4" />
+                  {isSending ? (
+                    <svg
+                      className="h-4 w-4 animate-spin"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      />
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                      />
+                    </svg>
+                  ) : (
+                    <Icon icon="heroicons:paper-airplane" className="h-4 w-4" />
+                  )}
                 </ChatToolbarButton>
               </ChatToolbarAddon>
             </ChatToolbar>

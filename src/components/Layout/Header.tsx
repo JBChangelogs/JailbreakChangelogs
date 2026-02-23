@@ -427,7 +427,7 @@ export default function Header() {
           <Link
             href={`/users/${userData?.id}`}
             onClick={handleDrawerToggle}
-            className="hover:bg-button-info-hover/10 border-border-secondary flex w-full min-w-0 cursor-pointer items-center gap-3 border-b px-4 py-3 pr-8 transition-colors"
+            className="hover:bg-button-info-hover/10 border-border-secondary flex w-full min-w-0 cursor-pointer items-center gap-3 border-b px-4 py-3 transition-colors"
           >
             <UserAvatar
               userId={userData.id}
@@ -440,10 +440,10 @@ export default function Header() {
               premiumType={userData.premiumtype}
             />
             <div className="min-w-0 flex-1">
-              <div className="text-primary-text max-w-[120px] truncate font-semibold">
+              <div className="text-primary-text truncate font-semibold">
                 {userData.global_name || userData.username}
               </div>
-              <div className="text-secondary-text text-sm">
+              <div className="text-secondary-text truncate text-sm">
                 @{userData.username}
               </div>
             </div>
@@ -490,7 +490,7 @@ export default function Header() {
           )}
           <div
             onClick={handleLogout}
-            className="hover:bg-button-info-hover/10 flex cursor-pointer items-center gap-3 px-4 py-3 transition-colors"
+            className="hover:bg-button-danger/10 flex cursor-pointer items-center gap-3 px-4 py-3 transition-colors"
             data-umami-event="Logout"
           >
             <Icon

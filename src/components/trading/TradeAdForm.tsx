@@ -502,13 +502,9 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
         note: trimmedNote.length > 0 ? trimmedNote : null,
         expiration: expirationHours!,
       };
-      const authToken = userData?.token || user?.token;
       const headers: Record<string, string> = {
         "Content-Type": "application/json",
       };
-      if (authToken) {
-        headers.Authorization = authToken;
-      }
 
       const response = await fetch(endpoint, {
         method,

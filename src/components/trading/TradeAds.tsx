@@ -385,7 +385,7 @@ export default function TradeAds({
     try {
       // Remove the trade from the list immediately to prevent UI flicker
       setTradeAds((prevAds) => prevAds.filter((ad) => ad.id !== tradeId));
-      await deleteTradeAd(tradeId, user?.token);
+      await deleteTradeAd(tradeId);
       toast.success("Trade ad deleted successfully", { id: toastId });
     } catch (error) {
       console.error("Error deleting trade ad:", error);
