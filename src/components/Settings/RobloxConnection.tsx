@@ -6,6 +6,7 @@ import { safeGetJSON, safeSetJSON } from "@/utils/safeStorage";
 import { UserData } from "@/types/auth";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
+import { PUBLIC_API_URL } from "@/utils/api";
 
 interface RobloxConnectionProps {
   userData: {
@@ -27,12 +28,20 @@ export const RobloxConnection = ({ userData }: RobloxConnectionProps) => {
 
   const handleDisconnect = async () => {
     try {
-      const response = await fetch("/api/oauth/roblox/disconnect", {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
+      if (!PUBLIC_API_URL) {
+        throw new Error("Missing public API URL configuration");
+      }
+
+      const response = await fetch(
+        `${PUBLIC_API_URL}/oauth/roblox/disconnect`,
+        {
+          method: "DELETE",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
         },
-      });
+      );
 
       if (!response.ok) {
         const errorData = await response.json();
@@ -42,9 +51,9 @@ export const RobloxConnection = ({ userData }: RobloxConnectionProps) => {
       }
 
       // Update local storage
-      const user = safeGetJSON<UserData>("user", null);
-      if (user) {
-        const updatedUser = { ...user };
+      const storedUser = safeGetJSON<UserData>("user", null);
+      if (storedUser) {
+        const updatedUser = { ...storedUser };
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         delete (updatedUser as any).roblox_id;
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
