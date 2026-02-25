@@ -209,7 +209,7 @@ export default function AirdropCard({ airdrop }: AirdropCardProps) {
           {jobId && (
             <Button asChild variant="default" className="mt-2 w-full">
               <a
-                href={`http://tracker.jailbreakchangelogs.xyz/?jobid=${jobId}&utm_campaign=Airdrop_Tracker&utm_term=${airdrop.color}+Airdrop&utm_source=website`}
+                href={`https://tracker.jailbreakchangelogs.xyz/?jobid=${jobId}&utm_campaign=Airdrop_Tracker&utm_term=${airdrop.color}+Airdrop&utm_source=website`}
                 target="_blank"
                 rel="noopener noreferrer"
               >
