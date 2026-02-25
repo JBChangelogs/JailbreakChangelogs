@@ -10,12 +10,18 @@ interface RobberyTrackerAuthWrapperProps {
   children: React.ReactNode;
   redirectOnFail?: boolean;
   requireAuth?: boolean;
+  loginTitle?: string;
+  loginDescription?: string;
+  redirectToastMessage?: string;
 }
 
 export default function RobberyTrackerAuthWrapper({
   children,
   redirectOnFail = true,
   requireAuth,
+  loginTitle = "Login required",
+  loginDescription = "You must be logged in to access live robbery data. This helps prevent abuse and keeps queue times reasonable.",
+  redirectToastMessage = "You need to be logged in to use the Robbery Tracker.",
 }: RobberyTrackerAuthWrapperProps) {
   // Environment variable to toggle auth requirement
   const authRequired =
@@ -38,7 +44,7 @@ export default function RobberyTrackerAuthWrapper({
       !hasRedirected.current
     ) {
       hasRedirected.current = true;
-      toast.error("You need to be logged in to use the Robbery Tracker.", {
+      toast.error(redirectToastMessage, {
         duration: 4000,
       });
       setShowLoginModal(true);
@@ -51,6 +57,7 @@ export default function RobberyTrackerAuthWrapper({
     router,
     authRequired,
     redirectOnFail,
+    redirectToastMessage,
   ]);
 
   // If auth is NOT required, always render children immediately
@@ -80,11 +87,10 @@ export default function RobberyTrackerAuthWrapper({
       <div className="container mx-auto flex min-h-screen items-center justify-center px-4 py-8">
         <div className="border-border-card bg-secondary-bg w-full max-w-2xl rounded-lg border p-6 text-center shadow-sm">
           <h2 className="text-primary-text text-2xl font-semibold">
-            Login required
+            {loginTitle}
           </h2>
           <p className="text-secondary-text mx-auto mt-3 max-w-xl text-base leading-relaxed">
-            You must be logged in to access live robbery data. This helps
-            prevent abuse and keeps queue times reasonable.
+            {loginDescription}
           </p>
           <div className="mt-6">
             <Button onClick={() => setShowLoginModal(true)}>Log In</Button>

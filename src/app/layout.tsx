@@ -32,7 +32,6 @@ import {
 import { getGitHubUrl } from "@/utils/version";
 import { Suspense } from "react";
 import QueryProvider from "@/components/QueryProvider";
-import { getCurrentUser } from "@/utils/serverSession";
 
 export const viewport: Viewport = {
   themeColor: "#2462cd",
@@ -91,11 +90,6 @@ export default async function RootLayout({
 }) {
   const { isMaintenanceMode } = await checkMaintenanceMode();
   const githubUrl = getGitHubUrl();
-
-  // Check if user is a supporter before loading Nitro script
-  const user = await getCurrentUser();
-  const isSupporter =
-    user?.premiumtype && user.premiumtype >= 2 && user.premiumtype <= 3;
 
   if (isMaintenanceMode) {
     return (
@@ -185,6 +179,8 @@ export default async function RootLayout({
                     <AuthCheck />
                     <AuthProvider>
                       <UmamiIdentity />
+                      <AdBlockRecovery />
+                      <AdBlockPrompt />
                       <AdErrorBoundary>
                         <NitroBottomAnchor />
                         <NitroVideoPlayer />
@@ -220,12 +216,8 @@ export default async function RootLayout({
                   </MaintenanceBypass>
                 </QueryProvider>
               </ThemeProvider>
-              {/* Ad Block Prompt UI - Only shown to non-supporters when ad blocking is detected */}
-              <AdBlockPrompt />
             </CustomThemeProvider>
           </AppRouterCacheProvider>
-          {/* Ad Block Detection Script - Only load if user is NOT a supporter */}
-          <AdBlockRecovery isSupporter={!!isSupporter} />
         </body>
       </html>
     );
@@ -323,6 +315,8 @@ export default async function RootLayout({
                 <AuthCheck />
                 <AuthProvider>
                   <UmamiIdentity />
+                  <AdBlockRecovery />
+                  <AdBlockPrompt />
                   <NitroBottomAnchor />
                   <NitroVideoPlayer />
                   <NitroAnchorCloseSupporterModal />
@@ -352,12 +346,8 @@ export default async function RootLayout({
                 </AuthProvider>
               </QueryProvider>
             </ThemeProvider>
-            {/* Ad Block Prompt UI - Only shown to non-supporters when ad blocking is detected */}
-            <AdBlockPrompt />
           </CustomThemeProvider>
         </AppRouterCacheProvider>
-        {/* Ad Block Detection Script - Only load if user is NOT a supporter */}
-        <AdBlockRecovery isSupporter={!!isSupporter} />
       </body>
     </html>
   );

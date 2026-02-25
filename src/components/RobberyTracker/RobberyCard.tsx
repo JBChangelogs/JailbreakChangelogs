@@ -9,6 +9,7 @@ import { RobberyData } from "@/hooks/useRobberyTrackerWebSocket";
 import { useServerRegions } from "@/hooks/useServerRegions";
 import { toast } from "sonner";
 import RobberyPlayersModal from "./RobberyPlayersModal";
+import { buildRobloxServerDeepLink } from "./deepLink";
 
 interface RobberyCardProps {
   robbery: RobberyData;
@@ -16,6 +17,7 @@ interface RobberyCardProps {
 
 export default function RobberyCard({ robbery }: RobberyCardProps) {
   const [isPlayersModalOpen, setIsPlayersModalOpen] = useState(false);
+  const [isJoining, setIsJoining] = useState(false);
   const [planeCountdown, setPlaneCountdown] = useState<string | null>(null);
   const [casinoCountdown, setCasinoCountdown] = useState<string | null>(null);
   const [regionData, setRegionData] = useState(robbery.region_data || null);
@@ -324,18 +326,29 @@ export default function RobberyCard({ robbery }: RobberyCardProps) {
 
           {/* Join Server Button */}
           {jobId && (
-            <Button asChild variant="default" className="mt-3 w-full">
-              <a
-                href={`https://tracker.jailbreakchangelogs.xyz/?jobid=${jobId}&utm_campaign=${robbery.marker_name === "Mansion" ? "Mansion_Tracker" : "Robbery_Tracker"}&utm_term=${displayName.replace(/ /g, "+")}&utm_source=website`}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <Icon
-                  icon="heroicons:arrow-top-right-on-square"
-                  className="h-4 w-4"
-                />
-                Join Server
-              </a>
+            <Button
+              variant="default"
+              className="mt-3 w-full"
+              disabled={isJoining}
+              data-umami-event="Join Server"
+              data-umami-event-tracker={
+                robbery.marker_name === "Mansion"
+                  ? "Mansion_Tracker"
+                  : "Robbery_Tracker"
+              }
+              data-umami-event-term={displayName}
+              data-umami-event-jobid={jobId}
+              onClick={() => {
+                setIsJoining(true);
+                window.setTimeout(() => setIsJoining(false), 2500);
+                window.location.assign(buildRobloxServerDeepLink(jobId));
+              }}
+            >
+              <Icon
+                icon="heroicons:arrow-top-right-on-square"
+                className="h-4 w-4"
+              />
+              {isJoining ? "Joining..." : "Join Server"}
             </Button>
           )}
 

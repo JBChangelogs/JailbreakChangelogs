@@ -11,6 +11,7 @@ import {
 import { useOptimizedRealTimeRelativeDate } from "@/hooks/useSharedTimer";
 import { useServerRegions } from "@/hooks/useServerRegions";
 import RobberyPlayersModal from "./RobberyPlayersModal";
+import { buildRobloxServerDeepLink } from "./deepLink";
 
 interface RobberyComboCardProps {
   comboId: string;
@@ -26,6 +27,7 @@ export default function RobberyComboCard({
   comboLabel,
 }: RobberyComboCardProps) {
   const [isPlayersModalOpen, setIsPlayersModalOpen] = useState(false);
+  const [isJoining, setIsJoining] = useState(false);
   const [regionData, setRegionData] = useState<ServerRegionData | null>(null);
   const { fetchRegionData } = useServerRegions();
 
@@ -174,18 +176,25 @@ export default function RobberyComboCard({
           </div>
         </div>
 
-        <Button asChild variant="default" className="mt-auto w-full">
-          <a
-            href={`https://tracker.jailbreakchangelogs.xyz/?jobid=${serverId}&utm_campaign=Robbery_Tracker&utm_term=Power+Combo&utm_source=website`}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Icon
-              icon="heroicons:arrow-top-right-on-square"
-              className="h-4 w-4"
-            />
-            Join Combo Server
-          </a>
+        <Button
+          variant="default"
+          className="mt-auto w-full"
+          disabled={isJoining}
+          data-umami-event="Join Server"
+          data-umami-event-tracker="Robbery_Tracker"
+          data-umami-event-term="Power Combo"
+          data-umami-event-jobid={serverId}
+          onClick={() => {
+            setIsJoining(true);
+            window.setTimeout(() => setIsJoining(false), 2500);
+            window.location.assign(buildRobloxServerDeepLink(serverId));
+          }}
+        >
+          <Icon
+            icon="heroicons:arrow-top-right-on-square"
+            className="h-4 w-4"
+          />
+          {isJoining ? "Joining..." : "Join Combo Server"}
         </Button>
 
         {players.length > 0 && (
