@@ -8,6 +8,7 @@ import BountyCard from "./BountyCard";
 import { useOptimizedRealTimeRelativeDate } from "@/hooks/useSharedTimer";
 import RobberyPlayersModal from "./RobberyPlayersModal";
 import { useServerRegions } from "@/hooks/useServerRegions";
+import { buildRobloxServerDeepLink } from "./deepLink";
 
 interface ServerBountyGroupProps {
   serverId: string;
@@ -19,6 +20,7 @@ export default function ServerBountyGroup({
   bounties,
 }: ServerBountyGroupProps) {
   const [isPlayersModalOpen, setIsPlayersModalOpen] = React.useState(false);
+  const [isJoining, setIsJoining] = React.useState(false);
   const [regionData, setRegionData] = useState<{
     city: string;
     regionName: string;
@@ -131,18 +133,25 @@ export default function ServerBountyGroup({
 
             {/* Join Server Button */}
             {jobId && (
-              <Button asChild variant="default" size="sm">
-                <a
-                  href={`https://tracker.jailbreakchangelogs.xyz/?jobid=${jobId}&utm_campaign=Bounty_Tracker&utm_term=Bounty&utm_source=website`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <Icon
-                    icon="heroicons:arrow-top-right-on-square"
-                    className="h-3.5 w-3.5"
-                  />
-                  Join Server
-                </a>
+              <Button
+                variant="default"
+                size="sm"
+                disabled={isJoining}
+                data-umami-event="Join Server"
+                data-umami-event-tracker="Bounty_Tracker"
+                data-umami-event-term="Bounty"
+                data-umami-event-jobid={jobId}
+                onClick={() => {
+                  setIsJoining(true);
+                  window.setTimeout(() => setIsJoining(false), 2500);
+                  window.location.assign(buildRobloxServerDeepLink(jobId));
+                }}
+              >
+                <Icon
+                  icon="heroicons:arrow-top-right-on-square"
+                  className="h-3.5 w-3.5"
+                />
+                {isJoining ? "Joining..." : "Join Server"}
               </Button>
             )}
           </div>

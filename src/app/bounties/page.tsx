@@ -516,7 +516,12 @@ function BountyTrackerContent() {
 
 export default function BountyTrackerPage() {
   return (
-    <RobberyTrackerAuthWrapper>
+    <RobberyTrackerAuthWrapper
+      redirectOnFail={false}
+      requireAuth
+      loginDescription="You must be logged in to access live bounty data. This helps prevent abuse and keeps queue times reasonable."
+      redirectToastMessage="You need to be logged in to use the Bounty Tracker."
+    >
       <BountyTrackerContent />
     </RobberyTrackerAuthWrapper>
   );
