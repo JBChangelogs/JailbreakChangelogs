@@ -133,7 +133,7 @@ export default function ServerBountyGroup({
             {jobId && (
               <Button asChild variant="default" size="sm">
                 <a
-                  href={`http://tracker.jailbreakchangelogs.xyz/?jobid=${jobId}&utm_campaign=Bounty_Tracker&utm_term=Bounty&utm_source=website`}
+                  href={`https://tracker.jailbreakchangelogs.xyz/?jobid=${jobId}&utm_campaign=Bounty_Tracker&utm_term=Bounty&utm_source=website`}
                   target="_blank"
                   rel="noopener noreferrer"
                 >

@@ -176,7 +176,7 @@ export default function RobberyComboCard({
 
         <Button asChild variant="default" className="mt-auto w-full">
           <a
-            href={`http://tracker.jailbreakchangelogs.xyz/?jobid=${serverId}&utm_campaign=Robbery_Tracker&utm_term=Power+Combo&utm_source=website`}
+            href={`https://tracker.jailbreakchangelogs.xyz/?jobid=${serverId}&utm_campaign=Robbery_Tracker&utm_term=Power+Combo&utm_source=website`}
             target="_blank"
             rel="noopener noreferrer"
           >

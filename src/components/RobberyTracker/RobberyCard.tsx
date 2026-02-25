@@ -326,7 +326,7 @@ export default function RobberyCard({ robbery }: RobberyCardProps) {
           {jobId && (
             <Button asChild variant="default" className="mt-3 w-full">
               <a
-                href={`http://tracker.jailbreakchangelogs.xyz/?jobid=${jobId}&utm_campaign=${robbery.marker_name === "Mansion" ? "Mansion_Tracker" : "Robbery_Tracker"}&utm_term=${displayName.replace(/ /g, "+")}&utm_source=website`}
+                href={`https://tracker.jailbreakchangelogs.xyz/?jobid=${jobId}&utm_campaign=${robbery.marker_name === "Mansion" ? "Mansion_Tracker" : "Robbery_Tracker"}&utm_term=${displayName.replace(/ /g, "+")}&utm_source=website`}
                 target="_blank"
                 rel="noopener noreferrer"
               >

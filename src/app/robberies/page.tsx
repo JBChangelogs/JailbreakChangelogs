@@ -33,12 +33,19 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { safeSessionStorage } from "@/utils/safeStorage";
 
 type NameSort = "a-z" | "z-a";
 type TimeSort = "newest" | "oldest";
 type ServerSize = "all" | "big" | "small";
 type DifficultySort = "none" | "easy-to-hard" | "hard-to-easy";
 type RobberyFilterMode = "any" | "all";
+
+const ROBBERIES_NAME_SORT_STORAGE_KEY = "robberiesNameSort";
+const ROBBERIES_TIME_SORT_STORAGE_KEY = "robberiesTimeSort";
+const ROBBERIES_SELECTED_TYPES_STORAGE_KEY = "robberiesSelectedTypes";
+const ROBBERIES_FILTER_MODE_STORAGE_KEY = "robberiesFilterMode";
+const ROBBERIES_COMBO_PRESET_IDS_STORAGE_KEY = "robberiesComboPresetIds";
 
 // Define all robbery types with their marker names
 const ROBBERY_TYPES = [
@@ -210,21 +217,119 @@ function RobberyTrackerContent() {
         : airdrops.length > 0;
 
   const [searchQuery, setSearchQuery] = useState("");
-  const [nameSort, setNameSort] = useState<NameSort>("a-z");
-  const [timeSort, setTimeSort] = useState<TimeSort>("newest");
+  const [robberiesNameSort, setRobberiesNameSort] = useState<NameSort>(() => {
+    const storedNameSort = safeSessionStorage.getItem(
+      ROBBERIES_NAME_SORT_STORAGE_KEY,
+    );
+    return storedNameSort === "z-a" ? "z-a" : "a-z";
+  });
+  const [otherNameSort, setOtherNameSort] = useState<NameSort>("a-z");
+  const [robberiesTimeSort, setRobberiesTimeSort] = useState<TimeSort>(() => {
+    const storedTimeSort = safeSessionStorage.getItem(
+      ROBBERIES_TIME_SORT_STORAGE_KEY,
+    );
+    return storedTimeSort === "oldest" ? "oldest" : "newest";
+  });
+  const [otherTimeSort, setOtherTimeSort] = useState<TimeSort>("newest");
   const [serverSize, setServerSize] = useState<ServerSize>("all");
   const [difficultySort, setDifficultySort] = useState<DifficultySort>("none");
   const [selectedRobberyTypes, setSelectedRobberyTypes] = useState<string[]>(
-    [],
+    () => {
+      const storedTypes = safeSessionStorage.getItem(
+        ROBBERIES_SELECTED_TYPES_STORAGE_KEY,
+      );
+      if (!storedTypes) return [];
+
+      try {
+        const parsedTypes = JSON.parse(storedTypes);
+        if (!Array.isArray(parsedTypes)) return [];
+
+        const validTypeSet = new Set(
+          ROBBERY_TYPES.map((type) => type.marker_name),
+        );
+        return parsedTypes.filter(
+          (type): type is string =>
+            typeof type === "string" && validTypeSet.has(type),
+        );
+      } catch {
+        return [];
+      }
+    },
   );
   const [selectedComboPresetIds, setSelectedComboPresetIds] = useState<
     string[]
-  >([]);
-  const [robberyFilterMode, setRobberyFilterMode] =
-    useState<RobberyFilterMode>("any");
+  >(() => {
+    const storedPresetIds = safeSessionStorage.getItem(
+      ROBBERIES_COMBO_PRESET_IDS_STORAGE_KEY,
+    );
+    if (!storedPresetIds) return [];
+
+    try {
+      const parsedPresetIds = JSON.parse(storedPresetIds);
+      if (!Array.isArray(parsedPresetIds)) return [];
+
+      const validPresetIdSet = new Set<string>(
+        ROBBERY_COMBO_PRESETS.map((preset) => preset.id),
+      );
+
+      return parsedPresetIds.filter(
+        (presetId): presetId is string =>
+          typeof presetId === "string" && validPresetIdSet.has(presetId),
+      );
+    } catch {
+      return [];
+    }
+  });
+  const [robberyFilterMode, setRobberyFilterMode] = useState<RobberyFilterMode>(
+    () => {
+      const storedFilterMode = safeSessionStorage.getItem(
+        ROBBERIES_FILTER_MODE_STORAGE_KEY,
+      );
+      return storedFilterMode === "all" ? "all" : "any";
+    },
+  );
   const [activeAirdropLocation, setActiveAirdropLocation] = useState<
     "all" | "CactusValley" | "Dunes"
   >("all");
+  const nameSort =
+    activeView === "robberies" ? robberiesNameSort : otherNameSort;
+  const timeSort =
+    activeView === "robberies" ? robberiesTimeSort : otherTimeSort;
+
+  useEffect(() => {
+    safeSessionStorage.setItem(
+      ROBBERIES_NAME_SORT_STORAGE_KEY,
+      robberiesNameSort,
+    );
+  }, [robberiesNameSort]);
+
+  useEffect(() => {
+    safeSessionStorage.setItem(
+      ROBBERIES_TIME_SORT_STORAGE_KEY,
+      robberiesTimeSort,
+    );
+  }, [robberiesTimeSort]);
+
+  useEffect(() => {
+    safeSessionStorage.setItem(
+      ROBBERIES_SELECTED_TYPES_STORAGE_KEY,
+      JSON.stringify(selectedRobberyTypes),
+    );
+  }, [selectedRobberyTypes]);
+
+  useEffect(() => {
+    safeSessionStorage.setItem(
+      ROBBERIES_FILTER_MODE_STORAGE_KEY,
+      robberyFilterMode,
+    );
+  }, [robberyFilterMode]);
+
+  useEffect(() => {
+    safeSessionStorage.setItem(
+      ROBBERIES_COMBO_PRESET_IDS_STORAGE_KEY,
+      JSON.stringify(selectedComboPresetIds),
+    );
+  }, [selectedComboPresetIds]);
 
   const serverSizeLabel =
     serverSize === "all"
@@ -932,9 +1037,14 @@ function RobberyTrackerContent() {
                         >
                           <DropdownMenuRadioGroup
                             value={nameSort}
-                            onValueChange={(value) =>
-                              setNameSort(value as NameSort)
-                            }
+                            onValueChange={(value) => {
+                              const nextValue = value as NameSort;
+                              if (activeView === "robberies") {
+                                setRobberiesNameSort(nextValue);
+                                return;
+                              }
+                              setOtherNameSort(nextValue);
+                            }}
                           >
                             <DropdownMenuRadioItem
                               value="a-z"
@@ -976,9 +1086,14 @@ function RobberyTrackerContent() {
                       >
                         <DropdownMenuRadioGroup
                           value={timeSort}
-                          onValueChange={(value) =>
-                            setTimeSort(value as TimeSort)
-                          }
+                          onValueChange={(value) => {
+                            const nextValue = value as TimeSort;
+                            if (activeView === "robberies") {
+                              setRobberiesTimeSort(nextValue);
+                              return;
+                            }
+                            setOtherTimeSort(nextValue);
+                          }}
                         >
                           <DropdownMenuRadioItem
                             value="newest"
