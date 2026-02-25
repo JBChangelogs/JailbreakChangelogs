@@ -461,6 +461,18 @@ export default function Header() {
             </div>
           )}
           <Link
+            href="/messages"
+            onClick={handleDrawerToggle}
+            className="hover:bg-button-info-hover/10 flex cursor-pointer items-center gap-3 px-4 py-3 transition-colors"
+          >
+            <Icon
+              icon="heroicons:chat-bubble-left-right"
+              className="text-primary-text h-5 w-5"
+              inline={true}
+            />
+            <span className="text-primary-text">Messages</span>
+          </Link>
+          <Link
             href="/settings"
             onClick={handleDrawerToggle}
             className="hover:bg-button-info-hover/10 flex cursor-pointer items-center gap-3 px-4 py-3 transition-colors"

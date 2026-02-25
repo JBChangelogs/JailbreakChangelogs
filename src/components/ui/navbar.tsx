@@ -996,6 +996,18 @@ export const NavbarModern = ({
                       )}
 
                       <Link
+                        href="/messages"
+                        className="text-primary-text hover:bg-button-info-hover hover:text-form-button-text flex items-center gap-3 px-4 py-2 text-sm transition-colors"
+                      >
+                        <Icon
+                          icon="heroicons:chat-bubble-left-right"
+                          className="h-4 w-4"
+                          inline={true}
+                        />
+                        Messages
+                      </Link>
+
+                      <Link
                         href="/settings"
                         className="text-primary-text hover:bg-button-info-hover hover:text-form-button-text flex items-center gap-3 px-4 py-2 text-sm transition-colors"
                       >

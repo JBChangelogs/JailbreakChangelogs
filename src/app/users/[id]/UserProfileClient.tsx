@@ -40,12 +40,6 @@ const FollowingModal = dynamic(
     ssr: false,
   },
 );
-const MessagesModal = dynamic(
-  () => import("@/components/Users/MessagesModal"),
-  {
-    ssr: false,
-  },
-);
 import type { UserFlag } from "@/types/auth";
 
 // Global audio instance to prevent overlapping playback
@@ -307,7 +301,6 @@ export default function UserProfileClient({
   const [commentsError] = useState<string | null>(null);
   const [isFollowersModalOpen, setIsFollowersModalOpen] = useState(false);
   const [isFollowingModalOpen, setIsFollowingModalOpen] = useState(false);
-  const [isMessagesModalOpen, setIsMessagesModalOpen] = useState(false);
   const [privateServers] = useState<Server[]>(
     initialData?.privateServers || [],
   );
@@ -917,16 +910,16 @@ export default function UserProfileClient({
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <span>
-                              <Button
-                                variant="outline"
-                                size="md"
-                                onClick={() => setIsMessagesModalOpen(true)}
-                              >
-                                <Icon
-                                  icon="heroicons:chat-bubble-left-right"
-                                  className="h-5 w-5"
-                                />
-                                Message
+                              <Button variant="outline" size="md" asChild>
+                                <Link
+                                  href={`/messages/${encodeURIComponent(user.id)}`}
+                                >
+                                  <Icon
+                                    icon="heroicons:chat-bubble-left-right"
+                                    className="h-5 w-5"
+                                  />
+                                  Message
+                                </Link>
                               </Button>
                             </span>
                           </TooltipTrigger>
@@ -1045,38 +1038,6 @@ export default function UserProfileClient({
         }}
         userData={user}
       />
-      {isMessagesModalOpen && (
-        <MessagesModal
-          isOpen={isMessagesModalOpen}
-          onClose={() => setIsMessagesModalOpen(false)}
-          currentUser={
-            currentUser
-              ? {
-                  id: currentUser.id,
-                  username: currentUser.username,
-                  global_name: currentUser.global_name,
-                  avatar: currentUser.avatar,
-                  custom_avatar: currentUser.custom_avatar,
-                  premiumtype: currentUser.premiumtype,
-                  presence: currentUser.presence,
-                  last_seen: currentUser.last_seen,
-                  settings: currentUser.settings,
-                }
-              : null
-          }
-          targetUser={{
-            id: user.id,
-            username: user.username,
-            global_name: user.global_name,
-            avatar: user.avatar,
-            custom_avatar: user.custom_avatar,
-            premiumtype: user.premiumtype,
-            presence: user.presence,
-            last_seen: user.last_seen,
-            settings: user.settings,
-          }}
-        />
-      )}
     </main>
   );
 }
