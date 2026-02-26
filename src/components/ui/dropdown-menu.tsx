@@ -6,7 +6,28 @@ import * as DropdownMenuPrimitive from "@radix-ui/react-dropdown-menu";
 import { cn } from "@/lib/utils";
 import { Icon } from "@/components/ui/IconWrapper";
 
-const DropdownMenu = DropdownMenuPrimitive.Root;
+const DropdownMenu = ({
+  onOpenChange,
+  ...props
+}: React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Root>) => {
+  return (
+    <DropdownMenuPrimitive.Root
+      onOpenChange={(open) => {
+        if (!open) {
+          const activeElement = document.activeElement;
+          if (
+            activeElement instanceof HTMLElement &&
+            activeElement.getAttribute("aria-haspopup") === "menu"
+          ) {
+            activeElement.blur();
+          }
+        }
+        onOpenChange?.(open);
+      }}
+      {...props}
+    />
+  );
+};
 
 const DropdownMenuTrigger = DropdownMenuPrimitive.Trigger;
 

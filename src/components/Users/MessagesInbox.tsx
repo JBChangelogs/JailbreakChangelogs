@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { toast } from "sonner";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import { Icon } from "@/components/ui/IconWrapper";
@@ -76,6 +76,7 @@ type Message = {
   receiverId: string;
   content: string;
   createdAt?: number;
+  type?: "user" | "system";
 };
 
 type ConversationSummary = {
@@ -95,9 +96,20 @@ type ApiSendResponse = {
 
 type ApiErrorResponse = {
   error?: string;
+  reason?: string;
   detail?: string | { message?: string };
   message?: string;
   limit?: number;
+};
+
+type RealtimeMessageEventDetail = {
+  action?: "message_received" | "message_sent";
+  data?: {
+    id?: string;
+    user_id?: string;
+    recipient_id?: string;
+    content?: string;
+  };
 };
 
 function getDisplayName(user: MessageUser): string {
@@ -117,7 +129,7 @@ function asId(value: unknown): string {
 function parseJsonWithLargeIds(raw: string): unknown {
   return JSON.parse(
     raw.replace(
-      /"(id|sender_id|receiver_id|recipient_id|user_id)"\s*:\s*(\d{16,})/g,
+      /"(id|sender_id|receiver_id|recipient_id|user_id|blocked_user_id)"\s*:\s*(\d{16,})/g,
       '"$1":"$2"',
     ),
   );
@@ -259,6 +271,7 @@ function hasBannerSettingsData(user: MessageUser | null | undefined): boolean {
 
 export default function MessagesInbox() {
   const pathname = usePathname();
+  const router = useRouter();
 
   const {
     user: currentUser,
@@ -274,9 +287,6 @@ export default function MessagesInbox() {
   const [isLoadingConversations, setIsLoadingConversations] = useState(false);
   const [isLoadingMessages, setIsLoadingMessages] = useState(false);
   const [isSending, setIsSending] = useState(false);
-  const [canMessageRecipient, setCanMessageRecipient] = useState(true);
-  const [isCheckingMessagePermission, setIsCheckingMessagePermission] =
-    useState(false);
   const [isProcessingBlockAction, setIsProcessingBlockAction] = useState(false);
   const [blockedByMeByUserId, setBlockedByMeByUserId] = useState<
     Record<string, boolean>
@@ -322,6 +332,7 @@ export default function MessagesInbox() {
   }, [currentUser]);
 
   const selectedUser = selectedConversation?.user ?? null;
+  const currentUserId = currentUser ? asId(currentUser.id) : null;
 
   const lastSeenTime = useOptimizedRealTimeRelativeDate(
     selectedUser?.last_seen,
@@ -446,7 +457,7 @@ export default function MessagesInbox() {
   }, [currentUserMessageUser, isAuthenticated]);
 
   useEffect(() => {
-    if (!isAuthenticated || !currentUser) {
+    if (!isAuthenticated || !currentUserId) {
       setConversations([]);
       setSelectedUserId(null);
       return;
@@ -461,11 +472,14 @@ export default function MessagesInbox() {
           throw new Error("Public API URL is not configured");
         }
 
-        const response = await fetch(`${PUBLIC_API_URL}/messages`, {
-          method: "GET",
-          credentials: "include",
-          cache: "no-store",
-        });
+        const response = await fetch(
+          `${PUBLIC_API_URL}/messages?nocache=true`,
+          {
+            method: "GET",
+            credentials: "include",
+            cache: "no-store",
+          },
+        );
 
         if (!response.ok) {
           throw new Error("Failed to fetch conversations");
@@ -488,14 +502,14 @@ export default function MessagesInbox() {
             toMessageUser(record.recipient) ||
             toMessageUser(record.other_user);
 
-          if (directUser && directUser.id !== currentUser.id) {
+          if (directUser && directUser.id !== currentUserId) {
             userHints.set(directUser.id, directUser);
           }
 
           if (!message) continue;
 
           const otherId =
-            message.senderId === currentUser.id
+            message.senderId === currentUserId
               ? message.receiverId
               : message.senderId;
 
@@ -571,10 +585,73 @@ export default function MessagesInbox() {
     return () => {
       isCancelled = true;
     };
-  }, [currentUser, isAuthenticated]);
+  }, [currentUserId, isAuthenticated]);
 
   useEffect(() => {
-    if (!isAuthenticated || !currentUser || !routeConversationId) {
+    if (!isAuthenticated || !currentUserId) {
+      setBlockedByMeByUserId({});
+      return;
+    }
+
+    let isCancelled = false;
+
+    const fetchBlockedUsers = async () => {
+      try {
+        if (!PUBLIC_API_URL) {
+          throw new Error("Public API URL is not configured");
+        }
+
+        const response = await fetch(`${PUBLIC_API_URL}/messages/blocked`, {
+          method: "GET",
+          credentials: "include",
+          cache: "no-store",
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch blocked users");
+        }
+
+        const rawBody = await response.text();
+        const parsed = rawBody ? parseJsonWithLargeIds(rawBody) : null;
+        const blockedUsers = Array.isArray(
+          (parsed as { blocked_users?: unknown[] } | null)?.blocked_users,
+        )
+          ? ((parsed as { blocked_users: unknown[] }).blocked_users ?? [])
+          : [];
+
+        const nextMap: Record<string, boolean> = {};
+        for (const item of blockedUsers) {
+          if (!item || typeof item !== "object") continue;
+          const record = item as Record<string, unknown>;
+          const blockedUserId = record.blocked_user_id;
+          if (
+            typeof blockedUserId === "string" ||
+            typeof blockedUserId === "number"
+          ) {
+            nextMap[asId(blockedUserId)] = true;
+          }
+        }
+
+        if (!isCancelled) {
+          setBlockedByMeByUserId(nextMap);
+        }
+      } catch (error) {
+        if (!isCancelled) {
+          console.error("Error fetching blocked users:", error);
+          setBlockedByMeByUserId({});
+        }
+      }
+    };
+
+    void fetchBlockedUsers();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [currentUserId, isAuthenticated]);
+
+  useEffect(() => {
+    if (!isAuthenticated || !currentUserId || !routeConversationId) {
       return;
     }
 
@@ -607,10 +684,10 @@ export default function MessagesInbox() {
     return () => {
       isCancelled = true;
     };
-  }, [conversations, currentUser, isAuthenticated, routeConversationId]);
+  }, [conversations, currentUserId, isAuthenticated, routeConversationId]);
 
   useEffect(() => {
-    if (!selectedUserId || !isAuthenticated || !currentUser) {
+    if (!selectedUserId || !isAuthenticated || !currentUserId) {
       setMessages([]);
       setIsLoadingMessages(false);
       return;
@@ -669,64 +746,71 @@ export default function MessagesInbox() {
     return () => {
       isCancelled = true;
     };
-  }, [currentUser, isAuthenticated, selectedUserId]);
+  }, [currentUserId, isAuthenticated, selectedUserId]);
 
   useEffect(() => {
-    if (!selectedUserId || !isAuthenticated || !currentUser) {
-      setCanMessageRecipient(true);
-      setIsCheckingMessagePermission(false);
+    if (!isAuthenticated || !currentUserId) {
       return;
     }
 
-    let isCancelled = false;
+    const handleRealtimeMessage = (event: Event) => {
+      const detail = (event as CustomEvent<RealtimeMessageEventDetail>).detail;
+      const action = detail?.action;
+      const payload = detail?.data;
 
-    const checkMessagingPermission = async () => {
-      try {
-        setIsCheckingMessagePermission(true);
-        if (!PUBLIC_API_URL) {
-          throw new Error("Public API URL is not configured");
-        }
-
-        const response = await fetch(
-          `${PUBLIC_API_URL}/messages/${encodeURIComponent(selectedUserId)}`,
-          {
-            method: "HEAD",
-            credentials: "include",
-            cache: "no-store",
-          },
-        );
-
-        if (isCancelled) return;
-
-        if (response.status === 200) {
-          setCanMessageRecipient(true);
-          return;
-        }
-
-        if (response.status === 401 || response.status === 403) {
-          setCanMessageRecipient(false);
-          return;
-        }
-
-        setCanMessageRecipient(false);
-      } catch (error) {
-        if (!isCancelled) {
-          console.error("Error checking messaging permission:", error);
-          setCanMessageRecipient(false);
-        }
-      } finally {
-        if (!isCancelled) {
-          setIsCheckingMessagePermission(false);
-        }
+      if (
+        (action !== "message_received" && action !== "message_sent") ||
+        !payload ||
+        typeof payload.id !== "string" ||
+        typeof payload.user_id !== "string" ||
+        typeof payload.recipient_id !== "string" ||
+        typeof payload.content !== "string"
+      ) {
+        return;
       }
+
+      const senderId = asId(payload.user_id);
+      const receiverId = asId(payload.recipient_id);
+      if (senderId !== currentUserId && receiverId !== currentUserId) {
+        return;
+      }
+
+      const realtimeMessage: Message = {
+        id: asId(payload.id),
+        senderId,
+        receiverId,
+        content: payload.content,
+        createdAt: Date.now(),
+      };
+
+      const counterpartId = senderId === currentUserId ? receiverId : senderId;
+      if (counterpartId !== selectedUserId) {
+        return;
+      }
+
+      setMessages((prev) => {
+        if (prev.some((item) => item.id === realtimeMessage.id)) {
+          return prev;
+        }
+        return [...prev, realtimeMessage].sort(
+          (a, b) => (a.createdAt ?? 0) - (b.createdAt ?? 0),
+        );
+      });
+
+      setConversations((prev) =>
+        prev.map((conversation) =>
+          conversation.user.id === counterpartId
+            ? { ...conversation, lastMessage: realtimeMessage }
+            : conversation,
+        ),
+      );
     };
 
-    void checkMessagingPermission();
-
+    window.addEventListener("realtimeMessage", handleRealtimeMessage);
     return () => {
-      isCancelled = true;
+      window.removeEventListener("realtimeMessage", handleRealtimeMessage);
     };
-  }, [currentUser, isAuthenticated, selectedUserId]);
+  }, [currentUserId, isAuthenticated, selectedUserId]);
 
   const updateBlockStatus = (targetUserId: string, isBlocked: boolean) => {
     setBlockedByMeByUserId((prev) => ({ ...prev, [targetUserId]: isBlocked }));
@@ -736,8 +820,18 @@ export default function MessagesInbox() {
     targetUserId: string,
     shouldBlock: boolean,
   ) => {
+    const loadingMessage = shouldBlock
+      ? "Blocking user..."
+      : "Unblocking user...";
+    const successMessage = shouldBlock ? "User blocked" : "User unblocked";
+    const fallbackErrorMessage = shouldBlock
+      ? "Failed to block user"
+      : "Failed to unblock user";
+    const toastId = `messages-block-action:${targetUserId}`;
+
     try {
       setIsProcessingBlockAction(true);
+      toast.loading(loadingMessage, { id: toastId });
       if (!PUBLIC_API_URL) {
         throw new Error("Public API URL is not configured");
       }
@@ -762,79 +856,24 @@ export default function MessagesInbox() {
       } | null;
 
       if (body && body.success === false) {
-        throw new Error(
-          shouldBlock ? "Failed to block user" : "Failed to unblock user",
-        );
+        throw new Error(fallbackErrorMessage);
       }
 
       updateBlockStatus(targetUserId, shouldBlock);
 
-      if (selectedUserId === targetUserId) {
-        try {
-          setIsCheckingMessagePermission(true);
-          const headResponse = await fetch(
-            `${PUBLIC_API_URL}/messages/${encodeURIComponent(targetUserId)}`,
-            {
-              method: "HEAD",
-              credentials: "include",
-              cache: "no-store",
-            },
-          );
-          setCanMessageRecipient(headResponse.status === 200);
-        } catch {
-          setCanMessageRecipient(false);
-        } finally {
-          setIsCheckingMessagePermission(false);
-        }
-      }
-
-      toast.success(shouldBlock ? "User blocked" : "User unblocked");
+      toast.success(successMessage, { id: toastId });
     } catch (error) {
       const message =
         error instanceof Error && error.message
           ? error.message
-          : shouldBlock
-            ? "Failed to block user"
-            : "Failed to unblock user";
-      toast.error(message);
+          : fallbackErrorMessage;
+      toast.error(message, { id: toastId });
     } finally {
       setIsProcessingBlockAction(false);
     }
   };
 
-  useEffect(() => {
-    if (!selectedUserId || !isAuthenticated || !currentUser) {
-      return;
-    }
-
-    let isCancelled = false;
-    const prefetchSelectedUser = async () => {
-      const refreshed = await loadUserById(selectedUserId, {
-        forceRefresh: true,
-      });
-      if (!refreshed || isCancelled) return;
-
-      setConversations((prev) =>
-        prev.map((conversation) =>
-          conversation.user.id === selectedUserId
-            ? { ...conversation, user: { ...conversation.user, ...refreshed } }
-            : conversation,
-        ),
-      );
-    };
-
-    void prefetchSelectedUser();
-
-    return () => {
-      isCancelled = true;
-    };
-  }, [currentUser, isAuthenticated, selectedUserId]);
-
   const selectConversation = (id: string) => {
-    if (id !== selectedUserId) {
-      setIsLoadingMessages(true);
-      setMessages([]);
-    }
     setSelectedUserId(id);
     setRouteConversationId(id);
     window.history.pushState({}, "", `/messages/${encodeURIComponent(id)}`);
@@ -851,11 +890,6 @@ export default function MessagesInbox() {
     if (!selectedUserId || !selectedUser) return;
     if (!currentUser) {
       toast.error("You need to be logged in to send messages");
-      return;
-    }
-    if (isCheckingMessagePermission) return;
-    if (!canMessageRecipient) {
-      toast.error("You cannot message this user");
       return;
     }
 
@@ -901,10 +935,10 @@ export default function MessagesInbox() {
           ? parsedBody.detail
           : detailMessage && typeof detailMessage === "string"
             ? detailMessage
-            : parsedBody?.error && typeof parsedBody.error === "string"
-              ? parsedBody.error
-              : parsedBody?.message && typeof parsedBody.message === "string"
-                ? parsedBody.message
+            : parsedBody?.message && typeof parsedBody.message === "string"
+              ? parsedBody.message
+              : parsedBody?.error && typeof parsedBody.error === "string"
+                ? parsedBody.error
                 : rawBody.trim();
 
       const combinedTooLongMessage =
@@ -916,6 +950,55 @@ export default function MessagesInbox() {
         response.status === 401 ? "Unauthorized" : "Failed to send message";
 
       if (!response.ok || !parsedBody?.success || !parsedBody.message) {
+        if (parsedBody?.error === "unmessageable") {
+          const defaultSystemMessage =
+            parsedBody?.reason === "not_mutual"
+              ? "Your message could not be delivered. You both need to follow each other."
+              : parsedBody?.reason === "blocked"
+                ? "Your message could not be delivered. You are blocked from messaging this user."
+                : "Your message could not be delivered.";
+          const systemContent = parsedBody.message || defaultSystemMessage;
+          toast.error(systemContent);
+          const systemMessage: Message = {
+            id: `system-${Date.now()}`,
+            senderId: "system",
+            receiverId: asId(selectedUserId),
+            content: systemContent,
+            createdAt: Date.now(),
+            type: "system",
+          };
+          setMessages((prev) => {
+            const existingIndex = [...prev]
+              .reverse()
+              .findIndex(
+                (item) =>
+                  item.type === "system" && item.content === systemContent,
+              );
+            if (existingIndex === -1) {
+              return [...prev, systemMessage];
+            }
+
+            const indexFromStart = prev.length - 1 - existingIndex;
+            const existing = prev[indexFromStart];
+            if (!existing) {
+              return [...prev, systemMessage];
+            }
+
+            const updated: Message = {
+              ...existing,
+              createdAt: Date.now(),
+            };
+
+            return [
+              ...prev.slice(0, indexFromStart),
+              ...prev.slice(indexFromStart + 1),
+              updated,
+            ];
+          });
+          setDraftMessage("");
+          return;
+        }
+
         throw new Error(
           combinedTooLongMessage || apiErrorMessage || fallbackStatusMessage,
         );
@@ -985,15 +1068,9 @@ export default function MessagesInbox() {
     );
   }
 
-  const isComposerDisabled =
-    isCheckingMessagePermission || !canMessageRecipient;
-  const messagePlaceholder = isCheckingMessagePermission
-    ? "Loading..."
-    : !canMessageRecipient
-      ? "You can't message this user."
-      : selectedUser
-        ? `Message ${getDisplayName(selectedUser)}...`
-        : "Select a conversation to start messaging.";
+  const messagePlaceholder = selectedUser
+    ? `Message ${getDisplayName(selectedUser)}...`
+    : "Select a conversation to start messaging.";
 
   return (
     <div className="h-[calc(100dvh-5rem)] overflow-hidden px-4 pb-4">
@@ -1148,18 +1225,32 @@ export default function MessagesInbox() {
                   <ChatHeaderAddon>
                     <DropdownMenu modal={false}>
                       <DropdownMenuTrigger asChild>
-                        <button
-                          type="button"
+                        <Button
+                          variant="secondary"
+                          size="icon"
                           aria-label="Conversation actions"
-                          className="text-primary-text hover:bg-secondary-bg cursor-pointer rounded-sm p-1 transition-colors"
                         >
                           <Icon
                             icon="heroicons:ellipsis-horizontal"
                             className="h-5 w-5"
                           />
-                        </button>
+                        </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end" className="p-0">
+                        <DropdownMenuItem
+                          onClick={() =>
+                            router.push(
+                              `/users/${encodeURIComponent(selectedUser.id)}`,
+                            )
+                          }
+                          className="bg-tertiary-bg rounded-none px-3 py-2"
+                        >
+                          <Icon
+                            icon="heroicons:user-circle"
+                            className="h-4 w-4"
+                          />
+                          View Profile
+                        </DropdownMenuItem>
                         {currentUser?.id !== selectedUser.id && (
                           <DropdownMenuItem
                             onClick={() =>
@@ -1196,12 +1287,41 @@ export default function MessagesInbox() {
                     </div>
                   ) : messages.length === 0 ? (
                     <div className="text-secondary-text bg-tertiary-bg border-border-card mx-auto my-auto rounded-md border px-4 py-3 text-center text-sm">
-                      {canMessageRecipient
-                        ? "No messages yet. Start the conversation."
-                        : "This user has blocked you from messaging them."}
+                      No messages yet. Start the conversation.
                     </div>
                   ) : (
                     messages.map((message, index) => {
+                      if (message.type === "system") {
+                        return (
+                          <ChatEvent
+                            key={message.id}
+                            className="border-link bg-tertiary-bg/20 my-1 items-start rounded-l-none rounded-r-md border-l-2 py-1 pl-2"
+                          >
+                            <ChatEventAddon>
+                              <div className="bg-tertiary-bg border-border-card text-link inline-flex h-7 w-7 items-center justify-center rounded-md border">
+                                <Icon icon="lucide:bot" className="h-4 w-4" />
+                              </div>
+                            </ChatEventAddon>
+                            <ChatEventBody>
+                              <ChatEventTitle>
+                                <span className="text-link text-xs font-medium sm:text-sm">
+                                  System
+                                </span>
+                                {typeof message.createdAt === "number" && (
+                                  <ChatEventTime
+                                    timestamp={message.createdAt}
+                                    format="time"
+                                  />
+                                )}
+                              </ChatEventTitle>
+                              <ChatEventContent className="text-primary-text break-words whitespace-pre-wrap">
+                                {message.content}
+                              </ChatEventContent>
+                            </ChatEventBody>
+                          </ChatEvent>
+                        );
+                      }
+
                       const currentUserId = currentUser
                         ? asId(currentUser.id)
                         : "";
@@ -1307,16 +1427,13 @@ export default function MessagesInbox() {
                     onSubmit={handleSendMessage}
                     placeholder={messagePlaceholder}
                     maxLength={1000}
-                    disabled={isComposerDisabled}
                     className="text-secondary-text placeholder-secondary-text"
                   />
                   <ChatToolbarAddon align="inline-end">
                     <ChatToolbarButton
                       onClick={() => void handleSendMessage()}
                       aria-label="Send message"
-                      disabled={
-                        isComposerDisabled || !draftMessage.trim() || isSending
-                      }
+                      disabled={!draftMessage.trim() || isSending}
                     >
                       {isSending ? (
                         <svg

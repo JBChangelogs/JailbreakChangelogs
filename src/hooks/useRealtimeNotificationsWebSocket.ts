@@ -17,11 +17,21 @@ interface RealtimeNotificationMessage {
   code?: number;
   message?: string;
   total_notifications?: number;
-  data?: {
-    total_notifications?: number;
-    type?: string;
-    data?: RealtimeNotificationContent;
-  };
+  data?:
+    | RealtimeNotificationContent
+    | RealtimeDmMessageData
+    | {
+        total_notifications?: number;
+        type?: string;
+        data?: RealtimeNotificationContent;
+      };
+}
+
+interface RealtimeDmMessageData {
+  id?: string | number;
+  user_id?: string | number;
+  recipient_id?: string | number;
+  content?: string;
 }
 
 const PING_INTERVAL_MS = 30000;
@@ -42,6 +52,15 @@ function getReconnectDelay(attempt: number): number {
     MAX_RECONNECT_DELAY_MS,
   );
   return delay;
+}
+
+function parseRealtimeMessagePayload(raw: string): RealtimeNotificationMessage {
+  // Preserve large snowflake-like IDs from websocket payloads.
+  const normalized = raw.replace(
+    /"(id|user_id|recipient_id|sender_id|receiver_id)"\s*:\s*(\d{16,})/g,
+    '"$1":"$2"',
+  );
+  return JSON.parse(normalized) as RealtimeNotificationMessage;
 }
 
 export function useRealtimeNotificationsWebSocket(enabled: boolean): void {
@@ -192,9 +211,9 @@ export function useRealtimeNotificationsWebSocket(enabled: boolean): void {
 
         ws.addEventListener("message", (event) => {
           try {
-            const payload = JSON.parse(
-              event.data,
-            ) as RealtimeNotificationMessage;
+            const rawPayload =
+              typeof event.data === "string" ? event.data : String(event.data);
+            const payload = parseRealtimeMessagePayload(rawPayload);
 
             if (payload.action === "error" && payload.code) {
               const errorMessage =
@@ -210,17 +229,101 @@ export function useRealtimeNotificationsWebSocket(enabled: boolean): void {
             }
 
             if (
+              (payload.action === "message_received" ||
+                payload.action === "message_sent") &&
+              payload.data &&
+              typeof payload.data === "object"
+            ) {
+              const dmData = payload.data as RealtimeDmMessageData;
+              const hasValidPayload =
+                (typeof dmData.id === "string" ||
+                  typeof dmData.id === "number") &&
+                (typeof dmData.user_id === "string" ||
+                  typeof dmData.user_id === "number") &&
+                (typeof dmData.recipient_id === "string" ||
+                  typeof dmData.recipient_id === "number") &&
+                typeof dmData.content === "string";
+
+              if (hasValidPayload) {
+                window.dispatchEvent(
+                  new CustomEvent("realtimeMessage", {
+                    detail: {
+                      action: payload.action,
+                      data: {
+                        id: String(dmData.id),
+                        user_id: String(dmData.user_id),
+                        recipient_id: String(dmData.recipient_id),
+                        content: dmData.content,
+                      },
+                    },
+                  }),
+                );
+
+                if (payload.action === "message_received") {
+                  const senderId = String(dmData.user_id);
+                  toast("You have a new message", {
+                    id: `realtime-dm:${String(dmData.id)}`,
+                    description: "Check your messages.",
+                    action: {
+                      label: "View",
+                      onClick: () => {
+                        window.location.assign(
+                          `/messages/${encodeURIComponent(senderId)}`,
+                        );
+                      },
+                    },
+                  });
+
+                  const now = Date.now();
+                  const isOnCooldown =
+                    now - lastSoundPlayedAtRef.current < SOUND_COOLDOWN_MS;
+                  if (!isOnCooldown) {
+                    const audio = ensureAudio();
+                    audio.currentTime = 0;
+                    lastSoundPlayedAtRef.current = now;
+                    void audio.play().catch((error) => {
+                      if (
+                        error instanceof DOMException &&
+                        error.name === "NotAllowedError"
+                      ) {
+                        return;
+                      }
+                      console.error(
+                        "[REALTIME NOTIFICATIONS WS] Failed to play notification sound:",
+                        error,
+                      );
+                    });
+                  }
+                }
+              }
+              return;
+            }
+
+            if (
               payload.action !== "notification_received" ||
-              !payload.data?.data
+              !payload.data ||
+              typeof payload.data !== "object" ||
+              !("data" in payload.data) ||
+              !payload.data.data
             ) {
               return;
             }
 
-            const { title, description, link } = payload.data.data;
+            const notificationPayload = payload.data as {
+              total_notifications?: number;
+              type?: string;
+              data?: RealtimeNotificationContent;
+            };
+            const notificationData = notificationPayload.data;
+            if (!notificationData) {
+              return;
+            }
+
+            const { title, description, link } = notificationData;
             const notificationTitle = title || "New notification";
             const notificationDescription =
               description || "You received a new notification.";
-            const type = payload.data.type || "unknown";
+            const type = notificationPayload.type || "unknown";
             const toastId = `realtime-notification:${type}:${link || notificationTitle}`;
 
             const urlInfo = link ? parseNotificationUrl(link) : null;
@@ -281,9 +384,9 @@ export function useRealtimeNotificationsWebSocket(enabled: boolean): void {
                 detail: {
                   total_notifications:
                     payload.total_notifications ??
-                    payload.data?.total_notifications,
-                  data: payload.data.data,
-                  type: payload.data.type,
+                    notificationPayload.total_notifications,
+                  data: notificationData,
+                  type: notificationPayload.type,
                 },
               }),
             );

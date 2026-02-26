@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import Error from "next/error";
-import { notFound } from "next/navigation";
+import NextError from "next/error";
+import { notFound, useRouter } from "next/navigation";
 import { UserAvatar } from "@/utils/avatar";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import { Skeleton } from "@mui/material";
@@ -21,6 +21,12 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { formatShortDate, formatCustomDate } from "@/utils/timestamp";
 import { useOptimizedRealTimeRelativeDate } from "@/hooks/useSharedTimer";
 import ProfileTabs from "@/components/Profile/ProfileTabs";
@@ -277,6 +283,7 @@ export default function UserProfileClient({
   isLoadingAdditionalData = false,
   additionalDataError,
 }: UserProfileClientProps) {
+  const router = useRouter();
   const { user: currentUser } = useAuthContext();
   const [user, setUser] = useState<User | null>(initialData?.user || null);
   const [loading] = useState(!initialData && !error);
@@ -292,6 +299,9 @@ export default function UserProfileClient({
     initialData?.followingCount || 0,
   );
   const [isAuthenticatedUser, setIsAuthenticatedUser] = useState(false);
+  const [canMessageFromProfile, setCanMessageFromProfile] = useState(false);
+  const [isBlockedByMe, setIsBlockedByMe] = useState(false);
+  const [isBlockingAction, setIsBlockingAction] = useState(false);
   const [bio, setBio] = useState<string | null>(initialData?.bio || null);
   const [bioLastUpdated, setBioLastUpdated] = useState<number | null>(
     initialData?.bioLastUpdated || null,
@@ -309,6 +319,14 @@ export default function UserProfileClient({
     initialData?.favoriteItemDetails || {},
   );
   const [tradeAds] = useState<TradeAd[]>(initialData?.tradeAds || []);
+
+  const parseJsonWithLargeIds = (raw: string): unknown =>
+    JSON.parse(
+      raw.replace(
+        /"(id|user_id|blocked_user_id)"\s*:\s*(\d{16,})/g,
+        '"$1":"$2"',
+      ),
+    );
 
   // Use realtime relative date for last seen timestamp
   const lastSeenTime = useOptimizedRealTimeRelativeDate(
@@ -362,6 +380,169 @@ export default function UserProfileClient({
 
     updateFollowingStatus();
   }, [currentUserId, userId, user]);
+
+  useEffect(() => {
+    if (
+      !isAuthenticatedUser ||
+      !currentUserId ||
+      !user ||
+      currentUserId === user.id
+    ) {
+      setIsBlockedByMe(false);
+      return;
+    }
+
+    let isCancelled = false;
+
+    const fetchBlockedStatus = async () => {
+      try {
+        if (!PUBLIC_API_URL) {
+          throw new Error("Public API URL is not configured");
+        }
+
+        const response = await fetch(`${PUBLIC_API_URL}/messages/blocked`, {
+          method: "GET",
+          credentials: "include",
+          cache: "no-store",
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch blocked users");
+        }
+
+        const rawBody = await response.text();
+        const parsed = rawBody ? parseJsonWithLargeIds(rawBody) : null;
+        const blockedUsers = Array.isArray(
+          (parsed as { blocked_users?: unknown[] } | null)?.blocked_users,
+        )
+          ? ((parsed as { blocked_users: unknown[] }).blocked_users ?? [])
+          : [];
+
+        const isBlocked = blockedUsers.some((entry) => {
+          if (!entry || typeof entry !== "object") return false;
+          const blockedUserId = (entry as Record<string, unknown>)
+            .blocked_user_id;
+          return String(blockedUserId) === user.id;
+        });
+
+        if (!isCancelled) {
+          setIsBlockedByMe(isBlocked);
+        }
+      } catch (error) {
+        if (!isCancelled) {
+          console.error("Error fetching blocked status:", error);
+          setIsBlockedByMe(false);
+        }
+      }
+    };
+
+    void fetchBlockedStatus();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [currentUserId, isAuthenticatedUser, user]);
+
+  useEffect(() => {
+    if (
+      !isAuthenticatedUser ||
+      !currentUserId ||
+      !user ||
+      currentUserId === user.id
+    ) {
+      setCanMessageFromProfile(true);
+      return;
+    }
+
+    let isCancelled = false;
+    setCanMessageFromProfile(false);
+
+    const checkCanMessage = async () => {
+      try {
+        if (!PUBLIC_API_URL) {
+          throw new Error("Public API URL is not configured");
+        }
+
+        const response = await fetch(
+          `${PUBLIC_API_URL}/messages/${encodeURIComponent(user.id)}`,
+          {
+            method: "HEAD",
+            credentials: "include",
+            cache: "no-store",
+          },
+        );
+
+        if (isCancelled) return;
+        setCanMessageFromProfile(response.status === 200);
+      } catch (error) {
+        if (isCancelled) return;
+        console.error("Error checking profile messaging permission:", error);
+        // Fallback: keep message button visible unless backend explicitly forbids.
+        setCanMessageFromProfile(true);
+      }
+    };
+
+    void checkCanMessage();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [currentUserId, isAuthenticatedUser, isBlockedByMe, user]);
+
+  const handleBlockToggle = async () => {
+    if (
+      !isAuthenticatedUser ||
+      !currentUserId ||
+      !user ||
+      currentUserId === user.id
+    ) {
+      return;
+    }
+
+    const shouldBlock = !isBlockedByMe;
+    const loadingMessage = shouldBlock
+      ? "Blocking user..."
+      : "Unblocking user...";
+    const successMessage = shouldBlock ? "User blocked" : "User unblocked";
+    const fallbackErrorMessage = shouldBlock
+      ? "Failed to block user"
+      : "Failed to unblock user";
+    const toastId = `profile-block-action:${user.id}`;
+
+    try {
+      setIsBlockingAction(true);
+      toast.loading(loadingMessage, { id: toastId });
+      if (!PUBLIC_API_URL) {
+        throw new Error("Public API URL is not configured");
+      }
+
+      const response = await fetch(
+        `${PUBLIC_API_URL}/messages/${encodeURIComponent(user.id)}/block`,
+        {
+          method: shouldBlock ? "POST" : "DELETE",
+          credentials: "include",
+          cache: "no-store",
+        },
+      );
+
+      if (!response.ok) {
+        throw new Error(fallbackErrorMessage);
+      }
+
+      setIsBlockedByMe((prev) => !prev);
+      toast.success(successMessage, { id: toastId });
+    } catch (error) {
+      console.error("Error toggling blocked status:", error);
+      toast.error(
+        error instanceof Error && error.message
+          ? error.message
+          : fallbackErrorMessage,
+        { id: toastId },
+      );
+    } finally {
+      setIsBlockingAction(false);
+    }
+  };
 
   const handleFollow = async () => {
     if (isLoadingFollow) return;
@@ -561,7 +742,7 @@ export default function UserProfileClient({
       notFound();
     }
 
-    return <Error statusCode={errorCode} title={errorState || undefined} />;
+    return <NextError statusCode={errorCode} title={errorState || undefined} />;
   }
 
   if (!user) {
@@ -907,24 +1088,53 @@ export default function UserProfileClient({
                               : "Follow this user"}
                           </TooltipContent>
                         </Tooltip>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <span>
-                              <Button variant="outline" size="md" asChild>
-                                <Link
-                                  href={`/messages/${encodeURIComponent(user.id)}`}
-                                >
-                                  <Icon
-                                    icon="heroicons:chat-bubble-left-right"
-                                    className="h-5 w-5"
-                                  />
-                                  Message
-                                </Link>
-                              </Button>
-                            </span>
-                          </TooltipTrigger>
-                          <TooltipContent>Message this user</TooltipContent>
-                        </Tooltip>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              variant="secondary"
+                              size="icon"
+                              disabled={isBlockingAction}
+                            >
+                              <Icon
+                                icon="heroicons:ellipsis-horizontal"
+                                className="h-5 w-5"
+                              />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="w-48 p-0">
+                            {canMessageFromProfile && (
+                              <DropdownMenuItem
+                                onClick={() =>
+                                  router.push(
+                                    `/messages/${encodeURIComponent(user.id)}`,
+                                  )
+                                }
+                                className="rounded-none px-3 py-2"
+                              >
+                                <Icon
+                                  icon="heroicons:chat-bubble-left-right"
+                                  className="mr-2 h-4 w-4"
+                                />
+                                Message
+                              </DropdownMenuItem>
+                            )}
+                            <DropdownMenuItem
+                              onClick={() => void handleBlockToggle()}
+                              disabled={isBlockingAction}
+                              className="text-button-danger hover:bg-button-danger/10 focus:bg-button-danger/10 focus:text-button-danger rounded-none px-3 py-2"
+                            >
+                              <Icon
+                                icon={
+                                  isBlockedByMe
+                                    ? "heroicons:lock-open"
+                                    : "heroicons:no-symbol"
+                                }
+                                className="mr-2 h-4 w-4"
+                              />
+                              {isBlockedByMe ? "Unblock User" : "Block User"}
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </>
                     ) : (
                       <>
