@@ -1,5 +1,6 @@
 "use client";
 
+import { canHideAdsForPremiumType } from "@/utils/supporterAccess";
 import { useEffect, useRef } from "react";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
@@ -28,7 +29,7 @@ export default function NitroValuesVideoPlayer({ className }: Props) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const createdRef = useRef(false);
   const tier = user?.premiumtype ?? 0;
-  const isSupporter = tier >= 2 && tier <= 3;
+  const isSupporter = canHideAdsForPremiumType(tier);
 
   useEffect(() => {
     const clearContainer = () => {

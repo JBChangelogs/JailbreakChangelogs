@@ -1,5 +1,6 @@
 "use client";
 
+import { canHideAdsForPremiumType } from "@/utils/supporterAccess";
 import { useEffect } from "react";
 import { useAuthContext } from "@/contexts/AuthContext";
 import {
@@ -26,7 +27,7 @@ function isLikelyNitroVideoCloseClick(target: EventTarget | null): boolean {
 export default function NitroVideoCloseSupporterModal() {
   const { user } = useAuthContext();
   const tier = user?.premiumtype ?? 0;
-  const isSupporter = tier >= HIDE_ADS_REQUIRED_TIER && tier <= 3;
+  const isSupporter = canHideAdsForPremiumType(tier);
   const { modalState, openModal, closeModal } = useSupporterModal();
 
   useEffect(() => {

@@ -1,11 +1,13 @@
 "use client";
 
+import { canHideAdsForPremiumType } from "@/utils/supporterAccess";
 import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import Image from "next/image";
 
 import { Icon } from "@/components/ui/IconWrapper";
 import { Button } from "@/components/ui/button";
+import { useAuthContext } from "@/contexts/AuthContext";
 import { useAuthContext } from "@/contexts/AuthContext";
 
 // Simple ad block detection strategy:
@@ -15,6 +17,9 @@ import { useAuthContext } from "@/contexts/AuthContext";
 const MODAL_DISMISSED_KEY = "adblock_modal_dismissed";
 
 const AdBlockPrompt = () => {
+  const { user, isLoading } = useAuthContext();
+  const tier = user?.premiumtype ?? 0;
+  const canHideAds = canHideAdsForPremiumType(tier);
   const [isBlocking, setIsBlocking] = useState(false);
   const [isDismissed, setIsDismissed] = useState(() => {
     try {
@@ -33,6 +38,10 @@ const AdBlockPrompt = () => {
   const isSupporter = tier >= 2 && tier <= 3;
 
   useEffect(() => {
+    if (canHideAds) {
+      return;
+    }
+
     // Listen for ad-block detection event
     const handleAdBlockDetection = (e: CustomEvent) => {
       if (e.detail?.blocking) {
@@ -59,7 +68,7 @@ const AdBlockPrompt = () => {
         handleAdBlockDetection as EventListener,
       );
     };
-  }, [pathname]);
+  }, [canHideAds, pathname]);
 
   const handleModalDismiss = () => {
     // Save modal dismissal to sessionStorage (resets on browser close)
@@ -85,7 +94,7 @@ const AdBlockPrompt = () => {
 
   if (
     isLoading ||
-    isSupporter ||
+    canHideAds ||
     !isBlocking ||
     isDismissed ||
     pathname === "/supporting" ||

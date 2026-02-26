@@ -1,5 +1,6 @@
 "use client";
 
+import { canHideAdsForPremiumType } from "@/utils/supporterAccess";
 import { useEffect, useMemo, useRef, useSyncExternalStore } from "react";
 import { useMediaQuery } from "@mui/material";
 import { usePathname } from "next/navigation";
@@ -70,7 +71,7 @@ export default function NitroVideoPlayer() {
 
   useEffect(() => {
     const tier = user?.premiumtype ?? 0;
-    const isSupporter = tier >= 2 && tier <= 3;
+    const isSupporter = canHideAdsForPremiumType(tier);
 
     const hasDedicatedVideoNcPlayer =
       pathname === "/values" ||
