@@ -1,5 +1,6 @@
 "use client";
 
+import { canHideAdsForPremiumType } from "@/utils/supporterAccess";
 import { useEffect, useRef } from "react";
 import { useAuthContext } from "@/contexts/AuthContext";
 
@@ -28,7 +29,7 @@ export default function NitroRobberiesTopAd({ className }: Props) {
   const createdRef = useRef(false);
   const tier = user?.premiumtype ?? 0;
   // Tier 1 (Supporter) still sees ads, Tier 2 & 3 (Server Booster & Partner) do not
-  const isSupporter = tier >= 2 && tier <= 3;
+  const isSupporter = canHideAdsForPremiumType(tier);
 
   useEffect(() => {
     const clearContainer = () => {

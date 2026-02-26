@@ -1,5 +1,6 @@
 "use client";
 
+import { canHideAdsForPremiumType } from "@/utils/supporterAccess";
 import { useEffect, useRef, useMemo, useSyncExternalStore } from "react";
 import { useMediaQuery } from "@mui/material";
 import { useAuthContext } from "@/contexts/AuthContext";
@@ -41,7 +42,7 @@ export default function NitroBottomAnchor() {
 
   useEffect(() => {
     const tier = user?.premiumtype ?? 0;
-    const isSupporter = tier >= 2 && tier <= 3;
+    const isSupporter = canHideAdsForPremiumType(tier);
 
     if (disableAnchor) {
       const el = document.getElementById(ANCHOR_ID);

@@ -1,16 +1,22 @@
 "use client";
 
+import { canHideAdsForPremiumType } from "@/utils/supporterAccess";
 import { usePathname } from "next/navigation";
 import Script from "next/script";
 import { useAuthContext } from "@/contexts/AuthContext";
 
 const AdBlockRecovery = () => {
   const pathname = usePathname();
-  const { user } = useAuthContext();
+  const { user, isLoading } = useAuthContext();
   const tier = user?.premiumtype ?? 0;
-  const isSupporter = tier >= 2 && tier <= 3;
+  const canHideAds = canHideAdsForPremiumType(tier);
 
-  if (isSupporter || pathname === "/supporting" || pathname === "/redeem") {
+  if (
+    isLoading ||
+    canHideAds ||
+    pathname === "/supporting" ||
+    pathname === "/redeem"
+  ) {
     return null;
   }
 

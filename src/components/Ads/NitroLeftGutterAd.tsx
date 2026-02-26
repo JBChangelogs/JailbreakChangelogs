@@ -1,5 +1,6 @@
 "use client";
 
+import { canHideAdsForPremiumType } from "@/utils/supporterAccess";
 import { useEffect, useRef } from "react";
 import { useMediaQuery } from "@mui/material";
 import type { NitroAdInstance } from "@/utils/nitroAds";
@@ -48,7 +49,7 @@ export default function NitroLeftGutterAd({
     if (typeof window === "undefined") return;
 
     const tier = premiumType ?? 0;
-    const isSupporter = tier >= 2 && tier <= 3;
+    const isSupporter = canHideAdsForPremiumType(tier);
     const ads = window.nitroAds as unknown as NitroAdsWithApi;
 
     const removeSlot = (id: string) => {
@@ -167,7 +168,7 @@ export default function NitroLeftGutterAd({
   ]);
 
   const tier = premiumType ?? 0;
-  const isSupporter = tier >= 2 && tier <= 3;
+  const isSupporter = canHideAdsForPremiumType(tier);
 
   if (isSupporter) return null;
 
