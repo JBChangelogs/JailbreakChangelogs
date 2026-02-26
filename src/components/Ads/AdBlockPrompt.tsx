@@ -8,7 +8,6 @@ import Image from "next/image";
 import { Icon } from "@/components/ui/IconWrapper";
 import { Button } from "@/components/ui/button";
 import { useAuthContext } from "@/contexts/AuthContext";
-import { useAuthContext } from "@/contexts/AuthContext";
 
 // Simple ad block detection strategy:
 // 1. Show modal immediately if adblock is detected
@@ -33,9 +32,6 @@ const AdBlockPrompt = () => {
   });
   const router = useRouter();
   const pathname = usePathname();
-  const { user, isLoading } = useAuthContext();
-  const tier = user?.premiumtype ?? 0;
-  const isSupporter = tier >= 2 && tier <= 3;
 
   useEffect(() => {
     if (canHideAds) {
