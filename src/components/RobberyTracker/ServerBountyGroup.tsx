@@ -7,6 +7,7 @@ import { BountyData } from "@/hooks/useRobberyTrackerBountiesWebSocket";
 import BountyCard from "./BountyCard";
 import { useOptimizedRealTimeRelativeDate } from "@/hooks/useSharedTimer";
 import RobberyPlayersModal from "./RobberyPlayersModal";
+import { toast } from "sonner";
 import { useServerRegions } from "@/hooks/useServerRegions";
 import { buildRobloxServerDeepLink } from "./deepLink";
 
@@ -143,7 +144,11 @@ export default function ServerBountyGroup({
                 data-umami-event-jobid={jobId}
                 onClick={() => {
                   setIsJoining(true);
-                  window.setTimeout(() => setIsJoining(false), 2500);
+                  const joiningToastId = toast.loading("Joining server...");
+                  window.setTimeout(() => {
+                    toast.dismiss(joiningToastId);
+                    setIsJoining(false);
+                  }, 5000);
                   window.location.assign(buildRobloxServerDeepLink(jobId));
                 }}
               >

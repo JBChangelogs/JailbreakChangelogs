@@ -87,6 +87,45 @@ type RobberyComboResult = {
   latestTimestamp: number;
 };
 
+function RobberiesInitialEmptyState() {
+  const [showInitialLoading, setShowInitialLoading] = useState(true);
+
+  useEffect(() => {
+    const timeoutId = window.setTimeout(() => {
+      setShowInitialLoading(false);
+    }, 10000);
+
+    return () => window.clearTimeout(timeoutId);
+  }, []);
+
+  if (showInitialLoading) {
+    return (
+      <>
+        <div className="border-button-info mx-auto mb-4 h-12 w-12 animate-spin rounded-full border-b-2"></div>
+        <h3 className="text-secondary-text mb-2 text-lg font-medium">
+          Loading robberies...
+        </h3>
+        <p className="text-tertiary-text text-sm">
+          Connected. Waiting for the first robbery batch.
+        </p>
+      </>
+    );
+  }
+
+  return (
+    <>
+      <Icon
+        icon="mdi:clock"
+        className="text-tertiary-text mx-auto mb-4 h-16 w-16"
+      />
+      <h3 className="text-secondary-text mb-2 text-lg font-medium">
+        No robberies tracked yet
+      </h3>
+      <p className="text-tertiary-text text-sm">Waiting for robbery data...</p>
+    </>
+  );
+}
+
 function RobberyTrackerContent() {
   const { user } = useAuthContext();
   const searchParams = useSearchParams();
@@ -1278,7 +1317,7 @@ function RobberyTrackerContent() {
         {!isConnected && !hasData && !requiresManualReconnect && (
           <div className="flex min-h-screen flex-col items-center justify-start py-20 pt-24">
             <div className="text-center">
-              <div className="border-primary-border border-t-primary-accent mb-4 inline-block h-12 w-12 animate-spin rounded-full border-4" />
+              <div className="border-button-info mx-auto mb-4 h-12 w-12 animate-spin rounded-full border-b-2"></div>
               <p className="text-secondary-text">
                 Connecting to robbery tracker...
               </p>
@@ -1676,26 +1715,30 @@ function RobberyTrackerContent() {
           !error && (
             <div className="flex min-h-screen flex-col items-center justify-start py-20 pt-24">
               <div className="text-center">
-                <Icon
-                  icon="mdi:clock"
-                  className="text-tertiary-text mx-auto mb-4 h-16 w-16"
-                />
-                <h3 className="text-secondary-text mb-2 text-lg font-medium">
-                  {activeView === "robberies"
-                    ? "No robberies tracked yet"
-                    : activeView === "mansions"
-                      ? "No mansions tracked yet"
-                      : "No airdrops tracked yet"}
-                </h3>
-                <p className="text-tertiary-text text-sm">
-                  Waiting for{" "}
-                  {activeView === "robberies"
-                    ? "robbery"
-                    : activeView === "mansions"
-                      ? "mansion"
-                      : "airdrop"}{" "}
-                  data...
-                </p>
+                {activeView === "robberies" ? (
+                  <>
+                    <RobberiesInitialEmptyState
+                      key={`${activeView}-${isConnected}-${hasData}-${Boolean(error)}`}
+                    />
+                  </>
+                ) : (
+                  <>
+                    <Icon
+                      icon="mdi:clock"
+                      className="text-tertiary-text mx-auto mb-4 h-16 w-16"
+                    />
+                    <h3 className="text-secondary-text mb-2 text-lg font-medium">
+                      {activeView === "mansions"
+                        ? "No mansions tracked yet"
+                        : "No airdrops tracked yet"}
+                    </h3>
+                    <p className="text-tertiary-text text-sm">
+                      Waiting for{" "}
+                      {activeView === "mansions" ? "mansion" : "airdrop"}{" "}
+                      data...
+                    </p>
+                  </>
+                )}
               </div>
             </div>
           )

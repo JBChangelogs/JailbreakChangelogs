@@ -427,7 +427,7 @@ function BountyTrackerContent() {
         {!isConnected && !error && !hasData && (
           <div className="flex items-center justify-center py-20">
             <div className="text-center">
-              <div className="border-primary-border border-t-primary-accent mb-4 inline-block h-12 w-12 animate-spin rounded-full border-4" />
+              <div className="border-button-info mx-auto mb-4 h-12 w-12 animate-spin rounded-full border-b-2"></div>
               <p className="text-secondary-text">
                 Connecting to bounty tracker...
               </p>
