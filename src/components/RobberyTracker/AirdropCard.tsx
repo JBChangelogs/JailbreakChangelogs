@@ -11,6 +11,7 @@ import RobberyPlayersModal from "./RobberyPlayersModal";
 import { useServerRegions } from "@/hooks/useServerRegions";
 import { ServerRegionData } from "@/hooks/useRobberyTrackerWebSocket";
 import { INVENTORY_API_URL } from "@/utils/api";
+import { toast } from "sonner";
 import { buildRobloxServerDeepLink } from "./deepLink";
 
 interface AirdropCardProps {
@@ -219,7 +220,11 @@ export default function AirdropCard({ airdrop }: AirdropCardProps) {
               data-umami-event-jobid={jobId}
               onClick={() => {
                 setIsJoining(true);
-                window.setTimeout(() => setIsJoining(false), 2500);
+                const joiningToastId = toast.loading("Joining server...");
+                window.setTimeout(() => {
+                  toast.dismiss(joiningToastId);
+                  setIsJoining(false);
+                }, 5000);
                 window.location.assign(buildRobloxServerDeepLink(jobId));
               }}
             >

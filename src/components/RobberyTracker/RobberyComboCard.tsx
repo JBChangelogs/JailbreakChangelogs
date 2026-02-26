@@ -10,6 +10,7 @@ import {
 } from "@/hooks/useRobberyTrackerWebSocket";
 import { useOptimizedRealTimeRelativeDate } from "@/hooks/useSharedTimer";
 import { useServerRegions } from "@/hooks/useServerRegions";
+import { toast } from "sonner";
 import RobberyPlayersModal from "./RobberyPlayersModal";
 import { buildRobloxServerDeepLink } from "./deepLink";
 
@@ -186,7 +187,11 @@ export default function RobberyComboCard({
           data-umami-event-jobid={serverId}
           onClick={() => {
             setIsJoining(true);
-            window.setTimeout(() => setIsJoining(false), 2500);
+            const joiningToastId = toast.loading("Joining server...");
+            window.setTimeout(() => {
+              toast.dismiss(joiningToastId);
+              setIsJoining(false);
+            }, 5000);
             window.location.assign(buildRobloxServerDeepLink(serverId));
           }}
         >

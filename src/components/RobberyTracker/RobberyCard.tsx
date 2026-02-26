@@ -340,7 +340,11 @@ export default function RobberyCard({ robbery }: RobberyCardProps) {
               data-umami-event-jobid={jobId}
               onClick={() => {
                 setIsJoining(true);
-                window.setTimeout(() => setIsJoining(false), 2500);
+                const joiningToastId = toast.loading("Joining server...");
+                window.setTimeout(() => {
+                  toast.dismiss(joiningToastId);
+                  setIsJoining(false);
+                }, 5000);
                 window.location.assign(buildRobloxServerDeepLink(jobId));
               }}
             >
