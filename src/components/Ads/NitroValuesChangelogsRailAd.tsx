@@ -9,6 +9,10 @@ const AD_ID_WIDE = "np-values-changelogs-rail-wide";
 export default function NitroValuesChangelogsRailAd() {
   const authContext = useSafeAuthContext();
 
+  if (authContext?.isLoading) {
+    return null;
+  }
+
   return (
     <NitroLeftGutterAd
       premiumType={authContext?.user?.premiumtype}

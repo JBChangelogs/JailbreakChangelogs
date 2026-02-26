@@ -7,7 +7,11 @@ const AD_ID_SMALL = "np-calculators-rail";
 const AD_ID_WIDE = "np-calculators-rail-wide";
 
 export default function NitroCalculatorsRailAd() {
-  const { user } = useAuthContext();
+  const { user, isLoading } = useAuthContext();
+
+  if (isLoading) {
+    return null;
+  }
 
   return (
     <NitroLeftGutterAd

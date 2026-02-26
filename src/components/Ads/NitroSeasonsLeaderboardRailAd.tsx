@@ -7,7 +7,11 @@ const AD_ID_SMALL = "np-seasons-leaderboard-rail";
 const AD_ID_WIDE = "np-seasons-leaderboard-rail-wide";
 
 export default function NitroSeasonsLeaderboardRailAd() {
-  const { user } = useAuthContext();
+  const { user, isLoading } = useAuthContext();
+
+  if (isLoading) {
+    return null;
+  }
 
   return (
     <NitroLeftGutterAd

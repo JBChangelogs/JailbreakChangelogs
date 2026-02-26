@@ -111,6 +111,7 @@ type RealtimeMessageEventDetail = {
     content?: string;
   };
 };
+const WS_SEND_FALLBACK_MS = 1200;
 
 function getDisplayName(user: MessageUser): string {
   return user.global_name && user.global_name !== "None"
@@ -287,6 +288,7 @@ export default function MessagesInbox() {
   const [isLoadingConversations, setIsLoadingConversations] = useState(false);
   const [isLoadingMessages, setIsLoadingMessages] = useState(false);
   const [isSending, setIsSending] = useState(false);
+  const [isRealtimeConnected, setIsRealtimeConnected] = useState(false);
   const [isProcessingBlockAction, setIsProcessingBlockAction] = useState(false);
   const [blockedByMeByUserId, setBlockedByMeByUserId] = useState<
     Record<string, boolean>
@@ -300,6 +302,10 @@ export default function MessagesInbox() {
   const userLookupPendingRef = useRef<Map<string, Promise<MessageUser | null>>>(
     new Map(),
   );
+  const selectedUserIdRef = useRef<string | null>(null);
+  const wsSendFallbackTimeoutsRef = useRef<Set<number>>(new Set());
+  const messagesContainerRef = useRef<HTMLDivElement | null>(null);
+  const pendingOwnSendScrollRef = useRef(false);
 
   const selectedConversation = useMemo(
     () =>
@@ -380,6 +386,72 @@ export default function MessagesInbox() {
   useEffect(() => {
     setSelectedUserId(routeConversationId);
   }, [routeConversationId]);
+
+  useEffect(() => {
+    selectedUserIdRef.current = selectedUserId;
+  }, [selectedUserId]);
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      setIsRealtimeConnected(false);
+      return;
+    }
+
+    const handleConnectionChange = (event: Event) => {
+      const detail = (event as CustomEvent<{ connected?: boolean }>).detail;
+      setIsRealtimeConnected(detail?.connected === true);
+    };
+
+    window.addEventListener(
+      "realtimeNotificationsConnection",
+      handleConnectionChange,
+    );
+    return () => {
+      window.removeEventListener(
+        "realtimeNotificationsConnection",
+        handleConnectionChange,
+      );
+    };
+  }, [isAuthenticated]);
+
+  useEffect(() => {
+    const fallbackTimeouts = wsSendFallbackTimeoutsRef.current;
+
+    return () => {
+      fallbackTimeouts.forEach((timeoutId) => {
+        window.clearTimeout(timeoutId);
+      });
+      fallbackTimeouts.clear();
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!pendingOwnSendScrollRef.current) {
+      return;
+    }
+
+    const latestMessage = messages[messages.length - 1];
+    if (!latestMessage || latestMessage.type === "system" || !currentUserId) {
+      return;
+    }
+
+    if (asId(latestMessage.senderId) !== currentUserId) {
+      return;
+    }
+
+    const container = messagesContainerRef.current;
+    if (!container) {
+      return;
+    }
+
+    requestAnimationFrame(() => {
+      container.scrollTo({
+        top: container.scrollHeight,
+        behavior: "smooth",
+      });
+    });
+    pendingOwnSendScrollRef.current = false;
+  }, [messages, currentUserId]);
 
   const loadUserById = async (
     id: string,
@@ -898,6 +970,7 @@ export default function MessagesInbox() {
 
     try {
       setIsSending(true);
+      pendingOwnSendScrollRef.current = true;
       if (!PUBLIC_API_URL) {
         throw new Error("Public API URL is not configured");
       }
@@ -1012,13 +1085,36 @@ export default function MessagesInbox() {
         createdAt: Date.now(),
       };
 
-      setMessages((prev) => [...prev, sentMessage]);
+      if (isRealtimeConnected) {
+        const targetUserId = selectedUserId;
+        const timeoutId = window.setTimeout(() => {
+          wsSendFallbackTimeoutsRef.current.delete(timeoutId);
+          if (!targetUserId || selectedUserIdRef.current !== targetUserId) {
+            return;
+          }
+          setMessages((prev) => {
+            if (prev.some((item) => item.id === sentMessage.id)) {
+              return prev;
+            }
+            return [...prev, sentMessage];
+          });
+        }, WS_SEND_FALLBACK_MS);
+        wsSendFallbackTimeoutsRef.current.add(timeoutId);
+      } else {
+        setMessages((prev) => {
+          if (prev.some((item) => item.id === sentMessage.id)) {
+            return prev;
+          }
+          return [...prev, sentMessage];
+        });
+      }
       setConversations((prev) => [
         { user: selectedUser, lastMessage: sentMessage },
         ...prev.filter((item) => item.user.id !== selectedUserId),
       ]);
       setDraftMessage("");
     } catch (error) {
+      pendingOwnSendScrollRef.current = false;
       console.error("Error sending message:", error);
       const message =
         error instanceof Error && error.message
@@ -1280,7 +1376,10 @@ export default function MessagesInbox() {
                   </ChatHeaderAddon>
                 </ChatHeader>
 
-                <ChatMessages className="bg-secondary-bg !flex-col px-2 py-3 sm:px-4">
+                <ChatMessages
+                  ref={messagesContainerRef}
+                  className="bg-secondary-bg !flex-col px-2 py-3 sm:px-4"
+                >
                   {isLoadingMessages ? (
                     <div className="text-secondary-text bg-tertiary-bg/40 border-border-card mx-auto my-auto rounded-md border px-4 py-3 text-center text-sm">
                       Loading messages...

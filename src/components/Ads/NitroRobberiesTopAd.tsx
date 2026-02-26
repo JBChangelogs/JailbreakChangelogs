@@ -24,7 +24,7 @@ interface Props {
 }
 
 export default function NitroRobberiesTopAd({ className }: Props) {
-  const { user } = useAuthContext();
+  const { user, isLoading } = useAuthContext();
   const containerRef = useRef<HTMLDivElement | null>(null);
   const createdRef = useRef(false);
   const tier = user?.premiumtype ?? 0;
@@ -38,7 +38,7 @@ export default function NitroRobberiesTopAd({ className }: Props) {
       }
     };
 
-    if (isSupporter) {
+    if (isLoading || isSupporter) {
       clearContainer();
       createdRef.current = false;
       return;
@@ -69,9 +69,9 @@ export default function NitroRobberiesTopAd({ className }: Props) {
       clearContainer();
       createdRef.current = false;
     };
-  }, [isSupporter]);
+  }, [isLoading, isSupporter]);
 
-  if (isSupporter) {
+  if (isLoading || isSupporter) {
     return null;
   }
 

@@ -25,7 +25,7 @@ interface Props {
 }
 
 export default function NitroCalculatorAd({ className }: Props) {
-  const { user } = useAuthContext();
+  const { user, isLoading } = useAuthContext();
   const containerRef = useRef<HTMLDivElement | null>(null);
   const createdRef = useRef(false);
   const tier = user?.premiumtype ?? 0;
@@ -38,7 +38,7 @@ export default function NitroCalculatorAd({ className }: Props) {
       }
     };
 
-    if (isSupporter) {
+    if (isLoading || isSupporter) {
       clearContainer();
       createdRef.current = false;
       return;
@@ -71,9 +71,9 @@ export default function NitroCalculatorAd({ className }: Props) {
       clearContainer();
       createdRef.current = false;
     };
-  }, [isSupporter]);
+  }, [isLoading, isSupporter]);
 
-  if (isSupporter) {
+  if (isLoading || isSupporter) {
     return null;
   }
 

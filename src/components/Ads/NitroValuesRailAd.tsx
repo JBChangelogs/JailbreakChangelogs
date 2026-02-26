@@ -7,7 +7,11 @@ const AD_ID_SMALL = "np-rail-left-values";
 const AD_ID_WIDE = "np-rail-left-values-wide";
 
 export default function NitroValuesRailAd() {
-  const { user } = useAuthContext();
+  const { user, isLoading } = useAuthContext();
+
+  if (isLoading) {
+    return null;
+  }
 
   return (
     <NitroLeftGutterAd

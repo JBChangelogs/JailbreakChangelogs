@@ -10,7 +10,7 @@ interface NitroGridAdProps {
 }
 
 export default function NitroGridAd({ adId, className }: NitroGridAdProps) {
-  const { user } = useAuthContext();
+  const { user, isLoading } = useAuthContext();
   const containerRef = useRef<HTMLDivElement>(null);
   const createdRef = useRef(false);
 
@@ -18,7 +18,7 @@ export default function NitroGridAd({ adId, className }: NitroGridAdProps) {
   const isSupporter = canHideAdsForPremiumType(tier);
 
   useEffect(() => {
-    if (isSupporter) {
+    if (isLoading || isSupporter) {
       // If user becomes supporter, remove ad if it exists
       const el = document.getElementById(adId);
       if (el) el.remove();
@@ -90,9 +90,9 @@ export default function NitroGridAd({ adId, className }: NitroGridAdProps) {
       ads?.removeAd?.(adId);
       createdRef.current = false;
     };
-  }, [isSupporter, adId]);
+  }, [isLoading, isSupporter, adId]);
 
-  if (isSupporter) {
+  if (isLoading || isSupporter) {
     return null;
   }
 

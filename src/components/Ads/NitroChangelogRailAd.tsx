@@ -7,7 +7,11 @@ const AD_ID_SMALL = "np-changelog-rail";
 const AD_ID_WIDE = "np-changelog-rail-wide";
 
 export default function NitroChangelogRailAd() {
-  const { user } = useAuthContext();
+  const { user, isLoading } = useAuthContext();
+
+  if (isLoading) {
+    return null;
+  }
 
   return (
     <NitroLeftGutterAd

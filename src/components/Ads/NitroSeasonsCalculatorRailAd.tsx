@@ -7,7 +7,11 @@ const AD_ID_SMALL = "np-seasons-calculator-rail";
 const AD_ID_WIDE = "np-seasons-calculator-rail-wide";
 
 export default function NitroSeasonsCalculatorRailAd() {
-  const { user } = useAuthContext();
+  const { user, isLoading } = useAuthContext();
+
+  if (isLoading) {
+    return null;
+  }
 
   return (
     <NitroLeftGutterAd

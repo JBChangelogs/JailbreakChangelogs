@@ -7,7 +7,11 @@ const AD_ID_SMALL = "np-og-detail-rail";
 const AD_ID_WIDE = "np-og-detail-rail-wide";
 
 export default function NitroOGDetailRailAd() {
-  const { user } = useAuthContext();
+  const { user, isLoading } = useAuthContext();
+
+  if (isLoading) {
+    return null;
+  }
 
   return (
     <NitroLeftGutterAd

@@ -12,7 +12,11 @@ const WIDE_SIZES: [string, string][] = [
 ];
 
 export default function NitroRobberiesRailAd() {
-  const { user } = useAuthContext();
+  const { user, isLoading } = useAuthContext();
+
+  if (isLoading) {
+    return null;
+  }
 
   return (
     <NitroLeftGutterAd

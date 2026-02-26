@@ -11,10 +11,10 @@ interface AdRemovalNoticeProps {
 const AdRemovalNotice: React.FC<AdRemovalNoticeProps> = ({
   className = "",
 }) => {
-  const { user } = useAuthContext();
+  const { user, isLoading } = useAuthContext();
   const isSupporter = user?.premiumtype && user.premiumtype > 0;
 
-  if (isSupporter) {
+  if (isLoading || isSupporter) {
     return null;
   }
 

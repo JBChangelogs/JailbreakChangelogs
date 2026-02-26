@@ -27,13 +27,13 @@ function isLikelyNitroAnchorCloseClick(target: EventTarget | null): boolean {
 }
 
 export default function NitroAnchorCloseSupporterModal() {
-  const { user } = useAuthContext();
+  const { user, isLoading } = useAuthContext();
   const tier = user?.premiumtype ?? 0;
   const isSupporter = canHideAdsForPremiumType(tier);
   const { modalState, openModal, closeModal } = useSupporterModal();
 
   useEffect(() => {
-    if (isSupporter) return;
+    if (isLoading || isSupporter) return;
 
     const handler = (e: Event) => {
       if (!isLikelyNitroAnchorCloseClick(e.target)) return;
@@ -63,7 +63,7 @@ export default function NitroAnchorCloseSupporterModal() {
       document.removeEventListener("touchstart", handler, opts);
       document.removeEventListener("click", handler, opts);
     };
-  }, [isSupporter, openModal]);
+  }, [isLoading, isSupporter, openModal]);
 
   return (
     <SupporterModal

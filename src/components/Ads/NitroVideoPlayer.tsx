@@ -55,7 +55,7 @@ function useItemSheetOpen() {
 }
 
 export default function NitroVideoPlayer() {
-  const { user } = useAuthContext();
+  const { user, isLoading } = useAuthContext();
   const pathname = usePathname();
   const createdRef = useRef(false);
   const isSheetScreen = useMediaQuery("(max-width: 1024px)");
@@ -79,7 +79,10 @@ export default function NitroVideoPlayer() {
       pathname === "/values/calculator";
 
     const shouldSuppressFloatingPlayer =
-      isSupporter || hasDedicatedVideoNcPlayer || disableFloatingPlayer;
+      isLoading ||
+      isSupporter ||
+      hasDedicatedVideoNcPlayer ||
+      disableFloatingPlayer;
 
     const removeFloatingPlayer = () => {
       const el = document.getElementById(VIDEO_PLAYER_ID);
@@ -149,7 +152,7 @@ export default function NitroVideoPlayer() {
     ).catch(() => {
       createdRef.current = false;
     });
-  }, [user?.premiumtype, pathname, disableFloatingPlayer]);
+  }, [user?.premiumtype, isLoading, pathname, disableFloatingPlayer]);
 
   return null;
 }

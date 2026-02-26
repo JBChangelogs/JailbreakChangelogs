@@ -30,7 +30,7 @@ function useMobileSheetOpen() {
 }
 
 export default function NitroBottomAnchor() {
-  const { user } = useAuthContext();
+  const { user, isLoading } = useAuthContext();
   const pathname = usePathname();
   const createdRef = useRef(false);
   const isSheetScreen = useMediaQuery("(max-width: 1024px)");
@@ -47,7 +47,7 @@ export default function NitroBottomAnchor() {
     const tier = user?.premiumtype ?? 0;
     const isSupporter = canHideAdsForPremiumType(tier);
 
-    if (disableAnchor || isAccessDeniedRoute) {
+    if (isLoading || disableAnchor || isAccessDeniedRoute) {
       const el = document.getElementById(ANCHOR_ID);
       if (el) {
         el.remove();
@@ -132,7 +132,7 @@ export default function NitroBottomAnchor() {
     return () => {
       removeAdReference(ANCHOR_ID);
     };
-  }, [user?.premiumtype, disableAnchor, isAccessDeniedRoute]);
+  }, [user?.premiumtype, isLoading, disableAnchor, isAccessDeniedRoute]);
 
   return null;
 }

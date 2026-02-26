@@ -7,7 +7,11 @@ const AD_ID_SMALL = "np-inventories-rail";
 const AD_ID_WIDE = "np-inventories-rail-wide";
 
 export default function NitroInventoriesRailAd() {
-  const { user } = useAuthContext();
+  const { user, isLoading } = useAuthContext();
+
+  if (isLoading) {
+    return null;
+  }
 
   return (
     <NitroLeftGutterAd

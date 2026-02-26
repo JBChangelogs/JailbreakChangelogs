@@ -7,7 +7,11 @@ const AD_ID_SMALL = "np-rail-left-dupes";
 const AD_ID_WIDE = "np-rail-left-dupes-wide";
 
 export default function NitroDupesRailAd() {
-  const { user } = useAuthContext();
+  const { user, isLoading } = useAuthContext();
+
+  if (isLoading) {
+    return null;
+  }
 
   return (
     <NitroLeftGutterAd

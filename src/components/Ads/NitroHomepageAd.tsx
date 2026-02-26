@@ -61,7 +61,7 @@ interface Props {
 }
 
 export default function NitroHomepageAd({ className }: Props) {
-  const { user } = useAuthContext();
+  const { user, isLoading } = useAuthContext();
   const containerRefMobile = useRef<HTMLDivElement | null>(null);
   const containerRefDesktop = useRef<HTMLDivElement | null>(null);
   const createdRef = useRef(false);
@@ -79,7 +79,7 @@ export default function NitroHomepageAd({ className }: Props) {
       }
     };
 
-    if (isSupporter) {
+    if (isLoading || isSupporter) {
       clearContainers();
       createdRef.current = false;
       return;
@@ -136,9 +136,9 @@ export default function NitroHomepageAd({ className }: Props) {
       clearContainers();
       createdRef.current = false;
     };
-  }, [isSupporter]);
+  }, [isLoading, isSupporter]);
 
-  if (isSupporter) {
+  if (isLoading || isSupporter) {
     return null;
   }
 

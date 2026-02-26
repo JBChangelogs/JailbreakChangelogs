@@ -78,7 +78,7 @@ interface Props {
 }
 
 export default function NitroLiveScansAd({ className }: Props) {
-  const { user } = useAuthContext();
+  const { user, isLoading } = useAuthContext();
   const containerRefMobile = useRef<HTMLDivElement | null>(null);
   const containerRefTablet = useRef<HTMLDivElement | null>(null);
   const containerRefDesktop = useRef<HTMLDivElement | null>(null);
@@ -99,7 +99,7 @@ export default function NitroLiveScansAd({ className }: Props) {
       }
     };
 
-    if (isSupporter) {
+    if (isLoading || isSupporter) {
       clearContainers();
       createdRef.current = false;
       return;
@@ -161,9 +161,9 @@ export default function NitroLiveScansAd({ className }: Props) {
       clearContainers();
       createdRef.current = false;
     };
-  }, [isSupporter]);
+  }, [isLoading, isSupporter]);
 
-  if (isSupporter) {
+  if (isLoading || isSupporter) {
     return null;
   }
 
