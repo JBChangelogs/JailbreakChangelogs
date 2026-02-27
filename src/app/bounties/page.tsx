@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  memo,
   useState,
   useMemo,
   useEffect,
@@ -19,14 +20,182 @@ import RobberyTrackerAuthWrapper from "@/components/RobberyTracker/RobberyTracke
 import ExperimentalFeatureBanner from "@/components/ui/ExperimentalFeatureBanner";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Slider } from "@/components/ui/slider";
 
-type BountySort =
-  | "last_updated"
-  | "highest_total"
-  | "lowest_total"
-  | "highest_individual"
-  | "lowest_individual";
+const BOUNTY_RANGE_MAX = 200_000;
+
+interface BountyRangeFilterProps {
+  range: [number, number];
+  onCommit: (range: [number, number]) => void;
+}
+
+const BountyRangeFilter = memo(function BountyRangeFilter({
+  range,
+  onCommit,
+}: BountyRangeFilterProps) {
+  const SNAP_DISTANCE = 2_500;
+  const [localRange, setLocalRange] = useState<[number, number]>(range);
+  const [minInput, setMinInput] = useState(range[0].toLocaleString());
+  const [maxInput, setMaxInput] = useState(range[1].toLocaleString());
+
+  const stripCommas = (value: string) => value.replace(/,/g, "");
+
+  const sliderMarks = useMemo(() => {
+    const points = [0, 0.25, 0.5, 0.75, 1].map(
+      (ratio) => Math.round((BOUNTY_RANGE_MAX * ratio) / 1000) * 1000,
+    );
+    const unique = Array.from(new Set(points)).sort((a, b) => a - b);
+
+    return unique.map((value) => ({
+      value,
+      label:
+        value >= 1_000_000
+          ? `${Math.round((value / 1_000_000) * 10) / 10}M`
+          : value >= 1_000
+            ? `${Math.round(value / 1_000)}K`
+            : value.toString(),
+    }));
+  }, []);
+
+  useEffect(() => {
+    setLocalRange(range);
+    setMinInput(range[0].toLocaleString());
+    setMaxInput(range[1].toLocaleString());
+  }, [range]);
+
+  useEffect(() => {
+    setMinInput(localRange[0].toLocaleString());
+    setMaxInput(localRange[1].toLocaleString());
+  }, [localRange]);
+
+  const maybeSnapToMark = (value: number): number => {
+    const nearest = sliderMarks.reduce((closest, mark) => {
+      return Math.abs(mark.value - value) < Math.abs(closest - value)
+        ? mark.value
+        : closest;
+    }, sliderMarks[0]?.value ?? 0);
+
+    return Math.abs(nearest - value) <= SNAP_DISTANCE ? nearest : value;
+  };
+
+  return (
+    <div className="bg-secondary-bg border-border-card mt-4 rounded-lg border p-4">
+      <div className="mb-2 flex items-center justify-between">
+        <div>
+          <p className="text-primary-text text-sm font-semibold">
+            Total Server Bounty Range
+          </p>
+          <p className="text-secondary-text text-xs">
+            Filter servers by total bounty value
+          </p>
+        </div>
+      </div>
+
+      <div className="mb-2 flex flex-col items-start gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center gap-2">
+          <input
+            type="text"
+            inputMode="numeric"
+            value={minInput}
+            onFocus={(e) => {
+              setMinInput(stripCommas(e.target.value));
+            }}
+            onChange={(e) => {
+              const val = e.target.value.replace(/\D/g, "");
+              setMinInput(val);
+            }}
+            onBlur={() => {
+              let val = parseInt(stripCommas(minInput)) || 0;
+              val = Math.max(0, Math.min(val, localRange[1]));
+              const nextRange: [number, number] = [val, localRange[1]];
+              setLocalRange(nextRange);
+              onCommit(nextRange);
+              setMinInput(val.toLocaleString());
+            }}
+            className="border-border-card bg-primary-bg text-primary-text focus:border-button-info h-7 w-20 rounded border px-2 text-[11px] focus:outline-none"
+            placeholder="Min"
+          />
+          <span className="text-secondary-text text-xs">-</span>
+          <input
+            type="text"
+            inputMode="numeric"
+            value={maxInput}
+            onFocus={(e) => {
+              setMaxInput(stripCommas(e.target.value));
+            }}
+            onChange={(e) => {
+              const val = e.target.value.replace(/\D/g, "");
+              setMaxInput(val);
+            }}
+            onBlur={() => {
+              let val = parseInt(stripCommas(maxInput)) || 0;
+              val = Math.max(localRange[0], Math.min(val, BOUNTY_RANGE_MAX));
+              const nextRange: [number, number] = [localRange[0], val];
+              setLocalRange(nextRange);
+              onCommit(nextRange);
+              setMaxInput(val.toLocaleString());
+            }}
+            className="border-border-card bg-primary-bg text-primary-text focus:border-button-info h-7 w-20 rounded border px-2 text-[11px] focus:outline-none"
+            placeholder="Max"
+          />
+        </div>
+        <span className="text-secondary-text text-[11px] whitespace-nowrap">
+          {localRange[0].toLocaleString()} -{" "}
+          {localRange[1] >= BOUNTY_RANGE_MAX
+            ? `${BOUNTY_RANGE_MAX.toLocaleString()}+`
+            : localRange[1].toLocaleString()}
+        </span>
+      </div>
+
+      <div className="mt-2 px-1 py-1">
+        <Slider
+          key="bounty-range-slider"
+          value={localRange}
+          onValueChange={(newValue) => {
+            const snappedRange: [number, number] = [
+              maybeSnapToMark(newValue[0]),
+              maybeSnapToMark(newValue[1]),
+            ];
+            setLocalRange([
+              Math.min(snappedRange[0], snappedRange[1]),
+              Math.max(snappedRange[0], snappedRange[1]),
+            ]);
+          }}
+          onValueCommit={(newValue) => {
+            const snappedRange: [number, number] = [
+              maybeSnapToMark(newValue[0]),
+              maybeSnapToMark(newValue[1]),
+            ];
+            onCommit([
+              Math.min(snappedRange[0], snappedRange[1]),
+              Math.max(snappedRange[0], snappedRange[1]),
+            ]);
+          }}
+          min={0}
+          max={BOUNTY_RANGE_MAX}
+          step={500}
+          minStepsBetweenThumbs={0}
+        />
+        <div className="relative mt-2 h-4 w-full">
+          {sliderMarks.map((mark) => (
+            <div
+              key={mark.value}
+              className="absolute top-0 flex -translate-x-1/2 flex-col items-center"
+              style={{
+                left: `${(mark.value / BOUNTY_RANGE_MAX) * 100}%`,
+              }}
+            >
+              <div className="bg-secondary-text mb-1 h-1 w-0.5" />
+              <span className="text-secondary-text text-[10px] leading-none font-medium">
+                {mark.label}
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+});
 
 function BountyTrackerContent() {
   const { user } = useAuthContext();
@@ -45,7 +214,12 @@ function BountyTrackerContent() {
   } = useRobberyTrackerBountiesWebSocket(true, user?.id);
 
   const [searchQuery, setSearchQuery] = useState("");
-  const [bountySort, setBountySort] = useState<BountySort>("last_updated");
+  const [totalBountyRange, setTotalBountyRange] = useState<[number, number]>([
+    0,
+    BOUNTY_RANGE_MAX,
+  ]);
+
+  const formatBountyAmount = (amount: number) => `$${amount.toLocaleString()}`;
 
   // Filter and sort bounties
   const filteredBounties = useMemo(() => {
@@ -67,7 +241,7 @@ function BountyTrackerContent() {
   }, [bounties, searchQuery]);
 
   // Group bounties by server
-  const serverGroups = useMemo(() => {
+  const groupedServerData = useMemo(() => {
     const groups = new Map<string, BountyData[]>();
 
     filteredBounties.forEach((bounty) => {
@@ -80,7 +254,7 @@ function BountyTrackerContent() {
       }
     });
 
-    // Convert to array and sort
+    // Convert to array and sort by freshest updates
     return Array.from(groups.entries())
       .map(([serverId, serverBounties]) => ({
         serverId,
@@ -91,23 +265,16 @@ function BountyTrackerContent() {
         ),
         lastUpdated: Math.max(...serverBounties.map((b) => b.timestamp)),
       }))
-      .sort((a, b) => {
-        if (bountySort === "highest_total") {
-          return b.totalBounty - a.totalBounty;
-        }
-        if (bountySort === "lowest_total") {
-          return a.totalBounty - b.totalBounty;
-        }
-        if (bountySort === "highest_individual") {
-          return b.highestIndividualBounty - a.highestIndividualBounty;
-        }
-        if (bountySort === "lowest_individual") {
-          return a.highestIndividualBounty - b.highestIndividualBounty;
-        }
-        // Default to last_updated (newest first)
-        return b.lastUpdated - a.lastUpdated;
-      });
-  }, [filteredBounties, bountySort]);
+      .sort((a, b) => b.lastUpdated - a.lastUpdated);
+  }, [filteredBounties]);
+
+  const serverGroups = useMemo(() => {
+    const [minSelected, maxSelected] = totalBountyRange;
+    return groupedServerData.filter(
+      (group) =>
+        group.totalBounty >= minSelected && group.totalBounty <= maxSelected,
+    );
+  }, [groupedServerData, totalBountyRange]);
 
   // Calculate bounty statistics
   const bountyStats = useMemo(() => {
@@ -349,32 +516,10 @@ function BountyTrackerContent() {
             </div>
           </div>
 
-          <div className="mt-4">
-            <div className="overflow-x-auto">
-              <Tabs
-                value={bountySort}
-                onValueChange={(value) => setBountySort(value as BountySort)}
-              >
-                <TabsList fullWidth>
-                  <TabsTrigger value="last_updated" fullWidth>
-                    Latest
-                  </TabsTrigger>
-                  <TabsTrigger value="highest_total" fullWidth>
-                    High Total
-                  </TabsTrigger>
-                  <TabsTrigger value="lowest_total" fullWidth>
-                    Low Total
-                  </TabsTrigger>
-                  <TabsTrigger value="highest_individual" fullWidth>
-                    High Individual
-                  </TabsTrigger>
-                  <TabsTrigger value="lowest_individual" fullWidth>
-                    Low Individual
-                  </TabsTrigger>
-                </TabsList>
-              </Tabs>
-            </div>
-          </div>
+          <BountyRangeFilter
+            range={totalBountyRange}
+            onCommit={setTotalBountyRange}
+          />
         </div>
 
         {/* Status Bar */}
@@ -479,12 +624,14 @@ function BountyTrackerContent() {
                   className="text-tertiary-text mb-4 h-12 w-12"
                 />
                 <h3 className="text-primary-text text-lg font-medium">
-                  No bounties found
+                  No server groups found
                 </h3>
                 <p className="text-secondary-text">
                   {searchQuery
-                    ? "No bounties match your search"
-                    : "No bounties tracked yet"}
+                    ? "No server groups match your search and total server bounty filter"
+                    : groupedServerData.length > 0
+                      ? `No servers in selected total server bounty range (${formatBountyAmount(totalBountyRange[0])} - ${formatBountyAmount(totalBountyRange[1])})`
+                      : "No bounties tracked yet"}
                 </p>
               </div>
             )}
