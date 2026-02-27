@@ -98,7 +98,7 @@ export function useRobberyTrackerBountiesWebSocket(
       }
 
       try {
-        const wsUrl = `${INVENTORY_WS_URL}/tracker?type=bounties`;
+        const wsUrl = `${INVENTORY_WS_URL}/tracker?type=bounties&jbcl_token=UeqOkuUnhcdqSOhfoC`;
 
         const ws = new WebSocket(wsUrl);
         wsRef.current = ws;
