@@ -1,6 +1,11 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { BASE_API_URL } from "@/utils/api";
+import {
+  SERVER_LINK_ERROR_MESSAGE,
+  validatePrivateServerLink,
+  validateServerRulesText,
+} from "@/utils/serverValidation";
 
 export async function POST(request: Request) {
   const cookieStore = await cookies();
@@ -9,6 +14,25 @@ export async function POST(request: Request) {
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
 
   const body = await request.json();
+  const link = typeof body?.link === "string" ? body.link : "";
+  const rules = typeof body?.rules === "string" ? body.rules : "";
+
+  const linkValidation = validatePrivateServerLink(link);
+  if (!linkValidation.isValid) {
+    return NextResponse.json(
+      { message: linkValidation.message || SERVER_LINK_ERROR_MESSAGE },
+      { status: 403 },
+    );
+  }
+
+  const rulesValidation = validateServerRulesText(rules);
+  if (!rulesValidation.isValid) {
+    return NextResponse.json(
+      { message: rulesValidation.message || "Invalid server rules" },
+      { status: 400 },
+    );
+  }
+
   const upstream = await fetch(`${BASE_API_URL}/servers/add`, {
     method: "POST",
     headers: { "content-type": "application/json" },

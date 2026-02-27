@@ -7,7 +7,13 @@ import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { Dialog, DialogPanel } from "@headlessui/react";
+import { Icon } from "@/components/ui/IconWrapper";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  validatePrivateServerLink,
+  validateServerRulesText,
+} from "@/utils/serverValidation";
 
 interface AddServerModalProps {
   isOpen: boolean;
@@ -108,6 +114,20 @@ const AddServerModal: React.FC<AddServerModalProps> = ({
       return;
     }
 
+    const normalizedRules = cleanRulesText(rules) || "N/A";
+
+    const linkValidation = validatePrivateServerLink(link);
+    if (!linkValidation.isValid) {
+      toast.error(linkValidation.message || "Invalid server link");
+      return;
+    }
+
+    const rulesValidation = validateServerRulesText(normalizedRules);
+    if (!rulesValidation.isValid) {
+      toast.error(rulesValidation.message || "Invalid server rules");
+      return;
+    }
+
     // Check if the expiration date is in the past
     if (!neverExpires && expires) {
       const now = new Date();
@@ -144,7 +164,7 @@ const AddServerModal: React.FC<AddServerModalProps> = ({
         },
         body: JSON.stringify({
           link: link.trim(),
-          rules: cleanRulesText(rules) || "N/A",
+          rules: normalizedRules,
           expires:
             neverExpires || (expires && expires > oneYearFromNow)
               ? "Never"
@@ -187,7 +207,7 @@ const AddServerModal: React.FC<AddServerModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <Dialog open={isOpen} onClose={() => {}} className="relative z-50">
+    <Dialog open={isOpen} onClose={() => {}} className="relative z-[3000]">
       <div
         className="fixed inset-0 bg-black/50 backdrop-blur-sm"
         aria-hidden="true"
@@ -196,10 +216,18 @@ const AddServerModal: React.FC<AddServerModalProps> = ({
       <div className="fixed inset-0 flex items-center justify-center p-4">
         <DialogPanel className="border-border-card bg-secondary-bg hover:border-border-focus relative w-full max-w-md rounded-lg border shadow-xl">
           {/* Header */}
-          <div className="border-border-card flex items-center border-b p-4">
+          <div className="border-border-card flex items-center justify-between border-b p-4">
             <h2 className="text-primary-text text-xl font-semibold">
               {editingServer ? "Edit Server" : "Add New Server"}
             </h2>
+            <button
+              type="button"
+              onClick={onClose}
+              aria-label="Close"
+              className="text-secondary-text hover:text-primary-text hover:bg-quaternary-bg focus-visible:ring-ring inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-md transition-colors focus-visible:ring-1 focus-visible:outline-none"
+            >
+              <Icon icon="heroicons:x-mark" className="h-5 w-5" />
+            </button>
           </div>
 
           {/* Content */}
@@ -444,18 +472,17 @@ const AddServerModal: React.FC<AddServerModalProps> = ({
 
               <div>
                 <label className="flex cursor-pointer items-center space-x-2">
-                  <input
-                    type="checkbox"
+                  <Checkbox
                     checked={neverExpires}
-                    onChange={(e) => {
-                      setNeverExpires(e.target.checked);
-                      if (e.target.checked) {
+                    onCheckedChange={(checked) => {
+                      const isChecked = checked === true;
+                      setNeverExpires(isChecked);
+                      if (isChecked) {
                         setExpires(null);
                       } else {
                         setExpires(originalExpires);
                       }
                     }}
-                    className="text-button-info focus:ring-button-info h-4 w-4 cursor-pointer rounded"
                   />
                   <span className="text-primary-text text-sm">
                     Never Expires
@@ -467,10 +494,7 @@ const AddServerModal: React.FC<AddServerModalProps> = ({
               </div>
 
               {/* Actions */}
-              <div className="border-border-card mt-8 flex justify-end space-x-4 border-t pt-6">
-                <Button onClick={onClose} variant="ghost" size="md">
-                  Cancel
-                </Button>
+              <div className="border-border-card mt-8 flex justify-end border-t pt-6">
                 <Button
                   onClick={handleSubmit}
                   disabled={loading}
