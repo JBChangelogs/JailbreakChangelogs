@@ -19,7 +19,26 @@ export const SERVER_RULES_LINK_ERROR_MESSAGE =
   "Server rules contain an unsafe link. Only Roblox, Discord, and JailbreakChangelogs links are allowed.";
 
 const trimTrailingUrlPunctuation = (url: string): string => {
-  return url.replace(/[),.;!?]+$/g, "");
+  let end = url.length;
+
+  while (end > 0) {
+    const char = url[end - 1];
+    if (
+      char === ")" ||
+      char === "," ||
+      char === "." ||
+      char === ";" ||
+      char === "!" ||
+      char === "?"
+    ) {
+      end -= 1;
+      continue;
+    }
+
+    break;
+  }
+
+  return end === url.length ? url : url.slice(0, end);
 };
 
 const extractUrls = (text: string): string[] => {
