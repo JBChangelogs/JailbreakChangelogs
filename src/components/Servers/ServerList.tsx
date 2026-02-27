@@ -348,6 +348,7 @@ const ServerList: React.FC<{
       setServerToDelete(null);
       return;
     }
+    const deletingToastId = toast.loading("Deleting server...");
     try {
       const response = await fetch(`/api/servers/delete`, {
         method: "DELETE",
@@ -359,16 +360,20 @@ const ServerList: React.FC<{
         }),
       });
       if (response.ok) {
-        toast.success("Server deleted successfully!");
+        toast.success("Server deleted successfully!", { id: deletingToastId });
         handleServerAdded();
       } else {
         const errorData = await response
           .json()
           .catch(() => ({ message: "Failed to delete server" }));
-        toast.error(`Error deleting server: ${errorData.message}`);
+        toast.error(`Error deleting server: ${errorData.message}`, {
+          id: deletingToastId,
+        });
       }
     } catch {
-      toast.error("An error occurred while deleting the server.");
+      toast.error("An error occurred while deleting the server.", {
+        id: deletingToastId,
+      });
     } finally {
       setDeleteModalOpen(false);
       setServerToDelete(null);
