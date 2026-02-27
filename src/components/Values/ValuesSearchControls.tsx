@@ -102,6 +102,24 @@ export default function ValuesSearchControls({
     return marks;
   }, [maxValueRange]);
 
+  const snapPoints = useMemo(() => {
+    return [0, maxValueRange, ...sliderMarks.map((mark) => mark.value)];
+  }, [maxValueRange, sliderMarks]);
+
+  const snapDistance = useMemo(() => {
+    return Math.max(100_000, Math.floor(maxValueRange * 0.01));
+  }, [maxValueRange]);
+
+  const maybeSnapToPoint = (value: number): number => {
+    const nearest = snapPoints.reduce((closest, point) => {
+      return Math.abs(point - value) < Math.abs(closest - value)
+        ? point
+        : closest;
+    }, snapPoints[0] ?? value);
+
+    return Math.abs(nearest - value) <= snapDistance ? nearest : value;
+  };
+
   const filterLabel =
     filterOptions.find((option) => option.value === filterSort)?.label ??
     "Select category";
@@ -361,12 +379,27 @@ export default function ValuesSearchControls({
                   key="value-range-slider"
                   value={localRange}
                   onValueChange={(newValue) => {
-                    setLocalRange(newValue);
+                    const snappedRange = [
+                      maybeSnapToPoint(newValue[0]),
+                      maybeSnapToPoint(newValue[1]),
+                    ];
+                    setLocalRange([
+                      Math.min(snappedRange[0], snappedRange[1]),
+                      Math.max(snappedRange[0], snappedRange[1]),
+                    ]);
                   }}
                   onValueCommit={(newValue) => {
-                    setRangeValue(newValue);
-                    setAppliedMinValue(newValue[0]);
-                    setAppliedMaxValue(newValue[1]);
+                    const snappedRange = [
+                      maybeSnapToPoint(newValue[0]),
+                      maybeSnapToPoint(newValue[1]),
+                    ];
+                    const normalizedRange = [
+                      Math.min(snappedRange[0], snappedRange[1]),
+                      Math.max(snappedRange[0], snappedRange[1]),
+                    ];
+                    setRangeValue(normalizedRange);
+                    setAppliedMinValue(normalizedRange[0]);
+                    setAppliedMaxValue(normalizedRange[1]);
                   }}
                   min={0}
                   max={maxValueRange}
