@@ -42,7 +42,7 @@ export async function POST(request: Request) {
     {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify(body),
+      body: JSON.stringify({ ...body, owner: token }),
       cache: "no-store",
     },
   );

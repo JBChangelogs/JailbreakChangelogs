@@ -1,10 +1,10 @@
 "use client";
 
 import React from "react";
-import { PUBLIC_API_URL } from "@/utils/api";
 import { Icon } from "@/components/ui/IconWrapper";
 import { formatProfileDate } from "@/utils/timestamp";
 import { useAuthContext } from "@/contexts/AuthContext";
+import { Dialog, DialogPanel } from "@headlessui/react";
 import { toast } from "sonner";
 import AddServerModal from "./AddServerModal";
 import { Skeleton } from "@mui/material";
@@ -20,11 +20,11 @@ import {
 import { UserAvatar } from "@/utils/avatar";
 import DOMPurify from "dompurify";
 import type { UserData } from "@/types/auth";
-import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuItem,
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
   DropdownMenuTrigger,
@@ -87,14 +87,15 @@ const ServerList: React.FC<{
   const [serverToDelete, setServerToDelete] = React.useState<Server | null>(
     null,
   );
+  const [deletingServer, setDeletingServer] = React.useState(false);
   const [page, setPage] = React.useState(1);
-  const itemsPerPage = 9;
+  const itemsPerPage = 15;
 
   const sortOptions = [
-    { value: "date_added_desc", label: "Date Added (Newest First)" },
-    { value: "date_added_asc", label: "Date Added (Oldest First)" },
-    { value: "date_expires_desc", label: "Date Expires (Latest First)" },
-    { value: "date_expires_asc", label: "Date Expires (Earliest First)" },
+    { value: "date_added_desc", label: "Newest added" },
+    { value: "date_added_asc", label: "Oldest added" },
+    { value: "date_expires_desc", label: "Latest expiry" },
+    { value: "date_expires_asc", label: "Earliest expiry" },
   ];
   const sortLabel =
     sortOptions.find((option) => option.value === sortOption)?.label ??
@@ -187,11 +188,9 @@ const ServerList: React.FC<{
 
       try {
         const userResponse = await fetch(
-          `${PUBLIC_API_URL}/users/get/batch?ids=${idsToFetch.join(",")}&nocache=true`,
+          `/api/users/batch?ids=${encodeURIComponent(idsToFetch.join(","))}`,
           {
-            headers: {
-              "User-Agent": "JailbreakChangelogs-Servers/1.0",
-            },
+            cache: "no-store",
           },
         );
 
@@ -231,22 +230,18 @@ const ServerList: React.FC<{
   };
 
   React.useEffect(() => {
+    setLoggedInUserId(user?.id || null);
+  }, [user?.id]);
+
+  React.useEffect(() => {
     const fetchServers = async () => {
       setLoading(true);
       setError(null);
 
-      const userId = user?.id || null;
-      setLoggedInUserId(userId);
-
       try {
-        const serversResponse = await fetch(
-          `${PUBLIC_API_URL}/servers/list?nocache=true`,
-          {
-            headers: {
-              "User-Agent": "JailbreakChangelogs-Servers/1.0",
-            },
-          },
-        );
+        const serversResponse = await fetch("/api/servers/list", {
+          cache: "no-store",
+        });
         if (!serversResponse.ok) {
           throw new Error("Failed to fetch servers");
         }
@@ -263,7 +258,6 @@ const ServerList: React.FC<{
               : expiryTimestamp;
           return normalizedExpiry > now;
         });
-
         setServers(filteredServers);
         // User data fetching is now handled by the other useEffect dependent on currentServers
       } catch (serverErr) {
@@ -299,18 +293,13 @@ const ServerList: React.FC<{
         handleAuthChange as EventListener,
       );
     };
-  }, [user]);
+  }, []);
 
   const handleServerAdded = async () => {
     try {
-      const serversResponse = await fetch(
-        `${PUBLIC_API_URL}/servers/list?nocache=true`,
-        {
-          headers: {
-            "User-Agent": "JailbreakChangelogs-Servers/1.0",
-          },
-        },
-      );
+      const serversResponse = await fetch("/api/servers/list", {
+        cache: "no-store",
+      });
       if (!serversResponse.ok) {
         throw new Error("Failed to fetch servers");
       }
@@ -327,7 +316,6 @@ const ServerList: React.FC<{
             : expiryTimestamp;
         return normalizedExpiry > now;
       });
-
       setServers(filteredServers);
       // User data will update automatically thanks to the effect
     } catch {
@@ -340,14 +328,23 @@ const ServerList: React.FC<{
     setDeleteModalOpen(true);
   };
 
+  const handleDeleteServerFromMenu = (server: Server) => {
+    // Let Radix close the menu before opening modal to avoid layout/focus race.
+    setTimeout(() => {
+      handleDeleteServer(server);
+    }, 0);
+  };
+
   const confirmDeleteServer = async () => {
     if (!serverToDelete) return;
+    if (deletingServer) return;
     if (!isAuthenticated) {
       toast.error("You must be logged in to delete a server.");
       setDeleteModalOpen(false);
       setServerToDelete(null);
       return;
     }
+    setDeletingServer(true);
     const deletingToastId = toast.loading("Deleting server...");
     try {
       const response = await fetch(`/api/servers/delete`, {
@@ -375,14 +372,22 @@ const ServerList: React.FC<{
         id: deletingToastId,
       });
     } finally {
+      setDeletingServer(false);
       setDeleteModalOpen(false);
       setServerToDelete(null);
     }
   };
 
-  const handleEditServer = async (server: Server) => {
+  const handleEditServer = (server: Server) => {
     setEditingServer(server);
     setIsAddModalOpen(true);
+  };
+
+  const handleEditServerFromMenu = (server: Server) => {
+    // Let Radix close the menu before opening modal to avoid layout/focus race.
+    setTimeout(() => {
+      handleEditServer(server);
+    }, 0);
   };
 
   const handleAddServer = () => {
@@ -403,11 +408,7 @@ const ServerList: React.FC<{
     return (
       <div>
         <div className="mb-4 flex items-center justify-between px-4 lg:px-0">
-          <div className="flex items-center space-x-2">
-            <Icon
-              icon="heroicons-outline:shield-check"
-              className="text-button-info h-5 w-5"
-            />
+          <div className="flex items-center">
             <Skeleton
               variant="text"
               width={120}
@@ -427,98 +428,105 @@ const ServerList: React.FC<{
           {[1, 2, 3, 4, 5, 6].map((i) => (
             <div
               key={i}
-              className="border-border-card bg-secondary-bg hover:border-border-focus rounded-lg border p-4 sm:p-6"
+              className="border-border-card bg-secondary-bg rounded-xl border p-4 shadow-sm sm:p-5"
             >
-              <div className="mb-4 flex flex-col gap-3">
-                <div className="flex items-center space-x-2">
-                  <Icon
-                    icon="heroicons-outline:shield-check"
-                    className="text-button-info h-5 w-5"
+              <div className="mb-4 flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <Skeleton
+                    variant="text"
+                    width={110}
+                    height={24}
+                    sx={{ bgcolor: "var(--color-tertiary-bg)" }}
                   />
                   <Skeleton
                     variant="text"
-                    width={80}
-                    height={24}
-                    sx={{ bgcolor: "var(--color-secondary-bg)" }}
+                    width={90}
+                    height={16}
+                    sx={{ bgcolor: "var(--color-tertiary-bg)" }}
                   />
                 </div>
-                <div className="flex flex-wrap gap-2">
+                <Skeleton
+                  variant="rounded"
+                  width={90}
+                  height={28}
+                  sx={{ bgcolor: "var(--color-tertiary-bg)" }}
+                />
+              </div>
+
+              <div className="border-border-card bg-tertiary-bg mb-4 rounded-lg border p-3">
+                <Skeleton
+                  variant="text"
+                  width={90}
+                  height={16}
+                  sx={{ bgcolor: "var(--color-secondary-bg)" }}
+                />
+                <div className="mt-2 flex items-center gap-2">
                   <Skeleton
-                    variant="rounded"
+                    variant="circular"
                     width={32}
                     height={32}
                     sx={{ bgcolor: "var(--color-secondary-bg)" }}
                   />
                   <Skeleton
-                    variant="rounded"
-                    width={32}
-                    height={32}
-                    sx={{ bgcolor: "var(--color-secondary-bg)" }}
-                  />
-                  <Skeleton
-                    variant="rounded"
-                    width={80}
-                    height={32}
+                    variant="text"
+                    width={130}
+                    height={22}
                     sx={{ bgcolor: "var(--color-secondary-bg)" }}
                   />
                 </div>
               </div>
 
-              <div className="space-y-3 sm:space-y-4">
-                <div className="flex items-center space-x-2">
-                  <Icon
-                    icon="heroicons:user-solid"
-                    className="text-secondary-text h-5 w-5"
+              <div className="mb-4 flex flex-wrap gap-2">
+                <Skeleton
+                  variant="rounded"
+                  width={130}
+                  height={28}
+                  sx={{ bgcolor: "var(--color-tertiary-bg)" }}
+                />
+                <Skeleton
+                  variant="rounded"
+                  width={120}
+                  height={28}
+                  sx={{ bgcolor: "var(--color-tertiary-bg)" }}
+                />
+              </div>
+
+              <div className="border-border-card bg-tertiary-bg rounded-lg border p-3 sm:p-4">
+                <Skeleton
+                  variant="text"
+                  width={70}
+                  height={20}
+                  sx={{ bgcolor: "var(--color-secondary-bg)" }}
+                />
+                <div className="mt-2 space-y-2">
+                  <Skeleton
+                    variant="text"
+                    width="100%"
+                    height={16}
+                    sx={{ bgcolor: "var(--color-secondary-bg)" }}
                   />
                   <Skeleton
                     variant="text"
-                    width={160}
-                    height={20}
+                    width="85%"
+                    height={16}
                     sx={{ bgcolor: "var(--color-secondary-bg)" }}
                   />
                 </div>
+              </div>
 
-                <div className="flex items-center space-x-2">
-                  <Icon
-                    icon="heroicons:clock"
-                    className="text-secondary-text h-5 w-5"
-                  />
-                  <Skeleton
-                    variant="text"
-                    width={120}
-                    height={20}
-                    sx={{ bgcolor: "var(--color-secondary-bg)" }}
-                  />
-                </div>
-
-                <div className="border-border-card bg-primary-bg hover:border-border-focus rounded-lg border p-3 sm:p-4">
-                  <Skeleton
-                    variant="text"
-                    width={100}
-                    height={24}
-                    sx={{ bgcolor: "var(--color-primary-bg)" }}
-                  />
-                  <div className="mt-2 space-y-2">
-                    <Skeleton
-                      variant="text"
-                      width="100%"
-                      height={16}
-                      sx={{ bgcolor: "var(--color-primary-bg)" }}
-                    />
-                    <Skeleton
-                      variant="text"
-                      width="90%"
-                      height={16}
-                      sx={{ bgcolor: "var(--color-primary-bg)" }}
-                    />
-                    <Skeleton
-                      variant="text"
-                      width="80%"
-                      height={16}
-                      sx={{ bgcolor: "var(--color-primary-bg)" }}
-                    />
-                  </div>
-                </div>
+              <div className="border-border-card mt-4 flex items-center justify-between border-t pt-4">
+                <Skeleton
+                  variant="rounded"
+                  width={90}
+                  height={32}
+                  sx={{ bgcolor: "var(--color-tertiary-bg)" }}
+                />
+                <Skeleton
+                  variant="rounded"
+                  width={100}
+                  height={32}
+                  sx={{ bgcolor: "var(--color-tertiary-bg)" }}
+                />
               </div>
             </div>
           ))}
@@ -554,21 +562,10 @@ const ServerList: React.FC<{
 
   return (
     <div>
-      <div className="mb-4 flex flex-col gap-4 px-4 lg:px-0">
-        <div className="flex items-center space-x-2">
-          <Icon
-            icon="heroicons-outline:shield-check"
-            className="text-button-info h-5 w-5"
-          />
-          <span className="text-secondary-text">
-            {sortedServers.length > 0
-              ? `${sortedServers.length} servers`
-              : "No servers available"}
-          </span>
-        </div>
-        <div className="flex flex-row items-center gap-3">
-          <div className="flex items-center gap-2">
-            <div className="w-64 sm:w-80">
+      <div className="mb-4 px-4 lg:px-0">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-start">
+          <div className="flex w-full items-center gap-2 sm:w-auto">
+            <div className="min-w-0 flex-1 sm:min-w-[190px] sm:flex-none md:min-w-[210px]">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <button
@@ -584,7 +581,7 @@ const ServerList: React.FC<{
                   </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent
-                  align="start"
+                  align="end"
                   className="border-border-card bg-secondary-bg text-primary-text scrollbar-thin max-h-[240px] w-[var(--radix-popper-anchor-width)] min-w-[var(--radix-popper-anchor-width)] overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
                 >
                   <DropdownMenuRadioGroup
@@ -608,21 +605,34 @@ const ServerList: React.FC<{
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
+            <Button
+              onClick={handleAddServer}
+              size="sm"
+              className="shrink-0 whitespace-nowrap"
+            >
+              <Icon
+                icon="heroicons:plus-circle"
+                className="mr-1 h-4 w-4 sm:mr-2 sm:h-5 sm:w-5"
+              />
+              <span className="hidden sm:inline">Add server</span>
+              <span className="sm:hidden">Add</span>
+            </Button>
           </div>
-          <Button
-            onClick={handleAddServer}
-            size="sm"
-            className="whitespace-nowrap"
-          >
-            <Icon
-              icon="heroicons:plus-circle"
-              className="mr-1 h-4 w-4 sm:mr-2 sm:h-5 sm:w-5"
-            />
-            <span className="hidden sm:inline">Add Server</span>
-            <span className="sm:hidden">Add</span>
-          </Button>
         </div>
+        <p className="text-secondary-text mt-3 text-sm">
+          Total Servers: {sortedServers.length}
+        </p>
       </div>
+
+      {totalPages > 1 && (
+        <div className="mb-6 flex justify-center">
+          <Pagination
+            count={totalPages}
+            page={page}
+            onChange={handlePageChange}
+          />
+        </div>
+      )}
 
       <div className="grid grid-cols-1 gap-4 gap-y-6 pb-4 md:grid-cols-2 xl:grid-cols-3">
         {currentServers.map((server) => {
@@ -630,6 +640,16 @@ const ServerList: React.FC<{
           const premiumType = userData[server.owner]?.premiumtype ?? 0;
           const isSupporter = premiumType >= 1 && premiumType <= 3;
           const supporterTier = isSupporter ? premiumType : null;
+          const isServerOwner = loggedInUserId === server.owner;
+          const expiresText =
+            server.expires === "Never"
+              ? "Never"
+              : formatProfileDate(server.expires);
+          const hasRules = Boolean(server.rules && server.rules !== "N/A");
+          const parsedRules = hasRules
+            ? sanitizeHTML(processMentions(server.rules))
+            : "No rules set by owner";
+          const shouldShowRulesExpand = hasRules && server.rules.length > 140;
 
           // Background style for different supporter tiers
           const getBackgroundStyle = (): React.CSSProperties => {
@@ -656,194 +676,192 @@ const ServerList: React.FC<{
           return (
             <div
               key={server.id}
-              className={`border-border-card rounded-lg border p-4 sm:p-6 ${
+              className={`border-border-card rounded-xl border p-4 shadow-sm transition-all hover:shadow-md sm:p-5 ${
                 isSupporter ? "" : "bg-secondary-bg"
               }`}
               style={getBackgroundStyle()}
             >
-              <div className="mb-4 flex flex-col gap-3">
-                <div className="flex items-center space-x-2">
-                  <Icon
-                    icon="heroicons-outline:shield-check"
-                    className="text-button-info h-5 w-5"
-                  />
-                  <span className="text-secondary-text">
+              <div className="mb-4 flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <span className="text-primary-text block text-base font-semibold">
                     Server #{serverNumberMap[server.id]}
                   </span>
-                  {isSupporter && supporterTier && (
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <a href="/supporting" className="flex items-center">
-                          <Image
-                            src={
-                              supporterIcons[
-                                supporterTier as keyof typeof supporterIcons
-                              ]
-                            }
-                            alt={`Supporter Type ${supporterTier}`}
-                            width={20}
-                            height={20}
-                            className="object-contain transition-opacity hover:opacity-80"
-                          />
-                        </a>
-                      </TooltipTrigger>
-                      <TooltipContent
-                        side="top"
-                        className="bg-secondary-bg text-primary-text border-none shadow-[var(--color-card-shadow)]"
-                      >
-                        <p>Supporter Type {supporterTier}</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  )}
                 </div>
-                <div className="flex flex-wrap gap-2">
-                  {loggedInUserId && loggedInUserId === server.owner ? (
-                    <>
-                      <Button
-                        onClick={() => handleCopyLink(server.link)}
-                        size="sm"
-                        variant="default"
-                        className="px-2 sm:px-3"
-                        aria-label="Copy Server Link"
-                        data-umami-event="Copy Server Link"
-                        data-umami-event-server-id={server.id}
-                      >
-                        <Icon icon="heroicons:clipboard" className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        onClick={() => handleEditServer(server)}
-                        size="sm"
-                        variant="secondary"
-                        className="px-2 sm:px-3"
-                        aria-label="Edit Server"
-                      >
-                        <Icon icon="heroicons:pencil" className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        onClick={() => handleDeleteServer(server)}
-                        size="sm"
-                        variant="destructive"
-                        className="px-2 sm:px-3"
-                        aria-label="Delete Server"
-                      >
-                        <Icon
-                          icon="heroicons:trash-solid"
-                          className="h-4 w-4"
-                        />
-                      </Button>
-                      <Button
-                        asChild
-                        size="sm"
-                        variant="default"
-                        className="px-2 sm:px-3"
-                        data-umami-event="Join Server"
-                        data-umami-event-server-id={server.id}
-                      >
-                        <a
-                          href={server.link}
-                          target="_blank"
-                          rel="noopener noreferrer"
+
+                <div className="flex shrink-0 items-center gap-2">
+                  {isServerOwner && (
+                    <DropdownMenu modal={false}>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="secondary"
+                          size="sm"
+                          className="px-2"
+                          aria-label="Server actions"
                         >
-                          Join Server
-                        </a>
-                      </Button>
-                    </>
-                  ) : (
-                    <>
-                      <Button
-                        onClick={() => handleCopyLink(server.link)}
-                        size="sm"
-                        variant="default"
-                        className="px-2 sm:px-3"
-                        aria-label="Copy Server Link"
-                        data-umami-event="Copy Server Link"
-                        data-umami-event-server-id={server.id}
+                          <Icon icon="heroicons:ellipsis-horizontal" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent
+                        align="end"
+                        onCloseAutoFocus={(event) => event.preventDefault()}
+                        className="border-border-card bg-secondary-bg text-primary-text min-w-[180px] rounded-xl border p-0"
                       >
-                        <Icon icon="heroicons:clipboard" className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        asChild
-                        size="sm"
-                        variant="default"
-                        className="px-2 sm:px-3"
-                        data-umami-event="Join Server"
-                        data-umami-event-server-id={server.id}
-                      >
-                        <a
-                          href={server.link}
-                          target="_blank"
-                          rel="noopener noreferrer"
+                        <DropdownMenuItem
+                          className="w-full cursor-pointer rounded-none px-4 py-2"
+                          onSelect={() => handleEditServerFromMenu(server)}
                         >
-                          Join Server
-                        </a>
-                      </Button>
-                    </>
+                          <Icon
+                            icon="heroicons:pencil"
+                            className="mr-2 h-4 w-4"
+                          />
+                          Edit server
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          className="hover:bg-button-danger/10 text-button-danger hover:text-button-danger focus:bg-button-danger/10 focus:text-button-danger w-full cursor-pointer rounded-none px-4 py-2"
+                          onSelect={() => handleDeleteServerFromMenu(server)}
+                        >
+                          <Icon
+                            icon="heroicons:trash-solid"
+                            className="mr-2 h-4 w-4"
+                          />
+                          Delete server
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   )}
                 </div>
               </div>
 
-              <div className="space-y-3 sm:space-y-4">
-                <div className="flex items-center space-x-2">
-                  <Icon
-                    icon="heroicons:user-solid"
-                    className="text-secondary-text h-5 w-5 shrink-0"
-                  />
-                  <span className="text-secondary-text flex items-center gap-1 text-sm sm:text-base">
-                    Owner:{" "}
-                    {userData[server.owner] ? (
+              <div className="border-border-card bg-tertiary-bg mb-4 rounded-lg border p-3">
+                <p className="text-secondary-text mb-2 text-xs tracking-wide uppercase">
+                  Server owner
+                </p>
+                <div className="flex items-center justify-between gap-3">
+                  {userData[server.owner] ? (
+                    <div className="flex min-w-0 flex-1 items-center gap-2">
+                      <UserAvatar
+                        userId={userData[server.owner].id}
+                        avatarHash={userData[server.owner].avatar}
+                        username={userData[server.owner].username}
+                        size={9}
+                        custom_avatar={userData[server.owner].custom_avatar}
+                        showBadge={false}
+                        settings={userData[server.owner].settings}
+                        premiumType={userData[server.owner].premiumtype}
+                      />
                       <Link
                         href={`/users/${server.owner}`}
-                        className="text-link hover:text-link-hover active:text-link-active flex items-center gap-2 transition-colors hover:underline"
+                        prefetch={false}
+                        className="text-primary-text hover:text-link active:text-link-active min-w-0 truncate font-medium transition-colors"
                       >
-                        {userData[server.owner] && (
-                          <UserAvatar
-                            userId={userData[server.owner].id}
-                            avatarHash={userData[server.owner].avatar}
-                            username={userData[server.owner].username}
-                            size={8}
-                            custom_avatar={userData[server.owner].custom_avatar}
-                            showBadge={false}
-                            settings={userData[server.owner].settings}
-                            premiumType={userData[server.owner].premiumtype}
-                          />
-                        )}
-                        <span className="truncate">
-                          {userData[server.owner].username}
-                        </span>
+                        {userData[server.owner].username}
                       </Link>
-                    ) : (
-                      <Skeleton
-                        variant="text"
-                        width={100}
-                        sx={{ bgcolor: "var(--color-secondary-bg)" }}
-                      />
-                    )}
-                  </span>
-                </div>
-
-                <div className="flex items-center space-x-2">
-                  <Icon
-                    icon="heroicons:clock"
-                    className="text-secondary-text h-5 w-5 shrink-0"
-                  />
-                  <span className="text-secondary-text text-sm sm:text-base">
-                    Added: {formatProfileDate(server.created_at)}
-                  </span>
-                </div>
-
-                {server.rules && (
-                  <div className="border-border-card bg-tertiary-bg rounded-lg border p-3 sm:p-4">
-                    <h4 className="text-primary-text mb-2 text-sm font-medium">
-                      Rules:
-                    </h4>
-                    <p
-                      className="text-secondary-text text-sm wrap-break-word"
-                      dangerouslySetInnerHTML={{
-                        __html: sanitizeHTML(processMentions(server.rules)),
-                      }}
+                      {isSupporter && supporterTier && (
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <span className="flex items-center">
+                              <Image
+                                src={
+                                  supporterIcons[
+                                    supporterTier as keyof typeof supporterIcons
+                                  ]
+                                }
+                                alt={`Supporter Type ${supporterTier}`}
+                                width={16}
+                                height={16}
+                                className="object-contain"
+                              />
+                            </span>
+                          </TooltipTrigger>
+                          <TooltipContent
+                            side="top"
+                            className="bg-secondary-bg text-primary-text border-none shadow-[var(--color-card-shadow)]"
+                          >
+                            <p>Supporter Type {supporterTier}</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      )}
+                    </div>
+                  ) : (
+                    <Skeleton
+                      variant="text"
+                      width={100}
+                      sx={{ bgcolor: "var(--color-secondary-bg)" }}
                     />
-                  </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="mb-4 flex flex-wrap gap-2">
+                <div className="text-primary-text bg-tertiary-bg/40 border-border-card hover:bg-quaternary-bg/60 inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium shadow-sm transition-all">
+                  <Icon icon="heroicons:clock" className="h-3.5 w-3.5" />
+                  Added {formatProfileDate(server.created_at)}
+                </div>
+                <div className="text-primary-text bg-tertiary-bg/40 border-border-card hover:bg-quaternary-bg/60 inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium shadow-sm transition-all">
+                  <Icon
+                    icon="heroicons:calendar-days"
+                    className="h-3.5 w-3.5"
+                  />
+                  Expires {expiresText}
+                </div>
+              </div>
+
+              <div className="border-border-card bg-tertiary-bg rounded-lg border p-3 sm:p-4">
+                <h4 className="text-primary-text mb-2 text-sm font-medium">
+                  Server rules
+                </h4>
+                <p
+                  className="text-secondary-text text-sm wrap-break-word"
+                  style={{
+                    display: "-webkit-box",
+                    WebkitLineClamp: 2,
+                    WebkitBoxOrient: "vertical",
+                    overflow: "hidden",
+                  }}
+                  dangerouslySetInnerHTML={{ __html: parsedRules }}
+                />
+                {shouldShowRulesExpand && (
+                  <details className="mt-2">
+                    <summary className="text-link hover:text-link-hover cursor-pointer text-xs">
+                      Read full rules
+                    </summary>
+                    <p
+                      className="text-secondary-text mt-2 text-sm wrap-break-word"
+                      dangerouslySetInnerHTML={{ __html: parsedRules }}
+                    />
+                  </details>
                 )}
+              </div>
+
+              <div className="border-border-card mt-4 flex items-center justify-between border-t pt-4">
+                <Button
+                  onClick={() => handleCopyLink(server.link)}
+                  size="sm"
+                  variant="secondary"
+                  className="px-3"
+                  aria-label="Copy Server Link"
+                  data-umami-event="Copy Server Link"
+                  data-umami-event-server-id={server.id}
+                >
+                  <Icon icon="heroicons:clipboard" className="mr-1 h-4 w-4" />
+                  Copy link
+                </Button>
+                <Button
+                  asChild
+                  size="sm"
+                  variant="default"
+                  className="px-3"
+                  data-umami-event="Join Server"
+                  data-umami-event-server-id={server.id}
+                >
+                  <a
+                    href={server.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Join Server
+                  </a>
+                </Button>
               </div>
             </div>
           );
@@ -870,16 +888,60 @@ const ServerList: React.FC<{
       )}
 
       {deleteModalOpen && serverToDelete && (
-        <ConfirmDialog
-          isOpen={deleteModalOpen}
-          onClose={() => setDeleteModalOpen(false)}
-          onConfirm={confirmDeleteServer}
-          title="Delete Server?"
-          message="Are you sure you want to delete this server? This action cannot be undone."
-          confirmText="Delete"
-          cancelText="Cancel"
-          confirmVariant="destructive"
-        />
+        <Dialog
+          open={deleteModalOpen}
+          onClose={() => {}}
+          className="relative z-[3000]"
+        >
+          <div
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm"
+            aria-hidden="true"
+          />
+
+          <div className="fixed inset-0 flex items-center justify-center p-4">
+            <DialogPanel className="border-border-card bg-secondary-bg hover:border-border-focus relative w-full max-w-md rounded-lg border shadow-xl">
+              <div className="border-border-card flex items-center justify-between border-b p-4">
+                <h2 className="text-primary-text text-xl font-semibold">
+                  Delete Server?
+                </h2>
+                <button
+                  type="button"
+                  onClick={() => setDeleteModalOpen(false)}
+                  aria-label="Close"
+                  className="text-secondary-text hover:text-primary-text hover:bg-quaternary-bg focus-visible:ring-ring inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-md transition-colors focus-visible:ring-1 focus-visible:outline-none"
+                >
+                  <Icon icon="heroicons:x-mark" className="h-5 w-5" />
+                </button>
+              </div>
+
+              <div className="p-6">
+                <p className="text-secondary-text">
+                  Are you sure you want to delete this server? This action
+                  cannot be undone.
+                </p>
+              </div>
+
+              <div className="border-border-card flex justify-end gap-2 border-t p-4">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  disabled={deletingServer}
+                  onClick={() => setDeleteModalOpen(false)}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  disabled={deletingServer}
+                  onClick={confirmDeleteServer}
+                >
+                  {deletingServer ? "Deleting..." : "Delete"}
+                </Button>
+              </div>
+            </DialogPanel>
+          </div>
+        </Dialog>
       )}
     </div>
   );
