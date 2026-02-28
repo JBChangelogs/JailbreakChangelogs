@@ -19,6 +19,7 @@ interface ConfirmDialogProps {
     | "link";
   confirmDisabled?: boolean;
   closeOnConfirm?: boolean;
+  zIndexClassName?: string;
   children?: React.ReactNode;
 }
 
@@ -33,10 +34,15 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   confirmVariant = "destructive",
   confirmDisabled = false,
   closeOnConfirm = true,
+  zIndexClassName = "z-50",
   children,
 }) => {
   return (
-    <Dialog open={isOpen} onClose={onClose} className="relative z-50">
+    <Dialog
+      open={isOpen}
+      onClose={onClose}
+      className={`relative ${zIndexClassName}`}
+    >
       <div
         className="fixed inset-0 bg-black/30 backdrop-blur-sm"
         aria-hidden="true"

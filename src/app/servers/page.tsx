@@ -2,7 +2,6 @@
 
 import React from "react";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
-import ServerHeader from "@/components/Servers/ServerHeader";
 import ServerList from "@/components/Servers/ServerList";
 import VIPServerNotice from "@/components/ui/VIPServerNotice";
 
@@ -21,7 +20,6 @@ export default function ServersPage() {
       <div className="container mx-auto mb-8 px-4">
         <Breadcrumb />
         <VIPServerNotice className="mb-6" />
-        <ServerHeader />
         <ServerList sortOption={sortOption} onSortChange={setSortOption} />
       </div>
     </main>

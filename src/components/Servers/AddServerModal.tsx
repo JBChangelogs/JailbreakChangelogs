@@ -2,14 +2,18 @@
 
 import React from "react";
 import { toast } from "sonner";
-import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
-import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import { format } from "date-fns";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { Dialog, DialogPanel } from "@headlessui/react";
 import { Icon } from "@/components/ui/IconWrapper";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import {
   validatePrivateServerLink,
   validateServerRulesText,
@@ -38,10 +42,14 @@ const AddServerModal: React.FC<AddServerModalProps> = ({
   const [link, setLink] = React.useState("");
   const [rules, setRules] = React.useState("");
   const [expires, setExpires] = React.useState<Date | null>(null);
+  const [expiresTime, setExpiresTime] = React.useState("00:00:00");
   const [neverExpires, setNeverExpires] = React.useState(false);
   const [originalExpires, setOriginalExpires] = React.useState<Date | null>(
     null,
   );
+  const [originalExpiresTime, setOriginalExpiresTime] =
+    React.useState("00:00:00");
+  const [isDatePickerOpen, setIsDatePickerOpen] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
 
   // Character limits
@@ -62,6 +70,35 @@ const AddServerModal: React.FC<AddServerModalProps> = ({
       .replace(/\n\n+/g, "\n\n"); // Collapse multiple consecutive newlines to just two
   };
 
+  const formatTimeForInput = (date: Date): string => {
+    const hours = String(date.getHours()).padStart(2, "0");
+    const minutes = String(date.getMinutes()).padStart(2, "0");
+    const seconds = String(date.getSeconds()).padStart(2, "0");
+    return `${hours}:${minutes}:${seconds}`;
+  };
+
+  const applyTimeToDate = (date: Date, timeValue: string): Date => {
+    const [h = "0", m = "0", s = "0"] = timeValue.split(":");
+    const hours = Number.parseInt(h, 10) || 0;
+    const minutes = Number.parseInt(m, 10) || 0;
+    const seconds = Number.parseInt(s, 10) || 0;
+    const next = new Date(date);
+    next.setHours(hours, minutes, seconds, 0);
+    return next;
+  };
+
+  const minSelectableDate = React.useMemo(() => {
+    const date = new Date();
+    date.setHours(0, 0, 0, 0);
+    date.setDate(date.getDate() + 7);
+    return date;
+  }, []);
+
+  const initialCalendarMonth = React.useMemo(() => {
+    if (expires && expires >= minSelectableDate) return expires;
+    return minSelectableDate;
+  }, [expires, minSelectableDate]);
+
   // Reset form when modal opens/closes or editingServer changes
   React.useEffect(() => {
     if (isOpen) {
@@ -79,20 +116,28 @@ const AddServerModal: React.FC<AddServerModalProps> = ({
           setNeverExpires(true);
           setExpires(null);
           setOriginalExpires(null);
+          setExpiresTime("00:00:00");
+          setOriginalExpiresTime("00:00:00");
         } else {
           const expirationDate = new Date(
             parseInt(editingServer.expires) * 1000,
           );
+          const expirationTime = formatTimeForInput(expirationDate);
           setNeverExpires(false);
           setExpires(expirationDate);
           setOriginalExpires(expirationDate);
+          setExpiresTime(expirationTime);
+          setOriginalExpiresTime(expirationTime);
         }
       } else {
         // Reset form for new server
+        const today = new Date();
         setLink("");
         setRules("");
-        setExpires(null);
+        setExpires(today);
         setOriginalExpires(null);
+        setExpiresTime(formatTimeForInput(today));
+        setOriginalExpiresTime("00:00:00");
         setNeverExpires(false);
       }
     }
@@ -114,9 +159,13 @@ const AddServerModal: React.FC<AddServerModalProps> = ({
       return;
     }
 
+    const expiresWithTime =
+      !neverExpires && expires ? applyTimeToDate(expires, expiresTime) : null;
+
+    const normalizedLink = link.trim();
     const normalizedRules = cleanRulesText(rules) || "N/A";
 
-    const linkValidation = validatePrivateServerLink(link);
+    const linkValidation = validatePrivateServerLink(normalizedLink);
     if (!linkValidation.isValid) {
       toast.error(linkValidation.message || "Invalid server link");
       return;
@@ -129,9 +178,9 @@ const AddServerModal: React.FC<AddServerModalProps> = ({
     }
 
     // Check if the expiration date is in the past
-    if (!neverExpires && expires) {
+    if (!neverExpires && expiresWithTime) {
       const now = new Date();
-      if (expires < now) {
+      if (expiresWithTime < now) {
         toast.error("Expiration date cannot be in the past");
         return;
       }
@@ -139,8 +188,45 @@ const AddServerModal: React.FC<AddServerModalProps> = ({
       // Check if expiration date is at least 7 days from now
       const sevenDaysFromNow = new Date();
       sevenDaysFromNow.setDate(sevenDaysFromNow.getDate() + 7);
-      if (expires < sevenDaysFromNow) {
+      if (expiresWithTime < sevenDaysFromNow) {
         toast.error("Expiration date must be at least 7 days from now");
+        return;
+      }
+    }
+
+    // Check if the expiration date is more than 1 year away
+    const oneYearFromNow = new Date();
+    oneYearFromNow.setFullYear(oneYearFromNow.getFullYear() + 1);
+
+    const normalizedExpires =
+      neverExpires || (expiresWithTime && expiresWithTime > oneYearFromNow)
+        ? "Never"
+        : expiresWithTime
+          ? String(Math.floor(expiresWithTime.getTime() / 1000))
+          : null;
+
+    if (editingServer) {
+      const originalLink = editingServer.link.trim();
+      const originalRules = cleanRulesText(editingServer.rules) || "N/A";
+      const originalExpires =
+        editingServer.expires === "Never"
+          ? "Never"
+          : (() => {
+              const parsed = parseInt(editingServer.expires, 10);
+              if (Number.isNaN(parsed)) return editingServer.expires;
+              // Normalize to seconds for reliable comparisons.
+              return String(
+                parsed > 10000000000 ? Math.floor(parsed / 1000) : parsed,
+              );
+            })();
+
+      const hasChanges =
+        normalizedLink !== originalLink ||
+        normalizedRules !== originalRules ||
+        normalizedExpires !== originalExpires;
+
+      if (!hasChanges) {
+        onClose();
         return;
       }
     }
@@ -148,11 +234,10 @@ const AddServerModal: React.FC<AddServerModalProps> = ({
     // auth enforced server-side via cookie; client just gates UX
 
     setLoading(true);
+    const savingToastId = toast.loading(
+      editingServer ? "Saving server changes..." : "Adding server...",
+    );
     try {
-      // Check if the expiration date is more than 1 year away
-      const oneYearFromNow = new Date();
-      oneYearFromNow.setFullYear(oneYearFromNow.getFullYear() + 1);
-
       const endpoint = editingServer
         ? `/api/servers/update?id=${editingServer.id}`
         : `/api/servers/add`;
@@ -163,14 +248,9 @@ const AddServerModal: React.FC<AddServerModalProps> = ({
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          link: link.trim(),
+          link: normalizedLink,
           rules: normalizedRules,
-          expires:
-            neverExpires || (expires && expires > oneYearFromNow)
-              ? "Never"
-              : expires
-                ? String(Math.floor(expires.getTime() / 1000))
-                : null,
+          expires: normalizedExpires,
         }),
       });
 
@@ -179,6 +259,7 @@ const AddServerModal: React.FC<AddServerModalProps> = ({
           editingServer
             ? "Server updated successfully!"
             : "Server added successfully!",
+          { id: savingToastId },
         );
         onServerAdded();
         onClose();
@@ -187,17 +268,22 @@ const AddServerModal: React.FC<AddServerModalProps> = ({
           .json()
           .catch(() => ({ message: "Failed to save server" }));
         if (response.status === 409) {
-          toast.error("This server already exists");
+          toast.error("This server already exists", { id: savingToastId });
         } else if (response.status === 403) {
           toast.error(
             "Server link must start with: https://www.roblox.com/share?code=",
+            { id: savingToastId },
           );
         } else {
-          toast.error(`Error saving server: ${errorData.message}`);
+          toast.error(`Error saving server: ${errorData.message}`, {
+            id: savingToastId,
+          });
         }
       }
     } catch (err) {
-      toast.error("An error occurred while saving the server");
+      toast.error("An error occurred while saving the server", {
+        id: savingToastId,
+      });
       console.error("Save server error:", err);
     } finally {
       setLoading(false);
@@ -275,222 +361,115 @@ const AddServerModal: React.FC<AddServerModalProps> = ({
               </div>
 
               <div>
-                <div className="text-primary-text mb-2 flex items-center text-sm font-medium">
-                  Expires <span className="text-button-danger ml-1">*</span>
+                <div className="text-primary-text mb-3 flex items-center text-sm font-medium">
+                  Expires<span className="text-button-danger ml-1">*</span>
                 </div>
-                <LocalizationProvider dateAdapter={AdapterDateFns}>
-                  <DatePicker
-                    value={expires}
-                    onChange={(date) => setExpires(date)}
-                    minDate={new Date()}
-                    disabled={neverExpires}
-                    slotProps={{
-                      textField: {
-                        fullWidth: true,
-                        variant: "outlined",
-                        placeholder: "Select expiration date",
-                        sx: {
-                          backgroundColor: "var(--color-primary-bg) !important",
-                          "& .MuiOutlinedInput-root": {
-                            color: "var(--color-primary-text)",
-                            backgroundColor:
-                              "var(--color-primary-bg) !important",
-                            "& fieldset": {
-                              borderColor: "var(--color-border-primary)",
-                            },
-                            "&:hover fieldset": {
-                              borderColor: "var(--color-button-info)",
-                            },
-                            "&.Mui-focused fieldset": {
-                              borderColor: "var(--color-button-info)",
-                            },
-                          },
-                          "& .MuiInputLabel-root": {
-                            color: "var(--color-primary-text)",
-                          },
-                          "& .MuiInputBase-input": {
-                            backgroundColor:
-                              "var(--color-primary-bg) !important",
-                            "&::placeholder": {
-                              color: "var(--color-secondary-text) !important",
-                              opacity: "1 !important",
-                            },
-                          },
-                          "& .MuiInputBase-root": {
-                            backgroundColor:
-                              "var(--color-primary-bg) !important",
-                            "& .MuiInputAdornment-root": {
-                              "& .MuiIconButton-root": {
-                                color: "var(--color-secondary-text) !important",
-                                "&:hover": {
-                                  backgroundColor: "var(--color-quaternary-bg)",
-                                },
-                                "& svg": {
-                                  color:
-                                    "var(--color-secondary-text) !important",
-                                },
-                              },
-                            },
-                          },
-                          "& .MuiPickersInputBase-root": {
-                            "& .MuiInputAdornment-root": {
-                              "& .MuiIconButton-root": {
-                                color: "var(--color-secondary-text) !important",
-                                "&:hover": {
-                                  backgroundColor: "var(--color-quaternary-bg)",
-                                },
-                                "& svg": {
-                                  color:
-                                    "var(--color-secondary-text) !important",
-                                },
-                              },
-                            },
-                          },
-                          "& .MuiPickersSectionList-root": {
-                            "& .MuiPickersSectionList-section": {
-                              color: "var(--color-secondary-text) !important",
-                              "&::placeholder": {
-                                color: "var(--color-secondary-text) !important",
-                                opacity: "1 !important",
-                              },
-                            },
-                          },
-                          "& .mui-joz0rk-MuiPickersSectionList-section-MuiPickersInputBase-section":
-                            {
-                              color: "var(--color-secondary-text) !important",
-                              "&::placeholder": {
-                                color: "var(--color-secondary-text) !important",
-                                opacity: "1 !important",
-                              },
-                            },
-                          "& .MuiOutlinedInput-notchedOutline": {
-                            borderColor: "var(--color-border-primary)",
-                          },
-                          "&:hover .MuiOutlinedInput-notchedOutline": {
-                            borderColor: "var(--color-button-info)",
-                          },
-                          "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                            borderColor: "var(--color-button-info)",
-                          },
-                        },
-                      },
-                      popper: {
-                        sx: {
-                          "& .MuiPaper-root": {
-                            backgroundColor: "var(--color-secondary-bg)",
-                            color: "var(--color-primary-text)",
-                            border: "1px solid var(--color-border-primary)",
-                            "& .MuiPickersCalendarHeader-root": {
-                              color: "var(--color-primary-text)",
-                              "& .MuiIconButton-root": {
-                                color: "var(--color-primary-text)",
-                                "&:hover": {
-                                  backgroundColor: "var(--color-quaternary-bg)",
-                                },
-                                "& svg": {
-                                  color: "var(--color-primary-text) !important",
-                                },
-                              },
-                              "& .MuiPickersArrowSwitcher-root": {
-                                "& .MuiIconButton-root": {
-                                  color: "var(--color-primary-text)",
-                                  "&:hover": {
-                                    backgroundColor:
-                                      "var(--color-quaternary-bg)",
-                                  },
-                                  "& svg": {
-                                    color:
-                                      "var(--color-primary-text) !important",
-                                  },
-                                },
-                              },
-                              "& .MuiPickersCalendarHeader-labelContainer": {
-                                "& .MuiIconButton-root": {
-                                  color: "var(--color-primary-text)",
-                                  "&:hover": {
-                                    backgroundColor:
-                                      "var(--color-quaternary-bg)",
-                                  },
-                                  "& svg": {
-                                    color:
-                                      "var(--color-primary-text) !important",
-                                  },
-                                },
-                              },
-                            },
-                            "& .MuiDayCalendar-root": {
-                              "& .MuiPickersDay-root": {
-                                color: "var(--color-primary-text)",
-                                backgroundColor: "transparent",
-                                "&:hover": {
-                                  backgroundColor: "var(--color-quaternary-bg)",
-                                },
-                                "&.Mui-selected": {
-                                  backgroundColor: "var(--color-button-info)",
-                                  color: "var(--color-form-button-text)",
-                                  "&:hover": {
-                                    backgroundColor:
-                                      "var(--color-button-info-hover)",
-                                  },
-                                },
-                                "&.Mui-disabled": {
-                                  color: "var(--color-secondary-text)",
-                                },
-                              },
-                            },
-                            "& .MuiPickersMonth-root": {
-                              color: "var(--color-primary-text)",
-                              "&:hover": {
-                                backgroundColor: "var(--color-quaternary-bg)",
-                              },
-                              "&.Mui-selected": {
-                                backgroundColor: "var(--color-button-info)",
-                                color: "var(--color-form-button-text)",
-                              },
-                            },
-                            "& .MuiPickersYear-root": {
-                              color: "var(--color-primary-text)",
-                              "&:hover": {
-                                backgroundColor: "var(--color-quaternary-bg)",
-                              },
-                              "&.Mui-selected": {
-                                backgroundColor: "var(--color-button-info)",
-                                color: "var(--color-form-button-text)",
-                              },
-                            },
-                          },
-                        },
-                      },
-                    }}
-                  />
-                </LocalizationProvider>
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
+                  <div className="w-full sm:flex-1">
+                    <label
+                      htmlFor="server-expiry-date"
+                      className={`mb-2 block text-sm font-medium ${
+                        neverExpires
+                          ? "text-secondary-text"
+                          : "text-primary-text"
+                      }`}
+                    >
+                      Date
+                    </label>
+                    <Popover
+                      open={isDatePickerOpen}
+                      onOpenChange={(open) => {
+                        if (neverExpires) return;
+                        setIsDatePickerOpen(open);
+                      }}
+                    >
+                      <PopoverTrigger asChild>
+                        <Button
+                          id="server-expiry-date"
+                          type="button"
+                          variant="ghost"
+                          disabled={neverExpires}
+                          style={{
+                            backgroundColor: "var(--color-tertiary-bg)",
+                          }}
+                          className="border-border-card bg-tertiary-bg text-primary-text hover:border-border-focus hover:bg-tertiary-bg! active:bg-tertiary-bg! disabled:bg-tertiary-bg h-10 w-full justify-between rounded-md border px-3 py-2 font-normal disabled:cursor-not-allowed disabled:opacity-60"
+                        >
+                          <span>{format(expires ?? new Date(), "PPP")}</span>
+                          <Icon icon="heroicons:chevron-down" />
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent
+                        align="start"
+                        className="border-border-card bg-secondary-bg z-[3100] w-auto p-0"
+                      >
+                        <Calendar
+                          mode="single"
+                          selected={expires ?? undefined}
+                          defaultMonth={initialCalendarMonth}
+                          onSelect={(date) => {
+                            setExpires(date ?? null);
+                            setIsDatePickerOpen(false);
+                          }}
+                          disabled={(date) => date < minSelectableDate}
+                          initialFocus
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+                  <div className="w-full shrink-0 sm:w-36">
+                    <label
+                      htmlFor="server-expiry-time"
+                      className={`mb-2 block text-sm font-medium ${
+                        neverExpires
+                          ? "text-secondary-text"
+                          : "text-primary-text"
+                      }`}
+                    >
+                      Time
+                    </label>
+                    <input
+                      id="server-expiry-time"
+                      type="time"
+                      step={1}
+                      value={expiresTime}
+                      disabled={neverExpires}
+                      onChange={(event) => setExpiresTime(event.target.value)}
+                      style={{ backgroundColor: "var(--color-tertiary-bg)" }}
+                      className="border-border-card bg-tertiary-bg text-primary-text hover:border-border-focus focus:border-button-info disabled:bg-tertiary-bg h-10 w-full appearance-none rounded-md border px-3 py-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-60 [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none"
+                    />
+                  </div>
+                </div>
                 <p className="text-secondary-text mt-1 text-sm">
-                  When will this server link expire? <br />
-                  (Must be at least 7 days from now)
+                  Must be at least 7 days from now.
                 </p>
-              </div>
 
-              <div>
-                <label className="flex cursor-pointer items-center space-x-2">
+                <label className="mt-3 flex cursor-pointer items-center space-x-2">
                   <Checkbox
                     checked={neverExpires}
                     onCheckedChange={(checked) => {
                       const isChecked = checked === true;
                       setNeverExpires(isChecked);
-                      if (isChecked) {
-                        setExpires(null);
-                      } else {
-                        setExpires(originalExpires);
+                      if (!isChecked && !expires) {
+                        const restoredDate = originalExpires ?? new Date();
+                        setExpires(restoredDate);
+                        setExpiresTime(
+                          originalExpires
+                            ? originalExpiresTime
+                            : formatTimeForInput(restoredDate),
+                        );
                       }
                     }}
                   />
                   <span className="text-primary-text text-sm">
-                    Never Expires
+                    Never expires
                   </span>
                 </label>
-                <p className="text-secondary-text mt-1 text-sm">
-                  Toggle this if the server will remain active indefinitely
-                </p>
+                {neverExpires && (
+                  <p className="text-secondary-text mt-1 text-sm">
+                    Expiry fields are disabled because this server never
+                    expires.
+                  </p>
+                )}
               </div>
 
               {/* Actions */}
