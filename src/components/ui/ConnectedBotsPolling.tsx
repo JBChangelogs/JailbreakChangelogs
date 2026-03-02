@@ -13,6 +13,7 @@ import Image from "next/image";
 import Link from "next/link";
 import RetryErrorDisplay from "./RetryErrorDisplay";
 import { Icon } from "@iconify/react";
+import { Button } from "./button";
 
 export default function ConnectedBotsPolling() {
   "use memo";
@@ -157,6 +158,21 @@ export default function ConnectedBotsPolling() {
               {pollingStopped
                 ? "No inventory scanning bots have been active for 2+ minutes. Please check back in a bit."
                 : "No inventory scanning bots have been active in the last 30 seconds"}
+            </div>
+            <div className="mt-3 flex flex-col items-center gap-2">
+              <p className="text-secondary-text text-sm">
+                If this takes longer than usual, check our status page.
+              </p>
+              <Button asChild variant="secondary" size="sm">
+                <a
+                  href="https://status.jailbreakchangelogs.xyz"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <Icon icon="heroicons:signal" className="h-4 w-4" />
+                  View Uptime
+                </a>
+              </Button>
             </div>
           </div>
         </div>
