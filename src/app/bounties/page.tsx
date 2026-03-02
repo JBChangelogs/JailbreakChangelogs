@@ -24,6 +24,26 @@ import { Slider } from "@/components/ui/slider";
 
 const BOUNTY_RANGE_MAX = 200_000;
 
+function StatusPageAction({ className = "" }: { className?: string }) {
+  return (
+    <div className={`mt-2 flex flex-col items-center gap-2 ${className}`}>
+      <p className="text-secondary-text text-sm">
+        If this takes longer than usual, check our status page.
+      </p>
+      <Button asChild variant="secondary" size="sm">
+        <a
+          href="https://status.jailbreakchangelogs.xyz"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <Icon icon="heroicons:signal" className="h-4 w-4" />
+          View Uptime
+        </a>
+      </Button>
+    </div>
+  );
+}
+
 interface BountyRangeFilterProps {
   range: [number, number];
   onCommit: (range: [number, number]) => void;
@@ -555,27 +575,19 @@ function BountyTrackerContent() {
           </div>
         </div>
 
-        {/* Error Display */}
-        {error && (
-          <div className="border-status-error/50 bg-status-error/10 mb-6 rounded-lg border p-4">
-            <div className="flex items-center gap-2">
-              <Icon
-                icon="heroicons:exclamation-triangle"
-                className="text-status-error h-5 w-5"
-              />
-              <p className="text-status-error">{error}</p>
-            </div>
-          </div>
-        )}
-
-        {/* Loading State - only show when no data and no error */}
-        {!isConnected && !error && !hasData && (
+        {/* Connection State - no data yet (connecting/disconnected/error) */}
+        {!isConnected && !hasData && (
           <div className="flex items-center justify-center py-20">
             <div className="text-center">
               <div className="border-button-info mx-auto mb-4 h-12 w-12 animate-spin rounded-full border-b-2"></div>
               <p className="text-secondary-text">
-                Connecting to bounty tracker...
+                {isConnecting
+                  ? "Connecting to bounty tracker..."
+                  : error
+                    ? "Connection issue detected."
+                    : "Connecting to bounty tracker..."}
               </p>
+              <StatusPageAction />
             </div>
           </div>
         )}
@@ -599,6 +611,7 @@ function BountyTrackerContent() {
                       ? "Tracker paused due to inactivity. Move your mouse or press a key to resume."
                       : "Showing last known data. Connection will resume automatically."}
                 </p>
+                <StatusPageAction className="items-start" />
               </div>
             </div>
           </div>
@@ -652,6 +665,7 @@ function BountyTrackerContent() {
                 <p className="text-tertiary-text text-sm">
                   Waiting for bounty data...
                 </p>
+                <StatusPageAction />
               </div>
             </div>
           )

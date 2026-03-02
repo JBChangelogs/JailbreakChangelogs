@@ -87,6 +87,26 @@ type RobberyComboResult = {
   latestTimestamp: number;
 };
 
+function StatusPageAction({ className = "" }: { className?: string }) {
+  return (
+    <div className={`mt-2 flex flex-col items-center gap-2 ${className}`}>
+      <p className="text-secondary-text text-sm">
+        If this takes longer than usual, check our status page.
+      </p>
+      <Button asChild variant="secondary" size="sm">
+        <a
+          href="https://status.jailbreakchangelogs.xyz"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <Icon icon="heroicons:signal" className="h-4 w-4" />
+          View Uptime
+        </a>
+      </Button>
+    </div>
+  );
+}
+
 function RobberiesInitialEmptyState() {
   const [showInitialLoading, setShowInitialLoading] = useState(true);
 
@@ -108,6 +128,7 @@ function RobberiesInitialEmptyState() {
         <p className="text-tertiary-text text-sm">
           Connected. Waiting for the first robbery batch.
         </p>
+        <StatusPageAction />
       </>
     );
   }
@@ -122,6 +143,7 @@ function RobberiesInitialEmptyState() {
         No robberies tracked yet
       </h3>
       <p className="text-tertiary-text text-sm">Waiting for robbery data...</p>
+      <StatusPageAction />
     </>
   );
 }
@@ -1321,6 +1343,7 @@ function RobberyTrackerContent() {
               <p className="text-secondary-text">
                 Connecting to robbery tracker...
               </p>
+              <StatusPageAction />
             </div>
           </div>
         )}
@@ -1344,6 +1367,7 @@ function RobberyTrackerContent() {
                       ? "Tracker paused due to inactivity. Move your mouse or press a key to resume."
                       : "Showing last known data. Connection will resume automatically."}
                 </p>
+                <StatusPageAction className="items-start" />
               </div>
             </div>
           </div>
@@ -1558,27 +1582,44 @@ function RobberyTrackerContent() {
                   </div>
                 ) : (
                   <div className="flex min-h-screen flex-col items-center justify-start py-12 pt-24 text-center">
-                    <Icon
-                      icon="heroicons:magnifying-glass"
-                      className="text-tertiary-text mb-4 h-12 w-12"
-                    />
-                    <h3 className="text-primary-text text-lg font-medium">
-                      No robberies found
-                    </h3>
-                    <p className="text-secondary-text">
-                      {selectedRobberyTypes.length > 0 && !searchQuery ? (
+                    {(() => {
+                      const hasActiveRobberyFilters =
+                        Boolean(searchQuery) ||
+                        selectedRobberyTypes.length > 0 ||
+                        serverSize !== "all";
+
+                      return (
                         <>
-                          No robberies logged yet for the selected type
-                          {selectedRobberyTypes.length > 1 ? "s" : ""}
+                          <Icon
+                            icon="heroicons:magnifying-glass"
+                            className="text-tertiary-text mb-4 h-12 w-12"
+                          />
+                          <h3 className="text-primary-text text-lg font-medium">
+                            {hasActiveRobberyFilters
+                              ? "No robberies found"
+                              : "No robberies tracked yet"}
+                          </h3>
+                          <p className="text-secondary-text">
+                            {selectedRobberyTypes.length > 0 && !searchQuery ? (
+                              <>
+                                No robberies logged yet for the selected type
+                                {selectedRobberyTypes.length > 1 ? "s" : ""}
+                              </>
+                            ) : selectedRobberyTypes.length > 0 &&
+                              searchQuery ? (
+                              <>No robberies match your filters and search</>
+                            ) : searchQuery ? (
+                              <>Try adjusting your search query</>
+                            ) : hasActiveRobberyFilters ? (
+                              <>No robberies found for your current filters</>
+                            ) : (
+                              <>Waiting for robbery data...</>
+                            )}
+                          </p>
                         </>
-                      ) : selectedRobberyTypes.length > 0 && searchQuery ? (
-                        <>No robberies match your filters and search</>
-                      ) : searchQuery ? (
-                        <>Try adjusting your search query</>
-                      ) : (
-                        <>No robberies tracked yet</>
-                      )}
-                    </p>
+                      );
+                    })()}
+                    <StatusPageAction />
                   </div>
                 )}
               </>
