@@ -21,17 +21,26 @@ export default function ServiceAvailabilityTicker() {
 
           <div className="flex items-center gap-2">
             <span className="text-primary-text text-center text-xs">
-              <strong>Bank Truck Tracker:</strong> Bank Trucks are temporarily
-              unavailable on the{" "}
+              <strong>SERVICE ALERT:</strong> Robbery &amp; Bounty updates may
+              be delayed on the{" "}
               <Link
                 href="/robberies"
                 prefetch={false}
                 className="text-link hover:underline"
               >
                 robbery tracker
-              </Link>{" "}
-              due to technical issues. All other robbery tracking services
-              remain functional.
+              </Link>
+              . Inventory Tracking remains operational. Follow progress on{" "}
+              <Link
+                href="https://status.jailbreakchangelogs.xyz/"
+                prefetch={false}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-link hover:underline"
+              >
+                our status page
+              </Link>
+              .
             </span>
           </div>
         </div>
