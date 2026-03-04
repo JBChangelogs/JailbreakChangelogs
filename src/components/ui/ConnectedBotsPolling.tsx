@@ -404,7 +404,7 @@ export default function ConnectedBotsPolling() {
                   />
                 ))
               ) : (
-                <div className="text-secondary-text rounded-lg border border-dashed p-3 text-sm">
+                <div className="text-secondary-text border-border-card bg-tertiary-bg rounded-lg border p-3 text-center text-sm">
                   No bots active in this mode.
                 </div>
               )}
