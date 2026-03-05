@@ -28,60 +28,14 @@ import {
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { useIsAuthenticated } from "@/contexts/AuthContext";
-import { usePathname, useRouter } from "next/navigation";
-import {
-  CategoryIconBadge,
-  getCategoryColor,
-  getCategoryIcon,
-} from "@/utils/categoryIcons";
+import { usePathname } from "next/navigation";
+import { CategoryIconBadge, getCategoryColor } from "@/utils/categoryIcons";
 import { Icon } from "@/components/ui/IconWrapper";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
-import { Button } from "@/components/ui/button";
-import {
-  demandDescriptions,
-  trendDescriptions,
-} from "@/utils/tradingDefinitions";
-
-const demandNote =
-  "Demand levels are ranked from lowest to highest. Items with higher demand are generally easier to trade and may have better values.";
-
-const setMobileSheetOpen = (isOpen: boolean) => {
-  if (typeof window === "undefined" || typeof document === "undefined") return;
-  const w = window as Window & { __jbMobileSheetOpenCount?: number };
-  const current = w.__jbMobileSheetOpenCount ?? 0;
-  const next = Math.max(0, current + (isOpen ? 1 : -1));
-  w.__jbMobileSheetOpenCount = next;
-  if (next > 0) {
-    document.body.dataset.mobileSheetOpen = "true";
-  } else {
-    delete document.body.dataset.mobileSheetOpen;
-  }
-  window.dispatchEvent(new Event("jb-sheet-toggle"));
-};
-
-const setItemSheetOpen = (isOpen: boolean) => {
-  if (typeof window === "undefined" || typeof document === "undefined") return;
-  const w = window as Window & { __jbItemSheetOpenCount?: number };
-  const current = w.__jbItemSheetOpenCount ?? 0;
-  const next = Math.max(0, current + (isOpen ? 1 : -1));
-  w.__jbItemSheetOpenCount = next;
-  if (next > 0) {
-    document.body.dataset.itemSheetOpen = "true";
-  } else {
-    delete document.body.dataset.itemSheetOpen;
-  }
-  window.dispatchEvent(new Event("jb-sheet-toggle"));
-};
 
 interface ItemCardProps {
   item: Item;
@@ -102,37 +56,15 @@ export default function ItemCard({
   const [isPlaying, setIsPlaying] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const [isBlueBirdRaised, setIsBlueBirdRaised] = useState(false);
-  const [isSheetOpen, setIsSheetOpen] = useState(false);
   const isMobile = useMediaQuery("(max-width:640px)");
-  const isSheetScreen = useMediaQuery("(max-width:1024px)");
   const mediaRef = useRef<HTMLDivElement>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const pathname = usePathname();
-  const router = useRouter();
   const isValuesPage = pathname === "/values";
   const [itemMetadata, setItemMetadata] =
     useState<ItemUnlockMetadataEntry | null>(null);
   const isAuthenticated = useIsAuthenticated();
-  const wasSheetOpenRef = useRef(false);
-  const wasItemSheetOpenRef = useRef(false);
-
-  const handleCardClick = (e: React.MouseEvent) => {
-    // Don't navigate if clicking on interactive elements
-    if (
-      e.target instanceof HTMLElement &&
-      (e.target.closest("button") ||
-        e.target.closest("a") ||
-        e.target.closest(".dropdown"))
-    ) {
-      return;
-    }
-    if (isValuesPage) {
-      router.push(itemUrl);
-      return;
-    }
-    setIsSheetOpen(true);
-  };
 
   useEffect(() => {
     const currentMediaRef = mediaRef.current;
@@ -197,44 +129,6 @@ export default function ItemCard({
       window.clearInterval(interval);
     };
   }, [isBlueBird]);
-
-  useEffect(() => {
-    if (isSheetOpen && !wasItemSheetOpenRef.current) {
-      setItemSheetOpen(true);
-      wasItemSheetOpenRef.current = true;
-      return;
-    }
-    if (!isSheetOpen && wasItemSheetOpenRef.current) {
-      setItemSheetOpen(false);
-      wasItemSheetOpenRef.current = false;
-    }
-  }, [isSheetOpen]);
-
-  useEffect(() => {
-    if (!isSheetScreen) return;
-    if (isSheetOpen && !wasSheetOpenRef.current) {
-      setMobileSheetOpen(true);
-      wasSheetOpenRef.current = true;
-      return;
-    }
-    if (!isSheetOpen && wasSheetOpenRef.current) {
-      setMobileSheetOpen(false);
-      wasSheetOpenRef.current = false;
-    }
-  }, [isSheetScreen, isSheetOpen]);
-
-  useEffect(() => {
-    return () => {
-      if (wasItemSheetOpenRef.current) {
-        setItemSheetOpen(false);
-        wasItemSheetOpenRef.current = false;
-      }
-      if (wasSheetOpenRef.current) {
-        setMobileSheetOpen(false);
-        wasSheetOpenRef.current = false;
-      }
-    };
-  }, []);
 
   useEffect(() => {
     if (!isValuesPage) return;
@@ -371,10 +265,6 @@ export default function ItemCard({
   const itemUrl = `/item/${item.type.toLowerCase()}/${item.name}`;
   const demandLabel =
     currentItemData.demand === "N/A" ? "Unknown" : currentItemData.demand;
-  const demandDescription =
-    demandLabel === "Unknown"
-      ? "No official demand data yet."
-      : (demandDescriptions[demandLabel] ?? demandNote);
   const trendLabel =
     currentItemData.trend === null || currentItemData.trend === "N/A"
       ? "Unknown"
@@ -409,25 +299,15 @@ export default function ItemCard({
     <div className="w-full">
       <div
         className="group border-border-card border-b-border-card bg-secondary-bg relative cursor-pointer overflow-hidden rounded-lg border-2 transition-all duration-300 hover:shadow-lg"
-        role="button"
-        tabIndex={0}
-        aria-haspopup={isValuesPage ? undefined : "dialog"}
-        aria-expanded={isValuesPage ? undefined : isSheetOpen}
-        aria-label={`${isValuesPage ? "View" : "Open"} ${item.name} details`}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
-        onClick={handleCardClick}
-        onKeyDown={(event) => {
-          if (event.key === "Enter" || event.key === " ") {
-            event.preventDefault();
-            if (isValuesPage) {
-              router.push(itemUrl);
-              return;
-            }
-            setIsSheetOpen(true);
-          }
-        }}
       >
+        <Link
+          href={itemUrl}
+          prefetch={false}
+          aria-label={`View ${item.name} details`}
+          className="absolute inset-0 z-10 rounded-lg"
+        />
         <div
           ref={mediaRef}
           className="bg-tertiary-bg relative w-full overflow-hidden rounded-t-lg"
@@ -464,7 +344,7 @@ export default function ItemCard({
             )}
           <button
             onClick={handleFavoriteClick}
-            className={`bg-secondary-bg/80 border-border-card hover:border-border-focus absolute top-2 left-2 z-10 cursor-pointer rounded-full border p-1.5 transition-opacity ${
+            className={`bg-secondary-bg/80 border-border-card hover:border-border-focus absolute top-2 left-2 z-20 cursor-pointer rounded-full border p-1.5 transition-opacity ${
               isHovered ? "opacity-100" : "opacity-0"
             } hover:bg-secondary-bg`}
             title={isFavorited ? "Remove from favorites" : "Add to favorites"}
@@ -498,7 +378,7 @@ export default function ItemCard({
               />
               <button
                 onClick={handleHornClick}
-                className={`bg-primary-bg/50 absolute inset-0 flex items-center justify-center transition-opacity ${
+                className={`bg-primary-bg/50 absolute inset-0 z-20 flex items-center justify-center transition-opacity ${
                   isHovered || isPlaying ? "opacity-100" : "opacity-0"
                 }`}
               >
@@ -777,249 +657,6 @@ export default function ItemCard({
           </div>
         </div>
       </div>
-      <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
-        <SheetContent
-          side={isMobile ? "bottom" : isValuesPage ? "top" : "right"}
-          className="z-[4000] flex h-full max-h-screen flex-col"
-        >
-          <SheetHeader className="text-left">
-            <div className="flex items-start gap-3">
-              <div className="bg-primary-bg border-border-card relative h-14 w-14 shrink-0 overflow-hidden rounded-lg border">
-                <Image
-                  src={getItemImagePath(item.type, item.name, isValuesPage)}
-                  alt={item.name}
-                  width={112}
-                  height={112}
-                  className="h-full w-full object-cover"
-                  onError={handleImageError}
-                />
-              </div>
-              <div className="min-w-0 flex-1">
-                <SheetTitle className="truncate">{item.name}</SheetTitle>
-                <div className="mt-2 flex flex-wrap items-center gap-2">
-                  <span
-                    className="text-primary-text bg-tertiary-bg/40 inline-flex h-6 items-center gap-1 rounded-lg border px-2 text-xs leading-none font-semibold shadow-2xl backdrop-blur-xl"
-                    style={{
-                      borderColor: getCategoryColor(item.type),
-                    }}
-                  >
-                    {(() => {
-                      const categoryIcon = getCategoryIcon(item.type);
-                      return categoryIcon ? (
-                        <categoryIcon.Icon
-                          className="h-3 w-3"
-                          style={{ color: getCategoryColor(item.type) }}
-                        />
-                      ) : null;
-                    })()}
-                    {item.type}
-                  </span>
-                  {currentItemData.is_limited === 1 && (
-                    <span className="text-primary-text border-border-card bg-tertiary-bg/40 inline-flex h-6 items-center gap-1 rounded-lg border px-2 text-xs leading-none font-semibold shadow-2xl backdrop-blur-xl">
-                      <Icon
-                        icon="mdi:clock"
-                        className="h-3 w-3"
-                        style={{ color: "#ffd700" }}
-                      />
-                      Limited
-                    </span>
-                  )}
-                  {currentItemData.is_seasonal === 1 && (
-                    <span className="text-primary-text border-border-card bg-tertiary-bg/40 inline-flex h-6 items-center gap-1 rounded-lg border px-2 text-xs leading-none font-semibold shadow-2xl backdrop-blur-xl">
-                      <Icon
-                        icon="noto-v1:snowflake"
-                        className="h-3 w-3"
-                        style={{ color: "#40c0e7" }}
-                      />
-                      Seasonal
-                    </span>
-                  )}
-                  {isValuesPage &&
-                    (typeof visibleItemMetadata?.season === "number" ||
-                      hasMetadataLevel) && (
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <div className="flex cursor-help items-center gap-1">
-                            {typeof visibleItemMetadata?.season ===
-                              "number" && (
-                              <span className="bg-button-info text-form-button-text inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold shadow-sm">
-                                S{visibleItemMetadata.season}
-                              </span>
-                            )}
-                            {hasMetadataLevel && (
-                              <span className="bg-status-success text-form-button-text inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold shadow-sm">
-                                {formatUnlockLevelBadge(metadataLevel)}
-                              </span>
-                            )}
-                          </div>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          {requirementsTooltipText}
-                        </TooltipContent>
-                      </Tooltip>
-                    )}
-                </div>
-              </div>
-            </div>
-          </SheetHeader>
-
-          <div className="mt-4 flex-1 space-y-4 overflow-y-auto pr-1">
-            <div>
-              <div className="text-primary-text text-xs font-semibold tracking-wide uppercase">
-                Values
-              </div>
-              <div className="mt-2 space-y-2">
-                <div className="border-border-card bg-tertiary-bg flex items-center justify-between rounded-lg border p-2">
-                  <span className="text-secondary-text text-xs font-medium">
-                    Cash Value
-                  </span>
-                  <span className="bg-button-info text-form-button-text inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold shadow-sm">
-                    {formatFullValue(currentItemData.cash_value)}
-                  </span>
-                </div>
-                {cashChange && cashChange.difference !== 0 ? (
-                  <p className="text-secondary-text flex items-center gap-2 text-xs">
-                    <Icon
-                      icon={
-                        cashChange.difference > 0
-                          ? "mingcute:arrow-up-fill"
-                          : "mingcute:arrow-down-fill"
-                      }
-                      className={`h-4 w-4 ${
-                        cashChange.difference > 0
-                          ? "text-status-success"
-                          : "text-status-error"
-                      }`}
-                    />
-                    <span>
-                      Cash Value{" "}
-                      {cashChange.difference > 0 ? "increased" : "decreased"} by{" "}
-                      {formatChange(cashChange.difference)} in the latest value
-                      changelog.
-                    </span>
-                  </p>
-                ) : (
-                  <p className="text-secondary-text text-xs">
-                    No recent Cash Value change noted.
-                  </p>
-                )}
-                <div className="border-border-card bg-tertiary-bg flex items-center justify-between rounded-lg border p-2">
-                  <span className="text-secondary-text text-xs font-medium">
-                    Duped Value
-                  </span>
-                  <span className="bg-button-info text-form-button-text inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold shadow-sm">
-                    {formatFullValue(currentItemData.duped_value)}
-                  </span>
-                </div>
-                {dupedChange && dupedChange.difference !== 0 ? (
-                  <p className="text-secondary-text flex items-center gap-2 text-xs">
-                    <Icon
-                      icon={
-                        dupedChange.difference > 0
-                          ? "mingcute:arrow-up-fill"
-                          : "mingcute:arrow-down-fill"
-                      }
-                      className={`h-4 w-4 ${
-                        dupedChange.difference > 0
-                          ? "text-status-success"
-                          : "text-status-error"
-                      }`}
-                    />
-                    <span>
-                      Duped Value{" "}
-                      {dupedChange.difference > 0 ? "increased" : "decreased"}{" "}
-                      by {formatChange(dupedChange.difference)} in the latest
-                      value changelog.
-                    </span>
-                  </p>
-                ) : (
-                  <p className="text-secondary-text text-xs">
-                    No recent Duped Value change noted.
-                  </p>
-                )}
-                {currentItemData.duped_value === "N/A" && (
-                  <p className="text-secondary-text text-xs">
-                    If an item&apos;s duped value is marked as &quot;N/A&quot;,
-                    it means the duped value is the same as the clean value.
-                  </p>
-                )}
-              </div>
-            </div>
-
-            <div>
-              <div className="text-primary-text text-xs font-semibold tracking-wide uppercase">
-                Trading Signals
-              </div>
-              <div className="mt-2 space-y-2">
-                <div className="border-border-card bg-tertiary-bg flex items-start justify-between gap-3 rounded-lg border p-2">
-                  <div>
-                    <div className="text-secondary-text text-xs font-medium">
-                      Demand
-                    </div>
-                    <p className="text-secondary-text text-xs">
-                      {demandDescription}
-                    </p>
-                  </div>
-                  <span
-                    className={`${getDemandColor(currentItemData.demand)} inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold whitespace-nowrap shadow-sm`}
-                  >
-                    {demandLabel}
-                  </span>
-                </div>
-                <div className="border-border-card bg-tertiary-bg flex items-start justify-between gap-3 rounded-lg border p-2">
-                  <div>
-                    <div className="text-secondary-text text-xs font-medium">
-                      Trend
-                    </div>
-                    <p className="text-secondary-text text-xs">
-                      {trendLabel === "Unknown"
-                        ? "No official trend data yet."
-                        : trendDescriptions[trendLabel] ||
-                          "No official trend data yet."}
-                    </p>
-                  </div>
-                  <span
-                    className={`${getTrendColor(currentItemData.trend || "N/A")} inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold whitespace-nowrap shadow-sm`}
-                  >
-                    {trendLabel}
-                  </span>
-                </div>
-              </div>
-            </div>
-            {currentItemData.notes && currentItemData.notes.trim() !== "" && (
-              <div>
-                <div className="text-primary-text text-xs font-semibold tracking-wide uppercase">
-                  Item Notes
-                </div>
-                <div className="border-border-card bg-tertiary-bg mt-2 rounded-lg border p-2">
-                  <p className="text-secondary-text text-xs">
-                    {currentItemData.notes}
-                  </p>
-                </div>
-              </div>
-            )}
-          </div>
-          <div className="border-secondary-text mt-4 border-t pt-3 text-center">
-            <div className="text-secondary-text text-xs">
-              {currentItemData.last_updated
-                ? `Last updated: ${formatCustomDate(
-                    currentItemData.last_updated,
-                  )}`
-                : "Last updated: Never"}
-            </div>
-            <div className="mt-3 flex flex-col items-center">
-              <Button asChild size="sm">
-                <Link href={itemUrl} prefetch={false}>
-                  Open full item profile
-                </Link>
-              </Button>
-              <p className="text-secondary-text mt-2 text-[11px]">
-                View hoarders, history charts, and value changelogs.
-              </p>
-            </div>
-          </div>
-        </SheetContent>
-      </Sheet>
     </div>
   );
 }

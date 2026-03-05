@@ -35,13 +35,11 @@ import {
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { safeSessionStorage } from "@/utils/safeStorage";
 
-type NameSort = "a-z" | "z-a";
 type TimeSort = "newest" | "oldest";
 type ServerSize = "all" | "big" | "small";
 type DifficultySort = "none" | "easy-to-hard" | "hard-to-easy";
 type RobberyFilterMode = "any" | "all";
 
-const ROBBERIES_NAME_SORT_STORAGE_KEY = "robberiesNameSort";
 const ROBBERIES_TIME_SORT_STORAGE_KEY = "robberiesTimeSort";
 const ROBBERIES_SELECTED_TYPES_STORAGE_KEY = "robberiesSelectedTypes";
 const ROBBERIES_FILTER_MODE_STORAGE_KEY = "robberiesFilterMode";
@@ -87,6 +85,26 @@ type RobberyComboResult = {
   latestTimestamp: number;
 };
 
+function StatusPageAction({ className = "" }: { className?: string }) {
+  return (
+    <div className={`mt-2 flex flex-col items-center gap-2 ${className}`}>
+      <p className="text-secondary-text text-sm">
+        If this takes longer than usual, check our status page.
+      </p>
+      <Button asChild variant="secondary" size="sm">
+        <a
+          href="https://status.jailbreakchangelogs.xyz"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <Icon icon="heroicons:signal" className="h-4 w-4" />
+          View Uptime
+        </a>
+      </Button>
+    </div>
+  );
+}
+
 function RobberiesInitialEmptyState() {
   const [showInitialLoading, setShowInitialLoading] = useState(true);
 
@@ -108,6 +126,7 @@ function RobberiesInitialEmptyState() {
         <p className="text-tertiary-text text-sm">
           Connected. Waiting for the first robbery batch.
         </p>
+        <StatusPageAction />
       </>
     );
   }
@@ -122,6 +141,7 @@ function RobberiesInitialEmptyState() {
         No robberies tracked yet
       </h3>
       <p className="text-tertiary-text text-sm">Waiting for robbery data...</p>
+      <StatusPageAction />
     </>
   );
 }
@@ -256,13 +276,6 @@ function RobberyTrackerContent() {
         : airdrops.length > 0;
 
   const [searchQuery, setSearchQuery] = useState("");
-  const [robberiesNameSort, setRobberiesNameSort] = useState<NameSort>(() => {
-    const storedNameSort = safeSessionStorage.getItem(
-      ROBBERIES_NAME_SORT_STORAGE_KEY,
-    );
-    return storedNameSort === "z-a" ? "z-a" : "a-z";
-  });
-  const [otherNameSort, setOtherNameSort] = useState<NameSort>("a-z");
   const [robberiesTimeSort, setRobberiesTimeSort] = useState<TimeSort>(() => {
     const storedTimeSort = safeSessionStorage.getItem(
       ROBBERIES_TIME_SORT_STORAGE_KEY,
@@ -330,17 +343,8 @@ function RobberyTrackerContent() {
   const [activeAirdropLocation, setActiveAirdropLocation] = useState<
     "all" | "CactusValley" | "Dunes"
   >("all");
-  const nameSort =
-    activeView === "robberies" ? robberiesNameSort : otherNameSort;
   const timeSort =
     activeView === "robberies" ? robberiesTimeSort : otherTimeSort;
-
-  useEffect(() => {
-    safeSessionStorage.setItem(
-      ROBBERIES_NAME_SORT_STORAGE_KEY,
-      robberiesNameSort,
-    );
-  }, [robberiesNameSort]);
 
   useEffect(() => {
     safeSessionStorage.setItem(
@@ -377,8 +381,6 @@ function RobberyTrackerContent() {
         ? "Big Servers (9+ Players)"
         : "Small Servers (0-8 Players)";
 
-  const nameSortLabel = nameSort === "a-z" ? "Name (A to Z)" : "Name (Z to A)";
-
   const timeSortLabel =
     timeSort === "newest"
       ? "Logged (Newest to Oldest)"
@@ -399,6 +401,28 @@ function RobberyTrackerContent() {
   const isPowerComboMode =
     activeView === "robberies" && robberyFilterMode === "all";
 
+  const robberyTypeCounts = useMemo(() => {
+    const counts = new Map<string, number>();
+
+    for (const robbery of robberies) {
+      if (robbery.status !== 1 && robbery.status !== 2) continue;
+
+      if (serverSize !== "all") {
+        const playerCount = robbery.server?.players?.length || 0;
+        const matchesServerSize =
+          serverSize === "big" ? playerCount >= 9 : playerCount < 9;
+        if (!matchesServerSize) continue;
+      }
+
+      counts.set(
+        robbery.marker_name,
+        (counts.get(robbery.marker_name) || 0) + 1,
+      );
+    }
+
+    return counts;
+  }, [robberies, serverSize]);
+
   const activeComboPresetIds = useMemo(
     () =>
       robberyFilterMode === "all"
@@ -409,9 +433,77 @@ function RobberyTrackerContent() {
     [robberyFilterMode, selectedComboPresetIds],
   );
 
+  const comboPresetCounts = useMemo(() => {
+    const counts = new Map<string, number>();
+    const query = searchQuery.trim().toLowerCase();
+
+    let base = robberies.filter((robbery) => robbery.status === 1);
+    if (serverSize !== "all") {
+      base = base.filter((robbery) => {
+        const playerCount = robbery.server?.players?.length || 0;
+        return serverSize === "big" ? playerCount >= 9 : playerCount < 9;
+      });
+    }
+
+    for (const preset of ROBBERY_COMBO_PRESETS) {
+      const presetTypeSet = new Set<string>(preset.types);
+      const openByServer = new Map<string, Map<string, RobberyData>>();
+
+      for (const robbery of base) {
+        if (!presetTypeSet.has(robbery.marker_name)) continue;
+
+        const serverId = robbery.server?.job_id || robbery.job_id;
+        if (!serverId) continue;
+
+        let serverMap = openByServer.get(serverId);
+        if (!serverMap) {
+          serverMap = new Map<string, RobberyData>();
+          openByServer.set(serverId, serverMap);
+        }
+
+        const current = serverMap.get(robbery.marker_name);
+        if (!current || robbery.timestamp > current.timestamp) {
+          serverMap.set(robbery.marker_name, robbery);
+        }
+      }
+
+      let count = 0;
+      for (const robberyMap of openByServer.values()) {
+        const hasAllPresetTypes = preset.types.every((type) =>
+          robberyMap.has(type),
+        );
+        if (!hasAllPresetTypes) continue;
+
+        const comboRobberies = preset.types
+          .map((type) => robberyMap.get(type))
+          .filter(Boolean) as RobberyData[];
+
+        if (
+          query &&
+          !(
+            preset.label.toLowerCase().includes(query) ||
+            comboRobberies.some((robbery) =>
+              robbery.name.toLowerCase().includes(query),
+            )
+          )
+        ) {
+          continue;
+        }
+
+        count++;
+      }
+
+      counts.set(preset.id, count);
+    }
+
+    return counts;
+  }, [robberies, serverSize, searchQuery]);
+
   // Filter and sort robberies
   const filteredRobberies = useMemo(() => {
-    let filtered = robberies;
+    let filtered = robberies.filter(
+      (robbery) => robbery.status === 1 || robbery.status === 2,
+    );
 
     // Apply server size filter
     if (serverSize !== "all") {
@@ -471,22 +563,9 @@ function RobberyTrackerContent() {
     }
 
     return filtered.sort((a, b) => {
-      // Sort by status first (Open -> In Progress -> Closed)
+      // Sort by status first (Open -> In Progress)
       if (a.status !== b.status) {
         return a.status - b.status;
-      }
-
-      // If status is the same, apply the requested sorts
-      // If name sort is explicitly chosen, it could be the primary secondary sort
-      // But usually people want to see newest first by default within a status
-      // So I prioritize name sort if it's not the default or if we want to support it properly
-
-      if (nameSort === "a-z") {
-        const nameCompare = a.name.localeCompare(b.name);
-        if (nameCompare !== 0) return nameCompare;
-      } else if (nameSort === "z-a") {
-        const nameCompare = b.name.localeCompare(a.name);
-        if (nameCompare !== 0) return nameCompare;
       }
 
       if (timeSort === "newest") {
@@ -501,7 +580,6 @@ function RobberyTrackerContent() {
     searchQuery,
     timeSort,
     serverSize,
-    nameSort,
   ]);
 
   const filteredRobberyCombos = useMemo<RobberyComboResult[]>(() => {
@@ -576,32 +654,17 @@ function RobberyTrackerContent() {
       }
     }
 
-    return comboResults.sort((a, b) => {
-      if (nameSort === "a-z") {
-        const comboCompare = a.comboLabel.localeCompare(b.comboLabel);
-        if (comboCompare !== 0) return comboCompare;
-        const serverCompare = a.serverId.localeCompare(b.serverId);
-        if (serverCompare !== 0) return serverCompare;
-      } else {
-        const comboCompare = b.comboLabel.localeCompare(a.comboLabel);
-        if (comboCompare !== 0) return comboCompare;
-        const serverCompare = b.serverId.localeCompare(a.serverId);
-        if (serverCompare !== 0) return serverCompare;
-      }
-
-      if (timeSort === "newest") {
-        return b.latestTimestamp - a.latestTimestamp;
-      }
-
-      return a.latestTimestamp - b.latestTimestamp;
-    });
+    return comboResults.sort((a, b) =>
+      timeSort === "newest"
+        ? b.latestTimestamp - a.latestTimestamp
+        : a.latestTimestamp - b.latestTimestamp,
+    );
   }, [
     isPowerComboMode,
     robberies,
     serverSize,
     activeComboPresetIds,
     searchQuery,
-    nameSort,
     timeSort,
   ]);
 
@@ -627,18 +690,10 @@ function RobberyTrackerContent() {
     return filtered.sort((a, b) => {
       if (a.status !== b.status) return a.status - b.status;
 
-      if (nameSort === "a-z") {
-        const nameCompare = a.name.localeCompare(b.name);
-        if (nameCompare !== 0) return nameCompare;
-      } else if (nameSort === "z-a") {
-        const nameCompare = b.name.localeCompare(a.name);
-        if (nameCompare !== 0) return nameCompare;
-      }
-
       if (timeSort === "newest") return b.timestamp - a.timestamp;
       return a.timestamp - b.timestamp;
     });
-  }, [mansions, searchQuery, timeSort, serverSize, nameSort]);
+  }, [mansions, searchQuery, timeSort, serverSize]);
 
   // Calculate robbery statistics
   const robberyStats = useMemo(() => {
@@ -921,7 +976,7 @@ function RobberyTrackerContent() {
             <div className="flex-1">
               <h1 className="mb-2 text-3xl font-bold">Robbery Tracker</h1>
               <p className="text-secondary-text mb-6">
-                Real-time tracking of active and completed robberies
+                Real-time tracking of open and in-progress robberies
               </p>
 
               {/* Search and Filters Row */}
@@ -957,7 +1012,7 @@ function RobberyTrackerContent() {
                 {/* Filter Dropdowns */}
                 <div className="grid w-full grid-cols-2 gap-4 lg:flex lg:flex-1 lg:flex-row lg:gap-4">
                   {/* Server Size Filter */}
-                  <div className="col-span-1 w-full lg:w-1/3">
+                  <div className="col-span-1 w-full lg:flex-1">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <button
@@ -1005,9 +1060,9 @@ function RobberyTrackerContent() {
                     </DropdownMenu>
                   </div>
 
-                  {/* Name Sort or Difficulty Sort Dropdown */}
-                  <div className="col-span-1 w-full lg:w-1/3">
-                    {activeView === "airdrops" ? (
+                  {/* Difficulty Sort Dropdown (Airdrops only) */}
+                  {activeView === "airdrops" && (
+                    <div className="col-span-1 w-full lg:flex-1">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <button
@@ -1055,56 +1110,11 @@ function RobberyTrackerContent() {
                           </DropdownMenuRadioGroup>
                         </DropdownMenuContent>
                       </DropdownMenu>
-                    ) : (
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <button
-                            type="button"
-                            className="border-border-card bg-secondary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus flex h-[56px] w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all focus:ring-1 focus:outline-none"
-                            aria-label="Sort by name"
-                          >
-                            <span className="truncate">{nameSortLabel}</span>
-                            <Icon
-                              icon="heroicons:chevron-down"
-                              className="text-secondary-text h-5 w-5"
-                            />
-                          </button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent
-                          align="start"
-                          className="border-border-card bg-secondary-bg text-primary-text scrollbar-thin max-h-[240px] w-[var(--radix-popper-anchor-width)] min-w-[var(--radix-popper-anchor-width)] overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
-                        >
-                          <DropdownMenuRadioGroup
-                            value={nameSort}
-                            onValueChange={(value) => {
-                              const nextValue = value as NameSort;
-                              if (activeView === "robberies") {
-                                setRobberiesNameSort(nextValue);
-                                return;
-                              }
-                              setOtherNameSort(nextValue);
-                            }}
-                          >
-                            <DropdownMenuRadioItem
-                              value="a-z"
-                              className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
-                            >
-                              Name (A to Z)
-                            </DropdownMenuRadioItem>
-                            <DropdownMenuRadioItem
-                              value="z-a"
-                              className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
-                            >
-                              Name (Z to A)
-                            </DropdownMenuRadioItem>
-                          </DropdownMenuRadioGroup>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    )}
-                  </div>
+                    </div>
+                  )}
 
                   {/* Time Sort Dropdown */}
-                  <div className="col-span-full w-full lg:col-span-1 lg:w-1/3">
+                  <div className="col-span-full w-full lg:col-span-1 lg:flex-1">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <button
@@ -1161,121 +1171,113 @@ function RobberyTrackerContent() {
         <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           {/* Statistics - Conditional based on view */}
           {/* Statistics - Conditional based on view */}
-          {activeView === "robberies"
-            ? robberyStats.total > 0 && (
-                <div className="flex flex-wrap items-center gap-3 text-sm">
-                  <span className="text-primary-text font-semibold">
-                    {searchQuery || selectedRobberyTypes.length > 0 ? (
-                      <>
-                        Showing {robberyStats.total}{" "}
-                        {isPowerComboMode
-                          ? "Combo Servers"
-                          : `of ${robberies.length} Robberies`}
-                      </>
-                    ) : (
-                      <>
-                        {robberyStats.total}{" "}
-                        {isPowerComboMode
-                          ? robberyStats.total === 1
-                            ? "Combo Server"
-                            : "Combo Servers"
-                          : robberyStats.total === 1
-                            ? "Robbery"
-                            : "Robberies"}
-                      </>
-                    )}
-                  </span>
-                  <div className="flex items-center gap-2 text-xs">
-                    {robberyStats.open > 0 && (
-                      <span className="text-secondary-text">
-                        {robberyStats.open} Open
-                      </span>
-                    )}
-                    {robberyStats.open > 0 && robberyStats.inProgress > 0 && (
+          {activeView === "robberies" ? (
+            <div className="flex flex-wrap items-center gap-3 text-sm">
+              <span className="text-primary-text font-semibold">
+                {searchQuery || selectedRobberyTypes.length > 0 ? (
+                  <>
+                    Showing {robberyStats.total}{" "}
+                    {isPowerComboMode
+                      ? "Combo Servers"
+                      : `of ${robberies.length} Robberies`}
+                  </>
+                ) : (
+                  <>
+                    {robberyStats.total}{" "}
+                    {isPowerComboMode
+                      ? robberyStats.total === 1
+                        ? "Combo Server"
+                        : "Combo Servers"
+                      : robberyStats.total === 1
+                        ? "Robbery"
+                        : "Robberies"}
+                  </>
+                )}
+              </span>
+              <div className="flex items-center gap-2 text-xs">
+                <span className="text-secondary-text">
+                  {robberyStats.open} Open
+                </span>
+                <span className="text-tertiary-text">•</span>
+                <span className="text-secondary-text">
+                  {robberyStats.inProgress} In Progress
+                </span>
+              </div>
+            </div>
+          ) : activeView === "mansions" ? (
+            mansionStats.total > 0 && (
+              <div className="flex flex-wrap items-center gap-3 text-sm">
+                <span className="text-primary-text font-semibold">
+                  {searchQuery ? (
+                    <>
+                      Showing {mansionStats.total} of {mansions.length} Mansions
+                    </>
+                  ) : (
+                    <>
+                      {mansionStats.total}{" "}
+                      {mansionStats.total === 1 ? "Mansion" : "Mansions"}
+                    </>
+                  )}
+                </span>
+                <div className="flex items-center gap-2 text-xs">
+                  {mansionStats.open > 0 && (
+                    <span className="text-secondary-text">
+                      {mansionStats.open} Open
+                    </span>
+                  )}
+                  {mansionStats.open > 0 && mansionStats.ready > 0 && (
+                    <span className="text-tertiary-text">•</span>
+                  )}
+                  {mansionStats.ready > 0 && (
+                    <span className="text-secondary-text">
+                      {mansionStats.ready} Ready to Open
+                    </span>
+                  )}
+                </div>
+              </div>
+            )
+          ) : (
+            airdropStats.total > 0 && (
+              <div className="flex flex-wrap items-center gap-3 text-sm">
+                <span className="text-primary-text font-semibold">
+                  {searchQuery || activeAirdropLocation !== "all" ? (
+                    <>
+                      Showing {airdropStats.total} of {airdrops.length} Airdrops
+                    </>
+                  ) : (
+                    <>
+                      {airdropStats.total}{" "}
+                      {airdropStats.total === 1 ? "Airdrop" : "Airdrops"}
+                    </>
+                  )}
+                </span>
+                <div className="flex items-center gap-2 text-xs">
+                  {airdropStats.easy > 0 && (
+                    <span className="text-secondary-text">
+                      {airdropStats.easy} Easy
+                    </span>
+                  )}
+                  {airdropStats.easy > 0 && airdropStats.medium > 0 && (
+                    <span className="text-tertiary-text">•</span>
+                  )}
+                  {airdropStats.medium > 0 && (
+                    <span className="text-secondary-text">
+                      {airdropStats.medium} Medium
+                    </span>
+                  )}
+                  {(airdropStats.easy > 0 || airdropStats.medium > 0) &&
+                    airdropStats.hard > 0 && (
                       <span className="text-tertiary-text">•</span>
                     )}
-                    {robberyStats.inProgress > 0 && (
-                      <span className="text-secondary-text">
-                        {robberyStats.inProgress} In Progress
-                      </span>
-                    )}
-                  </div>
+                  {airdropStats.hard > 0 && (
+                    <span className="text-secondary-text">
+                      {airdropStats.hard} Hard
+                    </span>
+                  )}
                 </div>
-              )
-            : activeView === "mansions"
-              ? mansionStats.total > 0 && (
-                  <div className="flex flex-wrap items-center gap-3 text-sm">
-                    <span className="text-primary-text font-semibold">
-                      {searchQuery ? (
-                        <>
-                          Showing {mansionStats.total} of {mansions.length}{" "}
-                          Mansions
-                        </>
-                      ) : (
-                        <>
-                          {mansionStats.total}{" "}
-                          {mansionStats.total === 1 ? "Mansion" : "Mansions"}
-                        </>
-                      )}
-                    </span>
-                    <div className="flex items-center gap-2 text-xs">
-                      {mansionStats.open > 0 && (
-                        <span className="text-secondary-text">
-                          {mansionStats.open} Open
-                        </span>
-                      )}
-                      {mansionStats.open > 0 && mansionStats.ready > 0 && (
-                        <span className="text-tertiary-text">•</span>
-                      )}
-                      {mansionStats.ready > 0 && (
-                        <span className="text-secondary-text">
-                          {mansionStats.ready} Ready to Open
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                )
-              : airdropStats.total > 0 && (
-                  <div className="flex flex-wrap items-center gap-3 text-sm">
-                    <span className="text-primary-text font-semibold">
-                      {searchQuery || activeAirdropLocation !== "all" ? (
-                        <>
-                          Showing {airdropStats.total} of {airdrops.length}{" "}
-                          Airdrops
-                        </>
-                      ) : (
-                        <>
-                          {airdropStats.total}{" "}
-                          {airdropStats.total === 1 ? "Airdrop" : "Airdrops"}
-                        </>
-                      )}
-                    </span>
-                    <div className="flex items-center gap-2 text-xs">
-                      {airdropStats.easy > 0 && (
-                        <span className="text-secondary-text">
-                          {airdropStats.easy} Easy
-                        </span>
-                      )}
-                      {airdropStats.easy > 0 && airdropStats.medium > 0 && (
-                        <span className="text-tertiary-text">•</span>
-                      )}
-                      {airdropStats.medium > 0 && (
-                        <span className="text-secondary-text">
-                          {airdropStats.medium} Medium
-                        </span>
-                      )}
-                      {(airdropStats.easy > 0 || airdropStats.medium > 0) &&
-                        airdropStats.hard > 0 && (
-                          <span className="text-tertiary-text">•</span>
-                        )}
-                      {airdropStats.hard > 0 && (
-                        <span className="text-secondary-text">
-                          {airdropStats.hard} Hard
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                )}
+              </div>
+            )
+          )}
 
           {/* Connection Status */}
           <div className="flex items-center gap-2">
@@ -1321,6 +1323,7 @@ function RobberyTrackerContent() {
               <p className="text-secondary-text">
                 Connecting to robbery tracker...
               </p>
+              <StatusPageAction />
             </div>
           </div>
         )}
@@ -1344,6 +1347,7 @@ function RobberyTrackerContent() {
                       ? "Tracker paused due to inactivity. Move your mouse or press a key to resume."
                       : "Showing last known data. Connection will resume automatically."}
                 </p>
+                <StatusPageAction className="items-start" />
               </div>
             </div>
           </div>
@@ -1411,7 +1415,10 @@ function RobberyTrackerContent() {
                           {isSelected && (
                             <Icon icon="heroicons:check" className="h-4 w-4" />
                           )}
-                          <span>{type.name}</span>
+                          <span>
+                            ({robberyTypeCounts.get(type.marker_name) || 0}){" "}
+                            {type.name}
+                          </span>
                         </Button>
                       );
                     })}
@@ -1498,12 +1505,9 @@ function RobberyTrackerContent() {
                             className="gap-2"
                             title={preset.description}
                           >
-                            <Icon
-                              icon={
-                                isActive ? "heroicons:check" : "heroicons:bolt"
-                              }
-                              className="h-4 w-4"
-                            />
+                            <span className="text-xs font-semibold tabular-nums">
+                              ({comboPresetCounts.get(preset.id) || 0})
+                            </span>
                             <span>{preset.label}</span>
                           </Button>
                         );
@@ -1558,27 +1562,44 @@ function RobberyTrackerContent() {
                   </div>
                 ) : (
                   <div className="flex min-h-screen flex-col items-center justify-start py-12 pt-24 text-center">
-                    <Icon
-                      icon="heroicons:magnifying-glass"
-                      className="text-tertiary-text mb-4 h-12 w-12"
-                    />
-                    <h3 className="text-primary-text text-lg font-medium">
-                      No robberies found
-                    </h3>
-                    <p className="text-secondary-text">
-                      {selectedRobberyTypes.length > 0 && !searchQuery ? (
+                    {(() => {
+                      const hasActiveRobberyFilters =
+                        Boolean(searchQuery) ||
+                        selectedRobberyTypes.length > 0 ||
+                        serverSize !== "all";
+
+                      return (
                         <>
-                          No robberies logged yet for the selected type
-                          {selectedRobberyTypes.length > 1 ? "s" : ""}
+                          <Icon
+                            icon="heroicons:magnifying-glass"
+                            className="text-tertiary-text mb-4 h-12 w-12"
+                          />
+                          <h3 className="text-primary-text text-lg font-medium">
+                            {hasActiveRobberyFilters
+                              ? "No robberies found"
+                              : "No robberies tracked yet"}
+                          </h3>
+                          <p className="text-secondary-text">
+                            {selectedRobberyTypes.length > 0 && !searchQuery ? (
+                              <>
+                                No robberies logged yet for the selected type
+                                {selectedRobberyTypes.length > 1 ? "s" : ""}
+                              </>
+                            ) : selectedRobberyTypes.length > 0 &&
+                              searchQuery ? (
+                              <>No robberies match your filters and search</>
+                            ) : searchQuery ? (
+                              <>Try adjusting your search query</>
+                            ) : hasActiveRobberyFilters ? (
+                              <>No robberies found for your current filters</>
+                            ) : (
+                              <>Waiting for robbery data...</>
+                            )}
+                          </p>
                         </>
-                      ) : selectedRobberyTypes.length > 0 && searchQuery ? (
-                        <>No robberies match your filters and search</>
-                      ) : searchQuery ? (
-                        <>Try adjusting your search query</>
-                      ) : (
-                        <>No robberies tracked yet</>
-                      )}
-                    </p>
+                      );
+                    })()}
+                    <StatusPageAction />
                   </div>
                 )}
               </>
