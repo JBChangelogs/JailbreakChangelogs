@@ -255,7 +255,7 @@ export const TradeAdCard: React.FC<TradeAdCardProps> = ({
 
   return (
     <div
-      className="bg-secondary-bg border-border-card rounded-xl border p-3 transition-colors"
+      className="bg-secondary-bg border-border-card rounded-xl border p-3 transition-colors overflow-hidden"
       tabIndex={0}
       role="region"
     >
