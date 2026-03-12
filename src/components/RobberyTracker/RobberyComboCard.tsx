@@ -106,117 +106,132 @@ export default function RobberyComboCard({
     ? getStatusBadgeClass(1)
     : getStatusBadgeClass(2);
 
-  return (
-    <div className="border-border-card bg-secondary-bg flex flex-col overflow-hidden rounded-lg border transition-all duration-200 hover:shadow-lg">
-      <div className="bg-secondary-background relative aspect-video w-full shrink-0 overflow-hidden">
-        {comboImageUrl ? (
-          <Image
-            src={comboImageUrl}
-            alt={comboLabel}
-            fill
-            className="object-cover"
-          />
-        ) : (
-          <div className="bg-tertiary-bg border-border-card text-primary-text flex h-full items-center justify-center border-b text-base font-semibold">
-            {comboLabel}
-          </div>
-        )}
-      </div>
+  const displayRobberies = sortedRobberies.slice(0, 4);
+  const remainingCount = sortedRobberies.length - displayRobberies.length;
 
-      <div className="flex grow flex-col p-4">
-        <div className="mb-3 flex items-start justify-between">
-          <h3 className="text-primary-text text-lg font-semibold">
-            {comboLabel}
-          </h3>
-          {(isAllOpen || isAllInProgress) && (
-            <span
-              className={`${comboHeaderStatusClass} inline-flex h-6 items-center rounded-lg border px-2.5 text-xs font-medium`}
-            >
-              {comboHeaderStatusText}
-            </span>
+  return (
+    <div className="border-border-card bg-secondary-bg flex flex-col overflow-hidden rounded-xl border transition-all duration-200 hover:shadow-lg">
+      <div className="flex flex-col gap-3 p-3 sm:flex-row">
+        {/* Thumbnail */}
+        <div className="relative h-28 w-full shrink-0 overflow-hidden rounded-lg border border-white/5 sm:h-16 sm:w-24">
+          {comboImageUrl ? (
+            <Image
+              src={comboImageUrl}
+              alt={comboLabel}
+              fill
+              className="object-cover"
+            />
+          ) : (
+            <div className="bg-tertiary-bg border-border-card text-primary-text flex h-full items-center justify-center border text-sm font-semibold">
+              {comboLabel}
+            </div>
           )}
         </div>
 
-        <div className="mb-4 space-y-2">
-          {sortedRobberies.map((robbery) => (
-            <div
-              key={`${robbery.marker_name}-${robbery.timestamp}`}
-              className="border-border-card bg-tertiary-bg flex items-center justify-between rounded-lg border px-3 py-2"
-            >
-              <span className="text-primary-text text-sm font-medium">
-                {robbery.name}
-              </span>
+        {/* Content */}
+        <div className="min-w-0 flex-1">
+          <div className="flex items-start justify-between gap-2">
+            <h3 className="text-primary-text min-w-0 flex-1 truncate text-base font-semibold">
+              {comboLabel}
+            </h3>
+            {(isAllOpen || isAllInProgress) && (
               <span
-                className={`${getStatusBadgeClass(robbery.status)} inline-flex h-6 items-center rounded-lg border px-2.5 text-xs font-medium`}
+                className={`${comboHeaderStatusClass} inline-flex h-6 items-center rounded-lg border px-2.5 text-xs font-medium`}
               >
-                {getStatusText(robbery.status)}
+                {comboHeaderStatusText}
               </span>
-            </div>
-          ))}
-        </div>
+            )}
+          </div>
 
-        <div className="text-secondary-text mb-3 space-y-1 text-sm">
-          <div className="flex items-center justify-between">
-            <span>Server Time:</span>
-            <span className="text-primary-text font-mono">
+          <div className="mt-2 flex flex-wrap gap-2">
+            {displayRobberies.map((robbery) => (
+              <span
+                key={`${robbery.marker_name}-${robbery.timestamp}`}
+                className={`${getStatusBadgeClass(robbery.status)} inline-flex max-w-full items-center gap-1.5 rounded-lg border px-2.5 py-1 text-xs font-medium`}
+              >
+                <span className="truncate">{robbery.name}</span>
+                <span className="text-tertiary-text">•</span>
+                <span className="shrink-0">
+                  {getStatusText(robbery.status)}
+                </span>
+              </span>
+            ))}
+            {remainingCount > 0 && (
+              <span className="text-primary-text border-border-card bg-tertiary-bg inline-flex items-center rounded-lg border px-2.5 py-1 text-xs font-medium">
+                +{remainingCount} more
+              </span>
+            )}
+          </div>
+
+          <div className="text-secondary-text mt-2 flex items-center gap-2 text-xs">
+            <Icon icon="heroicons:clock" className="h-4 w-4 shrink-0" />
+            <span className="text-primary-text font-mono tabular-nums">
               {formatServerTime(firstRobbery.server_time)}
             </span>
           </div>
-          <div className="space-y-1">
-            <span>Region:</span>
-            <span className="text-primary-text block font-medium">
+
+          <div className="text-secondary-text mt-1 flex items-center gap-2 text-xs">
+            <Icon icon="heroicons:map-pin" className="h-4 w-4 shrink-0" />
+            <span className="text-primary-text truncate font-medium">
               {regionData ? (
                 `${regionData.city}, ${regionData.regionName}, ${regionData.country}`
               ) : (
                 <span className="text-secondary-text inline-flex items-center gap-2">
                   <Icon icon="svg-spinners:180-ring" className="h-3.5 w-3.5" />
-                  Loading...
+                  Loading region...
                 </span>
               )}
             </span>
           </div>
-        </div>
 
-        <Button
-          variant="default"
-          className="mt-auto w-full"
-          disabled={isJoining}
-          data-umami-event="Join Server"
-          data-umami-event-tracker="Robbery_Tracker"
-          data-umami-event-term="Power Combo"
-          data-umami-event-jobid={serverId}
-          onClick={() => {
-            setIsJoining(true);
-            const joiningToastId = toast.loading("Joining server...");
-            window.setTimeout(() => {
-              toast.dismiss(joiningToastId);
-              setIsJoining(false);
-            }, 5000);
-            window.location.assign(buildRobloxServerDeepLink(serverId));
-          }}
-        >
-          <Icon
-            icon="heroicons:arrow-top-right-on-square"
-            className="h-4 w-4"
-          />
-          {isJoining ? "Joining..." : "Join Combo Server"}
-        </Button>
+          <div className="mt-2 grid min-w-0 grid-cols-2 gap-2">
+            <Button
+              size="sm"
+              variant="default"
+              className={
+                players.length > 0
+                  ? "w-full min-w-0"
+                  : "col-span-2 w-full min-w-0"
+              }
+              disabled={isJoining}
+              data-umami-event="Join Server"
+              data-umami-event-tracker="Robbery_Tracker"
+              data-umami-event-term="Power Combo"
+              data-umami-event-jobid={serverId}
+              onClick={() => {
+                setIsJoining(true);
+                const joiningToastId = toast.loading("Joining server...");
+                window.setTimeout(() => {
+                  toast.dismiss(joiningToastId);
+                  setIsJoining(false);
+                }, 5000);
+                window.location.assign(buildRobloxServerDeepLink(serverId));
+              }}
+            >
+              <Icon icon="heroicons:arrow-top-right-on-square" />
+              {isJoining ? "Joining..." : "Join"}
+            </Button>
 
-        {players.length > 0 && (
-          <Button
-            onClick={() => setIsPlayersModalOpen(true)}
-            variant="default"
-            className="mt-2 w-full"
-          >
-            <Icon icon="heroicons-outline:users" className="h-4 w-4" />
-            View {players.length} Players
-          </Button>
-        )}
-
-        <div className="border-border-card mt-4 border-t pt-3">
-          <div className="text-primary-text flex items-center justify-center text-xs font-medium">
-            <span>Logged {relativeTime || "Just now"}</span>
+            {players.length > 0 ? (
+              <Button
+                size="sm"
+                onClick={() => setIsPlayersModalOpen(true)}
+                variant="secondary"
+                className="w-full min-w-0"
+              >
+                <Icon icon="heroicons-outline:users" />
+                {players.length} Players
+              </Button>
+            ) : (
+              <div />
+            )}
           </div>
+        </div>
+      </div>
+
+      <div className="border-border-card border-t px-3 py-2">
+        <div className="text-secondary-text text-center text-xs font-medium tabular-nums">
+          Logged {relativeTime || "Just now"}
         </div>
       </div>
 

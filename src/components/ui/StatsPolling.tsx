@@ -7,14 +7,14 @@ export default function StatsPolling() {
   const { data: stats, isLoading: isLoadingStats } = useQuery({
     queryKey: ["item-count-stats"],
     queryFn: fetchItemCountStats,
-    refetchInterval: 30000,
+    refetchInterval: 60000,
     refetchIntervalInBackground: true,
   });
 
   const { data: duplicatesStats, isLoading: isLoadingDuplicates } = useQuery({
     queryKey: ["duplicates-count"],
     queryFn: fetchDuplicatesCount,
-    refetchInterval: 30000,
+    refetchInterval: 60000,
     refetchIntervalInBackground: true,
   });
 

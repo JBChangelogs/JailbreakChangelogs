@@ -866,6 +866,7 @@ export async function fetchDuplicatesCount() {
         "User-Agent": "JailbreakChangelogs-Inventory/1.0",
         "X-Source": INVENTORY_API_SOURCE_HEADER,
       },
+      cache: "no-store",
     });
     if (!response.ok) {
       if (response.status === 404) {
@@ -879,6 +880,32 @@ export async function fetchDuplicatesCount() {
   } catch (err) {
     console.error("[SERVER] Error fetching duplicates count:", err);
     return { total_duplicates: 0, total_duplicates_str: "0" };
+  }
+}
+
+export async function fetchTotalRobberiesLogged(): Promise<number> {
+  try {
+    const url = `${INVENTORY_API_URL}/tracker/stats/total?nocache=false`;
+    const response = await fetch(url, {
+      headers: {
+        "User-Agent": "JailbreakChangelogs-Inventory/1.0",
+        "X-Source": INVENTORY_API_SOURCE_HEADER,
+      },
+      cache: "no-store",
+    });
+    if (!response.ok) {
+      if (response.status === 404) {
+        return 0;
+      }
+      throw new Error("Failed to fetch total robberies logged");
+    }
+
+    const text = (await response.text()).trim();
+    const parsed = Number(text);
+    return Number.isFinite(parsed) ? parsed : 0;
+  } catch (err) {
+    console.error("[SERVER] Error fetching total robberies logged:", err);
+    return 0;
   }
 }
 
@@ -1589,6 +1616,7 @@ export async function fetchItemCountStats(): Promise<ItemCountStats | null> {
         "User-Agent": "JailbreakChangelogs-Inventory/1.0",
         "X-Source": INVENTORY_API_SOURCE_HEADER,
       },
+      cache: "no-store",
     });
 
     if (!response.ok) {
