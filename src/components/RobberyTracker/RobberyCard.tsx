@@ -10,6 +10,11 @@ import { useServerRegions } from "@/hooks/useServerRegions";
 import { toast } from "sonner";
 import RobberyPlayersModal from "./RobberyPlayersModal";
 import { buildRobloxServerDeepLink } from "./deepLink";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface RobberyCardProps {
   robbery: RobberyData;
@@ -99,11 +104,11 @@ export default function RobberyCard({ robbery }: RobberyCardProps) {
           const seconds = absoluteDiff % 60;
 
           if (hours > 0) {
-            setPlaneCountdown(`Took off ${hours}h ${minutes}m ago`);
+            setPlaneCountdown(`Departed ${hours}h ${minutes}m ago`);
           } else if (minutes > 0) {
-            setPlaneCountdown(`Took off ${minutes}m ${seconds}s ago`);
+            setPlaneCountdown(`Departed ${minutes}m ${seconds}s ago`);
           } else {
-            setPlaneCountdown(`Took off ${seconds}s ago`);
+            setPlaneCountdown(`Departed ${seconds}s ago`);
           }
         }
       };
@@ -172,12 +177,15 @@ export default function RobberyCard({ robbery }: RobberyCardProps) {
     }
   };
 
+  const isValidCasinoCode = (code: string | null | undefined) =>
+    typeof code === "string" && /^\d+$/.test(code.trim());
+
   // Get status badge
   const getStatusBadge = () => {
     if (isTrainNearClose) {
       return (
         <div className="text-primary-text border-status-warning/30 bg-status-warning/20 inline-flex h-6 items-center gap-1.5 rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl">
-          <span>Closing Soon</span>
+          <span>Ends Soon</span>
         </div>
       );
     }
@@ -214,9 +222,9 @@ export default function RobberyCard({ robbery }: RobberyCardProps) {
           return (
             <div className="text-primary-text border-status-warning/30 bg-status-warning/20 inline-flex h-6 items-center gap-1.5 rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl">
               <span>
-                {planeCountdown.includes("Took off")
+                {planeCountdown.includes("Departed")
                   ? planeCountdown
-                  : `Takes off in ${planeCountdown}`}
+                  : `Departs in ${planeCountdown}`}
               </span>
             </div>
           );
@@ -229,7 +237,7 @@ export default function RobberyCard({ robbery }: RobberyCardProps) {
       case 2:
         return (
           <div className="text-primary-text border-status-warning/30 bg-status-warning/20 inline-flex h-6 items-center gap-1.5 rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl">
-            <span>In Progress</span>
+            <span>Active</span>
           </div>
         );
       case 3:
@@ -252,128 +260,166 @@ export default function RobberyCard({ robbery }: RobberyCardProps) {
   const players = robbery.server?.players || [];
 
   return (
-    <div className="border-border-card bg-secondary-bg flex flex-col overflow-hidden rounded-lg border transition-all duration-200 hover:shadow-lg">
-      {/* Image */}
-      <div className="bg-secondary-background relative aspect-video w-full shrink-0 overflow-hidden">
-        <Image src={imageUrl} alt={displayName} fill className="object-cover" />
-      </div>
-
-      {/* Content */}
-      <div className="flex grow flex-col p-4">
-        {/* Header */}
-        <div className="mb-3 flex items-start justify-between">
-          <h3 className="text-primary-text text-lg font-semibold">
-            {displayName}
-          </h3>
-          {getStatusBadge()}
+    <div className="border-border-card bg-secondary-bg flex flex-col overflow-hidden rounded-xl border transition-all duration-200 hover:shadow-lg">
+      <div className="flex flex-col gap-3 p-3 sm:flex-row">
+        {/* Thumbnail */}
+        <div className="relative h-28 w-full shrink-0 overflow-hidden rounded-lg border border-white/5 sm:h-16 sm:w-24">
+          <Image
+            src={imageUrl}
+            alt={displayName}
+            fill
+            className="object-cover"
+          />
         </div>
 
-        {/* Details */}
-        <div className="text-secondary-text space-y-2 text-sm">
-          {robbery.metadata?.casino_code && (
-            <div className="flex items-center justify-between">
-              <span className="text-secondary-text">Casino Code:</span>
-              <button
-                onClick={() =>
-                  handleCopyCasinoCode(robbery.metadata!.casino_code!)
-                }
-                className="text-primary-text border-button-info/30 bg-button-info/20 hover:bg-button-info/30 group inline-flex h-6 cursor-pointer items-center gap-1.5 rounded-lg border px-2.5 font-mono text-xs leading-none font-medium shadow-2xl backdrop-blur-xl transition-colors"
-                title="Click to copy code"
-              >
-                {robbery.metadata.casino_code}
-                <Icon
-                  icon="heroicons:clipboard-document"
-                  className="h-4 w-4 opacity-50 transition-opacity group-hover:opacity-100"
-                />
-              </button>
-            </div>
-          )}
+        {/* Content */}
+        <div className="min-w-0 flex-1">
+          {/* Header */}
+          <div className="flex items-start justify-between gap-2">
+            <h3 className="text-primary-text min-w-0 flex-1 truncate text-base font-semibold">
+              {displayName}
+            </h3>
+            <div className="shrink-0">{getStatusBadge()}</div>
+          </div>
 
-          {/* Casino Countdown */}
-          {robbery.marker_name === "Casino" &&
-            robbery.status === 2 &&
-            robbery.metadata?.casino_time &&
-            casinoCountdown && (
-              <div className="flex items-center justify-between">
-                <span className="text-secondary-text">Closes In:</span>
-                <span className="text-primary-text font-mono font-semibold">
-                  {casinoCountdown}
-                </span>
-              </div>
-            )}
-
-          <div className="flex items-center justify-between">
-            <span className="text-secondary-text">Server Time:</span>
-            <span className="text-primary-text font-mono">
+          {/* Server time */}
+          <div className="text-secondary-text mt-0.5 flex items-center gap-2 text-xs">
+            <Icon icon="heroicons:clock" className="h-4 w-4 shrink-0" />
+            <span className="text-primary-text font-mono tabular-nums">
               {formatServerTime(robbery.server_time)}
             </span>
           </div>
 
-          {/* Region Info */}
-          <div className="space-y-1">
-            <span className="text-secondary-text text-sm">Region:</span>
-            <span className="text-primary-text block font-medium">
+          {/* Region */}
+          <div className="text-secondary-text mt-1 flex items-center gap-2 text-xs">
+            <Icon icon="heroicons:map-pin" className="h-4 w-4 shrink-0" />
+            <span className="text-primary-text truncate font-medium">
               {regionData ? (
                 `${regionData.city}, ${regionData.regionName}, ${regionData.country}`
               ) : (
                 <span className="text-secondary-text inline-flex items-center gap-2">
                   <Icon icon="svg-spinners:180-ring" className="h-3.5 w-3.5" />
-                  Loading...
+                  Loading region...
                 </span>
               )}
             </span>
           </div>
 
-          {/* Join Server Button */}
-          {jobId && (
-            <Button
-              variant="default"
-              className="mt-3 w-full"
-              disabled={isJoining}
-              data-umami-event="Join Server"
-              data-umami-event-tracker={
-                robbery.marker_name === "Mansion"
-                  ? "Mansion_Tracker"
-                  : "Robbery_Tracker"
-              }
-              data-umami-event-term={displayName}
-              data-umami-event-jobid={jobId}
-              onClick={() => {
-                setIsJoining(true);
-                const joiningToastId = toast.loading("Joining server...");
-                window.setTimeout(() => {
-                  toast.dismiss(joiningToastId);
-                  setIsJoining(false);
-                }, 5000);
-                window.location.assign(buildRobloxServerDeepLink(jobId));
-              }}
-            >
-              <Icon
-                icon="heroicons:arrow-top-right-on-square"
-                className="h-4 w-4"
-              />
-              {isJoining ? "Joining..." : "Join Server"}
-            </Button>
+          {/* Casino extras (compact row) */}
+          {(robbery.metadata?.casino_code ||
+            (robbery.marker_name === "Casino" &&
+              robbery.status === 2 &&
+              robbery.metadata?.casino_time &&
+              casinoCountdown)) && (
+            <div className="mt-1 flex flex-wrap items-center gap-2 text-xs">
+              {robbery.metadata?.casino_code &&
+                (isValidCasinoCode(robbery.metadata.casino_code) ? (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button
+                        onClick={() =>
+                          handleCopyCasinoCode(robbery.metadata!.casino_code!)
+                        }
+                        className="text-primary-text border-button-info/30 bg-button-info/20 hover:bg-button-info/30 group inline-flex h-6 cursor-pointer items-center gap-1.5 rounded-lg border px-2.5 font-mono text-xs leading-none font-medium shadow-2xl backdrop-blur-xl transition-colors"
+                      >
+                        Code: {robbery.metadata.casino_code}
+                        <Icon
+                          icon="heroicons:clipboard-document"
+                          className="h-4 w-4 opacity-50 transition-opacity group-hover:opacity-100"
+                        />
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent>Click to copy code</TooltipContent>
+                  </Tooltip>
+                ) : (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <div className="text-primary-text border-border-card bg-tertiary-bg inline-flex h-6 cursor-help items-center gap-1.5 rounded-lg border px-2.5 font-mono text-xs leading-none font-medium">
+                        Code: ???
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      Code not available due to a {displayName} rendering issue
+                    </TooltipContent>
+                  </Tooltip>
+                ))}
+
+              {robbery.marker_name === "Casino" &&
+                robbery.status === 2 &&
+                robbery.metadata?.casino_time &&
+                casinoCountdown && (
+                  <span className="text-secondary-text inline-flex items-center gap-1.5">
+                    <Icon icon="heroicons:hourglass" className="h-4 w-4" />
+                    <span>
+                      Closes in{" "}
+                      <span className="text-primary-text font-mono font-semibold tabular-nums">
+                        {casinoCountdown}
+                      </span>
+                    </span>
+                  </span>
+                )}
+            </div>
           )}
 
-          {/* View Players Button */}
-          {players.length > 0 && (
-            <Button
-              onClick={() => setIsPlayersModalOpen(true)}
-              variant="default"
-              className="mt-2 w-full"
-            >
-              <Icon icon="heroicons-outline:users" className="h-4 w-4" />
-              View {players.length} Players
-            </Button>
+          {/* Actions */}
+          {(jobId || players.length > 0) && (
+            <div className="mt-2 grid min-w-0 grid-cols-2 gap-2">
+              {jobId ? (
+                <Button
+                  size="sm"
+                  variant="default"
+                  className={
+                    players.length > 0
+                      ? "w-full min-w-0"
+                      : "col-span-2 w-full min-w-0"
+                  }
+                  disabled={isJoining}
+                  data-umami-event="Join Server"
+                  data-umami-event-tracker={
+                    robbery.marker_name === "Mansion"
+                      ? "Mansion_Tracker"
+                      : "Robbery_Tracker"
+                  }
+                  data-umami-event-term={displayName}
+                  data-umami-event-jobid={jobId}
+                  onClick={() => {
+                    setIsJoining(true);
+                    const joiningToastId = toast.loading("Joining server...");
+                    window.setTimeout(() => {
+                      toast.dismiss(joiningToastId);
+                      setIsJoining(false);
+                    }, 5000);
+                    window.location.assign(buildRobloxServerDeepLink(jobId));
+                  }}
+                >
+                  <Icon icon="heroicons:arrow-top-right-on-square" />
+                  {isJoining ? "Joining..." : "Join"}
+                </Button>
+              ) : (
+                <div />
+              )}
+
+              {players.length > 0 ? (
+                <Button
+                  size="sm"
+                  onClick={() => setIsPlayersModalOpen(true)}
+                  variant="secondary"
+                  className="w-full min-w-0"
+                >
+                  <Icon icon="heroicons-outline:users" />
+                  {players.length} Players
+                </Button>
+              ) : (
+                <div />
+              )}
+            </div>
           )}
         </div>
+      </div>
 
-        {/* Footer with Last Update */}
-        <div className="border-border-card mt-4 border-t pt-3">
-          <div className="text-primary-text flex items-center justify-center text-xs font-medium">
-            <span>Logged {relativeTime || "Just now"}</span>
-          </div>
+      <div className="border-border-card border-t px-3 py-2">
+        <div className="text-secondary-text text-center text-xs font-medium tabular-nums">
+          Logged {relativeTime || "Just now"}
         </div>
       </div>
 

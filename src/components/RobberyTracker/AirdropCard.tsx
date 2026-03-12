@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import { Icon } from "@/components/ui/IconWrapper";
 import { Button } from "@/components/ui/button";
-import { motion, AnimatePresence } from "framer-motion";
+import { Dialog, DialogPanel } from "@headlessui/react";
 import { useOptimizedRealTimeRelativeDate } from "@/hooks/useSharedTimer";
 import { AirdropData } from "@/hooks/useRobberyTrackerAirdropsWebSocket";
 import RobberyPlayersModal from "./RobberyPlayersModal";
@@ -21,6 +21,7 @@ interface AirdropCardProps {
 export default function AirdropCard({ airdrop }: AirdropCardProps) {
   const [isPlayersModalOpen, setIsPlayersModalOpen] = useState(false);
   const [isMapModalOpen, setIsMapModalOpen] = useState(false);
+  const [isMapImageLoading, setIsMapImageLoading] = useState(false);
   const [isJoining, setIsJoining] = useState(false);
   const [despawnCountdown, setDespawnCountdown] = useState<string | null>(null);
   const [regionData, setRegionData] = useState<ServerRegionData | null>(null);
@@ -149,36 +150,33 @@ export default function AirdropCard({ airdrop }: AirdropCardProps) {
   const mapImageUrl = `${INVENTORY_API_URL}/map/airdrop?x=${airdrop.x}&z=${airdrop.z}`;
 
   return (
-    <div className="border-border-card bg-secondary-bg flex flex-col overflow-hidden rounded-lg border transition-all duration-200 hover:shadow-lg">
-      {/* Image */}
-      <div className="bg-secondary-background relative aspect-video w-full shrink-0 overflow-hidden">
-        <Image
-          src={imageUrl}
-          alt={`${airdrop.color} Airdrop at ${airdrop.location}`}
-          fill
-          className="object-cover"
-        />
-      </div>
-
-      {/* Content */}
-      <div className="flex grow flex-col p-4">
-        {/* Header */}
-        <div className="mb-3 flex items-start justify-between">
-          <div>
-            <h3 className="text-primary-text text-lg font-semibold">
-              {airdrop.location.replace(/([A-Z])/g, " $1").trim()} Airdrop
-            </h3>
-          </div>
-          {getDifficultyBadge()}
+    <div className="border-border-card bg-secondary-bg flex flex-col overflow-hidden rounded-xl border transition-all duration-200 hover:shadow-lg">
+      <div className="flex flex-col gap-3 p-3 sm:flex-row">
+        {/* Thumbnail */}
+        <div className="relative h-28 w-full shrink-0 overflow-hidden rounded-lg border border-white/5 sm:h-16 sm:w-24">
+          <Image
+            src={imageUrl}
+            alt={`${airdrop.color} Airdrop at ${airdrop.location}`}
+            fill
+            className="object-cover"
+          />
         </div>
 
-        {/* Details */}
-        <div className="text-secondary-text space-y-2 text-sm">
-          {/* Despawn Countdown */}
+        {/* Content */}
+        <div className="min-w-0 flex-1">
+          {/* Header */}
+          <div className="flex items-start justify-between gap-2">
+            <h3 className="text-primary-text min-w-0 flex-1 truncate text-base font-semibold">
+              {airdrop.location.replace(/([A-Z])/g, " $1").trim()} Airdrop
+            </h3>
+            <div className="shrink-0">{getDifficultyBadge()}</div>
+          </div>
+
+          {/* Status */}
           {despawnCountdown && (
-            <div className="flex items-center justify-between">
-              <span className="text-secondary-text">Status:</span>
-              <span className="text-primary-text font-mono font-semibold">
+            <div className="text-secondary-text mt-0.5 flex items-center gap-2 text-xs">
+              <Icon icon="heroicons:clock" className="h-4 w-4 shrink-0" />
+              <span className="text-primary-text font-mono font-semibold tabular-nums">
                 {despawnCountdown.includes("Despawned")
                   ? despawnCountdown
                   : `Despawns in ${despawnCountdown}`}
@@ -186,86 +184,91 @@ export default function AirdropCard({ airdrop }: AirdropCardProps) {
             </div>
           )}
 
-          <div className="flex items-center justify-between">
-            <span className="text-secondary-text">Server Time:</span>
-            <span className="text-primary-text font-mono">
+          {/* Server time */}
+          <div className="text-secondary-text mt-1 flex items-center gap-2 text-xs">
+            <Icon icon="heroicons:clock" className="h-4 w-4 shrink-0" />
+            <span className="text-primary-text font-mono tabular-nums">
               {formatServerTime(airdrop.server_time)}
             </span>
           </div>
 
-          {/* Region Info */}
-          <div className="space-y-1">
-            <span className="text-secondary-text text-sm">Region:</span>
-            <span className="text-primary-text block font-medium">
+          {/* Region */}
+          <div className="text-secondary-text mt-1 flex items-center gap-2 text-xs">
+            <Icon icon="heroicons:map-pin" className="h-4 w-4 shrink-0" />
+            <span className="text-primary-text truncate font-medium">
               {regionData ? (
                 `${regionData.city}, ${regionData.regionName}, ${regionData.country}`
               ) : (
                 <span className="text-secondary-text inline-flex items-center gap-2">
                   <Icon icon="svg-spinners:180-ring" className="h-3.5 w-3.5" />
-                  Loading...
+                  Loading region...
                 </span>
               )}
             </span>
           </div>
 
-          {/* Join Server Button */}
-          {jobId && (
+          {/* Actions */}
+          <div className="mt-2 grid min-w-0 grid-cols-2 gap-2">
+            {jobId ? (
+              <Button
+                size="sm"
+                variant="default"
+                className="w-full min-w-0"
+                disabled={isJoining}
+                data-umami-event="Join Server"
+                data-umami-event-tracker="Airdrop_Tracker"
+                data-umami-event-term={`${airdrop.color} Airdrop`}
+                data-umami-event-jobid={jobId}
+                onClick={() => {
+                  setIsJoining(true);
+                  const joiningToastId = toast.loading("Joining server...");
+                  window.setTimeout(() => {
+                    toast.dismiss(joiningToastId);
+                    setIsJoining(false);
+                  }, 5000);
+                  window.location.assign(buildRobloxServerDeepLink(jobId));
+                }}
+              >
+                <Icon icon="heroicons:arrow-top-right-on-square" />
+                {isJoining ? "Joining..." : "Join"}
+              </Button>
+            ) : (
+              <div />
+            )}
+
             <Button
-              variant="default"
-              className="mt-2 w-full"
-              disabled={isJoining}
-              data-umami-event="Join Server"
-              data-umami-event-tracker="Airdrop_Tracker"
-              data-umami-event-term={`${airdrop.color} Airdrop`}
-              data-umami-event-jobid={jobId}
+              size="sm"
               onClick={() => {
-                setIsJoining(true);
-                const joiningToastId = toast.loading("Joining server...");
-                window.setTimeout(() => {
-                  toast.dismiss(joiningToastId);
-                  setIsJoining(false);
-                }, 5000);
-                window.location.assign(buildRobloxServerDeepLink(jobId));
+                setIsMapImageLoading(true);
+                setIsMapModalOpen(true);
               }}
+              variant="secondary"
+              className="w-full min-w-0"
+              data-umami-event="View Airdrop Map"
+              data-umami-event-location={airdrop.location}
             >
-              <Icon
-                icon="heroicons:arrow-top-right-on-square"
-                className="h-4 w-4"
-              />
-              {isJoining ? "Joining..." : "Join Server"}
+              <Icon icon="heroicons:map-pin" />
+              Location
             </Button>
-          )}
+          </div>
 
-          {/* View Map Button */}
-          <Button
-            onClick={() => setIsMapModalOpen(true)}
-            variant="default"
-            className="mt-2 w-full"
-            data-umami-event="View Airdrop Map"
-            data-umami-event-location={airdrop.location}
-          >
-            <Icon icon="heroicons:map-pin" className="h-4 w-4" />
-            View Location
-          </Button>
-
-          {/* View Players Button */}
           {players.length > 0 && (
             <Button
+              size="sm"
               onClick={() => setIsPlayersModalOpen(true)}
-              variant="default"
-              className="mt-2 w-full"
+              variant="secondary"
+              className="mt-2 w-full min-w-0"
             >
-              <Icon icon="heroicons-outline:users" className="h-4 w-4" />
-              View {players.length} Players
+              <Icon icon="heroicons-outline:users" />
+              {players.length} Players
             </Button>
           )}
         </div>
+      </div>
 
-        {/* Footer with Last Update */}
-        <div className="border-border-card mt-4 border-t pt-3">
-          <div className="text-primary-text flex items-center justify-center text-xs font-medium">
-            <span>Logged {relativeTime || "Just now"}</span>
-          </div>
+      <div className="border-border-card border-t px-3 py-2">
+        <div className="text-secondary-text text-center text-xs font-medium tabular-nums">
+          Logged {relativeTime || "Just now"}
         </div>
       </div>
 
@@ -279,44 +282,60 @@ export default function AirdropCard({ airdrop }: AirdropCardProps) {
       )}
 
       {/* Map Modal */}
-      <AnimatePresence>
-        {isMapModalOpen && (
-          <motion.div
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={() => setIsMapModalOpen(false)}
-          >
-            {/* Modal Content */}
-            <motion.div
-              className="relative max-h-[90vh] max-w-[90vw] p-4"
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              transition={{ type: "spring", damping: 25, stiffness: 300 }}
-              onClick={(e) => e.stopPropagation()}
-            >
-              {/* Image */}
+      <Dialog
+        open={isMapModalOpen}
+        onClose={() => setIsMapModalOpen(false)}
+        className="relative z-[3000]"
+      >
+        <div
+          className="fixed inset-0 bg-black/50 backdrop-blur-sm"
+          aria-hidden="true"
+        />
+        <div className="fixed inset-0 flex items-center justify-center p-4">
+          <DialogPanel className="border-border-card bg-secondary-bg hover:border-border-focus relative flex max-h-[90vh] w-full max-w-4xl flex-col overflow-hidden rounded-lg border shadow-xl">
+            <div className="border-border-card flex items-center justify-between border-b px-6 py-4">
+              <div className="min-w-0">
+                <div className="flex flex-wrap items-center gap-3">
+                  <h2 className="text-primary-text truncate text-xl font-semibold">
+                    {airdrop.location.replace(/([A-Z])/g, " $1").trim()} Airdrop
+                  </h2>
+                  {getDifficultyBadge()}
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsMapModalOpen(false)}
+                aria-label="Close"
+                className="text-secondary-text hover:text-primary-text hover:bg-quaternary-bg focus-visible:ring-ring inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-md transition-colors focus-visible:ring-1 focus-visible:outline-none"
+              >
+                <Icon icon="heroicons:x-mark" className="h-5 w-5" />
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-auto p-4">
               <div className="relative">
+                {isMapImageLoading && (
+                  <div className="bg-secondary-bg/40 absolute inset-0 z-10 flex items-center justify-center rounded-lg backdrop-blur-sm">
+                    <div className="text-secondary-text inline-flex items-center gap-2 text-sm font-medium">
+                      <Icon icon="svg-spinners:180-ring" className="h-5 w-5" />
+                      Generating map...
+                    </div>
+                  </div>
+                )}
                 <Image
                   src={mapImageUrl}
                   alt="Airdrop Map Location"
                   width={1200}
                   height={800}
-                  className="h-auto max-h-[80vh] w-auto max-w-full rounded-lg shadow-2xl"
+                  className="h-auto w-full rounded-lg shadow-2xl"
+                  onLoad={() => setIsMapImageLoading(false)}
+                  onError={() => setIsMapImageLoading(false)}
                 />
               </div>
-
-              {/* Caption */}
-              <p className="mt-3 text-center text-sm text-gray-300">
-                Airdrop Location:{" "}
-                {airdrop.location.replace(/([A-Z])/g, " $1").trim()}
-              </p>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+            </div>
+          </DialogPanel>
+        </div>
+      </Dialog>
     </div>
   );
 }

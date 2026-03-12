@@ -24,6 +24,7 @@ import ExperimentalFeatureBanner from "@/components/ui/ExperimentalFeatureBanner
 import { Button } from "@/components/ui/button";
 import NitroRobberiesTopAd from "@/components/Ads/NitroRobberiesTopAd";
 import NitroRobberiesRailAd from "@/components/Ads/NitroRobberiesRailAd";
+import TotalRobberiesLoggedPolling from "@/components/RobberyTracker/TotalRobberiesLoggedPolling";
 import { useAuthContext } from "@/contexts/AuthContext";
 import {
   DropdownMenu,
@@ -1168,7 +1169,7 @@ function RobberyTrackerContent() {
         </div>
 
         {/* Status Bar */}
-        <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
           {/* Statistics - Conditional based on view */}
           {/* Statistics - Conditional based on view */}
           {activeView === "robberies" ? (
@@ -1291,6 +1292,8 @@ function RobberyTrackerContent() {
               {isConnected ? "LIVE" : isIdle ? "IDLE" : "OFFLINE"}
             </span>
           </div>
+
+          <TotalRobberiesLoggedPolling className="hidden sm:ml-auto sm:inline-flex" />
         </div>
 
         {/* Main View Toggle */}
@@ -1526,7 +1529,7 @@ function RobberyTrackerContent() {
                 {/* Robberies Grid */}
                 {isPowerComboMode ? (
                   filteredRobberyCombos.length > 0 ? (
-                    <div className="grid grid-cols-1 items-start gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                    <div className="grid grid-cols-1 items-start gap-6 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
                       {filteredRobberyCombos.map((combo) => (
                         <RobberyComboCard
                           key={`${combo.comboId}-${combo.serverId}`}
@@ -1552,7 +1555,7 @@ function RobberyTrackerContent() {
                     </div>
                   )
                 ) : filteredRobberies.length > 0 ? (
-                  <div className="grid grid-cols-1 items-start gap-6 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                  <div className="grid grid-cols-1 items-start gap-6 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
                     {filteredRobberies.map((robbery) => (
                       <RobberyCard
                         key={`${robbery.marker_name}-${robbery.server?.job_id || robbery.job_id}-${robbery.timestamp}`}
@@ -1607,7 +1610,7 @@ function RobberyTrackerContent() {
               <>
                 {/* Mansions Grid */}
                 {filteredMansions.length > 0 ? (
-                  <div className="grid grid-cols-1 items-start gap-6 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                  <div className="grid grid-cols-1 items-start gap-6 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
                     {filteredMansions.map((robbery) => (
                       <RobberyCard
                         key={`${robbery.marker_name}-${robbery.server?.job_id || robbery.job_id}-${robbery.timestamp}`}
@@ -1703,7 +1706,7 @@ function RobberyTrackerContent() {
 
                 {/* Airdrops Grid */}
                 {filteredAirdrops.length > 0 ? (
-                  <div className="grid grid-cols-1 items-start gap-6 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                  <div className="grid grid-cols-1 items-start gap-6 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
                     {filteredAirdrops.map((airdrop, index) => (
                       <AirdropCard
                         key={`${airdrop.location}-${airdrop.color}-${airdrop.server?.job_id || index}-${airdrop.timestamp}`}
