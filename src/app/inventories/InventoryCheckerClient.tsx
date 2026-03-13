@@ -1080,6 +1080,8 @@ export default function InventoryCheckerClient({
                         <InventoryBreakdown
                           networthData={networthData}
                           username={getUserDisplay(robloxId)}
+                          itemsData={itemsData}
+                          inventoryData={currentData}
                         />
                       )}
 
