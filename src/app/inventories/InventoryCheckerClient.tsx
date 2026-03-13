@@ -232,66 +232,55 @@ export default function InventoryCheckerClient({
     ),
   );
 
+  const hasComments = Boolean(robloxId);
+
+  const tabIndex = useMemo(() => {
+    let nextIndex = 1;
+
+    const breakdown = hasBreakdownData ? nextIndex++ : null;
+    const copies = hasDuplicates ? nextIndex++ : null;
+    const dupes = hasDupedItems ? nextIndex++ : null;
+    const graphs = robloxId ? nextIndex++ : null;
+    const comments = hasComments ? nextIndex++ : null;
+
+    const max = Math.max(
+      0,
+      ...(Array.from([breakdown, copies, dupes, graphs, comments]).filter(
+        (idx): idx is number => typeof idx === "number",
+      ) as number[]),
+    );
+
+    return {
+      breakdown,
+      copies,
+      dupes,
+      graphs,
+      comments,
+      max,
+    };
+  }, [hasBreakdownData, hasComments, hasDuplicates, hasDupedItems, robloxId]);
+
   // Hash navigation
   useEffect(() => {
     const handleHashChange = () => {
       const hash = window.location.hash.slice(1); // Remove the # symbol
-      const hasComments = Boolean(robloxId);
 
-      if (hash === "copies" && hasDuplicates) {
-        setActiveTab(1);
-      } else if (hash === "dupes" && hasDupedItems) {
-        setActiveTab(hasDuplicates ? 2 : 1);
-      } else if (hash === "money" && robloxId) {
-        const moneyTab =
-          hasDuplicates && hasDupedItems
-            ? 3
-            : hasDuplicates && !hasDupedItems
-              ? 2
-              : !hasDuplicates && hasDupedItems
-                ? 2
-                : 1;
-        setActiveTab(moneyTab);
-      } else if (hash === "networth" && robloxId) {
-        const networthTab =
-          hasDuplicates && hasDupedItems
-            ? 4
-            : hasDuplicates && !hasDupedItems
-              ? 3
-              : !hasDuplicates && hasDupedItems
-                ? 3
-                : 2;
-        setActiveTab(networthTab);
-      } else if (hash === "breakdown" && hasBreakdownData) {
-        const breakdownTab =
-          hasDuplicates && hasDupedItems
-            ? 5
-            : hasDuplicates && !hasDupedItems
-              ? 4
-              : !hasDuplicates && hasDupedItems
-                ? 4
-                : !hasDuplicates && !hasDupedItems
-                  ? 3
-                  : 2;
-        setActiveTab(breakdownTab);
-      } else if (hash === "comments" && hasComments) {
-        const commentsTab =
-          hasDuplicates && hasDupedItems && hasBreakdownData
-            ? 6
-            : hasDuplicates && hasDupedItems && !hasBreakdownData
-              ? 5
-              : hasDuplicates && !hasDupedItems && hasBreakdownData
-                ? 5
-                : hasDuplicates && !hasDupedItems && !hasBreakdownData
-                  ? 4
-                  : !hasDuplicates && hasDupedItems && hasBreakdownData
-                    ? 5
-                    : !hasDuplicates && hasDupedItems && !hasBreakdownData
-                      ? 4
-                      : !hasDuplicates && !hasDupedItems && hasBreakdownData
-                        ? 4
-                        : 3;
-        setActiveTab(commentsTab);
+      if (hash === "copies" && tabIndex.copies !== null) {
+        setActiveTab(tabIndex.copies);
+      } else if (hash === "dupes" && tabIndex.dupes !== null) {
+        setActiveTab(tabIndex.dupes);
+      } else if (
+        (hash === "money" ||
+          hash === "networth" ||
+          hash === "graphs" ||
+          hash === "charts") &&
+        tabIndex.graphs !== null
+      ) {
+        setActiveTab(tabIndex.graphs);
+      } else if (hash === "breakdown" && tabIndex.breakdown !== null) {
+        setActiveTab(tabIndex.breakdown);
+      } else if (hash === "comments" && tabIndex.comments !== null) {
+        setActiveTab(tabIndex.comments);
       } else {
         setActiveTab(0);
       }
@@ -303,10 +292,10 @@ export default function InventoryCheckerClient({
     // Listen for hash changes
     window.addEventListener("hashchange", handleHashChange);
     return () => window.removeEventListener("hashchange", handleHashChange);
-  }, [robloxId, hasDuplicates, hasDupedItems, hasBreakdownData]);
+  }, [tabIndex]);
 
   // Derive active tab from robloxId to avoid setState in effect
-  const effectiveActiveTab = !robloxId && activeTab === 1 ? 0 : activeTab;
+  const effectiveActiveTab = activeTab > tabIndex.max ? 0 : activeTab;
 
   // Derive loading state to avoid setState in effects
   // Reset internal loading when data arrives or there's an error
@@ -525,53 +514,15 @@ export default function InventoryCheckerClient({
     if (newValue === 0) {
       // Remove hash completely for Inventory Items tab
       history.pushState(null, "", window.location.pathname);
-    } else if (newValue === 1 && hasDuplicates) {
+    } else if (tabIndex.copies !== null && newValue === tabIndex.copies) {
       window.location.hash = "copies";
-    } else if (
-      (hasDuplicates && newValue === 2 && hasDupedItems) ||
-      (!hasDuplicates && newValue === 1 && hasDupedItems)
-    ) {
+    } else if (tabIndex.dupes !== null && newValue === tabIndex.dupes) {
       window.location.hash = "dupes";
-    } else if (
-      (hasDuplicates && hasDupedItems && newValue === 3 && robloxId) ||
-      (hasDuplicates && !hasDupedItems && newValue === 2 && robloxId) ||
-      (!hasDuplicates && hasDupedItems && newValue === 2 && robloxId) ||
-      (!hasDuplicates && !hasDupedItems && newValue === 1 && robloxId)
-    ) {
-      window.location.hash = "money";
-    } else if (
-      (hasDuplicates && hasDupedItems && newValue === 4 && robloxId) ||
-      (hasDuplicates && !hasDupedItems && newValue === 3 && robloxId) ||
-      (!hasDuplicates && hasDupedItems && newValue === 3 && robloxId) ||
-      (!hasDuplicates && !hasDupedItems && newValue === 2 && robloxId)
-    ) {
-      window.location.hash = "networth";
-    } else if (
-      (hasDuplicates && hasDupedItems && hasBreakdownData && newValue === 5) ||
-      (hasDuplicates && !hasDupedItems && hasBreakdownData && newValue === 4) ||
-      (!hasDuplicates && hasDupedItems && hasBreakdownData && newValue === 4) ||
-      (!hasDuplicates && !hasDupedItems && hasBreakdownData && newValue === 3)
-    ) {
+    } else if (tabIndex.graphs !== null && newValue === tabIndex.graphs) {
+      window.location.hash = "graphs";
+    } else if (tabIndex.breakdown !== null && newValue === tabIndex.breakdown) {
       window.location.hash = "breakdown";
-    } else if (
-      (hasDuplicates && hasDupedItems && hasBreakdownData && newValue === 6) ||
-      (hasDuplicates && hasDupedItems && !hasBreakdownData && newValue === 5) ||
-      (hasDuplicates && !hasDupedItems && hasBreakdownData && newValue === 5) ||
-      (hasDuplicates &&
-        !hasDupedItems &&
-        !hasBreakdownData &&
-        newValue === 4) ||
-      (!hasDuplicates && hasDupedItems && hasBreakdownData && newValue === 5) ||
-      (!hasDuplicates &&
-        hasDupedItems &&
-        !hasBreakdownData &&
-        newValue === 4) ||
-      (!hasDuplicates &&
-        !hasDupedItems &&
-        hasBreakdownData &&
-        newValue === 4) ||
-      (!hasDuplicates && !hasDupedItems && !hasBreakdownData && newValue === 3)
-    ) {
+    } else if (tabIndex.comments !== null && newValue === tabIndex.comments) {
       window.location.hash = "comments";
     }
   };
@@ -1105,22 +1056,22 @@ export default function InventoryCheckerClient({
                       />
                     )}
 
-                    {effectiveActiveTab === 1 && hasDuplicates && (
-                      <DuplicatesTab
-                        initialData={{
-                          data: currentData.data,
-                          user_id: currentData.user_id,
-                          duplicates: currentData.duplicates,
-                        }}
-                        robloxUsers={mergedRobloxUsers}
-                        onItemClick={handleItemClick}
-                        itemsData={itemsData}
-                      />
-                    )}
+                    {tabIndex.copies !== null &&
+                      effectiveActiveTab === tabIndex.copies && (
+                        <DuplicatesTab
+                          initialData={{
+                            data: currentData.data,
+                            user_id: currentData.user_id,
+                            duplicates: currentData.duplicates,
+                          }}
+                          robloxUsers={mergedRobloxUsers}
+                          onItemClick={handleItemClick}
+                          itemsData={itemsData}
+                        />
+                      )}
 
-                    {((hasDuplicates && effectiveActiveTab === 2) ||
-                      (!hasDuplicates && effectiveActiveTab === 1)) &&
-                      hasDupedItems &&
+                    {tabIndex.dupes !== null &&
+                      effectiveActiveTab === tabIndex.dupes &&
                       currentData.duplicates && (
                         <DupedItemsTab
                           duplicates={currentData.duplicates}
@@ -1131,60 +1082,34 @@ export default function InventoryCheckerClient({
                         />
                       )}
 
-                    {((hasDuplicates &&
-                      hasDupedItems &&
-                      effectiveActiveTab === 3) ||
-                      (hasDuplicates &&
-                        !hasDupedItems &&
-                        effectiveActiveTab === 2) ||
-                      (!hasDuplicates &&
-                        hasDupedItems &&
-                        effectiveActiveTab === 2) ||
-                      (!hasDuplicates &&
-                        !hasDupedItems &&
-                        effectiveActiveTab === 1)) &&
+                    {tabIndex.graphs !== null &&
+                      effectiveActiveTab === tabIndex.graphs &&
                       robloxId && (
-                        <MoneyHistoryChart
-                          userId={robloxId}
-                          initialData={moneyHistoryData}
-                        />
+                        <div className="space-y-6">
+                          <div className="space-y-3">
+                            <h4 className="text-primary-text text-sm font-semibold">
+                              Networth Graph
+                            </h4>
+                            <NetworthHistoryChart
+                              userId={robloxId}
+                              initialData={networthData}
+                            />
+                          </div>
+
+                          <div className="space-y-3">
+                            <h4 className="text-primary-text text-sm font-semibold">
+                              Money Graph
+                            </h4>
+                            <MoneyHistoryChart
+                              userId={robloxId}
+                              initialData={moneyHistoryData}
+                            />
+                          </div>
+                        </div>
                       )}
 
-                    {((hasDuplicates &&
-                      hasDupedItems &&
-                      effectiveActiveTab === 4) ||
-                      (hasDuplicates &&
-                        !hasDupedItems &&
-                        effectiveActiveTab === 3) ||
-                      (!hasDuplicates &&
-                        hasDupedItems &&
-                        effectiveActiveTab === 3) ||
-                      (!hasDuplicates &&
-                        !hasDupedItems &&
-                        effectiveActiveTab === 2)) &&
-                      robloxId && (
-                        <NetworthHistoryChart
-                          userId={robloxId}
-                          initialData={networthData}
-                        />
-                      )}
-
-                    {((hasDuplicates &&
-                      hasDupedItems &&
-                      hasBreakdownData &&
-                      effectiveActiveTab === 5) ||
-                      (hasDuplicates &&
-                        !hasDupedItems &&
-                        hasBreakdownData &&
-                        effectiveActiveTab === 4) ||
-                      (!hasDuplicates &&
-                        hasDupedItems &&
-                        hasBreakdownData &&
-                        effectiveActiveTab === 4) ||
-                      (!hasDuplicates &&
-                        !hasDupedItems &&
-                        hasBreakdownData &&
-                        effectiveActiveTab === 3)) &&
+                    {tabIndex.breakdown !== null &&
+                      effectiveActiveTab === tabIndex.breakdown &&
                       robloxId && (
                         <InventoryBreakdown
                           networthData={networthData}
@@ -1194,38 +1119,8 @@ export default function InventoryCheckerClient({
                         />
                       )}
 
-                    {((hasDuplicates &&
-                      hasDupedItems &&
-                      hasBreakdownData &&
-                      effectiveActiveTab === 6) ||
-                      (hasDuplicates &&
-                        hasDupedItems &&
-                        !hasBreakdownData &&
-                        effectiveActiveTab === 5) ||
-                      (hasDuplicates &&
-                        !hasDupedItems &&
-                        hasBreakdownData &&
-                        effectiveActiveTab === 5) ||
-                      (hasDuplicates &&
-                        !hasDupedItems &&
-                        !hasBreakdownData &&
-                        effectiveActiveTab === 4) ||
-                      (!hasDuplicates &&
-                        hasDupedItems &&
-                        hasBreakdownData &&
-                        effectiveActiveTab === 5) ||
-                      (!hasDuplicates &&
-                        hasDupedItems &&
-                        !hasBreakdownData &&
-                        effectiveActiveTab === 4) ||
-                      (!hasDuplicates &&
-                        !hasDupedItems &&
-                        hasBreakdownData &&
-                        effectiveActiveTab === 4) ||
-                      (!hasDuplicates &&
-                        !hasDupedItems &&
-                        !hasBreakdownData &&
-                        effectiveActiveTab === 3)) &&
+                    {tabIndex.comments !== null &&
+                      effectiveActiveTab === tabIndex.comments &&
                       robloxId && (
                         <ChangelogComments
                           changelogId={robloxId}
@@ -1248,8 +1143,8 @@ export default function InventoryCheckerClient({
                     username={robloxId ? getUsername(robloxId) : undefined}
                     isDupeTab={
                       (hasDupedItems &&
-                        ((hasDuplicates && effectiveActiveTab === 2) ||
-                          (!hasDuplicates && effectiveActiveTab === 1))) ||
+                        tabIndex.dupes !== null &&
+                        effectiveActiveTab === tabIndex.dupes) ||
                       (selectedItem?.is_duplicated ?? false)
                     }
                   />
@@ -1315,11 +1210,10 @@ function InventoryOverflowTabs({
 }) {
   const labels = [
     "Inventory Items",
+    ...(hasBreakdown ? ["Inventory Breakdown"] : []),
     ...(hasDuplicates ? ["Multiple Copies"] : []),
     ...(hasDupedItems ? ["Duplicate Items"] : []),
-    ...(robloxId ? ["Money Graph"] : []),
-    ...(robloxId ? ["Networth Graph"] : []),
-    ...(hasBreakdown ? ["Inventory Breakdown"] : []),
+    ...(robloxId ? ["Graphs"] : []),
     ...(hasComments ? ["Comments"] : []),
   ];
 
