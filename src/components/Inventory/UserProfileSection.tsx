@@ -246,10 +246,11 @@ export default function UserProfileSection({
                     href={`https://discord.com/users/${userConnectionData.id}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="bg-tertiary-bg/40 border-border-card text-primary-text inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium transition-opacity hover:opacity-80"
+                    prefetch={false}
+                    className="text-primary-text bg-tertiary-bg/40 border-border-card hover:bg-quaternary-bg/60 inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium shadow-sm transition-all"
                   >
-                    <DiscordIcon className="text-border-focus h-3.5 w-3.5 shrink-0" />
-                    <span className="text-sm font-semibold">Discord</span>
+                    <DiscordIcon className="h-3.5 w-3.5 shrink-0" />
+                    Discord
                   </Link>
                 </TooltipTrigger>
                 <TooltipContent>Discord profile</TooltipContent>
@@ -263,10 +264,11 @@ export default function UserProfileSection({
                   href={`https://www.roblox.com/users/${userId}/profile`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="bg-tertiary-bg/40 border-border-card text-primary-text inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium transition-opacity hover:opacity-80"
+                  prefetch={false}
+                  className="text-primary-text bg-tertiary-bg/40 border-border-card hover:bg-quaternary-bg/60 inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium shadow-sm transition-all"
                 >
                   <RobloxIcon className="h-3.5 w-3.5 shrink-0" />
-                  <span className="text-sm font-semibold">Roblox</span>
+                  Roblox
                 </Link>
               </TooltipTrigger>
               <TooltipContent>Roblox profile</TooltipContent>
@@ -279,7 +281,7 @@ export default function UserProfileSection({
                   <Link
                     href={`/users/${userConnectionData.id}`}
                     prefetch={false}
-                    className="bg-tertiary-bg/40 border-border-card text-primary-text inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium transition-opacity hover:opacity-80"
+                    className="text-primary-text bg-tertiary-bg/40 border-border-card hover:bg-quaternary-bg/60 inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium shadow-sm transition-all"
                   >
                     <Image
                       src="https://assets.jailbreakchangelogs.xyz/assets/logos/JBCL_Short_Transparent.webp"
@@ -288,7 +290,7 @@ export default function UserProfileSection({
                       height={16}
                       className="h-3.5 w-3.5 shrink-0"
                     />
-                    <span className="text-sm font-semibold">Website</span>
+                    Website
                   </Link>
                 </TooltipTrigger>
                 <TooltipContent>JBCL profile</TooltipContent>
