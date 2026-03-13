@@ -30,6 +30,14 @@ interface TradeAdCardProps {
   onDelete?: () => void;
 }
 
+const getProxyRobloxHeadshotUrl = (robloxId: string | null | undefined) => {
+  const baseUrl = process.env.NEXT_PUBLIC_INVENTORY_API_URL;
+  if (!baseUrl) return null;
+  const trimmed = (robloxId ?? "").toString().trim();
+  if (!trimmed) return null;
+  return `${baseUrl}/proxy/users/${encodeURIComponent(trimmed)}/avatar-headshot`;
+};
+
 const groupTradeItems = (items: TradeItem[]) => {
   const grouped = items.reduce(
     (acc, item) => {
@@ -202,6 +210,7 @@ export const TradeAdCard: React.FC<TradeAdCardProps> = ({
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [hasHydrated, setHasHydrated] = useState(false);
   const [isNoteExpanded, setIsNoteExpanded] = useState(false);
+  const [avatarError, setAvatarError] = useState(false);
 
   useEffect(() => {
     setHasHydrated(true);
@@ -210,6 +219,10 @@ export const TradeAdCard: React.FC<TradeAdCardProps> = ({
   useEffect(() => {
     setIsNoteExpanded(false);
   }, [trade.note]);
+
+  useEffect(() => {
+    setAvatarError(false);
+  }, [trade.user?.roblox_id, trade.user?.roblox_avatar]);
 
   const handleDelete = async () => {
     if (!onDelete) return;
@@ -253,6 +266,11 @@ export const TradeAdCard: React.FC<TradeAdCardProps> = ({
         : noteContent.slice(0, MAX_NOTE_CHARS) + "..."
       : noteContent;
 
+  const avatarSrc =
+    !avatarError &&
+    (getProxyRobloxHeadshotUrl(trade.user?.roblox_id) ||
+      trade.user?.roblox_avatar);
+
   return (
     <div
       className="bg-secondary-bg border-border-card overflow-hidden rounded-xl border p-3 transition-colors"
@@ -267,13 +285,14 @@ export const TradeAdCard: React.FC<TradeAdCardProps> = ({
                 trade.user?.premiumtype === 3 ? "rounded-sm" : "rounded-full"
               }`}
             >
-              {trade.user?.roblox_avatar ? (
+              {avatarSrc ? (
                 <Image
-                  src={trade.user.roblox_avatar}
+                  src={avatarSrc}
                   alt={`${displayName}'s Roblox avatar`}
                   fill
                   className="object-cover"
                   draggable={false}
+                  onError={() => setAvatarError(true)}
                 />
               ) : (
                 <div className="flex h-full w-full items-center justify-center">

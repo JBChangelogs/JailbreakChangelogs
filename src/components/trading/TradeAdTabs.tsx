@@ -23,7 +23,6 @@ export const TradeAdTabs: React.FC<TradeAdTabsProps> = ({
         <TabsTrigger
           fullWidth
           value="view"
-          className="data-[state=active]:!bg-quaternary-bg"
           id="trading-tab-view"
           aria-controls="trading-tabpanel-view"
         >
@@ -32,7 +31,6 @@ export const TradeAdTabs: React.FC<TradeAdTabsProps> = ({
         <TabsTrigger
           fullWidth
           value="supporter"
-          className="data-[state=active]:!bg-quaternary-bg"
           id="trading-tab-supporter"
           aria-controls="trading-tabpanel-supporter"
         >
@@ -42,7 +40,6 @@ export const TradeAdTabs: React.FC<TradeAdTabsProps> = ({
           <TabsTrigger
             fullWidth
             value="myads"
-            className="data-[state=active]:!bg-quaternary-bg"
             id="trading-tab-myads"
             aria-controls="trading-tabpanel-myads"
           >
@@ -52,7 +49,6 @@ export const TradeAdTabs: React.FC<TradeAdTabsProps> = ({
         <TabsTrigger
           fullWidth
           value="create"
-          className="data-[state=active]:!bg-quaternary-bg"
           id="trading-tab-create"
           aria-controls="trading-tabpanel-create"
         >

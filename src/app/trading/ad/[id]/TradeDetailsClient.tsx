@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { CommentData } from "@/utils/api";
 import { UserData } from "@/types/auth";
@@ -37,6 +37,14 @@ interface TradeDetailsClientProps {
   initialComments?: CommentData[];
   initialUserMap?: Record<string, UserData>;
 }
+
+const getProxyRobloxHeadshotUrl = (robloxId: string | null | undefined) => {
+  const baseUrl = process.env.NEXT_PUBLIC_INVENTORY_API_URL;
+  if (!baseUrl) return null;
+  const trimmed = (robloxId ?? "").toString().trim();
+  if (!trimmed) return null;
+  return `${baseUrl}/proxy/users/${encodeURIComponent(trimmed)}/avatar-headshot`;
+};
 
 const groupTradeItems = (items: TradeItem[]) => {
   const grouped = items.reduce(
@@ -165,6 +173,7 @@ export default function TradeDetailsClient({
   const { user } = useAuthContext();
   const currentUserId = user?.id || null;
   const [isDeleting, setIsDeleting] = useState(false);
+  const [avatarError, setAvatarError] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showOfferConfirm, setShowOfferConfirm] = useState(false);
   const [isNoteExpanded, setIsNoteExpanded] = useState(false);
@@ -197,6 +206,15 @@ export default function TradeDetailsClient({
         ? noteLines.slice(0, MAX_NOTE_LINES).join("\n")
         : noteContent.slice(0, MAX_NOTE_CHARS) + "..."
       : noteContent;
+
+  useEffect(() => {
+    setAvatarError(false);
+  }, [trade.user?.roblox_id, trade.user?.roblox_avatar]);
+
+  const avatarSrc =
+    !avatarError &&
+    (getProxyRobloxHeadshotUrl(trade.user?.roblox_id) ||
+      trade.user?.roblox_avatar);
 
   const handleMakeOffer = async () => {
     try {
@@ -303,13 +321,14 @@ export default function TradeDetailsClient({
                   trade.user?.premiumtype === 3 ? "rounded-sm" : "rounded-full"
                 }`}
               >
-                {trade.user?.roblox_avatar ? (
+                {avatarSrc ? (
                   <Image
-                    src={trade.user.roblox_avatar}
+                    src={avatarSrc}
                     alt={`${displayName}'s Roblox avatar`}
                     fill
                     className="object-cover"
                     draggable={false}
+                    onError={() => setAvatarError(true)}
                   />
                 ) : (
                   <div className="flex h-full w-full items-center justify-center">
