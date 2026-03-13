@@ -331,15 +331,9 @@ const ItemValueChart = ({
     duped: avgNullable(chunk.map((entry) => entry.duped)),
   }));
 
-  const valuePoints = valueChartData.flatMap((point) =>
-    [point.cash, point.duped].filter(
-      (value): value is number => value !== null && value !== undefined,
-    ),
-  );
-
-  const getNiceStep = (maxValue: number, targetTicks = 6) => {
-    if (maxValue <= 0) return 1;
-    const roughStep = maxValue / (targetTicks - 1);
+  const getNiceStep = (rangeValue: number, targetTicks = 6) => {
+    if (rangeValue <= 0) return 1;
+    const roughStep = rangeValue / (targetTicks - 1);
     const magnitude = 10 ** Math.floor(Math.log10(roughStep));
     const fraction = roughStep / magnitude;
 
@@ -352,12 +346,47 @@ const ItemValueChart = ({
     return niceFraction * magnitude;
   };
 
-  const valueAxisMax = (() => {
-    if (valuePoints.length === 0) return 1;
-    const maxPoint = Math.max(...valuePoints);
-    const step = getNiceStep(maxPoint);
-    return (Math.floor(maxPoint / step) + 1) * step;
-  })();
+  const getYAxisDomain = (
+    points: { cash: number | null; duped: number | null }[],
+  ): [number, number] => {
+    if (points.length === 0) return [0, 1];
+    const values = points
+      .flatMap((point) => [point.cash, point.duped])
+      .filter((value): value is number => value !== null && value !== undefined)
+      .filter((value) => Number.isFinite(value));
+
+    if (values.length === 0) return [0, 1];
+
+    const rawMin = Math.min(...values);
+    const rawMax = Math.max(...values);
+
+    const baseMin = Math.max(0, rawMin);
+    const baseMax = Math.max(baseMin, rawMax);
+    const baseRange = Math.max(baseMax - baseMin, baseMax * 0.01, 1);
+    const padding = baseRange * 0.08;
+
+    const paddedMin = Math.max(0, baseMin - padding);
+    const paddedMax = baseMax + padding;
+
+    const step = getNiceStep(paddedMax - paddedMin);
+    let axisMin = Math.floor(paddedMin / step) * step;
+    const axisMax = Math.ceil(paddedMax / step) * step;
+
+    // If the min is above zero but smaller than our step, flooring can snap it to 0.
+    // For trading metrics, that defeats the purpose of adaptive scaling.
+    if (axisMin === 0 && paddedMin > 0) {
+      axisMin = Math.floor(paddedMin);
+    }
+
+    if (axisMax <= axisMin) {
+      return [Math.max(0, axisMin - step), axisMin + step];
+    }
+    return [axisMin, axisMax];
+  };
+
+  const displayedValueChartData =
+    valueChartType === "bar" ? barValueChartData : valueChartData;
+  const [valueAxisMin, valueAxisMax] = getYAxisDomain(displayedValueChartData);
 
   const getRangeLabel = (rangeData: typeof valueChartData) => {
     if (rangeData.length === 0) return null;
@@ -604,7 +633,7 @@ const ItemValueChart = ({
                           axisLine={false}
                           tickMargin={8}
                           width={56}
-                          domain={[0, valueAxisMax]}
+                          domain={[valueAxisMin, valueAxisMax]}
                           tick={{
                             fill: "var(--color-secondary-text)",
                             fontSize: 12,
@@ -748,7 +777,7 @@ const ItemValueChart = ({
                           axisLine={false}
                           tickMargin={8}
                           width={56}
-                          domain={[0, valueAxisMax]}
+                          domain={[valueAxisMin, valueAxisMax]}
                           tick={{
                             fill: "var(--color-secondary-text)",
                             fontSize: 12,
