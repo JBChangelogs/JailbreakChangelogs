@@ -229,9 +229,9 @@ const MoneyHistoryChart = ({ initialData = [] }: MoneyHistoryChartProps) => {
     money: avg(chunk.map((entry) => entry.money)),
   }));
 
-  const getNiceStep = (maxValue: number, targetTicks = 6) => {
-    if (maxValue <= 0) return 1;
-    const roughStep = maxValue / (targetTicks - 1);
+  const getNiceStep = (rangeValue: number, targetTicks = 6) => {
+    if (rangeValue <= 0) return 1;
+    const roughStep = rangeValue / (targetTicks - 1);
     const magnitude = 10 ** Math.floor(Math.log10(roughStep));
     const fraction = roughStep / magnitude;
 
@@ -244,12 +244,37 @@ const MoneyHistoryChart = ({ initialData = [] }: MoneyHistoryChartProps) => {
     return niceFraction * magnitude;
   };
 
-  const moneyAxisMax = (() => {
-    if (moneyChartData.length === 0) return 1;
-    const maxPoint = Math.max(...moneyChartData.map((point) => point.money));
-    const step = getNiceStep(maxPoint);
-    return (Math.floor(maxPoint / step) + 1) * step;
-  })();
+  const getYAxisDomain = (points: { money: number }[]): [number, number] => {
+    if (points.length === 0) return [0, 1];
+    const values = points
+      .map((point) => point.money)
+      .filter((value) => Number.isFinite(value));
+    if (values.length === 0) return [0, 1];
+
+    const rawMin = Math.min(...values);
+    const rawMax = Math.max(...values);
+
+    const baseMin = Math.max(0, rawMin);
+    const baseMax = Math.max(baseMin, rawMax);
+    const baseRange = Math.max(baseMax - baseMin, baseMax * 0.01, 1);
+    const padding = baseRange * 0.08;
+
+    const paddedMin = Math.max(0, baseMin - padding);
+    const paddedMax = baseMax + padding;
+
+    const step = getNiceStep(paddedMax - paddedMin);
+    const axisMin = Math.floor(paddedMin / step) * step;
+    const axisMax = Math.ceil(paddedMax / step) * step;
+
+    if (axisMax <= axisMin) {
+      return [Math.max(0, axisMin - step), axisMin + step];
+    }
+    return [axisMin, axisMax];
+  };
+
+  const displayedMoneyChartData =
+    chartType === "bar" ? barMoneyChartData : moneyChartData;
+  const [moneyAxisMin, moneyAxisMax] = getYAxisDomain(displayedMoneyChartData);
 
   const getRangeLabel = (rangeData: typeof moneyChartData) => {
     if (rangeData.length === 0) return null;
@@ -401,7 +426,7 @@ const MoneyHistoryChart = ({ initialData = [] }: MoneyHistoryChartProps) => {
                     axisLine={false}
                     tickMargin={8}
                     width={56}
-                    domain={[0, moneyAxisMax]}
+                    domain={[moneyAxisMin, moneyAxisMax]}
                     tick={{
                       fill: "var(--color-secondary-text)",
                       fontSize: 12,
@@ -503,7 +528,7 @@ const MoneyHistoryChart = ({ initialData = [] }: MoneyHistoryChartProps) => {
                     axisLine={false}
                     tickMargin={8}
                     width={56}
-                    domain={[0, moneyAxisMax]}
+                    domain={[moneyAxisMin, moneyAxisMax]}
                     tick={{
                       fill: "var(--color-secondary-text)",
                       fontSize: 12,
