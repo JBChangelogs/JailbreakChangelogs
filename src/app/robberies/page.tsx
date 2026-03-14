@@ -38,8 +38,20 @@ import { safeSessionStorage } from "@/utils/safeStorage";
 
 type TimeSort = "newest" | "oldest";
 type ServerSize = "all" | "big" | "small";
-type DifficultySort = "none" | "easy-to-hard" | "hard-to-easy";
 type RobberyFilterMode = "any" | "all";
+type AirdropDifficultyFilter = "all" | "easy" | "medium" | "hard";
+
+function serverTimeToMinutes(serverTime: number) {
+  if (!Number.isFinite(serverTime)) return null;
+  const hours24 = Math.floor(serverTime);
+  const minutes = Math.floor((serverTime % 1) * 60);
+  return hours24 * 60 + minutes;
+}
+
+function mansionTimeUntilCloseMinutes(serverTimeMinutes: number) {
+  const mansionCloseMinutes = 4 * 60;
+  return (mansionCloseMinutes - serverTimeMinutes + 24 * 60) % (24 * 60);
+}
 
 const ROBBERIES_TIME_SORT_STORAGE_KEY = "robberiesTimeSort";
 const ROBBERIES_SELECTED_TYPES_STORAGE_KEY = "robberiesSelectedTypes";
@@ -285,7 +297,8 @@ function RobberyTrackerContent() {
   });
   const [otherTimeSort, setOtherTimeSort] = useState<TimeSort>("newest");
   const [serverSize, setServerSize] = useState<ServerSize>("all");
-  const [difficultySort, setDifficultySort] = useState<DifficultySort>("none");
+  const [airdropDifficultyFilter, setAirdropDifficultyFilter] =
+    useState<AirdropDifficultyFilter>("all");
   const [selectedRobberyTypes, setSelectedRobberyTypes] = useState<string[]>(
     () => {
       const storedTypes = safeSessionStorage.getItem(
@@ -387,12 +400,14 @@ function RobberyTrackerContent() {
       ? "Logged (Newest to Oldest)"
       : "Logged (Oldest to Newest)";
 
-  const difficultySortLabel =
-    difficultySort === "none"
-      ? "Sort by Difficulty"
-      : difficultySort === "easy-to-hard"
-        ? "Difficulty (Easy First)"
-        : "Difficulty (Hard First)";
+  const airdropDifficultyFilterLabel =
+    airdropDifficultyFilter === "all"
+      ? "All Difficulties"
+      : airdropDifficultyFilter === "easy"
+        ? "Easy Only"
+        : airdropDifficultyFilter === "medium"
+          ? "Medium Only"
+          : "Hard Only";
 
   const robberyFilterModeLabel =
     robberyFilterMode === "any"
@@ -689,8 +704,20 @@ function RobberyTrackerContent() {
     }
 
     return filtered.sort((a, b) => {
-      if (a.status !== b.status) return a.status - b.status;
+      const minutesA = serverTimeToMinutes(a.server_time);
+      const minutesB = serverTimeToMinutes(b.server_time);
 
+      if (minutesA === null && minutesB !== null) return 1;
+      if (minutesA !== null && minutesB === null) return -1;
+
+      if (minutesA !== null && minutesB !== null && minutesA !== minutesB) {
+        const timeUntilCloseA = mansionTimeUntilCloseMinutes(minutesA);
+        const timeUntilCloseB = mansionTimeUntilCloseMinutes(minutesB);
+        if (timeUntilCloseA !== timeUntilCloseB)
+          return timeUntilCloseB - timeUntilCloseA;
+      }
+
+      if (a.status !== b.status) return a.status - b.status;
       if (timeSort === "newest") return b.timestamp - a.timestamp;
       return a.timestamp - b.timestamp;
     });
@@ -751,24 +778,19 @@ function RobberyTrackerContent() {
       );
     }
 
-    // Sort by timestamp or difficulty
+    // Apply difficulty filter
+    if (airdropDifficultyFilter !== "all") {
+      const allowedColors =
+        airdropDifficultyFilter === "easy"
+          ? new Set(["Brown"])
+          : airdropDifficultyFilter === "medium"
+            ? new Set(["Blue"])
+            : new Set(["Red"]);
+      filtered = filtered.filter((airdrop) => allowedColors.has(airdrop.color));
+    }
+
+    // Sort by timestamp
     return filtered.sort((a, b) => {
-      if (difficultySort !== "none") {
-        const difficultyMap: Record<string, number> = {
-          Brown: 1, // Easy
-          Blue: 2, // Medium
-          Red: 3, // Hard
-        };
-        const diffA = difficultyMap[a.color] || 0;
-        const diffB = difficultyMap[b.color] || 0;
-
-        if (diffA !== diffB) {
-          return difficultySort === "easy-to-hard"
-            ? diffA - diffB
-            : diffB - diffA;
-        }
-      }
-
       return timeSort === "newest"
         ? b.timestamp - a.timestamp
         : a.timestamp - b.timestamp;
@@ -779,7 +801,7 @@ function RobberyTrackerContent() {
     searchQuery,
     timeSort,
     serverSize,
-    difficultySort,
+    airdropDifficultyFilter,
   ]);
 
   // Calculate airdrop statistics
@@ -1061,7 +1083,7 @@ function RobberyTrackerContent() {
                     </DropdownMenu>
                   </div>
 
-                  {/* Difficulty Sort Dropdown (Airdrops only) */}
+                  {/* Difficulty Filter Dropdown (Airdrops only) */}
                   {activeView === "airdrops" && (
                     <div className="col-span-1 w-full lg:flex-1">
                       <DropdownMenu>
@@ -1069,10 +1091,10 @@ function RobberyTrackerContent() {
                           <button
                             type="button"
                             className="border-border-card bg-secondary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus flex h-[56px] w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all focus:ring-1 focus:outline-none"
-                            aria-label="Sort by difficulty"
+                            aria-label="Filter by difficulty"
                           >
                             <span className="truncate">
-                              {difficultySortLabel}
+                              {airdropDifficultyFilterLabel}
                             </span>
                             <Icon
                               icon="heroicons:chevron-down"
@@ -1085,28 +1107,36 @@ function RobberyTrackerContent() {
                           className="border-border-card bg-secondary-bg text-primary-text scrollbar-thin max-h-[240px] w-[var(--radix-popper-anchor-width)] min-w-[var(--radix-popper-anchor-width)] overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
                         >
                           <DropdownMenuRadioGroup
-                            value={difficultySort}
+                            value={airdropDifficultyFilter}
                             onValueChange={(value) =>
-                              setDifficultySort(value as DifficultySort)
+                              setAirdropDifficultyFilter(
+                                value as AirdropDifficultyFilter,
+                              )
                             }
                           >
                             <DropdownMenuRadioItem
-                              value="none"
+                              value="all"
                               className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
                             >
-                              Sort by Difficulty
+                              All Difficulties
                             </DropdownMenuRadioItem>
                             <DropdownMenuRadioItem
-                              value="easy-to-hard"
+                              value="easy"
                               className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
                             >
-                              Difficulty (Easy First)
+                              Easy Only
                             </DropdownMenuRadioItem>
                             <DropdownMenuRadioItem
-                              value="hard-to-easy"
+                              value="medium"
                               className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
                             >
-                              Difficulty (Hard First)
+                              Medium Only
+                            </DropdownMenuRadioItem>
+                            <DropdownMenuRadioItem
+                              value="hard"
+                              className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
+                            >
+                              Hard Only
                             </DropdownMenuRadioItem>
                           </DropdownMenuRadioGroup>
                         </DropdownMenuContent>
@@ -1425,8 +1455,52 @@ function RobberyTrackerContent() {
                         </Button>
                       );
                     })}
+                    {ROBBERY_COMBO_PRESETS.map((preset) => {
+                      const isActive =
+                        robberyFilterMode === "all" &&
+                        activeComboPresetIds.includes(preset.id);
+
+                      return (
+                        <Button
+                          key={preset.id}
+                          onClick={() => {
+                            if (
+                              robberyFilterMode === "all" &&
+                              selectedComboPresetIds.length === 1 &&
+                              selectedComboPresetIds.includes(preset.id)
+                            ) {
+                              setRobberyFilterMode("any");
+                              setSelectedComboPresetIds([]);
+                              return;
+                            }
+
+                            setRobberyFilterMode("all");
+                            setSelectedRobberyTypes([]);
+                            setSelectedComboPresetIds((prev) => {
+                              if (prev.length === 0) return [preset.id];
+                              if (prev.includes(preset.id)) {
+                                return prev.filter((id) => id !== preset.id);
+                              }
+                              return [...prev, preset.id];
+                            });
+                          }}
+                          variant={isActive ? "default" : "secondary"}
+                          size="sm"
+                          className="gap-2"
+                          title={preset.description}
+                        >
+                          {isActive && (
+                            <Icon icon="heroicons:check" className="h-4 w-4" />
+                          )}
+                          <span className="text-xs font-semibold tabular-nums">
+                            ({comboPresetCounts.get(preset.id) || 0})
+                          </span>
+                          <span>{preset.label}</span>
+                        </Button>
+                      );
+                    })}
                   </div>
-                  <div className="mt-4 grid gap-3 lg:grid-cols-2">
+                  <div className="mt-4 w-full lg:max-w-md">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <button
@@ -1472,50 +1546,6 @@ function RobberyTrackerContent() {
                         </DropdownMenuRadioGroup>
                       </DropdownMenuContent>
                     </DropdownMenu>
-
-                    <div className="flex flex-wrap items-center gap-2">
-                      {ROBBERY_COMBO_PRESETS.map((preset) => {
-                        const isActive =
-                          robberyFilterMode === "all" &&
-                          activeComboPresetIds.includes(preset.id);
-
-                        return (
-                          <Button
-                            key={preset.id}
-                            onClick={() => {
-                              if (
-                                robberyFilterMode === "all" &&
-                                selectedComboPresetIds.length === 1 &&
-                                selectedComboPresetIds.includes(preset.id)
-                              ) {
-                                setRobberyFilterMode("any");
-                                setSelectedComboPresetIds([]);
-                                return;
-                              }
-
-                              setRobberyFilterMode("all");
-                              setSelectedRobberyTypes([]);
-                              setSelectedComboPresetIds((prev) => {
-                                if (prev.length === 0) return [preset.id];
-                                if (prev.includes(preset.id)) {
-                                  return prev.filter((id) => id !== preset.id);
-                                }
-                                return [...prev, preset.id];
-                              });
-                            }}
-                            variant={isActive ? "default" : "secondary"}
-                            size="sm"
-                            className="gap-2"
-                            title={preset.description}
-                          >
-                            <span className="text-xs font-semibold tabular-nums">
-                              ({comboPresetCounts.get(preset.id) || 0})
-                            </span>
-                            <span>{preset.label}</span>
-                          </Button>
-                        );
-                      })}
-                    </div>
                   </div>
                   {isPowerComboMode && (
                     <p className="text-secondary-text mt-3 text-xs">
@@ -1716,18 +1746,77 @@ function RobberyTrackerContent() {
                   </div>
                 ) : (
                   <div className="flex min-h-screen flex-col items-center justify-start py-12 pt-24 text-center">
-                    <Icon
-                      icon="heroicons:magnifying-glass"
-                      className="text-tertiary-text mb-4 h-12 w-12"
-                    />
-                    <h3 className="text-primary-text text-lg font-medium">
-                      No airdrops found
-                    </h3>
-                    <p className="text-secondary-text">
-                      {activeAirdropLocation !== "all"
-                        ? `No airdrops in ${activeAirdropLocation.replace(/([A-Z])/g, " $1").trim()} right now`
-                        : "No airdrops tracked yet"}
-                    </p>
+                    {(() => {
+                      const hasActiveAirdropFilters =
+                        Boolean(searchQuery) ||
+                        activeAirdropLocation !== "all" ||
+                        airdropDifficultyFilter !== "all" ||
+                        serverSize !== "all";
+
+                      const locationLabel =
+                        activeAirdropLocation === "all"
+                          ? null
+                          : activeAirdropLocation
+                              .replace(/([A-Z])/g, " $1")
+                              .trim();
+
+                      const difficultyLabel =
+                        airdropDifficultyFilter === "easy"
+                          ? "Easy"
+                          : airdropDifficultyFilter === "medium"
+                            ? "Medium"
+                            : airdropDifficultyFilter === "hard"
+                              ? "Hard"
+                              : null;
+
+                      const subject = difficultyLabel
+                        ? `${difficultyLabel} airdrops`
+                        : "airdrops";
+
+                      const constraints: string[] = [];
+                      if (locationLabel)
+                        constraints.push(`in ${locationLabel}`);
+                      if (serverSize !== "all") {
+                        constraints.push(
+                          serverSize === "big"
+                            ? "in big servers"
+                            : "in small servers",
+                        );
+                      }
+
+                      const constraintsText =
+                        constraints.length > 0
+                          ? ` ${constraints.join(" ")}`
+                          : "";
+
+                      return (
+                        <>
+                          <Icon
+                            icon="heroicons:magnifying-glass"
+                            className="text-tertiary-text mb-4 h-12 w-12"
+                          />
+                          <h3 className="text-primary-text text-lg font-medium">
+                            {hasActiveAirdropFilters
+                              ? "No airdrops match your filters"
+                              : "No airdrops tracked yet"}
+                          </h3>
+                          <p className="text-secondary-text">
+                            {hasActiveAirdropFilters ? (
+                              searchQuery ? (
+                                <>No airdrops match your search and filters</>
+                              ) : (
+                                <>
+                                  No {subject}
+                                  {constraintsText} right now
+                                </>
+                              )
+                            ) : (
+                              <>Waiting for airdrop data...</>
+                            )}
+                          </p>
+                        </>
+                      );
+                    })()}
                   </div>
                 )}
               </>

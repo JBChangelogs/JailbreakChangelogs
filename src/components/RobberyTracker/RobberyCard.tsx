@@ -201,8 +201,8 @@ export default function RobberyCard({ robbery }: RobberyCardProps) {
           );
         case 2:
           return (
-            <div className="bg-button-info/20 text-primary-text flex items-center gap-1.5 rounded-full px-3 py-1">
-              <span className="text-sm font-medium">Ready to Open</span>
+            <div className="text-primary-text border-status-success/30 bg-status-success/20 inline-flex h-6 items-center gap-1.5 rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl">
+              <span>Ready to Open</span>
             </div>
           );
         default:
