@@ -579,7 +579,7 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
                 onClick={() => setShowClearConfirmModal(false)}
               />
               <div className="fixed inset-0 flex items-center justify-center p-4">
-                <div className="modal-container border-button-info bg-secondary-bg mx-auto w-full max-w-sm rounded-lg border p-6 shadow-lg">
+                <div className="modal-container border-border-card bg-secondary-bg mx-auto w-full max-w-sm rounded-lg border p-6 shadow-lg">
                   <div className="modal-header text-primary-text mb-2 text-xl font-semibold">
                     Clear Trade Ad?
                   </div>
@@ -589,7 +589,7 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
                     </p>
                   </div>
                   <div className="mb-4 grid grid-cols-1 gap-3">
-                    <button
+                    <UiButton
                       onClick={() => {
                         setOfferingItems([]);
                         if (requestingItems.length === 0) {
@@ -599,11 +599,12 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
                         }
                         setShowClearConfirmModal(false);
                       }}
-                      className="bg-button-success/10 hover:bg-button-success/20 border-button-success text-button-success w-full rounded-md border px-4 py-2 text-sm font-medium transition-colors hover:cursor-pointer"
+                      variant="outline"
+                      className="border-button-success! text-button-success! bg-button-success/10! hover:bg-button-success/20! active:bg-button-success/20! w-full"
                     >
                       Clear Offering
-                    </button>
-                    <button
+                    </UiButton>
+                    <UiButton
                       onClick={() => {
                         setRequestingItems([]);
                         if (offeringItems.length === 0) {
@@ -613,26 +614,29 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
                         }
                         setShowClearConfirmModal(false);
                       }}
-                      className="bg-button-danger/10 hover:bg-button-danger/20 border-button-danger text-button-danger w-full rounded-md border px-4 py-2 text-sm font-medium transition-colors hover:cursor-pointer"
+                      variant="outline"
+                      className="border-button-danger! text-button-danger! bg-button-danger/10! hover:bg-button-danger/20! active:bg-button-danger/20! w-full"
                     >
                       Clear Requesting
-                    </button>
-                    <button
+                    </UiButton>
+                    <UiButton
                       onClick={() => {
                         handleStartNewTradeAd();
                       }}
-                      className="bg-button-danger text-form-button-text hover:bg-button-danger-hover w-full rounded-md px-4 py-2 text-sm font-medium transition-colors hover:cursor-pointer"
+                      variant="destructive"
+                      className="w-full"
                     >
                       Clear Both
-                    </button>
+                    </UiButton>
                   </div>
                   <div className="modal-footer flex justify-end">
-                    <button
+                    <UiButton
                       onClick={() => setShowClearConfirmModal(false)}
-                      className="text-secondary-text hover:text-primary-text cursor-pointer rounded border-none bg-transparent px-4 py-2 text-sm"
+                      variant="ghost"
+                      className="px-4"
                     >
                       Cancel
-                    </button>
+                    </UiButton>
                   </div>
                 </div>
               </div>
