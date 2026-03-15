@@ -1,5 +1,6 @@
 "use client";
 
+import { type CSSProperties } from "react";
 import { Season } from "@/types/seasons";
 
 interface XpProgressBarProps {
@@ -89,6 +90,11 @@ export default function XpProgressBar({
     return null;
   }
 
+  const clippedTextStyle: CSSProperties & { WebkitClipPath?: string } = {
+    clipPath: `inset(0 ${100 - progressPercentage}% 0 0)`,
+    WebkitClipPath: `inset(0 ${100 - progressPercentage}% 0 0)`,
+  };
+
   return (
     <div className="mt-3">
       {/* Game-style Progress Bar - old design without rounded corners */}
@@ -105,38 +111,77 @@ export default function XpProgressBar({
           }
         />
 
-        {/* Mobile Layout - Stack vertically on small screens */}
-        <div className="absolute inset-0 flex flex-col justify-center px-2 sm:hidden">
-          <div className="text-primary-text text-xs leading-tight font-bold">
-            <div className="text-center">LEVEL {currentLevel}</div>
-            <div className="text-center text-[10px]">
-              SEASON {season?.season || "?"}
+        {/* Base text layer */}
+        <div className="pointer-events-none absolute inset-0 z-10">
+          {/* Mobile Layout - Stack vertically on small screens */}
+          <div className="absolute inset-0 flex flex-col justify-center px-2 sm:hidden">
+            <div className="text-primary-text text-xs leading-tight font-bold">
+              <div className="text-center">LEVEL {currentLevel}</div>
+              <div className="text-center text-[10px]">
+                SEASON {season?.season || "?"}
+              </div>
+            </div>
+          </div>
+
+          {/* Desktop Layout - Horizontal layout for larger screens */}
+          <div className="hidden sm:block">
+            <div className="absolute top-1/2 left-2 -translate-y-1/2">
+              <span className="text-primary-text text-sm font-bold">
+                {currentXpInLevel.toLocaleString()}/
+                {xpRequiredForNextLevel.toLocaleString()}
+              </span>
+            </div>
+
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+              <span className="text-primary-text text-sm font-bold">
+                LEVEL {currentLevel}
+              </span>
+            </div>
+
+            <div className="absolute top-1/2 right-2 -translate-y-1/2">
+              <span className="text-primary-text text-sm font-bold">
+                SEASON {season?.season || "?"}
+              </span>
             </div>
           </div>
         </div>
 
-        {/* Desktop Layout - Horizontal layout for larger screens */}
-        <div className="hidden sm:block">
-          {/* XP Text Overlay */}
-          <div className="absolute top-1/2 left-2 -translate-y-1/2">
-            <span className="text-primary-text text-sm font-bold">
-              {currentXpInLevel.toLocaleString()}/
-              {xpRequiredForNextLevel.toLocaleString()}
-            </span>
+        {/* Clipped text layer (white only where the fill covers) */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 z-20"
+          style={clippedTextStyle}
+        >
+          {/* Mobile Layout - Stack vertically on small screens */}
+          <div className="absolute inset-0 flex flex-col justify-center px-2 sm:hidden">
+            <div className="text-xs leading-tight font-bold text-white">
+              <div className="text-center">LEVEL {currentLevel}</div>
+              <div className="text-center text-[10px]">
+                SEASON {season?.season || "?"}
+              </div>
+            </div>
           </div>
 
-          {/* Level Info - Centered */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-            <span className="text-primary-text text-sm font-bold">
-              LEVEL {currentLevel}
-            </span>
-          </div>
+          {/* Desktop Layout - Horizontal layout for larger screens */}
+          <div className="hidden sm:block">
+            <div className="absolute top-1/2 left-2 -translate-y-1/2">
+              <span className="text-sm font-bold text-white">
+                {currentXpInLevel.toLocaleString()}/
+                {xpRequiredForNextLevel.toLocaleString()}
+              </span>
+            </div>
 
-          {/* Season Info - Right Side */}
-          <div className="absolute top-1/2 right-2 -translate-y-1/2">
-            <span className="text-primary-text text-sm font-bold">
-              SEASON {season?.season || "?"}
-            </span>
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+              <span className="text-sm font-bold text-white">
+                LEVEL {currentLevel}
+              </span>
+            </div>
+
+            <div className="absolute top-1/2 right-2 -translate-y-1/2">
+              <span className="text-sm font-bold text-white">
+                SEASON {season?.season || "?"}
+              </span>
+            </div>
           </div>
         </div>
       </div>
