@@ -332,7 +332,10 @@ export default async function Home() {
             <div className="pt-6 md:col-span-2">
               <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
                 <div>
-                  <p className="text-link text-xs font-semibold tracking-[0.2em] uppercase">
+                  <p
+                    className="text-xs font-semibold tracking-[0.2em] uppercase"
+                    style={{ color: "#66B3FF" }}
+                  >
                     Trusted by Badimo
                   </p>
                   <a
