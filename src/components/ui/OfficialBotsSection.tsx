@@ -3,7 +3,6 @@
 import { useOfficialBotsQuery } from "@/hooks/useOfficialBotsQuery";
 import { Icon } from "./IconWrapper";
 import Image from "next/image";
-import CopyButton from "@/app/inventories/CopyButton";
 
 // Skeleton loader for official bots section
 function OfficialBotsSkeleton() {
@@ -148,21 +147,16 @@ function OfficialBotsContent() {
                 </div>
 
                 <div className="min-w-0 flex-1">
-                  <div className="flex items-start gap-2">
-                    <div className="min-w-0 flex-1">
-                      <a
-                        href={`https://www.roblox.com/users/${botId}/profile`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-primary-text hover:text-link-hover font-medium wrap-break-word transition-colors"
-                      >
-                        {displayName}
-                      </a>
-                      <div className="text-secondary-text text-sm wrap-break-word">
-                        @{username}
-                      </div>
-                    </div>
-                    <CopyButton text={botId} className="mt-1 shrink-0" />
+                  <a
+                    href={`https://www.roblox.com/users/${botId}/profile`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-primary-text hover:text-link-hover font-medium wrap-break-word transition-colors"
+                  >
+                    {displayName}
+                  </a>
+                  <div className="text-secondary-text text-sm wrap-break-word">
+                    @{username}
                   </div>
                 </div>
               </div>
