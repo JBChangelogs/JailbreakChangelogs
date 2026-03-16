@@ -26,12 +26,15 @@ export default function ReportIssueModal({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (title.length > MAX_TITLE_LENGTH) {
+    const sanitizedTitle = title.trim().replace(/\p{M}+/gu, "");
+    const sanitizedDescription = description.trim().replace(/\p{M}+/gu, "");
+
+    if (sanitizedTitle.length > MAX_TITLE_LENGTH) {
       toast.error(`Title must be ${MAX_TITLE_LENGTH} characters or less`);
       return;
     }
 
-    if (description.length > MAX_DESCRIPTION_LENGTH) {
+    if (sanitizedDescription.length > MAX_DESCRIPTION_LENGTH) {
       toast.error(
         `Description must be ${MAX_DESCRIPTION_LENGTH} characters or less`,
       );
@@ -51,7 +54,10 @@ export default function ReportIssueModal({
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ title, description }),
+        body: JSON.stringify({
+          title: sanitizedTitle,
+          description: sanitizedDescription,
+        }),
       });
 
       if (!response.ok) {

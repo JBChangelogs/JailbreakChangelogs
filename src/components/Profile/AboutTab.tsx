@@ -32,6 +32,7 @@ const MAX_BIO_LENGTH = 512;
 
 const cleanBioText = (text: string): string => {
   return text
+    .replace(/\p{M}+/gu, "")
     .split(/\r?\n/)
     .map((line) => line.trim())
     .join("\n")

@@ -965,7 +965,7 @@ export default function MessagesInbox() {
       return;
     }
 
-    const trimmedMessage = draftMessage.trim();
+    const trimmedMessage = draftMessage.trim().replace(/\p{M}+/gu, "");
     if (!trimmedMessage || isSending) return;
 
     try {

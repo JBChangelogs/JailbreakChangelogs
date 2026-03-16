@@ -31,7 +31,8 @@ const SurveyModal: React.FC<SurveyModalProps> = ({ open, onClose, survey }) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!answer.trim()) {
+    const sanitizedAnswer = answer.trim().replace(/\p{M}+/gu, "");
+    if (!sanitizedAnswer) {
       toast.error("Please provide an answer");
       return;
     }
@@ -49,7 +50,7 @@ const SurveyModal: React.FC<SurveyModalProps> = ({ open, onClose, survey }) => {
         },
         body: JSON.stringify({
           id: survey.id,
-          answer: answer,
+          answer: sanitizedAnswer,
         }),
       });
 

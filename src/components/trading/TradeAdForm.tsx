@@ -499,7 +499,8 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
       const createPayload = {
         offering: buildV2CreateItems(offeringItems),
         requesting: buildV2CreateItems(requestingItems),
-        note: trimmedNote.length > 0 ? trimmedNote : null,
+        note:
+          trimmedNote.length > 0 ? trimmedNote.replace(/\p{M}+/gu, "") : null,
         expiration: expirationHours!,
       };
       const headers: Record<string, string> = {

@@ -1146,6 +1146,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
     if (!reason.trim() || !reportingCommentId) return;
 
     try {
+      const sanitizedReason = reason.trim().replace(/\p{M}+/gu, "");
       const response = await fetch(`/api/comments/report`, {
         method: "POST",
         headers: {
@@ -1153,7 +1154,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
         },
         body: JSON.stringify({
           comment_id: reportingCommentId,
-          reason: reason.trim(),
+          reason: sanitizedReason,
         }),
       });
 
