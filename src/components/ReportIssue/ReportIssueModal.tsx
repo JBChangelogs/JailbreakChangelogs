@@ -5,6 +5,7 @@ import { Dialog, DialogPanel } from "@headlessui/react";
 import { toast } from "sonner";
 // import { PUBLIC_API_URL } from '@/utils/api';
 import { useAuthContext } from "@/contexts/AuthContext";
+import { sanitizeText } from "@/utils/sanitizeText";
 
 const MAX_TITLE_LENGTH = 100;
 const MAX_DESCRIPTION_LENGTH = 500;
@@ -26,8 +27,8 @@ export default function ReportIssueModal({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const sanitizedTitle = title.trim().replace(/\p{M}+/gu, "");
-    const sanitizedDescription = description.trim().replace(/\p{M}+/gu, "");
+    const sanitizedTitle = sanitizeText(title.trim());
+    const sanitizedDescription = sanitizeText(description.trim());
 
     if (sanitizedTitle.length > MAX_TITLE_LENGTH) {
       toast.error(`Title must be ${MAX_TITLE_LENGTH} characters or less`);

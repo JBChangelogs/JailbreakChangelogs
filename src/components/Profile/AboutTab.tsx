@@ -14,6 +14,7 @@ import { useRealTimeRelativeDate } from "@/hooks/useRealTimeRelativeDate";
 import { toast } from "sonner";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { convertUrlsToLinks } from "@/utils/urlConverter";
+import { sanitizeText } from "@/utils/sanitizeText";
 
 interface AboutTabProps {
   user: {
@@ -31,8 +32,7 @@ interface AboutTabProps {
 const MAX_BIO_LENGTH = 512;
 
 const cleanBioText = (text: string): string => {
-  return text
-    .replace(/\p{M}+/gu, "")
+  return sanitizeText(text)
     .split(/\r?\n/)
     .map((line) => line.trim())
     .join("\n")

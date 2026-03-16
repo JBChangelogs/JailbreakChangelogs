@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { toast } from "sonner";
+import { sanitizeText } from "@/utils/sanitizeText";
 
 interface Survey {
   id: string;
@@ -31,7 +32,7 @@ const SurveyModal: React.FC<SurveyModalProps> = ({ open, onClose, survey }) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const sanitizedAnswer = answer.trim().replace(/\p{M}+/gu, "");
+    const sanitizedAnswer = sanitizeText(answer.trim());
     if (!sanitizedAnswer) {
       toast.error("Please provide an answer");
       return;

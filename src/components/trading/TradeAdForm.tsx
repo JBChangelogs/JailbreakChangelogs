@@ -22,6 +22,7 @@ import { DroppableZone } from "@/components/dnd/DroppableZone";
 import { CustomDragOverlay } from "@/components/dnd/DragOverlay";
 import { isCustomTradeItem, tradeItemIdsEqual } from "@/utils/tradeItems";
 import TradeItemPickerV2 from "./TradeItemPickerV2";
+import { sanitizeText } from "@/utils/sanitizeText";
 
 interface TradeAdFormProps {
   onSuccess?: (createdTrade?: unknown) => void;
@@ -499,8 +500,7 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
       const createPayload = {
         offering: buildV2CreateItems(offeringItems),
         requesting: buildV2CreateItems(requestingItems),
-        note:
-          trimmedNote.length > 0 ? trimmedNote.replace(/\p{M}+/gu, "") : null,
+        note: trimmedNote.length > 0 ? sanitizeText(trimmedNote) : null,
         expiration: expirationHours!,
       };
       const headers: Record<string, string> = {

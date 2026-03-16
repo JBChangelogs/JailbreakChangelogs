@@ -18,6 +18,7 @@ import {
   validatePrivateServerLink,
   validateServerRulesText,
 } from "@/utils/serverValidation";
+import { sanitizeText } from "@/utils/sanitizeText";
 
 interface AddServerModalProps {
   isOpen: boolean;
@@ -63,8 +64,7 @@ const AddServerModal: React.FC<AddServerModalProps> = ({
   };
 
   const cleanRulesText = (text: string): string => {
-    return text
-      .replace(/\p{M}+/gu, "")
+    return sanitizeText(text)
       .split(/\r?\n/)
       .map((line) => line.trim())
       .join("\n")

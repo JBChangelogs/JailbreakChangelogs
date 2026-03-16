@@ -35,6 +35,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "../ui/button";
 import { CommentData } from "@/utils/api";
+import { sanitizeText } from "@/utils/sanitizeText";
 import {
   refreshComments,
   fetchUsersBatchAction,
@@ -104,8 +105,7 @@ interface MoreItem {
  * Cleans up comment text by removing excess whitespace and empty lines.
  */
 const cleanCommentText = (text: string): string => {
-  return text
-    .replace(/\p{M}+/gu, "")
+  return sanitizeText(text)
     .split(/\r?\n/)
     .map((line) => line.trim())
     .filter((line) => line.length > 0)
@@ -1146,7 +1146,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
     if (!reason.trim() || !reportingCommentId) return;
 
     try {
-      const sanitizedReason = reason.trim().replace(/\p{M}+/gu, "");
+      const sanitizedReason = sanitizeText(reason.trim());
       const response = await fetch(`/api/comments/report`, {
         method: "POST",
         headers: {

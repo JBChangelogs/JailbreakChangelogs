@@ -16,6 +16,7 @@ import {
 } from "@/utils/tradeItems";
 import { createTradeOffer, CreateTradeOfferPayload } from "@/utils/trading";
 import { DefaultAvatar } from "@/utils/avatar";
+import { sanitizeText } from "@/utils/sanitizeText";
 
 const CUSTOM_TRADE_TYPES = [
   { id: "adds", label: "Adds" },
@@ -267,7 +268,7 @@ export function MakeOfferDialog({
     };
 
     const trimmedNote = note.trim();
-    if (trimmedNote) payload.note = trimmedNote.replace(/\p{M}+/gu, "");
+    if (trimmedNote) payload.note = sanitizeText(trimmedNote);
 
     if (requestingExtras.length > 0) {
       payload.requesting = buildV2OfferItems(

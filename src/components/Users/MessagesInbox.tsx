@@ -38,6 +38,7 @@ import {
 } from "@/components/chat/chat-event";
 import { useOptimizedRealTimeRelativeDate } from "@/hooks/useSharedTimer";
 import { useAuthContext } from "@/contexts/AuthContext";
+import { sanitizeText } from "@/utils/sanitizeText";
 import { PUBLIC_API_URL } from "@/utils/api";
 import type { UserFlag, UserSettings } from "@/types/auth";
 
@@ -965,7 +966,7 @@ export default function MessagesInbox() {
       return;
     }
 
-    const trimmedMessage = draftMessage.trim().replace(/\p{M}+/gu, "");
+    const trimmedMessage = sanitizeText(draftMessage.trim());
     if (!trimmedMessage || isSending) return;
 
     try {
