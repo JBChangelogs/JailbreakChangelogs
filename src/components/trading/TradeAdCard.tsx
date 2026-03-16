@@ -17,6 +17,7 @@ import {
   getTradeItemImagePath,
   isCustomTradeItem,
 } from "@/utils/tradeItems";
+import { sanitizeText } from "@/utils/sanitizeText";
 
 import {
   Tooltip,
@@ -251,7 +252,7 @@ export const TradeAdCard: React.FC<TradeAdCardProps> = ({
     trade.user?.username ||
     "Unknown User";
 
-  const noteContent = trade.note || "";
+  const noteContent = sanitizeText(trade.note || "");
   const noteLines = noteContent.split(/\r?\n/);
   const MAX_NOTE_LINES = 3;
   const MAX_NOTE_CHARS = 180;

@@ -62,7 +62,7 @@ export default function AboutTab({
 
   useEffect(() => {
     // Initialize bio from props
-    setNewBio(bio || "");
+    setNewBio(sanitizeText(bio || ""));
     setLocalBioLastUpdated(bioLastUpdated || null);
     setBioExpanded(false);
   }, [bio, bioLastUpdated]);
@@ -168,7 +168,7 @@ export default function AboutTab({
                 variant="ghost"
                 onClick={() => {
                   setIsEditingBio(false);
-                  setNewBio(bio || "");
+                  setNewBio(sanitizeText(bio || ""));
                 }}
               >
                 Cancel
@@ -186,8 +186,9 @@ export default function AboutTab({
           <div>
             {bio ? (
               (() => {
+                const displayBio = sanitizeText(bio);
                 // Split bio into lines for truncation
-                const lines = bio.split(/\r?\n/);
+                const lines = displayBio.split(/\r?\n/);
                 const shouldTruncate = lines.length > MAX_VISIBLE_LINES;
                 const visibleLines =
                   shouldTruncate && !bioExpanded

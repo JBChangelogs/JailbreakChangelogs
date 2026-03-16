@@ -2,6 +2,7 @@ import React from "react";
 import { Icon } from "@/components/ui/IconWrapper";
 import { Button } from "@/components/ui/button";
 import { formatProfileDate } from "@/utils/timestamp";
+import { sanitizeText } from "@/utils/sanitizeText";
 import Link from "next/link";
 import { toast } from "sonner";
 
@@ -124,7 +125,7 @@ const PrivateServersTab: React.FC<PrivateServersTabProps> = ({
                   <p className="text-primary-text text-xs wrap-break-word whitespace-pre-wrap sm:text-sm">
                     {server.rules === "N/A"
                       ? "No Rules set by owner"
-                      : server.rules}
+                      : sanitizeText(server.rules)}
                   </p>
                 </div>
               </div>

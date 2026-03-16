@@ -22,6 +22,7 @@ import { formatCustomDate } from "@/utils/timestamp";
 import TradeItemHoverTooltip from "@/components/trading/TradeItemHoverTooltip";
 import { MakeOfferDialog } from "@/components/trading/MakeOfferDialog";
 import { handleImageError } from "@/utils/images";
+import { sanitizeText } from "@/utils/sanitizeText";
 import {
   getTradeItemDetailHref,
   getTradeItemImagePath,
@@ -202,7 +203,7 @@ export default function TradeDetailsClient({
     trade.user?.roblox_username ||
     trade.user?.username ||
     "Unknown User";
-  const noteContent = trade.note || "";
+  const noteContent = sanitizeText(trade.note || "");
   const noteLines = noteContent.split(/\r?\n/);
   const MAX_NOTE_LINES = 3;
   const MAX_NOTE_CHARS = 180;

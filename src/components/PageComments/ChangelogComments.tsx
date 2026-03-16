@@ -1127,7 +1127,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
     const comment = filteredComments.find((c) => c.id === commentId);
     if (comment) {
       setEditingCommentId(commentId);
-      setEditContent(comment.content);
+      setEditContent(sanitizeText(comment.content || ""));
     }
   };
 
@@ -1391,7 +1391,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                   const isExpanded = expandedComments.has(comment.id);
                   const MAX_VISIBLE_LINES = 5;
                   const MAX_VISIBLE_CHARS = 500;
-                  const commentContent = comment.content || "";
+                  const commentContent = sanitizeText(comment.content || "");
                   const lines = commentContent.split(/\r?\n/);
                   const isLongLine = commentContent.length > MAX_VISIBLE_CHARS;
                   const shouldTruncate =

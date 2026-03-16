@@ -21,6 +21,7 @@ import { UserAvatar } from "@/utils/avatar";
 import DOMPurify from "dompurify";
 import type { UserData } from "@/types/auth";
 import { Button } from "@/components/ui/button";
+import { sanitizeText } from "@/utils/sanitizeText";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -662,7 +663,7 @@ const ServerList: React.FC<{
               : formatProfileDate(server.expires);
           const hasRules = Boolean(server.rules && server.rules !== "N/A");
           const parsedRules = hasRules
-            ? sanitizeHTML(processMentions(server.rules))
+            ? sanitizeHTML(processMentions(sanitizeText(server.rules)))
             : "No rules set by owner";
           const shouldShowRulesExpand = hasRules && server.rules.length > 140;
 

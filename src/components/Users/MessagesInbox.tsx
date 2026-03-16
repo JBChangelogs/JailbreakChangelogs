@@ -1415,7 +1415,7 @@ export default function MessagesInbox() {
                                 )}
                               </ChatEventTitle>
                               <ChatEventContent className="text-primary-text break-words whitespace-pre-wrap">
-                                {message.content}
+                                {sanitizeText(message.content ?? "")}
                               </ChatEventContent>
                             </ChatEventBody>
                           </ChatEvent>
@@ -1510,7 +1510,7 @@ export default function MessagesInbox() {
                                 )}
                               </ChatEventTitle>
                               <ChatEventContent className="text-primary-text break-words whitespace-pre-wrap">
-                                {message.content}
+                                {sanitizeText(message.content ?? "")}
                               </ChatEventContent>
                             </ChatEventBody>
                           </ChatEvent>
