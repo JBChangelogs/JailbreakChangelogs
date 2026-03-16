@@ -8,7 +8,11 @@ import { DiscordIcon } from "@/components/Icons/DiscordIcon";
 import { Icon } from "@/components/ui/IconWrapper";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import ChangelogComments from "@/components/PageComments/ChangelogComments";
-import { deleteTradeAd } from "@/utils/trading";
+import {
+  deleteTradeAd,
+  fetchTradeOffers,
+  type TradeOfferV2,
+} from "@/utils/trading";
 import { toast } from "sonner";
 import { TradeAd, TradeItem } from "@/types/trading";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
@@ -25,6 +29,7 @@ import { handleImageError } from "@/utils/images";
 import { sanitizeText } from "@/utils/sanitizeText";
 import {
   getTradeItemDetailHref,
+  getTradeItemIdentifier,
   getTradeItemImagePath,
 } from "@/utils/tradeItems";
 
@@ -33,6 +38,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface TradeDetailsClientProps {
   trade: TradeAd;
@@ -85,6 +91,56 @@ const groupTradeItems = (items: TradeItem[]) => {
   );
 
   return Object.values(grouped);
+};
+
+const getOfferStatusLabel = (status: unknown): string => {
+  const value = typeof status === "string" ? Number(status) : status;
+  if (value === 0) return "Pending";
+  if (value === 1) return "Accepted";
+  if (value === 2) return "Declined";
+  if (value === 3) return "Cancelled";
+  return "Unknown";
+};
+
+const getOfferStatusBadgeClassName = (status: unknown): string => {
+  const value = typeof status === "string" ? Number(status) : status;
+
+  if (value === 1) return "border-status-success/30 bg-status-success/20";
+  if (value === 2) return "border-status-error/30 bg-status-error/15";
+  if (value === 3) return "border-status-error/30 bg-status-error/10";
+  return "border-status-warning/30 bg-status-warning/20";
+};
+
+const getOfferStatusAccentClassName = (status: unknown): string => {
+  const value = typeof status === "string" ? Number(status) : status;
+
+  if (value === 1) return "border-status-success/50";
+  if (value === 2) return "border-status-error/50";
+  if (value === 3) return "border-status-error/40";
+  return "border-status-warning/50";
+};
+
+const buildTradeItemCountMap = (items: TradeItem[]): Map<string, number> => {
+  const map = new Map<string, number>();
+  items.forEach((item) => {
+    const key = `${getTradeItemIdentifier(item)}:${item.isDuped ? 1 : 0}:${item.isOG ? 1 : 0}`;
+    map.set(key, (map.get(key) ?? 0) + 1);
+  });
+  return map;
+};
+
+const tradeItemsEquivalent = (
+  left: TradeItem[],
+  right: TradeItem[],
+): boolean => {
+  if (left.length !== right.length) return false;
+  const leftMap = buildTradeItemCountMap(left);
+  const rightMap = buildTradeItemCountMap(right);
+  if (leftMap.size !== rightMap.size) return false;
+  for (const [key, count] of leftMap) {
+    if (rightMap.get(key) !== count) return false;
+  }
+  return true;
 };
 
 const TradeSidePreview = ({
@@ -177,6 +233,34 @@ const TradeSidePreview = ({
   );
 };
 
+const normalizeOfferItems = (items: TradeOfferV2["offering"]): TradeItem[] => {
+  if (!items) return [];
+
+  return items.flatMap((item, index) => {
+    const amount = Math.max(1, Number(item?.amount) || 1);
+    const parsedId = Number(item?.id);
+    const fallbackId = -(index + 1);
+    const itemId = Number.isFinite(parsedId) ? parsedId : fallbackId;
+    const normalized: TradeItem = {
+      id: itemId,
+      instanceId: String(item?.id ?? itemId),
+      name: item?.name || "Unknown Item",
+      type: item?.type || "Unknown",
+      cash_value: item?.info?.cash_value || "N/A",
+      duped_value: item?.info?.duped_value || "N/A",
+      is_limited: null,
+      is_seasonal: null,
+      tradable: 1,
+      trend: item?.info?.trend || "N/A",
+      demand: item?.info?.demand || "N/A",
+      isDuped: item?.duped ?? false,
+      isOG: item?.og ?? false,
+    };
+
+    return Array.from({ length: amount }, () => normalized);
+  });
+};
+
 export default function TradeDetailsClient({
   trade,
   items = [],
@@ -188,6 +272,11 @@ export default function TradeDetailsClient({
   const router = useRouter();
   const { user, isAuthenticated, setLoginModal } = useAuthContext();
   const currentUserId = user?.id || null;
+  const isOwner = !!(
+    isAuthenticated &&
+    currentUserId &&
+    trade.author === currentUserId
+  );
   const [isDeleting, setIsDeleting] = useState(false);
   const [avatarError, setAvatarError] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -197,6 +286,11 @@ export default function TradeDetailsClient({
     status: "idle" | "checking" | "can_offer" | "already_offered" | "error";
     error: string | null;
   }>({ status: "idle", error: null });
+  const [tradeOffers, setTradeOffers] = useState<{
+    status: "idle" | "loading" | "loaded" | "error";
+    offers: TradeOfferV2[];
+    error: string | null;
+  }>({ status: "idle", offers: [], error: null });
   const displayName =
     trade.user?.roblox_display_name ||
     trade.user?.global_name ||
@@ -225,15 +319,16 @@ export default function TradeDetailsClient({
     (getProxyRobloxHeadshotUrl(trade.user?.roblox_id) ||
       trade.user?.roblox_avatar);
 
+  const offerCountLabel =
+    tradeOffers.status === "loaded"
+      ? `Trade Offers (${tradeOffers.offers.length})`
+      : "Trade Offers";
+
   useEffect(() => {
     let isCancelled = false;
 
     const run = async () => {
-      if (
-        !isAuthenticated ||
-        !currentUserId ||
-        trade.author === currentUserId
-      ) {
+      if (!isAuthenticated || !currentUserId || isOwner) {
         setOfferState({ status: "idle", error: null });
         return;
       }
@@ -294,7 +389,37 @@ export default function TradeDetailsClient({
     return () => {
       isCancelled = true;
     };
-  }, [currentUserId, isAuthenticated, trade.author, trade.id]);
+  }, [currentUserId, isAuthenticated, isOwner, trade.author, trade.id]);
+
+  useEffect(() => {
+    let isCancelled = false;
+
+    const run = async () => {
+      setTradeOffers({ status: "loading", offers: [], error: null });
+
+      try {
+        const offers = await fetchTradeOffers(trade.id);
+        if (isCancelled) return;
+        const sorted = [...offers].sort(
+          (a, b) => Number(b.created_at ?? 0) - Number(a.created_at ?? 0),
+        );
+        setTradeOffers({ status: "loaded", offers: sorted, error: null });
+      } catch (err) {
+        if (isCancelled) return;
+        setTradeOffers({
+          status: "error",
+          offers: [],
+          error: err instanceof Error ? err.message : "Failed to load offers",
+        });
+      }
+    };
+
+    void run();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [trade.id]);
 
   const handleDelete = async () => {
     if (!trade) return;
@@ -501,23 +626,260 @@ export default function TradeDetailsClient({
             </div>
           )}
 
-          <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
-            <TradeSidePreview title="Offering" items={trade.offering} />
-            <TradeSidePreview title="Requesting" items={trade.requesting} />
+          <div className="mt-6">
+            <div className="mb-3 flex items-center justify-between gap-2">
+              <div className="min-w-0">
+                <h3 className="text-primary-text text-base font-semibold">
+                  Original Trade
+                </h3>
+                <p className="text-secondary-text mt-0.5 text-sm">
+                  This is what the ad owner posted.
+                </p>
+              </div>
+              <span className="text-primary-text border-border-card bg-tertiary-bg/40 inline-flex h-6 shrink-0 items-center rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl">
+                Ad #{trade.id}
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
+              <TradeSidePreview title="Offering" items={trade.offering} />
+              <TradeSidePreview title="Requesting" items={trade.requesting} />
+            </div>
           </div>
 
           <div className="mt-8">
-            <h3 className="text-primary-text mb-3 text-base font-semibold">
-              Comments
-            </h3>
-            <ChangelogComments
-              changelogId={trade.id}
-              changelogTitle={`Trade #${trade.id}`}
-              type="trade"
-              trade={trade}
-              initialComments={initialComments}
-              initialUserMap={initialUserMap}
-            />
+            <Tabs defaultValue="offers">
+              <div className="w-full overflow-x-auto">
+                <TabsList fullWidth className="w-full min-w-0">
+                  <TabsTrigger
+                    fullWidth
+                    value="offers"
+                    id="trade-tab-offers"
+                    aria-controls="trade-tabpanel-offers"
+                  >
+                    {offerCountLabel}
+                  </TabsTrigger>
+                  <TabsTrigger
+                    fullWidth
+                    value="comments"
+                    id="trade-tab-comments"
+                    aria-controls="trade-tabpanel-comments"
+                  >
+                    Comments
+                  </TabsTrigger>
+                </TabsList>
+              </div>
+
+              <TabsContent value="offers" id="trade-tabpanel-offers">
+                <h3 className="text-primary-text mb-3 text-base font-semibold">
+                  Trade Offers
+                </h3>
+
+                {tradeOffers.status === "loading" && (
+                  <div className="border-border-card bg-secondary-bg rounded-lg border p-4">
+                    <p className="text-secondary-text text-sm">
+                      Loading offers...
+                    </p>
+                  </div>
+                )}
+
+                {tradeOffers.status === "error" && (
+                  <div className="border-border-card bg-secondary-bg rounded-lg border p-4">
+                    <p className="text-primary-text text-sm font-semibold">
+                      Failed to load offers
+                    </p>
+                    <p className="text-secondary-text mt-1 text-sm">
+                      {tradeOffers.error || "Please try again later."}
+                    </p>
+                  </div>
+                )}
+
+                {tradeOffers.status === "loaded" &&
+                  tradeOffers.offers.length === 0 && (
+                    <div className="border-border-card bg-secondary-bg rounded-lg border p-6 text-center">
+                      <p className="text-primary-text text-sm font-semibold">
+                        No offers yet
+                      </p>
+                      <p className="text-secondary-text mt-1 text-sm">
+                        Check back later to see incoming offers.
+                      </p>
+                    </div>
+                  )}
+
+                {tradeOffers.status === "loaded" &&
+                  tradeOffers.offers.length > 0 && (
+                    <div className="space-y-4">
+                      {tradeOffers.offers.map((offer) => {
+                        const offerUser = offer.user;
+                        const offerDisplayName =
+                          offerUser?.roblox_display_name ||
+                          offerUser?.global_name ||
+                          offerUser?.roblox_username ||
+                          offerUser?.username ||
+                          "Unknown User";
+                        const offerAvatarSrc =
+                          (getProxyRobloxHeadshotUrl(offerUser?.roblox_id) ||
+                            offerUser?.roblox_avatar) ??
+                          null;
+                        const offerNote = sanitizeText(offer.note || "");
+                        const offerOffering =
+                          offer.offering == null
+                            ? trade.offering
+                            : normalizeOfferItems(offer.offering);
+                        const offerRequesting =
+                          offer.requesting == null
+                            ? trade.requesting
+                            : normalizeOfferItems(offer.requesting);
+                        const requestingMatchesOriginal = tradeItemsEquivalent(
+                          offerRequesting,
+                          trade.requesting,
+                        );
+                        const requestingProvided = offer.requesting != null;
+                        const shouldShowRequestingGrid =
+                          requestingProvided && !requestingMatchesOriginal;
+                        const offerStatusLabel = getOfferStatusLabel(
+                          offer.status,
+                        );
+                        const offerStatusBadgeClassName =
+                          getOfferStatusBadgeClassName(offer.status);
+                        const offerStatusAccentClassName =
+                          getOfferStatusAccentClassName(offer.status);
+
+                        return (
+                          <div
+                            key={offer.id}
+                            className={`border-border-card bg-tertiary-bg rounded-lg border border-l-4 p-5 shadow-[var(--color-card-shadow)] ${offerStatusAccentClassName}`}
+                          >
+                            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                              <div className="flex min-w-0 items-center gap-3">
+                                <div
+                                  className={`border-border-card bg-primary-bg relative h-10 w-10 shrink-0 overflow-hidden border ${
+                                    offerUser?.premiumtype === 3
+                                      ? "rounded-sm"
+                                      : "rounded-full"
+                                  }`}
+                                >
+                                  {offerAvatarSrc ? (
+                                    <Image
+                                      src={offerAvatarSrc}
+                                      alt={`${offerDisplayName}'s Roblox avatar`}
+                                      fill
+                                      className="object-cover"
+                                      draggable={false}
+                                      onError={handleImageError}
+                                    />
+                                  ) : (
+                                    <div className="flex h-full w-full items-center justify-center">
+                                      <DefaultAvatar
+                                        premiumType={offerUser?.premiumtype}
+                                      />
+                                    </div>
+                                  )}
+                                </div>
+
+                                <div className="min-w-0">
+                                  {offerUser?.roblox_id ? (
+                                    <a
+                                      href={`https://www.roblox.com/users/${offerUser.roblox_id}/profile`}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="text-primary-text hover:text-link truncate text-sm font-semibold transition-colors"
+                                    >
+                                      {offerDisplayName}
+                                    </a>
+                                  ) : (
+                                    <p className="text-primary-text truncate text-sm font-semibold">
+                                      {offerDisplayName}
+                                    </p>
+                                  )}
+                                  <p className="text-secondary-text truncate text-xs">
+                                    @
+                                    {offerUser?.roblox_username ||
+                                      offerUser?.username ||
+                                      "unknown"}
+                                  </p>
+                                </div>
+                              </div>
+
+                              <div className="flex shrink-0 flex-col items-start gap-1 sm:items-end">
+                                <div className="text-secondary-text text-xs">
+                                  <span
+                                    className={`text-primary-text inline-flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl ${offerStatusBadgeClassName}`}
+                                  >
+                                    {offerStatusLabel}
+                                  </span>
+                                </div>
+                                <div className="text-secondary-text text-xs">
+                                  <span>
+                                    <RelativeTimeText
+                                      timestamp={offer.created_at}
+                                      fallback="unknown"
+                                    />
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+
+                            {offerNote ? (
+                              <div className="mt-3">
+                                <p className="text-secondary-text mb-1 text-[10px] tracking-wide uppercase">
+                                  Note
+                                </p>
+                                <p className="text-primary-text text-sm break-words whitespace-pre-wrap">
+                                  {offerNote}
+                                </p>
+                              </div>
+                            ) : (
+                              <p className="text-secondary-text mt-3 text-sm">
+                                No note provided.
+                              </p>
+                            )}
+
+                            <div className="mt-4 grid grid-cols-1 gap-3 lg:grid-cols-2">
+                              <div className="space-y-3">
+                                <TradeSidePreview
+                                  title="Offering"
+                                  items={offerOffering}
+                                />
+                              </div>
+
+                              {shouldShowRequestingGrid ? (
+                                <TradeSidePreview
+                                  title="Requesting"
+                                  items={offerRequesting}
+                                />
+                              ) : (
+                                <div className="border-border-card bg-secondary-bg/40 rounded-lg border p-4">
+                                  <p className="text-primary-text text-sm font-semibold">
+                                    Requesting
+                                  </p>
+                                  <p className="text-secondary-text mt-1 text-sm">
+                                    As requested in the original ad.
+                                  </p>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+              </TabsContent>
+
+              <TabsContent value="comments" id="trade-tabpanel-comments">
+                <h3 className="text-primary-text mb-3 text-base font-semibold">
+                  Comments
+                </h3>
+                <ChangelogComments
+                  changelogId={trade.id}
+                  changelogTitle={`Trade #${trade.id}`}
+                  type="trade"
+                  trade={trade}
+                  initialComments={initialComments}
+                  initialUserMap={initialUserMap}
+                />
+              </TabsContent>
+            </Tabs>
           </div>
         </div>
 

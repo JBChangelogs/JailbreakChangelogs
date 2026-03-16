@@ -90,3 +90,79 @@ export const createTradeOffer = async (
     return null;
   }
 };
+
+export interface TradeOfferV2ItemInfo {
+  cash_value?: string | null;
+  duped_value?: string | null;
+  trend?: string | null;
+  demand?: string | null;
+  notes?: string | null;
+}
+
+export interface TradeOfferV2Item {
+  id?: string | number | null;
+  duped?: boolean;
+  amount?: number;
+  og?: boolean;
+  name?: string | null;
+  type?: string | null;
+  info?: TradeOfferV2ItemInfo | null;
+}
+
+export interface TradeOfferV2User {
+  id?: string;
+  roblox_id?: string;
+  roblox_username?: string;
+  roblox_display_name?: string;
+  roblox_avatar?: string;
+  roblox_join_date?: number;
+  premiumtype?: number;
+  username?: string;
+  global_name?: string;
+  created_at?: string | number;
+  last_seen?: string | number;
+  usernumber?: number;
+}
+
+export interface TradeOfferV2 {
+  id: number;
+  trade: number;
+  note?: string | null;
+  requesting?: TradeOfferV2Item[] | null;
+  offering?: TradeOfferV2Item[] | null;
+  user?: TradeOfferV2User | null;
+  created_at?: number;
+  status?: number | string | null;
+}
+
+export const fetchTradeOffers = async (
+  tradeId: number,
+): Promise<TradeOfferV2[]> => {
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL;
+  if (!baseUrl) {
+    throw new Error("Trade API is not configured");
+  }
+
+  const response = await fetch(
+    `${baseUrl}/trades/v2/${encodeURIComponent(String(tradeId))}/offers?token=`,
+    {
+      method: "GET",
+      cache: "no-store",
+      credentials: "include",
+      headers: {
+        "User-Agent": "JailbreakChangelogs-Trading/2.0",
+      },
+    },
+  );
+
+  if (!response.ok) {
+    if (response.status === 401) {
+      throw new Error("Unauthorized");
+    }
+    throw new Error("Failed to fetch trade offers");
+  }
+
+  const body = (await response.json()) as unknown;
+  if (!Array.isArray(body)) return [];
+  return body as TradeOfferV2[];
+};

@@ -50,6 +50,29 @@ type V2OfferTradeItem =
       og?: boolean;
     };
 
+const buildItemKey = (item: TradeItem): string =>
+  `${getTradeItemIdentifier(item)}:${item.isDuped ? 1 : 0}:${item.isOG ? 1 : 0}`;
+
+const buildItemCountMap = (items: TradeItem[]): Map<string, number> => {
+  const map = new Map<string, number>();
+  items.forEach((item) => {
+    const key = buildItemKey(item);
+    map.set(key, (map.get(key) ?? 0) + 1);
+  });
+  return map;
+};
+
+const itemsEquivalent = (left: TradeItem[], right: TradeItem[]): boolean => {
+  if (left.length !== right.length) return false;
+  const leftMap = buildItemCountMap(left);
+  const rightMap = buildItemCountMap(right);
+  if (leftMap.size !== rightMap.size) return false;
+  for (const [key, count] of leftMap) {
+    if (rightMap.get(key) !== count) return false;
+  }
+  return true;
+};
+
 const buildV2OfferItems = (
   selectedItems: TradeItem[],
   customTradeTypeSet: Set<string>,
@@ -101,7 +124,7 @@ export function MakeOfferDialog({
   const [submitting, setSubmitting] = useState(false);
   const [note, setNote] = useState("");
   const [offeringItems, setOfferingItems] = useState<TradeItem[]>([]);
-  const [requestingExtras, setRequestingExtras] = useState<TradeItem[]>([]);
+  const [requestingItems, setRequestingItems] = useState<TradeItem[]>([]);
   const [avatarError, setAvatarError] = useState(false);
 
   const customTradeTypeSet = useMemo(
@@ -163,9 +186,7 @@ export function MakeOfferDialog({
   const handleAddItem = (item: TradeItem, side: TradeSide): boolean => {
     const maxItemsPerSide = 8;
     if (side === "requesting") {
-      const baseCount = trade.requesting?.length ?? 0;
-      const total = baseCount + requestingExtras.length;
-      if (total >= maxItemsPerSide) {
+      if (requestingItems.length >= maxItemsPerSide) {
         toast.error("You can only request up to 8 items.");
         return false;
       }
@@ -174,7 +195,7 @@ export function MakeOfferDialog({
       return false;
     }
 
-    const current = side === "offering" ? offeringItems : requestingExtras;
+    const current = side === "offering" ? offeringItems : requestingItems;
 
     const itemIdentifier = getTradeItemIdentifier(item);
     if (
@@ -187,7 +208,7 @@ export function MakeOfferDialog({
     }
 
     if (side === "offering") setOfferingItems((prev) => [...prev, item]);
-    else setRequestingExtras((prev) => [...prev, item]);
+    else setRequestingItems((prev) => [...prev, item]);
     return true;
   };
 
@@ -207,7 +228,7 @@ export function MakeOfferDialog({
       return;
     }
 
-    setRequestingExtras((prev) => {
+    setRequestingItems((prev) => {
       const index = prev.findIndex(removePredicate);
       if (index === -1) return prev;
       return [...prev.slice(0, index), ...prev.slice(index + 1)];
@@ -226,8 +247,8 @@ export function MakeOfferDialog({
     setShowCustom(false);
     setSubmitting(false);
     setNote("");
-    setOfferingItems([]);
-    setRequestingExtras([]);
+    setOfferingItems(trade.requesting ?? []);
+    setRequestingItems(trade.offering ?? []);
     setAvatarError(false);
   };
 
@@ -240,6 +261,13 @@ export function MakeOfferDialog({
     resetForm();
     onClose();
   };
+
+  React.useEffect(() => {
+    if (!isOpen) return;
+    setOfferingItems(trade.requesting ?? []);
+    setRequestingItems(trade.offering ?? []);
+    setNote("");
+  }, [isOpen, trade.offering, trade.requesting]);
 
   const sendExactOffer = async () => {
     try {
@@ -258,28 +286,36 @@ export function MakeOfferDialog({
   };
 
   const sendCustomOffer = async () => {
-    if (offeringItems.length === 0) {
-      toast.error("Add at least 1 item to your offering.");
-      return;
-    }
-
-    const payload: CreateTradeOfferPayload = {
-      offering: buildV2OfferItems(offeringItems, customTradeTypeSet),
-    };
+    const payload: CreateTradeOfferPayload = {};
 
     const trimmedNote = note.trim();
     if (trimmedNote) payload.note = sanitizeText(trimmedNote);
 
-    if (requestingExtras.length > 0) {
+    const originalOffering = trade.requesting ?? [];
+    if (
+      offeringItems.length > 0 &&
+      !itemsEquivalent(offeringItems, originalOffering)
+    ) {
+      payload.offering = buildV2OfferItems(offeringItems, customTradeTypeSet);
+    }
+
+    const originalRequesting = trade.offering ?? [];
+    if (
+      requestingItems.length > 0 &&
+      !itemsEquivalent(requestingItems, originalRequesting)
+    ) {
       payload.requesting = buildV2OfferItems(
-        [...trade.requesting, ...requestingExtras],
+        requestingItems,
         customTradeTypeSet,
       );
     }
 
     try {
       setSubmitting(true);
-      await createTradeOffer(trade.id, payload);
+      const shouldSendPayload =
+        !!payload.note || !!payload.offering || !!payload.requesting;
+      if (shouldSendPayload) await createTradeOffer(trade.id, payload);
+      else await createTradeOffer(trade.id);
       toast.success("Offer sent");
       onOfferSent?.();
       resetForm();
@@ -424,36 +460,19 @@ export function MakeOfferDialog({
                   </div>
                   <div className="border-border-card bg-secondary-bg rounded-lg border p-4">
                     <p className="text-secondary-text mb-3 text-sm font-medium">
-                      Your Requesting
+                      Your Requesting (optional)
                     </p>
-                    <div className="space-y-3">
-                      <div>
-                        <p className="text-secondary-text/70 mb-2 text-xs">
-                          Trade ad is requesting
-                        </p>
-                        <ItemGrid
-                          items={trade.requesting}
-                          title="Requesting"
-                          disableInteraction={true}
-                          variant="compact"
-                        />
-                      </div>
-                      <div>
-                        <p className="text-secondary-text/70 mb-2 text-xs">
-                          Additions ({requestingExtras.length}/
-                          {Math.max(0, 8 - (trade.requesting?.length ?? 0))})
-                        </p>
-                        <ItemGrid
-                          items={requestingExtras}
-                          title="Requesting"
-                          onRemove={(item) =>
-                            handleRemoveItem(item, "requesting")
-                          }
-                          disableInteraction={submitting}
-                          variant="compact"
-                        />
-                      </div>
-                    </div>
+                    <p className="text-secondary-text/70 mb-3 text-xs">
+                      Pre-filled with what the trade owner is offering. Edit if
+                      you want different items.
+                    </p>
+                    <ItemGrid
+                      items={requestingItems}
+                      title="Requesting"
+                      onRemove={(item) => handleRemoveItem(item, "requesting")}
+                      disableInteraction={submitting}
+                      variant="compact"
+                    />
                   </div>
                 </div>
 
@@ -467,7 +486,7 @@ export function MakeOfferDialog({
                   ) : (
                     <TradeItemPickerV2
                       items={items}
-                      selectedItems={[...offeringItems, ...requestingExtras]}
+                      selectedItems={[...offeringItems, ...requestingItems]}
                       onSelect={handleAddItem}
                       onAddCustomType={handleAddCustomType}
                       variant="compact"
