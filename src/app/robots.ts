@@ -5,7 +5,6 @@ export default function robots(): MetadataRoute.Robots {
     rules: [
       {
         userAgent: "*",
-        allow: ["/values", "/values/*", "/item/*", "/changelogs", "/seasons"],
         disallow: [
           "/*?page=",
           "/*?filter=",
@@ -15,20 +14,10 @@ export default function robots(): MetadataRoute.Robots {
           "/cdn-cgi/",
           "/settings",
           "/trading/ad",
-        ],
-      },
-      {
-        userAgent: "Googlebot",
-        allow: ["/values", "/values/*", "/item/*", "/changelogs", "/seasons"],
-        disallow: [
-          "/*?page=",
-          "/*?filter=",
-          "/*?username=",
-          "/*?sort=",
-          "/api/",
-          "/cdn-cgi/",
-          "/settings",
-          "/trading/ad",
+          "/bounties",
+          "/bounties/",
+          "/robberies",
+          "/robberies/",
         ],
       },
     ],
