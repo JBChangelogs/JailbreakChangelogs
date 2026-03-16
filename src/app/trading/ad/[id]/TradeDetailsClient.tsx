@@ -40,6 +40,18 @@ interface TradeDetailsClientProps {
   initialUserMap?: Record<string, UserData>;
 }
 
+const RelativeTimeText = ({
+  timestamp,
+  fallback = "unknown",
+}: {
+  timestamp: string | number | null | undefined;
+  fallback?: string;
+}) => {
+  const relative = useRealTimeRelativeDate(timestamp);
+  const text = timestamp ? relative || fallback : fallback;
+  return <span suppressHydrationWarning>{text}</span>;
+};
+
 const getProxyRobloxHeadshotUrl = (robloxId: string | null | undefined) => {
   const baseUrl = process.env.NEXT_PUBLIC_INVENTORY_API_URL;
   if (!baseUrl) return null;
@@ -184,8 +196,6 @@ export default function TradeDetailsClient({
     status: "idle" | "checking" | "can_offer" | "already_offered" | "error";
     error: string | null;
   }>({ status: "idle", error: null });
-  const createdRelative = useRealTimeRelativeDate(trade.created_at);
-  const expiresRelative = useRealTimeRelativeDate(trade.expires);
   const displayName =
     trade.user?.roblox_display_name ||
     trade.user?.global_name ||
@@ -433,7 +443,9 @@ export default function TradeDetailsClient({
           <div className="text-secondary-text mb-4 text-xs">
             <Tooltip>
               <TooltipTrigger asChild>
-                <span className="cursor-help">Created {createdRelative}</span>
+                <span className="cursor-help">
+                  Created <RelativeTimeText timestamp={trade.created_at} />
+                </span>
               </TooltipTrigger>
               <TooltipContent
                 side="top"
@@ -446,7 +458,7 @@ export default function TradeDetailsClient({
             <Tooltip>
               <TooltipTrigger asChild>
                 <span className="ml-2 cursor-help">
-                  Expires {expiresRelative}
+                  Expires <RelativeTimeText timestamp={trade.expires} />
                 </span>
               </TooltipTrigger>
               <TooltipContent
