@@ -308,6 +308,22 @@ export default function TradeAds({
       },
     });
 
+    if (response.status === 404) {
+      try {
+        const body = (await response.json()) as unknown;
+        if (
+          body &&
+          typeof body === "object" &&
+          (body as Record<string, unknown>).error === "no_trades_found"
+        ) {
+          return [];
+        }
+      } catch {
+        // Ignore parse errors and treat as a real 404 below.
+      }
+      throw new Error("Failed to fetch recent trades (404)");
+    }
+
     if (!response.ok) {
       throw new Error("Failed to fetch recent trades");
     }
@@ -450,7 +466,7 @@ export default function TradeAds({
                 No Trade Ads Available
               </h3>
               <p className="text-secondary-text mb-8">
-                This page seems empty at the moment.
+                There are no active trade ads right now.
               </p>
               <div className="flex justify-center gap-4">
                 <Button onClick={refreshTradeAds}>Refresh List</Button>
