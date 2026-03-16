@@ -27,3 +27,66 @@ export const deleteTradeAd = async (tradeId: number): Promise<boolean> => {
     throw error;
   }
 };
+
+type V2OfferTradeItem =
+  | {
+      id: string;
+    }
+  | {
+      id: string;
+      amount: number;
+      duped?: boolean;
+      og?: boolean;
+    };
+
+export interface CreateTradeOfferPayload {
+  note?: string | null;
+  requesting?: V2OfferTradeItem[] | null;
+  offering?: V2OfferTradeItem[] | null;
+}
+
+export const createTradeOffer = async (
+  tradeId: number,
+  payload?: CreateTradeOfferPayload,
+): Promise<unknown> => {
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL;
+  if (!baseUrl) {
+    throw new Error("Trade API is not configured");
+  }
+
+  const url = `${baseUrl}/trades/v2/${encodeURIComponent(String(tradeId))}/offers`;
+  const hasBody = payload !== undefined;
+
+  const response = await fetch(url, {
+    method: "POST",
+    cache: "no-store",
+    credentials: "include",
+    headers: hasBody ? { "Content-Type": "application/json" } : undefined,
+    body: hasBody ? JSON.stringify(payload) : undefined,
+  });
+
+  if (!response.ok) {
+    let errorMessage = "Failed to create trade offer";
+    try {
+      const body = (await response.json()) as unknown;
+      if (body && typeof body === "object") {
+        const message = (body as Record<string, unknown>).message;
+        if (typeof message === "string" && message.trim()) {
+          errorMessage = message;
+        }
+      }
+    } catch {
+      // Ignore parse errors.
+    }
+    if (response.status === 401) {
+      throw new Error("Unauthorized");
+    }
+    throw new Error(errorMessage);
+  }
+
+  try {
+    return await response.json();
+  } catch {
+    return null;
+  }
+};

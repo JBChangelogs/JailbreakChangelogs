@@ -51,6 +51,7 @@ interface TradeDetailsDataClientProps {
   tradeId: string;
   initialComments?: CommentData[];
   initialUserMap?: Record<string, UserData>;
+  initialItems?: TradeItem[];
 }
 
 function normalizeV2Items(items: V2TradeItem[] = []): TradeItem[] {
@@ -126,6 +127,7 @@ export default function TradeDetailsDataClient({
   tradeId,
   initialComments = [],
   initialUserMap = {},
+  initialItems = [],
 }: TradeDetailsDataClientProps) {
   const [trade, setTrade] = useState<TradeAd | null>(null);
   const [status, setStatus] = useState<"loading" | "not_found" | "error">(
@@ -224,6 +226,7 @@ export default function TradeDetailsDataClient({
       trade={trade}
       initialComments={initialComments}
       initialUserMap={initialUserMap}
+      items={initialItems}
     />
   );
 }

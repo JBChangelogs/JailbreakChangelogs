@@ -20,6 +20,7 @@ import { UserBadges } from "@/components/Profile/UserBadges";
 import { useRealTimeRelativeDate } from "@/hooks/useRealTimeRelativeDate";
 import { formatCustomDate } from "@/utils/timestamp";
 import TradeItemHoverTooltip from "@/components/trading/TradeItemHoverTooltip";
+import { MakeOfferDialog } from "@/components/trading/MakeOfferDialog";
 import { handleImageError } from "@/utils/images";
 import {
   getTradeItemDetailHref,
@@ -34,6 +35,7 @@ import {
 
 interface TradeDetailsClientProps {
   trade: TradeAd;
+  items?: TradeItem[];
   initialComments?: CommentData[];
   initialUserMap?: Record<string, UserData>;
 }
@@ -164,28 +166,24 @@ const TradeSidePreview = ({
 
 export default function TradeDetailsClient({
   trade,
+  items = [],
   initialComments = [],
   initialUserMap = {},
 }: TradeDetailsClientProps) {
   const discordChannelId = "1398359394726449352";
   const discordGuildId = "1286064050135896064";
   const router = useRouter();
-  const { user } = useAuthContext();
+  const { user, isAuthenticated, setLoginModal } = useAuthContext();
   const currentUserId = user?.id || null;
   const [isDeleting, setIsDeleting] = useState(false);
   const [avatarError, setAvatarError] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [showOfferConfirm, setShowOfferConfirm] = useState(false);
+  const [showOfferDialog, setShowOfferDialog] = useState(false);
   const [isNoteExpanded, setIsNoteExpanded] = useState(false);
-  const [offerStatus, setOfferStatus] = useState<{
-    loading: boolean;
+  const [offerState, setOfferState] = useState<{
+    status: "idle" | "checking" | "can_offer" | "already_offered" | "error";
     error: string | null;
-    success: boolean;
-  }>({
-    loading: false,
-    error: null,
-    success: false,
-  });
+  }>({ status: "idle", error: null });
   const createdRelative = useRealTimeRelativeDate(trade.created_at);
   const expiresRelative = useRealTimeRelativeDate(trade.expires);
   const displayName =
@@ -216,76 +214,76 @@ export default function TradeDetailsClient({
     (getProxyRobloxHeadshotUrl(trade.user?.roblox_id) ||
       trade.user?.roblox_avatar);
 
-  const handleMakeOffer = async () => {
-    try {
-      setOfferStatus({ loading: true, error: null, success: false });
+  useEffect(() => {
+    let isCancelled = false;
 
-      if (!currentUserId) {
-        toast.error("You must be logged in to make an offer", {
-          duration: 3000,
-        });
-        setOfferStatus({
-          loading: false,
-          error: "You must be logged in to make an offer",
-          success: false,
+    const run = async () => {
+      if (
+        !isAuthenticated ||
+        !currentUserId ||
+        trade.author === currentUserId
+      ) {
+        setOfferState({ status: "idle", error: null });
+        return;
+      }
+
+      const baseUrl = process.env.NEXT_PUBLIC_API_URL;
+      if (!baseUrl) {
+        setOfferState({
+          status: "error",
+          error: "Trade API is not configured",
         });
         return;
       }
 
-      const response = await fetch(`/api/trades/offer`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          id: trade?.id,
-        }),
-      });
+      setOfferState({ status: "checking", error: null });
 
-      if (response.status === 409) {
-        toast.error("You have already made an offer for this trade", {
-          duration: 3000,
+      try {
+        const response = await fetch(
+          `${baseUrl}/trades/v2/${encodeURIComponent(String(trade.id))}/offers`,
+          {
+            method: "HEAD",
+            cache: "no-store",
+            credentials: "include",
+            headers: {
+              "User-Agent": "JailbreakChangelogs-Trading/2.0",
+            },
+          },
+        );
+
+        if (isCancelled) return;
+
+        if (response.status === 409) {
+          setOfferState({ status: "already_offered", error: null });
+          return;
+        }
+
+        if (response.ok) {
+          setOfferState({ status: "can_offer", error: null });
+          return;
+        }
+
+        setOfferState({
+          status: "error",
+          error: "Failed to check offer status",
         });
-        setOfferStatus({
-          loading: false,
-          error: "You have already made an offer for this trade",
-          success: false,
-        });
-      } else if (response.status === 403) {
-        toast.error("The trade owner's settings do not allow direct messages", {
-          duration: 3000,
-        });
-        setOfferStatus({
-          loading: false,
-          error: "The trade owner's settings do not allow direct messages",
-          success: false,
-        });
-      } else if (!response.ok) {
-        throw new Error("Failed to create offer");
-      } else {
-        toast.success("Offer Sent", {
-          description:
-            "Your offer has been successfully sent to the trade owner.",
-          duration: 3000,
-        });
-        setOfferStatus({
-          loading: false,
-          error: null,
-          success: true,
-        });
+      } catch (err) {
+        console.error("Error checking offer status:", err);
+        if (!isCancelled) {
+          setOfferState({
+            status: "error",
+            error: "Failed to check offer status",
+          });
+        }
       }
-    } catch (err) {
-      console.error("Error creating offer:", err);
-      toast.error("Failed to create offer. Please try again.", {
-        duration: 3000,
-      });
-      setOfferStatus({
-        loading: false,
-        error: "Failed to create offer. Please try again.",
-        success: false,
-      });
-    }
-  };
+    };
+
+    void run();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [currentUserId, isAuthenticated, trade.author, trade.id]);
 
   const handleDelete = async () => {
     if (!trade) return;
@@ -371,21 +369,43 @@ export default function TradeDetailsClient({
             <div className="flex shrink-0 items-center gap-2">
               {trade.status === "Pending" && trade.author !== currentUserId && (
                 <Button
-                  onClick={() => setShowOfferConfirm(true)}
-                  disabled={offerStatus.loading}
-                  variant={offerStatus.success ? "success" : "default"}
+                  type="button"
+                  onClick={() => {
+                    if (!isAuthenticated) {
+                      toast.error("Please log in to make an offer.");
+                      setLoginModal({ open: true });
+                      return;
+                    }
+                    if (offerState.status === "already_offered") return;
+                    setShowOfferDialog(true);
+                  }}
+                  disabled={
+                    offerState.status === "checking" ||
+                    offerState.status === "already_offered"
+                  }
+                  className={
+                    offerState.status === "already_offered"
+                      ? "disabled:cursor-not-allowed disabled:opacity-100"
+                      : undefined
+                  }
+                  variant={
+                    offerState.status === "already_offered"
+                      ? "success"
+                      : "default"
+                  }
                   size="sm"
                 >
-                  <Icon icon="heroicons:chat-bubble-left" />
-                  {offerStatus.loading
-                    ? "Making Offer..."
-                    : offerStatus.success
+                  <Icon icon="heroicons-outline:hand-raised" />
+                  {offerState.status === "checking"
+                    ? "Checking..."
+                    : offerState.status === "already_offered"
                       ? "Offer Sent!"
                       : "Make Offer"}
                 </Button>
               )}
               {trade.author === currentUserId && (
                 <Button
+                  type="button"
                   onClick={() => setShowDeleteConfirm(true)}
                   disabled={isDeleting}
                   variant="destructive"
@@ -500,16 +520,14 @@ export default function TradeDetailsClient({
           confirmVariant="destructive"
         />
 
-        {/* Offer Confirmation Dialog */}
-        <ConfirmDialog
-          isOpen={showOfferConfirm}
-          onClose={() => setShowOfferConfirm(false)}
-          onConfirm={handleMakeOffer}
-          title="Make Trade Offer"
-          message={`Are you sure you want to make an offer for Trade #${trade.id}? This will notify ${trade.user?.username || "the trade owner"} about your interest in trading for their ${trade.offering.length} items.`}
-          confirmText="Make Offer"
-          cancelText="Cancel"
-          confirmVariant="default"
+        <MakeOfferDialog
+          isOpen={showOfferDialog}
+          onClose={() => setShowOfferDialog(false)}
+          trade={trade}
+          items={items}
+          onOfferSent={() =>
+            setOfferState({ status: "already_offered", error: null })
+          }
         />
       </div>
     </>

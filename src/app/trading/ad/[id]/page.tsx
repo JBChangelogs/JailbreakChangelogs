@@ -1,5 +1,6 @@
 import React, { Suspense } from "react";
 import { fetchComments } from "@/utils/api";
+import { fetchItems } from "@/utils/api";
 import TradeDetailsDataClient from "./TradeDetailsDataClient";
 import Loading from "./loading";
 
@@ -25,12 +26,19 @@ async function TradeDetailsWrapper({
   const { id } = await params;
 
   const commentsData = await fetchComments("trade", id);
+  const items = await fetchItems();
+  const tradeItems = items.map((item) => ({
+    ...item,
+    is_sub: false,
+    side: undefined,
+  }));
 
   return (
     <TradeDetailsDataClient
       tradeId={id}
       initialComments={commentsData.comments}
       initialUserMap={commentsData.userMap}
+      initialItems={tradeItems}
     />
   );
 }

@@ -15,6 +15,7 @@ interface ItemGridProps {
   title: string;
   onRemove?: (item: TradeItem) => void;
   disableInteraction?: boolean;
+  variant?: "default" | "compact";
 }
 
 interface ItemWithData {
@@ -76,6 +77,7 @@ export const ItemGrid: React.FC<ItemGridProps> = ({
   title,
   onRemove,
   disableInteraction = false,
+  variant = "default",
 }) => {
   if (items.length === 0) {
     const isOffering = title.toLowerCase() === "offering";
@@ -155,7 +157,13 @@ export const ItemGrid: React.FC<ItemGridProps> = ({
         className="max-h-[480px] overflow-y-auto pr-1"
         aria-label="Selected items list"
       >
-        <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-4">
+        <div
+          className={
+            variant === "compact"
+              ? "grid grid-cols-2 gap-3 sm:grid-cols-3"
+              : "grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-4"
+          }
+        >
           {groupItems(items).map((item) => {
             const originalItem = items.find((i) =>
               tradeItemIdsEqual(i.id, item.id),

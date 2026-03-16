@@ -84,6 +84,18 @@ const formatTradeValue = (value: number): string => {
   return Math.round(value).toLocaleString();
 };
 
+const RelativeTimeText = ({
+  timestamp,
+  fallback = "unknown",
+}: {
+  timestamp: string | number | null | undefined;
+  fallback?: string;
+}) => {
+  const relative = useRealTimeRelativeDate(timestamp);
+  const text = timestamp ? relative || fallback : fallback;
+  return <span suppressHydrationWarning>{text}</span>;
+};
+
 const TradeSidePreview = ({
   title,
   items,
@@ -208,13 +220,8 @@ export const TradeAdCard: React.FC<TradeAdCardProps> = ({
 }) => {
   const [isDeleting, setIsDeleting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [hasHydrated, setHasHydrated] = useState(false);
   const [isNoteExpanded, setIsNoteExpanded] = useState(false);
   const [avatarError, setAvatarError] = useState(false);
-
-  useEffect(() => {
-    setHasHydrated(true);
-  }, []);
 
   useEffect(() => {
     setIsNoteExpanded(false);
@@ -234,15 +241,6 @@ export const TradeAdCard: React.FC<TradeAdCardProps> = ({
       setIsDeleting(false);
     }
   };
-
-  const createdRelative = useRealTimeRelativeDate(trade.created_at);
-  const expiresRelative = useRealTimeRelativeDate(trade.expires);
-  const createdDisplay = hasHydrated ? createdRelative || "unknown" : "unknown";
-  const expiresDisplay = trade.expires
-    ? hasHydrated
-      ? expiresRelative || "unknown"
-      : "unknown"
-    : "";
 
   const discordChannelId = "1398359394726449352";
   const discordGuildId = "1286064050135896064";
@@ -344,6 +342,20 @@ export const TradeAdCard: React.FC<TradeAdCardProps> = ({
                 <span className="hidden sm:inline">Details</span>
               </Link>
             </Button>
+            {trade.author !== currentUserId && (
+              <Button
+                asChild
+                size="sm"
+                variant="outline"
+                className="px-2 sm:px-3"
+                aria-label="Make an offer"
+              >
+                <Link href={`/trading/ad/${trade.id}`}>
+                  <Icon icon="heroicons-outline:hand-raised" />
+                  <span className="hidden sm:inline">Make Offer</span>
+                </Link>
+              </Button>
+            )}
             {trade.author === currentUserId && (
               <Button
                 onClick={(e) => {
@@ -421,7 +433,9 @@ export const TradeAdCard: React.FC<TradeAdCardProps> = ({
         <div className="text-secondary-text mt-4 text-xs">
           <Tooltip>
             <TooltipTrigger asChild>
-              <span className="cursor-help">Created {createdDisplay}</span>
+              <span className="cursor-help">
+                Created <RelativeTimeText timestamp={trade.created_at} />
+              </span>
             </TooltipTrigger>
             <TooltipContent
               side="top"
@@ -436,7 +450,7 @@ export const TradeAdCard: React.FC<TradeAdCardProps> = ({
               <Tooltip>
                 <TooltipTrigger asChild>
                   <span className="ml-2 cursor-help">
-                    Expires {expiresDisplay}
+                    Expires <RelativeTimeText timestamp={trade.expires} />
                   </span>
                 </TooltipTrigger>
                 <TooltipContent

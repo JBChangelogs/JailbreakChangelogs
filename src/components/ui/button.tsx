@@ -16,7 +16,7 @@ const buttonVariants = cva(
         success:
           "bg-status-success! text-form-button-text! shadow-lg hover:bg-status-success/90! active:bg-status-success!",
         outline:
-          "border-2! border-form-button-text! text-form-button-text! hover:bg-button-info-hover! active:bg-button-info-active!",
+          "border-2! border-primary-text! text-primary-text! hover:border-button-info! hover:bg-button-info-hover! hover:text-form-button-text! active:border-button-info! active:bg-button-info-active! active:text-form-button-text!",
         secondary:
           "bg-button-secondary! text-primary-text! hover:bg-button-secondary-hover! active:bg-button-secondary-active!",
         ghost:

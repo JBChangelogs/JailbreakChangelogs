@@ -51,9 +51,11 @@ interface TradeItemPickerV2Props {
   selectedItems: TradeItem[];
   onSelect: (item: TradeItem, side: TradeSide) => boolean;
   onAddCustomType: (customId: string, side: TradeSide) => void;
+  variant?: "default" | "compact";
 }
 
-const ITEMS_PER_PAGE = 28;
+const ITEMS_PER_PAGE_DEFAULT = 28;
+const ITEMS_PER_PAGE_COMPACT = 20;
 
 export default function TradeItemPickerV2({
   items,
@@ -61,6 +63,7 @@ export default function TradeItemPickerV2({
   selectedItems,
   onSelect,
   onAddCustomType,
+  variant = "default",
 }: TradeItemPickerV2Props) {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeSide, setActiveSide] = useState<TradeSide>("offering");
@@ -208,13 +211,25 @@ export default function TradeItemPickerV2({
 
   const totalPages = Math.max(
     1,
-    Math.ceil(filteredItems.length / ITEMS_PER_PAGE),
+    Math.ceil(
+      filteredItems.length /
+        (variant === "compact"
+          ? ITEMS_PER_PAGE_COMPACT
+          : ITEMS_PER_PAGE_DEFAULT),
+    ),
   );
   const currentPage = Math.min(page, totalPages);
+  const itemsPerPage =
+    variant === "compact" ? ITEMS_PER_PAGE_COMPACT : ITEMS_PER_PAGE_DEFAULT;
   const pagedItems = filteredItems.slice(
-    (currentPage - 1) * ITEMS_PER_PAGE,
-    currentPage * ITEMS_PER_PAGE,
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage,
   );
+
+  const gridClassName =
+    variant === "compact"
+      ? "mb-8 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5"
+      : "mb-8 grid grid-cols-2 gap-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-7";
 
   return (
     <div>
@@ -438,7 +453,7 @@ export default function TradeItemPickerV2({
           </p>
         </div>
       ) : (
-        <div className="mb-8 grid grid-cols-2 gap-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-7">
+        <div className={gridClassName}>
           {pagedItems.map((item) => {
             const itemKey = getTradeItemIdentifier(item);
             const condition =
