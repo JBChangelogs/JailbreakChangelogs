@@ -11,6 +11,7 @@ import { UserAvatar } from "@/utils/avatar";
 import { RobloxIcon } from "@/components/Icons/RobloxIcon";
 import { isFeatureEnabled } from "@/utils/featureFlags";
 import dynamic from "next/dynamic";
+import { useMediaQuery } from "@mui/material";
 import {
   Tooltip,
   TooltipContent,
@@ -54,6 +55,7 @@ import {
 } from "@/components/ui/popover";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { UtmGeneratorModal } from "@/components/Modals/UtmGeneratorModal";
+import { useToastRuntimeRightOffset } from "@/hooks/useToastRuntimeRightOffset";
 
 const menuTransition = {
   type: "spring" as const,
@@ -292,6 +294,7 @@ export const NavbarModern = ({
   setUnreadCount: React.Dispatch<React.SetStateAction<number>>;
   wsHistoryNotifications: NotificationItem[];
 }) => {
+  const isXlUp = useMediaQuery("(min-width: 1280px)");
   const [active, setActive] = useState<string | null>(null);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [utmModalOpen, setUtmModalOpen] = useState(false);
@@ -354,6 +357,15 @@ export const NavbarModern = ({
   React.useEffect(() => {
     setMounted(true);
   }, []);
+
+  useToastRuntimeRightOffset({
+    enabled: isXlUp,
+    rightOffset: notificationMenuOpen
+      ? "500px"
+      : userMenuOpen
+        ? "304px"
+        : "16px",
+  });
 
   const isCollabPage =
     pathname === "/values" ||

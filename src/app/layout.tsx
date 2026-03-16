@@ -158,9 +158,12 @@ export default async function RootLayout({
               <ThemeProvider>
                 <QueryProvider>
                   <Toaster
-                    position="top-center"
-                    toastOptions={{
-                      className: "!mt-[calc(var(--header-height,0px)+16px)]",
+                    position="top-right"
+                    dir="ltr"
+                    expand
+                    offset={{
+                      top: "calc(var(--header-height, 0px) + 16px)",
+                      right: "var(--toast-runtime-right, 16px)",
                     }}
                   />
                   <MaintenanceBypass>
@@ -299,9 +302,12 @@ export default async function RootLayout({
             <ThemeProvider>
               <QueryProvider>
                 <Toaster
-                  position="top-center"
-                  toastOptions={{
-                    className: "!mt-[calc(var(--header-height,0px)+16px)]",
+                  position="top-right"
+                  dir="ltr"
+                  expand
+                  offset={{
+                    top: "calc(var(--header-height, 0px) + 16px)",
+                    right: "var(--toast-runtime-right, 16px)",
                   }}
                 />
                 <NextTopLoader

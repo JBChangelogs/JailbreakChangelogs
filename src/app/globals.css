@@ -766,3 +766,31 @@
 * {
   scrollbar-width: auto !important;
 }
+
+/* Make right-position toasts exit horizontally to the right instead of vertically. */
+[data-sonner-toaster] {
+  transition:
+    right 0.24s ease,
+    left 0.24s ease;
+}
+
+[data-sonner-toaster][data-x-position="right"]
+  [data-sonner-toast][data-removed="true"] {
+  --y: translateX(120%) !important;
+}
+
+/* Make toast cards slightly darker in light mode for better contrast. */
+.light [data-sonner-toaster][data-sonner-theme="light"] [data-sonner-toast] {
+  background-color: color-mix(
+    in srgb,
+    var(--color-tertiary-bg),
+    transparent 30%
+  ) !important;
+  border-color: color-mix(
+    in srgb,
+    var(--color-border-card),
+    black 18%
+  ) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+}

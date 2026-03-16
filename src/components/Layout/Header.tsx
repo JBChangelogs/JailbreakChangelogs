@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { AppBar, Toolbar, Box, Typography } from "@mui/material";
+import { AppBar, Toolbar, Box, Typography, useMediaQuery } from "@mui/material";
 import { Pagination } from "@/components/ui/Pagination";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import dynamic from "next/dynamic";
@@ -60,6 +60,7 @@ import { formatCompactDateTime } from "@/utils/timestamp";
 import { parseNotificationUrl } from "@/utils/notificationUrl";
 import { UtmGeneratorModal } from "@/components/Modals/UtmGeneratorModal";
 import { useOptimizedRealTimeRelativeDate } from "@/hooks/useSharedTimer";
+import { useToastRuntimeRightOffset } from "@/hooks/useToastRuntimeRightOffset";
 
 const UnreadNotificationBadge = ({ count }: { count: number }) => {
   if (count === 0) return null;
@@ -138,6 +139,7 @@ const getNotificationType = (
 
 export default function Header() {
   const pathname = usePathname();
+  const isXlUp = useMediaQuery("(min-width: 1280px)");
   const isCollabPage =
     pathname === "/values" ||
     pathname.startsWith("/item") ||
@@ -199,6 +201,11 @@ export default function Header() {
   const { resolvedTheme } = useTheme();
   const userData = isAuthenticated ? authUser : null;
   useEscapeLogin();
+
+  useToastRuntimeRightOffset({
+    enabled: !isXlUp,
+    rightOffset: mobileOpen || notificationMenuOpen ? "256px" : "16px",
+  });
 
   useEffect(() => {
     if (!isAuthenticated) return;
