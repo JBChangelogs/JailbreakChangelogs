@@ -16,6 +16,8 @@ import RetryErrorDisplay from "./RetryErrorDisplay";
 import { Icon } from "@iconify/react";
 import { Tabs, TabsList, TabsTrigger } from "./tabs";
 import { Button } from "./button";
+import { toast } from "sonner";
+import { buildRobloxServerDeepLink } from "@/components/RobberyTracker/deepLink";
 
 export default function ConnectedBotsPolling() {
   "use memo";
@@ -423,10 +425,10 @@ function BotStatusCard({
   bot: ConnectedBot;
   usersData: Record<string, RobloxUser> | null;
 }) {
+  const [isJoining, setIsJoining] = useState(false);
   const userData = usersData?.[bot.id];
   const displayName =
     userData?.displayName || userData?.name || `Bot ${bot.id}`;
-  const botUsername = userData?.name || bot.id;
 
   const relativeTime = useOptimizedRealTimeRelativeDate(
     bot.last_heartbeat,
@@ -442,10 +444,8 @@ function BotStatusCard({
   let methodText = "";
   if (bot.method === 1) methodText = "Trade World";
   else if (bot.method === 2) methodText = "Main Game";
-  const trackerUrl = bot.current_job
-    ? `https://tracker.jailbreakchangelogs.xyz/?jobid=${encodeURIComponent(bot.current_job)}&utm_source=website&utm_campaign=Connected_Bots&utm_term=${encodeURIComponent(botUsername)}`
-    : null;
-  const canJoinServer = bot.method === 2 && Boolean(trackerUrl);
+  const jobId = bot.current_job || null;
+  const canJoinServer = bot.method === 2 && Boolean(jobId);
 
   return (
     <div className="border-border-card bg-tertiary-bg rounded-lg border p-3">
@@ -502,19 +502,32 @@ function BotStatusCard({
             {bot.current_job && (
               <div className="text-secondary-text text-xs">
                 <span className="font-semibold">Last Server:</span>{" "}
-                {canJoinServer && trackerUrl ? (
-                  <a
-                    href={trackerUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-link hover:text-link-hover text-xs font-medium underline-offset-4 transition-colors hover:underline"
+                {canJoinServer && jobId ? (
+                  <Button
+                    variant="link"
+                    size="sm"
+                    className="h-auto! px-0! py-0! text-xs font-medium"
+                    disabled={isJoining}
+                    data-umami-event="Join Server"
+                    data-umami-event-tracker="Connected_Bots"
+                    data-umami-event-term={displayName}
+                    data-umami-event-jobid={jobId}
+                    onClick={() => {
+                      setIsJoining(true);
+                      const joiningToastId = toast.loading("Joining server...");
+                      window.setTimeout(() => {
+                        toast.dismiss(joiningToastId);
+                        setIsJoining(false);
+                      }, 5000);
+                      window.location.assign(buildRobloxServerDeepLink(jobId));
+                    }}
                   >
-                    Join Server
+                    {isJoining ? "Joining..." : "Join Server"}
                     <Icon
-                      icon="material-symbols:open-in-new-rounded"
+                      icon="heroicons:arrow-top-right-on-square"
                       className="inline-block h-3.5 w-3.5 align-text-bottom"
                     />
-                  </a>
+                  </Button>
                 ) : (
                   <span className="font-mono text-xs">{bot.current_job}</span>
                 )}
