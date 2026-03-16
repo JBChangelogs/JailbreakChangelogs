@@ -279,12 +279,7 @@ export default async function Home() {
                     Play Jailbreak Now
                   </a>
                 </Button>
-                <Button
-                  asChild
-                  variant="outline"
-                  size="lg"
-                  className="border-white/55 bg-black/50 text-white shadow-[0_2px_12px_rgba(0,0,0,0.4)] hover:bg-black/60 hover:text-white"
-                >
+                <Button asChild variant="heroOutline" size="lg">
                   <a
                     href="https://discord.jailbreakchangelogs.xyz"
                     target="_blank"
@@ -357,8 +352,8 @@ export default async function Home() {
                 </div>
                 <Button
                   asChild
-                  variant="outline"
-                  className="hidden border-white/55 bg-black/50 text-white shadow-[0_2px_12px_rgba(0,0,0,0.4)] hover:bg-black/60 hover:text-white md:inline-flex"
+                  variant="heroOutline"
+                  className="hidden md:inline-flex"
                 >
                   <Link href="/testimonials" prefetch={false}>
                     View All Testimonials
@@ -399,11 +394,7 @@ export default async function Home() {
                   </blockquote>
                 ))}
               </div>
-              <Button
-                asChild
-                variant="outline"
-                className="mb-4 border-white/55 bg-black/50 text-white shadow-[0_2px_12px_rgba(0,0,0,0.4)] hover:bg-black/60 hover:text-white md:hidden"
-              >
+              <Button asChild variant="heroOutline" className="mb-4 md:hidden">
                 <Link href="/testimonials" prefetch={false}>
                   View Testimonials
                 </Link>
