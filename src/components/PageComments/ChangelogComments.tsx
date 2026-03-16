@@ -105,6 +105,7 @@ interface MoreItem {
  */
 const cleanCommentText = (text: string): string => {
   return text
+    .replace(/\p{M}+/gu, "")
     .split(/\r?\n/)
     .map((line) => line.trim())
     .filter((line) => line.length > 0)

@@ -267,7 +267,7 @@ export function MakeOfferDialog({
     };
 
     const trimmedNote = note.trim();
-    if (trimmedNote) payload.note = trimmedNote;
+    if (trimmedNote) payload.note = trimmedNote.replace(/\p{M}+/gu, "");
 
     if (requestingExtras.length > 0) {
       payload.requesting = buildV2OfferItems(

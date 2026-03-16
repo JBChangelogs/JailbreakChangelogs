@@ -64,6 +64,7 @@ const AddServerModal: React.FC<AddServerModalProps> = ({
 
   const cleanRulesText = (text: string): string => {
     return text
+      .replace(/\p{M}+/gu, "")
       .split(/\r?\n/)
       .map((line) => line.trim())
       .join("\n")
