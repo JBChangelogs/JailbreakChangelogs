@@ -132,6 +132,19 @@ const nextConfig = {
           },
         ],
       },
+	      {
+	        source: "/:path*",
+	        headers: [
+	          {
+	            key: "Content-Security-Policy",
+	            value: "frame-ancestors 'none'; base-uri 'self'; object-src 'none';",
+	          },
+	          {
+	            key: "X-Frame-Options",
+	            value: "DENY",
+	          },
+	        ],
+	      },
     ];
   },
 };
