@@ -7,19 +7,18 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogPanel } from "@headlessui/react";
 import { useOptimizedRealTimeRelativeDate } from "@/hooks/useSharedTimer";
 import { AirdropData } from "@/hooks/useRobberyTrackerAirdropsWebSocket";
-import RobberyPlayersModal from "./RobberyPlayersModal";
 import { useServerRegions } from "@/hooks/useServerRegions";
 import { ServerRegionData } from "@/hooks/useRobberyTrackerWebSocket";
 import { INVENTORY_API_URL } from "@/utils/api";
 import { toast } from "sonner";
 import { buildRobloxServerDeepLink } from "./deepLink";
+import InlineTeamPlayers from "./InlineTeamPlayers";
 
 interface AirdropCardProps {
   airdrop: AirdropData;
 }
 
 export default function AirdropCard({ airdrop }: AirdropCardProps) {
-  const [isPlayersModalOpen, setIsPlayersModalOpen] = useState(false);
   const [isMapModalOpen, setIsMapModalOpen] = useState(false);
   const [isMapImageLoading, setIsMapImageLoading] = useState(false);
   const [isJoining, setIsJoining] = useState(false);
@@ -192,6 +191,8 @@ export default function AirdropCard({ airdrop }: AirdropCardProps) {
             </span>
           </div>
 
+          <InlineTeamPlayers players={players} className="mt-1" />
+
           {/* Region */}
           <div className="text-secondary-text mt-1 flex items-center gap-2 text-xs">
             <Icon icon="heroicons:map-pin" className="h-4 w-4 shrink-0" />
@@ -251,18 +252,6 @@ export default function AirdropCard({ airdrop }: AirdropCardProps) {
               Location
             </Button>
           </div>
-
-          {players.length > 0 && (
-            <Button
-              size="sm"
-              onClick={() => setIsPlayersModalOpen(true)}
-              variant="secondary"
-              className="mt-2 w-full min-w-0"
-            >
-              <Icon icon="heroicons-outline:users" />
-              {players.length} Players
-            </Button>
-          )}
         </div>
       </div>
 
@@ -271,15 +260,6 @@ export default function AirdropCard({ airdrop }: AirdropCardProps) {
           Logged {relativeTime || "Just now"}
         </div>
       </div>
-
-      {/* Players Modal */}
-      {players.length > 0 && (
-        <RobberyPlayersModal
-          isOpen={isPlayersModalOpen}
-          onClose={() => setIsPlayersModalOpen(false)}
-          players={players}
-        />
-      )}
 
       {/* Map Modal */}
       <Dialog

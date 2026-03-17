@@ -12,6 +12,7 @@ import Breadcrumb from "@/components/Layout/Breadcrumb";
 import {
   useRobberyTrackerWebSocket,
   type RobberyData,
+  type ServerRegionData,
 } from "@/hooks/useRobberyTrackerWebSocket";
 import { useRobberyTrackerMansionsWebSocket } from "@/hooks/useRobberyTrackerMansionsWebSocket";
 import { useRobberyTrackerAirdropsWebSocket } from "@/hooks/useRobberyTrackerAirdropsWebSocket";
@@ -19,6 +20,7 @@ import { Icon } from "@/components/ui/IconWrapper";
 import RobberyCard from "@/components/RobberyTracker/RobberyCard";
 import RobberyComboCard from "@/components/RobberyTracker/RobberyComboCard";
 import AirdropCard from "@/components/RobberyTracker/AirdropCard";
+import RobberyServerGroupCard from "@/components/RobberyTracker/RobberyServerGroupCard";
 import RobberyTrackerAuthWrapper from "@/components/RobberyTracker/RobberyTrackerAuthWrapper";
 import ExperimentalFeatureBanner from "@/components/ui/ExperimentalFeatureBanner";
 import { Button } from "@/components/ui/button";
@@ -40,6 +42,7 @@ type TimeSort = "newest" | "oldest";
 type ServerSize = "all" | "big" | "small";
 type RobberyFilterMode = "any" | "all";
 type AirdropDifficultyFilter = "all" | "easy" | "medium" | "hard";
+type RobberiesDisplayMode = "individual" | "grouped";
 
 function serverTimeToMinutes(serverTime: number) {
   if (!Number.isFinite(serverTime)) return null;
@@ -57,6 +60,7 @@ const ROBBERIES_TIME_SORT_STORAGE_KEY = "robberiesTimeSort";
 const ROBBERIES_SELECTED_TYPES_STORAGE_KEY = "robberiesSelectedTypes";
 const ROBBERIES_FILTER_MODE_STORAGE_KEY = "robberiesFilterMode";
 const ROBBERIES_COMBO_PRESET_IDS_STORAGE_KEY = "robberiesComboPresetIds";
+const ROBBERIES_DISPLAY_MODE_STORAGE_KEY = "robberiesDisplayMode";
 
 // Define all robbery types with their marker names
 const ROBBERY_TYPES = [
@@ -157,6 +161,10 @@ function RobberiesInitialEmptyState() {
       <StatusPageAction />
     </>
   );
+}
+
+function isNonEmptyString(value: unknown): value is string {
+  return typeof value === "string" && value.length > 0;
 }
 
 function RobberyTrackerContent() {
@@ -354,11 +362,22 @@ function RobberyTrackerContent() {
       return storedFilterMode === "all" ? "all" : "any";
     },
   );
+  const [robberiesDisplayMode, setRobberiesDisplayMode] =
+    useState<RobberiesDisplayMode>(() => {
+      const storedDisplayMode = safeSessionStorage.getItem(
+        ROBBERIES_DISPLAY_MODE_STORAGE_KEY,
+      );
+      return storedDisplayMode === "grouped" ? "grouped" : "individual";
+    });
   const [activeAirdropLocation, setActiveAirdropLocation] = useState<
     "all" | "CactusValley" | "Dunes"
   >("all");
   const timeSort =
     activeView === "robberies" ? robberiesTimeSort : otherTimeSort;
+
+  const [serverRegionsByJobId, setServerRegionsByJobId] = useState<
+    Record<string, ServerRegionData | null>
+  >({});
 
   useEffect(() => {
     safeSessionStorage.setItem(
@@ -387,6 +406,13 @@ function RobberyTrackerContent() {
       JSON.stringify(selectedComboPresetIds),
     );
   }, [selectedComboPresetIds]);
+
+  useEffect(() => {
+    safeSessionStorage.setItem(
+      ROBBERIES_DISPLAY_MODE_STORAGE_KEY,
+      robberiesDisplayMode,
+    );
+  }, [robberiesDisplayMode]);
 
   const serverSizeLabel =
     serverSize === "all"
@@ -453,7 +479,9 @@ function RobberyTrackerContent() {
     const counts = new Map<string, number>();
     const query = searchQuery.trim().toLowerCase();
 
-    let base = robberies.filter((robbery) => robbery.status === 1);
+    let base = robberies.filter(
+      (robbery) => robbery.status === 1 || robbery.status === 2,
+    );
     if (serverSize !== "all") {
       base = base.filter((robbery) => {
         const playerCount = robbery.server?.players?.length || 0;
@@ -532,23 +560,26 @@ function RobberyTrackerContent() {
     if (selectedRobberyTypes.length > 0) {
       if (robberyFilterMode === "all" && selectedRobberyTypes.length > 1) {
         const selectedTypeSet = new Set(selectedRobberyTypes);
-        const openRobberiesByServer = new Map<string, Set<string>>();
+        const eligibleRobberiesByServer = new Map<string, Set<string>>();
 
         for (const robbery of filtered) {
-          if (robbery.status !== 1) continue;
+          if (robbery.status !== 1 && robbery.status !== 2) continue;
           const serverId = robbery.server?.job_id || robbery.job_id;
           if (!serverId) continue;
 
-          let serverTypes = openRobberiesByServer.get(serverId);
+          let serverTypes = eligibleRobberiesByServer.get(serverId);
           if (!serverTypes) {
             serverTypes = new Set<string>();
-            openRobberiesByServer.set(serverId, serverTypes);
+            eligibleRobberiesByServer.set(serverId, serverTypes);
           }
           serverTypes.add(robbery.marker_name);
         }
 
         const comboMatchingServers = new Set<string>();
-        for (const [serverId, serverTypes] of openRobberiesByServer.entries()) {
+        for (const [
+          serverId,
+          serverTypes,
+        ] of eligibleRobberiesByServer.entries()) {
           const hasAllTypes = [...selectedTypeSet].every((selectedType) =>
             serverTypes.has(selectedType),
           );
@@ -559,7 +590,7 @@ function RobberyTrackerContent() {
           const serverId = robbery.server?.job_id || robbery.job_id;
           return (
             comboMatchingServers.has(serverId) &&
-            robbery.status === 1 &&
+            (robbery.status === 1 || robbery.status === 2) &&
             selectedTypeSet.has(robbery.marker_name)
           );
         });
@@ -598,6 +629,50 @@ function RobberyTrackerContent() {
     serverSize,
   ]);
 
+  const groupedRobberies = useMemo(() => {
+    const groups = new Map<string, RobberyData[]>();
+    for (const robbery of filteredRobberies) {
+      const jobId = robbery.server?.job_id || robbery.job_id;
+      if (!jobId) continue;
+      const existing = groups.get(jobId);
+      if (existing) existing.push(robbery);
+      else groups.set(jobId, [robbery]);
+    }
+
+    return Array.from(groups.entries())
+      .map(([jobId, group]) => ({
+        jobId,
+        robberies: group,
+        latestTimestamp: Math.max(...group.map((r) => r.timestamp)),
+      }))
+      .sort((a, b) => b.latestTimestamp - a.latestTimestamp);
+  }, [filteredRobberies]);
+
+  const baselineRobberies = useMemo(() => {
+    let filtered = robberies.filter(
+      (robbery) => robbery.status === 1 || robbery.status === 2,
+    );
+
+    if (serverSize !== "all") {
+      filtered = filtered.filter((robbery) => {
+        const playerCount = robbery.server?.players?.length || 0;
+        return serverSize === "big" ? playerCount >= 9 : playerCount < 9;
+      });
+    }
+
+    return filtered;
+  }, [robberies, serverSize]);
+
+  const baselineGroupedServers = useMemo(() => {
+    const groups = new Map<string, true>();
+    for (const robbery of baselineRobberies) {
+      const jobId = robbery.server?.job_id || robbery.job_id;
+      if (!jobId) continue;
+      groups.set(jobId, true);
+    }
+    return groups.size;
+  }, [baselineRobberies]);
+
   const filteredRobberyCombos = useMemo<RobberyComboResult[]>(() => {
     if (!isPowerComboMode) return [];
 
@@ -620,7 +695,7 @@ function RobberyTrackerContent() {
       const openByServer = new Map<string, Map<string, RobberyData>>();
 
       for (const robbery of base) {
-        if (robbery.status !== 1) continue;
+        if (robbery.status !== 1 && robbery.status !== 2) continue;
         if (!presetTypeSet.has(robbery.marker_name)) continue;
 
         const serverId = robbery.server?.job_id || robbery.job_id;
@@ -684,6 +759,27 @@ function RobberyTrackerContent() {
     timeSort,
   ]);
 
+  const mergedServerRegionsByJobId = useMemo(() => {
+    if (activeView !== "robberies") return serverRegionsByJobId;
+
+    const next = { ...serverRegionsByJobId };
+    for (const robbery of robberies) {
+      const jobId = robbery.server?.job_id || robbery.job_id;
+      if (!isNonEmptyString(jobId)) continue;
+      if (robbery.region_data && next[jobId] == null) {
+        next[jobId] = robbery.region_data;
+      }
+    }
+    return next;
+  }, [activeView, robberies, serverRegionsByJobId]);
+
+  const handleRegionData = (jobId: string, data: ServerRegionData | null) => {
+    setServerRegionsByJobId((prev) => {
+      if (prev[jobId] != null || data == null) return prev;
+      return { ...prev, [jobId]: data };
+    });
+  };
+
   // Filter and sort Mansions (simpler as no type filtering)
   const filteredMansions = useMemo(() => {
     let filtered = mansions;
@@ -730,6 +826,27 @@ function RobberyTrackerContent() {
         total: filteredRobberyCombos.length,
         open: filteredRobberyCombos.length,
         inProgress: 0,
+        baselineTotal: filteredRobberyCombos.length,
+        nounSingular: "Combo Server",
+        nounPlural: "Combo Servers",
+      };
+    }
+
+    if (robberiesDisplayMode === "grouped") {
+      const statuses = groupedRobberies.map((group) => {
+        const hasOpen = group.robberies.some((r) => r.status === 1);
+        if (hasOpen) return 1;
+        const hasActive = group.robberies.some((r) => r.status === 2);
+        return hasActive ? 2 : 0;
+      });
+
+      return {
+        total: groupedRobberies.length,
+        open: statuses.filter((s) => s === 1).length,
+        inProgress: statuses.filter((s) => s === 2).length,
+        baselineTotal: baselineGroupedServers,
+        nounSingular: "Server",
+        nounPlural: "Servers",
       };
     }
 
@@ -737,8 +854,19 @@ function RobberyTrackerContent() {
       total: filteredRobberies.length,
       open: filteredRobberies.filter((r) => r.status === 1).length,
       inProgress: filteredRobberies.filter((r) => r.status === 2).length,
+      baselineTotal: baselineRobberies.length,
+      nounSingular: "Robbery",
+      nounPlural: "Robberies",
     };
-  }, [filteredRobberies, filteredRobberyCombos, isPowerComboMode]);
+  }, [
+    baselineGroupedServers,
+    baselineRobberies.length,
+    filteredRobberies,
+    filteredRobberyCombos.length,
+    groupedRobberies,
+    isPowerComboMode,
+    robberiesDisplayMode,
+  ]);
 
   // Calculate mansion statistics
   const mansionStats = useMemo(() => {
@@ -1207,33 +1335,31 @@ function RobberyTrackerContent() {
               <span className="text-primary-text font-semibold">
                 {searchQuery || selectedRobberyTypes.length > 0 ? (
                   <>
-                    Showing {robberyStats.total}{" "}
-                    {isPowerComboMode
-                      ? "Combo Servers"
-                      : `of ${robberies.length} Robberies`}
+                    Showing {robberyStats.total} of {robberyStats.baselineTotal}{" "}
+                    {robberyStats.baselineTotal === 1
+                      ? robberyStats.nounSingular
+                      : robberyStats.nounPlural}
                   </>
                 ) : (
                   <>
                     {robberyStats.total}{" "}
-                    {isPowerComboMode
-                      ? robberyStats.total === 1
-                        ? "Combo Server"
-                        : "Combo Servers"
-                      : robberyStats.total === 1
-                        ? "Robbery"
-                        : "Robberies"}
+                    {robberyStats.total === 1
+                      ? robberyStats.nounSingular
+                      : robberyStats.nounPlural}
                   </>
                 )}
               </span>
-              <div className="flex items-center gap-2 text-xs">
-                <span className="text-secondary-text">
-                  {robberyStats.open} Open
-                </span>
-                <span className="text-tertiary-text">•</span>
-                <span className="text-secondary-text">
-                  {robberyStats.inProgress} In Progress
-                </span>
-              </div>
+              {!(robberiesDisplayMode === "grouped" && !isPowerComboMode) && (
+                <div className="flex items-center gap-2 text-xs">
+                  <span className="text-secondary-text">
+                    {robberyStats.open} Open
+                  </span>
+                  <span className="text-tertiary-text">•</span>
+                  <span className="text-secondary-text">
+                    {robberyStats.inProgress} In Progress
+                  </span>
+                </div>
+              )}
             </div>
           ) : activeView === "mansions" ? (
             mansionStats.total > 0 && (
@@ -1556,6 +1682,26 @@ function RobberyTrackerContent() {
                   )}
                 </div>
 
+                {!isPowerComboMode && (
+                  <div className="mb-4 overflow-x-auto">
+                    <Tabs
+                      value={robberiesDisplayMode}
+                      onValueChange={(value) =>
+                        setRobberiesDisplayMode(value as RobberiesDisplayMode)
+                      }
+                    >
+                      <TabsList fullWidth>
+                        <TabsTrigger value="individual" fullWidth>
+                          Individual
+                        </TabsTrigger>
+                        <TabsTrigger value="grouped" fullWidth>
+                          Grouped (Server)
+                        </TabsTrigger>
+                      </TabsList>
+                    </Tabs>
+                  </div>
+                )}
+
                 {/* Robberies Grid */}
                 {isPowerComboMode ? (
                   filteredRobberyCombos.length > 0 ? (
@@ -1584,14 +1730,52 @@ function RobberyTrackerContent() {
                       </p>
                     </div>
                   )
+                ) : robberiesDisplayMode === "grouped" ? (
+                  groupedRobberies.length > 0 ? (
+                    <div className="grid grid-cols-1 items-start gap-6 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
+                      {groupedRobberies.map((group) => (
+                        <RobberyServerGroupCard
+                          key={group.jobId}
+                          serverId={group.jobId}
+                          robberies={group.robberies}
+                          regionData={mergedServerRegionsByJobId[group.jobId]}
+                          useExternalRegionData={
+                            mergedServerRegionsByJobId[group.jobId] != null
+                          }
+                          onRegionData={handleRegionData}
+                        />
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="flex min-h-screen flex-col items-center justify-start py-12 pt-24 text-center">
+                      <Icon
+                        icon="heroicons:magnifying-glass"
+                        className="text-tertiary-text mb-4 h-12 w-12"
+                      />
+                      <h3 className="text-primary-text text-lg font-medium">
+                        No servers found
+                      </h3>
+                      <p className="text-secondary-text">
+                        Try changing your filters or search query
+                      </p>
+                    </div>
+                  )
                 ) : filteredRobberies.length > 0 ? (
                   <div className="grid grid-cols-1 items-start gap-6 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
-                    {filteredRobberies.map((robbery) => (
-                      <RobberyCard
-                        key={`${robbery.marker_name}-${robbery.server?.job_id || robbery.job_id}-${robbery.timestamp}`}
-                        robbery={robbery}
-                      />
-                    ))}
+                    {filteredRobberies.map((robbery) => {
+                      const jobId = robbery.server?.job_id || robbery.job_id;
+                      return (
+                        <RobberyCard
+                          key={`${robbery.marker_name}-${jobId}-${robbery.timestamp}`}
+                          robbery={robbery}
+                          regionData={mergedServerRegionsByJobId[jobId]}
+                          useExternalRegionData={
+                            mergedServerRegionsByJobId[jobId] != null
+                          }
+                          onRegionData={handleRegionData}
+                        />
+                      );
+                    })}
                   </div>
                 ) : (
                   <div className="flex min-h-screen flex-col items-center justify-start py-12 pt-24 text-center">

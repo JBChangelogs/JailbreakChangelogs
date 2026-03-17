@@ -11,8 +11,8 @@ import {
 import { useOptimizedRealTimeRelativeDate } from "@/hooks/useSharedTimer";
 import { useServerRegions } from "@/hooks/useServerRegions";
 import { toast } from "sonner";
-import RobberyPlayersModal from "./RobberyPlayersModal";
 import { buildRobloxServerDeepLink } from "./deepLink";
+import InlineTeamPlayers from "./InlineTeamPlayers";
 
 interface RobberyComboCardProps {
   comboId: string;
@@ -27,7 +27,6 @@ export default function RobberyComboCard({
   robberies,
   comboLabel,
 }: RobberyComboCardProps) {
-  const [isPlayersModalOpen, setIsPlayersModalOpen] = useState(false);
   const [isJoining, setIsJoining] = useState(false);
   const [regionData, setRegionData] = useState<ServerRegionData | null>(null);
   const { fetchRegionData } = useServerRegions();
@@ -170,6 +169,8 @@ export default function RobberyComboCard({
             </span>
           </div>
 
+          <InlineTeamPlayers players={players} className="mt-1" />
+
           <div className="text-secondary-text mt-1 flex items-center gap-2 text-xs">
             <Icon icon="heroicons:map-pin" className="h-4 w-4 shrink-0" />
             <span className="text-primary-text truncate font-medium">
@@ -184,15 +185,11 @@ export default function RobberyComboCard({
             </span>
           </div>
 
-          <div className="mt-2 grid min-w-0 grid-cols-2 gap-2">
+          <div className="mt-2">
             <Button
               size="sm"
               variant="default"
-              className={
-                players.length > 0
-                  ? "w-full min-w-0"
-                  : "col-span-2 w-full min-w-0"
-              }
+              className="w-full min-w-0"
               disabled={isJoining}
               data-umami-event="Join Server"
               data-umami-event-tracker="Robbery_Tracker"
@@ -211,20 +208,6 @@ export default function RobberyComboCard({
               <Icon icon="heroicons:arrow-top-right-on-square" />
               {isJoining ? "Joining..." : "Join"}
             </Button>
-
-            {players.length > 0 ? (
-              <Button
-                size="sm"
-                onClick={() => setIsPlayersModalOpen(true)}
-                variant="secondary"
-                className="w-full min-w-0"
-              >
-                <Icon icon="heroicons-outline:users" />
-                {players.length} Players
-              </Button>
-            ) : (
-              <div />
-            )}
           </div>
         </div>
       </div>
@@ -234,14 +217,6 @@ export default function RobberyComboCard({
           Logged {relativeTime || "Just now"}
         </div>
       </div>
-
-      {players.length > 0 && (
-        <RobberyPlayersModal
-          isOpen={isPlayersModalOpen}
-          onClose={() => setIsPlayersModalOpen(false)}
-          players={players}
-        />
-      )}
     </div>
   );
 }
