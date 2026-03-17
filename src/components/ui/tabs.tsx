@@ -21,7 +21,7 @@ const TabsList = React.forwardRef<
   <TabsPrimitive.List
     ref={ref}
     className={cn(
-      "border-border-card bg-tertiary-bg text-secondary-text inline-flex h-auto min-w-max items-center justify-start gap-1 border p-0.5",
+      "border-border-card bg-tertiary-bg text-secondary-text inline-flex h-auto max-w-full min-w-max items-center justify-start gap-1 overflow-x-auto border p-0.5 [-webkit-overflow-scrolling:touch]",
       fullWidth && "w-full min-w-0",
       noBottomRadius ? "rounded-t-lg rounded-b-none" : "rounded-lg",
       className,

@@ -50,11 +50,10 @@ export default function TradeAds({
   );
   const [items] = useState<TradeItem[]>(initialItems);
   const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<
-    "view" | "supporter" | "create" | "myads"
-  >("view");
+  const [activeTab, setActiveTab] = useState<"view" | "create" | "myads">(
+    "view",
+  );
   const [page, setPage] = useState(1);
-  const [sortOrder, setSortOrder] = useState<"newest" | "oldest">("newest");
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [searchScope, setSearchScope] = useState<
     "all" | "offering" | "requesting"
@@ -370,8 +369,8 @@ export default function TradeAds({
         return;
       }
 
-      if (hash === "create" || hash === "myads" || hash === "supporter") {
-        setActiveTab(hash);
+      if (hash === "create" || hash === "myads") {
+        setActiveTab(hash as "create" | "myads");
       } else {
         setActiveTab("view");
       }
@@ -386,7 +385,7 @@ export default function TradeAds({
     };
   }, [currentUserId, userTradeAds.length]);
 
-  const handleTabChange = (tab: "view" | "supporter" | "create" | "myads") => {
+  const handleTabChange = (tab: "view" | "create" | "myads") => {
     setActiveTab(tab);
     setPage(1); // Reset to first page when changing tabs
     if (tab === "view") {
@@ -416,11 +415,6 @@ export default function TradeAds({
     value: number,
   ) => {
     setPage(value);
-  };
-
-  const toggleSortOrder = () => {
-    setSortOrder((prev) => (prev === "newest" ? "oldest" : "newest"));
-    setPage(1); // Reset to first page when changing sort order
   };
 
   if (error) {
@@ -499,24 +493,25 @@ export default function TradeAds({
         trade.user && trade.user.roblox_id && trade.user.roblox_username,
     )
     .sort((a, b) => {
-      return sortOrder === "newest"
-        ? b.created_at - a.created_at
-        : a.created_at - b.created_at;
+      const aPremium =
+        typeof a.user?.premiumtype === "number" ? a.user.premiumtype : 0;
+      const bPremium =
+        typeof b.user?.premiumtype === "number" ? b.user.premiumtype : 0;
+      const supporterRank = (premium: number) => {
+        if (premium === 3) return 0;
+        if (premium === 2) return 1;
+        if (premium === 1) return 2;
+        return 3;
+      };
+      const rankDelta = supporterRank(aPremium) - supporterRank(bPremium);
+      if (rankDelta !== 0) return rankDelta;
+      // Within each tier, newest -> oldest
+      return b.created_at - a.created_at;
     });
 
   const isSystemError = tradeAds.length > 0 && sortedTradeAds.length === 0;
 
-  // Filter supporter trade ads (premium types 1-3)
-  const supporterTradeAds = sortedTradeAds.filter(
-    (trade) =>
-      trade.user?.premiumtype &&
-      trade.user.premiumtype >= 1 &&
-      trade.user.premiumtype <= 3,
-  );
-
-  // Determine which ads to show based on active tab
-  const baseDisplayTradeAds =
-    activeTab === "supporter" ? supporterTradeAds : sortedTradeAds;
+  const baseDisplayTradeAds = sortedTradeAds;
 
   const normalizeItemName = (item: TradeItem): string =>
     (item.data?.name || item.name || "").toLowerCase().trim();
@@ -713,129 +708,169 @@ export default function TradeAds({
         hasTradeAds={userTradeAds.length > 0}
       />
 
-      {/* Search Input - Show for view, supporter, and myads tabs */}
-      {(activeTab === "view" ||
-        activeTab === "supporter" ||
-        activeTab === "myads") &&
-        !isSystemError && (
-          <div className="mt-6">
-            <div className="flex flex-col gap-3">
-              <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-                <div className="relative flex-1">
-                  <input
-                    type="text"
-                    placeholder="Search trade ads (e.g., Torpedo)"
-                    value={searchQuery}
-                    onChange={(e) => {
-                      setSearchQuery(e.target.value);
-                      setPage(1); // Reset to first page when searching
-                    }}
-                    className="border-border-card bg-secondary-bg text-primary-text placeholder-secondary-text focus:border-button-info w-full rounded-lg border px-4 py-3 pr-16 transition-all duration-300 focus:outline-none"
-                  />
-                  {/* Right side controls container */}
-                  <div className="absolute top-1/2 right-3 flex -translate-y-1/2 items-center gap-2">
-                    {/* Clear button - only show when there's text */}
-                    {searchQuery && (
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setSearchQuery("");
-                          setPage(1);
-                        }}
-                        className="text-secondary-text hover:text-primary-text cursor-pointer transition-colors"
-                        aria-label="Clear search"
-                      >
-                        <Icon icon="heroicons:x-mark" className="h-5 w-5" />
-                      </button>
-                    )}
-                  </div>
-                </div>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
+      {/* Search Input - Show for view and myads tabs */}
+      {(activeTab === "view" || activeTab === "myads") && !isSystemError && (
+        <div className="mt-6">
+          <div className="flex flex-col gap-3">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+              <div className="relative flex-1">
+                <input
+                  type="text"
+                  placeholder="Search trade ads (e.g., Torpedo)"
+                  value={searchQuery}
+                  onChange={(e) => {
+                    setSearchQuery(e.target.value);
+                    setPage(1); // Reset to first page when searching
+                  }}
+                  className="border-border-card bg-secondary-bg text-primary-text placeholder-secondary-text focus:border-button-info w-full rounded-lg border px-4 py-3 pr-16 transition-all duration-300 focus:outline-none"
+                />
+                {/* Right side controls container */}
+                <div className="absolute top-1/2 right-3 flex -translate-y-1/2 items-center gap-2">
+                  {/* Clear button - only show when there's text */}
+                  {searchQuery && (
                     <button
                       type="button"
-                      className="border-border-card bg-secondary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus inline-flex h-[56px] w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all duration-300 focus:ring-1 focus:outline-none sm:w-56"
-                      aria-label="Search side"
-                    >
-                      <span>{searchScopeLabel}</span>
-                      <Icon
-                        icon="heroicons:chevron-down"
-                        className="text-secondary-text h-5 w-5"
-                        inline={true}
-                      />
-                    </button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent
-                    align="start"
-                    className="w-[var(--radix-dropdown-menu-trigger-width)]"
-                  >
-                    <DropdownMenuRadioGroup
-                      value={searchScope}
-                      onValueChange={(value) => {
-                        setSearchScope(
-                          value as "all" | "offering" | "requesting",
-                        );
+                      onClick={() => {
+                        setSearchQuery("");
                         setPage(1);
                       }}
+                      className="text-secondary-text hover:text-primary-text cursor-pointer transition-colors"
+                      aria-label="Clear search"
                     >
-                      <DropdownMenuRadioItem value="all">
-                        Both Sides
-                      </DropdownMenuRadioItem>
-                      <DropdownMenuRadioItem value="offering">
-                        Offering Only
-                      </DropdownMenuRadioItem>
-                      <DropdownMenuRadioItem value="requesting">
-                        Requesting Only
-                      </DropdownMenuRadioItem>
-                    </DropdownMenuRadioGroup>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                      <Icon icon="heroicons:x-mark" className="h-5 w-5" />
+                    </button>
+                  )}
+                </div>
               </div>
-              <div className="flex items-center gap-3">
-                <Button
-                  size="sm"
-                  className="w-fit"
-                  onClick={() => setShowAdvancedFilters((prev) => !prev)}
-                >
-                  <Icon
-                    icon="rivet-icons:filter"
-                    className="h-4 w-4"
-                    inline={true}
-                  />
-                  Filter
-                  {advancedFilterCount > 0 ? ` (${advancedFilterCount})` : ""}
-                </Button>
-                {hasActiveFilters && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
                   <button
                     type="button"
-                    onClick={clearAllFilters}
-                    className="text-link hover:text-link-hover cursor-pointer text-sm font-medium transition-colors"
+                    className="border-border-card bg-secondary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus inline-flex h-[56px] w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all duration-300 focus:ring-1 focus:outline-none sm:w-56"
+                    aria-label="Search side"
                   >
-                    Clear Filters
+                    <span>{searchScopeLabel}</span>
+                    <Icon
+                      icon="heroicons:chevron-down"
+                      className="text-secondary-text h-5 w-5"
+                      inline={true}
+                    />
                   </button>
-                )}
-              </div>
-            </div>
-            {showAdvancedFilters && (
-              <div className="border-border-card bg-secondary-bg mt-3 grid grid-cols-1 gap-3 rounded-xl border p-3 sm:grid-cols-2 lg:grid-cols-3">
-                <label className="border-border-card bg-tertiary-bg text-primary-text flex cursor-pointer items-center gap-2 rounded-lg border px-3 py-2 text-sm">
-                  <Checkbox
-                    checked={vehicleOnly}
-                    onCheckedChange={(checked) => {
-                      setVehicleOnly(checked === true);
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  align="start"
+                  className="w-[var(--radix-dropdown-menu-trigger-width)]"
+                >
+                  <DropdownMenuRadioGroup
+                    value={searchScope}
+                    onValueChange={(value) => {
+                      setSearchScope(
+                        value as "all" | "offering" | "requesting",
+                      );
                       setPage(1);
                     }}
-                  />
-                  Vehicles Only
-                </label>
+                  >
+                    <DropdownMenuRadioItem value="all">
+                      Both Sides
+                    </DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value="offering">
+                      Offering Only
+                    </DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value="requesting">
+                      Requesting Only
+                    </DropdownMenuRadioItem>
+                  </DropdownMenuRadioGroup>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+            <div className="flex items-center gap-3">
+              <Button
+                size="sm"
+                className="w-fit"
+                onClick={() => setShowAdvancedFilters((prev) => !prev)}
+              >
+                <Icon
+                  icon="rivet-icons:filter"
+                  className="h-4 w-4"
+                  inline={true}
+                />
+                Filter
+                {advancedFilterCount > 0 ? ` (${advancedFilterCount})` : ""}
+              </Button>
+              {hasActiveFilters && (
+                <button
+                  type="button"
+                  onClick={clearAllFilters}
+                  className="text-link hover:text-link-hover cursor-pointer text-sm font-medium transition-colors"
+                >
+                  Clear Filters
+                </button>
+              )}
+            </div>
+          </div>
+          {showAdvancedFilters && (
+            <div className="border-border-card bg-secondary-bg mt-3 grid grid-cols-1 gap-3 rounded-xl border p-3 sm:grid-cols-2 lg:grid-cols-3">
+              <label className="border-border-card bg-tertiary-bg text-primary-text flex cursor-pointer items-center gap-2 rounded-lg border px-3 py-2 text-sm">
+                <Checkbox
+                  checked={vehicleOnly}
+                  onCheckedChange={(checked) => {
+                    setVehicleOnly(checked === true);
+                    setPage(1);
+                  }}
+                />
+                Vehicles Only
+              </label>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button
+                    type="button"
+                    className="border-border-card bg-tertiary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus inline-flex h-[56px] w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all duration-300 focus:ring-1 focus:outline-none"
+                    aria-label="Filter custom types"
+                  >
+                    <span>{selectedCustomTypeLabel}</span>
+                    <Icon
+                      icon="heroicons:chevron-down"
+                      className="text-secondary-text h-5 w-5"
+                      inline={true}
+                    />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  align="start"
+                  className="w-[var(--radix-dropdown-menu-trigger-width)]"
+                >
+                  <DropdownMenuRadioGroup
+                    value={customTypeFilter}
+                    onValueChange={(value) => {
+                      setCustomTypeFilter(value);
+                      if (value === "all") {
+                        setCustomTypeMatchMode("contains");
+                      }
+                      setPage(1);
+                    }}
+                  >
+                    <DropdownMenuRadioItem value="all">
+                      All Custom Types
+                    </DropdownMenuRadioItem>
+                    {CUSTOM_TYPE_OPTIONS.map((option) => (
+                      <DropdownMenuRadioItem key={option.id} value={option.id}>
+                        {option.label}
+                      </DropdownMenuRadioItem>
+                    ))}
+                  </DropdownMenuRadioGroup>
+                </DropdownMenuContent>
+              </DropdownMenu>
+              {customTypeFilterActive && (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <button
                       type="button"
                       className="border-border-card bg-tertiary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus inline-flex h-[56px] w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all duration-300 focus:ring-1 focus:outline-none"
-                      aria-label="Filter custom types"
+                      aria-label="Custom type match mode"
                     >
-                      <span>{selectedCustomTypeLabel}</span>
+                      <span>
+                        {customTypeMatchMode === "only" ? "Only" : "Contains"}
+                      </span>
                       <Icon
                         icon="heroicons:chevron-down"
                         className="text-secondary-text h-5 w-5"
@@ -848,90 +883,44 @@ export default function TradeAds({
                     className="w-[var(--radix-dropdown-menu-trigger-width)]"
                   >
                     <DropdownMenuRadioGroup
-                      value={customTypeFilter}
+                      value={customTypeMatchMode}
                       onValueChange={(value) => {
-                        setCustomTypeFilter(value);
-                        if (value === "all") {
-                          setCustomTypeMatchMode("contains");
-                        }
+                        setCustomTypeMatchMode(value as "contains" | "only");
                         setPage(1);
                       }}
                     >
-                      <DropdownMenuRadioItem value="all">
-                        All Custom Types
+                      <DropdownMenuRadioItem value="contains">
+                        Contains
                       </DropdownMenuRadioItem>
-                      {CUSTOM_TYPE_OPTIONS.map((option) => (
-                        <DropdownMenuRadioItem
-                          key={option.id}
-                          value={option.id}
-                        >
-                          {option.label}
-                        </DropdownMenuRadioItem>
-                      ))}
+                      <DropdownMenuRadioItem value="only">
+                        Only
+                      </DropdownMenuRadioItem>
                     </DropdownMenuRadioGroup>
                   </DropdownMenuContent>
                 </DropdownMenu>
-                {customTypeFilterActive && (
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <button
-                        type="button"
-                        className="border-border-card bg-tertiary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus inline-flex h-[56px] w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all duration-300 focus:ring-1 focus:outline-none"
-                        aria-label="Custom type match mode"
-                      >
-                        <span>
-                          {customTypeMatchMode === "only" ? "Only" : "Contains"}
-                        </span>
-                        <Icon
-                          icon="heroicons:chevron-down"
-                          className="text-secondary-text h-5 w-5"
-                          inline={true}
-                        />
-                      </button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent
-                      align="start"
-                      className="w-[var(--radix-dropdown-menu-trigger-width)]"
-                    >
-                      <DropdownMenuRadioGroup
-                        value={customTypeMatchMode}
-                        onValueChange={(value) => {
-                          setCustomTypeMatchMode(value as "contains" | "only");
-                          setPage(1);
-                        }}
-                      >
-                        <DropdownMenuRadioItem value="contains">
-                          Contains
-                        </DropdownMenuRadioItem>
-                        <DropdownMenuRadioItem value="only">
-                          Only
-                        </DropdownMenuRadioItem>
-                      </DropdownMenuRadioGroup>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                )}
-              </div>
-            )}
-            {activeFilterChips.length > 0 && (
-              <div className="mt-3 flex flex-wrap items-center gap-2">
-                {activeFilterChips.map((chip) => (
-                  <button
-                    key={chip.key}
-                    type="button"
-                    onClick={() => {
-                      chip.onRemove();
-                      setPage(1);
-                    }}
-                    className="border-border-card bg-secondary-bg text-primary-text hover:border-border-focus inline-flex items-center gap-1 rounded-full border px-3 py-1 text-xs transition-colors"
-                  >
-                    <span>{chip.label}</span>
-                    <Icon icon="heroicons:x-mark" className="h-3.5 w-3.5" />
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
+              )}
+            </div>
+          )}
+          {activeFilterChips.length > 0 && (
+            <div className="mt-3 flex flex-wrap items-center gap-2">
+              {activeFilterChips.map((chip) => (
+                <button
+                  key={chip.key}
+                  type="button"
+                  onClick={() => {
+                    chip.onRemove();
+                    setPage(1);
+                  }}
+                  className="border-border-card bg-secondary-bg text-primary-text hover:border-border-focus inline-flex items-center gap-1 rounded-full border px-3 py-1 text-xs transition-colors"
+                >
+                  <span>{chip.label}</span>
+                  <Icon icon="heroicons:x-mark" className="h-3.5 w-3.5" />
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Tab Content */}
       <div
@@ -951,14 +940,6 @@ export default function TradeAds({
                     {displayTradeAds.length === 1 ? "trade ad" : "trade ads"}
                     {activeFiltersSummary ? ` • ${activeFiltersSummary}` : ""}
                   </p>
-                  <Button onClick={toggleSortOrder} size="sm">
-                    {sortOrder === "newest" ? (
-                      <Icon icon="heroicons-outline:arrow-down" inline={true} />
-                    ) : (
-                      <Icon icon="heroicons-outline:arrow-up" inline={true} />
-                    )}
-                    {sortOrder === "newest" ? "Newest First" : "Oldest First"}
-                  </Button>
                 </div>
               )}
             {displayTradeAds.length === 0 ? (
@@ -1025,104 +1006,6 @@ export default function TradeAds({
         )}
       </div>
 
-      {/* Supporter Ads Tab */}
-      <div
-        role="tabpanel"
-        hidden={activeTab !== "supporter"}
-        id="trading-tabpanel-supporter"
-        aria-labelledby="trading-tab-supporter"
-        className="mt-6"
-      >
-        {activeTab === "supporter" && (
-          <>
-            {!isSystemError && (
-              <div className="mb-4 flex items-center justify-between">
-                <p className="text-secondary-text">
-                  Showing {displayTradeAds.length}{" "}
-                  {displayTradeAds.length === 1
-                    ? "supporter trade ad"
-                    : "supporter trade ads"}
-                  {activeFiltersSummary ? ` • ${activeFiltersSummary}` : ""}
-                </p>
-                <Button onClick={toggleSortOrder} size="sm">
-                  {sortOrder === "newest" ? (
-                    <Icon icon="heroicons-outline:arrow-down" inline={true} />
-                  ) : (
-                    <Icon icon="heroicons-outline:arrow-up" inline={true} />
-                  )}
-                  {sortOrder === "newest" ? "Newest First" : "Oldest First"}
-                </Button>
-              </div>
-            )}
-            {displayTradeAds.length === 0 ? (
-              isSystemError ? (
-                <div className="border-border-card bg-secondary-bg mb-8 flex min-h-[50vh] flex-col items-center justify-center rounded-lg border p-12 text-center">
-                  <Icon
-                    icon="mdi:face-sad-outline"
-                    className="text-link mb-4 h-16 w-16 opacity-50"
-                  />
-                  <h3 className="text-secondary-text mb-4 text-xl font-medium">
-                    Unable to Load Supporter Trades
-                  </h3>
-                  <p className="text-secondary-text max-w-md">
-                    Please try again later.
-                  </p>
-                </div>
-              ) : (
-                <div className="border-border-card bg-secondary-bg mb-8 rounded-lg border p-6 text-center">
-                  <h3 className="text-secondary-text mb-4 text-lg font-medium">
-                    No Supporter Trade Ads Available
-                  </h3>
-                  <p className="text-secondary-text mb-8">
-                    There are currently no trade ads from Supporters.
-                  </p>
-                  <Button onClick={() => handleTabChange("view")}>
-                    View All Trade Ads
-                  </Button>
-                </div>
-              )
-            ) : (
-              <>
-                <div className="space-y-4">
-                  {currentPageItems.map((trade) => {
-                    const enrichedTrade: TradeAd = {
-                      ...trade,
-                      offering: trade.offering.map((it) => ({
-                        ...it,
-                        demand: getDemandForItem(it) || it.demand,
-                        trend: getTrendForItem(it) || it.trend,
-                      })),
-                      requesting: trade.requesting.map((it) => ({
-                        ...it,
-                        demand: getDemandForItem(it) || it.demand,
-                        trend: getTrendForItem(it) || it.trend,
-                      })),
-                    };
-                    return (
-                      <TradeAdCard
-                        key={trade.id}
-                        trade={enrichedTrade}
-                        currentUserId={currentUserId}
-                        onDelete={() => handleDeleteTrade(trade.id)}
-                      />
-                    );
-                  })}
-                </div>
-                {totalPages > 1 && (
-                  <div className="mt-8 mb-8 flex justify-center">
-                    <Pagination
-                      count={totalPages}
-                      page={page}
-                      onChange={handlePageChange}
-                    />
-                  </div>
-                )}
-              </>
-            )}
-          </>
-        )}
-      </div>
-
       <div
         role="tabpanel"
         hidden={activeTab !== "create"}
@@ -1151,14 +1034,6 @@ export default function TradeAds({
                 {filteredUserTradeAds.length === 1 ? "trade ad" : "trade ads"}
                 {activeFiltersSummary ? ` • ${activeFiltersSummary}` : ""}
               </p>
-              <Button onClick={toggleSortOrder} size="sm">
-                {sortOrder === "newest" ? (
-                  <Icon icon="heroicons-outline:arrow-down" inline={true} />
-                ) : (
-                  <Icon icon="heroicons-outline:arrow-up" inline={true} />
-                )}
-                {sortOrder === "newest" ? "Newest First" : "Oldest First"}
-              </Button>
             </div>
             {filteredUserTradeAds.length === 0 ? (
               userTradeAds.length === 0 ? (

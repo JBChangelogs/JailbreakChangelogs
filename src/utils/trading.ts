@@ -144,7 +144,7 @@ export const fetchTradeOffers = async (
   }
 
   const response = await fetch(
-    `${baseUrl}/trades/v2/${encodeURIComponent(String(tradeId))}/offers?token=${encodeURIComponent(TRADE_OFFERS_TOKEN)}`,
+    `${baseUrl}/trades/v2/${encodeURIComponent(String(tradeId))}/offers`,
     {
       method: "GET",
       cache: "no-store",

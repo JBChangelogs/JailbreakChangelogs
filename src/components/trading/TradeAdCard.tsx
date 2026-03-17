@@ -122,7 +122,7 @@ const TradeSidePreview = ({
       <div className="mb-3 flex items-center justify-center">
         <h3 className="text-primary-text text-sm font-semibold">{title}</h3>
       </div>
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap justify-center gap-2 sm:justify-start">
         {previewItems.map((item) => {
           const itemKey = `${item.id}-${item.name}-${item.type}-${item.isDuped ? "duped" : "clean"}-${item.isOG ? "og" : "regular"}`;
           const itemHref = getTradeItemDetailHref(item);

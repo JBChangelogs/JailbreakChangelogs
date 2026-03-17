@@ -2,8 +2,8 @@ import React from "react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface TradeAdTabsProps {
-  activeTab: "view" | "supporter" | "create" | "myads";
-  onTabChange: (tab: "view" | "supporter" | "create" | "myads") => void;
+  activeTab: "view" | "create" | "myads";
+  onTabChange: (tab: "view" | "create" | "myads") => void;
   hasTradeAds?: boolean;
 }
 
@@ -14,9 +14,7 @@ export const TradeAdTabs: React.FC<TradeAdTabsProps> = ({
 }) => (
   <Tabs
     value={activeTab}
-    onValueChange={(value) =>
-      onTabChange(value as "view" | "supporter" | "create" | "myads")
-    }
+    onValueChange={(value) => onTabChange(value as "view" | "create" | "myads")}
   >
     <div className="w-full overflow-x-auto">
       <TabsList fullWidth className="w-full min-w-0">
@@ -27,14 +25,6 @@ export const TradeAdTabs: React.FC<TradeAdTabsProps> = ({
           aria-controls="trading-tabpanel-view"
         >
           View Trade Ads
-        </TabsTrigger>
-        <TabsTrigger
-          fullWidth
-          value="supporter"
-          id="trading-tab-supporter"
-          aria-controls="trading-tabpanel-supporter"
-        >
-          Supporter Ads
         </TabsTrigger>
         {hasTradeAds && (
           <TabsTrigger
