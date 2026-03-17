@@ -325,10 +325,13 @@ export function useRealtimeNotificationsWebSocket(enabled: boolean): void {
               description || "You received a new notification.";
             const type = notificationPayload.type || "unknown";
             const toastId = `realtime-notification:${type}:${link || notificationTitle}`;
+            const shouldHideViewAction =
+              notificationTitle.trim().toLowerCase() === "login detected";
 
             const urlInfo = link ? parseNotificationUrl(link) : null;
-            const action =
-              link && urlInfo?.isWhitelisted
+            const action = shouldHideViewAction
+              ? undefined
+              : link && urlInfo?.isWhitelisted
                 ? {
                     label: "View",
                     onClick: () => {

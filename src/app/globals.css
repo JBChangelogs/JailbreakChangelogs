@@ -771,7 +771,9 @@
 [data-sonner-toaster] {
   transition:
     right 0.24s ease,
-    left 0.24s ease;
+    left 0.24s ease,
+    transform 0.24s ease !important;
+  will-change: right, left, transform;
 }
 
 [data-sonner-toaster][data-x-position="right"]

@@ -159,7 +159,6 @@ export default function Header() {
   const [notificationTimeoutId, setNotificationTimeoutId] =
     useState<NodeJS.Timeout | null>(null);
   const [unreadCount, setUnreadCount] = useState(0);
-  const [isRealtimeConnected, setIsRealtimeConnected] = useState(false);
   const [wsHistoryNotifications, setWsHistoryNotifications] = useState<
     NotificationItem[]
   >([]);
@@ -176,6 +175,7 @@ export default function Header() {
       setIsLoadingNotifications(true);
       const data = await fetchUnreadNotifications(page, limit);
       setNotifications(data);
+      setUnreadCount(Math.max(0, data.total || 0));
       setIsLoadingNotifications(false);
     }, 300);
 
@@ -201,6 +201,21 @@ export default function Header() {
   const { resolvedTheme } = useTheme();
   const userData = isAuthenticated ? authUser : null;
   useEscapeLogin();
+
+  useEffect(() => {
+    if (!isAuthenticated) return;
+
+    let cancelled = false;
+    void (async () => {
+      const data = await fetchUnreadNotifications(1, 1);
+      if (cancelled) return;
+      setUnreadCount(Math.max(0, data.total || 0));
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [isAuthenticated]);
 
   useToastRuntimeRightOffset({
     enabled: !isXlUp,
@@ -275,8 +290,8 @@ export default function Header() {
             description,
             link: normalizedLink,
             metadata: wsNotification.metadata ?? null,
-            seen: 1,
-            seen_at: now,
+            seen: 0,
+            seen_at: 0,
             last_updated: now,
           };
 
@@ -301,7 +316,6 @@ export default function Header() {
       wsNotificationIdRef.current = -1;
       hasWsUnreadSeedRef.current = false;
       setUnreadCount(0);
-      setIsRealtimeConnected(false);
     }, 0);
 
     return () => {
@@ -315,7 +329,6 @@ export default function Header() {
     const handleConnectionChange = (event: Event) => {
       const detail = (event as CustomEvent<{ connected?: boolean }>).detail;
       const connected = detail?.connected === true;
-      setIsRealtimeConnected(connected);
       if (!connected) {
         setUnreadCount(0);
         hasWsUnreadSeedRef.current = false;
@@ -336,13 +349,25 @@ export default function Header() {
   }, [isAuthenticated]);
 
   const displayNotifications = useMemo(() => {
-    if (!notifications) return null;
-    if (notificationTab !== "history" || wsHistoryNotifications.length === 0) {
-      return notifications;
+    const baseNotifications: NotificationHistory | null = notifications
+      ? notifications
+      : notificationTab === "unread" && wsHistoryNotifications.length > 0
+        ? {
+            items: [],
+            total: 0,
+            page: 1,
+            total_pages: 1,
+            size: 5,
+          }
+        : null;
+
+    if (!baseNotifications) return null;
+    if (notificationTab !== "unread" || wsHistoryNotifications.length === 0) {
+      return baseNotifications;
     }
 
     const apiKeys = new Set(
-      notifications.items.map(
+      baseNotifications.items.map(
         (item) => `${item.title}|${item.description}|${item.link.trim()}`,
       ),
     );
@@ -352,7 +377,7 @@ export default function Header() {
     );
 
     if (wsOnlyItems.length === 0) {
-      return notifications;
+      return baseNotifications;
     }
 
     const wsOnlyCountedItems = wsOnlyItems.filter(
@@ -360,9 +385,9 @@ export default function Header() {
     );
 
     return {
-      ...notifications,
-      items: [...wsOnlyItems, ...notifications.items],
-      total: notifications.total + wsOnlyCountedItems.length,
+      ...baseNotifications,
+      items: [...wsOnlyItems, ...baseNotifications.items],
+      total: baseNotifications.total + wsOnlyCountedItems.length,
     };
   }, [notifications, notificationTab, wsHistoryNotifications]);
 
@@ -754,9 +779,12 @@ export default function Header() {
         <div className="relative z-10">
           <NavbarModern
             unreadCount={unreadCount}
-            isRealtimeConnected={isRealtimeConnected}
             setUnreadCount={setUnreadCount}
             wsHistoryNotifications={wsHistoryNotifications}
+            clearWsNotifications={() => {
+              setWsHistoryNotifications([]);
+              wsNotificationIdRef.current = -1;
+            }}
           />
         </div>
       </div>
@@ -828,7 +856,7 @@ export default function Header() {
                           className="text-primary-text h-4 w-4"
                           inline={true}
                         />
-                        {isAuthenticated && isRealtimeConnected && (
+                        {isAuthenticated && unreadCount > 0 && (
                           <UnreadNotificationBadge count={unreadCount} />
                         )}
                       </button>
@@ -883,6 +911,8 @@ export default function Header() {
                                         setIsLoadingNotifications(false);
                                         if (notificationTab === "unread") {
                                           setUnreadCount(0);
+                                          setWsHistoryNotifications([]);
+                                          wsNotificationIdRef.current = -1;
                                         }
                                       } else {
                                         toast.error(
@@ -1003,6 +1033,9 @@ export default function Header() {
                                 const urlInfo = parseNotificationUrl(
                                   notif.link,
                                 );
+                                const shouldHideViewAction =
+                                  notif.title.trim().toLowerCase() ===
+                                  "login detected";
 
                                 return (
                                   <div
@@ -1103,7 +1136,7 @@ export default function Header() {
                                       <p className="text-secondary-text mt-1 text-xs wrap-break-word whitespace-normal">
                                         {notif.description}
                                       </p>
-                                      {urlInfo.isWhitelisted ? (
+                                      {shouldHideViewAction ? null : urlInfo.isWhitelisted ? (
                                         urlInfo.isJailbreakChangelogs &&
                                         urlInfo.relativePath ? (
                                           <Button

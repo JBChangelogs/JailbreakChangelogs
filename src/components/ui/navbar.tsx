@@ -284,15 +284,15 @@ const getNotificationType = (
 export const NavbarModern = ({
   className,
   unreadCount,
-  isRealtimeConnected,
   setUnreadCount,
   wsHistoryNotifications,
+  clearWsNotifications,
 }: {
   className?: string;
   unreadCount: number;
-  isRealtimeConnected: boolean;
   setUnreadCount: React.Dispatch<React.SetStateAction<number>>;
   wsHistoryNotifications: NotificationItem[];
+  clearWsNotifications?: () => void;
 }) => {
   const isXlUp = useMediaQuery("(min-width: 1280px)");
   const [active, setActive] = useState<string | null>(null);
@@ -321,6 +321,7 @@ export const NavbarModern = ({
       setIsLoadingNotifications(true);
       const data = await fetchUnreadNotifications(page, limit);
       setNotifications(data);
+      setUnreadCount(Math.max(0, data.total || 0));
       setIsLoadingNotifications(false);
     }, 300);
 
@@ -350,6 +351,21 @@ export const NavbarModern = ({
     isAuthenticated,
     logout,
   } = useAuthContext();
+
+  React.useEffect(() => {
+    if (!isAuthenticated) return;
+
+    let cancelled = false;
+    void (async () => {
+      const data = await fetchUnreadNotifications(1, 1);
+      if (cancelled) return;
+      setUnreadCount(Math.max(0, data.total || 0));
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [isAuthenticated, setUnreadCount]);
 
   const { resolvedTheme } = useTheme();
   const userData = isAuthenticated ? authUser : null;
@@ -383,13 +399,25 @@ export const NavbarModern = ({
   };
 
   const displayNotifications = React.useMemo(() => {
-    if (!notifications) return null;
-    if (notificationTab !== "history" || wsHistoryNotifications.length === 0) {
-      return notifications;
+    const baseNotifications: NotificationHistory | null = notifications
+      ? notifications
+      : notificationTab === "unread" && wsHistoryNotifications.length > 0
+        ? {
+            items: [],
+            total: 0,
+            page: 1,
+            total_pages: 1,
+            size: 5,
+          }
+        : null;
+
+    if (!baseNotifications) return null;
+    if (notificationTab !== "unread" || wsHistoryNotifications.length === 0) {
+      return baseNotifications;
     }
 
     const apiKeys = new Set(
-      notifications.items.map(
+      baseNotifications.items.map(
         (item) => `${item.title}|${item.description}|${item.link.trim()}`,
       ),
     );
@@ -399,7 +427,7 @@ export const NavbarModern = ({
     );
 
     if (wsOnlyItems.length === 0) {
-      return notifications;
+      return baseNotifications;
     }
 
     const wsOnlyCountedItems = wsOnlyItems.filter(
@@ -407,9 +435,9 @@ export const NavbarModern = ({
     );
 
     return {
-      ...notifications,
-      items: [...wsOnlyItems, ...notifications.items],
-      total: notifications.total + wsOnlyCountedItems.length,
+      ...baseNotifications,
+      items: [...wsOnlyItems, ...baseNotifications.items],
+      total: baseNotifications.total + wsOnlyCountedItems.length,
     };
   }, [notifications, notificationTab, wsHistoryNotifications]);
 
@@ -581,7 +609,7 @@ export const NavbarModern = ({
                       className="text-primary-text h-5 w-5"
                       inline={true}
                     />
-                    {isAuthenticated && isRealtimeConnected && (
+                    {isAuthenticated && unreadCount > 0 && (
                       <UnreadNotificationBadge count={unreadCount} />
                     )}
                   </button>
@@ -628,6 +656,7 @@ export const NavbarModern = ({
                               setIsLoadingNotifications(false);
                               if (notificationTab === "unread") {
                                 setUnreadCount(0);
+                                clearWsNotifications?.();
                               }
                             } else {
                               toast.error(
@@ -744,6 +773,8 @@ export const NavbarModern = ({
                       {displayNotifications.items.map((notif) => {
                         // Check if link domain is whitelisted and extract URL info
                         const urlInfo = parseNotificationUrl(notif.link);
+                        const shouldHideViewAction =
+                          notif.title.trim().toLowerCase() === "login detected";
 
                         return (
                           <div
@@ -831,7 +862,7 @@ export const NavbarModern = ({
                             <p className="text-secondary-text mt-1 text-xs wrap-break-word whitespace-normal">
                               {notif.description}
                             </p>
-                            {urlInfo.isWhitelisted ? (
+                            {shouldHideViewAction ? null : urlInfo.isWhitelisted ? (
                               urlInfo.isJailbreakChangelogs &&
                               urlInfo.relativePath ? (
                                 <Button
