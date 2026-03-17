@@ -236,10 +236,10 @@ const TradeSidePreview = ({
                 <div className="grid grid-cols-[1fr_auto] items-center gap-3 px-3 py-2">
                   <div className="flex min-w-0 items-center gap-3">
                     <div
-                      className={`bg-tertiary-bg relative shrink-0 overflow-hidden rounded-lg border border-white/5 ${
+                      className={`bg-tertiary-bg relative hidden shrink-0 overflow-hidden rounded-lg border border-white/5 min-[376px]:block ${
                         isCustomTradeItem(item)
-                          ? "h-12 w-12"
-                          : "aspect-video w-20"
+                          ? "h-14 w-14"
+                          : "aspect-video w-28"
                       }`}
                     >
                       <Image
@@ -255,34 +255,58 @@ const TradeSidePreview = ({
                       <div className="flex flex-wrap items-center gap-2">
                         {nameNode}
                         {item.isDuped && (
-                          <span className="bg-status-error/90 inline-flex items-center rounded-full px-2 py-0.5 text-[11px] leading-none font-semibold text-white">
+                          <span className="bg-status-error/90 inline-flex h-6 items-center rounded-lg px-2.5 text-xs leading-none font-semibold text-white">
                             Duped
                           </span>
                         )}
                         {item.isOG && (
-                          <span className="inline-flex items-center rounded-full border border-white/10 bg-black/40 px-2 py-0.5 text-[11px] leading-none font-semibold text-white">
+                          <span className="inline-flex h-6 items-center rounded-lg border border-white/10 bg-black/40 px-2.5 text-xs leading-none font-semibold text-white">
                             OG
                           </span>
                         )}
                       </div>
                       <div className="text-secondary-text mt-0.5 line-clamp-1 text-xs">
-                        <span
-                          className="text-primary-text bg-tertiary-bg/40 inline-flex h-6 items-center gap-1.5 rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl"
-                          style={{
-                            borderColor: getCategoryColor(item.type),
-                          }}
-                        >
-                          {(() => {
-                            const categoryIcon = getCategoryIcon(item.type);
-                            return categoryIcon ? (
-                              <categoryIcon.Icon
-                                className="h-3 w-3"
-                                style={{ color: getCategoryColor(item.type) }}
-                              />
-                            ) : null;
-                          })()}
-                          {item.type}
-                        </span>
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span
+                            className="text-primary-text bg-tertiary-bg/40 inline-flex h-6 items-center gap-1.5 rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl"
+                            style={{
+                              borderColor: getCategoryColor(item.type),
+                            }}
+                          >
+                            {(() => {
+                              const categoryIcon = getCategoryIcon(item.type);
+                              return categoryIcon ? (
+                                <categoryIcon.Icon
+                                  className="h-3 w-3"
+                                  style={{ color: getCategoryColor(item.type) }}
+                                />
+                              ) : null;
+                            })()}
+                            {item.type}
+                          </span>
+                          {!isCustomTradeItem(item) && (
+                            <span
+                              className={`inline-flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-semibold whitespace-nowrap ${
+                                item.isDuped
+                                  ? "border-status-error/20 bg-status-error/80 text-form-button-text"
+                                  : "border-status-success/20 bg-status-success/80 text-form-button-text"
+                              }`}
+                            >
+                              {(() => {
+                                const valueLabel = item.isDuped ? "D" : "C";
+                                const rawValue = item.isDuped
+                                  ? item.duped_value
+                                  : item.cash_value;
+                                if (rawValue == null || rawValue === "N/A") {
+                                  return `${valueLabel}: N/A`;
+                                }
+                                const totalValue =
+                                  parseTradeValue(rawValue) * item.count;
+                                return `${valueLabel}: ${formatTradeValue(totalValue)}`;
+                              })()}
+                            </span>
+                          )}
+                        </div>
                       </div>
                       <div className="sr-only">
                         {item.name} ({item.type})
@@ -320,10 +344,10 @@ const TradeSidePreview = ({
 
       {hasStandardItems && (
         <div className="mt-3 flex flex-wrap items-center gap-2 text-xs sm:text-sm">
-          <span className="border-status-success/20 bg-status-success/80 text-form-button-text inline-flex items-center rounded-full border px-2 py-0.5">
+          <span className="border-status-success/20 bg-status-success/80 text-form-button-text inline-flex h-6 items-center rounded-lg border px-2.5 py-0.5">
             Cash: {formatTradeValue(cashTotal)}
           </span>
-          <span className="border-status-error/20 bg-status-error/80 text-form-button-text inline-flex items-center rounded-full border px-2 py-0.5">
+          <span className="border-status-error/20 bg-status-error/80 text-form-button-text inline-flex h-6 items-center rounded-lg border px-2.5 py-0.5">
             Duped: {formatTradeValue(dupedTotal)}
           </span>
         </div>
@@ -654,159 +678,216 @@ export default function TradeDetailsClient({
         <Breadcrumb />
         {/* Trade Card */}
         <div className="border-border-card bg-secondary-bg w-full rounded-lg border p-6">
-          <div className="bg-tertiary-bg border-border-card -mx-6 -mt-6 mb-4 flex items-center justify-between gap-3 border-b px-6 py-3">
-            <div className="flex min-w-0 items-center gap-3">
-              <div
-                className={`border-border-card bg-primary-bg relative h-10 w-10 shrink-0 overflow-hidden border ${
-                  trade.user?.premiumtype === 3 ? "rounded-sm" : "rounded-full"
-                }`}
-              >
-                {avatarSrc ? (
-                  <Image
-                    src={avatarSrc}
-                    alt={`${displayName}'s Roblox avatar`}
-                    fill
-                    className="object-cover"
-                    draggable={false}
-                    onError={() => setAvatarError(true)}
-                  />
-                ) : (
-                  <div className="flex h-full w-full items-center justify-center">
-                    <DefaultAvatar premiumType={trade.user?.premiumtype} />
+          <div className="bg-tertiary-bg border-border-card -mx-6 -mt-6 mb-4 flex flex-col gap-3 border-b px-6 py-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex min-w-0 flex-1 items-center gap-3">
+                <div
+                  className={`border-border-card bg-primary-bg relative h-10 w-10 shrink-0 overflow-hidden border ${
+                    trade.user?.premiumtype === 3
+                      ? "rounded-sm"
+                      : "rounded-full"
+                  }`}
+                >
+                  {avatarSrc ? (
+                    <Image
+                      src={avatarSrc}
+                      alt={`${displayName}'s Roblox avatar`}
+                      fill
+                      className="object-cover"
+                      draggable={false}
+                      onError={() => setAvatarError(true)}
+                    />
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center">
+                      <DefaultAvatar premiumType={trade.user?.premiumtype} />
+                    </div>
+                  )}
+                </div>
+                <div className="min-w-0">
+                  <div className="flex min-w-0 items-center gap-2">
+                    {trade.user?.id ? (
+                      <Link
+                        href={`/users/${trade.user.id}`}
+                        prefetch={false}
+                        className="text-primary-text hover:text-link truncate text-sm font-semibold transition-colors"
+                      >
+                        {displayName}
+                      </Link>
+                    ) : trade.user?.roblox_id ? (
+                      <a
+                        href={`https://www.roblox.com/users/${trade.user.roblox_id}/profile`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-primary-text hover:text-link truncate text-sm font-semibold transition-colors"
+                      >
+                        {displayName}
+                      </a>
+                    ) : (
+                      <p className="text-primary-text truncate text-sm font-semibold">
+                        {displayName}
+                      </p>
+                    )}
+                    <UserBadges
+                      usernumber={trade.user?.usernumber ?? 0}
+                      premiumType={trade.user?.premiumtype}
+                      size="sm"
+                      noContainer={true}
+                      disableTooltips={false}
+                    />
                   </div>
-                )}
+                  <p className="text-secondary-text truncate text-xs">
+                    @
+                    {trade.user?.roblox_username ||
+                      trade.user?.username ||
+                      "unknown"}
+                  </p>
+                  <div className="text-secondary-text mt-1 hidden text-xs sm:block">
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <span className="cursor-help">
+                          Created{" "}
+                          <RelativeTimeText timestamp={trade.created_at} />
+                        </span>
+                      </TooltipTrigger>
+                      <TooltipContent
+                        side="top"
+                        className="bg-primary-bg text-secondary-text border-none shadow-[var(--color-card-shadow)]"
+                      >
+                        <p>{formatCustomDate(trade.created_at)}</p>
+                      </TooltipContent>
+                    </Tooltip>
+                    <span className="mx-2">•</span>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <span className="cursor-help">
+                          Expires <RelativeTimeText timestamp={trade.expires} />
+                        </span>
+                      </TooltipTrigger>
+                      <TooltipContent
+                        side="top"
+                        className="bg-primary-bg text-secondary-text border-none shadow-[var(--color-card-shadow)]"
+                      >
+                        <p>{formatCustomDate(trade.expires)}</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </div>
+                </div>
               </div>
-              <div className="min-w-0">
-                <div className="flex min-w-0 items-center gap-2">
-                  {trade.user?.id ? (
-                    <Link
-                      href={`/users/${trade.user.id}`}
-                      prefetch={false}
-                      className="text-primary-text hover:text-link truncate text-sm font-semibold transition-colors"
+
+              <div className="flex shrink-0 items-center gap-2">
+                {trade.status === "Pending" &&
+                  trade.author !== currentUserId && (
+                    <Button
+                      type="button"
+                      onClick={() => {
+                        if (!isAuthenticated) {
+                          toast.error("Please log in to make an offer.");
+                          setLoginModal({ open: true });
+                          return;
+                        }
+                        if (offerState.status === "already_offered") return;
+                        setShowOfferDialog(true);
+                      }}
+                      disabled={
+                        offerState.status === "checking" ||
+                        offerState.status === "already_offered"
+                      }
+                      className={
+                        offerState.status === "already_offered"
+                          ? "px-2 disabled:cursor-not-allowed disabled:opacity-100 sm:px-3"
+                          : "px-2 sm:px-3"
+                      }
+                      variant={
+                        offerState.status === "already_offered"
+                          ? "success"
+                          : "default"
+                      }
+                      size="sm"
+                      aria-label={
+                        offerState.status === "checking"
+                          ? "Checking offer status"
+                          : offerState.status === "already_offered"
+                            ? "Offer sent"
+                            : "Make an offer"
+                      }
                     >
-                      {displayName}
-                    </Link>
-                  ) : trade.user?.roblox_id ? (
+                      <Icon icon="heroicons-outline:hand-raised" />
+                      <span className="hidden sm:inline">
+                        {offerState.status === "checking"
+                          ? "Checking..."
+                          : offerState.status === "already_offered"
+                            ? "Offer Sent!"
+                            : "Make Offer"}
+                      </span>
+                    </Button>
+                  )}
+                {trade.author === currentUserId && (
+                  <Button
+                    type="button"
+                    onClick={() => setShowDeleteConfirm(true)}
+                    disabled={isDeleting}
+                    variant="destructive"
+                    size="sm"
+                    className="px-2 sm:px-3"
+                    aria-label={
+                      isDeleting ? "Deleting trade ad" : "Delete trade ad"
+                    }
+                  >
+                    <Icon icon="heroicons-outline:trash" />
+                    <span className="hidden sm:inline">
+                      {isDeleting ? "Deleting..." : "Delete"}
+                    </span>
+                  </Button>
+                )}
+                {trade.message_id && (
+                  <Button
+                    asChild
+                    size="sm"
+                    className="px-2 sm:px-3"
+                    aria-label="View in Discord"
+                  >
                     <a
-                      href={`https://www.roblox.com/users/${trade.user.roblox_id}/profile`}
+                      href={`https://discord.com/channels/${discordGuildId}/${discordChannelId}/${trade.message_id}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-primary-text hover:text-link truncate text-sm font-semibold transition-colors"
                     >
-                      {displayName}
+                      <DiscordIcon className="h-4 w-4" />
+                      <span className="hidden sm:inline">View in Discord</span>
                     </a>
-                  ) : (
-                    <p className="text-primary-text truncate text-sm font-semibold">
-                      {displayName}
-                    </p>
-                  )}
-                  <UserBadges
-                    usernumber={trade.user?.usernumber ?? 0}
-                    premiumType={trade.user?.premiumtype}
-                    size="sm"
-                    noContainer={true}
-                    disableTooltips={false}
-                  />
-                </div>
-                <p className="text-secondary-text truncate text-xs">
-                  @
-                  {trade.user?.roblox_username ||
-                    trade.user?.username ||
-                    "unknown"}
-                </p>
-                <div className="text-secondary-text mt-1 text-xs">
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <span className="cursor-help">
-                        Created{" "}
-                        <RelativeTimeText timestamp={trade.created_at} />
-                      </span>
-                    </TooltipTrigger>
-                    <TooltipContent
-                      side="top"
-                      className="bg-primary-bg text-secondary-text border-none shadow-[var(--color-card-shadow)]"
-                    >
-                      <p>{formatCustomDate(trade.created_at)}</p>
-                    </TooltipContent>
-                  </Tooltip>
-                  <span className="mx-2">•</span>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <span className="cursor-help">
-                        Expires <RelativeTimeText timestamp={trade.expires} />
-                      </span>
-                    </TooltipTrigger>
-                    <TooltipContent
-                      side="top"
-                      className="bg-primary-bg text-secondary-text border-none shadow-[var(--color-card-shadow)]"
-                    >
-                      <p>{formatCustomDate(trade.expires)}</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </div>
+                  </Button>
+                )}
               </div>
             </div>
-            <div className="flex shrink-0 items-center gap-2">
-              {trade.status === "Pending" && trade.author !== currentUserId && (
-                <Button
-                  type="button"
-                  onClick={() => {
-                    if (!isAuthenticated) {
-                      toast.error("Please log in to make an offer.");
-                      setLoginModal({ open: true });
-                      return;
-                    }
-                    if (offerState.status === "already_offered") return;
-                    setShowOfferDialog(true);
-                  }}
-                  disabled={
-                    offerState.status === "checking" ||
-                    offerState.status === "already_offered"
-                  }
-                  className={
-                    offerState.status === "already_offered"
-                      ? "disabled:cursor-not-allowed disabled:opacity-100"
-                      : undefined
-                  }
-                  variant={
-                    offerState.status === "already_offered"
-                      ? "success"
-                      : "default"
-                  }
-                  size="sm"
-                >
-                  <Icon icon="heroicons-outline:hand-raised" />
-                  {offerState.status === "checking"
-                    ? "Checking..."
-                    : offerState.status === "already_offered"
-                      ? "Offer Sent!"
-                      : "Make Offer"}
-                </Button>
-              )}
-              {trade.author === currentUserId && (
-                <Button
-                  type="button"
-                  onClick={() => setShowDeleteConfirm(true)}
-                  disabled={isDeleting}
-                  variant="destructive"
-                  size="sm"
-                >
-                  <Icon icon="heroicons-outline:trash" />
-                  {isDeleting ? "Deleting..." : "Delete"}
-                </Button>
-              )}
-              {trade.message_id && (
-                <Button asChild size="sm">
-                  <a
-                    href={`https://discord.com/channels/${discordGuildId}/${discordChannelId}/${trade.message_id}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
+            <div className="text-secondary-text text-xs sm:hidden">
+              <div className="flex flex-wrap items-center gap-2">
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span className="cursor-help">
+                      Created <RelativeTimeText timestamp={trade.created_at} />
+                    </span>
+                  </TooltipTrigger>
+                  <TooltipContent
+                    side="top"
+                    className="bg-primary-bg text-secondary-text border-none shadow-[var(--color-card-shadow)]"
                   >
-                    <DiscordIcon className="h-4 w-4" />
-                    View in Discord
-                  </a>
-                </Button>
-              )}
+                    <p>{formatCustomDate(trade.created_at)}</p>
+                  </TooltipContent>
+                </Tooltip>
+                <span className="opacity-60">•</span>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span className="cursor-help">
+                      Expires <RelativeTimeText timestamp={trade.expires} />
+                    </span>
+                  </TooltipTrigger>
+                  <TooltipContent
+                    side="top"
+                    className="bg-primary-bg text-secondary-text border-none shadow-[var(--color-card-shadow)]"
+                  >
+                    <p>{formatCustomDate(trade.expires)}</p>
+                  </TooltipContent>
+                </Tooltip>
+              </div>
             </div>
           </div>
 
@@ -1038,8 +1119,8 @@ export default function TradeDetailsClient({
                               key={offer.id}
                               className="border-border-card bg-secondary-bg overflow-hidden rounded-lg border shadow-[var(--color-card-shadow)]"
                             >
-                              <div className="bg-tertiary-bg border-border-card flex flex-col gap-3 border-b px-4 py-3 sm:flex-row sm:items-start sm:justify-between">
-                                <div className="flex min-w-0 items-center gap-3">
+                              <div className="bg-tertiary-bg border-border-card flex items-start justify-between gap-3 border-b px-4 py-3">
+                                <div className="flex min-w-0 flex-1 items-center gap-3">
                                   <div
                                     className={`border-border-card bg-primary-bg relative h-10 w-10 shrink-0 overflow-hidden border ${
                                       offerUser?.premiumtype === 3
@@ -1131,7 +1212,7 @@ export default function TradeDetailsClient({
                                   </div>
                                 </div>
 
-                                <div className="flex shrink-0 items-start justify-between gap-3 sm:flex-col sm:items-end sm:gap-1">
+                                <div className="shrink-0">
                                   <span
                                     className={`text-primary-text inline-flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl ${offerStatusBadgeClassName}`}
                                   >

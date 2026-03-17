@@ -306,11 +306,11 @@ export default function ItemCard({
           href={itemUrl}
           prefetch={false}
           aria-label={`View ${item.name} details`}
-          className="absolute inset-0 z-10 rounded-lg"
+          className="absolute inset-0 z-10 rounded-[inherit]"
         />
         <div
           ref={mediaRef}
-          className="bg-tertiary-bg relative w-full overflow-hidden rounded-t-lg"
+          className="bg-tertiary-bg relative w-full overflow-hidden"
           style={{ aspectRatio: isValuesPage ? "854 / 480" : "1 / 1" }}
         >
           <div className="absolute top-2 right-2 z-10 flex gap-2">

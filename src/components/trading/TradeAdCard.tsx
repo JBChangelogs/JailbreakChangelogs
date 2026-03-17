@@ -174,10 +174,10 @@ const TradeSidePreview = ({
                 <div className="grid grid-cols-[1fr_auto] items-center gap-3 px-3 py-2">
                   <div className="flex min-w-0 items-center gap-3">
                     <div
-                      className={`bg-tertiary-bg relative shrink-0 overflow-hidden rounded-lg border border-white/5 ${
+                      className={`bg-tertiary-bg relative hidden shrink-0 overflow-hidden rounded-lg border border-white/5 min-[376px]:block ${
                         isCustomTradeItem(item)
-                          ? "h-12 w-12"
-                          : "aspect-video w-20"
+                          ? "h-14 w-14"
+                          : "aspect-video w-28"
                       }`}
                     >
                       <Image
@@ -193,34 +193,58 @@ const TradeSidePreview = ({
                       <div className="flex flex-wrap items-center gap-2">
                         {nameNode}
                         {item.isDuped && (
-                          <span className="bg-status-error/90 inline-flex items-center rounded-full px-2 py-0.5 text-[11px] leading-none font-semibold text-white">
+                          <span className="bg-status-error/90 inline-flex h-6 items-center rounded-lg px-2.5 text-xs leading-none font-semibold text-white">
                             Duped
                           </span>
                         )}
                         {item.isOG && (
-                          <span className="inline-flex items-center rounded-full border border-white/10 bg-black/40 px-2 py-0.5 text-[11px] leading-none font-semibold text-white">
+                          <span className="inline-flex h-6 items-center rounded-lg border border-white/10 bg-black/40 px-2.5 text-xs leading-none font-semibold text-white">
                             OG
                           </span>
                         )}
                       </div>
                       <div className="text-secondary-text mt-0.5 line-clamp-1 text-xs">
-                        <span
-                          className="text-primary-text bg-tertiary-bg/40 inline-flex h-6 items-center gap-1.5 rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl"
-                          style={{
-                            borderColor: getCategoryColor(item.type),
-                          }}
-                        >
-                          {(() => {
-                            const categoryIcon = getCategoryIcon(item.type);
-                            return categoryIcon ? (
-                              <categoryIcon.Icon
-                                className="h-3 w-3"
-                                style={{ color: getCategoryColor(item.type) }}
-                              />
-                            ) : null;
-                          })()}
-                          {item.type}
-                        </span>
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span
+                            className="text-primary-text bg-tertiary-bg/40 inline-flex h-6 items-center gap-1.5 rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl"
+                            style={{
+                              borderColor: getCategoryColor(item.type),
+                            }}
+                          >
+                            {(() => {
+                              const categoryIcon = getCategoryIcon(item.type);
+                              return categoryIcon ? (
+                                <categoryIcon.Icon
+                                  className="h-3 w-3"
+                                  style={{ color: getCategoryColor(item.type) }}
+                                />
+                              ) : null;
+                            })()}
+                            {item.type}
+                          </span>
+                          {!isCustomTradeItem(item) && (
+                            <span
+                              className={`inline-flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-semibold whitespace-nowrap ${
+                                item.isDuped
+                                  ? "border-status-error/20 bg-status-error/80 text-form-button-text"
+                                  : "border-status-success/20 bg-status-success/80 text-form-button-text"
+                              }`}
+                            >
+                              {(() => {
+                                const valueLabel = item.isDuped ? "D" : "C";
+                                const rawValue = item.isDuped
+                                  ? item.duped_value
+                                  : item.cash_value;
+                                if (rawValue == null || rawValue === "N/A") {
+                                  return `${valueLabel}: N/A`;
+                                }
+                                const totalValue =
+                                  parseTradeValue(rawValue) * item.count;
+                                return `${valueLabel}: ${formatTradeValue(totalValue)}`;
+                              })()}
+                            </span>
+                          )}
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -254,10 +278,10 @@ const TradeSidePreview = ({
       </div>
       {hasStandardItems && (
         <div className="mt-3 flex flex-wrap items-center gap-2 text-xs sm:text-sm">
-          <span className="border-status-success/20 bg-status-success/80 text-form-button-text inline-flex items-center rounded-full border px-2 py-0.5">
+          <span className="border-status-success/20 bg-status-success/80 text-form-button-text inline-flex h-6 items-center rounded-lg border px-2.5 py-0.5">
             Cash: {formatTradeValue(cashTotal)}
           </span>
-          <span className="border-status-error/20 bg-status-error/80 text-form-button-text inline-flex items-center rounded-full border px-2 py-0.5">
+          <span className="border-status-error/20 bg-status-error/80 text-form-button-text inline-flex h-6 items-center rounded-lg border px-2.5 py-0.5">
             Duped: {formatTradeValue(dupedTotal)}
           </span>
         </div>
