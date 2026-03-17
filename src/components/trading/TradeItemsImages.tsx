@@ -95,7 +95,7 @@ export default function TradeItemsImages({
                           />
                         )}
                         {item.count > 1 && (
-                          <span className="border-button-info/20 bg-button-info absolute top-2 right-2 rounded-full border px-2.5 py-1 text-sm text-white">
+                          <span className="absolute top-2 right-2 rounded-full border border-white/20 bg-black/70 px-2.5 py-1 text-sm leading-none font-semibold text-white shadow-sm backdrop-blur-sm [text-shadow:0_1px_2px_rgba(0,0,0,0.95),0_0_4px_rgba(0,0,0,0.85)]">
                             ×{item.count}
                           </span>
                         )}
@@ -169,7 +169,7 @@ export default function TradeItemsImages({
                           />
                         )}
                         {item.count > 1 && (
-                          <span className="border-button-info/20 bg-button-info absolute top-2 right-2 rounded-full border px-2.5 py-1 text-sm text-white">
+                          <span className="absolute top-2 right-2 rounded-full border border-white/20 bg-black/70 px-2.5 py-1 text-sm leading-none font-semibold text-white shadow-sm backdrop-blur-sm [text-shadow:0_1px_2px_rgba(0,0,0,0.95),0_0_4px_rgba(0,0,0,0.85)]">
                             ×{item.count}
                           </span>
                         )}

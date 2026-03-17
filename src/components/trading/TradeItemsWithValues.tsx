@@ -114,7 +114,7 @@ const ItemRow: React.FC<ItemRowProps> = ({ item, isFirst = false }) => {
             </div>
             <div className="mt-1 flex flex-wrap items-center gap-2">
               {item.count > 1 && (
-                <span className="bg-primary/10 border-primary/30 text-primary-text rounded-lg border px-2 py-1 text-xs font-medium">
+                <span className="bg-primary/10 border-primary/30 text-primary-text rounded-lg border px-2 py-1 text-xs font-medium [text-shadow:0_1px_2px_rgba(0,0,0,0.35)]">
                   ×{item.count}
                 </span>
               )}

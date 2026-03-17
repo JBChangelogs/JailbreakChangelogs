@@ -202,7 +202,7 @@ export const ItemGrid: React.FC<ItemGridProps> = ({
                       />
                     )}
                     {item.count > 1 && (
-                      <div className="bg-button-info/90 border-button-info text-form-button-text absolute top-1 right-1 z-5 rounded-full border px-1.5 py-0.5 text-xs">
+                      <div className="absolute top-1 right-1 z-5 rounded-full border border-white/20 bg-black/70 px-2 py-0.5 text-xs leading-none font-semibold text-white shadow-sm backdrop-blur-sm [text-shadow:0_1px_2px_rgba(0,0,0,0.95),0_0_4px_rgba(0,0,0,0.85)]">
                         ×{item.count}
                       </div>
                     )}

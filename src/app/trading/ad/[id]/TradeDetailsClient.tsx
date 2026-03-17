@@ -34,6 +34,7 @@ import {
   getTradeItemImagePath,
   isCustomTradeItem,
 } from "@/utils/tradeItems";
+import { getCategoryColor, getCategoryIcon } from "@/utils/categoryIcons";
 
 import {
   Tooltip,
@@ -183,79 +184,138 @@ const TradeSidePreview = ({
   return (
     <section className="overflow-hidden">
       <div className="mb-3 flex items-center justify-center">
-        <h3 className="text-primary-text text-sm font-semibold">{title}</h3>
+        <h3 className="text-primary-text text-sm font-semibold">
+          {title}{" "}
+          <span className="text-secondary-text font-medium">
+            ({items.length})
+          </span>
+        </h3>
       </div>
-      <div className="flex flex-wrap justify-center gap-2 sm:justify-start">
-        {previewItems.map((item) => {
-          const itemKey = `${item.id}-${item.name}-${item.type}-${item.isDuped ? "duped" : "clean"}-${item.isOG ? "og" : "regular"}`;
-          const itemHref = getTradeItemDetailHref(item);
-          const itemText = (
-            <div className="w-24 sm:w-28 lg:w-32">
-              <div className="group bg-tertiary-bg border-border-card relative h-24 w-24 overflow-hidden rounded-lg border sm:h-28 sm:w-28 lg:h-32 lg:w-32">
-                <Image
-                  src={getTradeItemImagePath(item, true)}
-                  alt={item.name}
-                  fill
-                  className="object-cover"
-                  onError={handleImageError}
-                  draggable={false}
-                />
-                {item.count > 1 && (
-                  <div className="bg-button-info/90 border-button-info text-form-button-text absolute top-1 right-1 z-5 rounded-full border px-1.5 py-0.5 text-[10px] leading-none">
-                    x{item.count}
-                  </div>
-                )}
-                {(item.isDuped || item.isOG) && (
-                  <div className="absolute bottom-1 left-1 z-5 flex gap-1">
-                    {item.isDuped && (
-                      <span className="bg-status-error/90 text-form-button-text rounded px-1.5 py-0.5 text-[10px] leading-none font-semibold">
-                        Duped
-                      </span>
-                    )}
-                    {item.isOG && (
-                      <span className="bg-tertiary-bg/80 text-primary-text rounded px-1 py-0.5 text-[9px] leading-none font-semibold">
-                        OG
-                      </span>
-                    )}
-                  </div>
-                )}
-                <div className="pointer-events-none absolute inset-0 bg-black/10 opacity-0 transition-opacity group-hover:opacity-100" />
-              </div>
-              <p className="text-primary-text mt-1 line-clamp-2 text-center text-xs leading-tight font-medium break-words whitespace-normal">
-                {item.name}
-              </p>
-              <div className="sr-only">
-                {item.name} ({item.type})
-              </div>
-            </div>
-          );
+      <div className="border-border-card bg-tertiary-bg/40 rounded-xl border">
+        <div className="border-border-card grid grid-cols-[1fr_auto] gap-3 border-b px-3 py-2 text-xs font-semibold">
+          <span className="text-secondary-text">Item</span>
+          <span className="text-secondary-text">Qty</span>
+        </div>
+        {previewItems.length > 0 ? (
+          <div className="max-h-64 overflow-y-auto">
+            {previewItems.map((item) => {
+              const itemKey = `${item.id}-${item.name}-${item.type}-${item.isDuped ? "duped" : "clean"}-${item.isOG ? "og" : "regular"}`;
+              const itemHref = getTradeItemDetailHref(item);
 
-          if (!itemHref) {
-            return (
-              <div key={itemKey} className="w-auto">
-                {itemText}
-              </div>
-            );
-          }
+              const rawNameNode = itemHref ? (
+                <Link
+                  href={itemHref}
+                  prefetch={false}
+                  className="text-primary-text hover:text-link line-clamp-1 text-sm font-semibold transition-colors"
+                >
+                  {item.name}
+                </Link>
+              ) : (
+                <span className="text-primary-text line-clamp-1 text-sm font-semibold">
+                  {item.name}
+                </span>
+              );
 
-          return (
-            <Tooltip key={itemKey} delayDuration={0}>
-              <TooltipTrigger asChild>
-                <a href={itemHref} className="inline-block w-auto">
-                  {itemText}
-                </a>
-              </TooltipTrigger>
-              <TradeItemHoverTooltip
-                side="top"
-                item={{
-                  ...item,
-                  base_name: item.base_name || item.name,
-                  name: item.name,
-                }}
-              />
-            </Tooltip>
-          );
-        })}
+              const nameNode = isCustomTradeItem(item) ? (
+                rawNameNode
+              ) : (
+                <Tooltip delayDuration={0}>
+                  <TooltipTrigger asChild>{rawNameNode}</TooltipTrigger>
+                  <TradeItemHoverTooltip
+                    side="top"
+                    item={{
+                      ...item,
+                      base_name: item.base_name || item.name,
+                      name: item.name,
+                    }}
+                  />
+                </Tooltip>
+              );
+
+              const rowContent = (
+                <div className="grid grid-cols-[1fr_auto] items-center gap-3 px-3 py-2">
+                  <div className="flex min-w-0 items-center gap-3">
+                    <div
+                      className={`bg-tertiary-bg relative shrink-0 overflow-hidden rounded-lg border border-white/5 ${
+                        isCustomTradeItem(item)
+                          ? "h-12 w-12"
+                          : "aspect-video w-20"
+                      }`}
+                    >
+                      <Image
+                        src={getTradeItemImagePath(item, true)}
+                        alt={item.name}
+                        fill
+                        className="object-cover"
+                        onError={handleImageError}
+                        draggable={false}
+                      />
+                    </div>
+                    <div className="min-w-0">
+                      <div className="flex flex-wrap items-center gap-2">
+                        {nameNode}
+                        {item.isDuped && (
+                          <span className="bg-status-error/90 inline-flex items-center rounded-full px-2 py-0.5 text-[11px] leading-none font-semibold text-white">
+                            Duped
+                          </span>
+                        )}
+                        {item.isOG && (
+                          <span className="inline-flex items-center rounded-full border border-white/10 bg-black/40 px-2 py-0.5 text-[11px] leading-none font-semibold text-white">
+                            OG
+                          </span>
+                        )}
+                      </div>
+                      <div className="text-secondary-text mt-0.5 line-clamp-1 text-xs">
+                        <span
+                          className="text-primary-text bg-tertiary-bg/40 inline-flex h-6 items-center gap-1.5 rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl"
+                          style={{
+                            borderColor: getCategoryColor(item.type),
+                          }}
+                        >
+                          {(() => {
+                            const categoryIcon = getCategoryIcon(item.type);
+                            return categoryIcon ? (
+                              <categoryIcon.Icon
+                                className="h-3 w-3"
+                                style={{ color: getCategoryColor(item.type) }}
+                              />
+                            ) : null;
+                          })()}
+                          {item.type}
+                        </span>
+                      </div>
+                      <div className="sr-only">
+                        {item.name} ({item.type})
+                      </div>
+                    </div>
+                  </div>
+                  <div className="text-primary-text text-sm font-semibold tabular-nums">
+                    ×{item.count}
+                  </div>
+                </div>
+              );
+
+              const row = (
+                <div className="hover:bg-quaternary-bg cursor-default transition-colors">
+                  {rowContent}
+                </div>
+              );
+
+              return (
+                <div
+                  key={itemKey}
+                  className="border-border-card border-b last:border-b-0"
+                >
+                  {row}
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          <p className="text-secondary-text px-3 py-3 text-xs">
+            No items listed
+          </p>
+        )}
       </div>
 
       {hasStandardItems && (
