@@ -58,6 +58,7 @@ export interface NotificationHistory {
   page: number;
   total_pages: number;
   size: number;
+  unread_count?: number;
 }
 
 import {
@@ -2533,6 +2534,7 @@ export async function fetchNotificationHistory(
         page: 1,
         total_pages: 0,
         size: 10,
+        unread_count: 0,
       };
     }
 
@@ -2547,6 +2549,7 @@ export async function fetchNotificationHistory(
       page: 1,
       total_pages: 0,
       size: 10,
+      unread_count: 0,
     };
   }
 }
@@ -2579,6 +2582,7 @@ export async function fetchUnreadNotifications(
         page: 1,
         total_pages: 0,
         size: 10,
+        unread_count: 0,
       };
     }
 
@@ -2593,6 +2597,7 @@ export async function fetchUnreadNotifications(
       page: 1,
       total_pages: 0,
       size: 10,
+      unread_count: 0,
     };
   }
 }
@@ -2619,6 +2624,34 @@ export async function markNotificationAsSeen(
   } catch (error) {
     console.error("Error marking notification as seen:", error);
     return false;
+  }
+}
+
+/**
+ * Fetch unread notification count for the current user
+ * Uses the Next.js API route which handles authentication via HttpOnly cookies
+ */
+export async function fetchUnreadNotificationCount(): Promise<number> {
+  try {
+    const response = await fetch(`/api/notifications/unread`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      cache: "no-store",
+    });
+
+    if (!response.ok) {
+      return 0;
+    }
+
+    const data = (await response.json()) as { unread_count?: unknown };
+    return typeof data.unread_count === "number"
+      ? Math.max(0, data.unread_count)
+      : 0;
+  } catch (error) {
+    console.error("Error fetching unread notification count:", error);
+    return 0;
   }
 }
 

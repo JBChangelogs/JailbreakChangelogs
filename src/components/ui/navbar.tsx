@@ -321,7 +321,11 @@ export const NavbarModern = ({
       setIsLoadingNotifications(true);
       const data = await fetchUnreadNotifications(page, limit);
       setNotifications(data);
-      setUnreadCount(Math.max(0, data.total || 0));
+      const nextUnread =
+        typeof data.unread_count === "number"
+          ? data.unread_count
+          : Math.max(0, data.total || 0);
+      setUnreadCount(Math.max(0, nextUnread));
       setIsLoadingNotifications(false);
     }, 300);
 
@@ -351,21 +355,6 @@ export const NavbarModern = ({
     isAuthenticated,
     logout,
   } = useAuthContext();
-
-  React.useEffect(() => {
-    if (!isAuthenticated) return;
-
-    let cancelled = false;
-    void (async () => {
-      const data = await fetchUnreadNotifications(1, 1);
-      if (cancelled) return;
-      setUnreadCount(Math.max(0, data.total || 0));
-    })();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [isAuthenticated, setUnreadCount]);
 
   const { resolvedTheme } = useTheme();
   const userData = isAuthenticated ? authUser : null;
@@ -837,7 +826,14 @@ export const NavbarModern = ({
                                               5,
                                             );
                                           setNotifications(data);
-                                          setUnreadCount((prev) => prev + 1);
+                                          const nextUnread =
+                                            typeof data.unread_count ===
+                                            "number"
+                                              ? data.unread_count
+                                              : Math.max(0, data.total || 0);
+                                          setUnreadCount(
+                                            Math.max(0, nextUnread),
+                                          );
                                         }
                                       }}
                                       className={`shrink-0 cursor-pointer rounded-full p-1 transition-all ${

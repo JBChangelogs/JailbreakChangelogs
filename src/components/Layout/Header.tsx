@@ -49,6 +49,7 @@ import {
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   fetchNotificationHistory,
+  fetchUnreadNotificationCount,
   fetchUnreadNotifications,
   markNotificationAsSeen,
   clearUnreadNotifications,
@@ -175,7 +176,11 @@ export default function Header() {
       setIsLoadingNotifications(true);
       const data = await fetchUnreadNotifications(page, limit);
       setNotifications(data);
-      setUnreadCount(Math.max(0, data.total || 0));
+      const nextUnread =
+        typeof data.unread_count === "number"
+          ? data.unread_count
+          : Math.max(0, data.total || 0);
+      setUnreadCount(Math.max(0, nextUnread));
       setIsLoadingNotifications(false);
     }, 300);
 
@@ -207,15 +212,15 @@ export default function Header() {
 
     let cancelled = false;
     void (async () => {
-      const data = await fetchUnreadNotifications(1, 1);
+      const count = await fetchUnreadNotificationCount();
       if (cancelled) return;
-      setUnreadCount(Math.max(0, data.total || 0));
+      setUnreadCount(count);
     })();
 
     return () => {
       cancelled = true;
     };
-  }, [isAuthenticated]);
+  }, [isAuthenticated, pathname]);
 
   useToastRuntimeRightOffset({
     enabled: !isXlUp,
@@ -330,7 +335,6 @@ export default function Header() {
       const detail = (event as CustomEvent<{ connected?: boolean }>).detail;
       const connected = detail?.connected === true;
       if (!connected) {
-        setUnreadCount(0);
         hasWsUnreadSeedRef.current = false;
       }
     };
@@ -1107,8 +1111,16 @@ export default function Header() {
                                                           5,
                                                         );
                                                       setNotifications(data);
+                                                      const nextUnread =
+                                                        typeof data.unread_count ===
+                                                        "number"
+                                                          ? data.unread_count
+                                                          : Math.max(
+                                                              0,
+                                                              data.total || 0,
+                                                            );
                                                       setUnreadCount(
-                                                        (prev) => prev + 1,
+                                                        Math.max(0, nextUnread),
                                                       );
                                                     }
                                                   }}
