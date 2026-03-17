@@ -5,11 +5,14 @@ import Image from "next/image";
 import { Icon } from "@/components/ui/IconWrapper";
 import { Button } from "@/components/ui/button";
 import { useOptimizedRealTimeRelativeDate } from "@/hooks/useSharedTimer";
-import { RobberyData } from "@/hooks/useRobberyTrackerWebSocket";
+import {
+  type RobberyData,
+  type ServerRegionData,
+} from "@/hooks/useRobberyTrackerWebSocket";
 import { useServerRegions } from "@/hooks/useServerRegions";
 import { toast } from "sonner";
-import RobberyPlayersModal from "./RobberyPlayersModal";
 import { buildRobloxServerDeepLink } from "./deepLink";
+import InlineTeamPlayers from "./InlineTeamPlayers";
 import {
   Tooltip,
   TooltipContent,
@@ -18,10 +21,17 @@ import {
 
 interface RobberyCardProps {
   robbery: RobberyData;
+  regionData?: ServerRegionData | null;
+  useExternalRegionData?: boolean;
+  onRegionData?: (jobId: string, data: ServerRegionData | null) => void;
 }
 
-export default function RobberyCard({ robbery }: RobberyCardProps) {
-  const [isPlayersModalOpen, setIsPlayersModalOpen] = useState(false);
+export default function RobberyCard({
+  robbery,
+  regionData: externalRegionData,
+  useExternalRegionData = false,
+  onRegionData,
+}: RobberyCardProps) {
   const [isJoining, setIsJoining] = useState(false);
   const [planeCountdown, setPlaneCountdown] = useState<string | null>(null);
   const [casinoCountdown, setCasinoCountdown] = useState<string | null>(null);
@@ -62,17 +72,33 @@ export default function RobberyCard({ robbery }: RobberyCardProps) {
     robbery.progress !== null &&
     robbery.progress > 0.6;
 
+  const displayedRegionData = useExternalRegionData
+    ? (externalRegionData ?? null)
+    : (robbery.region_data ?? regionData);
+
   useEffect(() => {
+    if (useExternalRegionData) return;
+
     const regionId = robbery.region_id || jobId;
-    if (regionId) {
-      fetchRegionData([regionId]).then((results) => {
-        const data = results[regionId];
-        if (data) {
-          setRegionData(data);
-        }
-      });
-    }
-  }, [jobId, robbery.region_id, fetchRegionData]);
+    if (!regionId) return;
+    if (robbery.region_data || regionData) return;
+
+    fetchRegionData([regionId]).then((results) => {
+      const data = results[regionId];
+      if (data) {
+        setRegionData(data);
+        if (jobId) onRegionData?.(jobId, data);
+      }
+    });
+  }, [
+    fetchRegionData,
+    jobId,
+    onRegionData,
+    regionData,
+    robbery.region_data,
+    robbery.region_id,
+    useExternalRegionData,
+  ]);
 
   // Handle cargo plane countdown
   useEffect(() => {
@@ -263,7 +289,7 @@ export default function RobberyCard({ robbery }: RobberyCardProps) {
     <div className="border-border-card bg-secondary-bg flex flex-col overflow-hidden rounded-xl border transition-all duration-200 hover:shadow-lg">
       <div className="flex flex-col gap-3 p-3 sm:flex-row">
         {/* Thumbnail */}
-        <div className="relative h-28 w-full shrink-0 overflow-hidden rounded-lg border border-white/5 sm:h-16 sm:w-24">
+        <div className="relative aspect-video w-full shrink-0 overflow-hidden rounded-lg border border-white/5 sm:aspect-auto sm:h-16 sm:w-24">
           <Image
             src={imageUrl}
             alt={displayName}
@@ -290,12 +316,15 @@ export default function RobberyCard({ robbery }: RobberyCardProps) {
             </span>
           </div>
 
+          {/* Players */}
+          <InlineTeamPlayers players={players} className="mt-1" />
+
           {/* Region */}
           <div className="text-secondary-text mt-1 flex items-center gap-2 text-xs">
             <Icon icon="heroicons:map-pin" className="h-4 w-4 shrink-0" />
             <span className="text-primary-text truncate font-medium">
-              {regionData ? (
-                `${regionData.city}, ${regionData.regionName}, ${regionData.country}`
+              {displayedRegionData ? (
+                `${displayedRegionData.city}, ${displayedRegionData.regionName}, ${displayedRegionData.country}`
               ) : (
                 <span className="text-secondary-text inline-flex items-center gap-2">
                   <Icon icon="svg-spinners:180-ring" className="h-3.5 w-3.5" />
@@ -362,56 +391,34 @@ export default function RobberyCard({ robbery }: RobberyCardProps) {
           )}
 
           {/* Actions */}
-          {(jobId || players.length > 0) && (
-            <div className="mt-2 grid min-w-0 grid-cols-2 gap-2">
-              {jobId ? (
-                <Button
-                  size="sm"
-                  variant="default"
-                  className={
-                    players.length > 0
-                      ? "w-full min-w-0"
-                      : "col-span-2 w-full min-w-0"
-                  }
-                  disabled={isJoining}
-                  data-umami-event="Join Server"
-                  data-umami-event-tracker={
-                    robbery.marker_name === "Mansion"
-                      ? "Mansion_Tracker"
-                      : "Robbery_Tracker"
-                  }
-                  data-umami-event-term={displayName}
-                  data-umami-event-jobid={jobId}
-                  onClick={() => {
-                    setIsJoining(true);
-                    const joiningToastId = toast.loading("Joining server...");
-                    window.setTimeout(() => {
-                      toast.dismiss(joiningToastId);
-                      setIsJoining(false);
-                    }, 5000);
-                    window.location.assign(buildRobloxServerDeepLink(jobId));
-                  }}
-                >
-                  <Icon icon="heroicons:arrow-top-right-on-square" />
-                  {isJoining ? "Joining..." : "Join"}
-                </Button>
-              ) : (
-                <div />
-              )}
-
-              {players.length > 0 ? (
-                <Button
-                  size="sm"
-                  onClick={() => setIsPlayersModalOpen(true)}
-                  variant="secondary"
-                  className="w-full min-w-0"
-                >
-                  <Icon icon="heroicons-outline:users" />
-                  {players.length} Players
-                </Button>
-              ) : (
-                <div />
-              )}
+          {jobId && (
+            <div className="mt-2">
+              <Button
+                size="sm"
+                variant="default"
+                className="w-full min-w-0"
+                disabled={isJoining}
+                data-umami-event="Join Server"
+                data-umami-event-tracker={
+                  robbery.marker_name === "Mansion"
+                    ? "Mansion_Tracker"
+                    : "Robbery_Tracker"
+                }
+                data-umami-event-term={displayName}
+                data-umami-event-jobid={jobId}
+                onClick={() => {
+                  setIsJoining(true);
+                  const joiningToastId = toast.loading("Joining server...");
+                  window.setTimeout(() => {
+                    toast.dismiss(joiningToastId);
+                    setIsJoining(false);
+                  }, 5000);
+                  window.location.assign(buildRobloxServerDeepLink(jobId));
+                }}
+              >
+                <Icon icon="heroicons:arrow-top-right-on-square" />
+                {isJoining ? "Joining..." : "Join"}
+              </Button>
             </div>
           )}
         </div>
@@ -422,15 +429,6 @@ export default function RobberyCard({ robbery }: RobberyCardProps) {
           Logged {relativeTime || "Just now"}
         </div>
       </div>
-
-      {/* Players Modal */}
-      {players.length > 0 && (
-        <RobberyPlayersModal
-          isOpen={isPlayersModalOpen}
-          onClose={() => setIsPlayersModalOpen(false)}
-          players={players}
-        />
-      )}
     </div>
   );
 }
