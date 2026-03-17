@@ -58,6 +58,7 @@
     "embla-carousel-react": "^8.6.0",
     "framer-motion": "^12.35.2",
     "geist": "^1.7.0",
+    "he": "^1.2.0",
     "lucide-react": "^0.564.0",
     "motion": "^12.35.2",
     "next": "16.1.6",

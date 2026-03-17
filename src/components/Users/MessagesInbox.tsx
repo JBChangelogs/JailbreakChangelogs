@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -39,8 +39,9 @@ import {
 import { useOptimizedRealTimeRelativeDate } from "@/hooks/useSharedTimer";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { sanitizeText } from "@/utils/sanitizeText";
-import { PUBLIC_API_URL } from "@/utils/api";
-import type { UserFlag, UserSettings } from "@/types/auth";
+import { PUBLIC_API_URL, searchUsers } from "@/utils/api";
+import { decode as decodeHtmlEntities } from "he";
+import type { UserData, UserFlag, UserSettings } from "@/types/auth";
 
 type MessageUser = {
   id: string;
@@ -184,6 +185,14 @@ function toMessageUser(raw: unknown): MessageUser | null {
   const id = data.id;
   const username = data.username;
   const avatar = data.avatar;
+  const rawSettings =
+    data.settings && typeof data.settings === "object"
+      ? (data.settings as Record<string, unknown>)
+      : null;
+  const avatarDiscord =
+    rawSettings && typeof rawSettings.avatar_discord === "number"
+      ? rawSettings.avatar_discord
+      : 1;
 
   if (
     (typeof id !== "string" && typeof id !== "number") ||
@@ -192,6 +201,11 @@ function toMessageUser(raw: unknown): MessageUser | null {
   ) {
     return null;
   }
+
+  const settings = {
+    ...(rawSettings ? (rawSettings as MessageUser["settings"]) : {}),
+    avatar_discord: avatarDiscord,
+  } satisfies MessageUser["settings"] as MessageUser["settings"];
 
   return {
     id: asId(id),
@@ -222,10 +236,7 @@ function toMessageUser(raw: unknown): MessageUser | null {
         ? (data.presence as MessageUser["presence"])
         : undefined,
     last_seen: typeof data.last_seen === "number" ? data.last_seen : null,
-    settings:
-      data.settings && typeof data.settings === "object"
-        ? (data.settings as MessageUser["settings"])
-        : undefined,
+    settings,
     flags: Array.isArray(data.flags) ? (data.flags as UserFlag[]) : undefined,
     primary_guild:
       data.primary_guild && typeof data.primary_guild === "object"
@@ -261,14 +272,13 @@ function getDayKey(timestamp?: number): string | null {
   return `${year}-${month}-${day}`;
 }
 
-function hasBannerSettingsData(user: MessageUser | null | undefined): boolean {
+function hasAvatarSettingsData(user: MessageUser | null | undefined): boolean {
   if (!user) return false;
-  const hasBannerToggle = typeof user.settings?.banner_discord === "number";
-  const hasBannerFields =
-    user.banner !== undefined ||
-    user.custom_banner !== undefined ||
-    user.accent_color !== undefined;
-  return hasBannerToggle && hasBannerFields;
+  return typeof user.settings?.avatar_discord === "number";
+}
+
+function formatMessageText(value: string): string {
+  return sanitizeText(decodeHtmlEntities(value));
 }
 
 export default function MessagesInbox() {
@@ -296,8 +306,25 @@ export default function MessagesInbox() {
   >({});
   const [currentUserEnriched, setCurrentUserEnriched] =
     useState<MessageUser | null>(null);
+  const [userSearchQuery, setUserSearchQuery] = useState("");
+  const [userSearchResults, setUserSearchResults] = useState<UserData[]>([]);
+  const [isUserSearchLoading, setIsUserSearchLoading] = useState(false);
+  const userSearchRequestIdRef = useRef(0);
+
+  const getConversationIdFromPathname = (path: string): string | null => {
+    if (!path.startsWith("/messages")) return null;
+    const parts = path.split("/").filter(Boolean);
+    if (parts.length < 2) return null;
+    try {
+      const decoded = decodeURIComponent(parts[1] ?? "").trim();
+      return decoded || null;
+    } catch {
+      return null;
+    }
+  };
+
   const [routeConversationId, setRouteConversationId] = useState<string | null>(
-    null,
+    () => getConversationIdFromPathname(pathname),
   );
   const userLookupCacheRef = useRef<Map<string, MessageUser | null>>(new Map());
   const userLookupPendingRef = useRef<Map<string, Promise<MessageUser | null>>>(
@@ -307,6 +334,26 @@ export default function MessagesInbox() {
   const wsSendFallbackTimeoutsRef = useRef<Set<number>>(new Set());
   const messagesContainerRef = useRef<HTMLDivElement | null>(null);
   const pendingOwnSendScrollRef = useRef(false);
+  const initialScrollConversationIdRef = useRef<string | null>(null);
+
+  const scrollMessagesToLatest = (behavior: ScrollBehavior) => {
+    const container = messagesContainerRef.current;
+    if (!container) return;
+
+    const scroll = () => {
+      container.scrollTo({
+        top: container.scrollHeight,
+        behavior,
+      });
+    };
+
+    // Double RAF helps when switching conversations because layout/paint can
+    // occur after state updates land, especially with large message lists.
+    requestAnimationFrame(() => {
+      scroll();
+      requestAnimationFrame(scroll);
+    });
+  };
 
   const selectedConversation = useMemo(
     () =>
@@ -357,15 +404,8 @@ export default function MessagesInbox() {
     !!selectedUser?.id && blockedByMeByUserId[selectedUser.id] === true;
 
   useEffect(() => {
-    if (!pathname.startsWith("/messages")) {
-      setRouteConversationId(null);
-      return;
-    }
-
-    const parts = pathname.split("/").filter(Boolean);
-    const idFromPath =
-      parts.length >= 2 ? decodeURIComponent(parts[1]).trim() : "";
-    setRouteConversationId(idFromPath || null);
+    const idFromPath = getConversationIdFromPathname(pathname);
+    setRouteConversationId(idFromPath);
   }, [pathname]);
 
   useEffect(() => {
@@ -445,14 +485,31 @@ export default function MessagesInbox() {
       return;
     }
 
-    requestAnimationFrame(() => {
-      container.scrollTo({
-        top: container.scrollHeight,
-        behavior: "smooth",
-      });
-    });
+    scrollMessagesToLatest("smooth");
     pendingOwnSendScrollRef.current = false;
   }, [messages, currentUserId]);
+
+  useEffect(() => {
+    initialScrollConversationIdRef.current = null;
+  }, [selectedUserId]);
+
+  useLayoutEffect(() => {
+    if (!selectedUserId || isLoadingMessages || messages.length === 0) {
+      return;
+    }
+
+    if (initialScrollConversationIdRef.current === selectedUserId) {
+      return;
+    }
+
+    const container = messagesContainerRef.current;
+    if (!container) {
+      return;
+    }
+
+    initialScrollConversationIdRef.current = selectedUserId;
+    scrollMessagesToLatest("auto");
+  }, [isLoadingMessages, messages.length, selectedUserId]);
 
   const loadUserById = async (
     id: string,
@@ -461,7 +518,7 @@ export default function MessagesInbox() {
     const forceRefresh = options?.forceRefresh === true;
     if (!forceRefresh && userLookupCacheRef.current.has(id)) {
       const cached = userLookupCacheRef.current.get(id) ?? null;
-      if (hasBannerSettingsData(cached)) {
+      if (hasAvatarSettingsData(cached)) {
         return cached;
       }
     }
@@ -530,6 +587,45 @@ export default function MessagesInbox() {
   }, [currentUserMessageUser, isAuthenticated]);
 
   useEffect(() => {
+    const trimmedQuery = userSearchQuery.trim();
+    if (!trimmedQuery) {
+      userSearchRequestIdRef.current += 1;
+      setUserSearchResults([]);
+      setIsUserSearchLoading(false);
+      return;
+    }
+
+    const requestId = (userSearchRequestIdRef.current += 1);
+    setIsUserSearchLoading(true);
+
+    const timeoutId = window.setTimeout(async () => {
+      try {
+        const resultsRaw = await searchUsers(trimmedQuery, 100);
+        if (userSearchRequestIdRef.current !== requestId) return;
+
+        const results = Array.isArray(resultsRaw) ? resultsRaw : [];
+        setUserSearchResults(
+          currentUserId
+            ? results.filter((result) => result?.id !== currentUserId)
+            : results,
+        );
+      } catch (error) {
+        if (userSearchRequestIdRef.current !== requestId) return;
+        console.error("Error searching users:", error);
+        setUserSearchResults([]);
+      } finally {
+        if (userSearchRequestIdRef.current === requestId) {
+          setIsUserSearchLoading(false);
+        }
+      }
+    }, 300);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
+  }, [currentUserId, userSearchQuery]);
+
+  useEffect(() => {
     if (!isAuthenticated || !currentUserId) {
       setConversations([]);
       setSelectedUserId(null);
@@ -546,7 +642,7 @@ export default function MessagesInbox() {
         }
 
         const response = await fetch(
-          `${PUBLIC_API_URL}/messages?nocache=true`,
+          `${PUBLIC_API_URL}/messages?nocache=true-`,
           {
             method: "GET",
             credentials: "include",
@@ -598,10 +694,10 @@ export default function MessagesInbox() {
         const allUserIds = Array.from(groupedConversations.keys());
         const missingUserIds = allUserIds.filter((id) => {
           const hinted = userHints.get(id);
-          return !hinted || !hasBannerSettingsData(hinted);
+          return !hinted || !hasAvatarSettingsData(hinted);
         });
         const loadedUsers = await Promise.all(
-          missingUserIds.map((id) => loadUserById(id, { forceRefresh: true })),
+          missingUserIds.map((id) => loadUserById(id)),
         );
 
         missingUserIds.forEach((id, index) => {
@@ -647,9 +743,7 @@ export default function MessagesInbox() {
 
         toast.error("Failed to load conversations");
       } finally {
-        if (!isCancelled) {
-          setIsLoadingConversations(false);
-        }
+        setIsLoadingConversations(false);
       }
     };
 
@@ -661,7 +755,7 @@ export default function MessagesInbox() {
   }, [currentUserId, isAuthenticated]);
 
   useEffect(() => {
-    if (!isAuthenticated || !currentUserId) {
+    if (!isAuthenticated || !currentUserId || !selectedUserId) {
       setBlockedByMeByUserId({});
       return;
     }
@@ -721,7 +815,7 @@ export default function MessagesInbox() {
     return () => {
       isCancelled = true;
     };
-  }, [currentUserId, isAuthenticated]);
+  }, [currentUserId, isAuthenticated, selectedUserId]);
 
   useEffect(() => {
     if (!isAuthenticated || !currentUserId || !routeConversationId) {
@@ -1178,16 +1272,88 @@ export default function MessagesInbox() {
           <aside
             className={cn(
               "border-border-card flex h-full min-h-0 flex-col border-b lg:border-r lg:border-b-0",
-              selectedUserId ? "hidden lg:block" : "block",
+              selectedUserId ? "hidden lg:flex" : "",
             )}
           >
             <div className="border-border-card border-b px-4 py-3">
               <p className="text-primary-text text-sm font-semibold">
-                Recent Conversations
+                {userSearchQuery.trim()
+                  ? "Search Results"
+                  : "Recent Conversations"}
               </p>
             </div>
-            <div className="min-h-0 flex-1 overflow-y-auto">
-              {isLoadingConversations ? (
+            <div className="border-border-card border-b px-4 py-3">
+              <div className="relative">
+                <Icon
+                  icon="heroicons:magnifying-glass"
+                  className="text-secondary-text pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2"
+                />
+                <input
+                  value={userSearchQuery}
+                  onChange={(event) => setUserSearchQuery(event.target.value)}
+                  placeholder="Search users to message..."
+                  className="border-border-card bg-secondary-bg text-primary-text placeholder-secondary-text focus:border-button-info w-full rounded-md border py-2 pr-9 pl-9 text-sm transition-colors outline-none"
+                  autoComplete="off"
+                  spellCheck={false}
+                  disabled={!isAuthenticated}
+                />
+                {userSearchQuery.trim() ? (
+                  <button
+                    type="button"
+                    onClick={() => setUserSearchQuery("")}
+                    className="text-secondary-text hover:text-primary-text absolute top-1/2 right-2 -translate-y-1/2 cursor-pointer transition-colors"
+                    aria-label="Clear search"
+                  >
+                    <Icon icon="heroicons:x-mark" className="h-4 w-4" />
+                  </button>
+                ) : null}
+              </div>
+            </div>
+            <div className="min-h-0 flex-1 touch-pan-y overflow-y-auto overscroll-contain">
+              {userSearchQuery.trim() ? (
+                isUserSearchLoading ? (
+                  <p className="text-secondary-text px-4 py-4 text-sm">
+                    Searching...
+                  </p>
+                ) : userSearchResults.length === 0 ? (
+                  <p className="text-secondary-text px-4 py-4 text-sm">
+                    No users found.
+                  </p>
+                ) : (
+                  userSearchResults.map((user) => (
+                    <button
+                      key={user.id}
+                      type="button"
+                      onClick={() => {
+                        setUserSearchQuery("");
+                        selectConversation(user.id);
+                      }}
+                      className="border-border-card hover:bg-tertiary-bg group flex w-full cursor-pointer items-center gap-3 border-b px-4 py-3 text-left transition-colors"
+                    >
+                      <UserAvatar
+                        userId={user.id}
+                        avatarHash={user.avatar}
+                        username={user.username}
+                        custom_avatar={user.custom_avatar}
+                        size={8}
+                        showBadge={false}
+                        settings={user.settings}
+                        premiumType={user.premiumtype}
+                      />
+                      <div className="min-w-0 flex-1">
+                        <p className="text-primary-text group-hover:text-link truncate text-sm font-medium transition-colors">
+                          {user.global_name && user.global_name !== "None"
+                            ? user.global_name
+                            : user.username}
+                        </p>
+                        <p className="text-secondary-text truncate text-[11px]">
+                          @{user.username}
+                        </p>
+                      </div>
+                    </button>
+                  ))
+                )
+              ) : isLoadingConversations ? (
                 <p className="text-secondary-text px-4 py-4 text-sm">
                   Loading conversations...
                 </p>
@@ -1204,7 +1370,7 @@ export default function MessagesInbox() {
                       onClick={() => selectConversation(conversation.user.id)}
                       aria-current={isActive ? "page" : undefined}
                       className={cn(
-                        "border-border-card hover:bg-quaternary-bg flex w-full cursor-pointer items-center gap-3 border-b border-l-2 border-l-transparent px-4 py-3 text-left transition-colors",
+                        "border-border-card hover:bg-tertiary-bg flex w-full cursor-pointer items-center gap-3 border-b border-l-2 border-l-transparent px-4 py-3 text-left transition-colors",
                         isActive ? "bg-tertiary-bg border-l-button-info" : "",
                       )}
                     >
@@ -1228,8 +1394,11 @@ export default function MessagesInbox() {
                           {getDisplayName(conversation.user)}
                         </p>
                         <p className="text-secondary-text truncate text-xs">
-                          {conversation.lastMessage?.content ??
-                            "No messages yet"}
+                          {conversation.lastMessage
+                            ? formatMessageText(
+                                conversation.lastMessage.content,
+                              )
+                            : "No messages yet"}
                         </p>
                       </div>
                     </button>
@@ -1415,7 +1584,7 @@ export default function MessagesInbox() {
                                 )}
                               </ChatEventTitle>
                               <ChatEventContent className="text-primary-text break-words whitespace-pre-wrap">
-                                {sanitizeText(message.content ?? "")}
+                                {formatMessageText(message.content ?? "")}
                               </ChatEventContent>
                             </ChatEventBody>
                           </ChatEvent>
@@ -1510,7 +1679,7 @@ export default function MessagesInbox() {
                                 )}
                               </ChatEventTitle>
                               <ChatEventContent className="text-primary-text break-words whitespace-pre-wrap">
-                                {sanitizeText(message.content ?? "")}
+                                {formatMessageText(message.content ?? "")}
                               </ChatEventContent>
                             </ChatEventBody>
                           </ChatEvent>

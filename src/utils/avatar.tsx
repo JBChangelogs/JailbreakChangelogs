@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
+import { memo, useState } from "react";
 import dynamic from "next/dynamic";
 
 const CircularProgress = dynamic(
@@ -113,7 +113,7 @@ const AvatarWrapper = ({
   );
 };
 
-export const UserAvatar = ({
+const UserAvatarImpl = ({
   userId,
   avatarHash,
   username,
@@ -265,3 +265,25 @@ export const UserAvatar = ({
     </AvatarWrapper>
   );
 };
+
+export const UserAvatar = memo(
+  UserAvatarImpl,
+  (prev, next) =>
+    prev.userId === next.userId &&
+    prev.avatarHash === next.avatarHash &&
+    prev.username === next.username &&
+    prev.size === next.size &&
+    prev.custom_avatar === next.custom_avatar &&
+    prev.isOnline === next.isOnline &&
+    prev.showBadge === next.showBadge &&
+    prev.shape === next.shape &&
+    prev.premiumType === next.premiumType &&
+    prev.className === next.className &&
+    prev.onlineRingClassName === next.onlineRingClassName &&
+    (prev.settings?.avatar_discord ?? null) ===
+      (next.settings?.avatar_discord ?? null) &&
+    (prev.settings?.hide_presence ?? null) ===
+      (next.settings?.hide_presence ?? null),
+);
+
+UserAvatar.displayName = "UserAvatar";
