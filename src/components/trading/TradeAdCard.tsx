@@ -301,15 +301,14 @@ export const TradeAdCard: React.FC<TradeAdCardProps> = ({
             </div>
             <div className="min-w-0">
               <div className="flex min-w-0 items-center gap-2">
-                {trade.user?.roblox_id ? (
-                  <a
-                    href={`https://www.roblox.com/users/${trade.user.roblox_id}/profile`}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                {trade.user?.id ? (
+                  <Link
+                    href={`/users/${trade.user.id}`}
+                    prefetch={false}
                     className="text-primary-text hover:text-link truncate text-sm font-semibold transition-colors"
                   >
                     {displayName}
-                  </a>
+                  </Link>
                 ) : (
                   <p className="text-primary-text truncate text-sm font-semibold">
                     {displayName}
@@ -338,7 +337,7 @@ export const TradeAdCard: React.FC<TradeAdCardProps> = ({
               className="px-2 sm:px-3"
               aria-label="View trade details"
             >
-              <Link href={`/trading/ad/${trade.id}`}>
+              <Link href={`/trading/ad/${trade.id}`} prefetch={false}>
                 <Icon icon="heroicons:magnifying-glass" />
                 <span className="hidden sm:inline">Details</span>
               </Link>
@@ -351,7 +350,10 @@ export const TradeAdCard: React.FC<TradeAdCardProps> = ({
                 className="px-2 sm:px-3"
                 aria-label="Make an offer"
               >
-                <Link href={`/trading/ad/${trade.id}`}>
+                <Link
+                  href={`/trading/ad/${trade.id}?makeOffer=1`}
+                  prefetch={false}
+                >
                   <Icon icon="heroicons-outline:hand-raised" />
                   <span className="hidden sm:inline">Make Offer</span>
                 </Link>

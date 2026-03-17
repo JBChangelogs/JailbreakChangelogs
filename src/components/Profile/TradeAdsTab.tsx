@@ -189,6 +189,7 @@ export default function TradeAdsTab({
           <div className="flex items-center gap-3">
             <Link
               href={`/trading/ad/${ad.id}`}
+              prefetch={false}
               className="text-primary-text hover:text-link text-xl font-bold transition-colors"
             >
               Trade Ad #{ad.id}

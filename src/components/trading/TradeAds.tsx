@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { TradeAd } from "@/types/trading";
 import { TradeItem } from "@/types/trading";
 import { TradeAdCard } from "./TradeAdCard";
@@ -44,6 +44,7 @@ export default function TradeAds({
   initialItems = [],
 }: TradeAdsProps) {
   const { user } = useAuthContext();
+  const hasAutoLoadedTradeAdsRef = useRef(false);
   const [tradeAds, setTradeAds] = useState<TradeAd[]>(initialTradeAds);
   const [isTradeAdsLoading, setIsTradeAdsLoading] = useState(
     initialTradeAds.length === 0,
@@ -336,8 +337,9 @@ export default function TradeAds({
   }, [normalizeCreatedTrade]);
 
   const refreshTradeAds = useCallback(async () => {
+    const showSkeleton = tradeAds.length === 0;
     try {
-      setIsTradeAdsLoading(true);
+      if (showSkeleton) setIsTradeAdsLoading(true);
       setError(null);
       const recentTrades = await fetchRecentTradeAds();
       setTradeAds(recentTrades);
@@ -347,7 +349,7 @@ export default function TradeAds({
     } finally {
       setIsTradeAdsLoading(false);
     }
-  }, [fetchRecentTradeAds]);
+  }, [fetchRecentTradeAds, tradeAds.length]);
 
   const userTradeAds = tradeAds.filter(
     (trade) => trade.author === currentUserId,
@@ -355,6 +357,8 @@ export default function TradeAds({
 
   useEffect(() => {
     if (initialTradeAds.length > 0) return;
+    if (hasAutoLoadedTradeAdsRef.current) return;
+    hasAutoLoadedTradeAdsRef.current = true;
     void refreshTradeAds();
   }, [initialTradeAds.length, refreshTradeAds]);
 
@@ -722,7 +726,7 @@ export default function TradeAds({
                     setSearchQuery(e.target.value);
                     setPage(1); // Reset to first page when searching
                   }}
-                  className="border-border-card bg-secondary-bg text-primary-text placeholder-secondary-text focus:border-button-info w-full rounded-lg border px-4 py-3 pr-16 transition-all duration-300 focus:outline-none"
+                  className="border-border-card bg-tertiary-bg text-primary-text placeholder-secondary-text focus:border-button-info h-[56px] w-full rounded-lg border px-4 pr-16 text-sm transition-all duration-300 focus:outline-none"
                 />
                 {/* Right side controls container */}
                 <div className="absolute top-1/2 right-3 flex -translate-y-1/2 items-center gap-2">
@@ -746,7 +750,7 @@ export default function TradeAds({
                 <DropdownMenuTrigger asChild>
                   <button
                     type="button"
-                    className="border-border-card bg-secondary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus inline-flex h-[56px] w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all duration-300 focus:ring-1 focus:outline-none sm:w-56"
+                    className="border-border-card bg-tertiary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus inline-flex h-[56px] w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all duration-300 focus:ring-1 focus:outline-none sm:w-56"
                     aria-label="Search side"
                   >
                     <span>{searchScopeLabel}</span>

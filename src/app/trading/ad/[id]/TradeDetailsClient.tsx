@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import React, { useEffect, useRef, useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
 import { CommentData } from "@/utils/api";
 import { UserData } from "@/types/auth";
 import { DiscordIcon } from "@/components/Icons/DiscordIcon";
@@ -308,6 +309,8 @@ export default function TradeDetailsClient({
   const discordChannelId = "1398359394726449352";
   const discordGuildId = "1286064050135896064";
   const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const { user, isAuthenticated, setLoginModal } = useAuthContext();
   const currentUserId = user?.id || null;
   const isOwner = !!(
@@ -320,6 +323,7 @@ export default function TradeDetailsClient({
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showOfferDialog, setShowOfferDialog] = useState(false);
   const [isNoteExpanded, setIsNoteExpanded] = useState(false);
+  const autoOfferHandledRef = useRef(false);
   const [offerState, setOfferState] = useState<{
     status: "idle" | "checking" | "can_offer" | "already_offered" | "error";
     error: string | null;
@@ -468,6 +472,70 @@ export default function TradeDetailsClient({
   }, [currentUserId, isAuthenticated, isOwner, trade.author, trade.id]);
 
   useEffect(() => {
+    const wantsAutoOffer =
+      searchParams?.get("makeOffer") === "1" ||
+      searchParams?.get("make_offer") === "1" ||
+      searchParams?.get("offer") === "1";
+
+    if (!wantsAutoOffer) return;
+    if (autoOfferHandledRef.current) return;
+
+    if (!isAuthenticated) {
+      autoOfferHandledRef.current = true;
+      toast.error("Please log in to make an offer.");
+      setLoginModal({ open: true });
+      if (pathname) {
+        window.history.replaceState(null, "", pathname);
+      }
+      return;
+    }
+
+    if (isOwner || trade.status !== "Pending") {
+      autoOfferHandledRef.current = true;
+      if (pathname) {
+        window.history.replaceState(null, "", pathname);
+      }
+      return;
+    }
+
+    if (offerState.status === "checking" || offerState.status === "idle") {
+      return;
+    }
+
+    autoOfferHandledRef.current = true;
+
+    if (offerState.status === "can_offer") {
+      setShowOfferDialog(true);
+      if (pathname) {
+        window.history.replaceState(null, "", pathname);
+      }
+      return;
+    }
+
+    if (offerState.status === "already_offered") {
+      toast.error("You already sent an offer for this trade ad.");
+      if (pathname) {
+        window.history.replaceState(null, "", pathname);
+      }
+      return;
+    }
+
+    toast.error(offerState.error || "Unable to make an offer right now.");
+    if (pathname) {
+      window.history.replaceState(null, "", pathname);
+    }
+  }, [
+    isAuthenticated,
+    isOwner,
+    offerState.error,
+    offerState.status,
+    pathname,
+    searchParams,
+    setLoginModal,
+    trade.status,
+  ]);
+
+  useEffect(() => {
     let isCancelled = false;
 
     const run = async () => {
@@ -522,12 +590,10 @@ export default function TradeDetailsClient({
 
   return (
     <>
-      <div className="container mx-auto mb-16">
-        <div className="mx-auto max-w-5xl">
-          <Breadcrumb />
-        </div>
+      <div className="container mx-auto mb-16 px-4 sm:px-6 lg:px-8">
+        <Breadcrumb />
         {/* Trade Card */}
-        <div className="border-border-card bg-secondary-bg mx-auto max-w-5xl rounded-lg border p-6">
+        <div className="border-border-card bg-secondary-bg w-full rounded-lg border p-6">
           <div className="bg-tertiary-bg border-border-card -mx-6 -mt-6 mb-4 flex items-center justify-between gap-3 border-b px-6 py-3">
             <div className="flex min-w-0 items-center gap-3">
               <div
@@ -552,7 +618,15 @@ export default function TradeDetailsClient({
               </div>
               <div className="min-w-0">
                 <div className="flex min-w-0 items-center gap-2">
-                  {trade.user?.roblox_id ? (
+                  {trade.user?.id ? (
+                    <Link
+                      href={`/users/${trade.user.id}`}
+                      prefetch={false}
+                      className="text-primary-text hover:text-link truncate text-sm font-semibold transition-colors"
+                    >
+                      {displayName}
+                    </Link>
+                  ) : trade.user?.roblox_id ? (
                     <a
                       href={`https://www.roblox.com/users/${trade.user.roblox_id}/profile`}
                       target="_blank"
@@ -734,7 +808,11 @@ export default function TradeDetailsClient({
                 </TabsList>
               </div>
 
-              <TabsContent value="offers" id="trade-tabpanel-offers">
+              <TabsContent
+                value="offers"
+                id="trade-tabpanel-offers"
+                className="mt-4"
+              >
                 {tradeOffers.status === "loaded" &&
                   tradeOffers.offers.length > 0 && (
                     <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center">
@@ -744,7 +822,7 @@ export default function TradeDetailsClient({
                           placeholder="Search offers (e.g., Torpedo)"
                           value={offersSearchQuery}
                           onChange={(e) => setOffersSearchQuery(e.target.value)}
-                          className="border-border-card bg-secondary-bg text-primary-text placeholder-secondary-text focus:border-button-info w-full rounded-lg border px-4 py-3 pr-16 transition-all duration-300 focus:outline-none"
+                          className="border-border-card bg-tertiary-bg text-primary-text placeholder-secondary-text focus:border-button-info h-[56px] w-full rounded-lg border px-4 pr-16 text-sm transition-all duration-300 focus:outline-none"
                         />
                         <div className="absolute top-1/2 right-3 flex -translate-y-1/2 items-center gap-2">
                           {offersSearchQuery && (
@@ -766,7 +844,7 @@ export default function TradeDetailsClient({
                         <DropdownMenuTrigger asChild>
                           <button
                             type="button"
-                            className="border-border-card bg-secondary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus inline-flex h-[56px] w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all duration-300 focus:ring-1 focus:outline-none sm:w-56"
+                            className="border-border-card bg-tertiary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus inline-flex h-[56px] w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all duration-300 focus:ring-1 focus:outline-none sm:w-56"
                             aria-label="Offer search side"
                           >
                             <span>{offersSearchScopeLabel}</span>
@@ -929,7 +1007,15 @@ export default function TradeDetailsClient({
 
                                   <div className="min-w-0">
                                     <div className="flex min-w-0 items-center gap-2">
-                                      {offerUser?.roblox_id ? (
+                                      {offerUser?.id ? (
+                                        <Link
+                                          href={`/users/${offerUser.id}`}
+                                          prefetch={false}
+                                          className="text-primary-text hover:text-link truncate text-sm font-semibold transition-colors"
+                                        >
+                                          {offerDisplayName}
+                                        </Link>
+                                      ) : offerUser?.roblox_id ? (
                                         <a
                                           href={`https://www.roblox.com/users/${offerUser.roblox_id}/profile`}
                                           target="_blank"
@@ -1041,7 +1127,11 @@ export default function TradeDetailsClient({
                   )}
               </TabsContent>
 
-              <TabsContent value="comments" id="trade-tabpanel-comments">
+              <TabsContent
+                value="comments"
+                id="trade-tabpanel-comments"
+                className="mt-4"
+              >
                 <h3 className="text-primary-text mb-3 text-base font-semibold">
                   Comments
                 </h3>
