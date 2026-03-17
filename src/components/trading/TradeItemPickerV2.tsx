@@ -36,6 +36,11 @@ import {
   getTradeItemIdentifier,
 } from "@/utils/tradeItems";
 import { handleImageError } from "@/utils/images";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 type TradeSide = "offering" | "requesting";
 type ItemCondition = "clean" | "duped" | "og";
@@ -56,6 +61,17 @@ interface TradeItemPickerV2Props {
 
 const ITEMS_PER_PAGE_DEFAULT = 28;
 const ITEMS_PER_PAGE_COMPACT = 20;
+
+const CUSTOM_TYPE_DESCRIPTIONS: Record<string, string> = {
+  adds: "Extra items added to sweeten the trade.",
+  overpays: "Offering more value than the other side.",
+  upgrades: "Giving multiple lower items for one higher item.",
+  downgrades: "Giving one higher item for multiple lower items.",
+  collectors: "Specifically for collectors / rare variants.",
+  rares: "Rare items or hard-to-find pieces.",
+  demands: "High-demand items (demand-focused).",
+  "og owners": "Those looking for their OG items.",
+};
 
 export default function TradeItemPickerV2({
   items,
@@ -249,39 +265,69 @@ export default function TradeItemPickerV2({
         </Tabs>
       </div>
 
+      <div className="mb-2 text-center">
+        <p className="text-secondary-text text-xs tracking-wider uppercase">
+          Custom Trade Tags
+        </p>
+        <p className="text-secondary-text/80 mt-1 text-sm">
+          Quick shortcuts like “Overpays”, “Adds”, or “Upgrades”. Hover to learn
+          what each tag means.
+        </p>
+      </div>
+
       <div className="mb-4 flex flex-wrap justify-center gap-3 md:gap-4">
         {customTypes.map((customType) => {
           const selectedOnSide =
             activeSide === "offering"
               ? selectedCustomBySide.offering.has(customType.id)
               : selectedCustomBySide.requesting.has(customType.id);
+          const description =
+            CUSTOM_TYPE_DESCRIPTIONS[customType.id] ??
+            "A custom trade tag used to describe your offer.";
 
           return (
-            <button
-              key={customType.id}
-              type="button"
-              onClick={() => onAddCustomType(customType.id, activeSide)}
-              disabled={selectedOnSide}
-              className={`border-border-card bg-secondary-bg hover:bg-tertiary-bg flex aspect-square h-20 w-20 cursor-pointer items-center justify-center rounded-lg border p-2 transition-colors md:h-24 md:w-24 ${
-                selectedOnSide ? "opacity-50" : ""
-              }`}
-              title={customType.label}
-            >
-              <div className="relative aspect-square w-full overflow-hidden rounded">
-                <Image
-                  src={getTradeItemImagePath({
-                    id: customType.id,
-                    instanceId: customType.id,
-                    type: "Custom",
-                    name: customType.label,
-                  })}
-                  alt={customType.label}
-                  fill
-                  className="object-cover"
-                  onError={handleImageError}
-                />
-              </div>
-            </button>
+            <Tooltip key={customType.id}>
+              <TooltipTrigger asChild>
+                <span className={selectedOnSide ? "cursor-not-allowed" : ""}>
+                  <button
+                    type="button"
+                    onClick={() => onAddCustomType(customType.id, activeSide)}
+                    disabled={selectedOnSide}
+                    className={`border-border-card bg-secondary-bg flex aspect-square h-20 w-20 items-center justify-center rounded-lg border p-2 transition-colors md:h-24 md:w-24 ${
+                      selectedOnSide
+                        ? "cursor-not-allowed opacity-50"
+                        : "hover:bg-tertiary-bg cursor-pointer"
+                    }`}
+                    aria-label={customType.label}
+                  >
+                    <div className="relative aspect-square w-full overflow-hidden rounded">
+                      <Image
+                        src={getTradeItemImagePath({
+                          id: customType.id,
+                          instanceId: customType.id,
+                          type: "Custom",
+                          name: customType.label,
+                        })}
+                        alt={customType.label}
+                        fill
+                        className="object-cover"
+                        onError={handleImageError}
+                      />
+                    </div>
+                  </button>
+                </span>
+              </TooltipTrigger>
+              <TooltipContent>
+                <div className="max-w-[240px]">
+                  <p className="text-primary-text text-sm font-semibold">
+                    {customType.label}
+                  </p>
+                  <p className="text-secondary-text mt-1 text-xs">
+                    {description}
+                  </p>
+                </div>
+              </TooltipContent>
+            </Tooltip>
           );
         })}
       </div>

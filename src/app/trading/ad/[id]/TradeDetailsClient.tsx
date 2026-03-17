@@ -39,6 +39,13 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface TradeDetailsClientProps {
   trade: TradeAd;
@@ -111,15 +118,6 @@ const getOfferStatusBadgeClassName = (status: unknown): string => {
   return "border-status-warning/30 bg-status-warning/20";
 };
 
-const getOfferStatusAccentClassName = (status: unknown): string => {
-  const value = typeof status === "string" ? Number(status) : status;
-
-  if (value === 1) return "border-status-success/50";
-  if (value === 2) return "border-status-error/50";
-  if (value === 3) return "border-status-error/40";
-  return "border-status-warning/50";
-};
-
 const buildTradeItemCountMap = (items: TradeItem[]): Map<string, number> => {
   const map = new Map<string, number>();
   items.forEach((item) => {
@@ -157,7 +155,7 @@ const TradeSidePreview = ({
       <div className="mb-3 flex items-center justify-center">
         <h3 className="text-primary-text text-sm font-semibold">{title}</h3>
       </div>
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap justify-center gap-2 sm:justify-start">
         {previewItems.map((item) => {
           const itemKey = `${item.id}-${item.name}-${item.type}-${item.isDuped ? "duped" : "clean"}-${item.isOG ? "og" : "regular"}`;
           const itemHref = getTradeItemDetailHref(item);
@@ -291,6 +289,11 @@ export default function TradeDetailsClient({
     offers: TradeOfferV2[];
     error: string | null;
   }>({ status: "idle", offers: [], error: null });
+  const [offersRefreshToken, setOffersRefreshToken] = useState(0);
+  const [offersSearchQuery, setOffersSearchQuery] = useState("");
+  const [offersSearchScope, setOffersSearchScope] = useState<
+    "all" | "offering" | "requesting"
+  >("all");
   const displayName =
     trade.user?.roblox_display_name ||
     trade.user?.global_name ||
@@ -323,6 +326,39 @@ export default function TradeDetailsClient({
     tradeOffers.status === "loaded"
       ? `Trade Offers (${tradeOffers.offers.length})`
       : "Trade Offers";
+
+  const offersSearchScopeLabel =
+    offersSearchScope === "all"
+      ? "Both Sides"
+      : offersSearchScope === "offering"
+        ? "Offering Only"
+        : "Requesting Only";
+
+  const visibleOffers =
+    tradeOffers.status === "loaded"
+      ? tradeOffers.offers.filter((offer) => {
+          const query = offersSearchQuery.trim().toLowerCase();
+          if (!query) return true;
+
+          const offeringNames =
+            offer.offering == null
+              ? trade.offering.map((item) => item.name)
+              : offer.offering.map((item) => item?.name ?? "");
+          const requestingNames =
+            offer.requesting == null
+              ? trade.requesting.map((item) => item.name)
+              : offer.requesting.map((item) => item?.name ?? "");
+
+          const haystacks =
+            offersSearchScope === "offering"
+              ? offeringNames
+              : offersSearchScope === "requesting"
+                ? requestingNames
+                : [...offeringNames, ...requestingNames];
+
+          return haystacks.some((name) => name.toLowerCase().includes(query));
+        })
+      : [];
 
   useEffect(() => {
     let isCancelled = false;
@@ -395,7 +431,11 @@ export default function TradeDetailsClient({
     let isCancelled = false;
 
     const run = async () => {
-      setTradeOffers({ status: "loading", offers: [], error: null });
+      setTradeOffers((prev) => ({
+        ...prev,
+        status: "loading",
+        error: null,
+      }));
 
       try {
         const offers = await fetchTradeOffers(trade.id);
@@ -419,7 +459,7 @@ export default function TradeDetailsClient({
     return () => {
       isCancelled = true;
     };
-  }, [trade.id]);
+  }, [offersRefreshToken, trade.id]);
 
   const handleDelete = async () => {
     if (!trade) return;
@@ -500,6 +540,36 @@ export default function TradeDetailsClient({
                     trade.user?.username ||
                     "unknown"}
                 </p>
+                <div className="text-secondary-text mt-1 text-xs">
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <span className="cursor-help">
+                        Created{" "}
+                        <RelativeTimeText timestamp={trade.created_at} />
+                      </span>
+                    </TooltipTrigger>
+                    <TooltipContent
+                      side="top"
+                      className="bg-primary-bg text-secondary-text border-none shadow-[var(--color-card-shadow)]"
+                    >
+                      <p>{formatCustomDate(trade.created_at)}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                  <span className="mx-2">•</span>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <span className="cursor-help">
+                        Expires <RelativeTimeText timestamp={trade.expires} />
+                      </span>
+                    </TooltipTrigger>
+                    <TooltipContent
+                      side="top"
+                      className="bg-primary-bg text-secondary-text border-none shadow-[var(--color-card-shadow)]"
+                    >
+                      <p>{formatCustomDate(trade.expires)}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </div>
               </div>
             </div>
             <div className="flex shrink-0 items-center gap-2">
@@ -566,42 +636,12 @@ export default function TradeDetailsClient({
             </div>
           </div>
 
-          <div className="text-secondary-text mb-4 text-xs">
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <span className="cursor-help">
-                  Created <RelativeTimeText timestamp={trade.created_at} />
-                </span>
-              </TooltipTrigger>
-              <TooltipContent
-                side="top"
-                className="bg-primary-bg text-secondary-text border-none shadow-[var(--color-card-shadow)]"
-              >
-                <p>{formatCustomDate(trade.created_at)}</p>
-              </TooltipContent>
-            </Tooltip>
-            <span className="ml-2">•</span>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <span className="ml-2 cursor-help">
-                  Expires <RelativeTimeText timestamp={trade.expires} />
-                </span>
-              </TooltipTrigger>
-              <TooltipContent
-                side="top"
-                className="bg-primary-bg text-secondary-text border-none shadow-[var(--color-card-shadow)]"
-              >
-                <p>{formatCustomDate(trade.expires)}</p>
-              </TooltipContent>
-            </Tooltip>
-          </div>
-
           {trade.note && (
             <div className="mb-4 w-full min-w-0">
               <p className="text-secondary-text mb-1 text-[10px] tracking-wide uppercase">
                 Trade Note
               </p>
-              <p className="text-primary-text max-w-full min-w-0 overflow-hidden text-sm break-all whitespace-pre-wrap">
+              <p className="text-primary-text max-w-full min-w-0 overflow-hidden text-sm break-words whitespace-pre-wrap">
                 {visibleNote}
                 {shouldTruncateNote && (
                   <>
@@ -626,25 +666,9 @@ export default function TradeDetailsClient({
             </div>
           )}
 
-          <div className="mt-6">
-            <div className="mb-3 flex items-center justify-between gap-2">
-              <div className="min-w-0">
-                <h3 className="text-primary-text text-base font-semibold">
-                  Original Trade
-                </h3>
-                <p className="text-secondary-text mt-0.5 text-sm">
-                  This is what the ad owner posted.
-                </p>
-              </div>
-              <span className="text-primary-text border-border-card bg-tertiary-bg/40 inline-flex h-6 shrink-0 items-center rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl">
-                Ad #{trade.id}
-              </span>
-            </div>
-
-            <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
-              <TradeSidePreview title="Offering" items={trade.offering} />
-              <TradeSidePreview title="Requesting" items={trade.requesting} />
-            </div>
+          <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
+            <TradeSidePreview title="Offering" items={trade.offering} />
+            <TradeSidePreview title="Requesting" items={trade.requesting} />
           </div>
 
           <div className="mt-8">
@@ -671,12 +695,77 @@ export default function TradeDetailsClient({
               </div>
 
               <TabsContent value="offers" id="trade-tabpanel-offers">
-                <h3 className="text-primary-text mb-3 text-base font-semibold">
-                  Trade Offers
-                </h3>
+                {tradeOffers.status === "loaded" &&
+                  tradeOffers.offers.length > 0 && (
+                    <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center">
+                      <div className="relative flex-1">
+                        <input
+                          type="text"
+                          placeholder="Search offers (e.g., Torpedo)"
+                          value={offersSearchQuery}
+                          onChange={(e) => setOffersSearchQuery(e.target.value)}
+                          className="border-border-card bg-secondary-bg text-primary-text placeholder-secondary-text focus:border-button-info w-full rounded-lg border px-4 py-3 pr-16 transition-all duration-300 focus:outline-none"
+                        />
+                        <div className="absolute top-1/2 right-3 flex -translate-y-1/2 items-center gap-2">
+                          {offersSearchQuery && (
+                            <button
+                              type="button"
+                              onClick={() => setOffersSearchQuery("")}
+                              className="text-secondary-text hover:text-primary-text cursor-pointer transition-colors"
+                              aria-label="Clear offer search"
+                            >
+                              <Icon
+                                icon="heroicons:x-mark"
+                                className="h-5 w-5"
+                              />
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <button
+                            type="button"
+                            className="border-border-card bg-secondary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus inline-flex h-[56px] w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all duration-300 focus:ring-1 focus:outline-none sm:w-56"
+                            aria-label="Offer search side"
+                          >
+                            <span>{offersSearchScopeLabel}</span>
+                            <Icon
+                              icon="heroicons:chevron-down"
+                              className="text-secondary-text h-5 w-5"
+                              inline={true}
+                            />
+                          </button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent
+                          align="start"
+                          className="w-[var(--radix-dropdown-menu-trigger-width)]"
+                        >
+                          <DropdownMenuRadioGroup
+                            value={offersSearchScope}
+                            onValueChange={(value) =>
+                              setOffersSearchScope(
+                                value as "all" | "offering" | "requesting",
+                              )
+                            }
+                          >
+                            <DropdownMenuRadioItem value="all">
+                              Both Sides
+                            </DropdownMenuRadioItem>
+                            <DropdownMenuRadioItem value="offering">
+                              Offering Only
+                            </DropdownMenuRadioItem>
+                            <DropdownMenuRadioItem value="requesting">
+                              Requesting Only
+                            </DropdownMenuRadioItem>
+                          </DropdownMenuRadioGroup>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
+                  )}
 
                 {tradeOffers.status === "loading" && (
-                  <div className="border-border-card bg-secondary-bg rounded-lg border p-4">
+                  <div className="border-border-card bg-tertiary-bg flex min-h-24 items-center justify-center rounded-lg border p-6 text-center">
                     <p className="text-secondary-text text-sm">
                       Loading offers...
                     </p>
@@ -696,172 +785,218 @@ export default function TradeDetailsClient({
 
                 {tradeOffers.status === "loaded" &&
                   tradeOffers.offers.length === 0 && (
-                    <div className="border-border-card bg-secondary-bg rounded-lg border p-6 text-center">
+                    <div className="border-border-card bg-tertiary-bg rounded-lg border p-6 text-center">
                       <p className="text-primary-text text-sm font-semibold">
                         No offers yet
                       </p>
                       <p className="text-secondary-text mt-1 text-sm">
                         Check back later to see incoming offers.
                       </p>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="secondary"
+                        className="mt-4"
+                        onClick={() =>
+                          setOffersRefreshToken((prev) => prev + 1)
+                        }
+                      >
+                        <Icon icon="heroicons-outline:arrow-path" />
+                        Refresh
+                      </Button>
                     </div>
                   )}
 
                 {tradeOffers.status === "loaded" &&
                   tradeOffers.offers.length > 0 && (
                     <div className="space-y-4">
-                      {tradeOffers.offers.map((offer) => {
-                        const offerUser = offer.user;
-                        const offerDisplayName =
-                          offerUser?.roblox_display_name ||
-                          offerUser?.global_name ||
-                          offerUser?.roblox_username ||
-                          offerUser?.username ||
-                          "Unknown User";
-                        const offerAvatarSrc =
-                          (getProxyRobloxHeadshotUrl(offerUser?.roblox_id) ||
-                            offerUser?.roblox_avatar) ??
-                          null;
-                        const offerNote = sanitizeText(offer.note || "");
-                        const offerOffering =
-                          offer.offering == null
-                            ? trade.offering
-                            : normalizeOfferItems(offer.offering);
-                        const offerRequesting =
-                          offer.requesting == null
-                            ? trade.requesting
-                            : normalizeOfferItems(offer.requesting);
-                        const requestingMatchesOriginal = tradeItemsEquivalent(
-                          offerRequesting,
-                          trade.requesting,
-                        );
-                        const requestingProvided = offer.requesting != null;
-                        const shouldShowRequestingGrid =
-                          requestingProvided && !requestingMatchesOriginal;
-                        const offerStatusLabel = getOfferStatusLabel(
-                          offer.status,
-                        );
-                        const offerStatusBadgeClassName =
-                          getOfferStatusBadgeClassName(offer.status);
-                        const offerStatusAccentClassName =
-                          getOfferStatusAccentClassName(offer.status);
+                      {visibleOffers.length === 0 ? (
+                        <div className="border-border-card bg-tertiary-bg rounded-lg border p-6 text-center">
+                          <p className="text-primary-text text-sm font-semibold">
+                            No matching offers
+                          </p>
+                          <p className="text-secondary-text mt-1 text-sm">
+                            Try a different search or switch sides.
+                          </p>
+                        </div>
+                      ) : (
+                        visibleOffers.map((offer) => {
+                          const offerUser = offer.user;
+                          const offerDisplayName =
+                            offerUser?.roblox_display_name ||
+                            offerUser?.global_name ||
+                            offerUser?.roblox_username ||
+                            offerUser?.username ||
+                            "Unknown User";
+                          const offerAvatarSrc =
+                            (getProxyRobloxHeadshotUrl(offerUser?.roblox_id) ||
+                              offerUser?.roblox_avatar) ??
+                            null;
+                          const offerNote = sanitizeText(offer.note || "");
+                          const offerOffering =
+                            offer.offering == null
+                              ? trade.offering
+                              : normalizeOfferItems(offer.offering);
+                          const offerRequesting =
+                            offer.requesting == null
+                              ? trade.requesting
+                              : normalizeOfferItems(offer.requesting);
+                          const requestingMatchesOriginal =
+                            tradeItemsEquivalent(
+                              offerRequesting,
+                              trade.requesting,
+                            );
+                          const requestingProvided = offer.requesting != null;
+                          const shouldShowRequestingGrid =
+                            requestingProvided && !requestingMatchesOriginal;
+                          const offerStatusLabel = getOfferStatusLabel(
+                            offer.status,
+                          );
+                          const offerStatusBadgeClassName =
+                            getOfferStatusBadgeClassName(offer.status);
 
-                        return (
-                          <div
-                            key={offer.id}
-                            className={`border-border-card bg-tertiary-bg rounded-lg border border-l-4 p-5 shadow-[var(--color-card-shadow)] ${offerStatusAccentClassName}`}
-                          >
-                            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                              <div className="flex min-w-0 items-center gap-3">
-                                <div
-                                  className={`border-border-card bg-primary-bg relative h-10 w-10 shrink-0 overflow-hidden border ${
-                                    offerUser?.premiumtype === 3
-                                      ? "rounded-sm"
-                                      : "rounded-full"
-                                  }`}
-                                >
-                                  {offerAvatarSrc ? (
-                                    <Image
-                                      src={offerAvatarSrc}
-                                      alt={`${offerDisplayName}'s Roblox avatar`}
-                                      fill
-                                      className="object-cover"
-                                      draggable={false}
-                                      onError={handleImageError}
-                                    />
-                                  ) : (
-                                    <div className="flex h-full w-full items-center justify-center">
-                                      <DefaultAvatar
+                          return (
+                            <div
+                              key={offer.id}
+                              className="border-border-card bg-secondary-bg overflow-hidden rounded-lg border shadow-[var(--color-card-shadow)]"
+                            >
+                              <div className="bg-tertiary-bg border-border-card flex flex-col gap-3 border-b px-4 py-3 sm:flex-row sm:items-start sm:justify-between">
+                                <div className="flex min-w-0 items-center gap-3">
+                                  <div
+                                    className={`border-border-card bg-primary-bg relative h-10 w-10 shrink-0 overflow-hidden border ${
+                                      offerUser?.premiumtype === 3
+                                        ? "rounded-sm"
+                                        : "rounded-full"
+                                    }`}
+                                  >
+                                    {offerAvatarSrc ? (
+                                      <Image
+                                        src={offerAvatarSrc}
+                                        alt={`${offerDisplayName}'s Roblox avatar`}
+                                        fill
+                                        className="object-cover"
+                                        draggable={false}
+                                        onError={handleImageError}
+                                      />
+                                    ) : (
+                                      <div className="flex h-full w-full items-center justify-center">
+                                        <DefaultAvatar
+                                          premiumType={offerUser?.premiumtype}
+                                        />
+                                      </div>
+                                    )}
+                                  </div>
+
+                                  <div className="min-w-0">
+                                    <div className="flex min-w-0 items-center gap-2">
+                                      {offerUser?.roblox_id ? (
+                                        <a
+                                          href={`https://www.roblox.com/users/${offerUser.roblox_id}/profile`}
+                                          target="_blank"
+                                          rel="noopener noreferrer"
+                                          className="text-primary-text hover:text-link truncate text-sm font-semibold transition-colors"
+                                        >
+                                          {offerDisplayName}
+                                        </a>
+                                      ) : (
+                                        <p className="text-primary-text truncate text-sm font-semibold">
+                                          {offerDisplayName}
+                                        </p>
+                                      )}
+                                      <UserBadges
+                                        usernumber={offerUser?.usernumber ?? 0}
                                         premiumType={offerUser?.premiumtype}
+                                        size="sm"
+                                        noContainer={true}
+                                        disableTooltips={false}
                                       />
                                     </div>
-                                  )}
-                                </div>
-
-                                <div className="min-w-0">
-                                  {offerUser?.roblox_id ? (
-                                    <a
-                                      href={`https://www.roblox.com/users/${offerUser.roblox_id}/profile`}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      className="text-primary-text hover:text-link truncate text-sm font-semibold transition-colors"
-                                    >
-                                      {offerDisplayName}
-                                    </a>
-                                  ) : (
-                                    <p className="text-primary-text truncate text-sm font-semibold">
-                                      {offerDisplayName}
+                                    <p className="text-secondary-text truncate text-xs">
+                                      @
+                                      {offerUser?.roblox_username ||
+                                        offerUser?.username ||
+                                        "unknown"}
                                     </p>
-                                  )}
-                                  <p className="text-secondary-text truncate text-xs">
-                                    @
-                                    {offerUser?.roblox_username ||
-                                      offerUser?.username ||
-                                      "unknown"}
-                                  </p>
+                                    <div className="text-secondary-text mt-1 text-xs">
+                                      <Tooltip>
+                                        <TooltipTrigger asChild>
+                                          <span className="cursor-help">
+                                            Offered{" "}
+                                            <RelativeTimeText
+                                              timestamp={offer.created_at}
+                                              fallback="unknown"
+                                            />
+                                          </span>
+                                        </TooltipTrigger>
+                                        <TooltipContent
+                                          side="top"
+                                          className="bg-primary-bg text-secondary-text border-none shadow-[var(--color-card-shadow)]"
+                                        >
+                                          <p>
+                                            {offer.created_at
+                                              ? formatCustomDate(
+                                                  offer.created_at,
+                                                )
+                                              : "Unknown"}
+                                          </p>
+                                        </TooltipContent>
+                                      </Tooltip>
+                                    </div>
+                                  </div>
                                 </div>
-                              </div>
 
-                              <div className="flex shrink-0 flex-col items-start gap-1 sm:items-end">
-                                <div className="text-secondary-text text-xs">
+                                <div className="flex shrink-0 items-start justify-between gap-3 sm:flex-col sm:items-end sm:gap-1">
                                   <span
                                     className={`text-primary-text inline-flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl ${offerStatusBadgeClassName}`}
                                   >
                                     {offerStatusLabel}
                                   </span>
                                 </div>
-                                <div className="text-secondary-text text-xs">
-                                  <span>
-                                    <RelativeTimeText
-                                      timestamp={offer.created_at}
-                                      fallback="unknown"
+                              </div>
+
+                              <div className="p-4">
+                                <div>
+                                  <p className="text-secondary-text mb-1 text-[10px] tracking-wide uppercase">
+                                    Offer Note
+                                  </p>
+                                  {offerNote ? (
+                                    <p className="text-primary-text text-sm break-words whitespace-pre-wrap">
+                                      {offerNote}
+                                    </p>
+                                  ) : (
+                                    <p className="text-secondary-text text-sm">
+                                      No note provided.
+                                    </p>
+                                  )}
+                                </div>
+
+                                <div className="mt-4 grid grid-cols-1 gap-3 lg:grid-cols-2">
+                                  <TradeSidePreview
+                                    title="Offering"
+                                    items={offerOffering}
+                                  />
+
+                                  {shouldShowRequestingGrid ? (
+                                    <TradeSidePreview
+                                      title="Requesting"
+                                      items={offerRequesting}
                                     />
-                                  </span>
+                                  ) : (
+                                    <div className="border-border-card bg-tertiary-bg/40 rounded-lg border p-4">
+                                      <p className="text-primary-text text-sm font-semibold">
+                                        Requesting
+                                      </p>
+                                      <p className="text-secondary-text mt-1 text-sm">
+                                        As requested in the original ad.
+                                      </p>
+                                    </div>
+                                  )}
                                 </div>
                               </div>
                             </div>
-
-                            {offerNote ? (
-                              <div className="mt-3">
-                                <p className="text-secondary-text mb-1 text-[10px] tracking-wide uppercase">
-                                  Note
-                                </p>
-                                <p className="text-primary-text text-sm break-words whitespace-pre-wrap">
-                                  {offerNote}
-                                </p>
-                              </div>
-                            ) : (
-                              <p className="text-secondary-text mt-3 text-sm">
-                                No note provided.
-                              </p>
-                            )}
-
-                            <div className="mt-4 grid grid-cols-1 gap-3 lg:grid-cols-2">
-                              <div className="space-y-3">
-                                <TradeSidePreview
-                                  title="Offering"
-                                  items={offerOffering}
-                                />
-                              </div>
-
-                              {shouldShowRequestingGrid ? (
-                                <TradeSidePreview
-                                  title="Requesting"
-                                  items={offerRequesting}
-                                />
-                              ) : (
-                                <div className="border-border-card bg-secondary-bg/40 rounded-lg border p-4">
-                                  <p className="text-primary-text text-sm font-semibold">
-                                    Requesting
-                                  </p>
-                                  <p className="text-secondary-text mt-1 text-sm">
-                                    As requested in the original ad.
-                                  </p>
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        );
-                      })}
+                          );
+                        })
+                      )}
                     </div>
                   )}
               </TabsContent>
@@ -900,9 +1035,10 @@ export default function TradeDetailsClient({
           onClose={() => setShowOfferDialog(false)}
           trade={trade}
           items={items}
-          onOfferSent={() =>
-            setOfferState({ status: "already_offered", error: null })
-          }
+          onOfferSent={() => {
+            setOfferState({ status: "already_offered", error: null });
+            setOffersRefreshToken((prev) => prev + 1);
+          }}
         />
       </div>
     </>

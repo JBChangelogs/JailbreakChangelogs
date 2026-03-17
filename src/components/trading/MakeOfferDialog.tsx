@@ -450,6 +450,10 @@ export function MakeOfferDialog({
                     <p className="text-secondary-text mb-3 text-sm font-medium">
                       Your Offering ({offeringItems.length}/8)
                     </p>
+                    <p className="text-secondary-text/70 mb-3 text-xs">
+                      Pre-filled with what the trade owner is requesting. Edit
+                      if you want to offer different items.
+                    </p>
                     <ItemGrid
                       items={offeringItems}
                       title="Offering"

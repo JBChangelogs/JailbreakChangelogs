@@ -17,9 +17,8 @@ const defaultClassNames: NonNullable<
   icon: "mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center text-secondary-text [&>svg]:h-5 [&>svg]:w-5",
   loader: "text-secondary-text [--size:16px]",
   actionButton:
-    "w-fit bg-button-info text-form-button-text hover:bg-button-info-hover",
-  cancelButton:
-    "w-fit border border-border-card bg-tertiary-bg text-primary-text hover:bg-quaternary-bg",
+    "w-fit cursor-pointer rounded-lg bg-button-info px-3 py-1.5 text-xs font-semibold text-form-button-text hover:bg-button-info-hover",
+  cancelButton: "hidden",
   closeButton:
     "bg-secondary-bg text-secondary-text border border-border-card hover:bg-quaternary-bg hover:text-primary-text",
   success:
