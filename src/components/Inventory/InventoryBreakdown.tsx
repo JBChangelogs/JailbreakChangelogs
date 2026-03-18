@@ -1,11 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { getCategoryColor, getCategoryIcon } from "@/utils/categoryIcons";
 import { UserNetworthData } from "@/utils/api";
 import { Icon } from "@/components/ui/IconWrapper";
-import { Checkbox } from "@/components/ui/checkbox";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -148,18 +147,16 @@ export default function InventoryBreakdown({
   const includeUntradable = true;
   const [missingSearch, setMissingSearch] = useState("");
   const [missingTypeFilter, setMissingTypeFilter] = useState<string>("all");
-  const [excludedSearch, setExcludedSearch] = useState("");
-  const [excludedTypeFilter, setExcludedTypeFilter] = useState<string>("all");
-  const [manualOwnedUnverifiableIds, setManualOwnedUnverifiableIds] = useState<
-    number[]
-  >([]);
-  const unverifiableSectionRef = useRef<HTMLDivElement>(null);
-  const markAllUnverifiableRef = useRef<HTMLButtonElement>(null);
+  const [unverifiableSearch, setUnverifiableSearch] = useState("");
+  const [unverifiableTypeFilter, setUnverifiableTypeFilter] =
+    useState<string>("all");
 
   const eligibleItems = useMemo(() => {
     if (includeUntradable) return itemsData;
     return itemsData.filter((item) => Boolean(item.tradable));
   }, [itemsData, includeUntradable]);
+
+  const unverifiableSectionRef = useRef<HTMLDivElement>(null);
 
   const unverifiableItemsAll = useMemo(() => {
     const unverifiable = eligibleItems
@@ -180,71 +177,17 @@ export default function InventoryBreakdown({
     return unverifiable;
   }, [eligibleItems]);
 
-  const manualOwnedUnverifiableSet = useMemo(() => {
-    return new Set(manualOwnedUnverifiableIds);
-  }, [manualOwnedUnverifiableIds]);
-
-  const unverifiableOwnedCount = useMemo(() => {
-    return unverifiableItemsAll.reduce((count, item) => {
-      return manualOwnedUnverifiableSet.has(item.id) ? count + 1 : count;
+  const unverifiableCount = useMemo(() => {
+    return eligibleItems.reduce((count, item) => {
+      return UNVERIFIABLE_COLLECTION_ITEM_IDS.has(item.id) ? count + 1 : count;
     }, 0);
-  }, [manualOwnedUnverifiableSet, unverifiableItemsAll]);
-
-  useEffect(() => {
-    if (!inventoryData.user_id) return;
-    const storageKey = `jbcl:inventories:${inventoryData.user_id}:unverifiableOwned`;
-    let cancelled = false;
-    const schedule =
-      typeof queueMicrotask === "function"
-        ? queueMicrotask
-        : (cb: () => void) => Promise.resolve().then(cb);
-
-    let nextIds: number[] = [];
-    try {
-      const raw = window.localStorage.getItem(storageKey);
-      if (raw) {
-        const parsed = JSON.parse(raw) as unknown;
-        if (Array.isArray(parsed)) {
-          const ids = parsed
-            .map((v) => Number(v))
-            .filter((v) => Number.isFinite(v))
-            .map((v) => Math.trunc(v))
-            .filter((v) => v > 0);
-          nextIds = Array.from(new Set(ids));
-        }
-      }
-    } catch {
-      nextIds = [];
-    }
-
-    schedule(() => {
-      if (cancelled) return;
-      setManualOwnedUnverifiableIds(nextIds);
-    });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [inventoryData.user_id]);
-
-  useEffect(() => {
-    if (!inventoryData.user_id) return;
-    const storageKey = `jbcl:inventories:${inventoryData.user_id}:unverifiableOwned`;
-    try {
-      window.localStorage.setItem(
-        storageKey,
-        JSON.stringify(manualOwnedUnverifiableIds),
-      );
-    } catch {
-      // Ignore storage quota / access issues
-    }
-  }, [inventoryData.user_id, manualOwnedUnverifiableIds]);
+  }, [eligibleItems]);
 
   const effectiveOwnedItemIds = useMemo(() => {
-    const merged = new Set<number>(ownedItemIds);
-    manualOwnedUnverifiableIds.forEach((id) => merged.add(id));
-    return merged;
-  }, [manualOwnedUnverifiableIds, ownedItemIds]);
+    const ids = new Set<number>(ownedItemIds);
+    UNVERIFIABLE_COLLECTION_ITEM_IDS.forEach((id) => ids.add(id));
+    return ids;
+  }, [ownedItemIds]);
 
   const typeProgress = useMemo(() => {
     const byType = new Map<string, Item[]>();
@@ -356,7 +299,7 @@ export default function InventoryBreakdown({
     });
   }, [missingItemsAll, missingSearch, missingTypeFilter]);
 
-  const excludedTypeOptions = useMemo(() => {
+  const unverifiableTypeOptions = useMemo(() => {
     const seen = new Set<string>();
     const uniqueTypes: string[] = [];
     unverifiableItemsAll.forEach((entry) => {
@@ -376,7 +319,7 @@ export default function InventoryBreakdown({
   }, [unverifiableItemsAll]);
 
   const filteredUnverifiableItems = useMemo(() => {
-    const typeFilter = excludedTypeFilter.trim().toLowerCase();
+    const typeFilter = unverifiableTypeFilter.trim().toLowerCase();
     const typeFiltered =
       typeFilter === "all"
         ? unverifiableItemsAll
@@ -384,7 +327,7 @@ export default function InventoryBreakdown({
             (item) => item.type.toLowerCase() === typeFilter,
           );
 
-    const query = excludedSearch.trim().toLowerCase();
+    const query = unverifiableSearch.trim().toLowerCase();
     if (!query) return typeFiltered;
     return typeFiltered.filter((item) => {
       return (
@@ -392,7 +335,7 @@ export default function InventoryBreakdown({
         item.type.toLowerCase().includes(query)
       );
     });
-  }, [excludedSearch, excludedTypeFilter, unverifiableItemsAll]);
+  }, [unverifiableItemsAll, unverifiableSearch, unverifiableTypeFilter]);
 
   const scrollToUnverifiableSection = () => {
     const target = unverifiableSectionRef.current;
@@ -554,32 +497,19 @@ export default function InventoryBreakdown({
               </div>
             ) : (
               <div className="space-y-4">
-                {unverifiableItemsAll.length > 0 && (
+                {unverifiableCount > 0 && (
                   <div className="text-secondary-text text-xs">
                     Unverifiable:{" "}
                     <span className="text-primary-text font-mono font-semibold tabular-nums">
-                      {formatInventoryCount(unverifiableItemsAll.length)}
+                      {formatInventoryCount(unverifiableCount)}
                     </span>{" "}
-                    (marked owned:{" "}
-                    <span className="text-primary-text font-mono font-semibold tabular-nums">
-                      {formatInventoryCount(unverifiableOwnedCount)}
-                    </span>
-                    , unmarked:{" "}
-                    <span className="text-primary-text font-mono font-semibold tabular-nums">
-                      {formatInventoryCount(
-                        Math.max(
-                          0,
-                          unverifiableItemsAll.length - unverifiableOwnedCount,
-                        ),
-                      )}
-                    </span>
-                    ). Hidden from missing list.
+                    assumed owned. Hidden from missing list.
                     <button
                       type="button"
                       onClick={scrollToUnverifiableSection}
                       className="text-link hover:text-link-hover ml-2 cursor-pointer underline underline-offset-2"
                     >
-                      Manage
+                      View list
                     </button>
                   </div>
                 )}
@@ -739,17 +669,12 @@ export default function InventoryBreakdown({
                       {formatInventoryCount(missingItemsAll.length)})
                     </div>
                   </div>
-                  {unverifiableItemsAll.length > 0 &&
-                    unverifiableItemsAll.length - unverifiableOwnedCount >
-                      0 && (
-                      <div className="text-secondary-text mb-2 text-xs">
-                        +{" "}
-                        {formatInventoryCount(
-                          unverifiableItemsAll.length - unverifiableOwnedCount,
-                        )}{" "}
-                        unverifiable items unmarked (counted as missing)
-                      </div>
-                    )}
+                  {unverifiableCount > 0 && (
+                    <div className="text-secondary-text mb-2 text-xs">
+                      {formatInventoryCount(unverifiableCount)} unverifiable
+                      items are assumed owned and excluded from this list.
+                    </div>
+                  )}
                   <div className="mb-2">
                     <div className="flex w-full flex-col gap-4 sm:flex-row">
                       <div className="relative w-full sm:w-2/3">
@@ -902,68 +827,20 @@ export default function InventoryBreakdown({
                       Unverifiable Items (
                       {formatInventoryCount(unverifiableItemsAll.length)})
                     </div>
-                    <div className="mb-2 flex items-center justify-between gap-3">
-                      <div className="text-secondary-text text-xs">
-                        Mark items you own (saved in this browser). Marked items
-                        count toward completion.
-                      </div>
-                      <label
-                        className="text-secondary-text flex cursor-pointer items-center gap-2 text-xs font-medium select-none"
-                        htmlFor="unverifiable-mark-all"
-                      >
-                        <span>Mark all owned</span>
-                        <Checkbox
-                          id="unverifiable-mark-all"
-                          ref={markAllUnverifiableRef}
-                          checked={
-                            unverifiableItemsAll.length > 0 &&
-                            unverifiableOwnedCount ===
-                              unverifiableItemsAll.length
-                          }
-                          onCheckedChange={() => {
-                            const beforeTop =
-                              markAllUnverifiableRef.current?.getBoundingClientRect()
-                                .top;
-                            const allIds = unverifiableItemsAll.map(
-                              (item) => item.id,
-                            );
-                            const isAllMarked =
-                              unverifiableOwnedCount ===
-                                unverifiableItemsAll.length &&
-                              unverifiableItemsAll.length > 0;
-                            setManualOwnedUnverifiableIds(
-                              isAllMarked ? [] : allIds,
-                            );
-                            requestAnimationFrame(() => {
-                              const afterTop =
-                                markAllUnverifiableRef.current?.getBoundingClientRect()
-                                  .top;
-                              if (
-                                typeof beforeTop === "number" &&
-                                typeof afterTop === "number"
-                              ) {
-                                const delta = afterTop - beforeTop;
-                                if (Math.abs(delta) > 0.5) {
-                                  window.scrollBy({ top: delta });
-                                }
-                              }
-                            });
-                          }}
-                          aria-label="Mark all unverifiable items as owned"
-                        />
-                      </label>
+                    <div className="text-secondary-text mb-2 text-xs">
+                      Not returned by scans; assumed owned for completion and
+                      hidden from the missing list.
                     </div>
-                    <p className="text-secondary-text mb-2 text-xs">
-                      Unverifiable items don&apos;t show up in the missing list.
-                    </p>
                     <div className="mb-2">
                       <div className="flex w-full flex-col gap-4 sm:flex-row">
                         <div className="relative w-full sm:w-2/3">
                           <input
                             type="text"
                             placeholder="Search unverifiable items..."
-                            value={excludedSearch}
-                            onChange={(e) => setExcludedSearch(e.target.value)}
+                            value={unverifiableSearch}
+                            onChange={(e) =>
+                              setUnverifiableSearch(e.target.value)
+                            }
                             maxLength={80}
                             className="border-border-card bg-secondary-bg text-primary-text placeholder-secondary-text focus:border-button-info w-full rounded-lg border px-3 py-2 pr-9 pl-9 text-sm transition-all duration-300 focus:outline-none"
                           />
@@ -971,10 +848,10 @@ export default function InventoryBreakdown({
                             icon="heroicons:magnifying-glass"
                             className="text-secondary-text absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2"
                           />
-                          {excludedSearch && (
+                          {unverifiableSearch && (
                             <button
                               type="button"
-                              onClick={() => setExcludedSearch("")}
+                              onClick={() => setUnverifiableSearch("")}
                               className="text-secondary-text hover:text-primary-text absolute top-1/2 right-2 h-6 w-6 -translate-y-1/2 cursor-pointer"
                               aria-label="Clear unverifiable item search"
                             >
@@ -991,9 +868,9 @@ export default function InventoryBreakdown({
                                 aria-label="Filter unverifiable items by type"
                               >
                                 <span className="truncate">
-                                  {excludedTypeFilter === "all"
+                                  {unverifiableTypeFilter === "all"
                                     ? "All types"
-                                    : excludedTypeFilter}
+                                    : unverifiableTypeFilter}
                                 </span>
                                 <Icon
                                   icon="heroicons:chevron-down"
@@ -1007,9 +884,9 @@ export default function InventoryBreakdown({
                               className="border-border-card bg-secondary-bg text-primary-text scrollbar-thin max-h-[280px] w-[var(--radix-popper-anchor-width)] min-w-[14rem] overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
                             >
                               <DropdownMenuRadioGroup
-                                value={excludedTypeFilter}
+                                value={unverifiableTypeFilter}
                                 onValueChange={(value) =>
-                                  setExcludedTypeFilter(value)
+                                  setUnverifiableTypeFilter(value)
                                 }
                               >
                                 <DropdownMenuRadioItem
@@ -1018,7 +895,7 @@ export default function InventoryBreakdown({
                                 >
                                   All types
                                 </DropdownMenuRadioItem>
-                                {excludedTypeOptions.map((type) => (
+                                {unverifiableTypeOptions.map((type) => (
                                   <DropdownMenuRadioItem
                                     key={type}
                                     value={type}
@@ -1032,8 +909,8 @@ export default function InventoryBreakdown({
                           </DropdownMenu>
                         </div>
                       </div>
-                      {(excludedSearch.trim() ||
-                        excludedTypeFilter !== "all") && (
+                      {(unverifiableSearch.trim() ||
+                        unverifiableTypeFilter !== "all") && (
                         <div className="text-secondary-text mt-1 text-xs">
                           Showing{" "}
                           {formatInventoryCount(
@@ -1056,23 +933,6 @@ export default function InventoryBreakdown({
                               className="flex flex-col gap-2 py-2 sm:flex-row sm:items-center sm:gap-3"
                             >
                               <div className="flex min-w-0 items-center gap-3">
-                                <Checkbox
-                                  checked={manualOwnedUnverifiableSet.has(
-                                    item.id,
-                                  )}
-                                  onCheckedChange={(checked) => {
-                                    const nextChecked =
-                                      checked === true ||
-                                      checked === "indeterminate";
-                                    setManualOwnedUnverifiableIds((prev) => {
-                                      const next = new Set(prev);
-                                      if (nextChecked) next.add(item.id);
-                                      else next.delete(item.id);
-                                      return Array.from(next);
-                                    });
-                                  }}
-                                  aria-label={`Mark ${item.name} as owned`}
-                                />
                                 <span className="text-secondary-text w-10 shrink-0 text-right font-mono text-xs font-medium tabular-nums">
                                   {idx + 1}.
                                 </span>
