@@ -13,6 +13,8 @@ import { INVENTORY_API_URL } from "@/utils/api";
 import { toast } from "sonner";
 import { buildRobloxServerDeepLink } from "./deepLink";
 import InlineTeamPlayers from "./InlineTeamPlayers";
+import { useRobberyTrackerLastJoinedServer } from "@/hooks/useRobberyTrackerLastJoinedServer";
+import { cn } from "@/lib/utils";
 
 interface AirdropCardProps {
   airdrop: AirdropData;
@@ -47,6 +49,19 @@ export default function AirdropCard({ airdrop }: AirdropCardProps) {
   // Create unique ID for timer subscription
   const jobId = airdrop.server?.job_id || "";
   const timerId = `airdrop-${airdrop.location}-${airdrop.color}-${jobId}-${airdrop.timestamp}`;
+  const { lastJoined, setLastJoined } = useRobberyTrackerLastJoinedServer();
+  const isLastJoined = Boolean(
+    jobId &&
+    lastJoined?.kind === "airdrop" &&
+    lastJoined.jobId === jobId &&
+    lastJoined.location === airdrop.location &&
+    lastJoined.color === airdrop.color,
+  );
+  const showLastJoinedState = isLastJoined && !isJoining;
+  const lastJoinedRelative = useOptimizedRealTimeRelativeDate(
+    isLastJoined ? lastJoined?.joinedAt : null,
+    `airdrop-last-joined-${jobId || "unknown"}-${airdrop.location}-${airdrop.color}`,
+  );
 
   // Use real-time updating relative timestamp
   const relativeTime = useOptimizedRealTimeRelativeDate(
@@ -149,10 +164,15 @@ export default function AirdropCard({ airdrop }: AirdropCardProps) {
   const mapImageUrl = `${INVENTORY_API_URL}/map/airdrop?x=${airdrop.x}&z=${airdrop.z}`;
 
   return (
-    <div className="border-border-card bg-secondary-bg flex flex-col overflow-hidden rounded-xl border transition-all duration-200 hover:shadow-lg">
+    <div
+      className={cn(
+        "border-border-card bg-secondary-bg flex flex-col overflow-hidden rounded-xl border transition-all duration-200 hover:shadow-lg",
+        showLastJoinedState && "bg-tertiary-bg",
+      )}
+    >
       <div className="flex flex-col gap-3 p-3 sm:flex-row">
         {/* Thumbnail */}
-        <div className="relative h-28 w-full shrink-0 overflow-hidden rounded-lg border border-white/5 sm:h-16 sm:w-24">
+        <div className="relative aspect-video w-full shrink-0 overflow-hidden rounded-lg border border-white/5 sm:aspect-auto sm:h-16 sm:w-24">
           <Image
             src={imageUrl}
             alt={`${airdrop.color} Airdrop at ${airdrop.location}`}
@@ -209,48 +229,67 @@ export default function AirdropCard({ airdrop }: AirdropCardProps) {
           </div>
 
           {/* Actions */}
-          <div className="mt-2 grid min-w-0 grid-cols-2 gap-2">
-            {jobId ? (
-              <Button
-                size="sm"
-                variant="default"
-                className="w-full min-w-0"
-                disabled={isJoining}
-                data-umami-event="Join Server"
-                data-umami-event-tracker="Airdrop_Tracker"
-                data-umami-event-term={`${airdrop.color} Airdrop`}
-                data-umami-event-jobid={jobId}
-                onClick={() => {
-                  setIsJoining(true);
-                  const joiningToastId = toast.loading("Joining server...");
-                  window.setTimeout(() => {
-                    toast.dismiss(joiningToastId);
-                    setIsJoining(false);
-                  }, 5000);
-                  window.location.assign(buildRobloxServerDeepLink(jobId));
-                }}
-              >
-                <Icon icon="heroicons:arrow-top-right-on-square" />
-                {isJoining ? "Joining..." : "Join"}
-              </Button>
-            ) : (
-              <div />
+          <div className="mt-2">
+            {showLastJoinedState && lastJoinedRelative && (
+              <div className="border-status-success/30 bg-status-success/10 text-primary-text mb-2 inline-flex max-w-full items-center gap-1.5 rounded-lg border px-2 py-1 text-xs font-semibold">
+                <span className="truncate">
+                  Last joined {lastJoinedRelative}
+                </span>
+              </div>
             )}
 
-            <Button
-              size="sm"
-              onClick={() => {
-                setIsMapImageLoading(true);
-                setIsMapModalOpen(true);
-              }}
-              variant="secondary"
-              className="w-full min-w-0"
-              data-umami-event="View Airdrop Map"
-              data-umami-event-location={airdrop.location}
-            >
-              <Icon icon="heroicons:map-pin" />
-              Location
-            </Button>
+            <div className="grid min-w-0 grid-cols-2 gap-2">
+              {jobId ? (
+                <Button
+                  size="sm"
+                  variant="default"
+                  className="w-full min-w-0"
+                  disabled={isJoining}
+                  data-umami-event="Join Server"
+                  data-umami-event-tracker="Airdrop_Tracker"
+                  data-umami-event-term={`${airdrop.color} Airdrop`}
+                  data-umami-event-jobid={jobId}
+                  onClick={() => {
+                    setIsJoining(true);
+                    setLastJoined({
+                      kind: "airdrop",
+                      jobId,
+                      location: airdrop.location,
+                      color: airdrop.color,
+                      joinedAt: Math.floor(Date.now() / 1000),
+                      label: `${airdrop.color} Airdrop`,
+                      tracker: "airdrops",
+                    });
+                    const joiningToastId = toast.loading("Joining server...");
+                    window.setTimeout(() => {
+                      toast.dismiss(joiningToastId);
+                      setIsJoining(false);
+                    }, 5000);
+                    window.location.assign(buildRobloxServerDeepLink(jobId));
+                  }}
+                >
+                  <Icon icon="heroicons:arrow-top-right-on-square" />
+                  {isJoining ? "Joining..." : isLastJoined ? "Rejoin" : "Join"}
+                </Button>
+              ) : (
+                <div />
+              )}
+
+              <Button
+                size="sm"
+                onClick={() => {
+                  setIsMapImageLoading(true);
+                  setIsMapModalOpen(true);
+                }}
+                variant="secondary"
+                className="w-full min-w-0"
+                data-umami-event="View Airdrop Map"
+                data-umami-event-location={airdrop.location}
+              >
+                <Icon icon="heroicons:map-pin" />
+                Location
+              </Button>
+            </div>
           </div>
         </div>
       </div>
