@@ -21,11 +21,8 @@ import { Pagination } from "@/components/ui/Pagination";
 import {
   fetchNotificationHistory,
   fetchUnreadNotifications,
-  markNotificationAsSeen,
-  clearUnreadNotifications,
   clearNotificationHistory,
   NotificationHistory,
-  NotificationItem,
 } from "@/utils/api";
 import { formatCustomDate } from "@/utils/timestamp";
 import { useOptimizedRealTimeRelativeDate } from "@/hooks/useSharedTimer";
@@ -256,43 +253,14 @@ const NotificationTimestamp = ({
   );
 };
 
-const getNotificationType = (
-  notification:
-    | NotificationItem
-    | {
-        type?: unknown;
-        metadata?: Record<string, unknown> | null;
-      },
-): string | null => {
-  if (typeof notification.type === "string" && notification.type.trim()) {
-    return notification.type.trim().toLowerCase();
-  }
-
-  const metadata = notification.metadata;
-  if (!metadata || typeof metadata !== "object") {
-    return null;
-  }
-
-  const metadataType = metadata.type;
-  if (typeof metadataType === "string" && metadataType.trim()) {
-    return metadataType.trim().toLowerCase();
-  }
-
-  return null;
-};
-
 export const NavbarModern = ({
   className,
   unreadCount,
   setUnreadCount,
-  wsHistoryNotifications,
-  clearWsNotifications,
 }: {
   className?: string;
   unreadCount: number;
   setUnreadCount: React.Dispatch<React.SetStateAction<number>>;
-  wsHistoryNotifications: NotificationItem[];
-  clearWsNotifications?: () => void;
 }) => {
   const isXlUp = useMediaQuery("(min-width: 1280px)");
   const [active, setActive] = useState<string | null>(null);
@@ -306,7 +274,6 @@ export const NavbarModern = ({
     useState<NotificationHistory | null>(null);
   const [isLoadingNotifications, setIsLoadingNotifications] = useState(false);
   const [notificationPage, setNotificationPage] = useState(1);
-  const [markedAsSeen, setMarkedAsSeen] = useState<Set<number>>(new Set());
   const [notificationTimeoutId, setNotificationTimeoutId] =
     useState<NodeJS.Timeout | null>(null);
   const [mounted, setMounted] = useState(false);
@@ -387,48 +354,7 @@ export const NavbarModern = ({
     }
   };
 
-  const displayNotifications = React.useMemo(() => {
-    const baseNotifications: NotificationHistory | null = notifications
-      ? notifications
-      : notificationTab === "unread" && wsHistoryNotifications.length > 0
-        ? {
-            items: [],
-            total: 0,
-            page: 1,
-            total_pages: 1,
-            size: 5,
-          }
-        : null;
-
-    if (!baseNotifications) return null;
-    if (notificationTab !== "unread" || wsHistoryNotifications.length === 0) {
-      return baseNotifications;
-    }
-
-    const apiKeys = new Set(
-      baseNotifications.items.map(
-        (item) => `${item.title}|${item.description}|${item.link.trim()}`,
-      ),
-    );
-    const wsOnlyItems = wsHistoryNotifications.filter(
-      (item) =>
-        !apiKeys.has(`${item.title}|${item.description}|${item.link.trim()}`),
-    );
-
-    if (wsOnlyItems.length === 0) {
-      return baseNotifications;
-    }
-
-    const wsOnlyCountedItems = wsOnlyItems.filter(
-      (item) => getNotificationType(item) !== "broadcast",
-    );
-
-    return {
-      ...baseNotifications,
-      items: [...wsOnlyItems, ...baseNotifications.items],
-      total: baseNotifications.total + wsOnlyCountedItems.length,
-    };
-  }, [notifications, notificationTab, wsHistoryNotifications]);
+  const displayNotifications = notifications;
 
   return (
     <div
@@ -574,7 +500,6 @@ export const NavbarModern = ({
                 // Reset to unread tab when opening
                 setNotificationTab("unread");
                 setNotificationPage(1);
-                setMarkedAsSeen(new Set()); // Clear marked state
                 setIsLoadingNotifications(true); // Show loading immediately
                 setNotifications(null); // Clear old notifications
                 fetchUnreadWithDebounce(1, 5);
@@ -582,7 +507,6 @@ export const NavbarModern = ({
                 // Reset state when closing
                 setNotifications(null);
                 setIsLoadingNotifications(false);
-                setMarkedAsSeen(new Set());
               }
             }}
           >
@@ -616,69 +540,49 @@ export const NavbarModern = ({
                       ? `${displayNotifications.total} ${notificationTab === "unread" ? "Unread " : ""}Notification${displayNotifications.total !== 1 ? "s" : ""}`
                       : `0 ${notificationTab === "unread" ? "Unread " : ""}Notifications`}
                   </h3>
-                  {displayNotifications && displayNotifications.total > 0 && (
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <button
-                          onClick={async () => {
-                            const success =
-                              notificationTab === "unread"
-                                ? await clearUnreadNotifications()
-                                : await clearNotificationHistory();
-                            if (success) {
-                              toast.success(
-                                notificationTab === "unread"
-                                  ? "Cleared all unread notifications"
-                                  : "Cleared notification history",
-                                {
+                  {notificationTab === "history" &&
+                    displayNotifications &&
+                    displayNotifications.total > 0 && (
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <button
+                            onClick={async () => {
+                              const success = await clearNotificationHistory();
+                              if (success) {
+                                toast.success("Cleared notification history", {
                                   duration: 2000,
-                                },
-                              );
-                              // Refetch to update the list
-                              setIsLoadingNotifications(true);
-                              const data =
-                                notificationTab === "unread"
-                                  ? await fetchUnreadNotifications(1, 5)
-                                  : await fetchNotificationHistory(1, 5);
-                              setNotifications(data);
-                              setNotificationPage(1);
-                              setIsLoadingNotifications(false);
-                              if (notificationTab === "unread") {
-                                setUnreadCount(0);
-                                clearWsNotifications?.();
+                                });
+                                // Refetch to update the list
+                                setIsLoadingNotifications(true);
+                                const data = await fetchNotificationHistory(
+                                  1,
+                                  5,
+                                );
+                                setNotifications(data);
+                                setNotificationPage(1);
+                                setIsLoadingNotifications(false);
+                              } else {
+                                toast.error(
+                                  "Failed to clear notification history",
+                                  {
+                                    duration: 3000,
+                                  },
+                                );
                               }
-                            } else {
-                              toast.error(
-                                notificationTab === "unread"
-                                  ? "Failed to clear unread notifications"
-                                  : "Failed to clear notification history",
-                                {
-                                  duration: 3000,
-                                },
-                              );
-                            }
-                          }}
-                          data-umami-event={
-                            notificationTab === "unread"
-                              ? "Clear Unread Notifications"
-                              : "Clear Notification History"
-                          }
-                          className="text-secondary-text cursor-pointer transition-colors hover:text-red-500"
-                        >
-                          <Icon
-                            icon="si:bin-fill"
-                            className="h-5 w-5"
-                            inline={true}
-                          />
-                        </button>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        {notificationTab === "unread"
-                          ? "Clear Unread"
-                          : "Clear History"}
-                      </TooltipContent>
-                    </Tooltip>
-                  )}
+                            }}
+                            data-umami-event={"Clear Notification History"}
+                            className="text-secondary-text cursor-pointer transition-colors hover:text-red-500"
+                          >
+                            <Icon
+                              icon="si:bin-fill"
+                              className="h-5 w-5"
+                              inline={true}
+                            />
+                          </button>
+                        </TooltipTrigger>
+                        <TooltipContent>Clear History</TooltipContent>
+                      </Tooltip>
+                    )}
                 </div>
               </div>
 
@@ -691,7 +595,6 @@ export const NavbarModern = ({
                       if (value !== "unread" && value !== "history") return;
                       setNotificationTab(value);
                       setNotificationPage(1);
-                      setMarkedAsSeen(new Set()); // Clear marked state
                       setIsLoadingNotifications(true); // Show loading immediately
                       setNotifications(null); // Clear old notifications
                       if (value === "unread") {
@@ -774,86 +677,6 @@ export const NavbarModern = ({
                               <p className="text-primary-text flex-1 text-sm font-semibold wrap-break-word whitespace-normal">
                                 {notif.title}
                               </p>
-                              {notificationTab === "unread" && (
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    <button
-                                      onClick={async () => {
-                                        // Optimistically remove from UI
-                                        setNotifications((prev) => {
-                                          if (!prev) return prev;
-                                          return {
-                                            ...prev,
-                                            items: prev.items.filter(
-                                              (n) => n.id !== notif.id,
-                                            ),
-                                            total: prev.total - 1,
-                                          };
-                                        });
-
-                                        // Update unread count immediately
-                                        setUnreadCount((prev) =>
-                                          Math.max(0, prev - 1),
-                                        );
-
-                                        // Mark as seen for visual feedback
-                                        setMarkedAsSeen((prev) =>
-                                          new Set(prev).add(notif.id),
-                                        );
-
-                                        toast.success("Marked as read", {
-                                          duration: 2000,
-                                        });
-
-                                        // Call API in background
-                                        const success =
-                                          await markNotificationAsSeen(
-                                            notif.id,
-                                          );
-
-                                        if (!success) {
-                                          // Revert on failure
-                                          toast.error(
-                                            "Failed to mark as read",
-                                            {
-                                              duration: 2000,
-                                            },
-                                          );
-                                          // Refetch to restore state
-                                          const data =
-                                            await fetchUnreadNotifications(
-                                              notificationPage,
-                                              5,
-                                            );
-                                          setNotifications(data);
-                                          const nextUnread =
-                                            typeof data.unread_count ===
-                                            "number"
-                                              ? data.unread_count
-                                              : Math.max(0, data.total || 0);
-                                          setUnreadCount(
-                                            Math.max(0, nextUnread),
-                                          );
-                                        }
-                                      }}
-                                      className={`shrink-0 cursor-pointer rounded-full p-1 transition-all ${
-                                        markedAsSeen.has(notif.id)
-                                          ? "bg-green-500/20 text-green-500"
-                                          : "bg-secondary-bg text-secondary-text hover:bg-tertiary-bg hover:text-primary-text"
-                                      }`}
-                                      data-umami-event="Mark Notification Read"
-                                      aria-label="Mark as seen"
-                                    >
-                                      <Icon
-                                        icon="proicons:checkmark"
-                                        className="h-4 w-4"
-                                        inline={true}
-                                      />
-                                    </button>
-                                  </TooltipTrigger>
-                                  <TooltipContent>Mark As Read</TooltipContent>
-                                </Tooltip>
-                              )}
                             </div>
                             <p className="text-secondary-text mt-1 text-xs wrap-break-word whitespace-normal">
                               {notif.description}
