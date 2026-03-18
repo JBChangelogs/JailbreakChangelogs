@@ -9,7 +9,7 @@ import React, {
   useCallback,
   useRef,
 } from "react";
-import { usePathname, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { AuthState, AuthResponse, UserData } from "@/types/auth";
 import {
   validateAuth,
@@ -59,7 +59,6 @@ interface AuthProviderProps {
 
 export function AuthProvider({ children }: AuthProviderProps) {
   const router = useRouter();
-  const pathname = usePathname();
   const [authState, setAuthState] = useState<AuthState>({
     isAuthenticated: false,
     user: null,
@@ -325,7 +324,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         return { success: false, error: errorMessage };
       }
     },
-    [pathname, router],
+    [],
   );
 
   const clearTokenFromUrl = useCallback(() => {
