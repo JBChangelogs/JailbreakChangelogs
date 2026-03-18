@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useCallback } from "react";
 import { Season } from "@/types/seasons";
 import { InventoryData } from "@/app/inventories/types";
 import { RobloxUser } from "@/types";
@@ -12,6 +12,7 @@ import XpProgressBar from "./XpProgressBar";
 import Image from "next/image";
 import ScanHistoryModal from "../Modals/ScanHistoryModal";
 import { Icon } from "../ui/IconWrapper";
+import { Button } from "../ui/button";
 import { Switch } from "../ui/switch";
 
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
@@ -156,7 +157,7 @@ export default function UserStatsSection({
   robloxUsers,
 }: UserStatsSectionProps) {
   const [isScanHistoryModalOpen, setIsScanHistoryModalOpen] = useState(false);
-  const [isMetadataExpanded, setIsMetadataExpanded] = useState(false);
+  const [isMetadataExpanded, setIsMetadataExpanded] = useState(true);
   const [scanHistory, setScanHistory] = useState<
     Array<{ scan_id: string; created_at: number }>
   >([]);
@@ -167,7 +168,7 @@ export default function UserStatsSection({
   } | null>(null);
   const [isLoadingQueuePosition, setIsLoadingQueuePosition] = useState(false);
   const [queueError, setQueueError] = useState<string | null>(null);
-  const hasFetchedQueuePosition = useRef(false);
+  const [hasCheckedQueuePosition, setHasCheckedQueuePosition] = useState(false);
   const createdRelativeTime = useRealTimeRelativeDate(
     currentData?.created_at || 0,
   );
@@ -216,6 +217,7 @@ export default function UserStatsSection({
   const fetchQueuePosition = useCallback(async () => {
     if (!INVENTORY_API_URL || !userId) return;
 
+    setHasCheckedQueuePosition(true);
     setIsLoadingQueuePosition(true);
     setQueueError(null);
     try {
@@ -255,18 +257,6 @@ export default function UserStatsSection({
       setIsLoadingQueuePosition(false);
     }
   }, [userId]);
-
-  // Fetch queue position when metadata dropdown opens
-  useEffect(() => {
-    if (isMetadataExpanded && !hasFetchedQueuePosition.current) {
-      hasFetchedQueuePosition.current = true;
-      fetchQueuePosition();
-    }
-    // Reset the ref when dropdown closes so it can fetch again next time
-    if (!isMetadataExpanded) {
-      hasFetchedQueuePosition.current = false;
-    }
-  }, [isMetadataExpanded, fetchQueuePosition]);
 
   if (!currentData) {
     return (
@@ -594,279 +584,277 @@ export default function UserStatsSection({
         )}
       </div>
 
-      {/* Gamepasses */}
-      {currentData.gamepasses && currentData.gamepasses.length > 0 && (
-        <div className="mt-4">
-          <div className="mb-2 flex items-center justify-between">
-            <h3 className="text-primary-text text-sm font-medium">
-              Owned Gamepasses ({currentData.gamepasses.length})
-            </h3>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {(() => {
-              const gamepassOrder = [
-                "VIP",
-                "PremiumGarage",
-                "BOSS",
-                "SWAT",
-                "TradingVIP",
-                "DuffelBag",
-                "Stereo",
-                "Walmart",
-                "Stash",
-              ];
+      {(() => {
+        const gamepasses = Array.isArray(currentData.gamepasses)
+          ? currentData.gamepasses
+          : [];
+        const hasGamepasses = gamepasses.length > 0;
 
-              const uniqueGamepasses = [...new Set(currentData.gamepasses)];
-              const orderedGamepasses = gamepassOrder.filter((gamepass) =>
-                uniqueGamepasses.includes(gamepass),
-              );
+        const GamepassesBlock = hasGamepasses ? (
+          <div>
+            <div className="mb-2 flex items-center justify-between">
+              <h3 className="text-primary-text text-sm font-medium">
+                Owned Gamepasses ({gamepasses.length})
+              </h3>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {(() => {
+                const gamepassOrder = [
+                  "VIP",
+                  "PremiumGarage",
+                  "BOSS",
+                  "SWAT",
+                  "TradingVIP",
+                  "DuffelBag",
+                  "Stereo",
+                  "Walmart",
+                  "Stash",
+                ];
 
-              return orderedGamepasses.map((gamepass) => {
-                const gamepassInfo =
-                  gamepassData[gamepass as keyof typeof gamepassData];
-                if (!gamepassInfo) return null;
+                const uniqueGamepasses = [...new Set(gamepasses)];
+                const orderedGamepasses = gamepassOrder.filter((gamepass) =>
+                  uniqueGamepasses.includes(gamepass),
+                );
 
-                const GamepassContent = () => (
-                  <div className="group border-border-card bg-tertiary-bg flex items-center gap-3 rounded-lg border px-3 py-2 text-sm transition-all duration-200">
-                    <div className="relative h-8 w-8 shrink-0">
-                      <Image
-                        src={`https://assets.jailbreakchangelogs.xyz/assets/images/gamepasses/${gamepassInfo.image}.webp`}
-                        alt={gamepass}
-                        width={32}
-                        height={32}
-                        className="h-full w-full object-contain"
-                        onError={handleImageError}
-                      />
-                    </div>
-                    <span className="text-primary-text group-hover:text-link text-sm font-medium transition-colors">
-                      {gamepassInfo.displayName}
-                    </span>
-                    {gamepassInfo.link && (
-                      <svg
-                        className="text-secondary-text h-4 w-4 opacity-0 transition-opacity group-hover:opacity-100"
-                        fill="currentColor"
-                        viewBox="0 0 20 20"
-                      >
-                        <path
-                          fillRule="evenodd"
-                          d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z"
-                          clipRule="evenodd"
+                return orderedGamepasses.map((gamepass) => {
+                  const gamepassInfo =
+                    gamepassData[gamepass as keyof typeof gamepassData];
+                  if (!gamepassInfo) return null;
+
+                  const gamepassContent = (
+                    <div className="group border-border-card bg-tertiary-bg flex items-center gap-3 rounded-lg border px-3 py-2 text-sm transition-all duration-200">
+                      <div className="relative h-8 w-8 shrink-0">
+                        <Image
+                          src={`https://assets.jailbreakchangelogs.xyz/assets/images/gamepasses/${gamepassInfo.image}.webp`}
+                          alt={gamepass}
+                          width={32}
+                          height={32}
+                          className="h-full w-full object-contain"
+                          onError={handleImageError}
                         />
-                      </svg>
-                    )}
-                  </div>
-                );
-
-                return gamepassInfo.link ? (
-                  <a
-                    key={gamepass}
-                    href={gamepassInfo.link}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="block"
-                  >
-                    <GamepassContent />
-                  </a>
-                ) : (
-                  <div key={gamepass}>
-                    <GamepassContent />
-                  </div>
-                );
-              });
-            })()}
-          </div>
-        </div>
-      )}
-
-      {/* Collapsible Metadata Section */}
-      <div className="border-border-card bg-tertiary-bg overflow-hidden rounded-lg border text-sm">
-        <button
-          onClick={() => setIsMetadataExpanded(!isMetadataExpanded)}
-          className="flex w-full cursor-pointer items-center justify-between px-4 py-3 transition-colors"
-        >
-          <span className="text-primary-text font-medium">Scan Metadata</span>
-          <Icon
-            icon="material-symbols:keyboard-arrow-down"
-            className={`text-secondary-text h-5 w-5 transition-transform duration-200 ${
-              isMetadataExpanded ? "rotate-180" : ""
-            }`}
-          />
-        </button>
-
-        <div
-          className={`overflow-hidden transition-[max-height] duration-300 ease-in-out ${
-            isMetadataExpanded ? "max-h-[500px]" : "max-h-0"
-          }`}
-        >
-          <div className="border-border-card border-t px-4 py-3">
-            <div className="space-y-2">
-              <div className="flex gap-2">
-                <span className="text-secondary-text min-w-[100px]">
-                  Scan Count:
-                </span>
-                <span className="text-primary-text font-medium">
-                  {currentData.scan_count}
-                </span>
-              </div>
-              <div className="flex gap-2">
-                <span className="text-secondary-text min-w-[100px]">
-                  First Scanned:
-                </span>
-                <span className="text-primary-text font-medium">
-                  {formatDate(currentData.created_at)}
-                  <span className="text-secondary-text ml-1 text-xs">
-                    ({createdRelativeTime})
-                  </span>
-                </span>
-              </div>
-              <div className="flex gap-2">
-                <span className="text-secondary-text min-w-[100px]">
-                  Last Scanned:
-                </span>
-                <span className="text-primary-text font-medium">
-                  {formatDate(currentData.updated_at)}
-                  <span className="text-secondary-text ml-1 text-xs">
-                    ({updatedRelativeTime})
-                  </span>
-                </span>
-              </div>
-
-              {/* Bot Info */}
-              {currentData.bot_id && (
-                <div className="flex items-center gap-2">
-                  <span className="text-secondary-text min-w-[100px]">
-                    Scanned By:
-                  </span>
-                  <div className="flex items-center gap-2">
-                    {botUser ? (
-                      <>
-                        <div className="h-6 w-6 overflow-hidden rounded-full bg-gray-200">
-                          <Image
-                            src={`${process.env.NEXT_PUBLIC_INVENTORY_API_URL}/proxy/users/${botUser.id}/avatar-headshot`}
-                            alt={
-                              botUser.name ||
-                              botUser.displayName ||
-                              `Bot ${botUser.id} avatar`
-                            }
-                            width={24}
-                            height={24}
-                            className="h-full w-full object-cover"
-                            onError={(e) => {
-                              e.currentTarget.src =
-                                "/assets/images/Placeholder.webp";
-                            }}
-                          />
-                        </div>
-                        <a
-                          href={`https://www.roblox.com/users/${botUser.id}/profile`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-primary-text hover:text-link font-medium transition-colors"
+                      </div>
+                      <span className="text-primary-text group-hover:text-link text-sm font-medium transition-colors">
+                        {gamepassInfo.displayName}
+                      </span>
+                      {gamepassInfo.link && (
+                        <svg
+                          className="text-secondary-text h-4 w-4 opacity-0 transition-opacity group-hover:opacity-100"
+                          fill="currentColor"
+                          viewBox="0 0 20 20"
                         >
-                          {botUser.name || botUser.displayName}
-                        </a>
-                      </>
-                    ) : (
-                      <a
-                        href={`https://www.roblox.com/users/${currentData.bot_id}/profile`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-primary-text hover:text-link font-medium transition-colors"
-                      >
-                        Bot {currentData.bot_id}
-                      </a>
-                    )}
+                          <path
+                            fillRule="evenodd"
+                            d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
+                      )}
+                    </div>
+                  );
+
+                  return gamepassInfo.link ? (
+                    <a
+                      key={gamepass}
+                      href={gamepassInfo.link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="block"
+                    >
+                      {gamepassContent}
+                    </a>
+                  ) : (
+                    <div key={gamepass}>{gamepassContent}</div>
+                  );
+                });
+              })()}
+            </div>
+          </div>
+        ) : null;
+
+        const ScanMetadataBlock = (
+          <div className="border-border-card bg-tertiary-bg overflow-hidden rounded-lg border text-sm">
+            <button
+              onClick={() => setIsMetadataExpanded(!isMetadataExpanded)}
+              className="flex w-full cursor-pointer items-center justify-between px-4 py-3 transition-colors"
+            >
+              <span className="text-primary-text font-medium">
+                Scan Metadata
+              </span>
+              <Icon
+                icon="material-symbols:keyboard-arrow-down"
+                className={`text-secondary-text h-5 w-5 transition-transform duration-200 ${
+                  isMetadataExpanded ? "rotate-180" : ""
+                }`}
+              />
+            </button>
+
+            <div
+              className={`overflow-hidden transition-[max-height] duration-300 ease-in-out ${
+                isMetadataExpanded ? "max-h-[500px]" : "max-h-0"
+              }`}
+            >
+              <div className="border-border-card border-t px-4 py-3">
+                <div className="space-y-2">
+                  <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                    <span className="text-secondary-text">Scan Count:</span>
+                    <span className="text-primary-text font-medium">
+                      {currentData.scan_count}
+                    </span>
+                  </div>
+                  <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
+                    <span className="text-secondary-text">
+                      First scanned on:
+                    </span>
+                    <span className="text-primary-text font-medium">
+                      {formatDate(currentData.created_at)}
+                      <span className="text-secondary-text ml-1 text-xs">
+                        ({createdRelativeTime})
+                      </span>
+                    </span>
+                  </div>
+                  <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
+                    <span className="text-secondary-text">
+                      Last scanned on:
+                    </span>
+                    <span className="text-primary-text font-medium">
+                      {formatDate(currentData.updated_at)}
+                      <span className="text-secondary-text ml-1 text-xs">
+                        ({updatedRelativeTime})
+                      </span>
+                    </span>
+                  </div>
+
+                  {/* Bot Info */}
+                  {currentData.bot_id && (
+                    <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                      <span className="text-secondary-text">
+                        Last scanned by:
+                      </span>
+                      <div className="flex items-center gap-2">
+                        {botUser ? (
+                          <>
+                            <div className="h-6 w-6 overflow-hidden rounded-full bg-gray-200">
+                              <Image
+                                src={`${process.env.NEXT_PUBLIC_INVENTORY_API_URL}/proxy/users/${botUser.id}/avatar-headshot`}
+                                alt={
+                                  botUser.name ||
+                                  botUser.displayName ||
+                                  `Bot ${botUser.id} avatar`
+                                }
+                                width={24}
+                                height={24}
+                                className="h-full w-full object-cover"
+                                onError={(e) => {
+                                  e.currentTarget.src =
+                                    "/assets/images/Placeholder.webp";
+                                }}
+                              />
+                            </div>
+                            <a
+                              href={`https://www.roblox.com/users/${botUser.id}/profile`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-primary-text hover:text-link font-medium transition-colors"
+                            >
+                              {botUser.name || botUser.displayName}
+                            </a>
+                          </>
+                        ) : (
+                          <a
+                            href={`https://www.roblox.com/users/${currentData.bot_id}/profile`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-primary-text hover:text-link font-medium transition-colors"
+                          >
+                            Bot {currentData.bot_id}
+                          </a>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Queue Position */}
+                  <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                    <span className="text-secondary-text">Queue Position:</span>
+                    <div className="text-primary-text flex items-center gap-2 font-medium">
+                      {!hasCheckedQueuePosition ? (
+                        <span className="text-secondary-text text-xs">
+                          Click refresh to check
+                        </span>
+                      ) : isLoadingQueuePosition ? (
+                        <span className="text-secondary-text text-xs">
+                          Loading...
+                        </span>
+                      ) : queueError ? (
+                        <span className="text-secondary-text text-xs">
+                          Not in queue
+                        </span>
+                      ) : queuePosition ? (
+                        <span className="text-xs">
+                          #{queuePosition.position.toLocaleString()}
+                        </span>
+                      ) : (
+                        <span className="text-secondary-text text-xs">
+                          Not in queue
+                        </span>
+                      )}
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <button
+                            onClick={() => fetchQueuePosition()}
+                            disabled={isLoadingQueuePosition}
+                            className="text-secondary-text hover:text-primary-text cursor-pointer rounded p-0.5 transition-colors hover:bg-white/10 disabled:opacity-50"
+                          >
+                            <Icon
+                              icon="material-symbols:refresh"
+                              className={`h-4 w-4 ${isLoadingQueuePosition ? "animate-spin" : ""}`}
+                            />
+                          </button>
+                        </TooltipTrigger>
+                        <TooltipContent
+                          side="top"
+                          className="bg-secondary-bg text-primary-text border-none shadow-[var(--color-card-shadow)]"
+                        >
+                          <p>
+                            {hasCheckedQueuePosition
+                              ? "Refresh position"
+                              : "Check position"}
+                          </p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </div>
+                  </div>
+
+                  {/* View Scan History Button */}
+                  <div className="pt-2">
+                    <Button
+                      onClick={handleOpenScanHistory}
+                      disabled={isLoadingScanHistory}
+                      size="sm"
+                      className="font-medium"
+                    >
+                      {isLoadingScanHistory
+                        ? "Loading..."
+                        : "View Scan History"}
+                    </Button>
                   </div>
                 </div>
-              )}
-
-              {/* Job ID */}
-              {currentData.job_id && (
-                <div className="flex gap-2">
-                  <span className="text-secondary-text min-w-[100px]">
-                    Job ID:
-                  </span>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <a
-                        href={`https://tracker.jailbreakchangelogs.xyz/?jobid=${currentData.job_id}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-primary-text hover:text-link max-w-[200px] cursor-pointer truncate font-mono text-xs font-medium transition-colors md:max-w-full"
-                      >
-                        {currentData.job_id}
-                      </a>
-                    </TooltipTrigger>
-                    <TooltipContent
-                      side="top"
-                      className="bg-secondary-bg text-primary-text border-none shadow-[var(--color-card-shadow)]"
-                    >
-                      <p>{currentData.job_id}</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </div>
-              )}
-
-              {/* Queue Position */}
-              <div className="flex items-center gap-2">
-                <span className="text-secondary-text min-w-[100px]">
-                  Queue Position:
-                </span>
-                <div className="text-primary-text flex items-center gap-2 font-medium">
-                  {isLoadingQueuePosition ? (
-                    <span className="text-secondary-text text-xs">
-                      Loading...
-                    </span>
-                  ) : queueError ? (
-                    <span className="text-secondary-text text-xs">
-                      Not in queue
-                    </span>
-                  ) : queuePosition ? (
-                    <span className="text-xs">
-                      #{queuePosition.position.toLocaleString()}
-                    </span>
-                  ) : (
-                    <span className="text-secondary-text text-xs">
-                      Not in queue
-                    </span>
-                  )}
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <button
-                        onClick={() => fetchQueuePosition()}
-                        disabled={isLoadingQueuePosition}
-                        className="text-secondary-text hover:text-primary-text cursor-pointer rounded p-0.5 transition-colors hover:bg-white/10 disabled:opacity-50"
-                      >
-                        <Icon
-                          icon="material-symbols:refresh"
-                          className={`h-4 w-4 ${isLoadingQueuePosition ? "animate-spin" : ""}`}
-                        />
-                      </button>
-                    </TooltipTrigger>
-                    <TooltipContent
-                      side="top"
-                      className="bg-secondary-bg text-primary-text border-none shadow-[var(--color-card-shadow)]"
-                    >
-                      <p>Refresh position</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </div>
-              </div>
-
-              {/* View Scan History Button */}
-              <div className="pt-2">
-                <button
-                  onClick={handleOpenScanHistory}
-                  disabled={isLoadingScanHistory}
-                  className="bg-button-info text-form-button-text hover:bg-button-info-hover inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors hover:cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  {isLoadingScanHistory ? "Loading..." : "View Scan History"}
-                </button>
               </div>
             </div>
           </div>
-        </div>
-      </div>
+        );
+
+        if (hasGamepasses) {
+          return (
+            <div className="mt-4 grid gap-4 lg:grid-cols-2 lg:items-start">
+              {GamepassesBlock}
+              {ScanMetadataBlock}
+            </div>
+          );
+        }
+
+        return <div className="mt-4">{ScanMetadataBlock}</div>;
+      })()}
 
       {/* Scan History Modal */}
       <ScanHistoryModal
