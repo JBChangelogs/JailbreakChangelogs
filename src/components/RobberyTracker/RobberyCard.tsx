@@ -18,6 +18,8 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useRobberyTrackerLastJoinedServer } from "@/hooks/useRobberyTrackerLastJoinedServer";
+import { cn } from "@/lib/utils";
 
 interface RobberyCardProps {
   robbery: RobberyData;
@@ -36,6 +38,7 @@ export default function RobberyCard({
   const [planeCountdown, setPlaneCountdown] = useState<string | null>(null);
   const [casinoCountdown, setCasinoCountdown] = useState<string | null>(null);
   const [regionData, setRegionData] = useState(robbery.region_data || null);
+  const { lastJoined, setLastJoined } = useRobberyTrackerLastJoinedServer();
 
   const { fetchRegionData } = useServerRegions();
 
@@ -63,6 +66,18 @@ export default function RobberyCard({
   const relativeTime = useOptimizedRealTimeRelativeDate(
     robbery.timestamp,
     timerId,
+  );
+
+  const isLastJoined = Boolean(
+    jobId &&
+    lastJoined?.kind === "robbery" &&
+    lastJoined.jobId === jobId &&
+    lastJoined.markerName === robbery.marker_name,
+  );
+  const showLastJoinedState = isLastJoined && !isJoining;
+  const lastJoinedRelative = useOptimizedRealTimeRelativeDate(
+    isLastJoined ? lastJoined?.joinedAt : null,
+    `robbery-last-joined-${jobId || "unknown"}-${robbery.marker_name}`,
   );
 
   // Check if this is a train with high progress
@@ -286,7 +301,12 @@ export default function RobberyCard({
   const players = robbery.server?.players || [];
 
   return (
-    <div className="border-border-card bg-secondary-bg flex flex-col overflow-hidden rounded-xl border transition-all duration-200 hover:shadow-lg">
+    <div
+      className={cn(
+        "border-border-card bg-secondary-bg flex flex-col overflow-hidden rounded-xl border transition-all duration-200 hover:shadow-lg",
+        showLastJoinedState && "bg-tertiary-bg",
+      )}
+    >
       <div className="flex flex-col gap-3 p-3 sm:flex-row">
         {/* Thumbnail */}
         <div className="relative aspect-video w-full shrink-0 overflow-hidden rounded-lg border border-white/5 sm:aspect-auto sm:h-16 sm:w-24">
@@ -393,6 +413,13 @@ export default function RobberyCard({
           {/* Actions */}
           {jobId && (
             <div className="mt-2">
+              {showLastJoinedState && lastJoinedRelative && (
+                <div className="border-status-success/30 bg-status-success/10 text-primary-text mb-2 inline-flex max-w-full items-center gap-1.5 rounded-lg border px-2 py-1 text-xs font-semibold">
+                  <span className="truncate">
+                    Last joined {lastJoinedRelative}
+                  </span>
+                </div>
+              )}
               <Button
                 size="sm"
                 variant="default"
@@ -408,6 +435,17 @@ export default function RobberyCard({
                 data-umami-event-jobid={jobId}
                 onClick={() => {
                   setIsJoining(true);
+                  setLastJoined({
+                    kind: "robbery",
+                    jobId,
+                    markerName: robbery.marker_name,
+                    joinedAt: Math.floor(Date.now() / 1000),
+                    label: displayName,
+                    tracker:
+                      robbery.marker_name === "Mansion"
+                        ? "mansions"
+                        : "robberies",
+                  });
                   const joiningToastId = toast.loading("Joining server...");
                   window.setTimeout(() => {
                     toast.dismiss(joiningToastId);
@@ -417,7 +455,7 @@ export default function RobberyCard({
                 }}
               >
                 <Icon icon="heroicons:arrow-top-right-on-square" />
-                {isJoining ? "Joining..." : "Join"}
+                {isJoining ? "Joining..." : isLastJoined ? "Rejoin" : "Join"}
               </Button>
             </div>
           )}

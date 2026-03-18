@@ -18,6 +18,8 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useRobberyTrackerLastJoinedServer } from "@/hooks/useRobberyTrackerLastJoinedServer";
+import { cn } from "@/lib/utils";
 
 const ROBBERY_IMAGE_PRIORITY: string[] = [
   "Jewelry",
@@ -100,6 +102,15 @@ export default function RobberyServerGroupCard({
   const [isJoining, setIsJoining] = useState(false);
   const [regionData, setRegionData] = useState<ServerRegionData | null>(null);
   const { fetchRegionData } = useServerRegions();
+  const { lastJoined, setLastJoined } = useRobberyTrackerLastJoinedServer();
+  const isLastJoined = Boolean(
+    serverId && lastJoined?.kind === "grouped" && lastJoined.jobId === serverId,
+  );
+  const showLastJoinedState = isLastJoined && !isJoining;
+  const lastJoinedRelative = useOptimizedRealTimeRelativeDate(
+    isLastJoined ? lastJoined?.joinedAt : null,
+    `grouped-last-joined-${serverId || "unknown"}`,
+  );
 
   const latestTimestamp = useMemo(
     () => Math.max(...robberies.map((r) => r.timestamp)),
@@ -209,7 +220,12 @@ export default function RobberyServerGroupCard({
     : regionData;
 
   return (
-    <div className="border-border-card bg-secondary-bg flex flex-col overflow-hidden rounded-xl border transition-all duration-200 hover:shadow-lg">
+    <div
+      className={cn(
+        "border-border-card bg-secondary-bg flex flex-col overflow-hidden rounded-xl border transition-all duration-200 hover:shadow-lg",
+        showLastJoinedState && "bg-tertiary-bg",
+      )}
+    >
       <div className="flex flex-col gap-3 p-3 sm:flex-row">
         {/* Thumbnail (adaptive layout) */}
         <div className="aspect-video w-full shrink-0 overflow-hidden rounded-lg border border-white/5 sm:aspect-auto sm:h-24 sm:w-40">
@@ -407,6 +423,13 @@ export default function RobberyServerGroupCard({
           )}
 
           <div className="mt-2">
+            {showLastJoinedState && lastJoinedRelative && (
+              <div className="border-status-success/30 bg-status-success/10 text-primary-text mb-2 inline-flex max-w-full items-center gap-1.5 rounded-lg border px-2 py-1 text-xs font-semibold">
+                <span className="truncate">
+                  Last joined {lastJoinedRelative}
+                </span>
+              </div>
+            )}
             <Button
               size="sm"
               variant="default"
@@ -418,6 +441,13 @@ export default function RobberyServerGroupCard({
               data-umami-event-jobid={serverId}
               onClick={() => {
                 setIsJoining(true);
+                setLastJoined({
+                  kind: "grouped",
+                  jobId: serverId,
+                  joinedAt: Math.floor(Date.now() / 1000),
+                  label: "Grouped Server",
+                  tracker: "grouped",
+                });
                 const joiningToastId = toast.loading("Joining server...");
                 window.setTimeout(() => {
                   toast.dismiss(joiningToastId);
@@ -427,7 +457,7 @@ export default function RobberyServerGroupCard({
               }}
             >
               <Icon icon="heroicons:arrow-top-right-on-square" />
-              {isJoining ? "Joining..." : "Join"}
+              {isJoining ? "Joining..." : isLastJoined ? "Rejoin" : "Join"}
             </Button>
           </div>
         </div>

@@ -13,6 +13,8 @@ import { useServerRegions } from "@/hooks/useServerRegions";
 import { toast } from "sonner";
 import { buildRobloxServerDeepLink } from "./deepLink";
 import InlineTeamPlayers from "./InlineTeamPlayers";
+import { useRobberyTrackerLastJoinedServer } from "@/hooks/useRobberyTrackerLastJoinedServer";
+import { cn } from "@/lib/utils";
 
 interface RobberyComboCardProps {
   comboId: string;
@@ -30,6 +32,18 @@ export default function RobberyComboCard({
   const [isJoining, setIsJoining] = useState(false);
   const [regionData, setRegionData] = useState<ServerRegionData | null>(null);
   const { fetchRegionData } = useServerRegions();
+  const { lastJoined, setLastJoined } = useRobberyTrackerLastJoinedServer();
+  const isLastJoined = Boolean(
+    serverId &&
+    lastJoined?.kind === "combo" &&
+    lastJoined.jobId === serverId &&
+    lastJoined.comboId === comboId,
+  );
+  const showLastJoinedState = isLastJoined && !isJoining;
+  const lastJoinedRelative = useOptimizedRealTimeRelativeDate(
+    isLastJoined ? lastJoined?.joinedAt : null,
+    `combo-last-joined-${serverId || "unknown"}-${comboId}`,
+  );
 
   const sortedRobberies = [...robberies].sort((a, b) =>
     a.name.localeCompare(b.name),
@@ -109,7 +123,12 @@ export default function RobberyComboCard({
   const remainingCount = sortedRobberies.length - displayRobberies.length;
 
   return (
-    <div className="border-border-card bg-secondary-bg flex flex-col overflow-hidden rounded-xl border transition-all duration-200 hover:shadow-lg">
+    <div
+      className={cn(
+        "border-border-card bg-secondary-bg flex flex-col overflow-hidden rounded-xl border transition-all duration-200 hover:shadow-lg",
+        showLastJoinedState && "bg-tertiary-bg",
+      )}
+    >
       <div className="flex flex-col gap-3 p-3 sm:flex-row">
         {/* Thumbnail */}
         <div className="relative h-28 w-full shrink-0 overflow-hidden rounded-lg border border-white/5 sm:h-16 sm:w-24">
@@ -186,6 +205,13 @@ export default function RobberyComboCard({
           </div>
 
           <div className="mt-2">
+            {showLastJoinedState && lastJoinedRelative && (
+              <div className="border-status-success/30 bg-status-success/10 text-primary-text mb-2 inline-flex max-w-full items-center gap-1.5 rounded-lg border px-2 py-1 text-xs font-semibold">
+                <span className="truncate">
+                  Last joined {lastJoinedRelative}
+                </span>
+              </div>
+            )}
             <Button
               size="sm"
               variant="default"
@@ -197,6 +223,14 @@ export default function RobberyComboCard({
               data-umami-event-jobid={serverId}
               onClick={() => {
                 setIsJoining(true);
+                setLastJoined({
+                  kind: "combo",
+                  jobId: serverId,
+                  comboId,
+                  joinedAt: Math.floor(Date.now() / 1000),
+                  label: comboLabel,
+                  tracker: "robberies",
+                });
                 const joiningToastId = toast.loading("Joining server...");
                 window.setTimeout(() => {
                   toast.dismiss(joiningToastId);
@@ -206,7 +240,7 @@ export default function RobberyComboCard({
               }}
             >
               <Icon icon="heroicons:arrow-top-right-on-square" />
-              {isJoining ? "Joining..." : "Join"}
+              {isJoining ? "Joining..." : isLastJoined ? "Rejoin" : "Join"}
             </Button>
           </div>
         </div>
