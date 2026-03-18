@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
 import { RobloxUser, Item } from "@/types";
 import { InventoryData, InventoryItem } from "@/app/inventories/types";
@@ -8,6 +8,10 @@ import InventoryFilters from "./InventoryFilters";
 import InventoryItemsGrid from "./InventoryItemsGrid";
 import { Icon } from "../ui/IconWrapper";
 import { mergeInventoryArrayWithMetadata } from "@/utils/inventoryMerge";
+import {
+  fetchItemUnlockMetadataById,
+  ItemUnlockMetadataEntry,
+} from "@/utils/itemUnlockMetadata";
 
 interface InventoryItemsProps {
   initialData: InventoryData;
@@ -59,11 +63,36 @@ export default function InventoryItems({
     | "alpha-desc"
     | "created-asc"
     | "created-desc"
+    | "season-asc"
+    | "season-desc"
     | "cash-desc"
     | "cash-asc"
     | "duped-desc"
     | "duped-asc"
   >("created-desc");
+
+  const [itemUnlockMetadataById, setItemUnlockMetadataById] = useState<Map<
+    number,
+    ItemUnlockMetadataEntry
+  > | null>(null);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    fetchItemUnlockMetadataById()
+      .then((metadata) => {
+        if (!isMounted) return;
+        setItemUnlockMetadataById(metadata);
+      })
+      .catch((error) => {
+        console.error("Error loading item unlock metadata:", error);
+        if (isMounted) setItemUnlockMetadataById(null);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   // Merge inventory data with metadata from item/list endpoint
   // This ensures fields like timesTraded and uniqueCirculation
@@ -247,6 +276,86 @@ export default function InventoryItems({
 
   // Filter and sort logic
   const filteredAndSortedItems = (() => {
+    const getLatestTime = (item: InventoryItem) => {
+      if (item.history && item.history.length > 0) {
+        const maxHistoryTime = Math.max(
+          ...item.history.map((h) => h.TradeTime),
+        );
+        return maxHistoryTime * 1000;
+      }
+      return 0;
+    };
+
+    const getDisplayedSeasonNumber = (item: InventoryItem) => {
+      const seasonFromMetadata = itemUnlockMetadataById?.get(
+        item.item_id,
+      )?.season;
+      if (typeof seasonFromMetadata === "number") return seasonFromMetadata;
+      if (typeof item.season === "number") return item.season;
+      return null;
+    };
+
+    const getDisplayedUnlockLevel = (item: InventoryItem) => {
+      const levelFromMetadata = itemUnlockMetadataById?.get(
+        item.item_id,
+      )?.level;
+      if (
+        typeof levelFromMetadata === "string" &&
+        levelFromMetadata.length > 0
+      ) {
+        return levelFromMetadata;
+      }
+      if (typeof item.level === "number") return String(item.level);
+      return null;
+    };
+
+    const parseUnlockLevelForSort = (level: string | null) => {
+      if (!level) {
+        return { kind: "none" as const, value: Infinity };
+      }
+
+      if (level.includes("%")) {
+        const numeric = Number.parseFloat(level.replace(/[^0-9.]/g, ""));
+        return {
+          kind: "percent" as const,
+          value: Number.isFinite(numeric) ? numeric : Infinity,
+        };
+      }
+
+      const numeric = Number.parseFloat(level.replace(/[^0-9.]/g, ""));
+      return {
+        kind: "level" as const,
+        value: Number.isFinite(numeric) ? numeric : Infinity,
+      };
+    };
+
+    const compareUnlockLevels = (
+      aLevel: string | null,
+      bLevel: string | null,
+      direction: "asc" | "desc",
+    ) => {
+      const aParsed = parseUnlockLevelForSort(aLevel);
+      const bParsed = parseUnlockLevelForSort(bLevel);
+
+      const kindOrder = (kind: "level" | "percent" | "none") => {
+        // Put season-only items first (no level), then numeric levels, then percent unlocks (e.g. "10%").
+        if (kind === "none") return 0;
+        if (kind === "level") return 1;
+        return 2;
+      };
+
+      const kindDiff = kindOrder(aParsed.kind) - kindOrder(bParsed.kind);
+      if (kindDiff !== 0) return kindDiff;
+
+      if (aParsed.value !== bParsed.value) {
+        return direction === "asc"
+          ? aParsed.value - bParsed.value
+          : bParsed.value - aParsed.value;
+      }
+
+      return 0;
+    };
+
     if (showMissingItems) {
       const ownedItemIds = new Set(
         mergedInventoryData.map((item) => item.item_id),
@@ -393,6 +502,46 @@ export default function InventoryItems({
             return a.itemData.name.localeCompare(b.itemData.name);
           case "alpha-desc":
             return b.itemData.name.localeCompare(a.itemData.name);
+          case "season-asc": {
+            const aSeason =
+              itemUnlockMetadataById?.get(a.itemData.id)?.season ?? null;
+            const bSeason =
+              itemUnlockMetadataById?.get(b.itemData.id)?.season ?? null;
+            const aSeasonScore =
+              typeof aSeason === "number" ? aSeason : Infinity;
+            const bSeasonScore =
+              typeof bSeason === "number" ? bSeason : Infinity;
+            if (aSeasonScore !== bSeasonScore)
+              return aSeasonScore - bSeasonScore;
+
+            const aLevel =
+              itemUnlockMetadataById?.get(a.itemData.id)?.level ?? null;
+            const bLevel =
+              itemUnlockMetadataById?.get(b.itemData.id)?.level ?? null;
+            const levelDiff = compareUnlockLevels(aLevel, bLevel, "asc");
+            if (levelDiff !== 0) return levelDiff;
+
+            return a.itemData.name.localeCompare(b.itemData.name);
+          }
+          case "season-desc": {
+            const aSeason =
+              itemUnlockMetadataById?.get(a.itemData.id)?.season ?? null;
+            const bSeason =
+              itemUnlockMetadataById?.get(b.itemData.id)?.season ?? null;
+            const aSeasonScore = typeof aSeason === "number" ? aSeason : -1;
+            const bSeasonScore = typeof bSeason === "number" ? bSeason : -1;
+            if (aSeasonScore !== bSeasonScore)
+              return bSeasonScore - aSeasonScore;
+
+            const aLevel =
+              itemUnlockMetadataById?.get(a.itemData.id)?.level ?? null;
+            const bLevel =
+              itemUnlockMetadataById?.get(b.itemData.id)?.level ?? null;
+            const levelDiff = compareUnlockLevels(aLevel, bLevel, "desc");
+            if (levelDiff !== 0) return levelDiff;
+
+            return a.itemData.name.localeCompare(b.itemData.name);
+          }
           case "cash-desc":
             const aCashDesc = parseNumericValue(a.itemData.cash_value);
             const bCashDesc = parseNumericValue(b.itemData.cash_value);
@@ -553,32 +702,47 @@ export default function InventoryItems({
         case "alpha-desc":
           return b.item.title.localeCompare(a.item.title);
         case "created-asc": {
-          const getLatestTime = (item: InventoryItem) => {
-            // Check history details
-            if (item.history && item.history.length > 0) {
-              // History TradeTime is in seconds
-              const maxHistoryTime = Math.max(
-                ...item.history.map((h) => h.TradeTime),
-              );
-              return maxHistoryTime * 1000;
-            }
-            return 0;
-          };
           return getLatestTime(a.item) - getLatestTime(b.item);
         }
         case "created-desc": {
-          const getLatestTime = (item: InventoryItem) => {
-            // Check history details
-            if (item.history && item.history.length > 0) {
-              // History TradeTime is in seconds
-              const maxHistoryTime = Math.max(
-                ...item.history.map((h) => h.TradeTime),
-              );
-              return maxHistoryTime * 1000;
-            }
-            return 0;
-          };
           return getLatestTime(b.item) - getLatestTime(a.item);
+        }
+        case "season-asc": {
+          const aSeason = getDisplayedSeasonNumber(a.item);
+          const bSeason = getDisplayedSeasonNumber(b.item);
+          const aScore = typeof aSeason === "number" ? aSeason : Infinity;
+          const bScore = typeof bSeason === "number" ? bSeason : Infinity;
+          if (aScore !== bScore) return aScore - bScore;
+
+          const levelDiff = compareUnlockLevels(
+            getDisplayedUnlockLevel(a.item),
+            getDisplayedUnlockLevel(b.item),
+            "asc",
+          );
+          if (levelDiff !== 0) return levelDiff;
+
+          // Keep newest items first within a season+level group
+          const timeDiff = getLatestTime(b.item) - getLatestTime(a.item);
+          if (timeDiff !== 0) return timeDiff;
+          return a.item.title.localeCompare(b.item.title);
+        }
+        case "season-desc": {
+          const aSeason = getDisplayedSeasonNumber(a.item);
+          const bSeason = getDisplayedSeasonNumber(b.item);
+          const aScore = typeof aSeason === "number" ? aSeason : -1;
+          const bScore = typeof bSeason === "number" ? bSeason : -1;
+          if (aScore !== bScore) return bScore - aScore;
+
+          const levelDiff = compareUnlockLevels(
+            getDisplayedUnlockLevel(a.item),
+            getDisplayedUnlockLevel(b.item),
+            "desc",
+          );
+          if (levelDiff !== 0) return levelDiff;
+
+          const timeDiff = getLatestTime(b.item) - getLatestTime(a.item);
+          if (timeDiff !== 0) return timeDiff;
+          return a.item.title.localeCompare(b.item.title);
         }
         case "cash-desc":
           const aCashDesc = parseNumericValue(a.itemData?.cash_value);
