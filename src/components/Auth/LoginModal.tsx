@@ -11,7 +11,6 @@ function LoginModalInner() {
     <LoginModalView
       showLoginModal={controller.showLoginModal}
       tabValue={controller.tabValue}
-      campaign={controller.campaign}
       resolvedTheme={controller.resolvedTheme}
       joinDiscord={controller.joinDiscord}
       onTabChange={controller.handleTabChange}

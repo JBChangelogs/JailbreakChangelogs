@@ -18,12 +18,6 @@ import {
   type TokenAuthFlow,
   trackLogoutSource,
 } from "@/utils/auth";
-import {
-  getStoredCampaign,
-  clearStoredCampaign,
-  countCampaignVisit,
-  storeCampaign,
-} from "@/utils/campaign";
 import { safeGetJSON } from "@/utils/safeStorage";
 import { toast } from "sonner";
 import { useRealtimeNotificationsWebSocket } from "@/hooks/useRealtimeNotificationsWebSocket";
@@ -102,9 +96,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
           // Track user status in Clarity
           trackUserStatus(true);
-
-          // Clear any stored campaign data
-          clearStoredCampaign();
           return;
         }
       }
@@ -124,9 +115,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
           // Track user status in Clarity
           trackUserStatus(true);
-
-          // Clear any stored campaign data
-          clearStoredCampaign();
           return;
         }
       }
@@ -140,16 +128,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
       // Track user status in Clarity
       trackUserStatus(false);
-
-      // Check for campaign parameter in URL and show login modal if not authenticated
-      if (typeof window !== "undefined") {
-        const urlParams = new URLSearchParams(window.location.search);
-        const campaign = urlParams.get("campaign");
-        if (campaign) {
-          storeCampaign(campaign);
-          setShowLoginModal(true);
-        }
-      }
     } catch (err) {
       console.error("Auth initialization error:", err);
       setAuthState({
@@ -263,14 +241,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
     };
   }, [initializeAuth]);
 
-  // Separate effect for campaign detection
+  // Handle URL-driven login modal opening (e.g. ?login=true)
   useEffect(() => {
     if (typeof window === "undefined" || authState.isLoading) {
       return;
     }
 
     const urlParams = new URLSearchParams(window.location.search);
-    const campaign = urlParams.get("campaign");
     const loginParam = urlParams.get("login");
     const shouldOpenLoginFromUrl =
       loginParam !== null &&
@@ -298,44 +275,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
         window.history.replaceState({}, "", currentUrl.toString());
       }, 1000);
     }
-
-    if (campaign) {
-      if (authState.isAuthenticated) {
-        // User is logged in, try to count the visit
-        countCampaignVisit(campaign)
-          .then(() => {
-            toast.success("Campaign visit recorded!", {
-              duration: 3000,
-            });
-          })
-          .catch((err) => {
-            console.error("Campaign visit error:", err);
-            // If error indicates user is already in campaign, show toast
-            // The backend returns "User already in campaign" (status 400)
-            if (
-              err.message &&
-              (err.message.includes("already") ||
-                err.message.includes("Already"))
-            ) {
-              toast.error("You are already participating in this campaign", {
-                duration: 3000,
-              });
-            }
-          })
-          .finally(() => {
-            // Clear the param
-            const currentUrl = new URL(window.location.href);
-            currentUrl.searchParams.delete("campaign");
-            window.history.replaceState({}, "", currentUrl.toString());
-          });
-      } else {
-        // User not logged in
-        storeCampaign(campaign);
-        setTimeout(() => {
-          setShowLoginModal(true);
-        }, 0);
-      }
-    }
   }, [authState.isAuthenticated, authState.isLoading]);
 
   const handleLogin = useCallback(
@@ -357,25 +296,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
           // Track user status in Clarity
           trackUserStatus(true);
-
-          // Check for campaign and count visit after successful login
-          const campaign = getStoredCampaign();
-          if (campaign) {
-            try {
-              await countCampaignVisit(campaign, token);
-              toast.success("Campaign visit recorded!", {
-                duration: 3000,
-              });
-            } catch (e) {
-              console.error("Campaign visit error during login:", e);
-            }
-            clearStoredCampaign();
-          }
-
-          if (pathname === "/access-denied") {
-            router.replace("/");
-            router.refresh();
-          }
         } else {
           setAuthState({
             isAuthenticated: false,
