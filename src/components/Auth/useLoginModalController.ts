@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useCallback, type SyntheticEvent } from "react";
-import { useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import { PUBLIC_API_URL } from "@/utils/api";
 import { useAuthContext } from "@/contexts/AuthContext";
@@ -11,7 +10,6 @@ import { hasAuthSessionCookie } from "@/utils/serverSession";
 export interface LoginModalController {
   tabValue: number;
   joinDiscord: boolean;
-  campaign: string | null;
   resolvedTheme: string | undefined;
   showLoginModal: boolean;
   setJoinDiscord: (checked: boolean) => void;
@@ -25,8 +23,6 @@ export function useLoginModalController(): LoginModalController {
   const [joinDiscord, setJoinDiscord] = useState(false);
   const { showLoginModal, loginModalTab, setLoginModal } = useAuthContext();
   const { resolvedTheme } = useTheme();
-  const searchParams = useSearchParams();
-  const campaign = searchParams.get("campaign");
   const tabValue = loginModalTab === "roblox" ? 1 : 0;
 
   const handleTabChange = (_event: SyntheticEvent, newValue: number) => {
@@ -81,7 +77,6 @@ export function useLoginModalController(): LoginModalController {
   return {
     tabValue,
     joinDiscord,
-    campaign,
     resolvedTheme,
     showLoginModal,
     setJoinDiscord,
