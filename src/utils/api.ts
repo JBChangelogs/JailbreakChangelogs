@@ -202,6 +202,7 @@ export const fetchUsers = async () => {
 export const fetchPaginatedUsers = async (
   page: number = 1,
   size: number = 30,
+  signal?: AbortSignal,
 ) => {
   const response = await fetch(
     `/api/users/paginated?page=${page}&size=${size}`,
@@ -210,6 +211,7 @@ export const fetchPaginatedUsers = async (
         "User-Agent": "JailbreakChangelogs-UserSearch/1.0",
       },
       cache: "no-store",
+      signal,
     },
   );
   if (!response.ok) {
@@ -219,7 +221,11 @@ export const fetchPaginatedUsers = async (
   return data;
 };
 
-export const searchUsers = async (username: string, limit: number = 30) => {
+export const searchUsers = async (
+  username: string,
+  limit: number = 30,
+  signal?: AbortSignal,
+) => {
   const response = await fetch(
     `/api/users/search?username=${encodeURIComponent(username)}&limit=${limit}`,
     {
@@ -227,6 +233,7 @@ export const searchUsers = async (username: string, limit: number = 30) => {
         "User-Agent": "JailbreakChangelogs-UserSearch/1.0",
       },
       cache: "no-store",
+      signal,
     },
   );
   if (!response.ok) {
