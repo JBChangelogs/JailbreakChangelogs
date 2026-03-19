@@ -71,7 +71,7 @@ export default function DupesTab({ itemId }: DupesTabProps) {
     return (
       <div className="bg-secondary-bg rounded-lg p-8 text-center">
         <div className="text-secondary-text animate-pulse text-lg font-semibold">
-          Loading dupers...
+          Loading dupe owners...
         </div>
       </div>
     );
@@ -82,10 +82,10 @@ export default function DupesTab({ itemId }: DupesTabProps) {
     return (
       <div className="bg-secondary-bg rounded-lg p-8 text-center">
         <h3 className="text-primary-text mb-2 text-xl font-semibold">
-          Error Loading Dupers
+          Error Loading Dupe Owners
         </h3>
         <p className="text-secondary-text mx-auto max-w-md text-sm leading-relaxed">
-          Failed to load dupers data. Please try again later.
+          Failed to load dupe owners data. Please try again later.
         </p>
       </div>
     );
@@ -111,7 +111,7 @@ export default function DupesTab({ itemId }: DupesTabProps) {
           </svg>
         </div>
         <h3 className="text-primary-text mb-2 text-xl font-semibold">
-          No Dupers Found
+          No Dupe Owners Found
         </h3>
         <p className="text-secondary-text mx-auto max-w-md text-sm leading-relaxed">
           No duped versions of this item have been detected.
@@ -124,7 +124,7 @@ export default function DupesTab({ itemId }: DupesTabProps) {
     <div className="space-y-6">
       <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
         <h3 className="text-primary-text text-2xl font-bold">
-          Dupers ({dupedUsers.length})
+          Dupe owners ({dupedUsers.length})
         </h3>
       </div>
 
@@ -166,7 +166,7 @@ export default function DupesTab({ itemId }: DupesTabProps) {
             No Results Found
           </h3>
           <p className="text-secondary-text mx-auto max-w-md text-sm leading-relaxed">
-            No dupers found matching &quot;{searchTerm}&quot;
+            No dupe owners found matching &quot;{searchTerm}&quot;
           </p>
           <button
             onClick={() => setSearchTerm("")}
