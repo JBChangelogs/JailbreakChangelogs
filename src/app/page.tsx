@@ -10,7 +10,7 @@ import NitroHomepageAd from "@/components/Ads/NitroHomepageAd";
 import CountUpNumber from "@/components/Home/CountUpNumber";
 import { Button } from "@/components/ui/button";
 import {
-  testimonials,
+  getTestimonials,
   type Testimonial,
 } from "@/components/Testimonials/testimonialsData";
 import {
@@ -180,9 +180,10 @@ const pickRandomTestimonials = (items: Testimonial[], count: number) => {
 
 export default async function Home() {
   const initialImage = getRandomBackgroundImage();
-  const [impactStats, homepageStats] = await Promise.all([
+  const [impactStats, homepageStats, testimonials] = await Promise.all([
     fetchHomepageImpactStats(),
     fetchHomepageStats(),
+    getTestimonials(),
   ]);
 
   const legacyStats: HeroStatCard[] = [

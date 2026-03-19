@@ -1,7 +1,10 @@
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import TestimonialsSection from "@/components/Testimonials/TestimonialsSection";
+import { getTestimonials } from "@/components/Testimonials/testimonialsData";
 
-export default function TestimonialsPage() {
+export default async function TestimonialsPage() {
+  const testimonials = await getTestimonials();
+
   return (
     <main className="bg-primary-bg mb-8 min-h-screen">
       <div className="container mx-auto px-4">
@@ -17,7 +20,7 @@ export default function TestimonialsPage() {
             community!
           </p>
         </div>
-        <TestimonialsSection />
+        <TestimonialsSection testimonials={testimonials} />
       </div>
     </main>
   );

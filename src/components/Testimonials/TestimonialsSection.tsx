@@ -3,13 +3,19 @@
 import Image from "next/image";
 import { Masonry } from "@mui/lab";
 import { useMediaQuery } from "@mui/material";
-import { testimonials } from "@/components/Testimonials/testimonialsData";
+import type { Testimonial } from "@/components/Testimonials/testimonialsData";
 import {
   TESTIMONIALS_BASE_URL,
   highlightBrandName,
 } from "@/components/Testimonials/testimonialText";
 
-export default function TestimonialsSection() {
+type TestimonialsSectionProps = {
+  testimonials: Testimonial[];
+};
+
+export default function TestimonialsSection({
+  testimonials,
+}: TestimonialsSectionProps) {
   const isAtLeast1024 = useMediaQuery("(min-width: 1024px)");
   const isAtLeast768 = useMediaQuery("(min-width: 768px)");
 
@@ -29,7 +35,7 @@ export default function TestimonialsSection() {
         >
           {testimonials.map((testimonial, index) => (
             <a
-              key={index}
+              key={`${testimonial.name}-${index}`}
               href={testimonial.url}
               target="_blank"
               rel="noopener noreferrer"
