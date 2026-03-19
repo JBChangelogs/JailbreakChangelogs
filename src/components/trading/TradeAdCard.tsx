@@ -342,7 +342,7 @@ export const TradeAdCard: React.FC<TradeAdCardProps> = ({
       role="region"
     >
       <div className="block">
-        <div className="bg-tertiary-bg border-border-card -mx-3 -mt-3 mb-4 flex items-center justify-between gap-3 border-b px-3 py-2">
+        <div className="bg-tertiary-bg border-border-card -mx-3 -mt-3 mb-4 flex flex-col gap-3 border-b px-3 py-2 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex min-w-0 items-center gap-3">
             <div
               className={`border-border-card bg-primary-bg relative h-10 w-10 shrink-0 overflow-hidden border ${
@@ -393,6 +393,39 @@ export const TradeAdCard: React.FC<TradeAdCardProps> = ({
                   trade.user?.username ||
                   "unknown"}
               </p>
+              <div className="text-secondary-text mt-1 text-xs">
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span className="cursor-help">
+                      Created <RelativeTimeText timestamp={trade.created_at} />
+                    </span>
+                  </TooltipTrigger>
+                  <TooltipContent
+                    side="top"
+                    className="bg-primary-bg text-secondary-text border-none shadow-[var(--color-card-shadow)]"
+                  >
+                    <p>{formatCustomDate(trade.created_at)}</p>
+                  </TooltipContent>
+                </Tooltip>
+                {trade.expires && (
+                  <>
+                    <span className="mx-2">•</span>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <span className="cursor-help">
+                          Expires <RelativeTimeText timestamp={trade.expires} />
+                        </span>
+                      </TooltipTrigger>
+                      <TooltipContent
+                        side="top"
+                        className="bg-primary-bg text-secondary-text border-none shadow-[var(--color-card-shadow)]"
+                      >
+                        <p>{formatCustomDate(trade.expires)}</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </>
+                )}
+              </div>
             </div>
           </div>
           <div className="flex shrink-0 items-center gap-2">
@@ -483,9 +516,9 @@ export const TradeAdCard: React.FC<TradeAdCardProps> = ({
           <TradeSidePreview title="Requesting" items={trade.requesting} />
         </div>
 
-        <div className="mt-4 pt-0">
-          {trade.message_id && (
-            <Button asChild className="mt-2 w-full">
+        {trade.message_id && (
+          <div className="mt-4">
+            <Button asChild className="w-full">
               <a
                 href={`https://discord.com/channels/${discordGuildId}/${discordChannelId}/${trade.message_id}`}
                 target="_blank"
@@ -495,42 +528,8 @@ export const TradeAdCard: React.FC<TradeAdCardProps> = ({
                 View in Discord
               </a>
             </Button>
-          )}
-        </div>
-
-        <div className="text-secondary-text mt-4 text-xs">
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <span className="cursor-help">
-                Created <RelativeTimeText timestamp={trade.created_at} />
-              </span>
-            </TooltipTrigger>
-            <TooltipContent
-              side="top"
-              className="bg-primary-bg text-secondary-text border-none shadow-[var(--color-card-shadow)]"
-            >
-              <p>{formatCustomDate(trade.created_at)}</p>
-            </TooltipContent>
-          </Tooltip>
-          {trade.expires && (
-            <>
-              <span className="ml-2">•</span>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <span className="ml-2 cursor-help">
-                    Expires <RelativeTimeText timestamp={trade.expires} />
-                  </span>
-                </TooltipTrigger>
-                <TooltipContent
-                  side="top"
-                  className="bg-primary-bg text-secondary-text border-none shadow-[var(--color-card-shadow)]"
-                >
-                  <p>{formatCustomDate(trade.expires)}</p>
-                </TooltipContent>
-              </Tooltip>
-            </>
-          )}
-        </div>
+          </div>
+        )}
       </div>
 
       <ConfirmDialog

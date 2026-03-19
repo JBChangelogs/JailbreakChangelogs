@@ -11,7 +11,9 @@ import Breadcrumb from "@/components/Layout/Breadcrumb";
 import ChangelogComments from "@/components/PageComments/ChangelogComments";
 import {
   deleteTradeAd,
+  deleteTradeOfferV2,
   fetchTradeOffers,
+  respondToTradeOfferV2,
   type TradeOfferV2,
 } from "@/utils/trading";
 import { toast } from "sonner";
@@ -108,7 +110,7 @@ const getOfferStatusLabel = (status: unknown): string => {
   if (value === 0) return "Pending";
   if (value === 1) return "Accepted";
   if (value === 2) return "Declined";
-  if (value === 3) return "Cancelled";
+  if (value === 3) return "Completed";
   return "Unknown";
 };
 
@@ -117,7 +119,7 @@ const getOfferStatusBadgeClassName = (status: unknown): string => {
 
   if (value === 1) return "border-status-success/30 bg-status-success/20";
   if (value === 2) return "border-status-error/30 bg-status-error/15";
-  if (value === 3) return "border-status-error/30 bg-status-error/10";
+  if (value === 3) return "border-status-success/30 bg-status-success/10";
   return "border-status-warning/30 bg-status-warning/20";
 };
 
@@ -379,6 +381,7 @@ export default function TradeDetailsClient({
   initialComments = [],
   initialUserMap = {},
 }: TradeDetailsClientProps) {
+  type OfferResponseAction = "accept" | "decline";
   const discordChannelId = "1398359394726449352";
   const discordGuildId = "1286064050135896064";
   const router = useRouter();
@@ -401,6 +404,15 @@ export default function TradeDetailsClient({
     status: "idle" | "checking" | "can_offer" | "already_offered" | "error";
     error: string | null;
   }>({ status: "idle", error: null });
+  const [offerResponseState, setOfferResponseState] = useState<
+    Record<number, OfferResponseAction | undefined>
+  >({});
+  const [offerDeleteState, setOfferDeleteState] = useState<
+    Record<number, boolean | undefined>
+  >({});
+  const [offerDeleteConfirmId, setOfferDeleteConfirmId] = useState<
+    number | null
+  >(null);
   const [tradeOffers, setTradeOffers] = useState<{
     status: "idle" | "loading" | "loaded" | "error";
     offers: TradeOfferV2[];
@@ -642,20 +654,75 @@ export default function TradeDetailsClient({
     };
   }, [offersRefreshToken, trade.id]);
 
+  const handleOfferResponse = async (
+    offerId: number,
+    action: OfferResponseAction,
+  ) => {
+    if (!isOwner) return;
+
+    const toastId = toast.loading(
+      action === "accept" ? "Accepting offer..." : "Declining offer...",
+    );
+    setOfferResponseState((prev) => ({ ...prev, [offerId]: action }));
+
+    try {
+      await respondToTradeOfferV2(trade.id, offerId, action);
+      toast.success(action === "accept" ? "Offer accepted" : "Offer declined", {
+        id: toastId,
+      });
+      setOffersRefreshToken((prev) => prev + 1);
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : "Failed to update offer status";
+      toast.error(message, { id: toastId });
+    } finally {
+      setOfferResponseState((prev) => {
+        const next = { ...prev };
+        delete next[offerId];
+        return next;
+      });
+    }
+  };
+
+  const handleDeleteOffer = async (offerId: number) => {
+    if (!isAuthenticated || !currentUserId) return;
+
+    const toastId = toast.loading("Deleting offer...");
+    setOfferDeleteState((prev) => ({ ...prev, [offerId]: true }));
+
+    try {
+      await deleteTradeOfferV2(trade.id, offerId);
+      toast.success("Offer deleted", { id: toastId });
+      setOffersRefreshToken((prev) => prev + 1);
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : "Failed to delete offer";
+      toast.error(message, { id: toastId });
+    } finally {
+      setOfferDeleteState((prev) => {
+        const next = { ...prev };
+        delete next[offerId];
+        return next;
+      });
+    }
+  };
+
   const handleDelete = async () => {
     if (!trade) return;
 
+    const toastId = toast.loading("Deleting trade ad...");
     try {
       setIsDeleting(true);
       await deleteTradeAd(trade.id);
       toast.success("Trade Ad Deleted", {
+        id: toastId,
         description:
           "Your trade ad has been successfully removed from the platform.",
       });
       router.push("/trading");
     } catch (error) {
       console.error("Error deleting trade ad:", error);
-      toast.error("Failed to delete trade ad");
+      toast.error("Failed to delete trade ad", { id: toastId });
     } finally {
       setIsDeleting(false);
     }
@@ -668,7 +735,7 @@ export default function TradeDetailsClient({
         {/* Trade Card */}
         <div className="border-border-card bg-secondary-bg w-full rounded-lg border p-6">
           <div className="bg-tertiary-bg border-border-card -mx-6 -mt-6 mb-4 flex flex-col gap-3 border-b px-6 py-3 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex items-start justify-between gap-3">
+            <div className="flex w-full items-start justify-between gap-3">
               <div className="flex min-w-0 flex-1 items-center gap-3">
                 <div
                   className={`border-border-card bg-primary-bg relative h-10 w-10 shrink-0 overflow-hidden border ${
@@ -1076,6 +1143,22 @@ export default function TradeDetailsClient({
                             offerUser?.roblox_username ||
                             offerUser?.username ||
                             "Unknown User";
+                          const offerStatusValue =
+                            typeof offer.status === "string"
+                              ? Number(offer.status)
+                              : typeof offer.status === "number"
+                                ? offer.status
+                                : null;
+                          const isPendingOffer = offerStatusValue === 0;
+                          const offerResponseAction =
+                            offerResponseState[offer.id];
+                          const isOfferOwner = !!(
+                            isAuthenticated &&
+                            currentUserId &&
+                            offerUser?.id &&
+                            offerUser.id === currentUserId
+                          );
+                          const isDeletingOffer = !!offerDeleteState[offer.id];
                           const offerAvatarSrc =
                             (getProxyRobloxHeadshotUrl(offerUser?.roblox_id) ||
                               offerUser?.roblox_avatar) ??
@@ -1108,7 +1191,7 @@ export default function TradeDetailsClient({
                               key={offer.id}
                               className="border-border-card bg-secondary-bg overflow-hidden rounded-lg border shadow-[var(--color-card-shadow)]"
                             >
-                              <div className="bg-tertiary-bg border-border-card flex items-start justify-between gap-3 border-b px-4 py-3">
+                              <div className="bg-tertiary-bg border-border-card flex flex-col gap-3 border-b px-4 py-3 sm:flex-row sm:items-start sm:justify-between">
                                 <div className="flex min-w-0 flex-1 items-center gap-3">
                                   <div
                                     className={`border-border-card bg-primary-bg relative h-10 w-10 shrink-0 overflow-hidden border ${
@@ -1201,12 +1284,81 @@ export default function TradeDetailsClient({
                                   </div>
                                 </div>
 
-                                <div className="shrink-0">
+                                <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto sm:shrink-0 sm:justify-end">
                                   <span
                                     className={`text-primary-text inline-flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl ${offerStatusBadgeClassName}`}
                                   >
                                     {offerStatusLabel}
                                   </span>
+
+                                  {isOwner && isPendingOffer && (
+                                    <>
+                                      <Button
+                                        type="button"
+                                        size="sm"
+                                        variant="success"
+                                        className="h-6! px-2.5!"
+                                        disabled={!!offerResponseAction}
+                                        onClick={() =>
+                                          void handleOfferResponse(
+                                            offer.id,
+                                            "accept",
+                                          )
+                                        }
+                                        aria-label="Accept offer"
+                                      >
+                                        <Icon icon="heroicons-outline:check" />
+                                        <span className="hidden sm:inline">
+                                          {offerResponseAction === "accept"
+                                            ? "Accepting..."
+                                            : "Accept"}
+                                        </span>
+                                      </Button>
+
+                                      <Button
+                                        type="button"
+                                        size="sm"
+                                        variant="destructive"
+                                        className="h-6! px-2.5!"
+                                        disabled={!!offerResponseAction}
+                                        onClick={() =>
+                                          void handleOfferResponse(
+                                            offer.id,
+                                            "decline",
+                                          )
+                                        }
+                                        aria-label="Decline offer"
+                                      >
+                                        <Icon icon="heroicons-outline:x-mark" />
+                                        <span className="hidden sm:inline">
+                                          {offerResponseAction === "decline"
+                                            ? "Declining..."
+                                            : "Decline"}
+                                        </span>
+                                      </Button>
+                                    </>
+                                  )}
+
+                                  {isOfferOwner && isPendingOffer && (
+                                    <Button
+                                      type="button"
+                                      size="sm"
+                                      variant="destructive"
+                                      className="h-6! px-2.5!"
+                                      disabled={isDeletingOffer}
+                                      onClick={() =>
+                                        setOfferDeleteConfirmId(offer.id)
+                                      }
+                                      aria-label="Delete offer"
+                                    >
+                                      <Icon icon="heroicons-outline:trash" />
+                                      <span className="hidden sm:inline">
+                                        {isDeletingOffer
+                                          ? "Deleting..."
+                                          : "Delete"}
+                                      </span>
+                                    </Button>
+                                  )}
                                 </div>
                               </div>
 
@@ -1285,6 +1437,22 @@ export default function TradeDetailsClient({
           onConfirm={handleDelete}
           title="Delete Trade Ad"
           message="Are you sure you want to delete this trade ad? This action cannot be undone."
+          confirmText="Delete"
+          cancelText="Cancel"
+          confirmVariant="destructive"
+        />
+
+        <ConfirmDialog
+          isOpen={offerDeleteConfirmId != null}
+          onClose={() => setOfferDeleteConfirmId(null)}
+          onConfirm={() => {
+            if (offerDeleteConfirmId == null) return;
+            const id = offerDeleteConfirmId;
+            setOfferDeleteConfirmId(null);
+            void handleDeleteOffer(id);
+          }}
+          title="Delete Offer"
+          message="Are you sure you want to delete this offer? This action cannot be undone."
           confirmText="Delete"
           cancelText="Cancel"
           confirmVariant="destructive"

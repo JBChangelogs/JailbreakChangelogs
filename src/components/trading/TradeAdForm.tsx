@@ -483,12 +483,16 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
       return;
     }
 
+    if (!isAuthenticated) {
+      toast.error("You must be logged in to create a trade ad");
+      return;
+    }
+
+    let creatingToastId: string | number | null = null;
+
     try {
       setSubmitting(true);
-      if (!isAuthenticated) {
-        toast.error("You must be logged in to create a trade ad");
-        return;
-      }
+      creatingToastId = toast.loading("Posting your trade ad...");
 
       const baseUrl = process.env.NEXT_PUBLIC_API_URL;
       if (!baseUrl) {
@@ -559,12 +563,14 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
           typeof responseCount === "number"
             ? ` (selected: ${responseCount})`
             : "";
-        toast.error(`${message}${countSuffix}`);
-        setSubmitting(false);
+        toast.error(`${message}${countSuffix}`, {
+          id: creatingToastId ?? undefined,
+        });
         return;
       } else if (response.status === 409) {
         toast.error(
           "You already have a similar trade ad. Please modify your items or delete your existing trade ad first.",
+          { id: creatingToastId ?? undefined },
         );
         const availableItemsGrid = document.querySelector(
           '[data-component="available-items-grid"]',
@@ -579,12 +585,13 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
           });
           availableItemsGrid.dispatchEvent(event);
         }
-        setSubmitting(false);
         return;
       } else if (!response.ok) {
         throw new Error(responseMessage || "Failed to create trade ad");
       } else {
-        toast.success("Trade ad created successfully!");
+        toast.success("Trade ad created successfully!", {
+          id: creatingToastId ?? undefined,
+        });
         safeLocalStorage.removeItem("tradeAdFormItems");
         setOfferingItems([]);
         setRequestingItems([]);
@@ -604,7 +611,7 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
         err instanceof Error && err.message
           ? err.message
           : "Failed to create trade ad. Please try again.";
-      toast.error(errorMessage);
+      toast.error(errorMessage, { id: creatingToastId ?? undefined });
     } finally {
       setSubmitting(false);
     }

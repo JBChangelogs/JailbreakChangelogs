@@ -1,6 +1,7 @@
 import React from "react";
 import { Dialog, DialogPanel } from "@headlessui/react";
 import { Button } from "@/components/ui/button";
+import { Icon } from "@/components/ui/IconWrapper";
 
 interface ConfirmDialogProps {
   isOpen: boolean;
@@ -30,7 +31,6 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   title,
   message,
   confirmText = "Confirm",
-  cancelText = "Cancel",
   confirmVariant = "destructive",
   confirmDisabled = false,
   closeOnConfirm = true,
@@ -44,17 +44,25 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
       className={`relative ${zIndexClassName}`}
     >
       <div
-        className="fixed inset-0 bg-black/30 backdrop-blur-sm"
+        className="fixed inset-0 bg-black/50 backdrop-blur-sm"
         aria-hidden="true"
       />
 
       <div className="fixed inset-0 flex items-center justify-center p-4">
-        <DialogPanel className="modal-container border-button-info bg-secondary-bg w-full max-w-[480px] min-w-[320px] rounded-lg border shadow-lg">
-          <div className="modal-header border-border-card text-primary-text border-b px-6 py-4 text-xl font-semibold">
-            {title}
+        <DialogPanel className="border-border-card bg-secondary-bg hover:border-border-focus relative w-full max-w-md rounded-lg border shadow-xl">
+          <div className="border-border-card flex items-center justify-between border-b p-4">
+            <h2 className="text-primary-text text-xl font-semibold">{title}</h2>
+            <button
+              type="button"
+              onClick={onClose}
+              aria-label="Close"
+              className="text-secondary-text hover:text-primary-text hover:bg-quaternary-bg focus-visible:ring-ring inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-md transition-colors focus-visible:ring-1 focus-visible:outline-none"
+            >
+              <Icon icon="heroicons:x-mark" className="h-5 w-5" />
+            </button>
           </div>
 
-          <div className="modal-content p-6">
+          <div className="p-6">
             {children ? (
               children
             ) : (
@@ -62,10 +70,7 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
             )}
           </div>
 
-          <div className="modal-footer flex justify-end gap-2 px-6 py-4">
-            <Button variant="ghost" onClick={onClose} size="sm">
-              {cancelText}
-            </Button>
+          <div className="border-border-card flex justify-end gap-2 border-t p-4">
             <Button
               onClick={() => {
                 if (confirmDisabled) return;

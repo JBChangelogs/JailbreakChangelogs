@@ -166,3 +166,104 @@ export const fetchTradeOffers = async (
   if (!Array.isArray(body)) return [];
   return body as TradeOfferV2[];
 };
+
+export type TradeOfferV2ResponseStatus =
+  | "accept"
+  | "decline"
+  | "complete"
+  | "cancel";
+
+export const respondToTradeOfferV2 = async (
+  tradeId: number,
+  offerId: number,
+  status: TradeOfferV2ResponseStatus,
+): Promise<unknown> => {
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL;
+  if (!baseUrl) {
+    throw new Error("Trade API is not configured");
+  }
+
+  const endpoint = `${baseUrl}/trades/v2/${encodeURIComponent(String(tradeId))}/offers/${encodeURIComponent(String(offerId))}`;
+
+  const response = await fetch(endpoint, {
+    method: "POST",
+    cache: "no-store",
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ status }),
+  });
+
+  if (!response.ok) {
+    let errorMessage = "Failed to update offer status";
+    try {
+      const body = (await response.json()) as unknown;
+      if (body && typeof body === "object") {
+        const message = (body as Record<string, unknown>).message;
+        if (typeof message === "string" && message.trim()) {
+          errorMessage = message;
+        } else {
+          const error = (body as Record<string, unknown>).error;
+          if (typeof error === "string" && error.trim()) {
+            errorMessage = error;
+          }
+        }
+      }
+    } catch {
+      // Ignore parse errors.
+    }
+    if (response.status === 401) {
+      throw new Error("Unauthorized");
+    }
+    throw new Error(errorMessage);
+  }
+
+  try {
+    return await response.json();
+  } catch {
+    return null;
+  }
+};
+
+export const deleteTradeOfferV2 = async (
+  tradeId: number,
+  offerId: number,
+): Promise<boolean> => {
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL;
+  if (!baseUrl) {
+    throw new Error("Trade API is not configured");
+  }
+
+  const endpoint = `${baseUrl}/trades/v2/${encodeURIComponent(String(tradeId))}/offers/${encodeURIComponent(String(offerId))}`;
+
+  const response = await fetch(endpoint, {
+    method: "DELETE",
+    cache: "no-store",
+    credentials: "include",
+  });
+
+  if (!response.ok) {
+    if (response.status === 401) {
+      throw new Error("Unauthorized");
+    }
+    let errorMessage = "Failed to delete offer";
+    try {
+      const body = (await response.json()) as unknown;
+      if (body && typeof body === "object") {
+        const message = (body as Record<string, unknown>).message;
+        if (typeof message === "string" && message.trim()) {
+          errorMessage = message;
+        } else {
+          const error = (body as Record<string, unknown>).error;
+          if (typeof error === "string" && error.trim()) {
+            errorMessage = error;
+          }
+        }
+      }
+    } catch {
+      // Ignore parse errors.
+    }
+    throw new Error(errorMessage);
+  }
+
+  return true;
+};
