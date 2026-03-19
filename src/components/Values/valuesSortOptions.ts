@@ -24,6 +24,27 @@ export const valueSortGroups: ValueSortGroup[] = [
     ],
   },
   {
+    label: "Season",
+    options: [
+      {
+        value: "season-number-asc",
+        label: "Season Number (Oldest to Newest)",
+      },
+      {
+        value: "season-number-desc",
+        label: "Season Number (Newest to Oldest)",
+      },
+      {
+        value: "season-level-asc",
+        label: "Season Level (Low to High)",
+      },
+      {
+        value: "season-level-desc",
+        label: "Season Level (High to Low)",
+      },
+    ],
+  },
+  {
     label: "Last Updated",
     options: [
       { value: "last-updated-desc", label: "Last Updated (Newest to Oldest)" },

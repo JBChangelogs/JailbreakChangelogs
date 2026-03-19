@@ -65,6 +65,8 @@ export default function InventoryItems({
     | "created-desc"
     | "season-asc"
     | "season-desc"
+    | "level-asc"
+    | "level-desc"
     | "cash-desc"
     | "cash-asc"
     | "duped-desc"
@@ -338,7 +340,7 @@ export default function InventoryItems({
       const bParsed = parseUnlockLevelForSort(bLevel);
 
       const kindOrder = (kind: "level" | "percent" | "none") => {
-        // Put season-only items first (no level), then numeric levels, then percent unlocks (e.g. "10%").
+        // For season sorting, keep "season-only" (no level) items first, then numeric levels, then percent unlocks.
         if (kind === "none") return 0;
         if (kind === "level") return 1;
         return 2;
@@ -354,6 +356,254 @@ export default function InventoryItems({
       }
 
       return 0;
+    };
+
+    const compareSeasons = (
+      aSeason: number | null,
+      bSeason: number | null,
+      direction: "asc" | "desc",
+    ) => {
+      const aScore =
+        typeof aSeason === "number"
+          ? aSeason
+          : direction === "asc"
+            ? Infinity
+            : -1;
+      const bScore =
+        typeof bSeason === "number"
+          ? bSeason
+          : direction === "asc"
+            ? Infinity
+            : -1;
+      if (aScore === bScore) return 0;
+      return direction === "asc" ? aScore - bScore : bScore - aScore;
+    };
+
+    type LevelSortKind = "level" | "percent" | "none";
+    const getLevelSortKindRank = (
+      kind: LevelSortKind,
+      direction: "asc" | "desc",
+    ) => {
+      // `level-asc`: numeric levels -> percent -> none
+      // `level-desc`: percent -> numeric levels -> none
+      if (direction === "desc") {
+        if (kind === "percent") return 0;
+        if (kind === "level") return 1;
+        return 2;
+      }
+
+      if (kind === "level") return 0;
+      if (kind === "percent") return 1;
+      return 2;
+    };
+
+    type LevelSortKey = {
+      kindRank: number;
+      indexInSeason: number; // used to "cycle" seasons by lowest available, then next lowest, etc.
+      seasonScore: number; // Infinity for unknown season
+      timeScore: number;
+      title: string;
+    };
+
+    const buildLevelSortKeyByInventoryItemId = (
+      items: Array<{ item: InventoryItem; itemData: Item }>,
+      direction: "asc" | "desc",
+    ) => {
+      type Entry = {
+        inventoryId: string;
+        kind: LevelSortKind;
+        levelValue: number;
+        seasonScore: number;
+        timeScore: number;
+        title: string;
+      };
+
+      const bySeason = new Map<
+        number,
+        { level: Entry[]; percent: Entry[]; none: Entry[] }
+      >();
+
+      const ensure = (seasonScore: number) => {
+        const existing = bySeason.get(seasonScore);
+        if (existing) return existing;
+        const created = { level: [], percent: [], none: [] };
+        bySeason.set(seasonScore, created);
+        return created;
+      };
+
+      for (const { item } of items) {
+        const season = getDisplayedSeasonNumber(item);
+        const seasonScore = typeof season === "number" ? season : Infinity;
+        const level = getDisplayedUnlockLevel(item);
+        const parsed = parseUnlockLevelForSort(level);
+        const kind = parsed.kind;
+
+        const bucket = ensure(seasonScore);
+        const entry: Entry = {
+          inventoryId: item.id,
+          kind,
+          levelValue: parsed.value,
+          seasonScore,
+          timeScore: getLatestTime(item),
+          title: item.title,
+        };
+
+        if (kind === "level") bucket.level.push(entry);
+        else if (kind === "percent") bucket.percent.push(entry);
+        else bucket.none.push(entry);
+      }
+
+      const keyById = new Map<string, LevelSortKey>();
+
+      const sortWithinSeason = (entries: Entry[]) => {
+        entries.sort((a, b) => {
+          // Level sort wants "lowest available per season" first (or highest when direction is desc),
+          // but then cycles seasons by index. So we sort each season's list here.
+          if (a.levelValue !== b.levelValue) {
+            return direction === "asc"
+              ? a.levelValue - b.levelValue
+              : b.levelValue - a.levelValue;
+          }
+          const timeDiff = b.timeScore - a.timeScore;
+          if (timeDiff !== 0) return timeDiff;
+          return a.title.localeCompare(b.title);
+        });
+      };
+
+      for (const [, buckets] of bySeason) {
+        sortWithinSeason(buckets.level);
+        sortWithinSeason(buckets.percent);
+
+        buckets.level.forEach((e, indexInSeason) => {
+          keyById.set(e.inventoryId, {
+            kindRank: getLevelSortKindRank("level", direction),
+            indexInSeason,
+            seasonScore: e.seasonScore,
+            timeScore: e.timeScore,
+            title: e.title,
+          });
+        });
+
+        buckets.percent.forEach((e, indexInSeason) => {
+          keyById.set(e.inventoryId, {
+            kindRank: getLevelSortKindRank("percent", direction),
+            indexInSeason,
+            seasonScore: e.seasonScore,
+            timeScore: e.timeScore,
+            title: e.title,
+          });
+        });
+
+        // No-level items go last and are ordered by season (not cycled), then by newest/title.
+        buckets.none.forEach((e) => {
+          keyById.set(e.inventoryId, {
+            kindRank: getLevelSortKindRank("none", direction),
+            indexInSeason: 0,
+            seasonScore: e.seasonScore,
+            timeScore: e.timeScore,
+            title: e.title,
+          });
+        });
+      }
+
+      return keyById;
+    };
+
+    const buildLevelSortKeyByItemId = (
+      itemsData: Item[],
+      direction: "asc" | "desc",
+    ) => {
+      type Entry = {
+        itemId: number;
+        kind: LevelSortKind;
+        levelValue: number;
+        seasonScore: number;
+        title: string;
+      };
+
+      const bySeason = new Map<
+        number,
+        { level: Entry[]; percent: Entry[]; none: Entry[] }
+      >();
+
+      const ensure = (seasonScore: number) => {
+        const existing = bySeason.get(seasonScore);
+        if (existing) return existing;
+        const created = { level: [], percent: [], none: [] };
+        bySeason.set(seasonScore, created);
+        return created;
+      };
+
+      for (const itemData of itemsData) {
+        const meta = itemUnlockMetadataById?.get(itemData.id);
+        const season = typeof meta?.season === "number" ? meta.season : null;
+        const seasonScore = typeof season === "number" ? season : Infinity;
+        const level = typeof meta?.level === "string" ? meta.level : null;
+        const parsed = parseUnlockLevelForSort(level);
+
+        const bucket = ensure(seasonScore);
+        const entry: Entry = {
+          itemId: itemData.id,
+          kind: parsed.kind,
+          levelValue: parsed.value,
+          seasonScore,
+          title: itemData.name,
+        };
+
+        if (parsed.kind === "level") bucket.level.push(entry);
+        else if (parsed.kind === "percent") bucket.percent.push(entry);
+        else bucket.none.push(entry);
+      }
+
+      const keyById = new Map<number, LevelSortKey>();
+
+      const sortWithinSeason = (entries: Entry[]) => {
+        entries.sort((a, b) => {
+          if (a.levelValue !== b.levelValue) {
+            return direction === "asc"
+              ? a.levelValue - b.levelValue
+              : b.levelValue - a.levelValue;
+          }
+          return a.title.localeCompare(b.title);
+        });
+      };
+
+      for (const [, buckets] of bySeason) {
+        sortWithinSeason(buckets.level);
+        sortWithinSeason(buckets.percent);
+
+        buckets.level.forEach((e, indexInSeason) => {
+          keyById.set(e.itemId, {
+            kindRank: getLevelSortKindRank("level", direction),
+            indexInSeason,
+            seasonScore: e.seasonScore,
+            timeScore: 0,
+            title: e.title,
+          });
+        });
+
+        buckets.percent.forEach((e, indexInSeason) => {
+          keyById.set(e.itemId, {
+            kindRank: getLevelSortKindRank("percent", direction),
+            indexInSeason,
+            seasonScore: e.seasonScore,
+            timeScore: 0,
+            title: e.title,
+          });
+        });
+
+        buckets.none.forEach((e) => {
+          keyById.set(e.itemId, {
+            kindRank: getLevelSortKindRank("none", direction),
+            indexInSeason: 0,
+            seasonScore: e.seasonScore,
+            timeScore: 0,
+            title: e.title,
+          });
+        });
+      }
+
+      return keyById;
     };
 
     if (showMissingItems) {
@@ -495,6 +745,30 @@ export default function InventoryItems({
         };
       });
 
+      if (sortOrder === "level-asc" || sortOrder === "level-desc") {
+        const direction = sortOrder === "level-asc" ? "asc" : "desc";
+        const keyById = buildLevelSortKeyByItemId(
+          mappedMissingItems.map((x) => x.itemData),
+          direction,
+        );
+
+        return [...mappedMissingItems].sort((a, b) => {
+          const aKey = keyById.get(a.itemData.id);
+          const bKey = keyById.get(b.itemData.id);
+          if (!aKey && !bKey) return 0;
+          if (!aKey) return 1;
+          if (!bKey) return -1;
+
+          if (aKey.kindRank !== bKey.kindRank)
+            return aKey.kindRank - bKey.kindRank;
+          if (aKey.indexInSeason !== bKey.indexInSeason)
+            return aKey.indexInSeason - bKey.indexInSeason;
+          if (aKey.seasonScore !== bKey.seasonScore)
+            return aKey.seasonScore - bKey.seasonScore;
+          return aKey.title.localeCompare(bKey.title);
+        });
+      }
+
       // Sort missing items
       return [...mappedMissingItems].sort((a, b) => {
         switch (sortOrder) {
@@ -507,12 +781,8 @@ export default function InventoryItems({
               itemUnlockMetadataById?.get(a.itemData.id)?.season ?? null;
             const bSeason =
               itemUnlockMetadataById?.get(b.itemData.id)?.season ?? null;
-            const aSeasonScore =
-              typeof aSeason === "number" ? aSeason : Infinity;
-            const bSeasonScore =
-              typeof bSeason === "number" ? bSeason : Infinity;
-            if (aSeasonScore !== bSeasonScore)
-              return aSeasonScore - bSeasonScore;
+            const seasonDiff = compareSeasons(aSeason, bSeason, "asc");
+            if (seasonDiff !== 0) return seasonDiff;
 
             const aLevel =
               itemUnlockMetadataById?.get(a.itemData.id)?.level ?? null;
@@ -528,10 +798,8 @@ export default function InventoryItems({
               itemUnlockMetadataById?.get(a.itemData.id)?.season ?? null;
             const bSeason =
               itemUnlockMetadataById?.get(b.itemData.id)?.season ?? null;
-            const aSeasonScore = typeof aSeason === "number" ? aSeason : -1;
-            const bSeasonScore = typeof bSeason === "number" ? bSeason : -1;
-            if (aSeasonScore !== bSeasonScore)
-              return bSeasonScore - aSeasonScore;
+            const seasonDiff = compareSeasons(aSeason, bSeason, "desc");
+            if (seasonDiff !== 0) return seasonDiff;
 
             const aLevel =
               itemUnlockMetadataById?.get(a.itemData.id)?.level ?? null;
@@ -695,6 +963,34 @@ export default function InventoryItems({
     });
 
     // Sort the items
+    if (sortOrder === "level-asc" || sortOrder === "level-desc") {
+      const direction = sortOrder === "level-asc" ? "asc" : "desc";
+      const keyByInventoryId = buildLevelSortKeyByInventoryItemId(
+        mappedItems,
+        direction,
+      );
+
+      return [...mappedItems].sort((a, b) => {
+        const aKey = keyByInventoryId.get(a.item.id);
+        const bKey = keyByInventoryId.get(b.item.id);
+        if (!aKey && !bKey) return 0;
+        if (!aKey) return 1;
+        if (!bKey) return -1;
+
+        if (aKey.kindRank !== bKey.kindRank)
+          return aKey.kindRank - bKey.kindRank;
+        if (aKey.indexInSeason !== bKey.indexInSeason)
+          return aKey.indexInSeason - bKey.indexInSeason;
+        if (aKey.seasonScore !== bKey.seasonScore)
+          return aKey.seasonScore - bKey.seasonScore;
+
+        // Within the same "cycle position", keep newest first.
+        const timeDiff = bKey.timeScore - aKey.timeScore;
+        if (timeDiff !== 0) return timeDiff;
+        return aKey.title.localeCompare(bKey.title);
+      });
+    }
+
     return [...mappedItems].sort((a, b) => {
       switch (sortOrder) {
         case "alpha-asc":
@@ -710,9 +1006,8 @@ export default function InventoryItems({
         case "season-asc": {
           const aSeason = getDisplayedSeasonNumber(a.item);
           const bSeason = getDisplayedSeasonNumber(b.item);
-          const aScore = typeof aSeason === "number" ? aSeason : Infinity;
-          const bScore = typeof bSeason === "number" ? bSeason : Infinity;
-          if (aScore !== bScore) return aScore - bScore;
+          const seasonDiff = compareSeasons(aSeason, bSeason, "asc");
+          if (seasonDiff !== 0) return seasonDiff;
 
           const levelDiff = compareUnlockLevels(
             getDisplayedUnlockLevel(a.item),
@@ -729,9 +1024,8 @@ export default function InventoryItems({
         case "season-desc": {
           const aSeason = getDisplayedSeasonNumber(a.item);
           const bSeason = getDisplayedSeasonNumber(b.item);
-          const aScore = typeof aSeason === "number" ? aSeason : -1;
-          const bScore = typeof bSeason === "number" ? bSeason : -1;
-          if (aScore !== bScore) return bScore - aScore;
+          const seasonDiff = compareSeasons(aSeason, bSeason, "desc");
+          if (seasonDiff !== 0) return seasonDiff;
 
           const levelDiff = compareUnlockLevels(
             getDisplayedUnlockLevel(a.item),
