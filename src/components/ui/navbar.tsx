@@ -378,6 +378,7 @@ export const NavbarModern = ({
               height={48}
               quality={90}
               fetchPriority="high"
+              loading="eager"
               style={{
                 height: "48px",
                 width: "auto",

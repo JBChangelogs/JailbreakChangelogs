@@ -46,7 +46,7 @@ export default function HeroBackgroundCarousel({
       fill
       priority={isFirstRender}
       fetchPriority={isFirstRender ? "high" : "auto"}
-      loading={isFirstRender ? undefined : "lazy"}
+      loading={isFirstRender ? "eager" : "lazy"}
       className="object-cover transition-opacity duration-1000"
       style={{ objectPosition: "center 70%" }}
     />

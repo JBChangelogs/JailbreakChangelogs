@@ -124,6 +124,7 @@ const AdBlockPrompt = () => {
               alt="JBCL Logo"
               width={600}
               height={100}
+              loading="eager"
               className="mx-auto h-auto w-[240px]"
             />
           </div>

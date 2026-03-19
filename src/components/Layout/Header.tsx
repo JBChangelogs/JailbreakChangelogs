@@ -727,6 +727,7 @@ export default function Header() {
                       height={48}
                       quality={90}
                       fetchPriority="high"
+                      loading="eager"
                       unoptimized={false}
                       className="h-9 w-auto sm:h-12"
                     />

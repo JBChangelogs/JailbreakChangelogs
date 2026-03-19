@@ -281,6 +281,7 @@ export default async function RootLayout({
                 alt="Jailbreak Changelogs"
                 width={96}
                 height={96}
+                loading="eager"
                 className="mx-auto mb-6 h-24 w-24"
               />
               <h1 className="text-primary-text mb-4 text-2xl font-bold">
