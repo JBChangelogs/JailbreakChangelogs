@@ -18,13 +18,35 @@ import { UserDetailsTooltip } from "../ui/UserDetailsTooltip";
 import { useAuthContext } from "@/contexts/AuthContext";
 import UserCardSkeleton from "./UserCardSkeleton";
 
-interface PaginatedUsersResponse {
-  items?: UserData[];
-  total?: number;
-  page?: number;
-  seed?: number;
-  total_pages?: number;
-  size?: number;
+function InlineSpinner() {
+  return (
+    <span
+      className="inline-flex items-center align-middle"
+      aria-label="Loading"
+    >
+      <svg
+        className="h-4 w-4 animate-spin"
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+        role="status"
+      >
+        <circle
+          className="opacity-25"
+          cx="12"
+          cy="12"
+          r="10"
+          stroke="currentColor"
+          strokeWidth="4"
+        ></circle>
+        <path
+          className="opacity-75"
+          fill="currentColor"
+          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+        ></path>
+      </svg>
+    </span>
+  );
 }
 
 export default function UserSearch() {
@@ -35,28 +57,48 @@ export default function UserSearch() {
   const pageFromUrl = parseInt(searchParams.get("page") || "1");
 
   const [searchQuery, setSearchQuery] = useState(queryFromUrl);
-  const [page, setPage] = useState(pageFromUrl);
   const [users, setUsers] = useState<UserData[]>([]);
   const [totalPages, setTotalPages] = useState(0);
   const [total, setTotal] = useState(0);
   const [paginationSeed, setPaginationSeed] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const fetchTimeoutIdRef = useRef<NodeJS.Timeout | null>(null);
+  const latestRequestIdRef = useRef(0);
+  const activeAbortControllerRef = useRef<AbortController | null>(null);
   const usersPerPage = 30;
 
   const currentUserId = user?.id ?? null;
 
+  const cancelPendingFetch = useCallback(() => {
+    if (fetchTimeoutIdRef.current) {
+      clearTimeout(fetchTimeoutIdRef.current);
+      fetchTimeoutIdRef.current = null;
+    }
+    activeAbortControllerRef.current?.abort();
+  }, []);
+
+  const startNewRequest = useCallback(() => {
+    cancelPendingFetch();
+    const controller = new AbortController();
+    activeAbortControllerRef.current = controller;
+    latestRequestIdRef.current += 1;
+    return { requestId: latestRequestIdRef.current, signal: controller.signal };
+  }, [cancelPendingFetch]);
+
   // Debounced fetch function for search
   const fetchSearchWithDebounce = useCallback(
     (query: string) => {
-      if (fetchTimeoutIdRef.current) {
-        clearTimeout(fetchTimeoutIdRef.current);
-      }
-
+      const { requestId, signal } = startNewRequest();
+      setIsLoading(true);
       fetchTimeoutIdRef.current = setTimeout(async () => {
-        setIsLoading(true);
         try {
-          const searchResultsRaw = await searchUsers(query, usersPerPage);
+          const searchResultsRaw = await searchUsers(
+            query,
+            usersPerPage,
+            signal,
+          );
+          if (signal.aborted || latestRequestIdRef.current !== requestId)
+            return;
           const searchResults = Array.isArray(searchResultsRaw)
             ? searchResultsRaw
             : [];
@@ -64,47 +106,32 @@ export default function UserSearch() {
           setTotalPages(0); // No pagination for search results
           setTotal(searchResults.length);
         } catch (error) {
+          if (signal.aborted || latestRequestIdRef.current !== requestId)
+            return;
           console.error("Error searching users:", error);
           setUsers([]);
           setTotalPages(0);
           setTotal(0);
         } finally {
-          setIsLoading(false);
+          if (!signal.aborted && latestRequestIdRef.current === requestId) {
+            setIsLoading(false);
+          }
         }
       }, 300);
     },
-    [usersPerPage],
+    [startNewRequest, usersPerPage],
   );
 
   // Debounced fetch function for page changes
   const fetchUsersWithDebounce = useCallback(
     (pageNum: number) => {
-      if (fetchTimeoutIdRef.current) {
-        clearTimeout(fetchTimeoutIdRef.current);
-      }
-
+      const { requestId, signal } = startNewRequest();
+      setIsLoading(true);
       fetchTimeoutIdRef.current = setTimeout(async () => {
-        setIsLoading(true);
         try {
-          let effectiveSeed = paginationSeed;
-
-          // If user lands directly on page > 1 without a seed, fetch page 1 first to get one.
-          if (pageNum > 1 && effectiveSeed === null) {
-            const firstPageData = (await fetchPaginatedUsers(
-              1,
-              usersPerPage,
-            )) as PaginatedUsersResponse;
-            if (typeof firstPageData?.seed === "number") {
-              effectiveSeed = firstPageData.seed;
-              setPaginationSeed(firstPageData.seed);
-            }
-          }
-
-          const data = (await fetchPaginatedUsers(
-            pageNum,
-            usersPerPage,
-            pageNum > 1 ? (effectiveSeed ?? undefined) : undefined,
-          )) as PaginatedUsersResponse;
+          const data = await fetchPaginatedUsers(pageNum, usersPerPage, signal);
+          if (signal.aborted || latestRequestIdRef.current !== requestId)
+            return;
           const items = Array.isArray(data?.items) ? data.items : [];
           const nextTotalPages =
             typeof data?.total_pages === "number" ? data.total_pages : 0;
@@ -118,16 +145,20 @@ export default function UserSearch() {
             setPaginationSeed(nextSeed);
           }
         } catch (error) {
+          if (signal.aborted || latestRequestIdRef.current !== requestId)
+            return;
           console.error("Error fetching users:", error);
           setUsers([]);
           setTotalPages(0);
           setTotal(0);
         } finally {
-          setIsLoading(false);
+          if (!signal.aborted && latestRequestIdRef.current === requestId) {
+            setIsLoading(false);
+          }
         }
       }, 300);
     },
-    [paginationSeed, usersPerPage],
+    [startNewRequest, usersPerPage],
   );
 
   // Initial fetch on mount
@@ -138,7 +169,6 @@ export default function UserSearch() {
   // Sync local state with URL params
   useEffect(() => {
     setSearchQuery(queryFromUrl);
-    setPage(pageFromUrl);
   }, [queryFromUrl, pageFromUrl]);
 
   // Fetch users when URL params change (with debounce)
@@ -146,20 +176,29 @@ export default function UserSearch() {
     if (queryFromUrl.trim()) {
       fetchSearchWithDebounce(queryFromUrl.trim());
     } else {
-      fetchUsersWithDebounce(page);
+      fetchUsersWithDebounce(pageFromUrl);
     }
 
     return () => {
-      if (fetchTimeoutIdRef.current) {
-        clearTimeout(fetchTimeoutIdRef.current);
-      }
+      cancelPendingFetch();
     };
-  }, [queryFromUrl, page, fetchSearchWithDebounce, fetchUsersWithDebounce]);
+  }, [
+    cancelPendingFetch,
+    fetchSearchWithDebounce,
+    fetchUsersWithDebounce,
+    pageFromUrl,
+    queryFromUrl,
+  ]);
 
   // Form submission is handled by Next.js Form component via URL navigation
 
   const handleClearSearch = () => {
+    cancelPendingFetch();
     setSearchQuery("");
+    setUsers([]);
+    setTotalPages(0);
+    setTotal(0);
+    setIsLoading(true);
     router.push("/users");
   };
 
@@ -181,6 +220,11 @@ export default function UserSearch() {
     const value = e.target.value;
     setSearchQuery(value);
     if (value.trim() === "" && queryFromUrl) {
+      cancelPendingFetch();
+      setUsers([]);
+      setTotalPages(0);
+      setTotal(0);
+      setIsLoading(true);
       router.push("/users");
     }
   };
@@ -196,7 +240,7 @@ export default function UserSearch() {
             value={searchQuery}
             onChange={handleInputChange}
             placeholder="Search by ID or username..."
-            className="border-border-card bg-secondary-bg text-primary-text placeholder-secondary-text focus:border-button-info w-full rounded-lg border px-4 py-3 pr-16 transition-all duration-300 focus:outline-none"
+            className="border-border-card bg-secondary-bg text-primary-text placeholder-secondary-text focus:border-button-info w-full rounded-lg border px-4 py-3 pr-16 transition-all duration-300 focus:outline-none disabled:cursor-not-allowed disabled:opacity-70"
             disabled={isLoading}
             required
           />
@@ -272,9 +316,28 @@ export default function UserSearch() {
                   ? queryFromUrl.slice(0, MAX_QUERY_DISPLAY) + "..."
                   : queryFromUrl;
               const usersCount = users?.length ?? 0;
-              return queryFromUrl
-                ? `Found ${usersCount.toLocaleString()} ${usersCount === 1 ? "user" : "users"} matching "${displayQuery}"`
-                : `Total Users: ${total.toLocaleString()}`;
+
+              if (queryFromUrl) {
+                return (
+                  <>
+                    Found{" "}
+                    {isLoading ? (
+                      <InlineSpinner />
+                    ) : (
+                      usersCount.toLocaleString()
+                    )}{" "}
+                    {isLoading ? "users" : usersCount === 1 ? "user" : "users"}{" "}
+                    matching &quot;{displayQuery}&quot;
+                  </>
+                );
+              }
+
+              return (
+                <>
+                  Total Users:{" "}
+                  {isLoading ? <InlineSpinner /> : total.toLocaleString()}
+                </>
+              );
             })()}
           </span>
         </div>
@@ -350,7 +413,7 @@ export default function UserSearch() {
         <div className="mt-8 flex justify-center">
           <Pagination
             count={totalPages}
-            page={page}
+            page={pageFromUrl}
             onChange={handlePageChange}
           />
         </div>

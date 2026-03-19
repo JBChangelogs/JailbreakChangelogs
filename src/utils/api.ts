@@ -207,22 +207,18 @@ export const fetchUsers = async () => {
 export const fetchPaginatedUsers = async (
   page: number = 1,
   size: number = 30,
-  seed?: number,
+  signal?: AbortSignal,
 ) => {
-  const params = new URLSearchParams({
-    page: page.toString(),
-    size: size.toString(),
-  });
-  if (typeof seed === "number") {
-    params.set("seed", seed.toString());
-  }
-
-  const response = await fetch(`/api/users/paginated?${params.toString()}`, {
-    headers: {
-      "User-Agent": "JailbreakChangelogs-UserSearch/1.0",
+  const response = await fetch(
+    `/api/users/paginated?page=${page}&size=${size}`,
+    {
+      headers: {
+        "User-Agent": "JailbreakChangelogs-UserSearch/1.0",
+      },
+      cache: "no-store",
+      signal,
     },
-    cache: "no-store",
-  });
+  );
   if (!response.ok) {
     throw new Error("Failed to fetch paginated users");
   }
@@ -230,7 +226,11 @@ export const fetchPaginatedUsers = async (
   return data;
 };
 
-export const searchUsers = async (username: string, limit: number = 30) => {
+export const searchUsers = async (
+  username: string,
+  limit: number = 30,
+  signal?: AbortSignal,
+) => {
   const response = await fetch(
     `/api/users/search?username=${encodeURIComponent(username)}&limit=${limit}`,
     {
@@ -238,6 +238,7 @@ export const searchUsers = async (username: string, limit: number = 30) => {
         "User-Agent": "JailbreakChangelogs-UserSearch/1.0",
       },
       cache: "no-store",
+      signal,
     },
   );
   if (!response.ok) {
