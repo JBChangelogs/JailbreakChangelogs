@@ -20,6 +20,8 @@ type SortOrder =
   | "created-desc"
   | "season-asc"
   | "season-desc"
+  | "level-asc"
+  | "level-desc"
   | "cash-desc"
   | "cash-asc"
   | "duped-desc"
@@ -92,8 +94,10 @@ export default function InventoryFilters({
     "alpha-desc": "Name (Z to A)",
     "created-asc": "Oldest First",
     "created-desc": "Newest First",
-    "season-asc": "Season (Oldest to Newest)",
-    "season-desc": "Season (Newest to Oldest)",
+    "season-asc": "Season Number (Oldest to Newest)",
+    "season-desc": "Season Number (Newest to Oldest)",
+    "level-asc": "Season Level (Low to High)",
+    "level-desc": "Season Level (High to Low)",
     "cash-desc": "Cash Value (High to Low)",
     "cash-asc": "Cash Value (Low to High)",
     "duped-desc": "Duped Value (High to Low)",
@@ -261,13 +265,25 @@ export default function InventoryFilters({
                   value="season-asc"
                   className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
                 >
-                  Season (Oldest to Newest)
+                  Season Number (Oldest to Newest)
                 </DropdownMenuRadioItem>
                 <DropdownMenuRadioItem
                   value="season-desc"
                   className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
                 >
-                  Season (Newest to Oldest)
+                  Season Number (Newest to Oldest)
+                </DropdownMenuRadioItem>
+                <DropdownMenuRadioItem
+                  value="level-asc"
+                  className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
+                >
+                  Season Level (Low to High)
+                </DropdownMenuRadioItem>
+                <DropdownMenuRadioItem
+                  value="level-desc"
+                  className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
+                >
+                  Season Level (High to Low)
                 </DropdownMenuRadioItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuLabel className="text-secondary-text px-3 py-1 text-xs tracking-widest uppercase">
