@@ -998,7 +998,7 @@ export default function InventoryBreakdown({
               <>
                 <ChartContainer
                   config={collectionChartConfig}
-                  className="[&_.recharts-pie-label-text]:fill-foreground mx-auto aspect-square max-h-[360px] w-full"
+                  className="[&_.recharts-pie-label-text]:fill-foreground mx-auto aspect-square h-[min(360px,calc(100vw-3rem))] max-h-[360px] w-full max-w-[360px]"
                 >
                   <PieChart>
                     <ChartTooltip
@@ -1225,7 +1225,7 @@ export default function InventoryBreakdown({
             </div>
             <ChartContainer
               config={categoryChartConfig}
-              className="[&_.recharts-pie-label-text]:fill-foreground mx-auto aspect-square max-h-[360px] w-full"
+              className="[&_.recharts-pie-label-text]:fill-foreground mx-auto aspect-square h-[min(360px,calc(100vw-3rem))] max-h-[360px] w-full max-w-[360px]"
             >
               <PieChart>
                 <ChartTooltip
@@ -1419,7 +1419,7 @@ export default function InventoryBreakdown({
                 </div>
                 <ChartContainer
                   config={categoryChartConfig}
-                  className="[&_.recharts-pie-label-text]:fill-foreground mx-auto aspect-square max-h-[360px] w-full"
+                  className="[&_.recharts-pie-label-text]:fill-foreground mx-auto aspect-square h-[min(360px,calc(100vw-3rem))] max-h-[360px] w-full max-w-[360px]"
                 >
                   <PieChart>
                     <ChartTooltip
