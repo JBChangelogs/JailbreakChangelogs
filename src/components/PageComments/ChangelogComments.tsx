@@ -1309,7 +1309,10 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
               <div className="relative mb-6">
                 <div className="from-border-focus/20 to-button-info-hover/20 absolute inset-0 rounded-full bg-linear-to-r blur-xl"></div>
                 <div className="border-border-focus/30 bg-secondary-bg relative rounded-full border p-4">
-                  <CircularProgress size={32} className="text-border-focus" />
+                  <CircularProgress
+                    size="2.5rem"
+                    className="text-border-focus flex"
+                  />
                 </div>
               </div>
               <h3 className="text-primary-text mb-2 text-lg font-semibold sm:text-xl">
