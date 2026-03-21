@@ -42,7 +42,12 @@ export function shouldShowDesktopNotification(options?: {
   if (Notification.permission !== "granted") return false;
   if (typeof document === "undefined") return false;
   if (options?.allowWhenVisible) return true;
-  return document.visibilityState !== "visible";
+
+  const isTabVisible = document.visibilityState === "visible";
+  const isWindowFocused =
+    typeof document.hasFocus === "function" ? document.hasFocus() : true;
+
+  return !isTabVisible || !isWindowFocused;
 }
 
 export function showDesktopNotification(input: {
