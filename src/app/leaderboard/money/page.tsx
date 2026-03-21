@@ -4,8 +4,7 @@ import MoneyLeaderboardClient from "@/components/Leaderboard/MoneyLeaderboardCli
 import { checkMoneyLeaderboardMaintenanceMode } from "@/utils/maintenance";
 import FeatureMaintenance from "@/theme/FeatureMaintenance";
 
-// Cache this page for 30 minutes
-export const revalidate = 1800;
+export const dynamic = "force-dynamic";
 
 export default async function MoneyLeaderboardPage() {
   // Check for money leaderboard maintenance mode
