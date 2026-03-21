@@ -55,12 +55,15 @@ export default function UserSearch() {
   const router = useRouter();
   const queryFromUrl = searchParams.get("query") || "";
   const pageFromUrl = parseInt(searchParams.get("page") || "1");
+  const seedFromUrl = searchParams.get("seed");
 
   const [searchQuery, setSearchQuery] = useState(queryFromUrl);
   const [users, setUsers] = useState<UserData[]>([]);
   const [totalPages, setTotalPages] = useState(0);
   const [total, setTotal] = useState(0);
-  const [paginationSeed, setPaginationSeed] = useState<number | null>(null);
+  const [paginationSeed, setPaginationSeed] = useState<string | null>(
+    seedFromUrl,
+  );
   const [isLoading, setIsLoading] = useState(true);
   const fetchTimeoutIdRef = useRef<NodeJS.Timeout | null>(null);
   const latestRequestIdRef = useRef(0);
@@ -129,20 +132,35 @@ export default function UserSearch() {
       setIsLoading(true);
       fetchTimeoutIdRef.current = setTimeout(async () => {
         try {
-          const data = await fetchPaginatedUsers(pageNum, usersPerPage, signal);
+          const effectiveSeed = seedFromUrl || paginationSeed;
+          const data = await fetchPaginatedUsers(
+            pageNum,
+            usersPerPage,
+            signal,
+            effectiveSeed,
+          );
           if (signal.aborted || latestRequestIdRef.current !== requestId)
             return;
           const items = Array.isArray(data?.items) ? data.items : [];
           const nextTotalPages =
             typeof data?.total_pages === "number" ? data.total_pages : 0;
           const nextTotal = typeof data?.total === "number" ? data.total : 0;
-          const nextSeed = typeof data?.seed === "number" ? data.seed : null;
+          const nextSeed =
+            data?.seed === null || data?.seed === undefined
+              ? null
+              : String(data.seed);
 
           setUsers(items);
           setTotalPages(nextTotalPages);
           setTotal(nextTotal);
-          if (pageNum === 1 && nextSeed !== null) {
+          if (pageNum === 1 && nextSeed) {
             setPaginationSeed(nextSeed);
+            if (!seedFromUrl) {
+              const params = new URLSearchParams();
+              params.set("seed", nextSeed);
+              const queryString = params.toString();
+              router.replace(queryString ? `/users?${queryString}` : "/users");
+            }
           }
         } catch (error) {
           if (signal.aborted || latestRequestIdRef.current !== requestId)
@@ -158,7 +176,7 @@ export default function UserSearch() {
         }
       }, 300);
     },
-    [startNewRequest, usersPerPage],
+    [startNewRequest, usersPerPage, seedFromUrl, paginationSeed, router],
   );
 
   // Initial fetch on mount
@@ -169,7 +187,8 @@ export default function UserSearch() {
   // Sync local state with URL params
   useEffect(() => {
     setSearchQuery(queryFromUrl);
-  }, [queryFromUrl, pageFromUrl]);
+    setPaginationSeed(seedFromUrl);
+  }, [queryFromUrl, pageFromUrl, seedFromUrl]);
 
   // Fetch users when URL params change (with debounce)
   useEffect(() => {
@@ -209,6 +228,9 @@ export default function UserSearch() {
     const params = new URLSearchParams();
     if (queryFromUrl) {
       params.set("query", queryFromUrl);
+    }
+    if (!queryFromUrl && paginationSeed) {
+      params.set("seed", paginationSeed);
     }
     if (value > 1) {
       params.set("page", value.toString());

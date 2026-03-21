@@ -25,6 +25,7 @@ import { safeSetJSON } from "@/utils/safeStorage";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import { toast } from "sonner";
 import { NotificationPreferenceToggle } from "@/components/Settings/NotificationPreferenceToggle";
+import { DesktopNotificationToggle } from "@/components/Settings/DesktopNotificationToggle";
 import {
   fetchAvailableNotificationPreferences,
   fetchUserNotificationPreferences,
@@ -707,6 +708,9 @@ export default function SettingsPage() {
               )}
             </h2>
             <div className="border-border-card mb-2 border-t" />
+
+            <DesktopNotificationToggle />
+            <div className="border-border-card mb-2 border-t opacity-50" />
 
             <EmailNotificationSettings userData={userData} />
             <div className="border-border-card mb-2 border-t opacity-50" />

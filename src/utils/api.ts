@@ -208,17 +208,20 @@ export const fetchPaginatedUsers = async (
   page: number = 1,
   size: number = 30,
   signal?: AbortSignal,
+  seed?: string | null,
 ) => {
-  const response = await fetch(
-    `/api/users/paginated?page=${page}&size=${size}`,
-    {
-      headers: {
-        "User-Agent": "JailbreakChangelogs-UserSearch/1.0",
-      },
-      cache: "no-store",
-      signal,
+  const params = new URLSearchParams();
+  params.set("page", page.toString());
+  params.set("size", size.toString());
+  if (seed) params.set("seed", seed);
+
+  const response = await fetch(`/api/users/paginated?${params.toString()}`, {
+    headers: {
+      "User-Agent": "JailbreakChangelogs-UserSearch/1.0",
     },
-  );
+    cache: "no-store",
+    signal,
+  });
   if (!response.ok) {
     throw new Error("Failed to fetch paginated users");
   }

@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef } from "react";
 import { toast } from "sonner";
 import { ENABLE_REALTIME_NOTIFICATIONS_WS, WS_URL } from "@/utils/api";
 import { parseNotificationUrl } from "@/utils/notificationUrl";
+import { showDesktopNotification } from "@/utils/desktopNotifications";
 
 interface RealtimeNotificationContent {
   title?: string;
@@ -40,9 +41,18 @@ const MAX_RECONNECT_DELAY_MS = 15000;
 const SOUND_COOLDOWN_MS = 800;
 const MAX_HANDSHAKE_RETRIES = 3;
 
+function toNotificationBody(value: unknown, maxLen = 140): string | undefined {
+  if (typeof value !== "string") return undefined;
+  const trimmed = value.trim();
+  if (!trimmed) return undefined;
+  if (trimmed.length <= maxLen) return trimmed;
+  return `${trimmed.slice(0, maxLen - 1)}…`;
+}
+
 function getRealtimeWsUrl(): string | null {
   const baseUrl = WS_URL?.replace(/\/+$/, "");
   if (!baseUrl) return null;
+
   return `${baseUrl}/realtime`;
 }
 
@@ -261,6 +271,14 @@ export function useRealtimeNotificationsWebSocket(enabled: boolean): void {
 
                 if (payload.action === "message_received") {
                   const senderId = String(dmData.user_id);
+                  showDesktopNotification({
+                    title: "New message",
+                    body:
+                      toNotificationBody(dmData.content) ??
+                      "Check your messages.",
+                    url: `${window.location.origin}/messages/${encodeURIComponent(senderId)}`,
+                    tag: `realtime-dm:${String(dmData.id)}`,
+                  });
                   toast("You have a new message", {
                     id: `realtime-dm:${String(dmData.id)}`,
                     description: "Check your messages.",
@@ -358,6 +376,24 @@ export function useRealtimeNotificationsWebSocket(enabled: boolean): void {
               id: toastId,
               description: notificationDescription,
               action,
+            });
+
+            const desktopUrl = (() => {
+              if (!link) return undefined;
+              if (urlInfo?.isJailbreakChangelogs && urlInfo.relativePath) {
+                return `${window.location.origin}${urlInfo.relativePath}`;
+              }
+              if (!urlInfo?.isJailbreakChangelogs && urlInfo?.href) {
+                return urlInfo.href;
+              }
+              return undefined;
+            })();
+
+            showDesktopNotification({
+              title: notificationTitle,
+              body: notificationDescription,
+              url: desktopUrl,
+              tag: toastId,
             });
 
             const now = Date.now();
