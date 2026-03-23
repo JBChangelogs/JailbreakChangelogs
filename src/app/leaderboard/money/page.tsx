@@ -20,7 +20,13 @@ export default async function MoneyLeaderboardPage() {
     );
   }
 
-  const leaderboard = await fetchMoneyLeaderboard();
+  let leaderboard;
+  try {
+    leaderboard = await fetchMoneyLeaderboard();
+  } catch (error) {
+    console.error("[BUILD] Error fetching money leaderboard:", error);
+    leaderboard = [];
+  }
 
   return (
     <main className="mb-8 min-h-screen">
