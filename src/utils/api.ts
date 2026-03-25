@@ -834,7 +834,7 @@ export async function fetchTradeAds() {
   };
 
   try {
-    const response = await fetch(`${BASE_API_URL}/trades/v2/recent?limit=12`, {
+    const response = await fetch(`${BASE_API_URL}/trades/v2/recent?limit=24`, {
       headers: {
         "User-Agent": "JailbreakChangelogs-Trading/2.0",
       },

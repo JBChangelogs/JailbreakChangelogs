@@ -8,6 +8,7 @@ import { RobloxIcon } from "@/components/Icons/RobloxIcon";
 import { formatShortDate, formatCustomDate } from "@/utils/timestamp";
 import TradeAdsTab from "./TradeAdsTab";
 import { CircularProgress, Skeleton } from "@mui/material";
+import type { TradeAd } from "@/types/trading";
 
 import {
   Tooltip,
@@ -22,36 +23,6 @@ interface User {
   roblox_display_name?: string;
   roblox_avatar?: string;
   roblox_join_date?: number;
-}
-
-interface TradeItem {
-  id: number | string;
-  name: string;
-  type: string;
-  creator: string;
-  is_seasonal: number;
-  cash_value: string;
-  duped_value: string;
-  price: string;
-  is_limited: number;
-  duped_owners: string;
-  notes: string;
-  demand: string;
-  description: string;
-  health: number;
-  tradable: number;
-  last_updated: number;
-}
-
-interface TradeAd {
-  id: number;
-  requesting: TradeItem[];
-  offering: TradeItem[];
-  author: string;
-  created_at: number;
-  expires: number | null;
-  expired: number;
-  status: string;
 }
 
 interface RobloxProfileTabProps {

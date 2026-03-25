@@ -20,36 +20,7 @@ import {
   getTradeItemDetailHref,
   getTradeItemImagePath,
 } from "@/utils/tradeItems";
-
-interface TradeItem {
-  id: number | string;
-  name: string;
-  type: string;
-  creator: string;
-  is_seasonal: number;
-  cash_value: string;
-  duped_value: string;
-  price: string;
-  is_limited: number;
-  duped_owners: string;
-  notes: string;
-  demand: string;
-  description: string;
-  health: number;
-  tradable: number;
-  last_updated: number;
-}
-
-interface TradeAd {
-  id: number;
-  requesting: TradeItem[];
-  offering: TradeItem[];
-  author: string;
-  created_at: number;
-  expires: number | null;
-  expired: number;
-  status: string;
-}
+import type { TradeAd, TradeItem } from "@/types/trading";
 
 const getStatusColor = (status: string) => {
   switch (status) {

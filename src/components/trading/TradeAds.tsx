@@ -300,7 +300,7 @@ export default function TradeAds({
       throw new Error("NEXT_PUBLIC_API_URL is not configured");
     }
 
-    const response = await fetch(`${baseUrl}/trades/v2/recent?limit=12`, {
+    const response = await fetch(`${baseUrl}/trades/v2/recent?limit=24`, {
       cache: "no-store",
       credentials: "include",
       headers: {

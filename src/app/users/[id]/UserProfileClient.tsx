@@ -33,6 +33,7 @@ import ProfileTabs from "@/components/Profile/ProfileTabs";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { DiscordIcon } from "@/components/Icons/DiscordIcon";
 import { RobloxIcon } from "@/components/Icons/RobloxIcon";
+import type { TradeAd } from "@/types/trading";
 const FollowersModal = dynamic(
   () => import("@/components/Users/FollowersModal"),
   {
@@ -223,36 +224,6 @@ interface FavoriteItem {
       type: string;
     };
   };
-}
-
-interface TradeItem {
-  id: number | string;
-  name: string;
-  type: string;
-  creator: string;
-  is_seasonal: number;
-  cash_value: string;
-  duped_value: string;
-  price: string;
-  is_limited: number;
-  duped_owners: string;
-  notes: string;
-  demand: string;
-  description: string;
-  health: number;
-  tradable: number;
-  last_updated: number;
-}
-
-interface TradeAd {
-  id: number;
-  requesting: TradeItem[];
-  offering: TradeItem[];
-  author: string;
-  created_at: number;
-  expires: number | null;
-  expired: number;
-  status: string;
 }
 
 interface UserProfileData {

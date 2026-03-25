@@ -5,6 +5,7 @@ import { UserSettings, UserFlag } from "@/types/auth";
 import { ProfileDataService } from "@/services/profileDataService";
 import { logError } from "@/services/logger";
 import { getCurrentUser } from "@/utils/serverSession";
+import type { TradeAd } from "@/types/trading";
 
 interface CommentData {
   id: number;
@@ -76,36 +77,6 @@ interface FavoriteItem {
       type: string;
     };
   };
-}
-
-interface TradeItem {
-  id: number | string;
-  name: string;
-  type: string;
-  creator: string;
-  is_seasonal: number;
-  cash_value: string;
-  duped_value: string;
-  price: string;
-  is_limited: number;
-  duped_owners: string;
-  notes: string;
-  demand: string;
-  description: string;
-  health: number;
-  tradable: number;
-  last_updated: number;
-}
-
-interface TradeAd {
-  id: number;
-  requesting: TradeItem[];
-  offering: TradeItem[];
-  author: string;
-  created_at: number;
-  expires: number | null;
-  expired: number;
-  status: string;
 }
 
 interface UserProfileData {
