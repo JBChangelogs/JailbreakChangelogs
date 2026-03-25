@@ -20,7 +20,7 @@
 
 Leave us a ⭐ if you like the Jailbreak Changelogs project.
 
-[![Stargazers over time](https://starchart.cc/JBChangelogs/JailbreakChangelogs.svg?background=%23121317&axis=%23fffffe&line=%231d80e2)](https://starchart.cc/JBChangelogs/JailbreakChangelogs)
+[![Stargazers over time](https://starchart.cc/JBChangelogs/JailbreakChangelogs.svg?background=%23121317&axis=%23fffffe&line=%23017ffe)](https://starchart.cc/JBChangelogs/JailbreakChangelogs)
 
 # Jailbreak Changelogs
 
@@ -75,7 +75,8 @@ Our platform offers comprehensive Roblox Jailbreak related features:
 
 - [Jalenzz16](https://github.com/Jalenzzz) - Co-founder & Lead Front-end Developer
 - [Jakobiis](https://github.com/Jakobiis/) - Co-founder, Lead Back-end Developer & API Architect
-- [linsonder6](https://github.com/linsonder6/) - Back-end Developer
+- [linsonder6](https://github.com/linsonder6/) - Bot Scanning Developer
+- [sencha](#) - Bot Scanning Developer
 
 **Jailbreak Changelogs LLC** - The legal entity operating this platform
 
