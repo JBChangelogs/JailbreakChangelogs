@@ -619,19 +619,12 @@ export default function MessagesInbox() {
   const activeOfferAccepted = offerAcceptedEvents[activeOfferAcceptedIndex];
   const canMarkOfferComplete = useMemo(() => {
     if (!currentUserId || !activeOfferAccepted) return false;
-    const userId = asId(currentUserId);
-    const participants = [
-      activeOfferAccepted.metadata.user,
-      activeOfferAccepted.metadata.trade_user,
-      activeOfferDetailsStatus.status === "loaded"
-        ? activeOfferDetailsStatus.data.user?.id
-        : null,
-    ];
-    return participants.some((id) => {
-      if (typeof id !== "string" && typeof id !== "number") return false;
-      return asId(id) === userId;
-    });
-  }, [activeOfferAccepted, activeOfferDetailsStatus, currentUserId]);
+    const tradeOwnerId = activeOfferAccepted.metadata.trade_user;
+    if (typeof tradeOwnerId !== "string" && typeof tradeOwnerId !== "number") {
+      return false;
+    }
+    return asId(tradeOwnerId) === asId(currentUserId);
+  }, [activeOfferAccepted, currentUserId]);
 
   const [isMarkingOfferComplete, setIsMarkingOfferComplete] = useState(false);
 
@@ -1613,6 +1606,11 @@ export default function MessagesInbox() {
                   const isActive = selectedUserId === conversation.user.id;
                   const isSystemPreview =
                     conversation.lastMessage?.type === "system";
+                  const isOwnPreview =
+                    !!currentUserId &&
+                    !!conversation.lastMessage &&
+                    conversation.lastMessage.type !== "system" &&
+                    conversation.lastMessage.senderId === currentUserId;
                   const previewText = conversation.lastMessage
                     ? conversation.lastMessage.type === "system"
                       ? formatSystemMessageContent(
@@ -1620,7 +1618,9 @@ export default function MessagesInbox() {
                           currentUserId,
                           conversation.user,
                         )
-                      : conversation.lastMessage.content
+                      : isOwnPreview
+                        ? `You: ${conversation.lastMessage.content}`
+                        : conversation.lastMessage.content
                     : "No messages yet";
                   return (
                     <button
