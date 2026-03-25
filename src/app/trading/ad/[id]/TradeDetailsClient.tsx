@@ -30,6 +30,7 @@ import TradeItemHoverTooltip from "@/components/trading/TradeItemHoverTooltip";
 import { MakeOfferDialog } from "@/components/trading/MakeOfferDialog";
 import { handleImageError } from "@/utils/images";
 import { sanitizeText } from "@/utils/sanitizeText";
+import { consumeMakeOfferLoadingToastId } from "@/utils/makeOfferToasts";
 import {
   getTradeItemDetailHref,
   getTradeItemIdentifier,
@@ -556,6 +557,44 @@ export default function TradeDetailsClient({
     };
   }, [currentUserId, isAuthenticated, isOwner, trade.author, trade.id]);
 
+  const pendingMakeOfferToastIdRef = useRef<string | number | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (pendingMakeOfferToastIdRef.current) {
+        toast.dismiss(pendingMakeOfferToastIdRef.current);
+        pendingMakeOfferToastIdRef.current = null;
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    const wantsAutoOffer =
+      searchParams?.get("makeOffer") === "1" ||
+      searchParams?.get("make_offer") === "1" ||
+      searchParams?.get("offer") === "1";
+
+    if (!wantsAutoOffer) return;
+    if (pendingMakeOfferToastIdRef.current) return;
+
+    const storedId = consumeMakeOfferLoadingToastId();
+    if (storedId) {
+      pendingMakeOfferToastIdRef.current = storedId;
+      toast.loading("Checking offer status...", {
+        id: storedId,
+        duration: Infinity,
+      });
+      return;
+    }
+
+    pendingMakeOfferToastIdRef.current = toast.loading(
+      "Checking offer status...",
+      {
+        duration: Infinity,
+      },
+    );
+  }, [searchParams]);
+
   useEffect(() => {
     const wantsAutoOffer =
       searchParams?.get("makeOffer") === "1" ||
@@ -567,7 +606,15 @@ export default function TradeDetailsClient({
 
     if (!isAuthenticated) {
       autoOfferHandledRef.current = true;
-      toast.error("Please log in to make an offer.");
+      if (pendingMakeOfferToastIdRef.current) {
+        toast.error("Please log in to make an offer.", {
+          id: pendingMakeOfferToastIdRef.current,
+          duration: 5000,
+        });
+        pendingMakeOfferToastIdRef.current = null;
+      } else {
+        toast.error("Please log in to make an offer.");
+      }
       setLoginModal({ open: true });
       if (pathname) {
         window.history.replaceState(null, "", pathname);
@@ -577,6 +624,10 @@ export default function TradeDetailsClient({
 
     if (isOwner || trade.status !== "Pending") {
       autoOfferHandledRef.current = true;
+      if (pendingMakeOfferToastIdRef.current) {
+        toast.dismiss(pendingMakeOfferToastIdRef.current);
+        pendingMakeOfferToastIdRef.current = null;
+      }
       if (pathname) {
         window.history.replaceState(null, "", pathname);
       }
@@ -590,6 +641,10 @@ export default function TradeDetailsClient({
     autoOfferHandledRef.current = true;
 
     if (offerState.status === "can_offer") {
+      if (pendingMakeOfferToastIdRef.current) {
+        toast.dismiss(pendingMakeOfferToastIdRef.current);
+        pendingMakeOfferToastIdRef.current = null;
+      }
       setShowOfferDialog(true);
       if (pathname) {
         window.history.replaceState(null, "", pathname);
@@ -598,14 +653,38 @@ export default function TradeDetailsClient({
     }
 
     if (offerState.status === "already_offered") {
-      toast.error("You already sent an offer for this trade ad.");
+      if (pendingMakeOfferToastIdRef.current) {
+        toast.error("You already sent an offer for this trade ad.", {
+          id: pendingMakeOfferToastIdRef.current,
+          duration: 5000,
+        });
+        pendingMakeOfferToastIdRef.current = null;
+      } else {
+        toast.error("You already sent an offer for this trade ad.");
+      }
       if (pathname) {
         window.history.replaceState(null, "", pathname);
       }
       return;
     }
 
-    toast.error(offerState.error || "Unable to make an offer right now.");
+    if (offerState.status === "error") {
+      if (pendingMakeOfferToastIdRef.current) {
+        toast.dismiss(pendingMakeOfferToastIdRef.current);
+        pendingMakeOfferToastIdRef.current = null;
+      }
+      setShowOfferDialog(true);
+    } else if (pendingMakeOfferToastIdRef.current) {
+      const message = offerState.error || "Unable to make an offer right now.";
+      toast.error(message, {
+        id: pendingMakeOfferToastIdRef.current,
+        duration: 5000,
+      });
+      pendingMakeOfferToastIdRef.current = null;
+    } else {
+      const message = offerState.error || "Unable to make an offer right now.";
+      toast.error(message);
+    }
     if (pathname) {
       window.history.replaceState(null, "", pathname);
     }

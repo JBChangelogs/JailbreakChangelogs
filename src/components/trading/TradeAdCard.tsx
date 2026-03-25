@@ -19,6 +19,7 @@ import {
 } from "@/utils/tradeItems";
 import { getCategoryColor, getCategoryIcon } from "@/utils/categoryIcons";
 import { sanitizeText } from "@/utils/sanitizeText";
+import { startMakeOfferLoadingToast } from "@/utils/makeOfferToasts";
 
 import {
   Tooltip,
@@ -451,6 +452,9 @@ export const TradeAdCard: React.FC<TradeAdCardProps> = ({
                 <Link
                   href={`/trading/ad/${trade.id}?makeOffer=1`}
                   prefetch={false}
+                  onClick={() => {
+                    startMakeOfferLoadingToast("Preparing offer...");
+                  }}
                 >
                   <Icon icon="heroicons-outline:hand-raised" />
                   <span className="hidden sm:inline">Make Offer</span>
