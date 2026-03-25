@@ -610,14 +610,10 @@ export default function MessagesInbox() {
 
   useEffect(() => {
     if (activeOfferDetailsStatus.status === "loaded") {
-      const isCompleted = activeOfferDetailsStatus.data.status === 3;
-      setOfferBannerVisible(!isCompleted);
+      setOfferBannerVisible(activeOfferDetailsStatus.data.status === 1);
       return;
     }
-    if (activeOfferDetailsStatus.status === "not_found") {
-      // Keep banner visible so users can navigate back to a valid offer.
-      setOfferBannerVisible(true);
-    }
+    setOfferBannerVisible(false);
   }, [activeOfferDetailsStatus]);
 
   const activeOfferAccepted = offerAcceptedEvents[activeOfferAcceptedIndex];
