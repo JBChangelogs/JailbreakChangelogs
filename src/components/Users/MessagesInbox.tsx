@@ -1,6 +1,13 @@
 "use client";
 
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -380,6 +387,12 @@ function formatMessageText(value: string): string {
   return sanitizeText(decodeHtmlEntities(value));
 }
 
+const OFFER_DETAILS_NOT_FOUND = Symbol("offer_details_not_found");
+type OfferDetailsCacheValue =
+  | TradeOfferDetails
+  | null
+  | typeof OFFER_DETAILS_NOT_FOUND;
+
 export default function MessagesInbox() {
   const pathname = usePathname();
   const router = useRouter();
@@ -511,9 +524,11 @@ export default function MessagesInbox() {
   }, [messages]);
 
   const [activeOfferAcceptedIndex, setActiveOfferAcceptedIndex] = useState(0);
-  const offerDetailsCacheRef = useRef<Map<string, TradeOfferDetails | null>>(
+  const offerDetailsCacheRef = useRef<Map<string, OfferDetailsCacheValue>>(
     new Map(),
   );
+  const offerDetailsPendingRef = useRef<Map<string, Promise<void>>>(new Map());
+  const [offerDetailsCacheVersion, setOfferDetailsCacheVersion] = useState(0);
   const [activeOfferDetailsStatus, setActiveOfferDetailsStatus] = useState<
     | { status: "idle" }
     | { status: "loading" }
@@ -525,6 +540,83 @@ export default function MessagesInbox() {
   useEffect(() => {
     setActiveOfferAcceptedIndex(0);
   }, [selectedUserId, offerAcceptedEvents.length]);
+
+  const getOfferDetailsKey = useCallback(
+    (metadata: OfferAcceptedMetadata) =>
+      `${metadata.trade}:${metadata.offer}` as const,
+    [],
+  );
+
+  const ensureOfferDetailsCached = useCallback(
+    async (metadata: OfferAcceptedMetadata) => {
+      if (!PUBLIC_API_URL) return;
+
+      const key = getOfferDetailsKey(metadata);
+      const cache = offerDetailsCacheRef.current;
+      if (cache.has(key)) return;
+
+      const pending = offerDetailsPendingRef.current.get(key);
+      if (pending) return pending;
+
+      const promise = (async () => {
+        try {
+          const response = await fetch(
+            `${PUBLIC_API_URL}/trades/v2/${encodeURIComponent(String(metadata.trade))}/offers/${encodeURIComponent(String(metadata.offer))}`,
+            {
+              method: "GET",
+              credentials: "include",
+              cache: "no-store",
+            },
+          );
+
+          const raw = await response.text();
+          const parsed = raw ? (parseJsonWithLargeIds(raw) as unknown) : null;
+
+          if (response.status === 404 && parsed && typeof parsed === "object") {
+            const errorCode = (parsed as Record<string, unknown>).error;
+            if (errorCode === "trade_not_found") {
+              cache.set(key, OFFER_DETAILS_NOT_FOUND);
+              return;
+            }
+          }
+
+          if (!response.ok || !parsed || typeof parsed !== "object") {
+            cache.set(key, null);
+            return;
+          }
+
+          cache.set(key, parsed as TradeOfferDetails);
+        } catch (err) {
+          console.error("Offer details fetch error:", err);
+          offerDetailsCacheRef.current.set(key, null);
+        } finally {
+          offerDetailsPendingRef.current.delete(key);
+          setOfferDetailsCacheVersion((prev) => prev + 1);
+        }
+      })();
+
+      offerDetailsPendingRef.current.set(key, promise);
+      return promise;
+    },
+    [getOfferDetailsKey],
+  );
+
+  useEffect(() => {
+    if (!PUBLIC_API_URL || offerAcceptedEvents.length === 0) return;
+
+    let isCancelled = false;
+    const run = async () => {
+      for (const event of offerAcceptedEvents) {
+        if (isCancelled) return;
+        await ensureOfferDetailsCached(event.metadata);
+      }
+    };
+
+    void run();
+    return () => {
+      isCancelled = true;
+    };
+  }, [ensureOfferDetailsCached, offerAcceptedEvents]);
 
   useEffect(() => {
     const active = offerAcceptedEvents[activeOfferAcceptedIndex];
@@ -540,10 +632,14 @@ export default function MessagesInbox() {
       return;
     }
 
-    const key = `${active.metadata.trade}:${active.metadata.offer}`;
+    const key = getOfferDetailsKey(active.metadata);
     const cached = offerDetailsCacheRef.current.get(key);
-    if (cached) {
+    if (cached && cached !== OFFER_DETAILS_NOT_FOUND) {
       setActiveOfferDetailsStatus({ status: "loaded", data: cached });
+      return;
+    }
+    if (cached === OFFER_DETAILS_NOT_FOUND) {
+      setActiveOfferDetailsStatus({ status: "not_found" });
       return;
     }
     if (cached === null) {
@@ -557,58 +653,86 @@ export default function MessagesInbox() {
     let isCancelled = false;
     const run = async () => {
       setActiveOfferDetailsStatus({ status: "loading" });
-      try {
-        const response = await fetch(
-          `${PUBLIC_API_URL}/trades/v2/${encodeURIComponent(String(active.metadata.trade))}/offers/${encodeURIComponent(String(active.metadata.offer))}`,
-          {
-            method: "GET",
-            credentials: "include",
-            cache: "no-store",
-          },
-        );
+      await ensureOfferDetailsCached(active.metadata);
+      if (isCancelled) return;
 
-        const raw = await response.text();
-        const parsed = raw ? (parseJsonWithLargeIds(raw) as unknown) : null;
-
-        if (response.status === 404 && parsed && typeof parsed === "object") {
-          const errorCode = (parsed as Record<string, unknown>).error;
-          if (errorCode === "trade_not_found") {
-            offerDetailsCacheRef.current.set(key, null);
-            setActiveOfferDetailsStatus({ status: "not_found" });
-            return;
-          }
-        }
-
-        if (!response.ok || !parsed || typeof parsed !== "object") {
-          throw new Error("Unable to load trade offer details");
-        }
-
-        const data = parsed as TradeOfferDetails;
-        if (!isCancelled) {
-          offerDetailsCacheRef.current.set(key, data);
-          setActiveOfferDetailsStatus({ status: "loaded", data });
-        }
-      } catch (err) {
-        console.error("Offer details fetch error:", err);
-        if (!isCancelled) {
-          offerDetailsCacheRef.current.set(key, null);
-          setActiveOfferDetailsStatus({
-            status: "error",
-            error: err instanceof Error ? err.message : "Failed to load offer",
-          });
-        }
+      const updated = offerDetailsCacheRef.current.get(key);
+      if (updated && updated !== OFFER_DETAILS_NOT_FOUND) {
+        setActiveOfferDetailsStatus({ status: "loaded", data: updated });
+        return;
       }
+      if (updated === OFFER_DETAILS_NOT_FOUND) {
+        setActiveOfferDetailsStatus({ status: "not_found" });
+        return;
+      }
+      setActiveOfferDetailsStatus({
+        status: "error",
+        error: "Unable to load trade offer details",
+      });
     };
 
     void run();
     return () => {
       isCancelled = true;
     };
-  }, [activeOfferAcceptedIndex, offerAcceptedEvents]);
+  }, [
+    activeOfferAcceptedIndex,
+    ensureOfferDetailsCached,
+    getOfferDetailsKey,
+    offerAcceptedEvents,
+    offerDetailsCacheVersion,
+  ]);
 
   const activeOfferAccepted = offerAcceptedEvents[activeOfferAcceptedIndex];
-  const showOfferAcceptedBanner =
-    offerAcceptedEvents.length > 0 && !!selectedUser;
+  const showOfferAcceptedBanner = useMemo(() => {
+    if (!selectedUser || offerAcceptedEvents.length === 0) return false;
+    if (offerDetailsCacheVersion === -1) return false;
+
+    const cache = offerDetailsCacheRef.current;
+    let known = 0;
+    let notFound = 0;
+
+    for (const event of offerAcceptedEvents) {
+      const key = getOfferDetailsKey(event.metadata);
+      if (!cache.has(key)) continue;
+      known += 1;
+      if (cache.get(key) === OFFER_DETAILS_NOT_FOUND) {
+        notFound += 1;
+      }
+    }
+
+    const allKnown = known === offerAcceptedEvents.length;
+    const allNotFound = allKnown && notFound === offerAcceptedEvents.length;
+    return !allNotFound;
+  }, [
+    getOfferDetailsKey,
+    offerAcceptedEvents,
+    offerDetailsCacheVersion,
+    selectedUser,
+  ]);
+
+  useEffect(() => {
+    const active = offerAcceptedEvents[activeOfferAcceptedIndex];
+    if (!active) return;
+
+    const cache = offerDetailsCacheRef.current;
+    const activeKey = getOfferDetailsKey(active.metadata);
+    if (cache.get(activeKey) !== OFFER_DETAILS_NOT_FOUND) return;
+
+    const existingIndex = offerAcceptedEvents.findIndex((event) => {
+      const value = cache.get(getOfferDetailsKey(event.metadata));
+      return value && value !== OFFER_DETAILS_NOT_FOUND;
+    });
+
+    if (existingIndex >= 0 && existingIndex !== activeOfferAcceptedIndex) {
+      setActiveOfferAcceptedIndex(existingIndex);
+    }
+  }, [
+    activeOfferAcceptedIndex,
+    getOfferDetailsKey,
+    offerAcceptedEvents,
+    offerDetailsCacheVersion,
+  ]);
   const canMarkOfferComplete = useMemo(() => {
     if (!currentUserId || !activeOfferAccepted) return false;
     const tradeOwnerId = activeOfferAccepted.metadata.trade_user;
@@ -2009,7 +2133,10 @@ export default function MessagesInbox() {
                                       const key = `${active.metadata.trade}:${active.metadata.offer}`;
                                       const cached =
                                         offerDetailsCacheRef.current.get(key);
-                                      if (cached) {
+                                      if (
+                                        cached &&
+                                        cached !== OFFER_DETAILS_NOT_FOUND
+                                      ) {
                                         offerDetailsCacheRef.current.set(key, {
                                           ...cached,
                                           status: 3,
