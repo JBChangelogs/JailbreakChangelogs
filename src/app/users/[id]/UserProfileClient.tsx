@@ -291,7 +291,7 @@ export default function UserProfileClient({
   const [errorCode] = useState<number | null>(error?.code || null);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [isFollowing, setIsFollowing] = useState(false);
-  const [isLoadingFollow, setIsLoadingFollow] = useState(false);
+  const [isLoadingFollow, setIsLoadingFollow] = useState(true);
   const [followerCount, setFollowerCount] = useState(
     initialData?.followerCount || 0,
   );
@@ -352,7 +352,8 @@ export default function UserProfileClient({
   // Update following status when currentUserId changes
   useEffect(() => {
     const updateFollowingStatus = async () => {
-      if (currentUserId && user) {
+      if (currentUserId && user && userId) {
+        setIsLoadingFollow(true);
         try {
           const response = await fetch(
             `${PUBLIC_API_URL}/users/following/get?user=${currentUserId}`,
@@ -374,6 +375,8 @@ export default function UserProfileClient({
           setIsFollowing(isUserFollowing);
         } catch (error: unknown) {
           console.error("Error fetching following status:", error);
+        } finally {
+          setIsLoadingFollow(false);
         }
       }
     };
@@ -1144,11 +1147,7 @@ export default function UserProfileClient({
                               <Button
                                 variant="default"
                                 size="md"
-                                onClick={() =>
-                                  toast.error(
-                                    "You need to be logged in to follow users",
-                                  )
-                                }
+                                disabled={true}
                               >
                                 <Icon
                                   icon="heroicons:user-plus"
@@ -1160,30 +1159,6 @@ export default function UserProfileClient({
                           </TooltipTrigger>
                           <TooltipContent>
                             You need to be logged in to follow users
-                          </TooltipContent>
-                        </Tooltip>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <span>
-                              <Button
-                                variant="outline"
-                                size="md"
-                                onClick={() =>
-                                  toast.error(
-                                    "You need to be logged in to message users",
-                                  )
-                                }
-                              >
-                                <Icon
-                                  icon="heroicons:chat-bubble-left-right"
-                                  className="h-5 w-5"
-                                />
-                                Message
-                              </Button>
-                            </span>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            You need to be logged in to message users
                           </TooltipContent>
                         </Tooltip>
                       </>
