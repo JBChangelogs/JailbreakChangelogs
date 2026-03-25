@@ -183,7 +183,7 @@ export const respondToTradeOfferV2 = async (
     throw new Error("Trade API is not configured");
   }
 
-  const endpoint = `${baseUrl}/trades/v2/${encodeURIComponent(String(tradeId))}/offers/${encodeURIComponent(String(offerId))}`;
+  const endpoint = `${baseUrl}/trades/v2/${encodeURIComponent(String(tradeId))}/offers/${encodeURIComponent(String(offerId))}}`;
 
   const response = await fetch(endpoint, {
     method: "POST",
@@ -233,7 +233,7 @@ export const deleteTradeOfferV2 = async (
     throw new Error("Trade API is not configured");
   }
 
-  const endpoint = `${baseUrl}/trades/v2/${encodeURIComponent(String(tradeId))}/offers/${encodeURIComponent(String(offerId))}`;
+  const endpoint = `${baseUrl}/trades/v2/${encodeURIComponent(String(tradeId))}/offers/${encodeURIComponent(String(offerId))}}`;
 
   const response = await fetch(endpoint, {
     method: "DELETE",

@@ -21,6 +21,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { UserAvatar } from "@/utils/avatar";
+import { getCategoryColor, getCategoryIcon } from "@/utils/categoryIcons";
 import { cn } from "@/lib/utils";
 import { Chat } from "@/components/chat/chat";
 import {
@@ -102,8 +103,8 @@ type TradeOfferDetails = {
   id: number;
   trade: number;
   note: string | null;
-  offering?: Array<{ name?: string; amount?: number }> | null;
-  requesting?: Array<{ name?: string; amount?: number }> | null;
+  offering?: Array<{ name?: string; amount?: number; type?: string }> | null;
+  requesting?: Array<{ name?: string; amount?: number; type?: string }> | null;
   user?: { id?: string | number } | null;
   created_at?: number | string;
   status?: number;
@@ -268,18 +269,128 @@ function formatSystemMessageContent(
   return message.content ?? "";
 }
 
-function summarizeOfferSide(
+type OfferItem = { name: string; amount: number; type?: string };
+
+function normalizeOfferItems(
   items: TradeOfferDetails["offering"] | TradeOfferDetails["requesting"],
-): string {
-  if (!items || !Array.isArray(items) || items.length === 0) return "—";
-  const parts = items
+): OfferItem[] {
+  if (!items || !Array.isArray(items) || items.length === 0) return [];
+  return items
     .map((item) => {
-      const name = typeof item?.name === "string" ? item.name : "Unknown";
+      const name = typeof item?.name === "string" ? item.name.trim() : "";
       const amount = typeof item?.amount === "number" ? item.amount : 1;
-      return amount > 1 ? `${amount}× ${name}` : name;
+      if (!name) return null;
+      const type = typeof item?.type === "string" ? item.type : undefined;
+      return { name, amount: amount > 0 ? amount : 1, type };
     })
-    .filter(Boolean);
-  return parts.join(", ");
+    .filter(Boolean) as OfferItem[];
+}
+
+function isOfferDetailsValid(details: TradeOfferDetails): boolean {
+  const offeringCount = normalizeOfferItems(details.offering).length;
+  const requestingCount = normalizeOfferItems(details.requesting).length;
+  return offeringCount + requestingCount > 0;
+}
+
+function OfferItems({
+  label,
+  items,
+  expanded,
+  onExpand,
+  onCollapse,
+  maxCollapsed = 3,
+}: {
+  label: string;
+  items: OfferItem[];
+  expanded: boolean;
+  onExpand?: () => void;
+  onCollapse?: () => void;
+  maxCollapsed?: number;
+}) {
+  const visible = expanded ? items : items.slice(0, maxCollapsed);
+  const remaining = expanded ? 0 : Math.max(items.length - visible.length, 0);
+
+  return (
+    <div className="min-w-0">
+      <p className="text-secondary-text text-xs">
+        <span className="text-primary-text font-medium">{label}:</span>
+      </p>
+      <div className="mt-1 flex min-w-0 flex-wrap items-center gap-1.5">
+        {visible.length === 0 ? (
+          <span className="text-primary-text border-border-card bg-tertiary-bg/40 inline-flex h-6 items-center rounded-lg border px-2.5 text-[11px] leading-none font-medium shadow-2xl backdrop-blur-xl">
+            —
+          </span>
+        ) : (
+          visible.map((item, idx) =>
+            (() => {
+              const categoryIcon =
+                typeof item.type === "string"
+                  ? getCategoryIcon(item.type)
+                  : null;
+              const categoryColor =
+                typeof item.type === "string"
+                  ? getCategoryColor(item.type)
+                  : null;
+              return (
+                <span
+                  key={`${item.name}-${idx}`}
+                  className="text-primary-text border-border-card bg-tertiary-bg/40 inline-flex h-6 max-w-[14rem] min-w-0 items-center gap-1.5 rounded-lg border px-2.5 text-[11px] leading-none font-medium shadow-2xl backdrop-blur-xl"
+                  title={
+                    item.amount > 1 ? `${item.name} x${item.amount}` : item.name
+                  }
+                >
+                  {categoryIcon && categoryColor ? (
+                    <categoryIcon.Icon
+                      className="h-3.5 w-3.5 shrink-0"
+                      style={{ color: categoryColor }}
+                    />
+                  ) : null}
+                  <span className="truncate">
+                    {item.name}
+                    {item.amount > 1 ? (
+                      <span className="text-secondary-text/90 tabular-nums">
+                        {" "}
+                        x{item.amount}
+                      </span>
+                    ) : null}
+                  </span>
+                </span>
+              );
+            })(),
+          )
+        )}
+        {remaining > 0 ? (
+          <button
+            type="button"
+            onClick={onExpand}
+            className={cn(
+              "text-primary-text border-border-card bg-tertiary-bg/40 hover:bg-quaternary-bg/30 inline-flex h-6 items-center rounded-lg border px-2.5 text-[11px] leading-none font-medium shadow-2xl backdrop-blur-xl transition-colors",
+              "text-link hover:text-link",
+              onExpand ? "cursor-pointer" : "cursor-default opacity-70",
+            )}
+            disabled={!onExpand}
+            aria-label={`Show ${remaining} more ${label.toLowerCase()} items`}
+          >
+            +{remaining} more
+          </button>
+        ) : expanded && items.length > maxCollapsed ? (
+          <button
+            type="button"
+            onClick={onCollapse}
+            className={cn(
+              "text-primary-text border-border-card bg-tertiary-bg/40 hover:bg-quaternary-bg/30 inline-flex h-6 items-center rounded-lg border px-2.5 text-[11px] leading-none font-medium shadow-2xl backdrop-blur-xl transition-colors",
+              "text-link hover:text-link",
+              onCollapse ? "cursor-pointer" : "cursor-default opacity-70",
+            )}
+            disabled={!onCollapse}
+            aria-label={`Show fewer ${label.toLowerCase()} items`}
+          >
+            Show less
+          </button>
+        ) : null}
+      </div>
+    </div>
+  );
 }
 
 function toMessageUser(raw: unknown): MessageUser | null {
@@ -524,6 +635,8 @@ export default function MessagesInbox() {
   }, [messages]);
 
   const [activeOfferAcceptedIndex, setActiveOfferAcceptedIndex] = useState(0);
+  const [isOfferBannerMinimized, setIsOfferBannerMinimized] = useState(true);
+  const [isOfferBannerExpanded, setIsOfferBannerExpanded] = useState(false);
   const offerDetailsCacheRef = useRef<Map<string, OfferDetailsCacheValue>>(
     new Map(),
   );
@@ -539,13 +652,38 @@ export default function MessagesInbox() {
 
   useEffect(() => {
     setActiveOfferAcceptedIndex(0);
+    setIsOfferBannerMinimized(true);
+    setIsOfferBannerExpanded(false);
   }, [selectedUserId, offerAcceptedEvents.length]);
+
+  useEffect(() => {
+    // Default to minimized on small screens to preserve chat space.
+    const query = window.matchMedia("(min-width: 640px)");
+    const apply = () => setIsOfferBannerMinimized(!query.matches);
+    apply();
+    query.addEventListener("change", apply);
+    return () => query.removeEventListener("change", apply);
+  }, []);
 
   const getOfferDetailsKey = useCallback(
     (metadata: OfferAcceptedMetadata) =>
       `${metadata.trade}:${metadata.offer}` as const,
     [],
   );
+
+  const validOfferAcceptedEvents = useMemo(() => {
+    // Cache is stored in a ref; this forces recompute when cache updates.
+    void offerDetailsCacheVersion;
+    const cache = offerDetailsCacheRef.current;
+    return offerAcceptedEvents.filter((event) => {
+      const key = getOfferDetailsKey(event.metadata);
+      const value = cache.get(key);
+      if (!value || value === null || value === OFFER_DETAILS_NOT_FOUND) {
+        return false;
+      }
+      return isOfferDetailsValid(value);
+    });
+  }, [getOfferDetailsKey, offerAcceptedEvents, offerDetailsCacheVersion]);
 
   const ensureOfferDetailsCached = useCallback(
     async (metadata: OfferAcceptedMetadata) => {
@@ -619,7 +757,7 @@ export default function MessagesInbox() {
   }, [ensureOfferDetailsCached, offerAcceptedEvents]);
 
   useEffect(() => {
-    const active = offerAcceptedEvents[activeOfferAcceptedIndex];
+    const active = validOfferAcceptedEvents[activeOfferAcceptedIndex];
     if (!active) {
       setActiveOfferDetailsStatus({ status: "idle" });
       return;
@@ -679,60 +817,33 @@ export default function MessagesInbox() {
     activeOfferAcceptedIndex,
     ensureOfferDetailsCached,
     getOfferDetailsKey,
-    offerAcceptedEvents,
+    validOfferAcceptedEvents,
     offerDetailsCacheVersion,
-  ]);
-
-  const activeOfferAccepted = offerAcceptedEvents[activeOfferAcceptedIndex];
-  const showOfferAcceptedBanner = useMemo(() => {
-    if (!selectedUser || offerAcceptedEvents.length === 0) return false;
-    if (offerDetailsCacheVersion === -1) return false;
-
-    const cache = offerDetailsCacheRef.current;
-    let known = 0;
-    let notFound = 0;
-
-    for (const event of offerAcceptedEvents) {
-      const key = getOfferDetailsKey(event.metadata);
-      if (!cache.has(key)) continue;
-      known += 1;
-      if (cache.get(key) === OFFER_DETAILS_NOT_FOUND) {
-        notFound += 1;
-      }
-    }
-
-    const allKnown = known === offerAcceptedEvents.length;
-    const allNotFound = allKnown && notFound === offerAcceptedEvents.length;
-    return !allNotFound;
-  }, [
-    getOfferDetailsKey,
-    offerAcceptedEvents,
-    offerDetailsCacheVersion,
-    selectedUser,
   ]);
 
   useEffect(() => {
-    const active = offerAcceptedEvents[activeOfferAcceptedIndex];
-    if (!active) return;
+    setIsOfferBannerExpanded(false);
+  }, [activeOfferAcceptedIndex]);
 
-    const cache = offerDetailsCacheRef.current;
-    const activeKey = getOfferDetailsKey(active.metadata);
-    if (cache.get(activeKey) !== OFFER_DETAILS_NOT_FOUND) return;
+  useEffect(() => {
+    if (activeOfferAcceptedIndex < validOfferAcceptedEvents.length) return;
+    setActiveOfferAcceptedIndex(
+      Math.max(0, validOfferAcceptedEvents.length - 1),
+    );
+  }, [activeOfferAcceptedIndex, validOfferAcceptedEvents.length]);
 
-    const existingIndex = offerAcceptedEvents.findIndex((event) => {
-      const value = cache.get(getOfferDetailsKey(event.metadata));
-      return value && value !== OFFER_DETAILS_NOT_FOUND;
-    });
+  const activeOfferAccepted =
+    validOfferAcceptedEvents[activeOfferAcceptedIndex];
+  const showOfferAcceptedBanner =
+    !!selectedUser && validOfferAcceptedEvents.length > 0;
 
-    if (existingIndex >= 0 && existingIndex !== activeOfferAcceptedIndex) {
-      setActiveOfferAcceptedIndex(existingIndex);
-    }
-  }, [
-    activeOfferAcceptedIndex,
-    getOfferDetailsKey,
-    offerAcceptedEvents,
-    offerDetailsCacheVersion,
-  ]);
+  const activeOfferItems = useMemo(() => {
+    if (activeOfferDetailsStatus.status !== "loaded") return null;
+    return {
+      offering: normalizeOfferItems(activeOfferDetailsStatus.data.offering),
+      requesting: normalizeOfferItems(activeOfferDetailsStatus.data.requesting),
+    };
+  }, [activeOfferDetailsStatus]);
   const canMarkOfferComplete = useMemo(() => {
     if (!currentUserId || !activeOfferAccepted) return false;
     const tradeOwnerId = activeOfferAccepted.metadata.trade_user;
@@ -1954,12 +2065,38 @@ export default function MessagesInbox() {
                   <div className="border-border-card bg-tertiary-bg border-b px-4 py-2">
                     <div className="border-link bg-button-info/10 grid grid-cols-1 gap-3 rounded-l-none rounded-r-md border-l-2 px-3 py-2 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-start">
                       <div className="min-w-0 overflow-hidden">
-                        <p className="text-primary-text truncate text-sm font-semibold">
-                          <span className="sm:hidden">Offer accepted</span>
-                          <span className="hidden sm:inline">
-                            Trade offer accepted
-                          </span>
-                        </p>
+                        <div className="flex items-center gap-2">
+                          <p className="text-primary-text truncate text-sm font-semibold">
+                            <span className="sm:hidden">Offer accepted</span>
+                            <span className="hidden sm:inline">
+                              Trade offer accepted
+                            </span>
+                          </p>
+                          {activeOfferDetailsStatus.status === "loaded" ? (
+                            <button
+                              type="button"
+                              aria-label={
+                                isOfferBannerMinimized
+                                  ? "Show trade details"
+                                  : "Hide trade details"
+                              }
+                              aria-pressed={!isOfferBannerMinimized}
+                              onClick={() =>
+                                setIsOfferBannerMinimized((prev) => !prev)
+                              }
+                              className="text-secondary-text hover:text-primary-text hover:bg-quaternary-bg focus-visible:ring-ring inline-flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-md transition-colors focus-visible:ring-1 focus-visible:outline-none"
+                            >
+                              <Icon
+                                icon={
+                                  isOfferBannerMinimized
+                                    ? "heroicons:chevron-down"
+                                    : "heroicons:chevron-up"
+                                }
+                                className="h-5 w-5"
+                              />
+                            </button>
+                          ) : null}
+                        </div>
                         {activeOfferDetailsStatus.status === "loading" ? (
                           <p className="text-secondary-text flex items-center gap-2 text-xs">
                             <svg
@@ -1987,22 +2124,43 @@ export default function MessagesInbox() {
                           </p>
                         ) : activeOfferDetailsStatus.status === "loaded" ? (
                           <>
-                            <p className="text-secondary-text truncate text-xs">
-                              <span className="text-secondary-text/90">
-                                Offering:
-                              </span>{" "}
-                              {summarizeOfferSide(
-                                activeOfferDetailsStatus.data.offering,
-                              )}
-                            </p>
-                            <p className="text-secondary-text truncate text-xs">
-                              <span className="text-secondary-text/90">
-                                Requesting:
-                              </span>{" "}
-                              {summarizeOfferSide(
-                                activeOfferDetailsStatus.data.requesting,
-                              )}
-                            </p>
+                            {isOfferBannerMinimized ? (
+                              <p className="text-secondary-text mt-1 text-xs">
+                                Offering:{" "}
+                                <span className="text-primary-text/80 tabular-nums">
+                                  {activeOfferItems?.offering.length ?? 0}
+                                </span>{" "}
+                                • Requesting:{" "}
+                                <span className="text-primary-text/80 tabular-nums">
+                                  {activeOfferItems?.requesting.length ?? 0}
+                                </span>
+                              </p>
+                            ) : (
+                              <div className="mt-1 grid grid-cols-1 gap-2 sm:grid-cols-2">
+                                <OfferItems
+                                  label="Offering"
+                                  items={activeOfferItems?.offering ?? []}
+                                  expanded={isOfferBannerExpanded}
+                                  onExpand={() =>
+                                    setIsOfferBannerExpanded(true)
+                                  }
+                                  onCollapse={() =>
+                                    setIsOfferBannerExpanded(false)
+                                  }
+                                />
+                                <OfferItems
+                                  label="Requesting"
+                                  items={activeOfferItems?.requesting ?? []}
+                                  expanded={isOfferBannerExpanded}
+                                  onExpand={() =>
+                                    setIsOfferBannerExpanded(true)
+                                  }
+                                  onCollapse={() =>
+                                    setIsOfferBannerExpanded(false)
+                                  }
+                                />
+                              </div>
+                            )}
                           </>
                         ) : activeOfferDetailsStatus.status === "not_found" ? (
                           <p className="text-secondary-text truncate text-xs">
@@ -2039,22 +2197,22 @@ export default function MessagesInbox() {
                           <span className="text-secondary-text w-12 text-center text-[11px] tabular-nums">
                             {Math.min(
                               activeOfferAcceptedIndex + 1,
-                              offerAcceptedEvents.length,
+                              validOfferAcceptedEvents.length,
                             )}{" "}
-                            / {offerAcceptedEvents.length}
+                            / {validOfferAcceptedEvents.length}
                           </span>
                           <button
                             type="button"
                             aria-label="Next accepted offer"
                             disabled={
                               activeOfferAcceptedIndex >=
-                              offerAcceptedEvents.length - 1
+                              validOfferAcceptedEvents.length - 1
                             }
                             onClick={() =>
                               setActiveOfferAcceptedIndex((prev) =>
                                 Math.min(
                                   prev + 1,
-                                  offerAcceptedEvents.length - 1,
+                                  validOfferAcceptedEvents.length - 1,
                                 ),
                               )
                             }
@@ -2076,7 +2234,7 @@ export default function MessagesInbox() {
                             className="h-8 w-full sm:w-auto"
                           >
                             <Link
-                              href={`/trading/ad/${offerAcceptedEvents[activeOfferAcceptedIndex]?.metadata.trade ?? ""}`}
+                              href={`/trading/ad/${validOfferAcceptedEvents[activeOfferAcceptedIndex]?.metadata.trade ?? ""}`}
                               prefetch={false}
                               target="_blank"
                               rel="noopener noreferrer"

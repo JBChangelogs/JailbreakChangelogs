@@ -13,6 +13,7 @@ import {
 interface ItemGridProps {
   items: TradeItem[];
   title: string;
+  showTitle?: boolean;
   onRemove?: (item: TradeItem) => void;
   disableInteraction?: boolean;
   variant?: "default" | "compact";
@@ -75,6 +76,7 @@ const groupItems = (items: TradeItem[]) => {
 export const ItemGrid: React.FC<ItemGridProps> = ({
   items,
   title,
+  showTitle = true,
   onRemove,
   disableInteraction = false,
   variant = "default",
@@ -152,7 +154,9 @@ export const ItemGrid: React.FC<ItemGridProps> = ({
 
   return (
     <div className="rounded-lg p-4">
-      <h4 className="text-primary-text mb-2 text-sm">{title}</h4>
+      {showTitle ? (
+        <h4 className="text-primary-text mb-2 text-sm">{title}</h4>
+      ) : null}
       <div
         className="max-h-[480px] overflow-y-auto pr-1"
         aria-label="Selected items list"

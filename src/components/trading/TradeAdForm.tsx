@@ -554,16 +554,25 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
         (responseErrorCode === "requesting_limit" ||
           responseErrorCode === "offering_limit")
       ) {
-        const defaultMessage =
-          responseErrorCode === "requesting_limit"
-            ? "You can only request up to 8 items."
-            : "You can only offer up to 8 items.";
-        const message = responseMessage || defaultMessage;
-        const countSuffix =
+        const limit = 8;
+        const isRequesting = responseErrorCode === "requesting_limit";
+        const sideLabel = isRequesting ? "Requesting" : "Offering";
+        const selectedCount =
           typeof responseCount === "number"
-            ? ` (selected: ${responseCount})`
-            : "";
-        toast.error(`${message}${countSuffix}`, {
+            ? responseCount
+            : isRequesting
+              ? requestingItems.length
+              : offeringItems.length;
+        const overBy =
+          typeof selectedCount === "number"
+            ? Math.max(selectedCount - limit, 0)
+            : null;
+        const message =
+          overBy && overBy > 0
+            ? `${sideLabel}: max ${limit} items — selected ${selectedCount}, remove ${overBy}.`
+            : `${sideLabel}: max ${limit} items.`;
+
+        toast.error(message, {
           id: creatingToastId ?? undefined,
         });
         return;
@@ -760,75 +769,85 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
 
           {/* Clear Confirmation Modal - Multi-option like calculator */}
           {showClearConfirmModal && (
-            <div className="fixed inset-0 z-50">
+            <div className="fixed inset-0 z-[3000]">
               <div
-                className="fixed inset-0 bg-black/30 backdrop-blur-sm"
+                className="fixed inset-0 bg-black/50 backdrop-blur-sm"
                 aria-hidden="true"
                 onClick={() => setShowClearConfirmModal(false)}
               />
               <div className="fixed inset-0 flex items-center justify-center p-4">
-                <div className="modal-container border-border-card bg-secondary-bg mx-auto w-full max-w-sm rounded-lg border p-6 shadow-lg">
-                  <div className="modal-header text-primary-text mb-2 text-xl font-semibold">
-                    Clear Trade Ad?
+                <div
+                  className="border-border-card bg-secondary-bg hover:border-border-focus relative mx-auto w-full max-w-md rounded-lg border shadow-xl"
+                  onClick={(event) => event.stopPropagation()}
+                >
+                  <div className="border-border-card flex items-center justify-between border-b p-4">
+                    <h2 className="text-primary-text text-xl font-semibold">
+                      Clear Trade Ad?
+                    </h2>
+                    <button
+                      type="button"
+                      onClick={() => setShowClearConfirmModal(false)}
+                      aria-label="Close"
+                      className="text-secondary-text hover:text-primary-text hover:bg-quaternary-bg focus-visible:ring-ring inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-md transition-colors focus-visible:ring-1 focus-visible:outline-none"
+                    >
+                      <Icon icon="heroicons:x-mark" className="h-5 w-5" />
+                    </button>
                   </div>
-                  <div className="modal-content mb-6">
-                    <p className="text-secondary-text">
+
+                  <div className="p-6">
+                    <p className="text-secondary-text text-sm">
                       Choose what to clear. This action cannot be undone.
                     </p>
-                  </div>
-                  <div className="mb-4 grid grid-cols-1 gap-3">
-                    <UiButton
-                      onClick={() => {
-                        setOfferingItems([]);
-                        if (requestingItems.length === 0) {
-                          safeLocalStorage.removeItem("tradeAdFormItems");
-                        } else {
-                          saveItemsToLocalStorage(
-                            [],
-                            requestingItems,
-                            tradeNote,
-                          );
-                        }
-                        setShowClearConfirmModal(false);
-                      }}
-                      variant="outline"
-                      className="border-button-success! text-button-success! bg-button-success/10! hover:bg-button-success/20! active:bg-button-success/20! w-full"
-                    >
-                      Clear Offering
-                    </UiButton>
-                    <UiButton
-                      onClick={() => {
-                        setRequestingItems([]);
-                        if (offeringItems.length === 0) {
-                          safeLocalStorage.removeItem("tradeAdFormItems");
-                        } else {
-                          saveItemsToLocalStorage(offeringItems, [], tradeNote);
-                        }
-                        setShowClearConfirmModal(false);
-                      }}
-                      variant="outline"
-                      className="border-button-danger! text-button-danger! bg-button-danger/10! hover:bg-button-danger/20! active:bg-button-danger/20! w-full"
-                    >
-                      Clear Requesting
-                    </UiButton>
-                    <UiButton
-                      onClick={() => {
-                        handleStartNewTradeAd();
-                      }}
-                      variant="destructive"
-                      className="w-full"
-                    >
-                      Clear Both
-                    </UiButton>
-                  </div>
-                  <div className="modal-footer flex justify-end">
-                    <UiButton
-                      onClick={() => setShowClearConfirmModal(false)}
-                      variant="ghost"
-                      className="px-4"
-                    >
-                      Cancel
-                    </UiButton>
+
+                    <div className="mt-6 grid grid-cols-1 gap-3">
+                      <UiButton
+                        onClick={() => {
+                          setOfferingItems([]);
+                          if (requestingItems.length === 0) {
+                            safeLocalStorage.removeItem("tradeAdFormItems");
+                          } else {
+                            saveItemsToLocalStorage(
+                              [],
+                              requestingItems,
+                              tradeNote,
+                            );
+                          }
+                          setShowClearConfirmModal(false);
+                        }}
+                        variant="outline"
+                        className="border-button-success! text-button-success! bg-button-success/10! hover:bg-button-success/20! active:bg-button-success/20! w-full"
+                      >
+                        Clear Offering
+                      </UiButton>
+                      <UiButton
+                        onClick={() => {
+                          setRequestingItems([]);
+                          if (offeringItems.length === 0) {
+                            safeLocalStorage.removeItem("tradeAdFormItems");
+                          } else {
+                            saveItemsToLocalStorage(
+                              offeringItems,
+                              [],
+                              tradeNote,
+                            );
+                          }
+                          setShowClearConfirmModal(false);
+                        }}
+                        variant="outline"
+                        className="border-button-danger! text-button-danger! bg-button-danger/10! hover:bg-button-danger/20! active:bg-button-danger/20! w-full"
+                      >
+                        Clear Requesting
+                      </UiButton>
+                      <UiButton
+                        onClick={() => {
+                          handleStartNewTradeAd();
+                        }}
+                        variant="destructive"
+                        className="w-full"
+                      >
+                        Clear Both
+                      </UiButton>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -1021,9 +1040,6 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
               <div className="mb-4 flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <h3 className="text-secondary-text font-medium">Offering</h3>
-                  <span className="text-secondary-text/70 text-sm">
-                    ({offeringItems.length}/8)
-                  </span>
                 </div>
                 <Tooltip
                   title="Mirror to requesting"
@@ -1057,6 +1073,7 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
               <ItemGrid
                 items={offeringItems}
                 title="Offering"
+                showTitle={false}
                 onRemove={(item) => handleRemoveItem(item, "offering")}
                 disableInteraction={submitting}
               />
@@ -1089,9 +1106,6 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
                   <h3 className="text-secondary-text font-medium">
                     Requesting
                   </h3>
-                  <span className="text-secondary-text/70 text-sm">
-                    ({requestingItems.length}/8)
-                  </span>
                 </div>
                 <Tooltip
                   title="Mirror to offering"
@@ -1125,6 +1139,7 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
               <ItemGrid
                 items={requestingItems}
                 title="Requesting"
+                showTitle={false}
                 onRemove={(item) => handleRemoveItem(item, "requesting")}
                 disableInteraction={submitting}
               />
