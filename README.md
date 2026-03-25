@@ -1,5 +1,5 @@
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/jailbreakchangelogs)
-[![GPLv3 License](https://img.shields.io/badge/License-GPL%20v3-yellow.svg)](./LICENSE)
+[![License](https://img.shields.io/badge/License-PolyForm%20NC%201.0.0-blue.svg)](./LICENSE)
 [![Discord](https://img.shields.io/discord/1286064050135896064?logo=discord&logoColor=white&label=discord&color=4d3dff)](https://discord.jailbreakchangelogs.xyz)
 [![Uptime Kuma Badge](https://uptime.jailbreakchangelogs.xyz/api/badge/8/status)](https://status.jailbreakchangelogs.xyz)
 
@@ -101,11 +101,11 @@ Visit https://jailbreakchangelogs.xyz/faq
 
 ## License
 
-This project is licensed under the GNU General Public License v3.0 (GPL-3.0).
+This project is licensed under the PolyForm Noncommercial License 1.0.0.
 
-This means you are free to use, modify, and distribute this software, provided that any derivative works are also distributed under the same license terms.
+This is a noncommercial license: commercial use is not permitted without separate permission.
 
-For more details, see the [LICENSE](./LICENSE) file in this repository or visit the [GNU GPL v3.0 page](https://www.gnu.org/licenses/gpl-3.0.en.html).
+For details, see the [LICENSE](./LICENSE) file in this repository.
 
 ---
 

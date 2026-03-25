@@ -102,7 +102,7 @@ JailbreakChangelogs is a comprehensive fan-made platform by Jakobiis and Jalenzz
 - Tailwind CSS for styling
 - Real-time features with WebSocket connections
 - Responsive design for mobile and desktop
-- Open source under GPL v3.0 license
+- Source available under the PolyForm Noncommercial License 1.0.0
 
 ## Community & Support
 

@@ -17,6 +17,7 @@ interface User {
 interface BreadcrumbProps {
   userData?: User | null;
   loading?: boolean;
+  containerClassName?: string;
 }
 
 interface BreadcrumbItem {
@@ -41,8 +42,13 @@ const itemTypeToFilterSort: Record<string, FilterSort> = {
   "weapon skin": "name-weapon-skins",
 };
 
-export default function Breadcrumb({ userData, loading }: BreadcrumbProps) {
+export default function Breadcrumb({
+  userData,
+  loading,
+  containerClassName,
+}: BreadcrumbProps) {
   const pathname = usePathname();
+  const wrapperClassName = containerClassName ?? "container mx-auto px-4 py-4";
 
   // Check if we're on a user profile page
   const isUserProfilePage =
@@ -247,7 +253,7 @@ export default function Breadcrumb({ userData, loading }: BreadcrumbProps) {
 
   if (loading) {
     return (
-      <div className="container mx-auto px-4 py-4">
+      <div className={wrapperClassName}>
         <div className="text-secondary-text flex min-w-0 flex-wrap items-center">
           <div className="flex items-center">
             <Skeleton
@@ -307,7 +313,7 @@ export default function Breadcrumb({ userData, loading }: BreadcrumbProps) {
   }
 
   return (
-    <div className="container mx-auto px-4 py-4">
+    <div className={wrapperClassName}>
       <nav className="flex" aria-label="Breadcrumb">
         <ol className="flex flex-wrap items-center gap-1 md:gap-2 rtl:space-x-reverse">
           {breadcrumbItems.map((item, index) => {
