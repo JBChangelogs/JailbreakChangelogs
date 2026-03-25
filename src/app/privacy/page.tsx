@@ -16,7 +16,7 @@ export default function PrivacyPage() {
       />
       <div className="absolute inset-0 opacity-60" />
       <div className="relative mx-auto max-w-4xl">
-        <Breadcrumb />
+        <Breadcrumb containerClassName="px-0 py-0 mb-2" />
         <div className="mb-2 flex items-center gap-2">
           <Icon
             icon="heroicons-outline:shield-check"

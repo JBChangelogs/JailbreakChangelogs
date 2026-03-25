@@ -138,4 +138,4 @@ Thank you for your contribution!
 
 ## License
 
-By contributing to JailbreakChangelogs, you agree that your contributions will be licensed under its [GNU GENERAL PUBLIC LICENSE](./LICENSE)
+By contributing to JailbreakChangelogs, you agree that your contributions will be licensed under its [LICENSE](./LICENSE).

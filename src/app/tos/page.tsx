@@ -16,7 +16,7 @@ export default function TermsOfServicePage() {
       />
       <div className="absolute inset-0 opacity-60" />
       <div className="relative mx-auto max-w-4xl">
-        <Breadcrumb />
+        <Breadcrumb containerClassName="px-0 py-0 mb-2" />
         <div className="mb-2 flex items-center gap-2">
           <Icon
             icon="heroicons-outline:document-text"
@@ -27,7 +27,7 @@ export default function TermsOfServicePage() {
           </h1>
         </div>
         <p className="text-primary-text mb-6 text-sm">
-          Last updated: September 12th, 2025
+          Last updated: March 25th, 2026
         </p>
 
         <div className="border-border-card bg-secondary-bg rounded-lg border p-6 transition-colors">
@@ -63,8 +63,8 @@ export default function TermsOfServicePage() {
                 2. Use License
               </h2>
               <Typography className="text-secondary-text mb-4">
-                Permission is granted to temporarily access and use our
-                materials for personal, non-commercial viewing only.
+                Permission is granted to access and use our website materials
+                for personal, non-commercial viewing only.
               </Typography>
               <ul className="text-secondary-text mb-4 list-inside list-disc space-y-1">
                 <li>You must not modify or copy these materials</li>
@@ -76,6 +76,12 @@ export default function TermsOfServicePage() {
                   software
                 </li>
               </ul>
+              <Typography className="text-secondary-text mb-4">
+                Our source code is licensed separately under the PolyForm
+                Noncommercial License 1.0.0. If you obtain a copy of the source
+                code, your rights to use, modify, and distribute that code are
+                governed by that license.
+              </Typography>
               <div className="mt-2 ml-4">
                 <h3 className="text-primary-text mb-2 text-lg font-semibold">
                   API Terms of Service
