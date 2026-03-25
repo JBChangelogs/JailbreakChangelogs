@@ -511,7 +511,6 @@ export default function MessagesInbox() {
   }, [messages]);
 
   const [activeOfferAcceptedIndex, setActiveOfferAcceptedIndex] = useState(0);
-  const [offerBannerVisible, setOfferBannerVisible] = useState(false);
   const offerDetailsCacheRef = useRef<Map<string, TradeOfferDetails | null>>(
     new Map(),
   );
@@ -525,7 +524,6 @@ export default function MessagesInbox() {
 
   useEffect(() => {
     setActiveOfferAcceptedIndex(0);
-    setOfferBannerVisible(false);
   }, [selectedUserId, offerAcceptedEvents.length]);
 
   useEffect(() => {
@@ -608,15 +606,9 @@ export default function MessagesInbox() {
     };
   }, [activeOfferAcceptedIndex, offerAcceptedEvents]);
 
-  useEffect(() => {
-    if (activeOfferDetailsStatus.status === "loaded") {
-      setOfferBannerVisible(activeOfferDetailsStatus.data.status === 1);
-      return;
-    }
-    setOfferBannerVisible(false);
-  }, [activeOfferDetailsStatus]);
-
   const activeOfferAccepted = offerAcceptedEvents[activeOfferAcceptedIndex];
+  const showOfferAcceptedBanner =
+    offerAcceptedEvents.length > 0 && !!selectedUser;
   const canMarkOfferComplete = useMemo(() => {
     if (!currentUserId || !activeOfferAccepted) return false;
     const tradeOwnerId = activeOfferAccepted.metadata.trade_user;
@@ -1680,9 +1672,7 @@ export default function MessagesInbox() {
                 <ChatHeader
                   className={cn(
                     "border-border-card px-4 py-3",
-                    offerBannerVisible && offerAcceptedEvents.length > 0
-                      ? ""
-                      : "border-b",
+                    showOfferAcceptedBanner ? "" : "border-b",
                   )}
                 >
                   <ChatHeaderAddon>
@@ -1836,9 +1826,7 @@ export default function MessagesInbox() {
                   </ChatHeaderAddon>
                 </ChatHeader>
 
-                {offerBannerVisible &&
-                offerAcceptedEvents.length > 0 &&
-                selectedUser ? (
+                {showOfferAcceptedBanner ? (
                   <div className="border-border-card bg-tertiary-bg border-b px-4 py-2">
                     <div className="border-link bg-button-info/10 grid grid-cols-1 gap-3 rounded-l-none rounded-r-md border-l-2 px-3 py-2 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-start">
                       <div className="min-w-0 overflow-hidden">
@@ -1894,7 +1882,7 @@ export default function MessagesInbox() {
                           </>
                         ) : activeOfferDetailsStatus.status === "not_found" ? (
                           <p className="text-secondary-text truncate text-xs">
-                            This trade offer has expired.
+                            This trade offer no longer exists.
                           </p>
                         ) : activeOfferDetailsStatus.status === "error" ? (
                           <p className="text-secondary-text truncate text-xs">
@@ -2027,8 +2015,6 @@ export default function MessagesInbox() {
                                           status: 3,
                                         });
                                       }
-
-                                      setOfferBannerVisible(false);
                                     } catch (err) {
                                       toast.error(
                                         err instanceof Error
