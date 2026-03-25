@@ -1,7 +1,12 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { Icon } from "@/components/ui/IconWrapper";
 import { Button } from "@/components/ui/button";
 import AccessDeniedLoginButton from "@/components/Auth/AccessDeniedLoginButton";
+import AccessDeniedAutoRedirect from "@/components/Auth/AccessDeniedAutoRedirect";
+
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 export const metadata: Metadata = {
   title: "Access Restricted",
@@ -16,6 +21,7 @@ export const metadata: Metadata = {
 export default function AccessDeniedPage() {
   return (
     <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[url('/backgrounds/v2/background31.webp')] bg-cover bg-center bg-no-repeat px-6">
+      <AccessDeniedAutoRedirect />
       <div className="absolute inset-0 bg-[url('/backgrounds/vignette.png')] bg-cover bg-center bg-no-repeat opacity-70" />
       <div className="absolute inset-0 bg-black/70" />
 
@@ -40,7 +46,7 @@ export default function AccessDeniedPage() {
             variant="outline"
             className="border-border-primary! text-primary-text! hover:bg-quaternary-bg! active:bg-quaternary-bg! w-full sm:w-auto"
           >
-            <a href="https://jailbreakchangelogs.xyz/">Back to Home</a>
+            <Link href="/">Back to Home</Link>
           </Button>
           <Button
             asChild

@@ -16,7 +16,7 @@ const buttonVariants = cva(
         success:
           "bg-status-success! text-form-button-text! shadow-lg hover:bg-status-success/90! active:bg-status-success!",
         outline:
-          "border-2! border-primary-text! text-primary-text! hover:border-button-info! hover:bg-button-info-hover! hover:text-form-button-text! active:border-button-info! active:bg-button-info-active! active:text-form-button-text!",
+          "border-2! border-primary-text! text-primary-text! hover:bg-button-info-hover! hover:text-form-button-text! active:bg-button-info-active! active:text-form-button-text!",
         heroOutline:
           "border-2 border-white/55 bg-black/50 text-white shadow-[0_2px_12px_rgba(0,0,0,0.4)] hover:border-button-info hover:bg-button-info-hover hover:text-form-button-text active:border-button-info active:bg-button-info-active active:text-form-button-text",
         secondary:
