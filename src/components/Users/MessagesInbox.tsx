@@ -40,6 +40,7 @@ import { useOptimizedRealTimeRelativeDate } from "@/hooks/useSharedTimer";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { sanitizeText } from "@/utils/sanitizeText";
 import { PUBLIC_API_URL, searchUsers } from "@/utils/api";
+import { respondToTradeOfferV2 } from "@/utils/trading";
 import { decode as decodeHtmlEntities } from "he";
 import type { UserData, UserFlag, UserSettings } from "@/types/auth";
 
@@ -77,8 +78,28 @@ type Message = {
   senderId: string;
   receiverId: string;
   content: string;
+  metadata?: Record<string, unknown> | null;
   createdAt?: number;
   type?: "user" | "system";
+};
+
+type OfferAcceptedMetadata = {
+  type: "offer_accepted";
+  user?: string | number;
+  offer?: number;
+  trade?: number;
+  trade_user?: string | number;
+};
+
+type TradeOfferDetails = {
+  id: number;
+  trade: number;
+  note: string | null;
+  offering?: Array<{ name?: string; amount?: number }> | null;
+  requesting?: Array<{ name?: string; amount?: number }> | null;
+  user?: { id?: string | number } | null;
+  created_at?: number | string;
+  status?: number;
 };
 
 type ConversationSummary = {
@@ -129,6 +150,15 @@ function asId(value: unknown): string {
   return String(value);
 }
 
+function asNumber(value: unknown): number | null {
+  if (typeof value === "number" && Number.isFinite(value)) return value;
+  if (typeof value === "string" && value.trim()) {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : null;
+  }
+  return null;
+}
+
 function parseJsonWithLargeIds(raw: string): unknown {
   return JSON.parse(
     raw.replace(
@@ -136,6 +166,23 @@ function parseJsonWithLargeIds(raw: string): unknown {
       '"$1":"$2"',
     ),
   );
+}
+
+function parseOfferAcceptedMetadata(
+  metadata: Record<string, unknown> | null | undefined,
+): OfferAcceptedMetadata | null {
+  if (!metadata || typeof metadata !== "object") return null;
+  if (metadata.type !== "offer_accepted") return null;
+  const trade = asNumber(metadata.trade);
+  const offer = asNumber(metadata.offer);
+  if (!trade || !offer) return null;
+  return {
+    type: "offer_accepted",
+    user: metadata.user as OfferAcceptedMetadata["user"],
+    trade,
+    offer,
+    trade_user: metadata.trade_user as OfferAcceptedMetadata["trade_user"],
+  };
 }
 
 function parseMessageRecord(item: unknown): Message | null {
@@ -152,6 +199,7 @@ function parseMessageRecord(item: unknown): Message | null {
   const sourceReceiver = source.receiver_id;
   const sourceId = source.id;
   const sourceContent = source.content;
+  const sourceMetadata = source.metadata;
 
   if (
     (typeof sourceSender !== "string" && typeof sourceSender !== "number") ||
@@ -172,8 +220,59 @@ function parseMessageRecord(item: unknown): Message | null {
     senderId: asId(sourceSender),
     receiverId: asId(sourceReceiver),
     content: sourceContent,
+    metadata:
+      sourceMetadata && typeof sourceMetadata === "object"
+        ? (sourceMetadata as Record<string, unknown>)
+        : sourceMetadata === null
+          ? null
+          : undefined,
     createdAt,
+    type:
+      sourceMetadata && typeof sourceMetadata === "object" ? "system" : "user",
   };
+}
+
+function formatSystemMessageContent(
+  message: Message,
+  currentUserId: string | null,
+  selectedUser: MessageUser | null,
+): string {
+  const metadata = message.metadata;
+  if (!metadata) return message.content ?? "";
+
+  const type = metadata.type;
+  if (typeof type !== "string") return message.content ?? "";
+
+  if (type === "offer_accepted") {
+    const acceptorId = metadata.trade_user;
+    const acceptorIdString =
+      typeof acceptorId === "string" || typeof acceptorId === "number"
+        ? asId(acceptorId)
+        : null;
+
+    if (currentUserId && acceptorIdString === currentUserId) {
+      return "You have accepted a trade offer.";
+    }
+
+    const otherName = selectedUser ? getDisplayName(selectedUser) : "They";
+    return `${otherName} has accepted your trade offer.`;
+  }
+
+  return message.content ?? "";
+}
+
+function summarizeOfferSide(
+  items: TradeOfferDetails["offering"] | TradeOfferDetails["requesting"],
+): string {
+  if (!items || !Array.isArray(items) || items.length === 0) return "—";
+  const parts = items
+    .map((item) => {
+      const name = typeof item?.name === "string" ? item.name : "Unknown";
+      const amount = typeof item?.amount === "number" ? item.amount : 1;
+      return amount > 1 ? `${amount}× ${name}` : name;
+    })
+    .filter(Boolean);
+  return parts.join(", ");
 }
 
 function toMessageUser(raw: unknown): MessageUser | null {
@@ -387,6 +486,158 @@ export default function MessagesInbox() {
 
   const selectedUser = selectedConversation?.user ?? null;
   const currentUserId = currentUser ? asId(currentUser.id) : null;
+
+  const offerAcceptedEvents = useMemo(() => {
+    const parsed = messages
+      .map((message) => {
+        const metadata = parseOfferAcceptedMetadata(
+          message.metadata ?? undefined,
+        );
+        if (!metadata) return null;
+        return {
+          messageId: message.id,
+          createdAt: message.createdAt ?? 0,
+          metadata,
+        };
+      })
+      .filter(Boolean) as Array<{
+      messageId: string;
+      createdAt: number;
+      metadata: OfferAcceptedMetadata;
+    }>;
+
+    parsed.sort((a, b) => b.createdAt - a.createdAt);
+    return parsed;
+  }, [messages]);
+
+  const [activeOfferAcceptedIndex, setActiveOfferAcceptedIndex] = useState(0);
+  const [offerBannerVisible, setOfferBannerVisible] = useState(false);
+  const offerDetailsCacheRef = useRef<Map<string, TradeOfferDetails | null>>(
+    new Map(),
+  );
+  const [activeOfferDetailsStatus, setActiveOfferDetailsStatus] = useState<
+    | { status: "idle" }
+    | { status: "loading" }
+    | { status: "loaded"; data: TradeOfferDetails }
+    | { status: "not_found" }
+    | { status: "error"; error: string }
+  >({ status: "idle" });
+
+  useEffect(() => {
+    setActiveOfferAcceptedIndex(0);
+    setOfferBannerVisible(false);
+  }, [selectedUserId, offerAcceptedEvents.length]);
+
+  useEffect(() => {
+    const active = offerAcceptedEvents[activeOfferAcceptedIndex];
+    if (!active) {
+      setActiveOfferDetailsStatus({ status: "idle" });
+      return;
+    }
+    if (!PUBLIC_API_URL) {
+      setActiveOfferDetailsStatus({
+        status: "error",
+        error: "Trade API is not configured",
+      });
+      return;
+    }
+
+    const key = `${active.metadata.trade}:${active.metadata.offer}`;
+    const cached = offerDetailsCacheRef.current.get(key);
+    if (cached) {
+      setActiveOfferDetailsStatus({ status: "loaded", data: cached });
+      return;
+    }
+    if (cached === null) {
+      setActiveOfferDetailsStatus({
+        status: "error",
+        error: "Unable to load trade offer details",
+      });
+      return;
+    }
+
+    let isCancelled = false;
+    const run = async () => {
+      setActiveOfferDetailsStatus({ status: "loading" });
+      try {
+        const response = await fetch(
+          `${PUBLIC_API_URL}/trades/v2/${encodeURIComponent(String(active.metadata.trade))}/offers/${encodeURIComponent(String(active.metadata.offer))}`,
+          {
+            method: "GET",
+            credentials: "include",
+            cache: "no-store",
+          },
+        );
+
+        const raw = await response.text();
+        const parsed = raw ? (parseJsonWithLargeIds(raw) as unknown) : null;
+
+        if (response.status === 404 && parsed && typeof parsed === "object") {
+          const errorCode = (parsed as Record<string, unknown>).error;
+          if (errorCode === "trade_not_found") {
+            offerDetailsCacheRef.current.set(key, null);
+            setActiveOfferDetailsStatus({ status: "not_found" });
+            return;
+          }
+        }
+
+        if (!response.ok || !parsed || typeof parsed !== "object") {
+          throw new Error("Unable to load trade offer details");
+        }
+
+        const data = parsed as TradeOfferDetails;
+        if (!isCancelled) {
+          offerDetailsCacheRef.current.set(key, data);
+          setActiveOfferDetailsStatus({ status: "loaded", data });
+        }
+      } catch (err) {
+        console.error("Offer details fetch error:", err);
+        if (!isCancelled) {
+          offerDetailsCacheRef.current.set(key, null);
+          setActiveOfferDetailsStatus({
+            status: "error",
+            error: err instanceof Error ? err.message : "Failed to load offer",
+          });
+        }
+      }
+    };
+
+    void run();
+    return () => {
+      isCancelled = true;
+    };
+  }, [activeOfferAcceptedIndex, offerAcceptedEvents]);
+
+  useEffect(() => {
+    if (activeOfferDetailsStatus.status === "loaded") {
+      const isCompleted = activeOfferDetailsStatus.data.status === 3;
+      setOfferBannerVisible(!isCompleted);
+      return;
+    }
+    if (activeOfferDetailsStatus.status === "not_found") {
+      // Keep banner visible so users can navigate back to a valid offer.
+      setOfferBannerVisible(true);
+    }
+  }, [activeOfferDetailsStatus]);
+
+  const activeOfferAccepted = offerAcceptedEvents[activeOfferAcceptedIndex];
+  const canMarkOfferComplete = useMemo(() => {
+    if (!currentUserId || !activeOfferAccepted) return false;
+    const userId = asId(currentUserId);
+    const participants = [
+      activeOfferAccepted.metadata.user,
+      activeOfferAccepted.metadata.trade_user,
+      activeOfferDetailsStatus.status === "loaded"
+        ? activeOfferDetailsStatus.data.user?.id
+        : null,
+    ];
+    return participants.some((id) => {
+      if (typeof id !== "string" && typeof id !== "number") return false;
+      return asId(id) === userId;
+    });
+  }, [activeOfferAccepted, activeOfferDetailsStatus, currentUserId]);
+
+  const [isMarkingOfferComplete, setIsMarkingOfferComplete] = useState(false);
 
   const lastSeenTime = useOptimizedRealTimeRelativeDate(
     selectedUser?.last_seen,
@@ -642,7 +893,7 @@ export default function MessagesInbox() {
         }
 
         const response = await fetch(
-          `${PUBLIC_API_URL}/messages?nocache=true-`,
+          `${PUBLIC_API_URL}/messages?nocache=true`,
           {
             method: "GET",
             credentials: "include",
@@ -1292,7 +1543,7 @@ export default function MessagesInbox() {
                   value={userSearchQuery}
                   onChange={(event) => setUserSearchQuery(event.target.value)}
                   placeholder="Search users to message..."
-                  className="border-border-card bg-secondary-bg text-primary-text placeholder-secondary-text focus:border-button-info w-full rounded-md border py-2 pr-9 pl-9 text-sm transition-colors outline-none"
+                  className="border-border-card bg-tertiary-bg text-primary-text placeholder-secondary-text focus:border-button-info w-full rounded-md border py-2 pr-9 pl-9 text-sm transition-colors outline-none"
                   autoComplete="off"
                   spellCheck={false}
                   disabled={!isAuthenticated}
@@ -1364,6 +1615,17 @@ export default function MessagesInbox() {
               ) : (
                 conversations.map((conversation) => {
                   const isActive = selectedUserId === conversation.user.id;
+                  const isSystemPreview =
+                    conversation.lastMessage?.type === "system";
+                  const previewText = conversation.lastMessage
+                    ? conversation.lastMessage.type === "system"
+                      ? formatSystemMessageContent(
+                          conversation.lastMessage,
+                          currentUserId,
+                          conversation.user,
+                        )
+                      : conversation.lastMessage.content
+                    : "No messages yet";
                   return (
                     <button
                       key={conversation.user.id}
@@ -1372,6 +1634,7 @@ export default function MessagesInbox() {
                       className={cn(
                         "border-border-card hover:bg-tertiary-bg flex w-full cursor-pointer items-center gap-3 border-b border-l-2 border-l-transparent px-4 py-3 text-left transition-colors",
                         isActive ? "bg-tertiary-bg border-l-button-info" : "",
+                        isSystemPreview && !isActive ? "bg-tertiary-bg/40" : "",
                       )}
                     >
                       <UserAvatar
@@ -1394,11 +1657,7 @@ export default function MessagesInbox() {
                           {getDisplayName(conversation.user)}
                         </p>
                         <p className="text-secondary-text truncate text-xs">
-                          {conversation.lastMessage
-                            ? formatMessageText(
-                                conversation.lastMessage.content,
-                              )
-                            : "No messages yet"}
+                          {formatMessageText(previewText)}
                         </p>
                       </div>
                     </button>
@@ -1422,7 +1681,14 @@ export default function MessagesInbox() {
               </div>
             ) : (
               <Chat className="h-full min-h-0">
-                <ChatHeader className="border-border-card border-b px-4 py-3">
+                <ChatHeader
+                  className={cn(
+                    "border-border-card px-4 py-3",
+                    offerBannerVisible && offerAcceptedEvents.length > 0
+                      ? ""
+                      : "border-b",
+                  )}
+                >
                   <ChatHeaderAddon>
                     <Button
                       variant="ghost"
@@ -1479,7 +1745,35 @@ export default function MessagesInbox() {
                         </p>
                       ) : selectedUser.last_seen ? (
                         <p className="text-secondary-text truncate text-xs">
-                          Last seen: {lastSeenTime}
+                          Last seen:{" "}
+                          {lastSeenTime ? (
+                            lastSeenTime
+                          ) : (
+                            <span className="inline-flex items-center gap-1">
+                              <svg
+                                className="text-secondary-text h-3 w-3 animate-spin"
+                                xmlns="http://www.w3.org/2000/svg"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                aria-hidden="true"
+                              >
+                                <circle
+                                  className="opacity-25"
+                                  cx="12"
+                                  cy="12"
+                                  r="10"
+                                  stroke="currentColor"
+                                  strokeWidth="4"
+                                />
+                                <path
+                                  className="opacity-75"
+                                  fill="currentColor"
+                                  d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                                />
+                              </svg>
+                              Loading...
+                            </span>
+                          )}
                         </p>
                       ) : (
                         <p className="text-secondary-text truncate text-xs">
@@ -1546,6 +1840,228 @@ export default function MessagesInbox() {
                   </ChatHeaderAddon>
                 </ChatHeader>
 
+                {offerBannerVisible &&
+                offerAcceptedEvents.length > 0 &&
+                selectedUser ? (
+                  <div className="border-border-card bg-tertiary-bg border-b px-4 py-2">
+                    <div className="border-link bg-button-info/10 grid grid-cols-1 gap-3 rounded-l-none rounded-r-md border-l-2 px-3 py-2 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-start">
+                      <div className="min-w-0 overflow-hidden">
+                        <p className="text-primary-text truncate text-sm font-semibold">
+                          <span className="sm:hidden">Offer accepted</span>
+                          <span className="hidden sm:inline">
+                            Trade offer accepted
+                          </span>
+                        </p>
+                        {activeOfferDetailsStatus.status === "loading" ? (
+                          <p className="text-secondary-text flex items-center gap-2 text-xs">
+                            <svg
+                              className="h-3.5 w-3.5 animate-spin"
+                              xmlns="http://www.w3.org/2000/svg"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              aria-hidden="true"
+                            >
+                              <circle
+                                className="opacity-25"
+                                cx="12"
+                                cy="12"
+                                r="10"
+                                stroke="currentColor"
+                                strokeWidth="4"
+                              />
+                              <path
+                                className="opacity-75"
+                                fill="currentColor"
+                                d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                              />
+                            </svg>
+                            Loading offer details…
+                          </p>
+                        ) : activeOfferDetailsStatus.status === "loaded" ? (
+                          <>
+                            <p className="text-secondary-text truncate text-xs">
+                              <span className="text-secondary-text/90">
+                                Offering:
+                              </span>{" "}
+                              {summarizeOfferSide(
+                                activeOfferDetailsStatus.data.offering,
+                              )}
+                            </p>
+                            <p className="text-secondary-text truncate text-xs">
+                              <span className="text-secondary-text/90">
+                                Requesting:
+                              </span>{" "}
+                              {summarizeOfferSide(
+                                activeOfferDetailsStatus.data.requesting,
+                              )}
+                            </p>
+                          </>
+                        ) : activeOfferDetailsStatus.status === "not_found" ? (
+                          <p className="text-secondary-text truncate text-xs">
+                            This trade offer has expired.
+                          </p>
+                        ) : activeOfferDetailsStatus.status === "error" ? (
+                          <p className="text-secondary-text truncate text-xs">
+                            {activeOfferDetailsStatus.error}
+                          </p>
+                        ) : null}
+                      </div>
+
+                      <div className="flex w-full shrink-0 flex-col gap-2 sm:w-auto sm:flex-row sm:flex-wrap sm:items-center sm:justify-end">
+                        <div className="flex w-full items-center justify-between gap-2 sm:w-auto sm:justify-end sm:gap-1">
+                          <button
+                            type="button"
+                            aria-label="Previous accepted offer"
+                            disabled={activeOfferAcceptedIndex <= 0}
+                            onClick={() =>
+                              setActiveOfferAcceptedIndex((prev) =>
+                                Math.max(prev - 1, 0),
+                              )
+                            }
+                            className={cn(
+                              "text-primary-text flex h-8 w-8 items-center justify-center rounded-full transition-colors",
+                              "hover:bg-quaternary-bg cursor-pointer disabled:opacity-50 disabled:hover:bg-transparent",
+                            )}
+                          >
+                            <Icon
+                              icon="heroicons:chevron-left"
+                              className="h-5 w-5"
+                            />
+                          </button>
+                          <span className="text-secondary-text w-12 text-center text-[11px] tabular-nums">
+                            {Math.min(
+                              activeOfferAcceptedIndex + 1,
+                              offerAcceptedEvents.length,
+                            )}{" "}
+                            / {offerAcceptedEvents.length}
+                          </span>
+                          <button
+                            type="button"
+                            aria-label="Next accepted offer"
+                            disabled={
+                              activeOfferAcceptedIndex >=
+                              offerAcceptedEvents.length - 1
+                            }
+                            onClick={() =>
+                              setActiveOfferAcceptedIndex((prev) =>
+                                Math.min(
+                                  prev + 1,
+                                  offerAcceptedEvents.length - 1,
+                                ),
+                              )
+                            }
+                            className={cn(
+                              "text-primary-text flex h-8 w-8 items-center justify-center rounded-full transition-colors",
+                              "hover:bg-quaternary-bg cursor-pointer disabled:opacity-50 disabled:hover:bg-transparent",
+                            )}
+                          >
+                            <Icon
+                              icon="heroicons:chevron-right"
+                              className="h-5 w-5"
+                            />
+                          </button>
+                        </div>
+                        <div className="grid grid-cols-2 gap-2 sm:flex sm:items-center sm:justify-end sm:gap-2">
+                          <Button
+                            asChild
+                            size="sm"
+                            className="h-8 w-full sm:w-auto"
+                          >
+                            <Link
+                              href={`/trading/ad/${offerAcceptedEvents[activeOfferAcceptedIndex]?.metadata.trade ?? ""}`}
+                              prefetch={false}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              aria-disabled={
+                                activeOfferDetailsStatus.status === "not_found"
+                              }
+                              onClick={(event) => {
+                                if (
+                                  activeOfferDetailsStatus.status ===
+                                  "not_found"
+                                ) {
+                                  event.preventDefault();
+                                }
+                              }}
+                            >
+                              <span className="md:hidden">View</span>
+                              <span className="hidden md:inline">
+                                View trade
+                              </span>
+                            </Link>
+                          </Button>
+                          {canMarkOfferComplete &&
+                            activeOfferDetailsStatus.status === "loaded" &&
+                            activeOfferDetailsStatus.data.status !== 3 && (
+                              <Button
+                                variant="success"
+                                size="sm"
+                                className="h-8 w-full sm:w-auto"
+                                disabled={isMarkingOfferComplete}
+                                onClick={() => {
+                                  if (isMarkingOfferComplete) return;
+                                  const active =
+                                    offerAcceptedEvents[
+                                      activeOfferAcceptedIndex
+                                    ];
+                                  if (!active) return;
+                                  setIsMarkingOfferComplete(true);
+                                  const toastId = toast.loading(
+                                    "Marking offer as completed...",
+                                    { duration: Infinity },
+                                  );
+                                  void (async () => {
+                                    try {
+                                      await respondToTradeOfferV2(
+                                        active.metadata.trade ?? 0,
+                                        active.metadata.offer ?? 0,
+                                        "complete",
+                                      );
+                                      toast.success("Offer marked completed", {
+                                        id: toastId,
+                                        duration: 4000,
+                                      });
+
+                                      const key = `${active.metadata.trade}:${active.metadata.offer}`;
+                                      const cached =
+                                        offerDetailsCacheRef.current.get(key);
+                                      if (cached) {
+                                        offerDetailsCacheRef.current.set(key, {
+                                          ...cached,
+                                          status: 3,
+                                        });
+                                      }
+
+                                      setOfferBannerVisible(false);
+                                    } catch (err) {
+                                      toast.error(
+                                        err instanceof Error
+                                          ? err.message
+                                          : "Failed to mark completed",
+                                        { id: toastId, duration: 5000 },
+                                      );
+                                    } finally {
+                                      setIsMarkingOfferComplete(false);
+                                    }
+                                  })();
+                                }}
+                              >
+                                <Icon
+                                  icon="heroicons:check"
+                                  className="h-4 w-4"
+                                />
+                                <span className="md:hidden">Complete</span>
+                                <span className="hidden md:inline">
+                                  Mark completed
+                                </span>
+                              </Button>
+                            )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ) : null}
+
                 <ChatMessages
                   ref={messagesContainerRef}
                   className="bg-secondary-bg !flex-col px-2 py-3 sm:px-4"
@@ -1561,10 +2077,15 @@ export default function MessagesInbox() {
                   ) : (
                     messages.map((message, index) => {
                       if (message.type === "system") {
+                        const systemContent = formatSystemMessageContent(
+                          message,
+                          currentUser ? asId(currentUser.id) : null,
+                          selectedUser ?? null,
+                        );
                         return (
                           <ChatEvent
                             key={message.id}
-                            className="border-link bg-tertiary-bg/20 my-1 items-start rounded-l-none rounded-r-md border-l-2 py-1 pl-2"
+                            className="border-link bg-button-info/10 my-1 items-start rounded-l-none rounded-r-md border-l-2 py-1 pl-2"
                           >
                             <ChatEventAddon>
                               <div className="bg-tertiary-bg border-border-card text-link inline-flex h-7 w-7 items-center justify-center rounded-md border">
@@ -1580,11 +2101,12 @@ export default function MessagesInbox() {
                                   <ChatEventTime
                                     timestamp={message.createdAt}
                                     format="time"
+                                    className="text-secondary-text text-xs font-semibold"
                                   />
                                 )}
                               </ChatEventTitle>
                               <ChatEventContent className="text-primary-text break-words whitespace-pre-wrap">
-                                {formatMessageText(message.content ?? "")}
+                                {formatMessageText(systemContent)}
                               </ChatEventContent>
                             </ChatEventBody>
                           </ChatEvent>
@@ -1630,7 +2152,6 @@ export default function MessagesInbox() {
                           <ChatEvent
                             className={cn(
                               "items-start rounded-md py-1 transition-colors",
-                              isOwnMessage ? "bg-tertiary-bg/25" : "",
                             )}
                           >
                             <ChatEventAddon>
@@ -1675,6 +2196,7 @@ export default function MessagesInbox() {
                                   <ChatEventTime
                                     timestamp={message.createdAt}
                                     format="time"
+                                    className="text-secondary-text text-xs font-semibold"
                                   />
                                 )}
                               </ChatEventTitle>

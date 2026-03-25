@@ -113,6 +113,11 @@ export const useOptimizedRealTimeRelativeDate = (
     getInitialRelativeTime,
   );
 
+  useEffect(() => {
+    setRelativeTime(getInitialRelativeTime());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [timestamp]);
+
   const updateRelativeTime = useCallback(() => {
     if (timestamp) {
       setRelativeTime(formatRelativeDate(timestamp));
