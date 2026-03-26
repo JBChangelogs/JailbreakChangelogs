@@ -23,7 +23,7 @@ export async function POST() {
 
   const response = NextResponse.json({ ok: true });
   const isProd = process.env.RAILWAY_ENVIRONMENT_NAME === "production";
-  const cookieDomain = isProd ? ".jailbreakchangelogs.xyz" : undefined;
+  const cookieDomain = isProd ? ".jailbreakchangelogs.com" : undefined;
   const cookieParts = [
     "jbcl_token=",
     "HttpOnly",

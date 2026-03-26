@@ -25,7 +25,7 @@ export async function POST(request: Request) {
     const user = await resp.json();
 
     const isProd = process.env.RAILWAY_ENVIRONMENT_NAME === "production";
-    const cookieDomain = isProd ? ".jailbreakchangelogs.xyz" : undefined;
+    const cookieDomain = isProd ? ".jailbreakchangelogs.com" : undefined;
     const response = NextResponse.json(user, { status: 200 });
     const cookieParts = [
       `jbcl_token=${encodeURIComponent(token)}`,
