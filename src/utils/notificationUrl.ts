@@ -9,6 +9,22 @@ export interface NotificationUrlInfo {
   href?: string;
 }
 
+const INTERNAL_HOSTNAMES = new Set([
+  "jailbreakchangelogs.com",
+  "www.jailbreakchangelogs.com",
+  // Legacy domain kept for old notifications
+  "jailbreakchangelogs.xyz",
+  "www.jailbreakchangelogs.xyz",
+]);
+
+function isJailbreakChangelogsHostname(hostname: string) {
+  return (
+    hostname === "jailbreakchangelogs.com" ||
+    hostname.endsWith(".jailbreakchangelogs.com") ||
+    hostname === "jailbreakchangelogs.xyz" ||
+    hostname.endsWith(".jailbreakchangelogs.xyz")
+  );
+}
 /**
  * Parses a notification link URL and determines how it should be handled
  *
@@ -29,17 +45,16 @@ export function parseNotificationUrl(link: string): NotificationUrlInfo {
   try {
     const url = new URL(link);
 
-    // Only treat the main domain (without subdomain) as internal
-    const isMainDomain = url.hostname === "jailbreakchangelogs.xyz";
-    const isSubdomain = url.hostname.endsWith(".jailbreakchangelogs.xyz");
+    // Only treat the main site hostnames as internal navigation
+    const isInternalHostname = INTERNAL_HOSTNAMES.has(url.hostname);
     const isWhitelisted =
-      isMainDomain ||
-      isSubdomain ||
+      isInternalHostname ||
+      isJailbreakChangelogsHostname(url.hostname) ||
       url.hostname === "google.com" ||
       url.hostname.endsWith(".google.com");
 
-    if (isMainDomain) {
-      // Extract relative path for main domain only
+    if (isInternalHostname) {
+      // Extract relative path for internal navigation
       const relativePath = url.pathname + url.search + url.hash;
       return {
         isWhitelisted: true,

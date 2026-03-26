@@ -105,7 +105,7 @@ export default async function RootLayout({
                   : `/${process.env.NEXT_PUBLIC_UMAMI_SCRIPT_NAME}`
                 : "/assets/js/app.js"
             }`}
-            data-website-id="91439a73-21f8-4129-961e-5de4267a08db"
+            data-website-id="fb7c4ad7-860e-4333-82cf-6b6f337b8190"
             data-domains="jailbreakchangelogs.xyz"
           />
           {/* Nitro Pay Ads & GDPR - Always load script for consent prompts */}
@@ -242,7 +242,7 @@ export default async function RootLayout({
                 : `/${process.env.NEXT_PUBLIC_UMAMI_SCRIPT_NAME}`
               : "/assets/js/app.js"
           }`}
-          data-website-id="91439a73-21f8-4129-961e-5de4267a08db"
+          data-website-id="fb7c4ad7-860e-4333-82cf-6b6f337b8190"
           data-domains="jailbreakchangelogs.xyz"
         />
         {/* Nitro Pay Ads & GDPR - Always load script for consent prompts */}
