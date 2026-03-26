@@ -40,8 +40,18 @@ const nextConfig = {
         pathname: "/**",
       },
       {
+        protocol: "http",
+        hostname: "proxy.jailbreakchangelogs.com",
+        pathname: "/**",
+      },
+      {
         protocol: "https",
         hostname: "assets.jailbreakchangelogs.xyz",
+        pathname: "/assets/**",
+      },
+      {
+        protocol: "https",
+        hostname: "assets.jailbreakchangelogs.com",
         pathname: "/assets/**",
       },
       {
