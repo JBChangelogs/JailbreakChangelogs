@@ -99,7 +99,7 @@ export default async function RootLayout({
           {/* Umami Analytics */}
           <Script
             defer
-            src={`https://umami.jailbreakchangelogs.xyz${
+            src={`https://umami.jailbreakchangelogs.com${
               process.env.NEXT_PUBLIC_UMAMI_SCRIPT_NAME
                 ? process.env.NEXT_PUBLIC_UMAMI_SCRIPT_NAME.startsWith("/")
                   ? process.env.NEXT_PUBLIC_UMAMI_SCRIPT_NAME
@@ -243,7 +243,7 @@ export default async function RootLayout({
         {/* Umami Analytics */}
         <Script
           defer
-          src={`https://umami.jailbreakchangelogs.xyz${
+          src={`https://umami.jailbreakchangelogs.com${
             process.env.NEXT_PUBLIC_UMAMI_SCRIPT_NAME
               ? process.env.NEXT_PUBLIC_UMAMI_SCRIPT_NAME.startsWith("/")
                 ? process.env.NEXT_PUBLIC_UMAMI_SCRIPT_NAME
