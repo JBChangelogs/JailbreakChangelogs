@@ -14,6 +14,7 @@ interface UserAvatarProps {
   avatarHash: string | null;
   username: string;
   size?: number;
+  cdnSize?: number;
   custom_avatar?: string;
   isOnline?: boolean;
   showBadge?: boolean;
@@ -118,6 +119,7 @@ const UserAvatarImpl = ({
   avatarHash,
   username,
   size = 12,
+  cdnSize,
   custom_avatar,
   isOnline,
   showBadge = true,
@@ -133,10 +135,16 @@ const UserAvatarImpl = ({
 
   const finalShape = premiumType === 3 ? "square" : shape;
 
+  const discordCdnSize = (() => {
+    const value = cdnSize ?? 4096;
+    const allowed = new Set([16, 32, 64, 128, 256, 512, 1024, 2048, 4096]);
+    return allowed.has(value) ? value : 4096;
+  })();
+
   const getAvatarSource = () => {
     if (settings?.avatar_discord === 1 && !imageError) {
       if (avatarHash && avatarHash !== "None") {
-        const url = `https://cdn.discordapp.com/avatars/${userId}/${avatarHash}?size=4096`;
+        const url = `https://cdn.discordapp.com/avatars/${userId}/${avatarHash}?size=${discordCdnSize}`;
         return {
           src: url,
           alt: username ? `${username}'s profile picture` : "User avatar",
@@ -166,7 +174,7 @@ const UserAvatarImpl = ({
       !imageError
     ) {
       if (avatarHash && avatarHash !== "None") {
-        const url = `https://cdn.discordapp.com/avatars/${userId}/${avatarHash}?size=4096`;
+        const url = `https://cdn.discordapp.com/avatars/${userId}/${avatarHash}?size=${discordCdnSize}`;
         return {
           src: url,
           alt: username ? `${username}'s profile picture` : "User avatar",

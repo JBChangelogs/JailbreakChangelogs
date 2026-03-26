@@ -338,6 +338,7 @@ const FollowingModal: React.FC<FollowingModalProps> = ({
                                 avatarHash={user.avatar}
                                 username={user.username}
                                 size={10}
+                                cdnSize={512}
                                 custom_avatar={user.custom_avatar}
                                 showBadge={false}
                                 settings={user.settings}

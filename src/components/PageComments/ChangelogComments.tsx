@@ -1502,6 +1502,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                                 parentComment.author
                               }
                               size={4}
+                              cdnSize={512}
                               showBadge={false}
                               premiumType={
                                 userData[parentComment.user_id]?.premiumtype
@@ -1575,6 +1576,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                                   comment.author
                                 }
                                 size={10}
+                                cdnSize={512}
                                 custom_avatar={
                                   userData[comment.user_id]?.custom_avatar
                                 }
