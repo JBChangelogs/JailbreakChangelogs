@@ -98,7 +98,7 @@ Visit https://jailbreakchangelogs.com/faq
   - [@badimo](https://x.com/badimo) (Official Jailbreak account)
 
 - Join our [Discord community](https://discord.jailbreakchangelogs.xyz/) to discuss changes and connect with other players or make feature requests.
-- For support, reach out to [support@jailbreakchangelogs.xyz](mailto:support@jailbreakchangelogs.xyz)
+- For support, reach out to [support@jailbreakchangelogs.com](mailto:support@jailbreakchangelogs.com)
 
 ## License
 

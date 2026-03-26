@@ -132,7 +132,7 @@ export default function Footer({ githubUrl, versionInfo }: FooterProps) {
                 </button>
               </div>
               <a
-                href="mailto:support@jailbreakchangelogs.xyz"
+                href="mailto:support@jailbreakchangelogs.com"
                 className="text-link hover:text-link-hover active:text-link-active block transition-colors duration-200"
               >
                 Contact Us

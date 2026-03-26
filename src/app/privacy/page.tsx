@@ -167,10 +167,10 @@ export default function PrivacyPage() {
                 <li>
                   Email us at{" "}
                   <a
-                    href="mailto:support@jailbreakchangelogs.xyz"
+                    href="mailto:support@jailbreakchangelogs.com"
                     className="text-link hover:text-link-hover hover:underline"
                   >
-                    support@jailbreakchangelogs.xyz
+                    support@jailbreakchangelogs.com
                   </a>
                 </li>
               </ul>
@@ -286,10 +286,10 @@ export default function PrivacyPage() {
               <Typography className="text-secondary-text mt-2">
                 Email:{" "}
                 <a
-                  href="mailto:support@jailbreakchangelogs.xyz"
+                  href="mailto:support@jailbreakchangelogs.com"
                   className="text-link hover:text-link-hover hover:underline"
                 >
-                  support@jailbreakchangelogs.xyz
+                  support@jailbreakchangelogs.com
                 </a>
               </Typography>
             </div>

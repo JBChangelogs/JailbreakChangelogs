@@ -431,10 +431,10 @@ export default function ModernPricingSection() {
                 </a>{" "}
                 or email{" "}
                 <a
-                  href="mailto:support@jailbreakchangelogs.xyz"
+                  href="mailto:support@jailbreakchangelogs.com"
                   className="text-link hover:text-link-hover font-semibold underline transition-colors"
                 >
-                  support@jailbreakchangelogs.xyz
+                  support@jailbreakchangelogs.com
                 </a>
                 .
               </p>
@@ -624,10 +624,10 @@ export default function ModernPricingSection() {
             <p className="text-secondary-text mb-3 text-sm">
               Reach out via email:{" "}
               <a
-                href="mailto:support@jailbreakchangelogs.xyz"
+                href="mailto:support@jailbreakchangelogs.com"
                 className="text-link hover:text-link-hover font-semibold underline transition-colors"
               >
-                support@jailbreakchangelogs.xyz
+                support@jailbreakchangelogs.com
               </a>
             </p>
           </div>
