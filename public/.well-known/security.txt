@@ -1,4 +1,4 @@
-Contact: mailto:support@jailbreakchangelogs.xyz
+Contact: mailto:support@jailbreakchangelogs.com
 Expires: 2026-06-09T12:00:00Z
 Canonical: https://jailbreakchangelogs.com/.well-known/security.txt
 Policy: https://github.com/JBChangelogs/JailbreakChangelogs/security/policy
