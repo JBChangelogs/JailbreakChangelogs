@@ -22,13 +22,8 @@ export async function POST() {
   }
 
   const response = NextResponse.json({ ok: true });
-  const envName = process.env.RAILWAY_ENVIRONMENT_NAME;
-  const isProd = envName === "production";
-  const useSharedDomainCookie =
-    envName === "production" || envName === "testing";
-  const cookieDomain = useSharedDomainCookie
-    ? ".jailbreakchangelogs.xyz"
-    : undefined;
+  const isProd = process.env.RAILWAY_ENVIRONMENT_NAME === "production";
+  const cookieDomain = isProd ? ".jailbreakchangelogs.com" : undefined;
   const cookieParts = [
     "jbcl_token=",
     "HttpOnly",
