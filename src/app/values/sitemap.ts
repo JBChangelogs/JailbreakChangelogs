@@ -7,7 +7,7 @@ import {
   getVideoPath,
 } from "@/utils/images";
 
-const BASE_URL = "https://jailbreakchangelogs.xyz";
+const BASE_URL = "https://jailbreakchangelogs.com";
 
 interface Item {
   name: string;

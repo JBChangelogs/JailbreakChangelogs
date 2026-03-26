@@ -33,7 +33,7 @@ function isJailbreakChangelogsHostname(hostname: string) {
  *
  * @example
  * // Main domain - returns relative path for internal navigation
- * parseNotificationUrl("https://jailbreakchangelogs.xyz/values")
+ * parseNotificationUrl("https://jailbreakchangelogs.com/values")
  * // => { isWhitelisted: true, isJailbreakChangelogs: true, relativePath: "/values" }
  *
  * @example

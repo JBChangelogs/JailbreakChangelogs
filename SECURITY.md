@@ -33,7 +33,7 @@ When reporting a vulnerability, please include:
 ## Security Best Practices
 
 - We use HTTPS encryption for all web traffic
-- User data is handled according to our [Privacy Policy](https://jailbreakchangelogs.xyz/privacy)
+- User data is handled according to our [Privacy Policy](https://jailbreakchangelogs.com/privacy)
 - Regular security audits are performed on our website
 - Third-party dependencies are regularly updated to patch known vulnerabilities
 

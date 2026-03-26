@@ -22,11 +22,11 @@ export default function robots(): MetadataRoute.Robots {
       },
     ],
     sitemap: [
-      "https://jailbreakchangelogs.xyz/sitemap.xml",
-      "https://jailbreakchangelogs.xyz/changelogs/sitemap.xml",
-      "https://jailbreakchangelogs.xyz/seasons/sitemap.xml",
-      "https://jailbreakchangelogs.xyz/values/sitemap.xml",
-      "https://jailbreakchangelogs.xyz/values/changelogs/sitemap.xml",
+      "https://jailbreakchangelogs.com/sitemap.xml",
+      "https://jailbreakchangelogs.com/changelogs/sitemap.xml",
+      "https://jailbreakchangelogs.com/seasons/sitemap.xml",
+      "https://jailbreakchangelogs.com/values/sitemap.xml",
+      "https://jailbreakchangelogs.com/values/changelogs/sitemap.xml",
     ],
   };
 }

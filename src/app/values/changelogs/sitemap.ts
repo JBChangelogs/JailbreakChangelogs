@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next";
 import { BASE_API_URL } from "@/utils/api";
 
-const BASE_URL = "https://jailbreakchangelogs.xyz";
+const BASE_URL = "https://jailbreakchangelogs.com";
 
 export const revalidate = 3600; // Revalidate every 1 hour
 
