@@ -15,7 +15,7 @@ export async function generateMetadata({
   const { id } = await params;
 
   return {
-    metadataBase: new URL("https://jailbreakchangelogs.xyz"),
+    metadataBase: new URL("https://jailbreakchangelogs.com"),
     title: `Value Changelog #${id}`,
     description: `View value changes in this Jailbreak Changelogs Value update.`,
     alternates: {
@@ -25,7 +25,7 @@ export async function generateMetadata({
       title: `Value Changelog #${id}`,
       description: `View value changes in this Jailbreak Changelogs Value update.`,
       type: "website",
-      url: `https://jailbreakchangelogs.xyz/values/changelogs/${id}`,
+      url: `https://jailbreakchangelogs.com/values/changelogs/${id}`,
       siteName: "Jailbreak Changelogs",
       images: [
         {

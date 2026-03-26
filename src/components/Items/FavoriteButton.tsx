@@ -40,7 +40,7 @@ export default function FavoriteButton({
           method: isFavorited ? "DELETE" : "POST",
           headers: {
             "Content-Type": "application/json",
-            Origin: "https://jailbreakchangelogs.xyz",
+            Origin: "https://jailbreakchangelogs.com",
           },
           body: JSON.stringify({ item_id: idString }),
         },

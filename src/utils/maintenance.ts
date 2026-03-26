@@ -40,7 +40,7 @@ export async function getMaintenanceMetadata(): Promise<Metadata | null> {
     // For server-side rendering, we can't check localStorage
     // So we'll return maintenance metadata and let the client-side component handle the bypass
     return {
-      metadataBase: new URL("https://jailbreakchangelogs.xyz"),
+      metadataBase: new URL("https://jailbreakchangelogs.com"),
       title: "Under Maintenance",
       description:
         "Jailbreak Changelogs is currently under maintenance. We'll be back soon!",
@@ -55,7 +55,7 @@ export async function getMaintenanceMetadata(): Promise<Metadata | null> {
         type: "website",
         locale: "en_US",
         siteName: "Jailbreak Changelogs",
-        url: "https://jailbreakchangelogs.xyz",
+        url: "https://jailbreakchangelogs.com",
         images: [
           {
             url: "https://assets.jailbreakchangelogs.xyz/assets/backgrounds/background16.webp",
@@ -96,7 +96,7 @@ export async function getInventoryMaintenanceMetadata(): Promise<Metadata | null
 
   if (isInventoryMaintenanceMode) {
     return {
-      metadataBase: new URL("https://jailbreakchangelogs.xyz"),
+      metadataBase: new URL("https://jailbreakchangelogs.com"),
       title: "Inventory Checker - Under Maintenance",
       description:
         "The Inventory API is currently under maintenance. We'll be back soon!",
@@ -111,7 +111,7 @@ export async function getInventoryMaintenanceMetadata(): Promise<Metadata | null
         type: "website",
         locale: "en_US",
         siteName: "Jailbreak Changelogs",
-        url: "https://jailbreakchangelogs.xyz/inventories",
+        url: "https://jailbreakchangelogs.com/inventories",
         images: [
           {
             url: "https://assets.jailbreakchangelogs.xyz/assets/backgrounds/background16.webp",
@@ -152,7 +152,7 @@ export async function getOGFinderMaintenanceMetadata(): Promise<Metadata | null>
 
   if (isOGFinderMaintenanceMode) {
     return {
-      metadataBase: new URL("https://jailbreakchangelogs.xyz"),
+      metadataBase: new URL("https://jailbreakchangelogs.com"),
       title: "OG Finder - Under Maintenance",
       description:
         "The OG Finder is currently under maintenance. We'll be back soon!",
@@ -167,7 +167,7 @@ export async function getOGFinderMaintenanceMetadata(): Promise<Metadata | null>
         type: "website",
         locale: "en_US",
         siteName: "Jailbreak Changelogs",
-        url: "https://jailbreakchangelogs.xyz/og",
+        url: "https://jailbreakchangelogs.com/og",
         images: [
           {
             url: "https://assets.jailbreakchangelogs.xyz/assets/backgrounds/background16.webp",
@@ -209,7 +209,7 @@ export async function getDupeFinderMaintenanceMetadata(): Promise<Metadata | nul
 
   if (isDupeFinderMaintenanceMode) {
     return {
-      metadataBase: new URL("https://jailbreakchangelogs.xyz"),
+      metadataBase: new URL("https://jailbreakchangelogs.com"),
       title: "Dupe Finder - Under Maintenance",
       description:
         "The Dupe Finder is currently under maintenance. We'll be back soon!",
@@ -224,7 +224,7 @@ export async function getDupeFinderMaintenanceMetadata(): Promise<Metadata | nul
         type: "website",
         locale: "en_US",
         siteName: "Jailbreak Changelogs",
-        url: "https://jailbreakchangelogs.xyz/dupes",
+        url: "https://jailbreakchangelogs.com/dupes",
         images: [
           {
             url: "https://assets.jailbreakchangelogs.xyz/assets/backgrounds/background16.webp",
@@ -266,7 +266,7 @@ export async function getMoneyLeaderboardMaintenanceMetadata(): Promise<Metadata
 
   if (isMoneyLeaderboardMaintenanceMode) {
     return {
-      metadataBase: new URL("https://jailbreakchangelogs.xyz"),
+      metadataBase: new URL("https://jailbreakchangelogs.com"),
       title: "Money Leaderboard - Under Maintenance",
       description:
         "The Money Leaderboard is currently under maintenance. We'll be back soon!",
@@ -281,7 +281,7 @@ export async function getMoneyLeaderboardMaintenanceMetadata(): Promise<Metadata
         type: "website",
         locale: "en_US",
         siteName: "Jailbreak Changelogs",
-        url: "https://jailbreakchangelogs.xyz/leaderboard/money",
+        url: "https://jailbreakchangelogs.com/leaderboard/money",
         images: [
           {
             url: "https://assets.jailbreakchangelogs.xyz/assets/backgrounds/background16.webp",

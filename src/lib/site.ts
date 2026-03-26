@@ -1,6 +1,6 @@
 export const siteConfig = {
   name: "Jailbreak Changelogs",
-  url: "https://jailbreakchangelogs.xyz",
+  url: "https://jailbreakchangelogs.com",
   description:
     "Track all development changes, updates, fixes and improvements made to the website.",
   links: {

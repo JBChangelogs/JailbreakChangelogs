@@ -44,7 +44,7 @@ export async function generateMetadata(): Promise<Metadata> {
   }
 
   return {
-    metadataBase: new URL("https://jailbreakchangelogs.xyz"),
+    metadataBase: new URL("https://jailbreakchangelogs.com"),
     title: {
       template: "%s | Jailbreak Changelogs",
       default: "Jailbreak Changelogs",
@@ -69,7 +69,7 @@ export async function generateMetadata(): Promise<Metadata> {
       type: "website",
       locale: "en_US",
       siteName: "Jailbreak Changelogs",
-      url: "https://jailbreakchangelogs.xyz",
+      url: "https://jailbreakchangelogs.com",
     },
     twitter: {
       card: "summary_large_image",

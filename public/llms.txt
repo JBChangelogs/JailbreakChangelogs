@@ -6,7 +6,7 @@ This file provides guidance for AI systems to understand and navigate the Jailbr
 
 JailbreakChangelogs is a comprehensive fan-made platform by Jakobiis and Jalenzz16 for Roblox Jailbreak players, providing changelog archives, item values, trading systems, and community features. It's operated by Jailbreak Changelogs LLC and is not affiliated with Badimo (the official Jailbreak development team).
 
-**Website**: https://jailbreakchangelogs.xyz/
+**Website**: https://jailbreakchangelogs.com/
 
 ## Core Features & Pages
 

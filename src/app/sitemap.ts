@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next";
 import { isFeatureEnabled } from "@/utils/featureFlags";
 
-const BASE_URL = "https://jailbreakchangelogs.xyz";
+const BASE_URL = "https://jailbreakchangelogs.com";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   // Static pages that don't need their own sitemap

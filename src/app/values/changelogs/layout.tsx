@@ -1,7 +1,7 @@
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://jailbreakchangelogs.xyz"),
+  metadataBase: new URL("https://jailbreakchangelogs.com"),
   title: "Value Changelog History",
   description:
     "Track every value change, price adjustment, and item modification in Jailbreak Changelogs. View comprehensive changelog history for all tradeable items.",
@@ -13,7 +13,7 @@ export const metadata: Metadata = {
     description:
       "Track every value change, price adjustment, and item modification in Jailbreak Changelogs. View comprehensive changelog history for all tradeable items.",
     type: "website",
-    url: "https://jailbreakchangelogs.xyz/values/changelogs",
+    url: "https://jailbreakchangelogs.com/values/changelogs",
     images: [
       {
         url: "https://assets.jailbreakchangelogs.xyz/assets/logos/embeds/JBCL_X_TC_Embed_Graphic.png",

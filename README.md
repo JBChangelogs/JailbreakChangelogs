@@ -9,7 +9,7 @@
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/JBChangelogs/JailbreakChangelogs)
 
 > [!CAUTION]
-> The only websites associated with this repository are the [main website](https://jailbreakchangelogs.xyz/) and the [testing website](https://testing.jailbreakchangelogs.xyz). We have no other affiliated websites or domains. Any other websites or platforms claiming to represent or provide content for this repo are not controlled by us.
+> The only websites associated with this repository are the [main website](https://jailbreakchangelogs.com/) and the [testing website](https://testing.jailbreakchangelogs.xyz). We have no other affiliated websites or domains. Any other websites or platforms claiming to represent or provide content for this repo are not controlled by us.
 
 > [!NOTE]
 > This is a fan-made project operated by Jailbreak Changelogs LLC and is not affiliated with or endorsed by Badimo - the development team behind Roblox Jailbreak.
@@ -88,7 +88,7 @@ See [CONTRIBUTING.md](./CONTRIBUTING.md) for ways to get started.
 
 ## FAQ
 
-Visit https://jailbreakchangelogs.xyz/faq
+Visit https://jailbreakchangelogs.com/faq
 
 ## Stay Connected
 

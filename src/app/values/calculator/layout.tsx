@@ -3,7 +3,7 @@ import { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Value Calculator",
   description: "Calculate the value of your Roblox Jailbreak items and trades",
-  metadataBase: new URL("https://jailbreakchangelogs.xyz"),
+  metadataBase: new URL("https://jailbreakchangelogs.com"),
   openGraph: {
     title: "Value Calculator",
     description:
@@ -18,7 +18,7 @@ export const metadata: Metadata = {
     ],
     type: "website",
     siteName: "Jailbreak Changelogs",
-    url: "https://jailbreakchangelogs.xyz/values/calculator",
+    url: "https://jailbreakchangelogs.com/values/calculator",
   },
   twitter: {
     card: "summary_large_image",

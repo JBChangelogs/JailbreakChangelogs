@@ -1,5 +1,5 @@
 export const metadata = {
-  metadataBase: new URL("https://jailbreakchangelogs.xyz"),
+  metadataBase: new URL("https://jailbreakchangelogs.com"),
   title: {
     template: "%s | Jailbreak Changelogs",
     default: "Values | Jailbreak Changelogs",
@@ -37,7 +37,7 @@ export const metadata = {
     ],
     type: "website",
     siteName: "Jailbreak Changelogs",
-    url: "https://jailbreakchangelogs.xyz/values",
+    url: "https://jailbreakchangelogs.com/values",
   },
   twitter: {
     card: "summary_large_image",
@@ -60,16 +60,16 @@ export default function ValuesLayout({
     "@type": "WebSite",
     name: "Roblox Jailbreak Values | Jailbreak Changelogs",
     description: `Comprehensive and regularly updated Roblox Jailbreak values list for ${new Date().getFullYear()}. Find current trading values for vehicles, spoilers, rims, body colors, hyperchromes, textures, tire stickers, tire styles, drifts, furniture, horns, and weapon skins.`,
-    url: "https://jailbreakchangelogs.xyz/values",
+    url: "https://jailbreakchangelogs.com/values",
     publisher: {
       "@type": "Organization",
       name: "Jailbreak Changelogs",
-      url: "https://jailbreakchangelogs.xyz",
+      url: "https://jailbreakchangelogs.com",
     },
     potentialAction: {
       "@type": "SearchAction",
       target:
-        "https://jailbreakchangelogs.xyz/values?search={search_term_string}",
+        "https://jailbreakchangelogs.com/values?search={search_term_string}",
       "query-input": "required name=search_term_string",
     },
     mainEntity: {
