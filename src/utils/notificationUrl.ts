@@ -38,8 +38,8 @@ function isJailbreakChangelogsHostname(hostname: string) {
  *
  * @example
  * // Subdomain - returns full URL for external navigation
- * parseNotificationUrl("https://inventories.jailbreakchangelogs.xyz/user/export/123")
- * // => { isWhitelisted: true, isJailbreakChangelogs: false, href: "https://inventories.jailbreakchangelogs.xyz/user/export/123" }
+ * parseNotificationUrl("https://inventories.jailbreakchangelogs.com/user/export/123")
+ * // => { isWhitelisted: true, isJailbreakChangelogs: false, href: "https://inventories.jailbreakchangelogs.com/user/export/123" }
  */
 export function parseNotificationUrl(link: string): NotificationUrlInfo {
   try {
