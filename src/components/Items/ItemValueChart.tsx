@@ -184,16 +184,6 @@ const ItemValueChart = ({
     }
   };
 
-  // Format value for display
-  const formatValue = (value: number) => {
-    if (value >= 1000000) {
-      return `${(value / 1000000).toFixed(1).replace(/\\.0$/, "")}m`;
-    } else if (value >= 1000) {
-      return `${(value / 1000).toFixed(0)}k`;
-    }
-    return value.toString();
-  };
-
   // Sort history by date
   const sortedHistory = [...history].sort(
     (a, b) => parseInt(a.date) - parseInt(b.date),
