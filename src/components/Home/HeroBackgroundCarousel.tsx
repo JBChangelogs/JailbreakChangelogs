@@ -10,6 +10,7 @@ export default function HeroBackgroundCarousel({
   initialImage: string;
 }) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [isTransitioning, setIsTransitioning] = useState(false);
   const [isFirstRender, setIsFirstRender] = useState(true);
 
   const backgroundImages = useMemo(() => {
@@ -28,27 +29,58 @@ export default function HeroBackgroundCarousel({
   useEffect(() => {
     if (backgroundImages.length <= 1) return;
 
-    const interval = setInterval(nextImage, 10000);
-    return () => clearInterval(interval);
+    let timeoutId: ReturnType<typeof setTimeout>;
+    const intervalId = setInterval(() => {
+      setIsTransitioning(true);
+      timeoutId = setTimeout(() => {
+        setIsTransitioning(false);
+        setCurrentImageIndex((prev) => prev + 1);
+        setIsFirstRender(false);
+      }, 1000);
+    }, 10_000);
+
+    return () => {
+      clearInterval(intervalId);
+      clearInterval(timeoutId);
+    };
   }, [backgroundImages.length, nextImage]);
 
-  const currentBackgroundImage = backgroundImages[currentImageIndex] || "";
-
-  if (!currentBackgroundImage) {
+  if (!backgroundImages.length) {
     return null;
   }
 
+  const activeLayer: number = currentImageIndex % 2;
+  const numImages = backgroundImages.length;
+
+  const renderLayer = (layerIndex: number) => {
+    const isActive = activeLayer === layerIndex;
+    const imageIndex = isActive ? currentImageIndex : currentImageIndex + 1;
+    const src = backgroundImages[imageIndex % numImages];
+    const isFading = isActive && isTransitioning;
+
+    return (
+      <Image
+        key={`layer-${layerIndex}`}
+        src={src}
+        alt="Jailbreak Background"
+        fill
+        sizes="100vw"
+        quality={85}
+        priority={isFirstRender && isActive}
+        fetchPriority={isFirstRender && isActive ? "high" : "auto"}
+        loading={isFirstRender && isActive ? "eager" : "lazy"}
+        className={`object-cover transition-opacity duration-1000 ${
+          isActive ? "z-10" : "z-0"
+        } ${isFading ? "opacity-0" : "opacity-100"}`}
+        style={{ objectPosition: "center 70%", willChange: "opacity" }}
+      />
+    );
+  };
+
   return (
-    <Image
-      key={currentBackgroundImage}
-      src={currentBackgroundImage}
-      alt="Jailbreak Background"
-      fill
-      priority={isFirstRender}
-      fetchPriority={isFirstRender ? "high" : "auto"}
-      loading={isFirstRender ? "eager" : "lazy"}
-      className="object-cover transition-opacity duration-1000"
-      style={{ objectPosition: "center 70%" }}
-    />
+    <>
+      {renderLayer(0)}
+      {renderLayer(1)}
+    </>
   );
 }
