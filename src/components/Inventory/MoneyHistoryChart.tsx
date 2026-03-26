@@ -17,7 +17,6 @@ import {
   BarChart,
   CartesianGrid,
   Legend as RechartsLegend,
-  ResponsiveContainer,
   XAxis,
   YAxis,
 } from "recharts";
@@ -380,230 +379,222 @@ const MoneyHistoryChart = ({ initialData = [] }: MoneyHistoryChartProps) => {
 
         <div className="h-[350px]">
           <ChartContainer config={moneyChartConfig} className="h-full w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              {chartType === "area" ? (
-                <AreaChart
-                  accessibilityLayer
-                  data={moneyChartData}
-                  margin={{ left: 6, right: 6 }}
-                >
-                  <defs>
-                    <linearGradient
-                      id={moneyGradientId}
-                      x1="0"
-                      y1="0"
-                      x2="0"
-                      y2="1"
-                    >
-                      <stop
-                        offset="5%"
-                        stopColor="var(--color-money)"
-                        stopOpacity={0.45}
-                      />
-                      <stop
-                        offset="95%"
-                        stopColor="var(--color-money)"
-                        stopOpacity={0.04}
-                      />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid
-                    vertical={false}
-                    stroke="var(--color-border-card)"
-                    strokeOpacity={0.5}
-                  />
-                  <XAxis
-                    dataKey="timestamp"
-                    type="number"
-                    scale="time"
-                    domain={["dataMin", "dataMax"]}
-                    tickLine={false}
-                    axisLine={false}
-                    tick={false}
-                  />
-                  <YAxis
-                    tickLine={false}
-                    axisLine={false}
-                    tickMargin={8}
-                    width={56}
-                    domain={[moneyAxisMin, moneyAxisMax]}
-                    tick={{
-                      fill: "var(--color-secondary-text)",
-                      fontSize: 12,
-                    }}
-                    tickFormatter={(tickValue: number) =>
-                      formatValue(Number(tickValue))
-                    }
-                  />
-                  <ChartTooltip
-                    cursor={false}
-                    content={
-                      <ChartTooltipContent
-                        className="min-w-[12rem] px-3 py-2"
-                        formatter={(value) => (
-                          <div className="flex w-full items-center justify-between gap-3">
-                            <span className="text-secondary-text flex items-center gap-2">
-                              <span
-                                className="h-2.5 w-2.5 shrink-0 rounded-[2px]"
-                                style={{
-                                  backgroundColor: "var(--color-money)",
-                                }}
-                              />
-                              Money
-                            </span>
-                            <span className="text-primary-text font-mono font-semibold tabular-nums">
-                              {value === null || value === undefined
-                                ? "N/A"
-                                : Number(value).toLocaleString()}
-                            </span>
-                          </div>
-                        )}
-                        labelFormatter={(_, payload) => {
-                          const row = payload?.[0]?.payload as
-                            | { timestamp?: number | string }
-                            | undefined;
-                          const timestamp =
-                            typeof row?.timestamp === "number"
-                              ? row.timestamp
-                              : Number(row?.timestamp);
-                          if (!Number.isFinite(timestamp)) {
-                            return "Unknown Date";
-                          }
-                          return new Date(timestamp).toLocaleDateString(
-                            "en-US",
-                            {
-                              month: "short",
-                              day: "numeric",
-                              year: "numeric",
-                            },
-                          );
-                        }}
-                      />
-                    }
-                  />
-                  <RechartsLegend
-                    verticalAlign="bottom"
-                    formatter={(value) => (
-                      <span style={{ color: "var(--color-secondary-text)" }}>
-                        {value}
-                      </span>
-                    )}
-                  />
-                  <Area
-                    type="monotone"
-                    dataKey="money"
-                    name="Money"
-                    fill={`url(#${moneyGradientId})`}
-                    fillOpacity={1}
-                    stroke="var(--color-money)"
-                    strokeWidth={3}
-                    dot={false}
-                    activeDot={{
-                      r: 5,
-                      fill: "var(--color-secondary-bg)",
-                      stroke: "var(--color-money)",
-                      strokeWidth: 2,
-                    }}
-                  />
-                </AreaChart>
-              ) : (
-                <BarChart
-                  accessibilityLayer
-                  data={barMoneyChartData}
-                  margin={{ left: 6, right: 6 }}
-                >
-                  <CartesianGrid
-                    vertical={false}
-                    stroke="var(--color-border-card)"
-                    strokeOpacity={0.5}
-                  />
-                  <XAxis
-                    dataKey="timestamp"
-                    tickLine={false}
-                    axisLine={false}
-                    tick={false}
-                  />
-                  <YAxis
-                    tickLine={false}
-                    axisLine={false}
-                    tickMargin={8}
-                    width={56}
-                    domain={[moneyAxisMin, moneyAxisMax]}
-                    tick={{
-                      fill: "var(--color-secondary-text)",
-                      fontSize: 12,
-                    }}
-                    tickFormatter={(tickValue: number) =>
-                      formatValue(Number(tickValue))
-                    }
-                  />
-                  <ChartTooltip
-                    cursor={{
-                      fill: "#6b7280",
-                      fillOpacity: 0.28,
-                    }}
-                    content={
-                      <ChartTooltipContent
-                        className="min-w-[12rem] px-3 py-2"
-                        formatter={(value) => (
-                          <div className="flex w-full items-center justify-between gap-3">
-                            <span className="text-secondary-text flex items-center gap-2">
-                              <span
-                                className="h-2.5 w-2.5 shrink-0 rounded-[2px]"
-                                style={{
-                                  backgroundColor: "var(--color-money)",
-                                }}
-                              />
-                              Money
-                            </span>
-                            <span className="text-primary-text font-mono font-semibold tabular-nums">
-                              {value === null || value === undefined
-                                ? "N/A"
-                                : Number(value).toLocaleString()}
-                            </span>
-                          </div>
-                        )}
-                        labelFormatter={(_, payload) => {
-                          const row = payload?.[0]?.payload as
-                            | { timestamp?: number | string }
-                            | undefined;
-                          const timestamp =
-                            typeof row?.timestamp === "number"
-                              ? row.timestamp
-                              : Number(row?.timestamp);
-                          if (!Number.isFinite(timestamp)) {
-                            return "Unknown Date";
-                          }
-                          return new Date(timestamp).toLocaleDateString(
-                            "en-US",
-                            {
-                              month: "short",
-                              day: "numeric",
-                              year: "numeric",
-                            },
-                          );
-                        }}
-                      />
-                    }
-                  />
-                  <RechartsLegend
-                    verticalAlign="bottom"
-                    formatter={(value) => (
-                      <span style={{ color: "var(--color-secondary-text)" }}>
-                        {value}
-                      </span>
-                    )}
-                  />
-                  <Bar
-                    dataKey="money"
-                    name="Money"
-                    fill="var(--color-money)"
-                    fillOpacity={0.7}
-                    radius={[6, 6, 0, 0]}
-                  />
-                </BarChart>
-              )}
-            </ResponsiveContainer>
+            {chartType === "area" ? (
+              <AreaChart
+                accessibilityLayer
+                data={moneyChartData}
+                margin={{ left: 6, right: 6 }}
+              >
+                <defs>
+                  <linearGradient
+                    id={moneyGradientId}
+                    x1="0"
+                    y1="0"
+                    x2="0"
+                    y2="1"
+                  >
+                    <stop
+                      offset="5%"
+                      stopColor="var(--color-money)"
+                      stopOpacity={0.45}
+                    />
+                    <stop
+                      offset="95%"
+                      stopColor="var(--color-money)"
+                      stopOpacity={0.04}
+                    />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid
+                  vertical={false}
+                  stroke="var(--color-border-card)"
+                  strokeOpacity={0.5}
+                />
+                <XAxis
+                  dataKey="timestamp"
+                  type="number"
+                  scale="time"
+                  domain={["dataMin", "dataMax"]}
+                  tickLine={false}
+                  axisLine={false}
+                  tick={false}
+                />
+                <YAxis
+                  tickLine={false}
+                  axisLine={false}
+                  tickMargin={8}
+                  width={56}
+                  domain={[moneyAxisMin, moneyAxisMax]}
+                  tick={{
+                    fill: "var(--color-secondary-text)",
+                    fontSize: 12,
+                  }}
+                  tickFormatter={(tickValue: number) =>
+                    formatValue(Number(tickValue))
+                  }
+                />
+                <ChartTooltip
+                  cursor={false}
+                  content={
+                    <ChartTooltipContent
+                      className="min-w-[12rem] px-3 py-2"
+                      formatter={(value) => (
+                        <div className="flex w-full items-center justify-between gap-3">
+                          <span className="text-secondary-text flex items-center gap-2">
+                            <span
+                              className="h-2.5 w-2.5 shrink-0 rounded-[2px]"
+                              style={{
+                                backgroundColor: "var(--color-money)",
+                              }}
+                            />
+                            Money
+                          </span>
+                          <span className="text-primary-text font-mono font-semibold tabular-nums">
+                            {value === null || value === undefined
+                              ? "N/A"
+                              : Number(value).toLocaleString()}
+                          </span>
+                        </div>
+                      )}
+                      labelFormatter={(_, payload) => {
+                        const row = payload?.[0]?.payload as
+                          | { timestamp?: number | string }
+                          | undefined;
+                        const timestamp =
+                          typeof row?.timestamp === "number"
+                            ? row.timestamp
+                            : Number(row?.timestamp);
+                        if (!Number.isFinite(timestamp)) {
+                          return "Unknown Date";
+                        }
+                        return new Date(timestamp).toLocaleDateString("en-US", {
+                          month: "short",
+                          day: "numeric",
+                          year: "numeric",
+                        });
+                      }}
+                    />
+                  }
+                />
+                <RechartsLegend
+                  verticalAlign="bottom"
+                  formatter={(value) => (
+                    <span style={{ color: "var(--color-secondary-text)" }}>
+                      {value}
+                    </span>
+                  )}
+                />
+                <Area
+                  type="monotone"
+                  dataKey="money"
+                  name="Money"
+                  fill={`url(#${moneyGradientId})`}
+                  fillOpacity={1}
+                  stroke="var(--color-money)"
+                  strokeWidth={3}
+                  dot={false}
+                  activeDot={{
+                    r: 5,
+                    fill: "var(--color-secondary-bg)",
+                    stroke: "var(--color-money)",
+                    strokeWidth: 2,
+                  }}
+                />
+              </AreaChart>
+            ) : (
+              <BarChart
+                accessibilityLayer
+                data={barMoneyChartData}
+                margin={{ left: 6, right: 6 }}
+              >
+                <CartesianGrid
+                  vertical={false}
+                  stroke="var(--color-border-card)"
+                  strokeOpacity={0.5}
+                />
+                <XAxis
+                  dataKey="timestamp"
+                  tickLine={false}
+                  axisLine={false}
+                  tick={false}
+                />
+                <YAxis
+                  tickLine={false}
+                  axisLine={false}
+                  tickMargin={8}
+                  width={56}
+                  domain={[moneyAxisMin, moneyAxisMax]}
+                  tick={{
+                    fill: "var(--color-secondary-text)",
+                    fontSize: 12,
+                  }}
+                  tickFormatter={(tickValue: number) =>
+                    formatValue(Number(tickValue))
+                  }
+                />
+                <ChartTooltip
+                  cursor={{
+                    fill: "#6b7280",
+                    fillOpacity: 0.28,
+                  }}
+                  content={
+                    <ChartTooltipContent
+                      className="min-w-[12rem] px-3 py-2"
+                      formatter={(value) => (
+                        <div className="flex w-full items-center justify-between gap-3">
+                          <span className="text-secondary-text flex items-center gap-2">
+                            <span
+                              className="h-2.5 w-2.5 shrink-0 rounded-[2px]"
+                              style={{
+                                backgroundColor: "var(--color-money)",
+                              }}
+                            />
+                            Money
+                          </span>
+                          <span className="text-primary-text font-mono font-semibold tabular-nums">
+                            {value === null || value === undefined
+                              ? "N/A"
+                              : Number(value).toLocaleString()}
+                          </span>
+                        </div>
+                      )}
+                      labelFormatter={(_, payload) => {
+                        const row = payload?.[0]?.payload as
+                          | { timestamp?: number | string }
+                          | undefined;
+                        const timestamp =
+                          typeof row?.timestamp === "number"
+                            ? row.timestamp
+                            : Number(row?.timestamp);
+                        if (!Number.isFinite(timestamp)) {
+                          return "Unknown Date";
+                        }
+                        return new Date(timestamp).toLocaleDateString("en-US", {
+                          month: "short",
+                          day: "numeric",
+                          year: "numeric",
+                        });
+                      }}
+                    />
+                  }
+                />
+                <RechartsLegend
+                  verticalAlign="bottom"
+                  formatter={(value) => (
+                    <span style={{ color: "var(--color-secondary-text)" }}>
+                      {value}
+                    </span>
+                  )}
+                />
+                <Bar
+                  dataKey="money"
+                  name="Money"
+                  fill="var(--color-money)"
+                  fillOpacity={0.7}
+                  radius={[6, 6, 0, 0]}
+                />
+              </BarChart>
+            )}
           </ChartContainer>
         </div>
         {(moneyTrend || moneyRangeLabel) && (
