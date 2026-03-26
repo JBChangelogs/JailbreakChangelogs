@@ -90,24 +90,26 @@ export default async function RootLayout({
 }) {
   const { isMaintenanceMode } = await checkMaintenanceMode();
   const githubUrl = getGitHubUrl();
+  const umamiWebsiteId = process.env.NEXT_PUBLIC_UMAMI_WEBSITE_ID;
+  const umamiScriptName = process.env.NEXT_PUBLIC_UMAMI_SCRIPT_NAME
+    ? process.env.NEXT_PUBLIC_UMAMI_SCRIPT_NAME.startsWith("/")
+      ? process.env.NEXT_PUBLIC_UMAMI_SCRIPT_NAME
+      : `/${process.env.NEXT_PUBLIC_UMAMI_SCRIPT_NAME}`
+    : "/script.js";
 
   if (isMaintenanceMode) {
     return (
       <html lang="en" className={`${GeistSans.variable} ${GeistMono.variable}`}>
         <head>
           {/* Umami Analytics */}
-          <Script
-            defer
-            src={`https://umami.jailbreakchangelogs.com${
-              process.env.NEXT_PUBLIC_UMAMI_SCRIPT_NAME
-                ? process.env.NEXT_PUBLIC_UMAMI_SCRIPT_NAME.startsWith("/")
-                  ? process.env.NEXT_PUBLIC_UMAMI_SCRIPT_NAME
-                  : `/${process.env.NEXT_PUBLIC_UMAMI_SCRIPT_NAME}`
-                : "/assets/js/app.js"
-            }`}
-            data-website-id="fb7c4ad7-860e-4333-82cf-6b6f337b8190"
-            data-domains="jailbreakchangelogs.xyz"
-          />
+          {umamiWebsiteId ? (
+            <Script
+              defer
+              src={`https://umami.jailbreakchangelogs.com${umamiScriptName}`}
+              data-website-id={umamiWebsiteId}
+              data-domains="jailbreakchangelogs.com"
+            />
+          ) : null}
           {/* Nitro Pay Ads & GDPR - Always load script for consent prompts */}
           <Script
             id="nitropay-init"
@@ -233,18 +235,14 @@ export default async function RootLayout({
           href="https://assets.jailbreakchangelogs.xyz"
         />
         {/* Umami Analytics */}
-        <Script
-          defer
-          src={`https://umami.jailbreakchangelogs.com${
-            process.env.NEXT_PUBLIC_UMAMI_SCRIPT_NAME
-              ? process.env.NEXT_PUBLIC_UMAMI_SCRIPT_NAME.startsWith("/")
-                ? process.env.NEXT_PUBLIC_UMAMI_SCRIPT_NAME
-                : `/${process.env.NEXT_PUBLIC_UMAMI_SCRIPT_NAME}`
-              : "/assets/js/app.js"
-          }`}
-          data-website-id="fb7c4ad7-860e-4333-82cf-6b6f337b8190"
-          data-domains="jailbreakchangelogs.xyz"
-        />
+        {umamiWebsiteId ? (
+          <Script
+            defer
+            src={`https://umami.jailbreakchangelogs.com${umamiScriptName}`}
+            data-website-id={umamiWebsiteId}
+            data-domains="jailbreakchangelogs.com"
+          />
+        ) : null}
         {/* Nitro Pay Ads & GDPR - Always load script for consent prompts */}
         <Script
           id="nitropay-init"
