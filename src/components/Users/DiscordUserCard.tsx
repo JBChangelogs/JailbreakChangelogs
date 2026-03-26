@@ -41,6 +41,7 @@ export default function DiscordUserCard({
         avatarHash={user.avatar}
         username={user.username}
         size={12}
+        cdnSize={512}
         custom_avatar={user.custom_avatar}
         showBadge={false}
         settings={user.settings}
