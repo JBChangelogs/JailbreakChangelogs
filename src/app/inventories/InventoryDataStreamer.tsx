@@ -36,7 +36,7 @@ async function InventoryDataFetcher({
   let seasonDates: SeasonDateRange[] = [];
   try {
     const seasonDatesResponse = await fetch(
-      "https://assets.jailbreakchangelogs.xyz/assets/json/season_dates.json",
+      "https://assets.jailbreakchangelogs.com/assets/json/season_dates.json",
       { cache: "no-store" },
     );
     if (seasonDatesResponse.ok) {

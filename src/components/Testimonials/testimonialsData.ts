@@ -6,7 +6,7 @@ export type Testimonial = {
 };
 
 export const TESTIMONIALS_JSON_URL =
-  "https://assets.jailbreakchangelogs.xyz/assets/json/testimonials.json";
+  "https://assets.jailbreakchangelogs.com/assets/json/testimonials.json";
 
 const isTestimonial = (value: unknown): value is Testimonial => {
   if (!value || typeof value !== "object") return false;

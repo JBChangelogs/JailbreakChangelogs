@@ -20,7 +20,7 @@ export async function fetchItemUnlockMetadataById(): Promise<
   }
 
   itemUnlockMetadataPromise = fetch(
-    "https://assets.jailbreakchangelogs.xyz/assets/json/items_metadata.json",
+    "https://assets.jailbreakchangelogs.com/assets/json/items_metadata.json",
   )
     .then(async (response) => {
       if (!response.ok) {
