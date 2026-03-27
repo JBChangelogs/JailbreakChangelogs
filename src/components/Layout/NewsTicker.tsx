@@ -30,7 +30,7 @@ export default function NewsTicker() {
   if (!shouldShowTicker || isVisible !== true) return null;
 
   return (
-    <div className="from-status-info/15 to-secondary-bg bg-linear-to-r backdrop-blur-lg">
+    <div className="from-status-info/15 to-secondary-bg bg-linear-to-r">
       <div className="container mx-auto px-4 py-2">
         <div className="relative flex flex-col items-center justify-center gap-2 pr-8 lg:flex-row lg:gap-3 lg:pr-12">
           <div className="flex items-center gap-2">

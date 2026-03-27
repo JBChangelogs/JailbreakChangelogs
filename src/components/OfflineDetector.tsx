@@ -37,7 +37,7 @@ export default function OfflineDetector() {
   if (!isOffline) return null;
 
   return (
-    <div className="w-full bg-[#B45309] text-white backdrop-blur-lg">
+    <div className="w-full bg-[#B45309] text-white">
       <div className="container mx-auto px-4 py-2">
         <div className="relative flex flex-col items-center justify-center gap-2 lg:flex-row lg:gap-3">
           <div className="flex items-center gap-2">

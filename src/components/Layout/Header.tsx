@@ -210,6 +210,7 @@ export default function Header() {
 
   useEffect(() => {
     let frameId: number;
+    let lastHeaderHeight = -1;
 
     const updateHeaderHeight = () => {
       if (frameId) return;
@@ -225,10 +226,14 @@ export default function Header() {
           mobileRect?.bottom ?? 0,
         );
 
-        document.documentElement.style.setProperty(
-          "--header-height",
-          `${height}px`,
-        );
+        // Avoid forcing style recalculation when value did not change.
+        if (height !== lastHeaderHeight) {
+          document.documentElement.style.setProperty(
+            "--header-height",
+            `${height}px`,
+          );
+          lastHeaderHeight = height;
+        }
         frameId = 0;
       });
     };
@@ -236,8 +241,7 @@ export default function Header() {
     // Initial measurement
     updateHeaderHeight();
 
-    // Set up listeners for things that can change the height/position
-    window.addEventListener("scroll", updateHeaderHeight, { passive: true });
+    // Set up listeners for things that can change the header height.
     window.addEventListener("resize", updateHeaderHeight);
 
     const observer = new ResizeObserver(updateHeaderHeight);
@@ -245,7 +249,6 @@ export default function Header() {
     if (mobileHeaderRef.current) observer.observe(mobileHeaderRef.current);
 
     return () => {
-      window.removeEventListener("scroll", updateHeaderHeight);
       window.removeEventListener("resize", updateHeaderHeight);
       if (frameId) cancelAnimationFrame(frameId);
       observer.disconnect();
@@ -575,6 +578,7 @@ export default function Header() {
       <div
         ref={desktopHeaderRef}
         className="sticky top-0 z-1300 hidden xl:block"
+        style={{ viewTransitionName: "navbar" } as React.CSSProperties}
       >
         <OfflineDetector />
         <NewsTicker />
@@ -593,6 +597,7 @@ export default function Header() {
       <div
         ref={mobileHeaderRef}
         className="sticky top-0 z-1400 block xl:hidden"
+        style={{ viewTransitionName: "navbar-mobile" } as React.CSSProperties}
       >
         <>
           <OfflineDetector />

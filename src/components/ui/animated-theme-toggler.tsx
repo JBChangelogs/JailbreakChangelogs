@@ -1,19 +1,16 @@
 "use client";
 
 import { useCallback, useRef } from "react";
-import { flushSync } from "react-dom";
 import { cn } from "@/lib/utils";
 import { useTheme } from "@/contexts/ThemeContext";
 import { safeLocalStorage } from "@/utils/safeStorage";
 
 interface AnimatedThemeTogglerProps extends React.ComponentPropsWithoutRef<"button"> {
-  duration?: number;
   size?: "sm" | "md";
 }
 
 export const AnimatedThemeToggler = ({
   className,
-  duration = 400,
   size = "md",
   ...props
 }: AnimatedThemeTogglerProps) => {
@@ -28,50 +25,11 @@ export const AnimatedThemeToggler = ({
 
   const toggleTheme = useCallback(async () => {
     const newTheme = getNextTheme(theme);
-
-    if ("startViewTransition" in document && buttonRef.current) {
-      await document.startViewTransition(() => {
-        flushSync(() => {
-          // Direct DOM manipulation for immediate effect
-          document.documentElement.classList.remove("light", "dark");
-          document.documentElement.classList.add(newTheme);
-          safeLocalStorage.setItem("theme", newTheme);
-
-          // Update React state
-          setTheme(newTheme);
-        });
-      }).ready;
-
-      const { top, left, width, height } =
-        buttonRef.current.getBoundingClientRect();
-      const x = left + width / 2;
-      const y = top + height / 2;
-      const maxRadius = Math.hypot(
-        Math.max(left, window.innerWidth - left),
-        Math.max(top, window.innerHeight - top),
-      );
-
-      document.documentElement.animate(
-        {
-          clipPath: [
-            `circle(0px at ${x}px ${y}px)`,
-            `circle(${maxRadius}px at ${x}px ${y}px)`,
-          ],
-        },
-        {
-          duration,
-          easing: "ease-in-out",
-          pseudoElement: "::view-transition-new(root)",
-        },
-      );
-    } else {
-      // Fallback for browsers without View Transitions API
-      document.documentElement.classList.remove("light", "dark");
-      document.documentElement.classList.add(newTheme);
-      safeLocalStorage.setItem("theme", newTheme);
-      setTheme(newTheme);
-    }
-  }, [theme, setTheme, duration, getNextTheme]);
+    document.documentElement.classList.remove("light", "dark");
+    document.documentElement.classList.add(newTheme);
+    safeLocalStorage.setItem("theme", newTheme);
+    setTheme(newTheme);
+  }, [theme, setTheme, getNextTheme]);
 
   // Determine which icon to show based on current theme
   const getIcon = () => {

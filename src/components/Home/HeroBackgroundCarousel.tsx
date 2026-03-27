@@ -2,7 +2,10 @@
 
 import Image from "next/image";
 import { useEffect, useState, useCallback, useMemo } from "react";
-import { generateShuffledBackgroundImages } from "@/utils/fisherYatesShuffle";
+import {
+  BACKGROUNDS_BASE_URL,
+  TOTAL_BACKGROUND_IMAGES,
+} from "@/utils/fisherYatesShuffle";
 
 export default function HeroBackgroundCarousel({
   initialImage,
@@ -14,7 +17,11 @@ export default function HeroBackgroundCarousel({
   const [isFirstRender, setIsFirstRender] = useState(true);
 
   const backgroundImages = useMemo(() => {
-    const allImages = generateShuffledBackgroundImages();
+    // Keep ordering deterministic to avoid server/client hydration mismatches.
+    const allImages = Array.from(
+      { length: TOTAL_BACKGROUND_IMAGES },
+      (_, i) => `${BACKGROUNDS_BASE_URL}/background${i + 1}.webp`,
+    );
     const remainingImages = allImages.filter((img) => img !== initialImage);
     return [initialImage, ...remainingImages];
   }, [initialImage]);
@@ -34,14 +41,13 @@ export default function HeroBackgroundCarousel({
       setIsTransitioning(true);
       timeoutId = setTimeout(() => {
         setIsTransitioning(false);
-        setCurrentImageIndex((prev) => prev + 1);
-        setIsFirstRender(false);
+        nextImage();
       }, 1000);
     }, 10_000);
 
     return () => {
       clearInterval(intervalId);
-      clearInterval(timeoutId);
+      clearTimeout(timeoutId);
     };
   }, [backgroundImages.length, nextImage]);
 
@@ -72,7 +78,7 @@ export default function HeroBackgroundCarousel({
         className={`object-cover transition-opacity duration-1000 ${
           isActive ? "z-10" : "z-0"
         } ${isFading ? "opacity-0" : "opacity-100"}`}
-        style={{ objectPosition: "center 70%", willChange: "opacity" }}
+        style={{ objectPosition: "center 70%" }}
       />
     );
   };

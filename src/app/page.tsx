@@ -148,16 +148,16 @@ const platformGroups = [
 ] as const;
 
 const heroQuickCardClass =
-  "group relative block overflow-hidden rounded-2xl border border-white/20 bg-white/10 p-4 text-left backdrop-blur-xl transition-all duration-300 hover:-translate-y-0.5 hover:border-white/35 hover:bg-white/15";
+  "group relative block overflow-hidden rounded-2xl border border-white/20 bg-black/35 p-4 text-left transition-all duration-300 hover:-translate-y-0.5 hover:border-white/35 hover:bg-black/40";
 
 const platformGroupClass =
-  "rounded-2xl border border-border-card bg-secondary-bg/80 p-5 backdrop-blur-sm";
+  "rounded-2xl border border-border-card bg-secondary-bg/90 p-5";
 
 const platformRowClass =
   "group -mx-2 flex items-start gap-3 rounded-xl px-2 py-2 transition-colors hover:bg-tertiary-bg";
 
 const heroStatCardClass =
-  "group rounded-2xl border border-white/20 bg-white/10 p-4 text-left backdrop-blur-xl transition-all duration-200 hover:-translate-y-0.5 hover:border-white/35 hover:bg-white/15";
+  "group rounded-2xl border border-white/20 bg-black/35 p-4 text-left transition-all duration-200 hover:-translate-y-0.5 hover:border-white/35 hover:bg-black/40";
 
 type HeroStatCard = {
   label: string;
@@ -301,12 +301,17 @@ export default async function Home() {
 
             <div>
               <div className="mb-4 grid gap-3 sm:grid-cols-2">
-                {quickLinks.map((link) => (
+                {quickLinks.map((link, i) => (
                   <Link
                     key={link.href}
                     href={link.href}
                     prefetch={false}
                     className={heroQuickCardClass}
+                    style={
+                      {
+                        viewTransitionName: `hero-card-${i + 1}`,
+                      } as React.CSSProperties
+                    }
                   >
                     <div className="flex items-start gap-3">
                       <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white/15 text-white">
@@ -366,11 +371,16 @@ export default async function Home() {
                   </Link>
                 </Button>
               </div>
-              <div className="mb-4 hidden grid-cols-1 items-start gap-3 md:grid md:grid-cols-2 lg:grid-cols-3">
-                {featuredTestimonials.map((testimonial) => (
+              <div className="mb-4 hidden grid-cols-1 items-stretch gap-3 md:grid md:grid-cols-2 lg:grid-cols-3">
+                {featuredTestimonials.map((testimonial, i) => (
                   <blockquote
                     key={testimonial.name}
-                    className="flex flex-col rounded-2xl border border-white/20 bg-white/10 p-4 text-left backdrop-blur-xl"
+                    className="flex flex-col rounded-2xl border border-white/20 bg-black/35 p-4 text-left"
+                    style={
+                      {
+                        viewTransitionName: `hero-card-${i + 5}`,
+                      } as React.CSSProperties
+                    }
                   >
                     <p className="text-sm leading-relaxed text-white/90">
                       &ldquo;{highlightBrandName(testimonial.quote)}&rdquo;
@@ -410,8 +420,16 @@ export default async function Home() {
                 </Link>
               </Button>
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-5">
-                {legacyStats.map((stat) => (
-                  <div key={stat.label} className={heroStatCardClass}>
+                {legacyStats.map((stat, i) => (
+                  <div
+                    key={stat.label}
+                    className={heroStatCardClass}
+                    style={
+                      {
+                        viewTransitionName: `hero-card-${i + 8}`,
+                      } as React.CSSProperties
+                    }
+                  >
                     <div className="mb-2 flex items-center gap-2">
                       <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-white/15">
                         <Icon
@@ -437,8 +455,16 @@ export default async function Home() {
                 ))}
               </div>
               <div className="mt-3 grid grid-cols-1 gap-3 md:grid-cols-3">
-                {impactStatsCards.map((stat) => (
-                  <div key={stat.label} className={heroStatCardClass}>
+                {impactStatsCards.map((stat, i) => (
+                  <div
+                    key={stat.label}
+                    className={heroStatCardClass}
+                    style={
+                      {
+                        viewTransitionName: `hero-card-${i + 13}`,
+                      } as React.CSSProperties
+                    }
+                  >
                     <div className="mb-2 flex items-center gap-2">
                       <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-white/15">
                         <Icon
