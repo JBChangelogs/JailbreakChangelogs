@@ -531,6 +531,29 @@
   animation: none;
 }
 
+::view-transition-group(navbar),
+::view-transition-group(navbar-mobile) {
+  backdrop-filter: blur(16px);
+}
+
+::view-transition-group(hero-card-1),
+::view-transition-group(hero-card-2),
+::view-transition-group(hero-card-3),
+::view-transition-group(hero-card-4),
+::view-transition-group(hero-card-5),
+::view-transition-group(hero-card-6),
+::view-transition-group(hero-card-7),
+::view-transition-group(hero-card-8),
+::view-transition-group(hero-card-9),
+::view-transition-group(hero-card-10),
+::view-transition-group(hero-card-11),
+::view-transition-group(hero-card-12),
+::view-transition-group(hero-card-13),
+::view-transition-group(hero-card-14),
+::view-transition-group(hero-card-15) {
+  backdrop-filter: blur(16px);
+}
+
 /* Ensure smooth theme transitions */
 ::view-transition-old(root) {
   z-index: 1;

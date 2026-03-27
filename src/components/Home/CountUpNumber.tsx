@@ -1,12 +1,12 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo } from "react";
 import {
   animate,
   useMotionValue,
-  useMotionValueEvent,
   useReducedMotion,
-  useSpring,
+  useTransform,
+  motion,
 } from "framer-motion";
 
 interface CountUpNumberProps {
@@ -18,20 +18,14 @@ export default function CountUpNumber({
   value,
   durationMs = 1400,
 }: CountUpNumberProps) {
-  const [displayValue, setDisplayValue] = useState(0);
   const shouldReduceMotion = useReducedMotion();
   const motionValue = useMotionValue(0);
-  const springValue = useSpring(motionValue, {
-    damping: 26,
-    stiffness: 90,
-    mass: 0.9,
-  });
+  const numberFormatter = useMemo(() => new Intl.NumberFormat("en-US"), []);
 
-  const formatter = useMemo(() => new Intl.NumberFormat("en-US"), []);
-
-  useMotionValueEvent(springValue, "change", (latest) => {
-    setDisplayValue(Math.max(0, Math.round(latest)));
-  });
+  // Smooth number interpolation
+  const rounded = useTransform(motionValue, (latest) =>
+    numberFormatter.format(Math.max(0, Math.round(latest))),
+  );
 
   useEffect(() => {
     if (shouldReduceMotion) {
@@ -48,6 +42,7 @@ export default function CountUpNumber({
     return () => controls.stop();
   }, [durationMs, motionValue, shouldReduceMotion, value]);
 
-  const valueToRender = shouldReduceMotion ? value : displayValue;
-  return <>{formatter.format(valueToRender)}</>;
+  if (shouldReduceMotion) return <>{numberFormatter.format(value)}</>;
+
+  return <motion.span>{rounded}</motion.span>;
 }
