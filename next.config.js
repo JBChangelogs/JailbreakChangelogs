@@ -93,13 +93,12 @@ const nextConfig = {
   },
   async headers() {
     return [
+      // Do not set global Cache-Control here — Next.js sets per-route headers (and
+      // overriding `/_next/static` triggers a build warning). Rely on framework
+      // defaults; use route handlers / segment config when you need no-store.
       {
         source: "/:path*",
         headers: [
-          {
-            key: "Cache-Control",
-            value: "public, max-age=300, must-revalidate",
-          },
           {
             key: "X-Built-By",
             value: "JailbreakChangelogs",

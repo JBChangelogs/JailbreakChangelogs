@@ -1,12 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { fetchItemHoarders } from "@/utils/api";
 
-// Revalidate every 1 hour (3600 seconds)
-export const revalidate = 3600;
+export const dynamic = "force-dynamic";
 
 export async function GET(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url);
+    const searchParams = request.nextUrl.searchParams;
     const name = searchParams.get("name");
     const type = searchParams.get("type");
 
