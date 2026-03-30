@@ -45,6 +45,7 @@ import {
 } from "@radix-ui/react-avatar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useMemo } from "react";
+import { formatDiscordTimestamp } from "@/utils/timestamp";
 
 /**
  * Preset format names for `ChatEventTime`.
@@ -60,7 +61,8 @@ export type ChatEventTimeFormat =
   | "date"
   | "dateTime"
   | "longDate"
-  | "relative";
+  | "relative"
+  | "discord";
 
 export interface ChatEventTimeProps extends React.ComponentProps<"time"> {
   /** Unix timestamp (ms) or Date object. */
@@ -80,6 +82,7 @@ const FORMAT_PRESETS: Record<ChatEventTimeFormat, Intl.DateTimeFormatOptions> =
     dateTime: { dateStyle: "medium", timeStyle: "short" },
     longDate: { dateStyle: "long" },
     relative: { dateStyle: "medium", timeStyle: "short" },
+    discord: { dateStyle: "short", timeStyle: "short" },
   };
 
 export type ChatEventProps = React.ComponentProps<"div">;
@@ -384,6 +387,10 @@ export function ChatEventTime({
   const formattedTime = useMemo(() => {
     if (format === "relative") {
       return getRelativeTimeString(date, resolvedLocale);
+    }
+
+    if (format === "discord") {
+      return formatDiscordTimestamp(date, resolvedLocale);
     }
 
     const options = formatOptions ?? FORMAT_PRESETS[format];

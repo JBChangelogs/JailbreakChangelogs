@@ -217,9 +217,75 @@ export const formatCompactDateTime = (timestamp: string | number): string => {
 
   return `${month}/${day}/${year} ${hours12}:${minutes.toString().padStart(2, "0")} ${period}`;
 };
+/**
+ * Formats a date in a Discord-like style:
+ * - Today: "19:34"
+ * - Yesterday: "Yesterday at 19:34"
+ * - Older: "26/03/2026, 23:20"
+ * @param timestamp Unix timestamp or Date object
+ * @param locale Optional locale string
+ * @returns Formatted string
+ */
+export const formatDiscordTimestamp = (
+  timestamp: string | number | Date,
+  locale?: string,
+): string => {
+  const timestampNum =
+    typeof timestamp === "string" ? parseInt(timestamp) : timestamp;
+  const date =
+    timestamp instanceof Date
+      ? timestamp
+      : new Date(
+          (typeof timestampNum === "number" && timestampNum > 1000000000000
+            ? timestampNum
+            : (timestampNum as number) * 1000) || Date.now(),
+        );
+
+  const resolvedLocale =
+    locale ?? (typeof navigator !== "undefined" ? navigator.language : "en-US");
+
+  const now = new Date();
+  const isToday =
+    date.getDate() === now.getDate() &&
+    date.getMonth() === now.getMonth() &&
+    date.getFullYear() === now.getFullYear();
+
+  const yesterday = new Date();
+  yesterday.setDate(now.getDate() - 1);
+  const isYesterday =
+    date.getDate() === yesterday.getDate() &&
+    date.getMonth() === yesterday.getMonth() &&
+    date.getFullYear() === yesterday.getFullYear();
+
+  const timeStr = new Intl.DateTimeFormat(resolvedLocale, {
+    timeStyle: "short",
+  }).format(date);
+
+  if (isToday) {
+    return timeStr;
+  }
+  if (isYesterday) {
+    return `Yesterday at ${timeStr}`;
+  }
+
+  const datePart = new Intl.DateTimeFormat(resolvedLocale, {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  }).format(date);
+
+  const timePart = new Intl.DateTimeFormat(resolvedLocale, {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  }).format(date);
+
+  return `${datePart}, ${timePart}`;
+};
 
 /**
  * Returns the current Unix timestamp in seconds
+...
  * @returns Current timestamp in seconds
  */
 export const getCurrentTimestamp = (): number => Math.floor(Date.now() / 1000);

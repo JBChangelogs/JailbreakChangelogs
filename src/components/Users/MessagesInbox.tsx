@@ -31,11 +31,11 @@ import {
 } from "@/components/chat/chat-header";
 import { ChatMessages } from "@/components/chat/chat-messages";
 import {
-  ChatToolbar,
   ChatToolbarAddon,
   ChatToolbarButton,
   ChatToolbarTextarea,
 } from "@/components/chat/chat-toolbar";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import {
   ChatEvent,
   ChatEventAddon,
@@ -83,11 +83,13 @@ type MessageUser = {
 
 type Message = {
   id: string;
+  parentId?: string | null;
   senderId: string;
   receiverId: string;
   content: string;
   metadata?: Record<string, unknown> | null;
   createdAt?: number;
+  updatedAt?: number;
   type?: "user" | "system";
 };
 
@@ -119,9 +121,11 @@ type ApiSendResponse = {
   success: boolean;
   message: {
     id: string;
+    parent_id?: string | null;
     user_id: string;
     recipient_id: string;
     content: string;
+    updated_at?: number;
   };
 };
 
@@ -222,9 +226,13 @@ function parseMessageRecord(item: unknown): Message | null {
   const createdRaw = source.created_at;
   const createdAt =
     typeof createdRaw === "number" ? normalizeTimestamp(createdRaw) : undefined;
+  const updatedRaw = source.updated_at;
+  const updatedAt =
+    typeof updatedRaw === "number" ? normalizeTimestamp(updatedRaw) : undefined;
 
   return {
     id: asId(sourceId),
+    parentId: source.parent_id ? asId(source.parent_id) : null,
     senderId: asId(sourceSender),
     receiverId: asId(sourceReceiver),
     content: sourceContent,
@@ -235,6 +243,7 @@ function parseMessageRecord(item: unknown): Message | null {
           ? null
           : undefined,
     createdAt,
+    updatedAt,
     type:
       sourceMetadata && typeof sourceMetadata === "object" ? "system" : "user",
   };
@@ -519,6 +528,14 @@ export default function MessagesInbox() {
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [draftMessage, setDraftMessage] = useState("");
+  const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
+  const [editContent, setEditContent] = useState("");
+  const [deletingMessageId, setDeletingMessageId] = useState<string | null>(
+    null,
+  );
+  const [replyingToMessage, setReplyingToMessage] = useState<Message | null>(
+    null,
+  );
   const [isLoadingConversations, setIsLoadingConversations] = useState(false);
   const [isLoadingMessages, setIsLoadingMessages] = useState(false);
   const [isSending, setIsSending] = useState(false);
@@ -1530,11 +1547,18 @@ export default function MessagesInbox() {
     const trimmedMessage = sanitizeText(draftMessage.trim());
     if (!trimmedMessage || isSending) return;
 
+    let toastId: string | number | undefined;
     try {
       setIsSending(true);
+      toastId = toast.loading("Sending message...");
       pendingOwnSendScrollRef.current = true;
       if (!PUBLIC_API_URL) {
         throw new Error("Public API URL is not configured");
+      }
+
+      const body: Record<string, string> = { content: trimmedMessage };
+      if (replyingToMessage) {
+        body.parent_id = replyingToMessage.id;
       }
 
       const response = await fetch(
@@ -1545,7 +1569,7 @@ export default function MessagesInbox() {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ content: trimmedMessage }),
+          body: JSON.stringify(body),
         },
       );
 
@@ -1641,6 +1665,9 @@ export default function MessagesInbox() {
 
       const sentMessage: Message = {
         id: asId(parsedBody.message.id),
+        parentId: parsedBody.message.parent_id
+          ? asId(parsedBody.message.parent_id)
+          : null,
         senderId: asId(parsedBody.message.user_id),
         receiverId: asId(parsedBody.message.recipient_id),
         content: parsedBody.message.content,
@@ -1675,6 +1702,8 @@ export default function MessagesInbox() {
         ...prev.filter((item) => item.user.id !== selectedUserId),
       ]);
       setDraftMessage("");
+      setReplyingToMessage(null);
+      toast.success("Message sent", { id: toastId });
     } catch (error) {
       pendingOwnSendScrollRef.current = false;
       console.error("Error sending message:", error);
@@ -1682,9 +1711,146 @@ export default function MessagesInbox() {
         error instanceof Error && error.message
           ? error.message
           : "Failed to send message";
-      toast.error(message);
+      toast.error(message, { id: toastId });
     } finally {
       setIsSending(false);
+    }
+  };
+
+  const handleEditMessage = async (messageId: string) => {
+    const trimmedMessage = sanitizeText(editContent.trim());
+    if (!trimmedMessage || !selectedUserId || isSending) return;
+
+    const originalMessage = messages.find((m) => m.id === messageId);
+    if (originalMessage?.content === trimmedMessage) {
+      setEditingMessageId(null);
+      setEditContent("");
+      return;
+    }
+
+    let toastId: string | number | undefined;
+    try {
+      setIsSending(true);
+      toastId = toast.loading("Saving changes...");
+      if (!PUBLIC_API_URL) {
+        throw new Error("Public API URL is not configured");
+      }
+
+      const response = await fetch(
+        `${PUBLIC_API_URL}/messages/${encodeURIComponent(selectedUserId)}/${encodeURIComponent(messageId)}`,
+        {
+          method: "PATCH",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ content: trimmedMessage }),
+        },
+      );
+
+      const rawBody = await response.text();
+      const parsedBody = rawBody
+        ? (() => {
+            try {
+              return parseJsonWithLargeIds(rawBody) as ApiSendResponse &
+                ApiErrorResponse;
+            } catch {
+              return null;
+            }
+          })()
+        : null;
+
+      if (!response.ok || !parsedBody?.success) {
+        const apiErrorMessage =
+          parsedBody?.message && typeof parsedBody.message === "string"
+            ? parsedBody.message
+            : parsedBody?.detail && typeof parsedBody.detail === "string"
+              ? parsedBody.detail
+              : typeof parsedBody?.detail === "object"
+                ? parsedBody.detail.message
+                : rawBody.trim() || "Failed to edit message";
+        throw new Error(apiErrorMessage);
+      }
+
+      const updatedMessage: Message = {
+        id: asId(parsedBody.message?.id ?? messageId),
+        parentId: originalMessage?.parentId,
+        senderId: asId(
+          parsedBody.message?.user_id ?? originalMessage?.senderId,
+        ),
+        receiverId: asId(
+          parsedBody.message?.recipient_id ?? originalMessage?.receiverId,
+        ),
+        content: parsedBody.message?.content ?? trimmedMessage,
+        createdAt: originalMessage?.createdAt,
+        updatedAt: parsedBody.message?.updated_at
+          ? normalizeTimestamp(parsedBody.message.updated_at)
+          : Date.now(),
+      };
+
+      setMessages((prev) =>
+        prev.map((m) => (m.id === messageId ? updatedMessage : m)),
+      );
+
+      setEditingMessageId(null);
+      setEditContent("");
+      toast.success("Message edited", { id: toastId });
+    } catch (error) {
+      console.error("Error editing message:", error);
+      toast.error(
+        error instanceof Error ? error.message : "Failed to edit message",
+        { id: toastId },
+      );
+    } finally {
+      setIsSending(false);
+    }
+  };
+
+  const handleDeleteMessage = async (
+    messageId: string,
+    skipConfirmation = false,
+  ) => {
+    if (!selectedUserId || isSending) return;
+
+    if (!skipConfirmation && deletingMessageId !== messageId) {
+      setDeletingMessageId(messageId);
+      return;
+    }
+
+    const toastId = toast.loading("Deleting message...");
+    // Keep a copy of current messages for restoration if delete fails
+    const previousMessages = [...messages];
+
+    // Optimistically remove the message from UI
+    setMessages((prev) => prev.filter((m) => m.id !== messageId));
+    setDeletingMessageId(null);
+
+    try {
+      if (!PUBLIC_API_URL) {
+        throw new Error("Public API URL is not configured");
+      }
+
+      const response = await fetch(
+        `${PUBLIC_API_URL}/messages/${encodeURIComponent(selectedUserId)}/${encodeURIComponent(messageId)}`,
+        {
+          method: "DELETE",
+          credentials: "include",
+        },
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to delete message");
+      }
+
+      toast.success("Message deleted", { id: toastId });
+    } catch (error) {
+      // If deletion failed, restore the previous state
+      setMessages(previousMessages);
+      console.error("Error deleting message:", error);
+      toast.error(
+        error instanceof Error ? error.message : "Failed to delete message",
+        { id: toastId },
+      );
     }
   };
 
@@ -2367,8 +2533,8 @@ export default function MessagesInbox() {
                                 {typeof message.createdAt === "number" && (
                                   <ChatEventTime
                                     timestamp={message.createdAt}
-                                    format="time"
-                                    className="text-secondary-text text-xs font-semibold"
+                                    format="discord"
+                                    className="text-secondary-text text-xs"
                                   />
                                 )}
                               </ChatEventTitle>
@@ -2403,7 +2569,11 @@ export default function MessagesInbox() {
                         !!currentDayKey && currentDayKey !== previousDayKey;
 
                       return (
-                        <div key={message.id}>
+                        <div
+                          key={message.id}
+                          id={`message-${message.id}`}
+                          className="group"
+                        >
                           {showDaySeparator &&
                             typeof message.createdAt === "number" && (
                               <ChatEvent className="items-center gap-2 py-2">
@@ -2418,59 +2588,309 @@ export default function MessagesInbox() {
                             )}
                           <ChatEvent
                             className={cn(
-                              "items-start rounded-md py-1 transition-colors",
+                              "group-hover:bg-tertiary-bg/30 w-full flex-col items-start rounded-md py-1 transition-colors",
+                              message.parentId && "mt-1",
                             )}
                           >
-                            <ChatEventAddon>
-                              <Link
-                                href={`/users/${sender.id}`}
-                                prefetch={false}
-                                className="cursor-pointer"
-                                aria-label={`View ${getDisplayName(sender)} profile`}
-                              >
-                                <UserAvatar
-                                  userId={sender.id}
-                                  avatarHash={sender.avatar}
-                                  username={sender.username}
-                                  custom_avatar={sender.custom_avatar}
-                                  size={7}
-                                  showBadge={false}
-                                  settings={sender.settings}
-                                  premiumType={sender.premiumtype}
-                                />
-                              </Link>
-                            </ChatEventAddon>
-                            <ChatEventBody>
-                              <ChatEventTitle>
-                                {isOwnMessage ? (
-                                  <Link
-                                    href={`/users/${sender.id}`}
-                                    prefetch={false}
-                                    className="text-primary-text hover:text-link cursor-pointer text-xs font-medium transition-colors sm:text-sm"
-                                  >
-                                    You
-                                  </Link>
-                                ) : (
-                                  <Link
-                                    href={`/users/${sender.id}`}
-                                    prefetch={false}
-                                    className="text-primary-text hover:text-link cursor-pointer text-xs font-medium transition-colors sm:text-sm"
-                                  >
-                                    {getDisplayName(selectedUser)}
-                                  </Link>
-                                )}
-                                {typeof message.createdAt === "number" && (
-                                  <ChatEventTime
-                                    timestamp={message.createdAt}
-                                    format="time"
-                                    className="text-secondary-text text-xs font-semibold"
+                            {message.parentId && (
+                              <div className="-mb-1 flex items-center gap-2 sm:gap-3">
+                                <div className="flex w-10 shrink-0 justify-end @md/chat:w-12">
+                                  <div className="border-secondary-text/40 h-3 w-8 translate-x-2 translate-y-2 rounded-tl-md border-t-2 border-l-2" />
+                                </div>
+                                {(() => {
+                                  const parentMsg = messages.find(
+                                    (m) => m.id === message.parentId,
+                                  );
+                                  if (!parentMsg) return null;
+                                  const isParentOwn =
+                                    asId(parentMsg.senderId) ===
+                                    asId(currentUser?.id);
+                                  const parentSender = isParentOwn
+                                    ? (currentUserEnriched ??
+                                      currentUserMessageUser)
+                                    : selectedUser;
+                                  const parentDisplayName = parentSender
+                                    ? getDisplayName(parentSender)
+                                    : "Unknown";
+                                  return (
+                                    <div
+                                      className="text-secondary-text/80 flex min-w-0 cursor-pointer items-center gap-1.5 overflow-hidden rounded px-1 text-xs transition-opacity hover:opacity-100"
+                                      onClick={() => {
+                                        const el = document.getElementById(
+                                          `message-${parentMsg.id}`,
+                                        );
+                                        const container =
+                                          messagesContainerRef.current;
+                                        if (el && container) {
+                                          const rect =
+                                            el.getBoundingClientRect();
+                                          const containerRect =
+                                            container.getBoundingClientRect();
+
+                                          const isVisible =
+                                            rect.top >= containerRect.top &&
+                                            rect.bottom <= containerRect.bottom;
+
+                                          if (!isVisible) {
+                                            const relativeTop =
+                                              el.offsetTop -
+                                              container.offsetTop;
+                                            container.scrollTo({
+                                              top:
+                                                relativeTop -
+                                                container.clientHeight / 2 +
+                                                el.clientHeight / 2,
+                                              behavior: "smooth",
+                                            });
+                                          }
+                                          el.classList.add(
+                                            "bg-button-info/10",
+                                            "transition-colors",
+                                            "duration-500",
+                                          );
+                                          setTimeout(
+                                            () =>
+                                              el.classList.remove(
+                                                "bg-button-info/10",
+                                                "transition-colors",
+                                                "duration-500",
+                                              ),
+                                            1500,
+                                          );
+                                        }
+                                      }}
+                                    >
+                                      {parentSender && (
+                                        <UserAvatar
+                                          userId={parentSender.id}
+                                          avatarHash={parentSender.avatar}
+                                          username={parentSender.username}
+                                          custom_avatar={
+                                            parentSender.custom_avatar
+                                          }
+                                          size={4}
+                                          showBadge={false}
+                                          settings={parentSender.settings}
+                                          premiumType={parentSender.premiumtype}
+                                          className="h-4 w-4"
+                                        />
+                                      )}
+                                      <span className="text-primary-text shrink-0 font-semibold">
+                                        @
+                                        {isParentOwn
+                                          ? "You"
+                                          : parentDisplayName}
+                                      </span>
+                                      <span className="text-secondary-text max-w-[200px] truncate sm:max-w-[400px]">
+                                        {formatMessageText(parentMsg.content)}
+                                      </span>
+                                    </div>
+                                  );
+                                })()}
+                              </div>
+                            )}
+                            <div className="flex w-full items-start gap-2">
+                              <ChatEventAddon>
+                                <Link
+                                  href={`/users/${sender.id}`}
+                                  prefetch={false}
+                                  className="cursor-pointer"
+                                  aria-label={`View ${getDisplayName(sender)} profile`}
+                                >
+                                  <UserAvatar
+                                    userId={sender.id}
+                                    avatarHash={sender.avatar}
+                                    username={sender.username}
+                                    custom_avatar={sender.custom_avatar}
+                                    size={7}
+                                    showBadge={false}
+                                    settings={sender.settings}
+                                    premiumType={sender.premiumtype}
                                   />
+                                </Link>
+                              </ChatEventAddon>
+                              <ChatEventBody>
+                                <ChatEventTitle>
+                                  {isOwnMessage ? (
+                                    <Link
+                                      href={`/users/${sender.id}`}
+                                      prefetch={false}
+                                      className="text-primary-text hover:text-link cursor-pointer text-xs font-medium transition-colors sm:text-sm"
+                                    >
+                                      You
+                                    </Link>
+                                  ) : (
+                                    <Link
+                                      href={`/users/${sender.id}`}
+                                      prefetch={false}
+                                      className="text-primary-text hover:text-link cursor-pointer text-xs font-medium transition-colors sm:text-sm"
+                                    >
+                                      {getDisplayName(selectedUser)}
+                                    </Link>
+                                  )}
+                                  {typeof message.createdAt === "number" && (
+                                    <ChatEventTime
+                                      timestamp={message.createdAt}
+                                      format="discord"
+                                      className="text-secondary-text text-xs"
+                                    />
+                                  )}
+                                  {!editingMessageId && (
+                                    <div className="ml-auto flex items-center gap-1">
+                                      <DropdownMenu>
+                                        <DropdownMenuTrigger asChild>
+                                          <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            className="text-primary-text hover:bg-quaternary-bg h-8 w-8 rounded-lg p-0 opacity-100 transition-all duration-200 data-[state=open]:opacity-100 lg:opacity-0 lg:group-hover:opacity-100"
+                                          >
+                                            <Icon
+                                              icon="heroicons:ellipsis-horizontal"
+                                              className="h-4 w-4"
+                                            />
+                                          </Button>
+                                        </DropdownMenuTrigger>
+                                        <DropdownMenuContent align="end">
+                                          <DropdownMenuItem
+                                            onClick={() => {
+                                              setReplyingToMessage(message);
+                                              setDraftMessage("");
+                                            }}
+                                          >
+                                            <Icon
+                                              icon="heroicons-outline:reply"
+                                              className="mr-2 h-4 w-4"
+                                            />
+                                            Reply
+                                          </DropdownMenuItem>
+                                          {isOwnMessage && (
+                                            <>
+                                              <DropdownMenuItem
+                                                onClick={() => {
+                                                  setEditingMessageId(
+                                                    message.id,
+                                                  );
+                                                  setEditContent(
+                                                    message.content,
+                                                  );
+                                                }}
+                                              >
+                                                <Icon
+                                                  icon="heroicons-outline:pencil"
+                                                  className="mr-2 h-4 w-4"
+                                                />
+                                                Edit Message
+                                              </DropdownMenuItem>
+                                              <DropdownMenuItem
+                                                onClick={(e) =>
+                                                  void handleDeleteMessage(
+                                                    message.id,
+                                                    e.shiftKey,
+                                                  )
+                                                }
+                                                className="text-button-danger focus:bg-button-danger/10 focus:text-button-danger"
+                                              >
+                                                <Icon
+                                                  icon="heroicons-outline:trash"
+                                                  className="mr-2 h-4 w-4"
+                                                />
+                                                Delete Message
+                                              </DropdownMenuItem>
+                                            </>
+                                          )}
+                                        </DropdownMenuContent>
+                                      </DropdownMenu>
+                                    </div>
+                                  )}
+                                </ChatEventTitle>
+                                {editingMessageId === message.id ? (
+                                  <div className="mt-2 space-y-3">
+                                    <div className="space-y-2">
+                                      <textarea
+                                        value={editContent}
+                                        onChange={(e) =>
+                                          setEditContent(e.target.value)
+                                        }
+                                        disabled={isSending}
+                                        rows={3}
+                                        className="border-border-card bg-form-input text-primary-text focus:border-button-info w-full resize-y rounded border p-3 text-sm focus:outline-none"
+                                        autoCorrect="off"
+                                        autoComplete="off"
+                                        spellCheck="false"
+                                        autoCapitalize="off"
+                                        autoFocus
+                                        onKeyDown={(e) => {
+                                          if (e.key === "Escape") {
+                                            setEditingMessageId(null);
+                                            setEditContent("");
+                                          }
+                                          if (
+                                            e.key === "Enter" &&
+                                            !e.shiftKey
+                                          ) {
+                                            e.preventDefault();
+                                            void handleEditMessage(message.id);
+                                          }
+                                        }}
+                                      />
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                      <div className="flex items-center gap-2 lg:hidden">
+                                        <Button
+                                          size="sm"
+                                          className="h-8 px-4 text-xs"
+                                          onClick={() =>
+                                            void handleEditMessage(message.id)
+                                          }
+                                          disabled={
+                                            isSending || !editContent.trim()
+                                          }
+                                        >
+                                          {isSending ? (
+                                            <Icon
+                                              icon="lucide:loader-2"
+                                              className="mr-1 h-3 w-3 animate-spin"
+                                            />
+                                          ) : null}
+                                          Update
+                                        </Button>
+                                        <Button
+                                          size="sm"
+                                          variant="ghost"
+                                          className="text-secondary-text h-8 px-4 text-xs"
+                                          onClick={() => {
+                                            setEditingMessageId(null);
+                                            setEditContent("");
+                                          }}
+                                          disabled={isSending}
+                                        >
+                                          Cancel
+                                        </Button>
+                                      </div>
+                                      <div className="text-secondary-text hidden text-[11px] lg:block">
+                                        Esc to{" "}
+                                        <span className="text-link">
+                                          cancel
+                                        </span>{" "}
+                                        • Enter to{" "}
+                                        <span className="text-link">save</span>
+                                      </div>
+                                    </div>
+                                  </div>
+                                ) : (
+                                  <ChatEventContent className="text-primary-text break-words whitespace-pre-wrap">
+                                    {formatMessageText(message.content ?? "")}
+                                    {message.updatedAt &&
+                                      message.updatedAt !==
+                                        message.createdAt && (
+                                        <span className="text-secondary-text ml-1.5 text-[10px]">
+                                          (edited)
+                                        </span>
+                                      )}
+                                  </ChatEventContent>
                                 )}
-                              </ChatEventTitle>
-                              <ChatEventContent className="text-primary-text break-words whitespace-pre-wrap">
-                                {formatMessageText(message.content ?? "")}
-                              </ChatEventContent>
-                            </ChatEventBody>
+                              </ChatEventBody>
+                            </div>
                           </ChatEvent>
                         </div>
                       );
@@ -2478,56 +2898,120 @@ export default function MessagesInbox() {
                   )}
                 </ChatMessages>
 
-                <ChatToolbar className="border-border-card [&>div]:border-border-card [&>div]:bg-secondary-bg border-t p-3">
-                  <ChatToolbarTextarea
-                    value={draftMessage}
-                    onChange={(event) => setDraftMessage(event.target.value)}
-                    onSubmit={handleSendMessage}
-                    placeholder={messagePlaceholder}
-                    maxLength={1000}
-                    className="text-secondary-text placeholder-secondary-text"
-                  />
-                  <ChatToolbarAddon align="inline-end">
-                    <ChatToolbarButton
-                      onClick={() => void handleSendMessage()}
-                      aria-label="Send message"
-                      disabled={!draftMessage.trim() || isSending}
-                    >
-                      {isSending ? (
-                        <svg
-                          className="h-4 w-4 animate-spin"
-                          xmlns="http://www.w3.org/2000/svg"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                        >
-                          <circle
-                            className="opacity-25"
-                            cx="12"
-                            cy="12"
-                            r="10"
-                            stroke="currentColor"
-                            strokeWidth="4"
-                          />
-                          <path
-                            className="opacity-75"
-                            fill="currentColor"
-                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-                          />
-                        </svg>
-                      ) : (
+                <div className="bg-secondary-bg border-border-card sticky bottom-0 border-t p-3">
+                  {replyingToMessage && (
+                    <div className="bg-tertiary-bg border-border-card flex w-full items-center justify-between rounded-t-md border-x border-t px-3 py-2 text-xs">
+                      <div className="flex items-center gap-2 truncate">
                         <Icon
-                          icon="heroicons:paper-airplane"
-                          className="h-4 w-4"
+                          icon="heroicons-outline:reply"
+                          className="text-secondary-text h-3 w-3 shrink-0"
                         />
-                      )}
-                    </ChatToolbarButton>
-                  </ChatToolbarAddon>
-                </ChatToolbar>
+                        <span className="text-secondary-text">
+                          Replying to{" "}
+                          <span className="text-primary-text font-bold">
+                            {replyingToMessage.senderId ===
+                            asId(currentUser?.id)
+                              ? "yourself"
+                              : getDisplayName(
+                                  replyingToMessage.senderId === selectedUserId
+                                    ? selectedUser
+                                    : (currentUserEnriched ??
+                                        currentUserMessageUser ??
+                                        selectedUser),
+                                )}
+                          </span>
+                        </span>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-5 w-5 rounded-full p-0"
+                        onClick={() => setReplyingToMessage(null)}
+                      >
+                        <Icon icon="lucide:x" className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  )}
+                  <div
+                    className={cn(
+                      "bg-primary-bg border-border-card flex w-full items-center gap-2 rounded-md border px-1 py-1 shadow-none",
+                      replyingToMessage && "rounded-t-none border-t-0",
+                    )}
+                  >
+                    <ChatToolbarTextarea
+                      value={draftMessage}
+                      onChange={(event) => setDraftMessage(event.target.value)}
+                      onSubmit={handleSendMessage}
+                      placeholder={messagePlaceholder}
+                      maxLength={1000}
+                      className="text-secondary-text placeholder-secondary-text border-none bg-transparent shadow-none focus-visible:ring-0"
+                    />
+                    <ChatToolbarAddon align="inline-end">
+                      <ChatToolbarButton
+                        onClick={() => void handleSendMessage()}
+                        aria-label="Send message"
+                        className="hover:bg-secondary-bg/50 transition-colors"
+                        disabled={!draftMessage.trim() || isSending}
+                      >
+                        {isSending ? (
+                          <svg
+                            className="h-4 w-4 animate-spin"
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                          >
+                            <circle
+                              className="opacity-25"
+                              cx="12"
+                              cy="12"
+                              r="10"
+                              stroke="currentColor"
+                              strokeWidth="4"
+                            />
+                            <path
+                              className="opacity-75"
+                              fill="currentColor"
+                              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                            />
+                          </svg>
+                        ) : (
+                          <Icon
+                            icon="heroicons:paper-airplane"
+                            className="h-4 w-4"
+                          />
+                        )}
+                      </ChatToolbarButton>
+                    </ChatToolbarAddon>
+                  </div>
+                </div>
               </Chat>
             )}
           </section>
         </div>
       </div>
+
+      <ConfirmDialog
+        isOpen={!!deletingMessageId}
+        onClose={() => setDeletingMessageId(null)}
+        onConfirm={() =>
+          deletingMessageId && void handleDeleteMessage(deletingMessageId, true)
+        }
+        title="Delete Message"
+        confirmText="Delete"
+        confirmVariant="destructive"
+      >
+        <div className="space-y-2">
+          <p className="text-secondary-text">
+            Are you sure you want to delete this message? This action cannot be
+            undone.
+          </p>
+          <p className="text-secondary-text text-sm">
+            Tip: Hold <span className="font-semibold">Shift</span> while
+            clicking <span className="font-semibold">Delete Message</span> to
+            skip this confirmation.
+          </p>
+        </div>
+      </ConfirmDialog>
     </div>
   );
 }
