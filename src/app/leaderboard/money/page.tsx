@@ -4,8 +4,7 @@ import MoneyLeaderboardClient from "@/components/Leaderboard/MoneyLeaderboardCli
 import { checkMoneyLeaderboardMaintenanceMode } from "@/utils/maintenance";
 import FeatureMaintenance from "@/theme/FeatureMaintenance";
 
-// Cache this page for 30 minutes
-export const revalidate = 1800;
+export const dynamic = "force-dynamic";
 
 export default async function MoneyLeaderboardPage() {
   // Check for money leaderboard maintenance mode
@@ -20,7 +19,22 @@ export default async function MoneyLeaderboardPage() {
     );
   }
 
-  const leaderboard = await fetchMoneyLeaderboard();
+  let leaderboard;
+  try {
+    leaderboard = await fetchMoneyLeaderboard();
+  } catch (error) {
+    console.error(
+      "[MoneyLeaderboardPage] Failed to fetch leaderboard data:",
+      error,
+    );
+
+    return (
+      <FeatureMaintenance
+        featureName="Money Leaderboard"
+        customMessage="We're experiencing technical difficulties. The Money Leaderboard is temporarily unavailable. Please try again later."
+      />
+    );
+  }
 
   return (
     <main className="mb-8 min-h-screen">
