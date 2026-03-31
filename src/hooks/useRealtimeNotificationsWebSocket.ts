@@ -118,7 +118,7 @@ export function useRealtimeNotificationsWebSocket(
 
   const ensureAudio = useCallback((): HTMLAudioElement => {
     if (!audioRef.current) {
-      audioRef.current = new Audio("/audios/Notification_ding.wav");
+      audioRef.current = new Audio("/audios/notification_ding.mp3");
       audioRef.current.preload = "auto";
     }
     return audioRef.current;
