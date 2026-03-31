@@ -707,7 +707,7 @@ export default function RedeemPage() {
                 redeemedResult.premiumtype >= 1 &&
                 redeemedResult.premiumtype <= 3 ? (
                   <Image
-                    src={`https://assets.jailbreakchangelogs.xyz/assets/website_icons/jbcl_supporter_${redeemedResult.premiumtype}.svg`}
+                    src={`https://assets.jailbreakchangelogs.com/assets/website_icons/jbcl_supporter_${redeemedResult.premiumtype}.svg`}
                     alt={`Supporter Tier ${redeemedResult.premiumtype}`}
                     width={48}
                     height={48}

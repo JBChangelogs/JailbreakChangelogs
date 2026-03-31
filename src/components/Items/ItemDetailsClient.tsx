@@ -122,9 +122,9 @@ export default function ItemDetailsClient({
   "use memo";
   const isBlueBird = item.id === 919;
   const blueBirdDefaultImage =
-    "https://assets.jailbreakchangelogs.xyz/assets/images/items/vehicles/BlueBird.webp";
+    "https://assets.jailbreakchangelogs.com/assets/images/items/vehicles/BlueBird.webp";
   const blueBirdRaisedImage =
-    "https://assets.jailbreakchangelogs.xyz/assets/images/items/vehicles/BlueBird_1.webp";
+    "https://assets.jailbreakchangelogs.com/assets/images/items/vehicles/BlueBird_1.webp";
   const [isPlaying, setIsPlaying] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const [isBlueBirdRaised, setIsBlueBirdRaised] = useState(false);
@@ -421,7 +421,7 @@ export default function ItemDetailsClient({
                     className="transition-transform hover:scale-105"
                   >
                     <Image
-                      src="https://assets.jailbreakchangelogs.xyz/assets/contributors/TradingCore_Transparent_Small.webp"
+                      src="https://assets.jailbreakchangelogs.com/assets/contributors/TradingCore_Transparent_Small.webp"
                       alt="Trading Core Logo"
                       width={120}
                       height={120}

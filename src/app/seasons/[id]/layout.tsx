@@ -42,7 +42,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       .sort(() => Math.random() - 0.5)
       .slice(0, 4);
     const images = shuffledRewards.map((reward: Reward) => ({
-      url: `https://assets.jailbreakchangelogs.xyz${reward.link}`,
+      url: `https://assets.jailbreakchangelogs.com${reward.link}`,
       width: 1200,
       height: 630,
       alt: `${reward.item} - Season ${season.season} Reward`,
@@ -84,7 +84,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         siteName: "Jailbreak Changelogs",
         url: "https://jailbreakchangelogs.com/seasons",
         images: [
-          "https://assets.jailbreakchangelogs.xyz/assets/logos/embeds/JBCL_Embed_Graphic.png",
+          "https://assets.jailbreakchangelogs.com/assets/logos/embeds/JBCL_Embed_Graphic.png",
         ],
       },
       twitter: {
@@ -92,7 +92,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         title: "Jailbreak Seasons",
         description: "Explore all seasons of Roblox Jailbreak.",
         images: [
-          "https://assets.jailbreakchangelogs.xyz/assets/logos/embeds/JBCL_Embed_Graphic.png",
+          "https://assets.jailbreakchangelogs.com/assets/logos/embeds/JBCL_Embed_Graphic.png",
         ],
       },
     };

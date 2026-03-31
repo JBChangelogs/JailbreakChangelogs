@@ -163,7 +163,7 @@ export default function RobberyServerGroupCard({
   const prioritizedImages = useMemo(() => {
     return sortedUniqueRobberies.slice(0, 4).map((robbery) => {
       const imageName = robberyMarkerToImageName(robbery.marker_name);
-      const imageUrl = `https://assets.jailbreakchangelogs.xyz/assets/images/robberies/${imageName}.webp`;
+      const imageUrl = `https://assets.jailbreakchangelogs.com/assets/images/robberies/${imageName}.webp`;
       const alt = robberyMarkerToDisplayName(robbery.marker_name, robbery.name);
       return { imageUrl, alt };
     });

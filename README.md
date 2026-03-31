@@ -1,7 +1,7 @@
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/jailbreakchangelogs)
 [![License](https://img.shields.io/badge/License-PolyForm%20NC%201.0.0-blue.svg)](./LICENSE)
 [![Discord](https://img.shields.io/discord/1286064050135896064?logo=discord&logoColor=white&label=discord&color=4d3dff)](https://discord.jailbreakchangelogs.com)
-[![Uptime Kuma Badge](https://uptime.jailbreakchangelogs.xyz/api/badge/8/status)](https://status.jailbreakchangelogs.xyz)
+[![Uptime Kuma Badge](https://uptime.jailbreakchangelogs.com/api/badge/8/status)](https://status.jailbreakchangelogs.com)
 
 [![Dependabot Updates](https://github.com/JBChangelogs/JailbreakChangelogs/actions/workflows/dependabot/dependabot-updates/badge.svg?branch=main)](https://github.com/JBChangelogs/JailbreakChangelogs/actions/workflows/dependabot/dependabot-updates)
 [![CodeQL](https://github.com/JBChangelogs/JailbreakChangelogs/actions/workflows/github-code-scanning/codeql/badge.svg?branch=main)](https://github.com/JBChangelogs/JailbreakChangelogs/actions/workflows/github-code-scanning/codeql)
@@ -9,12 +9,12 @@
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/JBChangelogs/JailbreakChangelogs)
 
 > [!CAUTION]
-> The only websites associated with this repository are the [main website](https://jailbreakchangelogs.com/) and the [testing website](https://testing.jailbreakchangelogs.xyz). We have no other affiliated websites or domains. Any other websites or platforms claiming to represent or provide content for this repo are not controlled by us.
+> The only websites associated with this repository are the [main website](https://jailbreakchangelogs.com/) and the [testing website](https://testing.jailbreakchangelogs.com). We have no other affiliated websites or domains. Any other websites or platforms claiming to represent or provide content for this repo are not controlled by us.
 
 > [!NOTE]
 > This is a fan-made project operated by Jailbreak Changelogs LLC and is not affiliated with or endorsed by Badimo - the development team behind Roblox Jailbreak.
 
-![Logo](https://assets.jailbreakchangelogs.xyz/assets/logos/JBCL_Long_Game_Background.png)
+![Logo](https://assets.jailbreakchangelogs.com/assets/logos/JBCL_Long_Game_Background.png)
 
 ## big numbers = jbcl happy
 

@@ -625,7 +625,7 @@ export default function UserStatsSection({
                     <div className="group border-border-card bg-tertiary-bg flex items-center gap-3 rounded-lg border px-3 py-2 text-sm transition-all duration-200">
                       <div className="relative h-8 w-8 shrink-0">
                         <Image
-                          src={`https://assets.jailbreakchangelogs.xyz/assets/images/gamepasses/${gamepassInfo.image}.webp`}
+                          src={`https://assets.jailbreakchangelogs.com/assets/images/gamepasses/${gamepassInfo.image}.webp`}
                           alt={gamepass}
                           width={32}
                           height={32}

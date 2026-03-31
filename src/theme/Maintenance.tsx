@@ -53,7 +53,7 @@ export default function Maintenance() {
           }}
         >
           <Image
-            src="https://assets.jailbreakchangelogs.xyz/assets/logos/JBCL_Short_Transparent.webp"
+            src="https://assets.jailbreakchangelogs.com/assets/logos/JBCL_Short_Transparent.webp"
             alt="Jailbreak Changelogs Logo"
             width={140}
             height={140}
@@ -154,7 +154,7 @@ export default function Maintenance() {
           </div>
 
           <a
-            href="https://status.jailbreakchangelogs.xyz"
+            href="https://status.jailbreakchangelogs.com"
             target="_blank"
             rel="noopener noreferrer"
             className="rounded-lg px-6 py-2.5 text-base font-semibold shadow-[0_4px_14px_0_rgba(0,0,0,0.25)] transition-colors duration-200"

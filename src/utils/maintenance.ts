@@ -63,7 +63,7 @@ export async function getMaintenanceMetadata(): Promise<Metadata | null> {
         url: "https://jailbreakchangelogs.com",
         images: [
           {
-            url: "https://assets.jailbreakchangelogs.xyz/assets/backgrounds/background16.webp",
+            url: "https://assets.jailbreakchangelogs.com/assets/backgrounds/background16.webp",
             width: 1200,
             height: 630,
             alt: "Jailbreak Changelogs Maintenance Banner",
@@ -76,7 +76,7 @@ export async function getMaintenanceMetadata(): Promise<Metadata | null> {
         description:
           "Jailbreak Changelogs is currently under maintenance. We'll be back soon!",
         images: [
-          "https://assets.jailbreakchangelogs.xyz/assets/backgrounds/background16.webp",
+          "https://assets.jailbreakchangelogs.com/assets/backgrounds/background16.webp",
         ],
       },
     };
@@ -119,7 +119,7 @@ export async function getInventoryMaintenanceMetadata(): Promise<Metadata | null
         url: "https://jailbreakchangelogs.com/inventories",
         images: [
           {
-            url: "https://assets.jailbreakchangelogs.xyz/assets/backgrounds/background16.webp",
+            url: "https://assets.jailbreakchangelogs.com/assets/backgrounds/background16.webp",
             width: 1200,
             height: 630,
             alt: "Jailbreak Changelogs Inventory Maintenance Banner",
@@ -132,7 +132,7 @@ export async function getInventoryMaintenanceMetadata(): Promise<Metadata | null
         description:
           "The Inventory API is currently under maintenance. We'll be back soon!",
         images: [
-          "https://assets.jailbreakchangelogs.xyz/assets/backgrounds/background16.webp",
+          "https://assets.jailbreakchangelogs.com/assets/backgrounds/background16.webp",
         ],
       },
     };
@@ -175,7 +175,7 @@ export async function getOGFinderMaintenanceMetadata(): Promise<Metadata | null>
         url: "https://jailbreakchangelogs.com/og",
         images: [
           {
-            url: "https://assets.jailbreakchangelogs.xyz/assets/backgrounds/background16.webp",
+            url: "https://assets.jailbreakchangelogs.com/assets/backgrounds/background16.webp",
             width: 1200,
             height: 630,
             alt: "Jailbreak Changelogs OG Finder Maintenance Banner",
@@ -188,7 +188,7 @@ export async function getOGFinderMaintenanceMetadata(): Promise<Metadata | null>
         description:
           "The OG Finder is currently under maintenance. We'll be back soon!",
         images: [
-          "https://assets.jailbreakchangelogs.xyz/assets/backgrounds/background16.webp",
+          "https://assets.jailbreakchangelogs.com/assets/backgrounds/background16.webp",
         ],
       },
     };
@@ -232,7 +232,7 @@ export async function getDupeFinderMaintenanceMetadata(): Promise<Metadata | nul
         url: "https://jailbreakchangelogs.com/dupes",
         images: [
           {
-            url: "https://assets.jailbreakchangelogs.xyz/assets/backgrounds/background16.webp",
+            url: "https://assets.jailbreakchangelogs.com/assets/backgrounds/background16.webp",
             width: 1200,
             height: 630,
             alt: "Jailbreak Changelogs Dupe Finder Maintenance Banner",
@@ -245,7 +245,7 @@ export async function getDupeFinderMaintenanceMetadata(): Promise<Metadata | nul
         description:
           "The Dupe Finder is currently under maintenance. We'll be back soon!",
         images: [
-          "https://assets.jailbreakchangelogs.xyz/assets/backgrounds/background16.webp",
+          "https://assets.jailbreakchangelogs.com/assets/backgrounds/background16.webp",
         ],
       },
     };
@@ -289,7 +289,7 @@ export async function getMoneyLeaderboardMaintenanceMetadata(): Promise<Metadata
         url: "https://jailbreakchangelogs.com/leaderboard/money",
         images: [
           {
-            url: "https://assets.jailbreakchangelogs.xyz/assets/backgrounds/background16.webp",
+            url: "https://assets.jailbreakchangelogs.com/assets/backgrounds/background16.webp",
             width: 1200,
             height: 630,
             alt: "Jailbreak Changelogs Money Leaderboard Maintenance Banner",
@@ -302,7 +302,7 @@ export async function getMoneyLeaderboardMaintenanceMetadata(): Promise<Metadata
         description:
           "The Money Leaderboard is currently under maintenance. We'll be back soon!",
         images: [
-          "https://assets.jailbreakchangelogs.xyz/assets/backgrounds/background16.webp",
+          "https://assets.jailbreakchangelogs.com/assets/backgrounds/background16.webp",
         ],
       },
     };

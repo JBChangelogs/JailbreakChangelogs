@@ -104,7 +104,7 @@ const TimelineContent: React.FC<TimelineContentProps> = ({ changelogs }) => {
                       />
                     </div>
                     <Image
-                      src={`https://assets.jailbreakchangelogs.xyz${changelog.image_url}`}
+                      src={`https://assets.jailbreakchangelogs.com${changelog.image_url}`}
                       alt={changelog.title}
                       fill
                       sizes="(max-width: 768px) 100vw, 45vw"

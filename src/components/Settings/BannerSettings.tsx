@@ -30,7 +30,7 @@ export const BannerSettings = ({
   onUploadStateChange,
 }: BannerSettingsProps) => {
   const BADGE_BASE_URL =
-    "https://assets.jailbreakchangelogs.xyz/assets/website_icons";
+    "https://assets.jailbreakchangelogs.com/assets/website_icons";
   const [customBannerUrl, setCustomBannerUrl] = useState<string>("");
   const [bannerError, setBannerError] = useState<string | null>(null);
   const [isValidBanner, setIsValidBanner] = useState(false);

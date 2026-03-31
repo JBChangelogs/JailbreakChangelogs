@@ -147,7 +147,7 @@ export default function SupporterModal({
   requiredLimit,
 }: SupporterModalProps) {
   const BADGE_BASE_URL =
-    "https://assets.jailbreakchangelogs.xyz/assets/website_icons";
+    "https://assets.jailbreakchangelogs.com/assets/website_icons";
   const featureInfo = getFeatureDescription(
     feature,
     currentLimit,

@@ -15,7 +15,7 @@ export const metadata: Metadata = {
     type: "website",
     images: [
       {
-        url: "https://assets.jailbreakchangelogs.xyz/assets/logos/embeds/JBCL_X_TC_Embed_Graphic.png",
+        url: "https://assets.jailbreakchangelogs.com/assets/logos/embeds/JBCL_X_TC_Embed_Graphic.png",
         width: 2400,
         height: 1260,
         alt: "Trading Banner",
@@ -28,7 +28,7 @@ export const metadata: Metadata = {
     description:
       "Browse and create trade offers. Find the best deals and connect with other traders.",
     images: [
-      "https://assets.jailbreakchangelogs.xyz/assets/logos/embeds/JBCL_X_TC_Embed_Graphic.png",
+      "https://assets.jailbreakchangelogs.com/assets/logos/embeds/JBCL_X_TC_Embed_Graphic.png",
     ],
   },
 };

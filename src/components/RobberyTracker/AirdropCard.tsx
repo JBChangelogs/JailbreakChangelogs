@@ -44,7 +44,7 @@ export default function AirdropCard({ airdrop }: AirdropCardProps) {
 
   const difficulty = getDifficulty(airdrop.color);
   const locationLower = airdrop.location.toLowerCase();
-  const imageUrl = `https://assets.jailbreakchangelogs.xyz/assets/images/robberies/location/${locationLower}/${difficulty}.webp`;
+  const imageUrl = `https://assets.jailbreakchangelogs.com/assets/images/robberies/location/${locationLower}/${difficulty}.webp`;
 
   // Create unique ID for timer subscription
   const jobId = airdrop.server?.job_id || "";

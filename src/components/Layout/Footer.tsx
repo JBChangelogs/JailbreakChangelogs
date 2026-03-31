@@ -84,7 +84,7 @@ export default function Footer({ githubUrl, versionInfo }: FooterProps) {
                 Dev Changelogs
               </Link>
               <a
-                href="https://status.jailbreakchangelogs.xyz"
+                href="https://status.jailbreakchangelogs.com"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-link hover:text-link-hover active:text-link-active block transition-colors duration-200"

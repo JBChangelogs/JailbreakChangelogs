@@ -1,5 +1,5 @@
 export const TESTIMONIALS_BASE_URL =
-  "https://assets.jailbreakchangelogs.xyz/assets/testimonials";
+  "https://assets.jailbreakchangelogs.com/assets/testimonials";
 
 const DEFAULT_TEXT_LINK_HEX = "#66B3FF";
 

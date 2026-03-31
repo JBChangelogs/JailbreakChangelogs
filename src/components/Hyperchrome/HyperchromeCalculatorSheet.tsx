@@ -484,7 +484,7 @@ export default function HyperchromeCalculatorModal({
                   <div className="mb-3 flex items-center gap-3">
                     <div className="relative h-14 w-14 shrink-0">
                       <Image
-                        src="https://assets.jailbreakchangelogs.xyz/assets/images/items/hyperchromes/jars/HyperChrome_Wildcard.webp"
+                        src="https://assets.jailbreakchangelogs.com/assets/images/items/hyperchromes/jars/HyperChrome_Wildcard.webp"
                         alt="HyperChrome Wildcard"
                         fill
                         className="object-contain"
@@ -755,7 +755,7 @@ export default function HyperchromeCalculatorModal({
           </div>
           <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {hyperchromeRobberyImages.map((item) => {
-              const imageSrc = `https://assets.jailbreakchangelogs.xyz/assets/images/items/hyperchromes/jars/${item.name}.webp`;
+              const imageSrc = `https://assets.jailbreakchangelogs.com/assets/images/items/hyperchromes/jars/${item.name}.webp`;
               return (
                 <div
                   key={item.name}

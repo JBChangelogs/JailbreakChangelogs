@@ -21,7 +21,7 @@ export async function generateMetadata(): Promise<Metadata> {
         "Find and check for duplicated items in Roblox Jailbreak inventories. Use our dupe finder tool to identify potential duplicate items in your or other players' inventories.",
       images: [
         {
-          url: "https://assets.jailbreakchangelogs.xyz/assets/logos/embeds/JBCL_Embed_Graphic.png",
+          url: "https://assets.jailbreakchangelogs.com/assets/logos/embeds/JBCL_Embed_Graphic.png",
           width: 2400,
           height: 1260,
           alt: "Jailbreak Changelogs Banner",
@@ -37,7 +37,7 @@ export async function generateMetadata(): Promise<Metadata> {
       description:
         "Find and check for duplicated items in Roblox Jailbreak inventories. Use our dupe finder tool to identify potential duplicate items in your or other players' inventories.",
       images: [
-        "https://assets.jailbreakchangelogs.xyz/assets/logos/embeds/JBCL_Embed_Graphic.png",
+        "https://assets.jailbreakchangelogs.com/assets/logos/embeds/JBCL_Embed_Graphic.png",
       ],
     },
   };

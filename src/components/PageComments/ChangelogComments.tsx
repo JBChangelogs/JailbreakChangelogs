@@ -163,8 +163,8 @@ const convertUrlsToLinksHTML = (text: string): string => {
         urlObj.hostname.endsWith(".reddit.com") ||
         urlObj.hostname === "amazon.com" ||
         urlObj.hostname.endsWith(".amazon.com") ||
-        urlObj.hostname === "jailbreakchangelogs.xyz" ||
-        urlObj.hostname.endsWith(".jailbreakchangelogs.xyz")
+        urlObj.hostname === "jailbreakchangelogs.com" ||
+        urlObj.hostname.endsWith(".jailbreakchangelogs.com")
       ) {
         // Escape the URL to prevent attribute injection
         const escapedUrl = escapeHtml(url);

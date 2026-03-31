@@ -33,7 +33,7 @@ export default function ServiceAvailabilityTicker() {
               </Link>
               . Follow progress on{" "}
               <Link
-                href="https://status.jailbreakchangelogs.xyz/"
+                href="https://status.jailbreakchangelogs.com/"
                 prefetch={false}
                 target="_blank"
                 rel="noopener noreferrer"

@@ -7,7 +7,7 @@ export default function ComingSoon() {
       {/* Dark overlay for better text readability */}
       <div className="absolute inset-0 z-1 bg-black/50" />
       {/* Vignette overlay */}
-      <div className="absolute inset-0 z-1 bg-[url('https://assets.jailbreakchangelogs.xyz/assets/backgrounds/vignette.png')] bg-cover bg-center bg-no-repeat" />
+      <div className="absolute inset-0 z-1 bg-[url('https://assets.jailbreakchangelogs.com/assets/backgrounds/vignette.png')] bg-cover bg-center bg-no-repeat" />
 
       <div className="relative z-2 mx-auto max-w-md px-4 text-center">
         <div className="bg-secondary-bg/90 border-border-card shadow-card-shadow rounded-2xl border px-8 py-8 backdrop-blur-xl">

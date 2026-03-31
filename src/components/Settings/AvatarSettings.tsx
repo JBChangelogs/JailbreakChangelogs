@@ -30,7 +30,7 @@ export const AvatarSettings = ({
   onUploadStateChange,
 }: AvatarSettingsProps) => {
   const BADGE_BASE_URL =
-    "https://assets.jailbreakchangelogs.xyz/assets/website_icons";
+    "https://assets.jailbreakchangelogs.com/assets/website_icons";
   const [customAvatarUrl, setCustomAvatarUrl] = useState<string>("");
   const [avatarError, setAvatarError] = useState<string | null>(null);
   const [isValidAvatar, setIsValidAvatar] = useState(false);

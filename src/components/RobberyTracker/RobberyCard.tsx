@@ -56,7 +56,7 @@ export default function RobberyCard({
 
   const imageName = getImageName(robbery.marker_name);
   const displayName = getDisplayName(robbery.marker_name, robbery.name);
-  const imageUrl = `https://assets.jailbreakchangelogs.xyz/assets/images/robberies/${imageName}.webp`;
+  const imageUrl = `https://assets.jailbreakchangelogs.com/assets/images/robberies/${imageName}.webp`;
 
   // Create unique ID for timer subscription (same pattern as card key)
   const jobId = robbery.server?.job_id || robbery.job_id;

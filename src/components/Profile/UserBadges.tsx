@@ -44,7 +44,7 @@ export const UserBadges = ({
   const badimoSize = { sm: 20, md: 24, lg: 28 }[size]; // Scaled down to fit container
   const containerHeight = { sm: "h-7", md: "h-9", lg: "h-11" }[size];
   const BADGE_BASE_URL =
-    "https://assets.jailbreakchangelogs.xyz/assets/website_icons";
+    "https://assets.jailbreakchangelogs.com/assets/website_icons";
 
   const sortedFlags = flags
     .filter((f) => f.enabled !== false)
@@ -243,7 +243,7 @@ export const UserBadges = ({
         duration: 4000,
         icon: (
           <Image
-            src="https://assets.jailbreakchangelogs.xyz/assets/images/badimo_transparent.png"
+            src="https://assets.jailbreakchangelogs.com/assets/images/badimo_transparent.png"
             alt="Badimo"
             width={20}
             height={20}
@@ -391,7 +391,7 @@ export const UserBadges = ({
         return renderTooltipWrapper(
           flag.flag,
           <Image
-            src="https://assets.jailbreakchangelogs.xyz/assets/images/badimo_transparent.png"
+            src="https://assets.jailbreakchangelogs.com/assets/images/badimo_transparent.png"
             alt="Badimo"
             width={badimoSize}
             height={badimoSize}

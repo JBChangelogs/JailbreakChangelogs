@@ -32,7 +32,7 @@ function StatusPageAction({ className = "" }: { className?: string }) {
       </p>
       <Button asChild variant="secondary" size="sm">
         <a
-          href="https://status.jailbreakchangelogs.xyz"
+          href="https://status.jailbreakchangelogs.com"
           target="_blank"
           rel="noopener noreferrer"
         >
