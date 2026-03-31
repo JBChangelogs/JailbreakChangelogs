@@ -149,6 +149,7 @@ export default function TradeDetailsDataClient({
           `${baseUrl}/trades/v2/${encodeURIComponent(tradeId)}`,
           {
             cache: "no-store",
+            credentials: "include",
             headers: {
               "User-Agent": "JailbreakChangelogs-Trading/2.0",
             },
