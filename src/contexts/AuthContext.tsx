@@ -9,7 +9,7 @@ import React, {
   useCallback,
   useRef,
 } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { AuthState, AuthResponse, UserData } from "@/types/auth";
 import {
   validateAuth,
@@ -59,6 +59,7 @@ interface AuthProviderProps {
 
 export function AuthProvider({ children }: AuthProviderProps) {
   const router = useRouter();
+  const pathname = usePathname();
   const [authState, setAuthState] = useState<AuthState>({
     isAuthenticated: false,
     user: null,
@@ -74,6 +75,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   useRealtimeNotificationsWebSocket(
     authState.isAuthenticated && !authState.isLoading,
+    pathname,
   );
 
   const initializeAuth = useCallback(async () => {

@@ -30,9 +30,11 @@ interface RealtimeNotificationMessage {
 
 interface RealtimeDmMessageData {
   id?: string | number;
+  parent_id?: string | number | null;
   user_id?: string | number;
   recipient_id?: string | number;
   content?: string;
+  metadata?: unknown | null;
 }
 
 const PING_INTERVAL_MS = 30000;
@@ -53,7 +55,7 @@ function getRealtimeWsUrl(): string | null {
   const baseUrl = WS_URL?.replace(/\/+$/, "");
   if (!baseUrl) return null;
 
-  return `${baseUrl}/realtime`;
+  return `${baseUrl}/realtime?jbcl_token=mFpJgYWeYT2h-Mv1v66Qy2LW5reNhCisgO3gFCMVKAk`;
 }
 
 function getReconnectDelay(attempt: number): number {
@@ -67,13 +69,16 @@ function getReconnectDelay(attempt: number): number {
 function parseRealtimeMessagePayload(raw: string): RealtimeNotificationMessage {
   // Preserve large snowflake-like IDs from websocket payloads.
   const normalized = raw.replace(
-    /"(id|user_id|recipient_id|sender_id|receiver_id)"\s*:\s*(\d{16,})/g,
+    /"(id|parent_id|user_id|recipient_id|sender_id|receiver_id)"\s*:\s*(\d{16,})/g,
     '"$1":"$2"',
   );
   return JSON.parse(normalized) as RealtimeNotificationMessage;
 }
 
-export function useRealtimeNotificationsWebSocket(enabled: boolean): void {
+export function useRealtimeNotificationsWebSocket(
+  enabled: boolean,
+  locationPath?: string | null,
+): void {
   const isRealtimeNotificationsEnabled =
     enabled && ENABLE_REALTIME_NOTIFICATIONS_WS;
   const wsRef = useRef<WebSocket | null>(null);
@@ -88,6 +93,10 @@ export function useRealtimeNotificationsWebSocket(enabled: boolean): void {
   const openedForAttemptRef = useRef(false);
   const disableAutoReconnectRef = useRef(false);
   const handshakeRetryAttemptsRef = useRef(0);
+  const locationPathRef = useRef<string>(
+    typeof window !== "undefined" ? window.location?.pathname || "/" : "/",
+  );
+  const lastSentLocationRef = useRef<string>("");
 
   const closeForIdle = useCallback(() => {
     isIdleRef.current = true;
@@ -123,6 +132,22 @@ export function useRealtimeNotificationsWebSocket(enabled: boolean): void {
   useEffect(() => {
     enabledRef.current = isRealtimeNotificationsEnabled;
   }, [isRealtimeNotificationsEnabled]);
+
+  useEffect(() => {
+    const nextPath =
+      locationPath ??
+      (typeof window !== "undefined" ? window.location?.pathname : null) ??
+      "/";
+    locationPathRef.current = nextPath;
+
+    if (
+      wsRef.current?.readyState === WebSocket.OPEN &&
+      lastSentLocationRef.current !== nextPath
+    ) {
+      lastSentLocationRef.current = nextPath;
+      wsRef.current.send(JSON.stringify({ location: nextPath }));
+    }
+  }, [locationPath]);
 
   useEffect(() => {
     if (!isRealtimeNotificationsEnabled) {
@@ -214,9 +239,18 @@ export function useRealtimeNotificationsWebSocket(enabled: boolean): void {
 
           pingIntervalRef.current = setInterval(() => {
             if (wsRef.current?.readyState === WebSocket.OPEN) {
-              wsRef.current.send(JSON.stringify({ action: "ping" }));
+              wsRef.current.send(
+                JSON.stringify({
+                  action: "ping",
+                  location: locationPathRef.current || "/",
+                }),
+              );
             }
           }, PING_INTERVAL_MS);
+
+          const currentPath = locationPathRef.current || "/";
+          lastSentLocationRef.current = currentPath;
+          ws.send(JSON.stringify({ location: currentPath }));
         });
 
         ws.addEventListener("message", (event) => {
@@ -238,32 +272,42 @@ export function useRealtimeNotificationsWebSocket(enabled: boolean): void {
               return;
             }
 
-            if (
-              (payload.action === "message_received" ||
-                payload.action === "message_sent") &&
-              payload.data &&
-              typeof payload.data === "object"
-            ) {
+            if (payload.data && typeof payload.data === "object") {
               const dmData = payload.data as RealtimeDmMessageData;
-              const hasValidPayload =
+              const hasValidIds =
                 (typeof dmData.id === "string" ||
                   typeof dmData.id === "number") &&
                 (typeof dmData.user_id === "string" ||
                   typeof dmData.user_id === "number") &&
                 (typeof dmData.recipient_id === "string" ||
                   typeof dmData.recipient_id === "number") &&
-                typeof dmData.content === "string";
+                (dmData.parent_id === undefined ||
+                  dmData.parent_id === null ||
+                  typeof dmData.parent_id === "string" ||
+                  typeof dmData.parent_id === "number");
 
-              if (hasValidPayload) {
+              if (
+                (payload.action === "message_received" ||
+                  payload.action === "message_sent" ||
+                  payload.action === "message_edited") &&
+                hasValidIds &&
+                typeof dmData.content === "string"
+              ) {
                 window.dispatchEvent(
                   new CustomEvent("realtimeMessage", {
                     detail: {
                       action: payload.action,
                       data: {
                         id: String(dmData.id),
+                        parent_id:
+                          dmData.parent_id === null ||
+                          dmData.parent_id === undefined
+                            ? null
+                            : String(dmData.parent_id),
                         user_id: String(dmData.user_id),
                         recipient_id: String(dmData.recipient_id),
                         content: dmData.content,
+                        metadata: dmData.metadata ?? null,
                       },
                     },
                   }),
@@ -313,8 +357,30 @@ export function useRealtimeNotificationsWebSocket(enabled: boolean): void {
                     });
                   }
                 }
+                return;
               }
-              return;
+
+              if (payload.action === "message_deleted" && hasValidIds) {
+                window.dispatchEvent(
+                  new CustomEvent("realtimeMessage", {
+                    detail: {
+                      action: payload.action,
+                      data: {
+                        id: String(dmData.id),
+                        parent_id:
+                          dmData.parent_id === null ||
+                          dmData.parent_id === undefined
+                            ? null
+                            : String(dmData.parent_id),
+                        user_id: String(dmData.user_id),
+                        recipient_id: String(dmData.recipient_id),
+                        metadata: dmData.metadata ?? null,
+                      },
+                    },
+                  }),
+                );
+                return;
+              }
             }
 
             if (

@@ -83,6 +83,7 @@ type MessageUser = {
 
 type Message = {
   id: string;
+  clientId?: string;
   parentId?: string | null;
   senderId: string;
   receiverId: string;
@@ -91,6 +92,7 @@ type Message = {
   createdAt?: number;
   updatedAt?: number;
   type?: "user" | "system";
+  status?: "pending" | "sent" | "failed";
 };
 
 type OfferAcceptedMetadata = {
@@ -138,12 +140,18 @@ type ApiErrorResponse = {
 };
 
 type RealtimeMessageEventDetail = {
-  action?: "message_received" | "message_sent";
+  action?:
+    | "message_received"
+    | "message_sent"
+    | "message_edited"
+    | "message_deleted";
   data?: {
     id?: string;
+    parent_id?: string | null;
     user_id?: string;
     recipient_id?: string;
     content?: string;
+    metadata?: unknown | null;
   };
 };
 const WS_SEND_FALLBACK_MS = 1200;
@@ -171,10 +179,23 @@ function asNumber(value: unknown): number | null {
   return null;
 }
 
+function createClientMessageId(): string {
+  return `client-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+}
+
+function getMessageDomId(message: Message): string {
+  return message.clientId ?? message.id;
+}
+
+function trimLocalThreadMessages(messages: Message[], max = 200): Message[] {
+  if (messages.length <= max) return messages;
+  return messages.slice(messages.length - max);
+}
+
 function parseJsonWithLargeIds(raw: string): unknown {
   return JSON.parse(
     raw.replace(
-      /"(id|sender_id|receiver_id|recipient_id|user_id|blocked_user_id)"\s*:\s*(\d{16,})/g,
+      /"(id|parent_id|sender_id|receiver_id|recipient_id|user_id|blocked_user_id)"\s*:\s*(\d{16,})/g,
       '"$1":"$2"',
     ),
   );
@@ -575,6 +596,67 @@ export default function MessagesInbox() {
   const messagesContainerRef = useRef<HTMLDivElement | null>(null);
   const pendingOwnSendScrollRef = useRef(false);
   const initialScrollConversationIdRef = useRef<string | null>(null);
+  const recentRealtimeEventKeysRef = useRef<Map<string, number>>(new Map());
+  const localThreadMessagesByUserIdRef = useRef<Map<string, Message[]>>(
+    new Map(),
+  );
+
+  const upsertLocalThreadMessage = useCallback(
+    (counterpartUserId: string, message: Message) => {
+      const store = localThreadMessagesByUserIdRef.current;
+      const existing = store.get(counterpartUserId) ?? [];
+      const idx = existing.findIndex((m) => m.id === message.id);
+      if (idx !== -1) {
+        const next = [...existing];
+        next[idx] = { ...next[idx], ...message };
+        store.set(counterpartUserId, trimLocalThreadMessages(next));
+        return;
+      }
+      if (message.clientId) {
+        const clientIdx = existing.findIndex(
+          (m) => m.clientId === message.clientId,
+        );
+        if (clientIdx !== -1) {
+          const next = [...existing];
+          next[clientIdx] = { ...next[clientIdx], ...message };
+          store.set(counterpartUserId, trimLocalThreadMessages(next));
+          return;
+        }
+      }
+      store.set(
+        counterpartUserId,
+        trimLocalThreadMessages([...existing, message]),
+      );
+    },
+    [],
+  );
+
+  const updateLocalThreadMessage = useCallback(
+    (
+      counterpartUserId: string,
+      predicate: (message: Message) => boolean,
+      patch: (message: Message) => Message,
+    ) => {
+      const store = localThreadMessagesByUserIdRef.current;
+      const existing = store.get(counterpartUserId) ?? [];
+      const idx = existing.findIndex(predicate);
+      if (idx === -1) return;
+      const next = [...existing];
+      next[idx] = patch(next[idx] as Message);
+      store.set(counterpartUserId, trimLocalThreadMessages(next));
+    },
+    [],
+  );
+
+  const removeLocalThreadMessage = useCallback(
+    (counterpartUserId: string, predicate: (message: Message) => boolean) => {
+      const store = localThreadMessagesByUserIdRef.current;
+      const existing = store.get(counterpartUserId) ?? [];
+      const next = existing.filter((m) => !predicate(m));
+      store.set(counterpartUserId, next);
+    },
+    [],
+  );
 
   const scrollMessagesToLatest = (behavior: ScrollBehavior) => {
     const container = messagesContainerRef.current;
@@ -1337,7 +1419,7 @@ export default function MessagesInbox() {
     };
   }, [conversations, currentUserId, isAuthenticated, routeConversationId]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!selectedUserId || !isAuthenticated || !currentUserId) {
       setMessages([]);
       setIsLoadingMessages(false);
@@ -1377,7 +1459,14 @@ export default function MessagesInbox() {
           .sort((a, b) => (a.createdAt ?? 0) - (b.createdAt ?? 0));
 
         if (!isCancelled) {
-          setMessages(parsedMessages);
+          const local =
+            localThreadMessagesByUserIdRef.current.get(selectedUserId) ?? [];
+          const serverIds = new Set(parsedMessages.map((m) => m.id));
+          const merged = [
+            ...parsedMessages,
+            ...local.filter((m) => !serverIds.has(m.id)),
+          ].sort((a, b) => (a.createdAt ?? 0) - (b.createdAt ?? 0));
+          setMessages(merged);
         }
       } catch (error) {
         if (!isCancelled) {
@@ -1410,14 +1499,39 @@ export default function MessagesInbox() {
       const payload = detail?.data;
 
       if (
-        (action !== "message_received" && action !== "message_sent") ||
+        (action !== "message_received" &&
+          action !== "message_sent" &&
+          action !== "message_edited" &&
+          action !== "message_deleted") ||
         !payload ||
         typeof payload.id !== "string" ||
         typeof payload.user_id !== "string" ||
         typeof payload.recipient_id !== "string" ||
-        typeof payload.content !== "string"
+        (payload.parent_id !== undefined &&
+          payload.parent_id !== null &&
+          typeof payload.parent_id !== "string") ||
+        (action !== "message_deleted" && typeof payload.content !== "string")
       ) {
         return;
+      }
+
+      // Guard against duplicate realtime events (can happen in dev/strict-mode
+      // or if multiple WS connections/event listeners exist briefly).
+      {
+        const now = Date.now();
+        const key = `${action}:${payload.id}`;
+        const recent = recentRealtimeEventKeysRef.current;
+        const lastSeen = recent.get(key);
+        if (typeof lastSeen === "number" && now - lastSeen < 2000) {
+          return;
+        }
+        recent.set(key, now);
+        // prune old keys
+        for (const [k, t] of recent) {
+          if (now - t > 10_000) {
+            recent.delete(k);
+          }
+        }
       }
 
       const senderId = asId(payload.user_id);
@@ -1426,23 +1540,219 @@ export default function MessagesInbox() {
         return;
       }
 
+      const counterpartId = senderId === currentUserId ? receiverId : senderId;
+      const messageId = asId(payload.id);
+
+      if (action === "message_deleted") {
+        removeLocalThreadMessage(counterpartId, (m) => m.id === messageId);
+        setConversations((prev) =>
+          prev.map((conversation) =>
+            conversation.user.id === counterpartId &&
+            conversation.lastMessage?.id === messageId
+              ? { ...conversation, lastMessage: undefined }
+              : conversation,
+          ),
+        );
+        if (selectedUserIdRef.current === counterpartId) {
+          setMessages((prev) => prev.filter((m) => m.id !== messageId));
+          setReplyingToMessage((prev) =>
+            prev?.id === messageId ? null : prev,
+          );
+        }
+        return;
+      }
+
+      const parentId = payload.parent_id ? asId(payload.parent_id) : null;
+      const content = payload.content as string;
+
+      if (action === "message_edited") {
+        const editedAt = Date.now();
+        updateLocalThreadMessage(
+          counterpartId,
+          (m) => m.id === messageId,
+          (m) => ({
+            ...m,
+            parentId,
+            content,
+            updatedAt: editedAt,
+          }),
+        );
+        setConversations((prev) =>
+          prev.map((conversation) =>
+            conversation.user.id === counterpartId &&
+            conversation.lastMessage?.id === messageId
+              ? {
+                  ...conversation,
+                  lastMessage: {
+                    ...conversation.lastMessage,
+                    parentId,
+                    content,
+                    updatedAt: editedAt,
+                  },
+                }
+              : conversation,
+          ),
+        );
+        if (selectedUserIdRef.current === counterpartId) {
+          setMessages((prev) =>
+            prev.map((m) =>
+              m.id === messageId
+                ? { ...m, parentId, content, updatedAt: editedAt }
+                : m,
+            ),
+          );
+        }
+        return;
+      }
+
       const realtimeMessage: Message = {
-        id: asId(payload.id),
+        id: messageId,
+        parentId,
         senderId,
         receiverId,
-        content: payload.content,
+        content,
+        metadata:
+          payload.metadata && typeof payload.metadata === "object"
+            ? (payload.metadata as Record<string, unknown>)
+            : null,
         createdAt: Date.now(),
+        status: "sent",
       };
 
-      const counterpartId = senderId === currentUserId ? receiverId : senderId;
-      if (counterpartId !== selectedUserId) {
+      const isOwnSend =
+        action === "message_sent" && asId(senderId) === asId(currentUserId);
+
+      if (isOwnSend) {
+        const metadata =
+          payload.metadata && typeof payload.metadata === "object"
+            ? (payload.metadata as Record<string, unknown>)
+            : null;
+        const clientIdFromMetadata =
+          metadata && typeof metadata.client_id === "string"
+            ? metadata.client_id
+            : null;
+
+        let matchedLocal = false;
+        if (clientIdFromMetadata) {
+          updateLocalThreadMessage(
+            counterpartId,
+            (m) => m.clientId === clientIdFromMetadata,
+            (m) => ({
+              ...m,
+              id: realtimeMessage.id,
+              parentId: m.parentId ?? realtimeMessage.parentId ?? null,
+              content: realtimeMessage.content,
+              status: "sent",
+            }),
+          );
+          matchedLocal = (
+            localThreadMessagesByUserIdRef.current.get(counterpartId) ?? []
+          ).some((m) => m.id === realtimeMessage.id);
+        }
+
+        if (!matchedLocal) {
+          const now = Date.now();
+          const maxAgeMs = 30_000;
+          updateLocalThreadMessage(
+            counterpartId,
+            (m) => {
+              if (m.status !== "pending") return false;
+              if (asId(m.senderId) !== asId(senderId)) return false;
+              if (asId(m.receiverId) !== asId(receiverId)) return false;
+              if ((m.parentId ?? null) !== (realtimeMessage.parentId ?? null))
+                return false;
+              if (m.content !== realtimeMessage.content) return false;
+              const createdAt = m.createdAt ?? 0;
+              if (!createdAt) return false;
+              return now - createdAt <= maxAgeMs;
+            },
+            (m) => ({ ...m, id: realtimeMessage.id, status: "sent" }),
+          );
+          matchedLocal = (
+            localThreadMessagesByUserIdRef.current.get(counterpartId) ?? []
+          ).some((m) => m.id === realtimeMessage.id);
+        }
+
+        if (!matchedLocal) {
+          upsertLocalThreadMessage(counterpartId, realtimeMessage);
+        }
+      } else {
+        upsertLocalThreadMessage(counterpartId, realtimeMessage);
+      }
+
+      if (selectedUserIdRef.current !== counterpartId) {
+        setConversations((prev) =>
+          prev.map((conversation) =>
+            conversation.user.id === counterpartId
+              ? { ...conversation, lastMessage: realtimeMessage }
+              : conversation,
+          ),
+        );
         return;
       }
 
       setMessages((prev) => {
-        if (prev.some((item) => item.id === realtimeMessage.id)) {
-          return prev;
+        const existing = prev.find((item) => item.id === realtimeMessage.id);
+        if (existing) {
+          return prev.map((item) =>
+            item.id === realtimeMessage.id
+              ? {
+                  ...item,
+                  parentId: item.parentId ?? realtimeMessage.parentId ?? null,
+                  content: realtimeMessage.content,
+                  status: "sent",
+                }
+              : item,
+          );
         }
+
+        if (isOwnSend) {
+          const metadata =
+            payload.metadata && typeof payload.metadata === "object"
+              ? (payload.metadata as Record<string, unknown>)
+              : null;
+          const clientIdFromMetadata =
+            metadata && typeof metadata.client_id === "string"
+              ? metadata.client_id
+              : null;
+
+          if (clientIdFromMetadata) {
+            const idx = prev.findIndex(
+              (item) => item.clientId === clientIdFromMetadata,
+            );
+            if (idx !== -1) {
+              return prev.map((item, i) =>
+                i === idx
+                  ? { ...item, id: realtimeMessage.id, status: "sent" }
+                  : item,
+              );
+            }
+          }
+
+          const now = Date.now();
+          const maxAgeMs = 30_000;
+          const pendingIndex = [...prev].reverse().findIndex((item) => {
+            if (item.status !== "pending") return false;
+            if (asId(item.senderId) !== asId(senderId)) return false;
+            if (asId(item.receiverId) !== asId(receiverId)) return false;
+            if ((item.parentId ?? null) !== (realtimeMessage.parentId ?? null))
+              return false;
+            if (item.content !== realtimeMessage.content) return false;
+            const createdAt = item.createdAt ?? 0;
+            if (!createdAt) return false;
+            return now - createdAt <= maxAgeMs;
+          });
+
+          if (pendingIndex !== -1) {
+            const indexFromStart = prev.length - 1 - pendingIndex;
+            return prev.map((item, idx) =>
+              idx === indexFromStart
+                ? { ...item, id: realtimeMessage.id, status: "sent" }
+                : item,
+            );
+          }
+        }
+
         return [...prev, realtimeMessage].sort(
           (a, b) => (a.createdAt ?? 0) - (b.createdAt ?? 0),
         );
@@ -1461,7 +1771,13 @@ export default function MessagesInbox() {
     return () => {
       window.removeEventListener("realtimeMessage", handleRealtimeMessage);
     };
-  }, [currentUserId, isAuthenticated, selectedUserId]);
+  }, [
+    currentUserId,
+    isAuthenticated,
+    updateLocalThreadMessage,
+    upsertLocalThreadMessage,
+    removeLocalThreadMessage,
+  ]);
 
   const updateBlockStatus = (targetUserId: string, isBlocked: boolean) => {
     setBlockedByMeByUserId((prev) => ({ ...prev, [targetUserId]: isBlocked }));
@@ -1544,25 +1860,50 @@ export default function MessagesInbox() {
       return;
     }
 
+    const targetUserId = selectedUserId;
+    const targetUser = selectedUser;
+    const replyTarget = replyingToMessage;
+
     const trimmedMessage = sanitizeText(draftMessage.trim());
     if (!trimmedMessage || isSending) return;
 
-    let toastId: string | number | undefined;
+    const optimisticId = createClientMessageId();
+    const optimisticMessage: Message = {
+      id: optimisticId,
+      clientId: optimisticId,
+      parentId: replyTarget ? replyTarget.id : null,
+      senderId: asId(currentUser.id),
+      receiverId: asId(targetUserId),
+      content: trimmedMessage,
+      metadata: { client_id: optimisticId },
+      createdAt: Date.now(),
+      status: "pending",
+    };
+
     try {
       setIsSending(true);
-      toastId = toast.loading("Sending message...");
       pendingOwnSendScrollRef.current = true;
       if (!PUBLIC_API_URL) {
         throw new Error("Public API URL is not configured");
       }
 
-      const body: Record<string, string> = { content: trimmedMessage };
-      if (replyingToMessage) {
-        body.parent_id = replyingToMessage.id;
+      upsertLocalThreadMessage(targetUserId, optimisticMessage);
+      setMessages((prev) => [...prev, optimisticMessage]);
+      setConversations((prev) => [
+        { user: targetUser, lastMessage: optimisticMessage },
+        ...prev.filter((item) => item.user.id !== targetUserId),
+      ]);
+      setDraftMessage("");
+      setReplyingToMessage(null);
+
+      const body: Record<string, unknown> = { content: trimmedMessage };
+      if (replyTarget) {
+        body.parent_id = replyTarget.id;
       }
+      body.metadata = { client_id: optimisticId };
 
       const response = await fetch(
-        `${PUBLIC_API_URL}/messages/${encodeURIComponent(selectedUserId)}`,
+        `${PUBLIC_API_URL}/messages/${encodeURIComponent(targetUserId)}`,
         {
           method: "POST",
           credentials: "include",
@@ -1621,40 +1962,63 @@ export default function MessagesInbox() {
           const systemMessage: Message = {
             id: `system-${Date.now()}`,
             senderId: "system",
-            receiverId: asId(selectedUserId),
+            receiverId: asId(targetUserId),
             content: systemContent,
             createdAt: Date.now(),
             type: "system",
           };
-          setMessages((prev) => {
-            const existingIndex = [...prev]
-              .reverse()
-              .findIndex(
-                (item) =>
-                  item.type === "system" && item.content === systemContent,
-              );
-            if (existingIndex === -1) {
-              return [...prev, systemMessage];
-            }
+          removeLocalThreadMessage(targetUserId, (m) => m.id === optimisticId);
+          const existingLocalSystem = (
+            localThreadMessagesByUserIdRef.current.get(targetUserId) ?? []
+          ).find((m) => m.type === "system" && m.content === systemContent);
+          if (existingLocalSystem) {
+            updateLocalThreadMessage(
+              targetUserId,
+              (m) => m.id === existingLocalSystem.id,
+              (m) => ({ ...m, createdAt: Date.now() }),
+            );
+          } else {
+            upsertLocalThreadMessage(targetUserId, systemMessage);
+          }
+          setConversations((prev) =>
+            prev.map((conversation) =>
+              conversation.user.id === targetUserId
+                ? { ...conversation, lastMessage: systemMessage }
+                : conversation,
+            ),
+          );
 
-            const indexFromStart = prev.length - 1 - existingIndex;
-            const existing = prev[indexFromStart];
-            if (!existing) {
-              return [...prev, systemMessage];
-            }
+          if (selectedUserIdRef.current === targetUserId) {
+            setMessages((prev) => prev.filter((m) => m.id !== optimisticId));
+            setMessages((prev) => {
+              const existingIndex = [...prev]
+                .reverse()
+                .findIndex(
+                  (item) =>
+                    item.type === "system" && item.content === systemContent,
+                );
+              if (existingIndex === -1) {
+                return [...prev, systemMessage];
+              }
 
-            const updated: Message = {
-              ...existing,
-              createdAt: Date.now(),
-            };
+              const indexFromStart = prev.length - 1 - existingIndex;
+              const existing = prev[indexFromStart];
+              if (!existing) {
+                return [...prev, systemMessage];
+              }
 
-            return [
-              ...prev.slice(0, indexFromStart),
-              ...prev.slice(indexFromStart + 1),
-              updated,
-            ];
-          });
-          setDraftMessage("");
+              const updated: Message = {
+                ...existing,
+                createdAt: Date.now(),
+              };
+
+              return [
+                ...prev.slice(0, indexFromStart),
+                ...prev.slice(indexFromStart + 1),
+                updated,
+              ];
+            });
+          }
           return;
         }
 
@@ -1663,47 +2027,77 @@ export default function MessagesInbox() {
         );
       }
 
-      const sentMessage: Message = {
-        id: asId(parsedBody.message.id),
-        parentId: parsedBody.message.parent_id
-          ? asId(parsedBody.message.parent_id)
-          : null,
+      const serverMessageId = asId(parsedBody.message.id);
+      const parentId = parsedBody.message.parent_id
+        ? asId(parsedBody.message.parent_id)
+        : null;
+      const shouldStayPending = isRealtimeConnected;
+      const updatedLastMessage: Message = {
+        ...optimisticMessage,
+        id: serverMessageId,
+        parentId,
         senderId: asId(parsedBody.message.user_id),
         receiverId: asId(parsedBody.message.recipient_id),
         content: parsedBody.message.content,
-        createdAt: Date.now(),
+        status: shouldStayPending ? "pending" : "sent",
       };
+      updateLocalThreadMessage(
+        targetUserId,
+        (m) => m.id === optimisticId,
+        () => updatedLastMessage,
+      );
 
-      if (isRealtimeConnected) {
-        const targetUserId = selectedUserId;
-        const timeoutId = window.setTimeout(() => {
-          wsSendFallbackTimeoutsRef.current.delete(timeoutId);
-          if (!targetUserId || selectedUserIdRef.current !== targetUserId) {
-            return;
-          }
-          setMessages((prev) => {
-            if (prev.some((item) => item.id === sentMessage.id)) {
-              return prev;
-            }
-            return [...prev, sentMessage];
-          });
-        }, WS_SEND_FALLBACK_MS);
-        wsSendFallbackTimeoutsRef.current.add(timeoutId);
-      } else {
+      setConversations((prev) =>
+        prev.map((conversation) =>
+          conversation.user.id === targetUserId
+            ? { ...conversation, lastMessage: updatedLastMessage }
+            : conversation,
+        ),
+      );
+
+      if (selectedUserIdRef.current === targetUserId) {
         setMessages((prev) => {
-          if (prev.some((item) => item.id === sentMessage.id)) {
-            return prev;
+          if (prev.some((item) => item.id === serverMessageId)) {
+            return prev.filter((item) => item.id !== optimisticId);
           }
-          return [...prev, sentMessage];
+
+          return prev.map((item) =>
+            item.id === optimisticId
+              ? {
+                  ...item,
+                  id: serverMessageId,
+                  parentId,
+                  senderId: asId(parsedBody.message.user_id),
+                  receiverId: asId(parsedBody.message.recipient_id),
+                  content: parsedBody.message.content,
+                  status: shouldStayPending ? "pending" : "sent",
+                }
+              : item,
+          );
         });
       }
-      setConversations((prev) => [
-        { user: selectedUser, lastMessage: sentMessage },
-        ...prev.filter((item) => item.user.id !== selectedUserId),
-      ]);
-      setDraftMessage("");
-      setReplyingToMessage(null);
-      toast.success("Message sent", { id: toastId });
+
+      if (shouldStayPending) {
+        const timeoutId = window.setTimeout(() => {
+          wsSendFallbackTimeoutsRef.current.delete(timeoutId);
+          updateLocalThreadMessage(
+            targetUserId,
+            (m) => m.id === serverMessageId,
+            (m) => (m.status === "pending" ? { ...m, status: "sent" } : m),
+          );
+          if (selectedUserIdRef.current !== targetUserId) {
+            return;
+          }
+          setMessages((prev) =>
+            prev.map((item) =>
+              item.id === serverMessageId && item.status === "pending"
+                ? { ...item, status: "sent" }
+                : item,
+            ),
+          );
+        }, WS_SEND_FALLBACK_MS);
+        wsSendFallbackTimeoutsRef.current.add(timeoutId);
+      }
     } catch (error) {
       pendingOwnSendScrollRef.current = false;
       console.error("Error sending message:", error);
@@ -1711,7 +2105,30 @@ export default function MessagesInbox() {
         error instanceof Error && error.message
           ? error.message
           : "Failed to send message";
-      toast.error(message, { id: toastId });
+      updateLocalThreadMessage(
+        targetUserId,
+        (m) => m.id === optimisticId,
+        (m) => ({ ...m, status: "failed" }),
+      );
+      setConversations((prev) =>
+        prev.map((conversation) =>
+          conversation.user.id === targetUserId &&
+          conversation.lastMessage?.id === optimisticId
+            ? {
+                ...conversation,
+                lastMessage: { ...conversation.lastMessage, status: "failed" },
+              }
+            : conversation,
+        ),
+      );
+      if (selectedUserIdRef.current === targetUserId) {
+        setMessages((prev) =>
+          prev.map((item) =>
+            item.id === optimisticId ? { ...item, status: "failed" } : item,
+          ),
+        );
+      }
+      toast.error(message);
     } finally {
       setIsSending(false);
     }
@@ -1791,6 +2208,19 @@ export default function MessagesInbox() {
       setMessages((prev) =>
         prev.map((m) => (m.id === messageId ? updatedMessage : m)),
       );
+      updateLocalThreadMessage(
+        selectedUserId,
+        (m) => m.id === messageId,
+        () => updatedMessage,
+      );
+      setConversations((prev) =>
+        prev.map((conversation) =>
+          conversation.user.id === selectedUserId &&
+          conversation.lastMessage?.id === messageId
+            ? { ...conversation, lastMessage: updatedMessage }
+            : conversation,
+        ),
+      );
 
       setEditingMessageId(null);
       setEditContent("");
@@ -1823,6 +2253,16 @@ export default function MessagesInbox() {
 
     // Optimistically remove the message from UI
     setMessages((prev) => prev.filter((m) => m.id !== messageId));
+    removeLocalThreadMessage(selectedUserId, (m) => m.id === messageId);
+    setConversations((prev) =>
+      prev.map((conversation) =>
+        conversation.user.id === selectedUserId &&
+        conversation.lastMessage?.id === messageId
+          ? { ...conversation, lastMessage: undefined }
+          : conversation,
+      ),
+    );
+    setReplyingToMessage((prev) => (prev?.id === messageId ? null : prev));
     setDeletingMessageId(null);
 
     try {
@@ -1846,6 +2286,16 @@ export default function MessagesInbox() {
     } catch (error) {
       // If deletion failed, restore the previous state
       setMessages(previousMessages);
+      const existingLocal =
+        localThreadMessagesByUserIdRef.current.get(selectedUserId) ?? [];
+      const prevIds = new Set(previousMessages.map((m) => m.id));
+      localThreadMessagesByUserIdRef.current.set(
+        selectedUserId,
+        trimLocalThreadMessages([
+          ...previousMessages,
+          ...existingLocal.filter((m) => !prevIds.has(m.id)),
+        ]),
+      );
       console.error("Error deleting message:", error);
       toast.error(
         error instanceof Error ? error.message : "Failed to delete message",
@@ -2567,11 +3017,12 @@ export default function MessagesInbox() {
                       );
                       const showDaySeparator =
                         !!currentDayKey && currentDayKey !== previousDayKey;
+                      const domId = getMessageDomId(message);
 
                       return (
                         <div
-                          key={message.id}
-                          id={`message-${message.id}`}
+                          key={domId}
+                          id={`message-${domId}`}
                           className="group"
                         >
                           {showDaySeparator &&
@@ -2601,7 +3052,13 @@ export default function MessagesInbox() {
                                   const parentMsg = messages.find(
                                     (m) => m.id === message.parentId,
                                   );
-                                  if (!parentMsg) return null;
+                                  if (!parentMsg) {
+                                    return (
+                                      <div className="text-secondary-text/80 flex min-w-0 items-center gap-1.5 overflow-hidden rounded px-1 text-xs italic">
+                                        This message has been deleted
+                                      </div>
+                                    );
+                                  }
                                   const isParentOwn =
                                     asId(parentMsg.senderId) ===
                                     asId(currentUser?.id);
@@ -2617,7 +3074,7 @@ export default function MessagesInbox() {
                                       className="text-secondary-text/80 flex min-w-0 cursor-pointer items-center gap-1.5 overflow-hidden rounded px-1 text-xs transition-opacity hover:opacity-100"
                                       onClick={() => {
                                         const el = document.getElementById(
-                                          `message-${parentMsg.id}`,
+                                          `message-${getMessageDomId(parentMsg)}`,
                                         );
                                         const container =
                                           messagesContainerRef.current;
@@ -2878,7 +3335,16 @@ export default function MessagesInbox() {
                                     </div>
                                   </div>
                                 ) : (
-                                  <ChatEventContent className="text-primary-text break-words whitespace-pre-wrap">
+                                  <ChatEventContent
+                                    className={cn(
+                                      "break-words whitespace-pre-wrap",
+                                      message.status === "pending"
+                                        ? "text-secondary-text/70"
+                                        : message.status === "failed"
+                                          ? "text-red-400/90"
+                                          : "text-primary-text",
+                                    )}
+                                  >
                                     {formatMessageText(message.content ?? "")}
                                     {message.updatedAt &&
                                       message.updatedAt !==
