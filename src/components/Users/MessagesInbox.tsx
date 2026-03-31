@@ -119,6 +119,29 @@ type ConversationSummary = {
   lastMessage?: Message;
 };
 
+function getLatestMessage(messages: Message[]): Message | undefined {
+  let latest: Message | undefined;
+  let latestTimestamp = -Infinity;
+
+  for (const message of messages) {
+    const timestamp = message.createdAt ?? 0;
+    if (!latest || timestamp >= latestTimestamp) {
+      latest = message;
+      latestTimestamp = timestamp;
+    }
+  }
+
+  return latest;
+}
+
+function sortConversationsByLatestMessage(
+  conversations: ConversationSummary[],
+): ConversationSummary[] {
+  return [...conversations].sort(
+    (a, b) => (b.lastMessage?.createdAt ?? 0) - (a.lastMessage?.createdAt ?? 0),
+  );
+}
+
 type ApiSendResponse = {
   success: boolean;
   message: {
@@ -1545,16 +1568,33 @@ export default function MessagesInbox() {
 
       if (action === "message_deleted") {
         removeLocalThreadMessage(counterpartId, (m) => m.id === messageId);
-        setConversations((prev) =>
-          prev.map((conversation) =>
+        setConversations((prev) => {
+          const local =
+            localThreadMessagesByUserIdRef.current.get(counterpartId) ?? [];
+          const latestLocalMessage = getLatestMessage(local);
+          const updated = prev.map((conversation) =>
             conversation.user.id === counterpartId &&
             conversation.lastMessage?.id === messageId
-              ? { ...conversation, lastMessage: undefined }
+              ? { ...conversation, lastMessage: latestLocalMessage }
               : conversation,
-          ),
-        );
+          );
+          return sortConversationsByLatestMessage(updated);
+        });
         if (selectedUserIdRef.current === counterpartId) {
-          setMessages((prev) => prev.filter((m) => m.id !== messageId));
+          setMessages((prev) => {
+            const next = prev.filter((m) => m.id !== messageId);
+            const latestThreadMessage = getLatestMessage(next);
+            setConversations((conversationsPrev) => {
+              const updated = conversationsPrev.map((conversation) =>
+                conversation.user.id === counterpartId &&
+                conversation.lastMessage?.id === messageId
+                  ? { ...conversation, lastMessage: latestThreadMessage }
+                  : conversation,
+              );
+              return sortConversationsByLatestMessage(updated);
+            });
+            return next;
+          });
           setReplyingToMessage((prev) =>
             prev?.id === messageId ? null : prev,
           );
@@ -2250,18 +2290,24 @@ export default function MessagesInbox() {
     const toastId = toast.loading("Deleting message...");
     // Keep a copy of current messages for restoration if delete fails
     const previousMessages = [...messages];
+    const previousConversationLastMessage = conversations.find(
+      (conversation) => conversation.user.id === selectedUserId,
+    )?.lastMessage;
 
     // Optimistically remove the message from UI
     setMessages((prev) => prev.filter((m) => m.id !== messageId));
     removeLocalThreadMessage(selectedUserId, (m) => m.id === messageId);
-    setConversations((prev) =>
-      prev.map((conversation) =>
+    setConversations((prev) => {
+      const nextMessages = previousMessages.filter((m) => m.id !== messageId);
+      const latestThreadMessage = getLatestMessage(nextMessages);
+      const updated = prev.map((conversation) =>
         conversation.user.id === selectedUserId &&
         conversation.lastMessage?.id === messageId
-          ? { ...conversation, lastMessage: undefined }
+          ? { ...conversation, lastMessage: latestThreadMessage }
           : conversation,
-      ),
-    );
+      );
+      return sortConversationsByLatestMessage(updated);
+    });
     setReplyingToMessage((prev) => (prev?.id === messageId ? null : prev));
     setDeletingMessageId(null);
 
@@ -2296,6 +2342,14 @@ export default function MessagesInbox() {
           ...existingLocal.filter((m) => !prevIds.has(m.id)),
         ]),
       );
+      setConversations((prev) => {
+        const updated = prev.map((conversation) =>
+          conversation.user.id === selectedUserId
+            ? { ...conversation, lastMessage: previousConversationLastMessage }
+            : conversation,
+        );
+        return sortConversationsByLatestMessage(updated);
+      });
       console.error("Error deleting message:", error);
       toast.error(
         error instanceof Error ? error.message : "Failed to delete message",

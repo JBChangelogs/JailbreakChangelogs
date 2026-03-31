@@ -42,6 +42,15 @@ const IDLE_TIMEOUT_MS = 120000;
 const MAX_RECONNECT_DELAY_MS = 15000;
 const SOUND_COOLDOWN_MS = 800;
 const MAX_HANDSHAKE_RETRIES = 3;
+const FOCUS_ONLY_RECONNECT_CODES = new Set([4000, 4001]);
+
+function shouldReconnectOnFocusOnly(code: number, reason: string): boolean {
+  if (!FOCUS_ONLY_RECONNECT_CODES.has(code)) return false;
+  if (code === 4000) return true;
+  return (
+    /another instance/i.test(reason) || /duplicate connection/i.test(reason)
+  );
+}
 
 function toNotificationBody(value: unknown, maxLen = 140): string | undefined {
   if (typeof value !== "string") return undefined;
@@ -55,7 +64,7 @@ function getRealtimeWsUrl(): string | null {
   const baseUrl = WS_URL?.replace(/\/+$/, "");
   if (!baseUrl) return null;
 
-  return `${baseUrl}/realtime?jbcl_token=mFpJgYWeYT2h-Mv1v66Qy2LW5reNhCisgO3gFCMVKAk`;
+  return `${baseUrl}/realtime`;
 }
 
 function getReconnectDelay(attempt: number): number {
@@ -93,6 +102,7 @@ export function useRealtimeNotificationsWebSocket(
   const openedForAttemptRef = useRef(false);
   const disableAutoReconnectRef = useRef(false);
   const handshakeRetryAttemptsRef = useRef(0);
+  const reconnectOnFocusOnlyRef = useRef(false);
   const locationPathRef = useRef<string>(
     typeof window !== "undefined" ? window.location?.pathname || "/" : "/",
   );
@@ -172,6 +182,7 @@ export function useRealtimeNotificationsWebSocket(
       openedForAttemptRef.current = false;
       disableAutoReconnectRef.current = false;
       handshakeRetryAttemptsRef.current = 0;
+      reconnectOnFocusOnlyRef.current = false;
       return;
     }
 
@@ -197,6 +208,13 @@ export function useRealtimeNotificationsWebSocket(
         return;
       }
       if (disableAutoReconnectRef.current) {
+        return;
+      }
+      if (
+        reconnectOnFocusOnlyRef.current &&
+        typeof document !== "undefined" &&
+        document.visibilityState !== "visible"
+      ) {
         return;
       }
 
@@ -229,6 +247,7 @@ export function useRealtimeNotificationsWebSocket(
           openedForAttemptRef.current = true;
           disableAutoReconnectRef.current = false;
           handshakeRetryAttemptsRef.current = 0;
+          reconnectOnFocusOnlyRef.current = false;
           isIdleRef.current = false;
           reconnectAttemptsRef.current = 0;
           resetIdleTimer();
@@ -264,10 +283,28 @@ export function useRealtimeNotificationsWebSocket(
                 AUTH_WS_ERRORS[payload.code] ||
                 payload.message ||
                 "Connection error.";
-              toast.error("Realtime notifications disconnected", {
-                id: `realtime-notifications-error:${payload.code}`,
-                description: errorMessage,
-              });
+              const focusOnly = shouldReconnectOnFocusOnly(
+                payload.code,
+                errorMessage,
+              );
+              toast.error(
+                focusOnly
+                  ? "Realtime features disabled"
+                  : "Realtime notifications disconnected",
+                {
+                  id: focusOnly
+                    ? `realtime-notifications-disabled:${payload.code}`
+                    : `realtime-notifications-error:${payload.code}`,
+                  description: errorMessage,
+                },
+              );
+              if (focusOnly) {
+                reconnectOnFocusOnlyRef.current = true;
+                if (reconnectTimeoutRef.current) {
+                  clearTimeout(reconnectTimeoutRef.current);
+                  reconnectTimeoutRef.current = null;
+                }
+              }
               ws.close(payload.code, errorMessage);
               return;
             }
@@ -519,6 +556,18 @@ export function useRealtimeNotificationsWebSocket(
           }
 
           wsRef.current = null;
+          if (shouldReconnectOnFocusOnly(event.code, event.reason || "")) {
+            reconnectOnFocusOnlyRef.current = true;
+            if (reconnectTimeoutRef.current) {
+              clearTimeout(reconnectTimeoutRef.current);
+              reconnectTimeoutRef.current = null;
+            }
+            toast.error("Realtime features disabled", {
+              id: `realtime-notifications-disabled:${event.code}`,
+              description: event.reason || "Connection closed.",
+            });
+            return;
+          }
           if (event.code in AUTH_WS_ERRORS) {
             toast.error("Realtime notifications disconnected", {
               id: `realtime-notifications-error:${event.code}`,
@@ -592,13 +641,31 @@ export function useRealtimeNotificationsWebSocket(
         }
         return;
       }
+      if (reconnectOnFocusOnlyRef.current && enabledRef.current) {
+        reconnectOnFocusOnlyRef.current = false;
+        connect();
+      }
       handleUserActivity();
+    };
+
+    const handleWindowFocus = () => {
+      if (!enabledRef.current) return;
+      if (!reconnectOnFocusOnlyRef.current) return;
+      if (
+        typeof document !== "undefined" &&
+        document.visibilityState !== "visible"
+      ) {
+        return;
+      }
+      reconnectOnFocusOnlyRef.current = false;
+      connect();
     };
 
     activityEvents.forEach((eventName) => {
       document.addEventListener(eventName, handleUserActivity, true);
     });
     document.addEventListener("visibilitychange", handleVisibilityChange);
+    window.addEventListener("focus", handleWindowFocus);
 
     connect();
     resetIdleTimer();
@@ -609,6 +676,7 @@ export function useRealtimeNotificationsWebSocket(
         document.removeEventListener(eventName, handleUserActivity, true);
       });
       document.removeEventListener("visibilitychange", handleVisibilityChange);
+      window.removeEventListener("focus", handleWindowFocus);
       if (reconnectTimeoutRef.current) {
         clearTimeout(reconnectTimeoutRef.current);
         reconnectTimeoutRef.current = null;
@@ -632,6 +700,7 @@ export function useRealtimeNotificationsWebSocket(
       openedForAttemptRef.current = false;
       disableAutoReconnectRef.current = false;
       handshakeRetryAttemptsRef.current = 0;
+      reconnectOnFocusOnlyRef.current = false;
     };
   }, [isRealtimeNotificationsEnabled, ensureAudio, resetIdleTimer]);
 }
