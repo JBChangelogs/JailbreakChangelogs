@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 export default function AccessDeniedLoginButton() {
   const handleClick = (event: MouseEvent<HTMLAnchorElement>) => {
     event.preventDefault();
-    const redirectTarget = "https://testing.jailbreakchangelogs.xyz/";
+    const redirectTarget = "https://testing.jailbreakchangelogs.com/";
     const loginUrl = `/api/auth/discord?redirect=${encodeURIComponent(redirectTarget)}`;
     window.location.assign(loginUrl);
   };

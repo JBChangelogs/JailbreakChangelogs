@@ -9,7 +9,7 @@ type TradeItemLike = {
 };
 
 const TRADE_ICON_BASE_URL =
-  "https://assets.jailbreakchangelogs.xyz/assets/items/trade_icons";
+  "https://assets.jailbreakchangelogs.com/assets/items/trade_icons";
 
 const normalizeString = (value: unknown): string =>
   typeof value === "string" ? value.trim() : "";
