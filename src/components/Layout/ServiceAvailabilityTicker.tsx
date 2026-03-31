@@ -21,16 +21,17 @@ export default function ServiceAvailabilityTicker() {
 
           <div className="flex items-center gap-2">
             <span className="text-primary-text text-center text-xs">
-              <strong>SERVICE ALERT:</strong> Robbery &amp; Bounty updates may
-              be delayed on the{" "}
+              <strong>SERVICE ALERT:</strong> Inventory lookups are temporarily
+              unavailable while we resolve a backend issue. For now, you may see
+              500 errors on the{" "}
               <Link
-                href="/robberies"
+                href="/inventories"
                 prefetch={false}
                 className="text-link hover:underline"
               >
-                robbery tracker
+                inventory checker
               </Link>
-              . Inventory Tracking remains operational. Follow progress on{" "}
+              . Follow progress on{" "}
               <Link
                 href="https://status.jailbreakchangelogs.xyz/"
                 prefetch={false}
