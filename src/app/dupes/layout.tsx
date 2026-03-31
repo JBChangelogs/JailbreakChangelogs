@@ -8,7 +8,7 @@ export async function generateMetadata(): Promise<Metadata> {
   }
 
   return {
-    metadataBase: new URL("https://jailbreakchangelogs.xyz"),
+    metadataBase: new URL("https://jailbreakchangelogs.com"),
     title: "Dupe Finder",
     description:
       "Find and check for duplicated items in Roblox Jailbreak inventories. Use our dupe finder tool to identify potential duplicate items in your or other players' inventories.",
@@ -29,7 +29,7 @@ export async function generateMetadata(): Promise<Metadata> {
       ],
       type: "website",
       siteName: "Jailbreak Changelogs",
-      url: "https://jailbreakchangelogs.xyz/dupes",
+      url: "https://jailbreakchangelogs.com/dupes",
     },
     twitter: {
       card: "summary_large_image",

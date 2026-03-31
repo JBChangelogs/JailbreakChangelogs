@@ -282,7 +282,7 @@ export default async function Home() {
                 </Button>
                 <Button asChild variant="heroOutline" size="lg">
                   <a
-                    href="https://discord.jailbreakchangelogs.xyz"
+                    href="https://discord.jailbreakchangelogs.com"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-2"

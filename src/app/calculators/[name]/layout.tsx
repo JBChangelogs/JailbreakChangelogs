@@ -20,7 +20,7 @@ export async function generateMetadata({
 
   if (name === "hyperchrome-pity") {
     return {
-      metadataBase: new URL("https://jailbreakchangelogs.xyz"),
+      metadataBase: new URL("https://jailbreakchangelogs.com"),
       title: "Hyperchrome Pity Calculator | JailbreakChangelogs",
       description:
         "Calculate robberies needed to reach the next Hyperchrome level in Roblox Jailbreak.",
@@ -33,7 +33,7 @@ export async function generateMetadata({
           "Calculate robberies needed to reach the next Hyperchrome level in Roblox Jailbreak.",
         type: "website",
         siteName: "Jailbreak Changelogs",
-        url: `https://jailbreakchangelogs.xyz/calculators/${name}`,
+        url: `https://jailbreakchangelogs.com/calculators/${name}`,
         images: [
           {
             url: "https://assets.jailbreakchangelogs.xyz/assets/logos/embeds/JBCL_Embed_Graphic.png",
@@ -56,7 +56,7 @@ export async function generateMetadata({
   }
 
   return {
-    metadataBase: new URL("https://jailbreakchangelogs.xyz"),
+    metadataBase: new URL("https://jailbreakchangelogs.com"),
     title: "Calculator | JailbreakChangelogs",
     description: "Jailbreak calculator tool.",
     alternates: {

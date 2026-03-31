@@ -1,7 +1,7 @@
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://jailbreakchangelogs.xyz"),
+  metadataBase: new URL("https://jailbreakchangelogs.com"),
   title: "Support Us",
   description:
     "Support Jailbreak Changelogs and unlock exclusive perks. Choose from various supporter tiers to enhance your experience and help us maintain the platform.",
@@ -14,7 +14,7 @@ export const metadata: Metadata = {
       "Support Jailbreak Changelogs and unlock exclusive perks. Choose from various supporter tiers to enhance your experience and help us maintain the platform.",
     type: "website",
     siteName: "Jailbreak Changelogs",
-    url: "https://jailbreakchangelogs.xyz/supporting",
+    url: "https://jailbreakchangelogs.com/supporting",
     images: [
       {
         url: "https://assets.jailbreakchangelogs.xyz/assets/logos/embeds/JBCL_Support_Us_Embed.png",

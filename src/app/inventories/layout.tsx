@@ -11,7 +11,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: "Inventory Checker",
     description: "Check any player's Jailbreak inventory and stats",
-    metadataBase: new URL("https://jailbreakchangelogs.xyz"),
+    metadataBase: new URL("https://jailbreakchangelogs.com"),
     alternates: {
       canonical: "/inventories",
     },
@@ -28,7 +28,7 @@ export async function generateMetadata(): Promise<Metadata> {
       ],
       type: "website",
       siteName: "Jailbreak Changelogs",
-      url: "https://jailbreakchangelogs.xyz/inventories",
+      url: "https://jailbreakchangelogs.com/inventories",
     },
     twitter: {
       card: "summary_large_image",

@@ -1,7 +1,7 @@
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://jailbreakchangelogs.xyz"),
+  metadataBase: new URL("https://jailbreakchangelogs.com"),
   title: "Jailbreak Update Timeline | Complete History of Changes",
   description:
     "Explore the complete chronological history of Roblox Jailbreak updates. See how the game has evolved through major updates and feature releases.",
@@ -13,7 +13,7 @@ export const metadata: Metadata = {
     description:
       "Explore the complete chronological history of Roblox Jailbreak updates. See how the game has evolved through major updates and feature releases.",
     siteName: "Jailbreak Changelogs",
-    url: "https://jailbreakchangelogs.xyz/changelogs/timeline",
+    url: "https://jailbreakchangelogs.com/changelogs/timeline",
   },
   twitter: {
     card: "summary_large_image",

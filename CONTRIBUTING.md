@@ -17,7 +17,7 @@ Once you have the environment file (.env.local) set up, you can proceed with the
 
 ## Where do I go from here?
 
-If you've noticed a bug or have a feature request, make sure to check our [Discord server](https://discord.jailbreakchangelogs.xyz) in the issues channel to see if someone else in the community has already reported it. If not, go ahead and [submit an issue](https://www.jailbreakchangelogs.xyz?report-issue)!
+If you've noticed a bug or have a feature request, make sure to check our [Discord server](https://discord.jailbreakchangelogs.com) in the issues channel to see if someone else in the community has already reported it. If not, go ahead and [submit an issue](https://www.jailbreakchangelogs.com?report-issue)!
 
 ## Fork & create a branch
 

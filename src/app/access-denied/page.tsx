@@ -54,7 +54,7 @@ export default function AccessDeniedPage() {
             className="border-border-primary! text-primary-text! hover:bg-quaternary-bg! active:bg-quaternary-bg! w-full sm:w-auto"
           >
             <a
-              href="https://discord.jailbreakchangelogs.xyz"
+              href="https://discord.jailbreakchangelogs.com"
               target="_blank"
               rel="noopener noreferrer"
             >

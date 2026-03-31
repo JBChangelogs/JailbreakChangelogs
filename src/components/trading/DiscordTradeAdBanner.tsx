@@ -20,7 +20,7 @@ const DiscordTradeAdBanner: React.FC<DiscordTradeAdBannerProps> = ({
         <div className="text-secondary-text mt-1">
           All trades are now automatically posted to our{" "}
           <a
-            href="https://discord.jailbreakchangelogs.xyz"
+            href="https://discord.jailbreakchangelogs.com"
             target="_blank"
             rel="noopener noreferrer"
             className="text-primary-text inline-flex items-center gap-1 font-semibold underline transition-opacity hover:opacity-80"

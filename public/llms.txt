@@ -106,7 +106,7 @@ JailbreakChangelogs is a comprehensive fan-made platform by Jakobiis and Jalenzz
 
 ## Community & Support
 
-- **Discord**: https://discord.jailbreakchangelogs.xyz
+- **Discord**: https://discord.jailbreakchangelogs.com
 - **Support Email**: support@jailbreakchangelogs.com
 - **GitHub**: https://github.com/JBChangelogs/JailbreakChangelogs
 - **Contributing**: See CONTRIBUTING.md for development guidelines

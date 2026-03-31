@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://jailbreakchangelogs.xyz"),
-  title: "Meet the team",
+  metadataBase: new URL("https://jailbreakchangelogs.com"),
+  title: "Meet the Team",
   description:
     "Meet the team behind Jailbreak Changelogs. Our contributors, value list managers, and team members who help keep the platform running smoothly.",
   alternates: {
@@ -22,7 +22,7 @@ export const metadata: Metadata = {
     ],
     type: "website",
     siteName: "Jailbreak Changelogs",
-    url: "https://jailbreakchangelogs.xyz/contributors",
+    url: "https://jailbreakchangelogs.com/contributors",
   },
   twitter: {
     card: "summary_large_image",

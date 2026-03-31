@@ -20,7 +20,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
     if (!season) {
       return {
-        metadataBase: new URL("https://jailbreakchangelogs.xyz"),
+        metadataBase: new URL("https://jailbreakchangelogs.com"),
         title: "Season Not Found",
         description: "The requested season could not be found.",
         alternates: {
@@ -49,7 +49,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     }));
 
     return {
-      metadataBase: new URL("https://jailbreakchangelogs.xyz"),
+      metadataBase: new URL("https://jailbreakchangelogs.com"),
       title: `Season ${season.season}: ${season.title}`,
       description: season.description,
       alternates: {
@@ -60,7 +60,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         description: season.description,
         images,
         siteName: "Jailbreak Changelogs",
-        url: `https://jailbreakchangelogs.xyz/seasons/${id}`,
+        url: `https://jailbreakchangelogs.com/seasons/${id}`,
       },
       twitter: {
         card: "summary_large_image",
@@ -72,7 +72,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   } catch {
     const { id } = await params;
     return {
-      metadataBase: new URL("https://jailbreakchangelogs.xyz"),
+      metadataBase: new URL("https://jailbreakchangelogs.com"),
       title: "Jailbreak Seasons",
       description: "Explore all seasons of Roblox Jailbreak.",
       alternates: {
@@ -82,7 +82,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         title: "Jailbreak Seasons",
         description: "Explore all seasons of Roblox Jailbreak.",
         siteName: "Jailbreak Changelogs",
-        url: "https://jailbreakchangelogs.xyz/seasons",
+        url: "https://jailbreakchangelogs.com/seasons",
         images: [
           "https://assets.jailbreakchangelogs.xyz/assets/logos/embeds/JBCL_Embed_Graphic.png",
         ],

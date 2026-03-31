@@ -21,7 +21,7 @@ export const metadata: Metadata = {
     ],
     type: "website",
     siteName: "Jailbreak Changelogs",
-    url: "https://jailbreakchangelogs.xyz/bounties",
+    url: "https://jailbreakchangelogs.com/bounties",
   },
   twitter: {
     card: "summary_large_image",

@@ -18,7 +18,7 @@ export async function generateMetadata({
     const changelog = await fetchChangelog(id);
 
     return {
-      metadataBase: new URL("https://jailbreakchangelogs.xyz"),
+      metadataBase: new URL("https://jailbreakchangelogs.com"),
       title: changelog.title,
       description: `View the complete changelog for ${changelog.title}. Track updates, features, and modifications in this Jailbreak update.`,
       alternates: {
@@ -28,7 +28,7 @@ export async function generateMetadata({
         title: changelog.title,
         description: `View the complete changelog for ${changelog.title}. Track updates, features, and modifications in this Jailbreak update.`,
         type: "article",
-        url: `https://jailbreakchangelogs.xyz/changelogs/${id}`,
+        url: `https://jailbreakchangelogs.com/changelogs/${id}`,
         siteName: "Jailbreak Changelogs",
         images: changelog.image_url
           ? [`https://assets.jailbreakchangelogs.xyz${changelog.image_url}`]
@@ -47,7 +47,7 @@ export async function generateMetadata({
     // Don't log the error to console as it's expected for non-existent changelogs
     const { id } = await params;
     return {
-      metadataBase: new URL("https://jailbreakchangelogs.xyz"),
+      metadataBase: new URL("https://jailbreakchangelogs.com"),
       title: "Changelog Not Found",
       description: "The requested changelog could not be found.",
       alternates: {
