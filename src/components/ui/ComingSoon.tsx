@@ -94,7 +94,7 @@ export default function ComingSoon() {
           </div>
           <div className="space-y-3">
             <Link
-              href="https://discord.jailbreakchangelogs.xyz"
+              href="https://discord.jailbreakchangelogs.com"
               target="_blank"
               rel="noopener noreferrer"
               className="bg-button-info text-form-button-text hover:bg-button-info-hover flex w-full items-center justify-center gap-2 rounded-lg px-6 py-3 font-medium transition-colors"

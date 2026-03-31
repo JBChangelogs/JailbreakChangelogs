@@ -36,7 +36,7 @@ const nextConfig = {
       },
       {
         protocol: "http",
-        hostname: "proxy.jailbreakchangelogs.xyz",
+        hostname: "proxy.jailbreakchangelogs.com",
         pathname: "/**",
       },
       {

@@ -21,7 +21,7 @@ export default function ExperimentalFeatureBanner({
           <br />
           Help us improve it by reporting any issues you find.{" "}
           <a
-            href="https://discord.jailbreakchangelogs.xyz"
+            href="https://discord.jailbreakchangelogs.com"
             target="_blank"
             rel="noopener noreferrer"
             className="text-primary-text inline-flex items-center gap-1 font-semibold underline transition-opacity hover:opacity-80"

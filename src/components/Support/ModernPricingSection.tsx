@@ -422,7 +422,7 @@ export default function ModernPricingSection() {
               <p className="text-secondary-text mt-1 text-sm">
                 Didn&apos;t receive a code or need donation help? Join our{" "}
                 <a
-                  href="https://discord.jailbreakchangelogs.xyz"
+                  href="https://discord.jailbreakchangelogs.com"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-link hover:text-link-hover font-semibold underline transition-colors"

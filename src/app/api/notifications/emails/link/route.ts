@@ -12,7 +12,7 @@ export async function GET() {
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   }
 
-  const redirectUrl = "https://jailbreakchangelogs.xyz/settings";
+  const redirectUrl = "https://jailbreakchangelogs.com/settings";
 
   const targetUrl = `${PUBLIC_API_URL}/email/link?redirect=${encodeURIComponent(
     redirectUrl,

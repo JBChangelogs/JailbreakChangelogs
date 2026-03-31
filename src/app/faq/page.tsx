@@ -68,7 +68,7 @@ const faqs = [
   {
     question: "How do I report issues with the website?",
     answer:
-      "To report website issues:<br>1. Visit the <a href='/?report-issue=true' class=\"text-link hover:text-link-hover underline\">report issue modal</a> or use the Report An Issue button at the bottom of any page<br>2. You must be logged in with Discord to submit issues<br>3. Follow these requirements:<br>&nbsp;&nbsp;• Issue Title must be at least 10 characters<br>&nbsp;&nbsp;• Description must be at least 25 characters<br>4. After submission, your issue will appear in our <a href='https://discord.jailbreakchangelogs.xyz' target='_blank' rel='noopener noreferrer' class=\"text-link hover:text-link-hover underline\">Discord server</a>'s issues channel",
+      "To report website issues:<br>1. Visit the <a href='/?report-issue=true' class=\"text-link hover:text-link-hover underline\">report issue modal</a> or use the Report An Issue button at the bottom of any page<br>2. You must be logged in with Discord to submit issues<br>3. Follow these requirements:<br>&nbsp;&nbsp;• Issue Title must be at least 10 characters<br>&nbsp;&nbsp;• Description must be at least 25 characters<br>4. After submission, your issue will appear in our <a href='https://discord.jailbreakchangelogs.com' target='_blank' rel='noopener noreferrer' class=\"text-link hover:text-link-hover underline\">Discord server</a>'s issues channel",
   },
   {
     question: "How can I create trade ads?",
@@ -83,7 +83,7 @@ const faqs = [
   {
     question: "How can I connect with JBChangelogs?",
     answer:
-      'There are several ways to connect with us:<br>1. Join our Discord server at <a href="https://discord.jailbreakchangelogs.xyz" target="_blank" rel="noopener noreferrer" class="text-link hover:text-link-hover underline">discord.jailbreakchangelogs.xyz</a> to trade, hang out, and discuss the website<br>2. Follow us on X (Twitter) at <a href="https://x.com/JBChangelogs" target="_blank" rel="noopener noreferrer" class="text-link hover:text-link-hover underline">@JBChangelogs</a> for website updates and announcements<br>3. Join our Roblox group at <a href="https://www.roblox.com/communities/35348206/Jailbreak-Changelogs#!/about" target="_blank" rel="noopener noreferrer" class="text-link hover:text-link-hover underline">Jailbreak Changelogs Group</a><br>4. Follow us on Bluesky at <a href="https://bsky.app/profile/jbchangelogs.bsky.social" target="_blank" rel="noopener noreferrer" class="text-link hover:text-link-hover underline">@jbchangelogs.bsky.social</a>',
+      'There are several ways to connect with us:<br>1. Join our Discord server at <a href="https://discord.jailbreakchangelogs.com" target="_blank" rel="noopener noreferrer" class="text-link hover:text-link-hover underline">discord.jailbreakchangelogs.xyz</a> to trade, hang out, and discuss the website<br>2. Follow us on X (Twitter) at <a href="https://x.com/JBChangelogs" target="_blank" rel="noopener noreferrer" class="text-link hover:text-link-hover underline">@JBChangelogs</a> for website updates and announcements<br>3. Join our Roblox group at <a href="https://www.roblox.com/communities/35348206/Jailbreak-Changelogs#!/about" target="_blank" rel="noopener noreferrer" class="text-link hover:text-link-hover underline">Jailbreak Changelogs Group</a><br>4. Follow us on Bluesky at <a href="https://bsky.app/profile/jbchangelogs.bsky.social" target="_blank" rel="noopener noreferrer" class="text-link hover:text-link-hover underline">@jbchangelogs.bsky.social</a>',
   },
   {
     question: "Who can I contact if I have questions or need assistance?",
@@ -113,7 +113,7 @@ const faqs = [
   {
     question: 'What if a scan fails or shows "No bots available"?',
     answer:
-      'If you see "No bots available" or the scan fails:<br>• This means all our scanning bots are currently busy or offline<br>• Wait a few minutes and try again<br>• Make sure you\'re in a trading server in Roblox Jailbreak<br><br>If the issue persists, you can report it through our <a href="https://discord.jailbreakchangelogs.xyz" target="_blank" rel="noopener noreferrer" class="text-link hover:text-link-hover underline">Discord server</a>.',
+      'If you see "No bots available" or the scan fails:<br>• This means all our scanning bots are currently busy or offline<br>• Wait a few minutes and try again<br>• Make sure you\'re in a trading server in Roblox Jailbreak<br><br>If the issue persists, you can report it through our <a href="https://discord.jailbreakchangelogs.com" target="_blank" rel="noopener noreferrer" class="text-link hover:text-link-hover underline">Discord server</a>.',
   },
 ];
 

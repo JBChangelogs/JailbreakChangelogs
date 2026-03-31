@@ -546,7 +546,7 @@ export default function RedeemPage() {
                     Your code will be sent to your Discord via our bot. Having
                     issues? Join our{" "}
                     <a
-                      href="https://discord.jailbreakchangelogs.xyz/"
+                      href="https://discord.jailbreakchangelogs.com/"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-link hover:text-link-hover"

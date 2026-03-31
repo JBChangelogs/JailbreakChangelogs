@@ -8,7 +8,7 @@ export async function generateMetadata(): Promise<Metadata> {
   }
 
   return {
-    metadataBase: new URL("https://jailbreakchangelogs.xyz"),
+    metadataBase: new URL("https://jailbreakchangelogs.com"),
     title: "OG Finder",
     description:
       "Find original items owned by any player. Discover who originally owned specific items in Jailbreak and track their trade history.",
@@ -29,7 +29,7 @@ export async function generateMetadata(): Promise<Metadata> {
       ],
       type: "website",
       siteName: "Jailbreak Changelogs",
-      url: "https://jailbreakchangelogs.xyz/og",
+      url: "https://jailbreakchangelogs.com/og",
     },
     twitter: {
       card: "summary_large_image",

@@ -1,7 +1,7 @@
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://jailbreakchangelogs.xyz"),
+  metadataBase: new URL("https://jailbreakchangelogs.com"),
   title: "Redeem",
   description:
     "Redeem your unique code to claim exclusive perks on Jailbreak Changelogs.",
@@ -22,7 +22,7 @@ export const metadata: Metadata = {
     ],
     type: "website",
     siteName: "Jailbreak Changelogs",
-    url: "https://jailbreakchangelogs.xyz/redeem",
+    url: "https://jailbreakchangelogs.com/redeem",
   },
   twitter: {
     card: "summary_large_image",

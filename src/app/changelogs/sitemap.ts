@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next";
 import { BASE_API_URL, Changelog } from "@/utils/api";
 
-const BASE_URL = "https://jailbreakchangelogs.xyz";
+const BASE_URL = "https://jailbreakchangelogs.com";
 const ASSETS_URL = "https://assets.jailbreakchangelogs.xyz";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {

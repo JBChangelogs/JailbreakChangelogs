@@ -17,7 +17,7 @@ export const metadata: Metadata = {
     ],
     type: "website",
     siteName: "Jailbreak Changelogs",
-    url: "https://jailbreakchangelogs.xyz/seasons/contracts",
+    url: "https://jailbreakchangelogs.com/seasons/contracts",
   },
   twitter: {
     card: "summary_large_image",

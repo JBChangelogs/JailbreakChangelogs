@@ -63,7 +63,7 @@ export async function generateMetadata({
 
     if (!user) {
       return {
-        metadataBase: new URL("https://jailbreakchangelogs.xyz"),
+        metadataBase: new URL("https://jailbreakchangelogs.com"),
         title: "User Not Found",
         description:
           "This user profile could not be found on Jailbreak Changelogs.",
@@ -75,7 +75,7 @@ export async function generateMetadata({
           description:
             "This user profile could not be found on Jailbreak Changelogs.",
           type: "website",
-          url: "https://jailbreakchangelogs.xyz/users",
+          url: "https://jailbreakchangelogs.com/users",
           siteName: "Jailbreak Changelogs",
           images: [
             {
@@ -110,7 +110,7 @@ export async function generateMetadata({
       : `${displayName}'s Profile`;
 
     return {
-      metadataBase: new URL("https://jailbreakchangelogs.xyz"),
+      metadataBase: new URL("https://jailbreakchangelogs.com"),
       title: titleFormat,
       description: `Check out ${displayName}'s profile on Jailbreak Changelogs. View their contributions and stay connected.`,
       alternates: {
@@ -152,7 +152,7 @@ export async function generateMetadata({
         .replace("PRIVATE_PROFILE:", "")
         .trim();
       return {
-        metadataBase: new URL("https://jailbreakchangelogs.xyz"),
+        metadataBase: new URL("https://jailbreakchangelogs.com"),
         title: "Private Profile",
         description: privateMessage || "This user's profile is private.",
         alternates: {
@@ -162,7 +162,7 @@ export async function generateMetadata({
           title: "Private Profile",
           description: privateMessage || "This user's profile is private.",
           type: "website",
-          url: "https://jailbreakchangelogs.xyz/users",
+          url: "https://jailbreakchangelogs.com/users",
           siteName: "Jailbreak Changelogs",
           images: [
             {
@@ -194,7 +194,7 @@ export async function generateMetadata({
     ) {
       const bannedMessage = error.message.replace("BANNED_USER:", "").trim();
       return {
-        metadataBase: new URL("https://jailbreakchangelogs.xyz"),
+        metadataBase: new URL("https://jailbreakchangelogs.com"),
         title: "User Banned",
         description: bannedMessage,
         alternates: {
@@ -204,7 +204,7 @@ export async function generateMetadata({
           title: "User Banned",
           description: bannedMessage,
           type: "website",
-          url: "https://jailbreakchangelogs.xyz/users",
+          url: "https://jailbreakchangelogs.com/users",
           siteName: "Jailbreak Changelogs",
           images: [
             {
@@ -228,7 +228,7 @@ export async function generateMetadata({
 
     // Fallback for other errors (including NOT_FOUND)
     return {
-      metadataBase: new URL("https://jailbreakchangelogs.xyz"),
+      metadataBase: new URL("https://jailbreakchangelogs.com"),
       title: "User Not Found",
       description:
         "This user profile could not be found on Jailbreak Changelogs.",
@@ -240,7 +240,7 @@ export async function generateMetadata({
         description:
           "This user profile could not be found on Jailbreak Changelogs.",
         type: "website",
-        url: "https://jailbreakchangelogs.xyz/users",
+        url: "https://jailbreakchangelogs.com/users",
         siteName: "Jailbreak Changelogs",
         images: [
           {

@@ -2,7 +2,7 @@ import React from "react";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://jailbreakchangelogs.xyz"),
+  metadataBase: new URL("https://jailbreakchangelogs.com"),
   title: "Calculators",
   description:
     "Access our calculators in one place - Values Calculator, Season XP Calculator, Dupe Calculator, and Hyperchrome Pity Calculator.",
@@ -23,7 +23,7 @@ export const metadata: Metadata = {
     ],
     type: "website",
     siteName: "Jailbreak Changelogs",
-    url: "https://jailbreakchangelogs.xyz/calculators",
+    url: "https://jailbreakchangelogs.com/calculators",
   },
   twitter: {
     card: "summary_large_image",

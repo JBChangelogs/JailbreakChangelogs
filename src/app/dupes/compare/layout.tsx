@@ -8,7 +8,7 @@ export async function generateMetadata(): Promise<Metadata> {
   }
 
   return {
-    metadataBase: new URL("https://jailbreakchangelogs.xyz"),
+    metadataBase: new URL("https://jailbreakchangelogs.com"),
     title: "Duplicate Comparison",
     description:
       "Compare duplicate item variants side-by-side to analyze ownership history and identify potential mass-duped items.",
@@ -29,7 +29,7 @@ export async function generateMetadata(): Promise<Metadata> {
       ],
       type: "website",
       siteName: "Jailbreak Changelogs",
-      url: "https://jailbreakchangelogs.xyz/dupes/compare",
+      url: "https://jailbreakchangelogs.com/dupes/compare",
     },
     twitter: {
       card: "summary_large_image",

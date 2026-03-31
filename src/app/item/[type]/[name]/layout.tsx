@@ -119,25 +119,25 @@ async function generateBreadcrumbJsonLd(
       "@type": "ListItem",
       position: 1,
       name: "Home",
-      item: "https://jailbreakchangelogs.xyz",
+      item: "https://jailbreakchangelogs.com",
     },
     {
       "@type": "ListItem",
       position: 2,
       name: "Values",
-      item: "https://jailbreakchangelogs.xyz/values",
+      item: "https://jailbreakchangelogs.com/values",
     },
     {
       "@type": "ListItem",
       position: 3,
       name: item.type.charAt(0).toUpperCase() + item.type.slice(1),
-      item: `https://jailbreakchangelogs.xyz/values?filterSort=name-${decodeURIComponent(itemType).replace(/\s+/g, "-")}s`,
+      item: `https://jailbreakchangelogs.com/values?filterSort=name-${decodeURIComponent(itemType).replace(/\s+/g, "-")}s`,
     },
     {
       "@type": "ListItem",
       position: 4,
       name: item.name,
-      item: `https://jailbreakchangelogs.xyz/item/${itemType}/${itemName}`,
+      item: `https://jailbreakchangelogs.com/item/${itemType}/${itemName}`,
     },
   ];
 
@@ -164,7 +164,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const itemType = decodeURIComponent(type);
     if (!item) {
       return {
-        metadataBase: new URL("https://jailbreakchangelogs.xyz"),
+        metadataBase: new URL("https://jailbreakchangelogs.com"),
         title: "Item Not Found",
         description: "The requested item could not be found.",
         alternates: {
@@ -174,7 +174,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
           title: "Item Not Found",
           description: "The requested item could not be found.",
           type: "website",
-          url: "https://jailbreakchangelogs.xyz/values",
+          url: "https://jailbreakchangelogs.com/values",
           images: [
             {
               url: FALLBACK_IMAGE,
@@ -196,7 +196,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const finalImageUrl = imageUrl || FALLBACK_IMAGE;
     const isFallbackImage = finalImageUrl === FALLBACK_IMAGE;
     return {
-      metadataBase: new URL("https://jailbreakchangelogs.xyz"),
+      metadataBase: new URL("https://jailbreakchangelogs.com"),
       title: `${item.name} (${item.type})`,
       description:
         item.description && item.description !== "N/A"
@@ -212,7 +212,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
             ? `${item.description.slice(0, 155)}...`
             : `View details about ${item.name}, a ${item.type} in Jailbreak.`,
         type: "website",
-        url: `https://jailbreakchangelogs.xyz/item/${itemType}/${itemName}`,
+        url: `https://jailbreakchangelogs.com/item/${itemType}/${itemName}`,
         siteName: "Jailbreak Changelogs",
         images: [
           {
@@ -238,7 +238,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const itemName = decodeURIComponent(name);
     const itemType = decodeURIComponent(type);
     return {
-      metadataBase: new URL("https://jailbreakchangelogs.xyz"),
+      metadataBase: new URL("https://jailbreakchangelogs.com"),
       title: "Error",
       description: "An error occurred while loading the item details.",
       alternates: {
@@ -248,7 +248,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         title: "Error | Jailbreak Changelogs",
         description: "An error occurred while loading the item details.",
         type: "website",
-        url: "https://jailbreakchangelogs.xyz/values",
+        url: "https://jailbreakchangelogs.com/values",
         siteName: "Jailbreak Changelogs",
         images: [
           {

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://jailbreakchangelogs.xyz"),
+  metadataBase: new URL("https://jailbreakchangelogs.com"),
   title: "Privacy Policy",
   description:
     "Learn about how we protect your privacy and handle your data at Jailbreak Changelogs. Our privacy policy outlines our commitment to transparency and data protection.",
@@ -22,7 +22,7 @@ export const metadata: Metadata = {
     ],
     type: "website",
     siteName: "Jailbreak Changelogs",
-    url: "https://jailbreakchangelogs.xyz/privacy",
+    url: "https://jailbreakchangelogs.com/privacy",
   },
   twitter: {
     card: "summary_large_image",

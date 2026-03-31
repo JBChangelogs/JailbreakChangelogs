@@ -1,7 +1,7 @@
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://jailbreakchangelogs.xyz"),
+  metadataBase: new URL("https://jailbreakchangelogs.com"),
   title: "Will I Make It to Level 10?",
   description:
     "Calculate your chances of reaching level 10 in the current Jailbreak season. Track your XP progress and see if you'll make it to the top rewards!",
@@ -22,7 +22,7 @@ export const metadata: Metadata = {
     ],
     type: "website",
     siteName: "Jailbreak Changelogs",
-    url: "https://jailbreakchangelogs.xyz/seasons/will-i-make-it",
+    url: "https://jailbreakchangelogs.com/seasons/will-i-make-it",
   },
   twitter: {
     card: "summary_large_image",

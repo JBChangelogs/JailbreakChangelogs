@@ -8,7 +8,7 @@ export async function generateMetadata(): Promise<Metadata> {
   }
 
   return {
-    metadataBase: new URL("https://jailbreakchangelogs.xyz"),
+    metadataBase: new URL("https://jailbreakchangelogs.com"),
     title: "Money Leaderboard",
     description:
       "View the top players in Roblox Jailbreak ranked by their total money. See who has the most cash, find your rank, and track the wealthiest players in the game.",
@@ -29,7 +29,7 @@ export async function generateMetadata(): Promise<Metadata> {
       ],
       type: "website",
       siteName: "Jailbreak Changelogs",
-      url: "https://jailbreakchangelogs.xyz/leaderboard/money",
+      url: "https://jailbreakchangelogs.com/leaderboard/money",
     },
     twitter: {
       card: "summary_large_image",

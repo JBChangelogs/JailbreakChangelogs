@@ -467,7 +467,7 @@ export default function ItemChangelogs({
                         <DefaultAvatar />
                         {voter.avatar && (
                           <Image
-                            src={`http://proxy.jailbreakchangelogs.xyz/?destination=${encodeURIComponent(voter.avatar)}`}
+                            src={`http://proxy.jailbreakchangelogs.com/?destination=${encodeURIComponent(voter.avatar)}`}
                             alt={voter.name}
                             fill
                             className="object-cover"
@@ -659,7 +659,7 @@ export default function ItemChangelogs({
                                 <div className="relative h-8 w-8 shrink-0 overflow-hidden rounded-full">
                                   <DefaultAvatar />
                                   <Image
-                                    src={`http://proxy.jailbreakchangelogs.xyz/?destination=${encodeURIComponent(`https://cdn.discordapp.com/avatars/${change.suggestion_data.user_id}/${change.suggestion_data.metadata.avatar_hash}?size=128`)}`}
+                                    src={`http://proxy.jailbreakchangelogs.com/?destination=${encodeURIComponent(`https://cdn.discordapp.com/avatars/${change.suggestion_data.user_id}/${change.suggestion_data.metadata.avatar_hash}?size=128`)}`}
                                     alt={`${change.suggestion_data.suggestor_name}'s avatar`}
                                     fill
                                     className="object-cover"

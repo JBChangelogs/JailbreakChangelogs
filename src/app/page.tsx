@@ -287,7 +287,7 @@ export default async function Home() {
                   className="border-white/55 bg-black/50 text-white shadow-[0_2px_12px_rgba(0,0,0,0.4)] hover:bg-black/60 hover:text-white"
                 >
                   <a
-                    href="https://discord.jailbreakchangelogs.xyz"
+                    href="https://discord.jailbreakchangelogs.com"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-2"

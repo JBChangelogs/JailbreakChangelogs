@@ -200,7 +200,7 @@ export default function Footer({ githubUrl, versionInfo }: FooterProps) {
           <Tooltip>
             <TooltipTrigger asChild>
               <a
-                href="https://discord.jailbreakchangelogs.xyz"
+                href="https://discord.jailbreakchangelogs.com"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-link hover:bg-quaternary-bg hover:text-link-hover rounded-full p-2 transition-colors duration-200"

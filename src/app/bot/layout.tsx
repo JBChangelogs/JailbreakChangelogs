@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://jailbreakchangelogs.xyz"),
+  metadataBase: new URL("https://jailbreakchangelogs.com"),
   title: "Discord Bot",
   description:
     "Get instant updates about Jailbreak seasons, changelogs, and items directly in your Discord server. Track seasons, view changelogs, and manage trades with our powerful Discord bot.",
@@ -12,7 +12,7 @@ export const metadata: Metadata = {
     title: "Discord Bot",
     description:
       "Get instant updates about Jailbreak seasons, changelogs, and items directly in your Discord server. Track seasons, view changelogs, and manage trades with our powerful Discord bot.",
-    url: "https://jailbreakchangelogs.xyz/bot",
+    url: "https://jailbreakchangelogs.com/bot",
     siteName: "Jailbreak Changelogs",
     images: [
       {

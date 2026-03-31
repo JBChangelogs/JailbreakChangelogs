@@ -120,7 +120,7 @@ export default function Maintenance() {
                 </svg>
               </a>
               <a
-                href="https://discord.jailbreakchangelogs.xyz"
+                href="https://discord.jailbreakchangelogs.com"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-secondary-text hover:bg-quaternary-bg hover:text-link-hover rounded-full p-3 transition-colors duration-200"

@@ -1,6 +1,6 @@
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/jailbreakchangelogs)
 [![License](https://img.shields.io/badge/License-PolyForm%20NC%201.0.0-blue.svg)](./LICENSE)
-[![Discord](https://img.shields.io/discord/1286064050135896064?logo=discord&logoColor=white&label=discord&color=4d3dff)](https://discord.jailbreakchangelogs.xyz)
+[![Discord](https://img.shields.io/discord/1286064050135896064?logo=discord&logoColor=white&label=discord&color=4d3dff)](https://discord.jailbreakchangelogs.com)
 [![Uptime Kuma Badge](https://uptime.jailbreakchangelogs.xyz/api/badge/8/status)](https://status.jailbreakchangelogs.xyz)
 
 [![Dependabot Updates](https://github.com/JBChangelogs/JailbreakChangelogs/actions/workflows/dependabot/dependabot-updates/badge.svg?branch=main)](https://github.com/JBChangelogs/JailbreakChangelogs/actions/workflows/dependabot/dependabot-updates)
@@ -97,7 +97,7 @@ Visit https://jailbreakchangelogs.com/faq
   - [@badcc](https://x.com/badccvoid)
   - [@badimo](https://x.com/badimo) (Official Jailbreak account)
 
-- Join our [Discord community](https://discord.jailbreakchangelogs.xyz/) to discuss changes and connect with other players or make feature requests.
+- Join our [Discord community](https://discord.jailbreakchangelogs.com/) to discuss changes and connect with other players or make feature requests.
 - For support, reach out to [support@jailbreakchangelogs.com](mailto:support@jailbreakchangelogs.com)
 
 ## License
