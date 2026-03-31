@@ -198,7 +198,7 @@ export function ChatEventBody({
   ...props
 }: ChatEventBodyProps) {
   return (
-    <div className={cn("flex flex-1 flex-col", className)} {...props}>
+    <div className={cn("flex min-w-0 flex-1 flex-col", className)} {...props}>
       {children}
     </div>
   );
@@ -221,7 +221,13 @@ export function ChatEventContent({
   ...props
 }: ChatEventContentProps) {
   return (
-    <div className={cn("text-sm @md/chat:text-base", className)} {...props}>
+    <div
+      className={cn(
+        "text-sm break-words whitespace-pre-wrap @md/chat:text-base",
+        className,
+      )}
+      {...props}
+    >
       {children}
     </div>
   );

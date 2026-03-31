@@ -119,6 +119,8 @@ type ConversationSummary = {
   lastMessage?: Message;
 };
 
+const MESSAGE_CHAR_LIMIT = 350;
+
 function getLatestMessage(messages: Message[]): Message | undefined {
   let latest: Message | undefined;
   let latestTimestamp = -Infinity;
@@ -732,6 +734,13 @@ export default function MessagesInbox() {
 
   const selectedUser = selectedConversation?.user ?? null;
   const currentUserId = currentUser ? asId(currentUser.id) : null;
+
+  const overMessageLimit = useMemo(() => {
+    const trimmed = draftMessage.trim();
+    if (!trimmed) return 0;
+    const sanitized = sanitizeText(trimmed);
+    return Math.max(0, sanitized.length - MESSAGE_CHAR_LIMIT);
+  }, [draftMessage]);
 
   const offerAcceptedEvents = useMemo(() => {
     const parsed = messages
@@ -1906,6 +1915,10 @@ export default function MessagesInbox() {
 
     const trimmedMessage = sanitizeText(draftMessage.trim());
     if (!trimmedMessage || isSending) return;
+    if (trimmedMessage.length > MESSAGE_CHAR_LIMIT) {
+      toast.error(`Message too long (max ${MESSAGE_CHAR_LIMIT} characters).`);
+      return;
+    }
 
     const optimisticId = createClientMessageId();
     const optimisticMessage: Message = {
@@ -2402,8 +2415,8 @@ export default function MessagesInbox() {
 
   return (
     <div className="h-[calc(100dvh-5rem)] overflow-hidden px-4 pb-4">
-      <div className="mx-auto flex h-full min-h-0 max-w-7xl flex-col">
-        <Breadcrumb />
+      <div className="flex h-full min-h-0 flex-col">
+        <Breadcrumb containerClassName="py-4" />
 
         <div className="border-border-card bg-secondary-bg mt-4 grid min-h-0 flex-1 grid-cols-1 overflow-hidden rounded-lg border shadow-md lg:grid-cols-[320px_1fr]">
           <aside
@@ -3072,6 +3085,94 @@ export default function MessagesInbox() {
                       const showDaySeparator =
                         !!currentDayKey && currentDayKey !== previousDayKey;
                       const domId = getMessageDomId(message);
+                      const previousMessage = messages[index - 1];
+                      const isGroupedWithPrevious = (() => {
+                        if (showDaySeparator) return false;
+                        if (!previousMessage) return false;
+                        if (message.parentId) return false;
+                        if (previousMessage.type === "system") return false;
+                        if (
+                          typeof message.createdAt !== "number" ||
+                          typeof previousMessage.createdAt !== "number"
+                        ) {
+                          return false;
+                        }
+                        if (asId(previousMessage.senderId) !== senderId) {
+                          return false;
+                        }
+                        const minute = Math.floor(message.createdAt / 60_000);
+                        const prevMinute = Math.floor(
+                          previousMessage.createdAt / 60_000,
+                        );
+                        return minute === prevMinute;
+                      })();
+
+                      const messageMenu = (
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="text-primary-text hover:bg-quaternary-bg h-8 w-8 rounded-lg p-0 opacity-100 transition-all duration-200 disabled:opacity-100 data-[state=open]:opacity-100 lg:opacity-0 lg:group-hover:opacity-100 lg:disabled:opacity-0 lg:group-hover:disabled:opacity-100"
+                              disabled={
+                                isSending ||
+                                Boolean(deletingMessageId) ||
+                                message.status === "pending"
+                              }
+                            >
+                              <Icon
+                                icon="heroicons:ellipsis-horizontal"
+                                className="h-4 w-4"
+                              />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem
+                              onClick={() => {
+                                setReplyingToMessage(message);
+                                setDraftMessage("");
+                              }}
+                            >
+                              <Icon
+                                icon="heroicons-outline:reply"
+                                className="mr-2 h-4 w-4"
+                              />
+                              Reply
+                            </DropdownMenuItem>
+                            {isOwnMessage && (
+                              <>
+                                <DropdownMenuItem
+                                  onClick={() => {
+                                    setEditingMessageId(message.id);
+                                    setEditContent(message.content);
+                                  }}
+                                >
+                                  <Icon
+                                    icon="heroicons-outline:pencil"
+                                    className="mr-2 h-4 w-4"
+                                  />
+                                  Edit Message
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                  onClick={(e) =>
+                                    void handleDeleteMessage(
+                                      message.id,
+                                      e.shiftKey,
+                                    )
+                                  }
+                                  className="text-button-danger focus:bg-button-danger/10 focus:text-button-danger"
+                                >
+                                  <Icon
+                                    icon="heroicons-outline:trash"
+                                    className="mr-2 h-4 w-4"
+                                  />
+                                  Delete Message
+                                </DropdownMenuItem>
+                              </>
+                            )}
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      );
 
                       return (
                         <div
@@ -3093,7 +3194,7 @@ export default function MessagesInbox() {
                             )}
                           <ChatEvent
                             className={cn(
-                              "group-hover:bg-tertiary-bg/30 w-full flex-col items-start rounded-md py-1 transition-colors",
+                              "group-hover:bg-tertiary-bg/30 relative w-full flex-col items-start rounded-md py-1 transition-colors",
                               message.parentId && "mt-1",
                             )}
                           >
@@ -3201,119 +3302,79 @@ export default function MessagesInbox() {
                               </div>
                             )}
                             <div className="flex w-full items-start gap-2">
-                              <ChatEventAddon>
-                                <Link
-                                  href={`/users/${sender.id}`}
-                                  prefetch={false}
-                                  className="cursor-pointer"
-                                  aria-label={`View ${getDisplayName(sender)} profile`}
-                                >
-                                  <UserAvatar
-                                    userId={sender.id}
-                                    avatarHash={sender.avatar}
-                                    username={sender.username}
-                                    custom_avatar={sender.custom_avatar}
-                                    size={7}
-                                    showBadge={false}
-                                    settings={sender.settings}
-                                    premiumType={sender.premiumtype}
-                                  />
-                                </Link>
-                              </ChatEventAddon>
-                              <ChatEventBody>
-                                <ChatEventTitle>
-                                  {isOwnMessage ? (
-                                    <Link
-                                      href={`/users/${sender.id}`}
-                                      prefetch={false}
-                                      className="text-primary-text hover:text-link cursor-pointer text-xs font-medium transition-colors sm:text-sm"
-                                    >
-                                      You
-                                    </Link>
-                                  ) : (
-                                    <Link
-                                      href={`/users/${sender.id}`}
-                                      prefetch={false}
-                                      className="text-primary-text hover:text-link cursor-pointer text-xs font-medium transition-colors sm:text-sm"
-                                    >
-                                      {getDisplayName(selectedUser)}
-                                    </Link>
-                                  )}
-                                  {typeof message.createdAt === "number" && (
+                              <ChatEventAddon
+                                className={cn(
+                                  isGroupedWithPrevious
+                                    ? "justify-end pr-1"
+                                    : undefined,
+                                )}
+                              >
+                                {isGroupedWithPrevious ? (
+                                  typeof message.createdAt === "number" ? (
                                     <ChatEventTime
                                       timestamp={message.createdAt}
-                                      format="discord"
-                                      className="text-secondary-text text-xs"
+                                      format="time"
+                                      className="text-secondary-text invisible text-[10px] group-hover:visible"
                                     />
-                                  )}
-                                  {!editingMessageId && (
-                                    <div className="ml-auto flex items-center gap-1">
-                                      <DropdownMenu>
-                                        <DropdownMenuTrigger asChild>
-                                          <Button
-                                            variant="ghost"
-                                            size="sm"
-                                            className="text-primary-text hover:bg-quaternary-bg h-8 w-8 rounded-lg p-0 opacity-100 transition-all duration-200 data-[state=open]:opacity-100 lg:opacity-0 lg:group-hover:opacity-100"
-                                          >
-                                            <Icon
-                                              icon="heroicons:ellipsis-horizontal"
-                                              className="h-4 w-4"
-                                            />
-                                          </Button>
-                                        </DropdownMenuTrigger>
-                                        <DropdownMenuContent align="end">
-                                          <DropdownMenuItem
-                                            onClick={() => {
-                                              setReplyingToMessage(message);
-                                              setDraftMessage("");
-                                            }}
-                                          >
-                                            <Icon
-                                              icon="heroicons-outline:reply"
-                                              className="mr-2 h-4 w-4"
-                                            />
-                                            Reply
-                                          </DropdownMenuItem>
-                                          {isOwnMessage && (
-                                            <>
-                                              <DropdownMenuItem
-                                                onClick={() => {
-                                                  setEditingMessageId(
-                                                    message.id,
-                                                  );
-                                                  setEditContent(
-                                                    message.content,
-                                                  );
-                                                }}
-                                              >
-                                                <Icon
-                                                  icon="heroicons-outline:pencil"
-                                                  className="mr-2 h-4 w-4"
-                                                />
-                                                Edit Message
-                                              </DropdownMenuItem>
-                                              <DropdownMenuItem
-                                                onClick={(e) =>
-                                                  void handleDeleteMessage(
-                                                    message.id,
-                                                    e.shiftKey,
-                                                  )
-                                                }
-                                                className="text-button-danger focus:bg-button-danger/10 focus:text-button-danger"
-                                              >
-                                                <Icon
-                                                  icon="heroicons-outline:trash"
-                                                  className="mr-2 h-4 w-4"
-                                                />
-                                                Delete Message
-                                              </DropdownMenuItem>
-                                            </>
-                                          )}
-                                        </DropdownMenuContent>
-                                      </DropdownMenu>
-                                    </div>
-                                  )}
-                                </ChatEventTitle>
+                                  ) : null
+                                ) : (
+                                  <Link
+                                    href={`/users/${sender.id}`}
+                                    prefetch={false}
+                                    className="cursor-pointer"
+                                    aria-label={`View ${getDisplayName(sender)} profile`}
+                                  >
+                                    <UserAvatar
+                                      userId={sender.id}
+                                      avatarHash={sender.avatar}
+                                      username={sender.username}
+                                      custom_avatar={sender.custom_avatar}
+                                      size={7}
+                                      showBadge={false}
+                                      settings={sender.settings}
+                                      premiumType={sender.premiumtype}
+                                    />
+                                  </Link>
+                                )}
+                              </ChatEventAddon>
+                              <ChatEventBody>
+                                {!isGroupedWithPrevious ? (
+                                  <ChatEventTitle>
+                                    {isOwnMessage ? (
+                                      <Link
+                                        href={`/users/${sender.id}`}
+                                        prefetch={false}
+                                        className="text-primary-text hover:text-link cursor-pointer text-xs font-medium transition-colors sm:text-sm"
+                                      >
+                                        You
+                                      </Link>
+                                    ) : (
+                                      <Link
+                                        href={`/users/${sender.id}`}
+                                        prefetch={false}
+                                        className="text-primary-text hover:text-link cursor-pointer text-xs font-medium transition-colors sm:text-sm"
+                                      >
+                                        {getDisplayName(selectedUser)}
+                                      </Link>
+                                    )}
+                                    {typeof message.createdAt === "number" && (
+                                      <ChatEventTime
+                                        timestamp={message.createdAt}
+                                        format="discord"
+                                        className="text-secondary-text text-xs"
+                                      />
+                                    )}
+                                    {!editingMessageId && (
+                                      <div className="ml-auto flex items-center gap-1">
+                                        {messageMenu}
+                                      </div>
+                                    )}
+                                  </ChatEventTitle>
+                                ) : !editingMessageId ? (
+                                  <div className="absolute top-0 right-1 z-10">
+                                    {messageMenu}
+                                  </div>
+                                ) : null}
                                 {editingMessageId === message.id ? (
                                   <div className="mt-2 space-y-3">
                                     <div className="space-y-2">
@@ -3380,11 +3441,30 @@ export default function MessagesInbox() {
                                       </div>
                                       <div className="text-secondary-text hidden text-[11px] lg:block">
                                         Esc to{" "}
-                                        <span className="text-link">
+                                        <button
+                                          type="button"
+                                          className="text-link cursor-pointer hover:underline disabled:cursor-not-allowed disabled:opacity-60"
+                                          onClick={() => {
+                                            setEditingMessageId(null);
+                                            setEditContent("");
+                                          }}
+                                          disabled={isSending}
+                                        >
                                           cancel
-                                        </span>{" "}
+                                        </button>{" "}
                                         • Enter to{" "}
-                                        <span className="text-link">save</span>
+                                        <button
+                                          type="button"
+                                          className="text-link cursor-pointer hover:underline disabled:cursor-not-allowed disabled:opacity-60"
+                                          onClick={() =>
+                                            void handleEditMessage(message.id)
+                                          }
+                                          disabled={
+                                            isSending || !editContent.trim()
+                                          }
+                                        >
+                                          save
+                                        </button>
                                       </div>
                                     </div>
                                   </div>
@@ -3454,7 +3534,7 @@ export default function MessagesInbox() {
                   )}
                   <div
                     className={cn(
-                      "bg-primary-bg border-border-card flex w-full items-center gap-2 rounded-md border px-1 py-1 shadow-none",
+                      "border-border-card bg-form-input text-primary-text focus-within:border-button-info flex w-full items-center gap-2 rounded-md border px-1 py-1 shadow-none",
                       replyingToMessage && "rounded-t-none border-t-0",
                     )}
                   >
@@ -3464,14 +3544,26 @@ export default function MessagesInbox() {
                       onSubmit={handleSendMessage}
                       placeholder={messagePlaceholder}
                       maxLength={1000}
-                      className="text-secondary-text placeholder-secondary-text border-none bg-transparent shadow-none focus-visible:ring-0"
+                      showResizeHandle
+                      rightOverlay={
+                        overMessageLimit > 0 ? (
+                          <span className="text-xs font-medium text-red-400/90 tabular-nums">
+                            -{overMessageLimit}
+                          </span>
+                        ) : null
+                      }
+                      className="text-primary-text placeholder-secondary-text"
                     />
                     <ChatToolbarAddon align="inline-end">
                       <ChatToolbarButton
                         onClick={() => void handleSendMessage()}
                         aria-label="Send message"
                         className="hover:bg-secondary-bg/50 transition-colors"
-                        disabled={!draftMessage.trim() || isSending}
+                        disabled={
+                          !draftMessage.trim() ||
+                          isSending ||
+                          overMessageLimit > 0
+                        }
                       >
                         {isSending ? (
                           <svg

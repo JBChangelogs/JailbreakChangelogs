@@ -52,7 +52,7 @@ export const ChatMessages = forwardRef<HTMLDivElement, ChatMessagesProps>(
       <div
         ref={ref}
         className={cn(
-          "flex flex-1 flex-col-reverse overflow-auto py-2",
+          "flex flex-1 flex-col-reverse overflow-x-hidden overflow-y-auto py-2",
           className,
         )}
         {...props}

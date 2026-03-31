@@ -88,6 +88,12 @@ export interface ChatToolbarTextareaProps extends React.ComponentProps<
 > {
   /** Called when the user presses Enter (without Shift). Use this to trigger message sending. */
   onSubmit?: () => void;
+  /** Optional overlay rendered inside the textarea container (right side). */
+  rightOverlay?: React.ReactNode;
+  /** Optional className applied to the overlay wrapper. */
+  rightOverlayClassName?: string;
+  /** Shows a top drag handle to resize the textarea vertically. */
+  showResizeHandle?: boolean;
 }
 
 /**
@@ -116,9 +122,31 @@ export interface ChatToolbarTextareaProps extends React.ComponentProps<
 export function ChatToolbarTextarea({
   className,
   onSubmit,
+  rightOverlay,
+  rightOverlayClassName,
+  showResizeHandle = false,
   onKeyDown,
   ...props
 }: ChatToolbarTextareaProps) {
+  const textareaRef = React.useRef<HTMLTextAreaElement | null>(null);
+  const [manualHeight, setManualHeight] = React.useState<number | null>(null);
+  const baseHeightRef = React.useRef(40);
+  const resizeStateRef = React.useRef<{
+    startY: number;
+    startHeight: number;
+  } | null>(null);
+
+  React.useLayoutEffect(() => {
+    if (!showResizeHandle) return;
+    if (manualHeight !== null) return;
+    const textarea = textareaRef.current;
+    if (!textarea) return;
+    baseHeightRef.current = Math.max(
+      40,
+      Math.ceil(textarea.getBoundingClientRect().height),
+    );
+  }, [manualHeight, showResizeHandle]);
+
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e[NEWLINE_MODIFIER_KEY]) {
       e.preventDefault();
@@ -127,20 +155,95 @@ export function ChatToolbarTextarea({
     onKeyDown?.(e);
   };
 
+  const clampHeight = (height: number) => {
+    const minHeight = baseHeightRef.current;
+    const maxHeight =
+      typeof window !== "undefined"
+        ? Math.max(minHeight, Math.floor(window.innerHeight * 0.6))
+        : 480;
+    return Math.min(maxHeight, Math.max(minHeight, height));
+  };
+
+  const handleResizePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!showResizeHandle) return;
+    if (e.pointerType === "mouse" && e.button !== 0) return;
+
+    const textarea = textareaRef.current;
+    const currentHeight =
+      manualHeight ??
+      (textarea ? Math.ceil(textarea.getBoundingClientRect().height) : 40);
+    resizeStateRef.current = {
+      startY: e.clientY,
+      startHeight: currentHeight,
+    };
+
+    e.currentTarget.setPointerCapture(e.pointerId);
+    e.preventDefault();
+  };
+
+  const handleResizePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    const state = resizeStateRef.current;
+    if (!state) return;
+    const delta = state.startY - e.clientY;
+    setManualHeight(clampHeight(state.startHeight + delta));
+    e.preventDefault();
+  };
+
+  const handleResizePointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!resizeStateRef.current) return;
+    resizeStateRef.current = null;
+    e.currentTarget.releasePointerCapture(e.pointerId);
+    e.preventDefault();
+  };
+
   return (
-    <div className="order-2 grid min-w-0 flex-1">
-      <Textarea
-        id="toolbar-input"
-        placeholder="Type your message..."
-        className={cn(
-          "h-fit max-h-30 min-h-10 px-1 @md/chat:text-base",
-          "resize-none border-none shadow-none placeholder:whitespace-nowrap focus-visible:border-none focus-visible:ring-0",
-          className,
-        )}
-        rows={1}
-        onKeyDown={handleKeyDown}
-        {...props}
-      />
+    <div className="relative order-2 min-w-0 flex-1">
+      {showResizeHandle ? (
+        <div
+          className="pointer-events-auto absolute -top-3 right-0 left-0 z-20 hidden h-4 items-center justify-center lg:flex"
+          onPointerDown={handleResizePointerDown}
+          onPointerMove={handleResizePointerMove}
+          onPointerUp={handleResizePointerUp}
+          onDoubleClick={() => setManualHeight(null)}
+          role="separator"
+          aria-orientation="horizontal"
+        >
+          <div className="bg-border-card/80 hover:bg-border-card h-1 w-10 cursor-ns-resize rounded-full transition-colors" />
+        </div>
+      ) : null}
+
+      <div className="relative grid">
+        <Textarea
+          id="toolbar-input"
+          placeholder="Type your message..."
+          ref={textareaRef}
+          className={cn(
+            "h-fit max-h-[60vh] min-h-10 @md/chat:text-base",
+            "resize-none overflow-y-auto bg-transparent p-2 text-sm text-inherit shadow-none",
+            "border-none placeholder:whitespace-nowrap focus-visible:border-none focus-visible:ring-0 focus-visible:outline-none",
+            rightOverlay ? "pr-16" : "",
+            className,
+          )}
+          rows={1}
+          style={
+            manualHeight
+              ? ({ height: manualHeight } satisfies React.CSSProperties)
+              : undefined
+          }
+          onKeyDown={handleKeyDown}
+          {...props}
+        />
+        {rightOverlay ? (
+          <div
+            className={cn(
+              "pointer-events-none absolute top-1/2 right-4 -translate-y-1/2",
+              rightOverlayClassName,
+            )}
+          >
+            {rightOverlay}
+          </div>
+        ) : null}
+      </div>
     </div>
   );
 }
