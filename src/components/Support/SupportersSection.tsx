@@ -72,7 +72,7 @@ export default function SupportersSection({
   supporters,
 }: SupportersSectionProps) {
   const BADGE_BASE_URL =
-    "https://assets.jailbreakchangelogs.xyz/assets/website_icons";
+    "https://assets.jailbreakchangelogs.com/assets/website_icons";
 
   const [sampledTiers, setSampledTiers] = useState<{
     tier3Supporters: Supporter[];

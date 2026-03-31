@@ -284,7 +284,7 @@ export default function UserProfileSection({
                     className="text-primary-text bg-tertiary-bg/40 border-border-card hover:bg-quaternary-bg/60 inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium shadow-sm transition-all"
                   >
                     <Image
-                      src="https://assets.jailbreakchangelogs.xyz/assets/logos/JBCL_Short_Transparent.webp"
+                      src="https://assets.jailbreakchangelogs.com/assets/logos/JBCL_Short_Transparent.webp"
                       alt="JBCL Logo"
                       width={16}
                       height={16}

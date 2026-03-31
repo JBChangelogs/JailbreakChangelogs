@@ -60,7 +60,7 @@ export async function generateMetadata(): Promise<Metadata> {
         "Your all-in-one Roblox Jailbreak platform for changelogs and game update tracking, values, trading, inventory lookups, OG item tracking, dupe detection, and more.",
       images: [
         {
-          url: "https://assets.jailbreakchangelogs.xyz/assets/logos/embeds/JBCL_Embed_Graphic.png",
+          url: "https://assets.jailbreakchangelogs.com/assets/logos/embeds/JBCL_Embed_Graphic.png",
           width: 2400,
           height: 1260,
           alt: "Jailbreak Changelogs Banner",
@@ -77,7 +77,7 @@ export async function generateMetadata(): Promise<Metadata> {
       description:
         "Your all-in-one Roblox Jailbreak platform for changelogs and game update tracking, values, trading, inventory lookups, OG item tracking, dupe detection, and more.",
       images: [
-        "https://assets.jailbreakchangelogs.xyz/assets/logos/embeds/JBCL_Embed_Graphic.png",
+        "https://assets.jailbreakchangelogs.com/assets/logos/embeds/JBCL_Embed_Graphic.png",
       ],
     },
   };
@@ -229,10 +229,10 @@ export default async function RootLayout({
     <html lang="en" className={`${GeistSans.variable} ${GeistMono.variable}`}>
       <head>
         {/* Preconnect to external asset domains */}
-        <link rel="preconnect" href="https://assets.jailbreakchangelogs.xyz" />
+        <link rel="preconnect" href="https://assets.jailbreakchangelogs.com" />
         <link
           rel="dns-prefetch"
-          href="https://assets.jailbreakchangelogs.xyz"
+          href="https://assets.jailbreakchangelogs.com"
         />
         {/* Umami Analytics */}
         {umamiWebsiteId ? (

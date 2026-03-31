@@ -111,7 +111,7 @@ export default function ContributorsClient({
       role: "Contributor",
       username: "Trading Core",
       avatar:
-        "https://assets.jailbreakchangelogs.xyz/assets/contributors/TradingCore_Bg_Big.webp",
+        "https://assets.jailbreakchangelogs.com/assets/contributors/TradingCore_Bg_Big.webp",
       link: "https://discord.com/invite/jailbreaktrading",
       external: true,
     },

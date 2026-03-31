@@ -36,7 +36,7 @@ export async function generateMetadata({
         url: `https://jailbreakchangelogs.com/calculators/${name}`,
         images: [
           {
-            url: "https://assets.jailbreakchangelogs.xyz/assets/logos/embeds/JBCL_Embed_Graphic.png",
+            url: "https://assets.jailbreakchangelogs.com/assets/logos/embeds/JBCL_Embed_Graphic.png",
             width: 2400,
             height: 1260,
             alt: "Jailbreak Changelogs Banner",
@@ -49,7 +49,7 @@ export async function generateMetadata({
         description:
           "Calculate robberies needed to reach the next Hyperchrome level in Roblox Jailbreak.",
         images: [
-          "https://assets.jailbreakchangelogs.xyz/assets/logos/embeds/JBCL_Embed_Graphic.png",
+          "https://assets.jailbreakchangelogs.com/assets/logos/embeds/JBCL_Embed_Graphic.png",
         ],
       },
     };

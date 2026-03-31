@@ -12,17 +12,12 @@ export interface NotificationUrlInfo {
 const INTERNAL_HOSTNAMES = new Set([
   "jailbreakchangelogs.com",
   "www.jailbreakchangelogs.com",
-  // Legacy domain kept for old notifications
-  "jailbreakchangelogs.xyz",
-  "www.jailbreakchangelogs.xyz",
 ]);
 
 function isJailbreakChangelogsHostname(hostname: string) {
   return (
     hostname === "jailbreakchangelogs.com" ||
-    hostname.endsWith(".jailbreakchangelogs.com") ||
-    hostname === "jailbreakchangelogs.xyz" ||
-    hostname.endsWith(".jailbreakchangelogs.xyz")
+    hostname.endsWith(".jailbreakchangelogs.com")
   );
 }
 /**

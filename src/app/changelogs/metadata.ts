@@ -11,7 +11,7 @@ export const defaultMetadata: Metadata = {
       "Track every update, feature release, and game modification in Jailbreak's history. Browse through our comprehensive collection of Roblox Jailbreak changelogs.",
     images: [
       {
-        url: "https://assets.jailbreakchangelogs.xyz/assets/logos/embeds/JBCL_Embed_Graphic.png",
+        url: "https://assets.jailbreakchangelogs.com/assets/logos/embeds/JBCL_Embed_Graphic.png",
         width: 2400,
         height: 1260,
         alt: "Jailbreak Changelogs Banner",
@@ -27,7 +27,7 @@ export const defaultMetadata: Metadata = {
     description:
       "Track every update, feature release, and game modification in Jailbreak's history. Browse through our comprehensive collection of Roblox Jailbreak changelogs.",
     images: [
-      "https://assets.jailbreakchangelogs.xyz/assets/logos/embeds/JBCL_Embed_Graphic.png",
+      "https://assets.jailbreakchangelogs.com/assets/logos/embeds/JBCL_Embed_Graphic.png",
     ],
   },
 };

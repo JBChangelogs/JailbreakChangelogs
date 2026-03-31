@@ -30,7 +30,7 @@ export default function FeatureMaintenance({
           }}
         >
           <Image
-            src="https://assets.jailbreakchangelogs.xyz/assets/logos/JBCL_Short_Transparent.webp"
+            src="https://assets.jailbreakchangelogs.com/assets/logos/JBCL_Short_Transparent.webp"
             alt="Jailbreak Changelogs Logo"
             width={140}
             height={140}

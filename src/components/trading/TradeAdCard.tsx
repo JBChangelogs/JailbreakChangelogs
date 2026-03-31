@@ -88,7 +88,7 @@ export const TradeAdCard: React.FC<TradeAdCardProps> = ({
   const supporterTier = isSupporter ? premiumType : null;
 
   const BADGE_BASE_URL =
-    "https://assets.jailbreakchangelogs.xyz/assets/website_icons";
+    "https://assets.jailbreakchangelogs.com/assets/website_icons";
   const supporterIcons = {
     1: `${BADGE_BASE_URL}/jbcl_supporter_1.svg`,
     2: `${BADGE_BASE_URL}/jbcl_supporter_2.svg`,

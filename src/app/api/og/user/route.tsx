@@ -53,7 +53,7 @@ const BACKGROUND_COUNT = 54;
 const BACKGROUNDS = Array.from(
   { length: BACKGROUND_COUNT },
   (_, i) =>
-    `https://assets.jailbreakchangelogs.xyz/assets/backgrounds/png/background${i + 1}.png`,
+    `https://assets.jailbreakchangelogs.com/assets/backgrounds/png/background${i + 1}.png`,
 );
 
 /**
@@ -517,7 +517,7 @@ export async function GET(request: Request) {
           >
             Visit{" "}
             <span style={{ color: "#2462cd", fontWeight: "bold" }}>
-              jailbreakchangelogs.xyz
+              jailbreakchangelogs.com
             </span>
           </p>
         </div>

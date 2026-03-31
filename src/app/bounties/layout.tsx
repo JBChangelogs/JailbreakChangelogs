@@ -13,7 +13,7 @@ export const metadata: Metadata = {
       "Track high-bounty players in Roblox Jailbreak. Get real-time updates on players with the highest bounties across servers.",
     images: [
       {
-        url: "https://assets.jailbreakchangelogs.xyz/assets/logos/embeds/JBCL_Embed_Graphic.png",
+        url: "https://assets.jailbreakchangelogs.com/assets/logos/embeds/JBCL_Embed_Graphic.png",
         width: 2400,
         height: 1260,
         alt: "Jailbreak Changelogs Banner",
@@ -29,7 +29,7 @@ export const metadata: Metadata = {
     description:
       "Track high-bounty players in Roblox Jailbreak. Get real-time updates on players with the highest bounties across servers.",
     images: [
-      "https://assets.jailbreakchangelogs.xyz/assets/logos/embeds/JBCL_Embed_Graphic.png",
+      "https://assets.jailbreakchangelogs.com/assets/logos/embeds/JBCL_Embed_Graphic.png",
     ],
   },
 };

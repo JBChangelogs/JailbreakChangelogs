@@ -2,7 +2,7 @@ import type { MetadataRoute } from "next";
 import { fetchSeasonsList, Season, Reward } from "@/utils/api";
 
 const BASE_URL = "https://jailbreakchangelogs.com";
-const ASSETS_URL = "https://assets.jailbreakchangelogs.xyz";
+const ASSETS_URL = "https://assets.jailbreakchangelogs.com";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const data = await fetchSeasonsList();

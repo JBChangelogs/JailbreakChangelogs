@@ -1,7 +1,7 @@
 // Image path constants
 export const IMAGE_PATHS = {
-  BASE: "https://assets.jailbreakchangelogs.xyz/assets/images/items",
-  VALUES: "https://assets.jailbreakchangelogs.xyz/assets/images/items/480p",
+  BASE: "https://assets.jailbreakchangelogs.com/assets/images/items",
+  VALUES: "https://assets.jailbreakchangelogs.com/assets/images/items/480p",
   PLACEHOLDER: "/assets/images/Placeholder.webp",
 } as const;
 
@@ -55,7 +55,7 @@ export const isDriftItem = (type: string): boolean => {
  * @returns The full path to the horn's audio file
  */
 export const getHornAudioPath = (name: string): string => {
-  return `https://assets.jailbreakchangelogs.xyz/assets/audios/horns/${name}.mp3`;
+  return `https://assets.jailbreakchangelogs.com/assets/audios/horns/${name}.mp3`;
 };
 
 /**
@@ -69,9 +69,9 @@ export const getDriftVideoPath = (
   isValuesPage: boolean = false,
 ): string => {
   if (isValuesPage) {
-    return `https://assets.jailbreakchangelogs.xyz/assets/images/items/480p/drifts/previews/${name}.webm`;
+    return `https://assets.jailbreakchangelogs.com/assets/images/items/480p/drifts/previews/${name}.webm`;
   }
-  return `https://assets.jailbreakchangelogs.xyz/assets/images/items/drifts/previews/${name}.webm`;
+  return `https://assets.jailbreakchangelogs.com/assets/images/items/drifts/previews/${name}.webm`;
 };
 
 /**
@@ -85,9 +85,9 @@ export const getDriftThumbnailPath = (
   isValuesPage: boolean = false,
 ): string => {
   if (isValuesPage) {
-    return `https://assets.jailbreakchangelogs.xyz/assets/images/items/480p/drifts/thumbnails/${name}.webp`;
+    return `https://assets.jailbreakchangelogs.com/assets/images/items/480p/drifts/thumbnails/${name}.webp`;
   }
-  return `https://assets.jailbreakchangelogs.xyz/assets/images/items/drifts/thumbnails/${name}.webp`;
+  return `https://assets.jailbreakchangelogs.com/assets/images/items/drifts/thumbnails/${name}.webp`;
 };
 
 /**
@@ -110,13 +110,13 @@ export const getVideoThumbnailPath = (type: string, name: string): string => {
  */
 export const getVideoPath = (type: string, name: string): string => {
   if (name === "HyperShift") {
-    return "https://assets.jailbreakchangelogs.xyz/assets/images/items/hyperchromes/HyperShift_optimized.mp4";
+    return "https://assets.jailbreakchangelogs.com/assets/images/items/hyperchromes/HyperShift_optimized.mp4";
   }
   if (name === "Gamer TV Set") {
-    return "https://assets.jailbreakchangelogs.xyz/assets/images/items/furnitures/Gamer%20TV%20Set.webm";
+    return "https://assets.jailbreakchangelogs.com/assets/images/items/furnitures/Gamer%20TV%20Set.webm";
   }
   if (name === "Arcade Racer") {
-    return "https://assets.jailbreakchangelogs.xyz/assets/images/items/spoilers/Arcade%20Racer.webm";
+    return "https://assets.jailbreakchangelogs.com/assets/images/items/spoilers/Arcade%20Racer.webm";
   }
   throw new Error(`No video path found for ${name}`);
 };
@@ -139,13 +139,13 @@ export const getItemImagePath = (
     if (isSocialEmbed) {
       // Return different paths for social media embeds
       if (name === "HyperShift") {
-        return "https://assets.jailbreakchangelogs.xyz/assets/images/items/hyperchromes/HyperShift_optimized.mp4";
+        return "https://assets.jailbreakchangelogs.com/assets/images/items/hyperchromes/HyperShift_optimized.mp4";
       }
       if (name === "Gamer TV Set") {
-        return "https://assets.jailbreakchangelogs.xyz/assets/images/items/furnitures/Gamer TV Set_optimized.gif";
+        return "https://assets.jailbreakchangelogs.com/assets/images/items/furnitures/Gamer TV Set_optimized.gif";
       }
       if (name === "Arcade Racer") {
-        return "https://assets.jailbreakchangelogs.xyz/assets/images/items/spoilers/Arcade Racer_optimized.gif";
+        return "https://assets.jailbreakchangelogs.com/assets/images/items/spoilers/Arcade Racer_optimized.gif";
       }
     }
     // For non-video elements (like thumbnails), return the thumbnail path
@@ -154,9 +154,9 @@ export const getItemImagePath = (
 
   if (isHornItem(type)) {
     if (isValuesPage) {
-      return "https://assets.jailbreakchangelogs.xyz/assets/audios/horns/thumbnails/480p/horn_thumbnail.webp";
+      return "https://assets.jailbreakchangelogs.com/assets/audios/horns/thumbnails/480p/horn_thumbnail.webp";
     }
-    return "https://assets.jailbreakchangelogs.xyz/assets/audios/horns/thumbnails/horn_thumbnail.webp";
+    return "https://assets.jailbreakchangelogs.com/assets/audios/horns/thumbnails/horn_thumbnail.webp";
   }
 
   if (isDriftItem(type)) {

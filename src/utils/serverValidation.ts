@@ -7,7 +7,7 @@ const URL_REGEX = /(https?:\/\/[^\s]+)/gi;
 
 const ALLOWED_RULES_HOSTS = [
   "roblox.com",
-  "jailbreakchangelogs.xyz",
+  "jailbreakchangelogs.com",
   "discord.com",
   "discord.gg",
 ];

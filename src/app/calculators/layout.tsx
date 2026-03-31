@@ -15,7 +15,7 @@ export const metadata: Metadata = {
       "Access our calculators in one place - Values Calculator, Season XP Calculator, Dupe Calculator, and Hyperchrome Pity Calculator.",
     images: [
       {
-        url: "https://assets.jailbreakchangelogs.xyz/assets/logos/embeds/JBCL_Embed_Graphic.png",
+        url: "https://assets.jailbreakchangelogs.com/assets/logos/embeds/JBCL_Embed_Graphic.png",
         width: 2400,
         height: 1260,
         alt: "Jailbreak Changelogs Banner",
@@ -31,7 +31,7 @@ export const metadata: Metadata = {
     description:
       "Access our calculators in one place - Values Calculator, Season XP Calculator, Dupe Calculator, and Hyperchrome Pity Calculator.",
     images: [
-      "https://assets.jailbreakchangelogs.xyz/assets/logos/embeds/JBCL_Embed_Graphic.png",
+      "https://assets.jailbreakchangelogs.com/assets/logos/embeds/JBCL_Embed_Graphic.png",
     ],
   },
 };

@@ -71,7 +71,7 @@ export default function ImageGallery({ rewards }: ImageGalleryProps) {
             <CarouselItem key={reward.id}>
               <div className="relative aspect-video overflow-hidden rounded-lg">
                 <Image
-                  src={`https://assets.jailbreakchangelogs.xyz${reward.link}`}
+                  src={`https://assets.jailbreakchangelogs.com${reward.link}`}
                   alt={reward.item}
                   fill
                   className="object-contain"

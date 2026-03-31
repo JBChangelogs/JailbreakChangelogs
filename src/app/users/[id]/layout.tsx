@@ -79,7 +79,7 @@ export async function generateMetadata({
           siteName: "Jailbreak Changelogs",
           images: [
             {
-              url: "https://assets.jailbreakchangelogs.xyz/assets/logos/embeds/JBCL_Embed_Graphic.png",
+              url: "https://assets.jailbreakchangelogs.com/assets/logos/embeds/JBCL_Embed_Graphic.png",
               width: 2400,
               height: 1260,
               alt: "Jailbreak Changelogs Banner",
@@ -92,7 +92,7 @@ export async function generateMetadata({
           description:
             "This user profile could not be found on Jailbreak Changelogs.",
           images: [
-            "https://assets.jailbreakchangelogs.xyz/assets/logos/embeds/JBCL_Embed_Graphic.png",
+            "https://assets.jailbreakchangelogs.com/assets/logos/embeds/JBCL_Embed_Graphic.png",
           ],
         },
       };
@@ -166,7 +166,7 @@ export async function generateMetadata({
           siteName: "Jailbreak Changelogs",
           images: [
             {
-              url: "https://assets.jailbreakchangelogs.xyz/assets/logos/embeds/JBCL_Embed_Graphic.png",
+              url: "https://assets.jailbreakchangelogs.com/assets/logos/embeds/JBCL_Embed_Graphic.png",
               width: 2400,
               height: 1260,
               alt: "Jailbreak Changelogs Banner",
@@ -178,7 +178,7 @@ export async function generateMetadata({
           title: "Private Profile",
           description: privateMessage || "This user's profile is private.",
           images: [
-            "https://assets.jailbreakchangelogs.xyz/assets/logos/embeds/JBCL_Embed_Graphic.png",
+            "https://assets.jailbreakchangelogs.com/assets/logos/embeds/JBCL_Embed_Graphic.png",
           ],
         },
       };
@@ -208,7 +208,7 @@ export async function generateMetadata({
           siteName: "Jailbreak Changelogs",
           images: [
             {
-              url: "https://assets.jailbreakchangelogs.xyz/assets/logos/embeds/JBCL_Embed_Graphic.png",
+              url: "https://assets.jailbreakchangelogs.com/assets/logos/embeds/JBCL_Embed_Graphic.png",
               width: 2400,
               height: 1260,
               alt: "Jailbreak Changelogs Banner",
@@ -220,7 +220,7 @@ export async function generateMetadata({
           title: "User Banned",
           description: bannedMessage,
           images: [
-            "https://assets.jailbreakchangelogs.xyz/assets/logos/embeds/JBCL_Embed_Graphic.png",
+            "https://assets.jailbreakchangelogs.com/assets/logos/embeds/JBCL_Embed_Graphic.png",
           ],
         },
       };
@@ -244,7 +244,7 @@ export async function generateMetadata({
         siteName: "Jailbreak Changelogs",
         images: [
           {
-            url: "https://assets.jailbreakchangelogs.xyz/assets/logos/embeds/JBCL_Embed_Graphic.png",
+            url: "https://assets.jailbreakchangelogs.com/assets/logos/embeds/JBCL_Embed_Graphic.png",
             width: 2400,
             height: 1260,
             alt: "Jailbreak Changelogs Banner",
@@ -257,7 +257,7 @@ export async function generateMetadata({
         description:
           "This user profile could not be found on Jailbreak Changelogs.",
         images: [
-          "https://assets.jailbreakchangelogs.xyz/assets/logos/embeds/JBCL_Embed_Graphic.png",
+          "https://assets.jailbreakchangelogs.com/assets/logos/embeds/JBCL_Embed_Graphic.png",
         ],
       },
     };

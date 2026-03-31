@@ -13,7 +13,7 @@ export const metadata: Metadata = {
       "Track live status of robberies, mansions, and airdrops in Roblox Jailbreak. Get real-time updates on robberies, mansions, and airdrops.",
     images: [
       {
-        url: "https://assets.jailbreakchangelogs.xyz/assets/logos/embeds/JBCL_Embed_Graphic.png",
+        url: "https://assets.jailbreakchangelogs.com/assets/logos/embeds/JBCL_Embed_Graphic.png",
         width: 2400,
         height: 1260,
         alt: "Jailbreak Changelogs Banner",
@@ -29,7 +29,7 @@ export const metadata: Metadata = {
     description:
       "Track live status of robberies, mansions, and airdrops in Roblox Jailbreak. Get real-time updates on robberies, mansions, and airdrops.",
     images: [
-      "https://assets.jailbreakchangelogs.xyz/assets/logos/embeds/JBCL_Embed_Graphic.png",
+      "https://assets.jailbreakchangelogs.com/assets/logos/embeds/JBCL_Embed_Graphic.png",
     ],
   },
 };

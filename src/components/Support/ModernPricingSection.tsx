@@ -92,7 +92,7 @@ const CRYPTO_ADDRESSES = {
 
 export default function ModernPricingSection() {
   const BADGE_BASE_URL =
-    "https://assets.jailbreakchangelogs.xyz/assets/website_icons";
+    "https://assets.jailbreakchangelogs.com/assets/website_icons";
   const [isYearly, setIsYearly] = useState(false);
   const [highlightedTier, setHighlightedTier] = useState<number | null>(null);
   const [copiedAddress, setCopiedAddress] = useState<string | null>(null);

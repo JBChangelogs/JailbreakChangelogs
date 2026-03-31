@@ -46,11 +46,6 @@ const nextConfig = {
       },
       {
         protocol: "https",
-        hostname: "assets.jailbreakchangelogs.xyz",
-        pathname: "/assets/**",
-      },
-      {
-        protocol: "https",
         hostname: "assets.jailbreakchangelogs.com",
         pathname: "/assets/**",
       },
@@ -86,7 +81,7 @@ const nextConfig = {
       {
         source: "/apple-touch-icon.png",
         destination:
-          "https://assets.jailbreakchangelogs.xyz/assets/logos/apple-touch-icon.png",
+          "https://assets.jailbreakchangelogs.com/assets/logos/apple-touch-icon.png",
       },
       { source: "/api/:path*", destination: "/api/:path*" },
     ];

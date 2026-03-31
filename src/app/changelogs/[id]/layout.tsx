@@ -31,7 +31,7 @@ export async function generateMetadata({
         url: `https://jailbreakchangelogs.com/changelogs/${id}`,
         siteName: "Jailbreak Changelogs",
         images: changelog.image_url
-          ? [`https://assets.jailbreakchangelogs.xyz${changelog.image_url}`]
+          ? [`https://assets.jailbreakchangelogs.com${changelog.image_url}`]
           : [],
       },
       twitter: {
@@ -39,7 +39,7 @@ export async function generateMetadata({
         title: changelog.title,
         description: `View the complete changelog for ${changelog.title}. Track updates, features, and modifications in this Jailbreak update.`,
         images: changelog.image_url
-          ? [`https://assets.jailbreakchangelogs.xyz${changelog.image_url}`]
+          ? [`https://assets.jailbreakchangelogs.com${changelog.image_url}`]
           : [],
       },
     };
@@ -57,7 +57,7 @@ export async function generateMetadata({
         title: "Changelog Not Found",
         description: "The requested changelog could not be found.",
         images: [
-          "https://assets.jailbreakchangelogs.xyz/assets/logos/embeds/JBCL_Embed_Graphic.png",
+          "https://assets.jailbreakchangelogs.com/assets/logos/embeds/JBCL_Embed_Graphic.png",
         ],
       },
       twitter: {
@@ -65,7 +65,7 @@ export async function generateMetadata({
         title: "Changelog Not Found",
         description: "The requested changelog could not be found.",
         images: [
-          "https://assets.jailbreakchangelogs.xyz/assets/logos/embeds/JBCL_Embed_Graphic.png",
+          "https://assets.jailbreakchangelogs.com/assets/logos/embeds/JBCL_Embed_Graphic.png",
         ],
       },
     };

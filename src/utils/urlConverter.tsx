@@ -15,8 +15,8 @@ export const convertUrlsToLinks = (
         url.hostname.endsWith(".reddit.com") ||
         url.hostname === "amazon.com" ||
         url.hostname.endsWith(".amazon.com") ||
-        url.hostname === "jailbreakchangelogs.xyz" ||
-        url.hostname.endsWith(".jailbreakchangelogs.xyz")
+        url.hostname === "jailbreakchangelogs.com" ||
+        url.hostname.endsWith(".jailbreakchangelogs.com")
       ) {
         // If links are disabled, return as plain text
         if (disableLinks) {
