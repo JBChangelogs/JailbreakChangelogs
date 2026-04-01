@@ -73,15 +73,15 @@ export default function UserStats({
 
   const totalNetworth = latestNetworthData?.networth || 0;
   const totalCashValue = latestNetworthData?.inventory_value || 0;
-  const totalDupedValue = latestNetworthData?.duplicates_value ?? 0;
 
-  // Calculate Non-OG values
+  // Calculate Non-OG values and total duped value client-side
   const nonOgStats = useMemo(() => {
     if (!itemsData || itemsData.length === 0) {
       return {
         inventoryValue: 0,
         networth: 0,
         dupedValue: 0,
+        totalDupedValue: 0,
         itemCount: 0,
         dupedItemCount: 0,
       };
@@ -105,6 +105,7 @@ export default function UserStats({
 
     let nonOgInventoryValue = 0;
     let nonOgDupedValue = 0;
+    let totalDupedValue = 0;
     let nonOgItemCount = 0;
     let nonOgDupedItemCount = 0;
 
@@ -119,12 +120,15 @@ export default function UserStats({
       }
     });
 
-    // Duped items
+    // Duped items — compute both total (all) and non-OG only in one pass
     (initialData.duplicates || []).forEach((invItem) => {
+      const item = itemsMap.get(invItem.item_id.toString());
+      if (item) {
+        totalDupedValue += parse(item.duped_value);
+      }
       if (!invItem.isOriginalOwner) {
         nonOgItemCount++;
         nonOgDupedItemCount++;
-        const item = itemsMap.get(invItem.item_id.toString());
         if (item) {
           nonOgDupedValue += parse(item.duped_value);
         }
@@ -134,6 +138,7 @@ export default function UserStats({
     return {
       inventoryValue: nonOgInventoryValue,
       dupedValue: nonOgDupedValue,
+      totalDupedValue,
       networth:
         nonOgInventoryValue +
         nonOgDupedValue +
@@ -142,6 +147,8 @@ export default function UserStats({
       dupedItemCount: nonOgDupedItemCount,
     };
   }, [itemsData, initialData]);
+
+  const totalDupedValue = nonOgStats.totalDupedValue;
 
   // Since we are deriving values directly from props, they are always available (or 0)
   // We can treat loading as false since there's no async operation here
