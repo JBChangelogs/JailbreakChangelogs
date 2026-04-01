@@ -1,7 +1,7 @@
 /**
  * Total number of available background images
  */
-export const TOTAL_BACKGROUND_IMAGES = 54;
+export const TOTAL_BACKGROUND_IMAGES = 36;
 
 /**
  * Base URL for background images
