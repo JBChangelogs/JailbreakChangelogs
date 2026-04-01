@@ -116,21 +116,42 @@ export default function InventoryBreakdown({
     },
   } satisfies ChartConfig;
 
-  // Calculate duplicate category values
+  // Calculate duplicate category values client-side from inventoryData.duplicates + itemsData
   const calculateDuplicateCategoryValues = (): Record<string, number> => {
-    if (!latestData?.duplicates_percentages || !latestData.duplicates_value)
+    if (
+      !itemsData ||
+      itemsData.length === 0 ||
+      !inventoryData.duplicates ||
+      inventoryData.duplicates.length === 0
+    )
       return {};
 
-    const duplicateCategoryValues: Record<string, number> = {};
+    const parseVal = (val: string | null): number => {
+      if (!val || val === "N/A") return 0;
+      const cleanVal = val.replace(/,/g, "").toLowerCase();
+      const num = parseFloat(cleanVal.replace(/[^0-9.]/g, ""));
+      if (isNaN(num)) return 0;
+      if (cleanVal.includes("k")) return num * 1000;
+      if (cleanVal.includes("m")) return num * 1000000;
+      if (cleanVal.includes("b")) return num * 1000000000;
+      return num;
+    };
 
-    Object.entries(latestData.duplicates_percentages).forEach(
-      ([category, percentage]) => {
-        duplicateCategoryValues[category] =
-          (percentage / 100) * latestData.duplicates_value!;
-      },
+    const itemsMap = new Map(
+      itemsData.map((item) => [item.id.toString(), item]),
     );
+    const categoryValues: Record<string, number> = {};
 
-    return duplicateCategoryValues;
+    inventoryData.duplicates.forEach((invItem) => {
+      const item = itemsMap.get(invItem.item_id.toString());
+      if (item) {
+        const val = parseVal(item.duped_value);
+        categoryValues[invItem.categoryTitle] =
+          (categoryValues[invItem.categoryTitle] || 0) + val;
+      }
+    });
+
+    return categoryValues;
   };
 
   const duplicateCategoryValues = calculateDuplicateCategoryValues();
@@ -367,10 +388,29 @@ export default function InventoryBreakdown({
   const { networth, inventory_count, money, inventory_value, percentages } =
     latestData;
   const duplicatesCount = latestData.duplicates_count;
-  const duplicatesValue = latestData.duplicates_value;
-  const duplicatesPercentages = latestData.duplicates_percentages;
+
+  // Derive total and per-category percentages client-side
+  const clientDuplicatesTotal = Object.values(duplicateCategoryValues).reduce(
+    (sum, v) => sum + v,
+    0,
+  );
+  const duplicatesValue =
+    clientDuplicatesTotal > 0
+      ? clientDuplicatesTotal
+      : latestData.duplicates_value;
+  const clientDuplicatesPercentages: Record<string, number> =
+    clientDuplicatesTotal > 0
+      ? Object.fromEntries(
+          Object.entries(duplicateCategoryValues).map(([cat, val]) => [
+            cat,
+            (val / clientDuplicatesTotal) * 100,
+          ]),
+        )
+      : {};
   const sortedDuplicateEntries = Object.entries(
-    duplicatesPercentages || {},
+    clientDuplicatesTotal > 0
+      ? clientDuplicatesPercentages
+      : latestData.duplicates_percentages || {},
   ).sort(([, a], [, b]) => b - a);
   const duplicatesChartData = sortedDuplicateEntries.map(
     ([category, percentage]) => ({
@@ -1309,8 +1349,7 @@ export default function InventoryBreakdown({
       {duplicatesCount !== undefined &&
         duplicatesValue !== undefined &&
         duplicatesValue !== null &&
-        duplicatesPercentages &&
-        Object.keys(duplicatesPercentages).length > 0 && (
+        sortedDuplicateEntries.length > 0 && (
           <div className="grid grid-cols-1 gap-6 xl:grid-cols-12">
             <div className="xl:col-span-8">
               <div className="border-border-card bg-secondary-bg space-y-4 rounded-lg border p-4">
