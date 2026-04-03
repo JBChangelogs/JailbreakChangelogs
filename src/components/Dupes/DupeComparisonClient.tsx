@@ -44,6 +44,10 @@ function VariantColumn({
   robloxUsers,
   usersData,
 }: VariantColumnProps) {
+  const loggedAtEstimated =
+    (item as unknown as { logged_at_estimated?: unknown })
+      .logged_at_estimated === true;
+
   const getUserAvatar = (userId: string) => {
     return `${process.env.NEXT_PUBLIC_INVENTORY_API_URL}/proxy/users/${userId}/avatar-headshot`;
   };
@@ -97,8 +101,13 @@ function VariantColumn({
 
         {/* Logged Date */}
         <div className="border-border-card mt-2 border-t pt-3 text-center">
-          <div className="text-secondary-text mb-1 text-xs uppercase">
-            Logged On
+          <div className="text-secondary-text mb-1 inline-flex items-center justify-center gap-2 text-xs uppercase">
+            <span>Logged On</span>
+            {loggedAtEstimated && (
+              <span className="text-secondary-text normal-case">
+                (estimate)
+              </span>
+            )}
           </div>
           <div className="text-primary-text font-bold">
             {new Date(item.logged_at * 1000).toLocaleDateString("en-US", {
