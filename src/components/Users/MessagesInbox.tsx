@@ -30,11 +30,7 @@ import {
   ChatHeaderMain,
 } from "@/components/chat/chat-header";
 import { ChatMessages } from "@/components/chat/chat-messages";
-import {
-  ChatToolbarAddon,
-  ChatToolbarButton,
-  ChatToolbarTextarea,
-} from "@/components/chat/chat-toolbar";
+import { MessageComposer } from "@/components/Users/MessageComposer";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import {
   ChatEvent,
@@ -573,7 +569,6 @@ export default function MessagesInbox() {
   const [conversations, setConversations] = useState<ConversationSummary[]>([]);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
-  const [draftMessage, setDraftMessage] = useState("");
   const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
   const [editContent, setEditContent] = useState("");
   const [deletingMessageId, setDeletingMessageId] = useState<string | null>(
@@ -734,13 +729,6 @@ export default function MessagesInbox() {
 
   const selectedUser = selectedConversation?.user ?? null;
   const currentUserId = currentUser ? asId(currentUser.id) : null;
-
-  const overMessageLimit = useMemo(() => {
-    const trimmed = draftMessage.trim();
-    if (!trimmed) return 0;
-    const sanitized = sanitizeText(trimmed);
-    return Math.max(0, sanitized.length - MESSAGE_CHAR_LIMIT);
-  }, [draftMessage]);
 
   const offerAcceptedEvents = useMemo(() => {
     const parsed = messages
@@ -1902,7 +1890,7 @@ export default function MessagesInbox() {
     window.history.pushState({}, "", "/messages");
   };
 
-  const handleSendMessage = async () => {
+  const handleSendMessage = async (rawMessage: string) => {
     if (!selectedUserId || !selectedUser) return;
     if (!currentUser) {
       toast.error("You need to be logged in to send messages");
@@ -1913,7 +1901,7 @@ export default function MessagesInbox() {
     const targetUser = selectedUser;
     const replyTarget = replyingToMessage;
 
-    const trimmedMessage = sanitizeText(draftMessage.trim());
+    const trimmedMessage = sanitizeText(rawMessage.trim());
     if (!trimmedMessage || isSending) return;
     if (trimmedMessage.length > MESSAGE_CHAR_LIMIT) {
       toast.error(`Message too long (max ${MESSAGE_CHAR_LIMIT} characters).`);
@@ -1946,7 +1934,6 @@ export default function MessagesInbox() {
         { user: targetUser, lastMessage: optimisticMessage },
         ...prev.filter((item) => item.user.id !== targetUserId),
       ]);
-      setDraftMessage("");
       setReplyingToMessage(null);
 
       const body: Record<string, unknown> = { content: trimmedMessage };
@@ -2373,10 +2360,10 @@ export default function MessagesInbox() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen px-4 pb-8">
-        <div className="mx-auto flex min-h-screen max-w-7xl flex-col">
-          <Breadcrumb />
-          <div className="border-border-card bg-secondary-bg mt-4 flex min-h-[60vh] flex-1 items-center justify-center rounded-lg border p-6">
+      <div className="h-[calc(100dvh-5rem)] overflow-hidden px-4 pb-4">
+        <div className="flex h-full min-h-0 flex-col">
+          <Breadcrumb loading={true} containerClassName="py-4" />
+          <div className="border-border-card bg-secondary-bg mt-0 flex min-h-0 flex-1 items-center justify-center rounded-lg border shadow-md">
             <p className="text-secondary-text text-sm">Loading...</p>
           </div>
         </div>
@@ -2386,10 +2373,10 @@ export default function MessagesInbox() {
 
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen px-4 pb-8">
-        <div className="mx-auto flex min-h-screen max-w-7xl flex-col">
-          <Breadcrumb />
-          <div className="border-border-card bg-secondary-bg mt-4 flex min-h-[60vh] flex-1 items-center justify-center rounded-lg border p-6 sm:p-8">
+      <div className="h-[calc(100dvh-5rem)] overflow-hidden px-4 pb-4">
+        <div className="flex h-full min-h-0 flex-col">
+          <Breadcrumb containerClassName="py-4" />
+          <div className="border-border-card bg-secondary-bg mt-0 flex min-h-0 w-full flex-1 items-center justify-center rounded-lg border p-6 shadow-md sm:p-8">
             <div className="text-center">
               <h1 className="text-primary-text text-2xl font-bold">
                 Direct Messages
@@ -2418,7 +2405,7 @@ export default function MessagesInbox() {
       <div className="flex h-full min-h-0 flex-col">
         <Breadcrumb containerClassName="py-4" />
 
-        <div className="border-border-card bg-secondary-bg mt-4 grid min-h-0 flex-1 grid-cols-1 overflow-hidden rounded-lg border shadow-md lg:grid-cols-[320px_1fr]">
+        <div className="border-border-card bg-secondary-bg mt-0 grid min-h-0 flex-1 grid-cols-1 overflow-hidden rounded-lg border shadow-md lg:grid-cols-[320px_1fr]">
           <aside
             className={cn(
               "border-border-card flex h-full min-h-0 flex-col border-b lg:border-r lg:border-b-0",
@@ -3111,9 +3098,9 @@ export default function MessagesInbox() {
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <Button
-                              variant="ghost"
-                              size="sm"
-                              className="text-primary-text hover:bg-quaternary-bg h-8 w-8 rounded-lg p-0 opacity-100 transition-all duration-200 disabled:opacity-100 data-[state=open]:opacity-100 lg:opacity-0 lg:group-hover:opacity-100 lg:disabled:opacity-0 lg:group-hover:disabled:opacity-100"
+                              variant="secondary"
+                              size="icon"
+                              className="h-8 w-8 rounded-lg p-0 opacity-100 transition-all duration-200 disabled:opacity-100 data-[state=open]:opacity-100 lg:opacity-0 lg:group-hover:opacity-100 lg:disabled:opacity-0 lg:group-hover:disabled:opacity-100"
                               disabled={
                                 isSending ||
                                 Boolean(deletingMessageId) ||
@@ -3130,7 +3117,6 @@ export default function MessagesInbox() {
                             <DropdownMenuItem
                               onClick={() => {
                                 setReplyingToMessage(message);
-                                setDraftMessage("");
                               }}
                             >
                               <Icon
@@ -3194,7 +3180,7 @@ export default function MessagesInbox() {
                             )}
                           <ChatEvent
                             className={cn(
-                              "group-hover:bg-tertiary-bg/30 relative w-full flex-col items-start rounded-md py-1 transition-colors",
+                              "group-hover:bg-tertiary-bg relative w-full flex-col items-start rounded-md py-1 transition-colors",
                               message.parentId && "mt-1",
                             )}
                           >
@@ -3538,62 +3524,13 @@ export default function MessagesInbox() {
                       replyingToMessage && "rounded-t-none border-t-0",
                     )}
                   >
-                    <ChatToolbarTextarea
-                      value={draftMessage}
-                      onChange={(event) => setDraftMessage(event.target.value)}
-                      onSubmit={handleSendMessage}
+                    <MessageComposer
+                      conversationId={selectedUserId}
                       placeholder={messagePlaceholder}
-                      maxLength={1000}
-                      showResizeHandle
-                      rightOverlay={
-                        overMessageLimit > 0 ? (
-                          <span className="text-xs font-medium text-red-400/90 tabular-nums">
-                            -{overMessageLimit}
-                          </span>
-                        ) : null
-                      }
-                      className="text-primary-text placeholder-secondary-text"
+                      maxChars={MESSAGE_CHAR_LIMIT}
+                      isSending={isSending}
+                      onSend={(message) => void handleSendMessage(message)}
                     />
-                    <ChatToolbarAddon align="inline-end">
-                      <ChatToolbarButton
-                        onClick={() => void handleSendMessage()}
-                        aria-label="Send message"
-                        className="hover:bg-secondary-bg/50 transition-colors"
-                        disabled={
-                          !draftMessage.trim() ||
-                          isSending ||
-                          overMessageLimit > 0
-                        }
-                      >
-                        {isSending ? (
-                          <svg
-                            className="h-4 w-4 animate-spin"
-                            xmlns="http://www.w3.org/2000/svg"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                          >
-                            <circle
-                              className="opacity-25"
-                              cx="12"
-                              cy="12"
-                              r="10"
-                              stroke="currentColor"
-                              strokeWidth="4"
-                            />
-                            <path
-                              className="opacity-75"
-                              fill="currentColor"
-                              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-                            />
-                          </svg>
-                        ) : (
-                          <Icon
-                            icon="heroicons:paper-airplane"
-                            className="h-4 w-4"
-                          />
-                        )}
-                      </ChatToolbarButton>
-                    </ChatToolbarAddon>
                   </div>
                 </div>
               </Chat>
@@ -3617,7 +3554,7 @@ export default function MessagesInbox() {
             Are you sure you want to delete this message? This action cannot be
             undone.
           </p>
-          <p className="text-secondary-text text-sm">
+          <p className="text-secondary-text text-xs">
             Tip: Hold <span className="font-semibold">Shift</span> while
             clicking <span className="font-semibold">Delete Message</span> to
             skip this confirmation.

@@ -126,11 +126,16 @@ export function ChatToolbarTextarea({
   rightOverlayClassName,
   showResizeHandle = false,
   onKeyDown,
+  onChange,
+  value,
   ...props
 }: ChatToolbarTextareaProps) {
   const textareaRef = React.useRef<HTMLTextAreaElement | null>(null);
   const [manualHeight, setManualHeight] = React.useState<number | null>(null);
+  const [isExpanded, setIsExpanded] = React.useState(false);
   const baseHeightRef = React.useRef(40);
+  const isExpandedRef = React.useRef(false);
+  const autosizeRafRef = React.useRef<number | null>(null);
   const resizeStateRef = React.useRef<{
     startY: number;
     startHeight: number;
@@ -155,14 +160,52 @@ export function ChatToolbarTextarea({
     onKeyDown?.(e);
   };
 
-  const clampHeight = (height: number) => {
+  const clampHeight = React.useCallback((height: number) => {
     const minHeight = baseHeightRef.current;
     const maxHeight =
       typeof window !== "undefined"
-        ? Math.max(minHeight, Math.floor(window.innerHeight * 0.6))
-        : 480;
+        ? Math.max(
+            minHeight,
+            Math.min(240, Math.floor(window.innerHeight * 0.4)),
+          )
+        : 240;
     return Math.min(maxHeight, Math.max(minHeight, height));
-  };
+  }, []);
+
+  const autosize = React.useCallback(() => {
+    if (showResizeHandle && manualHeight !== null) return;
+    const textarea = textareaRef.current;
+    if (!textarea) return;
+    textarea.style.height = "auto";
+    const nextHeight = clampHeight(textarea.scrollHeight);
+    textarea.style.height = `${nextHeight}px`;
+    const shouldExpand = nextHeight > baseHeightRef.current + 2;
+    if (shouldExpand !== isExpandedRef.current) {
+      isExpandedRef.current = shouldExpand;
+      setIsExpanded(shouldExpand);
+    }
+  }, [clampHeight, manualHeight, showResizeHandle]);
+
+  const scheduleAutosize = React.useCallback(() => {
+    if (typeof window === "undefined") return;
+    if (autosizeRafRef.current !== null) {
+      window.cancelAnimationFrame(autosizeRafRef.current);
+    }
+    autosizeRafRef.current = window.requestAnimationFrame(() => {
+      autosizeRafRef.current = null;
+      autosize();
+    });
+  }, [autosize]);
+
+  React.useLayoutEffect(() => {
+    scheduleAutosize();
+    return () => {
+      if (autosizeRafRef.current !== null && typeof window !== "undefined") {
+        window.cancelAnimationFrame(autosizeRafRef.current);
+      }
+      autosizeRafRef.current = null;
+    };
+  }, [scheduleAutosize, value]);
 
   const handleResizePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
     if (!showResizeHandle) return;
@@ -218,10 +261,10 @@ export function ChatToolbarTextarea({
           placeholder="Type your message..."
           ref={textareaRef}
           className={cn(
-            "h-fit max-h-[60vh] min-h-10 @md/chat:text-base",
+            "h-fit max-h-60 min-h-10 @md/chat:text-base",
             "resize-none overflow-y-auto bg-transparent p-2 text-sm text-inherit shadow-none",
             "border-none placeholder:whitespace-nowrap focus-visible:border-none focus-visible:ring-0 focus-visible:outline-none",
-            rightOverlay ? "pr-16" : "",
+            rightOverlay ? "pr-20" : "",
             className,
           )}
           rows={1}
@@ -230,13 +273,20 @@ export function ChatToolbarTextarea({
               ? ({ height: manualHeight } satisfies React.CSSProperties)
               : undefined
           }
+          value={value}
+          onChange={(event) => {
+            onChange?.(event);
+            scheduleAutosize();
+          }}
           onKeyDown={handleKeyDown}
           {...props}
         />
         {rightOverlay ? (
           <div
             className={cn(
-              "pointer-events-none absolute top-1/2 right-4 -translate-y-1/2",
+              isExpanded
+                ? "absolute top-[6px] right-2"
+                : "absolute top-1/2 right-2 -translate-y-1/2",
               rightOverlayClassName,
             )}
           >

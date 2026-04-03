@@ -40,7 +40,7 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   return (
     <Dialog
       open={isOpen}
-      onClose={onClose}
+      onClose={() => {}}
       className={`relative ${zIndexClassName}`}
     >
       <div

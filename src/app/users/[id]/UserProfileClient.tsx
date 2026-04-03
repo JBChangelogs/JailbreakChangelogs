@@ -438,7 +438,7 @@ export default function UserProfileClient({
         }
 
         const response = await fetch(
-          `${PUBLIC_API_URL}/messages/${encodeURIComponent(user.id)}-KkBoAPN64`,
+          `${PUBLIC_API_URL}/messages/${encodeURIComponent(user.id)}`,
           {
             method: "HEAD",
             credentials: "include",

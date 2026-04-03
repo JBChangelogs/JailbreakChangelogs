@@ -764,6 +764,25 @@ export const NavbarModern = ({
             </PopoverContent>
           </Popover>
 
+          {/* Messages button (desktop) */}
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Link href="/messages" prefetch={false}>
+                <button
+                  className="border-border-card bg-secondary-bg text-secondary-text hover:bg-quaternary-bg hover:text-primary-text flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg border transition-all duration-200 hover:scale-105 active:scale-95"
+                  aria-label="Messages"
+                >
+                  <Icon
+                    icon="ic:baseline-message"
+                    className="text-primary-text h-5 w-5"
+                    inline={true}
+                  />
+                </button>
+              </Link>
+            </TooltipTrigger>
+            <TooltipContent>Messages</TooltipContent>
+          </Tooltip>
+
           {/* Support button */}
           <Tooltip>
             <TooltipTrigger asChild>
@@ -857,18 +876,6 @@ export const NavbarModern = ({
                           Connect Roblox
                         </button>
                       )}
-
-                      <Link
-                        href="/messages"
-                        className="text-primary-text hover:bg-button-info-hover hover:text-form-button-text flex items-center gap-3 px-4 py-2 text-sm transition-colors"
-                      >
-                        <Icon
-                          icon="heroicons:chat-bubble-left-right"
-                          className="h-4 w-4"
-                          inline={true}
-                        />
-                        Messages
-                      </Link>
 
                       <Link
                         href="/settings"
