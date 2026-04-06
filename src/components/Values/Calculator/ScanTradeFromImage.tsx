@@ -1,9 +1,8 @@
 "use client";
 
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/IconWrapper";
 
 export interface ScannedTradeItem {
@@ -28,7 +27,7 @@ export function ScanTradeFromImage({ onScanSuccess }: ScanTradeFromImageProps) {
 
   const helpText = useMemo(
     () =>
-      "Drop a Jailbreak trading UI screenshot here (or click to upload). We'll detect Offering/Requesting items and prefill the calculator.",
+      "Drop a Jailbreak trading UI screenshot here. We'll detect Offering/Requesting items and prefill the calculator.",
     [],
   );
 
@@ -113,10 +112,10 @@ export function ScanTradeFromImage({ onScanSuccess }: ScanTradeFromImageProps) {
     [onScanSuccess],
   );
 
-  const { getRootProps, getInputProps, isDragActive, open } = useDropzone({
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
     multiple: false,
     maxFiles: 1,
-    noClick: true,
+    noClick: false,
     noKeyboard: true,
     disabled: isScanning,
     accept: { "image/*": [] },
@@ -126,6 +125,35 @@ export function ScanTradeFromImage({ onScanSuccess }: ScanTradeFromImageProps) {
     },
   });
 
+  useEffect(() => {
+    const isEditableTarget = (target: EventTarget | null): boolean => {
+      const el = target instanceof Element ? target : null;
+      if (!el) return false;
+      const tagName = el.tagName.toLowerCase();
+      if (tagName === "input" || tagName === "textarea") return true;
+      return (el as HTMLElement).isContentEditable;
+    };
+
+    const onPaste = (event: ClipboardEvent) => {
+      if (isScanning) return;
+      if (isEditableTarget(event.target)) return;
+      const items = event.clipboardData?.items;
+      if (!items || items.length === 0) return;
+
+      for (const item of items) {
+        if (!item.type.startsWith("image/")) continue;
+        const file = item.getAsFile();
+        if (!file) continue;
+        event.preventDefault();
+        void scanFile(file);
+        return;
+      }
+    };
+
+    window.addEventListener("paste", onPaste);
+    return () => window.removeEventListener("paste", onPaste);
+  }, [isScanning, scanFile]);
+
   return (
     <div data-component="scan-trade-from-image">
       <div
@@ -134,7 +162,7 @@ export function ScanTradeFromImage({ onScanSuccess }: ScanTradeFromImageProps) {
           isDragActive ? "border-border-focus bg-tertiary-bg" : "",
           isScanning ? "cursor-progress opacity-80" : "cursor-pointer",
         ].join(" ")}
-        {...getRootProps()}
+        {...getRootProps({ role: "button", tabIndex: 0 })}
       >
         <input {...getInputProps()} />
         <div className="mb-3 flex justify-center">
@@ -149,21 +177,9 @@ export function ScanTradeFromImage({ onScanSuccess }: ScanTradeFromImageProps) {
         <p className="text-secondary-text mx-auto mb-4 max-w-[560px] text-sm">
           {helpText}
         </p>
-
-        <div className="flex justify-center">
-          <Button
-            disabled={isScanning}
-            variant="default"
-            size="md"
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              open();
-            }}
-          >
-            {isScanning ? "Scanning..." : "Upload image"}
-          </Button>
-        </div>
+        <p className="text-secondary-text mx-auto mb-4 max-w-[560px] text-xs">
+          Tip: Click to upload, or paste an image (Ctrl+V / ⌘V).
+        </p>
 
         {lastFileName && (
           <p className="text-secondary-text/70 mt-4 text-xs">
