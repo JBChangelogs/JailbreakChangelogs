@@ -28,6 +28,18 @@ interface TradeAdsProps {
   initialItems?: TradeItem[];
 }
 
+class HttpStatusError extends Error {
+  status: number;
+  body: unknown;
+
+  constructor(message: string, status: number, body: unknown) {
+    super(message);
+    this.name = "HttpStatusError";
+    this.status = status;
+    this.body = body;
+  }
+}
+
 const CUSTOM_TYPE_OPTIONS = [
   { id: "adds", label: "Adds" },
   { id: "overpays", label: "Overpays" },
@@ -43,14 +55,17 @@ export default function TradeAds({
   initialTradeAds = [],
   initialItems = [],
 }: TradeAdsProps) {
-  const { user } = useAuthContext();
+  const { user, isAuthenticated, setLoginModal } = useAuthContext();
   const hasAutoLoadedTradeAdsRef = useRef(false);
+  const lastIsAuthenticatedRef = useRef(isAuthenticated);
   const [tradeAds, setTradeAds] = useState<TradeAd[]>(initialTradeAds);
   const [isTradeAdsLoading, setIsTradeAdsLoading] = useState(
     initialTradeAds.length === 0,
   );
   const [items] = useState<TradeItem[]>(initialItems);
   const [error, setError] = useState<string | null>(null);
+  const [isRecentTradesUnauthorized, setIsRecentTradesUnauthorized] =
+    useState(false);
   const [activeTab, setActiveTab] = useState<"view" | "create" | "myads">(
     "view",
   );
@@ -308,6 +323,16 @@ export default function TradeAds({
       },
     });
 
+    if (response.status === 401) {
+      let body: unknown = null;
+      try {
+        body = (await response.json()) as unknown;
+      } catch {
+        body = null;
+      }
+      throw new HttpStatusError("Unauthorized", 401, body);
+    }
+
     if (response.status === 404) {
       try {
         const body = (await response.json()) as unknown;
@@ -325,7 +350,17 @@ export default function TradeAds({
     }
 
     if (!response.ok) {
-      throw new Error("Failed to fetch recent trades");
+      let body: unknown = null;
+      try {
+        body = (await response.json()) as unknown;
+      } catch {
+        body = null;
+      }
+      throw new HttpStatusError(
+        "Failed to fetch recent trades",
+        response.status,
+        body,
+      );
     }
 
     const data = (await response.json()) as unknown;
@@ -341,9 +376,18 @@ export default function TradeAds({
     try {
       if (showSkeleton) setIsTradeAdsLoading(true);
       setError(null);
+      setIsRecentTradesUnauthorized(false);
       const recentTrades = await fetchRecentTradeAds();
       setTradeAds(recentTrades);
     } catch (err) {
+      if (err instanceof HttpStatusError && err.status === 401) {
+        console.warn("Recent trade ads request unauthorized:", err.body);
+        setTradeAds([]);
+        setIsRecentTradesUnauthorized(true);
+        setError(null);
+        return;
+      }
+
       console.error("Error refreshing trade ads:", err);
       setError("Failed to refresh trade ads");
     } finally {
@@ -361,6 +405,18 @@ export default function TradeAds({
     hasAutoLoadedTradeAdsRef.current = true;
     void refreshTradeAds();
   }, [initialTradeAds.length, refreshTradeAds]);
+
+  useEffect(() => {
+    const wasAuthenticated = lastIsAuthenticatedRef.current;
+    lastIsAuthenticatedRef.current = isAuthenticated;
+
+    if (!isRecentTradesUnauthorized) return;
+    if (!isAuthenticated) return;
+    // Prevent retry loops when the API keeps returning 401 while I'm already authenticated.
+    // Only auto-retry after an auth transition (false -> true).
+    if (wasAuthenticated) return;
+    void refreshTradeAds();
+  }, [isRecentTradesUnauthorized, isAuthenticated, refreshTradeAds]);
 
   useEffect(() => {
     const handleHashChange = () => {
@@ -438,6 +494,66 @@ export default function TradeAds({
           hasTradeAds={userTradeAds.length > 0}
         />
         <TradeAdSkeleton />
+      </div>
+    );
+  }
+
+  if (isRecentTradesUnauthorized) {
+    const title = isAuthenticated ? "Your session expired" : "Sign in required";
+    const description = isAuthenticated
+      ? "Please sign in again to view and create trade ads."
+      : "Please sign in to view and create trade ads.";
+
+    const openLogin = () => setLoginModal({ open: true, tab: "discord" });
+
+    const UnauthorizedCard = () => (
+      <div className="border-border-card bg-secondary-bg mb-8 rounded-lg border p-6 text-center">
+        <div className="mb-3 flex justify-center">
+          <Icon
+            icon="heroicons:lock-closed"
+            className="text-secondary-text h-8 w-8"
+          />
+        </div>
+        <h3 className="text-primary-text mb-2 text-lg font-semibold">
+          {title}
+        </h3>
+        <p className="text-secondary-text mb-6">{description}</p>
+        <div className="flex flex-wrap justify-center gap-4">
+          <Button onClick={openLogin}>Sign in</Button>
+          <Button variant="secondary" onClick={refreshTradeAds}>
+            Try again
+          </Button>
+        </div>
+      </div>
+    );
+
+    return (
+      <div className="mt-8">
+        <TradeAdTabs
+          activeTab={activeTab}
+          onTabChange={handleTabChange}
+          hasTradeAds={false}
+        />
+
+        <div
+          role="tabpanel"
+          hidden={activeTab !== "view"}
+          id="trading-tabpanel-view"
+          aria-labelledby="trading-tab-view"
+          className="mt-6"
+        >
+          {activeTab === "view" && <UnauthorizedCard />}
+        </div>
+
+        <div
+          role="tabpanel"
+          hidden={activeTab !== "create"}
+          id="trading-tabpanel-create"
+          aria-labelledby="trading-tab-create"
+          className="mt-6"
+        >
+          {activeTab === "create" && <UnauthorizedCard />}
+        </div>
       </div>
     );
   }
