@@ -21,31 +21,113 @@ interface ScanTradeFromImageProps {
   onScanSuccess: (result: ScanTradeResponse) => void;
 }
 
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  !!value && typeof value === "object" && !Array.isArray(value);
+
+const isSupportedImage = (file: File): boolean => {
+  const supportedTypes = new Set([
+    "image/png",
+    "image/jpeg",
+    "image/jpg",
+    "image/webp",
+  ]);
+  if (supportedTypes.has(file.type)) return true;
+  const name = file.name.toLowerCase();
+  return (
+    name.endsWith(".png") ||
+    name.endsWith(".jpg") ||
+    name.endsWith(".jpeg") ||
+    name.endsWith(".webp")
+  );
+};
+
+const getScanErrorMessage = (payload: unknown): string | null => {
+  const withExtras = (
+    message: string,
+    obj: Record<string, unknown>,
+  ): string => {
+    const pieces: string[] = [];
+    const width = typeof obj.width === "number" ? obj.width : null;
+    const height = typeof obj.height === "number" ? obj.height : null;
+    if (width && height) pieces.push(`${width}×${height}`);
+
+    const maxSize = typeof obj.max_size === "string" ? obj.max_size : null;
+    if (maxSize && !message.toLowerCase().includes(maxSize.toLowerCase())) {
+      pieces.push(`max ${maxSize}`);
+    }
+
+    return pieces.length ? `${message} (${pieces.join(", ")})` : message;
+  };
+
+  // Some deployments return `[errorObj, statusCode]` with HTTP 200.
+  if (Array.isArray(payload)) {
+    const first = payload[0];
+    if (isRecord(first)) {
+      const message =
+        (typeof first.message === "string" ? first.message : null) ??
+        (typeof first.detail === "string" ? first.detail : null);
+      return message ? withExtras(message, first) : null;
+    }
+    return null;
+  }
+
+  if (!isRecord(payload)) return null;
+
+  const message =
+    (typeof payload.message === "string" ? payload.message : null) ??
+    (typeof payload.detail === "string" ? payload.detail : null);
+  return message ? withExtras(message, payload) : null;
+};
+
+const getEmbeddedStatus = (payload: unknown): number | null => {
+  if (!Array.isArray(payload)) return null;
+  const maybeStatus = payload[1];
+  return typeof maybeStatus === "number" ? maybeStatus : null;
+};
+
 export function ScanTradeFromImage({ onScanSuccess }: ScanTradeFromImageProps) {
   const [isScanning, setIsScanning] = useState(false);
   const [lastFileName, setLastFileName] = useState<string | null>(null);
+  const [lastErrorMessage, setLastErrorMessage] = useState<string | null>(null);
 
   const helpText = useMemo(
     () =>
       "Drop a Jailbreak trading UI screenshot here. We'll detect Offering/Requesting items and prefill the calculator.",
     [],
   );
+  const acceptedTypesText = useMemo(
+    () => "Accepted formats: PNG, JPG/JPEG, WEBP.",
+    [],
+  );
 
   const scanFile = useCallback(
     async (file: File) => {
       if (!file.type.startsWith("image/")) {
-        toast.error("Please upload an image file.");
+        const message = "Please upload an image file.";
+        setLastErrorMessage(message);
+        toast.error(message);
+        return;
+      }
+
+      if (!isSupportedImage(file)) {
+        const message =
+          "Unsupported image type. Please upload a PNG, JPG, or WEBP.";
+        setLastErrorMessage(message);
+        toast.error(message);
         return;
       }
 
       const baseUrl = process.env.NEXT_PUBLIC_API_URL;
       if (!baseUrl) {
-        toast.error("API is not configured (NEXT_PUBLIC_API_URL missing).");
+        const message = "API is not configured (NEXT_PUBLIC_API_URL missing).";
+        setLastErrorMessage(message);
+        toast.error(message);
         return;
       }
 
       setIsScanning(true);
       setLastFileName(file.name);
+      setLastErrorMessage(null);
 
       const toastId = toast.loading("Scanning trade screenshot...");
       try {
@@ -60,26 +142,37 @@ export function ScanTradeFromImage({ onScanSuccess }: ScanTradeFromImageProps) {
         });
 
         const data = (await response.json()) as unknown;
-        if (!response.ok) {
-          if (response.status === 429) {
-            toast.error(
-              "Too many scans — please wait a moment and try again.",
-              {
-                id: toastId,
-              },
-            );
+        const embeddedStatus = getEmbeddedStatus(data);
+        const effectiveStatus = embeddedStatus ?? response.status;
+
+        if (
+          !response.ok ||
+          (embeddedStatus !== null && embeddedStatus >= 400)
+        ) {
+          if (effectiveStatus === 429) {
+            const message =
+              "Too many scans — please wait a moment and try again.";
+            setLastErrorMessage(message);
+            toast.error(message, { id: toastId });
             return;
           }
 
-          const detail =
-            data && typeof data === "object"
-              ? (data as Record<string, unknown>).detail
-              : null;
-          const message = typeof detail === "string" ? detail : "Scan failed";
+          const message =
+            getScanErrorMessage(data) ??
+            `Scan failed${effectiveStatus ? ` (${effectiveStatus})` : ""}`;
+          setLastErrorMessage(message);
           throw new Error(message);
         }
 
-        if (!data || typeof data !== "object") {
+        // Defensive: some backends return an error payload with HTTP 200.
+        const okButErrorMessage = getScanErrorMessage(data);
+        if (okButErrorMessage) {
+          setLastErrorMessage(okButErrorMessage);
+          throw new Error(okButErrorMessage);
+        }
+
+        if (!data || typeof data !== "object" || Array.isArray(data)) {
+          setLastErrorMessage("Unexpected scan response");
           throw new Error("Unexpected scan response");
         }
 
@@ -91,20 +184,21 @@ export function ScanTradeFromImage({ onScanSuccess }: ScanTradeFromImageProps) {
           : [];
 
         if (offering.length === 0 && requesting.length === 0) {
-          toast.error("No trade items were found in that image.", {
-            id: toastId,
-          });
+          const message = "No trade items were found in that image.";
+          setLastErrorMessage(message);
+          toast.error(message, { id: toastId });
           return;
         }
 
         onScanSuccess({ offering, requesting });
+        setLastErrorMessage(null);
         toast.success("Trade screenshot scanned.", { id: toastId });
       } catch (error) {
         console.error("Scan trade image failed:", error);
-        toast.error(
-          error instanceof Error ? error.message : "Failed to scan image",
-          { id: toastId },
-        );
+        const message =
+          error instanceof Error ? error.message : "Failed to scan image";
+        setLastErrorMessage(message);
+        toast.error(message, { id: toastId });
       } finally {
         setIsScanning(false);
       }
@@ -118,7 +212,7 @@ export function ScanTradeFromImage({ onScanSuccess }: ScanTradeFromImageProps) {
     noClick: false,
     noKeyboard: true,
     disabled: isScanning,
-    accept: { "image/*": [] },
+    accept: { "image/png": [], "image/jpeg": [], "image/webp": [] },
     onDrop: (acceptedFiles) => {
       const file = acceptedFiles[0];
       if (file) void scanFile(file);
@@ -180,6 +274,15 @@ export function ScanTradeFromImage({ onScanSuccess }: ScanTradeFromImageProps) {
         <p className="text-secondary-text mx-auto mb-4 max-w-[560px] text-xs">
           Tip: Click to upload, or paste an image (Ctrl+V / ⌘V).
         </p>
+        <p className="text-secondary-text/80 mx-auto mb-4 max-w-[560px] text-xs">
+          {acceptedTypesText}
+        </p>
+
+        {lastErrorMessage && (
+          <p className="mx-auto mb-4 max-w-[560px] text-xs text-red-400">
+            {lastErrorMessage}
+          </p>
+        )}
 
         {lastFileName && (
           <p className="text-secondary-text/70 mt-4 text-xs">
