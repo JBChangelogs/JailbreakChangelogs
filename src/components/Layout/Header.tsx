@@ -265,8 +265,45 @@ export default function Header() {
     }
   };
 
+  const prevMobileSheetOpenRef = useRef(false);
+  useEffect(() => {
+    if (typeof window === "undefined" || typeof document === "undefined")
+      return;
+    if (prevMobileSheetOpenRef.current === mobileOpen) return;
+    prevMobileSheetOpenRef.current = mobileOpen;
+
+    const w = window as Window & { __jbMobileSheetOpenCount?: number };
+    const current = w.__jbMobileSheetOpenCount ?? 0;
+    const next = mobileOpen ? current + 1 : Math.max(0, current - 1);
+    w.__jbMobileSheetOpenCount = next;
+
+    if (next > 0) {
+      document.body.dataset.mobileSheetOpen = "true";
+    } else {
+      delete document.body.dataset.mobileSheetOpen;
+    }
+    window.dispatchEvent(new Event("jb-sheet-toggle"));
+
+    return () => {
+      if (!prevMobileSheetOpenRef.current) return;
+      prevMobileSheetOpenRef.current = false;
+
+      const w = window as Window & { __jbMobileSheetOpenCount?: number };
+      const current = w.__jbMobileSheetOpenCount ?? 0;
+      const next = Math.max(0, current - 1);
+      w.__jbMobileSheetOpenCount = next;
+
+      if (next > 0) {
+        document.body.dataset.mobileSheetOpen = "true";
+      } else {
+        delete document.body.dataset.mobileSheetOpen;
+      }
+      window.dispatchEvent(new Event("jb-sheet-toggle"));
+    };
+  }, [mobileOpen]);
+
   const handleDrawerToggle = () => {
-    setMobileOpen(!mobileOpen);
+    setMobileOpen((prev) => !prev);
   };
 
   const drawer = (
