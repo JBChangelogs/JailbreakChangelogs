@@ -815,14 +815,19 @@ export default function MessagesInbox() {
       const pending = offerDetailsPendingRef.current.get(key);
       if (pending) return pending;
 
+      const baseUrl = process.env.NEXT_PUBLIC_API_URL;
+      if (!baseUrl) return;
       const promise = (async () => {
         try {
           const response = await fetch(
-            `${PUBLIC_API_URL}/trades/v2/${encodeURIComponent(String(metadata.trade))}/offers/${encodeURIComponent(String(metadata.offer))}`,
+            `${baseUrl}/trades/v2/${encodeURIComponent(String(metadata.trade))}/offers/${encodeURIComponent(String(metadata.offer))}`,
             {
               method: "GET",
-              credentials: "include",
               cache: "no-store",
+              credentials: "include",
+              headers: {
+                "User-Agent": "JailbreakChangelogs-Messages/1.0",
+              },
             },
           );
 

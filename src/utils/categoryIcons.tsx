@@ -128,88 +128,85 @@ export const CategoryIconBadge = ({
   isLimited,
   isSeasonal,
   preferItemType = false,
+  withContainer = true,
   className = "h-5 w-5",
 }: {
   type: string;
   isLimited: boolean;
   isSeasonal: boolean;
   preferItemType?: boolean;
+  withContainer?: boolean;
   className?: string;
 }) => {
+  const wrap = (node: React.ReactNode) =>
+    withContainer ? (
+      <div className="bg-primary-bg/50 rounded-full p-1.5">{node}</div>
+    ) : (
+      <>{node}</>
+    );
+
   // If preferItemType is true, show item type icon first
   if (preferItemType) {
     const categoryIcon = getCategoryIcon(type);
     if (categoryIcon) {
-      return (
-        <div className="bg-primary-bg/50 rounded-full p-1.5">
-          <categoryIcon.Icon
-            className={`${className}`}
-            style={{ color: getCategoryColor(type) }}
-          />
-        </div>
+      return wrap(
+        <categoryIcon.Icon
+          className={`${className}`}
+          style={{ color: getCategoryColor(type) }}
+        />,
       );
     }
 
     // Fall back to limited/seasonal if no item type icon
     if (isSeasonal) {
-      return (
-        <div className="bg-primary-bg/50 rounded-full p-1.5">
-          <Icon
-            icon="noto-v1:snowflake"
-            className={`${className}`}
-            style={{ color: "#40c0e7" }}
-          />
-        </div>
+      return wrap(
+        <Icon
+          icon="noto-v1:snowflake"
+          className={`${className}`}
+          style={{ color: "#40c0e7" }}
+        />,
       );
     }
 
     if (isLimited) {
-      return (
-        <div className="bg-primary-bg/50 rounded-full p-1.5">
-          <Icon
-            className={`${className}`}
-            style={{ color: "#ffd700" }}
-            icon="mdi:clock"
-          />
-        </div>
+      return wrap(
+        <Icon
+          className={`${className}`}
+          style={{ color: "#ffd700" }}
+          icon="mdi:clock"
+        />,
       );
     }
   } else {
     // Default behavior: prioritize limited/seasonal badges
     if (isSeasonal) {
-      return (
-        <div className="bg-primary-bg/50 rounded-full p-1.5">
-          <Icon
-            icon="noto-v1:snowflake"
-            className={`${className}`}
-            style={{ color: "#40c0e7" }}
-          />
-        </div>
+      return wrap(
+        <Icon
+          icon="noto-v1:snowflake"
+          className={`${className}`}
+          style={{ color: "#40c0e7" }}
+        />,
       );
     }
 
     if (isLimited) {
-      return (
-        <div className="bg-primary-bg/50 rounded-full p-1.5">
-          <Icon
-            className={`${className}`}
-            style={{ color: "#ffd700" }}
-            icon="mdi:clock"
-          />
-        </div>
+      return wrap(
+        <Icon
+          className={`${className}`}
+          style={{ color: "#ffd700" }}
+          icon="mdi:clock"
+        />,
       );
     }
 
     // Show category icon
     const categoryIcon = getCategoryIcon(type);
     if (categoryIcon) {
-      return (
-        <div className="bg-primary-bg/50 rounded-full p-1.5">
-          <categoryIcon.Icon
-            className={`${className}`}
-            style={{ color: getCategoryColor(type) }}
-          />
-        </div>
+      return wrap(
+        <categoryIcon.Icon
+          className={`${className}`}
+          style={{ color: getCategoryColor(type) }}
+        />,
       );
     }
   }

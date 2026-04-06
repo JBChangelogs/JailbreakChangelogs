@@ -1,9 +1,9 @@
 import { Suspense } from "react";
-import Breadcrumb from "@/components/Layout/Breadcrumb";
-import CalculatorDescription from "@/components/Values/Calculator/CalculatorDescription";
-import { CalculatorForm } from "@/components/Values/Calculator/CalculatorForm";
+import { CalculatorClient } from "./CalculatorClient";
 import { fetchItems } from "@/utils/api";
 import Loading from "./loading";
+import Breadcrumb from "@/components/Layout/Breadcrumb";
+import CalculatorDescription from "@/components/Values/Calculator/CalculatorDescription";
 
 export const revalidate = 120; // Revalidate every 2 minutes
 
@@ -25,5 +25,5 @@ async function CalculatorFormWrapper() {
     return { ...item, is_sub: false, side: undefined };
   });
 
-  return <CalculatorForm initialItems={tradeItems} />;
+  return <CalculatorClient initialItems={tradeItems} />;
 }

@@ -9,21 +9,19 @@ import { Tooltip, TooltipTrigger } from "@/components/ui/tooltip";
 interface CalculatorItemGridProps {
   items: TradeItem[];
   onRemove?: (instanceId: string) => void;
-  onValueTypeChange: (
+  onValueTypeChange?: (
     itemId: number,
     valueType: "cash" | "duped",
     instanceId?: string,
   ) => void;
-  getSelectedValueString: (item: TradeItem) => string;
-  getSelectedValueType: (item: TradeItem) => "cash" | "duped";
+  getSelectedValueString?: (item: TradeItem) => string;
+  getSelectedValueType?: (item: TradeItem) => "cash" | "duped";
   side?: "offering" | "requesting";
 }
 
 export const CalculatorItemGrid: React.FC<CalculatorItemGridProps> = ({
   items,
   onRemove,
-  onValueTypeChange,
-  getSelectedValueType,
   side,
 }) => {
   if (items.length === 0) {
@@ -34,12 +32,10 @@ export const CalculatorItemGrid: React.FC<CalculatorItemGridProps> = ({
       }
       // Scroll to items grid after a short delay to ensure tab switch completes
       setTimeout(() => {
-        const itemsGrid = document.querySelector(
-          '[data-component="available-items-grid"]',
-        );
-        if (itemsGrid) {
-          itemsGrid.scrollIntoView({ behavior: "smooth", block: "start" });
-        }
+        const target =
+          document.querySelector('[data-component="scan-trade-from-image"]') ??
+          document.querySelector('[data-component="trade-item-picker-v2"]');
+        target?.scrollIntoView({ behavior: "smooth", block: "start" });
       }, 100);
     };
 
@@ -95,8 +91,7 @@ export const CalculatorItemGrid: React.FC<CalculatorItemGridProps> = ({
         <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-4">
           {items.map((item) => {
             const displayName = item.name;
-            const selectedType = side ? getSelectedValueType(item) : "cash";
-            const isDupedSelected = selectedType === "duped";
+            const isDupedSelected = !!item.isDuped;
 
             return (
               <div key={item.instanceId} className="group relative">
@@ -120,6 +115,13 @@ export const CalculatorItemGrid: React.FC<CalculatorItemGridProps> = ({
                         draggable={false}
                         onError={handleImageError}
                       />
+                      {isDupedSelected && (
+                        <div className="absolute top-1 right-1 z-10 flex flex-col items-end gap-1">
+                          <span className="bg-status-error/90 text-form-button-text rounded px-1.5 py-0.5 text-[10px] leading-none font-semibold">
+                            Duped
+                          </span>
+                        </div>
+                      )}
                     </div>
                   </TooltipTrigger>
                   <TradeItemHoverTooltip
@@ -137,39 +139,6 @@ export const CalculatorItemGrid: React.FC<CalculatorItemGridProps> = ({
                   <p className="text-primary-text line-clamp-2 text-xs font-medium">
                     {displayName}
                   </p>
-                </div>
-
-                <div className="mt-2 flex flex-col items-center gap-1">
-                  <div className="bg-secondary-bg border-border-card inline-flex rounded-lg border p-0.5">
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onValueTypeChange(item.id, "cash", item.instanceId);
-                      }}
-                      className={`cursor-pointer rounded-md px-2.5 py-1 text-xs font-medium transition-all duration-200 ${
-                        !isDupedSelected
-                          ? "bg-status-success text-white shadow-sm"
-                          : "bg-tertiary-bg text-secondary-text hover:text-primary-text"
-                      }`}
-                    >
-                      Clean
-                    </button>
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onValueTypeChange(item.id, "duped", item.instanceId);
-                      }}
-                      className={`cursor-pointer rounded-md px-2.5 py-1 text-xs font-medium transition-all duration-200 ${
-                        isDupedSelected
-                          ? "bg-status-error text-white shadow-sm"
-                          : "bg-tertiary-bg text-secondary-text hover:text-primary-text"
-                      }`}
-                    >
-                      Duped
-                    </button>
-                  </div>
                 </div>
               </div>
             );

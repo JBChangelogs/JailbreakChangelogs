@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useMemo } from "react";
 import { TradeItem } from "@/types/trading";
-import { AvailableItemsGrid } from "../../trading/AvailableItemsGrid";
+import TradeItemPickerV2 from "../../trading/TradeItemPickerV2";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { useLockBodyScroll } from "@/hooks/useLockBodyScroll";
 import {
@@ -20,13 +20,17 @@ import { ActionButtons } from "./ActionButtons";
 import { TradeSidePanel } from "./TradeSidePanel";
 import { SimilarItemsTab } from "./SimilarItemsTab";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ScanTradeFromImage } from "./ScanTradeFromImage";
+import { toast } from "sonner";
 
 interface CalculatorFormProps {
   initialItems?: TradeItem[];
+  itemsInputMode?: "picker" | "scan";
 }
 
 export const CalculatorForm: React.FC<CalculatorFormProps> = ({
   initialItems = [],
+  itemsInputMode = "picker",
 }) => {
   const [offeringItems, setOfferingItems] = useState<TradeItem[]>([]);
   const [requestingItems, setRequestingItems] = useState<TradeItem[]>([]);
@@ -148,6 +152,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
             instanceId:
               item.instanceId || Math.random().toString(36).substring(2, 11),
             isDuped: item.isDuped || false,
+            isOG: false,
           }));
 
         setOfferingItems(mapItems(offering || []));
@@ -218,7 +223,8 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
     const itemWithInstance = {
       ...item,
       instanceId: Math.random().toString(36).substring(2, 11),
-      isDuped: false,
+      isDuped: !!item.isDuped,
+      isOG: false,
     };
 
     if (side === "offering") {
@@ -227,6 +233,56 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
       setRequestingItems((prev) => [...prev, itemWithInstance]);
     }
     return true;
+  };
+
+  const handleScanTradeSuccess = (result: {
+    offering: Array<{ id: number; name: string; type: string }>;
+    requesting: Array<{ id: number; name: string; type: string }>;
+  }) => {
+    const itemById = new Map<number, TradeItem>();
+    initialItems.forEach((it) => {
+      itemById.set(it.id, it);
+    });
+
+    const toTradeItem = (
+      scanned: { id: number; name: string; type: string },
+      side: "offering" | "requesting",
+    ): TradeItem => {
+      const base = itemById.get(scanned.id);
+      const baseName = base?.base_name || base?.name || scanned.name;
+
+      return {
+        id: scanned.id,
+        name: base?.name || scanned.name,
+        type: base?.type || scanned.type,
+        cash_value: base?.cash_value ?? "N/A",
+        duped_value: base?.duped_value ?? "N/A",
+        is_limited: base?.is_limited ?? null,
+        is_seasonal: base?.is_seasonal ?? null,
+        tradable: base?.tradable ?? 1,
+        demand: base?.demand ?? base?.data?.demand ?? "N/A",
+        trend: base?.trend ?? base?.data?.trend ?? "N/A",
+        base_name: baseName,
+        side,
+        isDuped: false,
+        isOG: false,
+        instanceId: Math.random().toString(36).substring(2, 11),
+      };
+    };
+
+    const newOffering = result.offering.map((it) =>
+      toTradeItem(it, "offering"),
+    );
+    const newRequesting = result.requesting.map((it) =>
+      toTradeItem(it, "requesting"),
+    );
+
+    setOfferingItems(newOffering);
+    setRequestingItems(newRequesting);
+    saveItemsToLocalStorage(newOffering, newRequesting);
+    toast.success(
+      `Filled ${newOffering.length} offering and ${newRequesting.length} requesting items.`,
+    );
   };
 
   const handleRemoveItem = (
@@ -318,6 +374,11 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
 
   return (
     <div className="space-y-6">
+      {itemsInputMode === "scan" && (
+        <div>
+          <ScanTradeFromImage onScanSuccess={handleScanTradeSuccess} />
+        </div>
+      )}
       {/* Restore Modal */}
       <ConfirmDialog
         isOpen={showRestoreModal}
@@ -431,12 +492,22 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
       >
         {activeTab === "items" && (
           <div className="mb-8">
-            <AvailableItemsGrid
-              items={initialItems.filter((i) => !i.is_sub)}
-              onSelect={handleAddItem}
-              selectedItems={[...offeringItems, ...requestingItems]}
-              requireAuth={false}
-            />
+            {itemsInputMode === "picker" ? (
+              <TradeItemPickerV2
+                items={initialItems.filter((i) => !i.is_sub)}
+                onSelect={handleAddItem}
+                selectedItems={[...offeringItems, ...requestingItems]}
+                customTypes={[]}
+                onAddCustomType={() => {}}
+                allowOg={false}
+              />
+            ) : (
+              <div className="border-border-card bg-secondary-bg rounded-lg border p-6 text-center">
+                <p className="text-secondary-text text-sm">
+                  Use the scan box above to upload a trade screenshot.
+                </p>
+              </div>
+            )}
           </div>
         )}
       </div>

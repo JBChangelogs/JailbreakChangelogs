@@ -205,23 +205,25 @@ export const ItemGrid: React.FC<ItemGridProps> = ({
                         onError={handleImageError}
                       />
                     )}
-                    {item.count > 1 && (
-                      <div className="absolute top-1 right-1 z-5 rounded-full border border-white/20 bg-black/70 px-2 py-0.5 text-xs leading-none font-semibold text-white shadow-sm backdrop-blur-sm [text-shadow:0_1px_2px_rgba(0,0,0,0.95),0_0_4px_rgba(0,0,0,0.85)]">
-                        ×{item.count}
-                      </div>
-                    )}
-                    {(item.isDuped || item.isOG) && (
-                      <div className="absolute bottom-1 left-1 z-5 flex gap-1">
-                        {item.isDuped && (
-                          <span className="bg-status-error/90 text-form-button-text rounded px-1.5 py-0.5 text-[10px] leading-none font-semibold">
-                            Duped
-                          </span>
+                    {(item.count > 1 || item.isDuped || item.isOG) && (
+                      <div className="absolute top-1 right-1 z-10 flex flex-col items-end gap-1">
+                        {item.count > 1 && (
+                          <div className="rounded-full border border-white/20 bg-black/70 px-2 py-0.5 text-xs leading-none font-semibold text-white shadow-sm backdrop-blur-sm [text-shadow:0_1px_2px_rgba(0,0,0,0.95),0_0_4px_rgba(0,0,0,0.85)]">
+                            ×{item.count}
+                          </div>
                         )}
-                        {item.isOG && (
-                          <span className="bg-tertiary-bg/80 text-primary-text rounded px-1 py-0.5 text-[9px] leading-none font-semibold">
-                            OG
-                          </span>
-                        )}
+                        <div className="flex gap-1">
+                          {item.isDuped && (
+                            <span className="bg-status-error/90 text-form-button-text rounded px-1.5 py-0.5 text-[10px] leading-none font-semibold">
+                              Duped
+                            </span>
+                          )}
+                          {item.isOG && (
+                            <span className="bg-tertiary-bg/80 text-primary-text rounded px-1 py-0.5 text-[9px] leading-none font-semibold">
+                              OG
+                            </span>
+                          )}
+                        </div>
                       </div>
                     )}
                   </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment, useMemo, useState } from "react";
+import { Fragment, useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { TradeItem } from "@/types/trading";
@@ -8,6 +8,8 @@ import { toast } from "sonner";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Icon } from "@/components/ui/IconWrapper";
 import { CategoryIconBadge } from "@/utils/categoryIcons";
+import { getDemandColor, getTrendColor } from "@/utils/badgeColors";
+import { formatCurrencyValue as formatCompactCurrencyValue } from "@/utils/currency";
 import { Pagination } from "@/components/ui/Pagination";
 import { FilterSort, ValueSort } from "@/types";
 import { filterByValueSort, sortByValueSort } from "@/utils/values";
@@ -57,10 +59,54 @@ interface TradeItemPickerV2Props {
   onSelect: (item: TradeItem, side: TradeSide) => boolean;
   onAddCustomType: (customId: string, side: TradeSide) => void;
   variant?: "default" | "compact";
+  allowOg?: boolean;
 }
 
 const ITEMS_PER_PAGE_DEFAULT = 28;
 const ITEMS_PER_PAGE_COMPACT = 20;
+
+const parseValueString = (
+  valStr: string | number | null | undefined,
+): number => {
+  if (valStr === undefined || valStr === null) return 0;
+  const cleanedValStr = String(valStr).toLowerCase().replace(/,/g, "");
+  if (cleanedValStr === "n/a" || cleanedValStr === "null") return 0;
+  if (cleanedValStr.endsWith("m")) {
+    return parseFloat(cleanedValStr) * 1_000_000;
+  } else if (cleanedValStr.endsWith("k")) {
+    return parseFloat(cleanedValStr) * 1_000;
+  } else if (cleanedValStr.endsWith("b")) {
+    return parseFloat(cleanedValStr) * 1_000_000_000;
+  }
+  return parseFloat(cleanedValStr);
+};
+
+const formatValue = (
+  valStr: string | number | null | undefined,
+  isMobile: boolean,
+): string => {
+  if (valStr === undefined || valStr === null) return "N/A";
+  const raw = String(valStr).trim();
+  if (!raw || raw.toLowerCase() === "n/a" || raw.toLowerCase() === "null") {
+    return "N/A";
+  }
+
+  // Match existing /values behavior:
+  // - On mobile, prefer short suffix values (e.g. "52m") when possible.
+  // - On desktop, prefer full values with commas (e.g. "52,000,000").
+  if (isMobile) {
+    if (/[kmb]$/i.test(raw)) return raw;
+    const parsed = parseValueString(raw);
+    if (!Number.isFinite(parsed) || parsed <= 0) return raw;
+    return formatCompactCurrencyValue(parsed).replace(/[KMB]$/, (m) =>
+      m.toLowerCase(),
+    );
+  }
+
+  const parsed = parseValueString(raw);
+  if (!Number.isFinite(parsed) || parsed <= 0) return raw;
+  return parsed.toLocaleString();
+};
 
 const CUSTOM_TYPE_DESCRIPTIONS: Record<string, string> = {
   adds: "Extra items added to sweeten the trade.",
@@ -80,7 +126,18 @@ export default function TradeItemPickerV2({
   onSelect,
   onAddCustomType,
   variant = "default",
+  allowOg = true,
 }: TradeItemPickerV2Props) {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const media = window.matchMedia("(max-width: 639px)");
+    const update = () => setIsMobile(media.matches);
+    update();
+    media.addEventListener("change", update);
+    return () => media.removeEventListener("change", update);
+  }, []);
+
   const [searchQuery, setSearchQuery] = useState("");
   const [activeSide, setActiveSide] = useState<TradeSide>("offering");
   const [itemConditionsBySide, setItemConditionsBySide] = useState<
@@ -245,10 +302,10 @@ export default function TradeItemPickerV2({
   const gridClassName =
     variant === "compact"
       ? "mb-8 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5"
-      : "mb-8 grid grid-cols-2 gap-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-7";
+      : "mb-8 grid grid-cols-2 gap-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7";
 
   return (
-    <div>
+    <div data-component="trade-item-picker-v2">
       <div className="mb-4">
         <Tabs
           value={activeSide}
@@ -265,72 +322,80 @@ export default function TradeItemPickerV2({
         </Tabs>
       </div>
 
-      <div className="mb-2 text-center">
-        <p className="text-secondary-text text-xs tracking-wider uppercase">
-          Custom Trade Tags
-        </p>
-        <p className="text-secondary-text/80 mt-1 text-sm">
-          Quick shortcuts like “Overpays”, “Adds”, or “Upgrades”. Hover to learn
-          what each tag means.
-        </p>
-      </div>
+      {customTypes.length > 0 && (
+        <>
+          <div className="mb-2 text-center">
+            <p className="text-secondary-text text-xs tracking-wider uppercase">
+              Custom Trade Tags
+            </p>
+            <p className="text-secondary-text/80 mt-1 text-sm">
+              Quick shortcuts like “Overpays”, “Adds”, or “Upgrades”. Hover to
+              learn what each tag means.
+            </p>
+          </div>
 
-      <div className="mb-4 flex flex-wrap justify-center gap-3 md:gap-4">
-        {customTypes.map((customType) => {
-          const selectedOnSide =
-            activeSide === "offering"
-              ? selectedCustomBySide.offering.has(customType.id)
-              : selectedCustomBySide.requesting.has(customType.id);
-          const description =
-            CUSTOM_TYPE_DESCRIPTIONS[customType.id] ??
-            "A custom trade tag used to describe your offer.";
+          <div className="mb-4 flex flex-wrap justify-center gap-3 md:gap-4">
+            {customTypes.map((customType) => {
+              const selectedOnSide =
+                activeSide === "offering"
+                  ? selectedCustomBySide.offering.has(customType.id)
+                  : selectedCustomBySide.requesting.has(customType.id);
+              const description =
+                CUSTOM_TYPE_DESCRIPTIONS[customType.id] ??
+                "A custom trade tag used to describe your offer.";
 
-          return (
-            <Tooltip key={customType.id}>
-              <TooltipTrigger asChild>
-                <span className={selectedOnSide ? "cursor-not-allowed" : ""}>
-                  <button
-                    type="button"
-                    onClick={() => onAddCustomType(customType.id, activeSide)}
-                    disabled={selectedOnSide}
-                    className={`border-border-card bg-secondary-bg flex aspect-square h-20 w-20 items-center justify-center rounded-lg border p-2 transition-colors md:h-24 md:w-24 ${
-                      selectedOnSide
-                        ? "cursor-not-allowed opacity-50"
-                        : "hover:bg-tertiary-bg cursor-pointer"
-                    }`}
-                    aria-label={customType.label}
-                  >
-                    <div className="relative aspect-square w-full overflow-hidden rounded">
-                      <Image
-                        src={getTradeItemImagePath({
-                          id: customType.id,
-                          instanceId: customType.id,
-                          type: "Custom",
-                          name: customType.label,
-                        })}
-                        alt={customType.label}
-                        fill
-                        className="object-cover"
-                        onError={handleImageError}
-                      />
+              return (
+                <Tooltip key={customType.id}>
+                  <TooltipTrigger asChild>
+                    <span
+                      className={selectedOnSide ? "cursor-not-allowed" : ""}
+                    >
+                      <button
+                        type="button"
+                        onClick={() =>
+                          onAddCustomType(customType.id, activeSide)
+                        }
+                        disabled={selectedOnSide}
+                        className={`border-border-card bg-secondary-bg flex aspect-square h-20 w-20 items-center justify-center rounded-lg border p-2 transition-colors md:h-24 md:w-24 ${
+                          selectedOnSide
+                            ? "cursor-not-allowed opacity-50"
+                            : "hover:bg-tertiary-bg cursor-pointer"
+                        }`}
+                        aria-label={customType.label}
+                      >
+                        <div className="relative aspect-square w-full overflow-hidden rounded">
+                          <Image
+                            src={getTradeItemImagePath({
+                              id: customType.id,
+                              instanceId: customType.id,
+                              type: "Custom",
+                              name: customType.label,
+                            })}
+                            alt={customType.label}
+                            fill
+                            className="object-cover"
+                            onError={handleImageError}
+                          />
+                        </div>
+                      </button>
+                    </span>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <div className="max-w-[240px]">
+                      <p className="text-primary-text text-sm font-semibold">
+                        {customType.label}
+                      </p>
+                      <p className="text-secondary-text mt-1 text-xs">
+                        {description}
+                      </p>
                     </div>
-                  </button>
-                </span>
-              </TooltipTrigger>
-              <TooltipContent>
-                <div className="max-w-[240px]">
-                  <p className="text-primary-text text-sm font-semibold">
-                    {customType.label}
-                  </p>
-                  <p className="text-secondary-text mt-1 text-xs">
-                    {description}
-                  </p>
-                </div>
-              </TooltipContent>
-            </Tooltip>
-          );
-        })}
-      </div>
+                  </TooltipContent>
+                </Tooltip>
+              );
+            })}
+          </div>
+        </>
+      )}
 
       <div className="mb-4 flex flex-col gap-4 lg:flex-row lg:gap-4">
         <div className="w-full lg:w-1/3">
@@ -502,8 +567,10 @@ export default function TradeItemPickerV2({
         <div className={gridClassName}>
           {pagedItems.map((item) => {
             const itemKey = getTradeItemIdentifier(item);
-            const condition =
+            const rawCondition =
               itemConditionsBySide[activeSide]?.[itemKey] || "clean";
+            const condition =
+              !allowOg && rawCondition === "og" ? "clean" : rawCondition;
             const flags = getConditionFlags(condition);
 
             const addToSide = () => {
@@ -603,31 +670,33 @@ export default function TradeItemPickerV2({
                         >
                           Duped
                         </button>
-                        <button
-                          type="button"
-                          onClick={(event) => {
-                            event.stopPropagation();
-                            setItemConditionsBySide((prev) => ({
-                              ...prev,
-                              [activeSide]: {
-                                ...prev[activeSide],
-                                [itemKey]: "og",
-                              },
-                            }));
-                          }}
-                          className={`cursor-pointer rounded border px-1.5 py-0.5 text-[10px] font-medium transition-colors ${
-                            condition === "og"
-                              ? "bg-tertiary-bg border-border-focus text-primary-text"
-                              : "bg-tertiary-bg border-border-card text-secondary-text"
-                          }`}
-                        >
-                          OG
-                        </button>
+                        {allowOg && (
+                          <button
+                            type="button"
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              setItemConditionsBySide((prev) => ({
+                                ...prev,
+                                [activeSide]: {
+                                  ...prev[activeSide],
+                                  [itemKey]: "og",
+                                },
+                              }));
+                            }}
+                            className={`cursor-pointer rounded border px-1.5 py-0.5 text-[10px] font-medium transition-colors ${
+                              condition === "og"
+                                ? "bg-tertiary-bg border-border-focus text-primary-text"
+                                : "bg-tertiary-bg border-border-card text-secondary-text"
+                            }`}
+                          >
+                            OG
+                          </button>
+                        )}
                       </div>
                     </div>
                   );
                 })()}
-                <div className="relative mb-1.5 aspect-square w-full overflow-hidden rounded-lg">
+                <div className="bg-tertiary-bg relative mb-1.5 aspect-video w-full overflow-hidden rounded-lg">
                   <Image
                     src={getTradeItemImagePath(item, true)}
                     alt={item.name}
@@ -635,16 +704,76 @@ export default function TradeItemPickerV2({
                     className="object-cover"
                     onError={handleImageError}
                   />
-                  <div className="absolute top-2 right-2 z-10">
+                  <div className="absolute top-1.5 right-1.5 z-10">
                     <CategoryIconBadge
                       type={item.type}
-                      isLimited={item.is_limited === 1}
-                      isSeasonal={item.is_seasonal === 1}
-                      preferItemType={true}
+                      isLimited={
+                        item.is_limited === 1 || item.data?.is_limited === 1
+                      }
+                      isSeasonal={
+                        item.is_seasonal === 1 || item.data?.is_seasonal === 1
+                      }
+                      withContainer={false}
                       className="h-4 w-4 sm:h-5 sm:w-5"
                     />
                   </div>
                 </div>
+                {item.tradable === 1 && (
+                  <div className="text-secondary-text space-y-1 text-xs">
+                    <div className="bg-secondary-bg flex items-center justify-between rounded-lg p-1.5">
+                      <span className="text-secondary-text text-xs font-medium whitespace-nowrap">
+                        Cash
+                      </span>
+                      <span className="bg-button-info text-form-button-text inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold shadow-sm">
+                        {formatValue(
+                          item.cash_value ?? item.data?.cash_value,
+                          isMobile,
+                        )}
+                      </span>
+                    </div>
+                    <div className="bg-secondary-bg flex items-center justify-between rounded-lg p-1.5">
+                      <span className="text-secondary-text text-xs font-medium whitespace-nowrap">
+                        Duped
+                      </span>
+                      <span className="bg-button-info text-form-button-text inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold shadow-sm">
+                        {formatValue(
+                          item.duped_value ?? item.data?.duped_value,
+                          isMobile,
+                        )}
+                      </span>
+                    </div>
+                    <div className="bg-secondary-bg flex items-center justify-between rounded-lg p-1.5">
+                      <span className="text-secondary-text text-xs font-medium whitespace-nowrap">
+                        Demand
+                      </span>
+                      {(() => {
+                        const d = item.demand ?? item.data?.demand ?? "N/A";
+                        return (
+                          <span
+                            className={`${getDemandColor(d)} inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold shadow-sm`}
+                          >
+                            {d === "N/A" ? "Unknown" : d}
+                          </span>
+                        );
+                      })()}
+                    </div>
+                    <div className="bg-secondary-bg flex items-center justify-between rounded-lg p-1.5">
+                      <span className="text-secondary-text text-xs font-medium whitespace-nowrap">
+                        Trend
+                      </span>
+                      {(() => {
+                        const t = item.trend ?? item.data?.trend ?? "N/A";
+                        return (
+                          <span
+                            className={`${getTrendColor(t)} inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold shadow-sm`}
+                          >
+                            {t === "N/A" ? "Unknown" : t}
+                          </span>
+                        );
+                      })()}
+                    </div>
+                  </div>
+                )}
               </div>
             );
           })}
