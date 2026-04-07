@@ -175,6 +175,7 @@ export default function UserStatsSection({
   const updatedRelativeTime = useRealTimeRelativeDate(
     currentData?.updated_at || 0,
   );
+  const tradeNote = (currentData?.trade_note?.note || "").trim();
 
   // Fetch bot user data if needed
   const { data: botRobloxData } = useRobloxUserDataQuery(
@@ -589,7 +590,6 @@ export default function UserStatsSection({
           ? currentData.gamepasses
           : [];
         const hasGamepasses = gamepasses.length > 0;
-
         const GamepassesBlock = hasGamepasses ? (
           <div>
             <div className="mb-2 flex items-center justify-between">
@@ -668,6 +668,41 @@ export default function UserStatsSection({
                 });
               })()}
             </div>
+          </div>
+        ) : null;
+
+        const TradeNoteBlock = tradeNote ? (
+          <div className="border-border-card bg-tertiary-bg rounded-lg border p-4">
+            <div className="mb-3 flex items-start justify-between gap-3">
+              <div className="flex items-center gap-2">
+                <h3 className="text-primary-text text-sm font-medium">
+                  Last Trade Note
+                </h3>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span className="inline-flex">
+                      <Icon
+                        icon="material-symbols:info-outline"
+                        className="text-secondary-text h-4 w-4 cursor-help"
+                        inline={true}
+                      />
+                    </span>
+                  </TooltipTrigger>
+                  <TooltipContent
+                    side="top"
+                    className="bg-secondary-bg text-primary-text max-w-[260px] border-none shadow-[var(--color-card-shadow)]"
+                  >
+                    <p>
+                      This note comes from the user&apos;s last inventory scan.
+                    </p>
+                  </TooltipContent>
+                </Tooltip>
+              </div>
+            </div>
+
+            <p className="text-primary-text text-sm break-words whitespace-pre-wrap italic">
+              &quot;{tradeNote}&quot;
+            </p>
           </div>
         ) : null;
 
@@ -847,7 +882,19 @@ export default function UserStatsSection({
         if (hasGamepasses) {
           return (
             <div className="mt-4 grid gap-4 lg:grid-cols-2 lg:items-start">
-              {GamepassesBlock}
+              <div className="space-y-4">
+                {GamepassesBlock}
+                {TradeNoteBlock}
+              </div>
+              {ScanMetadataBlock}
+            </div>
+          );
+        }
+
+        if (TradeNoteBlock) {
+          return (
+            <div className="mt-4 space-y-4">
+              {TradeNoteBlock}
               {ScanMetadataBlock}
             </div>
           );

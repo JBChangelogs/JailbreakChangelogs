@@ -15,6 +15,8 @@ import { TradeAdForm } from "./TradeAdForm";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { isCustomTradeItem, tradeItemIdsEqual } from "@/utils/tradeItems";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { INVENTORY_API_SOURCE_HEADER, INVENTORY_API_URL } from "@/utils/api";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -55,7 +57,12 @@ export default function TradeAds({
   initialTradeAds = [],
   initialItems = [],
 }: TradeAdsProps) {
-  const { user, isAuthenticated, setLoginModal } = useAuthContext();
+  const {
+    user,
+    isAuthenticated,
+    isLoading: isAuthLoading,
+    setLoginModal,
+  } = useAuthContext();
   const hasAutoLoadedTradeAdsRef = useRef(false);
   const lastIsAuthenticatedRef = useRef(isAuthenticated);
   const [tradeAds, setTradeAds] = useState<TradeAd[]>(initialTradeAds);
@@ -69,6 +76,19 @@ export default function TradeAds({
   const [activeTab, setActiveTab] = useState<"view" | "create" | "myads">(
     "view",
   );
+  const [itemsInputMode, setItemsInputMode] = useState<"values" | "inventory">(
+    "values",
+  );
+  const [inventoryItems, setInventoryItems] = useState<TradeItem[]>([]);
+  const [inventoryStatus, setInventoryStatus] = useState<
+    "idle" | "loading" | "loaded" | "error"
+  >("idle");
+  const [inventoryError, setInventoryError] = useState<string | null>(null);
+  const [inventoryTradeNote, setInventoryTradeNote] = useState<string | null>(
+    null,
+  );
+  const lastFetchedInventoryUserIdRef = useRef<string | null>(null);
+  const inventoryFetchControllerRef = useRef<AbortController | null>(null);
   const [page, setPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [searchScope, setSearchScope] = useState<
@@ -82,6 +102,238 @@ export default function TradeAds({
   >("contains");
   const itemsPerPage = 9;
   const currentUserId = user?.id || null;
+
+  const robloxId = (user?.roblox_id ?? "").trim();
+  const hasValidRobloxId = /^\d+$/.test(robloxId);
+  const canLoadInventory = Boolean(isAuthenticated && hasValidRobloxId);
+  const shouldUseInventoryItems =
+    activeTab === "create" && itemsInputMode === "inventory";
+
+  const sleep = (ms: number) =>
+    new Promise<void>((resolve) => setTimeout(resolve, ms));
+
+  const isRetryableFetchError = (error: unknown): boolean => {
+    if (!(error instanceof Error)) return false;
+    if (error.name === "AbortError") return false;
+    const message = error.message.toLowerCase();
+    return (
+      message.includes("fetch failed") ||
+      message.includes("network") ||
+      message.includes("timeout") ||
+      message.includes("connect") ||
+      message.includes("und_err")
+    );
+  };
+
+  useEffect(() => {
+    if (!shouldUseInventoryItems) return;
+
+    if (!canLoadInventory) {
+      setInventoryItems([]);
+      setInventoryStatus("idle");
+      setInventoryError(null);
+      setInventoryTradeNote(null);
+      lastFetchedInventoryUserIdRef.current = null;
+      return;
+    }
+
+    if (!INVENTORY_API_URL) {
+      setInventoryItems([]);
+      setInventoryStatus("error");
+      setInventoryError(
+        "Inventory API is not configured (NEXT_PUBLIC_INVENTORY_API_URL missing).",
+      );
+      setInventoryTradeNote(null);
+      lastFetchedInventoryUserIdRef.current = null;
+      return;
+    }
+
+    if (lastFetchedInventoryUserIdRef.current === robloxId) return;
+    lastFetchedInventoryUserIdRef.current = robloxId;
+
+    inventoryFetchControllerRef.current?.abort();
+    const controller = new AbortController();
+    inventoryFetchControllerRef.current = controller;
+    let didFinish = false;
+
+    const fetchInventory = async () => {
+      setInventoryStatus("loading");
+      setInventoryError(null);
+
+      try {
+        const url = `${INVENTORY_API_URL}/user/inventory?id=${encodeURIComponent(robloxId)}&nocache=false`;
+        const retryStatuses = new Set([408, 425, 429, 500, 502, 503, 504]);
+        const maxAttempts = 3;
+
+        let response: Response | null = null;
+        for (let attempt = 0; attempt < maxAttempts; attempt++) {
+          if (controller.signal.aborted) {
+            throw new DOMException("Aborted", "AbortError");
+          }
+
+          try {
+            response = await fetch(url, {
+              method: "GET",
+              headers: {
+                "User-Agent": "JailbreakChangelogs-Trading/2.0",
+                "X-Source": INVENTORY_API_SOURCE_HEADER ?? "",
+              },
+              cache: "no-store",
+              signal: controller.signal,
+            });
+          } catch (error) {
+            if (controller.signal.aborted) {
+              throw new DOMException("Aborted", "AbortError");
+            }
+
+            if (attempt < maxAttempts - 1 && isRetryableFetchError(error)) {
+              const baseDelayMs = 500 * Math.pow(2, attempt);
+              const jitterMs = Math.floor(Math.random() * 250);
+              await sleep(baseDelayMs + jitterMs);
+              continue;
+            }
+
+            throw error;
+          }
+
+          if (
+            response &&
+            !response.ok &&
+            retryStatuses.has(response.status) &&
+            attempt < maxAttempts - 1
+          ) {
+            response.body?.cancel();
+            const baseDelayMs = 500 * Math.pow(2, attempt);
+            const jitterMs = Math.floor(Math.random() * 250);
+            await sleep(baseDelayMs + jitterMs);
+            response = null;
+            continue;
+          }
+
+          break;
+        }
+
+        if (!response) {
+          throw new Error("Failed to load inventory (no response)");
+        }
+
+        const data = (await response.json()) as unknown;
+        if (!response.ok) {
+          const message =
+            (data &&
+            typeof data === "object" &&
+            "message" in data &&
+            typeof (data as { message?: unknown }).message === "string"
+              ? (data as { message: string }).message
+              : null) || `Failed to load inventory (${response.status})`;
+          throw new Error(message);
+        }
+
+        const record =
+          data && typeof data === "object" && !Array.isArray(data)
+            ? (data as Record<string, unknown>)
+            : null;
+        const rawItems = Array.isArray(record?.data) ? record?.data : [];
+        const rawDuplicates = Array.isArray(record?.duplicates)
+          ? record?.duplicates
+          : [];
+
+        const inventoryIds: number[] = [];
+        const isDupedById = new Map<number, boolean>();
+        const pushId = (entry: unknown, isDuped: boolean) => {
+          if (!entry || typeof entry !== "object") return;
+          const id =
+            "id" in entry && typeof (entry as { id?: unknown }).id === "number"
+              ? (entry as { id: number }).id
+              : null;
+          if (id === null) return;
+          if (!isDupedById.has(id)) inventoryIds.push(id);
+          isDupedById.set(id, isDupedById.get(id) || isDuped);
+        };
+
+        rawItems.forEach((entry) => pushId(entry, false));
+        rawDuplicates.forEach((entry) => pushId(entry, true));
+
+        const itemById = new Map<number, TradeItem>();
+        items.forEach((it) => itemById.set(it.id, it));
+
+        const inventoryTradeItems = inventoryIds
+          .map((id) => itemById.get(id))
+          .filter((it): it is TradeItem => Boolean(it))
+          .map((it) => ({
+            ...it,
+            is_sub: false,
+            side: undefined,
+            isDuped: isDupedById.get(it.id) || false,
+          }));
+
+        const tradeNoteCandidate =
+          record?.trade_note &&
+          typeof record.trade_note === "object" &&
+          !Array.isArray(record.trade_note) &&
+          "note" in record.trade_note &&
+          typeof (record.trade_note as { note?: unknown }).note === "string"
+            ? ((record.trade_note as { note: string }).note ?? "").trim()
+            : "";
+        setInventoryTradeNote(tradeNoteCandidate || null);
+        setInventoryItems(inventoryTradeItems);
+        setInventoryStatus("loaded");
+        didFinish = true;
+      } catch (error) {
+        if (error instanceof DOMException && error.name === "AbortError") {
+          setInventoryStatus("idle");
+          lastFetchedInventoryUserIdRef.current = null;
+          return;
+        }
+        const message =
+          error instanceof Error ? error.message : "Failed to load inventory";
+        setInventoryItems([]);
+        setInventoryStatus("error");
+        setInventoryError(message);
+        setInventoryTradeNote(null);
+        lastFetchedInventoryUserIdRef.current = null;
+        didFinish = true;
+      }
+    };
+
+    void fetchInventory();
+
+    return () => {
+      controller.abort();
+      if (!didFinish) lastFetchedInventoryUserIdRef.current = null;
+    };
+  }, [shouldUseInventoryItems, canLoadInventory, robloxId, items]);
+
+  const ItemSourceTabsRow = () => {
+    if (activeTab !== "create") return null;
+    return (
+      <div className="mt-6">
+        <Tabs
+          value={itemsInputMode}
+          onValueChange={(v) => setItemsInputMode(v as "values" | "inventory")}
+        >
+          <TabsList fullWidth>
+            <TabsTrigger value="inventory" fullWidth>
+              Inventory Items
+            </TabsTrigger>
+            <TabsTrigger value="values" fullWidth>
+              Values List
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
+      </div>
+    );
+  };
+
+  const inventoryModeGate =
+    shouldUseInventoryItems &&
+    (isAuthLoading || !isAuthenticated || !hasValidRobloxId);
+
+  const createPickerItems = shouldUseInventoryItems
+    ? inventoryModeGate
+      ? []
+      : inventoryItems
+    : items;
 
   const normalizeCreatedTrade = useCallback(
     (raw: unknown): TradeAd | null => {
@@ -493,6 +745,7 @@ export default function TradeAds({
           onTabChange={handleTabChange}
           hasTradeAds={userTradeAds.length > 0}
         />
+        <ItemSourceTabsRow />
         <TradeAdSkeleton />
       </div>
     );
@@ -534,6 +787,7 @@ export default function TradeAds({
           onTabChange={handleTabChange}
           hasTradeAds={false}
         />
+        <ItemSourceTabsRow />
 
         <div
           role="tabpanel"
@@ -566,6 +820,7 @@ export default function TradeAds({
           onTabChange={handleTabChange}
           hasTradeAds={userTradeAds.length > 0}
         />
+        <ItemSourceTabsRow />
         {/* Tab Content */}
         <div
           role="tabpanel"
@@ -600,7 +855,48 @@ export default function TradeAds({
           className="mt-6"
         >
           {activeTab === "create" && (
-            <TradeAdForm onSuccess={handleCreateSuccess} items={items} />
+            <>
+              {shouldUseInventoryItems && inventoryModeGate && (
+                <div className="border-border-card bg-secondary-bg mb-6 rounded-lg border p-6 text-center">
+                  <p className="text-secondary-text text-sm">
+                    {isAuthLoading
+                      ? "Loading your account..."
+                      : !isAuthenticated
+                        ? "Log in to use your inventory items."
+                        : "Connect your Roblox account to use your inventory items."}
+                  </p>
+                  {!isAuthLoading && (
+                    <div className="mt-4 flex justify-center">
+                      <Button
+                        onClick={() =>
+                          setLoginModal({
+                            open: true,
+                            tab: isAuthenticated ? "roblox" : "discord",
+                          })
+                        }
+                      >
+                        {isAuthenticated ? "Connect Roblox" : "Log In"}
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              )}
+              {shouldUseInventoryItems &&
+                !inventoryModeGate &&
+                inventoryStatus === "error" && (
+                  <div className="border-border-card bg-secondary-bg mb-6 rounded-lg border p-6 text-center">
+                    <p className="text-secondary-text text-sm">
+                      {inventoryError || "Failed to load inventory items."}
+                    </p>
+                  </div>
+                )}
+              <TradeAdForm
+                onSuccess={handleCreateSuccess}
+                items={createPickerItems}
+                suggestedTradeNote={inventoryTradeNote}
+                autoFillSuggestedTradeNote={shouldUseInventoryItems}
+              />
+            </>
           )}
         </div>
       </div>
@@ -827,6 +1123,7 @@ export default function TradeAds({
         onTabChange={handleTabChange}
         hasTradeAds={userTradeAds.length > 0}
       />
+      <ItemSourceTabsRow />
 
       {/* Search Input - Show for view and myads tabs */}
       {(activeTab === "view" || activeTab === "myads") && !isSystemError && (
@@ -1134,7 +1431,48 @@ export default function TradeAds({
         className="mt-6"
       >
         {activeTab === "create" && (
-          <TradeAdForm onSuccess={handleCreateSuccess} items={items} />
+          <>
+            {shouldUseInventoryItems && inventoryModeGate && (
+              <div className="border-border-card bg-secondary-bg mb-6 rounded-lg border p-6 text-center">
+                <p className="text-secondary-text text-sm">
+                  {isAuthLoading
+                    ? "Loading your account..."
+                    : !isAuthenticated
+                      ? "Log in to use your inventory items."
+                      : "Connect your Roblox account to use your inventory items."}
+                </p>
+                {!isAuthLoading && (
+                  <div className="mt-4 flex justify-center">
+                    <Button
+                      onClick={() =>
+                        setLoginModal({
+                          open: true,
+                          tab: isAuthenticated ? "roblox" : "discord",
+                        })
+                      }
+                    >
+                      {isAuthenticated ? "Connect Roblox" : "Log In"}
+                    </Button>
+                  </div>
+                )}
+              </div>
+            )}
+            {shouldUseInventoryItems &&
+              !inventoryModeGate &&
+              inventoryStatus === "error" && (
+                <div className="border-border-card bg-secondary-bg mb-6 rounded-lg border p-6 text-center">
+                  <p className="text-secondary-text text-sm">
+                    {inventoryError || "Failed to load inventory items."}
+                  </p>
+                </div>
+              )}
+            <TradeAdForm
+              onSuccess={handleCreateSuccess}
+              items={createPickerItems}
+              suggestedTradeNote={inventoryTradeNote}
+              autoFillSuggestedTradeNote={shouldUseInventoryItems}
+            />
+          </>
         )}
       </div>
 

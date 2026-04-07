@@ -3,6 +3,11 @@ export interface TradeHistoryEntry {
   TradeTime: number;
 }
 
+export interface InventoryTradeNote {
+  note: string;
+  timestamp: number;
+}
+
 export interface InventoryItem {
   tradePopularMetric: number | null;
   item_id: number;
@@ -25,6 +30,7 @@ export interface InventoryItem {
 
 export interface InventoryData {
   user_id: string;
+  trade_note?: InventoryTradeNote | null;
   data: InventoryItem[];
   duplicates?: InventoryItem[];
   item_count: number;

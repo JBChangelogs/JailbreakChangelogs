@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { TradeItem } from "@/types/trading";
 import { UserData } from "@/types/auth";
@@ -27,6 +27,8 @@ import { sanitizeText } from "@/utils/sanitizeText";
 interface TradeAdFormProps {
   onSuccess?: (createdTrade?: unknown) => void;
   items?: TradeItem[];
+  suggestedTradeNote?: string | null;
+  autoFillSuggestedTradeNote?: boolean;
 }
 
 interface UserPremiumTier {
@@ -74,6 +76,8 @@ type V2CreateTradeItem =
 export const TradeAdForm: React.FC<TradeAdFormProps> = ({
   onSuccess,
   items = [],
+  suggestedTradeNote = null,
+  autoFillSuggestedTradeNote = false,
 }) => {
   const [loading, setLoading] = useState(true);
   const [offeringItems, setOfferingItems] = useState<TradeItem[]>([]);
@@ -88,6 +92,7 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
   const [showClearConfirmModal, setShowClearConfirmModal] = useState(false);
   const [tradeNote, setTradeNote] = useState("");
   const [userData, setUserData] = useState<UserData | null>(null);
+  const didAutoFillSuggestedNoteRef = React.useRef(false);
   const router = useRouter();
   const { modalState, closeModal, checkTradeAdDuration } = useSupporterModal();
   const { isAuthenticated, user, setLoginModal } = useAuthContext();
@@ -223,15 +228,18 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
     };
   };
 
-  const saveItemsToLocalStorage = (
-    offering: TradeItem[],
-    requesting: TradeItem[],
-    note: string = tradeNote,
-  ) => {
-    if (isAuthenticated) {
-      safeSetJSON("tradeAdFormItems", { offering, requesting, note });
-    }
-  };
+  const saveItemsToLocalStorage = useCallback(
+    (
+      offering: TradeItem[],
+      requesting: TradeItem[],
+      note: string = tradeNote,
+    ) => {
+      if (isAuthenticated) {
+        safeSetJSON("tradeAdFormItems", { offering, requesting, note });
+      }
+    },
+    [isAuthenticated, tradeNote],
+  );
 
   useEffect(() => {
     if (user) {
@@ -249,6 +257,7 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
     setRequestingItems([]);
     setTradeNote("");
     setExpirationHours(null);
+    didAutoFillSuggestedNoteRef.current = false;
 
     if (!isAuthenticated) return;
 
@@ -269,6 +278,24 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
       safeLocalStorage.removeItem("tradeAdFormItems");
     }
   }, [isAuthenticated]);
+
+  useEffect(() => {
+    if (!autoFillSuggestedTradeNote) return;
+    if (!suggestedTradeNote || !suggestedTradeNote.trim()) return;
+    if (didAutoFillSuggestedNoteRef.current) return;
+    if (tradeNote.trim()) return;
+
+    didAutoFillSuggestedNoteRef.current = true;
+    setTradeNote(suggestedTradeNote);
+    saveItemsToLocalStorage(offeringItems, requestingItems, suggestedTradeNote);
+  }, [
+    autoFillSuggestedTradeNote,
+    suggestedTradeNote,
+    tradeNote,
+    offeringItems,
+    requestingItems,
+    saveItemsToLocalStorage,
+  ]);
 
   const handleRestoreItems = () => {
     try {
@@ -939,16 +966,26 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
           <div className="border-border-card bg-secondary-bg rounded-lg border p-4">
             <div className="mb-1">
               <div>
-                <h3 className="text-primary-text font-medium">
-                  Trade Note{" "}
-                  <span className="text-secondary-text">(optional)</span>
-                </h3>
-                <p className="text-secondary-text mt-1 text-xs">
-                  Trade notes help others better understand your ad. Adding a
-                  short note is encouraged.
-                </p>
+                <div>
+                  <h3 className="text-primary-text font-medium">
+                    Trade Note{" "}
+                    <span className="text-secondary-text">(optional)</span>
+                  </h3>
+                  <p className="text-secondary-text mt-1 text-xs">
+                    Trade notes help others better understand your ad. Adding a
+                    short note is encouraged.
+                  </p>
+                </div>
               </div>
             </div>
+            {autoFillSuggestedTradeNote &&
+              suggestedTradeNote &&
+              suggestedTradeNote.trim() &&
+              tradeNote.trim() === suggestedTradeNote.trim() && (
+                <p className="text-secondary-text mb-2 text-xs">
+                  Using your saved trade note from inventory.
+                </p>
+              )}
             <textarea
               value={tradeNote}
               onChange={(event) => {
