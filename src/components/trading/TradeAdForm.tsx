@@ -6,7 +6,6 @@ import { ItemGrid } from "./ItemGrid";
 import { Skeleton, Tooltip } from "@mui/material";
 import { toast } from "sonner";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useSupporterModal } from "@/hooks/useSupporterModal";
 import SupporterModal from "../Modals/SupporterModal";
@@ -88,12 +87,10 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
   );
   const [expirationHours, setExpirationHours] = useState<number | null>(null);
   const [showRestoreModal, setShowRestoreModal] = useState(false);
-  const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [showClearConfirmModal, setShowClearConfirmModal] = useState(false);
   const [tradeNote, setTradeNote] = useState("");
   const [userData, setUserData] = useState<UserData | null>(null);
   const didAutoFillSuggestedNoteRef = React.useRef(false);
-  const router = useRouter();
   const { modalState, closeModal, checkTradeAdDuration } = useSupporterModal();
   const { isAuthenticated, user, setLoginModal } = useAuthContext();
 
@@ -632,13 +629,8 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
         setOfferingItems([]);
         setRequestingItems([]);
         setTradeNote("");
-
-        if (userData?.settings?.dms_allowed !== 1) {
-          setShowSuccessModal(true);
-        } else {
-          if (onSuccess) {
-            onSuccess(responseBody);
-          }
+        if (onSuccess) {
+          onSuccess(responseBody);
         }
       }
     } catch (err) {
@@ -650,17 +642,6 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
       toast.error(errorMessage, { id: creatingToastId ?? undefined });
     } finally {
       setSubmitting(false);
-    }
-  };
-
-  const handleEnableBotDMs = () => {
-    router.push("/settings?highlight=dms_allowed");
-  };
-
-  const handleSuccessModalClose = () => {
-    setShowSuccessModal(false);
-    if (onSuccess) {
-      onSuccess();
     }
   };
 
@@ -780,17 +761,6 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
             confirmText="Restore"
             cancelText="Start New"
             onConfirm={handleRestoreItems}
-            confirmVariant="default"
-          />
-
-          <ConfirmDialog
-            isOpen={showSuccessModal}
-            onClose={handleSuccessModalClose}
-            onConfirm={handleEnableBotDMs}
-            title="Trade Ad Created!"
-            message="Want to know when someone wants to trade with you? Turn on bot DMs to get notifications on Discord."
-            confirmText="Enable Bot DMs"
-            cancelText="Not Now"
             confirmVariant="default"
           />
 
