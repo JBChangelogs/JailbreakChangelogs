@@ -3331,23 +3331,15 @@ export default function MessagesInbox() {
                               <ChatEventBody>
                                 {!isGroupedWithPrevious ? (
                                   <ChatEventTitle>
-                                    {isOwnMessage ? (
-                                      <Link
-                                        href={`/users/${sender.id}`}
-                                        prefetch={false}
-                                        className="text-primary-text hover:text-link cursor-pointer text-xs font-medium transition-colors sm:text-sm"
-                                      >
-                                        You
-                                      </Link>
-                                    ) : (
-                                      <Link
-                                        href={`/users/${sender.id}`}
-                                        prefetch={false}
-                                        className="text-primary-text hover:text-link cursor-pointer text-xs font-medium transition-colors sm:text-sm"
-                                      >
-                                        {getDisplayName(selectedUser)}
-                                      </Link>
-                                    )}
+                                    <Link
+                                      href={`/users/${sender.id}`}
+                                      prefetch={false}
+                                      className="text-primary-text hover:text-link cursor-pointer text-xs font-medium transition-colors sm:text-sm"
+                                    >
+                                      {isOwnMessage
+                                        ? "You"
+                                        : getDisplayName(selectedUser)}
+                                    </Link>
                                     {typeof message.createdAt === "number" && (
                                       <ChatEventTime
                                         timestamp={message.createdAt}
@@ -3355,13 +3347,15 @@ export default function MessagesInbox() {
                                         className="text-secondary-text text-xs"
                                       />
                                     )}
-                                    {!editingMessageId && (
-                                      <div className="ml-auto flex items-center gap-1">
-                                        {messageMenu}
-                                      </div>
-                                    )}
+                                    {editingMessageId !== message.id &&
+                                      message.status !== "pending" && (
+                                        <div className="ml-auto flex items-center gap-1">
+                                          {messageMenu}
+                                        </div>
+                                      )}
                                   </ChatEventTitle>
-                                ) : !editingMessageId ? (
+                                ) : editingMessageId !== message.id &&
+                                  message.status !== "pending" ? (
                                   <div className="absolute top-0 right-1 z-10">
                                     {messageMenu}
                                   </div>
