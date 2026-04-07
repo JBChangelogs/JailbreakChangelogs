@@ -325,6 +325,7 @@ export const NavbarModern = ({
 
   const { resolvedTheme } = useTheme();
   const userData = isAuthenticated ? authUser : null;
+  const shouldShowSupportButton = (userData?.premiumtype ?? 0) <= 0;
 
   React.useEffect(() => {
     setMounted(true);
@@ -532,7 +533,10 @@ export const NavbarModern = ({
               <TooltipContent>Notifications</TooltipContent>
             </Tooltip>
 
-            <PopoverContent align="end" className="w-80 p-0">
+            <PopoverContent
+              align="end"
+              className="w-80 overflow-hidden rounded-2xl p-0"
+            >
               {/* Header */}
               <div className="border-border-secondary border-b px-4 py-3">
                 <div className="flex items-center justify-between">
@@ -784,22 +788,24 @@ export const NavbarModern = ({
           </Tooltip>
 
           {/* Support button */}
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Link href="/supporting">
-                <button className="border-border-card bg-secondary-bg text-secondary-text hover:bg-quaternary-bg hover:text-primary-text flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg border transition-all duration-200 hover:scale-105 active:scale-95">
-                  <Image
-                    src="/logos/kofi_symbol.svg"
-                    alt="Ko-fi"
-                    width={22}
-                    height={22}
-                    style={{ display: "block" }}
-                  />
-                </button>
-              </Link>
-            </TooltipTrigger>
-            <TooltipContent>Support us</TooltipContent>
-          </Tooltip>
+          {shouldShowSupportButton && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Link href="/supporting">
+                  <button className="border-border-card bg-secondary-bg text-secondary-text hover:bg-quaternary-bg hover:text-primary-text flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg border transition-all duration-200 hover:scale-105 active:scale-95">
+                    <Image
+                      src="/logos/kofi_symbol.svg"
+                      alt="Ko-fi"
+                      width={22}
+                      height={22}
+                      style={{ display: "block" }}
+                    />
+                  </button>
+                </Link>
+              </TooltipTrigger>
+              <TooltipContent>Support us</TooltipContent>
+            </Tooltip>
+          )}
 
           {/* Theme toggle */}
           <AnimatedThemeToggler />

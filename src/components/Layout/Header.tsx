@@ -198,6 +198,7 @@ export default function Header() {
   const { setLoginModal, user: authUser, isAuthenticated } = useAuthContext();
   const { resolvedTheme } = useTheme();
   const userData = isAuthenticated ? authUser : null;
+  const shouldShowSupportButton = (userData?.premiumtype ?? 0) <= 0;
   useEscapeLogin();
 
   useEffect(() => {
@@ -815,7 +816,7 @@ export default function Header() {
                     <PopoverContent
                       align="center"
                       side="bottom"
-                      className="w-[calc(100vw-1rem)] max-w-md p-0"
+                      className="w-[calc(100vw-1rem)] max-w-md overflow-hidden rounded-2xl p-0"
                     >
                       {/* Header */}
                       <div className="border-border-secondary border-b px-4 py-3">
@@ -1057,23 +1058,25 @@ export default function Header() {
                       </div>
                     </PopoverContent>
                   </Popover>
-                  <Link
-                    href="/supporting"
-                    className="flex items-center justify-center"
-                  >
-                    <button
-                      className="border-border-card bg-secondary-bg text-secondary-text hover:bg-quaternary-bg hover:text-primary-text flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg border transition-all duration-200 hover:scale-105 active:scale-95"
-                      aria-label="Support us"
+                  {shouldShowSupportButton && (
+                    <Link
+                      href="/supporting"
+                      className="flex items-center justify-center"
                     >
-                      <Image
-                        src="/logos/kofi_symbol.svg"
-                        alt="Ko-fi"
-                        width={18}
-                        height={18}
-                        style={{ display: "block" }}
-                      />
-                    </button>
-                  </Link>
+                      <button
+                        className="border-border-card bg-secondary-bg text-secondary-text hover:bg-quaternary-bg hover:text-primary-text flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg border transition-all duration-200 hover:scale-105 active:scale-95"
+                        aria-label="Support us"
+                      >
+                        <Image
+                          src="/logos/kofi_symbol.svg"
+                          alt="Ko-fi"
+                          width={18}
+                          height={18}
+                          style={{ display: "block" }}
+                        />
+                      </button>
+                    </Link>
+                  )}
                   <div className="flex items-center justify-center">
                     <AnimatedThemeToggler size="sm" />
                   </div>

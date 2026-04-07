@@ -21,7 +21,7 @@ const TabsList = React.forwardRef<
   <TabsPrimitive.List
     ref={ref}
     className={cn(
-      "border-border-card bg-tertiary-bg text-secondary-text inline-flex h-auto max-w-full min-w-max items-center justify-start gap-1 overflow-x-auto border p-0.5 [-webkit-overflow-scrolling:touch]",
+      "text-secondary-text inline-flex h-auto max-w-full min-w-max items-center justify-start gap-1 overflow-x-auto bg-transparent p-0 [-webkit-overflow-scrolling:touch]",
       fullWidth && "w-full min-w-0",
       noBottomRadius ? "rounded-t-lg rounded-b-none" : "rounded-lg",
       className,
@@ -44,7 +44,7 @@ const TabsTrigger = React.forwardRef<
   <TabsPrimitive.Trigger
     ref={ref}
     className={cn(
-      "ring-offset-background focus-visible:ring-ring text-secondary-text hover:text-primary-text hover:bg-quaternary-bg data-[state=active]:bg-secondary-bg data-[state=active]:text-primary-text data-[state=active]:ring-border-focus inline-flex cursor-pointer items-center justify-center rounded-md px-3 py-2 text-sm font-medium whitespace-nowrap transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 data-[state=active]:shadow-none data-[state=active]:ring-1",
+      "ring-offset-background focus-visible:ring-ring text-secondary-text hover:bg-quaternary-bg hover:text-primary-text data-[state=active]:border-border-focus data-[state=active]:text-primary-text inline-flex cursor-pointer items-center justify-center rounded-md border-b-2 border-transparent bg-transparent px-3 py-2 text-sm font-medium whitespace-nowrap transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-transparent data-[state=active]:shadow-none",
       fullWidth && "flex-1",
       className,
     )}
