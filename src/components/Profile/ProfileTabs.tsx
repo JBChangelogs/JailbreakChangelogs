@@ -7,6 +7,7 @@ import AboutTab from "./AboutTab";
 import CommentsTab from "./CommentsTab";
 import FavoritesTab from "./FavoritesTab";
 import TradeAdsProfileTab from "./TradeAdsProfileTab";
+import ProfileInventoryTab from "./ProfileInventoryTab";
 import PrivateServersTab from "./PrivateServersTab";
 import { UserSettings } from "@/types/auth";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -103,10 +104,12 @@ const TabPanel = ({
   children,
   value,
   index,
+  keepMounted = false,
 }: {
   children: React.ReactNode;
   value: number;
   index: number;
+  keepMounted?: boolean;
 }) => (
   <div
     role="tabpanel"
@@ -114,7 +117,7 @@ const TabPanel = ({
     id={`profile-tabpanel-${index}`}
     aria-labelledby={`profile-tab-${index}`}
   >
-    {value === index && children}
+    {keepMounted ? children : value === index ? children : null}
   </div>
 );
 
@@ -168,6 +171,8 @@ export default function ProfileTabs({
         hasRobloxConnection
       ) {
         setValue(4);
+      } else if (hash === "inventory" && hasRobloxConnection) {
+        setValue(5);
       } else {
         setValue(0);
       }
@@ -182,20 +187,24 @@ export default function ProfileTabs({
   }, [user?.roblox_id]);
 
   const handleChange = (newValue: number) => {
-    setValue(newValue);
     const hasRobloxConnection = Boolean(user?.roblox_id);
+    const tabsCount = hasRobloxConnection ? 6 : 4;
+    const normalizedValue = Math.max(0, Math.min(newValue, tabsCount - 1));
+    setValue(normalizedValue);
     // Update hash based on selected tab
-    if (newValue === 0) {
+    if (normalizedValue === 0) {
       // Remove hash completely for About tab
       history.pushState(null, "", window.location.pathname);
-    } else if (newValue === 1) {
+    } else if (normalizedValue === 1) {
       window.location.hash = "comments";
-    } else if (newValue === 2) {
+    } else if (normalizedValue === 2) {
       window.location.hash = "favorites";
-    } else if (newValue === 3) {
+    } else if (normalizedValue === 3) {
       window.location.hash = "servers";
-    } else if (hasRobloxConnection && newValue === 4) {
+    } else if (hasRobloxConnection && normalizedValue === 4) {
       window.location.hash = "trade-ads";
+    } else if (hasRobloxConnection && normalizedValue === 5) {
+      window.location.hash = "inventory";
     }
   };
 
@@ -261,6 +270,14 @@ export default function ProfileTabs({
           />
         </TabPanel>
       )}
+      {hasRobloxConnection && (
+        <TabPanel value={value} index={5} keepMounted>
+          <ProfileInventoryTab
+            robloxId={user.roblox_id ?? ""}
+            active={value === 5}
+          />
+        </TabPanel>
+      )}
     </div>
   );
 }
@@ -279,7 +296,7 @@ function ProfileOverflowTabs({
     "Comments",
     "Favorites",
     "Private Servers",
-    ...(hasRobloxConnection ? ["Trade Ads"] : []),
+    ...(hasRobloxConnection ? ["Trade Ads", "Inventory"] : []),
   ];
 
   return (
