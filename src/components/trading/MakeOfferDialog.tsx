@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useRef, useState } from "react";
 import { Dialog, DialogPanel } from "@headlessui/react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -9,6 +9,7 @@ import Image from "next/image";
 import { ItemGrid } from "@/components/trading/ItemGrid";
 import TradeItemPickerV2 from "@/components/trading/TradeItemPickerV2";
 import { TradeAd, TradeItem } from "@/types/trading";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   getTradeItemIdentifier,
   isCustomTradeItem,
@@ -17,6 +18,8 @@ import {
 import { createTradeOffer, CreateTradeOfferPayload } from "@/utils/trading";
 import { DefaultAvatar } from "@/utils/avatar";
 import { sanitizeText } from "@/utils/sanitizeText";
+import { useAuthContext } from "@/contexts/AuthContext";
+import { INVENTORY_API_SOURCE_HEADER, INVENTORY_API_URL } from "@/utils/api";
 
 const CUSTOM_TRADE_TYPES = [
   { id: "adds", label: "Adds" },
@@ -120,12 +123,28 @@ export function MakeOfferDialog({
   items,
   onOfferSent,
 }: MakeOfferDialogProps) {
+  const {
+    user,
+    isAuthenticated,
+    isLoading: isAuthLoading,
+    setLoginModal,
+  } = useAuthContext();
   const [showCustom, setShowCustom] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [note, setNote] = useState("");
   const [offeringItems, setOfferingItems] = useState<TradeItem[]>([]);
   const [requestingItems, setRequestingItems] = useState<TradeItem[]>([]);
   const [avatarError, setAvatarError] = useState(false);
+  const [itemsInputMode, setItemsInputMode] = useState<"values" | "inventory">(
+    "values",
+  );
+  const [inventoryItems, setInventoryItems] = useState<TradeItem[]>([]);
+  const [inventoryStatus, setInventoryStatus] = useState<
+    "idle" | "loading" | "loaded" | "error"
+  >("idle");
+  const [inventoryError, setInventoryError] = useState<string | null>(null);
+  const lastFetchedInventoryUserIdRef = useRef<string | null>(null);
+  const inventoryFetchControllerRef = useRef<AbortController | null>(null);
 
   const customTradeTypeSet = useMemo(
     () => new Set<string>(CUSTOM_TRADE_TYPES.map((t) => t.id)),
@@ -250,6 +269,7 @@ export function MakeOfferDialog({
     setOfferingItems(trade.requesting ?? []);
     setRequestingItems(trade.offering ?? []);
     setAvatarError(false);
+    setItemsInputMode("values");
   };
 
   const handleClose = () => {
@@ -267,7 +287,198 @@ export function MakeOfferDialog({
     setOfferingItems(trade.requesting ?? []);
     setRequestingItems(trade.offering ?? []);
     setNote("");
+    setItemsInputMode("values");
   }, [isOpen, trade.offering, trade.requesting]);
+
+  const robloxId = (user?.roblox_id ?? "").trim();
+  const hasValidRobloxId = /^\d+$/.test(robloxId);
+  const canLoadInventory = Boolean(isAuthenticated && hasValidRobloxId);
+  const shouldUseInventoryItems = showCustom && itemsInputMode === "inventory";
+
+  const sleep = (ms: number) =>
+    new Promise<void>((resolve) => setTimeout(resolve, ms));
+
+  const isRetryableFetchError = (error: unknown): boolean => {
+    if (!(error instanceof Error)) return false;
+    if (error.name === "AbortError") return false;
+    const message = error.message.toLowerCase();
+    return (
+      message.includes("fetch failed") ||
+      message.includes("network") ||
+      message.includes("timeout") ||
+      message.includes("connect") ||
+      message.includes("und_err")
+    );
+  };
+
+  React.useEffect(() => {
+    if (!shouldUseInventoryItems) return;
+
+    if (!canLoadInventory) {
+      setInventoryItems([]);
+      setInventoryStatus("idle");
+      setInventoryError(null);
+      lastFetchedInventoryUserIdRef.current = null;
+      return;
+    }
+
+    if (!INVENTORY_API_URL) {
+      setInventoryItems([]);
+      setInventoryStatus("error");
+      setInventoryError(
+        "Inventory API is not configured (NEXT_PUBLIC_INVENTORY_API_URL missing).",
+      );
+      lastFetchedInventoryUserIdRef.current = null;
+      return;
+    }
+
+    if (lastFetchedInventoryUserIdRef.current === robloxId) return;
+    lastFetchedInventoryUserIdRef.current = robloxId;
+
+    inventoryFetchControllerRef.current?.abort();
+    const controller = new AbortController();
+    inventoryFetchControllerRef.current = controller;
+    let didFinish = false;
+
+    const fetchInventory = async () => {
+      setInventoryStatus("loading");
+      setInventoryError(null);
+
+      try {
+        const url = `${INVENTORY_API_URL}/user/inventory?id=${encodeURIComponent(robloxId)}&nocache=false`;
+        const retryStatuses = new Set([408, 425, 429, 500, 502, 503, 504]);
+        const maxAttempts = 3;
+
+        let response: Response | null = null;
+        for (let attempt = 0; attempt < maxAttempts; attempt++) {
+          if (controller.signal.aborted) {
+            throw new DOMException("Aborted", "AbortError");
+          }
+
+          try {
+            response = await fetch(url, {
+              method: "GET",
+              headers: {
+                "User-Agent": "JailbreakChangelogs-MakeOffer/1.0",
+                "X-Source": INVENTORY_API_SOURCE_HEADER ?? "",
+              },
+              cache: "no-store",
+              signal: controller.signal,
+            });
+          } catch (error) {
+            if (controller.signal.aborted) {
+              throw new DOMException("Aborted", "AbortError");
+            }
+
+            if (attempt < maxAttempts - 1 && isRetryableFetchError(error)) {
+              const baseDelayMs = 500 * Math.pow(2, attempt);
+              const jitterMs = Math.floor(Math.random() * 250);
+              await sleep(baseDelayMs + jitterMs);
+              continue;
+            }
+
+            throw error;
+          }
+
+          if (
+            response &&
+            !response.ok &&
+            retryStatuses.has(response.status) &&
+            attempt < maxAttempts - 1
+          ) {
+            response.body?.cancel();
+            const baseDelayMs = 500 * Math.pow(2, attempt);
+            const jitterMs = Math.floor(Math.random() * 250);
+            await sleep(baseDelayMs + jitterMs);
+            response = null;
+            continue;
+          }
+
+          break;
+        }
+
+        if (!response) {
+          throw new Error("Failed to load inventory (no response)");
+        }
+
+        const data = (await response.json()) as unknown;
+        if (!response.ok) {
+          const message =
+            (data &&
+            typeof data === "object" &&
+            "message" in data &&
+            typeof (data as { message?: unknown }).message === "string"
+              ? (data as { message: string }).message
+              : null) || `Failed to load inventory (${response.status})`;
+          throw new Error(message);
+        }
+
+        const record =
+          data && typeof data === "object" && !Array.isArray(data)
+            ? (data as Record<string, unknown>)
+            : null;
+        const rawItems = Array.isArray(record?.data) ? record?.data : [];
+        const rawDuplicates = Array.isArray(record?.duplicates)
+          ? record?.duplicates
+          : [];
+
+        const inventoryIds: number[] = [];
+        const isDupedById = new Map<number, boolean>();
+
+        const pushId = (entry: unknown, isDuped: boolean) => {
+          if (!entry || typeof entry !== "object") return;
+          const id =
+            "id" in entry && typeof (entry as { id?: unknown }).id === "number"
+              ? (entry as { id: number }).id
+              : null;
+          if (id === null) return;
+          if (!isDupedById.has(id)) inventoryIds.push(id);
+          // If an item appears in both arrays, treat it as duped.
+          isDupedById.set(id, isDupedById.get(id) || isDuped);
+        };
+
+        rawItems.forEach((entry) => pushId(entry, false));
+        rawDuplicates.forEach((entry) => pushId(entry, true));
+
+        const itemById = new Map<number, TradeItem>();
+        items.forEach((it) => itemById.set(it.id, it));
+
+        const inventoryTradeItems = inventoryIds
+          .map((id) => itemById.get(id))
+          .filter((it): it is TradeItem => Boolean(it))
+          .map((it) => ({
+            ...it,
+            is_sub: false,
+            side: undefined,
+            isDuped: isDupedById.get(it.id) || false,
+          }));
+
+        setInventoryItems(inventoryTradeItems);
+        setInventoryStatus("loaded");
+        didFinish = true;
+      } catch (error) {
+        if (error instanceof DOMException && error.name === "AbortError") {
+          setInventoryStatus("idle");
+          lastFetchedInventoryUserIdRef.current = null;
+          return;
+        }
+        const message =
+          error instanceof Error ? error.message : "Failed to load inventory";
+        setInventoryItems([]);
+        setInventoryStatus("error");
+        setInventoryError(message);
+        lastFetchedInventoryUserIdRef.current = null;
+        didFinish = true;
+      }
+    };
+
+    void fetchInventory();
+
+    return () => {
+      controller.abort();
+      if (!didFinish) lastFetchedInventoryUserIdRef.current = null;
+    };
+  }, [shouldUseInventoryItems, canLoadInventory, robloxId, items]);
 
   const sendExactOffer = async () => {
     try {
@@ -328,6 +539,16 @@ export function MakeOfferDialog({
     }
   };
 
+  const inventoryModeGate =
+    shouldUseInventoryItems &&
+    (isAuthLoading || !isAuthenticated || !hasValidRobloxId);
+
+  const pickerItems = shouldUseInventoryItems
+    ? inventoryModeGate
+      ? []
+      : inventoryItems
+    : items;
+
   return (
     <Dialog open={isOpen} onClose={() => {}} className="relative z-[3000]">
       <div
@@ -376,44 +597,46 @@ export function MakeOfferDialog({
               </button>
             </div>
 
-            <div className="mt-5 grid grid-cols-1 gap-4 md:grid-cols-2">
-              <div className="border-border-card bg-primary-bg rounded-lg border p-4">
-                <h3 className="text-primary-text mb-1 text-sm font-semibold">
-                  Quick Offer
-                </h3>
-                <p className="text-primary-text/80 mb-4 text-sm">
-                  Offer exactly what the owner requested (no custom items).
-                </p>
-                <Button
-                  onClick={() => void sendExactOffer()}
-                  disabled={submitting}
-                  className="w-full"
-                >
-                  {submitting ? "Sending..." : "Send Offer (As Requested)"}
-                </Button>
-              </div>
+            {!showCustom && (
+              <div className="mt-5 grid grid-cols-1 gap-4 md:grid-cols-2">
+                <div className="border-border-card bg-primary-bg rounded-lg border p-4">
+                  <h3 className="text-primary-text mb-1 text-sm font-semibold">
+                    Quick Offer
+                  </h3>
+                  <p className="text-primary-text/80 mb-4 text-sm">
+                    Offer exactly what the owner requested (no custom items).
+                  </p>
+                  <Button
+                    onClick={() => void sendExactOffer()}
+                    disabled={submitting}
+                    className="w-full"
+                  >
+                    {submitting ? "Sending..." : "Send Offer (As Requested)"}
+                  </Button>
+                </div>
 
-              <div className="border-border-card bg-primary-bg rounded-lg border p-4">
-                <h3 className="text-primary-text mb-1 text-sm font-semibold">
-                  Custom Offer
-                </h3>
-                <p className="text-primary-text/80 mb-4 text-sm">
-                  Offer your own items, and optionally change what&apos;s being
-                  asked for.
-                </p>
-                <Button
-                  variant="outline"
-                  onClick={() => setShowCustom(true)}
-                  disabled={submitting}
-                  className="w-full"
-                >
-                  Customize Offer
-                </Button>
+                <div className="border-border-card bg-primary-bg rounded-lg border p-4">
+                  <h3 className="text-primary-text mb-1 text-sm font-semibold">
+                    Custom Offer
+                  </h3>
+                  <p className="text-primary-text/80 mb-4 text-sm">
+                    Offer your own items, and optionally change what&apos;s
+                    being asked for.
+                  </p>
+                  <Button
+                    variant="outline"
+                    onClick={() => setShowCustom(true)}
+                    disabled={submitting}
+                    className="w-full"
+                  >
+                    Customize Offer
+                  </Button>
+                </div>
               </div>
-            </div>
+            )}
 
             {showCustom && (
-              <div className="mt-6">
+              <div className="mt-5">
                 <div className="border-border-card bg-primary-bg rounded-lg border p-4">
                   <div className="flex flex-wrap items-center justify-between gap-3">
                     <h3 className="text-primary-text text-sm font-semibold">
@@ -481,25 +704,123 @@ export function MakeOfferDialog({
                 </div>
 
                 <div className="mt-4">
-                  {items.length === 0 ? (
+                  <Tabs
+                    value={itemsInputMode}
+                    onValueChange={(v) =>
+                      setItemsInputMode(v as "values" | "inventory")
+                    }
+                  >
+                    <TabsList fullWidth>
+                      <TabsTrigger value="inventory" fullWidth>
+                        Inventory Items
+                      </TabsTrigger>
+                      <TabsTrigger value="values" fullWidth>
+                        Values List
+                      </TabsTrigger>
+                    </TabsList>
+                  </Tabs>
+                </div>
+
+                <div className="mt-4">
+                  {shouldUseInventoryItems && inventoryModeGate && (
                     <div className="border-border-card bg-secondary-bg rounded-lg border p-4 text-center">
                       <p className="text-secondary-text text-sm">
-                        Item list is unavailable right now. Try again later.
+                        {isAuthLoading
+                          ? "Loading your account..."
+                          : !isAuthenticated
+                            ? "Log in to use your inventory items."
+                            : "Connect your Roblox account to use your inventory items."}
                       </p>
+                      {!isAuthLoading && (
+                        <div className="mt-4 flex justify-center">
+                          <Button
+                            onClick={() =>
+                              setLoginModal({
+                                open: true,
+                                tab: isAuthenticated ? "roblox" : "discord",
+                              })
+                            }
+                          >
+                            {isAuthenticated ? "Connect Roblox" : "Log In"}
+                          </Button>
+                        </div>
+                      )}
                     </div>
-                  ) : (
-                    <TradeItemPickerV2
-                      items={items}
-                      selectedItems={[...offeringItems, ...requestingItems]}
-                      onSelect={handleAddItem}
-                      onAddCustomType={handleAddCustomType}
-                      variant="compact"
-                      customTypes={CUSTOM_TRADE_TYPES.map((t) => ({
-                        id: t.id,
-                        label: t.label,
-                      }))}
-                    />
                   )}
+
+                  {shouldUseInventoryItems &&
+                    !inventoryModeGate &&
+                    inventoryStatus === "loading" && (
+                      <div className="border-border-card bg-secondary-bg rounded-lg border p-4 text-center">
+                        <p className="text-secondary-text text-sm">
+                          Loading inventory items...
+                        </p>
+                      </div>
+                    )}
+
+                  {shouldUseInventoryItems &&
+                    !inventoryModeGate &&
+                    inventoryStatus === "error" && (
+                      <div className="border-border-card bg-secondary-bg rounded-lg border p-4 text-center">
+                        <p className="text-secondary-text text-sm">
+                          {inventoryError || "Failed to load inventory items."}
+                        </p>
+                      </div>
+                    )}
+
+                  {shouldUseInventoryItems &&
+                    !inventoryModeGate &&
+                    inventoryStatus === "loaded" &&
+                    pickerItems.length === 0 && (
+                      <div className="border-border-card bg-secondary-bg rounded-lg border p-4 text-center">
+                        <p className="text-secondary-text text-sm">
+                          No tradable inventory items found.
+                        </p>
+                      </div>
+                    )}
+
+                  {!inventoryModeGate && itemsInputMode === "values" && (
+                    <>
+                      {items.length === 0 ? (
+                        <div className="border-border-card bg-secondary-bg rounded-lg border p-4 text-center">
+                          <p className="text-secondary-text text-sm">
+                            Item list is unavailable right now. Try again later.
+                          </p>
+                        </div>
+                      ) : (
+                        <TradeItemPickerV2
+                          items={pickerItems}
+                          selectedItems={[...offeringItems, ...requestingItems]}
+                          onSelect={handleAddItem}
+                          onAddCustomType={handleAddCustomType}
+                          variant="compact"
+                          cardBackground="tertiary"
+                          customTypes={CUSTOM_TRADE_TYPES.map((t) => ({
+                            id: t.id,
+                            label: t.label,
+                          }))}
+                        />
+                      )}
+                    </>
+                  )}
+
+                  {!inventoryModeGate &&
+                    itemsInputMode === "inventory" &&
+                    inventoryStatus === "loaded" &&
+                    pickerItems.length > 0 && (
+                      <TradeItemPickerV2
+                        items={pickerItems}
+                        selectedItems={[...offeringItems, ...requestingItems]}
+                        onSelect={handleAddItem}
+                        onAddCustomType={handleAddCustomType}
+                        variant="compact"
+                        cardBackground="tertiary"
+                        customTypes={CUSTOM_TRADE_TYPES.map((t) => ({
+                          id: t.id,
+                          label: t.label,
+                        }))}
+                      />
+                    )}
                 </div>
               </div>
             )}

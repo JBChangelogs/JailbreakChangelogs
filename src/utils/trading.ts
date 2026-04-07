@@ -178,7 +178,7 @@ const tradeOfferV2Endpoint = (
   tradeId: number,
   offerId: number,
 ) =>
-  `${baseUrl}/trades/v2/${encodeURIComponent(String(tradeId))}/offers/${encodeURIComponent(String(offerId))}}`;
+  `${baseUrl}/trades/v2/${encodeURIComponent(String(tradeId))}/offers/${encodeURIComponent(String(offerId))}`;
 
 export const respondToTradeOfferV2 = async (
   tradeId: number,

@@ -60,6 +60,7 @@ interface TradeItemPickerV2Props {
   onAddCustomType: (customId: string, side: TradeSide) => void;
   variant?: "default" | "compact";
   allowOg?: boolean;
+  cardBackground?: "secondary" | "tertiary";
 }
 
 const ITEMS_PER_PAGE_DEFAULT = 28;
@@ -127,6 +128,7 @@ export default function TradeItemPickerV2({
   onAddCustomType,
   variant = "default",
   allowOg = true,
+  cardBackground = "secondary",
 }: TradeItemPickerV2Props) {
   const [isMobile, setIsMobile] = useState(false);
 
@@ -301,8 +303,15 @@ export default function TradeItemPickerV2({
 
   const gridClassName =
     variant === "compact"
-      ? "mb-8 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5"
+      ? "mb-8 grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3"
       : "mb-8 grid grid-cols-2 gap-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7";
+
+  const itemCardBackgroundClassName =
+    cardBackground === "tertiary" ? "bg-tertiary-bg" : "bg-secondary-bg";
+  const itemCardHoverClassName =
+    cardBackground === "tertiary"
+      ? "hover:bg-quaternary-bg"
+      : "hover:bg-tertiary-bg";
 
   return (
     <div data-component="trade-item-picker-v2">
@@ -603,7 +612,7 @@ export default function TradeItemPickerV2({
                 key={`${item.id}-${item.name}`}
                 role="button"
                 tabIndex={0}
-                className="border-border-card bg-secondary-bg hover:bg-tertiary-bg w-full cursor-pointer rounded-lg border p-1.5 text-left transition-colors md:p-2"
+                className={`border-border-card ${itemCardBackgroundClassName} ${itemCardHoverClassName} w-full cursor-pointer rounded-lg border p-1.5 text-left transition-colors md:p-2`}
                 onClick={addToSide}
                 onKeyDown={(event) => {
                   if (event.key === "Enter" || event.key === " ") {
@@ -743,30 +752,30 @@ export default function TradeItemPickerV2({
                         )}
                       </span>
                     </div>
-                    <div className="bg-secondary-bg flex items-center justify-between rounded-lg p-1.5">
-                      <span className="text-secondary-text text-xs font-medium whitespace-nowrap">
+                    <div className="bg-secondary-bg flex items-center justify-between gap-2 rounded-lg p-1.5">
+                      <span className="text-secondary-text shrink-0 text-xs font-medium whitespace-nowrap">
                         Demand
                       </span>
                       {(() => {
                         const d = item.demand ?? item.data?.demand ?? "N/A";
                         return (
                           <span
-                            className={`${getDemandColor(d)} inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold shadow-sm`}
+                            className={`${getDemandColor(d)} inline-flex h-6 max-w-[9rem] min-w-0 items-center truncate rounded-lg px-2 text-xs leading-none font-bold shadow-sm`}
                           >
                             {d === "N/A" ? "Unknown" : d}
                           </span>
                         );
                       })()}
                     </div>
-                    <div className="bg-secondary-bg flex items-center justify-between rounded-lg p-1.5">
-                      <span className="text-secondary-text text-xs font-medium whitespace-nowrap">
+                    <div className="bg-secondary-bg flex items-center justify-between gap-2 rounded-lg p-1.5">
+                      <span className="text-secondary-text shrink-0 text-xs font-medium whitespace-nowrap">
                         Trend
                       </span>
                       {(() => {
                         const t = item.trend ?? item.data?.trend ?? "N/A";
                         return (
                           <span
-                            className={`${getTrendColor(t)} inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold shadow-sm`}
+                            className={`${getTrendColor(t)} inline-flex h-6 max-w-[9rem] min-w-0 items-center truncate rounded-lg px-2 text-xs leading-none font-bold shadow-sm`}
                           >
                             {t === "N/A" ? "Unknown" : t}
                           </span>

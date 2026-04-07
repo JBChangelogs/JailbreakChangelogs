@@ -15,7 +15,6 @@ import { TradeAdForm } from "./TradeAdForm";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { isCustomTradeItem, tradeItemIdsEqual } from "@/utils/tradeItems";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { INVENTORY_API_SOURCE_HEADER, INVENTORY_API_URL } from "@/utils/api";
 import {
   DropdownMenu,
@@ -303,27 +302,6 @@ export default function TradeAds({
       if (!didFinish) lastFetchedInventoryUserIdRef.current = null;
     };
   }, [shouldUseInventoryItems, canLoadInventory, robloxId, items]);
-
-  const ItemSourceTabsRow = () => {
-    if (activeTab !== "create") return null;
-    return (
-      <div className="mt-6">
-        <Tabs
-          value={itemsInputMode}
-          onValueChange={(v) => setItemsInputMode(v as "values" | "inventory")}
-        >
-          <TabsList fullWidth>
-            <TabsTrigger value="inventory" fullWidth>
-              Inventory Items
-            </TabsTrigger>
-            <TabsTrigger value="values" fullWidth>
-              Values List
-            </TabsTrigger>
-          </TabsList>
-        </Tabs>
-      </div>
-    );
-  };
 
   const inventoryModeGate =
     shouldUseInventoryItems &&
@@ -745,7 +723,6 @@ export default function TradeAds({
           onTabChange={handleTabChange}
           hasTradeAds={userTradeAds.length > 0}
         />
-        <ItemSourceTabsRow />
         <TradeAdSkeleton />
       </div>
     );
@@ -787,7 +764,6 @@ export default function TradeAds({
           onTabChange={handleTabChange}
           hasTradeAds={false}
         />
-        <ItemSourceTabsRow />
 
         <div
           role="tabpanel"
@@ -806,7 +782,11 @@ export default function TradeAds({
           aria-labelledby="trading-tab-create"
           className="mt-6"
         >
-          {activeTab === "create" && <UnauthorizedCard />}
+          {activeTab === "create" && (
+            <>
+              <UnauthorizedCard />
+            </>
+          )}
         </div>
       </div>
     );
@@ -820,7 +800,6 @@ export default function TradeAds({
           onTabChange={handleTabChange}
           hasTradeAds={userTradeAds.length > 0}
         />
-        <ItemSourceTabsRow />
         {/* Tab Content */}
         <div
           role="tabpanel"
@@ -856,45 +835,15 @@ export default function TradeAds({
         >
           {activeTab === "create" && (
             <>
-              {shouldUseInventoryItems && inventoryModeGate && (
-                <div className="border-border-card bg-secondary-bg mb-6 rounded-lg border p-6 text-center">
-                  <p className="text-secondary-text text-sm">
-                    {isAuthLoading
-                      ? "Loading your account..."
-                      : !isAuthenticated
-                        ? "Log in to use your inventory items."
-                        : "Connect your Roblox account to use your inventory items."}
-                  </p>
-                  {!isAuthLoading && (
-                    <div className="mt-4 flex justify-center">
-                      <Button
-                        onClick={() =>
-                          setLoginModal({
-                            open: true,
-                            tab: isAuthenticated ? "roblox" : "discord",
-                          })
-                        }
-                      >
-                        {isAuthenticated ? "Connect Roblox" : "Log In"}
-                      </Button>
-                    </div>
-                  )}
-                </div>
-              )}
-              {shouldUseInventoryItems &&
-                !inventoryModeGate &&
-                inventoryStatus === "error" && (
-                  <div className="border-border-card bg-secondary-bg mb-6 rounded-lg border p-6 text-center">
-                    <p className="text-secondary-text text-sm">
-                      {inventoryError || "Failed to load inventory items."}
-                    </p>
-                  </div>
-                )}
               <TradeAdForm
                 onSuccess={handleCreateSuccess}
                 items={createPickerItems}
                 suggestedTradeNote={inventoryTradeNote}
                 autoFillSuggestedTradeNote={shouldUseInventoryItems}
+                itemsInputMode={itemsInputMode}
+                onItemsInputModeChange={setItemsInputMode}
+                inventoryStatus={inventoryStatus}
+                inventoryError={inventoryError}
               />
             </>
           )}
@@ -1123,7 +1072,6 @@ export default function TradeAds({
         onTabChange={handleTabChange}
         hasTradeAds={userTradeAds.length > 0}
       />
-      <ItemSourceTabsRow />
 
       {/* Search Input - Show for view and myads tabs */}
       {(activeTab === "view" || activeTab === "myads") && !isSystemError && (
@@ -1432,45 +1380,15 @@ export default function TradeAds({
       >
         {activeTab === "create" && (
           <>
-            {shouldUseInventoryItems && inventoryModeGate && (
-              <div className="border-border-card bg-secondary-bg mb-6 rounded-lg border p-6 text-center">
-                <p className="text-secondary-text text-sm">
-                  {isAuthLoading
-                    ? "Loading your account..."
-                    : !isAuthenticated
-                      ? "Log in to use your inventory items."
-                      : "Connect your Roblox account to use your inventory items."}
-                </p>
-                {!isAuthLoading && (
-                  <div className="mt-4 flex justify-center">
-                    <Button
-                      onClick={() =>
-                        setLoginModal({
-                          open: true,
-                          tab: isAuthenticated ? "roblox" : "discord",
-                        })
-                      }
-                    >
-                      {isAuthenticated ? "Connect Roblox" : "Log In"}
-                    </Button>
-                  </div>
-                )}
-              </div>
-            )}
-            {shouldUseInventoryItems &&
-              !inventoryModeGate &&
-              inventoryStatus === "error" && (
-                <div className="border-border-card bg-secondary-bg mb-6 rounded-lg border p-6 text-center">
-                  <p className="text-secondary-text text-sm">
-                    {inventoryError || "Failed to load inventory items."}
-                  </p>
-                </div>
-              )}
             <TradeAdForm
               onSuccess={handleCreateSuccess}
               items={createPickerItems}
               suggestedTradeNote={inventoryTradeNote}
               autoFillSuggestedTradeNote={shouldUseInventoryItems}
+              itemsInputMode={itemsInputMode}
+              onItemsInputModeChange={setItemsInputMode}
+              inventoryStatus={inventoryStatus}
+              inventoryError={inventoryError}
             />
           </>
         )}

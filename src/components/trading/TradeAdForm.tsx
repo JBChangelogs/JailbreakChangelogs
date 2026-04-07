@@ -22,12 +22,17 @@ import { CustomDragOverlay } from "@/components/dnd/DragOverlay";
 import { isCustomTradeItem, tradeItemIdsEqual } from "@/utils/tradeItems";
 import TradeItemPickerV2 from "./TradeItemPickerV2";
 import { sanitizeText } from "@/utils/sanitizeText";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface TradeAdFormProps {
   onSuccess?: (createdTrade?: unknown) => void;
   items?: TradeItem[];
   suggestedTradeNote?: string | null;
   autoFillSuggestedTradeNote?: boolean;
+  itemsInputMode?: "values" | "inventory";
+  onItemsInputModeChange?: (mode: "values" | "inventory") => void;
+  inventoryStatus?: "idle" | "loading" | "loaded" | "error";
+  inventoryError?: string | null;
 }
 
 interface UserPremiumTier {
@@ -77,6 +82,10 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
   items = [],
   suggestedTradeNote = null,
   autoFillSuggestedTradeNote = false,
+  itemsInputMode,
+  onItemsInputModeChange,
+  inventoryStatus = "idle",
+  inventoryError = null,
 }) => {
   const [loading, setLoading] = useState(true);
   const [offeringItems, setOfferingItems] = useState<TradeItem[]>([]);
@@ -92,7 +101,21 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
   const [userData, setUserData] = useState<UserData | null>(null);
   const didAutoFillSuggestedNoteRef = React.useRef(false);
   const { modalState, closeModal, checkTradeAdDuration } = useSupporterModal();
-  const { isAuthenticated, user, setLoginModal } = useAuthContext();
+  const {
+    isAuthenticated,
+    isLoading: isAuthLoading,
+    user,
+    setLoginModal,
+  } = useAuthContext();
+
+  const robloxId = (user?.roblox_id ?? "").trim();
+  const hasValidRobloxId = /^\d+$/.test(robloxId);
+  const isInventoryMode = itemsInputMode === "inventory";
+  const showItemSourceTabs = Boolean(itemsInputMode && onItemsInputModeChange);
+  const inventoryModeGate =
+    showItemSourceTabs &&
+    isInventoryMode &&
+    (isAuthLoading || !isAuthenticated || !hasValidRobloxId);
 
   // Drag and drop state
   const [activeItem, setActiveItem] = useState<TradeItem | null>(null);
@@ -1204,16 +1227,121 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
           </div>
 
           {/* Trade Item Picker */}
-          <TradeItemPickerV2
-            items={items}
-            onSelect={handleAddItem}
-            onAddCustomType={handleAddCustomType}
-            customTypes={CUSTOM_TRADE_TYPES.map((customType) => ({
-              id: customType.id,
-              label: customType.label,
-            }))}
-            selectedItems={[...offeringItems, ...requestingItems]}
-          />
+          {showItemSourceTabs && (
+            <div className="mt-8">
+              <Tabs
+                value={itemsInputMode}
+                onValueChange={(v) =>
+                  onItemsInputModeChange?.(v as "values" | "inventory")
+                }
+              >
+                <TabsList fullWidth>
+                  <TabsTrigger value="inventory" fullWidth>
+                    Inventory Items
+                  </TabsTrigger>
+                  <TabsTrigger value="values" fullWidth>
+                    Values List
+                  </TabsTrigger>
+                </TabsList>
+              </Tabs>
+            </div>
+          )}
+
+          {showItemSourceTabs && isInventoryMode && inventoryModeGate && (
+            <div className="border-border-card bg-secondary-bg mt-6 rounded-lg border p-6 text-center">
+              <p className="text-secondary-text text-sm">
+                {isAuthLoading
+                  ? "Loading your account..."
+                  : !isAuthenticated
+                    ? "Log in to use your inventory items."
+                    : "Connect your Roblox account to use your inventory items."}
+              </p>
+              {!isAuthLoading && (
+                <div className="mt-4 flex justify-center">
+                  <UiButton
+                    onClick={() =>
+                      setLoginModal({
+                        open: true,
+                        tab: isAuthenticated ? "roblox" : "discord",
+                      })
+                    }
+                  >
+                    {isAuthenticated ? "Connect Roblox" : "Log In"}
+                  </UiButton>
+                </div>
+              )}
+            </div>
+          )}
+
+          {showItemSourceTabs &&
+            isInventoryMode &&
+            !inventoryModeGate &&
+            inventoryStatus === "loading" && (
+              <div className="border-border-card bg-secondary-bg mt-6 rounded-lg border p-6 text-center">
+                <p className="text-secondary-text text-sm">
+                  Loading inventory items...
+                </p>
+              </div>
+            )}
+
+          {showItemSourceTabs &&
+            isInventoryMode &&
+            !inventoryModeGate &&
+            inventoryStatus === "error" && (
+              <div className="border-border-card bg-secondary-bg mt-6 rounded-lg border p-6 text-center">
+                <p className="text-secondary-text text-sm">
+                  {inventoryError || "Failed to load inventory items."}
+                </p>
+              </div>
+            )}
+
+          {showItemSourceTabs &&
+            isInventoryMode &&
+            !inventoryModeGate &&
+            inventoryStatus === "loaded" &&
+            items.length === 0 && (
+              <div className="border-border-card bg-secondary-bg mt-6 rounded-lg border p-6 text-center">
+                <p className="text-secondary-text text-sm">
+                  No tradable inventory items found.
+                </p>
+              </div>
+            )}
+
+          {!showItemSourceTabs && items.length === 0 && (
+            <div className="border-border-card bg-secondary-bg mt-6 rounded-lg border p-6 text-center">
+              <p className="text-secondary-text text-sm">
+                Item list is unavailable right now. Try again later.
+              </p>
+            </div>
+          )}
+
+          {showItemSourceTabs &&
+            itemsInputMode === "values" &&
+            items.length === 0 && (
+              <div className="border-border-card bg-secondary-bg mt-6 rounded-lg border p-6 text-center">
+                <p className="text-secondary-text text-sm">
+                  Item list is unavailable right now. Try again later.
+                </p>
+              </div>
+            )}
+
+          {items.length > 0 &&
+            (!showItemSourceTabs ||
+              itemsInputMode === "values" ||
+              (isInventoryMode &&
+                !inventoryModeGate &&
+                inventoryStatus === "loaded")) && (
+              <TradeItemPickerV2
+                items={items}
+                onSelect={handleAddItem}
+                onAddCustomType={handleAddCustomType}
+                customTypes={CUSTOM_TRADE_TYPES.map((customType) => ({
+                  id: customType.id,
+                  label: customType.label,
+                }))}
+                selectedItems={[...offeringItems, ...requestingItems]}
+              />
+            )}
         </div>
 
         {/* Drag Overlay */}
