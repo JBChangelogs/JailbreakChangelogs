@@ -208,6 +208,10 @@ function getMessageDomId(message: Message): string {
   return message.clientId ?? message.id;
 }
 
+function sortMessagesByCreatedAt(messages: Message[]): Message[] {
+  return [...messages].sort((a, b) => (a.createdAt ?? 0) - (b.createdAt ?? 0));
+}
+
 function trimLocalThreadMessages(messages: Message[], max = 200): Message[] {
   if (messages.length <= max) return messages;
   return messages.slice(messages.length - max);
@@ -531,6 +535,24 @@ function extractItems(data: unknown): unknown[] {
   return [];
 }
 
+function extractPagination(data: unknown): {
+  page: number | null;
+  totalPages: number | null;
+  total: number | null;
+  size: number | null;
+} {
+  if (!data || typeof data !== "object") {
+    return { page: null, totalPages: null, total: null, size: null };
+  }
+  const root = data as Record<string, unknown>;
+  const page = typeof root.page === "number" ? root.page : null;
+  const totalPages =
+    typeof root.total_pages === "number" ? root.total_pages : null;
+  const total = typeof root.total === "number" ? root.total : null;
+  const size = typeof root.size === "number" ? root.size : null;
+  return { page, totalPages, total, size };
+}
+
 function getDayKey(timestamp?: number): string | null {
   if (typeof timestamp !== "number") return null;
   const date = new Date(timestamp);
@@ -571,6 +593,7 @@ export default function MessagesInbox() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
   const [editContent, setEditContent] = useState("");
+  const [activeMessageId, setActiveMessageId] = useState<string | null>(null);
   const [deletingMessageId, setDeletingMessageId] = useState<string | null>(
     null,
   );
@@ -591,6 +614,14 @@ export default function MessagesInbox() {
   const [userSearchResults, setUserSearchResults] = useState<UserData[]>([]);
   const [isUserSearchLoading, setIsUserSearchLoading] = useState(false);
   const userSearchRequestIdRef = useRef(0);
+  const [messagesPage, setMessagesPage] = useState(1);
+  const [messagesTotalPages, setMessagesTotalPages] = useState<number | null>(
+    null,
+  );
+  const [isLoadingOlderMessages, setIsLoadingOlderMessages] = useState(false);
+  const messagesPageRef = useRef(1);
+  const messagesTotalPagesRef = useRef<number | null>(null);
+  const isLoadingOlderMessagesRef = useRef(false);
 
   const getConversationIdFromPathname = (path: string): string | null => {
     if (!path.startsWith("/messages")) return null;
@@ -607,6 +638,36 @@ export default function MessagesInbox() {
   const [routeConversationId, setRouteConversationId] = useState<string | null>(
     () => getConversationIdFromPathname(pathname),
   );
+
+  useEffect(() => {
+    messagesPageRef.current = messagesPage;
+  }, [messagesPage]);
+
+  useEffect(() => {
+    messagesTotalPagesRef.current = messagesTotalPages;
+  }, [messagesTotalPages]);
+
+  useEffect(() => {
+    isLoadingOlderMessagesRef.current = isLoadingOlderMessages;
+  }, [isLoadingOlderMessages]);
+
+  useEffect(() => {
+    setActiveMessageId(null);
+  }, [selectedUserId]);
+
+  useEffect(() => {
+    const handlePointerDown = (event: PointerEvent) => {
+      const target = event.target as HTMLElement | null;
+      if (!target) return;
+      if (target.closest("[data-message-row]")) return;
+      setActiveMessageId(null);
+    };
+
+    document.addEventListener("pointerdown", handlePointerDown, true);
+    return () => {
+      document.removeEventListener("pointerdown", handlePointerDown, true);
+    };
+  }, []);
   const userLookupCacheRef = useRef<Map<string, MessageUser | null>>(new Map());
   const userLookupPendingRef = useRef<Map<string, Promise<MessageUser | null>>>(
     new Map(),
@@ -614,6 +675,11 @@ export default function MessagesInbox() {
   const selectedUserIdRef = useRef<string | null>(null);
   const wsSendFallbackTimeoutsRef = useRef<Set<number>>(new Set());
   const messagesContainerRef = useRef<HTMLDivElement | null>(null);
+  const prependScrollRestoreRef = useRef<{
+    conversationId: string;
+    prevScrollTop: number;
+    prevScrollHeight: number;
+  } | null>(null);
   const pendingOwnSendScrollRef = useRef(false);
   const initialScrollConversationIdRef = useRef<string | null>(null);
   const recentRealtimeEventKeysRef = useRef<Map<string, number>>(new Map());
@@ -864,23 +930,6 @@ export default function MessagesInbox() {
   );
 
   useEffect(() => {
-    if (!PUBLIC_API_URL || offerAcceptedEvents.length === 0) return;
-
-    let isCancelled = false;
-    const run = async () => {
-      for (const event of offerAcceptedEvents) {
-        if (isCancelled) return;
-        await ensureOfferDetailsCached(event.metadata);
-      }
-    };
-
-    void run();
-    return () => {
-      isCancelled = true;
-    };
-  }, [ensureOfferDetailsCached, offerAcceptedEvents]);
-
-  useEffect(() => {
     const active = validOfferAcceptedEvents[activeOfferAcceptedIndex];
     if (!active) {
       setActiveOfferDetailsStatus({ status: "idle" });
@@ -1101,6 +1150,25 @@ export default function MessagesInbox() {
     initialScrollConversationIdRef.current = selectedUserId;
     scrollMessagesToLatest("auto");
   }, [isLoadingMessages, messages.length, selectedUserId]);
+
+  useLayoutEffect(() => {
+    const restore = prependScrollRestoreRef.current;
+    if (!restore) return;
+    if (!selectedUserId || restore.conversationId !== selectedUserId) {
+      prependScrollRestoreRef.current = null;
+      return;
+    }
+
+    const container = messagesContainerRef.current;
+    if (!container) {
+      prependScrollRestoreRef.current = null;
+      return;
+    }
+
+    const delta = container.scrollHeight - restore.prevScrollHeight;
+    container.scrollTop = restore.prevScrollTop + delta;
+    prependScrollRestoreRef.current = null;
+  }, [messages, selectedUserId]);
 
   const loadUserById = async (
     id: string,
@@ -1444,10 +1512,118 @@ export default function MessagesInbox() {
     };
   }, [conversations, currentUserId, isAuthenticated, routeConversationId]);
 
+  const fetchMessagesPage = useCallback(
+    async (userId: string, page: number) => {
+      if (!PUBLIC_API_URL) {
+        throw new Error("Public API URL is not configured");
+      }
+
+      const pageParam = page > 1 ? `?page=${page}` : "";
+      const url = `${PUBLIC_API_URL}/messages/${encodeURIComponent(userId)}${pageParam}`;
+      const response = await fetch(url, {
+        method: "GET",
+        credentials: "include",
+        cache: "no-store",
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch messages");
+      }
+
+      const rawBody = await response.text();
+      const parsed = rawBody ? (JSON.parse(rawBody) as unknown) : null;
+      const items = extractItems(parsed);
+      const pagination = extractPagination(parsed);
+
+      // API returns newest → oldest; UI expects oldest → newest.
+      const parsedMessages = items
+        .map((item) => parseMessageRecord(item))
+        .filter((item): item is Message => Boolean(item))
+        .reverse();
+      return { messages: parsedMessages, pagination };
+    },
+    [],
+  );
+
+  const loadOlderMessages = useCallback(async () => {
+    if (!selectedUserId) return;
+    if (isLoadingMessages || isLoadingOlderMessagesRef.current) return;
+    const totalPages = messagesTotalPagesRef.current;
+    const currentPage = messagesPageRef.current;
+    if (totalPages === null) return;
+    if (currentPage >= totalPages) return;
+
+    const container = messagesContainerRef.current;
+    if (!container) return;
+    setIsLoadingOlderMessages(true);
+    try {
+      const nextPage = currentPage + 1;
+      // Prevent duplicate loads firing before state updates flush.
+      messagesPageRef.current = nextPage;
+      const { messages: serverMessages, pagination } = await fetchMessagesPage(
+        selectedUserId,
+        nextPage,
+      );
+
+      const resolvedPage = pagination.page ?? nextPage;
+      const resolvedTotalPages = pagination.totalPages ?? totalPages;
+      messagesPageRef.current = resolvedPage;
+      messagesTotalPagesRef.current = resolvedTotalPages;
+      setMessagesPage(resolvedPage);
+      setMessagesTotalPages(resolvedTotalPages);
+
+      // Discord-style: keep current viewport anchored while older messages prepend.
+      prependScrollRestoreRef.current = {
+        conversationId: selectedUserId,
+        prevScrollTop: container.scrollTop,
+        prevScrollHeight: container.scrollHeight,
+      };
+      setMessages((prev) => {
+        const prevIds = new Set(prev.map((m) => m.id));
+        const unique = serverMessages.filter((m) => !prevIds.has(m.id));
+        return unique.length > 0 ? [...unique, ...prev] : prev;
+      });
+    } catch (error) {
+      messagesPageRef.current = currentPage;
+      console.error("Error loading older messages:", error);
+      toast.error("Failed to load older messages");
+    } finally {
+      setIsLoadingOlderMessages(false);
+    }
+  }, [fetchMessagesPage, isLoadingMessages, selectedUserId]);
+
+  useEffect(() => {
+    const container = messagesContainerRef.current;
+    if (!container) return;
+    if (!selectedUserId) return;
+    if (isLoadingMessages) return;
+
+    const onScroll = () => {
+      if (isLoadingOlderMessagesRef.current) return;
+      const totalPages = messagesTotalPagesRef.current;
+      const currentPage = messagesPageRef.current;
+      if (totalPages === null) return;
+      if (currentPage >= totalPages) return;
+      if (container.scrollTop <= 120) {
+        void loadOlderMessages();
+      }
+    };
+
+    container.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      container.removeEventListener("scroll", onScroll);
+    };
+  }, [isLoadingMessages, loadOlderMessages, selectedUserId]);
+
   useLayoutEffect(() => {
     if (!selectedUserId || !isAuthenticated || !currentUserId) {
       setMessages([]);
       setIsLoadingMessages(false);
+      setMessagesPage(1);
+      setMessagesTotalPages(null);
+      setIsLoadingOlderMessages(false);
+      messagesPageRef.current = 1;
+      messagesTotalPagesRef.current = null;
       return;
     }
 
@@ -1457,33 +1633,20 @@ export default function MessagesInbox() {
       try {
         setIsLoadingMessages(true);
         setMessages([]);
-        if (!PUBLIC_API_URL) {
-          throw new Error("Public API URL is not configured");
-        }
+        setMessagesPage(1);
+        setMessagesTotalPages(null);
+        setIsLoadingOlderMessages(false);
 
-        const response = await fetch(
-          `${PUBLIC_API_URL}/messages/${encodeURIComponent(selectedUserId)}`,
-          {
-            method: "GET",
-            credentials: "include",
-            cache: "no-store",
-          },
-        );
-
-        if (!response.ok) {
-          throw new Error("Failed to fetch messages");
-        }
-
-        const rawBody = await response.text();
-        const parsed = rawBody ? parseJsonWithLargeIds(rawBody) : null;
-        const items = extractItems(parsed);
-
-        const parsedMessages = items
-          .map((item) => parseMessageRecord(item))
-          .filter((item): item is Message => Boolean(item))
-          .sort((a, b) => (a.createdAt ?? 0) - (b.createdAt ?? 0));
+        const { messages: parsedMessages, pagination } =
+          await fetchMessagesPage(selectedUserId, 1);
 
         if (!isCancelled) {
+          const resolvedPage = pagination.page ?? 1;
+          const resolvedTotalPages = pagination.totalPages ?? null;
+          messagesPageRef.current = resolvedPage;
+          messagesTotalPagesRef.current = resolvedTotalPages;
+          setMessagesPage(resolvedPage);
+          setMessagesTotalPages(resolvedTotalPages);
           const local =
             localThreadMessagesByUserIdRef.current.get(selectedUserId) ?? [];
           const serverIds = new Set(parsedMessages.map((m) => m.id));
@@ -1511,7 +1674,7 @@ export default function MessagesInbox() {
     return () => {
       isCancelled = true;
     };
-  }, [currentUserId, isAuthenticated, selectedUserId]);
+  }, [currentUserId, fetchMessagesPage, isAuthenticated, selectedUserId]);
 
   useEffect(() => {
     if (!isAuthenticated || !currentUserId) {
@@ -1934,7 +2097,9 @@ export default function MessagesInbox() {
       }
 
       upsertLocalThreadMessage(targetUserId, optimisticMessage);
-      setMessages((prev) => [...prev, optimisticMessage]);
+      setMessages((prev) =>
+        sortMessagesByCreatedAt([...prev, optimisticMessage]),
+      );
       setConversations((prev) => [
         { user: targetUser, lastMessage: optimisticMessage },
         ...prev.filter((item) => item.user.id !== targetUserId),
@@ -1996,35 +2161,35 @@ export default function MessagesInbox() {
 
       if (!response.ok || !parsedBody?.success || !parsedBody.message) {
         if (parsedBody?.error === "unmessageable") {
-          const defaultSystemMessage =
+          const apiProvidedSystemMessage =
+            parsedBody?.message && typeof parsedBody.message === "string"
+              ? parsedBody.message.trim()
+              : "";
+          const systemContent =
             parsedBody?.reason === "not_mutual"
-              ? "Your message could not be delivered. You both need to follow each other."
+              ? "You and this user must follow each other to send and receive direct messages."
               : parsedBody?.reason === "blocked"
                 ? "Your message could not be delivered. You are blocked from messaging this user."
-                : "Your message could not be delivered.";
-          const systemContent = parsedBody.message || defaultSystemMessage;
+                : parsedBody?.reason === "self" && apiProvidedSystemMessage
+                  ? apiProvidedSystemMessage
+                  : apiProvidedSystemMessage ||
+                    "Your message could not be delivered.";
           toast.error(systemContent);
+          const optimisticCreatedAt = optimisticMessage.createdAt ?? Date.now();
           const systemMessage: Message = {
             id: `system-${Date.now()}`,
             senderId: "system",
             receiverId: asId(targetUserId),
             content: systemContent,
-            createdAt: Date.now(),
+            createdAt: Math.max(Date.now(), optimisticCreatedAt + 1),
             type: "system",
           };
-          removeLocalThreadMessage(targetUserId, (m) => m.id === optimisticId);
-          const existingLocalSystem = (
-            localThreadMessagesByUserIdRef.current.get(targetUserId) ?? []
-          ).find((m) => m.type === "system" && m.content === systemContent);
-          if (existingLocalSystem) {
-            updateLocalThreadMessage(
-              targetUserId,
-              (m) => m.id === existingLocalSystem.id,
-              (m) => ({ ...m, createdAt: Date.now() }),
-            );
-          } else {
-            upsertLocalThreadMessage(targetUserId, systemMessage);
-          }
+          updateLocalThreadMessage(
+            targetUserId,
+            (m) => m.id === optimisticId,
+            (m) => ({ ...m, status: "failed" as const }),
+          );
+          upsertLocalThreadMessage(targetUserId, systemMessage);
           setConversations((prev) =>
             prev.map((conversation) =>
               conversation.user.id === targetUserId
@@ -2034,35 +2199,16 @@ export default function MessagesInbox() {
           );
 
           if (selectedUserIdRef.current === targetUserId) {
-            setMessages((prev) => prev.filter((m) => m.id !== optimisticId));
-            setMessages((prev) => {
-              const existingIndex = [...prev]
-                .reverse()
-                .findIndex(
-                  (item) =>
-                    item.type === "system" && item.content === systemContent,
-                );
-              if (existingIndex === -1) {
-                return [...prev, systemMessage];
-              }
-
-              const indexFromStart = prev.length - 1 - existingIndex;
-              const existing = prev[indexFromStart];
-              if (!existing) {
-                return [...prev, systemMessage];
-              }
-
-              const updated: Message = {
-                ...existing,
-                createdAt: Date.now(),
-              };
-
-              return [
-                ...prev.slice(0, indexFromStart),
-                ...prev.slice(indexFromStart + 1),
-                updated,
-              ];
-            });
+            setMessages((prev) =>
+              sortMessagesByCreatedAt([
+                ...prev.map((m) =>
+                  m.id === optimisticId
+                    ? { ...m, status: "failed" as const }
+                    : m,
+                ),
+                systemMessage,
+              ]),
+            );
           }
           return;
         }
@@ -2287,18 +2433,24 @@ export default function MessagesInbox() {
   ) => {
     if (!selectedUserId || isSending) return;
 
-    if (!skipConfirmation && deletingMessageId !== messageId) {
+    const deleteTarget = messages.find((m) => m.id === messageId);
+    const shouldDeleteLocallyOnly =
+      deleteTarget?.id.startsWith("client-") &&
+      (deleteTarget.status === "failed" || deleteTarget.status === "pending");
+    const effectiveSkipConfirmation =
+      skipConfirmation || shouldDeleteLocallyOnly;
+
+    if (!effectiveSkipConfirmation && deletingMessageId !== messageId) {
       setDeletingMessageId(messageId);
       return;
     }
 
-    const toastId = toast.loading("Deleting message...");
+    let toastId: string | number | undefined;
     // Keep a copy of current messages for restoration if delete fails
     const previousMessages = [...messages];
     const previousConversationLastMessage = conversations.find(
       (conversation) => conversation.user.id === selectedUserId,
     )?.lastMessage;
-
     // Optimistically remove the message from UI
     setMessages((prev) => prev.filter((m) => m.id !== messageId));
     removeLocalThreadMessage(selectedUserId, (m) => m.id === messageId);
@@ -2317,6 +2469,10 @@ export default function MessagesInbox() {
     setDeletingMessageId(null);
 
     try {
+      if (shouldDeleteLocallyOnly) {
+        return;
+      }
+      toastId = toast.loading("Deleting message...");
       if (!PUBLIC_API_URL) {
         throw new Error("Public API URL is not configured");
       }
@@ -2363,6 +2519,15 @@ export default function MessagesInbox() {
     }
   };
 
+  const handleRetryFailedMessage = async (failedMessage: Message) => {
+    if (isSending) return;
+    if (failedMessage.status !== "failed") return;
+    if (!failedMessage.content?.trim()) return;
+
+    await handleDeleteMessage(failedMessage.id, true);
+    await handleSendMessage(failedMessage.content);
+  };
+
   if (isLoading) {
     return (
       <div className="h-[calc(100dvh-5rem)] overflow-hidden px-4 pb-4">
@@ -2406,11 +2571,11 @@ export default function MessagesInbox() {
     : "Select a conversation to start messaging.";
 
   return (
-    <div className="h-[calc(100dvh-5rem)] overflow-hidden px-4 pb-4">
+    <div className="h-[calc(100dvh-5rem)] overflow-hidden">
       <div className="flex h-full min-h-0 flex-col">
-        <Breadcrumb containerClassName="py-4" />
+        <Breadcrumb containerClassName="px-4 py-4" />
 
-        <div className="border-border-card bg-secondary-bg mt-0 grid min-h-0 flex-1 grid-cols-1 overflow-hidden rounded-lg border shadow-md lg:grid-cols-[320px_1fr]">
+        <div className="bg-secondary-bg border-border-card mt-0 grid min-h-0 flex-1 grid-cols-1 overflow-hidden border-t lg:grid-cols-[320px_1fr]">
           <aside
             className={cn(
               "border-border-card flex h-full min-h-0 flex-col border-b lg:border-r lg:border-b-0",
@@ -2454,9 +2619,12 @@ export default function MessagesInbox() {
             <div className="min-h-0 flex-1 touch-pan-y overflow-y-auto overscroll-contain">
               {userSearchQuery.trim() ? (
                 isUserSearchLoading ? (
-                  <p className="text-secondary-text px-4 py-4 text-sm">
-                    Searching...
-                  </p>
+                  <div className="flex items-center justify-center px-4 py-10">
+                    <Icon
+                      icon="lucide:loader-2"
+                      className="text-secondary-text h-5 w-5 animate-spin"
+                    />
+                  </div>
                 ) : userSearchResults.length === 0 ? (
                   <p className="text-secondary-text px-4 py-4 text-sm">
                     No users found.
@@ -2591,9 +2759,16 @@ export default function MessagesInbox() {
                       size="icon"
                       className="lg:hidden"
                       onClick={goToConversationList}
-                      aria-label="Back to conversations"
+                      aria-label="Open conversations"
                     >
-                      <Icon icon="heroicons:arrow-left" className="h-4 w-4" />
+                      <svg
+                        className="text-primary-text h-5 w-5 fill-current"
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 512 512"
+                        aria-hidden="true"
+                      >
+                        <path d="M64,384H448V341.33H64Zm0-106.67H448V234.67H64ZM64,128v42.67H448V128Z" />
+                      </svg>
                     </Button>
                   </ChatHeaderAddon>
                   <ChatHeaderAddon>
@@ -2622,7 +2797,7 @@ export default function MessagesInbox() {
                       <Link
                         href={`/users/${selectedUser.id}`}
                         prefetch={false}
-                        className="text-primary-text hover:text-link cursor-pointer truncate text-left text-sm font-semibold transition-colors sm:text-base"
+                        className="text-primary-text hover:text-link cursor-pointer truncate text-left text-base font-semibold transition-colors sm:text-lg"
                       >
                         {getDisplayName(selectedUser)}
                       </Link>
@@ -2684,11 +2859,12 @@ export default function MessagesInbox() {
                         <Button
                           variant="secondary"
                           size="icon"
+                          className="!size-8 sm:!size-10"
                           aria-label="Conversation actions"
                         >
                           <Icon
                             icon="heroicons:ellipsis-horizontal"
-                            className="h-5 w-5"
+                            className="!size-4 sm:!size-5"
                           />
                         </Button>
                       </DropdownMenuTrigger>
@@ -3006,8 +3182,19 @@ export default function MessagesInbox() {
 
                 <ChatMessages
                   ref={messagesContainerRef}
-                  className="bg-secondary-bg !flex-col px-2 py-3 sm:px-4"
+                  className="bg-secondary-bg relative !flex-col px-2 py-3 sm:px-4"
+                  style={{ overflowAnchor: "none" }}
                 >
+                  {!isLoadingMessages &&
+                    isLoadingOlderMessages &&
+                    messages.length > 0 && (
+                      <div className="pointer-events-none absolute inset-x-0 top-2 z-10 flex justify-center">
+                        <div className="bg-tertiary-bg border-border-card text-secondary-text flex items-center gap-2 rounded-full border px-3 py-1 text-xs">
+                          <span className="inline-block h-3 w-3 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                          Loading older messages
+                        </div>
+                      </div>
+                    )}
                   {isLoadingMessages ? (
                     <div className="text-secondary-text bg-tertiary-bg/40 border-border-card mx-auto my-auto rounded-md border px-4 py-3 text-center text-sm">
                       Loading messages...
@@ -3027,7 +3214,7 @@ export default function MessagesInbox() {
                         return (
                           <ChatEvent
                             key={message.id}
-                            className="border-link bg-button-info/10 my-1 items-start rounded-l-none rounded-r-md border-l-2 py-1 pl-2"
+                            className="border-link bg-button-info/10 my-0.5 items-start rounded-l-none rounded-r-md border-l-2 py-0.5 pl-2"
                           >
                             <ChatEventAddon>
                               <div className="bg-tertiary-bg border-border-card text-link inline-flex h-7 w-7 items-center justify-center rounded-md border">
@@ -3099,13 +3286,19 @@ export default function MessagesInbox() {
                         return minute === prevMinute;
                       })();
 
+                      const isMessageMenuActive =
+                        activeMessageId === message.id;
                       const messageMenu = (
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <Button
                               variant="secondary"
                               size="icon"
-                              className="h-8 w-8 rounded-lg p-0 opacity-100 transition-all duration-200 disabled:opacity-100 data-[state=open]:opacity-100 lg:opacity-0 lg:group-hover:opacity-100 lg:disabled:opacity-0 lg:group-hover:disabled:opacity-100"
+                              className={cn(
+                                "pointer-events-none !size-7 rounded-lg p-0 opacity-0 transition-all duration-200 data-[state=open]:pointer-events-auto data-[state=open]:opacity-100 sm:!size-8 lg:opacity-0 lg:group-hover:pointer-events-auto lg:group-hover:opacity-100 lg:disabled:opacity-0 lg:group-hover:disabled:opacity-100",
+                                isMessageMenuActive &&
+                                  "pointer-events-auto opacity-100",
+                              )}
                               disabled={
                                 isSending ||
                                 Boolean(deletingMessageId) ||
@@ -3114,23 +3307,25 @@ export default function MessagesInbox() {
                             >
                               <Icon
                                 icon="heroicons:ellipsis-horizontal"
-                                className="h-4 w-4"
+                                className="!size-4"
                               />
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
-                            <DropdownMenuItem
-                              onClick={() => {
-                                setReplyingToMessage(message);
-                              }}
-                            >
-                              <Icon
-                                icon="heroicons-outline:reply"
-                                className="mr-2 h-4 w-4"
-                              />
-                              Reply
-                            </DropdownMenuItem>
-                            {isOwnMessage && (
+                            {message.status !== "failed" && (
+                              <DropdownMenuItem
+                                onClick={() => {
+                                  setReplyingToMessage(message);
+                                }}
+                              >
+                                <Icon
+                                  icon="heroicons-outline:reply"
+                                  className="mr-2 h-4 w-4"
+                                />
+                                Reply
+                              </DropdownMenuItem>
+                            )}
+                            {isOwnMessage && message.status !== "failed" && (
                               <>
                                 <DropdownMenuItem
                                   onClick={() => {
@@ -3161,6 +3356,33 @@ export default function MessagesInbox() {
                                 </DropdownMenuItem>
                               </>
                             )}
+                            {isOwnMessage && message.status === "failed" && (
+                              <>
+                                <DropdownMenuItem
+                                  onClick={() =>
+                                    void handleRetryFailedMessage(message)
+                                  }
+                                >
+                                  <Icon
+                                    icon="lucide:rotate-cw"
+                                    className="mr-2 h-4 w-4"
+                                  />
+                                  Retry
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                  onClick={() =>
+                                    void handleDeleteMessage(message.id, true)
+                                  }
+                                  className="text-button-danger focus:bg-button-danger/10 focus:text-button-danger"
+                                >
+                                  <Icon
+                                    icon="heroicons-outline:trash"
+                                    className="mr-2 h-4 w-4"
+                                  />
+                                  Remove
+                                </DropdownMenuItem>
+                              </>
+                            )}
                           </DropdownMenuContent>
                         </DropdownMenu>
                       );
@@ -3170,6 +3392,7 @@ export default function MessagesInbox() {
                           key={domId}
                           id={`message-${domId}`}
                           className="group"
+                          data-message-row
                         >
                           {showDaySeparator &&
                             typeof message.createdAt === "number" && (
@@ -3185,9 +3408,26 @@ export default function MessagesInbox() {
                             )}
                           <ChatEvent
                             className={cn(
-                              "group-hover:bg-tertiary-bg relative w-full flex-col items-start rounded-md py-1 transition-colors",
-                              message.parentId && "mt-1",
+                              "group-hover:bg-tertiary-bg relative w-full flex-col items-start rounded-md py-0.5 transition-colors",
+                              message.parentId && "mt-0.5",
                             )}
+                            onClick={(event) => {
+                              if (editingMessageId) return;
+                              if (message.status === "pending") return;
+
+                              const target = event.target as HTMLElement | null;
+                              if (
+                                target?.closest(
+                                  "a,button,textarea,input,select,[role='menuitem']",
+                                )
+                              ) {
+                                return;
+                              }
+
+                              setActiveMessageId((prev) =>
+                                prev === message.id ? null : message.id,
+                              );
+                            }}
                           >
                             {message.parentId && (
                               <div className="-mb-1 flex items-center gap-2 sm:gap-3">
@@ -3292,7 +3532,7 @@ export default function MessagesInbox() {
                                 })()}
                               </div>
                             )}
-                            <div className="flex w-full items-start gap-2">
+                            <div className="relative flex w-full items-start gap-2">
                               <ChatEventAddon
                                 className={cn(
                                   isGroupedWithPrevious
@@ -3330,35 +3570,27 @@ export default function MessagesInbox() {
                               </ChatEventAddon>
                               <ChatEventBody>
                                 {!isGroupedWithPrevious ? (
-                                  <ChatEventTitle>
-                                    <Link
-                                      href={`/users/${sender.id}`}
-                                      prefetch={false}
-                                      className="text-primary-text hover:text-link cursor-pointer text-xs font-medium transition-colors sm:text-sm"
-                                    >
-                                      {isOwnMessage
-                                        ? "You"
-                                        : getDisplayName(selectedUser)}
-                                    </Link>
-                                    {typeof message.createdAt === "number" && (
-                                      <ChatEventTime
-                                        timestamp={message.createdAt}
-                                        format="discord"
-                                        className="text-secondary-text text-xs"
-                                      />
-                                    )}
-                                    {editingMessageId !== message.id &&
-                                      message.status !== "pending" && (
-                                        <div className="ml-auto flex items-center gap-1">
-                                          {messageMenu}
-                                        </div>
+                                  <ChatEventTitle className="w-full items-start">
+                                    <div className="flex min-w-0 flex-col items-start gap-0.5 sm:flex-row sm:items-center sm:gap-2">
+                                      <Link
+                                        href={`/users/${sender.id}`}
+                                        prefetch={false}
+                                        className="text-primary-text hover:text-link cursor-pointer truncate text-sm font-medium transition-colors sm:text-base"
+                                      >
+                                        {isOwnMessage
+                                          ? "You"
+                                          : getDisplayName(selectedUser)}
+                                      </Link>
+                                      {typeof message.createdAt ===
+                                        "number" && (
+                                        <ChatEventTime
+                                          timestamp={message.createdAt}
+                                          format="discord"
+                                          className="text-secondary-text text-xs"
+                                        />
                                       )}
+                                    </div>
                                   </ChatEventTitle>
-                                ) : editingMessageId !== message.id &&
-                                  message.status !== "pending" ? (
-                                  <div className="absolute top-0 right-1 z-10">
-                                    {messageMenu}
-                                  </div>
                                 ) : null}
                                 {editingMessageId === message.id ? (
                                   <div className="mt-2 space-y-3">
@@ -3454,27 +3686,39 @@ export default function MessagesInbox() {
                                     </div>
                                   </div>
                                 ) : (
-                                  <ChatEventContent
-                                    className={cn(
-                                      "break-words whitespace-pre-wrap",
-                                      message.status === "pending"
-                                        ? "text-secondary-text/70"
-                                        : message.status === "failed"
-                                          ? "text-red-400/90"
-                                          : "text-primary-text",
-                                    )}
-                                  >
-                                    {formatMessageText(message.content ?? "")}
-                                    {message.updatedAt &&
-                                      message.updatedAt !==
-                                        message.createdAt && (
-                                        <span className="text-secondary-text ml-1.5 text-[10px]">
-                                          (edited)
-                                        </span>
-                                      )}
-                                  </ChatEventContent>
+                                  <div className="flex w-full items-start gap-2">
+                                    <div className="min-w-0 flex-1">
+                                      <ChatEventContent
+                                        className={cn(
+                                          "break-words whitespace-pre-wrap",
+                                          message.status === "pending"
+                                            ? "text-secondary-text/70"
+                                            : message.status === "failed"
+                                              ? "text-red-400/90"
+                                              : "text-primary-text",
+                                        )}
+                                      >
+                                        {formatMessageText(
+                                          message.content ?? "",
+                                        )}
+                                        {message.updatedAt &&
+                                          message.updatedAt !==
+                                            message.createdAt && (
+                                            <span className="text-secondary-text ml-1.5 text-[10px]">
+                                              (edited)
+                                            </span>
+                                          )}
+                                      </ChatEventContent>
+                                    </div>
+                                  </div>
                                 )}
                               </ChatEventBody>
+                              {editingMessageId !== message.id &&
+                                message.status !== "pending" && (
+                                  <div className="absolute top-0 right-0 z-10">
+                                    {messageMenu}
+                                  </div>
+                                )}
                             </div>
                           </ChatEvent>
                         </div>
@@ -3519,7 +3763,7 @@ export default function MessagesInbox() {
                   )}
                   <div
                     className={cn(
-                      "border-border-card bg-form-input text-primary-text focus-within:border-button-info flex w-full items-center gap-2 rounded-md border px-1 py-1 shadow-none",
+                      "border-border-card bg-tertiary-bg text-primary-text focus-within:border-button-info flex w-full items-center gap-2 rounded-md border px-1 py-1 shadow-none",
                       replyingToMessage && "rounded-t-none border-t-0",
                     )}
                   >
