@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import { TradeItem } from "@/types/trading";
 import TradeItemPickerV2 from "../../trading/TradeItemPickerV2";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
@@ -11,6 +11,10 @@ import {
   safeSetJSON,
 } from "@/utils/safeStorage";
 import NitroCalculatorAd from "@/components/Ads/NitroCalculatorAd";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { useAuthContext } from "@/contexts/AuthContext";
+import { INVENTORY_API_SOURCE_HEADER, INVENTORY_API_URL } from "@/utils/api";
 
 // Import extracted components and utilities
 import { parseValueString, formatTotalValue } from "./calculatorUtils";
@@ -25,13 +29,36 @@ import { toast } from "sonner";
 
 interface CalculatorFormProps {
   initialItems?: TradeItem[];
-  itemsInputMode?: "picker" | "scan";
+  itemsInputMode?: "picker" | "scan" | "inventory";
 }
 
 export const CalculatorForm: React.FC<CalculatorFormProps> = ({
   initialItems = [],
   itemsInputMode = "picker",
 }) => {
+  const sleep = (ms: number) =>
+    new Promise<void>((resolve) => setTimeout(resolve, ms));
+
+  const isRetryableFetchError = (error: unknown): boolean => {
+    if (!(error instanceof Error)) return false;
+    if (error.name === "AbortError") return false;
+    const message = error.message.toLowerCase();
+    return (
+      message.includes("fetch failed") ||
+      message.includes("network") ||
+      message.includes("timeout") ||
+      message.includes("connect") ||
+      message.includes("und_err")
+    );
+  };
+
+  const {
+    user,
+    isAuthenticated,
+    isLoading: isAuthLoading,
+    setLoginModal,
+  } = useAuthContext();
+
   const [offeringItems, setOfferingItems] = useState<TradeItem[]>([]);
   const [requestingItems, setRequestingItems] = useState<TradeItem[]>([]);
   const [activeTab, setActiveTab] = useState<"items" | "values" | "similar">(
@@ -46,6 +73,187 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
     useState<number>(2_500_000);
   const [requestingSimilarItemsRange, setRequestingSimilarItemsRange] =
     useState<number>(2_500_000);
+
+  const [inventoryItems, setInventoryItems] = useState<TradeItem[]>([]);
+  const [inventoryStatus, setInventoryStatus] = useState<
+    "idle" | "loading" | "loaded" | "error"
+  >("idle");
+  const [inventoryError, setInventoryError] = useState<string | null>(null);
+  const lastFetchedInventoryUserIdRef = useRef<string | null>(null);
+  const inventoryFetchControllerRef = useRef<AbortController | null>(null);
+
+  const robloxId = (user?.roblox_id ?? "").trim();
+  const hasValidRobloxId = /^\d+$/.test(robloxId);
+  const canLoadInventory = Boolean(isAuthenticated && hasValidRobloxId);
+
+  useEffect(() => {
+    if (itemsInputMode !== "inventory") return;
+
+    if (!canLoadInventory) {
+      setInventoryItems([]);
+      setInventoryStatus("idle");
+      setInventoryError(null);
+      return;
+    }
+
+    if (!INVENTORY_API_URL) {
+      setInventoryItems([]);
+      setInventoryStatus("error");
+      setInventoryError(
+        "Inventory API is not configured (NEXT_PUBLIC_INVENTORY_API_URL missing).",
+      );
+      return;
+    }
+
+    if (lastFetchedInventoryUserIdRef.current === robloxId) {
+      return;
+    }
+
+    inventoryFetchControllerRef.current?.abort();
+    const controller = new AbortController();
+    inventoryFetchControllerRef.current = controller;
+    let didFinish = false;
+
+    const fetchInventory = async () => {
+      setInventoryStatus("loading");
+      setInventoryError(null);
+
+      try {
+        const url = `${INVENTORY_API_URL}/user/inventory?id=${encodeURIComponent(robloxId)}&nocache=false`;
+        const retryStatuses = new Set([408, 425, 429, 500, 502, 503, 504]);
+        const maxAttempts = 3;
+
+        let response: Response | null = null;
+        for (let attempt = 0; attempt < maxAttempts; attempt++) {
+          if (controller.signal.aborted) {
+            throw new DOMException("Aborted", "AbortError");
+          }
+
+          try {
+            response = await fetch(url, {
+              method: "GET",
+              headers: {
+                "User-Agent": "JailbreakChangelogs-ValuesCalculator/1.0",
+                "X-Source": INVENTORY_API_SOURCE_HEADER ?? "",
+              },
+              cache: "no-store",
+              signal: controller.signal,
+            });
+          } catch (error) {
+            if (controller.signal.aborted) {
+              throw new DOMException("Aborted", "AbortError");
+            }
+
+            if (attempt < maxAttempts - 1 && isRetryableFetchError(error)) {
+              const baseDelayMs = 500 * Math.pow(2, attempt);
+              const jitterMs = Math.floor(Math.random() * 250);
+              await sleep(baseDelayMs + jitterMs);
+              continue;
+            }
+
+            throw error;
+          }
+
+          if (
+            response &&
+            !response.ok &&
+            retryStatuses.has(response.status) &&
+            attempt < maxAttempts - 1
+          ) {
+            response.body?.cancel();
+            const baseDelayMs = 500 * Math.pow(2, attempt);
+            const jitterMs = Math.floor(Math.random() * 250);
+            await sleep(baseDelayMs + jitterMs);
+            response = null;
+            continue;
+          }
+
+          break;
+        }
+
+        if (!response) {
+          throw new Error("Failed to load inventory (no response)");
+        }
+
+        const data = (await response.json()) as unknown;
+        if (!response.ok) {
+          const message =
+            (data &&
+            typeof data === "object" &&
+            "message" in data &&
+            typeof (data as { message?: unknown }).message === "string"
+              ? (data as { message: string }).message
+              : null) || `Failed to load inventory (${response.status})`;
+          throw new Error(message);
+        }
+
+        const record =
+          data && typeof data === "object" && !Array.isArray(data)
+            ? (data as Record<string, unknown>)
+            : null;
+        const rawItems = Array.isArray(record?.data) ? record?.data : [];
+        const rawDuplicates = Array.isArray(record?.duplicates)
+          ? record?.duplicates
+          : [];
+
+        const inventoryIds: number[] = [];
+        const isDupedById = new Map<number, boolean>();
+
+        const pushId = (entry: unknown, isDuped: boolean) => {
+          if (!entry || typeof entry !== "object") return;
+          const id =
+            "id" in entry && typeof (entry as { id?: unknown }).id === "number"
+              ? (entry as { id: number }).id
+              : null;
+          if (id === null) return;
+          if (!isDupedById.has(id)) inventoryIds.push(id);
+          // If an item appears in both arrays, treat it as duped.
+          isDupedById.set(id, isDupedById.get(id) || isDuped);
+        };
+
+        rawItems.forEach((entry) => pushId(entry, false));
+        rawDuplicates.forEach((entry) => pushId(entry, true));
+
+        const itemById = new Map<number, TradeItem>();
+        initialItems.forEach((it) => itemById.set(it.id, it));
+
+        const inventoryTradeItems = inventoryIds
+          .map((id) => itemById.get(id))
+          .filter((it): it is TradeItem => Boolean(it))
+          .map((it) => ({
+            ...it,
+            is_sub: false,
+            side: undefined,
+            isDuped: isDupedById.get(it.id) || false,
+          }));
+
+        setInventoryItems(inventoryTradeItems);
+        setInventoryStatus("loaded");
+        lastFetchedInventoryUserIdRef.current = robloxId;
+        didFinish = true;
+      } catch (error) {
+        if (error instanceof DOMException && error.name === "AbortError") {
+          setInventoryStatus("idle");
+          return;
+        }
+        const message =
+          error instanceof Error ? error.message : "Failed to load inventory";
+        setInventoryItems([]);
+        setInventoryStatus("error");
+        setInventoryError(message);
+        lastFetchedInventoryUserIdRef.current = null;
+        didFinish = true;
+      }
+    };
+
+    void fetchInventory();
+
+    return () => {
+      controller.abort();
+      if (!didFinish) lastFetchedInventoryUserIdRef.current = null;
+    };
+  }, [itemsInputMode, canLoadInventory, robloxId, initialItems]);
+
   const DYNAMIC_MAX_VALUE = useMemo(() => {
     return initialItems.reduce((currentMax, item) => {
       if (item.tradable === 1) {
@@ -461,7 +669,9 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
               aria-controls="calculator-tabpanel-items"
               id="calculator-tab-items"
             >
-              Browse Items
+              {itemsInputMode === "inventory"
+                ? "Browse Inventory Items"
+                : "Browse Items"}
             </TabsTrigger>
             <TabsTrigger
               value="similar"
@@ -501,6 +711,80 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
                 onAddCustomType={() => {}}
                 allowOg={false}
               />
+            ) : itemsInputMode === "inventory" ? (
+              <div>
+                {isAuthLoading ? (
+                  <div className="border-border-card bg-secondary-bg rounded-lg border p-6 text-center">
+                    <p className="text-secondary-text text-sm">
+                      Loading your account...
+                    </p>
+                  </div>
+                ) : !isAuthenticated ? (
+                  <div className="border-border-card bg-secondary-bg rounded-lg border p-6 text-center">
+                    <p className="text-secondary-text text-sm">
+                      Log in to load your Roblox inventory.
+                    </p>
+                    <div className="mt-4 flex justify-center">
+                      <Button
+                        type="button"
+                        onClick={() => setLoginModal({ open: true })}
+                      >
+                        Log In
+                      </Button>
+                    </div>
+                  </div>
+                ) : !hasValidRobloxId ? (
+                  <div className="border-border-card bg-secondary-bg rounded-lg border p-6 text-center">
+                    <p className="text-secondary-text text-sm">
+                      Connect your Roblox account to load your inventory items.
+                    </p>
+                    <div className="mt-4 flex flex-col items-center justify-center gap-3 sm:flex-row">
+                      <Button
+                        type="button"
+                        onClick={() =>
+                          setLoginModal({ open: true, tab: "roblox" })
+                        }
+                      >
+                        Connect Roblox
+                      </Button>
+                      <Link
+                        href="/inventories"
+                        prefetch={false}
+                        className="text-link text-sm"
+                      >
+                        View Inventories
+                      </Link>
+                    </div>
+                  </div>
+                ) : inventoryStatus === "loading" ? (
+                  <div className="border-border-card bg-secondary-bg rounded-lg border p-6 text-center">
+                    <p className="text-secondary-text text-sm">
+                      Loading inventory items...
+                    </p>
+                  </div>
+                ) : inventoryStatus === "error" ? (
+                  <div className="border-border-card bg-secondary-bg rounded-lg border p-6 text-center">
+                    <p className="text-secondary-text text-sm">
+                      {inventoryError || "Failed to load inventory items."}
+                    </p>
+                  </div>
+                ) : inventoryItems.length === 0 ? (
+                  <div className="border-border-card bg-secondary-bg rounded-lg border p-6 text-center">
+                    <p className="text-secondary-text text-sm">
+                      No tradable inventory items found.
+                    </p>
+                  </div>
+                ) : (
+                  <TradeItemPickerV2
+                    items={inventoryItems}
+                    onSelect={handleAddItem}
+                    selectedItems={[...offeringItems, ...requestingItems]}
+                    customTypes={[]}
+                    onAddCustomType={() => {}}
+                    allowOg={false}
+                  />
+                )}
+              </div>
             ) : (
               <div className="border-border-card bg-secondary-bg rounded-lg border p-6 text-center">
                 <p className="text-secondary-text text-sm">
