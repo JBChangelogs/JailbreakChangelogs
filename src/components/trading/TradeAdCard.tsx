@@ -31,6 +31,7 @@ interface TradeAdCardProps {
   trade: TradeAd;
   currentUserId: string | null;
   onDelete?: () => void;
+  actionsVariant?: "full" | "details-only";
 }
 
 const getProxyRobloxHeadshotUrl = (robloxId: string | null | undefined) => {
@@ -284,6 +285,7 @@ export const TradeAdCard: React.FC<TradeAdCardProps> = ({
   trade,
   currentUserId,
   onDelete,
+  actionsVariant = "full",
 }) => {
   const [isDeleting, setIsDeleting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -441,46 +443,50 @@ export const TradeAdCard: React.FC<TradeAdCardProps> = ({
                 <span className="hidden sm:inline">Details</span>
               </Link>
             </Button>
-            {trade.author !== currentUserId && (
-              <Button
-                asChild
-                size="sm"
-                variant="outline"
-                className="px-2 sm:px-3"
-                aria-label="Make an offer"
-              >
-                <Link
-                  href={`/trading/ad/${trade.id}?makeOffer=1`}
-                  prefetch={false}
-                  onClick={() => {
-                    startMakeOfferLoadingToast("Preparing offer...");
-                  }}
-                >
-                  <Icon icon="heroicons-outline:hand-raised" />
-                  <span className="hidden sm:inline">Make Offer</span>
-                </Link>
-              </Button>
-            )}
-            {trade.author === currentUserId && (
-              <Button
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  setShowDeleteConfirm(true);
-                }}
-                disabled={isDeleting}
-                variant="destructive"
-                size="sm"
-                className="px-2 sm:px-3"
-                aria-label={
-                  isDeleting ? "Deleting trade ad" : "Delete trade ad"
-                }
-              >
-                <Icon icon="heroicons-outline:trash" />
-                <span className="hidden sm:inline">
-                  {isDeleting ? "Deleting..." : "Delete"}
-                </span>
-              </Button>
+            {actionsVariant === "full" && (
+              <>
+                {trade.author !== currentUserId && (
+                  <Button
+                    asChild
+                    size="sm"
+                    variant="outline"
+                    className="px-2 sm:px-3"
+                    aria-label="Make an offer"
+                  >
+                    <Link
+                      href={`/trading/ad/${trade.id}?makeOffer=1`}
+                      prefetch={false}
+                      onClick={() => {
+                        startMakeOfferLoadingToast("Preparing offer...");
+                      }}
+                    >
+                      <Icon icon="heroicons-outline:hand-raised" />
+                      <span className="hidden sm:inline">Make Offer</span>
+                    </Link>
+                  </Button>
+                )}
+                {trade.author === currentUserId && (
+                  <Button
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      setShowDeleteConfirm(true);
+                    }}
+                    disabled={isDeleting}
+                    variant="destructive"
+                    size="sm"
+                    className="px-2 sm:px-3"
+                    aria-label={
+                      isDeleting ? "Deleting trade ad" : "Delete trade ad"
+                    }
+                  >
+                    <Icon icon="heroicons-outline:trash" />
+                    <span className="hidden sm:inline">
+                      {isDeleting ? "Deleting..." : "Delete"}
+                    </span>
+                  </Button>
+                )}
+              </>
             )}
           </div>
         </div>

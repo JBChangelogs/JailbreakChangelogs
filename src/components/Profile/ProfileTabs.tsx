@@ -6,7 +6,7 @@ import React from "react";
 import AboutTab from "./AboutTab";
 import CommentsTab from "./CommentsTab";
 import FavoritesTab from "./FavoritesTab";
-import RobloxProfileTab from "./RobloxProfileTab";
+import TradeAdsProfileTab from "./TradeAdsProfileTab";
 import PrivateServersTab from "./PrivateServersTab";
 import { UserSettings } from "@/types/auth";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -163,7 +163,10 @@ export default function ProfileTabs({
         setValue(2);
       } else if (hash === "servers") {
         setValue(3);
-      } else if (hash === "roblox" && hasRobloxConnection) {
+      } else if (
+        (hash === "trade-ads" || hash === "roblox") &&
+        hasRobloxConnection
+      ) {
         setValue(4);
       } else {
         setValue(0);
@@ -192,7 +195,7 @@ export default function ProfileTabs({
     } else if (newValue === 3) {
       window.location.hash = "servers";
     } else if (hasRobloxConnection && newValue === 4) {
-      window.location.hash = "roblox";
+      window.location.hash = "trade-ads";
     }
   };
 
@@ -249,11 +252,12 @@ export default function ProfileTabs({
       </TabPanel>
       {hasRobloxConnection && (
         <TabPanel value={value} index={4}>
-          <RobloxProfileTab
+          <TradeAdsProfileTab
             user={user}
             tradeAds={tradeAds}
             isLoadingAdditionalData={isLoadingAdditionalData}
             isOwnProfile={currentUserId === user.id}
+            currentUserId={currentUserId}
           />
         </TabPanel>
       )}
@@ -275,7 +279,7 @@ function ProfileOverflowTabs({
     "Comments",
     "Favorites",
     "Private Servers",
-    ...(hasRobloxConnection ? ["Roblox Profile"] : []),
+    ...(hasRobloxConnection ? ["Trade Ads"] : []),
   ];
 
   return (

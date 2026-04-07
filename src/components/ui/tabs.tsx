@@ -83,6 +83,7 @@ const TabsList = React.forwardRef<
 
       const observer = new MutationObserver(scheduleUpdate);
       observer.observe(el, {
+        childList: true,
         subtree: true,
         attributes: true,
         attributeFilter: ["data-state", "data-disabled"],

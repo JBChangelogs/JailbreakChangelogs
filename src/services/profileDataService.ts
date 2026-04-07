@@ -232,7 +232,7 @@ export class ProfileDataService {
         ).catch(() => null),
         fetchFavoritesData(userId),
         fetchWithRetry(
-          `${BASE_API_URL}/trades/v2/recent?limit=24&user=${encodeURIComponent(userId)}`,
+          `${BASE_API_URL}/trades/v2/recent?user=${encodeURIComponent(userId)}&limit=12`,
           undefined,
           {
             maxRetries: 2,

@@ -40,12 +40,14 @@ interface TradeAdsTabProps {
   tradeAds?: TradeAd[];
   isLoadingAdditionalData?: boolean;
   isOwnProfile?: boolean;
+  embedded?: boolean;
 }
 
 export default function TradeAdsTab({
   tradeAds: propTradeAds = [],
   isLoadingAdditionalData = false,
   isOwnProfile = false,
+  embedded = false,
 }: TradeAdsTabProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const adsPerPage = 3;
@@ -239,6 +241,47 @@ export default function TradeAdsTab({
     );
   }
 
+  const content = error ? (
+    <p className="text-status-error">Error: {error}</p>
+  ) : tradeAds.length === 0 ? (
+    <div className="p-6 text-center">
+      <Icon
+        icon="heroicons:arrows-right-left"
+        className="text-button-info mx-auto mb-4 h-12 w-12"
+      />
+      <h3 className="text-primary-text mb-2 text-xl font-semibold">
+        {isOwnProfile ? "You have not posted any trade ads." : "No trade ads."}
+      </h3>
+      {isOwnProfile && (
+        <Button asChild variant="default" size="sm" className="mt-4">
+          <Link href="/trading">Create Trade Ad</Link>
+        </Button>
+      )}
+    </div>
+  ) : (
+    <>
+      <div className="space-y-4">
+        {currentAds.map((ad) => (
+          <TradeAdItem key={ad.id} ad={ad} />
+        ))}
+      </div>
+
+      {tradeAds.length > adsPerPage && (
+        <div className="mt-6 flex justify-center">
+          <Pagination
+            count={Math.ceil(tradeAds.length / adsPerPage)}
+            page={currentPage}
+            onChange={handlePageChange}
+          />
+        </div>
+      )}
+    </>
+  );
+
+  if (embedded) {
+    return <div className="mt-4">{content}</div>;
+  }
+
   if (error) {
     return (
       <div className="space-y-6">
@@ -248,7 +291,7 @@ export default function TradeAdsTab({
               Trade Ads
             </h2>
           </div>
-          <p className="text-status-error">Error: {error}</p>
+          {content}
         </div>
       </div>
     );
@@ -262,44 +305,7 @@ export default function TradeAdsTab({
             Trade Ads [{tradeAds.length}]
           </h2>
         </div>
-
-        {tradeAds.length === 0 ? (
-          <div className="p-8 text-center">
-            <Icon
-              icon="heroicons:arrows-right-left"
-              className="text-button-info mx-auto mb-4 h-12 w-12"
-            />
-            <h3 className="text-primary-text mb-2 text-xl font-semibold">
-              {isOwnProfile
-                ? "You have not posted any trade ads."
-                : "No trade ads available."}
-            </h3>
-            {isOwnProfile && (
-              <Button asChild variant="default" size="sm" className="mt-4">
-                <Link href="/trading">Create Trade Ad</Link>
-              </Button>
-            )}
-          </div>
-        ) : (
-          <>
-            <div className="space-y-4">
-              {currentAds.map((ad) => (
-                <TradeAdItem key={ad.id} ad={ad} />
-              ))}
-            </div>
-
-            {/* Pagination controls */}
-            {tradeAds.length > adsPerPage && (
-              <div className="mt-6 flex justify-center">
-                <Pagination
-                  count={Math.ceil(tradeAds.length / adsPerPage)}
-                  page={currentPage}
-                  onChange={handlePageChange}
-                />
-              </div>
-            )}
-          </>
-        )}
+        {content}
       </div>
     </div>
   );
