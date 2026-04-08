@@ -1,17 +1,3 @@
-interface User {
-  id: string;
-  username: string;
-  avatar: string;
-  global_name: string;
-  usernumber: number;
-  accent_color: string;
-  custom_avatar?: string;
-  presence?: {
-    status: "Online" | "Offline";
-    last_updated: number;
-  };
-}
-
 export interface Changelog {
   id: number;
   title: string;
@@ -193,16 +179,6 @@ function throwUserAccessErrorFrom403(data: unknown): never {
 
   throw new Error(`BANNED_USER: ${errorMessage}`);
 }
-
-export const fetchUsers = async () => {
-  const response = await fetch(`${BASE_API_URL}/users/list`, {
-    headers: {
-      "User-Agent": "JailbreakChangelogs-UserSearch/1.0",
-    },
-  });
-  const data = await response.json();
-  return data.sort((a: User, b: User) => a.usernumber - b.usernumber);
-};
 
 export const fetchPaginatedUsers = async (
   page: number = 1,
@@ -502,36 +478,6 @@ export async function fetchUserByRobloxId(robloxId: string) {
   }
 }
 
-export const fetchUsersForList = async () => {
-  const fields = [
-    "id",
-    "username",
-    "global_name",
-    "avatar",
-    "usernumber",
-    "custom_avatar",
-    "settings",
-    "premiumtype",
-    "created_at",
-    "roblox_id",
-    "roblox_username",
-    "roblox_display_name",
-    "roblox_avatar",
-    "roblox_join_date",
-  ].join(",");
-
-  const response = await fetch(
-    `${BASE_API_URL}/users/list?fields=${fields}&nocache=true`,
-    {
-      headers: {
-        "User-Agent": "JailbreakChangelogs-UserSearch/1.0",
-      },
-    },
-  );
-  const data = await response.json();
-  return data;
-};
-
 export async function fetchItems() {
   try {
     const response = await fetch(`${BASE_API_URL}/items/list`, {
@@ -724,270 +670,6 @@ export async function fetchItemChanges(id: string) {
   } catch (err) {
     console.error("[SERVER] Error fetching item changes:", err);
     return [] as unknown[];
-  }
-}
-
-export async function fetchTradeAds() {
-  interface V2TradeItemInfo {
-    cash_value?: string | null;
-    duped_value?: string | null;
-    trend?: string | null;
-    demand?: string | null;
-    notes?: string | null;
-  }
-
-  interface V2TradeItem {
-    id?: string | number | null;
-    duped?: boolean;
-    amount?: number;
-    og?: boolean;
-    name?: string | null;
-    type?: string | null;
-    info?: V2TradeItemInfo | null;
-  }
-
-  interface V2TradeUser {
-    id?: string;
-    roblox_id?: string;
-    roblox_username?: string;
-    roblox_display_name?: string;
-    roblox_avatar?: string;
-    premiumtype?: number;
-    username?: string;
-    global_name?: string;
-    usernumber?: number;
-  }
-
-  interface V2Trade {
-    id: number;
-    note?: string | null;
-    status?: string | null;
-    requesting?: V2TradeItem[];
-    offering?: V2TradeItem[];
-    user?: V2TradeUser | null;
-    created_at?: number;
-    expires?: number;
-  }
-
-  const now = Math.floor(Date.now() / 1000);
-  const toValidEpoch = (value: unknown): number => {
-    return typeof value === "number" && Number.isFinite(value) ? value : now;
-  };
-
-  const normalizeV2Items = (items: V2TradeItem[] = []) => {
-    return items.flatMap((item, index) => {
-      const amount = Math.max(1, Number(item.amount) || 1);
-      const parsedId = Number(item.id);
-      const fallbackId = -(index + 1);
-      const itemId = Number.isFinite(parsedId) ? parsedId : fallbackId;
-      const normalized = {
-        id: itemId,
-        instanceId: String(item.id ?? itemId),
-        name: item.name || "Unknown Item",
-        type: item.type || "Unknown",
-        cash_value: item.info?.cash_value || "N/A",
-        duped_value: item.info?.duped_value || "N/A",
-        is_limited: null,
-        is_seasonal: null,
-        tradable: 1,
-        trend: item.info?.trend || "N/A",
-        demand: item.info?.demand || "N/A",
-        isDuped: item.duped ?? false,
-        isOG: item.og ?? false,
-      };
-
-      return Array.from({ length: amount }, () => normalized);
-    });
-  };
-
-  const normalizeV2Trade = (trade: V2Trade) => {
-    const createdAt = toValidEpoch(trade.created_at);
-    const expiresAt = toValidEpoch(trade.expires);
-    const isExpired = expiresAt <= now;
-
-    return {
-      id: trade.id,
-      note: trade.note ?? "",
-      requesting: normalizeV2Items(trade.requesting),
-      offering: normalizeV2Items(trade.offering),
-      author: trade.user?.id || "",
-      created_at: createdAt,
-      expires: expiresAt,
-      expired: isExpired ? 1 : 0,
-      status: trade.status ?? "",
-      message_id: null,
-      user: trade.user
-        ? {
-            id: trade.user.id || "",
-            username: trade.user.username || "Unknown",
-            global_name: trade.user.global_name,
-            avatar: undefined,
-            roblox_id: trade.user.roblox_id,
-            roblox_username: trade.user.roblox_username,
-            roblox_display_name: trade.user.roblox_display_name,
-            roblox_avatar: trade.user.roblox_avatar,
-            premiumtype: trade.user.premiumtype ?? 0,
-            usernumber: trade.user.usernumber,
-          }
-        : undefined,
-    };
-  };
-
-  try {
-    const response = await fetch(`${BASE_API_URL}/trades/v2/recent?limit=24`, {
-      headers: {
-        "User-Agent": "JailbreakChangelogs-Trading/2.0",
-      },
-    });
-
-    if (response.status === 404) {
-      // 404 means no trade ads found
-      return [];
-    }
-
-    if (!response.ok) {
-      throw new Error("Failed to fetch trade ads");
-    }
-
-    const data = await response.json();
-    if (!Array.isArray(data)) {
-      return [];
-    }
-
-    return data.map((trade) => normalizeV2Trade(trade as V2Trade));
-  } catch (err) {
-    console.error("[SERVER] Error fetching trade ads:", err);
-    return [];
-  }
-}
-
-export async function fetchTradeAd(id: string) {
-  interface V2TradeItemInfo {
-    cash_value?: string | null;
-    duped_value?: string | null;
-    trend?: string | null;
-    demand?: string | null;
-    notes?: string | null;
-  }
-
-  interface V2TradeItem {
-    id?: string | number | null;
-    duped?: boolean;
-    amount?: number;
-    og?: boolean;
-    name?: string | null;
-    type?: string | null;
-    info?: V2TradeItemInfo | null;
-  }
-
-  interface V2TradeUser {
-    id?: string;
-    roblox_id?: string;
-    roblox_username?: string;
-    roblox_display_name?: string;
-    roblox_avatar?: string;
-    premiumtype?: number;
-    username?: string;
-    global_name?: string;
-    usernumber?: number;
-  }
-
-  interface V2Trade {
-    id: number;
-    note?: string | null;
-    status?: string | null;
-    requesting?: V2TradeItem[];
-    offering?: V2TradeItem[];
-    user?: V2TradeUser | null;
-    created_at?: number;
-    expires?: number;
-  }
-
-  const now = Math.floor(Date.now() / 1000);
-  const toValidEpoch = (value: unknown): number => {
-    if (typeof value === "number" && Number.isFinite(value)) return value;
-    if (typeof value === "string") {
-      const parsed = Number(value);
-      if (Number.isFinite(parsed)) return parsed;
-    }
-    return now;
-  };
-
-  const normalizeV2Items = (items: V2TradeItem[] = []) => {
-    return items.flatMap((item, index) => {
-      const amount = Math.max(1, Number(item.amount) || 1);
-      const parsedId = Number(item.id);
-      const fallbackId = -(index + 1);
-      const itemId = Number.isFinite(parsedId) ? parsedId : fallbackId;
-      const normalized = {
-        id: itemId,
-        instanceId: String(item.id ?? itemId),
-        name: item.name || "Unknown Item",
-        type: item.type || "Unknown",
-        cash_value: item.info?.cash_value || "N/A",
-        duped_value: item.info?.duped_value || "N/A",
-        is_limited: null,
-        is_seasonal: null,
-        tradable: 1,
-        trend: item.info?.trend || "N/A",
-        demand: item.info?.demand || "N/A",
-        isDuped: item.duped ?? false,
-        isOG: item.og ?? false,
-      };
-
-      return Array.from({ length: amount }, () => normalized);
-    });
-  };
-
-  try {
-    const response = await fetch(`${BASE_API_URL}/trades/v2/${id}`, {
-      headers: {
-        "User-Agent": "JailbreakChangelogs-Trading/2.0",
-      },
-    });
-
-    if (response.status === 404) {
-      return null;
-    }
-
-    if (!response.ok) {
-      throw new Error("Failed to fetch trade ad");
-    }
-
-    const trade = (await response.json()) as V2Trade;
-    const createdAt = toValidEpoch(trade.created_at);
-    const expiresAt = toValidEpoch(trade.expires);
-    const isExpired = expiresAt <= now;
-
-    return {
-      id: trade.id,
-      note: trade.note ?? "",
-      requesting: normalizeV2Items(trade.requesting),
-      offering: normalizeV2Items(trade.offering),
-      author: trade.user?.id || "",
-      created_at: createdAt,
-      expires: expiresAt,
-      expired: isExpired ? 1 : 0,
-      status: trade.status ?? "Pending",
-      message_id: null,
-      user: trade.user
-        ? {
-            id: trade.user.id || "",
-            username: trade.user.username || "Unknown",
-            global_name: trade.user.global_name,
-            avatar: undefined,
-            roblox_id: trade.user.roblox_id,
-            roblox_username: trade.user.roblox_username,
-            roblox_display_name: trade.user.roblox_display_name,
-            roblox_avatar: trade.user.roblox_avatar,
-            premiumtype: trade.user.premiumtype ?? 0,
-            usernumber: trade.user.usernumber,
-          }
-        : undefined,
-    };
-  } catch (err) {
-    console.error("[SERVER] Error fetching trade ad:", err);
-    return null;
   }
 }
 
@@ -1456,29 +1138,6 @@ export async function fetchUserFavorites(userId: string) {
   }
 }
 
-export async function fetchRandomItem() {
-  try {
-    const response = await fetch(`${BASE_API_URL}/items/random`, {
-      headers: {
-        "User-Agent": "JailbreakChangelogs-ItemCatalog/1.0",
-      },
-    });
-
-    if (!response.ok) {
-      if (response.status === 404) {
-        return null;
-      }
-      throw new Error("Failed to fetch random item");
-    }
-
-    const data = await response.json();
-    return data;
-  } catch (err) {
-    console.error("[SERVER] Error fetching random item:", err);
-    throw err;
-  }
-}
-
 export async function fetchItemHistory(id: string) {
   try {
     const response = await fetch(`${BASE_API_URL}/item/history?id=${id}`, {
@@ -1527,17 +1186,6 @@ export async function fetchItemsByType(type: string) {
     return data;
   } catch (err) {
     console.error("[SERVER] Error fetching items by type:", err);
-    return null;
-  }
-}
-
-// Convenience wrapper for HyperChrome items only
-export async function fetchHyperchromes() {
-  try {
-    const data = await fetchItemsByType("HyperChrome");
-    return data; // Same structure as values page, filtered to HyperChromes
-  } catch (err) {
-    console.error("[SERVER] Error fetching hyperchromes:", err);
     return null;
   }
 }
@@ -1720,24 +1368,6 @@ export async function fetchRobloxUsersBatch(userIds: string[]) {
     }
   } catch (err) {
     console.error("[SERVER] fetchRobloxUsersBatch: Unexpected error:", err);
-    return null;
-  }
-}
-
-export async function fetchRobloxUser(
-  robloxId: string,
-): Promise<RobloxUser | null> {
-  try {
-    // Use the batch endpoint for single user as well
-    const result = await fetchRobloxUsersBatch([robloxId]);
-
-    if (!result || typeof result !== "object" || !(robloxId in result)) {
-      throw new Error(`Failed to fetch Roblox user: ${robloxId}`);
-    }
-
-    return (result as Record<string, RobloxUser>)[robloxId];
-  } catch (err) {
-    console.error(`[SERVER] Error fetching Roblox user ${robloxId}:`, err);
     return null;
   }
 }
@@ -2607,31 +2237,6 @@ export async function fetchUnreadNotifications(
 }
 
 /**
- * Marks a notification as seen
- * Uses the Next.js API route which handles authentication via HttpOnly cookies
- */
-export async function markNotificationAsSeen(
-  notificationId: number,
-): Promise<boolean> {
-  try {
-    const response = await fetch(`/api/notifications/seen`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        id: notificationId,
-      }),
-    });
-
-    return response.ok;
-  } catch (error) {
-    console.error("Error marking notification as seen:", error);
-    return false;
-  }
-}
-
-/**
  * Fetch unread notification count for the current user
  * Uses the Next.js API route which handles authentication via HttpOnly cookies
  */
@@ -2656,26 +2261,6 @@ export async function fetchUnreadNotificationCount(): Promise<number> {
   } catch (error) {
     console.error("Error fetching unread notification count:", error);
     return 0;
-  }
-}
-
-/**
- * Clears all unread notifications
- * Uses the Next.js API route which handles authentication via HttpOnly cookies
- */
-export async function clearUnreadNotifications(): Promise<boolean> {
-  try {
-    const response = await fetch(`/api/notifications/clear`, {
-      method: "DELETE",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-
-    return response.ok;
-  } catch (error) {
-    console.error("Error clearing unread notifications:", error);
-    return false;
   }
 }
 

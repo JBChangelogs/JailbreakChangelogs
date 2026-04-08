@@ -64,7 +64,7 @@ function getRealtimeWsUrl(): string | null {
   const baseUrl = WS_URL?.replace(/\/+$/, "");
   if (!baseUrl) return null;
 
-  return `${baseUrl}/realtime`;
+  return `${baseUrl}/realtime?jbcl_token=u4Wvzpw4MzJkJ5IyQBG3yLATZzY2xF62axYAlvMczK8`;
 }
 
 function getReconnectDelay(attempt: number): number {
@@ -418,6 +418,15 @@ export function useRealtimeNotificationsWebSocket(
                 );
                 return;
               }
+            }
+
+            if (payload.action === "refresh_trades") {
+              window.dispatchEvent(
+                new CustomEvent("realtimeTrades", {
+                  detail: { action: "refresh_trades" },
+                }),
+              );
+              return;
             }
 
             if (

@@ -102,6 +102,7 @@ export default function TradeAds({
   >("contains");
   const currentUserId = user?.id || null;
   const lastFetchedTradeAdsPageRef = useRef<number | null>(null);
+  const lastRealtimeRefreshAtRef = useRef<number>(0);
 
   const robloxId = (user?.roblox_id ?? "").trim();
   const hasValidRobloxId = /^\d+$/.test(robloxId);
@@ -656,7 +657,8 @@ export default function TradeAds({
   );
 
   const refreshTradeAds = useCallback(
-    async (targetPage?: number) => {
+    async (targetPage?: number): Promise<boolean> => {
+      let didSucceed = false;
       const pageToFetch = targetPage ?? page;
       const showSkeleton = tradeAds.length === 0;
       try {
@@ -667,27 +669,30 @@ export default function TradeAds({
         if (response.total_pages > 0 && pageToFetch > response.total_pages) {
           // Clamp to last page if the current page is no longer valid.
           setPage(response.total_pages);
-          return;
+          return false;
         }
         setApiTotalPages(response.total_pages || 1);
         setApiTotalCount(
           typeof response.total === "number" ? response.total : 0,
         );
         setTradeAds(response.items);
+        didSucceed = true;
       } catch (err) {
         if (err instanceof HttpStatusError && err.status === 401) {
           console.warn("Recent trade ads request unauthorized:", err.body);
           setTradeAds([]);
           setIsRecentTradesUnauthorized(true);
           setError(null);
-          return;
+          return false;
         }
 
         console.error("Error refreshing trade ads:", err);
         setError("Failed to refresh trade ads");
+        return false;
       } finally {
         setIsTradeAdsLoading(false);
       }
+      return didSucceed;
     },
     [fetchRecentTradeAdsPage, page, tradeAds.length],
   );
@@ -703,6 +708,36 @@ export default function TradeAds({
     lastFetchedTradeAdsPageRef.current = page;
     void refreshTradeAds(page);
   }, [activeTab, initialTradeAds.length, page, refreshTradeAds]);
+
+  useEffect(() => {
+    const handler = (event: Event) => {
+      const customEvent = event as CustomEvent<{ action?: string }>;
+      if (customEvent.detail?.action !== "refresh_trades") return;
+      if (activeTab !== "view") return;
+
+      const now = Date.now();
+      if (now - lastRealtimeRefreshAtRef.current < 4000) return;
+      lastRealtimeRefreshAtRef.current = now;
+
+      const toastId = toast.loading(
+        "New trade ad(s) posted — refreshing the list...",
+      );
+
+      void (async () => {
+        setPage(1);
+        lastFetchedTradeAdsPageRef.current = 1;
+        const ok = await refreshTradeAds(1);
+        if (ok) {
+          toast.success("Trade ads updated.", { id: toastId });
+        } else {
+          toast.error("Failed to refresh trade ads.", { id: toastId });
+        }
+      })();
+    };
+
+    window.addEventListener("realtimeTrades", handler);
+    return () => window.removeEventListener("realtimeTrades", handler);
+  }, [activeTab, refreshTradeAds]);
 
   useEffect(() => {
     const wasAuthenticated = lastIsAuthenticatedRef.current;

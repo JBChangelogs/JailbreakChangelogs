@@ -31,7 +31,6 @@ export default function TradeAdsProfileTab({
   const [page, setPage] = useState(1);
   const [clientTradeAds, setClientTradeAds] = useState<TradeAd[]>(tradeAds);
   const [apiTotalPages, setApiTotalPages] = useState(1);
-  const [apiTotalCount, setApiTotalCount] = useState<number | null>(null);
   const [isFetchingTradeAds, setIsFetchingTradeAds] = useState(false);
   const [tradeAdsError, setTradeAdsError] = useState<string | null>(null);
 
@@ -194,7 +193,6 @@ export default function TradeAdsProfileTab({
             ) {
               setClientTradeAds([]);
               setApiTotalPages(1);
-              setApiTotalCount(0);
               return;
             }
           } catch {
@@ -215,14 +213,12 @@ export default function TradeAdsProfileTab({
             .filter((t) => t.requesting.length || t.offering.length);
           setClientTradeAds(normalized);
           setApiTotalPages(1);
-          setApiTotalCount(normalized.length);
           return;
         }
 
         if (!data || typeof data !== "object") {
           setClientTradeAds([]);
           setApiTotalPages(1);
-          setApiTotalCount(0);
           return;
         }
 
@@ -236,11 +232,6 @@ export default function TradeAdsProfileTab({
 
         const totalPagesValue =
           typeof record.total_pages === "number" ? record.total_pages : 1;
-        const totalValue =
-          typeof record.total === "number"
-            ? record.total
-            : normalizedItems.length;
-
         if (totalPagesValue > 0 && page > totalPagesValue) {
           setPage(totalPagesValue);
           return;
@@ -248,7 +239,6 @@ export default function TradeAdsProfileTab({
 
         setClientTradeAds(normalizedItems);
         setApiTotalPages(totalPagesValue || 1);
-        setApiTotalCount(totalValue);
       } catch (error) {
         if (isCancelled) return;
         if (error instanceof DOMException && error.name === "AbortError")
