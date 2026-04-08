@@ -18,6 +18,7 @@ interface TradeSidePanelProps {
   getSelectedValueString: (item: TradeItem) => string;
   getSelectedValueType: (item: TradeItem) => "cash" | "duped";
   onMirror: () => void;
+  onEmptyActivate?: () => void;
   totals: {
     cashValue: string;
     breakdown: {
@@ -35,6 +36,7 @@ export const TradeSidePanel: React.FC<TradeSidePanelProps> = ({
   getSelectedValueString,
   getSelectedValueType,
   onMirror,
+  onEmptyActivate,
   totals,
 }) => {
   const isOffering = side === "offering";
@@ -71,6 +73,7 @@ export const TradeSidePanel: React.FC<TradeSidePanelProps> = ({
         getSelectedValueString={getSelectedValueString}
         getSelectedValueType={getSelectedValueType}
         side={side}
+        onEmptyActivate={onEmptyActivate}
       />
       <div className="text-secondary-text/70 mt-4 flex flex-col flex-wrap items-start gap-2 text-xs sm:flex-row sm:items-center sm:gap-3 sm:text-sm">
         <span>

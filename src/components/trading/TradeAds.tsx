@@ -62,7 +62,6 @@ export default function TradeAds({
     isLoading: isAuthLoading,
     setLoginModal,
   } = useAuthContext();
-  const hasAutoLoadedTradeAdsRef = useRef(false);
   const lastIsAuthenticatedRef = useRef(isAuthenticated);
   const [tradeAds, setTradeAds] = useState<TradeAd[]>(initialTradeAds);
   const [isTradeAdsLoading, setIsTradeAdsLoading] = useState(
@@ -89,6 +88,8 @@ export default function TradeAds({
   const lastFetchedInventoryUserIdRef = useRef<string | null>(null);
   const inventoryFetchControllerRef = useRef<AbortController | null>(null);
   const [page, setPage] = useState(1);
+  const [apiTotalPages, setApiTotalPages] = useState(1);
+  const [apiTotalCount, setApiTotalCount] = useState<number | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [searchScope, setSearchScope] = useState<
     "all" | "offering" | "requesting"
@@ -99,8 +100,8 @@ export default function TradeAds({
   const [customTypeMatchMode, setCustomTypeMatchMode] = useState<
     "contains" | "only"
   >("contains");
-  const itemsPerPage = 9;
   const currentUserId = user?.id || null;
+  const lastFetchedTradeAdsPageRef = useRef<number | null>(null);
 
   const robloxId = (user?.roblox_id ?? "").trim();
   const hasValidRobloxId = /^\d+$/.test(robloxId);
@@ -491,20 +492,9 @@ export default function TradeAds({
   const handleCreateSuccess = (createdTradeRaw?: unknown) => {
     void (async () => {
       try {
-        const recentTrades = await fetchRecentTradeAds();
-        if (recentTrades.length > 0) {
-          setTradeAds(recentTrades);
-        } else {
-          const normalized = normalizeCreatedTrade(createdTradeRaw);
-          if (normalized) {
-            setTradeAds((prev) => {
-              const withoutDuplicate = prev.filter(
-                (ad) => ad.id !== normalized.id,
-              );
-              return [normalized, ...withoutDuplicate];
-            });
-          }
-        }
+        setPage(1);
+        lastFetchedTradeAdsPageRef.current = 1;
+        await refreshTradeAds(1);
       } catch {
         const normalized = normalizeCreatedTrade(createdTradeRaw);
         if (normalized) {
@@ -539,102 +529,180 @@ export default function TradeAds({
     return match.trend ?? undefined;
   };
 
-  const fetchRecentTradeAds = useCallback(async (): Promise<TradeAd[]> => {
-    const baseUrl = process.env.NEXT_PUBLIC_API_URL;
-    if (!baseUrl) {
-      throw new Error("NEXT_PUBLIC_API_URL is not configured");
-    }
+  type PaginatedTradeAdsResponse = {
+    items: TradeAd[];
+    total: number;
+    page: number;
+    total_pages: number;
+    size: number;
+  };
 
-    const response = await fetch(`${baseUrl}/trades/v2/recent?limit=24`, {
-      cache: "no-store",
-      credentials: "include",
-      headers: {
-        "User-Agent": "JailbreakChangelogs-Trading/2.0",
-      },
-    });
-
-    if (response.status === 401) {
-      let body: unknown = null;
-      try {
-        body = (await response.json()) as unknown;
-      } catch {
-        body = null;
+  const fetchRecentTradeAdsPage = useCallback(
+    async (targetPage: number): Promise<PaginatedTradeAdsResponse> => {
+      const baseUrl = process.env.NEXT_PUBLIC_API_URL;
+      if (!baseUrl) {
+        throw new Error("NEXT_PUBLIC_API_URL is not configured");
       }
-      throw new HttpStatusError("Unauthorized", 401, body);
-    }
 
-    if (response.status === 404) {
-      try {
-        const body = (await response.json()) as unknown;
-        if (
-          body &&
-          typeof body === "object" &&
-          (body as Record<string, unknown>).error === "no_trades_found"
-        ) {
-          return [];
-        }
-      } catch {
-        // Ignore parse errors and treat as a real 404 below.
-      }
-      throw new Error("Failed to fetch recent trades (404)");
-    }
-
-    if (!response.ok) {
-      let body: unknown = null;
-      try {
-        body = (await response.json()) as unknown;
-      } catch {
-        body = null;
-      }
-      throw new HttpStatusError(
-        "Failed to fetch recent trades",
-        response.status,
-        body,
+      const response = await fetch(
+        `${baseUrl}/trades/v2/recent?page=${encodeURIComponent(String(targetPage))}`,
+        {
+          cache: "no-store",
+          credentials: "include",
+          headers: {
+            "User-Agent": "JailbreakChangelogs-Trading/2.0",
+          },
+        },
       );
-    }
 
-    const data = (await response.json()) as unknown;
-    if (!Array.isArray(data)) return [];
-
-    return data
-      .map((entry) => normalizeCreatedTrade(entry))
-      .filter((entry): entry is TradeAd => entry !== null);
-  }, [normalizeCreatedTrade]);
-
-  const refreshTradeAds = useCallback(async () => {
-    const showSkeleton = tradeAds.length === 0;
-    try {
-      if (showSkeleton) setIsTradeAdsLoading(true);
-      setError(null);
-      setIsRecentTradesUnauthorized(false);
-      const recentTrades = await fetchRecentTradeAds();
-      setTradeAds(recentTrades);
-    } catch (err) {
-      if (err instanceof HttpStatusError && err.status === 401) {
-        console.warn("Recent trade ads request unauthorized:", err.body);
-        setTradeAds([]);
-        setIsRecentTradesUnauthorized(true);
-        setError(null);
-        return;
+      if (response.status === 401) {
+        let body: unknown = null;
+        try {
+          body = (await response.json()) as unknown;
+        } catch {
+          body = null;
+        }
+        throw new HttpStatusError("Unauthorized", 401, body);
       }
 
-      console.error("Error refreshing trade ads:", err);
-      setError("Failed to refresh trade ads");
-    } finally {
-      setIsTradeAdsLoading(false);
-    }
-  }, [fetchRecentTradeAds, tradeAds.length]);
+      if (response.status === 404) {
+        try {
+          const body = (await response.json()) as unknown;
+          if (
+            body &&
+            typeof body === "object" &&
+            (body as Record<string, unknown>).error === "no_trades_found"
+          ) {
+            return {
+              items: [],
+              total: 0,
+              page: targetPage,
+              total_pages: 1,
+              size: 0,
+            };
+          }
+        } catch {
+          // Ignore parse errors and treat as a real 404 below.
+        }
+        throw new Error("Failed to fetch recent trades (404)");
+      }
+
+      if (!response.ok) {
+        let body: unknown = null;
+        try {
+          body = (await response.json()) as unknown;
+        } catch {
+          body = null;
+        }
+        throw new HttpStatusError(
+          "Failed to fetch recent trades",
+          response.status,
+          body,
+        );
+      }
+
+      const data = (await response.json()) as unknown;
+
+      // Backwards compatibility: older API returned a plain list.
+      if (Array.isArray(data)) {
+        const normalized = data
+          .map((entry) => normalizeCreatedTrade(entry))
+          .filter((entry): entry is TradeAd => entry !== null);
+
+        return {
+          items: normalized,
+          total: normalized.length,
+          page: 1,
+          total_pages: 1,
+          size: normalized.length,
+        };
+      }
+
+      if (!data || typeof data !== "object") {
+        return {
+          items: [],
+          total: 0,
+          page: targetPage,
+          total_pages: 1,
+          size: 0,
+        };
+      }
+
+      const record = data as Record<string, unknown>;
+      const rawItems = record.items;
+      const items = Array.isArray(rawItems)
+        ? rawItems
+            .map((entry) => normalizeCreatedTrade(entry))
+            .filter((entry): entry is TradeAd => entry !== null)
+        : [];
+
+      const total =
+        typeof record.total === "number" ? record.total : items.length;
+      const pageValue =
+        typeof record.page === "number" ? record.page : targetPage;
+      const totalPagesValue =
+        typeof record.total_pages === "number" ? record.total_pages : 1;
+      const sizeValue = typeof record.size === "number" ? record.size : 0;
+
+      return {
+        items,
+        total,
+        page: pageValue,
+        total_pages: totalPagesValue,
+        size: sizeValue,
+      };
+    },
+    [normalizeCreatedTrade],
+  );
+
+  const refreshTradeAds = useCallback(
+    async (targetPage?: number) => {
+      const pageToFetch = targetPage ?? page;
+      const showSkeleton = tradeAds.length === 0;
+      try {
+        if (showSkeleton) setIsTradeAdsLoading(true);
+        setError(null);
+        setIsRecentTradesUnauthorized(false);
+        const response = await fetchRecentTradeAdsPage(pageToFetch);
+        if (response.total_pages > 0 && pageToFetch > response.total_pages) {
+          // Clamp to last page if the current page is no longer valid.
+          setPage(response.total_pages);
+          return;
+        }
+        setApiTotalPages(response.total_pages || 1);
+        setApiTotalCount(
+          typeof response.total === "number" ? response.total : 0,
+        );
+        setTradeAds(response.items);
+      } catch (err) {
+        if (err instanceof HttpStatusError && err.status === 401) {
+          console.warn("Recent trade ads request unauthorized:", err.body);
+          setTradeAds([]);
+          setIsRecentTradesUnauthorized(true);
+          setError(null);
+          return;
+        }
+
+        console.error("Error refreshing trade ads:", err);
+        setError("Failed to refresh trade ads");
+      } finally {
+        setIsTradeAdsLoading(false);
+      }
+    },
+    [fetchRecentTradeAdsPage, page, tradeAds.length],
+  );
 
   const userTradeAds = tradeAds.filter(
     (trade) => trade.author === currentUserId,
   );
 
   useEffect(() => {
+    if (activeTab !== "view") return;
     if (initialTradeAds.length > 0) return;
-    if (hasAutoLoadedTradeAdsRef.current) return;
-    hasAutoLoadedTradeAdsRef.current = true;
-    void refreshTradeAds();
-  }, [initialTradeAds.length, refreshTradeAds]);
+    if (lastFetchedTradeAdsPageRef.current === page) return;
+    lastFetchedTradeAdsPageRef.current = page;
+    void refreshTradeAds(page);
+  }, [activeTab, initialTradeAds.length, page, refreshTradeAds]);
 
   useEffect(() => {
     const wasAuthenticated = lastIsAuthenticatedRef.current;
@@ -645,8 +713,8 @@ export default function TradeAds({
     // Prevent retry loops when the API keeps returning 401 while I'm already authenticated.
     // Only auto-retry after an auth transition (false -> true).
     if (wasAuthenticated) return;
-    void refreshTradeAds();
-  }, [isRecentTradesUnauthorized, isAuthenticated, refreshTradeAds]);
+    void refreshTradeAds(page);
+  }, [isRecentTradesUnauthorized, isAuthenticated, page, refreshTradeAds]);
 
   useEffect(() => {
     const handleHashChange = () => {
@@ -750,7 +818,7 @@ export default function TradeAds({
         <p className="text-secondary-text mb-6">{description}</p>
         <div className="flex flex-wrap justify-center gap-4">
           <Button onClick={openLogin}>Sign in</Button>
-          <Button variant="secondary" onClick={refreshTradeAds}>
+          <Button variant="secondary" onClick={() => void refreshTradeAds()}>
             Try again
           </Button>
         </div>
@@ -817,7 +885,9 @@ export default function TradeAds({
                 There are no active trade ads right now.
               </p>
               <div className="flex justify-center gap-4">
-                <Button onClick={refreshTradeAds}>Refresh List</Button>
+                <Button onClick={() => void refreshTradeAds()}>
+                  Refresh List
+                </Button>
                 <Button onClick={() => handleTabChange("create")}>
                   Create A Trade Ad
                 </Button>
@@ -1006,7 +1076,6 @@ export default function TradeAds({
     setVehicleOnly(false);
     setCustomTypeFilter("all");
     setCustomTypeMatchMode("contains");
-    setPage(1);
   };
   const filterSummaryParts: string[] = [];
   if (trimmedSearchQuery) {
@@ -1059,11 +1128,7 @@ export default function TradeAds({
     });
   }
 
-  // Calculate pagination
-  const totalPages = Math.ceil(displayTradeAds.length / itemsPerPage);
-  const startIndex = (page - 1) * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
-  const currentPageItems = displayTradeAds.slice(startIndex, endIndex);
+  const currentPageItems = displayTradeAds;
 
   return (
     <div className="mt-8 mb-8">
@@ -1085,7 +1150,6 @@ export default function TradeAds({
                   value={searchQuery}
                   onChange={(e) => {
                     setSearchQuery(e.target.value);
-                    setPage(1); // Reset to first page when searching
                   }}
                   className="border-border-card bg-tertiary-bg text-primary-text placeholder-secondary-text focus:border-button-info h-[56px] w-full rounded-lg border px-4 pr-16 text-sm transition-all duration-300 focus:outline-none"
                 />
@@ -1097,7 +1161,6 @@ export default function TradeAds({
                       type="button"
                       onClick={() => {
                         setSearchQuery("");
-                        setPage(1);
                       }}
                       className="text-secondary-text hover:text-primary-text cursor-pointer transition-colors"
                       aria-label="Clear search"
@@ -1132,7 +1195,6 @@ export default function TradeAds({
                       setSearchScope(
                         value as "all" | "offering" | "requesting",
                       );
-                      setPage(1);
                     }}
                   >
                     <DropdownMenuRadioItem value="all">
@@ -1180,7 +1242,6 @@ export default function TradeAds({
                   checked={vehicleOnly}
                   onCheckedChange={(checked) => {
                     setVehicleOnly(checked === true);
-                    setPage(1);
                   }}
                 />
                 Vehicles Only
@@ -1211,7 +1272,6 @@ export default function TradeAds({
                       if (value === "all") {
                         setCustomTypeMatchMode("contains");
                       }
-                      setPage(1);
                     }}
                   >
                     <DropdownMenuRadioItem value="all">
@@ -1251,7 +1311,6 @@ export default function TradeAds({
                       value={customTypeMatchMode}
                       onValueChange={(value) => {
                         setCustomTypeMatchMode(value as "contains" | "only");
-                        setPage(1);
                       }}
                     >
                       <DropdownMenuRadioItem value="contains">
@@ -1274,7 +1333,6 @@ export default function TradeAds({
                   type="button"
                   onClick={() => {
                     chip.onRemove();
-                    setPage(1);
                   }}
                   className="border-border-card bg-secondary-bg text-primary-text hover:border-border-focus inline-flex items-center gap-1 rounded-full border px-3 py-1 text-xs transition-colors"
                 >
@@ -1301,7 +1359,10 @@ export default function TradeAds({
               (displayTradeAds.length > 0 || hasActiveFilters) && (
                 <div className="mb-4 flex items-center justify-between">
                   <p className="text-secondary-text">
-                    Showing {displayTradeAds.length}{" "}
+                    Showing {displayTradeAds.length}
+                    {apiTotalCount !== null && !hasActiveFilters
+                      ? ` of ${apiTotalCount}`
+                      : ""}{" "}
                     {displayTradeAds.length === 1 ? "trade ad" : "trade ads"}
                     {activeFiltersSummary ? ` • ${activeFiltersSummary}` : ""}
                   </p>
@@ -1358,10 +1419,10 @@ export default function TradeAds({
                 })}
               </div>
             )}
-            {totalPages > 1 && (
+            {apiTotalPages > 1 && (
               <div className="mt-8 mb-8 flex justify-center">
                 <Pagination
-                  count={totalPages}
+                  count={apiTotalPages}
                   page={page}
                   onChange={handlePageChange}
                 />

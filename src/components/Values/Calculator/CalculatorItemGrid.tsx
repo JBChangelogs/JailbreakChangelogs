@@ -17,25 +17,39 @@ interface CalculatorItemGridProps {
   getSelectedValueString?: (item: TradeItem) => string;
   getSelectedValueType?: (item: TradeItem) => "cash" | "duped";
   side?: "offering" | "requesting";
+  onEmptyActivate?: () => void;
+  emptyScrollTargetSelector?: string;
+  emptyScrollOffsetPx?: number;
 }
 
 export const CalculatorItemGrid: React.FC<CalculatorItemGridProps> = ({
   items,
   onRemove,
   side,
+  onEmptyActivate,
+  emptyScrollTargetSelector,
+  emptyScrollOffsetPx = 140,
 }) => {
   if (items.length === 0) {
     const handleClick = () => {
-      // Switch to items tab
-      if (typeof window !== "undefined") {
-        window.location.hash = "";
-      }
-      // Scroll to items grid after a short delay to ensure tab switch completes
+      onEmptyActivate?.();
+
+      const selector =
+        emptyScrollTargetSelector ??
+        '[data-component="calculator-items-panel"]';
+
+      // Scroll after a short delay to ensure any tab switch completes.
       setTimeout(() => {
         const target =
+          document.querySelector(selector) ??
           document.querySelector('[data-component="scan-trade-from-image"]') ??
           document.querySelector('[data-component="trade-item-picker-v2"]');
-        target?.scrollIntoView({ behavior: "smooth", block: "start" });
+        if (!target) return;
+        const top =
+          target.getBoundingClientRect().top +
+          (window.scrollY || window.pageYOffset) -
+          emptyScrollOffsetPx;
+        window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
       }, 100);
     };
 
@@ -75,9 +89,7 @@ export const CalculatorItemGrid: React.FC<CalculatorItemGridProps> = ({
         <p className="text-secondary-text text-sm font-medium">
           No items selected
         </p>
-        <p className="text-secondary-text/60 mt-1 text-xs">
-          Browse items or drop items here
-        </p>
+        <p className="text-secondary-text/60 mt-1 text-xs">Browse items here</p>
       </div>
     );
   }

@@ -212,7 +212,12 @@ export function ScanTradeFromImage({ onScanSuccess }: ScanTradeFromImageProps) {
     noClick: false,
     noKeyboard: true,
     disabled: isScanning,
-    accept: { "image/png": [], "image/jpeg": [], "image/webp": [] },
+    accept: {
+      "image/png": [".png"],
+      "image/jpeg": [".jpg", ".jpeg"],
+      "image/jpg": [".jpg"],
+      "image/webp": [".webp"],
+    },
     onDrop: (acceptedFiles) => {
       const file = acceptedFiles[0];
       if (file) void scanFile(file);

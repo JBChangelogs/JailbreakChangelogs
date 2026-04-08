@@ -17,6 +17,9 @@ interface ItemGridProps {
   onRemove?: (item: TradeItem) => void;
   disableInteraction?: boolean;
   variant?: "default" | "compact";
+  onEmptyActivate?: () => void;
+  emptyScrollTargetSelector?: string;
+  emptyScrollOffsetPx?: number;
 }
 
 interface ItemWithData {
@@ -80,12 +83,31 @@ export const ItemGrid: React.FC<ItemGridProps> = ({
   onRemove,
   disableInteraction = false,
   variant = "default",
+  onEmptyActivate,
+  emptyScrollTargetSelector = '[data-component="available-items-grid"]',
+  emptyScrollOffsetPx = 140,
 }) => {
   if (items.length === 0) {
     const isOffering = title.toLowerCase() === "offering";
     const borderColor = isOffering
       ? "border-status-success/30 hover:border-status-success/60"
       : "border-status-error/30 hover:border-status-error/60";
+
+    const activateEmpty = () => {
+      if (disableInteraction) return;
+      onEmptyActivate?.();
+      // Scroll after a short delay to ensure any tab switch completes.
+      setTimeout(() => {
+        const target = document.querySelector(emptyScrollTargetSelector);
+        if (target) {
+          const top =
+            target.getBoundingClientRect().top +
+            (window.scrollY || window.pageYOffset) -
+            emptyScrollOffsetPx;
+          window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
+        }
+      }, 100);
+    };
 
     return (
       <div
@@ -94,36 +116,14 @@ export const ItemGrid: React.FC<ItemGridProps> = ({
             ? "cursor-not-allowed opacity-60"
             : "hover:bg-secondary-bg cursor-pointer"
         }`}
-        onClick={() => {
-          if (disableInteraction) return;
-          // Scroll to items grid after a short delay to ensure tab switch completes
-          setTimeout(() => {
-            const itemsGrid = document.querySelector(
-              '[data-component="available-items-grid"]',
-            );
-            if (itemsGrid) {
-              itemsGrid.scrollIntoView({ behavior: "smooth", block: "start" });
-            }
-          }, 100);
-        }}
+        onClick={activateEmpty}
         role="button"
         tabIndex={0}
         onKeyDown={(e) => {
           if (disableInteraction) return;
           if (e.key === "Enter" || e.key === " ") {
             e.preventDefault();
-            // Scroll to items grid after a short delay to ensure tab switch completes
-            setTimeout(() => {
-              const itemsGrid = document.querySelector(
-                '[data-component="available-items-grid"]',
-              );
-              if (itemsGrid) {
-                itemsGrid.scrollIntoView({
-                  behavior: "smooth",
-                  block: "start",
-                });
-              }
-            }, 100);
+            activateEmpty();
           }
         }}
       >
@@ -145,9 +145,7 @@ export const ItemGrid: React.FC<ItemGridProps> = ({
         <p className="text-secondary-text text-sm font-medium">
           No items selected
         </p>
-        <p className="text-secondary-text/70 mt-1 text-xs">
-          Browse items or drop items here
-        </p>
+        <p className="text-secondary-text/70 mt-1 text-xs">Browse items here</p>
       </div>
     );
   }

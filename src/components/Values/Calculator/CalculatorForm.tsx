@@ -61,6 +61,9 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
 
   const [offeringItems, setOfferingItems] = useState<TradeItem[]>([]);
   const [requestingItems, setRequestingItems] = useState<TradeItem[]>([]);
+  const [pickerActiveSide, setPickerActiveSide] = useState<
+    "offering" | "requesting"
+  >("offering");
   const [activeTab, setActiveTab] = useState<"items" | "values" | "similar">(
     "items",
   );
@@ -85,6 +88,11 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
   const robloxId = (user?.roblox_id ?? "").trim();
   const hasValidRobloxId = /^\d+$/.test(robloxId);
   const canLoadInventory = Boolean(isAuthenticated && hasValidRobloxId);
+
+  const focusItemsForSide = (side: "offering" | "requesting") => {
+    setPickerActiveSide(side);
+    setActiveTab("items");
+  };
 
   useEffect(() => {
     if (itemsInputMode !== "inventory") return;
@@ -632,6 +640,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
             getSelectedValueString={getSelectedValueString}
             getSelectedValueType={getSelectedValueType}
             onMirror={() => handleMirrorItems("offering")}
+            onEmptyActivate={() => focusItemsForSide("offering")}
             totals={calculateTotals(offeringItems)}
           />
           <TradeSidePanel
@@ -646,6 +655,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
             getSelectedValueString={getSelectedValueString}
             getSelectedValueType={getSelectedValueType}
             onMirror={() => handleMirrorItems("requesting")}
+            onEmptyActivate={() => focusItemsForSide("requesting")}
             totals={calculateTotals(requestingItems)}
           />
         </div>
@@ -701,7 +711,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
         aria-labelledby="calculator-tab-items"
       >
         {activeTab === "items" && (
-          <div className="mb-8">
+          <div className="mb-8" data-component="calculator-items-panel">
             {itemsInputMode === "picker" ? (
               <TradeItemPickerV2
                 items={initialItems.filter((i) => !i.is_sub)}
@@ -710,6 +720,8 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
                 customTypes={[]}
                 onAddCustomType={() => {}}
                 allowOg={false}
+                activeSide={pickerActiveSide}
+                onActiveSideChange={setPickerActiveSide}
               />
             ) : itemsInputMode === "inventory" ? (
               <div>
@@ -782,6 +794,8 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
                     customTypes={[]}
                     onAddCustomType={() => {}}
                     allowOg={false}
+                    activeSide={pickerActiveSide}
+                    onActiveSideChange={setPickerActiveSide}
                   />
                 )}
               </div>

@@ -30,13 +30,19 @@ export default function TradeAdsProfileTab({
 }: TradeAdsProfileTabProps) {
   const [page, setPage] = useState(1);
   const [clientTradeAds, setClientTradeAds] = useState<TradeAd[]>(tradeAds);
+  const [apiTotalPages, setApiTotalPages] = useState(1);
+  const [apiTotalCount, setApiTotalCount] = useState<number | null>(null);
   const [isFetchingTradeAds, setIsFetchingTradeAds] = useState(false);
   const [tradeAdsError, setTradeAdsError] = useState<string | null>(null);
-  const adsPerPage = 9;
 
   useEffect(() => {
+    if (page !== 1) return;
     setClientTradeAds(tradeAds);
-  }, [tradeAds]);
+  }, [page, tradeAds]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [user?.id]);
 
   useEffect(() => {
     if (!user?.id) return;
@@ -165,7 +171,7 @@ export default function TradeAdsProfileTab({
       setTradeAdsError(null);
       try {
         const response = await fetch(
-          `${baseUrl}/trades/v2/recent?user=${encodeURIComponent(user.id)}&limit=12`,
+          `${baseUrl}/trades/v2/recent?user=${encodeURIComponent(user.id)}&page=${encodeURIComponent(String(page))}`,
           {
             cache: "no-store",
             credentials: "include",
@@ -187,6 +193,8 @@ export default function TradeAdsProfileTab({
               (body as Record<string, unknown>).error === "no_trades_found"
             ) {
               setClientTradeAds([]);
+              setApiTotalPages(1);
+              setApiTotalCount(0);
               return;
             }
           } catch {
@@ -199,12 +207,48 @@ export default function TradeAdsProfileTab({
         }
 
         const data = (await response.json()) as unknown;
-        const normalized = Array.isArray(data)
-          ? data
+
+        // Backwards compatibility: older API returned a plain list.
+        if (Array.isArray(data)) {
+          const normalized = data
+            .map((entry) => normalizeV2Trade(entry as V2Trade))
+            .filter((t) => t.requesting.length || t.offering.length);
+          setClientTradeAds(normalized);
+          setApiTotalPages(1);
+          setApiTotalCount(normalized.length);
+          return;
+        }
+
+        if (!data || typeof data !== "object") {
+          setClientTradeAds([]);
+          setApiTotalPages(1);
+          setApiTotalCount(0);
+          return;
+        }
+
+        const record = data as Record<string, unknown>;
+        const rawItems = record.items;
+        const normalizedItems = Array.isArray(rawItems)
+          ? rawItems
               .map((entry) => normalizeV2Trade(entry as V2Trade))
               .filter((t) => t.requesting.length || t.offering.length)
           : [];
-        setClientTradeAds(normalized);
+
+        const totalPagesValue =
+          typeof record.total_pages === "number" ? record.total_pages : 1;
+        const totalValue =
+          typeof record.total === "number"
+            ? record.total
+            : normalizedItems.length;
+
+        if (totalPagesValue > 0 && page > totalPagesValue) {
+          setPage(totalPagesValue);
+          return;
+        }
+
+        setClientTradeAds(normalizedItems);
+        setApiTotalPages(totalPagesValue || 1);
+        setApiTotalCount(totalValue);
       } catch (error) {
         if (isCancelled) return;
         if (error instanceof DOMException && error.name === "AbortError")
@@ -223,18 +267,13 @@ export default function TradeAdsProfileTab({
       isCancelled = true;
       controller.abort();
     };
-  }, [user]);
+  }, [page, user]);
 
   const sortedTradeAds = useMemo(
     () => [...clientTradeAds].sort((a, b) => b.created_at - a.created_at),
     [clientTradeAds],
   );
-  const totalPages = Math.max(1, Math.ceil(sortedTradeAds.length / adsPerPage));
-  const startIndex = (page - 1) * adsPerPage;
-  const currentPageAds = sortedTradeAds.slice(
-    startIndex,
-    startIndex + adsPerPage,
-  );
+  const currentPageAds = sortedTradeAds;
 
   return (
     <div className="mt-6 mb-8">
@@ -283,10 +322,10 @@ export default function TradeAdsProfileTab({
             ))}
           </div>
 
-          {totalPages > 1 && (
+          {apiTotalPages > 1 && (
             <div className="mt-8 flex justify-center">
               <Pagination
-                count={totalPages}
+                count={apiTotalPages}
                 page={page}
                 onChange={(_, value) => setPage(value)}
               />

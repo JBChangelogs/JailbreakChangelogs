@@ -61,6 +61,8 @@ interface TradeItemPickerV2Props {
   variant?: "default" | "compact";
   allowOg?: boolean;
   cardBackground?: "secondary" | "tertiary";
+  activeSide?: TradeSide;
+  onActiveSideChange?: (side: TradeSide) => void;
 }
 
 const ITEMS_PER_PAGE_DEFAULT = 28;
@@ -129,6 +131,8 @@ export default function TradeItemPickerV2({
   variant = "default",
   allowOg = true,
   cardBackground = "secondary",
+  activeSide: activeSideProp,
+  onActiveSideChange,
 }: TradeItemPickerV2Props) {
   const [isMobile, setIsMobile] = useState(false);
 
@@ -141,7 +145,15 @@ export default function TradeItemPickerV2({
   }, []);
 
   const [searchQuery, setSearchQuery] = useState("");
-  const [activeSide, setActiveSide] = useState<TradeSide>("offering");
+  const [internalActiveSide, setInternalActiveSide] =
+    useState<TradeSide>("offering");
+  const activeSide = activeSideProp ?? internalActiveSide;
+  const setActiveSide = (side: TradeSide) => {
+    onActiveSideChange?.(side);
+    if (activeSideProp === undefined) {
+      setInternalActiveSide(side);
+    }
+  };
   const [itemConditionsBySide, setItemConditionsBySide] = useState<
     Record<TradeSide, Record<string, ItemCondition>>
   >({

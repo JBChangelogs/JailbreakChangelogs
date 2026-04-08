@@ -3,7 +3,7 @@ import { useAuthContext } from "@/contexts/AuthContext";
 import { TradeItem } from "@/types/trading";
 import { UserData } from "@/types/auth";
 import { ItemGrid } from "./ItemGrid";
-import { Skeleton, Tooltip } from "@mui/material";
+import { Skeleton } from "@mui/material";
 import { toast } from "sonner";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import Link from "next/link";
@@ -23,6 +23,11 @@ import { isCustomTradeItem, tradeItemIdsEqual } from "@/utils/tradeItems";
 import TradeItemPickerV2 from "./TradeItemPickerV2";
 import { sanitizeText } from "@/utils/sanitizeText";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface TradeAdFormProps {
   onSuccess?: (createdTrade?: unknown) => void;
@@ -90,6 +95,9 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
   const [loading, setLoading] = useState(true);
   const [offeringItems, setOfferingItems] = useState<TradeItem[]>([]);
   const [requestingItems, setRequestingItems] = useState<TradeItem[]>([]);
+  const [pickerActiveSide, setPickerActiveSide] = useState<
+    "offering" | "requesting"
+  >("offering");
   const [submitting, setSubmitting] = useState(false);
   const [userPremiumTier, setUserPremiumTier] = useState<UserPremiumTier>(
     PREMIUM_TIERS[0],
@@ -914,8 +922,8 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
                         htmlFor={optionId}
                         className={`rounded-lg border px-3 py-2 transition-colors ${
                           isSelected
-                            ? "border-button-info bg-button-info/10"
-                            : "border-border-card bg-secondary-bg hover:border-border-focus"
+                            ? "border-button-info bg-tertiary-bg ring-button-info/20 ring-1"
+                            : "border-border-card bg-tertiary-bg hover:border-border-focus"
                         } ${!isAllowed ? "opacity-70" : ""} cursor-pointer`}
                       >
                         <div className="flex items-center justify-between gap-2">
@@ -998,50 +1006,31 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
 
           {/* Action Buttons */}
           <div className="flex items-center justify-center gap-3">
-            <Tooltip
-              title="Swap sides"
-              arrow
-              placement="top"
-              slotProps={{
-                tooltip: {
-                  sx: {
-                    backgroundColor: "var(--color-secondary-bg)",
-                    color: "var(--color-primary-text)",
-                    "& .MuiTooltip-arrow": {
-                      color: "var(--color-secondary-bg)",
-                    },
-                  },
-                },
-              }}
-            >
-              <UiButton onClick={handleSwapSides} variant="default">
-                <Icon
-                  icon="heroicons:arrows-right-left"
-                  className="mr-1 h-5 w-5"
-                />
-                Swap Sides
-              </UiButton>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <UiButton onClick={handleSwapSides} variant="default">
+                  <Icon
+                    icon="heroicons:arrows-right-left"
+                    className="mr-1 h-5 w-5"
+                  />
+                  Swap Sides
+                </UiButton>
+              </TooltipTrigger>
+              <TooltipContent>Swap sides</TooltipContent>
             </Tooltip>
-            <Tooltip
-              title="Clear all items (hold Shift to clear both sides instantly)"
-              arrow
-              placement="top"
-              slotProps={{
-                tooltip: {
-                  sx: {
-                    backgroundColor: "var(--color-secondary-bg)",
-                    color: "var(--color-primary-text)",
-                    "& .MuiTooltip-arrow": {
-                      color: "var(--color-secondary-bg)",
-                    },
-                  },
-                },
-              }}
-            >
-              <UiButton onClick={handleClearSides} variant="destructive">
-                <Icon icon="heroicons-outline:trash" className="mr-1 h-5 w-5" />
-                Clear
-              </UiButton>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <UiButton onClick={handleClearSides} variant="destructive">
+                  <Icon
+                    icon="heroicons-outline:trash"
+                    className="mr-1 h-5 w-5"
+                  />
+                  Clear
+                </UiButton>
+              </TooltipTrigger>
+              <TooltipContent>
+                Clear all items (hold Shift to clear both sides instantly)
+              </TooltipContent>
             </Tooltip>
           </div>
 
@@ -1070,34 +1059,25 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
               <div className="mb-4 flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <h3 className="text-secondary-text font-medium">Offering</h3>
+                  <span className="text-secondary-text/70 text-sm">
+                    ({offeringItems.length})
+                  </span>
                 </div>
-                <Tooltip
-                  title="Mirror to requesting"
-                  arrow
-                  placement="top"
-                  slotProps={{
-                    tooltip: {
-                      sx: {
-                        backgroundColor: "var(--color-secondary-bg)",
-                        color: "var(--color-primary-text)",
-                        "& .MuiTooltip-arrow": {
-                          color: "var(--color-secondary-bg)",
-                        },
-                      },
-                    },
-                  }}
-                >
-                  <UiButton
-                    onClick={() => handleMirrorItems("offering")}
-                    size="sm"
-                    className="bg-status-success/15 text-primary-text hover:bg-status-success/25"
-                  >
-                    <Icon
-                      icon="heroicons:arrows-right-left"
-                      className="mr-1 h-4 w-4"
-                    />
-                    Mirror
-                  </UiButton>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <UiButton
+                      onClick={() => handleMirrorItems("offering")}
+                      size="sm"
+                      className="bg-status-success/15 text-primary-text hover:bg-status-success/25"
+                    >
+                      <Icon
+                        icon="heroicons:arrows-right-left"
+                        className="mr-1 h-4 w-4"
+                      />
+                      Mirror
+                    </UiButton>
+                  </TooltipTrigger>
+                  <TooltipContent>Mirror to requesting</TooltipContent>
                 </Tooltip>
               </div>
               <ItemGrid
@@ -1106,6 +1086,9 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
                 showTitle={false}
                 onRemove={(item) => handleRemoveItem(item, "offering")}
                 disableInteraction={submitting}
+                onEmptyActivate={() => setPickerActiveSide("offering")}
+                emptyScrollTargetSelector='[data-component="trade-ad-item-picker"]'
+                emptyScrollOffsetPx={140}
               />
               <div className="text-secondary-text/70 mt-4 flex flex-col flex-wrap items-start gap-2 text-xs sm:flex-row sm:items-center sm:gap-3 sm:text-sm">
                 <span>
@@ -1136,34 +1119,25 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
                   <h3 className="text-secondary-text font-medium">
                     Requesting
                   </h3>
+                  <span className="text-secondary-text/70 text-sm">
+                    ({requestingItems.length})
+                  </span>
                 </div>
-                <Tooltip
-                  title="Mirror to offering"
-                  arrow
-                  placement="top"
-                  slotProps={{
-                    tooltip: {
-                      sx: {
-                        backgroundColor: "var(--color-secondary-bg)",
-                        color: "var(--color-primary-text)",
-                        "& .MuiTooltip-arrow": {
-                          color: "var(--color-secondary-bg)",
-                        },
-                      },
-                    },
-                  }}
-                >
-                  <UiButton
-                    onClick={() => handleMirrorItems("requesting")}
-                    size="sm"
-                    className="bg-status-error/15 text-primary-text hover:bg-status-error/25"
-                  >
-                    <Icon
-                      icon="heroicons:arrows-right-left"
-                      className="mr-1 h-4 w-4"
-                    />
-                    Mirror
-                  </UiButton>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <UiButton
+                      onClick={() => handleMirrorItems("requesting")}
+                      size="sm"
+                      className="bg-status-error/15 text-primary-text hover:bg-status-error/25"
+                    >
+                      <Icon
+                        icon="heroicons:arrows-right-left"
+                        className="mr-1 h-4 w-4"
+                      />
+                      Mirror
+                    </UiButton>
+                  </TooltipTrigger>
+                  <TooltipContent>Mirror to offering</TooltipContent>
                 </Tooltip>
               </div>
               <ItemGrid
@@ -1172,6 +1146,9 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
                 showTitle={false}
                 onRemove={(item) => handleRemoveItem(item, "requesting")}
                 disableInteraction={submitting}
+                onEmptyActivate={() => setPickerActiveSide("requesting")}
+                emptyScrollTargetSelector='[data-component="trade-ad-item-picker"]'
+                emptyScrollOffsetPx={140}
               />
               <div className="text-secondary-text/70 mt-4 flex flex-col flex-wrap items-start gap-2 text-xs sm:flex-row sm:items-center sm:gap-3 sm:text-sm">
                 <span>
@@ -1227,8 +1204,8 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
           </div>
 
           {/* Trade Item Picker */}
-          {showItemSourceTabs && (
-            <div className="mt-8">
+          <div className="mt-8" data-component="trade-ad-item-picker">
+            {showItemSourceTabs && (
               <Tabs
                 value={itemsInputMode}
                 onValueChange={(v) =>
@@ -1244,80 +1221,69 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
                   </TabsTrigger>
                 </TabsList>
               </Tabs>
-            </div>
-          )}
+            )}
 
-          {showItemSourceTabs && isInventoryMode && inventoryModeGate && (
-            <div className="border-border-card bg-secondary-bg mt-6 rounded-lg border p-6 text-center">
-              <p className="text-secondary-text text-sm">
-                {isAuthLoading
-                  ? "Loading your account..."
-                  : !isAuthenticated
-                    ? "Log in to use your inventory items."
-                    : "Connect your Roblox account to use your inventory items."}
-              </p>
-              {!isAuthLoading && (
-                <div className="mt-4 flex justify-center">
-                  <UiButton
-                    onClick={() =>
-                      setLoginModal({
-                        open: true,
-                        tab: isAuthenticated ? "roblox" : "discord",
-                      })
-                    }
-                  >
-                    {isAuthenticated ? "Connect Roblox" : "Log In"}
-                  </UiButton>
+            {showItemSourceTabs && isInventoryMode && inventoryModeGate && (
+              <div className="border-border-card bg-secondary-bg mt-6 rounded-lg border p-6 text-center">
+                <p className="text-secondary-text text-sm">
+                  {isAuthLoading
+                    ? "Loading your account..."
+                    : !isAuthenticated
+                      ? "Log in to use your inventory items."
+                      : "Connect your Roblox account to use your inventory items."}
+                </p>
+                {!isAuthLoading && (
+                  <div className="mt-4 flex justify-center">
+                    <UiButton
+                      onClick={() =>
+                        setLoginModal({
+                          open: true,
+                          tab: isAuthenticated ? "roblox" : "discord",
+                        })
+                      }
+                    >
+                      {isAuthenticated ? "Connect Roblox" : "Log In"}
+                    </UiButton>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {showItemSourceTabs &&
+              isInventoryMode &&
+              !inventoryModeGate &&
+              inventoryStatus === "loading" && (
+                <div className="border-border-card bg-secondary-bg mt-6 rounded-lg border p-6 text-center">
+                  <p className="text-secondary-text text-sm">
+                    Loading inventory items...
+                  </p>
                 </div>
               )}
-            </div>
-          )}
 
-          {showItemSourceTabs &&
-            isInventoryMode &&
-            !inventoryModeGate &&
-            inventoryStatus === "loading" && (
-              <div className="border-border-card bg-secondary-bg mt-6 rounded-lg border p-6 text-center">
-                <p className="text-secondary-text text-sm">
-                  Loading inventory items...
-                </p>
-              </div>
-            )}
+            {showItemSourceTabs &&
+              isInventoryMode &&
+              !inventoryModeGate &&
+              inventoryStatus === "error" && (
+                <div className="border-border-card bg-secondary-bg mt-6 rounded-lg border p-6 text-center">
+                  <p className="text-secondary-text text-sm">
+                    {inventoryError || "Failed to load inventory items."}
+                  </p>
+                </div>
+              )}
 
-          {showItemSourceTabs &&
-            isInventoryMode &&
-            !inventoryModeGate &&
-            inventoryStatus === "error" && (
-              <div className="border-border-card bg-secondary-bg mt-6 rounded-lg border p-6 text-center">
-                <p className="text-secondary-text text-sm">
-                  {inventoryError || "Failed to load inventory items."}
-                </p>
-              </div>
-            )}
+            {showItemSourceTabs &&
+              isInventoryMode &&
+              !inventoryModeGate &&
+              inventoryStatus === "loaded" &&
+              items.length === 0 && (
+                <div className="border-border-card bg-secondary-bg mt-6 rounded-lg border p-6 text-center">
+                  <p className="text-secondary-text text-sm">
+                    No tradable inventory items found.
+                  </p>
+                </div>
+              )}
 
-          {showItemSourceTabs &&
-            isInventoryMode &&
-            !inventoryModeGate &&
-            inventoryStatus === "loaded" &&
-            items.length === 0 && (
-              <div className="border-border-card bg-secondary-bg mt-6 rounded-lg border p-6 text-center">
-                <p className="text-secondary-text text-sm">
-                  No tradable inventory items found.
-                </p>
-              </div>
-            )}
-
-          {!showItemSourceTabs && items.length === 0 && (
-            <div className="border-border-card bg-secondary-bg mt-6 rounded-lg border p-6 text-center">
-              <p className="text-secondary-text text-sm">
-                Item list is unavailable right now. Try again later.
-              </p>
-            </div>
-          )}
-
-          {showItemSourceTabs &&
-            itemsInputMode === "values" &&
-            items.length === 0 && (
+            {!showItemSourceTabs && items.length === 0 && (
               <div className="border-border-card bg-secondary-bg mt-6 rounded-lg border p-6 text-center">
                 <p className="text-secondary-text text-sm">
                   Item list is unavailable right now. Try again later.
@@ -1325,23 +1291,36 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
               </div>
             )}
 
-          {items.length > 0 &&
-            (!showItemSourceTabs ||
-              itemsInputMode === "values" ||
-              (isInventoryMode &&
-                !inventoryModeGate &&
-                inventoryStatus === "loaded")) && (
-              <TradeItemPickerV2
-                items={items}
-                onSelect={handleAddItem}
-                onAddCustomType={handleAddCustomType}
-                customTypes={CUSTOM_TRADE_TYPES.map((customType) => ({
-                  id: customType.id,
-                  label: customType.label,
-                }))}
-                selectedItems={[...offeringItems, ...requestingItems]}
-              />
-            )}
+            {showItemSourceTabs &&
+              itemsInputMode === "values" &&
+              items.length === 0 && (
+                <div className="border-border-card bg-secondary-bg mt-6 rounded-lg border p-6 text-center">
+                  <p className="text-secondary-text text-sm">
+                    Item list is unavailable right now. Try again later.
+                  </p>
+                </div>
+              )}
+
+            {items.length > 0 &&
+              (!showItemSourceTabs ||
+                itemsInputMode === "values" ||
+                (isInventoryMode &&
+                  !inventoryModeGate &&
+                  inventoryStatus === "loaded")) && (
+                <TradeItemPickerV2
+                  items={items}
+                  onSelect={handleAddItem}
+                  onAddCustomType={handleAddCustomType}
+                  customTypes={CUSTOM_TRADE_TYPES.map((customType) => ({
+                    id: customType.id,
+                    label: customType.label,
+                  }))}
+                  selectedItems={[...offeringItems, ...requestingItems]}
+                  activeSide={pickerActiveSide}
+                  onActiveSideChange={setPickerActiveSide}
+                />
+              )}
+          </div>
         </div>
 
         {/* Drag Overlay */}
