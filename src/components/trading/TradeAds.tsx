@@ -41,6 +41,40 @@ class HttpStatusError extends Error {
   }
 }
 
+const normalizeInventoryEntry = (
+  entry: unknown,
+): { id: number | null; isOriginalOwner: boolean } => {
+  if (!entry || typeof entry !== "object") {
+    return { id: null, isOriginalOwner: false };
+  }
+
+  const record = entry as Record<string, unknown>;
+  const rawId = record.id;
+  const parsedId =
+    typeof rawId === "number"
+      ? rawId
+      : typeof rawId === "string"
+        ? Number(rawId)
+        : null;
+  const id =
+    typeof parsedId === "number" && Number.isFinite(parsedId)
+      ? Math.trunc(parsedId)
+      : null;
+
+  const rawOg =
+    record.is_original_owner ?? record.isOriginalOwner ?? record.is_og;
+  const isOriginalOwner =
+    typeof rawOg === "boolean"
+      ? rawOg
+      : typeof rawOg === "number"
+        ? rawOg === 1
+        : typeof rawOg === "string"
+          ? rawOg.toLowerCase() === "true" || rawOg === "1"
+          : false;
+
+  return { id, isOriginalOwner };
+};
+
 const CUSTOM_TYPE_OPTIONS = [
   { id: "adds", label: "Adds" },
   { id: "overpays", label: "Overpays" },
@@ -241,19 +275,18 @@ export default function TradeAds({
 
         const inventoryIds: number[] = [];
         const isDupedById = new Map<number, boolean>();
-        const pushId = (entry: unknown, isDuped: boolean) => {
-          if (!entry || typeof entry !== "object") return;
-          const id =
-            "id" in entry && typeof (entry as { id?: unknown }).id === "number"
-              ? (entry as { id: number }).id
-              : null;
+        const isOgById = new Map<number, boolean>();
+        const pushEntry = (entry: unknown, isDuped: boolean) => {
+          const normalized = normalizeInventoryEntry(entry);
+          const id = normalized.id;
           if (id === null) return;
           if (!isDupedById.has(id)) inventoryIds.push(id);
           isDupedById.set(id, isDupedById.get(id) || isDuped);
+          isOgById.set(id, isOgById.get(id) || normalized.isOriginalOwner);
         };
 
-        rawItems.forEach((entry) => pushId(entry, false));
-        rawDuplicates.forEach((entry) => pushId(entry, true));
+        rawItems.forEach((entry) => pushEntry(entry, false));
+        rawDuplicates.forEach((entry) => pushEntry(entry, true));
 
         const itemById = new Map<number, TradeItem>();
         items.forEach((it) => itemById.set(it.id, it));
@@ -266,6 +299,7 @@ export default function TradeAds({
             is_sub: false,
             side: undefined,
             isDuped: isDupedById.get(it.id) || false,
+            isOG: isOgById.get(it.id) || false,
           }));
 
         const tradeNoteCandidate =

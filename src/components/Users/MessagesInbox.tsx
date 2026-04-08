@@ -2762,24 +2762,6 @@ export default function MessagesInbox() {
                   const isActive = selectedUserId === conversation.user.id;
                   const isSystemPreview =
                     conversation.lastMessage?.type === "system";
-                  const systemPreviewType =
-                    conversation.lastMessage?.metadata &&
-                    typeof conversation.lastMessage.metadata === "object" &&
-                    typeof (
-                      conversation.lastMessage.metadata as Record<
-                        string,
-                        unknown
-                      >
-                    ).type === "string"
-                      ? (
-                          conversation.lastMessage.metadata as Record<
-                            string,
-                            unknown
-                          >
-                        ).type
-                      : null;
-                  const isTradeAcceptedPreview =
-                    isSystemPreview && systemPreviewType === "offer_accepted";
                   const isOwnPreview =
                     !!currentUserId &&
                     !!conversation.lastMessage &&
@@ -2835,11 +2817,6 @@ export default function MessagesInbox() {
                           </div>
                         </div>
                         <div className="mt-0.5 flex min-w-0 items-center gap-1.5">
-                          {isTradeAcceptedPreview ? (
-                            <span className="text-link border-link/30 bg-link/10 inline-flex h-5 shrink-0 items-center rounded-full border px-2 text-[10px] font-medium">
-                              Trade
-                            </span>
-                          ) : null}
                           <p className="text-secondary-text min-w-0 truncate text-xs">
                             {formatMessageText(previewText)}
                           </p>

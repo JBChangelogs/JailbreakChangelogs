@@ -590,7 +590,7 @@ export default function TradeItemPickerV2({
             const itemKey = getTradeItemIdentifier(item);
             const rawCondition =
               itemConditionsBySide[activeSide]?.[itemKey] ||
-              (item.isDuped ? "duped" : "clean");
+              (item.isDuped ? "duped" : item.isOG ? "og" : "clean");
             const condition =
               !allowOg && rawCondition === "og" ? "clean" : rawCondition;
             const flags = getConditionFlags(condition);
