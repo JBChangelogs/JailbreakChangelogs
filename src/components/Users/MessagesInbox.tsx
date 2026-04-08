@@ -425,6 +425,7 @@ function OfferItems({
   onExpand,
   onCollapse,
   maxCollapsed = 3,
+  display = "chips",
 }: {
   label: string;
   items: OfferItem[];
@@ -432,6 +433,7 @@ function OfferItems({
   onExpand?: () => void;
   onCollapse?: () => void;
   maxCollapsed?: number;
+  display?: "chips" | "text";
 }) {
   const visible = expanded ? items : items.slice(0, maxCollapsed);
   const remaining = expanded ? 0 : Math.max(items.length - visible.length, 0);
@@ -441,80 +443,138 @@ function OfferItems({
       <p className="text-secondary-text text-xs">
         <span className="text-primary-text font-medium">{label}:</span>
       </p>
-      <div className="mt-1 flex min-w-0 flex-wrap items-center gap-1.5">
-        {visible.length === 0 ? (
-          <span className="text-primary-text border-border-card bg-tertiary-bg/40 inline-flex h-6 items-center rounded-lg border px-2.5 text-[11px] leading-none font-medium shadow-2xl backdrop-blur-xl">
-            —
-          </span>
-        ) : (
-          visible.map((item, idx) =>
-            (() => {
-              const categoryIcon =
-                typeof item.type === "string"
-                  ? getCategoryIcon(item.type)
-                  : null;
-              const categoryColor =
-                typeof item.type === "string"
-                  ? getCategoryColor(item.type)
-                  : null;
-              return (
-                <span
+      {display === "text" ? (
+        <div className="mt-1 min-w-0">
+          {visible.length === 0 ? (
+            <p className="text-secondary-text text-xs">—</p>
+          ) : (
+            <ul className="space-y-0.5">
+              {visible.map((item, idx) => (
+                <li
                   key={`${item.name}-${idx}`}
-                  className="text-primary-text border-border-card bg-tertiary-bg/40 inline-flex h-6 max-w-[14rem] min-w-0 items-center gap-1.5 rounded-lg border px-2.5 text-[11px] leading-none font-medium shadow-2xl backdrop-blur-xl"
-                  title={
-                    item.amount > 1 ? `${item.name} x${item.amount}` : item.name
-                  }
+                  className="text-primary-text/80 text-xs leading-snug break-words"
                 >
-                  {categoryIcon && categoryColor ? (
-                    <categoryIcon.Icon
-                      className="h-3.5 w-3.5 shrink-0"
-                      style={{ color: categoryColor }}
-                    />
-                  ) : null}
-                  <span className="truncate">
-                    {item.name}
-                    {item.amount > 1 ? (
+                  {item.amount > 1 ? (
+                    <>
+                      {item.name}{" "}
                       <span className="text-secondary-text/90 tabular-nums">
-                        {" "}
                         x{item.amount}
                       </span>
+                    </>
+                  ) : (
+                    item.name
+                  )}
+                </li>
+              ))}
+            </ul>
+          )}
+
+          {remaining > 0 ? (
+            <button
+              type="button"
+              onClick={onExpand}
+              className={cn(
+                "text-link hover:text-link mt-1 inline-flex items-center text-xs font-medium transition-colors",
+                onExpand ? "cursor-pointer" : "cursor-default opacity-70",
+              )}
+              disabled={!onExpand}
+              aria-label={`Show ${remaining} more ${label.toLowerCase()} items`}
+            >
+              +{remaining} more
+            </button>
+          ) : expanded && items.length > maxCollapsed ? (
+            <button
+              type="button"
+              onClick={onCollapse}
+              className={cn(
+                "text-link hover:text-link mt-1 inline-flex items-center text-xs font-medium transition-colors",
+                onCollapse ? "cursor-pointer" : "cursor-default opacity-70",
+              )}
+              disabled={!onCollapse}
+              aria-label={`Show fewer ${label.toLowerCase()} items`}
+            >
+              Show less
+            </button>
+          ) : null}
+        </div>
+      ) : (
+        <div className="mt-1 flex min-w-0 flex-wrap items-center gap-1.5">
+          {visible.length === 0 ? (
+            <span className="text-primary-text border-border-card bg-tertiary-bg/40 inline-flex h-6 items-center rounded-lg border px-2.5 text-[11px] leading-none font-medium shadow-2xl backdrop-blur-xl">
+              —
+            </span>
+          ) : (
+            visible.map((item, idx) =>
+              (() => {
+                const categoryIcon =
+                  typeof item.type === "string"
+                    ? getCategoryIcon(item.type)
+                    : null;
+                const categoryColor =
+                  typeof item.type === "string"
+                    ? getCategoryColor(item.type)
+                    : null;
+                return (
+                  <span
+                    key={`${item.name}-${idx}`}
+                    className="text-primary-text border-border-card bg-tertiary-bg/40 inline-flex h-6 max-w-[14rem] min-w-0 items-center gap-1.5 rounded-lg border px-2.5 text-[11px] leading-none font-medium shadow-2xl backdrop-blur-xl"
+                    title={
+                      item.amount > 1
+                        ? `${item.name} x${item.amount}`
+                        : item.name
+                    }
+                  >
+                    {categoryIcon && categoryColor ? (
+                      <categoryIcon.Icon
+                        className="h-3.5 w-3.5 shrink-0"
+                        style={{ color: categoryColor }}
+                      />
                     ) : null}
+                    <span className="truncate">
+                      {item.name}
+                      {item.amount > 1 ? (
+                        <span className="text-secondary-text/90 tabular-nums">
+                          {" "}
+                          x{item.amount}
+                        </span>
+                      ) : null}
+                    </span>
                   </span>
-                </span>
-              );
-            })(),
-          )
-        )}
-        {remaining > 0 ? (
-          <button
-            type="button"
-            onClick={onExpand}
-            className={cn(
-              "text-primary-text border-border-card bg-tertiary-bg/40 hover:bg-quaternary-bg/30 inline-flex h-6 items-center rounded-lg border px-2.5 text-[11px] leading-none font-medium shadow-2xl backdrop-blur-xl transition-colors",
-              "text-link hover:text-link",
-              onExpand ? "cursor-pointer" : "cursor-default opacity-70",
-            )}
-            disabled={!onExpand}
-            aria-label={`Show ${remaining} more ${label.toLowerCase()} items`}
-          >
-            +{remaining} more
-          </button>
-        ) : expanded && items.length > maxCollapsed ? (
-          <button
-            type="button"
-            onClick={onCollapse}
-            className={cn(
-              "text-primary-text border-border-card bg-tertiary-bg/40 hover:bg-quaternary-bg/30 inline-flex h-6 items-center rounded-lg border px-2.5 text-[11px] leading-none font-medium shadow-2xl backdrop-blur-xl transition-colors",
-              "text-link hover:text-link",
-              onCollapse ? "cursor-pointer" : "cursor-default opacity-70",
-            )}
-            disabled={!onCollapse}
-            aria-label={`Show fewer ${label.toLowerCase()} items`}
-          >
-            Show less
-          </button>
-        ) : null}
-      </div>
+                );
+              })(),
+            )
+          )}
+          {remaining > 0 ? (
+            <button
+              type="button"
+              onClick={onExpand}
+              className={cn(
+                "text-primary-text border-border-card bg-tertiary-bg/40 hover:bg-quaternary-bg/30 inline-flex h-6 items-center rounded-lg border px-2.5 text-[11px] leading-none font-medium shadow-2xl backdrop-blur-xl transition-colors",
+                "text-link hover:text-link",
+                onExpand ? "cursor-pointer" : "cursor-default opacity-70",
+              )}
+              disabled={!onExpand}
+              aria-label={`Show ${remaining} more ${label.toLowerCase()} items`}
+            >
+              +{remaining} more
+            </button>
+          ) : expanded && items.length > maxCollapsed ? (
+            <button
+              type="button"
+              onClick={onCollapse}
+              className={cn(
+                "text-primary-text border-border-card bg-tertiary-bg/40 hover:bg-quaternary-bg/30 inline-flex h-6 items-center rounded-lg border px-2.5 text-[11px] leading-none font-medium shadow-2xl backdrop-blur-xl transition-colors",
+                "text-link hover:text-link",
+                onCollapse ? "cursor-pointer" : "cursor-default opacity-70",
+              )}
+              disabled={!onCollapse}
+              aria-label={`Show fewer ${label.toLowerCase()} items`}
+            >
+              Show less
+            </button>
+          ) : null}
+        </div>
+      )}
     </div>
   );
 }
@@ -871,6 +931,12 @@ export default function MessagesInbox() {
   const selectedUser = selectedConversation?.user ?? null;
   const currentUserId = currentUser ? asId(currentUser.id) : null;
 
+  const getOfferDetailsKey = useCallback(
+    (metadata: OfferAcceptedMetadata) =>
+      `${metadata.trade}:${metadata.offer}` as const,
+    [],
+  );
+
   const offerAcceptedEvents = useMemo(() => {
     const parsed = messages
       .map((message) => {
@@ -922,12 +988,6 @@ export default function MessagesInbox() {
     query.addEventListener("change", apply);
     return () => query.removeEventListener("change", apply);
   }, []);
-
-  const getOfferDetailsKey = useCallback(
-    (metadata: OfferAcceptedMetadata) =>
-      `${metadata.trade}:${metadata.offer}` as const,
-    [],
-  );
 
   const ensureOfferDetailsCached = useCallback(
     async (metadata: OfferAcceptedMetadata) => {
@@ -3179,12 +3239,14 @@ export default function MessagesInbox() {
                                   label="Offering"
                                   items={activeOfferItems?.offering ?? []}
                                   expanded={true}
+                                  display="text"
                                   maxCollapsed={Number.MAX_SAFE_INTEGER}
                                 />
                                 <OfferItems
                                   label="Requesting"
                                   items={activeOfferItems?.requesting ?? []}
                                   expanded={true}
+                                  display="text"
                                   maxCollapsed={Number.MAX_SAFE_INTEGER}
                                 />
                               </div>
@@ -3207,11 +3269,14 @@ export default function MessagesInbox() {
                             type="button"
                             aria-label="Previous accepted offer"
                             disabled={activeOfferAcceptedIndex <= 0}
-                            onClick={() =>
+                            onClick={() => {
+                              setActiveOfferDetailsStatus({
+                                status: "loading",
+                              });
                               setActiveOfferAcceptedIndex((prev) =>
                                 Math.max(prev - 1, 0),
-                              )
-                            }
+                              );
+                            }}
                             className={cn(
                               "text-primary-text flex h-8 w-8 items-center justify-center rounded-full transition-colors",
                               "hover:bg-quaternary-bg cursor-pointer disabled:opacity-50 disabled:hover:bg-transparent",
@@ -3236,14 +3301,17 @@ export default function MessagesInbox() {
                               activeOfferAcceptedIndex >=
                               offerAcceptedEvents.length - 1
                             }
-                            onClick={() =>
+                            onClick={() => {
+                              setActiveOfferDetailsStatus({
+                                status: "loading",
+                              });
                               setActiveOfferAcceptedIndex((prev) =>
                                 Math.min(
                                   prev + 1,
                                   offerAcceptedEvents.length - 1,
                                 ),
-                              )
-                            }
+                              );
+                            }}
                             className={cn(
                               "text-primary-text flex h-8 w-8 items-center justify-center rounded-full transition-colors",
                               "hover:bg-quaternary-bg cursor-pointer disabled:opacity-50 disabled:hover:bg-transparent",
@@ -3316,7 +3384,9 @@ export default function MessagesInbox() {
                                         duration: 4000,
                                       });
 
-                                      const key = `${active.metadata.trade}:${active.metadata.offer}`;
+                                      const key = getOfferDetailsKey(
+                                        active.metadata,
+                                      );
                                       const cached =
                                         offerDetailsCacheRef.current.get(key);
                                       if (
@@ -3328,6 +3398,22 @@ export default function MessagesInbox() {
                                           status: 3,
                                         });
                                       }
+                                      setOfferDetailsCacheVersion(
+                                        (prev) => prev + 1,
+                                      );
+                                      setActiveOfferDetailsStatus((prev) => {
+                                        if (
+                                          prev.status !== "loaded" ||
+                                          `${prev.data.trade}:${prev.data.id}` !==
+                                            key
+                                        ) {
+                                          return prev;
+                                        }
+                                        return {
+                                          status: "loaded",
+                                          data: { ...prev.data, status: 3 },
+                                        };
+                                      });
                                     } catch (err) {
                                       toast.error(
                                         err instanceof Error
