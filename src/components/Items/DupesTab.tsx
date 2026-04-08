@@ -5,7 +5,18 @@ import { useVirtualizer } from "@tanstack/react-virtual";
 import { useQuery } from "@tanstack/react-query";
 import Image from "next/image";
 import { Icon } from "@/components/ui/IconWrapper";
-import { ItemDupedUser } from "@/utils/api";
+
+interface ItemDupedUser {
+  hasVerifiedBadge: boolean;
+  id: number;
+  name: string;
+  displayName: string;
+  avatar: string;
+}
+
+const INVENTORY_API_URL = process.env.NEXT_PUBLIC_INVENTORY_API_URL;
+const INVENTORY_API_SOURCE_HEADER =
+  process.env.NEXT_PUBLIC_INVENTORY_API_SOURCE_HEADER;
 
 interface DupesTabProps {
   itemId: number;
@@ -16,7 +27,6 @@ export default function DupesTab({ itemId }: DupesTabProps) {
   const parentRef = useRef<HTMLDivElement>(null);
   const [searchTerm, setSearchTerm] = useState("");
 
-  // Fetch dupes through API route
   const {
     data: dupedUsers = [],
     isLoading: isLoadingDupes,
@@ -24,14 +34,22 @@ export default function DupesTab({ itemId }: DupesTabProps) {
   } = useQuery({
     queryKey: ["item-dupes", itemId],
     queryFn: async () => {
-      const response = await fetch(`/api/items/dupes?id=${itemId}`);
+      if (!INVENTORY_API_URL) {
+        throw new Error("Missing NEXT_PUBLIC_INVENTORY_API_URL");
+      }
+
+      const response = await fetch(
+        `${INVENTORY_API_URL}/item/duplicates?id=${itemId}&limit=5000`,
+        {
+          headers: {
+            "X-Source": INVENTORY_API_SOURCE_HEADER || "",
+          },
+          cache: "no-store",
+        },
+      );
       if (!response.ok) {
-        // If we get a 200 with empty array, return empty array instead of error
-        if (response.status === 200) {
-          const data = await response.json();
-          if (Array.isArray(data) && data.length === 0) {
-            return [];
-          }
+        if (response.status === 404) {
+          return [];
         }
         throw new Error("Failed to fetch dupes");
       }
