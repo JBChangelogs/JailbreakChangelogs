@@ -100,7 +100,7 @@ export default function Comment({
       );
     }
 
-    if (item_type.toLowerCase() === "trade") {
+    if (item_type.toLowerCase() === "tradev2") {
       return (
         <div className="relative mr-3 h-16 w-16 shrink-0 overflow-hidden rounded-md md:h-[4.5rem] md:w-32">
           <Image
@@ -219,7 +219,7 @@ export default function Comment({
       return `Season ${item_id}`;
     }
 
-    if (item_type.toLowerCase() === "trade") {
+    if (item_type.toLowerCase() === "tradev2") {
       return `Trade #${item_id}`;
     }
 
@@ -264,7 +264,7 @@ export default function Comment({
           ? `/changelogs/${item_id}`
           : item_type.toLowerCase() === "season"
             ? `/seasons/${item_id}`
-            : item_type.toLowerCase() === "trade"
+            : item_type.toLowerCase() === "tradev2"
               ? `/trading/ad/${item_id}`
               : item_type.toLowerCase() === "inventory"
                 ? `/inventories/${item_id}`

@@ -1499,7 +1499,7 @@ export default function TradeDetailsClient({
                 <ChangelogComments
                   changelogId={trade.id}
                   changelogTitle={`Trade #${trade.id}`}
-                  type="trade"
+                  type="tradev2"
                   trade={trade}
                   initialComments={initialComments}
                   initialUserMap={initialUserMap}

@@ -71,7 +71,7 @@ const isCommentEditable = (commentDate: string): boolean => {
 interface ChangelogCommentsProps {
   changelogId: number | string;
   changelogTitle: string;
-  type: "changelog" | "season" | "item" | "trade" | "inventory";
+  type: "changelog" | "season" | "item" | "tradev2" | "inventory";
   itemType?: string;
   trade?: {
     author: string;
@@ -1186,7 +1186,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
   };
 
   const containerBgClass =
-    type === "trade" ? "bg-tertiary-bg" : "bg-secondary-bg";
+    type === "tradev2" ? "bg-tertiary-bg" : "bg-secondary-bg";
 
   return (
     <div className="space-y-2 sm:space-y-3">
@@ -1203,7 +1203,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                 `Comments for Changelog ${changelogId}: ${changelogTitle}`
               ) : type === "season" ? (
                 `Comments for Season ${changelogId}: ${changelogTitle}`
-              ) : type === "trade" ? (
+              ) : type === "tradev2" ? (
                 `Comments for Trade #${changelogId}`
               ) : type === "inventory" ? (
                 `Comments for ${changelogTitle}`
@@ -1339,7 +1339,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                   ? "changelog"
                   : type === "season"
                     ? "season"
-                    : type === "trade"
+                    : type === "tradev2"
                       ? "trade ad"
                       : type === "inventory"
                         ? "inventory"
@@ -1668,7 +1668,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                                       </div>
 
                                       {/* Special OP badge for trade ad authors */}
-                                      {type === "trade" &&
+                                      {type === "tradev2" &&
                                         trade &&
                                         comment.user_id === trade.author && (
                                           <span className="from-button-info to-button-info-hover text-card-tag-text rounded-full bg-linear-to-r px-2 py-0.5 text-xs font-medium shadow-sm">

@@ -3763,7 +3763,7 @@ export default function MessagesInbox() {
                   )}
                   <div
                     className={cn(
-                      "border-border-card bg-tertiary-bg text-primary-text focus-within:border-button-info flex w-full items-center gap-2 rounded-md border px-1 py-1 shadow-none",
+                      "border-border-card bg-tertiary-bg text-primary-text focus-within:border-border-focus flex w-full items-center gap-2 rounded-md border px-1 py-1 shadow-none",
                       replyingToMessage && "rounded-t-none border-t-0",
                     )}
                   >

@@ -56,7 +56,7 @@ export default function CommentsTab({
 
   // Trades are temporary, so exclude trade comments from profile history.
   const profileComments = comments.filter(
-    (comment) => comment.item_type.toLowerCase() !== "trade",
+    (comment) => comment.item_type.toLowerCase() !== "tradev2",
   );
 
   // Check if comments should be hidden
@@ -138,7 +138,7 @@ export default function CommentsTab({
                 commentType !== "changelog" &&
                 commentType !== "season" &&
                 commentType !== "inventory" &&
-                commentType !== "trade"
+                commentType !== "tradev2"
               );
             }
             return commentType === selectedType;
