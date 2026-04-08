@@ -117,7 +117,7 @@ export function ScanTradeFromImage({ onScanSuccess }: ScanTradeFromImageProps) {
         return;
       }
 
-      const baseUrl = process.env.NEXT_PUBLIC_API_URL;
+      const baseUrl = process.env.NEXT_PUBLIC_SCANNING_API_URL;
       if (!baseUrl) {
         const message = "API is not configured (NEXT_PUBLIC_API_URL missing).";
         setLastErrorMessage(message);
@@ -134,7 +134,7 @@ export function ScanTradeFromImage({ onScanSuccess }: ScanTradeFromImageProps) {
         const formData = new FormData();
         formData.set("image", file);
 
-        const response = await fetch(`${baseUrl}/scan/trade`, {
+        const response = await fetch(`${baseUrl}/trade`, {
           method: "POST",
           body: formData,
           credentials: "include",
