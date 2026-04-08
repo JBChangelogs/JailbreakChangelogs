@@ -64,7 +64,7 @@ function getRealtimeWsUrl(): string | null {
   const baseUrl = WS_URL?.replace(/\/+$/, "");
   if (!baseUrl) return null;
 
-  return `${baseUrl}/realtime?jbcl_token=u4Wvzpw4MzJkJ5IyQBG3yLATZzY2xF62axYAlvMczK8`;
+  return `${baseUrl}/realtime`;
 }
 
 function getReconnectDelay(attempt: number): number {

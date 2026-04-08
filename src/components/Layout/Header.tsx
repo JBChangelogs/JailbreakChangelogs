@@ -448,18 +448,6 @@ export default function Header() {
             </div>
           )}
           <Link
-            href="/messages"
-            onClick={handleDrawerToggle}
-            className="hover:bg-button-info-hover/10 flex cursor-pointer items-center gap-3 px-4 py-3 transition-colors"
-          >
-            <Icon
-              icon="heroicons:chat-bubble-left-right"
-              className="text-primary-text h-5 w-5"
-              inline={true}
-            />
-            <span className="text-primary-text">Messages</span>
-          </Link>
-          <Link
             href="/settings"
             onClick={handleDrawerToggle}
             className="hover:bg-button-info-hover/10 flex cursor-pointer items-center gap-3 px-4 py-3 transition-colors"
@@ -1058,6 +1046,24 @@ export default function Header() {
                       </div>
                     </PopoverContent>
                   </Popover>
+                  {isAuthenticated && (
+                    <Link
+                      href="/messages"
+                      className="flex items-center justify-center"
+                      aria-label="Messages"
+                    >
+                      <button
+                        className="border-border-card bg-secondary-bg text-secondary-text hover:bg-quaternary-bg hover:text-primary-text flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg border transition-all duration-200 hover:scale-105 active:scale-95"
+                        aria-label="Messages"
+                      >
+                        <Icon
+                          icon="ic:baseline-message"
+                          className="text-primary-text h-4 w-4"
+                          inline={true}
+                        />
+                      </button>
+                    </Link>
+                  )}
                   {shouldShowSupportButton && (
                     <Link
                       href="/supporting"

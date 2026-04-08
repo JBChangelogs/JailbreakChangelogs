@@ -113,6 +113,7 @@ type TradeOfferDetails = {
 type ConversationSummary = {
   user: MessageUser;
   lastMessage?: Message;
+  messageCount?: number;
 };
 
 const MESSAGE_CHAR_LIMIT = 350;
@@ -185,6 +186,68 @@ function getDisplayName(user: MessageUser): string {
 
 function normalizeTimestamp(timestamp: number): number {
   return timestamp < 1_000_000_000_000 ? timestamp * 1000 : timestamp;
+}
+
+function formatCountCapped(value: number, max = 99): string {
+  if (!Number.isFinite(value) || value < 0) return "0";
+  return value > max ? `${max}+` : String(Math.floor(value));
+}
+
+function compactRelativeLabel(value: string): string {
+  const text = value.trim().toLowerCase();
+  if (!text) return "";
+  if (text === "just now") return "now";
+  if (text === "in a moment") return "soon";
+
+  const unitPattern = "(second|minute|hour|day|week|month|year)s?";
+  const futureMatch = text.match(
+    new RegExp(`^in\\s+(\\d+)\\s+${unitPattern}$`),
+  );
+  const pastMatch = text.match(new RegExp(`^(\\d+)\\s+${unitPattern}\\s+ago$`));
+  const match = futureMatch ?? pastMatch;
+  if (!match) return value;
+
+  const amount = Number(match[1]);
+  const unit = match[2];
+  const suffix =
+    unit === "second"
+      ? "s"
+      : unit === "minute"
+        ? "m"
+        : unit === "hour"
+          ? "h"
+          : unit === "day"
+            ? "d"
+            : unit === "week"
+              ? "w"
+              : unit === "month"
+                ? "mo"
+                : unit === "year"
+                  ? "y"
+                  : unit;
+
+  const compact = `${amount}${suffix}`;
+  return futureMatch ? `in ${compact}` : `${compact} ago`;
+}
+
+function ConversationRowTime({
+  timestamp,
+  cacheKey,
+}: {
+  timestamp?: number;
+  cacheKey: string;
+}) {
+  const relative = useOptimizedRealTimeRelativeDate(
+    timestamp ?? null,
+    cacheKey,
+  );
+  const compact = compactRelativeLabel(relative);
+  if (!compact) return null;
+  return (
+    <span className="text-secondary-text shrink-0 text-[11px] tabular-nums">
+      {compact}
+    </span>
+  );
 }
 
 function asId(value: unknown): string {
@@ -341,10 +404,18 @@ function normalizeOfferItems(
     .filter(Boolean) as OfferItem[];
 }
 
-function isOfferDetailsValid(details: TradeOfferDetails): boolean {
-  const offeringCount = normalizeOfferItems(details.offering).length;
-  const requestingCount = normalizeOfferItems(details.requesting).length;
-  return offeringCount + requestingCount > 0;
+function formatOfferItemSummary(items: OfferItem[], maxItems = 2): string {
+  if (!items || items.length === 0) return "—";
+  const shown = items
+    .slice(0, Math.max(0, maxItems))
+    .map((item) =>
+      item.amount > 1 ? `${item.name} x${item.amount}` : item.name,
+    )
+    .filter(Boolean);
+  const remaining = Math.max(items.length - shown.length, 0);
+  return remaining > 0
+    ? `${shown.join(", ")} +${remaining} more`
+    : shown.join(", ");
 }
 
 function OfferItems({
@@ -589,6 +660,9 @@ export default function MessagesInbox() {
   } = useAuthContext();
 
   const [conversations, setConversations] = useState<ConversationSummary[]>([]);
+  const [totalConversations, setTotalConversations] = useState<number | null>(
+    null,
+  );
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
@@ -613,6 +687,7 @@ export default function MessagesInbox() {
   const [userSearchQuery, setUserSearchQuery] = useState("");
   const [userSearchResults, setUserSearchResults] = useState<UserData[]>([]);
   const [isUserSearchLoading, setIsUserSearchLoading] = useState(false);
+  const userSearchInputRef = useRef<HTMLInputElement | null>(null);
   const userSearchRequestIdRef = useRef(0);
   const [messagesPage, setMessagesPage] = useState(1);
   const [messagesTotalPages, setMessagesTotalPages] = useState<number | null>(
@@ -821,7 +896,6 @@ export default function MessagesInbox() {
 
   const [activeOfferAcceptedIndex, setActiveOfferAcceptedIndex] = useState(0);
   const [isOfferBannerMinimized, setIsOfferBannerMinimized] = useState(true);
-  const [isOfferBannerExpanded, setIsOfferBannerExpanded] = useState(false);
   const offerDetailsCacheRef = useRef<Map<string, OfferDetailsCacheValue>>(
     new Map(),
   );
@@ -838,7 +912,6 @@ export default function MessagesInbox() {
   useEffect(() => {
     setActiveOfferAcceptedIndex(0);
     setIsOfferBannerMinimized(true);
-    setIsOfferBannerExpanded(false);
   }, [selectedUserId, offerAcceptedEvents.length]);
 
   useEffect(() => {
@@ -855,20 +928,6 @@ export default function MessagesInbox() {
       `${metadata.trade}:${metadata.offer}` as const,
     [],
   );
-
-  const validOfferAcceptedEvents = useMemo(() => {
-    // Cache is stored in a ref; this forces recompute when cache updates.
-    void offerDetailsCacheVersion;
-    const cache = offerDetailsCacheRef.current;
-    return offerAcceptedEvents.filter((event) => {
-      const key = getOfferDetailsKey(event.metadata);
-      const value = cache.get(key);
-      if (!value || value === null || value === OFFER_DETAILS_NOT_FOUND) {
-        return false;
-      }
-      return isOfferDetailsValid(value);
-    });
-  }, [getOfferDetailsKey, offerAcceptedEvents, offerDetailsCacheVersion]);
 
   const ensureOfferDetailsCached = useCallback(
     async (metadata: OfferAcceptedMetadata) => {
@@ -930,7 +989,7 @@ export default function MessagesInbox() {
   );
 
   useEffect(() => {
-    const active = validOfferAcceptedEvents[activeOfferAcceptedIndex];
+    const active = offerAcceptedEvents[activeOfferAcceptedIndex];
     if (!active) {
       setActiveOfferDetailsStatus({ status: "idle" });
       return;
@@ -990,25 +1049,18 @@ export default function MessagesInbox() {
     activeOfferAcceptedIndex,
     ensureOfferDetailsCached,
     getOfferDetailsKey,
-    validOfferAcceptedEvents,
+    offerAcceptedEvents,
     offerDetailsCacheVersion,
   ]);
 
   useEffect(() => {
-    setIsOfferBannerExpanded(false);
-  }, [activeOfferAcceptedIndex]);
+    if (activeOfferAcceptedIndex < offerAcceptedEvents.length) return;
+    setActiveOfferAcceptedIndex(Math.max(0, offerAcceptedEvents.length - 1));
+  }, [activeOfferAcceptedIndex, offerAcceptedEvents.length]);
 
-  useEffect(() => {
-    if (activeOfferAcceptedIndex < validOfferAcceptedEvents.length) return;
-    setActiveOfferAcceptedIndex(
-      Math.max(0, validOfferAcceptedEvents.length - 1),
-    );
-  }, [activeOfferAcceptedIndex, validOfferAcceptedEvents.length]);
-
-  const activeOfferAccepted =
-    validOfferAcceptedEvents[activeOfferAcceptedIndex];
+  const activeOfferAccepted = offerAcceptedEvents[activeOfferAcceptedIndex];
   const showOfferAcceptedBanner =
-    !!selectedUser && validOfferAcceptedEvents.length > 0;
+    !!selectedUser && offerAcceptedEvents.length > 0;
 
   const activeOfferItems = useMemo(() => {
     if (activeOfferDetailsStatus.status !== "loaded") return null;
@@ -1287,6 +1339,7 @@ export default function MessagesInbox() {
   useEffect(() => {
     if (!isAuthenticated || !currentUserId) {
       setConversations([]);
+      setTotalConversations(null);
       setSelectedUserId(null);
       return;
     }
@@ -1316,8 +1369,17 @@ export default function MessagesInbox() {
         const rawBody = await response.text();
         const parsed = rawBody ? parseJsonWithLargeIds(rawBody) : null;
         const items = extractItems(parsed);
+        const parsedTotalConversations =
+          parsed && typeof parsed === "object"
+            ? (parsed as { total_conversations?: unknown }).total_conversations
+            : null;
+        const totalConversationsValue =
+          typeof parsedTotalConversations === "number"
+            ? parsedTotalConversations
+            : null;
 
         const groupedConversations = new Map<string, Message>();
+        const messageCountByUserId = new Map<string, number>();
         const userHints = new Map<string, MessageUser>();
 
         for (const item of items) {
@@ -1340,6 +1402,11 @@ export default function MessagesInbox() {
             message.senderId === currentUserId
               ? message.receiverId
               : message.senderId;
+
+          const recordMessageCount = record.message_count;
+          if (typeof recordMessageCount === "number") {
+            messageCountByUserId.set(otherId, recordMessageCount);
+          }
 
           const existing = groupedConversations.get(otherId);
           if (
@@ -1377,6 +1444,7 @@ export default function MessagesInbox() {
           summaries.push({
             user,
             lastMessage: groupedConversations.get(id),
+            messageCount: messageCountByUserId.get(id),
           });
         }
         summaries.sort(
@@ -1387,6 +1455,7 @@ export default function MessagesInbox() {
         if (isCancelled) return;
 
         setConversations(summaries);
+        setTotalConversations(totalConversationsValue);
 
         setSelectedUserId((prev) => {
           if (prev && summaries.some((summary) => summary.user.id === prev)) {
@@ -1398,6 +1467,7 @@ export default function MessagesInbox() {
         if (isCancelled) return;
         console.error("Error fetching conversations:", error);
         setConversations([]);
+        setTotalConversations(null);
         setSelectedUserId(null);
 
         toast.error("Failed to load conversations");
@@ -2570,6 +2640,15 @@ export default function MessagesInbox() {
     ? `Message ${getDisplayName(selectedUser)}...`
     : "Select a conversation to start messaging.";
 
+  const focusUserSearch = () => {
+    if (selectedUserId) {
+      goToConversationList();
+    }
+    requestAnimationFrame(() => {
+      userSearchInputRef.current?.focus();
+    });
+  };
+
   return (
     <div className="h-[calc(100dvh-5rem)] overflow-hidden">
       <div className="flex h-full min-h-0 flex-col">
@@ -2585,8 +2664,14 @@ export default function MessagesInbox() {
             <div className="border-border-card border-b px-4 py-3">
               <p className="text-primary-text text-sm font-semibold">
                 {userSearchQuery.trim()
-                  ? "Search Results"
-                  : "Recent Conversations"}
+                  ? `${
+                      isUserSearchLoading
+                        ? ""
+                        : `${formatCountCapped(userSearchResults.length)} `
+                    }Search Results`
+                  : `${formatCountCapped(
+                      totalConversations ?? conversations.length,
+                    )} Conversations`}
               </p>
             </div>
             <div className="border-border-card border-b px-4 py-3">
@@ -2603,6 +2688,7 @@ export default function MessagesInbox() {
                   autoComplete="off"
                   spellCheck={false}
                   disabled={!isAuthenticated}
+                  ref={userSearchInputRef}
                 />
                 {userSearchQuery.trim() ? (
                   <button
@@ -2676,6 +2762,24 @@ export default function MessagesInbox() {
                   const isActive = selectedUserId === conversation.user.id;
                   const isSystemPreview =
                     conversation.lastMessage?.type === "system";
+                  const systemPreviewType =
+                    conversation.lastMessage?.metadata &&
+                    typeof conversation.lastMessage.metadata === "object" &&
+                    typeof (
+                      conversation.lastMessage.metadata as Record<
+                        string,
+                        unknown
+                      >
+                    ).type === "string"
+                      ? (
+                          conversation.lastMessage.metadata as Record<
+                            string,
+                            unknown
+                          >
+                        ).type
+                      : null;
+                  const isTradeAcceptedPreview =
+                    isSystemPreview && systemPreviewType === "offer_accepted";
                   const isOwnPreview =
                     !!currentUserId &&
                     !!conversation.lastMessage &&
@@ -2714,17 +2818,32 @@ export default function MessagesInbox() {
                         premiumType={conversation.user.premiumtype}
                       />
                       <div className="min-w-0 flex-1">
-                        <p
-                          className={cn(
-                            "text-primary-text truncate text-sm font-medium",
-                            isActive ? "text-link" : "",
-                          )}
-                        >
-                          {getDisplayName(conversation.user)}
-                        </p>
-                        <p className="text-secondary-text truncate text-xs">
-                          {formatMessageText(previewText)}
-                        </p>
+                        <div className="flex items-start justify-between gap-2">
+                          <p
+                            className={cn(
+                              "text-primary-text min-w-0 truncate text-sm font-medium",
+                              isActive ? "text-link" : "",
+                            )}
+                          >
+                            {getDisplayName(conversation.user)}
+                          </p>
+                          <div className="flex shrink-0 items-center gap-2">
+                            <ConversationRowTime
+                              timestamp={conversation.lastMessage?.createdAt}
+                              cacheKey={`conversation-row-${conversation.user.id}-${conversation.lastMessage?.id ?? "none"}`}
+                            />
+                          </div>
+                        </div>
+                        <div className="mt-0.5 flex min-w-0 items-center gap-1.5">
+                          {isTradeAcceptedPreview ? (
+                            <span className="text-link border-link/30 bg-link/10 inline-flex h-5 shrink-0 items-center rounded-full border px-2 text-[10px] font-medium">
+                              Trade
+                            </span>
+                          ) : null}
+                          <p className="text-secondary-text min-w-0 truncate text-xs">
+                            {formatMessageText(previewText)}
+                          </p>
+                        </div>
                       </div>
                     </button>
                   );
@@ -2741,9 +2860,25 @@ export default function MessagesInbox() {
           >
             {!selectedUser ? (
               <div className="flex h-full items-center justify-center p-6">
-                <p className="text-secondary-text text-sm">
-                  Select a conversation to start messaging.
-                </p>
+                <div className="text-center">
+                  <div className="border-border-card bg-tertiary-bg/40 mx-auto flex h-24 w-24 items-center justify-center rounded-full border shadow-sm">
+                    <Icon
+                      icon="heroicons:paper-airplane"
+                      className="text-secondary-text h-10 w-10"
+                    />
+                  </div>
+                  <h2 className="text-primary-text mt-5 text-lg font-semibold">
+                    Your messages
+                  </h2>
+                  <p className="text-secondary-text mt-1 text-sm">
+                    Search for a user to start a chat.
+                  </p>
+                  <div className="mt-5 flex justify-center">
+                    <Button onClick={focusUserSearch}>
+                      Start a conversation
+                    </Button>
+                  </div>
+                </div>
               </div>
             ) : (
               <Chat className="h-full min-h-0">
@@ -2976,39 +3111,104 @@ export default function MessagesInbox() {
                         ) : activeOfferDetailsStatus.status === "loaded" ? (
                           <>
                             {isOfferBannerMinimized ? (
-                              <p className="text-secondary-text mt-1 text-xs">
-                                Offering:{" "}
-                                <span className="text-primary-text/80 tabular-nums">
-                                  {activeOfferItems?.offering.length ?? 0}
-                                </span>{" "}
-                                • Requesting:{" "}
-                                <span className="text-primary-text/80 tabular-nums">
-                                  {activeOfferItems?.requesting.length ?? 0}
-                                </span>
-                              </p>
+                              <>
+                                {currentUserEnriched && selectedUser ? (
+                                  <div className="mt-1 flex items-center gap-2">
+                                    <div className="flex items-center gap-1.5">
+                                      <UserAvatar
+                                        userId={currentUserEnriched.id}
+                                        avatarHash={currentUserEnriched.avatar}
+                                        username={getDisplayName(
+                                          currentUserEnriched,
+                                        )}
+                                        custom_avatar={
+                                          currentUserEnriched.custom_avatar
+                                        }
+                                        settings={currentUserEnriched.settings}
+                                        premiumType={
+                                          currentUserEnriched.premiumtype
+                                        }
+                                        showBadge={false}
+                                        size={5}
+                                      />
+                                      <Icon
+                                        icon="heroicons:arrows-right-left"
+                                        className="text-secondary-text h-4 w-4"
+                                      />
+                                      <UserAvatar
+                                        userId={selectedUser.id}
+                                        avatarHash={selectedUser.avatar}
+                                        username={getDisplayName(selectedUser)}
+                                        custom_avatar={
+                                          selectedUser.custom_avatar
+                                        }
+                                        settings={selectedUser.settings}
+                                        premiumType={selectedUser.premiumtype}
+                                        showBadge={false}
+                                        size={5}
+                                      />
+                                    </div>
+                                    <p className="text-secondary-text min-w-0 truncate text-xs tabular-nums">
+                                      Offer{" "}
+                                      <span className="text-primary-text/80">
+                                        #{activeOfferDetailsStatus.data.id}
+                                      </span>{" "}
+                                      • Trade{" "}
+                                      <span className="text-primary-text/80">
+                                        #{activeOfferDetailsStatus.data.trade}
+                                      </span>
+                                    </p>
+                                  </div>
+                                ) : (
+                                  <p className="text-secondary-text mt-1 text-xs tabular-nums">
+                                    Offer{" "}
+                                    <span className="text-primary-text/80">
+                                      #{activeOfferDetailsStatus.data.id}
+                                    </span>{" "}
+                                    • Trade{" "}
+                                    <span className="text-primary-text/80">
+                                      #{activeOfferDetailsStatus.data.trade}
+                                    </span>
+                                  </p>
+                                )}
+                                <p className="text-secondary-text mt-1 truncate text-xs">
+                                  Offering:{" "}
+                                  <span className="text-primary-text/80">
+                                    {formatOfferItemSummary(
+                                      activeOfferItems?.offering ?? [],
+                                    )}
+                                  </span>{" "}
+                                  • Requesting:{" "}
+                                  <span className="text-primary-text/80">
+                                    {formatOfferItemSummary(
+                                      activeOfferItems?.requesting ?? [],
+                                    )}
+                                  </span>
+                                </p>
+                                {activeOfferDetailsStatus.data.note ? (
+                                  <p className="text-secondary-text mt-1 truncate text-xs">
+                                    Note:{" "}
+                                    <span className="text-primary-text/70">
+                                      {formatMessageText(
+                                        activeOfferDetailsStatus.data.note,
+                                      )}
+                                    </span>
+                                  </p>
+                                ) : null}
+                              </>
                             ) : (
                               <div className="mt-1 grid grid-cols-1 gap-2 sm:grid-cols-2">
                                 <OfferItems
                                   label="Offering"
                                   items={activeOfferItems?.offering ?? []}
-                                  expanded={isOfferBannerExpanded}
-                                  onExpand={() =>
-                                    setIsOfferBannerExpanded(true)
-                                  }
-                                  onCollapse={() =>
-                                    setIsOfferBannerExpanded(false)
-                                  }
+                                  expanded={true}
+                                  maxCollapsed={Number.MAX_SAFE_INTEGER}
                                 />
                                 <OfferItems
                                   label="Requesting"
                                   items={activeOfferItems?.requesting ?? []}
-                                  expanded={isOfferBannerExpanded}
-                                  onExpand={() =>
-                                    setIsOfferBannerExpanded(true)
-                                  }
-                                  onCollapse={() =>
-                                    setIsOfferBannerExpanded(false)
-                                  }
+                                  expanded={true}
+                                  maxCollapsed={Number.MAX_SAFE_INTEGER}
                                 />
                               </div>
                             )}
@@ -3048,22 +3248,22 @@ export default function MessagesInbox() {
                           <span className="text-secondary-text w-12 text-center text-[11px] tabular-nums">
                             {Math.min(
                               activeOfferAcceptedIndex + 1,
-                              validOfferAcceptedEvents.length,
+                              offerAcceptedEvents.length,
                             )}{" "}
-                            / {validOfferAcceptedEvents.length}
+                            / {offerAcceptedEvents.length}
                           </span>
                           <button
                             type="button"
                             aria-label="Next accepted offer"
                             disabled={
                               activeOfferAcceptedIndex >=
-                              validOfferAcceptedEvents.length - 1
+                              offerAcceptedEvents.length - 1
                             }
                             onClick={() =>
                               setActiveOfferAcceptedIndex((prev) =>
                                 Math.min(
                                   prev + 1,
-                                  validOfferAcceptedEvents.length - 1,
+                                  offerAcceptedEvents.length - 1,
                                 ),
                               )
                             }
@@ -3085,7 +3285,7 @@ export default function MessagesInbox() {
                             className="h-8 w-full sm:w-auto"
                           >
                             <Link
-                              href={`/trading/ad/${validOfferAcceptedEvents[activeOfferAcceptedIndex]?.metadata.trade ?? ""}`}
+                              href={`/trading/ad/${offerAcceptedEvents[activeOfferAcceptedIndex]?.metadata.trade ?? ""}`}
                               prefetch={false}
                               target="_blank"
                               rel="noopener noreferrer"
@@ -3196,12 +3396,31 @@ export default function MessagesInbox() {
                       </div>
                     )}
                   {isLoadingMessages ? (
-                    <div className="text-secondary-text bg-tertiary-bg/40 border-border-card mx-auto my-auto rounded-md border px-4 py-3 text-center text-sm">
-                      Loading messages...
+                    <div className="mx-auto my-auto flex flex-col items-center justify-center px-6 py-8 text-center">
+                      <div className="border-border-card bg-tertiary-bg/40 flex h-14 w-14 items-center justify-center rounded-full border">
+                        <span className="text-secondary-text inline-block h-6 w-6 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                      </div>
+                      <p className="text-secondary-text mt-3 text-sm">
+                        Loading messages…
+                      </p>
                     </div>
                   ) : messages.length === 0 ? (
-                    <div className="text-secondary-text bg-tertiary-bg border-border-card mx-auto my-auto rounded-md border px-4 py-3 text-center text-sm">
-                      No messages yet. Start the conversation.
+                    <div className="mx-auto my-auto w-full max-w-md px-4">
+                      <div className="text-center">
+                        <div className="border-border-card bg-tertiary-bg/40 mx-auto flex h-20 w-20 items-center justify-center rounded-full border shadow-sm">
+                          <Icon
+                            icon="ic:baseline-message"
+                            className="text-secondary-text h-9 w-9"
+                            inline={true}
+                          />
+                        </div>
+                        <h3 className="text-primary-text mt-4 text-base font-semibold">
+                          No messages yet
+                        </h3>
+                        <p className="text-secondary-text mt-1 text-sm">
+                          Say hi to start the conversation.
+                        </p>
+                      </div>
                     </div>
                   ) : (
                     messages.map((message, index) => {
