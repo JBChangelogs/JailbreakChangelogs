@@ -65,7 +65,9 @@ function getRealtimeWsUrl(): string | null {
   const baseUrl = WS_URL?.replace(/\/+$/, "");
   if (!baseUrl) return null;
 
-  return buildApiUrlWithDevToken(baseUrl, "/realtime");
+  return buildApiUrlWithDevToken(baseUrl, "/realtime", {
+    tokenParamName: "jbcl_token",
+  });
 }
 
 function getReconnectDelay(attempt: number): number {

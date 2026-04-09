@@ -302,8 +302,8 @@ function parseMessageRecord(item: unknown): Message | null {
     record.message && typeof record.message === "object"
       ? (record.message as Record<string, unknown>)
       : record;
-  const sourceSender = source.sender_id;
-  const sourceReceiver = source.receiver_id;
+  const sourceSender = source.sender_id ?? source.user_id;
+  const sourceReceiver = source.receiver_id ?? source.recipient_id;
   const sourceId = source.id;
   const sourceContent = source.content;
   const sourceMetadata = source.metadata;
@@ -342,6 +342,60 @@ function parseMessageRecord(item: unknown): Message | null {
     type:
       sourceMetadata && typeof sourceMetadata === "object" ? "system" : "user",
   };
+}
+
+function resolveMessageParticipants(options: {
+  senderCandidate?: unknown;
+  receiverCandidate?: unknown;
+  fallbackSenderId?: string | null;
+  fallbackReceiverId?: string | null;
+}): { senderId: string; receiverId: string } | null {
+  const senderCandidate =
+    typeof options.senderCandidate === "string" ||
+    typeof options.senderCandidate === "number"
+      ? asId(options.senderCandidate)
+      : null;
+  const receiverCandidate =
+    typeof options.receiverCandidate === "string" ||
+    typeof options.receiverCandidate === "number"
+      ? asId(options.receiverCandidate)
+      : null;
+  const fallbackSenderId =
+    typeof options.fallbackSenderId === "string" &&
+    options.fallbackSenderId.trim()
+      ? asId(options.fallbackSenderId)
+      : null;
+  const fallbackReceiverId =
+    typeof options.fallbackReceiverId === "string" &&
+    options.fallbackReceiverId.trim()
+      ? asId(options.fallbackReceiverId)
+      : null;
+
+  if (senderCandidate && receiverCandidate) {
+    if (fallbackSenderId && fallbackReceiverId) {
+      const sameOrientation =
+        senderCandidate === fallbackSenderId &&
+        receiverCandidate === fallbackReceiverId;
+      const reversedOrientation =
+        senderCandidate === fallbackReceiverId &&
+        receiverCandidate === fallbackSenderId;
+
+      if (sameOrientation || reversedOrientation) {
+        return {
+          senderId: fallbackSenderId,
+          receiverId: fallbackReceiverId,
+        };
+      }
+    }
+
+    return { senderId: senderCandidate, receiverId: receiverCandidate };
+  }
+
+  if (fallbackSenderId && fallbackReceiverId) {
+    return { senderId: fallbackSenderId, receiverId: fallbackReceiverId };
+  }
+
+  return null;
 }
 
 function formatSystemMessageContent(
@@ -2268,13 +2322,20 @@ export default function MessagesInbox() {
       const parentId = parsedBody.message.parent_id
         ? asId(parsedBody.message.parent_id)
         : null;
+      const resolvedParticipants = resolveMessageParticipants({
+        senderCandidate: parsedBody.message.user_id,
+        receiverCandidate: parsedBody.message.recipient_id,
+        fallbackSenderId: optimisticMessage.senderId,
+        fallbackReceiverId: optimisticMessage.receiverId,
+      });
       const shouldStayPending = isRealtimeConnected;
       const updatedLastMessage: Message = {
         ...optimisticMessage,
         id: serverMessageId,
         parentId,
-        senderId: asId(parsedBody.message.user_id),
-        receiverId: asId(parsedBody.message.recipient_id),
+        senderId: resolvedParticipants?.senderId ?? optimisticMessage.senderId,
+        receiverId:
+          resolvedParticipants?.receiverId ?? optimisticMessage.receiverId,
         content: parsedBody.message.content,
         status: shouldStayPending ? "pending" : "sent",
       };
@@ -2304,8 +2365,12 @@ export default function MessagesInbox() {
                   ...item,
                   id: serverMessageId,
                   parentId,
-                  senderId: asId(parsedBody.message.user_id),
-                  receiverId: asId(parsedBody.message.recipient_id),
+                  senderId:
+                    resolvedParticipants?.senderId ??
+                    optimisticMessage.senderId,
+                  receiverId:
+                    resolvedParticipants?.receiverId ??
+                    optimisticMessage.receiverId,
                   content: parsedBody.message.content,
                   status: shouldStayPending ? "pending" : "sent",
                 }
@@ -2429,15 +2494,22 @@ export default function MessagesInbox() {
         throw new Error(apiErrorMessage);
       }
 
+      const resolvedParticipants = resolveMessageParticipants({
+        senderCandidate: parsedBody.message?.user_id,
+        receiverCandidate: parsedBody.message?.recipient_id,
+        fallbackSenderId: originalMessage?.senderId ?? null,
+        fallbackReceiverId: originalMessage?.receiverId ?? null,
+      });
+
       const updatedMessage: Message = {
         id: asId(parsedBody.message?.id ?? messageId),
         parentId: originalMessage?.parentId,
-        senderId: asId(
-          parsedBody.message?.user_id ?? originalMessage?.senderId,
-        ),
-        receiverId: asId(
-          parsedBody.message?.recipient_id ?? originalMessage?.receiverId,
-        ),
+        senderId:
+          resolvedParticipants?.senderId ??
+          asId(parsedBody.message?.user_id ?? originalMessage?.senderId),
+        receiverId:
+          resolvedParticipants?.receiverId ??
+          asId(parsedBody.message?.recipient_id ?? originalMessage?.receiverId),
         content: parsedBody.message?.content ?? trimmedMessage,
         createdAt: originalMessage?.createdAt,
         updatedAt: parsedBody.message?.updated_at
