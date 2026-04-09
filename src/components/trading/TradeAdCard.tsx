@@ -34,14 +34,6 @@ interface TradeAdCardProps {
   actionsVariant?: "full" | "details-only";
 }
 
-const getProxyRobloxHeadshotUrl = (robloxId: string | null | undefined) => {
-  const baseUrl = process.env.NEXT_PUBLIC_INVENTORY_API_URL;
-  if (!baseUrl) return null;
-  const trimmed = (robloxId ?? "").toString().trim();
-  if (!trimmed) return null;
-  return `${baseUrl}/proxy/users/${encodeURIComponent(trimmed)}/avatar-headshot`;
-};
-
 const groupTradeItems = (items: TradeItem[]) => {
   const grouped = items.reduce(
     (acc, item) => {
@@ -333,10 +325,7 @@ export const TradeAdCard: React.FC<TradeAdCardProps> = ({
         : noteContent.slice(0, MAX_NOTE_CHARS) + "..."
       : noteContent;
 
-  const avatarSrc =
-    !avatarError &&
-    (getProxyRobloxHeadshotUrl(trade.user?.roblox_id) ||
-      trade.user?.roblox_avatar);
+  const avatarSrc = !avatarError ? trade.user?.roblox_avatar : null;
 
   return (
     <div

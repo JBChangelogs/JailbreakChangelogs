@@ -73,14 +73,6 @@ const RelativeTimeText = ({
   return <span suppressHydrationWarning>{text}</span>;
 };
 
-const getProxyRobloxHeadshotUrl = (robloxId: string | null | undefined) => {
-  const baseUrl = process.env.NEXT_PUBLIC_INVENTORY_API_URL;
-  if (!baseUrl) return null;
-  const trimmed = (robloxId ?? "").toString().trim();
-  if (!trimmed) return null;
-  return `${baseUrl}/proxy/users/${encodeURIComponent(trimmed)}/avatar-headshot`;
-};
-
 const groupTradeItems = (items: TradeItem[]) => {
   const grouped = items.reduce(
     (acc, item) => {
@@ -448,10 +440,7 @@ export default function TradeDetailsClient({
     setAvatarError(false);
   }, [trade.user?.roblox_id, trade.user?.roblox_avatar]);
 
-  const avatarSrc =
-    !avatarError &&
-    (getProxyRobloxHeadshotUrl(trade.user?.roblox_id) ||
-      trade.user?.roblox_avatar);
+  const avatarSrc = !avatarError ? trade.user?.roblox_avatar : null;
 
   const offerCountLabel =
     tradeOffers.status === "loaded"
@@ -1257,9 +1246,7 @@ export default function TradeDetailsClient({
                           );
                           const isDeletingOffer = !!offerDeleteState[offer.id];
                           const offerAvatarSrc =
-                            (getProxyRobloxHeadshotUrl(offerUser?.roblox_id) ||
-                              offerUser?.roblox_avatar) ??
-                            null;
+                            offerUser?.roblox_avatar ?? null;
                           const offerNote = sanitizeText(offer.note || "");
                           const offerOffering =
                             offer.offering == null
