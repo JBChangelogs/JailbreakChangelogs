@@ -12,7 +12,7 @@ export function CalculatorClient({
 }) {
   const [itemsInputMode, setItemsInputMode] = useState<
     "picker" | "scan" | "inventory"
-  >("scan");
+  >("picker");
 
   return (
     <>
