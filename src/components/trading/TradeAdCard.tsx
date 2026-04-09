@@ -392,10 +392,7 @@ export const TradeAdCard: React.FC<TradeAdCardProps> = ({
                       Created <RelativeTimeText timestamp={trade.created_at} />
                     </span>
                   </TooltipTrigger>
-                  <TooltipContent
-                    side="top"
-                    className="bg-primary-bg text-secondary-text border-none shadow-[var(--color-card-shadow)]"
-                  >
+                  <TooltipContent side="top">
                     <p>{formatCustomDate(trade.created_at)}</p>
                   </TooltipContent>
                 </Tooltip>
@@ -408,10 +405,7 @@ export const TradeAdCard: React.FC<TradeAdCardProps> = ({
                           Expires <RelativeTimeText timestamp={trade.expires} />
                         </span>
                       </TooltipTrigger>
-                      <TooltipContent
-                        side="top"
-                        className="bg-primary-bg text-secondary-text border-none shadow-[var(--color-card-shadow)]"
-                      >
+                      <TooltipContent side="top">
                         <p>{formatCustomDate(trade.expires)}</p>
                       </TooltipContent>
                     </Tooltip>

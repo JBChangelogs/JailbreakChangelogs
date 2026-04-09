@@ -49,10 +49,7 @@ export default function TradeAdMetadata({
           <TooltipTrigger asChild>
             <span className="cursor-help">Created {createdDisplay}</span>
           </TooltipTrigger>
-          <TooltipContent
-            side="top"
-            className="bg-primary-bg text-secondary-text border-none shadow-[var(--color-card-shadow)]"
-          >
+          <TooltipContent side="top">
             <p>{formatCustomDate(created_at)}</p>
           </TooltipContent>
         </Tooltip>
@@ -63,10 +60,7 @@ export default function TradeAdMetadata({
               <TooltipTrigger asChild>
                 <span className="cursor-help">Expires {expiresDisplay}</span>
               </TooltipTrigger>
-              <TooltipContent
-                side="top"
-                className="bg-primary-bg text-secondary-text border-none shadow-[var(--color-card-shadow)]"
-              >
+              <TooltipContent side="top">
                 <p>{formatCustomDate(expires)}</p>
               </TooltipContent>
             </Tooltip>

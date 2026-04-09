@@ -8,6 +8,7 @@ interface PaginationProps {
   onChange: (event: React.ChangeEvent<unknown>, value: number) => void;
   siblingCount?: number;
   className?: string;
+  disabled?: boolean;
 }
 
 export const Pagination = ({
@@ -16,6 +17,7 @@ export const Pagination = ({
   onChange,
   siblingCount = 1,
   className,
+  disabled = false,
 }: PaginationProps) => {
   // Helper to generate page numbers
   const generatePagination = () => {
@@ -62,6 +64,7 @@ export const Pagination = ({
   const pages = generatePagination();
 
   const handlePageChange = (newValue: number) => {
+    if (disabled) return;
     if (newValue >= 1 && newValue <= count) {
       onChange({} as React.ChangeEvent<unknown>, newValue);
     }
@@ -74,10 +77,10 @@ export const Pagination = ({
     >
       <button
         onClick={() => handlePageChange(page - 1)}
-        disabled={page === 1}
+        disabled={disabled || page === 1}
         className={cn(
           "text-primary-text flex h-8 w-8 items-center justify-center rounded-full transition-colors",
-          "hover:bg-quaternary-bg cursor-pointer disabled:opacity-50 disabled:hover:bg-transparent",
+          "hover:bg-quaternary-bg cursor-pointer disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-transparent",
         )}
         aria-label="Previous page"
       >
@@ -102,8 +105,9 @@ export const Pagination = ({
             <li key={pageNumber}>
               <button
                 onClick={() => handlePageChange(pageNumber as number)}
+                disabled={disabled}
                 className={cn(
-                  "flex h-8 min-w-8 cursor-pointer items-center justify-center rounded-full px-3 text-sm font-medium transition-colors",
+                  "flex h-8 min-w-8 cursor-pointer items-center justify-center rounded-full px-3 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-60",
                   isSelected
                     ? "bg-button-info text-form-button-text hover:bg-button-info-hover"
                     : "text-primary-text hover:bg-quaternary-bg",
@@ -119,10 +123,10 @@ export const Pagination = ({
 
       <button
         onClick={() => handlePageChange(page + 1)}
-        disabled={page === count}
+        disabled={disabled || page === count}
         className={cn(
           "text-primary-text flex h-8 w-8 items-center justify-center rounded-full transition-colors",
-          "hover:bg-quaternary-bg cursor-pointer disabled:opacity-50 disabled:hover:bg-transparent",
+          "hover:bg-quaternary-bg cursor-pointer disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-transparent",
         )}
         aria-label="Next page"
       >

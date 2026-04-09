@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useCallback, useRef } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { TradeAd } from "@/types/trading";
 import { TradeItem } from "@/types/trading";
 import { TradeAdCard } from "./TradeAdCard";
@@ -91,6 +92,9 @@ export default function TradeAds({
   initialTradeAds = [],
   initialItems = [],
 }: TradeAdsProps) {
+  const pathname = usePathname();
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const {
     user,
     isAuthenticated,
@@ -122,9 +126,14 @@ export default function TradeAds({
   );
   const lastFetchedInventoryUserIdRef = useRef<string | null>(null);
   const inventoryFetchControllerRef = useRef<AbortController | null>(null);
-  const [page, setPage] = useState(1);
+  const pageFromUrl = (() => {
+    const rawPage = Number.parseInt(searchParams.get("page") || "1", 10);
+    return Number.isFinite(rawPage) && rawPage > 0 ? rawPage : 1;
+  })();
+  const [page, setPage] = useState(pageFromUrl);
   const [apiTotalPages, setApiTotalPages] = useState(1);
   const [apiTotalCount, setApiTotalCount] = useState<number | null>(null);
+  const [isPageTransitionLoading, setIsPageTransitionLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [searchScope, setSearchScope] = useState<
     "all" | "offering" | "requesting"
@@ -138,6 +147,7 @@ export default function TradeAds({
   const currentUserId = user?.id || null;
   const lastFetchedTradeAdsPageRef = useRef<number | null>(null);
   const lastRealtimeRefreshAtRef = useRef<number>(0);
+  const isSyncingPageWithUrlRef = useRef(false);
 
   const robloxId = (user?.roblox_id ?? "").trim();
   const hasValidRobloxId = /^\d+$/.test(robloxId);
@@ -147,6 +157,22 @@ export default function TradeAds({
 
   const sleep = (ms: number) =>
     new Promise<void>((resolve) => setTimeout(resolve, ms));
+
+  const getTradingUrl = useCallback(
+    (targetPage: number, hash?: string) => {
+      const params = new URLSearchParams(searchParams.toString());
+      if (targetPage > 1) {
+        params.set("page", String(targetPage));
+      } else {
+        params.delete("page");
+      }
+      const queryString = params.toString();
+      return `${pathname}${queryString ? `?${queryString}` : ""}${
+        hash ? `#${hash}` : ""
+      }`;
+    },
+    [pathname, searchParams],
+  );
 
   const isRetryableFetchError = (error: unknown): boolean => {
     if (!(error instanceof Error)) return false;
@@ -528,6 +554,7 @@ export default function TradeAds({
   const handleCreateSuccess = (createdTradeRaw?: unknown) => {
     void (async () => {
       try {
+        isSyncingPageWithUrlRef.current = true;
         setPage(1);
         lastFetchedTradeAdsPageRef.current = 1;
         await refreshTradeAds(1);
@@ -544,7 +571,7 @@ export default function TradeAds({
       }
     })();
 
-    window.history.pushState(null, "", window.location.pathname);
+    router.replace(getTradingUrl(1));
     setActiveTab("view");
   };
 
@@ -706,7 +733,9 @@ export default function TradeAds({
         const response = await fetchRecentTradeAdsPage(pageToFetch);
         if (response.total_pages > 0 && pageToFetch > response.total_pages) {
           // Clamp to last page if the current page is no longer valid.
+          isSyncingPageWithUrlRef.current = true;
           setPage(response.total_pages);
+          router.replace(getTradingUrl(response.total_pages));
           return false;
         }
         setApiTotalPages(response.total_pages || 1);
@@ -729,15 +758,25 @@ export default function TradeAds({
         return false;
       } finally {
         setIsTradeAdsLoading(false);
+        setIsPageTransitionLoading(false);
       }
       return didSucceed;
     },
-    [fetchRecentTradeAdsPage, page, tradeAds.length],
+    [fetchRecentTradeAdsPage, getTradingUrl, page, router, tradeAds.length],
   );
 
   const userTradeAds = tradeAds.filter(
     (trade) => trade.author === currentUserId,
   );
+
+  useEffect(() => {
+    if (page === pageFromUrl) {
+      isSyncingPageWithUrlRef.current = false;
+      return;
+    }
+    if (isSyncingPageWithUrlRef.current) return;
+    setPage(pageFromUrl);
+  }, [page, pageFromUrl]);
 
   useEffect(() => {
     if (activeTab !== "view") return;
@@ -762,8 +801,10 @@ export default function TradeAds({
       );
 
       void (async () => {
+        isSyncingPageWithUrlRef.current = true;
         setPage(1);
         lastFetchedTradeAdsPageRef.current = 1;
+        router.replace(getTradingUrl(1));
         const ok = await refreshTradeAds(1);
         if (ok) {
           toast.success("Trade ads updated.", { id: toastId });
@@ -775,7 +816,7 @@ export default function TradeAds({
 
     window.addEventListener("realtimeTrades", handler);
     return () => window.removeEventListener("realtimeTrades", handler);
-  }, [activeTab, refreshTradeAds]);
+  }, [activeTab, getTradingUrl, refreshTradeAds, router]);
 
   useEffect(() => {
     const wasAuthenticated = lastIsAuthenticatedRef.current;
@@ -795,7 +836,7 @@ export default function TradeAds({
 
       // Redirect to view if trying to access myads without being logged in or having trade ads
       if (hash === "myads" && (!currentUserId || userTradeAds.length === 0)) {
-        window.history.pushState(null, "", window.location.pathname);
+        router.replace(getTradingUrl(1));
         setActiveTab("view");
         return;
       }
@@ -814,16 +855,15 @@ export default function TradeAds({
     return () => {
       window.removeEventListener("hashchange", handleHashChange);
     };
-  }, [currentUserId, userTradeAds.length]);
+  }, [currentUserId, getTradingUrl, router, userTradeAds.length]);
 
   const handleTabChange = (tab: "view" | "create" | "myads") => {
     setActiveTab(tab);
+    isSyncingPageWithUrlRef.current = true;
+    setIsPageTransitionLoading(tab === "view");
     setPage(1); // Reset to first page when changing tabs
-    if (tab === "view") {
-      window.history.pushState(null, "", window.location.pathname);
-    } else {
-      window.location.hash = tab;
-    }
+    const nextUrl = tab === "view" ? getTradingUrl(1) : getTradingUrl(1, tab);
+    router.push(nextUrl);
   };
 
   const handleDeleteTrade = async (tradeId: number) => {
@@ -845,7 +885,11 @@ export default function TradeAds({
     event: React.ChangeEvent<unknown>,
     value: number,
   ) => {
+    if (value === page || isPageTransitionLoading) return;
+    isSyncingPageWithUrlRef.current = true;
+    setIsPageTransitionLoading(true);
     setPage(value);
+    router.push(getTradingUrl(value));
   };
 
   if (error) {
@@ -856,7 +900,7 @@ export default function TradeAds({
     );
   }
 
-  if (isTradeAdsLoading) {
+  if (isTradeAdsLoading || (activeTab === "view" && isPageTransitionLoading)) {
     return (
       <div className="mt-8">
         <TradeAdTabs
@@ -1024,7 +1068,11 @@ export default function TradeAds({
   };
 
   const getFilteredSideItems = (sideItems: TradeItem[]) =>
-    vehicleOnly ? sideItems.filter(isVehicleItem) : sideItems;
+    vehicleOnly
+      ? sideItems.filter(
+          (item) => isCustomTradeItem(item) || isVehicleItem(item),
+        )
+      : sideItems;
 
   const getCustomTypeId = (item: TradeItem): string | null => {
     if (!isCustomTradeItem(item)) {
@@ -1055,18 +1103,21 @@ export default function TradeAds({
 
   const sideMatchesQuery = (sideItems: TradeItem[], query: string): boolean => {
     const filteredItems = getFilteredSideItems(sideItems);
+    const filteredCustomItems = filteredItems.filter((item) =>
+      isCustomTradeItem(item),
+    );
     const customMatchedItems =
       customTypeFilter === "all"
-        ? filteredItems
-        : filteredItems.filter(
+        ? filteredCustomItems
+        : filteredCustomItems.filter(
             (item) => getCustomTypeId(item) === customTypeFilter,
           );
 
     if (customTypeFilter !== "all" && customTypeMatchMode === "only") {
-      if (filteredItems.length === 0 || customMatchedItems.length === 0) {
+      if (filteredCustomItems.length === 0 || customMatchedItems.length === 0) {
         return false;
       }
-      if (customMatchedItems.length !== filteredItems.length) {
+      if (customMatchedItems.length !== filteredCustomItems.length) {
         return false;
       }
     }
@@ -1195,6 +1246,20 @@ export default function TradeAds({
   }
 
   const currentPageItems = displayTradeAds;
+  const renderPaginationControls = () =>
+    apiTotalPages > 1 ? (
+      <div className="flex flex-col items-center gap-2">
+        <Pagination
+          count={apiTotalPages}
+          page={page}
+          onChange={handlePageChange}
+          disabled={isPageTransitionLoading}
+        />
+        {isPageTransitionLoading && (
+          <p className="text-secondary-text text-sm">Fetching page {page}...</p>
+        )}
+      </div>
+    ) : null;
 
   return (
     <div className="mt-8 mb-8">
@@ -1400,7 +1465,7 @@ export default function TradeAds({
                   onClick={() => {
                     chip.onRemove();
                   }}
-                  className="border-border-card bg-secondary-bg text-primary-text hover:border-border-focus inline-flex items-center gap-1 rounded-full border px-3 py-1 text-xs transition-colors"
+                  className="border-border-card bg-secondary-bg text-primary-text hover:border-border-focus inline-flex cursor-pointer items-center gap-1 rounded-full border px-3 py-1 text-xs transition-colors"
                 >
                   <span>{chip.label}</span>
                   <Icon icon="heroicons:x-mark" className="h-3.5 w-3.5" />
@@ -1434,6 +1499,11 @@ export default function TradeAds({
                   </p>
                 </div>
               )}
+            {displayTradeAds.length > 0 && apiTotalPages > 1 && (
+              <div className="mb-4 flex justify-center">
+                {renderPaginationControls()}
+              </div>
+            )}
             {displayTradeAds.length === 0 ? (
               !isSystemError && hasActiveFilters ? (
                 <div className="border-border-card bg-secondary-bg mb-8 rounded-lg border p-6 text-center">
@@ -1487,11 +1557,7 @@ export default function TradeAds({
             )}
             {apiTotalPages > 1 && (
               <div className="mt-8 mb-8 flex justify-center">
-                <Pagination
-                  count={apiTotalPages}
-                  page={page}
-                  onChange={handlePageChange}
-                />
+                {renderPaginationControls()}
               </div>
             )}
           </>

@@ -1,80 +1,98 @@
 import React from "react";
-import { Skeleton } from "@mui/material";
 
-export const TradeAdSkeleton: React.FC = () => (
-  <div className="mt-8">
-    <div className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-      {[...Array(3)].map((_, i) => (
-        <div key={i} className="border-border-card rounded-lg border p-4">
-          {/* User Info Skeleton */}
-          <div className="mb-4 flex items-center space-x-3">
-            <Skeleton variant="circular" width={40} height={40} />
-            <div className="flex-1">
-              <Skeleton variant="text" width="75%" height={24} />
-              <Skeleton variant="text" width="50%" height={20} />
-            </div>
-          </div>
+const SkeletonBlock = ({ className }: { className: string }) => (
+  <div
+    className={`bg-quaternary-bg/70 animate-pulse rounded-md ${className}`}
+    aria-hidden="true"
+  />
+);
 
-          {/* Status Skeleton */}
-          <div className="mb-4 flex justify-end">
-            <Skeleton variant="rounded" width={80} height={24} />
-          </div>
-
-          {/* Trade Items Skeleton */}
-          <div className="space-y-4">
-            {/* Offering Section */}
-            <div>
-              <Skeleton
-                variant="text"
-                width="30%"
-                height={20}
-                className="mb-2"
-              />
-              <div className="grid grid-cols-4 gap-2">
-                {[...Array(4)].map((_, j) => (
-                  <Skeleton
-                    key={j}
-                    variant="rounded"
-                    width="100%"
-                    height={80}
-                  />
-                ))}
+const TradeSideSkeleton = ({ titleWidth }: { titleWidth: string }) => (
+  <section className="overflow-hidden">
+    <div className="mb-3 flex items-center justify-center">
+      <SkeletonBlock className={`h-4 ${titleWidth}`} />
+    </div>
+    <div className="border-border-card bg-tertiary-bg/40 rounded-xl border">
+      <div className="border-border-card grid grid-cols-[1fr_auto] gap-3 border-b px-3 py-2">
+        <SkeletonBlock className="h-3 w-10" />
+        <SkeletonBlock className="ml-auto h-3 w-8" />
+      </div>
+      <div>
+        {[0, 1].map((row) => (
+          <div
+            key={row}
+            className="border-border-card grid grid-cols-[1fr_auto] items-center gap-3 border-b px-3 py-2 last:border-b-0"
+          >
+            <div className="flex min-w-0 items-center gap-3">
+              <SkeletonBlock className="hidden aspect-video w-28 rounded-lg min-[376px]:block" />
+              <div className="min-w-0 flex-1">
+                <div className="flex flex-wrap items-center gap-2">
+                  <SkeletonBlock className="h-4 w-28" />
+                  <SkeletonBlock className="h-6 w-20 rounded-lg" />
+                </div>
+                <div className="mt-2">
+                  <SkeletonBlock className="h-3 w-32" />
+                </div>
               </div>
             </div>
-
-            {/* Requesting Section */}
-            <div>
-              <Skeleton
-                variant="text"
-                width="30%"
-                height={20}
-                className="mb-2"
-              />
-              <div className="grid grid-cols-4 gap-2">
-                {[...Array(4)].map((_, j) => (
-                  <Skeleton
-                    key={j}
-                    variant="rounded"
-                    width="100%"
-                    height={80}
-                  />
-                ))}
-              </div>
-            </div>
+            <SkeletonBlock className="h-4 w-8" />
           </div>
+        ))}
+      </div>
+    </div>
+    <div className="mt-3 flex flex-wrap items-center gap-2">
+      <SkeletonBlock className="h-6 w-24 rounded-lg" />
+      <SkeletonBlock className="h-6 w-24 rounded-lg" />
+    </div>
+  </section>
+);
 
-          {/* Date Skeleton */}
-          <div className="mt-4">
-            <Skeleton variant="text" width="40%" height={16} />
+const TradeCardSkeleton = () => (
+  <div className="bg-secondary-bg border-border-card overflow-hidden rounded-xl border p-3">
+    <div className="bg-tertiary-bg border-border-card -mx-3 -mt-3 mb-4 flex flex-col gap-3 border-b px-3 py-2 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex min-w-0 items-center gap-3">
+        <SkeletonBlock className="h-10 w-10 shrink-0 rounded-full" />
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-2">
+            <SkeletonBlock className="h-4 w-28" />
+            <SkeletonBlock className="h-4 w-10" />
           </div>
-
-          {/* Buttons Skeleton */}
-          <div className="border-border-card mt-4 space-y-2 border-t pt-4">
-            <Skeleton variant="rounded" width="100%" height={40} />
-            <Skeleton variant="rounded" width="100%" height={40} />
+          <div className="mt-2">
+            <SkeletonBlock className="h-3 w-24" />
+          </div>
+          <div className="mt-2 flex items-center gap-2">
+            <SkeletonBlock className="h-3 w-28" />
+            <SkeletonBlock className="h-3 w-20" />
           </div>
         </div>
-      ))}
+      </div>
+      <div className="flex shrink-0 items-center gap-2">
+        <SkeletonBlock className="h-9 w-20 rounded-md" />
+        <SkeletonBlock className="h-9 w-28 rounded-md" />
+      </div>
     </div>
+
+    <div className="mb-4">
+      <SkeletonBlock className="mb-2 h-3 w-16" />
+      <SkeletonBlock className="h-4 w-full max-w-2xl" />
+      <SkeletonBlock className="mt-2 h-4 w-5/6 max-w-xl" />
+    </div>
+
+    <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
+      <TradeSideSkeleton titleWidth="w-28" />
+      <TradeSideSkeleton titleWidth="w-32" />
+    </div>
+
+    <div className="mt-4">
+      <SkeletonBlock className="h-10 w-full rounded-md" />
+    </div>
+  </div>
+);
+
+export const TradeAdSkeleton: React.FC = () => (
+  <div className="mt-8 space-y-4">
+    {[0, 1, 2].map((index) => (
+      <TradeCardSkeleton key={index} />
+    ))}
   </div>
 );
