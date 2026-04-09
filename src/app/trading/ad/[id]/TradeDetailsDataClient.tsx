@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import type { CommentData } from "@/utils/api";
 import type { UserData } from "@/types/auth";
 import type { TradeAd, TradeItem } from "@/types/trading";
+import NotFoundView from "@/components/Layout/NotFoundView";
 import { buildApiUrlWithDevToken } from "@/utils/apiDevToken";
 import TradeDetailsClient from "./TradeDetailsClient";
 import Loading from "./loading";
@@ -203,26 +204,19 @@ export default function TradeDetailsDataClient({
     }
 
     return (
-      <div className="container mx-auto px-4 py-10">
-        <div className="border-border-card bg-secondary-bg mx-auto max-w-xl rounded-lg border p-6 text-center">
-          <h2 className="text-primary-text text-lg font-semibold">
-            {status === "not_found"
-              ? "Trade Not Found"
-              : "Failed to Load Trade"}
-          </h2>
-          <p className="text-secondary-text mt-2">
-            {status === "not_found"
-              ? "This trade is unavailable or has expired."
-              : "Please try again in a moment."}
-          </p>
-          <a
-            href="/trading"
-            className="bg-button-info text-form-button-text mt-4 inline-flex rounded-md px-4 py-2 text-sm font-medium"
-          >
-            Back to Trading
-          </a>
-        </div>
-      </div>
+      <NotFoundView
+        eyebrow={status === "not_found" ? "404 error" : "Trading error"}
+        title={
+          status === "not_found" ? "Trade not found" : "Failed to load trade"
+        }
+        description={
+          status === "not_found"
+            ? "This trade is unavailable or has expired. Here are some helpful links:"
+            : "We couldn't load this trade right now. Here are some helpful links:"
+        }
+        homeHref="/trading"
+        homeLabel="Back to trading"
+      />
     );
   }
 
