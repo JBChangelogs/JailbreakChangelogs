@@ -17,6 +17,7 @@ tsconfig.tsbuildinfo
 .vscode
 .augment
 .windsurf
+.codex
 
 # Build artifacts
 coverage/
