@@ -984,7 +984,8 @@ export default function Header() {
                                               View
                                             </Link>
                                           </Button>
-                                        ) : urlInfo.href ? (
+                                        ) : !urlInfo.isJailbreakChangelogs &&
+                                          urlInfo.validatedExternalHref ? (
                                           <Button
                                             variant="default"
                                             size="sm"
@@ -992,7 +993,9 @@ export default function Header() {
                                             className="mt-2"
                                           >
                                             <a
-                                              href={urlInfo.href}
+                                              href={
+                                                urlInfo.validatedExternalHref
+                                              }
                                               target="_blank"
                                               rel="noopener noreferrer"
                                             >

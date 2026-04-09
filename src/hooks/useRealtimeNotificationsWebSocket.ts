@@ -86,6 +86,10 @@ function parseRealtimeMessagePayload(raw: string): RealtimeNotificationMessage {
   return JSON.parse(normalized) as RealtimeNotificationMessage;
 }
 
+function openValidatedExternalNotificationUrl(validatedExternalHref: string) {
+  window.open(validatedExternalHref, "_blank", "noopener,noreferrer");
+}
+
 export function useRealtimeNotificationsWebSocket(
   enabled: boolean,
   locationPath?: string | null,
@@ -434,11 +438,12 @@ export function useRealtimeNotificationsWebSocket(
                         window.location.assign(urlInfo.relativePath);
                         return;
                       }
-                      if (!urlInfo.isJailbreakChangelogs && urlInfo.href) {
-                        window.open(
-                          urlInfo.href,
-                          "_blank",
-                          "noopener,noreferrer",
+                      if (
+                        !urlInfo.isJailbreakChangelogs &&
+                        urlInfo.validatedExternalHref
+                      ) {
+                        openValidatedExternalNotificationUrl(
+                          urlInfo.validatedExternalHref,
                         );
                       }
                     },
@@ -453,11 +458,19 @@ export function useRealtimeNotificationsWebSocket(
 
             const desktopUrl = (() => {
               if (!link) return undefined;
-              if (urlInfo?.isJailbreakChangelogs && urlInfo.relativePath) {
+              if (
+                urlInfo?.isWhitelisted &&
+                urlInfo.isJailbreakChangelogs &&
+                urlInfo.relativePath
+              ) {
                 return `${window.location.origin}${urlInfo.relativePath}`;
               }
-              if (!urlInfo?.isJailbreakChangelogs && urlInfo?.href) {
-                return urlInfo.href;
+              if (
+                urlInfo?.isWhitelisted &&
+                !urlInfo.isJailbreakChangelogs &&
+                urlInfo.validatedExternalHref
+              ) {
+                return urlInfo.validatedExternalHref;
               }
               return undefined;
             })();

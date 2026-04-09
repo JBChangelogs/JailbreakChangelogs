@@ -2,12 +2,20 @@
  * Utility for parsing and validating notification URLs
  */
 
-export interface NotificationUrlInfo {
-  isWhitelisted: boolean;
-  isJailbreakChangelogs?: boolean;
-  relativePath?: string;
-  href?: string;
-}
+export type NotificationUrlInfo =
+  | {
+      isWhitelisted: false;
+    }
+  | {
+      isWhitelisted: true;
+      isJailbreakChangelogs: true;
+      relativePath: string;
+    }
+  | {
+      isWhitelisted: true;
+      isJailbreakChangelogs: false;
+      validatedExternalHref: string;
+    };
 
 const INTERNAL_HOSTNAMES = new Set([
   "jailbreakchangelogs.com",
@@ -15,6 +23,7 @@ const INTERNAL_HOSTNAMES = new Set([
   "jailbreakchangelogs.xyz",
   "www.jailbreakchangelogs.xyz",
 ]);
+const SAFE_PROTOCOLS = new Set(["https:"]);
 
 function isJailbreakChangelogsHostname(hostname: string) {
   return (
@@ -38,19 +47,19 @@ function isJailbreakChangelogsHostname(hostname: string) {
  * @example
  * // Subdomain - returns full URL for external navigation
  * parseNotificationUrl("https://inventories.jailbreakchangelogs.com/user/export/123")
- * // => { isWhitelisted: true, isJailbreakChangelogs: false, href: "https://inventories.jailbreakchangelogs.com/user/export/123" }
+ * // => { isWhitelisted: true, isJailbreakChangelogs: false, validatedExternalHref: "https://inventories.jailbreakchangelogs.com/user/export/123" }
  */
 export function parseNotificationUrl(link: string): NotificationUrlInfo {
   try {
     const url = new URL(link);
+    if (!SAFE_PROTOCOLS.has(url.protocol)) {
+      return { isWhitelisted: false };
+    }
 
     // Only treat the main site hostnames as internal navigation
     const isInternalHostname = INTERNAL_HOSTNAMES.has(url.hostname);
     const isWhitelisted =
-      isInternalHostname ||
-      isJailbreakChangelogsHostname(url.hostname) ||
-      url.hostname === "google.com" ||
-      url.hostname.endsWith(".google.com");
+      isInternalHostname || isJailbreakChangelogsHostname(url.hostname);
 
     if (isInternalHostname) {
       // Extract relative path for internal navigation
@@ -65,7 +74,7 @@ export function parseNotificationUrl(link: string): NotificationUrlInfo {
       return {
         isWhitelisted: true,
         isJailbreakChangelogs: false,
-        href: link,
+        validatedExternalHref: url.href,
       };
     }
 

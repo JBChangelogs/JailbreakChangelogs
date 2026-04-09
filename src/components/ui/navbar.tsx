@@ -705,7 +705,8 @@ export const NavbarModern = ({
                                     View
                                   </Link>
                                 </Button>
-                              ) : urlInfo.href ? (
+                              ) : !urlInfo.isJailbreakChangelogs &&
+                                urlInfo.validatedExternalHref ? (
                                 <Button
                                   variant="default"
                                   size="sm"
@@ -713,7 +714,7 @@ export const NavbarModern = ({
                                   className="mt-2"
                                 >
                                   <a
-                                    href={urlInfo.href}
+                                    href={urlInfo.validatedExternalHref}
                                     target="_blank"
                                     rel="noopener noreferrer"
                                   >
