@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { ENABLE_REALTIME_NOTIFICATIONS_WS, WS_URL } from "@/utils/api";
 import { parseNotificationUrl } from "@/utils/notificationUrl";
 import { showDesktopNotification } from "@/utils/desktopNotifications";
+import { buildApiUrlWithDevToken } from "@/utils/apiDevToken";
 
 interface RealtimeNotificationContent {
   title?: string;
@@ -64,7 +65,7 @@ function getRealtimeWsUrl(): string | null {
   const baseUrl = WS_URL?.replace(/\/+$/, "");
   if (!baseUrl) return null;
 
-  return `${baseUrl}/realtime`;
+  return buildApiUrlWithDevToken(baseUrl, "/realtime");
 }
 
 function getReconnectDelay(attempt: number): number {

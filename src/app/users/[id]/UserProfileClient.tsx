@@ -14,6 +14,7 @@ import { UserSettings, FollowingData } from "@/types/auth";
 import { toast } from "sonner";
 import dynamic from "next/dynamic";
 import { PUBLIC_API_URL } from "@/utils/api";
+import { buildApiUrlWithDevToken } from "@/utils/apiDevToken";
 
 import { UserBadges } from "@/components/Profile/UserBadges";
 import {
@@ -374,11 +375,14 @@ export default function UserProfileClient({
           throw new Error("Public API URL is not configured");
         }
 
-        const response = await fetch(`${PUBLIC_API_URL}/messages/blocked`, {
-          method: "GET",
-          credentials: "include",
-          cache: "no-store",
-        });
+        const response = await fetch(
+          buildApiUrlWithDevToken(PUBLIC_API_URL, "/messages/blocked"),
+          {
+            method: "GET",
+            credentials: "include",
+            cache: "no-store",
+          },
+        );
 
         if (!response.ok) {
           throw new Error("Failed to fetch blocked users");
@@ -438,7 +442,10 @@ export default function UserProfileClient({
         }
 
         const response = await fetch(
-          `${PUBLIC_API_URL}/messages/${encodeURIComponent(user.id)}`,
+          buildApiUrlWithDevToken(
+            PUBLIC_API_URL,
+            `/messages/${encodeURIComponent(user.id)}`,
+          ),
           {
             method: "HEAD",
             credentials: "include",
@@ -491,7 +498,10 @@ export default function UserProfileClient({
       }
 
       const response = await fetch(
-        `${PUBLIC_API_URL}/messages/${encodeURIComponent(user.id)}/block`,
+        buildApiUrlWithDevToken(
+          PUBLIC_API_URL,
+          `/messages/${encodeURIComponent(user.id)}/block`,
+        ),
         {
           method: shouldBlock ? "POST" : "DELETE",
           credentials: "include",

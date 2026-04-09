@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import type { CommentData } from "@/utils/api";
 import type { UserData } from "@/types/auth";
 import type { TradeAd, TradeItem } from "@/types/trading";
+import { buildApiUrlWithDevToken } from "@/utils/apiDevToken";
 import TradeDetailsClient from "./TradeDetailsClient";
 import Loading from "./loading";
 
@@ -146,7 +147,10 @@ export default function TradeDetailsDataClient({
 
       try {
         const response = await fetch(
-          `${baseUrl}/trades/v2/${encodeURIComponent(tradeId)}`,
+          buildApiUrlWithDevToken(
+            baseUrl,
+            `/trades/v2/${encodeURIComponent(tradeId)}`,
+          ),
           {
             cache: "no-store",
             credentials: "include",

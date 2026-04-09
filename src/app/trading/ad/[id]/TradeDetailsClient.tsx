@@ -16,6 +16,7 @@ import {
   respondToTradeOfferV2,
   type TradeOfferV2,
 } from "@/utils/trading";
+import { buildApiUrlWithDevToken } from "@/utils/apiDevToken";
 import { toast } from "sonner";
 import { TradeAd, TradeItem } from "@/types/trading";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
@@ -511,15 +512,32 @@ export default function TradeDetailsClient({
       setOfferState({ status: "checking", error: null });
 
       try {
+        const headers: Record<string, string> = {
+          "User-Agent": "JailbreakChangelogs-Trading/2.0",
+        };
+
+        if (typeof document !== "undefined") {
+          const tokenCookie = document.cookie
+            ?.split(";")
+            .map((c) => c.trim())
+            .find((c) => c.startsWith("jbcl_token="));
+          const jbclToken = tokenCookie?.split("=").slice(1).join("=");
+
+          if (jbclToken) {
+            headers.Authorization = `token ${decodeURIComponent(jbclToken)}`;
+          }
+        }
+
         const response = await fetch(
-          `${baseUrl}/trades/v2/${encodeURIComponent(String(trade.id))}/offers`,
+          buildApiUrlWithDevToken(
+            baseUrl,
+            `/trades/v2/${encodeURIComponent(String(trade.id))}/offers`,
+          ),
           {
             method: "HEAD",
             cache: "no-store",
             credentials: "include",
-            headers: {
-              "User-Agent": "JailbreakChangelogs-Trading/2.0",
-            },
+            headers,
           },
         );
 

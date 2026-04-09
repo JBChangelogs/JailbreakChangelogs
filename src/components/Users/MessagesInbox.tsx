@@ -45,7 +45,13 @@ import { useAuthContext } from "@/contexts/AuthContext";
 import { sanitizeText } from "@/utils/sanitizeText";
 import { PUBLIC_API_URL, searchUsers } from "@/utils/api";
 import { respondToTradeOfferV2 } from "@/utils/trading";
+import { buildApiUrlWithDevToken } from "@/utils/apiDevToken";
+import {
+  useOfferDetailsBatch,
+  type TradeOfferDetails,
+} from "@/hooks/useOfferDetailsBatch";
 import { decode as decodeHtmlEntities } from "he";
+import { parseJsonWithLargeIds } from "@/utils/parseJsonWithLargeIds";
 import type { UserData, UserFlag, UserSettings } from "@/types/auth";
 
 type MessageUser = {
@@ -97,17 +103,6 @@ type OfferAcceptedMetadata = {
   offer?: number;
   trade?: number;
   trade_user?: string | number;
-};
-
-type TradeOfferDetails = {
-  id: number;
-  trade: number;
-  note: string | null;
-  offering?: Array<{ name?: string; amount?: number; type?: string }> | null;
-  requesting?: Array<{ name?: string; amount?: number; type?: string }> | null;
-  user?: { id?: string | number } | null;
-  created_at?: number | string;
-  status?: number;
 };
 
 type ConversationSummary = {
@@ -278,15 +273,6 @@ function sortMessagesByCreatedAt(messages: Message[]): Message[] {
 function trimLocalThreadMessages(messages: Message[], max = 200): Message[] {
   if (messages.length <= max) return messages;
   return messages.slice(messages.length - max);
-}
-
-function parseJsonWithLargeIds(raw: string): unknown {
-  return JSON.parse(
-    raw.replace(
-      /"(id|parent_id|sender_id|receiver_id|recipient_id|user_id|blocked_user_id)"\s*:\s*(\d{16,})/g,
-      '"$1":"$2"',
-    ),
-  );
 }
 
 function parseOfferAcceptedMetadata(
@@ -702,12 +688,6 @@ function formatMessageText(value: string): string {
   return sanitizeText(decodeHtmlEntities(value));
 }
 
-const OFFER_DETAILS_NOT_FOUND = Symbol("offer_details_not_found");
-type OfferDetailsCacheValue =
-  | TradeOfferDetails
-  | null
-  | typeof OFFER_DETAILS_NOT_FOUND;
-
 export default function MessagesInbox() {
   const pathname = usePathname();
   const router = useRouter();
@@ -739,6 +719,7 @@ export default function MessagesInbox() {
   const [isSending, setIsSending] = useState(false);
   const [isRealtimeConnected, setIsRealtimeConnected] = useState(false);
   const [isProcessingBlockAction, setIsProcessingBlockAction] = useState(false);
+  const [isMarkingOfferComplete, setIsMarkingOfferComplete] = useState(false);
   const [blockedByMeByUserId, setBlockedByMeByUserId] = useState<
     Record<string, boolean>
   >({});
@@ -962,23 +943,39 @@ export default function MessagesInbox() {
 
   const [activeOfferAcceptedIndex, setActiveOfferAcceptedIndex] = useState(0);
   const [isOfferBannerMinimized, setIsOfferBannerMinimized] = useState(true);
-  const offerDetailsCacheRef = useRef<Map<string, OfferDetailsCacheValue>>(
-    new Map(),
-  );
-  const offerDetailsPendingRef = useRef<Map<string, Promise<void>>>(new Map());
-  const [offerDetailsCacheVersion, setOfferDetailsCacheVersion] = useState(0);
-  const [activeOfferDetailsStatus, setActiveOfferDetailsStatus] = useState<
-    | { status: "idle" }
-    | { status: "loading" }
-    | { status: "loaded"; data: TradeOfferDetails }
-    | { status: "not_found" }
-    | { status: "error"; error: string }
-  >({ status: "idle" });
+
+  const {
+    map: offerDetailsMap,
+    setMap: setOfferDetailsMap,
+    status: offerDetailsStatus,
+  } = useOfferDetailsBatch(offerAcceptedEvents.map((entry) => entry.metadata));
+
+  const visibleOfferAcceptedEvents = useMemo(() => {
+    return offerAcceptedEvents.filter((entry) => {
+      const key = getOfferDetailsKey(entry.metadata);
+      const cached = offerDetailsMap[key];
+      if (cached === null) return false;
+      if (cached && cached.status !== 1) return false;
+      return true;
+    });
+  }, [offerAcceptedEvents, getOfferDetailsKey, offerDetailsMap]);
 
   useEffect(() => {
     setActiveOfferAcceptedIndex(0);
     setIsOfferBannerMinimized(true);
-  }, [selectedUserId, offerAcceptedEvents.length]);
+  }, [selectedUserId, visibleOfferAcceptedEvents.length]);
+
+  useEffect(() => {
+    if (
+      activeOfferAcceptedIndex >= visibleOfferAcceptedEvents.length &&
+      visibleOfferAcceptedEvents.length > 0
+    ) {
+      setActiveOfferAcceptedIndex(visibleOfferAcceptedEvents.length - 1);
+    }
+    if (visibleOfferAcceptedEvents.length === 0) {
+      setActiveOfferAcceptedIndex(0);
+    }
+  }, [activeOfferAcceptedIndex, visibleOfferAcceptedEvents.length]);
 
   useEffect(() => {
     // Default to minimized on small screens to preserve chat space.
@@ -989,138 +986,47 @@ export default function MessagesInbox() {
     return () => query.removeEventListener("change", apply);
   }, []);
 
-  const ensureOfferDetailsCached = useCallback(
-    async (metadata: OfferAcceptedMetadata) => {
-      if (!PUBLIC_API_URL) return;
+  const activeOfferAccepted =
+    visibleOfferAcceptedEvents[activeOfferAcceptedIndex];
 
-      const key = getOfferDetailsKey(metadata);
-      const cache = offerDetailsCacheRef.current;
-      if (cache.has(key)) return;
-
-      const pending = offerDetailsPendingRef.current.get(key);
-      if (pending) return pending;
-
-      const baseUrl = process.env.NEXT_PUBLIC_API_URL;
-      if (!baseUrl) return;
-      const promise = (async () => {
-        try {
-          const response = await fetch(
-            `${baseUrl}/trades/v2/${encodeURIComponent(String(metadata.trade))}/offers/${encodeURIComponent(String(metadata.offer))}`,
-            {
-              method: "GET",
-              cache: "no-store",
-              credentials: "include",
-              headers: {
-                "User-Agent": "JailbreakChangelogs-Messages/1.0",
-              },
-            },
-          );
-
-          const raw = await response.text();
-          const parsed = raw ? (parseJsonWithLargeIds(raw) as unknown) : null;
-
-          if (response.status === 404 && parsed && typeof parsed === "object") {
-            const errorCode = (parsed as Record<string, unknown>).error;
-            if (errorCode === "trade_not_found") {
-              cache.set(key, OFFER_DETAILS_NOT_FOUND);
-              return;
-            }
-          }
-
-          if (!response.ok || !parsed || typeof parsed !== "object") {
-            cache.set(key, null);
-            return;
-          }
-
-          cache.set(key, parsed as TradeOfferDetails);
-        } catch (err) {
-          console.error("Offer details fetch error:", err);
-          offerDetailsCacheRef.current.set(key, null);
-        } finally {
-          offerDetailsPendingRef.current.delete(key);
-          setOfferDetailsCacheVersion((prev) => prev + 1);
-        }
-      })();
-
-      offerDetailsPendingRef.current.set(key, promise);
-      return promise;
-    },
-    [getOfferDetailsKey],
-  );
-
-  useEffect(() => {
-    const active = offerAcceptedEvents[activeOfferAcceptedIndex];
-    if (!active) {
-      setActiveOfferDetailsStatus({ status: "idle" });
-      return;
-    }
+  const activeOfferDetailsStatus = useMemo<
+    | { status: "idle" }
+    | { status: "loading" }
+    | { status: "loaded"; data: TradeOfferDetails }
+    | { status: "not_found" }
+    | { status: "error"; error: string }
+  >(() => {
+    if (!activeOfferAccepted) return { status: "idle" };
     if (!PUBLIC_API_URL) {
-      setActiveOfferDetailsStatus({
-        status: "error",
-        error: "Trade API is not configured",
-      });
-      return;
+      return { status: "error", error: "Trade API is not configured" };
     }
-
-    const key = getOfferDetailsKey(active.metadata);
-    const cached = offerDetailsCacheRef.current.get(key);
-    if (cached && cached !== OFFER_DETAILS_NOT_FOUND) {
-      setActiveOfferDetailsStatus({ status: "loaded", data: cached });
-      return;
+    if (offerDetailsStatus === "error") {
+      return { status: "error", error: "Unable to load trade offer details" };
     }
-    if (cached === OFFER_DETAILS_NOT_FOUND) {
-      setActiveOfferDetailsStatus({ status: "not_found" });
-      return;
-    }
-    if (cached === null) {
-      setActiveOfferDetailsStatus({
-        status: "error",
-        error: "Unable to load trade offer details",
-      });
-      return;
-    }
-
-    let isCancelled = false;
-    const run = async () => {
-      setActiveOfferDetailsStatus({ status: "loading" });
-      await ensureOfferDetailsCached(active.metadata);
-      if (isCancelled) return;
-
-      const updated = offerDetailsCacheRef.current.get(key);
-      if (updated && updated !== OFFER_DETAILS_NOT_FOUND) {
-        setActiveOfferDetailsStatus({ status: "loaded", data: updated });
-        return;
-      }
-      if (updated === OFFER_DETAILS_NOT_FOUND) {
-        setActiveOfferDetailsStatus({ status: "not_found" });
-        return;
-      }
-      setActiveOfferDetailsStatus({
-        status: "error",
-        error: "Unable to load trade offer details",
-      });
-    };
-
-    void run();
-    return () => {
-      isCancelled = true;
-    };
+    const key = getOfferDetailsKey(activeOfferAccepted.metadata);
+    const cached = offerDetailsMap[key];
+    if (cached) return { status: "loaded", data: cached };
+    if (cached === null) return { status: "not_found" };
+    if (offerDetailsStatus === "loading") return { status: "loading" };
+    return { status: "loading" };
   }, [
-    activeOfferAcceptedIndex,
-    ensureOfferDetailsCached,
+    activeOfferAccepted,
     getOfferDetailsKey,
-    offerAcceptedEvents,
-    offerDetailsCacheVersion,
+    offerDetailsMap,
+    offerDetailsStatus,
   ]);
 
   useEffect(() => {
-    if (activeOfferAcceptedIndex < offerAcceptedEvents.length) return;
-    setActiveOfferAcceptedIndex(Math.max(0, offerAcceptedEvents.length - 1));
-  }, [activeOfferAcceptedIndex, offerAcceptedEvents.length]);
+    if (activeOfferAcceptedIndex < visibleOfferAcceptedEvents.length) return;
+    setActiveOfferAcceptedIndex(
+      Math.max(0, visibleOfferAcceptedEvents.length - 1),
+    );
+  }, [activeOfferAcceptedIndex, visibleOfferAcceptedEvents.length]);
 
-  const activeOfferAccepted = offerAcceptedEvents[activeOfferAcceptedIndex];
   const showOfferAcceptedBanner =
-    !!selectedUser && offerAcceptedEvents.length > 0;
+    !!selectedUser &&
+    visibleOfferAcceptedEvents.length > 0 &&
+    offerDetailsStatus === "loaded";
 
   const activeOfferItems = useMemo(() => {
     if (activeOfferDetailsStatus.status !== "loaded") return null;
@@ -1137,8 +1043,6 @@ export default function MessagesInbox() {
     }
     return asId(tradeOwnerId) === asId(currentUserId);
   }, [activeOfferAccepted, currentUserId]);
-
-  const [isMarkingOfferComplete, setIsMarkingOfferComplete] = useState(false);
 
   const lastSeenTime = useOptimizedRealTimeRelativeDate(
     selectedUser?.last_seen,
@@ -1414,7 +1318,7 @@ export default function MessagesInbox() {
         }
 
         const response = await fetch(
-          `${PUBLIC_API_URL}/messages?nocache=true`,
+          buildApiUrlWithDevToken(PUBLIC_API_URL, "/messages?nocache=true"),
           {
             method: "GET",
             credentials: "include",
@@ -1557,11 +1461,14 @@ export default function MessagesInbox() {
           throw new Error("Public API URL is not configured");
         }
 
-        const response = await fetch(`${PUBLIC_API_URL}/messages/blocked`, {
-          method: "GET",
-          credentials: "include",
-          cache: "no-store",
-        });
+        const response = await fetch(
+          buildApiUrlWithDevToken(PUBLIC_API_URL, "/messages/blocked"),
+          {
+            method: "GET",
+            credentials: "include",
+            cache: "no-store",
+          },
+        );
 
         if (!response.ok) {
           throw new Error("Failed to fetch blocked users");
@@ -1649,7 +1556,10 @@ export default function MessagesInbox() {
       }
 
       const pageParam = page > 1 ? `?page=${page}` : "";
-      const url = `${PUBLIC_API_URL}/messages/${encodeURIComponent(userId)}${pageParam}`;
+      const url = buildApiUrlWithDevToken(
+        PUBLIC_API_URL,
+        `/messages/${encodeURIComponent(userId)}${pageParam}`,
+      );
       const response = await fetch(url, {
         method: "GET",
         credentials: "include",
@@ -2139,7 +2049,10 @@ export default function MessagesInbox() {
       }
 
       const response = await fetch(
-        `${PUBLIC_API_URL}/messages/${encodeURIComponent(targetUserId)}/block`,
+        buildApiUrlWithDevToken(
+          PUBLIC_API_URL,
+          `/messages/${encodeURIComponent(targetUserId)}/block`,
+        ),
         {
           method: shouldBlock ? "POST" : "DELETE",
           credentials: "include",
@@ -2243,7 +2156,10 @@ export default function MessagesInbox() {
       body.metadata = { client_id: optimisticId };
 
       const response = await fetch(
-        `${PUBLIC_API_URL}/messages/${encodeURIComponent(targetUserId)}`,
+        buildApiUrlWithDevToken(
+          PUBLIC_API_URL,
+          `/messages/${encodeURIComponent(targetUserId)}`,
+        ),
         {
           method: "POST",
           credentials: "include",
@@ -2475,7 +2391,10 @@ export default function MessagesInbox() {
       }
 
       const response = await fetch(
-        `${PUBLIC_API_URL}/messages/${encodeURIComponent(selectedUserId)}/${encodeURIComponent(messageId)}`,
+        buildApiUrlWithDevToken(
+          PUBLIC_API_URL,
+          `/messages/${encodeURIComponent(selectedUserId)}/${encodeURIComponent(messageId)}`,
+        ),
         {
           method: "PATCH",
           credentials: "include",
@@ -2608,7 +2527,10 @@ export default function MessagesInbox() {
       }
 
       const response = await fetch(
-        `${PUBLIC_API_URL}/messages/${encodeURIComponent(selectedUserId)}/${encodeURIComponent(messageId)}`,
+        buildApiUrlWithDevToken(
+          PUBLIC_API_URL,
+          `/messages/${encodeURIComponent(selectedUserId)}/${encodeURIComponent(messageId)}`,
+        ),
         {
           method: "DELETE",
           credentials: "include",
@@ -3269,14 +3191,11 @@ export default function MessagesInbox() {
                             type="button"
                             aria-label="Previous accepted offer"
                             disabled={activeOfferAcceptedIndex <= 0}
-                            onClick={() => {
-                              setActiveOfferDetailsStatus({
-                                status: "loading",
-                              });
+                            onClick={() =>
                               setActiveOfferAcceptedIndex((prev) =>
                                 Math.max(prev - 1, 0),
-                              );
-                            }}
+                              )
+                            }
                             className={cn(
                               "text-primary-text flex h-8 w-8 items-center justify-center rounded-full transition-colors",
                               "hover:bg-quaternary-bg cursor-pointer disabled:opacity-50 disabled:hover:bg-transparent",
@@ -3290,28 +3209,25 @@ export default function MessagesInbox() {
                           <span className="text-secondary-text w-12 text-center text-[11px] tabular-nums">
                             {Math.min(
                               activeOfferAcceptedIndex + 1,
-                              offerAcceptedEvents.length,
+                              visibleOfferAcceptedEvents.length,
                             )}{" "}
-                            / {offerAcceptedEvents.length}
+                            / {visibleOfferAcceptedEvents.length}
                           </span>
                           <button
                             type="button"
                             aria-label="Next accepted offer"
                             disabled={
                               activeOfferAcceptedIndex >=
-                              offerAcceptedEvents.length - 1
+                              visibleOfferAcceptedEvents.length - 1
                             }
-                            onClick={() => {
-                              setActiveOfferDetailsStatus({
-                                status: "loading",
-                              });
+                            onClick={() =>
                               setActiveOfferAcceptedIndex((prev) =>
                                 Math.min(
                                   prev + 1,
-                                  offerAcceptedEvents.length - 1,
+                                  visibleOfferAcceptedEvents.length - 1,
                                 ),
-                              );
-                            }}
+                              )
+                            }
                             className={cn(
                               "text-primary-text flex h-8 w-8 items-center justify-center rounded-full transition-colors",
                               "hover:bg-quaternary-bg cursor-pointer disabled:opacity-50 disabled:hover:bg-transparent",
@@ -3363,7 +3279,7 @@ export default function MessagesInbox() {
                                 onClick={() => {
                                   if (isMarkingOfferComplete) return;
                                   const active =
-                                    offerAcceptedEvents[
+                                    visibleOfferAcceptedEvents[
                                       activeOfferAcceptedIndex
                                     ];
                                   if (!active) return;
@@ -3387,33 +3303,17 @@ export default function MessagesInbox() {
                                       const key = getOfferDetailsKey(
                                         active.metadata,
                                       );
-                                      const cached =
-                                        offerDetailsCacheRef.current.get(key);
-                                      if (
-                                        cached &&
-                                        cached !== OFFER_DETAILS_NOT_FOUND
-                                      ) {
-                                        offerDetailsCacheRef.current.set(key, {
-                                          ...cached,
-                                          status: 3,
-                                        });
-                                      }
-                                      setOfferDetailsCacheVersion(
-                                        (prev) => prev + 1,
-                                      );
-                                      setActiveOfferDetailsStatus((prev) => {
-                                        if (
-                                          prev.status !== "loaded" ||
-                                          `${prev.data.trade}:${prev.data.id}` !==
-                                            key
-                                        ) {
-                                          return prev;
-                                        }
-                                        return {
-                                          status: "loaded",
-                                          data: { ...prev.data, status: 3 },
-                                        };
-                                      });
+                                      setOfferDetailsMap((prev) => ({
+                                        ...prev,
+                                        [key]: prev[key]
+                                          ? {
+                                              ...(prev[
+                                                key
+                                              ] as TradeOfferDetails),
+                                              status: 3,
+                                            }
+                                          : null,
+                                      }));
                                     } catch (err) {
                                       toast.error(
                                         err instanceof Error

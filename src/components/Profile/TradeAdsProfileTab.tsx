@@ -7,6 +7,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Pagination } from "@/components/ui/Pagination";
 import { TradeAdCard } from "@/components/trading/TradeAdCard";
 import { Icon } from "@/components/ui/IconWrapper";
+import { buildApiUrlWithDevToken } from "@/utils/apiDevToken";
 
 interface User {
   id: string;
@@ -170,7 +171,10 @@ export default function TradeAdsProfileTab({
       setTradeAdsError(null);
       try {
         const response = await fetch(
-          `${baseUrl}/trades/v2/recent?user=${encodeURIComponent(user.id)}&page=${encodeURIComponent(String(page))}`,
+          buildApiUrlWithDevToken(
+            baseUrl,
+            `/trades/v2/recent?user=${encodeURIComponent(user.id)}&page=${encodeURIComponent(String(page))}`,
+          ),
           {
             cache: "no-store",
             credentials: "include",

@@ -28,6 +28,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { buildApiUrlWithDevToken } from "@/utils/apiDevToken";
 
 interface TradeAdFormProps {
   onSuccess?: (createdTrade?: unknown) => void;
@@ -554,7 +555,7 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
         throw new Error("Trade API is not configured");
       }
 
-      const endpoint = `${baseUrl}/trades/v2/create`;
+      const endpoint = buildApiUrlWithDevToken(baseUrl, "/trades/v2/create");
       const method = "POST";
       const createPayload = {
         offering: buildV2CreateItems(offeringItems),

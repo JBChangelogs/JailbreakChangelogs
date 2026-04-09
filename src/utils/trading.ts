@@ -6,7 +6,10 @@ export const deleteTradeAd = async (tradeId: number): Promise<boolean> => {
     }
 
     const response = await fetch(
-      `${baseUrl}/trades/v2/${encodeURIComponent(String(tradeId))}/delete`,
+      buildApiUrlWithDevToken(
+        baseUrl,
+        `/trades/v2/${encodeURIComponent(String(tradeId))}/delete`,
+      ),
       {
         method: "DELETE",
         cache: "no-store",
@@ -54,7 +57,10 @@ export const createTradeOffer = async (
     throw new Error("Trade API is not configured");
   }
 
-  const url = `${baseUrl}/trades/v2/${encodeURIComponent(String(tradeId))}/offers`;
+  const url = buildApiUrlWithDevToken(
+    baseUrl,
+    `/trades/v2/${encodeURIComponent(String(tradeId))}/offers`,
+  );
   const hasBody = payload !== undefined;
 
   const response = await fetch(url, {
@@ -144,7 +150,10 @@ export const fetchTradeOffers = async (
   }
 
   const response = await fetch(
-    `${baseUrl}/trades/v2/${encodeURIComponent(String(tradeId))}/offers`,
+    buildApiUrlWithDevToken(
+      baseUrl,
+      `/trades/v2/${encodeURIComponent(String(tradeId))}/offers`,
+    ),
     {
       method: "GET",
       cache: "no-store",
@@ -173,12 +182,8 @@ export type TradeOfferV2ResponseStatus =
   | "complete"
   | "cancel";
 
-const tradeOfferV2Endpoint = (
-  baseUrl: string,
-  tradeId: number,
-  offerId: number,
-) =>
-  `${baseUrl}/trades/v2/${encodeURIComponent(String(tradeId))}/offers/${encodeURIComponent(String(offerId))}`;
+const tradeOfferV2Path = (tradeId: number, offerId: number) =>
+  `/trades/v2/${encodeURIComponent(String(tradeId))}/offers/${encodeURIComponent(String(offerId))}`;
 
 export const respondToTradeOfferV2 = async (
   tradeId: number,
@@ -190,7 +195,10 @@ export const respondToTradeOfferV2 = async (
     throw new Error("Trade API is not configured");
   }
 
-  const endpoint = tradeOfferV2Endpoint(baseUrl, tradeId, offerId);
+  const endpoint = buildApiUrlWithDevToken(
+    baseUrl,
+    tradeOfferV2Path(tradeId, offerId),
+  );
 
   const response = await fetch(endpoint, {
     method: "POST",
@@ -240,7 +248,10 @@ export const deleteTradeOfferV2 = async (
     throw new Error("Trade API is not configured");
   }
 
-  const endpoint = tradeOfferV2Endpoint(baseUrl, tradeId, offerId);
+  const endpoint = buildApiUrlWithDevToken(
+    baseUrl,
+    tradeOfferV2Path(tradeId, offerId),
+  );
 
   const response = await fetch(endpoint, {
     method: "DELETE",
@@ -274,3 +285,4 @@ export const deleteTradeOfferV2 = async (
 
   return true;
 };
+import { buildApiUrlWithDevToken } from "@/utils/apiDevToken";

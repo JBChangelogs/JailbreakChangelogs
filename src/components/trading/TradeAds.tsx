@@ -13,6 +13,7 @@ import { deleteTradeAd } from "@/utils/trading";
 import { toast } from "sonner";
 import { TradeAdForm } from "./TradeAdForm";
 import { useAuthContext } from "@/contexts/AuthContext";
+import { buildApiUrlWithDevToken } from "@/utils/apiDevToken";
 import { isCustomTradeItem, tradeItemIdsEqual } from "@/utils/tradeItems";
 import { Checkbox } from "@/components/ui/checkbox";
 import { INVENTORY_API_SOURCE_HEADER, INVENTORY_API_URL } from "@/utils/api";
@@ -580,7 +581,10 @@ export default function TradeAds({
       }
 
       const response = await fetch(
-        `${baseUrl}/trades/v2/recent?page=${encodeURIComponent(String(targetPage))}`,
+        buildApiUrlWithDevToken(
+          baseUrl,
+          `/trades/v2/recent?page=${encodeURIComponent(String(targetPage))}`,
+        ),
         {
           cache: "no-store",
           credentials: "include",
