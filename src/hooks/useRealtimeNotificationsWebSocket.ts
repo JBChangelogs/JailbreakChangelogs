@@ -39,7 +39,6 @@ interface RealtimeDmMessageData {
 }
 
 const PING_INTERVAL_MS = 30000;
-const IDLE_TIMEOUT_MS = 120000;
 const MAX_RECONNECT_DELAY_MS = 15000;
 const SOUND_COOLDOWN_MS = 800;
 const MAX_HANDSHAKE_RETRIES = 3;
@@ -98,10 +97,8 @@ export function useRealtimeNotificationsWebSocket(
   const lastSoundPlayedAtRef = useRef(0);
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const pingIntervalRef = useRef<NodeJS.Timeout | null>(null);
-  const idleTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const reconnectAttemptsRef = useRef(0);
   const enabledRef = useRef(enabled);
-  const isIdleRef = useRef(false);
   const openedForAttemptRef = useRef(false);
   const disableAutoReconnectRef = useRef(false);
   const handshakeRetryAttemptsRef = useRef(0);
@@ -111,14 +108,6 @@ export function useRealtimeNotificationsWebSocket(
   );
   const lastSentLocationRef = useRef<string>("");
 
-  const closeForIdle = useCallback(() => {
-    isIdleRef.current = true;
-    if (wsRef.current) {
-      wsRef.current.close(1000, "idle-timeout");
-      wsRef.current = null;
-    }
-  }, []);
-
   const ensureAudio = useCallback((): HTMLAudioElement => {
     if (!audioRef.current) {
       audioRef.current = new Audio("/audios/notification_ding.mp3");
@@ -126,21 +115,6 @@ export function useRealtimeNotificationsWebSocket(
     }
     return audioRef.current;
   }, []);
-
-  const resetIdleTimer = useCallback(() => {
-    if (!enabledRef.current) return;
-    if (
-      typeof document !== "undefined" &&
-      document.visibilityState !== "visible"
-    ) {
-      return;
-    }
-
-    if (idleTimeoutRef.current) {
-      clearTimeout(idleTimeoutRef.current);
-    }
-    idleTimeoutRef.current = setTimeout(closeForIdle, IDLE_TIMEOUT_MS);
-  }, [closeForIdle]);
 
   useEffect(() => {
     enabledRef.current = isRealtimeNotificationsEnabled;
@@ -172,16 +146,11 @@ export function useRealtimeNotificationsWebSocket(
         clearInterval(pingIntervalRef.current);
         pingIntervalRef.current = null;
       }
-      if (idleTimeoutRef.current) {
-        clearTimeout(idleTimeoutRef.current);
-        idleTimeoutRef.current = null;
-      }
       if (wsRef.current) {
         wsRef.current.close(1000, "auth-disabled");
         wsRef.current = null;
       }
       reconnectAttemptsRef.current = 0;
-      isIdleRef.current = false;
       openedForAttemptRef.current = false;
       disableAutoReconnectRef.current = false;
       handshakeRetryAttemptsRef.current = 0;
@@ -196,15 +165,6 @@ export function useRealtimeNotificationsWebSocket(
       4002: "Invalid authentication token.",
       4004: "Your account has been banned.",
     };
-
-    const activityEvents: Array<keyof DocumentEventMap> = [
-      "mousedown",
-      "mousemove",
-      "keypress",
-      "scroll",
-      "touchstart",
-      "click",
-    ];
 
     const connect = () => {
       if (unmounted || !enabledRef.current) {
@@ -251,9 +211,7 @@ export function useRealtimeNotificationsWebSocket(
           disableAutoReconnectRef.current = false;
           handshakeRetryAttemptsRef.current = 0;
           reconnectOnFocusOnlyRef.current = false;
-          isIdleRef.current = false;
           reconnectAttemptsRef.current = 0;
-          resetIdleTimer();
 
           if (pingIntervalRef.current) {
             clearInterval(pingIntervalRef.current);
@@ -562,10 +520,6 @@ export function useRealtimeNotificationsWebSocket(
             clearInterval(pingIntervalRef.current);
             pingIntervalRef.current = null;
           }
-          if (idleTimeoutRef.current) {
-            clearTimeout(idleTimeoutRef.current);
-            idleTimeoutRef.current = null;
-          }
 
           wsRef.current = null;
           if (shouldReconnectOnFocusOnly(event.code, event.reason || "")) {
@@ -585,10 +539,6 @@ export function useRealtimeNotificationsWebSocket(
               id: `realtime-notifications-error:${event.code}`,
               description: AUTH_WS_ERRORS[event.code],
             });
-            return;
-          }
-
-          if (isIdleRef.current || event.reason === "idle-timeout") {
             return;
           }
 
@@ -637,27 +587,14 @@ export function useRealtimeNotificationsWebSocket(
       }
     };
 
-    const handleUserActivity = () => {
-      if (isIdleRef.current && enabledRef.current) {
-        isIdleRef.current = false;
-        connect();
-      }
-      resetIdleTimer();
-    };
-
     const handleVisibilityChange = () => {
       if (document.visibilityState === "hidden") {
-        if (idleTimeoutRef.current) {
-          clearTimeout(idleTimeoutRef.current);
-          idleTimeoutRef.current = null;
-        }
         return;
       }
       if (reconnectOnFocusOnlyRef.current && enabledRef.current) {
         reconnectOnFocusOnlyRef.current = false;
         connect();
       }
-      handleUserActivity();
     };
 
     const handleWindowFocus = () => {
@@ -673,20 +610,13 @@ export function useRealtimeNotificationsWebSocket(
       connect();
     };
 
-    activityEvents.forEach((eventName) => {
-      document.addEventListener(eventName, handleUserActivity, true);
-    });
     document.addEventListener("visibilitychange", handleVisibilityChange);
     window.addEventListener("focus", handleWindowFocus);
 
     connect();
-    resetIdleTimer();
 
     return () => {
       unmounted = true;
-      activityEvents.forEach((eventName) => {
-        document.removeEventListener(eventName, handleUserActivity, true);
-      });
       document.removeEventListener("visibilitychange", handleVisibilityChange);
       window.removeEventListener("focus", handleWindowFocus);
       if (reconnectTimeoutRef.current) {
@@ -697,10 +627,6 @@ export function useRealtimeNotificationsWebSocket(
         clearInterval(pingIntervalRef.current);
         pingIntervalRef.current = null;
       }
-      if (idleTimeoutRef.current) {
-        clearTimeout(idleTimeoutRef.current);
-        idleTimeoutRef.current = null;
-      }
       if (wsRef.current) {
         wsRef.current.close(1000, "unmount");
         wsRef.current = null;
@@ -708,11 +634,10 @@ export function useRealtimeNotificationsWebSocket(
       audioRef.current = null;
       lastSoundPlayedAtRef.current = 0;
       reconnectAttemptsRef.current = 0;
-      isIdleRef.current = false;
       openedForAttemptRef.current = false;
       disableAutoReconnectRef.current = false;
       handshakeRetryAttemptsRef.current = 0;
       reconnectOnFocusOnlyRef.current = false;
     };
-  }, [isRealtimeNotificationsEnabled, ensureAudio, resetIdleTimer]);
+  }, [isRealtimeNotificationsEnabled, ensureAudio]);
 }
