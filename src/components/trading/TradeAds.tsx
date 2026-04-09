@@ -1008,22 +1008,7 @@ export default function TradeAds({
       (trade) =>
         trade.user && trade.user.roblox_id && trade.user.roblox_username,
     )
-    .sort((a, b) => {
-      const aPremium =
-        typeof a.user?.premiumtype === "number" ? a.user.premiumtype : 0;
-      const bPremium =
-        typeof b.user?.premiumtype === "number" ? b.user.premiumtype : 0;
-      const supporterRank = (premium: number) => {
-        if (premium === 3) return 0;
-        if (premium === 2) return 1;
-        if (premium === 1) return 2;
-        return 3;
-      };
-      const rankDelta = supporterRank(aPremium) - supporterRank(bPremium);
-      if (rankDelta !== 0) return rankDelta;
-      // Within each tier, newest -> oldest
-      return b.created_at - a.created_at;
-    });
+    .sort((a, b) => b.created_at - a.created_at);
 
   const isSystemError = tradeAds.length > 0 && sortedTradeAds.length === 0;
 
