@@ -2636,7 +2636,7 @@ export default function MessagesInbox() {
       <div className="flex h-full min-h-0 flex-col">
         <Breadcrumb containerClassName="px-4 py-4" />
 
-        <div className="bg-secondary-bg border-border-card mx-4 mt-0 grid min-h-0 flex-1 grid-cols-1 overflow-hidden border-t lg:grid-cols-[320px_1fr]">
+        <div className="bg-secondary-bg border-border-card mx-4 mt-0 grid min-h-0 flex-1 grid-cols-1 overflow-hidden rounded-lg border lg:grid-cols-[320px_1fr]">
           <aside
             className={cn(
               "border-border-card flex h-full min-h-0 flex-col border-b lg:border-r lg:border-b-0",
