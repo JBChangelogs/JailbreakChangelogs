@@ -3773,10 +3773,7 @@ export default function MessagesInbox() {
                                         />
                                       )}
                                       <span className="text-primary-text shrink-0 font-semibold">
-                                        @
-                                        {isParentOwn
-                                          ? "You"
-                                          : parentDisplayName}
+                                        @{parentDisplayName}
                                       </span>
                                       <span className="text-secondary-text max-w-[200px] truncate sm:max-w-[400px]">
                                         {formatMessageText(parentMsg.content)}
@@ -3831,9 +3828,7 @@ export default function MessagesInbox() {
                                         prefetch={false}
                                         className="text-primary-text hover:text-link cursor-pointer truncate text-sm font-medium transition-colors sm:text-base"
                                       >
-                                        {isOwnMessage
-                                          ? "You"
-                                          : getDisplayName(selectedUser)}
+                                        {getDisplayName(sender)}
                                       </Link>
                                       {typeof message.createdAt ===
                                         "number" && (

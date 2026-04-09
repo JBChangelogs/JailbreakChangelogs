@@ -56,7 +56,10 @@ import {
   NotificationItem,
 } from "@/utils/api";
 import { formatCompactDateTime } from "@/utils/timestamp";
-import { parseNotificationUrl } from "@/utils/notificationUrl";
+import {
+  getNotificationActionLabel,
+  parseNotificationUrl,
+} from "@/utils/notificationUrl";
 import { UtmGeneratorModal } from "@/components/Modals/UtmGeneratorModal";
 import { useOptimizedRealTimeRelativeDate } from "@/hooks/useSharedTimer";
 import { useToastRuntimeRightOffset } from "@/hooks/useToastRuntimeRightOffset";
@@ -947,6 +950,8 @@ export default function Header() {
                                 const urlInfo = parseNotificationUrl(
                                   notif.link,
                                 );
+                                const actionLabel =
+                                  getNotificationActionLabel(urlInfo);
                                 const shouldHideViewAction =
                                   notif.title.trim().toLowerCase() ===
                                   "login detected";
@@ -981,7 +986,7 @@ export default function Header() {
                                                 setNotificationMenuOpen(false)
                                               }
                                             >
-                                              View
+                                              {actionLabel}
                                             </Link>
                                           </Button>
                                         ) : !urlInfo.isJailbreakChangelogs &&
@@ -999,7 +1004,7 @@ export default function Header() {
                                               target="_blank"
                                               rel="noopener noreferrer"
                                             >
-                                              View
+                                              {actionLabel}
                                             </a>
                                           </Button>
                                         ) : null

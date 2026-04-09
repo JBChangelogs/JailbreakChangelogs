@@ -84,3 +84,22 @@ export function parseNotificationUrl(link: string): NotificationUrlInfo {
     return { isWhitelisted: false };
   }
 }
+
+export function getNotificationActionLabel(
+  urlInfo: NotificationUrlInfo,
+): string {
+  if (!urlInfo.isWhitelisted) {
+    return "View";
+  }
+
+  if (urlInfo.isJailbreakChangelogs) {
+    return urlInfo.relativePath.startsWith("/redeem") ? "Redeem" : "View";
+  }
+
+  try {
+    const url = new URL(urlInfo.validatedExternalHref);
+    return url.pathname === "/redeem" ? "Redeem" : "View";
+  } catch {
+    return "View";
+  }
+}

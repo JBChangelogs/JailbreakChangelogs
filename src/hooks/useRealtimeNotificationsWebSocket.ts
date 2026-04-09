@@ -3,7 +3,10 @@
 import { useCallback, useEffect, useRef } from "react";
 import { toast } from "sonner";
 import { ENABLE_REALTIME_NOTIFICATIONS_WS, WS_URL } from "@/utils/api";
-import { parseNotificationUrl } from "@/utils/notificationUrl";
+import {
+  getNotificationActionLabel,
+  parseNotificationUrl,
+} from "@/utils/notificationUrl";
 import { showDesktopNotification } from "@/utils/desktopNotifications";
 import { buildApiUrlWithDevToken } from "@/utils/apiDevToken";
 
@@ -317,19 +320,22 @@ export function useRealtimeNotificationsWebSocket(
 
                 if (payload.action === "message_received") {
                   const senderId = String(dmData.user_id);
+                  const messagePreview =
+                    toNotificationBody(dmData.content) ??
+                    "Check your messages.";
                   showDesktopNotification({
                     title: "New message",
-                    body:
-                      toNotificationBody(dmData.content) ??
-                      "Check your messages.",
-                    url: `${window.location.origin}/messages/${encodeURIComponent(senderId)}`,
+                    body: messagePreview,
+                    target: {
+                      internalPath: `/messages/${encodeURIComponent(senderId)}`,
+                    },
                     tag: `realtime-dm:${String(dmData.id)}`,
                   });
-                  toast("You have a new message", {
+                  toast("New message", {
                     id: `realtime-dm:${String(dmData.id)}`,
-                    description: "Check your messages.",
+                    description: messagePreview,
                     action: {
-                      label: "View",
+                      label: "Open chat",
                       onClick: () => {
                         window.location.assign(
                           `/messages/${encodeURIComponent(senderId)}`,
@@ -428,7 +434,7 @@ export function useRealtimeNotificationsWebSocket(
               ? undefined
               : link && urlInfo?.isWhitelisted
                 ? {
-                    label: "View",
+                    label: getNotificationActionLabel(urlInfo),
                     onClick: () => {
                       if (!link) return;
                       if (
@@ -456,21 +462,25 @@ export function useRealtimeNotificationsWebSocket(
               action,
             });
 
-            const desktopUrl = (() => {
+            const desktopTarget = (() => {
               if (!link) return undefined;
               if (
                 urlInfo?.isWhitelisted &&
                 urlInfo.isJailbreakChangelogs &&
                 urlInfo.relativePath
               ) {
-                return `${window.location.origin}${urlInfo.relativePath}`;
+                return {
+                  internalPath: urlInfo.relativePath,
+                };
               }
               if (
                 urlInfo?.isWhitelisted &&
                 !urlInfo.isJailbreakChangelogs &&
                 urlInfo.validatedExternalHref
               ) {
-                return urlInfo.validatedExternalHref;
+                return {
+                  validatedExternalHref: urlInfo.validatedExternalHref,
+                };
               }
               return undefined;
             })();
@@ -478,7 +488,7 @@ export function useRealtimeNotificationsWebSocket(
             showDesktopNotification({
               title: notificationTitle,
               body: notificationDescription,
-              url: desktopUrl,
+              target: desktopTarget,
               tag: toastId,
             });
 

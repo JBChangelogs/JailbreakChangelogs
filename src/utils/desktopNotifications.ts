@@ -7,6 +7,14 @@ export type DesktopNotificationPermission =
   | NotificationPermission
   | "unsupported";
 
+export type DesktopNotificationTarget =
+  | {
+      internalPath: string;
+    }
+  | {
+      validatedExternalHref: string;
+    };
+
 export function isDesktopNotificationsSupported(): boolean {
   return typeof Notification !== "undefined";
 }
@@ -53,7 +61,7 @@ export function shouldShowDesktopNotification(options?: {
 export function showDesktopNotification(input: {
   title: string;
   body?: string;
-  url?: string;
+  target?: DesktopNotificationTarget;
   tag?: string;
   allowWhenVisible?: boolean;
 }): void {
@@ -62,20 +70,28 @@ export function showDesktopNotification(input: {
   )
     return;
 
-  const { title, body, url, tag } = input;
+  const { title, body, target, tag } = input;
   try {
     const notification = new Notification(title, {
       body,
       tag,
       icon: "/favicon.ico",
-      data: url ? { url } : undefined,
+      data: target ?? undefined,
     });
 
-    if (url) {
+    if (target) {
       notification.onclick = (event) => {
         event.preventDefault();
         notification.close();
-        window.open(url, "_blank", "noopener,noreferrer");
+        if ("internalPath" in target) {
+          window.location.assign(target.internalPath);
+          return;
+        }
+        window.open(
+          target.validatedExternalHref,
+          "_blank",
+          "noopener,noreferrer",
+        );
       };
     }
   } catch {

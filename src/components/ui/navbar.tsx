@@ -27,7 +27,10 @@ import {
 import { formatCustomDate } from "@/utils/timestamp";
 import { useOptimizedRealTimeRelativeDate } from "@/hooks/useSharedTimer";
 import { toast } from "sonner";
-import { parseNotificationUrl } from "@/utils/notificationUrl";
+import {
+  getNotificationActionLabel,
+  parseNotificationUrl,
+} from "@/utils/notificationUrl";
 
 const AnimatedThemeToggler = dynamic(
   () =>
@@ -670,6 +673,7 @@ export const NavbarModern = ({
                       {displayNotifications.items.map((notif) => {
                         // Check if link domain is whitelisted and extract URL info
                         const urlInfo = parseNotificationUrl(notif.link);
+                        const actionLabel = getNotificationActionLabel(urlInfo);
                         const shouldHideViewAction =
                           notif.title.trim().toLowerCase() === "login detected";
 
@@ -702,7 +706,7 @@ export const NavbarModern = ({
                                       setNotificationMenuOpen(false)
                                     }
                                   >
-                                    View
+                                    {actionLabel}
                                   </Link>
                                 </Button>
                               ) : !urlInfo.isJailbreakChangelogs &&
@@ -718,7 +722,7 @@ export const NavbarModern = ({
                                     target="_blank"
                                     rel="noopener noreferrer"
                                   >
-                                    View
+                                    {actionLabel}
                                   </a>
                                 </Button>
                               ) : null
