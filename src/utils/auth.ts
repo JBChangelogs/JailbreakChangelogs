@@ -240,6 +240,14 @@ async function performAuthValidation(): Promise<boolean> {
     // Clear timeout since request completed
     clearTimeout(timeoutId);
 
+    const contentType = response.headers.get("content-type");
+    if (!response.ok || !contentType?.includes("application/json")) {
+      console.warn(
+        "Auth validation request returned non-JSON response (likely a 404 or dev compilation state). Skipping validation update.",
+      );
+      return true; // Keep previous state when request is aborted or not ready
+    }
+
     const { user } = (await response.json()) as { user: UserData | null };
     if (user) {
       safeSetJSON("user", user);
