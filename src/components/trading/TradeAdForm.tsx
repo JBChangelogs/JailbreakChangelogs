@@ -507,18 +507,6 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
     if (requestingItems.length === 0) {
       errors.push("You must add at least one item to request");
     }
-    // Require all fields
-    if (
-      !userData?.roblox_id ||
-      !userData?.roblox_username ||
-      !userData?.roblox_display_name ||
-      !userData?.roblox_avatar ||
-      !userData?.roblox_join_date
-    ) {
-      toast.error("You must link a Roblox account first to create trade ads.");
-      setLoginModal({ open: true, tab: "roblox" });
-      return;
-    }
 
     if (errors.length > 0) {
       errors.forEach((error) => toast.error(error));
@@ -605,6 +593,17 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
         responseBody = null;
       }
 
+      if (response.status === 401 && isAuthenticated) {
+        toast.error(
+          "You must link a Roblox account first to create trade ads.",
+          {
+            id: creatingToastId ?? undefined,
+          },
+        );
+        setLoginModal({ open: true, tab: "roblox" });
+        return;
+      }
+
       if (
         response.status === 400 &&
         (responseErrorCode === "requesting_limit" ||
@@ -663,6 +662,11 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
         setTradeNote("");
         if (onSuccess) {
           onSuccess(responseBody);
+        }
+
+        // Track successful trade ad creation
+        if (typeof window !== "undefined" && window.umami) {
+          window.umami.track("Trade Offer Posted");
         }
       }
     } catch (err) {
@@ -1198,7 +1202,6 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
               }}
               disabled={submitting}
               className={submitting ? "cursor-progress" : undefined}
-              data-umami-event="Trade Offer Posted"
             >
               {submitting ? "Creating Trade Ad..." : "Create Trade Ad"}
             </UiButton>
