@@ -63,7 +63,17 @@ const TabsList = React.forwardRef<
 
       const left = active.offsetLeft;
       const width = active.offsetWidth;
-      setIndicator({ left, width, visible: width > 0 });
+
+      setIndicator((prev) => {
+        if (
+          prev.left === left &&
+          prev.width === width &&
+          prev.visible === width > 0
+        ) {
+          return prev;
+        }
+        return { left, width, visible: width > 0 };
+      });
     }, []);
 
     React.useLayoutEffect(() => {
@@ -105,7 +115,7 @@ const TabsList = React.forwardRef<
       <TabsPrimitive.List
         ref={setRefs(listRef, ref)}
         className={cn(
-          "text-secondary-text relative inline-flex h-auto max-w-full min-w-max items-center justify-start gap-1 overflow-x-auto bg-transparent p-0 [-webkit-overflow-scrolling:touch]",
+          "text-secondary-text relative inline-flex h-auto max-w-full min-w-max items-center justify-start gap-1 overflow-x-auto overflow-y-hidden bg-transparent p-0 [-webkit-overflow-scrolling:touch]",
           fullWidth && "w-full min-w-0",
           noBottomRadius ? "rounded-t-lg rounded-b-none" : "rounded-lg",
           className,
@@ -124,8 +134,8 @@ const TabsList = React.forwardRef<
             indicator.visible ? "opacity-100" : "opacity-0",
           )}
           style={{
-            width: `${indicator.width}px`,
-            transform: `translateX(${indicator.left}px)`,
+            width: `${Math.max(0, indicator.width - 8)}px`,
+            transform: `translateX(${indicator.left + 4}px)`,
           }}
         />
       </TabsPrimitive.List>
