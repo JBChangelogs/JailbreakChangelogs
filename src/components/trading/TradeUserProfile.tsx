@@ -67,10 +67,7 @@ export default function TradeUserProfile({ user }: TradeUserProfileProps) {
                         : user.username}
                     </Link>
                   </TooltipTrigger>
-                  <TooltipContent
-                    side="top"
-                    className="max-w-sm min-w-[300px] p-0"
-                  >
+                  <TooltipContent side="top" className="max-w-sm min-w-75 p-0">
                     <UserDetailsTooltip user={user as UserData} />
                   </TooltipContent>
                 </Tooltip>

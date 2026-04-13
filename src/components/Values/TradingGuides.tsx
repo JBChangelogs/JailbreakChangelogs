@@ -302,14 +302,14 @@ export default function TradingGuides({
 
             {/* Video positioned at top right */}
             <div className="flex flex-col items-center lg:items-end">
-              <div className="border-border-card bg-tertiary-bg w-full max-w-[400px] overflow-hidden rounded-xl border shadow-lg">
+              <div className="border-border-card bg-tertiary-bg w-full max-w-100 overflow-hidden rounded-xl border shadow-lg">
                 <YouTubeEmbed
                   videoid="Yn38fUrV7zo"
                   height={225}
                   params="controls=0&rel=0"
                 />
               </div>
-              <p className="text-secondary-text mt-2 w-full max-w-[400px] text-center text-[10px] italic lg:text-right">
+              <p className="text-secondary-text mt-2 w-full max-w-100 text-center text-[10px] italic lg:text-right">
                 Learn how to access the Trading Hub
               </p>
             </div>
@@ -323,7 +323,7 @@ export default function TradingGuides({
               <h3 className="text-primary-text mb-4 text-xl font-semibold">
                 Trend Levels Guide
               </h3>
-              <div className="border-border-card bg-tertiary-bg mb-4 max-h-[400px] overflow-y-auto rounded-lg border p-4 sm:max-h-none sm:border-0 sm:bg-transparent sm:p-0">
+              <div className="border-border-card bg-tertiary-bg mb-4 max-h-100 overflow-y-auto rounded-lg border p-4 sm:max-h-none sm:border-0 sm:bg-transparent sm:p-0">
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                   {trendOrder.map((trend) => (
                     <button
@@ -358,7 +358,7 @@ export default function TradingGuides({
               <h3 className="text-primary-text mb-4 text-xl font-semibold">
                 Common Trading Terms
               </h3>
-              <div className="border-border-card bg-tertiary-bg max-h-[300px] overflow-y-auto rounded-lg border p-4">
+              <div className="border-border-card bg-tertiary-bg max-h-75 overflow-y-auto rounded-lg border p-4">
                 <div className="grid grid-cols-1 gap-x-8 gap-y-4 md:grid-cols-2">
                   {tradingTerms.map((item) => (
                     <div

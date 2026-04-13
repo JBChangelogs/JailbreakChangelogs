@@ -97,7 +97,7 @@ export default function OGItemCard({
 
   return (
     <div
-      className="border-border-card bg-tertiary-bg text-primary-text hover:shadow-card-shadow relative flex min-h-[400px] cursor-pointer flex-col rounded-lg border p-3 transition-all duration-200"
+      className="border-border-card bg-tertiary-bg text-primary-text hover:shadow-card-shadow relative flex min-h-100 cursor-pointer flex-col rounded-lg border p-3 transition-all duration-200"
       onClick={() => onCardClick(item)}
     >
       {/* Duplicate Indicator */}
@@ -315,7 +315,7 @@ export default function OGItemCard({
       </div>
 
       {/* Season and Level badges - always show container for consistent layout */}
-      <div className="border-secondary-text mt-3 flex min-h-[40px] justify-center gap-2 border-t pt-3">
+      <div className="border-secondary-text mt-3 flex min-h-10 justify-center gap-2 border-t pt-3">
         {(typeof displayedSeason === "number" || hasDisplayedLevel) && (
           <Tooltip>
             <TooltipTrigger asChild>

@@ -36,7 +36,7 @@ export default function FeatureMaintenance({
             height={140}
             fetchPriority="high"
             draggable={false}
-            className="h-[140px] w-auto drop-shadow-[0_2px_12px_rgba(0,0,0,0.5)] filter"
+            className="h-35 w-auto drop-shadow-[0_2px_12px_rgba(0,0,0,0.5)] filter"
           />
 
           <Icon

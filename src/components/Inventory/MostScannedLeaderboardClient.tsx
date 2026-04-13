@@ -195,7 +195,7 @@ export default function MostScannedLeaderboardClient({
       <div className="border-border-card bg-secondary-bg shadow-card-shadow rounded-lg border p-4">
         <div
           ref={parentRef}
-          className="scrollbar-thin scrollbar-track-transparent scrollbar-thumb-border-primary hover:scrollbar-thumb-border-focus max-h-[32rem] overflow-y-auto pr-2"
+          className="scrollbar-thin scrollbar-track-transparent scrollbar-thumb-border-primary hover:scrollbar-thumb-border-focus max-h-128 overflow-y-auto pr-2"
           style={{
             scrollbarWidth: "thin",
             scrollbarColor: "var(--color-border-primary) transparent",

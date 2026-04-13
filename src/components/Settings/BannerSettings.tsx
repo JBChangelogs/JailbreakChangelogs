@@ -405,7 +405,7 @@ export const BannerSettings = ({
               size="md"
               asChild
               className={cn(
-                "flex-1 sm:min-w-[120px] sm:flex-none",
+                "flex-1 sm:min-w-30 sm:flex-none",
                 (!userData?.premiumtype ||
                   userData.premiumtype < 2 ||
                   isUploading) &&
@@ -457,7 +457,7 @@ export const BannerSettings = ({
                 isUploading
               }
               className={cn(
-                "flex-1 sm:min-w-[100px] sm:flex-none",
+                "flex-1 sm:min-w-25 sm:flex-none",
                 (!userData?.premiumtype || userData.premiumtype < 2) &&
                   "opacity-50",
               )}

@@ -273,18 +273,18 @@ export function ScanTradeFromImage({ onScanSuccess }: ScanTradeFromImageProps) {
         <h3 className="text-primary-text mb-2 text-lg font-semibold">
           Scan a trade screenshot
         </h3>
-        <p className="text-secondary-text mx-auto mb-4 max-w-[560px] text-sm">
+        <p className="text-secondary-text mx-auto mb-4 max-w-140 text-sm">
           {helpText}
         </p>
-        <p className="text-secondary-text mx-auto mb-4 max-w-[560px] text-xs">
+        <p className="text-secondary-text mx-auto mb-4 max-w-140 text-xs">
           Tip: Click to upload, or paste an image (Ctrl+V / ⌘V).
         </p>
-        <p className="text-secondary-text/80 mx-auto mb-4 max-w-[560px] text-xs">
+        <p className="text-secondary-text/80 mx-auto mb-4 max-w-140 text-xs">
           {acceptedTypesText}
         </p>
 
         {lastErrorMessage && (
-          <p className="mx-auto mb-4 max-w-[560px] text-xs text-red-400">
+          <p className="mx-auto mb-4 max-w-140 text-xs text-red-400">
             {lastErrorMessage}
           </p>
         )}

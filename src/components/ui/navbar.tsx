@@ -117,7 +117,7 @@ export const MenuItem = ({
         >
           {active === item && (
             <div
-              className="absolute left-1/2 z-1300 mt-0 min-w-[260px] -translate-x-1/2 rounded-2xl"
+              className="absolute left-1/2 z-1300 mt-0 min-w-65 -translate-x-1/2 rounded-2xl"
               style={{ top: "100%" }}
             >
               <motion.div
@@ -218,7 +218,7 @@ const UnreadNotificationBadge = ({ count }: { count: number }) => {
   const displayCount = count > 99 ? "99+" : count.toString();
 
   return (
-    <span className="absolute -top-1 -right-1 flex h-5 min-w-[20px] items-center justify-center rounded-full bg-red-500 px-1.5 py-0.5 text-xs font-semibold text-white">
+    <span className="absolute -top-1 -right-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1.5 py-0.5 text-xs font-semibold text-white">
       {displayCount}
     </span>
   );
@@ -654,7 +654,7 @@ export const NavbarModern = ({
               {/* Content */}
               <div className="max-h-96 overflow-y-auto">
                 {isLoadingNotifications ? (
-                  <div className="flex min-h-[200px] flex-col items-center justify-center px-4 py-8">
+                  <div className="flex min-h-50 flex-col items-center justify-center px-4 py-8">
                     <div className="loading loading-spinner loading-md text-primary-text"></div>
                     <p className="text-secondary-text mt-3 text-center text-sm">
                       Loading notifications...
@@ -758,7 +758,7 @@ export const NavbarModern = ({
                     )}
                   </>
                 ) : (
-                  <div className="flex min-h-[200px] flex-col items-center justify-center px-4 py-8">
+                  <div className="flex min-h-50 flex-col items-center justify-center px-4 py-8">
                     <Icon
                       icon="mingcute:notification-line"
                       className="text-secondary-text mb-3 h-12 w-12"

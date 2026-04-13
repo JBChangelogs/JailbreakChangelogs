@@ -174,16 +174,16 @@ export default function NitroLeftGutterAd({
 
   return (
     <>
-      <div className="fixed top-1/2 left-[10px] z-[2147483644] hidden -translate-y-1/2 [@media(min-width:1900px)]:block [@media(min-width:2150px)]:hidden">
+      <div className="left-2.5z-2147483644 fixed top-1/2 hidden -translate-y-1/2 [@media(min-width:1900px)]:block [@media(min-width:2150px)]:hidden">
         <div
           id={adIdSmall}
-          className="relative min-h-[600px] w-[160px] text-center text-[0px]"
+          className="relative min-h-150 w-40 text-center text-[0px]"
         />
       </div>
-      <div className="fixed top-1/2 left-[10px] z-[2147483644] hidden -translate-y-1/2 [@media(min-width:2150px)]:block">
+      <div className="fixed top-1/2 left-2.5 z-2147483644 hidden -translate-y-1/2 [@media(min-width:2150px)]:block">
         <div
           id={adIdWide}
-          className="relative min-h-[600px] w-[300px] text-center text-[0px]"
+          className="relative min-h-150 w-75 text-center text-[0px]"
         />
       </div>
     </>

@@ -497,7 +497,7 @@ function OfferItems({
               {visible.map((item, idx) => (
                 <li
                   key={`${item.name}-${idx}`}
-                  className="text-primary-text/80 text-xs leading-snug break-words"
+                  className="text-primary-text/80 text-xs leading-snug wrap-break-word"
                 >
                   {item.amount > 1 ? (
                     <>
@@ -562,7 +562,7 @@ function OfferItems({
                 return (
                   <span
                     key={`${item.name}-${idx}`}
-                    className="text-primary-text border-border-card bg-tertiary-bg/40 inline-flex h-6 max-w-[14rem] min-w-0 items-center gap-1.5 rounded-lg border px-2.5 text-[11px] leading-none font-medium shadow-2xl backdrop-blur-xl"
+                    className="text-primary-text border-border-card bg-tertiary-bg/40 inline-flex h-6 max-w-56 min-w-0 items-center gap-1.5 rounded-lg border px-2.5 text-[11px] leading-none font-medium shadow-2xl backdrop-blur-xl"
                     title={
                       item.amount > 1
                         ? `${item.name} x${item.amount}`
@@ -3516,7 +3516,7 @@ export default function MessagesInbox() {
                                   />
                                 )}
                               </ChatEventTitle>
-                              <ChatEventContent className="text-primary-text break-words whitespace-pre-wrap">
+                              <ChatEventContent className="text-primary-text wrap-break-word whitespace-pre-wrap">
                                 {formatMessageText(systemContent)}
                               </ChatEventContent>
                             </ChatEventBody>
@@ -3803,7 +3803,7 @@ export default function MessagesInbox() {
                                       <span className="text-primary-text shrink-0 font-semibold">
                                         @{parentDisplayName}
                                       </span>
-                                      <span className="text-secondary-text max-w-[200px] truncate sm:max-w-[400px]">
+                                      <span className="text-secondary-text max-w-50 truncate sm:max-w-100">
                                         {formatMessageText(parentMsg.content)}
                                       </span>
                                     </div>
@@ -3967,7 +3967,7 @@ export default function MessagesInbox() {
                                     <div className="min-w-0 flex-1">
                                       <ChatEventContent
                                         className={cn(
-                                          "break-words whitespace-pre-wrap",
+                                          "wrap-break-word whitespace-pre-wrap",
                                           message.status === "pending"
                                             ? "text-secondary-text/70"
                                             : message.status === "failed"

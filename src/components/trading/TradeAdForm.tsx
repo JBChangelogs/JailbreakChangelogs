@@ -808,7 +808,7 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
 
           {/* Clear Confirmation Modal - Multi-option like calculator */}
           {showClearConfirmModal && (
-            <div className="fixed inset-0 z-[3000]">
+            <div className="fixed inset-0 z-3000">
               <div
                 className="fixed inset-0 bg-black/50 backdrop-blur-sm"
                 aria-hidden="true"

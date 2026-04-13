@@ -34,7 +34,7 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   confirmVariant = "destructive",
   confirmDisabled = false,
   closeOnConfirm = true,
-  zIndexClassName = "z-[3000]",
+  zIndexClassName = "z-3000",
   children,
 }) => {
   return (

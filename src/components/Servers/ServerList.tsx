@@ -581,12 +581,12 @@ const ServerList: React.FC<{
       <div className="mb-4 px-4 lg:px-0">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-start">
           <div className="flex w-full items-center gap-2 sm:w-auto">
-            <div className="min-w-0 flex-1 sm:min-w-[190px] sm:flex-none md:min-w-[210px]">
+            <div className="min-w-0 flex-1 sm:min-w-47.5 sm:flex-none md:min-w-52.5">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <button
                     type="button"
-                    className="border-border-card bg-secondary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus flex h-[40px] w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all focus:ring-1 focus:outline-none"
+                    className="border-border-card bg-secondary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus flex h-10 w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all focus:ring-1 focus:outline-none"
                     aria-label="Select sort option"
                   >
                     <span className="truncate">{sortLabel}</span>
@@ -598,7 +598,7 @@ const ServerList: React.FC<{
                 </DropdownMenuTrigger>
                 <DropdownMenuContent
                   align="end"
-                  className="border-border-card bg-secondary-bg text-primary-text scrollbar-thin max-h-[240px] w-[var(--radix-popper-anchor-width)] min-w-[var(--radix-popper-anchor-width)] overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
+                  className="border-border-card bg-secondary-bg text-primary-text scrollbar-thin max-h-60 w-(--radix-popper-anchor-width) min-w-(--radix-popper-anchor-width) overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
                 >
                   <DropdownMenuRadioGroup
                     value={sortOption}
@@ -720,7 +720,7 @@ const ServerList: React.FC<{
                       <DropdownMenuContent
                         align="end"
                         onCloseAutoFocus={(event) => event.preventDefault()}
-                        className="border-border-card bg-secondary-bg text-primary-text min-w-[180px] rounded-xl border p-0"
+                        className="border-border-card bg-secondary-bg text-primary-text min-w-45 rounded-xl border p-0"
                       >
                         <DropdownMenuItem
                           className="w-full cursor-pointer rounded-none px-4 py-2"
@@ -791,7 +791,7 @@ const ServerList: React.FC<{
                           </TooltipTrigger>
                           <TooltipContent
                             side="top"
-                            className="bg-secondary-bg text-primary-text border-none shadow-[var(--color-card-shadow)]"
+                            className="bg-secondary-bg text-primary-text border-none shadow-(--color-card-shadow)"
                           >
                             <p>Supporter Type {supporterTier}</p>
                           </TooltipContent>
@@ -907,7 +907,7 @@ const ServerList: React.FC<{
         <Dialog
           open={deleteModalOpen}
           onClose={() => {}}
-          className="relative z-[3000]"
+          className="relative z-3000"
         >
           <div
             className="fixed inset-0 bg-black/50 backdrop-blur-sm"

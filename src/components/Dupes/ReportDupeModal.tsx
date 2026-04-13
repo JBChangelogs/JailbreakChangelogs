@@ -133,7 +133,7 @@ const ReportDupeModal: React.FC<ReportDupeModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center">
+    <div className="fixed inset-0 z-60 flex items-center justify-center">
       <div className="absolute inset-0 bg-black/75" onClick={onClose} />
       <div className="relative mx-4 w-full max-w-md rounded-lg shadow-xl">
         <div className="flex items-center justify-between border-b p-4">

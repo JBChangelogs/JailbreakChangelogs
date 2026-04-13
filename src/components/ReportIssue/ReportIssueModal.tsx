@@ -85,7 +85,7 @@ export default function ReportIssueModal({
       />
 
       <div className="fixed inset-0 flex items-center justify-center p-4">
-        <DialogPanel className="modal-container border-button-info bg-secondary-bg w-full max-w-[480px] min-w-[320px] rounded-lg border shadow-lg">
+        <DialogPanel className="modal-container border-button-info bg-secondary-bg w-full max-w-120 min-w-[320px] rounded-lg border shadow-lg">
           <div className="modal-header text-primary-text px-6 py-4 text-xl font-semibold">
             Report an Issue
           </div>
@@ -127,7 +127,7 @@ export default function ReportIssueModal({
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   rows={4}
-                  className="border-border-card bg-form-input text-primary-text hover:border-border-focus focus:border-button-info min-h-[120px] w-full resize-y rounded border p-3 text-sm focus:outline-none"
+                  className="border-border-card bg-form-input text-primary-text hover:border-border-focus focus:border-button-info min-h-30 w-full resize-y rounded border p-3 text-sm focus:outline-none"
                   placeholder="Detailed description of the issue"
                   required
                 />
@@ -151,7 +151,7 @@ export default function ReportIssueModal({
               <button
                 type="submit"
                 disabled={!title.trim() || !description.trim() || isSubmitting}
-                className="bg-button-info text-form-button-text min-w-[100px] cursor-pointer rounded border-none px-4 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-50"
+                className="bg-button-info text-form-button-text min-w-25 cursor-pointer rounded border-none px-4 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {isSubmitting ? "Submitting..." : "Submit Issue"}
               </button>

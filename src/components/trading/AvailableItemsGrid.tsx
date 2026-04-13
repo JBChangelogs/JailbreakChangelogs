@@ -320,7 +320,7 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
                   placeholder="Search items by name or type..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="border-border-card bg-primary-bg text-primary-text placeholder-secondary-text hover:bg-primary-bg focus:border-button-info min-h-[56px] w-full rounded-lg border px-4 py-3 pr-10 pl-10 transition-all duration-300 focus:outline-none"
+                  className="border-border-card bg-primary-bg text-primary-text placeholder-secondary-text hover:bg-primary-bg focus:border-button-info min-h-14 w-full rounded-lg border px-4 py-3 pr-10 pl-10 transition-all duration-300 focus:outline-none"
                 />
                 {searchQuery && (
                   <button
@@ -343,7 +343,7 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
                 <DropdownMenuTrigger asChild>
                   <button
                     type="button"
-                    className="border-border-card bg-primary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 flex h-[56px] w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all duration-300 focus:ring-1 focus:outline-none"
+                    className="border-border-card bg-primary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 flex h-14 w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all duration-300 focus:ring-1 focus:outline-none"
                     aria-label="Filter by category"
                   >
                     <span className="truncate">{filterLabel}</span>
@@ -356,7 +356,7 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
                 </DropdownMenuTrigger>
                 <DropdownMenuContent
                   align="start"
-                  className="border-border-card bg-primary-bg text-primary-text scrollbar-thin max-h-[320px] w-[var(--radix-popper-anchor-width)] min-w-[var(--radix-popper-anchor-width)] overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
+                  className="border-border-card bg-primary-bg text-primary-text scrollbar-thin max-h-80 w-(--radix-popper-anchor-width) min-w-(--radix-popper-anchor-width) overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
                 >
                   <DropdownMenuRadioGroup
                     value={filterSort}
@@ -393,7 +393,7 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
                 <DropdownMenuTrigger asChild>
                   <button
                     type="button"
-                    className="border-border-card bg-primary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 flex h-[56px] w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all duration-300 focus:ring-1 focus:outline-none"
+                    className="border-border-card bg-primary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 flex h-14 w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all duration-300 focus:ring-1 focus:outline-none"
                     aria-label="Sort items"
                   >
                     <span className="truncate">{sortLabel}</span>
@@ -406,7 +406,7 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
                 </DropdownMenuTrigger>
                 <DropdownMenuContent
                   align="start"
-                  className="border-border-card bg-primary-bg text-primary-text scrollbar-thin max-h-[320px] w-[var(--radix-popper-anchor-width)] min-w-[var(--radix-popper-anchor-width)] overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
+                  className="border-border-card bg-primary-bg text-primary-text scrollbar-thin max-h-80 w-(--radix-popper-anchor-width) min-w-(--radix-popper-anchor-width) overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
                 >
                   <DropdownMenuRadioGroup
                     value={valueSort}

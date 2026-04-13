@@ -1519,7 +1519,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                               @{parentUsername || "Unknown"}
                             </span>
                             <span
-                              className="text-secondary-text max-w-[200px] truncate sm:max-w-[400px]"
+                              className="text-secondary-text max-w-50 truncate sm:max-w-100"
                               dangerouslySetInnerHTML={{
                                 __html: sanitizeHTML(
                                   stripHTML(parentComment.content),
@@ -1634,13 +1634,13 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                                             <Link
                                               href={`/users/${comment.user_id}`}
                                               prefetch={false}
-                                              className="text-primary-text hover:text-link block max-w-[120px] truncate text-sm font-semibold transition-colors duration-200 sm:max-w-[200px] sm:text-base"
+                                              className="text-primary-text hover:text-link block max-w-30 truncate text-sm font-semibold transition-colors duration-200 sm:max-w-50 sm:text-base"
                                             >
                                               {userData[comment.user_id]
                                                 ?.username || comment.author}
                                             </Link>
                                           </TooltipTrigger>
-                                          <TooltipContent className="max-w-sm min-w-[300px] p-0">
+                                          <TooltipContent className="max-w-sm min-w-75 p-0">
                                             {userData[comment.user_id] && (
                                               <UserDetailsTooltip
                                                 user={userData[comment.user_id]}

@@ -99,8 +99,8 @@ export const TradeAdDetailsSkeleton: React.FC = () => {
 
         <div className="mt-4 space-y-4">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-            <SkeletonBlock className="h-[56px] flex-1 rounded-lg" />
-            <SkeletonBlock className="h-[56px] w-full rounded-lg sm:w-56" />
+            <SkeletonBlock className="h-14 flex-1 rounded-lg" />
+            <SkeletonBlock className="h-14 w-full rounded-lg sm:w-56" />
           </div>
           <div className="border-border-card bg-tertiary-bg rounded-lg border p-6">
             <SkeletonBlock className="h-4 w-28" />

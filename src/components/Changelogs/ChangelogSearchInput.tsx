@@ -42,7 +42,7 @@ const ChangelogSearchInput: React.FC<ChangelogSearchInputProps> = ({
           setTimeout(() => onSearchFocus(false), 200);
         }}
         placeholder={placeholder}
-        className="border-border-card bg-secondary-bg text-secondary-text placeholder-secondary-text hover:border-border-focus focus:border-button-info h-[56px] w-full rounded-lg border px-4 pr-10 pl-10 focus:outline-none"
+        className="border-border-card bg-secondary-bg text-secondary-text placeholder-secondary-text hover:border-border-focus focus:border-button-info h-14 w-full rounded-lg border px-4 pr-10 pl-10 focus:outline-none"
       />
       <div className="absolute top-1/2 left-3 -translate-y-1/2">
         <Icon
@@ -125,7 +125,7 @@ const ChangelogSearchInput: React.FC<ChangelogSearchInputProps> = ({
       {/* Search Results */}
       {searchResults.length > 0 ? (
         <div className="border-tertiary-bg bg-secondary-bg absolute z-10 mt-1 w-full rounded-lg border shadow-lg">
-          <div className="max-h-[400px] overflow-y-auto">
+          <div className="max-h-100 overflow-y-auto">
             {searchResults.map((item) => (
               <button
                 key={item.id}

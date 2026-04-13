@@ -417,10 +417,7 @@ export default function UserSearch() {
                     </div>
                   </Link>
                 </TooltipTrigger>
-                <TooltipContent
-                  side="top"
-                  className="max-w-sm min-w-[300px] p-0"
-                >
+                <TooltipContent side="top" className="max-w-sm min-w-75 p-0">
                   <UserDetailsTooltip
                     user={user}
                     currentUserId={currentUserId}

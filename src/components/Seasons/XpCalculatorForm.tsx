@@ -136,7 +136,7 @@ export default function XpCalculatorForm({
             <DropdownMenuTrigger asChild>
               <button
                 type="button"
-                className="border-border-card bg-primary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus flex h-[56px] w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all duration-300 focus:ring-1 focus:outline-none"
+                className="border-border-card bg-primary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus flex h-14 w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all duration-300 focus:ring-1 focus:outline-none"
                 aria-label="Select your level"
               >
                 <span className="truncate">{currentLevelLabel}</span>
@@ -149,7 +149,7 @@ export default function XpCalculatorForm({
             </DropdownMenuTrigger>
             <DropdownMenuContent
               align="start"
-              className="border-border-card bg-primary-bg text-primary-text scrollbar-thin max-h-[280px] w-[var(--radix-popper-anchor-width)] min-w-[var(--radix-popper-anchor-width)] overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
+              className="border-border-card bg-primary-bg text-primary-text scrollbar-thin max-h-70 w-(--radix-popper-anchor-width) min-w-(--radix-popper-anchor-width) overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
             >
               <DropdownMenuRadioGroup
                 value={currentLevel ? currentLevel.toString() : ""}
@@ -188,7 +188,7 @@ export default function XpCalculatorForm({
             max={maxXpForCurrentLevel}
             value={currentXp}
             onChange={(e) => onXpChange(e.target.value)}
-            className="border-button-info bg-form-input text-primary-text h-[56px] min-h-[56px] w-full rounded-lg border px-3 py-2 focus:outline-none"
+            className="border-button-info bg-form-input text-primary-text h-14 min-h-14 w-full rounded-lg border px-3 py-2 focus:outline-none"
             placeholder={`0-${maxXpForCurrentLevel}`}
           />
           <div className="text-secondary-text mt-1 text-xs">

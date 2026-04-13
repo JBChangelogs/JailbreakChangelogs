@@ -73,7 +73,7 @@ const UnreadNotificationBadge = ({ count }: { count: number }) => {
   return (
     <span
       className={`absolute top-0 right-0 z-10 flex translate-x-1/4 -translate-y-1/2 items-center justify-center rounded-full bg-red-500 text-[10px] font-semibold text-white ${
-        isDoubleDigit || count > 99 ? "h-4 min-w-[16px] px-1" : "h-4 w-4"
+        isDoubleDigit || count > 99 ? "h-4 min-w-4 px-1" : "h-4 w-4"
       }`}
     >
       {displayCount}
@@ -929,7 +929,7 @@ export default function Header() {
                       {/* Content */}
                       <div className="max-h-96 overflow-y-auto">
                         {isLoadingNotifications ? (
-                          <div className="flex min-h-[200px] flex-col items-center justify-center px-4 py-8">
+                          <div className="flex min-h-50 flex-col items-center justify-center px-4 py-8">
                             <div className="loading loading-spinner loading-md text-primary-text"></div>
                             <p className="text-secondary-text mt-3 text-center text-sm">
                               Loading notifications...
@@ -1040,7 +1040,7 @@ export default function Header() {
                             )}
                           </>
                         ) : (
-                          <div className="flex min-h-[200px] flex-col items-center justify-center px-4 py-8">
+                          <div className="flex min-h-50 flex-col items-center justify-center px-4 py-8">
                             <Icon
                               icon="mingcute:notification-line"
                               className="text-secondary-text mb-3 h-12 w-12"

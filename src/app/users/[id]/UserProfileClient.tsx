@@ -845,7 +845,7 @@ export default function UserProfileClient({
                 <div className="flex flex-col justify-between md:flex-row">
                   <div className="w-full text-center md:w-auto md:text-left">
                     <div className="flex max-w-full flex-col items-center justify-center gap-2 md:flex-row md:flex-wrap md:justify-start">
-                      <h1 className="text-primary-text mb-1 max-w-[280px] truncate text-2xl font-bold md:text-3xl lg:max-w-none">
+                      <h1 className="text-primary-text mb-1 max-w-70 truncate text-2xl font-bold md:text-3xl lg:max-w-none">
                         {user.global_name && user.global_name !== "None"
                           ? user.global_name
                           : user.username}
@@ -860,7 +860,7 @@ export default function UserProfileClient({
                         />
                       </div>
                     </div>
-                    <p className="text-secondary-text mx-auto mb-1 max-w-[280px] truncate text-lg md:mx-0 lg:max-w-none">
+                    <p className="text-secondary-text mx-auto mb-1 max-w-70 truncate text-lg md:mx-0 lg:max-w-none">
                       @{user.username}
                     </p>
 

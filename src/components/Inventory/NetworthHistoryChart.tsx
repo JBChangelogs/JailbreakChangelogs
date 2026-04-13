@@ -337,10 +337,10 @@ const NetworthHistoryChart = ({
             onValueChange={(value) => setChartType(value as ChartType)}
           >
             <TabsList className="h-10 w-full" fullWidth>
-              <TabsTrigger value="area" className="h-[34px] px-3" fullWidth>
+              <TabsTrigger value="area" className="h-8.5 px-3" fullWidth>
                 Line
               </TabsTrigger>
-              <TabsTrigger value="bar" className="h-[34px] px-3" fullWidth>
+              <TabsTrigger value="bar" className="h-8.5 px-3" fullWidth>
                 Bar
               </TabsTrigger>
             </TabsList>
@@ -362,7 +362,7 @@ const NetworthHistoryChart = ({
             </DropdownMenuTrigger>
             <DropdownMenuContent
               align="end"
-              className="w-[var(--radix-dropdown-menu-trigger-width)]"
+              className="w-(--radix-dropdown-menu-trigger-width)"
             >
               <DropdownMenuRadioGroup
                 value={effectiveDateRange}
@@ -378,7 +378,7 @@ const NetworthHistoryChart = ({
           </DropdownMenu>
         </div>
 
-        <div className="h-[350px]">
+        <div className="h-87.5">
           <ChartContainer
             config={networthChartConfig}
             className="h-full w-full"
@@ -441,12 +441,12 @@ const NetworthHistoryChart = ({
                   cursor={false}
                   content={
                     <ChartTooltipContent
-                      className="min-w-[12rem] px-3 py-2"
+                      className="min-w-48 px-3 py-2"
                       formatter={(value) => (
                         <div className="flex w-full items-center justify-between gap-3">
                           <span className="text-secondary-text flex items-center gap-2">
                             <span
-                              className="h-2.5 w-2.5 shrink-0 rounded-[2px]"
+                              className="h-2.5 w-2.5 shrink-0 rounded-xs"
                               style={{
                                 backgroundColor: "var(--color-networth)",
                               }}
@@ -543,12 +543,12 @@ const NetworthHistoryChart = ({
                   }}
                   content={
                     <ChartTooltipContent
-                      className="min-w-[12rem] px-3 py-2"
+                      className="min-w-48 px-3 py-2"
                       formatter={(value) => (
                         <div className="flex w-full items-center justify-between gap-3">
                           <span className="text-secondary-text flex items-center gap-2">
                             <span
-                              className="h-2.5 w-2.5 shrink-0 rounded-[2px]"
+                              className="h-2.5 w-2.5 shrink-0 rounded-xs"
                               style={{
                                 backgroundColor: "var(--color-networth)",
                               }}

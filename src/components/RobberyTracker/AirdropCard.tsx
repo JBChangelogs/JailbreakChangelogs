@@ -304,7 +304,7 @@ export default function AirdropCard({ airdrop }: AirdropCardProps) {
       <Dialog
         open={isMapModalOpen}
         onClose={() => setIsMapModalOpen(false)}
-        className="relative z-[3000]"
+        className="relative z-3000"
       >
         <div
           className="fixed inset-0 bg-black/50 backdrop-blur-sm"

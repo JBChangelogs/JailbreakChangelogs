@@ -61,12 +61,12 @@ const ReportCommentModal: React.FC<ReportCommentModalProps> = ({
         />
 
         <div className="fixed inset-0 flex items-center justify-center p-4">
-          <DialogPanel className="modal-container border-button-info bg-secondary-bg w-full max-w-[480px] min-w-[320px] rounded-lg border shadow-lg">
+          <DialogPanel className="modal-container border-button-info bg-secondary-bg w-full max-w-120 min-w-[320px] rounded-lg border shadow-lg">
             <div className="modal-header text-primary-text px-6 py-4 text-xl font-semibold">
               Report Comment #{commentId} by {commentOwner}
             </div>
             <div className="modal-content p-6">
-              <div className="border-button-info bg-secondary-bg mb-4 max-h-[200px] cursor-not-allowed overflow-y-auto rounded border p-3">
+              <div className="border-button-info bg-secondary-bg mb-4 max-h-50 cursor-not-allowed overflow-y-auto rounded border p-3">
                 <div className="text-secondary-text mb-1 text-xs tracking-wider uppercase">
                   Comment Content
                 </div>
@@ -79,7 +79,7 @@ const ReportCommentModal: React.FC<ReportCommentModalProps> = ({
                   value={reportReason}
                   onChange={handleReasonChange}
                   placeholder="Please provide a reason for reporting this comment..."
-                  className="border-border-card bg-form-input text-primary-text hover:border-border-focus focus:border-button-info min-h-[120px] w-full resize-y rounded border p-3 text-sm focus:outline-none"
+                  className="border-border-card bg-form-input text-primary-text hover:border-border-focus focus:border-button-info min-h-30 w-full resize-y rounded border p-3 text-sm focus:outline-none"
                 />
                 <div
                   className={`absolute right-2 bottom-2 text-xs ${reportReason.length >= MAX_REASON_LENGTH ? "text-button-danger" : "text-secondary-text"}`}

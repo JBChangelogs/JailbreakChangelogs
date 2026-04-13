@@ -97,7 +97,7 @@ export const CalculatorItemGrid: React.FC<CalculatorItemGridProps> = ({
   return (
     <div className="rounded-lg p-4">
       <div
-        className="max-h-[480px] overflow-y-auto pr-1"
+        className="max-h-120 overflow-y-auto pr-1"
         aria-label="Selected items list"
       >
         <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-4">

@@ -106,7 +106,7 @@ const AdBlockPrompt = () => {
       onClick={handleBackdropClick}
       className="bg-overlay-bg fixed inset-0 z-2147483647 flex items-center justify-center p-4 backdrop-blur-sm"
     >
-      <div className="bg-secondary-bg border-button-info relative mx-auto w-full max-w-[600px] overflow-hidden rounded-xl border shadow-xl">
+      <div className="bg-secondary-bg border-button-info relative mx-auto w-full max-w-150 overflow-hidden rounded-xl border shadow-xl">
         {/* Close button */}
         <button
           onClick={handleModalDismiss}

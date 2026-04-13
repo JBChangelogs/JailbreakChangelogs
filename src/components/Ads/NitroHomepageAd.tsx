@@ -148,14 +148,14 @@ export default function NitroHomepageAd({ className }: Props) {
       <div
         id={SLOT_ID_MOBILE}
         ref={containerRefMobile}
-        className={`block md:hidden ${!isSupporter ? "min-h-[280px]" : ""}`}
+        className={`block md:hidden ${!isSupporter ? "min-h-70" : ""}`}
       />
 
       {/* Desktop ad container with min-height to prevent CLS (only for non-supporters) */}
       <div
         id={SLOT_ID_DESKTOP}
         ref={containerRefDesktop}
-        className={`hidden lg:block ${!isSupporter ? "min-h-[250px]" : ""}`}
+        className={`hidden lg:block ${!isSupporter ? "min-h-62.5" : ""}`}
       />
     </div>
   );

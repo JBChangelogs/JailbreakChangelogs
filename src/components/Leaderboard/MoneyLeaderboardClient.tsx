@@ -169,7 +169,7 @@ export default function MoneyLeaderboardClient({
           <div className="border-border-card bg-secondary-bg shadow-card-shadow mt-6 rounded-lg border p-4">
             <div
               ref={parentRef}
-              className="scrollbar-thin scrollbar-track-transparent scrollbar-thumb-border-primary hover:scrollbar-thumb-border-focus h-[48rem] overflow-y-auto pr-2"
+              className="scrollbar-thin scrollbar-track-transparent scrollbar-thumb-border-primary hover:scrollbar-thumb-border-focus h-192 overflow-y-auto pr-2"
               style={{
                 scrollbarWidth: "thin",
                 scrollbarColor: "var(--color-border-primary) transparent",

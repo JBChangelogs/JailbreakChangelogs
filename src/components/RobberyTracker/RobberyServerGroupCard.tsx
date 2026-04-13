@@ -338,7 +338,7 @@ export default function RobberyServerGroupCard({
                         key={`${robbery.marker_name}-${robbery.timestamp}`}
                         className="flex items-center gap-2 text-xs"
                       >
-                        <span className="max-w-[220px] truncate font-medium">
+                        <span className="max-w-55 truncate font-medium">
                           {robberyMarkerToDisplayName(
                             robbery.marker_name,
                             robbery.name,

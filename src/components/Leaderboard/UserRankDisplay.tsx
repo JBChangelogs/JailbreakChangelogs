@@ -88,7 +88,7 @@ export default function UserRankDisplay() {
       <div className="border-border-card bg-secondary-bg rounded-lg border p-3 shadow-sm sm:p-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2 sm:space-x-3">
-            <div className="text-primary-text flex h-7 min-w-[2.5rem] items-center justify-center rounded-full px-1 text-xs font-bold sm:h-8 sm:min-w-[3rem] sm:px-2">
+            <div className="text-primary-text flex h-7 min-w-10 items-center justify-center rounded-full px-1 text-xs font-bold sm:h-8 sm:min-w-12 sm:px-2">
               #{userRank.rank.toLocaleString()}
             </div>
             {user.roblox_avatar ? (

@@ -573,7 +573,7 @@ export function MakeOfferDialog({
     : items;
 
   return (
-    <Dialog open={isOpen} onClose={() => {}} className="relative z-[3000]">
+    <Dialog open={isOpen} onClose={() => {}} className="relative z-3000">
       <div
         className="fixed inset-0 bg-black/50 backdrop-blur-sm"
         aria-hidden="true"

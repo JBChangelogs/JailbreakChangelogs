@@ -441,7 +441,7 @@ export default function UserStatsSection({
               </TooltipTrigger>
               <TooltipContent
                 side="top"
-                className="bg-secondary-bg text-primary-text max-w-[250px] border-none shadow-[var(--color-card-shadow)]"
+                className="bg-secondary-bg text-primary-text max-w-62.5 border-none shadow-(--color-card-shadow)"
               >
                 <p>
                   {showNonOgOnly
@@ -494,7 +494,7 @@ export default function UserStatsSection({
               </TooltipTrigger>
               <TooltipContent
                 side="top"
-                className="bg-secondary-bg text-primary-text max-w-[250px] border-none shadow-[var(--color-card-shadow)]"
+                className="bg-secondary-bg text-primary-text max-w-62.5 border-none shadow-(--color-card-shadow)"
               >
                 <p>
                   {showNonOgOnly
@@ -546,7 +546,7 @@ export default function UserStatsSection({
                 </TooltipTrigger>
                 <TooltipContent
                   side="top"
-                  className="bg-secondary-bg text-primary-text max-w-[250px] border-none shadow-[var(--color-card-shadow)]"
+                  className="bg-secondary-bg text-primary-text max-w-62.5 border-none shadow-(--color-card-shadow)"
                 >
                   <p>
                     {showNonOgOnly
@@ -690,7 +690,7 @@ export default function UserStatsSection({
                   </TooltipTrigger>
                   <TooltipContent
                     side="top"
-                    className="bg-secondary-bg text-primary-text max-w-[260px] border-none shadow-[var(--color-card-shadow)]"
+                    className="bg-secondary-bg text-primary-text max-w-65 border-none shadow-(--color-card-shadow)"
                   >
                     <p>
                       This note comes from the user&apos;s last inventory scan.
@@ -700,7 +700,7 @@ export default function UserStatsSection({
               </div>
             </div>
 
-            <p className="text-primary-text text-sm break-words whitespace-pre-wrap italic">
+            <p className="text-primary-text text-sm wrap-break-word whitespace-pre-wrap italic">
               &quot;{tradeNote}&quot;
             </p>
           </div>
@@ -725,7 +725,7 @@ export default function UserStatsSection({
 
             <div
               className={`overflow-hidden transition-[max-height] duration-300 ease-in-out ${
-                isMetadataExpanded ? "max-h-[500px]" : "max-h-0"
+                isMetadataExpanded ? "max-h-125" : "max-h-0"
               }`}
             >
               <div className="border-border-card border-t px-4 py-3">
@@ -848,7 +848,7 @@ export default function UserStatsSection({
                         </TooltipTrigger>
                         <TooltipContent
                           side="top"
-                          className="bg-secondary-bg text-primary-text border-none shadow-[var(--color-card-shadow)]"
+                          className="bg-secondary-bg text-primary-text border-none shadow-(--color-card-shadow)"
                         >
                           <p>
                             {hasCheckedQueuePosition

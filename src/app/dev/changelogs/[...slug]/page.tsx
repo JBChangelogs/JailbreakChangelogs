@@ -184,7 +184,7 @@ export default async function ChangelogEntryPage({ params }: PageProps) {
                         </TooltipTrigger>
                         <TooltipContent
                           side="top"
-                          className="bg-secondary-bg text-primary-text border-none shadow-[var(--color-card-shadow)]"
+                          className="bg-secondary-bg text-primary-text border-none shadow-(--color-card-shadow)"
                         >
                           <p>Download Source Code (ZIP)</p>
                         </TooltipContent>
@@ -208,7 +208,7 @@ export default async function ChangelogEntryPage({ params }: PageProps) {
                         </TooltipTrigger>
                         <TooltipContent
                           side="top"
-                          className="bg-secondary-bg text-primary-text border-none shadow-[var(--color-card-shadow)]"
+                          className="bg-secondary-bg text-primary-text border-none shadow-(--color-card-shadow)"
                         >
                           <p>Download Source Code (TAR)</p>
                         </TooltipContent>

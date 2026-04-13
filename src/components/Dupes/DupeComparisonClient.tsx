@@ -114,7 +114,7 @@ function VariantColumn({
         <h3 className="text-primary-text mb-3 text-lg font-bold">
           Ownership History ({item.history?.length || 0})
         </h3>
-        <div className="max-h-[700px] overflow-y-auto pr-1">
+        <div className="max-h-175 overflow-y-auto pr-1">
           <TradeHistoryList
             history={item.history || []}
             splitIndex={splitIndex}

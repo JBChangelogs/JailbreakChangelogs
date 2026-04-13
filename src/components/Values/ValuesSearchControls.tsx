@@ -163,7 +163,7 @@ export default function ValuesSearchControls({
                   placeholder={`Search ${getFilterDisplayName(filterSort)}...`}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className={`border-border-card bg-secondary-bg text-primary-text placeholder-secondary-text hover:border-border-focus h-[56px] w-full rounded-lg border px-4 pr-10 pl-10 transition-all duration-300 focus:outline-none ${
+                  className={`border-border-card bg-secondary-bg text-primary-text placeholder-secondary-text hover:border-border-focus h-14 w-full rounded-lg border px-4 pr-10 pl-10 transition-all duration-300 focus:outline-none ${
                     isSearchHighlighted
                       ? "bg-button-info/10 shadow-button-info/20 border-button-info shadow-lg"
                       : isItemIdSearch
@@ -196,7 +196,7 @@ export default function ValuesSearchControls({
                     <button
                       type="button"
                       id="values-filter-menu-trigger"
-                      className="border-border-card bg-secondary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus flex h-[56px] min-h-[56px] w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all duration-300 focus:ring-1 focus:outline-none"
+                      className="border-border-card bg-secondary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus flex h-14 min-h-14 w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all duration-300 focus:ring-1 focus:outline-none"
                       aria-label="Select category"
                     >
                       <span className="truncate">{filterLabel}</span>
@@ -209,7 +209,7 @@ export default function ValuesSearchControls({
                   </DropdownMenuTrigger>
                   <DropdownMenuContent
                     align="start"
-                    className="border-border-card bg-secondary-bg text-primary-text scrollbar-thin max-h-[320px] w-[var(--radix-popper-anchor-width)] min-w-[var(--radix-popper-anchor-width)] overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
+                    className="border-border-card bg-secondary-bg text-primary-text scrollbar-thin max-h-80 w-(--radix-popper-anchor-width) min-w-(--radix-popper-anchor-width) overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
                   >
                     <DropdownMenuRadioGroup
                       value={filterSort}
@@ -254,7 +254,7 @@ export default function ValuesSearchControls({
                     <button
                       type="button"
                       id="values-sort-menu-trigger"
-                      className="border-border-card bg-secondary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus flex h-[56px] min-h-[56px] w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all duration-300 focus:ring-1 focus:outline-none"
+                      className="border-border-card bg-secondary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus flex h-14 min-h-14 w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all duration-300 focus:ring-1 focus:outline-none"
                       aria-label="Select sort"
                     >
                       <span className="truncate">{sortLabel}</span>
@@ -267,7 +267,7 @@ export default function ValuesSearchControls({
                   </DropdownMenuTrigger>
                   <DropdownMenuContent
                     align="start"
-                    className="border-border-card bg-secondary-bg text-primary-text scrollbar-thin max-h-[360px] w-[var(--radix-popper-anchor-width)] min-w-[var(--radix-popper-anchor-width)] overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
+                    className="border-border-card bg-secondary-bg text-primary-text scrollbar-thin max-h-90 w-(--radix-popper-anchor-width) min-w-(--radix-popper-anchor-width) overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
                   >
                     <DropdownMenuRadioGroup
                       value={valueSort}

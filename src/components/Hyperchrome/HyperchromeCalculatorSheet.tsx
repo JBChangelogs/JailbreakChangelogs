@@ -809,7 +809,7 @@ export default function HyperchromeCalculatorModal({
     >
       <SheetContent
         side="right"
-        className="bg-secondary-bg flex h-full w-full max-w-[720px] flex-col p-0 shadow-lg"
+        className="bg-secondary-bg flex h-full w-full max-w-180 flex-col p-0 shadow-lg"
       >
         {calculatorContent}
       </SheetContent>

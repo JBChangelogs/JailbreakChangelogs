@@ -13,7 +13,7 @@ export default function TradeItemHoverTooltip({
   side = "top",
 }: TradeItemHoverTooltipProps) {
   return (
-    <TooltipContent side={side} className="max-w-sm min-w-[300px] p-0">
+    <TooltipContent side={side} className="max-w-sm min-w-75 p-0">
       <TradeAdTooltip item={item} />
     </TooltipContent>
   );

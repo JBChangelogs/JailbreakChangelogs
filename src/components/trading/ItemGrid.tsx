@@ -156,7 +156,7 @@ export const ItemGrid: React.FC<ItemGridProps> = ({
         <h4 className="text-primary-text mb-2 text-sm">{title}</h4>
       ) : null}
       <div
-        className="max-h-[480px] overflow-y-auto pr-1"
+        className="max-h-120 overflow-y-auto pr-1"
         aria-label="Selected items list"
       >
         <div

@@ -402,7 +402,7 @@ export default function TradeItemPickerV2({
                     </span>
                   </TooltipTrigger>
                   <TooltipContent>
-                    <div className="max-w-[240px]">
+                    <div className="max-w-60">
                       <p className="text-primary-text text-sm font-semibold">
                         {customType.label}
                       </p>
@@ -429,7 +429,7 @@ export default function TradeItemPickerV2({
                 setPage(1);
               }}
               placeholder="Search items by name or type..."
-              className="border-border-card bg-secondary-bg text-primary-text placeholder-secondary-text hover:border-border-focus focus:border-button-info h-[56px] min-h-[56px] w-full rounded-lg border px-4 py-2 pr-10 pl-10 transition-all duration-300 focus:outline-none"
+              className="border-border-card bg-secondary-bg text-primary-text placeholder-secondary-text hover:border-border-focus focus:border-button-info h-14 min-h-14 w-full rounded-lg border px-4 py-2 pr-10 pl-10 transition-all duration-300 focus:outline-none"
             />
             <Icon
               icon="heroicons:magnifying-glass"
@@ -454,7 +454,7 @@ export default function TradeItemPickerV2({
               <DropdownMenuTrigger asChild>
                 <button
                   type="button"
-                  className="border-border-card bg-secondary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus flex h-[56px] min-h-[56px] w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all duration-300 focus:ring-1 focus:outline-none"
+                  className="border-border-card bg-secondary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus flex h-14 min-h-14 w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all duration-300 focus:ring-1 focus:outline-none"
                   aria-label="Filter by category"
                 >
                   <span className="truncate">{filterLabel}</span>
@@ -467,7 +467,7 @@ export default function TradeItemPickerV2({
               </DropdownMenuTrigger>
               <DropdownMenuContent
                 align="start"
-                className="border-border-card bg-secondary-bg text-primary-text scrollbar-thin max-h-[320px] w-[var(--radix-popper-anchor-width)] min-w-[var(--radix-popper-anchor-width)] overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
+                className="border-border-card bg-secondary-bg text-primary-text scrollbar-thin max-h-80 w-(--radix-popper-anchor-width) min-w-(--radix-popper-anchor-width) overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
               >
                 <DropdownMenuRadioGroup
                   value={filterSort}
@@ -505,7 +505,7 @@ export default function TradeItemPickerV2({
               <DropdownMenuTrigger asChild>
                 <button
                   type="button"
-                  className="border-border-card bg-secondary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus flex h-[56px] min-h-[56px] w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all duration-300 focus:ring-1 focus:outline-none"
+                  className="border-border-card bg-secondary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus flex h-14 min-h-14 w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all duration-300 focus:ring-1 focus:outline-none"
                   aria-label="Sort items"
                 >
                   <span className="truncate">{sortLabel}</span>
@@ -518,7 +518,7 @@ export default function TradeItemPickerV2({
               </DropdownMenuTrigger>
               <DropdownMenuContent
                 align="start"
-                className="border-border-card bg-secondary-bg text-primary-text scrollbar-thin max-h-[360px] w-[var(--radix-popper-anchor-width)] min-w-[var(--radix-popper-anchor-width)] overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
+                className="border-border-card bg-secondary-bg text-primary-text scrollbar-thin max-h-90 w-(--radix-popper-anchor-width) min-w-(--radix-popper-anchor-width) overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
               >
                 <DropdownMenuRadioGroup
                   value={valueSort}
@@ -772,7 +772,7 @@ export default function TradeItemPickerV2({
                         const d = item.demand ?? item.data?.demand ?? "N/A";
                         return (
                           <span
-                            className={`${getDemandColor(d)} inline-flex h-6 max-w-[9rem] min-w-0 items-center truncate rounded-lg px-2 text-xs leading-none font-bold shadow-sm`}
+                            className={`${getDemandColor(d)} inline-flex h-6 max-w-36 min-w-0 items-center truncate rounded-lg px-2 text-xs leading-none font-bold shadow-sm`}
                           >
                             {d === "N/A" ? "Unknown" : d}
                           </span>
@@ -787,7 +787,7 @@ export default function TradeItemPickerV2({
                         const t = item.trend ?? item.data?.trend ?? "N/A";
                         return (
                           <span
-                            className={`${getTrendColor(t)} inline-flex h-6 max-w-[9rem] min-w-0 items-center truncate rounded-lg px-2 text-xs leading-none font-bold shadow-sm`}
+                            className={`${getTrendColor(t)} inline-flex h-6 max-w-36 min-w-0 items-center truncate rounded-lg px-2 text-xs leading-none font-bold shadow-sm`}
                           >
                             {t === "N/A" ? "Unknown" : t}
                           </span>

@@ -155,7 +155,7 @@ export default function SupporterModal({
   );
 
   return (
-    <Dialog open={isOpen} onClose={onClose} className="relative z-[3000]">
+    <Dialog open={isOpen} onClose={onClose} className="relative z-3000">
       <div
         className="bg-overlay-bg fixed inset-0 backdrop-blur-sm"
         aria-hidden="true"

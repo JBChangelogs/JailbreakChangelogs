@@ -59,7 +59,7 @@ export const SettingToggle = ({
               </TooltipTrigger>
               <TooltipContent
                 side="top"
-                className="bg-secondary-bg text-primary-text border-none shadow-[var(--color-card-shadow)]"
+                className="bg-secondary-bg text-primary-text border-none shadow-(--color-card-shadow)"
               >
                 <p>Copy URL</p>
               </TooltipContent>

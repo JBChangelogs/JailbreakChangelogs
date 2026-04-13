@@ -293,7 +293,7 @@ export default function DupeItemCard({
       </div>
 
       {/* Season and Level badges - centered like other cards */}
-      <div className="border-secondary-text mt-3 flex min-h-[40px] items-center justify-center gap-2 border-t pt-3">
+      <div className="border-secondary-text mt-3 flex min-h-10 items-center justify-center gap-2 border-t pt-3">
         {(typeof displayedSeason === "number" || hasDisplayedLevel) && (
           <Tooltip>
             <TooltipTrigger asChild>

@@ -28,7 +28,7 @@ const ChangelogHeader: React.FC<ChangelogHeaderProps> = ({ changelogs }) => {
           <UpdateStatisticsCard changelogs={changelogs} />
         </div>
 
-        <NitroChangelogVideoPlayer className="min-h-[210px] w-full max-w-xs self-center sm:max-w-sm lg:self-start" />
+        <NitroChangelogVideoPlayer className="min-h-52.5 w-full max-w-xs self-center sm:max-w-sm lg:self-start" />
       </div>
     </div>
   );

@@ -84,7 +84,7 @@ export default function InventoryBreakdownModal({
       />
 
       <div className="fixed inset-0 flex items-center justify-center p-4">
-        <DialogPanel className="modal-container border-button-info bg-secondary-bg flex max-h-[80vh] w-full max-w-[600px] min-w-[320px] flex-col overflow-hidden rounded-lg border shadow-lg">
+        <DialogPanel className="modal-container border-button-info bg-secondary-bg flex max-h-[80vh] w-full max-w-150 min-w-[320px] flex-col overflow-hidden rounded-lg border shadow-lg">
           <div className="modal-header text-primary-text flex items-center justify-between px-6 py-4 text-xl font-semibold">
             <span>{username}&apos;s Inventory Breakdown</span>
             <button
@@ -179,7 +179,7 @@ export default function InventoryBreakdownModal({
                           </TooltipTrigger>
                           <TooltipContent
                             side="top"
-                            className="bg-secondary-bg text-primary-text border-none shadow-[var(--color-card-shadow)]"
+                            className="bg-secondary-bg text-primary-text border-none shadow-(--color-card-shadow)"
                           >
                             <p>
                               {category}: {formatPercentage(percentage)}%
@@ -290,7 +290,7 @@ export default function InventoryBreakdownModal({
                           </TooltipTrigger>
                           <TooltipContent
                             side="top"
-                            className="bg-secondary-bg text-primary-text border-none shadow-[var(--color-card-shadow)]"
+                            className="bg-secondary-bg text-primary-text border-none shadow-(--color-card-shadow)"
                           >
                             <p>
                               {category}: {formatPercentage(percentage)}%

@@ -45,7 +45,7 @@ export const UserDetailsTooltip: React.FC<UserDetailsTooltipProps> = ({
                 prefetch={false}
                 className="hover:text-button-info transition-colors"
               >
-                <h3 className="text-primary-text max-w-[300px] truncate text-lg font-semibold">
+                <h3 className="text-primary-text max-w-75 truncate text-lg font-semibold">
                   {user.global_name && user.global_name !== "None"
                     ? user.global_name
                     : user.username}

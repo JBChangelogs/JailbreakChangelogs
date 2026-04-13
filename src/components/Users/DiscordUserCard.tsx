@@ -49,7 +49,7 @@ export default function DiscordUserCard({
       />
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-center gap-2">
-          <h2 className="text-primary-text group-hover:text-link max-w-full truncate text-base font-semibold transition-colors sm:max-w-[250px]">
+          <h2 className="text-primary-text group-hover:text-link max-w-full truncate text-base font-semibold transition-colors sm:max-w-62.5">
             {user.global_name && user.global_name !== "None"
               ? user.global_name
               : user.username}
@@ -64,7 +64,7 @@ export default function DiscordUserCard({
             disableTooltips={disableBadgeTooltips}
           />
         </div>
-        <p className="text-secondary-text max-w-[180px] truncate text-sm sm:max-w-[250px]">
+        <p className="text-secondary-text max-w-45 truncate text-sm sm:max-w-62.5">
           @{user.username}
         </p>
       </div>

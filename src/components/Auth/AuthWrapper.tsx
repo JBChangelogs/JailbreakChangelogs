@@ -59,7 +59,7 @@ export default function AuthWrapper({
   if (isLoading) {
     return (
       fallback || (
-        <div className="flex h-[200px] w-full items-center justify-center">
+        <div className="flex h-50 w-full items-center justify-center">
           <div className="border-button-info h-8 w-8 animate-spin rounded-full border-b-2"></div>
         </div>
       )

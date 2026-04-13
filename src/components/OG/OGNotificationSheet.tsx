@@ -376,7 +376,7 @@ export default function OGNotificationSheet({
                   {isAuthenticated ? "Link Roblox Account" : "Login Required"}
                 </h3>
 
-                <p className="text-secondary-text mb-8 max-w-[300px] text-sm leading-relaxed">
+                <p className="text-secondary-text mb-8 max-w-75 text-sm leading-relaxed">
                   {isAuthenticated
                     ? "You're almost there! Connect your Roblox account to start tracking OG items and receive instant notifications."
                     : "You need to log in with Discord first, then you'll be able to link your Roblox account and manage notifications."}
@@ -390,7 +390,7 @@ export default function OGNotificationSheet({
                       tab: isAuthenticated ? "roblox" : "discord",
                     });
                   }}
-                  className="shadow-button-info/20 h-[56px] w-full text-base font-bold shadow-lg"
+                  className="shadow-button-info/20 h-14 w-full text-base font-bold shadow-lg"
                 >
                   {isAuthenticated
                     ? "Link Roblox Account"
@@ -433,7 +433,7 @@ export default function OGNotificationSheet({
                       <DropdownMenuTrigger asChild>
                         <button
                           type="button"
-                          className="border-border-card bg-primary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus flex h-[56px] w-full items-center justify-between rounded-xl border px-4 py-2 text-sm transition-all duration-300 focus:ring-1 focus:outline-none"
+                          className="border-border-card bg-primary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus flex h-14 w-full items-center justify-between rounded-xl border px-4 py-2 text-sm transition-all duration-300 focus:ring-1 focus:outline-none"
                           aria-label="Select item category"
                         >
                           <span className="truncate">{currentTypeLabel}</span>
@@ -447,7 +447,7 @@ export default function OGNotificationSheet({
                       <DropdownMenuContent
                         align="start"
                         container={sheetContentRef.current}
-                        className="border-border-card bg-primary-bg text-primary-text scrollbar-thin max-h-[280px] w-[var(--radix-popper-anchor-width)] min-w-[var(--radix-popper-anchor-width)] overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
+                        className="border-border-card bg-primary-bg text-primary-text scrollbar-thin max-h-70 w-(--radix-popper-anchor-width) min-w-(--radix-popper-anchor-width) overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
                       >
                         <DropdownMenuCheckboxItem
                           checked={selectedType === "all"}
@@ -497,7 +497,7 @@ export default function OGNotificationSheet({
                         <h3 className="text-primary-text mb-2 text-lg font-semibold">
                           No items found
                         </h3>
-                        <p className="text-secondary-text mx-auto max-w-[240px] text-sm">
+                        <p className="text-secondary-text mx-auto max-w-60 text-sm">
                           We couldn&apos;t find any items matching your current
                           filters.
                         </p>

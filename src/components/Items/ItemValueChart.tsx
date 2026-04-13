@@ -563,10 +563,10 @@ const ItemValueChart = ({
                 onValueChange={(value) => setValueChartType(value as ChartType)}
               >
                 <TabsList className="h-10 w-full" fullWidth>
-                  <TabsTrigger value="area" className="h-[34px] px-3" fullWidth>
+                  <TabsTrigger value="area" className="h-8.5 px-3" fullWidth>
                     Line
                   </TabsTrigger>
-                  <TabsTrigger value="bar" className="h-[34px] px-3" fullWidth>
+                  <TabsTrigger value="bar" className="h-8.5 px-3" fullWidth>
                     Bar
                   </TabsTrigger>
                 </TabsList>
@@ -588,7 +588,7 @@ const ItemValueChart = ({
                 </DropdownMenuTrigger>
                 <DropdownMenuContent
                   align="end"
-                  className="w-[var(--radix-dropdown-menu-trigger-width)]"
+                  className="w-(--radix-dropdown-menu-trigger-width)"
                 >
                   <DropdownMenuRadioGroup
                     value={dateRange}
@@ -608,7 +608,7 @@ const ItemValueChart = ({
           )}
           {shouldShowValueChart ? (
             <>
-              <div className="h-[350px]">
+              <div className="h-87.5">
                 <ChartContainer
                   config={valueChartConfig}
                   className="h-full w-full"
@@ -690,7 +690,7 @@ const ItemValueChart = ({
                         cursor={false}
                         content={
                           <ChartTooltipContent
-                            className="min-w-[12rem] px-3 py-2"
+                            className="min-w-48 px-3 py-2"
                             formatter={(value, name, item) => {
                               const rawName = String(name ?? "").toLowerCase();
                               const isCash =
@@ -713,7 +713,7 @@ const ItemValueChart = ({
                                 <div className="flex w-full items-center justify-between gap-3">
                                   <span className="text-secondary-text flex items-center gap-2">
                                     <span
-                                      className="h-2.5 w-2.5 shrink-0 rounded-[2px]"
+                                      className="h-2.5 w-2.5 shrink-0 rounded-xs"
                                       style={{
                                         backgroundColor: indicatorColor,
                                       }}
@@ -835,7 +835,7 @@ const ItemValueChart = ({
                         }}
                         content={
                           <ChartTooltipContent
-                            className="min-w-[12rem] px-3 py-2"
+                            className="min-w-48 px-3 py-2"
                             formatter={(value, name, item) => {
                               const rawName = String(name ?? "").toLowerCase();
                               const isCash =
@@ -858,7 +858,7 @@ const ItemValueChart = ({
                                 <div className="flex w-full items-center justify-between gap-3">
                                   <span className="text-secondary-text flex items-center gap-2">
                                     <span
-                                      className="h-2.5 w-2.5 shrink-0 rounded-[2px]"
+                                      className="h-2.5 w-2.5 shrink-0 rounded-xs"
                                       style={{
                                         backgroundColor: indicatorColor,
                                       }}
@@ -1033,10 +1033,10 @@ const ItemValueChart = ({
                 }
               >
                 <TabsList className="h-10 w-full" fullWidth>
-                  <TabsTrigger value="area" className="h-[34px] px-3" fullWidth>
+                  <TabsTrigger value="area" className="h-8.5 px-3" fullWidth>
                     Line
                   </TabsTrigger>
-                  <TabsTrigger value="bar" className="h-[34px] px-3" fullWidth>
+                  <TabsTrigger value="bar" className="h-8.5 px-3" fullWidth>
                     Bar
                   </TabsTrigger>
                 </TabsList>
@@ -1058,7 +1058,7 @@ const ItemValueChart = ({
                 </DropdownMenuTrigger>
                 <DropdownMenuContent
                   align="end"
-                  className="w-[var(--radix-dropdown-menu-trigger-width)]"
+                  className="w-(--radix-dropdown-menu-trigger-width)"
                 >
                   <DropdownMenuRadioGroup
                     value={dateRange}
@@ -1081,7 +1081,7 @@ const ItemValueChart = ({
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
-            <div className="h-[350px]">
+            <div className="h-87.5">
               <ChartContainer
                 config={tradingChartConfig}
                 className="h-full w-full"
@@ -1161,7 +1161,7 @@ const ItemValueChart = ({
                       cursor={false}
                       content={
                         <ChartTooltipContent
-                          className="min-w-[12rem] px-3 py-2"
+                          className="min-w-48 px-3 py-2"
                           formatter={(value, name, item) => {
                             const rawName = String(name ?? "").toLowerCase();
                             const isTraded =
@@ -1180,7 +1180,7 @@ const ItemValueChart = ({
                               <div className="flex w-full items-center justify-between gap-3">
                                 <span className="text-secondary-text flex items-center gap-2">
                                   <span
-                                    className="h-2.5 w-2.5 shrink-0 rounded-[2px]"
+                                    className="h-2.5 w-2.5 shrink-0 rounded-xs"
                                     style={{
                                       backgroundColor: indicatorColor,
                                     }}
@@ -1296,7 +1296,7 @@ const ItemValueChart = ({
                       }}
                       content={
                         <ChartTooltipContent
-                          className="min-w-[12rem] px-3 py-2"
+                          className="min-w-48 px-3 py-2"
                           formatter={(value, name, item) => {
                             const rawName = String(name ?? "").toLowerCase();
                             const isTraded =
@@ -1315,7 +1315,7 @@ const ItemValueChart = ({
                               <div className="flex w-full items-center justify-between gap-3">
                                 <span className="text-secondary-text flex items-center gap-2">
                                   <span
-                                    className="h-2.5 w-2.5 shrink-0 rounded-[2px]"
+                                    className="h-2.5 w-2.5 shrink-0 rounded-xs"
                                     style={{
                                       backgroundColor: indicatorColor,
                                     }}

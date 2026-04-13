@@ -38,7 +38,7 @@ export default async function ItemDetailsPage({ params }: Props) {
   const changelogsSlot = (
     <Suspense
       fallback={
-        <div className="bg-secondary-bg h-[350px] animate-pulse rounded-lg" />
+        <div className="bg-secondary-bg h-87.5 animate-pulse rounded-lg" />
       }
     >
       <ItemChangelogsServer itemId={String(item.id)} />
@@ -48,7 +48,7 @@ export default async function ItemDetailsPage({ params }: Props) {
   const commentsSlot = (
     <Suspense
       fallback={
-        <div className="bg-secondary-bg h-[350px] animate-pulse rounded-lg" />
+        <div className="bg-secondary-bg h-87.5 animate-pulse rounded-lg" />
       }
     >
       <ItemCommentsServer
@@ -62,7 +62,7 @@ export default async function ItemDetailsPage({ params }: Props) {
   const similarItemsSlot = (
     <Suspense
       fallback={
-        <div className="bg-secondary-bg h-[350px] animate-pulse rounded-lg" />
+        <div className="bg-secondary-bg h-87.5 animate-pulse rounded-lg" />
       }
     >
       <SimilarItems

@@ -23,7 +23,7 @@ const ItemValueChart = dynamic(
   () => import("@/components/Items/ItemValueChart"),
   {
     loading: () => (
-      <div className="bg-secondary-bg h-[350px] animate-pulse rounded" />
+      <div className="bg-secondary-bg h-87.5 animate-pulse rounded" />
     ),
     ssr: false,
   },
@@ -408,11 +408,11 @@ export default function ItemDetailsClient({
             </div>
 
             <div className="mt-4 hidden justify-center xl:flex">
-              <NitroItemsVideoPlayer className="min-h-[180px] w-full max-w-xs sm:max-w-sm md:max-w-md" />
+              <NitroItemsVideoPlayer className="min-h-45 w-full max-w-xs sm:max-w-sm md:max-w-md" />
             </div>
 
-            <div className="mt-4 rounded-lg bg-linear-to-br from-[#076bb6] to-[#ca4a0d] p-[2px] shadow-lg">
-              <div className="bg-tertiary-bg rounded-[calc(0.5rem-2px)] p-4 text-center">
+            <div className="mt-4 rounded-lg bg-linear-to-br from-[#076bb6] to-[#ca4a0d] p-0.5 shadow-lg">
+              <div className="bg-tertiary-bg rounded-md p-4 text-center">
                 <div className="mb-3 flex justify-center">
                   <a
                     href="https://discord.com/invite/baHCsb8N5A"
@@ -617,7 +617,7 @@ export default function ItemDetailsClient({
 
               {/* Mobile Ad - shown only on smaller screens */}
               <div className="mt-4 flex justify-center xl:hidden">
-                <NitroItemMobileAd className="min-h-[180px] w-full max-w-xs sm:max-w-sm md:max-w-md" />
+                <NitroItemMobileAd className="min-h-45 w-full max-w-xs sm:max-w-sm md:max-w-md" />
               </div>
             </div>
 
@@ -763,7 +763,7 @@ export default function ItemDetailsClient({
                   <div className="mt-4">
                     <Suspense
                       fallback={
-                        <div className="bg-secondary-bg h-[350px] animate-pulse rounded" />
+                        <div className="bg-secondary-bg h-87.5 animate-pulse rounded" />
                       }
                     >
                       <ItemValueChart

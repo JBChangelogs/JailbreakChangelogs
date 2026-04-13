@@ -1029,7 +1029,7 @@ export default function TradeDetailsClient({
               <p className="text-secondary-text mb-1 text-[10px] tracking-wide uppercase">
                 Trade Note
               </p>
-              <p className="text-primary-text max-w-full min-w-0 overflow-hidden text-sm break-words whitespace-pre-wrap">
+              <p className="text-primary-text max-w-full min-w-0 overflow-hidden text-sm wrap-break-word whitespace-pre-wrap">
                 {visibleNote}
                 {shouldTruncateNote && (
                   <>
@@ -1096,7 +1096,7 @@ export default function TradeDetailsClient({
                           placeholder="Search offers (e.g., Torpedo)"
                           value={offersSearchQuery}
                           onChange={(e) => setOffersSearchQuery(e.target.value)}
-                          className="border-border-card bg-tertiary-bg text-primary-text placeholder-secondary-text focus:border-button-info h-[56px] w-full rounded-lg border px-4 pr-16 text-sm transition-all duration-300 focus:outline-none"
+                          className="border-border-card bg-tertiary-bg text-primary-text placeholder-secondary-text focus:border-button-info h-14 w-full rounded-lg border px-4 pr-16 text-sm transition-all duration-300 focus:outline-none"
                         />
                         <div className="absolute top-1/2 right-3 flex -translate-y-1/2 items-center gap-2">
                           {offersSearchQuery && (
@@ -1118,7 +1118,7 @@ export default function TradeDetailsClient({
                         <DropdownMenuTrigger asChild>
                           <button
                             type="button"
-                            className="border-border-card bg-tertiary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus inline-flex h-[56px] w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all duration-300 focus:ring-1 focus:outline-none sm:w-56"
+                            className="border-border-card bg-tertiary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus inline-flex h-14 w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all duration-300 focus:ring-1 focus:outline-none sm:w-56"
                             aria-label="Offer search side"
                           >
                             <span>{offersSearchScopeLabel}</span>
@@ -1131,7 +1131,7 @@ export default function TradeDetailsClient({
                         </DropdownMenuTrigger>
                         <DropdownMenuContent
                           align="start"
-                          className="w-[var(--radix-dropdown-menu-trigger-width)]"
+                          className="w-(--radix-dropdown-menu-trigger-width)"
                         >
                           <DropdownMenuRadioGroup
                             value={offersSearchScope}
@@ -1264,7 +1264,7 @@ export default function TradeDetailsClient({
                           return (
                             <div
                               key={offer.id}
-                              className="border-border-card bg-secondary-bg overflow-hidden rounded-lg border shadow-[var(--color-card-shadow)]"
+                              className="border-border-card bg-secondary-bg overflow-hidden rounded-lg border shadow-(--color-card-shadow)"
                             >
                               <div className="bg-tertiary-bg border-border-card flex flex-col gap-3 border-b px-4 py-3 sm:flex-row sm:items-start sm:justify-between">
                                 <div className="flex min-w-0 flex-1 items-center gap-3">
@@ -1344,7 +1344,7 @@ export default function TradeDetailsClient({
                                         </TooltipTrigger>
                                         <TooltipContent
                                           side="top"
-                                          className="bg-primary-bg text-secondary-text border-none shadow-[var(--color-card-shadow)]"
+                                          className="bg-primary-bg text-secondary-text border-none shadow-(--color-card-shadow)"
                                         >
                                           <p>
                                             {offer.created_at
@@ -1443,7 +1443,7 @@ export default function TradeDetailsClient({
                                     Offer Note
                                   </p>
                                   {offerNote ? (
-                                    <p className="text-primary-text text-sm break-words whitespace-pre-wrap">
+                                    <p className="text-primary-text text-sm wrap-break-word whitespace-pre-wrap">
                                       {offerNote}
                                     </p>
                                   ) : (

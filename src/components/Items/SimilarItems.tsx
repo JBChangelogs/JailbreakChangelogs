@@ -308,7 +308,7 @@ const SimilarItems = ({
           <DropdownMenuTrigger asChild>
             <button
               type="button"
-              className="border-border-card bg-tertiary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 flex h-[56px] w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all duration-300 focus:ring-1 focus:outline-none"
+              className="border-border-card bg-tertiary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 flex h-14 w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all duration-300 focus:ring-1 focus:outline-none"
               aria-label="Sort similar items"
             >
               <span className="truncate">
@@ -329,7 +329,7 @@ const SimilarItems = ({
           </DropdownMenuTrigger>
           <DropdownMenuContent
             align="start"
-            className="border-border-card bg-tertiary-bg text-primary-text scrollbar-thin max-h-[240px] w-[var(--radix-popper-anchor-width)] min-w-[var(--radix-popper-anchor-width)] overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
+            className="border-border-card bg-tertiary-bg text-primary-text scrollbar-thin max-h-60 w-(--radix-popper-anchor-width) min-w-(--radix-popper-anchor-width) overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
           >
             <DropdownMenuRadioGroup
               value={sortBy}

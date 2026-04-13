@@ -51,7 +51,7 @@ const SeasonHeader: React.FC<SeasonHeaderProps> = ({
             nextSeason={nextSeason}
           />
         </div>
-        <NitroSeasonVideoPlayer className="min-h-[210px] w-full max-w-xs self-center sm:max-w-sm lg:self-start" />
+        <NitroSeasonVideoPlayer className="min-h-52.5 w-full max-w-xs self-center sm:max-w-sm lg:self-start" />
       </div>
     </div>
   );

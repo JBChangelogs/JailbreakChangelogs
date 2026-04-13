@@ -469,7 +469,7 @@ export default function InventoryBreakdown({
                 </TooltipTrigger>
                 <TooltipContent
                   side="top"
-                  className="bg-secondary-bg text-primary-text max-w-[250px] border-none shadow-[var(--color-card-shadow)]"
+                  className="bg-secondary-bg text-primary-text max-w-62.5 border-none shadow-(--color-card-shadow)"
                 >
                   Includes total cash value of all items, including duped
                   items&apos; cash value.
@@ -493,7 +493,7 @@ export default function InventoryBreakdown({
                 </TooltipTrigger>
                 <TooltipContent
                   side="top"
-                  className="bg-secondary-bg text-primary-text max-w-[250px] border-none shadow-[var(--color-card-shadow)]"
+                  className="bg-secondary-bg text-primary-text max-w-62.5 border-none shadow-(--color-card-shadow)"
                 >
                   Only counts clean items&apos; cash value. Does not include
                   cash value of duped items.
@@ -579,10 +579,10 @@ export default function InventoryBreakdown({
                               />
                             </TooltipTrigger>
                             <TooltipContent side="top">
-                              <div className="grid min-w-[12rem] gap-1.5 text-xs">
+                              <div className="grid min-w-48 gap-1.5 text-xs">
                                 <div className="flex items-center gap-1.5">
                                   <span
-                                    className="h-2.5 w-2.5 rounded-[2px]"
+                                    className="h-2.5 w-2.5 rounded-xs"
                                     style={{
                                       backgroundColor: getCategoryColor(
                                         entry.type,
@@ -763,7 +763,7 @@ export default function InventoryBreakdown({
                           </DropdownMenuTrigger>
                           <DropdownMenuContent
                             align="end"
-                            className="border-border-card bg-secondary-bg text-primary-text scrollbar-thin max-h-[280px] w-[var(--radix-popper-anchor-width)] min-w-[14rem] overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
+                            className="border-border-card bg-secondary-bg text-primary-text scrollbar-thin max-h-70 w-(--radix-popper-anchor-width) min-w-56 overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
                           >
                             <DropdownMenuRadioGroup
                               value={missingTypeFilter}
@@ -808,7 +808,7 @@ export default function InventoryBreakdown({
                       No missing items match your search.
                     </p>
                   ) : (
-                    <div className="scrollbar-thin max-h-[260px] overflow-auto pr-1 text-sm">
+                    <div className="scrollbar-thin max-h-65 overflow-auto pr-1 text-sm">
                       <ol className="divide-border-card/60 space-y-0 divide-y">
                         {filteredMissingItems.map((item, idx) => (
                           <li
@@ -921,7 +921,7 @@ export default function InventoryBreakdown({
                             </DropdownMenuTrigger>
                             <DropdownMenuContent
                               align="end"
-                              className="border-border-card bg-secondary-bg text-primary-text scrollbar-thin max-h-[280px] w-[var(--radix-popper-anchor-width)] min-w-[14rem] overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
+                              className="border-border-card bg-secondary-bg text-primary-text scrollbar-thin max-h-70 w-(--radix-popper-anchor-width) min-w-56 overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
                             >
                               <DropdownMenuRadioGroup
                                 value={unverifiableTypeFilter}
@@ -965,7 +965,7 @@ export default function InventoryBreakdown({
                         No unverifiable items match your search.
                       </p>
                     ) : (
-                      <div className="scrollbar-thin max-h-[220px] overflow-auto pr-1 text-sm">
+                      <div className="scrollbar-thin max-h-55 overflow-auto pr-1 text-sm">
                         <ol className="divide-border-card/60 space-y-0 divide-y">
                           {filteredUnverifiableItems.map((item, idx) => (
                             <li
@@ -1038,7 +1038,7 @@ export default function InventoryBreakdown({
               <>
                 <ChartContainer
                   config={collectionChartConfig}
-                  className="[&_.recharts-pie-label-text]:fill-foreground mx-auto aspect-square h-[min(360px,calc(100vw-3rem))] max-h-[360px] w-full max-w-[360px]"
+                  className="[&_.recharts-pie-label-text]:fill-foreground mx-auto aspect-square h-[min(360px,calc(100vw-3rem))] max-h-90 w-full max-w-90"
                 >
                   <PieChart>
                     <ChartTooltip
@@ -1061,10 +1061,10 @@ export default function InventoryBreakdown({
                               "var(--color-primary-text)";
 
                             return (
-                              <div className="flex min-w-[12rem] flex-col gap-1.5 text-xs">
+                              <div className="flex min-w-48 flex-col gap-1.5 text-xs">
                                 <div className="flex items-center gap-1.5">
                                   <span
-                                    className="h-2.5 w-2.5 rounded-[2px]"
+                                    className="h-2.5 w-2.5 rounded-xs"
                                     style={{ backgroundColor: swatchColor }}
                                   />
                                   <span className="text-primary-text font-medium">
@@ -1174,10 +1174,10 @@ export default function InventoryBreakdown({
                         ></div>
                       </TooltipTrigger>
                       <TooltipContent side="top">
-                        <div className="grid min-w-[10rem] gap-1.5 text-xs">
+                        <div className="grid min-w-40 gap-1.5 text-xs">
                           <div className="flex items-center gap-1.5">
                             <span
-                              className="h-2.5 w-2.5 rounded-[2px]"
+                              className="h-2.5 w-2.5 rounded-xs"
                               style={{
                                 backgroundColor: getCategoryColor(category),
                               }}
@@ -1265,7 +1265,7 @@ export default function InventoryBreakdown({
             </div>
             <ChartContainer
               config={categoryChartConfig}
-              className="[&_.recharts-pie-label-text]:fill-foreground mx-auto aspect-square h-[min(360px,calc(100vw-3rem))] max-h-[360px] w-full max-w-[360px]"
+              className="[&_.recharts-pie-label-text]:fill-foreground mx-auto aspect-square h-[min(360px,calc(100vw-3rem))] max-h-90 w-full max-w-90"
             >
               <PieChart>
                 <ChartTooltip
@@ -1282,10 +1282,10 @@ export default function InventoryBreakdown({
                           "var(--color-primary-text)";
 
                         return (
-                          <div className="flex min-w-[10rem] flex-col gap-1.5 text-xs">
+                          <div className="flex min-w-40 flex-col gap-1.5 text-xs">
                             <div className="flex items-center gap-1.5">
                               <span
-                                className="h-2.5 w-2.5 rounded-[2px]"
+                                className="h-2.5 w-2.5 rounded-xs"
                                 style={{ backgroundColor: swatchColor }}
                               />
                               <span className="text-primary-text font-medium">
@@ -1369,10 +1369,10 @@ export default function InventoryBreakdown({
                         ></div>
                       </TooltipTrigger>
                       <TooltipContent side="top">
-                        <div className="grid min-w-[10rem] gap-1.5 text-xs">
+                        <div className="grid min-w-40 gap-1.5 text-xs">
                           <div className="flex items-center gap-1.5">
                             <span
-                              className="h-2.5 w-2.5 rounded-[2px]"
+                              className="h-2.5 w-2.5 rounded-xs"
                               style={{
                                 backgroundColor: getCategoryColor(category),
                               }}
@@ -1458,7 +1458,7 @@ export default function InventoryBreakdown({
                 </div>
                 <ChartContainer
                   config={categoryChartConfig}
-                  className="[&_.recharts-pie-label-text]:fill-foreground mx-auto aspect-square h-[min(360px,calc(100vw-3rem))] max-h-[360px] w-full max-w-[360px]"
+                  className="[&_.recharts-pie-label-text]:fill-foreground mx-auto aspect-square h-[min(360px,calc(100vw-3rem))] max-h-90 w-full max-w-90"
                 >
                   <PieChart>
                     <ChartTooltip
@@ -1475,10 +1475,10 @@ export default function InventoryBreakdown({
                               "var(--color-primary-text)";
 
                             return (
-                              <div className="flex min-w-[10rem] flex-col gap-1.5 text-xs">
+                              <div className="flex min-w-40 flex-col gap-1.5 text-xs">
                                 <div className="flex items-center gap-1.5">
                                   <span
-                                    className="h-2.5 w-2.5 rounded-[2px]"
+                                    className="h-2.5 w-2.5 rounded-xs"
                                     style={{ backgroundColor: swatchColor }}
                                   />
                                   <span className="text-primary-text font-medium">

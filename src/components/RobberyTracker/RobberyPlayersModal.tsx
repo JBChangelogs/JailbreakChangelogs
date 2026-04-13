@@ -86,14 +86,14 @@ export default function RobberyPlayersModal({
   if (!isOpen) return null;
 
   return (
-    <Dialog open={isOpen} onClose={onClose} className="relative z-[3000]">
+    <Dialog open={isOpen} onClose={onClose} className="relative z-3000">
       <div
         className="fixed inset-0 bg-black/50 backdrop-blur-sm"
         aria-hidden="true"
       />
 
       <div className="fixed inset-0 flex items-center justify-center p-4">
-        <DialogPanel className="border-border-card bg-secondary-bg hover:border-border-focus relative flex max-h-[80vh] w-full max-w-[600px] min-w-[320px] flex-col overflow-hidden rounded-lg border shadow-xl">
+        <DialogPanel className="border-border-card bg-secondary-bg hover:border-border-focus relative flex max-h-[80vh] w-full max-w-150 min-w-[320px] flex-col overflow-hidden rounded-lg border shadow-xl">
           {/* Header */}
           <div className="border-border-card flex items-center justify-between border-b px-6 py-4">
             <h2 className="text-primary-text text-xl font-semibold">

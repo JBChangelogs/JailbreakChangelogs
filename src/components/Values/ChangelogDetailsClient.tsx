@@ -488,7 +488,7 @@ export default function ChangelogDetailsClient({
                 <DropdownMenuTrigger asChild>
                   <button
                     type="button"
-                    className="border-border-card bg-secondary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus flex h-[56px] w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all duration-300 focus:ring-1 focus:outline-none"
+                    className="border-border-card bg-secondary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus flex h-14 w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all duration-300 focus:ring-1 focus:outline-none"
                     aria-label="Filter by item type"
                   >
                     <span className="truncate">{selectedType}</span>
@@ -501,7 +501,7 @@ export default function ChangelogDetailsClient({
                 </DropdownMenuTrigger>
                 <DropdownMenuContent
                   align="start"
-                  className="border-border-card bg-secondary-bg text-primary-text scrollbar-thin max-h-[320px] w-[var(--radix-popper-anchor-width)] min-w-[var(--radix-popper-anchor-width)] overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
+                  className="border-border-card bg-secondary-bg text-primary-text scrollbar-thin max-h-80 w-(--radix-popper-anchor-width) min-w-(--radix-popper-anchor-width) overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
                 >
                   <DropdownMenuRadioGroup
                     value={selectedType}
@@ -538,7 +538,7 @@ export default function ChangelogDetailsClient({
                 <DropdownMenuTrigger asChild>
                   <button
                     type="button"
-                    className="border-border-card bg-secondary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus flex h-[56px] w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all duration-300 focus:ring-1 focus:outline-none"
+                    className="border-border-card bg-secondary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus flex h-14 w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all duration-300 focus:ring-1 focus:outline-none"
                     aria-label="Filter by suggestion type"
                   >
                     <span className="truncate">
@@ -559,7 +559,7 @@ export default function ChangelogDetailsClient({
                 </DropdownMenuTrigger>
                 <DropdownMenuContent
                   align="start"
-                  className="border-border-card bg-secondary-bg text-primary-text scrollbar-thin max-h-[320px] w-[var(--radix-popper-anchor-width)] min-w-[var(--radix-popper-anchor-width)] overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
+                  className="border-border-card bg-secondary-bg text-primary-text scrollbar-thin max-h-80 w-(--radix-popper-anchor-width) min-w-(--radix-popper-anchor-width) overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
                 >
                   <DropdownMenuRadioGroup
                     value={selectedSuggestionType}
@@ -1175,7 +1175,7 @@ export default function ChangelogDetailsClient({
           />
 
           <div className="fixed inset-0 flex items-center justify-center p-4">
-            <div className="modal-container border-button-info bg-secondary-bg w-full max-w-[480px] min-w-[320px] rounded-lg border shadow-lg">
+            <div className="modal-container border-button-info bg-secondary-bg w-full max-w-120 min-w-[320px] rounded-lg border shadow-lg">
               <div className="modal-header text-primary-text flex items-center justify-between px-6 py-4 text-2xl font-bold">
                 <span>Voters</span>
                 <button
@@ -1220,7 +1220,7 @@ export default function ChangelogDetailsClient({
                   </button>
                 </div>
 
-                <div className="max-h-[400px] space-y-3 overflow-y-auto">
+                <div className="max-h-100 space-y-3 overflow-y-auto">
                   {(votersTab === "up"
                     ? activeVoters?.up || []
                     : activeVoters?.down || []

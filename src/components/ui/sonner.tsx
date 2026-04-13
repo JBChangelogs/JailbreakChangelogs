@@ -10,7 +10,7 @@ const defaultClassNames: NonNullable<
   ToasterProps["toastOptions"]
 >["classNames"] = {
   toast:
-    "relative flex w-full flex-row items-start gap-3 overflow-hidden rounded-xl border border-border-card bg-[color:color-mix(in_srgb,var(--color-tertiary-bg),transparent_55%)] p-3 text-left text-primary-text shadow-[var(--color-card-shadow)] backdrop-blur-xl",
+    "relative flex w-full flex-row items-start gap-3 overflow-hidden rounded-xl border border-border-card bg-[color:color-mix(in_srgb,var(--color-tertiary-bg),transparent_55%)] p-3 text-left text-primary-text shadow-(--color-card-shadow) backdrop-blur-xl",
   title: "text-left font-semibold text-primary-text",
   description: "text-left text-secondary-text",
   content: "min-w-0 flex-1 space-y-1 text-left",
@@ -54,7 +54,7 @@ const Toaster = ({ toastOptions, style, ...props }: ToasterProps) => {
   return (
     <Sonner
       theme={theme as ToasterProps["theme"]}
-      className="toaster group !z-[4000]"
+      className="toaster group z-4000!"
       style={
         {
           "--width": "440px",

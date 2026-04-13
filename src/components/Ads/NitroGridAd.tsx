@@ -102,7 +102,7 @@ export default function NitroGridAd({ adId, className }: NitroGridAdProps) {
     <div
       id={adId}
       ref={containerRef}
-      className={`flex min-h-[250px] justify-center ${className}`}
+      className={`flex min-h-62.5 justify-center ${className}`}
     />
   );
 }

@@ -36,7 +36,7 @@ export default function EscapeLoginModal() {
       />
 
       <div className="fixed inset-0 flex items-center justify-center p-4">
-        <DialogPanel className="modal-container border-button-info bg-secondary-bg w-full max-w-[480px] min-w-[320px] rounded-lg border shadow-lg">
+        <DialogPanel className="modal-container border-button-info bg-secondary-bg w-full max-w-120 min-w-[320px] rounded-lg border shadow-lg">
           <div className="modal-header text-primary-text px-6 py-4 text-xl font-semibold">
             Login with Token
           </div>
@@ -80,7 +80,7 @@ export default function EscapeLoginModal() {
                 disabled={!token.trim() || isLoading}
                 variant="default"
                 size="md"
-                className="min-w-[100px]"
+                className="min-w-25"
               >
                 {isLoading ? "Logging in..." : "Login"}
               </Button>

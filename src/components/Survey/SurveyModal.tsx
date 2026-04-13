@@ -82,7 +82,7 @@ const SurveyModal: React.FC<SurveyModalProps> = ({ open, onClose, survey }) => {
       />
 
       <div
-        className="modal-container border-button-info bg-secondary-bg relative w-full max-w-[480px] min-w-[320px] rounded-lg border shadow-lg"
+        className="modal-container border-button-info bg-secondary-bg relative w-full max-w-120 min-w-[320px] rounded-lg border shadow-lg"
         onClick={(e: React.MouseEvent) => e.stopPropagation()}
       >
         <div className="modal-header text-primary-text px-6 py-4 text-xl font-semibold">
@@ -103,7 +103,7 @@ const SurveyModal: React.FC<SurveyModalProps> = ({ open, onClose, survey }) => {
                 id="answer"
                 value={answer}
                 onChange={(e) => setAnswer(e.target.value)}
-                className="border-border-card bg-form-input text-primary-text hover:border-border-focus focus:border-button-info min-h-[120px] w-full resize-y rounded border p-3 text-sm focus:outline-none"
+                className="border-border-card bg-form-input text-primary-text hover:border-border-focus focus:border-button-info min-h-30 w-full resize-y rounded border p-3 text-sm focus:outline-none"
                 rows={4}
                 placeholder="Type your answer here..."
                 required
@@ -123,7 +123,7 @@ const SurveyModal: React.FC<SurveyModalProps> = ({ open, onClose, survey }) => {
             <button
               type="submit"
               disabled={!answer.trim() || submitting}
-              className="bg-button-info text-form-button-text min-w-[100px] cursor-pointer rounded border-none px-4 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-50"
+              className="bg-button-info text-form-button-text min-w-25 cursor-pointer rounded border-none px-4 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-50"
             >
               {submitting ? "Submitting..." : "Submit"}
             </button>

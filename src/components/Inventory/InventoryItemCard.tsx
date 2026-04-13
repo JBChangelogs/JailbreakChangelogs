@@ -109,7 +109,7 @@ export default function InventoryItemCard({
 
   return (
     <div
-      className={`text-primary-text relative flex min-h-[400px] cursor-pointer flex-col rounded-lg border p-3 transition-all duration-200 ${
+      className={`text-primary-text relative flex min-h-100 cursor-pointer flex-col rounded-lg border p-3 transition-all duration-200 ${
         isOriginalOwner
           ? "hover:shadow-card-shadow border-[#FFD700] bg-[#FFD700]/10 hover:border-[#FFD700]"
           : "border-border-card bg-tertiary-bg"
@@ -343,7 +343,7 @@ export default function InventoryItemCard({
       </div>
 
       {/* Season and Level badges or Duped Warning */}
-      <div className="border-secondary-text mt-3 min-h-[40px] border-t pt-3">
+      <div className="border-secondary-text mt-3 min-h-10 border-t pt-3">
         {isDupedItem ? (
           <div className="flex flex-col items-center gap-1 text-center text-xs">
             <span className="text-secondary-text">This item may be duped.</span>

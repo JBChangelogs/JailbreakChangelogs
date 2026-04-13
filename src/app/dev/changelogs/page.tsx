@@ -82,7 +82,7 @@ export default async function DevChangelogPage() {
         ) : (
           <div className="relative">
             {/* Scrollable Container with max height and custom scrollbar */}
-            <div className="scrollbar-thin scrollbar-track-secondary-bg scrollbar-thumb-button-info/20 hover:scrollbar-thumb-button-info/40 max-h-[1000px] overflow-y-auto pr-4 transition-colors">
+            <div className="scrollbar-thin scrollbar-track-secondary-bg scrollbar-thumb-button-info/20 hover:scrollbar-thumb-button-info/40 max-h-250 overflow-y-auto pr-4 transition-colors">
               <div className="relative">
                 {/* Timeline line */}
                 <div

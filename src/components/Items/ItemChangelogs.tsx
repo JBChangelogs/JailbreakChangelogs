@@ -384,7 +384,7 @@ export default function ItemChangelogs({
         />
 
         <div className="fixed inset-0 flex items-center justify-center p-4">
-          <DialogPanel className="modal-container border-button-info bg-secondary-bg w-full max-w-[480px] min-w-[320px] rounded-lg border shadow-lg">
+          <DialogPanel className="modal-container border-button-info bg-secondary-bg w-full max-w-120 min-w-[320px] rounded-lg border shadow-lg">
             <div className="modal-header text-primary-text flex items-center justify-between px-6 py-4 text-2xl font-bold">
               <span>Voters</span>
               <button
@@ -429,7 +429,7 @@ export default function ItemChangelogs({
                 </button>
               </div>
 
-              <div className="max-h-[400px] space-y-3 overflow-y-auto">
+              <div className="max-h-100 space-y-3 overflow-y-auto">
                 {(votersTab === "up"
                   ? activeVoters?.up || []
                   : activeVoters?.down || []

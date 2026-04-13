@@ -496,7 +496,7 @@ export default function ProfileInventoryTab({
 
       {status === "loaded" && (
         <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-center">
-          <div className="relative flex-1 md:min-w-[280px]">
+          <div className="relative flex-1 md:min-w-70">
             <input
               type="text"
               placeholder="Search inventory items (e.g., Torpedo)"
@@ -525,7 +525,7 @@ export default function ProfileInventoryTab({
             <DropdownMenuTrigger asChild>
               <button
                 type="button"
-                className="border-border-card bg-secondary-bg text-primary-text hover:bg-quaternary-bg inline-flex h-11 w-full items-center justify-between gap-2 rounded-lg border px-3 text-sm transition-all duration-200 focus:outline-none md:w-[200px] md:shrink-0 lg:w-[220px]"
+                className="border-border-card bg-secondary-bg text-primary-text hover:bg-quaternary-bg inline-flex h-11 w-full items-center justify-between gap-2 rounded-lg border px-3 text-sm transition-all duration-200 focus:outline-none md:w-50 md:shrink-0 lg:w-55"
                 aria-label="Filter by type"
               >
                 <span className="truncate">
@@ -540,7 +540,7 @@ export default function ProfileInventoryTab({
             </DropdownMenuTrigger>
             <DropdownMenuContent
               align="start"
-              className="border-border-card bg-secondary-bg text-primary-text scrollbar-thin w-[var(--radix-popper-anchor-width)] min-w-[14rem] overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
+              className="border-border-card bg-secondary-bg text-primary-text scrollbar-thin w-(--radix-popper-anchor-width) min-w-56 overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
             >
               <DropdownMenuRadioGroup
                 value={typeFilter}
@@ -629,7 +629,7 @@ export default function ProfileInventoryTab({
               return (
                 <div
                   key={`${item.id}-${item.copyOrder}`}
-                  className={`text-primary-text relative flex min-h-[400px] flex-col rounded-lg border p-3 transition-all duration-200 ${
+                  className={`text-primary-text relative flex min-h-100 flex-col rounded-lg border p-3 transition-all duration-200 ${
                     item.isOG
                       ? "hover:shadow-card-shadow border-[#FFD700] bg-[#FFD700]/10 hover:border-[#FFD700]"
                       : "border-border-card bg-tertiary-bg"
@@ -779,7 +779,7 @@ export default function ProfileInventoryTab({
                     </div>
                   </div>
 
-                  <div className="border-secondary-text mt-3 min-h-[40px] border-t pt-3">
+                  <div className="border-secondary-text mt-3 min-h-10 border-t pt-3">
                     {item.isDuped ? (
                       <div className="flex flex-col items-center gap-1 text-center text-xs">
                         <span className="text-secondary-text">

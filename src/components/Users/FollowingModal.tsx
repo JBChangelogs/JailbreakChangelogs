@@ -260,7 +260,7 @@ const FollowingModal: React.FC<FollowingModalProps> = ({
       />
 
       <div className="fixed inset-0 flex items-center justify-center p-4">
-        <div className="modal-container border-button-info bg-primary-bg w-full max-w-[480px] min-w-[320px] rounded-lg border shadow-lg">
+        <div className="modal-container border-button-info bg-primary-bg w-full max-w-120 min-w-[320px] rounded-lg border shadow-lg">
           <div className="modal-header text-primary-text flex items-center justify-between px-6 py-4 text-xl font-semibold">
             <span>Following ({following.length})</span>
             <button
@@ -271,7 +271,7 @@ const FollowingModal: React.FC<FollowingModalProps> = ({
             </button>
           </div>
 
-          <div className="modal-content max-h-[400px] overflow-y-auto p-6">
+          <div className="modal-content max-h-100 overflow-y-auto p-6">
             {loading ? (
               <div className="flex justify-center py-4 sm:py-8">
                 <CircularProgress sx={{ color: "var(--color-button-info)" }} />
@@ -346,14 +346,14 @@ const FollowingModal: React.FC<FollowingModalProps> = ({
                               />
                               <div className="min-w-0 flex-1">
                                 <div className="flex items-center gap-1 sm:gap-2">
-                                  <h3 className="text-primary-text group-hover:text-link-hover max-w-[180px] truncate text-sm font-semibold transition-colors sm:max-w-[250px] sm:text-base">
+                                  <h3 className="text-primary-text group-hover:text-link-hover max-w-45 truncate text-sm font-semibold transition-colors sm:max-w-62.5 sm:text-base">
                                     {user.global_name &&
                                     user.global_name !== "None"
                                       ? user.global_name
                                       : user.username}
                                   </h3>
                                 </div>
-                                <p className="text-secondary-text max-w-[180px] truncate text-[10px] sm:max-w-[250px] sm:text-sm">
+                                <p className="text-secondary-text max-w-45 truncate text-[10px] sm:max-w-62.5 sm:text-sm">
                                   @{user.username}
                                 </p>
                               </div>

@@ -1282,7 +1282,7 @@ export default function TradeAds({
                   onChange={(e) => {
                     setSearchQuery(e.target.value);
                   }}
-                  className="border-border-card bg-tertiary-bg text-primary-text placeholder-secondary-text focus:border-button-info h-[56px] w-full rounded-lg border px-4 pr-16 text-sm transition-all duration-300 focus:outline-none"
+                  className="border-border-card bg-tertiary-bg text-primary-text placeholder-secondary-text focus:border-button-info h-14 w-full rounded-lg border px-4 pr-16 text-sm transition-all duration-300 focus:outline-none"
                 />
                 {/* Right side controls container */}
                 <div className="absolute top-1/2 right-3 flex -translate-y-1/2 items-center gap-2">
@@ -1305,7 +1305,7 @@ export default function TradeAds({
                 <DropdownMenuTrigger asChild>
                   <button
                     type="button"
-                    className="border-border-card bg-tertiary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus inline-flex h-[56px] w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all duration-300 focus:ring-1 focus:outline-none sm:w-56"
+                    className="border-border-card bg-tertiary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus inline-flex h-14 w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all duration-300 focus:ring-1 focus:outline-none sm:w-56"
                     aria-label="Search side"
                   >
                     <span>{searchScopeLabel}</span>
@@ -1318,7 +1318,7 @@ export default function TradeAds({
                 </DropdownMenuTrigger>
                 <DropdownMenuContent
                   align="start"
-                  className="w-[var(--radix-dropdown-menu-trigger-width)]"
+                  className="w-(--radix-dropdown-menu-trigger-width)"
                 >
                   <DropdownMenuRadioGroup
                     value={searchScope}
@@ -1381,7 +1381,7 @@ export default function TradeAds({
                 <DropdownMenuTrigger asChild>
                   <button
                     type="button"
-                    className="border-border-card bg-tertiary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus inline-flex h-[56px] w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all duration-300 focus:ring-1 focus:outline-none"
+                    className="border-border-card bg-tertiary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus inline-flex h-14 w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all duration-300 focus:ring-1 focus:outline-none"
                     aria-label="Filter custom types"
                   >
                     <span>{selectedCustomTypeLabel}</span>
@@ -1394,7 +1394,7 @@ export default function TradeAds({
                 </DropdownMenuTrigger>
                 <DropdownMenuContent
                   align="start"
-                  className="w-[var(--radix-dropdown-menu-trigger-width)]"
+                  className="w-(--radix-dropdown-menu-trigger-width)"
                 >
                   <DropdownMenuRadioGroup
                     value={customTypeFilter}
@@ -1421,7 +1421,7 @@ export default function TradeAds({
                   <DropdownMenuTrigger asChild>
                     <button
                       type="button"
-                      className="border-border-card bg-tertiary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus inline-flex h-[56px] w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all duration-300 focus:ring-1 focus:outline-none"
+                      className="border-border-card bg-tertiary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus inline-flex h-14 w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all duration-300 focus:ring-1 focus:outline-none"
                       aria-label="Custom type match mode"
                     >
                       <span>
@@ -1436,7 +1436,7 @@ export default function TradeAds({
                   </DropdownMenuTrigger>
                   <DropdownMenuContent
                     align="start"
-                    className="w-[var(--radix-dropdown-menu-trigger-width)]"
+                    className="w-(--radix-dropdown-menu-trigger-width)"
                   >
                     <DropdownMenuRadioGroup
                       value={customTypeMatchMode}
