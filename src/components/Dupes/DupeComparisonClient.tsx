@@ -266,7 +266,15 @@ export default function DupeComparisonClient({
                     duplicateItem.title,
                   )}
                   className="h-full w-full object-cover"
-                />
+                >
+                  <track
+                    kind="captions"
+                    src="/captions/empty.vtt"
+                    srcLang="en"
+                    label="English"
+                    default
+                  />
+                </video>
               ) : isDriftItem(duplicateItem.categoryTitle) ? (
                 <div className="relative h-full w-full">
                   <Image

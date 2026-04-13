@@ -12,11 +12,11 @@ export interface ProfileDataResult {
   followingCount: number;
   bio: string | null;
   bioLastUpdated: number | null;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // oxlint-disable-next-line @typescript-eslint/no-explicit-any
   comments: any[];
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // oxlint-disable-next-line @typescript-eslint/no-explicit-any
   privateServers: any[];
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // oxlint-disable-next-line @typescript-eslint/no-explicit-any
   favorites: any[];
   favoriteItemDetails: Record<string, unknown>;
   tradeAds: TradeAd[];

@@ -1,4 +1,4 @@
-/* eslint-disable @next/next/no-img-element */
+/* oxlint-disable @next/next/no-img-element */
 import { ImageResponse } from "next/og";
 import { fetchUserByIdForOG } from "@/utils/api";
 import { readFile } from "node:fs/promises";

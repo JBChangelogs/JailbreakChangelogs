@@ -818,6 +818,14 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
                 <div
                   className="border-border-card bg-secondary-bg hover:border-border-focus relative mx-auto w-full max-w-md rounded-lg border shadow-xl"
                   onClick={(event) => event.stopPropagation()}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter" || event.key === " ") {
+                      event.stopPropagation();
+                    }
+                  }}
+                  role="dialog"
+                  aria-modal="true"
+                  tabIndex={-1}
                 >
                   <div className="border-border-card flex items-center justify-between border-b p-4">
                     <h2 className="text-primary-text text-xl font-semibold">

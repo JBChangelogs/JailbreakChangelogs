@@ -49,7 +49,7 @@ export const TotalSimilarItems: React.FC<TotalSimilarItemsProps> = ({
   typeFilter = null,
   range = 2_500_000,
   title,
-  contextLabel, // eslint-disable-line @typescript-eslint/no-unused-vars
+  contextLabel, // oxlint-disable-line @typescript-eslint/no-unused-vars
   baselineDemand = null,
   enableDemandSort = true,
   valuePreference = "cash",

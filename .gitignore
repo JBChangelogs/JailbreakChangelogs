@@ -18,6 +18,7 @@ tsconfig.tsbuildinfo
 .augment
 .windsurf
 .codex
+oxlint-report.txt
 
 # Build artifacts
 coverage/

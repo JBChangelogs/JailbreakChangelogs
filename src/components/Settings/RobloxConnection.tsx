@@ -54,9 +54,9 @@ export const RobloxConnection = ({ userData }: RobloxConnectionProps) => {
       const storedUser = safeGetJSON<UserData>("user", null);
       if (storedUser) {
         const updatedUser = { ...storedUser };
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        // oxlint-disable-next-line @typescript-eslint/no-explicit-any
         delete (updatedUser as any).roblox_id;
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        // oxlint-disable-next-line @typescript-eslint/no-explicit-any
         delete (updatedUser as any).roblox_username;
         safeSetJSON("user", updatedUser);
 

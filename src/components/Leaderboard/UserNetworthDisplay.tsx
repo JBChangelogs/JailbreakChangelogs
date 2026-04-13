@@ -93,17 +93,10 @@ export default function UserNetworthDisplay() {
         </p>
       </div>
 
-      <div
+      <button
+        type="button"
         className="border-border-card bg-secondary-bg hover:border-border-focus mb-0 cursor-pointer rounded-lg border p-3 transition-all duration-200 hover:shadow-lg"
         onClick={() => setIsBreakdownModalOpen(true)}
-        role="button"
-        tabIndex={0}
-        onKeyDown={(e) => {
-          if (e.key === "Enter" || e.key === " ") {
-            e.preventDefault();
-            setIsBreakdownModalOpen(true);
-          }
-        }}
       >
         <div className="flex flex-col space-y-2 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
           <div className="flex items-center space-x-2 sm:space-x-3">
@@ -161,7 +154,7 @@ export default function UserNetworthDisplay() {
             </div>
           </div>
         </div>
-      </div>
+      </button>
 
       <InventoryBreakdownModal
         isOpen={isBreakdownModalOpen}

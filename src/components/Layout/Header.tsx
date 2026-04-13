@@ -439,7 +439,8 @@ export default function Header() {
             </div>
           </Link>
           {!userData.roblox_id && (
-            <div
+            <button
+              type="button"
               onClick={() => {
                 handleDrawerToggle();
                 setLoginModal({ open: true, tab: "roblox" });
@@ -448,7 +449,7 @@ export default function Header() {
             >
               <RobloxIcon className="text-primary-text h-5 w-5" />
               <span className="text-primary-text">Connect Roblox</span>
-            </div>
+            </button>
           )}
           <Link
             href="/settings"
@@ -463,7 +464,8 @@ export default function Header() {
             <span className="text-primary-text">Settings</span>
           </Link>
           {userData?.flags?.some((f) => f.flag === "is_owner") && (
-            <div
+            <button
+              type="button"
               onClick={() => {
                 handleDrawerToggle();
                 setUtmModalOpen(true);
@@ -476,9 +478,10 @@ export default function Header() {
                 inline={true}
               />
               <span className="text-primary-text">Generate UTM Link</span>
-            </div>
+            </button>
           )}
-          <div
+          <button
+            type="button"
             onClick={handleLogout}
             className="hover:bg-button-danger/10 flex cursor-pointer items-center gap-3 px-4 py-3 transition-colors"
             data-umami-event="Logout"
@@ -489,7 +492,7 @@ export default function Header() {
               inline={true}
             />
             <span className="text-button-danger">Logout</span>
-          </div>
+          </button>
         </>
       ) : (
         <div className="px-4 py-3">

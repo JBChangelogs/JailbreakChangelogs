@@ -88,10 +88,7 @@ const ItemRow: React.FC<ItemRowProps> = ({ item, isFirst = false }) => {
   };
 
   return (
-    <div
-      className="bg-tertiary-bg rounded-lg p-4 transition-colors hover:cursor-pointer"
-      onClick={toggleExpanded}
-    >
+    <div className="bg-tertiary-bg rounded-lg p-4 transition-colors">
       {/* Main Item Info */}
       <div className="flex items-center justify-between">
         <div className="flex flex-1 items-center gap-3">
@@ -162,6 +159,7 @@ const ItemRow: React.FC<ItemRowProps> = ({ item, isFirst = false }) => {
         {/* Toggle Button */}
         <div className="flex items-center gap-2">
           <button
+            type="button"
             onClick={toggleExpanded}
             className="text-secondary-text hover:text-primary-text p-1 transition-colors"
             aria-label={isExpanded ? "Collapse details" : "Expand details"}

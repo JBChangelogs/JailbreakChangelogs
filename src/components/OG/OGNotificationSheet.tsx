@@ -582,8 +582,9 @@ export default function OGNotificationSheet({
           processingItemId !== null && "opacity-50",
         )}
       >
-        <div
-          className="min-w-0 flex-1 cursor-pointer pr-4"
+        <button
+          type="button"
+          className="min-w-0 flex-1 cursor-pointer pr-4 text-left"
           onClick={() => toggleNotification(item)}
         >
           <p className="truncate text-sm font-bold">
@@ -619,7 +620,7 @@ export default function OGNotificationSheet({
               {item.type}
             </span>
           </div>
-        </div>
+        </button>
 
         <div className="relative flex shrink-0 items-center">
           {isProcessing ? (

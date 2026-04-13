@@ -444,8 +444,12 @@ const AddServerModal: React.FC<AddServerModalProps> = ({
                   Must be at least 7 days from now.
                 </p>
 
-                <label className="mt-3 flex cursor-pointer items-center space-x-2">
+                <label
+                  htmlFor="server-never-expires"
+                  className="mt-3 flex cursor-pointer items-center space-x-2"
+                >
                   <Checkbox
+                    id="server-never-expires"
                     checked={neverExpires}
                     onCheckedChange={(checked) => {
                       const isChecked = checked === true;

@@ -80,6 +80,7 @@ export default function DupeItemCard({
     });
   };
 
+  /* oxlint-disable jsx-a11y/prefer-tag-over-role */
   return (
     <div
       className={`text-primary-text relative flex cursor-pointer flex-col rounded-lg border p-3 transition-all duration-200 ${
@@ -88,6 +89,14 @@ export default function DupeItemCard({
           : "border-border-card bg-tertiary-bg"
       }`}
       onClick={() => onCardClick(item)}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          onCardClick(item);
+        }
+      }}
     >
       {/* Duplicate Indicator */}
       {isDuplicate && duplicateNumber && (
@@ -320,4 +329,5 @@ export default function DupeItemCard({
       </div>
     </div>
   );
+  /* oxlint-enable jsx-a11y/prefer-tag-over-role */
 }

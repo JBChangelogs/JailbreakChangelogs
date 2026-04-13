@@ -30,10 +30,7 @@ const ValueItemRow: React.FC<ValueItemRowProps> = ({
   const selectedType = getSelectedValueType(item);
 
   return (
-    <div
-      className="bg-tertiary-bg rounded-lg p-4 transition-colors hover:cursor-pointer"
-      onClick={() => setIsExpanded((prev) => !prev)}
-    >
+    <div className="bg-tertiary-bg rounded-lg p-4 transition-colors">
       <div className="flex items-center justify-between gap-3">
         <div className="min-w-0 flex-1">
           <h5 className="text-primary-text truncate text-base font-semibold">
@@ -85,6 +82,7 @@ const ValueItemRow: React.FC<ValueItemRowProps> = ({
             {formatCurrencyValue(getSelectedValue(item))}
           </span>
           <button
+            type="button"
             onClick={(e) => {
               e.stopPropagation();
               setIsExpanded((prev) => !prev);

@@ -164,7 +164,7 @@ export default function SettingsPage() {
     return () => {
       mounted = false;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // oxlint-disable-next-line react-hooks/exhaustive-deps
   }, [isLoading, user?.id]);
 
   const setSaving = (title: string, saving: boolean) => {

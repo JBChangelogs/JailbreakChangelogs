@@ -95,10 +95,19 @@ export default function OGItemCard({
     displayedLevel,
   );
 
+  /* oxlint-disable jsx-a11y/prefer-tag-over-role */
   return (
     <div
       className="border-border-card bg-tertiary-bg text-primary-text hover:shadow-card-shadow relative flex min-h-100 cursor-pointer flex-col rounded-lg border p-3 transition-all duration-200"
       onClick={() => onCardClick(item)}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          onCardClick(item);
+        }
+      }}
     >
       {/* Duplicate Indicator */}
       {isDuplicate && (
@@ -342,4 +351,5 @@ export default function OGItemCard({
       </div>
     </div>
   );
+  /* oxlint-enable jsx-a11y/prefer-tag-over-role */
 }

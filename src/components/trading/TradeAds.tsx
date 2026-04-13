@@ -1368,8 +1368,12 @@ export default function TradeAds({
           </div>
           {showAdvancedFilters && (
             <div className="border-border-card bg-secondary-bg mt-3 grid grid-cols-1 gap-3 rounded-xl border p-3 sm:grid-cols-2 lg:grid-cols-3">
-              <label className="border-border-card bg-tertiary-bg text-primary-text flex cursor-pointer items-center gap-2 rounded-lg border px-3 py-2 text-sm">
+              <label
+                htmlFor="trade-ads-vehicles-only"
+                className="border-border-card bg-tertiary-bg text-primary-text flex cursor-pointer items-center gap-2 rounded-lg border px-3 py-2 text-sm"
+              >
                 <Checkbox
+                  id="trade-ads-vehicles-only"
                   checked={vehicleOnly}
                   onCheckedChange={(checked) => {
                     setVehicleOnly(checked === true);

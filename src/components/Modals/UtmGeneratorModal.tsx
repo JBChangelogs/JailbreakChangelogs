@@ -116,10 +116,14 @@ export const UtmGeneratorModal: React.FC<UtmGeneratorModalProps> = ({
           <div className="max-h-[calc(100vh-200px)] overflow-y-auto p-6">
             <div className="space-y-4">
               <div className="space-y-1">
-                <label className="text-primary-text text-sm font-medium">
+                <label
+                  htmlFor="utm-source"
+                  className="text-primary-text text-sm font-medium"
+                >
                   Campaign Source (optional)
                 </label>
                 <input
+                  id="utm-source"
                   type="text"
                   value={source}
                   onChange={(e) => setSource(e.target.value)}
@@ -132,10 +136,14 @@ export const UtmGeneratorModal: React.FC<UtmGeneratorModalProps> = ({
               </div>
 
               <div className="space-y-1">
-                <label className="text-primary-text text-sm font-medium">
+                <label
+                  htmlFor="utm-medium"
+                  className="text-primary-text text-sm font-medium"
+                >
                   Campaign Medium (optional)
                 </label>
                 <input
+                  id="utm-medium"
                   type="text"
                   value={medium}
                   onChange={(e) => setMedium(e.target.value)}
@@ -148,10 +156,14 @@ export const UtmGeneratorModal: React.FC<UtmGeneratorModalProps> = ({
               </div>
 
               <div className="space-y-1">
-                <label className="text-primary-text text-sm font-medium">
+                <label
+                  htmlFor="utm-campaign"
+                  className="text-primary-text text-sm font-medium"
+                >
                   Campaign Name (optional)
                 </label>
                 <input
+                  id="utm-campaign"
                   type="text"
                   value={campaign}
                   onChange={(e) => setCampaign(e.target.value)}
@@ -164,10 +176,14 @@ export const UtmGeneratorModal: React.FC<UtmGeneratorModalProps> = ({
               </div>
 
               <div className="space-y-1">
-                <label className="text-primary-text text-sm font-medium">
+                <label
+                  htmlFor="utm-term"
+                  className="text-primary-text text-sm font-medium"
+                >
                   Campaign Term (optional)
                 </label>
                 <input
+                  id="utm-term"
                   type="text"
                   value={term}
                   onChange={(e) => setTerm(e.target.value)}
@@ -180,10 +196,14 @@ export const UtmGeneratorModal: React.FC<UtmGeneratorModalProps> = ({
               </div>
 
               <div className="space-y-1">
-                <label className="text-primary-text text-sm font-medium">
+                <label
+                  htmlFor="utm-content"
+                  className="text-primary-text text-sm font-medium"
+                >
                   Campaign Content (optional)
                 </label>
                 <input
+                  id="utm-content"
                   type="text"
                   value={content}
                   onChange={(e) => setContent(e.target.value)}

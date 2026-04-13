@@ -61,7 +61,8 @@ export default function ChangelogsClient({
 
       <div className="grid gap-6">
         {sortedChangelogs.map((changelog) => (
-          <div
+          <button
+            type="button"
             key={changelog.id}
             onClick={() => router.push(`/changelogs/${changelog.id}`)}
             className="border-border-card bg-tertiary-bg hover:shadow-card-shadow cursor-pointer rounded-lg border p-6 transition-all duration-200 hover:shadow-lg"
@@ -92,7 +93,7 @@ export default function ChangelogsClient({
                 </div>
               )}
             </div>
-          </div>
+          </button>
         ))}
       </div>
     </div>

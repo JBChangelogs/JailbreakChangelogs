@@ -115,7 +115,7 @@ export const useOptimizedRealTimeRelativeDate = (
 
   useEffect(() => {
     setRelativeTime(getInitialRelativeTime());
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // oxlint-disable-next-line react-hooks/exhaustive-deps
   }, [timestamp]);
 
   const updateRelativeTime = useCallback(() => {

@@ -737,7 +737,7 @@ export default function ProfileInventoryTab({
                                         document.createElement("div");
                                       defaultAvatar.className =
                                         "flex h-full w-full items-center justify-center";
-                                      defaultAvatar.innerHTML = `<svg class=\"h-5 w-5 text-tertiary-text\" fill=\"currentColor\" viewBox=\"0 0 20 20\"><path fill-rule=\"evenodd\" d=\"M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z\" clip-rule=\"evenodd\" /></svg>`;
+                                      defaultAvatar.innerHTML = `<svg class="h-5 w-5 text-tertiary-text" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" /></svg>`;
                                       parent.appendChild(defaultAvatar);
                                     }
                                   }}

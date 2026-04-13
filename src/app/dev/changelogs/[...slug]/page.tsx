@@ -229,11 +229,13 @@ export default async function ChangelogEntryPage({ params }: PageProps) {
             remarkPlugins={[remarkGfm]}
             rehypePlugins={[rehypeRaw, rehypeSanitize]}
             components={{
-              a: ({ className, ...props }) => (
+              a: ({ className, children, ...props }) => (
                 <a
                   {...props}
                   className={`text-link hover:text-link-hover transition-colors ${className || ""}`}
-                />
+                >
+                  {children}
+                </a>
               ),
               li: ({ children, className, ...props }) => {
                 return (

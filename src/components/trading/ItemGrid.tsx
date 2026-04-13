@@ -110,15 +110,14 @@ export const ItemGrid: React.FC<ItemGridProps> = ({
     };
 
     return (
-      <div
+      <button
+        type="button"
         className={`rounded-lg border-2 border-dashed p-6 text-center transition-colors ${borderColor} ${
           disableInteraction
             ? "cursor-not-allowed opacity-60"
             : "hover:bg-secondary-bg cursor-pointer"
         }`}
         onClick={activateEmpty}
-        role="button"
-        tabIndex={0}
         onKeyDown={(e) => {
           if (disableInteraction) return;
           if (e.key === "Enter" || e.key === " ") {
@@ -146,7 +145,7 @@ export const ItemGrid: React.FC<ItemGridProps> = ({
           No items selected
         </p>
         <p className="text-secondary-text/70 mt-1 text-xs">Browse items here</p>
-      </div>
+      </button>
     );
   }
 
@@ -176,11 +175,13 @@ export const ItemGrid: React.FC<ItemGridProps> = ({
             const shouldShowTooltip = !isCustomTradeItem(item);
 
             const content = (
-              <div
+              <button
+                type="button"
                 onClick={() => {
                   if (disableInteraction || !onRemove) return;
                   onRemove(item);
                 }}
+                className="block w-full text-left"
               >
                 <div className="relative aspect-square">
                   <div className="relative h-full w-full overflow-hidden rounded-lg">
@@ -233,7 +234,7 @@ export const ItemGrid: React.FC<ItemGridProps> = ({
                     {displayName}
                   </p>
                 </div>
-              </div>
+              </button>
             );
 
             return (

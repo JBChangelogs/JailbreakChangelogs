@@ -79,7 +79,10 @@ export function DesktopNotificationToggle() {
         }`}
       >
         <div className="flex min-w-0 flex-col">
-          <label className="text-primary-text text-base font-medium">
+          <label
+            htmlFor="desktop-notifications-toggle"
+            className="text-primary-text text-base font-medium"
+          >
             Desktop Notifications
           </label>
           <p className="text-secondary-text text-sm">{description}</p>
@@ -87,6 +90,7 @@ export function DesktopNotificationToggle() {
 
         <div className="flex shrink-0 items-center gap-2">
           <Switch
+            id="desktop-notifications-toggle"
             checked={enabled}
             onCheckedChange={handleToggle}
             disabled={!!disabledReason && !enabled}

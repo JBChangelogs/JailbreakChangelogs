@@ -59,11 +59,10 @@ export const CalculatorItemGrid: React.FC<CalculatorItemGridProps> = ({
       : "border-status-error/30 hover:border-status-error/60";
 
     return (
-      <div
+      <button
+        type="button"
         className={`border-border-card bg-tertiary-bg hover:border-border-focus cursor-pointer rounded-lg border-2 border-dashed p-6 text-center transition-colors ${borderColor}`}
         onClick={handleClick}
-        role="button"
-        tabIndex={0}
         onKeyDown={(e) => {
           if (e.key === "Enter" || e.key === " ") {
             e.preventDefault();
@@ -90,7 +89,7 @@ export const CalculatorItemGrid: React.FC<CalculatorItemGridProps> = ({
           No items selected
         </p>
         <p className="text-secondary-text/60 mt-1 text-xs">Browse items here</p>
-      </div>
+      </button>
     );
   }
 
@@ -110,7 +109,8 @@ export const CalculatorItemGrid: React.FC<CalculatorItemGridProps> = ({
                 {/* Item Image Container - Click to Remove */}
                 <Tooltip delayDuration={0}>
                   <TooltipTrigger asChild>
-                    <div
+                    <button
+                      type="button"
                       className="relative aspect-square cursor-pointer overflow-hidden rounded-lg"
                       onClick={(e) => {
                         e.stopPropagation();
@@ -134,7 +134,7 @@ export const CalculatorItemGrid: React.FC<CalculatorItemGridProps> = ({
                           </span>
                         </div>
                       )}
-                    </div>
+                    </button>
                   </TooltipTrigger>
                   <TradeItemHoverTooltip
                     side="right"

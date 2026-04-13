@@ -490,7 +490,8 @@ export const UserBadges = ({
   ) {
     const badgeUrl = `https://cdn.discordapp.com/guild-tag-badges/${primary_guild.identity_guild_id}/${primary_guild.badge}`;
     const guildBadgeContent = (
-      <div
+      <button
+        type="button"
         onClick={(e) => e.stopPropagation()}
         className={`${customBgClass || "bg-tertiary-bg/40"} border-border-card text-primary-text hover:bg-quaternary-bg/30 flex cursor-pointer items-center gap-1.5 rounded-lg border px-2.5 shadow-2xl backdrop-blur-xl transition-colors ${containerHeight}`}
       >
@@ -504,7 +505,7 @@ export const UserBadges = ({
         <span className="text-sm leading-none font-semibold">
           {primary_guild.tag}
         </span>
-      </div>
+      </button>
     );
     guildBadge = renderTooltipWrapper(
       "guild",
@@ -516,16 +517,12 @@ export const UserBadges = ({
   if (badges.length === 0 && !guildBadge) return null;
 
   return (
-    <div
-      onClick={(e) => e.stopPropagation()}
-      className={`inline-flex items-stretch gap-2 ${className}`}
-    >
+    <div className={`inline-flex items-stretch gap-2 ${className}`}>
       {badges.length > 0 &&
         (noContainer ? (
           <div className="flex items-center gap-1">{badges}</div>
         ) : (
           <div
-            onClick={(e) => e.stopPropagation()}
             className={`${customBgClass || "bg-tertiary-bg/40"} border-border-card inline-flex items-center gap-2 rounded-lg border px-2.5 shadow-2xl backdrop-blur-xl ${containerHeight}`}
           >
             {badges}

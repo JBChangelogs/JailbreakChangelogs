@@ -107,6 +107,7 @@ export default function InventoryItemCard({
     };
   }, [item.item_id]);
 
+  /* oxlint-disable jsx-a11y/prefer-tag-over-role */
   return (
     <div
       className={`text-primary-text relative flex min-h-100 cursor-pointer flex-col rounded-lg border p-3 transition-all duration-200 ${
@@ -115,6 +116,14 @@ export default function InventoryItemCard({
           : "border-border-card bg-tertiary-bg"
       }`}
       onClick={() => onCardClick(item)}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          onCardClick(item);
+        }
+      }}
     >
       {/* Duplicate Indicator */}
       {isDuplicate && (
@@ -389,4 +398,5 @@ export default function InventoryItemCard({
       </div>
     </div>
   );
+  /* oxlint-enable jsx-a11y/prefer-tag-over-role */
 }

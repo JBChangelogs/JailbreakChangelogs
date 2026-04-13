@@ -65,13 +65,19 @@ const ItemSelectionModal: React.FC<ItemSelectionModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-60 flex items-center justify-center">
-      <div className="absolute inset-0 bg-black/75" onClick={onClose} />
+      <button
+        type="button"
+        className="absolute inset-0 bg-black/75"
+        onClick={onClose}
+        aria-label="Close item selection modal"
+      />
       <div className="relative mx-4 w-full max-w-md rounded-lg shadow-xl">
         <div className="flex items-center justify-between border-b p-4">
           <h2 className="text-primary-text text-xl font-semibold">
             Select Item
           </h2>
           <button
+            type="button"
             onClick={onClose}
             className="text-muted hover:text-primary-text cursor-pointer transition-colors"
           >

@@ -37,12 +37,12 @@ At this point, you're ready to make your changes! Feel free to ask for help; eve
 
 Your patch should follow the same coding conventions & pass the same code quality checks as the rest of the project. Make sure all features work as intended before you make a Pull Request.
 
-## Formatting
+## Formatting & Linting
 
-We enforce ESLint + Prettier via Git hooks (Husky + lint-staged).
+We enforce Oxlint + Oxfmt via Git hooks (Husky + lint-staged).
 
 - On commit: staged files are auto-fixed and formatted
-  - Runs `eslint --fix` on staged JS/TS files, then `prettier --write` on all staged files
+  - Runs `oxlint --fix` and `oxfmt` on staged JS/TS files
   - If issues remain, the commit is blocked; fix and re-commit
 
 - On push: formatting is verified
@@ -51,8 +51,10 @@ We enforce ESLint + Prettier via Git hooks (Husky + lint-staged).
 Manual commands (if needed):
 
 ```
-bun run format       # write formatting changes
-bun run format:check # check formatting without writing
+bun run lint         # lint the repo
+bun run format       # write formatting changes (src/)
+bun run format:check # check formatting without writing (src/)
+bun run check        # type-check + lint + format check
 ```
 
 Notes:
@@ -61,24 +63,17 @@ Notes:
 
 ### Editor setup
 
-- Install Prettier and ESLint extensions in your editor.
-  - VS Code: "Prettier - Code Formatter" (esbenp.prettier-vscode) and "ESLint" (dbaeumer.vscode-eslint)
+- Install an Oxlint/Oxc extension in your editor.
+  - VS Code: "Oxc" (official extension)
 
 #### VS Code Configuration
 
 **Settings (User Settings JSON):**
-Add these to your VS Code User Settings (Settings JSON):
+Add these to your VS Code User Settings (Settings JSON) if you want on-save formatting:
 
 ```json
 {
   "editor.formatOnSave": true,
-  "eslint.validate": [
-    "javascript",
-    "javascriptreact",
-    "typescript",
-    "typescriptreact"
-  ],
-  "eslint.format.enable": true,
   "tailwindCSS.experimental.classRegex": [
     ["className\\s*:\\s*['\"]([^'\"]*)['\"]"]
   ]
@@ -90,11 +85,9 @@ If you want VS Code to prompt you to install recommended extensions when opening
 
 ```json
 {
-  "recommendations": ["esbenp.prettier-vscode", "dbaeumer.vscode-eslint"]
+  "recommendations": ["oxc.oxc"]
 }
 ```
-
-- The Prettier extension will use the project-local Prettier version by default.
 
 ## Make a Pull Request
 

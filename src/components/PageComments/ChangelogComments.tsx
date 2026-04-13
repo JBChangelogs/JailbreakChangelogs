@@ -1448,7 +1448,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                         depth === 0 ? "py-2" : "py-1.5"
                       }`}
                     >
-                      {/* 
+                      {/*
                          Discord-style Reply Context 
                          Shows which comment this is replying to with a curved line transition.
                       */}
@@ -1459,11 +1459,12 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                             <div className="border-secondary-text/40 h-3 w-5 translate-x-2 translate-y-1.5 rounded-tl-md border-t-2 border-l-2" />
                           </div>
 
-                          {/* 
+                          {/*
                              Parent Content Preview
                              Allows users to jump back to the parent comment.
                           */}
-                          <div
+                          <button
+                            type="button"
                             className="text-secondary-text/80 -ml-1 flex min-w-0 cursor-pointer items-center gap-1.5 overflow-hidden rounded px-1 text-xs transition-opacity hover:opacity-100"
                             onClick={() => {
                               const el = document.getElementById(
@@ -1526,12 +1527,12 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                                 ),
                               }}
                             />
-                          </div>
+                          </button>
                         </div>
                       )}
 
                       <div className="flex gap-2 sm:gap-3">
-                        {/* 
+                        {/*
                            Avatar Gutter
                            Left side of the comment containing the user's avatar.
                         */}
@@ -1590,7 +1591,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                           )}
                         </div>
 
-                        {/* 
+                        {/*
                            Content Area
                            Right side of the comment containing author info, timestamp, and text.
                         */}

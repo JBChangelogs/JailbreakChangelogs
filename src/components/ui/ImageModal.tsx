@@ -31,17 +31,10 @@ export default function ImageModal({
   return (
     <>
       {/* Clickable Image */}
-      <div
+      <button
+        type="button"
         className={`group relative cursor-pointer transition-transform hover:scale-105 ${className}`}
         onClick={openModal}
-        role="button"
-        tabIndex={0}
-        onKeyDown={(e) => {
-          if (e.key === "Enter" || e.key === " ") {
-            e.preventDefault();
-            openModal();
-          }
-        }}
       >
         <Image
           src={src}
@@ -75,7 +68,7 @@ export default function ImageModal({
         <div className="absolute bottom-2 left-2 rounded bg-black/60 px-2 py-1 text-xs text-white opacity-0 transition-opacity duration-200 group-hover:opacity-100">
           Click to expand
         </div>
-      </div>
+      </button>
 
       {/* Modal Overlay */}
       <AnimatePresence>

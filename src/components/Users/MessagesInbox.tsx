@@ -3738,7 +3738,8 @@ export default function MessagesInbox() {
                                     ? getDisplayName(parentSender)
                                     : "Unknown";
                                   return (
-                                    <div
+                                    <button
+                                      type="button"
                                       className="text-secondary-text/80 flex min-w-0 cursor-pointer items-center gap-1.5 overflow-hidden rounded px-1 text-xs transition-opacity hover:opacity-100"
                                       onClick={() => {
                                         const el = document.getElementById(
@@ -3806,7 +3807,7 @@ export default function MessagesInbox() {
                                       <span className="text-secondary-text max-w-50 truncate sm:max-w-100">
                                         {formatMessageText(parentMsg.content)}
                                       </span>
-                                    </div>
+                                    </button>
                                   );
                                 })()}
                               </div>
@@ -3884,7 +3885,6 @@ export default function MessagesInbox() {
                                         autoComplete="off"
                                         spellCheck="false"
                                         autoCapitalize="off"
-                                        autoFocus
                                         onKeyDown={(e) => {
                                           if (e.key === "Escape") {
                                             setEditingMessageId(null);

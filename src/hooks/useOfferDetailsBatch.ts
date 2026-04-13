@@ -91,7 +91,7 @@ export function useOfferDetailsBatch(events: OfferDetailsBatchEntry[]) {
     };
 
     void run();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // oxlint-disable-next-line react-hooks/exhaustive-deps
   }, [JSON.stringify(payload)]);
 
   return { map, setMap, status };

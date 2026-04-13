@@ -17,7 +17,11 @@ export const UserDetailsTooltip: React.FC<UserDetailsTooltipProps> = ({
   currentUserId,
 }) => {
   return (
-    <div className="p-4" onClick={(e) => e.stopPropagation()}>
+    <div
+      className="p-4"
+      onMouseDown={(e) => e.stopPropagation()}
+      role="presentation"
+    >
       <div className="flex gap-3">
         {/* User Avatar */}
         <Link

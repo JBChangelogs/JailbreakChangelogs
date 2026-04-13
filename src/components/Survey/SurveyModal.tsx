@@ -76,15 +76,14 @@ const SurveyModal: React.FC<SurveyModalProps> = ({ open, onClose, survey }) => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
-      <div
+      <button
+        type="button"
         className="fixed inset-0 bg-black/30 backdrop-blur-sm"
         onClick={onClose}
+        aria-label="Close survey modal"
       />
 
-      <div
-        className="modal-container border-button-info bg-secondary-bg relative w-full max-w-120 min-w-[320px] rounded-lg border shadow-lg"
-        onClick={(e: React.MouseEvent) => e.stopPropagation()}
-      >
+      <div className="modal-container border-button-info bg-secondary-bg relative w-full max-w-120 min-w-[320px] rounded-lg border shadow-lg">
         <div className="modal-header text-primary-text px-6 py-4 text-xl font-semibold">
           Survey
         </div>

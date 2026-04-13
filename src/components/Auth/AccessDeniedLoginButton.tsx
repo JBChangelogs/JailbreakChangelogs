@@ -1,6 +1,7 @@
 "use client";
 
 import type { MouseEvent } from "react";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
 export default function AccessDeniedLoginButton() {
@@ -13,9 +14,9 @@ export default function AccessDeniedLoginButton() {
 
   return (
     <Button asChild className="w-full sm:w-auto">
-      <a href="/api/auth/discord" onClick={handleClick}>
+      <Link href="/api/auth/discord" onClick={handleClick}>
         Login
-      </a>
+      </Link>
     </Button>
   );
 }

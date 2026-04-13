@@ -102,13 +102,17 @@ const AdBlockPrompt = () => {
 
   // Show modal immediately
   return (
-    <div
-      onClick={handleBackdropClick}
-      className="bg-overlay-bg fixed inset-0 z-2147483647 flex items-center justify-center p-4 backdrop-blur-sm"
-    >
-      <div className="bg-secondary-bg border-button-info relative mx-auto w-full max-w-150 overflow-hidden rounded-xl border shadow-xl">
+    <div className="fixed inset-0 z-2147483647 flex items-center justify-center p-4">
+      <button
+        type="button"
+        className="bg-overlay-bg absolute inset-0 backdrop-blur-sm"
+        onClick={handleBackdropClick}
+        aria-label="Close ad block prompt"
+      />
+      <div className="bg-secondary-bg border-button-info relative z-10 mx-auto w-full max-w-150 overflow-hidden rounded-xl border shadow-xl">
         {/* Close button */}
         <button
+          type="button"
           onClick={handleModalDismiss}
           className="text-secondary-text hover:text-primary-text absolute top-4 right-4 z-10 cursor-pointer transition-colors"
           aria-label="Close"

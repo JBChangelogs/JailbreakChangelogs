@@ -26,13 +26,29 @@ const ChangelogMediaEmbed: React.FC<ChangelogMediaEmbedProps> = ({
     case "video":
       return (
         <div className="my-4 w-full max-w-2xl">
-          <video src={url} controls className="w-full" />
+          <video src={url} controls className="w-full">
+            <track
+              kind="captions"
+              src="/captions/empty.vtt"
+              srcLang="en"
+              label="English"
+              default
+            />
+          </video>
         </div>
       );
     case "audio":
       return (
         <div className="my-4 w-full max-w-2xl">
-          <audio src={url} controls className="w-full" />
+          <audio src={url} controls className="w-full">
+            <track
+              kind="captions"
+              src="/captions/empty.vtt"
+              srcLang="en"
+              label="English"
+              default
+            />
+          </audio>
         </div>
       );
     default:

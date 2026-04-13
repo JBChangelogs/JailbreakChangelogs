@@ -1,7 +1,7 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, Suspense } from "react";
+import Link from "next/link";
 import { Icon } from "../ui/IconWrapper";
 import ReportIssueButton from "@/components/ReportIssue/ReportIssueButton";
 import {
@@ -253,7 +253,7 @@ export default function Footer({ githubUrl, versionInfo }: FooterProps) {
           </Tooltip>
           <Tooltip>
             <TooltipTrigger asChild>
-              <a
+              <Link
                 href="/supporting"
                 className="text-link hover:bg-quaternary-bg hover:text-link-hover rounded-full p-2 transition-colors duration-200"
                 aria-label="Support Us"
@@ -263,7 +263,7 @@ export default function Footer({ githubUrl, versionInfo }: FooterProps) {
                   className="text-primary-text h-6 w-6"
                   inline={true}
                 />
-              </a>
+              </Link>
             </TooltipTrigger>
             <TooltipContent>Support Us</TooltipContent>
           </Tooltip>

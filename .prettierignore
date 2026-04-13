@@ -1,6 +1,0 @@
-# Ignore all files and folders in the root
-/*
-.*
-
-# But do not ignore the src folder
-!src/

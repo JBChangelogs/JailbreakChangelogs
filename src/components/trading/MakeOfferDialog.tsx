@@ -677,10 +677,14 @@ export function MakeOfferDialog({
                   </div>
 
                   <div className="mt-4">
-                    <label className="text-secondary-text mb-1 block text-xs font-medium">
+                    <label
+                      htmlFor="make-offer-note"
+                      className="text-secondary-text mb-1 block text-xs font-medium"
+                    >
                       Note (optional)
                     </label>
                     <textarea
+                      id="make-offer-note"
                       value={note}
                       onChange={(e) => setNote(e.target.value)}
                       placeholder="Add a note for the trade owner (optional)"

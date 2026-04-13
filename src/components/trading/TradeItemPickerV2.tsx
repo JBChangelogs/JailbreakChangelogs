@@ -619,6 +619,7 @@ export default function TradeItemPickerV2({
               }
             };
 
+            /* oxlint-disable jsx-a11y/prefer-tag-over-role */
             return (
               <div
                 key={`${item.id}-${item.name}`}
@@ -798,6 +799,7 @@ export default function TradeItemPickerV2({
                 )}
               </div>
             );
+            /* oxlint-enable jsx-a11y/prefer-tag-over-role */
           })}
         </div>
       )}

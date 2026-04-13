@@ -129,12 +129,16 @@ export default function XpCalculatorForm({
 
       <div className="mb-6 grid grid-cols-1 gap-6 md:grid-cols-2">
         <div>
-          <label className="text-primary-text mb-2 block text-sm font-medium">
+          <label
+            htmlFor="xp-current-level"
+            className="text-primary-text mb-2 block text-sm font-medium"
+          >
             Current Level
           </label>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button
+                id="xp-current-level"
                 type="button"
                 className="border-border-card bg-primary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus flex h-14 w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all duration-300 focus:ring-1 focus:outline-none"
                 aria-label="Select your level"
@@ -179,10 +183,14 @@ export default function XpCalculatorForm({
         </div>
 
         <div>
-          <label className="text-primary-text mb-2 block text-sm font-medium">
+          <label
+            htmlFor="xp-current-progress"
+            className="text-primary-text mb-2 block text-sm font-medium"
+          >
             XP in Current Level
           </label>
           <input
+            id="xp-current-progress"
             type="number"
             min="0"
             max={maxXpForCurrentLevel}
@@ -208,8 +216,12 @@ export default function XpCalculatorForm({
           These options apply to the entire remaining season.
         </p>
         <div className="space-y-3">
-          <label className="text-primary-text flex cursor-pointer items-center gap-3">
+          <label
+            htmlFor="include-daily-xp"
+            className="text-primary-text flex cursor-pointer items-center gap-3"
+          >
             <Checkbox
+              id="include-daily-xp"
               checked={includeDailyXp}
               onCheckedChange={(checked) =>
                 onIncludeDailyXpChange(checked === true)
@@ -219,8 +231,12 @@ export default function XpCalculatorForm({
               <span className="font-medium">Include Daily XP</span>
             </div>
           </label>
-          <label className="text-primary-text flex cursor-pointer items-center gap-3">
+          <label
+            htmlFor="include-contracts"
+            className="text-primary-text flex cursor-pointer items-center gap-3"
+          >
             <Checkbox
+              id="include-contracts"
               checked={includeContracts}
               onCheckedChange={(checked) =>
                 onIncludeContractsChange(checked === true)
