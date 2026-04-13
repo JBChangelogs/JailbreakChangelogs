@@ -43,7 +43,12 @@ import {
 import { useOptimizedRealTimeRelativeDate } from "@/hooks/useSharedTimer";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { sanitizeText } from "@/utils/sanitizeText";
-import { PUBLIC_API_URL, searchUsers } from "@/utils/api";
+import {
+  PUBLIC_API_URL,
+  getRateLimitMessage,
+  getResponseErrorMessage,
+  searchUsers,
+} from "@/utils/api";
 import { respondToTradeOfferV2 } from "@/utils/trading";
 import { buildApiUrlWithDevToken } from "@/utils/apiDevToken";
 import {
@@ -1381,7 +1386,12 @@ export default function MessagesInbox() {
         );
 
         if (!response.ok) {
-          throw new Error("Failed to fetch conversations");
+          throw new Error(
+            await getResponseErrorMessage(
+              response,
+              "Failed to load conversations",
+            ),
+          );
         }
 
         const rawBody = await response.text();
@@ -1488,7 +1498,11 @@ export default function MessagesInbox() {
         setTotalConversations(null);
         setSelectedUserId(null);
 
-        toast.error("Failed to load conversations");
+        toast.error(
+          error instanceof Error
+            ? error.message
+            : "Failed to load conversations",
+        );
       } finally {
         setIsLoadingConversations(false);
       }
@@ -1621,7 +1635,9 @@ export default function MessagesInbox() {
       });
 
       if (!response.ok) {
-        throw new Error("Failed to fetch messages");
+        throw new Error(
+          await getResponseErrorMessage(response, "Failed to load messages"),
+        );
       }
 
       const rawBody = await response.text();
@@ -1680,7 +1696,11 @@ export default function MessagesInbox() {
     } catch (error) {
       messagesPageRef.current = currentPage;
       console.error("Error loading older messages:", error);
-      toast.error("Failed to load older messages");
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "Failed to load older messages",
+      );
     } finally {
       setIsLoadingOlderMessages(false);
     }
@@ -1754,7 +1774,9 @@ export default function MessagesInbox() {
         if (!isCancelled) {
           console.error("Error fetching messages:", error);
           setMessages([]);
-          toast.error("Failed to load messages");
+          toast.error(
+            error instanceof Error ? error.message : "Failed to load messages",
+          );
         }
       } finally {
         if (!isCancelled) {
@@ -2257,7 +2279,11 @@ export default function MessagesInbox() {
           ? `Message too long (max ${parsedBody.limit} characters).`
           : null;
       const fallbackStatusMessage =
-        response.status === 401 ? "Unauthorized" : "Failed to send message";
+        response.status === 401
+          ? "Unauthorized"
+          : response.status === 429
+            ? getRateLimitMessage()
+            : "Failed to send message";
 
       if (!response.ok || !parsedBody?.success || !parsedBody.message) {
         if (parsedBody?.error === "unmessageable") {
@@ -2610,7 +2636,9 @@ export default function MessagesInbox() {
       );
 
       if (!response.ok) {
-        throw new Error("Failed to delete message");
+        throw new Error(
+          await getResponseErrorMessage(response, "Failed to delete message"),
+        );
       }
 
       toast.success("Message deleted", { id: toastId });

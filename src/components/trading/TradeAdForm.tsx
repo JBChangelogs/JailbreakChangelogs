@@ -28,6 +28,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { getResponseErrorMessage } from "@/utils/api";
 import { buildApiUrlWithDevToken } from "@/utils/apiDevToken";
 
 interface TradeAdFormProps {
@@ -651,7 +652,12 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
         }
         return;
       } else if (!response.ok) {
-        throw new Error(responseMessage || "Failed to create trade ad");
+        throw new Error(
+          await getResponseErrorMessage(
+            response,
+            responseMessage || "Failed to create trade ad",
+          ),
+        );
       } else {
         toast.success("Trade ad created successfully!", {
           id: creatingToastId ?? undefined,

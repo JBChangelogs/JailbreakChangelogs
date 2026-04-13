@@ -3,7 +3,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { CommentData } from "@/utils/api";
+import { CommentData, getResponseErrorMessage } from "@/utils/api";
 import { UserData } from "@/types/auth";
 import { DiscordIcon } from "@/components/Icons/DiscordIcon";
 import { Icon } from "@/components/ui/IconWrapper";
@@ -544,7 +544,10 @@ export default function TradeDetailsClient({
 
         setOfferState({
           status: "error",
-          error: "Failed to check offer status",
+          error: await getResponseErrorMessage(
+            response,
+            "Failed to check offer status",
+          ),
         });
       } catch (err) {
         console.error("Error checking offer status:", err);

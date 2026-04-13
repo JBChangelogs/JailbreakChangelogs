@@ -116,6 +116,45 @@ function getErrorMessageFromResponse(data: unknown, fallback: string): string {
   return fallback;
 }
 
+export function getRateLimitMessage(): string {
+  return "Too many requests. Please try again shortly.";
+}
+
+export async function getResponseErrorMessage(
+  response: Response,
+  fallback: string,
+): Promise<string> {
+  const rawBody = await response.text();
+  let parsedBody: unknown = null;
+
+  if (rawBody.trim()) {
+    try {
+      parsedBody = JSON.parse(rawBody) as unknown;
+    } catch {
+      parsedBody = null;
+    }
+  }
+
+  const errorMessage = getErrorMessageFromResponse(parsedBody, fallback);
+
+  if (response.status === 429) {
+    const normalized = errorMessage.trim().toLowerCase();
+    if (
+      !normalized ||
+      normalized === fallback.trim().toLowerCase() ||
+      normalized === "too many requests"
+    ) {
+      return getRateLimitMessage();
+    }
+  }
+
+  if (errorMessage.trim()) {
+    return errorMessage;
+  }
+
+  return fallback;
+}
+
 function isPrivateProfileResponse(
   data: unknown,
   errorMessage: string,
@@ -2000,19 +2039,15 @@ export async function fetchOGSearchData(
           };
         }
 
-        // Don't retry on client errors (4xx) except 429 (rate limit)
-        if (
-          response.status >= 400 &&
-          response.status < 500 &&
-          response.status !== 429
-        ) {
+        // Don't retry on client errors (4xx)
+        if (response.status >= 400 && response.status < 500) {
           return {
             error: "api_error",
             message: `API returned ${response.status}. Please try again later.`,
           };
         }
 
-        // For server errors (5xx) and rate limits (429), throw to trigger retry
+        // For server errors (5xx), throw to trigger retry
         throw new Error(`API returned ${response.status}`);
       }
 

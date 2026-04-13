@@ -15,6 +15,7 @@ import { toast } from "sonner";
 import { TradeAdForm } from "./TradeAdForm";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { buildApiUrlWithDevToken } from "@/utils/apiDevToken";
+import { shouldRetryResponseStatus } from "@/utils/fetchWithRetry";
 import { isCustomTradeItem, tradeItemIdsEqual } from "@/utils/tradeItems";
 import { Checkbox } from "@/components/ui/checkbox";
 import { INVENTORY_API_SOURCE_HEADER, INVENTORY_API_URL } from "@/utils/api";
@@ -224,7 +225,6 @@ export default function TradeAds({
 
       try {
         const url = `${INVENTORY_API_URL}/user/inventory?id=${encodeURIComponent(robloxId)}&nocache=false`;
-        const retryStatuses = new Set([408, 425, 429, 500, 502, 503, 504]);
         const maxAttempts = 3;
 
         let response: Response | null = null;
@@ -261,7 +261,7 @@ export default function TradeAds({
           if (
             response &&
             !response.ok &&
-            retryStatuses.has(response.status) &&
+            shouldRetryResponseStatus(response.status) &&
             attempt < maxAttempts - 1
           ) {
             response.body?.cancel();

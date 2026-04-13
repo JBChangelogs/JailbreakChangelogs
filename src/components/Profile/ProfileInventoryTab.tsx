@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/IconWrapper";
 import { INVENTORY_API_SOURCE_HEADER, INVENTORY_API_URL } from "@/utils/api";
+import { shouldRetryResponseStatus } from "@/utils/fetchWithRetry";
 import Image from "next/image";
 import { Pagination } from "@/components/ui/Pagination";
 import {
@@ -160,7 +161,6 @@ export default function ProfileInventoryTab({
 
       try {
         const url = `${INVENTORY_API_URL}/user/inventory?id=${encodeURIComponent(trimmedId)}&nocache=false`;
-        const retryStatuses = new Set([408, 425, 429, 500, 502, 503, 504]);
         const maxAttempts = 3;
 
         let response: Response | null = null;
@@ -195,7 +195,7 @@ export default function ProfileInventoryTab({
           if (
             response &&
             !response.ok &&
-            retryStatuses.has(response.status) &&
+            shouldRetryResponseStatus(response.status) &&
             attempt < maxAttempts - 1
           ) {
             response.body?.cancel();

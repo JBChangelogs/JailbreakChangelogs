@@ -5,7 +5,13 @@ interface FetchWithRetryOptions {
   retryOnStatuses?: number[];
 }
 
-const DEFAULT_RETRY_STATUSES = [408, 425, 429, 500, 502, 503, 504];
+export const TRANSIENT_RETRY_STATUSES = new Set([408, 425, 500, 502, 503, 504]);
+
+const DEFAULT_RETRY_STATUSES = [...TRANSIENT_RETRY_STATUSES];
+
+export function shouldRetryResponseStatus(status: number): boolean {
+  return TRANSIENT_RETRY_STATUSES.has(status);
+}
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 

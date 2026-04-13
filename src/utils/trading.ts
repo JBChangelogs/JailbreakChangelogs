@@ -1,3 +1,6 @@
+import { getResponseErrorMessage } from "@/utils/api";
+import { buildApiUrlWithDevToken } from "@/utils/apiDevToken";
+
 export const deleteTradeAd = async (tradeId: number): Promise<boolean> => {
   try {
     const baseUrl = process.env.NEXT_PUBLIC_API_URL;
@@ -21,7 +24,9 @@ export const deleteTradeAd = async (tradeId: number): Promise<boolean> => {
       if (response.status === 401) {
         throw new Error("Unauthorized");
       }
-      throw new Error("Failed to delete trade ad");
+      throw new Error(
+        await getResponseErrorMessage(response, "Failed to delete trade ad"),
+      );
     }
 
     return true;
@@ -72,22 +77,12 @@ export const createTradeOffer = async (
   });
 
   if (!response.ok) {
-    let errorMessage = "Failed to create trade offer";
-    try {
-      const body = (await response.json()) as unknown;
-      if (body && typeof body === "object") {
-        const message = (body as Record<string, unknown>).message;
-        if (typeof message === "string" && message.trim()) {
-          errorMessage = message;
-        }
-      }
-    } catch {
-      // Ignore parse errors.
-    }
     if (response.status === 401) {
       throw new Error("Unauthorized");
     }
-    throw new Error(errorMessage);
+    throw new Error(
+      await getResponseErrorMessage(response, "Failed to create trade offer"),
+    );
   }
 
   try {
@@ -168,7 +163,9 @@ export const fetchTradeOffers = async (
     if (response.status === 401) {
       throw new Error("Unauthorized");
     }
-    throw new Error("Failed to fetch trade offers");
+    throw new Error(
+      await getResponseErrorMessage(response, "Failed to fetch trade offers"),
+    );
   }
 
   const body = (await response.json()) as unknown;
@@ -209,27 +206,12 @@ export const respondToTradeOfferV2 = async (
   });
 
   if (!response.ok) {
-    let errorMessage = "Failed to update offer status";
-    try {
-      const body = (await response.json()) as unknown;
-      if (body && typeof body === "object") {
-        const message = (body as Record<string, unknown>).message;
-        if (typeof message === "string" && message.trim()) {
-          errorMessage = message;
-        } else {
-          const error = (body as Record<string, unknown>).error;
-          if (typeof error === "string" && error.trim()) {
-            errorMessage = error;
-          }
-        }
-      }
-    } catch {
-      // Ignore parse errors.
-    }
     if (response.status === 401) {
       throw new Error("Unauthorized");
     }
-    throw new Error(errorMessage);
+    throw new Error(
+      await getResponseErrorMessage(response, "Failed to update offer status"),
+    );
   }
 
   try {
@@ -263,26 +245,10 @@ export const deleteTradeOfferV2 = async (
     if (response.status === 401) {
       throw new Error("Unauthorized");
     }
-    let errorMessage = "Failed to delete offer";
-    try {
-      const body = (await response.json()) as unknown;
-      if (body && typeof body === "object") {
-        const message = (body as Record<string, unknown>).message;
-        if (typeof message === "string" && message.trim()) {
-          errorMessage = message;
-        } else {
-          const error = (body as Record<string, unknown>).error;
-          if (typeof error === "string" && error.trim()) {
-            errorMessage = error;
-          }
-        }
-      }
-    } catch {
-      // Ignore parse errors.
-    }
-    throw new Error(errorMessage);
+    throw new Error(
+      await getResponseErrorMessage(response, "Failed to delete offer"),
+    );
   }
 
   return true;
 };
-import { buildApiUrlWithDevToken } from "@/utils/apiDevToken";
