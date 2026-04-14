@@ -128,185 +128,187 @@ export default function ValuesChangelogPage() {
   });
 
   return (
-    <ThemeProvider theme={darkTheme}>
-      <main className="min-h-screen">
-        <NitroValuesChangelogsRailAd />
-        <div className="container mx-auto mb-8 px-4 sm:px-6">
-          <Breadcrumb />
-          <ValuesChangelogHeader />
+    <>
+      <NitroValuesChangelogsRailAd />
+      <ThemeProvider theme={darkTheme}>
+        <main className="min-h-screen">
+          <div className="container mx-auto mb-8 px-4 sm:px-6">
+            <Breadcrumb />
+            <ValuesChangelogHeader />
 
-          {/* H1 heading for SEO */}
-          <h1 className="sr-only">
-            Roblox Jailbreak Values Changelogs & History
-          </h1>
+            {/* H1 heading for SEO */}
+            <h1 className="sr-only">
+              Roblox Jailbreak Values Changelogs & History
+            </h1>
 
-          {loading ? (
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-              {[...Array(10)].map((_, i) => (
-                <div
-                  key={i}
-                  className="border-border-card bg-tertiary-bg rounded-lg border p-4"
-                >
-                  <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
-                    <div>
-                      <Skeleton variant="text" width={120} height={24} />
+            {loading ? (
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                {[...Array(10)].map((_, i) => (
+                  <div
+                    key={i}
+                    className="border-border-card bg-tertiary-bg rounded-lg border p-4"
+                  >
+                    <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
+                      <div>
+                        <Skeleton variant="text" width={120} height={24} />
+                        <Skeleton
+                          variant="text"
+                          width={80}
+                          height={20}
+                          className="mt-1"
+                        />
+                      </div>
                       <Skeleton
                         variant="text"
-                        width={80}
+                        width={150}
                         height={20}
-                        className="mt-1"
+                        className="mt-2 lg:mt-0"
                       />
                     </div>
-                    <Skeleton
-                      variant="text"
-                      width={150}
-                      height={20}
-                      className="mt-2 lg:mt-0"
-                    />
                   </div>
-                </div>
-              ))}
-            </div>
-          ) : error ? (
-            <div className="text-button-danger mt-8 text-center">{error}</div>
-          ) : (
-            <>
-              <div className="mb-4 flex flex-col md:flex-row md:items-center md:justify-between">
-                <p className="text-secondary-text mb-2 md:mb-0">
-                  Total Changelogs: {changelogs.length}
-                </p>
-                <Button
-                  onClick={toggleSortOrder}
-                  size="sm"
-                  className="text-primary-text border-border-card bg-tertiary-bg/40 hover:bg-quaternary-bg/30 h-6 rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl"
-                >
-                  {sortOrder === "newest" ? (
-                    <Icon
-                      icon="heroicons-outline:arrow-down"
-                      className="h-4 w-4"
-                      inline={true}
-                    />
-                  ) : (
-                    <Icon
-                      icon="heroicons-outline:arrow-up"
-                      className="h-4 w-4"
-                      inline={true}
-                    />
-                  )}
-                  {sortOrder === "newest" ? "Newest First" : "Oldest First"}
-                </Button>
+                ))}
               </div>
+            ) : error ? (
+              <div className="text-button-danger mt-8 text-center">{error}</div>
+            ) : (
+              <>
+                <div className="mb-4 flex flex-col md:flex-row md:items-center md:justify-between">
+                  <p className="text-secondary-text mb-2 md:mb-0">
+                    Total Changelogs: {changelogs.length}
+                  </p>
+                  <Button
+                    onClick={toggleSortOrder}
+                    size="sm"
+                    className="text-primary-text border-border-card bg-tertiary-bg/40 hover:bg-quaternary-bg/30 h-6 rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl"
+                  >
+                    {sortOrder === "newest" ? (
+                      <Icon
+                        icon="heroicons-outline:arrow-down"
+                        className="h-4 w-4"
+                        inline={true}
+                      />
+                    ) : (
+                      <Icon
+                        icon="heroicons-outline:arrow-up"
+                        className="h-4 w-4"
+                        inline={true}
+                      />
+                    )}
+                    {sortOrder === "newest" ? "Newest First" : "Oldest First"}
+                  </Button>
+                </div>
 
-              {/* Virtualized changelogs container */}
-              <div className="border-border-card bg-secondary-bg rounded-lg border">
-                <div
-                  ref={parentRef}
-                  className="scrollbar-thin scrollbar-track-transparent scrollbar-thumb-border-primary hover:scrollbar-thumb-border-focus h-240 overflow-y-auto"
-                  style={{
-                    scrollbarWidth: "thin",
-                    scrollbarColor: "var(--color-border-primary) transparent",
-                  }}
-                >
-                  {sortedChangelogs.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center py-16 text-center">
-                      <div className="relative mb-6">
-                        <div className="from-border-focus/20 to-button-info-hover/20 absolute inset-0 rounded-full bg-linear-to-r blur-xl"></div>
-                        <div className="border-border-focus/30 bg-secondary-bg relative rounded-full border p-4">
-                          <Icon
-                            icon="heroicons-outline:arrow-down"
-                            className="text-border-focus h-8 w-8 sm:h-10 sm:w-10"
-                            inline={true}
-                          />
+                {/* Virtualized changelogs container */}
+                <div className="border-border-card bg-secondary-bg rounded-lg border">
+                  <div
+                    ref={parentRef}
+                    className="scrollbar-thin scrollbar-track-transparent scrollbar-thumb-border-primary hover:scrollbar-thumb-border-focus h-240 overflow-y-auto"
+                    style={{
+                      scrollbarWidth: "thin",
+                      scrollbarColor: "var(--color-border-primary) transparent",
+                    }}
+                  >
+                    {sortedChangelogs.length === 0 ? (
+                      <div className="flex flex-col items-center justify-center py-16 text-center">
+                        <div className="relative mb-6">
+                          <div className="from-border-focus/20 to-button-info-hover/20 absolute inset-0 rounded-full bg-linear-to-r blur-xl"></div>
+                          <div className="border-border-focus/30 bg-secondary-bg relative rounded-full border p-4">
+                            <Icon
+                              icon="heroicons-outline:arrow-down"
+                              className="text-border-focus h-8 w-8 sm:h-10 sm:w-10"
+                              inline={true}
+                            />
+                          </div>
                         </div>
+                        <h3 className="text-primary-text mb-2 text-lg font-semibold sm:text-xl">
+                          No changelogs found
+                        </h3>
+                        <p className="text-secondary-text max-w-md text-sm leading-relaxed sm:text-base">
+                          No changelogs are available at this time.
+                        </p>
                       </div>
-                      <h3 className="text-primary-text mb-2 text-lg font-semibold sm:text-xl">
-                        No changelogs found
-                      </h3>
-                      <p className="text-secondary-text max-w-md text-sm leading-relaxed sm:text-base">
-                        No changelogs are available at this time.
-                      </p>
-                    </div>
-                  ) : (
-                    <div
-                      style={{
-                        height: `${virtualizer.getTotalSize()}px`,
-                        width: "100%",
-                        position: "relative",
-                      }}
-                    >
-                      {virtualizer.getVirtualItems().map((virtualRow) => {
-                        const rowChangelogs = rows[virtualRow.index];
-                        const rowIndex = virtualRow.index;
+                    ) : (
+                      <div
+                        style={{
+                          height: `${virtualizer.getTotalSize()}px`,
+                          width: "100%",
+                          position: "relative",
+                        }}
+                      >
+                        {virtualizer.getVirtualItems().map((virtualRow) => {
+                          const rowChangelogs = rows[virtualRow.index];
+                          const rowIndex = virtualRow.index;
 
-                        return (
-                          <div
-                            key={`row-${rowIndex}`}
-                            data-index={virtualRow.index}
-                            ref={virtualizer.measureElement}
-                            style={{
-                              position: "absolute",
-                              top: 0,
-                              left: 0,
-                              width: "100%",
-                              transform: `translateY(${virtualRow.start}px)`,
-                            }}
-                          >
-                            <div className="grid grid-cols-1 gap-2 p-2 md:grid-cols-2">
-                              {rowChangelogs.map((changelog) => {
-                                const isLatest =
-                                  changelog.id === latestChangelogId;
-                                return (
-                                  <Link
-                                    key={changelog.id}
-                                    href={`/values/changelogs/${changelog.id}`}
-                                    prefetch={false}
-                                    className="group block"
-                                  >
-                                    <div
-                                      className={`rounded-lg border p-4 transition-all duration-200 ${
-                                        isLatest
-                                          ? "from-button-info/10 to-button-info-hover/10 shadow-button-info/20 border-button-info bg-linear-to-r shadow-lg"
-                                          : "border-border-card bg-tertiary-bg"
-                                      }`}
+                          return (
+                            <div
+                              key={`row-${rowIndex}`}
+                              data-index={virtualRow.index}
+                              ref={virtualizer.measureElement}
+                              style={{
+                                position: "absolute",
+                                top: 0,
+                                left: 0,
+                                width: "100%",
+                                transform: `translateY(${virtualRow.start}px)`,
+                              }}
+                            >
+                              <div className="grid grid-cols-1 gap-2 p-2 md:grid-cols-2">
+                                {rowChangelogs.map((changelog) => {
+                                  const isLatest =
+                                    changelog.id === latestChangelogId;
+                                  return (
+                                    <Link
+                                      key={changelog.id}
+                                      href={`/values/changelogs/${changelog.id}`}
+                                      prefetch={false}
+                                      className="group block"
                                     >
-                                      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
-                                        <div>
-                                          <div className="flex items-center gap-2">
-                                            <h3 className="text-primary-text group-hover:text-link text-lg font-semibold transition-colors">
-                                              Changelog #{changelog.id}
-                                            </h3>
-                                            {isLatest && (
-                                              <span className="bg-button-info text-form-button-text rounded-full px-2 py-0.5 text-xs font-medium">
-                                                Latest
-                                              </span>
-                                            )}
+                                      <div
+                                        className={`rounded-lg border p-4 transition-all duration-200 ${
+                                          isLatest
+                                            ? "from-button-info/10 to-button-info-hover/10 shadow-button-info/20 border-button-info bg-linear-to-r shadow-lg"
+                                            : "border-border-card bg-tertiary-bg"
+                                        }`}
+                                      >
+                                        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
+                                          <div>
+                                            <div className="flex items-center gap-2">
+                                              <h3 className="text-primary-text group-hover:text-link text-lg font-semibold transition-colors">
+                                                Changelog #{changelog.id}
+                                              </h3>
+                                              {isLatest && (
+                                                <span className="bg-button-info text-form-button-text rounded-full px-2 py-0.5 text-xs font-medium">
+                                                  Latest
+                                                </span>
+                                              )}
+                                            </div>
+                                            <p className="text-secondary-text text-sm">
+                                              {changelog.change_count} changes
+                                            </p>
                                           </div>
-                                          <p className="text-secondary-text text-sm">
-                                            {changelog.change_count} changes
+                                          <p className="text-secondary-text mt-2 text-sm lg:mt-0">
+                                            {formatMessageDate(
+                                              changelog.created_at,
+                                            )}
                                           </p>
                                         </div>
-                                        <p className="text-secondary-text mt-2 text-sm lg:mt-0">
-                                          {formatMessageDate(
-                                            changelog.created_at,
-                                          )}
-                                        </p>
                                       </div>
-                                    </div>
-                                  </Link>
-                                );
-                              })}
+                                    </Link>
+                                  );
+                                })}
+                              </div>
                             </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  )}
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </div>
-            </>
-          )}
-        </div>
-      </main>
-    </ThemeProvider>
+              </>
+            )}
+          </div>
+        </main>
+      </ThemeProvider>
+    </>
   );
 }

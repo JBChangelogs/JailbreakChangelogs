@@ -74,14 +74,16 @@ export default async function ChangelogDetailsPage({
   const userData = await fetchUsersBatch(uniqueUserIds);
 
   return (
-    <main className="mb-8 min-h-screen">
+    <>
       <NitroValuesChangelogsRailAd />
-      <div className="container mx-auto px-4">
-        <Breadcrumb />
-        <Suspense fallback={<Loading />}>
-          <ChangelogDetailsClient changelog={changelog} userData={userData} />
-        </Suspense>
-      </div>
-    </main>
+      <main className="mb-8 min-h-screen">
+        <div className="container mx-auto px-4">
+          <Breadcrumb />
+          <Suspense fallback={<Loading />}>
+            <ChangelogDetailsClient changelog={changelog} userData={userData} />
+          </Suspense>
+        </div>
+      </main>
+    </>
   );
 }

@@ -40,44 +40,46 @@ export default async function DupeFinderPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 pb-8">
+    <>
       <NitroDupesRailAd />
-      <Breadcrumb />
+      <div className="container mx-auto px-4 pb-8">
+        <Breadcrumb />
 
-      <ExperimentalFeatureBanner className="mb-6" />
+        <ExperimentalFeatureBanner className="mb-6" />
 
-      <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
-        <h1 className="text-primary-text text-3xl font-bold">Dupe Finder</h1>
-        <Button asChild variant="outline" size="sm">
-          <Link href="/values" prefetch={false}>
-            <Icon icon="heroicons:list-bullet" className="mr-2" />
-            Values List
-          </Link>
-        </Button>
+        <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
+          <h1 className="text-primary-text text-3xl font-bold">Dupe Finder</h1>
+          <Button asChild variant="outline" size="sm">
+            <Link href="/values" prefetch={false}>
+              <Icon icon="heroicons:list-bullet" className="mr-2" />
+              Values List
+            </Link>
+          </Button>
+        </div>
+
+        <p className="text-secondary-text mb-4">
+          Enter a Roblox ID or username to check for any duped items associated
+          with that name.
+        </p>
+
+        <PremiumAwareLayout>
+          <DupeFinderClient />
+
+          <Suspense fallback={<StatsSkeleton />}>
+            <StatsPolling />
+          </Suspense>
+
+          <Suspense fallback={<MostDuplicatedItemsSkeleton />}>
+            <MostDuplicatedItemsServer />
+          </Suspense>
+
+          <ConnectedBotsPolling />
+
+          <OfficialBotsSection />
+
+          <DupeFinderFAQ />
+        </PremiumAwareLayout>
       </div>
-
-      <p className="text-secondary-text mb-4">
-        Enter a Roblox ID or username to check for any duped items associated
-        with that name.
-      </p>
-
-      <PremiumAwareLayout>
-        <DupeFinderClient />
-
-        <Suspense fallback={<StatsSkeleton />}>
-          <StatsPolling />
-        </Suspense>
-
-        <Suspense fallback={<MostDuplicatedItemsSkeleton />}>
-          <MostDuplicatedItemsServer />
-        </Suspense>
-
-        <ConnectedBotsPolling />
-
-        <OfficialBotsSection />
-
-        <DupeFinderFAQ />
-      </PremiumAwareLayout>
-    </div>
+    </>
   );
 }

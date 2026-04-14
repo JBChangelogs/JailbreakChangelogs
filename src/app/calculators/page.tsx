@@ -88,25 +88,27 @@ import NitroCalculatorsRailAd from "@/components/Ads/NitroCalculatorsRailAd";
 
 export default function CalculatorsPage() {
   return (
-    <div className="container mx-auto px-4 pb-8">
+    <>
       <NitroCalculatorsRailAd />
-      <Breadcrumb />
+      <div className="container mx-auto px-4 pb-8">
+        <Breadcrumb />
 
-      <div className="mb-8">
-        <h1 className="text-primary-text mb-4 text-4xl font-bold">
-          Jailbreak Changelogs Calculators
-        </h1>
-        <p className="text-secondary-text text-lg">
-          Access our calculators in one place. From trading values to season
-          progression, find the tools you need.
-        </p>
-      </div>
+        <div className="mb-8">
+          <h1 className="text-primary-text mb-4 text-4xl font-bold">
+            Jailbreak Changelogs Calculators
+          </h1>
+          <p className="text-secondary-text text-lg">
+            Access our calculators in one place. From trading values to season
+            progression, find the tools you need.
+          </p>
+        </div>
 
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-2">
-        {calculators.map((calculator) => (
-          <CalculatorCard key={calculator.id} calculator={calculator} />
-        ))}
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-2">
+          {calculators.map((calculator) => (
+            <CalculatorCard key={calculator.id} calculator={calculator} />
+          ))}
+        </div>
       </div>
-    </div>
+    </>
   );
 }

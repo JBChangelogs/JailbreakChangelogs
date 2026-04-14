@@ -53,69 +53,71 @@ export default async function DupeFinderPage({ params }: DupeFinderPageProps) {
   }
 
   return (
-    <div className="container mx-auto px-4 pb-8">
+    <>
       <NitroDupeDetailRailAd />
-      <Breadcrumb />
+      <div className="container mx-auto px-4 pb-8">
+        <Breadcrumb />
 
-      <ExperimentalFeatureBanner className="mb-6" />
+        <ExperimentalFeatureBanner className="mb-6" />
 
-      <div className="mb-6 flex items-center gap-3">
-        <h1 className="text-primary-text text-3xl font-bold">Dupe Finder</h1>
-      </div>
-      <p className="text-secondary-text mb-4">
-        Enter a Roblox ID or username to check for any duped items associated
-        with that name.
-      </p>
-      <div className="bg-button-info/10 border-border-card text-primary-text mb-6 rounded-lg border p-4 text-sm">
-        If you believe an item is incorrectly flagged, you can report the false
-        dupe by opening a support ticket in our{" "}
-        <Link
-          href="https://discord.com/channels/1286064050135896064/1392693026865811518"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-primary-text inline-flex items-center gap-1 font-semibold underline transition-opacity hover:opacity-80"
-        >
-          <Icon icon="akar-icons:link-out" className="h-4 w-4" />
-          Discord support channel
-        </Link>
-        .
-      </div>
+        <div className="mb-6 flex items-center gap-3">
+          <h1 className="text-primary-text text-3xl font-bold">Dupe Finder</h1>
+        </div>
+        <p className="text-secondary-text mb-4">
+          Enter a Roblox ID or username to check for any duped items associated
+          with that name.
+        </p>
+        <div className="bg-button-info/10 border-border-card text-primary-text mb-6 rounded-lg border p-4 text-sm">
+          If you believe an item is incorrectly flagged, you can report the
+          false dupe by opening a support ticket in our{" "}
+          <Link
+            href="https://discord.com/channels/1286064050135896064/1392693026865811518"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-primary-text inline-flex items-center gap-1 font-semibold underline transition-opacity hover:opacity-80"
+          >
+            <Icon icon="akar-icons:link-out" className="h-4 w-4" />
+            Discord support channel
+          </Link>
+          .
+        </div>
 
-      <PremiumAwareLayout>
-        <Suspense
-          fallback={
-            <div className="border-border-card bg-secondary-bg shadow-card-shadow rounded-lg border p-6">
-              <div className="animate-pulse space-y-4">
-                <div className="flex items-center gap-4">
-                  <div className="bg-surface-bg h-16 w-16 rounded-full"></div>
-                  <div className="flex-1">
-                    <div className="bg-surface-bg mb-2 h-6 w-32 rounded"></div>
-                    <div className="bg-surface-bg h-4 w-24 rounded"></div>
+        <PremiumAwareLayout>
+          <Suspense
+            fallback={
+              <div className="border-border-card bg-secondary-bg shadow-card-shadow rounded-lg border p-6">
+                <div className="animate-pulse space-y-4">
+                  <div className="flex items-center gap-4">
+                    <div className="bg-surface-bg h-16 w-16 rounded-full"></div>
+                    <div className="flex-1">
+                      <div className="bg-surface-bg mb-2 h-6 w-32 rounded"></div>
+                      <div className="bg-surface-bg h-4 w-24 rounded"></div>
+                    </div>
+                  </div>
+                  <div className="space-y-3">
+                    {[...Array(5)].map((_, i) => (
+                      <div
+                        key={i}
+                        className="flex items-center gap-4 rounded-lg p-4"
+                      >
+                        <div className="bg-surface-bg h-12 w-12 rounded"></div>
+                        <div className="flex-1 space-y-2">
+                          <div className="bg-surface-bg h-4 w-48 rounded"></div>
+                          <div className="bg-surface-bg h-3 w-32 rounded"></div>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
-                <div className="space-y-3">
-                  {[...Array(5)].map((_, i) => (
-                    <div
-                      key={i}
-                      className="flex items-center gap-4 rounded-lg p-4"
-                    >
-                      <div className="bg-surface-bg h-12 w-12 rounded"></div>
-                      <div className="flex-1 space-y-2">
-                        <div className="bg-surface-bg h-4 w-48 rounded"></div>
-                        <div className="bg-surface-bg h-3 w-32 rounded"></div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
               </div>
-            </div>
-          }
-        >
-          <DupeFinderDataStreamer robloxId={userid} />
-        </Suspense>
+            }
+          >
+            <DupeFinderDataStreamer robloxId={userid} />
+          </Suspense>
 
-        <DupeFinderFAQ />
-      </PremiumAwareLayout>
-    </div>
+          <DupeFinderFAQ />
+        </PremiumAwareLayout>
+      </div>
+    </>
   );
 }

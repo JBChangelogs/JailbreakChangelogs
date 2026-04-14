@@ -52,32 +52,34 @@ export default async function InventoryCheckerPage({
   }
 
   return (
-    <div className="container mx-auto px-4 pb-8">
+    <>
       <NitroInventoryDetailRailAd />
-      <Breadcrumb />
+      <div className="container mx-auto px-4 pb-8">
+        <Breadcrumb />
 
-      <ExperimentalFeatureBanner className="mb-6" />
+        <ExperimentalFeatureBanner className="mb-6" />
 
-      <div className="mb-6 flex items-center gap-3">
-        <h1 className="text-primary-text text-3xl font-bold">
-          Inventory Checker
-        </h1>
+        <div className="mb-6 flex items-center gap-3">
+          <h1 className="text-primary-text text-3xl font-bold">
+            Inventory Checker
+          </h1>
+        </div>
+
+        <PremiumAwareLayout>
+          <Suspense
+            key={`inventory-detail-${userid}`}
+            fallback={
+              <InventoryCheckerClient
+                key={`inventory-detail-fallback-${userid}`}
+                robloxId={userid}
+                isLoading={true}
+              />
+            }
+          >
+            <InventoryDataStreamer robloxId={userid} />
+          </Suspense>
+        </PremiumAwareLayout>
       </div>
-
-      <PremiumAwareLayout>
-        <Suspense
-          key={`inventory-detail-${userid}`}
-          fallback={
-            <InventoryCheckerClient
-              key={`inventory-detail-fallback-${userid}`}
-              robloxId={userid}
-              isLoading={true}
-            />
-          }
-        >
-          <InventoryDataStreamer robloxId={userid} />
-        </Suspense>
-      </PremiumAwareLayout>
-    </div>
+    </>
   );
 }

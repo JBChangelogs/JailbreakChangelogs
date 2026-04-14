@@ -35,27 +35,29 @@ export default async function OGFinderPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 pb-8">
+    <>
       <NitroOGRailAd />
-      <Breadcrumb />
+      <div className="container mx-auto px-4 pb-8">
+        <Breadcrumb />
 
-      <ExperimentalFeatureBanner className="mb-6" />
+        <ExperimentalFeatureBanner className="mb-6" />
 
-      <OGFinderDescription />
+        <OGFinderDescription />
 
-      <PremiumAwareLayout>
-        <OGFinderClient />
+        <PremiumAwareLayout>
+          <OGFinderClient />
 
-        <Suspense fallback={<StatsSkeleton />}>
-          <StatsPolling />
-        </Suspense>
+          <Suspense fallback={<StatsSkeleton />}>
+            <StatsPolling />
+          </Suspense>
 
-        <ConnectedBotsPolling />
+          <ConnectedBotsPolling />
 
-        <OfficialBotsSection />
+          <OfficialBotsSection />
 
-        <OGFinderFAQ />
-      </PremiumAwareLayout>
-    </div>
+          <OGFinderFAQ />
+        </PremiumAwareLayout>
+      </div>
+    </>
   );
 }
