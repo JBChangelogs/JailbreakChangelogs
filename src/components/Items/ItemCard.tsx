@@ -466,10 +466,25 @@ export default function ItemCard({
           )}
         </div>
         <div className="flex flex-1 flex-col space-y-2 p-2 sm:space-y-4 sm:p-4">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between gap-2">
             <h3 className="text-primary-text group-hover:text-link text-sm font-semibold transition-colors min-[375px]:text-xs min-[425px]:text-sm sm:text-lg">
               {item.name}
             </h3>
+            {item.notes && item.notes !== "N/A" && item.notes.trim() !== "" && (
+              <div className="relative z-20 hidden shrink-0 lg:block">
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div className="border-border-card bg-tertiary-bg hover:bg-quaternary-bg text-secondary-text hover:text-primary-text flex cursor-help items-center justify-center rounded-md border p-1 transition-colors duration-200">
+                      <Icon
+                        icon="mdi:information-outline"
+                        className="h-3.5 w-3.5 sm:h-4 sm:w-4"
+                      />
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent>{item.notes}</TooltipContent>
+                </Tooltip>
+              </div>
+            )}
           </div>
 
           <div className="flex flex-wrap gap-1 pb-2 sm:gap-2">
