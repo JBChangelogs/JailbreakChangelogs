@@ -661,11 +661,11 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
         </div>
       </div>
 
-      {/* Ad Section */}
-      <NitroCalculatorAd className="mb-8" />
+      {/* Visible after trade sides; avoids pinning the slot to the very end of the page */}
+      <NitroCalculatorAd className="mt-8" />
 
-      {/* Tabs */}
-      <div className="overflow-x-auto">
+      {/* Browse / analysis — full width below panels (matches /trading#create item picker placement) */}
+      <div className="mt-6 w-full min-w-0">
         <Tabs
           value={activeTab}
           onValueChange={(v) =>
@@ -701,94 +701,23 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
             </TabsTrigger>
           </TabsList>
         </Tabs>
-      </div>
 
-      {/* Tab Content */}
-      <div
-        role="tabpanel"
-        hidden={activeTab !== "items"}
-        id="calculator-tabpanel-items"
-        aria-labelledby="calculator-tab-items"
-      >
-        {activeTab === "items" && (
-          <div className="mb-8" data-component="calculator-items-panel">
-            {itemsInputMode === "picker" ? (
-              <TradeItemPickerV2
-                items={initialItems.filter((i) => !i.is_sub)}
-                onSelect={handleAddItem}
-                selectedItems={[...offeringItems, ...requestingItems]}
-                customTypes={[]}
-                onAddCustomType={() => {}}
-                allowOg={false}
-                activeSide={pickerActiveSide}
-                onActiveSideChange={setPickerActiveSide}
-              />
-            ) : itemsInputMode === "inventory" ? (
-              <div>
-                {isAuthLoading ? (
-                  <div className="border-border-card bg-secondary-bg rounded-lg border p-6 text-center">
-                    <p className="text-secondary-text text-sm">
-                      Loading your account...
-                    </p>
-                  </div>
-                ) : !isAuthenticated ? (
-                  <div className="border-border-card bg-secondary-bg rounded-lg border p-6 text-center">
-                    <p className="text-secondary-text text-sm">
-                      Log in to load your Roblox inventory.
-                    </p>
-                    <div className="mt-4 flex justify-center">
-                      <Button
-                        type="button"
-                        onClick={() => setLoginModal({ open: true })}
-                      >
-                        Log In
-                      </Button>
-                    </div>
-                  </div>
-                ) : !hasValidRobloxId ? (
-                  <div className="border-border-card bg-secondary-bg rounded-lg border p-6 text-center">
-                    <p className="text-secondary-text text-sm">
-                      Connect your Roblox account to load your inventory items.
-                    </p>
-                    <div className="mt-4 flex flex-col items-center justify-center gap-3 sm:flex-row">
-                      <Button
-                        type="button"
-                        onClick={() =>
-                          setLoginModal({ open: true, tab: "roblox" })
-                        }
-                      >
-                        Connect Roblox
-                      </Button>
-                      <Link
-                        href="/inventories"
-                        prefetch={false}
-                        className="text-link text-sm"
-                      >
-                        View Inventories
-                      </Link>
-                    </div>
-                  </div>
-                ) : inventoryStatus === "loading" ? (
-                  <div className="border-border-card bg-secondary-bg rounded-lg border p-6 text-center">
-                    <p className="text-secondary-text text-sm">
-                      Loading inventory items...
-                    </p>
-                  </div>
-                ) : inventoryStatus === "error" ? (
-                  <div className="border-border-card bg-secondary-bg rounded-lg border p-6 text-center">
-                    <p className="text-secondary-text text-sm">
-                      {inventoryError || "Failed to load inventory items."}
-                    </p>
-                  </div>
-                ) : inventoryItems.length === 0 ? (
-                  <div className="border-border-card bg-secondary-bg rounded-lg border p-6 text-center">
-                    <p className="text-secondary-text text-sm">
-                      No tradable inventory items found.
-                    </p>
-                  </div>
-                ) : (
+        {/* Tab Content — spaced below tab triggers so labels aren’t flush with panels */}
+        <div className="mt-5 min-w-0 md:mt-6">
+          <div
+            role="tabpanel"
+            hidden={activeTab !== "items"}
+            id="calculator-tabpanel-items"
+            aria-labelledby="calculator-tab-items"
+          >
+            {activeTab === "items" && (
+              <div
+                className="mb-8 w-full min-w-0"
+                data-component="calculator-items-panel"
+              >
+                {itemsInputMode === "picker" ? (
                   <TradeItemPickerV2
-                    items={inventoryItems}
+                    items={initialItems.filter((i) => !i.is_sub)}
                     onSelect={handleAddItem}
                     selectedItems={[...offeringItems, ...requestingItems]}
                     customTypes={[]}
@@ -797,63 +726,142 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
                     activeSide={pickerActiveSide}
                     onActiveSideChange={setPickerActiveSide}
                   />
+                ) : itemsInputMode === "inventory" ? (
+                  <div>
+                    {isAuthLoading ? (
+                      <div className="border-border-card bg-secondary-bg rounded-lg border p-6 text-center">
+                        <p className="text-secondary-text text-sm">
+                          Loading your account...
+                        </p>
+                      </div>
+                    ) : !isAuthenticated ? (
+                      <div className="border-border-card bg-secondary-bg rounded-lg border p-6 text-center">
+                        <p className="text-secondary-text text-sm">
+                          Log in to load your Roblox inventory.
+                        </p>
+                        <div className="mt-4 flex justify-center">
+                          <Button
+                            type="button"
+                            onClick={() => setLoginModal({ open: true })}
+                          >
+                            Log In
+                          </Button>
+                        </div>
+                      </div>
+                    ) : !hasValidRobloxId ? (
+                      <div className="border-border-card bg-secondary-bg rounded-lg border p-6 text-center">
+                        <p className="text-secondary-text text-sm">
+                          Connect your Roblox account to load your inventory
+                          items.
+                        </p>
+                        <div className="mt-4 flex flex-col items-center justify-center gap-3 sm:flex-row">
+                          <Button
+                            type="button"
+                            onClick={() =>
+                              setLoginModal({ open: true, tab: "roblox" })
+                            }
+                          >
+                            Connect Roblox
+                          </Button>
+                          <Link
+                            href="/inventories"
+                            prefetch={false}
+                            className="text-link text-sm"
+                          >
+                            View Inventories
+                          </Link>
+                        </div>
+                      </div>
+                    ) : inventoryStatus === "loading" ? (
+                      <div className="border-border-card bg-secondary-bg rounded-lg border p-6 text-center">
+                        <p className="text-secondary-text text-sm">
+                          Loading inventory items...
+                        </p>
+                      </div>
+                    ) : inventoryStatus === "error" ? (
+                      <div className="border-border-card bg-secondary-bg rounded-lg border p-6 text-center">
+                        <p className="text-secondary-text text-sm">
+                          {inventoryError || "Failed to load inventory items."}
+                        </p>
+                      </div>
+                    ) : inventoryItems.length === 0 ? (
+                      <div className="border-border-card bg-secondary-bg rounded-lg border p-6 text-center">
+                        <p className="text-secondary-text text-sm">
+                          No tradable inventory items found.
+                        </p>
+                      </div>
+                    ) : (
+                      <TradeItemPickerV2
+                        items={inventoryItems}
+                        onSelect={handleAddItem}
+                        selectedItems={[...offeringItems, ...requestingItems]}
+                        customTypes={[]}
+                        onAddCustomType={() => {}}
+                        allowOg={false}
+                        activeSide={pickerActiveSide}
+                        onActiveSideChange={setPickerActiveSide}
+                      />
+                    )}
+                  </div>
+                ) : (
+                  <div className="border-border-card bg-secondary-bg rounded-lg border p-6 text-center">
+                    <p className="text-secondary-text text-sm">
+                      Use the scan box above to upload a trade screenshot.
+                    </p>
+                  </div>
                 )}
-              </div>
-            ) : (
-              <div className="border-border-card bg-secondary-bg rounded-lg border p-6 text-center">
-                <p className="text-secondary-text text-sm">
-                  Use the scan box above to upload a trade screenshot.
-                </p>
               </div>
             )}
           </div>
-        )}
-      </div>
 
-      <div
-        role="tabpanel"
-        hidden={activeTab !== "values"}
-        id="calculator-tabpanel-values"
-        aria-labelledby="calculator-tab-values"
-      >
-        {activeTab === "values" && (
-          <div className="mb-8">
-            <CalculatorValueComparison
-              offering={offeringItems}
-              requesting={requestingItems}
-              getSelectedValueString={getSelectedValueString}
-              getSelectedValue={getSelectedValue}
-              getSelectedValueType={getSelectedValueType}
-              onBrowseItems={() => handleTabChange("items")}
-            />
+          <div
+            role="tabpanel"
+            hidden={activeTab !== "values"}
+            id="calculator-tabpanel-values"
+            aria-labelledby="calculator-tab-values"
+          >
+            {activeTab === "values" && (
+              <div className="mb-8">
+                <CalculatorValueComparison
+                  offering={offeringItems}
+                  requesting={requestingItems}
+                  getSelectedValueString={getSelectedValueString}
+                  getSelectedValue={getSelectedValue}
+                  getSelectedValueType={getSelectedValueType}
+                  onBrowseItems={() => handleTabChange("items")}
+                />
+              </div>
+            )}
           </div>
-        )}
-      </div>
 
-      <div
-        role="tabpanel"
-        hidden={activeTab !== "similar"}
-        id="calculator-tabpanel-similar"
-        aria-labelledby="calculator-tab-similar"
-      >
-        {activeTab === "similar" && (
-          <div className="mb-8">
-            <SimilarItemsTab
-              offeringItems={offeringItems}
-              requestingItems={requestingItems}
-              totalBasis={totalBasis}
-              setTotalBasis={setTotalBasis}
-              offeringSimilarItemsRange={offeringSimilarItemsRange}
-              requestingSimilarItemsRange={requestingSimilarItemsRange}
-              setOfferingSimilarItemsRange={setOfferingSimilarItemsRange}
-              setRequestingSimilarItemsRange={setRequestingSimilarItemsRange}
-              MAX_SIMILAR_ITEMS_RANGE={DYNAMIC_MAX_VALUE}
-              initialItems={initialItems}
-              getSelectedValue={getSelectedValue}
-              onBrowseItems={() => handleTabChange("items")}
-            />
+          <div
+            role="tabpanel"
+            hidden={activeTab !== "similar"}
+            id="calculator-tabpanel-similar"
+            aria-labelledby="calculator-tab-similar"
+          >
+            {activeTab === "similar" && (
+              <div className="mb-8">
+                <SimilarItemsTab
+                  offeringItems={offeringItems}
+                  requestingItems={requestingItems}
+                  totalBasis={totalBasis}
+                  setTotalBasis={setTotalBasis}
+                  offeringSimilarItemsRange={offeringSimilarItemsRange}
+                  requestingSimilarItemsRange={requestingSimilarItemsRange}
+                  setOfferingSimilarItemsRange={setOfferingSimilarItemsRange}
+                  setRequestingSimilarItemsRange={
+                    setRequestingSimilarItemsRange
+                  }
+                  MAX_SIMILAR_ITEMS_RANGE={DYNAMIC_MAX_VALUE}
+                  initialItems={initialItems}
+                  getSelectedValue={getSelectedValue}
+                  onBrowseItems={() => handleTabChange("items")}
+                />
+              </div>
+            )}
           </div>
-        )}
+        </div>
       </div>
     </div>
   );

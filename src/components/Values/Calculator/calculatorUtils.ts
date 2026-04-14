@@ -9,14 +9,24 @@ export const parseValueString = (
 ): number => {
   if (valStr === undefined || valStr === null) return 0;
   const cleanedValStr = String(valStr).toLowerCase().replace(/,/g, "");
-  if (cleanedValStr === "n/a") return 0;
+  if (
+    cleanedValStr === "n/a" ||
+    cleanedValStr === "null" ||
+    cleanedValStr === ""
+  ) {
+    return 0;
+  }
+  if (cleanedValStr.endsWith("b")) {
+    return parseFloat(cleanedValStr) * 1_000_000_000;
+  }
   if (cleanedValStr.endsWith("m")) {
     return parseFloat(cleanedValStr) * 1_000_000;
-  } else if (cleanedValStr.endsWith("k")) {
-    return parseFloat(cleanedValStr) * 1_000;
-  } else {
-    return parseFloat(cleanedValStr);
   }
+  if (cleanedValStr.endsWith("k")) {
+    return parseFloat(cleanedValStr) * 1_000;
+  }
+  const n = parseFloat(cleanedValStr);
+  return Number.isFinite(n) ? n : 0;
 };
 
 /** Formats a number with locale separators. */

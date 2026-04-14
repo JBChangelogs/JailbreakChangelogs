@@ -112,7 +112,7 @@ export const ItemGrid: React.FC<ItemGridProps> = ({
     return (
       <button
         type="button"
-        className={`rounded-lg border-2 border-dashed p-6 text-center transition-colors ${borderColor} ${
+        className={`w-full rounded-lg border-2 border-dashed p-6 text-center transition-colors ${borderColor} ${
           disableInteraction
             ? "cursor-not-allowed opacity-60"
             : "hover:bg-secondary-bg cursor-pointer"

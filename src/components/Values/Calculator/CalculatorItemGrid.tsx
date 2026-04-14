@@ -1,8 +1,14 @@
 import React from "react";
 import { TradeItem } from "@/types/trading";
 import Image from "next/image";
-import { getItemImagePath, handleImageError } from "@/utils/images";
+import {
+  getItemImagePath,
+  handleImageError,
+  isVideoItem,
+  getVideoPath,
+} from "@/utils/images";
 import TradeItemHoverTooltip from "../../trading/TradeItemHoverTooltip";
+import { isCustomTradeItem } from "@/utils/tradeItems";
 
 import { Tooltip, TooltipTrigger } from "@/components/ui/tooltip";
 
@@ -61,7 +67,7 @@ export const CalculatorItemGrid: React.FC<CalculatorItemGridProps> = ({
     return (
       <button
         type="button"
-        className={`border-border-card bg-tertiary-bg hover:border-border-focus cursor-pointer rounded-lg border-2 border-dashed p-6 text-center transition-colors ${borderColor}`}
+        className={`border-border-card bg-tertiary-bg hover:border-border-focus w-full cursor-pointer rounded-lg border-2 border-dashed p-6 text-center transition-colors ${borderColor}`}
         onClick={handleClick}
         onKeyDown={(e) => {
           if (e.key === "Enter" || e.key === " ") {
@@ -88,7 +94,7 @@ export const CalculatorItemGrid: React.FC<CalculatorItemGridProps> = ({
         <p className="text-secondary-text text-sm font-medium">
           No items selected
         </p>
-        <p className="text-secondary-text/60 mt-1 text-xs">Browse items here</p>
+        <p className="text-secondary-text/70 mt-1 text-xs">Browse items here</p>
       </button>
     );
   }
@@ -103,50 +109,78 @@ export const CalculatorItemGrid: React.FC<CalculatorItemGridProps> = ({
           {items.map((item) => {
             const displayName = item.name;
             const isDupedSelected = !!item.isDuped;
+            // Calculator assigns a random alphanumeric instanceId; that must not mark items as "custom" for images/tooltips.
+            const itemForTradeChecks: TradeItem = {
+              ...item,
+              instanceId: undefined,
+            };
+            const shouldShowTooltip = !isCustomTradeItem(itemForTradeChecks);
 
-            return (
-              <div key={item.instanceId} className="group relative">
-                {/* Item Image Container - Click to Remove */}
-                <Tooltip delayDuration={0}>
-                  <TooltipTrigger asChild>
-                    <button
-                      type="button"
-                      className="relative aspect-square cursor-pointer overflow-hidden rounded-lg"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        if (onRemove && item.instanceId) {
-                          onRemove(item.instanceId);
-                        }
-                      }}
-                    >
+            const media = (
+              <button
+                type="button"
+                className="block w-full cursor-pointer text-left"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (onRemove && item.instanceId) {
+                    onRemove(item.instanceId);
+                  }
+                }}
+              >
+                <div className="relative aspect-square">
+                  <div className="relative h-full w-full overflow-hidden rounded-lg">
+                    {isVideoItem(item.name) ? (
+                      <video
+                        src={getVideoPath(item.type, item.name)}
+                        className="h-full w-full object-cover"
+                        muted
+                        playsInline
+                        loop
+                        autoPlay
+                      />
+                    ) : (
                       <Image
-                        src={getItemImagePath(item.type, item.name, true)}
+                        src={getItemImagePath(
+                          item.type,
+                          item.base_name || item.name,
+                          true,
+                        )}
                         alt={item.name}
                         fill
                         className="object-cover"
                         draggable={false}
                         onError={handleImageError}
                       />
-                      {isDupedSelected && (
-                        <div className="absolute top-1 right-1 z-10 flex flex-col items-end gap-1">
-                          <span className="bg-status-error/90 text-form-button-text rounded px-1.5 py-0.5 text-[10px] leading-none font-semibold">
-                            Duped
-                          </span>
-                        </div>
-                      )}
-                    </button>
-                  </TooltipTrigger>
-                  <TradeItemHoverTooltip
-                    side="right"
-                    item={{
-                      ...item,
-                      name: displayName,
-                      base_name: item.base_name || item.name,
-                    }}
-                  />
-                </Tooltip>
+                    )}
+                    {isDupedSelected && (
+                      <div className="absolute top-1 right-1 z-10 flex flex-col items-end gap-1">
+                        <span className="bg-status-error/90 text-form-button-text rounded px-1.5 py-0.5 text-[10px] leading-none font-semibold">
+                          Duped
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </button>
+            );
 
-                {/* Item Name */}
+            return (
+              <div key={item.instanceId} className="group relative">
+                {shouldShowTooltip ? (
+                  <Tooltip delayDuration={0}>
+                    <TooltipTrigger asChild>{media}</TooltipTrigger>
+                    <TradeItemHoverTooltip
+                      item={{
+                        ...item,
+                        name: displayName,
+                        base_name: item.base_name || item.name,
+                      }}
+                    />
+                  </Tooltip>
+                ) : (
+                  media
+                )}
+
                 <div className="mt-2 text-center">
                   <p className="text-primary-text line-clamp-2 text-xs font-medium">
                     {displayName}
