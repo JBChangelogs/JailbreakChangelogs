@@ -18,7 +18,6 @@ import { useValueSortState } from "@/hooks/useValueSortState";
 import { filterOptions } from "./valuesFilterOptions";
 import { valueSortOptions } from "./valuesSortOptions";
 import NitroValuesVideoPlayer from "@/components/Ads/NitroValuesVideoPlayer";
-import NitroValuesRailAd from "@/components/Ads/NitroValuesRailAd";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { toast } from "sonner";
@@ -150,37 +149,6 @@ export default function ValuesClient({
 
   return (
     <ValuesErrorBoundary>
-      <NitroValuesRailAd />
-      <style jsx>{`
-        .sidebar-ad-container {
-          width: 320px;
-          height: 100px;
-          border-radius: 8px;
-          overflow: hidden;
-          transition: all 0.3s ease;
-        }
-
-        @media (min-width: 500px) {
-          .sidebar-ad-container {
-            width: 336px;
-            height: 280px;
-          }
-        }
-
-        @media (min-width: 768px) {
-          .sidebar-ad-container {
-            width: 300px;
-            height: 250px;
-          }
-        }
-
-        @media (min-width: 1024px) {
-          .sidebar-ad-container {
-            width: 300px;
-            height: 600px;
-          }
-        }
-      `}</style>
       <div className="border-border-card bg-secondary-bg mb-8 rounded-lg border p-6">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-start">
           <div className="flex-1">

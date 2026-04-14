@@ -7,7 +7,7 @@
   ],
   "categories": {
     "correctness": "off",
-    "perf": "warn"
+    "perf": "off"
   },
   "env": {
     "builtin": true
