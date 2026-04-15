@@ -387,6 +387,14 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
   const [page, setPage] = useState(1);
   const itemsPerPage = 10;
 
+  // Tracks a comment ID to scroll to + flash after a cross-page navigation
+  const [pendingScrollToId, setPendingScrollToId] = useState<number | null>(
+    null,
+  );
+
+  // Controls whether the new comment form is expanded
+  const [isCommentFormExpanded, setIsCommentFormExpanded] = useState(false);
+
   // Supporter modal hook for handling tier-based restrictions
   const { modalState, closeModal, openModal, COMMENT_CHAR_LIMITS } =
     useSupporterModal();
@@ -729,6 +737,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
         description: "You have 1 hour to edit your comment.",
       });
       setNewComment("");
+      setIsCommentFormExpanded(false);
 
       // Construct optimistic comment to ensure all fields are present
       const optimisticComment: CommentData = {
@@ -1009,10 +1018,47 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
     }
   }, [comments, userData, loadingUserData, failedUserData, fetchUserData]);
 
+  // Focus the new comment textarea when the form expands
+  useEffect(() => {
+    if (!isCommentFormExpanded) return;
+    const textarea = document.getElementById(
+      "new-comment-textarea",
+    ) as HTMLTextAreaElement | null;
+    textarea?.focus();
+  }, [isCommentFormExpanded]);
+
+  // Focus the reply textarea when a reply form opens
+  useEffect(() => {
+    if (replyingToId === null) return;
+    const textarea = document.getElementById(
+      `reply-textarea-${replyingToId}`,
+    ) as HTMLTextAreaElement | null;
+    textarea?.focus();
+  }, [replyingToId]);
+
   const toggleSortOrder = () => {
     setSortOrder((prev) => (prev === "newest" ? "oldest" : "newest"));
     setPage(1);
   };
+
+  // After a cross-page navigation, scroll to and flash the pending comment once it's in the DOM
+  useEffect(() => {
+    if (pendingScrollToId === null) return;
+    const el = document.getElementById(`comment-${pendingScrollToId}`);
+    if (!el) return;
+    setPendingScrollToId(null);
+    el.scrollIntoView({ behavior: "smooth", block: "center" });
+    el.classList.add("bg-button-info/20", "transition-colors", "duration-500");
+    setTimeout(
+      () =>
+        el.classList.remove(
+          "bg-button-info/20",
+          "transition-colors",
+          "duration-500",
+        ),
+      1500,
+    );
+  }, [pendingScrollToId, page]);
 
   const toggleCommentExpand = (commentId: number) => {
     setExpandedComments((prev) => {
@@ -1126,8 +1172,21 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
   const handleEditClick = (commentId: number) => {
     const comment = filteredComments.find((c) => c.id === commentId);
     if (comment) {
+      setReplyingToId(null);
+      setReplyContent("");
       setEditingCommentId(commentId);
       setEditContent(sanitizeText(comment.content || ""));
+      // Delay focus until after the dropdown closes and returns focus to its trigger
+      setTimeout(() => {
+        const textarea = document.querySelector<HTMLTextAreaElement>(
+          `#edit-textarea-${commentId}`,
+        );
+        if (textarea) {
+          textarea.focus();
+          const len = textarea.value.length;
+          textarea.setSelectionRange(len, len);
+        }
+      }, 50);
     }
   };
 
@@ -1195,60 +1254,35 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
       >
         <div className="flex flex-col gap-4">
           <div>
-            <h2
-              id="comments-header"
-              className="text-primary-text mb-4 text-lg font-bold tracking-tight sm:text-xl"
-            >
-              {type === "changelog" ? (
-                `Comments for Changelog ${changelogId}: ${changelogTitle}`
-              ) : type === "season" ? (
-                `Comments for Season ${changelogId}: ${changelogTitle}`
-              ) : type === "tradev2" ? (
-                `Comments for Trade #${changelogId}`
-              ) : type === "inventory" ? (
-                `Comments for ${changelogTitle}`
-              ) : (
-                <>
-                  Comments for {changelogTitle}{" "}
-                  <span className="text-secondary-text">({itemType})</span>
-                </>
-              )}
-            </h2>
-          </div>
-
-          {/* New Comment Form */}
-          <form onSubmit={handleSubmitComment} className="mb-2">
-            <div className="space-y-2">
-              <textarea
-                value={newComment}
-                onChange={(e) => setNewComment(e.target.value)}
-                placeholder={
-                  isLoggedIn ? "Write a comment..." : "Please log in to comment"
-                }
-                disabled={!isLoggedIn}
-                rows={3}
-                className={`w-full resize-y rounded border p-3 text-sm focus:outline-none ${
-                  !isLoggedIn
-                    ? "border-secondary-bg bg-primary-bg text-primary-text placeholder-secondary-text cursor-not-allowed"
-                    : "border-border-card bg-form-input text-primary-text placeholder-secondary-text focus:border-button-info"
-                }`}
-                autoCorrect="off"
-                autoComplete="off"
-                spellCheck="false"
-                autoCapitalize="off"
-              />
-              {!isLoggedIn && (
-                <p className="text-secondary-text text-xs">
-                  You must be logged in to comment
-                </p>
-              )}
-            </div>
-            <div className="mt-2 flex items-center justify-between">
+            <div className="flex items-start justify-between gap-2">
+              <h2
+                id="comments-header"
+                className="text-primary-text min-w-0 text-lg font-bold tracking-tight sm:text-xl"
+              >
+                {comments.length === 1
+                  ? "1 Comment for"
+                  : `${comments.length} Comments for`}{" "}
+                {type === "changelog" ? (
+                  `Changelog ${changelogId}: ${changelogTitle}`
+                ) : type === "season" ? (
+                  `Season ${changelogId}: ${changelogTitle}`
+                ) : type === "tradev2" ? (
+                  `Trade #${changelogId}`
+                ) : type === "inventory" ? (
+                  changelogTitle
+                ) : (
+                  <>
+                    {changelogTitle}{" "}
+                    <span className="text-secondary-text">({itemType})</span>
+                  </>
+                )}
+              </h2>
               <Button
                 variant="default"
                 size="sm"
                 onClick={toggleSortOrder}
                 type="button"
+                className="mt-0.5 shrink-0"
               >
                 {sortOrder === "newest" ? (
                   <Icon icon="heroicons-outline:arrow-down" inline={true} />
@@ -1257,50 +1291,151 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                 )}
                 {sortOrder === "newest" ? "Newest First" : "Oldest First"}
               </Button>
-              <Button
-                type="submit"
-                size="sm"
-                disabled={
-                  isLoggedIn && (!newComment.trim() || isSubmittingComment)
-                }
-                onClick={
-                  !isLoggedIn
-                    ? (e) => {
-                        e.preventDefault();
-                        setLoginModal({ open: true });
-                      }
-                    : undefined
-                }
-                data-umami-event="Post Comment"
-                data-umami-event-type={type}
-                data-umami-event-context-id={changelogId.toString()}
-              >
-                {isLoggedIn ? (
-                  isSubmittingComment ? (
-                    <>
-                      <CircularProgress
-                        size={16}
-                        className="text-form-button-text"
-                      />
-                      Posting...
-                    </>
-                  ) : (
-                    <>
-                      <Icon
-                        icon="streamline-plump:mail-send-email-message-solid"
-                        inline={true}
-                      />
-                      Post Comment
-                    </>
-                  )
-                ) : (
-                  <>
-                    <Icon icon="uil:signin" inline={true} />
-                    Login to Comment
-                  </>
-                )}
-              </Button>
             </div>
+            {/* Disclaimer */}
+            <p className="text-secondary-text mt-1 flex items-start gap-1 text-xs">
+              <Icon
+                icon="heroicons:information-circle"
+                className="h-3.5 w-3.5 shrink-0"
+              />
+              Comments are posted by users and are not verified. Some
+              information may be incorrect or misleading
+            </p>
+          </div>
+
+          {/* New Comment Form */}
+          <form id="new-comment-form" onSubmit={handleSubmitComment}>
+            {!isCommentFormExpanded ? (
+              /* Collapsed trigger */
+              <button
+                type="button"
+                className="border-border-card bg-form-input text-secondary-text hover:border-button-info w-full cursor-text rounded-lg border px-4 py-3 text-left text-sm transition-colors"
+                onClick={() => {
+                  if (!isLoggedIn) {
+                    setLoginModal({ open: true });
+                  } else {
+                    setIsCommentFormExpanded(true);
+                  }
+                }}
+              >
+                {isLoggedIn
+                  ? "Write a comment..."
+                  : "Log in to leave a comment..."}
+              </button>
+            ) : (
+              /* Expanded state */
+              <div className="border-border-card bg-form-input focus-within:border-button-info overflow-hidden rounded-lg border transition-colors">
+                <textarea
+                  id="new-comment-textarea"
+                  value={newComment}
+                  onChange={(e) => setNewComment(e.target.value)}
+                  placeholder="Write a comment..."
+                  rows={4}
+                  className="text-primary-text placeholder-secondary-text w-full resize-none bg-transparent p-3 text-sm focus:outline-none"
+                  autoCorrect="off"
+                  autoComplete="off"
+                  spellCheck="false"
+                  autoCapitalize="off"
+                  onKeyDown={(e) => {
+                    if (e.key === "Escape") {
+                      setIsCommentFormExpanded(false);
+                      setNewComment("");
+                    }
+                    if (e.key === "Enter" && !e.shiftKey) {
+                      e.preventDefault();
+                      if (newComment.trim() && !isSubmittingComment) {
+                        e.currentTarget.form?.requestSubmit();
+                      }
+                    }
+                  }}
+                />
+                <div className="border-border-card flex items-center justify-end gap-2 border-t px-3 py-2">
+                  {/* Mobile: show buttons */}
+                  <div className="flex items-center gap-2 lg:hidden">
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        setIsCommentFormExpanded(false);
+                        setNewComment("");
+                      }}
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      type="submit"
+                      size="sm"
+                      disabled={!newComment.trim() || isSubmittingComment}
+                      data-umami-event="Post Comment"
+                      data-umami-event-type={type}
+                      data-umami-event-context-id={changelogId.toString()}
+                    >
+                      {isSubmittingComment ? (
+                        <>
+                          <CircularProgress
+                            size={14}
+                            className="text-form-button-text"
+                          />
+                          Posting...
+                        </>
+                      ) : (
+                        <>
+                          <Icon
+                            icon="streamline-plump:mail-send-email-message-solid"
+                            inline={true}
+                          />
+                          Post
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                  {/* Desktop: keyboard hints */}
+                  <div className="text-secondary-text hidden items-center gap-1.5 text-[11px] lg:flex">
+                    {isSubmittingComment ? (
+                      <>
+                        <CircularProgress
+                          size={12}
+                          className="text-border-focus"
+                        />
+                        <span>Posting...</span>
+                      </>
+                    ) : (
+                      <>
+                        <span>Esc to </span>
+                        <button
+                          type="button"
+                          className="text-link cursor-pointer hover:underline"
+                          onClick={() => {
+                            setIsCommentFormExpanded(false);
+                            setNewComment("");
+                          }}
+                        >
+                          cancel
+                        </button>
+                        <span> • Enter to </span>
+                        <button
+                          type="button"
+                          className="text-link cursor-pointer hover:underline disabled:cursor-not-allowed disabled:opacity-60"
+                          disabled={!newComment.trim() || isSubmittingComment}
+                          onClick={() => {
+                            if (newComment.trim() && !isSubmittingComment) {
+                              document
+                                .querySelector<HTMLFormElement>(
+                                  "#new-comment-form",
+                                )
+                                ?.requestSubmit();
+                            }
+                          }}
+                        >
+                          post
+                        </button>
+                      </>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
           </form>
 
           {/* Comments List */}
@@ -1424,15 +1559,16 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                       ? filteredComments.find((c) => c.id === comment.parent_id)
                       : null;
 
+                  const parentHidden =
+                    !!parentComment &&
+                    (userData[parentComment.user_id]?.settings
+                      ?.show_recent_comments === 0 ||
+                      userData[parentComment.user_id]?.settings
+                        ?.profile_public === 0) &&
+                    currentUserId !== parentComment.user_id;
+
                   const parentUsername =
-                    parentComment &&
-                    !(
-                      (userData[parentComment.user_id]?.settings
-                        ?.show_recent_comments === 0 ||
-                        userData[parentComment.user_id]?.settings
-                          ?.profile_public === 0) &&
-                      currentUserId !== parentComment.user_id
-                    )
+                    parentComment && !parentHidden
                       ? userData[parentComment.user_id]?.username ||
                         parentComment.author
                       : null;
@@ -1467,15 +1603,27 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                             type="button"
                             className="text-secondary-text/80 -ml-1 flex min-w-0 cursor-pointer items-center gap-1.5 overflow-hidden rounded px-1 text-xs transition-opacity hover:opacity-100"
                             onClick={() => {
+                              // Find which page the parent comment lives on
+                              const parentIndex = threadedComments.findIndex(
+                                (c) =>
+                                  !("isMore" in c) &&
+                                  (c as CommentData).id === parentComment.id,
+                              );
+                              const targetPage =
+                                parentIndex >= 0
+                                  ? Math.floor(parentIndex / itemsPerPage) + 1
+                                  : null;
+
                               const el = document.getElementById(
                                 `comment-${parentComment.id}`,
                               );
+
                               if (el) {
+                                // Parent is already rendered on the current page
                                 el.scrollIntoView({
                                   behavior: "smooth",
                                   block: "center",
                                 });
-                                // Flash effect to highlight the target comment
                                 el.classList.add(
                                   "bg-button-info/20",
                                   "transition-colors",
@@ -1490,34 +1638,63 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                                     ),
                                   1500,
                                 );
+                              } else if (
+                                targetPage !== null &&
+                                targetPage !== page
+                              ) {
+                                // Parent is on a different page — navigate there first,
+                                // the useEffect will handle the scroll once it renders
+                                setPage(targetPage);
+                                setPendingScrollToId(parentComment.id);
                               }
                             }}
                           >
-                            <UserAvatar
-                              userId={parentComment.user_id}
-                              avatarHash={
-                                userData[parentComment.user_id]?.avatar
-                              }
-                              username={
-                                userData[parentComment.user_id]?.username ||
-                                parentComment.author
-                              }
-                              size={4}
-                              cdnSize={512}
-                              showBadge={false}
-                              premiumType={
-                                userData[parentComment.user_id]?.premiumtype
-                              }
-                              settings={
-                                userData[parentComment.user_id]?.settings
-                              }
-                              custom_avatar={
-                                userData[parentComment.user_id]?.custom_avatar
-                              }
-                              className="h-4 w-4"
-                            />
+                            {parentHidden ? (
+                              <div className="ring-tertiary-text/20 border-border-card bg-primary-bg flex h-4 w-4 shrink-0 items-center justify-center rounded-full border ring-1">
+                                <svg
+                                  className="text-secondary-text h-2.5 w-2.5"
+                                  fill="none"
+                                  viewBox="0 0 24 24"
+                                  stroke="currentColor"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                                  />
+                                </svg>
+                              </div>
+                            ) : (
+                              <UserAvatar
+                                userId={parentComment.user_id}
+                                avatarHash={
+                                  userData[parentComment.user_id]?.avatar
+                                }
+                                username={
+                                  userData[parentComment.user_id]?.username ||
+                                  parentComment.author
+                                }
+                                size={4}
+                                cdnSize={512}
+                                showBadge={false}
+                                premiumType={
+                                  userData[parentComment.user_id]?.premiumtype
+                                }
+                                settings={
+                                  userData[parentComment.user_id]?.settings
+                                }
+                                custom_avatar={
+                                  userData[parentComment.user_id]?.custom_avatar
+                                }
+                                className="h-4 w-4"
+                              />
+                            )}
                             <span className="text-primary-text shrink-0 font-semibold">
-                              @{parentUsername || "Unknown"}
+                              @
+                              {parentHidden
+                                ? "Hidden User"
+                                : parentUsername || "Unknown"}
                             </span>
                             <span
                               className="text-secondary-text max-w-50 truncate sm:max-w-100"
@@ -1607,25 +1784,9 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                                       <div className="bg-button-secondary h-4 w-20 animate-pulse rounded" />
                                     </>
                                   ) : hideRecent ? (
-                                    <div className="flex items-center gap-2">
-                                      {/* Hidden user identity */}
-                                      <svg
-                                        className="text-secondary-text h-4 w-4"
-                                        fill="none"
-                                        viewBox="0 0 24 24"
-                                        stroke="currentColor"
-                                      >
-                                        <path
-                                          strokeLinecap="round"
-                                          strokeLinejoin="round"
-                                          strokeWidth={2}
-                                          d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
-                                        />
-                                      </svg>
-                                      <span className="text-secondary-text text-sm font-medium">
-                                        Hidden User
-                                      </span>
-                                    </div>
+                                    <span className="text-primary-text text-sm font-semibold">
+                                      Hidden User
+                                    </span>
                                   ) : (
                                     <>
                                       {/* Author Name and Hover Profile Tooltip */}
@@ -1689,7 +1850,35 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                             </div>
 
                             {/* Action Menu Dropdown (Edit, Delete, Report) */}
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-1">
+                              {isLoggedIn && (
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      className="text-secondary-text hover:text-primary-text hover:bg-quaternary-bg h-8 w-8 rounded-lg p-0 opacity-100 transition-all duration-200 lg:opacity-0 lg:group-hover:opacity-100"
+                                      onClick={() => {
+                                        if (replyingToId === comment.id) {
+                                          setReplyingToId(null);
+                                          setReplyContent("");
+                                        } else {
+                                          setEditingCommentId(null);
+                                          setEditContent("");
+                                          setReplyingToId(comment.id);
+                                          setReplyContent("");
+                                        }
+                                      }}
+                                    >
+                                      <Icon
+                                        icon="heroicons-outline:chat-bubble-left-right"
+                                        className="h-4 w-4"
+                                      />
+                                    </Button>
+                                  </TooltipTrigger>
+                                  <TooltipContent>Reply</TooltipContent>
+                                </Tooltip>
+                              )}
                               <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
                                   <Button
@@ -1703,7 +1892,14 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                                     />
                                   </Button>
                                 </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end">
+                                <DropdownMenuContent
+                                  align="end"
+                                  onCloseAutoFocus={(e) => {
+                                    if (editingCommentId !== null) {
+                                      e.preventDefault();
+                                    }
+                                  }}
+                                >
                                   {currentUserId === comment.user_id ? (
                                     <>
                                       {/* Check if comment is still editable (within 1 hour) */}
@@ -1754,56 +1950,115 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                           {/* Content Section */}
                           <div className="pb-2">
                             {editingCommentId === comment.id ? (
-                              <div className="space-y-3">
-                                <div className="space-y-2">
-                                  <textarea
-                                    value={editContent}
-                                    onChange={(e) =>
-                                      setEditContent(e.target.value)
+                              <div className="border-border-card bg-form-input focus-within:border-button-info -ml-12 overflow-hidden rounded-lg border transition-colors sm:-ml-[3.25rem] lg:ml-0">
+                                <textarea
+                                  value={editContent}
+                                  onChange={(e) =>
+                                    setEditContent(e.target.value)
+                                  }
+                                  disabled={updatingCommentId === comment.id}
+                                  id={`edit-textarea-${comment.id}`}
+                                  rows={3}
+                                  className="text-primary-text placeholder-secondary-text w-full resize-none bg-transparent p-3 text-sm focus:outline-none disabled:opacity-50"
+                                  autoCorrect="off"
+                                  autoComplete="off"
+                                  spellCheck="false"
+                                  autoCapitalize="off"
+                                  onKeyDown={(e) => {
+                                    if (e.key === "Escape") {
+                                      setEditingCommentId(null);
+                                      setEditContent("");
                                     }
-                                    disabled={updatingCommentId === comment.id}
-                                    rows={3}
-                                    className="border-border-card bg-form-input text-primary-text focus:border-button-info w-full resize-y rounded border p-3 text-sm focus:outline-none"
-                                    autoCorrect="off"
-                                    autoComplete="off"
-                                    spellCheck="false"
-                                    autoCapitalize="off"
-                                  />
-                                </div>
-                                <div className="flex gap-2">
-                                  <Button
-                                    size="sm"
-                                    onClick={() =>
-                                      handleEditComment(comment.id)
+                                    if (e.key === "Enter" && !e.shiftKey) {
+                                      e.preventDefault();
+                                      if (
+                                        editContent.trim() &&
+                                        updatingCommentId !== comment.id
+                                      ) {
+                                        void handleEditComment(comment.id);
+                                      }
                                     }
-                                    disabled={
-                                      !editContent.trim() ||
-                                      updatingCommentId === comment.id
-                                    }
-                                  >
+                                  }}
+                                />
+                                <div className="border-border-card flex items-center justify-end gap-2 border-t px-3 py-2">
+                                  {/* Mobile: buttons */}
+                                  <div className="flex items-center gap-2 lg:hidden">
+                                    <Button
+                                      size="sm"
+                                      variant="ghost"
+                                      disabled={
+                                        updatingCommentId === comment.id
+                                      }
+                                      onClick={() => {
+                                        setEditingCommentId(null);
+                                        setEditContent("");
+                                      }}
+                                    >
+                                      Cancel
+                                    </Button>
+                                    <Button
+                                      size="sm"
+                                      onClick={() =>
+                                        handleEditComment(comment.id)
+                                      }
+                                      disabled={
+                                        !editContent.trim() ||
+                                        updatingCommentId === comment.id
+                                      }
+                                    >
+                                      {updatingCommentId === comment.id ? (
+                                        <>
+                                          <CircularProgress
+                                            size={14}
+                                            className="text-form-button-text"
+                                          />
+                                          Updating...
+                                        </>
+                                      ) : (
+                                        "Update"
+                                      )}
+                                    </Button>
+                                  </div>
+                                  {/* Desktop: keyboard hints */}
+                                  <div className="text-secondary-text hidden items-center gap-1.5 text-[11px] lg:flex">
                                     {updatingCommentId === comment.id ? (
                                       <>
                                         <CircularProgress
-                                          size={16}
-                                          className="text-form-button-text"
+                                          size={12}
+                                          className="text-border-focus"
                                         />
-                                        Updating...
+                                        <span>Updating...</span>
                                       </>
                                     ) : (
-                                      "Update"
+                                      <>
+                                        <span>Esc to </span>
+                                        <button
+                                          type="button"
+                                          className="text-link cursor-pointer hover:underline"
+                                          onClick={() => {
+                                            setEditingCommentId(null);
+                                            setEditContent("");
+                                          }}
+                                        >
+                                          cancel
+                                        </button>
+                                        <span> • Enter to </span>
+                                        <button
+                                          type="button"
+                                          className="text-link cursor-pointer hover:underline disabled:cursor-not-allowed disabled:opacity-60"
+                                          disabled={
+                                            !editContent.trim() ||
+                                            updatingCommentId === comment.id
+                                          }
+                                          onClick={() =>
+                                            void handleEditComment(comment.id)
+                                          }
+                                        >
+                                          save
+                                        </button>
+                                      </>
                                     )}
-                                  </Button>
-                                  <Button
-                                    size="sm"
-                                    variant="ghost"
-                                    disabled={updatingCommentId === comment.id}
-                                    onClick={() => {
-                                      setEditingCommentId(null);
-                                      setEditContent("");
-                                    }}
-                                  >
-                                    Cancel
-                                  </Button>
+                                  </div>
                                 </div>
                               </div>
                             ) : (
@@ -1882,79 +2137,120 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                             )}
                           </div>
 
-                          {/* Reply and Action Row */}
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                              {isLoggedIn && (
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  className="text-secondary-text hover:text-primary-text hover:bg-quaternary-bg h-7 px-2 text-xs transition-colors"
-                                  onClick={() => {
-                                    if (replyingToId === comment.id) {
-                                      setReplyingToId(null);
-                                      setReplyContent("");
-                                    } else {
-                                      setReplyingToId(comment.id);
-                                      setReplyContent("");
-                                    }
-                                  }}
-                                >
-                                  <Icon
-                                    icon="heroicons-outline:chat-bubble-left-right"
-                                    className="mr-1.5 h-3.5 w-3.5"
-                                  />
-                                  Reply
-                                </Button>
-                              )}
-                              {depth >= 7 && (
-                                <span className="text-secondary-text/60 text-[10px] italic">
-                                  Deep thread (level {depth})
-                                </span>
-                              )}
-                            </div>
-
-                            {/* Enhanced Menu */}
-                          </div>
-
                           {/* Inline Reply Form */}
                           {isLoggedIn && replyingToId === comment.id && (
-                            <div className="mt-3 space-y-2">
+                            <div className="border-border-card bg-form-input focus-within:border-button-info mt-3 -ml-12 overflow-hidden rounded-lg border transition-colors sm:-ml-[3.25rem] lg:ml-0">
                               <textarea
                                 value={replyContent}
                                 onChange={(e) =>
                                   setReplyContent(e.target.value)
                                 }
+                                id={`reply-textarea-${comment.id}`}
                                 rows={2}
-                                className="border-border-card bg-form-input text-primary-text placeholder-secondary-text focus:border-button-info w-full resize-y rounded border p-2 text-sm focus:outline-none"
+                                className="text-primary-text placeholder-secondary-text w-full resize-none bg-transparent p-3 text-sm focus:outline-none"
                                 placeholder="Write a reply..."
                                 autoCorrect="off"
                                 autoComplete="off"
                                 spellCheck="false"
                                 autoCapitalize="off"
-                              />
-                              <div className="flex gap-2">
-                                <Button
-                                  size="sm"
-                                  className="h-7 px-3 text-xs"
-                                  disabled={
-                                    !replyContent.trim() || isSubmittingComment
-                                  }
-                                  onClick={() => handleSubmitReply(comment.id)}
-                                >
-                                  {isSubmittingComment ? "Posting..." : "Reply"}
-                                </Button>
-                                <Button
-                                  size="sm"
-                                  variant="ghost"
-                                  className="h-7 px-3 text-xs"
-                                  onClick={() => {
+                                onKeyDown={(e) => {
+                                  if (e.key === "Escape") {
                                     setReplyingToId(null);
                                     setReplyContent("");
-                                  }}
-                                >
-                                  Cancel
-                                </Button>
+                                  }
+                                  if (e.key === "Enter" && !e.shiftKey) {
+                                    e.preventDefault();
+                                    if (
+                                      replyContent.trim() &&
+                                      !isSubmittingComment
+                                    ) {
+                                      void handleSubmitReply(comment.id);
+                                    }
+                                  }
+                                }}
+                              />
+                              <div className="border-border-card flex items-center justify-end gap-2 border-t px-3 py-2">
+                                {/* Mobile: buttons */}
+                                <div className="flex items-center gap-2 lg:hidden">
+                                  <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    onClick={() => {
+                                      setReplyingToId(null);
+                                      setReplyContent("");
+                                    }}
+                                  >
+                                    Cancel
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    disabled={
+                                      !replyContent.trim() ||
+                                      isSubmittingComment
+                                    }
+                                    onClick={() =>
+                                      handleSubmitReply(comment.id)
+                                    }
+                                  >
+                                    {isSubmittingComment ? (
+                                      <>
+                                        <CircularProgress
+                                          size={14}
+                                          className="text-form-button-text"
+                                        />
+                                        Posting...
+                                      </>
+                                    ) : (
+                                      <>
+                                        <Icon
+                                          icon="streamline-plump:mail-send-email-message-solid"
+                                          inline={true}
+                                        />
+                                        Reply
+                                      </>
+                                    )}
+                                  </Button>
+                                </div>
+                                {/* Desktop: keyboard hints */}
+                                <div className="text-secondary-text hidden items-center gap-1.5 text-[11px] lg:flex">
+                                  {isSubmittingComment ? (
+                                    <>
+                                      <CircularProgress
+                                        size={12}
+                                        className="text-border-focus"
+                                      />
+                                      <span>Posting...</span>
+                                    </>
+                                  ) : (
+                                    <>
+                                      <span>Esc to </span>
+                                      <button
+                                        type="button"
+                                        className="text-link cursor-pointer hover:underline"
+                                        onClick={() => {
+                                          setReplyingToId(null);
+                                          setReplyContent("");
+                                        }}
+                                      >
+                                        cancel
+                                      </button>
+                                      <span> • Enter to </span>
+                                      <button
+                                        type="button"
+                                        className="text-link cursor-pointer hover:underline disabled:cursor-not-allowed disabled:opacity-60"
+                                        disabled={
+                                          !replyContent.trim() ||
+                                          isSubmittingComment
+                                        }
+                                        onClick={() =>
+                                          void handleSubmitReply(comment.id)
+                                        }
+                                      >
+                                        reply
+                                      </button>
+                                    </>
+                                  )}
+                                </div>
                               </div>
                             </div>
                           )}
