@@ -711,7 +711,7 @@ export default function ChangelogDetailsClient({
                               <div className="relative h-8 w-8 shrink-0 overflow-hidden rounded-full">
                                 <DefaultAvatar />
                                 <Image
-                                  src={`http://proxy.jailbreakchangelogs.com/?destination=${encodeURIComponent(`https://cdn.discordapp.com/avatars/${change.suggestion.user_id}/${change.suggestion.metadata.avatar_hash}?size=128`)}`}
+                                  src={`https://cdn.discordapp.com/avatars/${change.suggestion.user_id}/${change.suggestion.metadata.avatar_hash}?size=128`}
                                   alt={`${change.suggestion.suggestor_name}'s avatar`}
                                   fill
                                   className="object-cover"
@@ -1258,7 +1258,7 @@ export default function ChangelogDetailsClient({
                           <DefaultAvatar />
                           {voter.avatar_hash && (
                             <Image
-                              src={`http://proxy.jailbreakchangelogs.com/?destination=${encodeURIComponent(`https://cdn.discordapp.com/avatars/${voter.id}/${voter.avatar_hash}?size=128`)}`}
+                              src={`https://cdn.discordapp.com/avatars/${voter.id}/${voter.avatar_hash}?size=128`}
                               alt={voter.name}
                               fill
                               className="object-cover"

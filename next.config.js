@@ -35,16 +35,6 @@ const nextConfig = {
         pathname: "/guild-tag-badges/**",
       },
       {
-        protocol: "http",
-        hostname: "proxy.jailbreakchangelogs.com",
-        pathname: "/**",
-      },
-      {
-        protocol: "http",
-        hostname: "proxy.jailbreakchangelogs.com",
-        pathname: "/**",
-      },
-      {
         protocol: "https",
         hostname: "assets.jailbreakchangelogs.com",
         pathname: "/assets/**",
