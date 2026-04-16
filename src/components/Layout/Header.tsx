@@ -731,12 +731,6 @@ export default function Header() {
             onClick={handleDrawerToggle}
           />
           <MobileNavItem
-            href="/leaderboard/money"
-            icon="mdi:currency-usd"
-            label="Money Leaderboard"
-            onClick={handleDrawerToggle}
-          />
-          <MobileNavItem
             href="/robberies"
             icon="material-symbols:local-police-rounded"
             label="Robbery Tracker"

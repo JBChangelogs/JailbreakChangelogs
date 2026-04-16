@@ -100,12 +100,6 @@ const platformGroups = [
         description: "See season rewards, contracts, and your progress tools.",
       },
       {
-        href: "/leaderboard/money",
-        icon: "mdi:podium",
-        title: "Leaderboards",
-        description: "Compare your progress with top players.",
-      },
-      {
         href: "/calculators",
         icon: "mdi:calculator",
         title: "Calculators",

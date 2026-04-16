@@ -502,7 +502,7 @@ export const NavbarModern = ({
                     position: "absolute",
                     top: 0,
                     left: 0,
-                    animationDuration: "250ms",
+                    animationDuration: "0ms",
                     animationTimingFunction: "ease",
                   }}
                   onClick={() => setNavMenuValue("")}
@@ -552,7 +552,7 @@ export const NavbarModern = ({
                     position: "absolute",
                     top: 0,
                     left: 0,
-                    animationDuration: "250ms",
+                    animationDuration: "0ms",
                     animationTimingFunction: "ease",
                   }}
                   onClick={() => setNavMenuValue("")}
@@ -607,7 +607,7 @@ export const NavbarModern = ({
                     position: "absolute",
                     top: 0,
                     left: 0,
-                    animationDuration: "250ms",
+                    animationDuration: "0ms",
                     animationTimingFunction: "ease",
                   }}
                   onClick={() => setNavMenuValue("")}
@@ -681,7 +681,7 @@ export const NavbarModern = ({
                     position: "absolute",
                     top: 0,
                     left: 0,
-                    animationDuration: "250ms",
+                    animationDuration: "0ms",
                     animationTimingFunction: "ease",
                   }}
                   onClick={() => setNavMenuValue("")}
@@ -694,12 +694,6 @@ export const NavbarModern = ({
                       title="User Search"
                       description="Browse 30k+ Jailbreak Changelogs user profiles"
                       prefetch={false}
-                    />
-                    <NavDropdownItem
-                      href="/leaderboard/money"
-                      icon="mdi:currency-usd"
-                      title="Money Leaderboard"
-                      description="The top richest players ranked from scanned in-game data"
                     />
                     <NavDropdownItem
                       href="/robberies"
@@ -736,6 +730,7 @@ export const NavbarModern = ({
                       icon="material-symbols:favorite-rounded"
                       title="Support Us"
                       description="Unlock perks like ad removal, custom avatars, and more"
+                      className="col-span-2"
                     />
                   </div>
                 </NavigationMenu.Content>
@@ -785,7 +780,7 @@ export const NavbarModern = ({
                   marginTop: "10px",
                   width: "var(--radix-navigation-menu-viewport-width)",
                   height: "var(--radix-navigation-menu-viewport-height)",
-                  transition: "height 300ms ease",
+                  transition: "height 100ms ease",
                   overflow: "hidden",
                   borderRadius: "16px",
                   border: "1px solid var(--color-border-card)",

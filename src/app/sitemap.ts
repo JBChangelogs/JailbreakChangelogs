@@ -121,12 +121,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "weekly" as const,
     },
     {
-      url: `${BASE_URL}/leaderboard/money`,
-      lastModified: new Date().toISOString(),
-      priority: 0.8,
-      changeFrequency: "daily" as const,
-    },
-    {
       url: `${BASE_URL}/robberies`,
       lastModified: new Date().toISOString(),
       priority: 0.7,
