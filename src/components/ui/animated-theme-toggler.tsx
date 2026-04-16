@@ -4,6 +4,11 @@ import { useCallback, useRef } from "react";
 import { cn } from "@/lib/utils";
 import { useTheme } from "@/contexts/ThemeContext";
 import { safeLocalStorage } from "@/utils/safeStorage";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface AnimatedThemeTogglerProps extends React.ComponentPropsWithoutRef<"button"> {
   size?: "sm" | "md";
@@ -60,20 +65,28 @@ export const AnimatedThemeToggler = ({
   };
 
   return (
-    <button
-      ref={buttonRef}
-      type="button"
-      onClick={toggleTheme}
-      className={cn(
-        "border-border-card bg-secondary-bg text-secondary-text hover:bg-quaternary-bg hover:text-primary-text flex cursor-pointer items-center justify-center rounded-lg border transition-all duration-200 hover:scale-105 active:scale-95",
-        size === "sm" ? "h-8 w-8" : "h-10 w-10",
-        className,
-      )}
-      aria-label={`Switch theme (current: ${theme})`}
-      {...props}
-    >
-      {getIcon()}
-      <span className="sr-only">Toggle theme</span>
-    </button>
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <button
+          ref={buttonRef}
+          type="button"
+          onClick={toggleTheme}
+          className={cn(
+            "border-border-card bg-secondary-bg text-secondary-text hover:bg-quaternary-bg hover:text-primary-text flex cursor-pointer items-center justify-center rounded-lg border transition-all duration-200",
+            size === "sm" ? "h-8 w-8" : "h-10 w-10",
+            className,
+          )}
+          aria-label={
+            theme === "dark" ? "Switch to light mode" : "Switch to dark mode"
+          }
+          {...props}
+        >
+          {getIcon()}
+        </button>
+      </TooltipTrigger>
+      <TooltipContent>
+        {theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+      </TooltipContent>
+    </Tooltip>
   );
 };

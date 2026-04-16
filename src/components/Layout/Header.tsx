@@ -3,11 +3,12 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { AppBar, Toolbar, Box, Typography, useMediaQuery } from "@mui/material";
+import { AppBar, Toolbar, Box, useMediaQuery } from "@mui/material";
 import { Pagination } from "@/components/ui/Pagination";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import dynamic from "next/dynamic";
 import { useState, useEffect, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { logout, trackLogoutSource } from "@/utils/auth";
 import { toast } from "sonner";
 import LoginModal from "../Auth/LoginModal";
@@ -15,7 +16,6 @@ import EscapeLoginModal from "../Auth/EscapeLoginModal";
 import { useEscapeLogin } from "@/utils/escapeLogin";
 import { UserAvatar } from "@/utils/avatar";
 import { RobloxIcon } from "@/components/Icons/RobloxIcon";
-import { isFeatureEnabled } from "@/utils/featureFlags";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { useTheme } from "@/contexts/ThemeContext";
 
@@ -139,6 +139,93 @@ const getNotificationType = (
   return null;
 };
 
+const MobileNavSection = ({
+  title,
+  sectionIcon,
+  children,
+}: {
+  title: string;
+  sectionIcon: string;
+  children: React.ReactNode;
+}) => {
+  const [open, setOpen] = useState(true);
+  return (
+    <div>
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        className="hover:bg-button-info-hover/10 flex w-full items-center justify-between px-4 py-2.5 transition-colors"
+      >
+        <div className="flex items-center gap-2.5">
+          <div className="bg-button-info/15 flex h-6 w-6 items-center justify-center rounded-md">
+            <Icon
+              icon={sectionIcon}
+              className="text-link h-3.5 w-3.5"
+              inline={true}
+            />
+          </div>
+          <span className="text-primary-text text-sm font-semibold">
+            {title}
+          </span>
+        </div>
+        <Icon
+          icon={open ? "mdi:chevron-up" : "mdi:chevron-down"}
+          className="text-secondary-text h-4 w-4 transition-colors duration-200"
+          inline={true}
+        />
+      </button>
+      <AnimatePresence initial={false}>
+        {open && (
+          <motion.div
+            initial={{ height: 0 }}
+            animate={{ height: "auto" }}
+            exit={{ height: 0 }}
+            transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
+            className="overflow-hidden"
+          >
+            <div className="pb-1">{children}</div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+};
+
+const MobileNavItem = ({
+  href,
+  icon,
+  label,
+  badge,
+  prefetch,
+  onClick,
+}: {
+  href: string;
+  icon: string;
+  label: string;
+  badge?: string;
+  prefetch?: boolean;
+  onClick?: () => void;
+}) => (
+  <Link
+    href={href}
+    prefetch={prefetch}
+    onClick={onClick}
+    className="hover:bg-button-info-hover/10 flex items-center gap-2.5 py-2 pr-3 pl-10 transition-colors"
+  >
+    <div className="bg-button-info/15 flex h-6 w-6 shrink-0 items-center justify-center rounded-md">
+      <Icon icon={icon} className="text-link h-3.5 w-3.5" inline={true} />
+    </div>
+    <span className="text-primary-text min-w-0 flex-1 truncate text-sm">
+      {label}
+    </span>
+    {badge && (
+      <span className="bg-button-info/20 text-link ml-auto shrink-0 rounded px-1.5 py-0.5 text-[9px] font-semibold tracking-wide uppercase">
+        {badge}
+      </span>
+    )}
+  </Link>
+);
+
 export default function Header() {
   const pathname = usePathname();
   const isXlUp = useMediaQuery("(min-width: 1280px)");
@@ -201,7 +288,6 @@ export default function Header() {
   const { setLoginModal, user: authUser, isAuthenticated } = useAuthContext();
   const { resolvedTheme } = useTheme();
   const userData = isAuthenticated ? authUser : null;
-  const shouldShowSupportButton = (userData?.premiumtype ?? 0) <= 0;
   useEscapeLogin();
 
   useEffect(() => {
@@ -417,7 +503,7 @@ export default function Header() {
           <Link
             href={`/users/${userData?.id}`}
             onClick={handleDrawerToggle}
-            className="hover:bg-button-info-hover/10 border-border-secondary flex w-full min-w-0 cursor-pointer items-center gap-3 border-b px-4 py-3 transition-colors"
+            className="hover:bg-tertiary-bg border-border-secondary flex w-full min-w-0 cursor-pointer items-center gap-3 border-b p-3 transition-colors"
           >
             <UserAvatar
               userId={userData.id}
@@ -433,66 +519,89 @@ export default function Header() {
               <div className="text-primary-text truncate font-semibold">
                 {userData.global_name || userData.username}
               </div>
-              <div className="text-secondary-text truncate text-sm">
+              <div className="text-secondary-text truncate text-xs">
                 @{userData.username}
               </div>
             </div>
-          </Link>
-          {!userData.roblox_id && (
-            <button
-              type="button"
-              onClick={() => {
-                handleDrawerToggle();
-                setLoginModal({ open: true, tab: "roblox" });
-              }}
-              className="hover:bg-button-info-hover/10 flex cursor-pointer items-center gap-3 px-4 py-3 transition-colors"
-            >
-              <RobloxIcon className="text-primary-text h-5 w-5" />
-              <span className="text-primary-text">Connect Roblox</span>
-            </button>
-          )}
-          <Link
-            href="/settings"
-            onClick={handleDrawerToggle}
-            className="hover:bg-button-info-hover/10 flex cursor-pointer items-center gap-3 px-4 py-3 transition-colors"
-          >
             <Icon
-              icon="material-symbols:settings"
-              className="text-primary-text h-5 w-5"
+              icon="material-symbols:chevron-right-rounded"
+              className="text-secondary-text h-4 w-4 shrink-0"
               inline={true}
             />
-            <span className="text-primary-text">Settings</span>
           </Link>
-          {userData?.flags?.some((f) => f.flag === "is_owner") && (
+          <div className="p-2">
+            {!userData.roblox_id && (
+              <button
+                type="button"
+                onClick={() => {
+                  handleDrawerToggle();
+                  setLoginModal({ open: true, tab: "roblox" });
+                }}
+                className="hover:bg-tertiary-bg flex w-full cursor-pointer items-center gap-3 rounded-xl px-2 py-2 text-left transition-colors"
+              >
+                <div className="bg-button-info/15 flex h-8 w-8 shrink-0 items-center justify-center rounded-md">
+                  <RobloxIcon className="text-link h-4 w-4" />
+                </div>
+                <span className="text-primary-text text-sm font-medium">
+                  Connect Roblox
+                </span>
+              </button>
+            )}
+            <Link
+              href="/settings"
+              onClick={handleDrawerToggle}
+              className="hover:bg-tertiary-bg flex cursor-pointer items-center gap-3 rounded-xl px-2 py-2 transition-colors"
+            >
+              <div className="bg-button-info/15 flex h-8 w-8 shrink-0 items-center justify-center rounded-md">
+                <Icon
+                  icon="material-symbols:settings-rounded"
+                  className="text-link h-4 w-4"
+                  inline={true}
+                />
+              </div>
+              <span className="text-primary-text text-sm font-medium">
+                Settings
+              </span>
+            </Link>
+            {userData?.flags?.some((f) => f.flag === "is_owner") && (
+              <button
+                type="button"
+                onClick={() => {
+                  handleDrawerToggle();
+                  setUtmModalOpen(true);
+                }}
+                className="hover:bg-tertiary-bg flex w-full cursor-pointer items-center gap-3 rounded-xl px-2 py-2 text-left transition-colors"
+              >
+                <div className="bg-button-info/15 flex h-8 w-8 shrink-0 items-center justify-center rounded-md">
+                  <Icon
+                    icon="heroicons:link"
+                    className="text-link h-4 w-4"
+                    inline={true}
+                  />
+                </div>
+                <span className="text-primary-text text-sm font-medium">
+                  Generate UTM Link
+                </span>
+              </button>
+            )}
             <button
               type="button"
-              onClick={() => {
-                handleDrawerToggle();
-                setUtmModalOpen(true);
-              }}
-              className="hover:bg-button-info-hover/10 flex cursor-pointer items-center gap-3 px-4 py-3 transition-colors"
+              onClick={handleLogout}
+              className="hover:bg-button-danger/10 flex w-full cursor-pointer items-center gap-3 rounded-xl px-2 py-2 text-left transition-colors"
+              data-umami-event="Logout"
             >
-              <Icon
-                icon="heroicons:link"
-                className="text-primary-text h-5 w-5"
-                inline={true}
-              />
-              <span className="text-primary-text">Generate UTM Link</span>
+              <div className="bg-button-danger/15 flex h-8 w-8 shrink-0 items-center justify-center rounded-md">
+                <Icon
+                  icon="material-symbols:logout-rounded"
+                  className="text-button-danger h-4 w-4"
+                  inline={true}
+                />
+              </div>
+              <span className="text-button-danger text-sm font-medium">
+                Logout
+              </span>
             </button>
-          )}
-          <button
-            type="button"
-            onClick={handleLogout}
-            className="hover:bg-button-danger/10 flex cursor-pointer items-center gap-3 px-4 py-3 transition-colors"
-            data-umami-event="Logout"
-          >
-            <Icon
-              icon="material-symbols:logout"
-              className="text-button-danger h-5 w-5"
-              inline={true}
-            />
-            <span className="text-button-danger">Logout</span>
-          </button>
+          </div>
         </>
       ) : (
         <div className="px-4 py-3">
@@ -507,208 +616,164 @@ export default function Header() {
         </div>
       )}
 
-      <div className="px-4 py-2">
-        <Typography className="text-secondary-text text-sm font-semibold tracking-wider uppercase">
-          Game & Updates
-        </Typography>
-      </div>
+      <div className="border-border-card border-t">
+        <MobileNavSection
+          title="Updates"
+          sectionIcon="material-symbols:article-rounded"
+        >
+          <MobileNavItem
+            href="/changelogs"
+            icon="material-symbols:article-rounded"
+            label="Game Changelogs"
+            onClick={handleDrawerToggle}
+          />
+          <MobileNavItem
+            href="/changelogs/timeline"
+            icon="material-symbols:schedule-rounded"
+            label="Timeline"
+            onClick={handleDrawerToggle}
+          />
+          <MobileNavItem
+            href="/values/changelogs"
+            icon="material-symbols:history-rounded"
+            label="Value Changelogs"
+            onClick={handleDrawerToggle}
+          />
+        </MobileNavSection>
 
-      <Link
-        href="/changelogs"
-        onClick={handleDrawerToggle}
-        className="hover:bg-button-info-hover/10 text-primary-text cursor-pointer px-8 py-2 transition-colors"
-      >
-        Changelogs
-      </Link>
-      <Link
-        href="/seasons"
-        onClick={handleDrawerToggle}
-        className="hover:bg-button-info-hover/10 text-primary-text cursor-pointer px-8 py-2 transition-colors"
-      >
-        Browse Seasons
-      </Link>
-      <Link
-        href="/seasons/leaderboard"
-        onClick={handleDrawerToggle}
-        className="hover:bg-button-info-hover/10 text-primary-text cursor-pointer px-8 py-2 transition-colors"
-      >
-        <Box className="flex flex-wrap items-center gap-1">
-          <span>Season Leaderboard</span>
-        </Box>
-      </Link>
-      <Link
-        href="/seasons/will-i-make-it"
-        onClick={handleDrawerToggle}
-        className="hover:bg-button-info-hover/10 text-primary-text cursor-pointer px-8 py-2 transition-colors"
-      >
-        <Box className="flex flex-wrap items-center gap-1">
-          <span>Will I Make It</span>
-        </Box>
-      </Link>
-      <Link
-        href="/seasons/contracts"
-        onClick={handleDrawerToggle}
-        className="hover:bg-button-info-hover/10 text-primary-text cursor-pointer px-8 py-2 transition-colors"
-      >
-        <Box className="flex flex-wrap items-center gap-1">
-          <span>Weekly Contracts</span>
-        </Box>
-      </Link>
-      <div className="px-4 py-2">
-        <Typography className="text-secondary-text text-sm font-semibold tracking-wider uppercase">
-          Calculators
-        </Typography>
+        <MobileNavSection
+          title="Seasons"
+          sectionIcon="material-symbols:layers-rounded"
+        >
+          <MobileNavItem
+            href="/seasons"
+            icon="material-symbols:layers-rounded"
+            label="Browse Seasons"
+            onClick={handleDrawerToggle}
+          />
+          <MobileNavItem
+            href="/seasons/leaderboard"
+            icon="material-symbols:leaderboard-rounded"
+            label="Season Leaderboard"
+            onClick={handleDrawerToggle}
+          />
+          <MobileNavItem
+            href="/seasons/will-i-make-it"
+            icon="material-symbols:trending-up-rounded"
+            label="Will I Make It"
+            onClick={handleDrawerToggle}
+          />
+          <MobileNavItem
+            href="/seasons/contracts"
+            icon="material-symbols:task-alt-rounded"
+            label="Weekly Contracts"
+            onClick={handleDrawerToggle}
+          />
+        </MobileNavSection>
+
+        <MobileNavSection
+          title="Trading"
+          sectionIcon="material-symbols:price-check-rounded"
+        >
+          <MobileNavItem
+            href="/values"
+            icon="material-symbols:price-check-rounded"
+            label="Value List"
+            onClick={handleDrawerToggle}
+          />
+          <MobileNavItem
+            href="/values/calculator"
+            icon="material-symbols:calculate-rounded"
+            label="Value Calculator"
+            onClick={handleDrawerToggle}
+          />
+          <MobileNavItem
+            href="/trading"
+            icon="material-symbols:swap-horiz-rounded"
+            label="Trade Ads"
+            onClick={handleDrawerToggle}
+          />
+          <MobileNavItem
+            href="/dupes"
+            icon="material-symbols:content-copy-rounded"
+            label="Dupe Finder"
+            onClick={handleDrawerToggle}
+          />
+          <MobileNavItem
+            href="/inventories"
+            icon="material-symbols:inventory-2-rounded"
+            label="Inventory Checker"
+            onClick={handleDrawerToggle}
+          />
+          <MobileNavItem
+            href="/og"
+            icon="material-symbols:star-rounded"
+            label="OG Finder"
+            onClick={handleDrawerToggle}
+          />
+          <MobileNavItem
+            href="/calculators/hyperchrome-pity"
+            icon="material-symbols:percent-rounded"
+            label="Hyperchrome Pity"
+            onClick={handleDrawerToggle}
+          />
+        </MobileNavSection>
+
+        <MobileNavSection
+          title="Community"
+          sectionIcon="material-symbols:groups-rounded"
+        >
+          <MobileNavItem
+            href="/users"
+            icon="material-symbols:person-search-rounded"
+            label="User Search"
+            prefetch={false}
+            onClick={handleDrawerToggle}
+          />
+          <MobileNavItem
+            href="/leaderboard/money"
+            icon="mdi:currency-usd"
+            label="Money Leaderboard"
+            onClick={handleDrawerToggle}
+          />
+          <MobileNavItem
+            href="/robberies"
+            icon="material-symbols:local-police-rounded"
+            label="Robbery Tracker"
+            onClick={handleDrawerToggle}
+          />
+          <MobileNavItem
+            href="/bounties"
+            icon="mdi:currency-usd"
+            label="Bounty Tracker"
+            onClick={handleDrawerToggle}
+          />
+          <MobileNavItem
+            href="/servers"
+            icon="material-symbols:groups-rounded"
+            label="Private Servers"
+            onClick={handleDrawerToggle}
+          />
+          <MobileNavItem
+            href="/contributors"
+            icon="material-symbols:groups-rounded"
+            label="Meet the Team"
+            onClick={handleDrawerToggle}
+          />
+          <MobileNavItem
+            href="/testimonials"
+            icon="material-symbols:rate-review-rounded"
+            label="Testimonials"
+            onClick={handleDrawerToggle}
+          />
+          <MobileNavItem
+            href="/supporting"
+            icon="material-symbols:favorite-rounded"
+            label="Support Us"
+            onClick={handleDrawerToggle}
+          />
+        </MobileNavSection>
       </div>
-      <Link
-        href="/calculators"
-        onClick={handleDrawerToggle}
-        className="hover:bg-button-info-hover/10 text-primary-text cursor-pointer px-8 py-2 transition-colors"
-      >
-        All Calculators
-      </Link>
-      <Link
-        href="/calculators/hyperchrome-pity"
-        onClick={handleDrawerToggle}
-        className="hover:bg-button-info-hover/10 text-primary-text cursor-pointer px-8 py-2 transition-colors"
-      >
-        Hyper Pity Calc
-      </Link>
-      <div className="px-4 py-2">
-        <Typography className="text-secondary-text text-sm font-semibold tracking-wider uppercase">
-          Values
-        </Typography>
-      </div>
-      <Link
-        href="/values"
-        onClick={handleDrawerToggle}
-        className="hover:bg-button-info-hover/10 text-primary-text cursor-pointer px-8 py-2 transition-colors"
-      >
-        Value List
-      </Link>
-      <Link
-        href="/values/changelogs"
-        onClick={handleDrawerToggle}
-        className="hover:bg-button-info-hover/10 text-primary-text cursor-pointer px-8 py-2 transition-colors"
-      >
-        Value Changelogs
-      </Link>
-      <Link
-        href="/values/calculator"
-        onClick={handleDrawerToggle}
-        className="hover:bg-button-info-hover/10 text-primary-text cursor-pointer px-8 py-2 transition-colors"
-      >
-        Value Calculator
-      </Link>
-      <Link
-        href="/trading"
-        onClick={handleDrawerToggle}
-        className="hover:bg-button-info-hover/10 text-primary-text cursor-pointer px-8 py-2 transition-colors"
-      >
-        Trade Ads
-      </Link>
-      <Link
-        href="/dupes"
-        onClick={handleDrawerToggle}
-        className="hover:bg-button-info-hover/10 text-primary-text cursor-pointer px-8 py-2 transition-colors"
-      >
-        <Box className="flex flex-wrap items-center gap-1">
-          <span>Dupe Finder</span>
-          {isFeatureEnabled("DUPE_FINDER") ? (
-            <></>
-          ) : (
-            <span className="bg-button-info text-form-button-text rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase">
-              Coming Soon
-            </span>
-          )}
-        </Box>
-      </Link>
-      <Link
-        href="/inventories"
-        onClick={handleDrawerToggle}
-        className="hover:bg-button-info-hover/10 group text-primary-text cursor-pointer px-8 py-2 transition-colors"
-      >
-        <Box className="flex flex-wrap items-center gap-1">
-          <span>Inventory Checker</span>
-          {isFeatureEnabled("INVENTORY_CALCULATOR") ? (
-            <></>
-          ) : (
-            <span className="bg-button-info text-form-button-text rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase">
-              Coming Soon
-            </span>
-          )}
-        </Box>
-      </Link>
-      <Link
-        href="/og"
-        onClick={handleDrawerToggle}
-        className="hover:bg-button-info-hover/10 text-primary-text cursor-pointer px-8 py-2 transition-colors"
-      >
-        <Box className="flex flex-wrap items-center gap-1">
-          <span>OG Finder</span>
-          {isFeatureEnabled("OG_FINDER") ? (
-            <></>
-          ) : (
-            <span className="bg-button-info text-form-button-text rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase">
-              Coming Soon
-            </span>
-          )}
-        </Box>
-      </Link>
-      <div className="px-4 py-2">
-        <Typography className="text-secondary-text text-sm font-semibold tracking-wider uppercase">
-          Community
-        </Typography>
-      </div>
-      <Link
-        href="/users"
-        prefetch={false}
-        onClick={handleDrawerToggle}
-        className="hover:bg-button-info-hover/10 text-primary-text cursor-pointer px-8 py-2 transition-colors"
-      >
-        User Search
-      </Link>
-      <Link
-        href="/leaderboard/money"
-        onClick={handleDrawerToggle}
-        className="hover:bg-button-info-hover/10 text-primary-text cursor-pointer px-8 py-2 transition-colors"
-      >
-        Money Leaderboard
-      </Link>
-      <Link
-        href="/robberies"
-        onClick={handleDrawerToggle}
-        className="hover:bg-button-info-hover/10 text-primary-text cursor-pointer px-8 py-2 transition-colors"
-      >
-        Robbery Tracker
-      </Link>
-      <Link
-        href="/bounties"
-        onClick={handleDrawerToggle}
-        className="hover:bg-button-info-hover/10 text-primary-text cursor-pointer px-8 py-2 transition-colors"
-      >
-        Bounty Tracker
-      </Link>
-      <Link
-        href="/servers"
-        onClick={handleDrawerToggle}
-        className="hover:bg-button-info-hover/10 text-primary-text cursor-pointer px-8 py-2 transition-colors"
-      >
-        Private Servers
-      </Link>
-      <Link
-        href="/contributors"
-        onClick={handleDrawerToggle}
-        className="hover:bg-button-info-hover/10 text-primary-text cursor-pointer px-8 py-2 transition-colors"
-      >
-        Meet the team
-      </Link>
-      <Link
-        href="/testimonials"
-        onClick={handleDrawerToggle}
-        className="hover:bg-button-info-hover/10 text-primary-text cursor-pointer px-8 py-2 transition-colors"
-      >
-        Testimonials
-      </Link>
 
       <div className="border-border-card my-4 border-t" />
     </div>
@@ -1075,25 +1140,6 @@ export default function Header() {
                       </button>
                     </Link>
                   )}
-                  {shouldShowSupportButton && (
-                    <Link
-                      href="/supporting"
-                      className="flex items-center justify-center"
-                    >
-                      <button
-                        className="border-border-card bg-secondary-bg text-secondary-text hover:bg-quaternary-bg hover:text-primary-text flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg border transition-all duration-200 hover:scale-105 active:scale-95"
-                        aria-label="Support us"
-                      >
-                        <Image
-                          src="/logos/kofi_symbol.svg"
-                          alt="Ko-fi"
-                          width={18}
-                          height={18}
-                          style={{ display: "block" }}
-                        />
-                      </button>
-                    </Link>
-                  )}
                   <div className="flex items-center justify-center">
                     <AnimatedThemeToggler size="sm" />
                   </div>
@@ -1117,7 +1163,7 @@ export default function Header() {
 
           {/* Mobile Drawer */}
           <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
-            <SheetContent side="right" className="w-60 overflow-y-auto p-0">
+            <SheetContent side="right" className="w-72 overflow-y-auto p-0">
               {drawer}
             </SheetContent>
           </Sheet>

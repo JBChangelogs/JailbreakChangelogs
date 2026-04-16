@@ -4,12 +4,12 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
+import * as NavigationMenu from "@radix-ui/react-navigation-menu";
 import { cn } from "@/lib/utils";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { useTheme } from "@/contexts/ThemeContext";
 import { UserAvatar } from "@/utils/avatar";
 import { RobloxIcon } from "@/components/Icons/RobloxIcon";
-import { isFeatureEnabled } from "@/utils/featureFlags";
 import dynamic from "next/dynamic";
 import { useMediaQuery } from "@mui/material";
 import {
@@ -40,7 +40,7 @@ const AnimatedThemeToggler = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="border-border-card bg-secondary-bg text-secondary-text hover:bg-quaternary-bg hover:text-primary-text flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg border transition-all duration-200 hover:scale-105 active:scale-95">
+      <div className="border-border-card bg-secondary-bg text-secondary-text hover:bg-quaternary-bg hover:text-primary-text flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg border transition-all duration-200">
         <div className="h-5 w-5" />
       </div>
     ),
@@ -71,17 +71,22 @@ export const MenuItem = ({
   active,
   item,
   children,
+  wide = false,
+  direction = 0,
 }: {
   setActive: (item: string | null) => void;
   active: string | null;
   item: string;
   children?: React.ReactNode;
+  wide?: boolean;
+  direction?: number;
 }) => {
+  const isActive = active === item;
   return (
     <div onMouseEnter={() => setActive(item)} className="relative">
       <motion.span
         className={`flex cursor-pointer items-center gap-1 rounded-lg py-1 pr-2 pl-3 transition-colors duration-200 ${
-          active === item
+          isActive
             ? "bg-button-info text-form-button-text"
             : "text-primary-text hover:bg-button-info-hover hover:text-form-button-text active:bg-button-info-active"
         }`}
@@ -90,50 +95,46 @@ export const MenuItem = ({
         transition={{ duration: 0.2 }}
       >
         <span className="font-bold">{item}</span>
-        <motion.div
-          animate={{ rotate: active === item ? 180 : 0 }}
-          transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
-          className="shrink-0"
-        >
-          <svg
-            className={`text-lg ${
-              active === item ? "text-form-button-text" : "text-secondary-text"
-            }`}
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="currentColor"
-          >
-            <path d="M7 10l5 5 5-5z" />
-          </svg>
-        </motion.div>
+        <Icon
+          icon={isActive ? "mdi:chevron-up" : "mdi:chevron-down"}
+          className={`h-4 w-4 shrink-0 transition-colors duration-200 ${isActive ? "text-form-button-text" : "text-secondary-text"}`}
+          inline={true}
+        />
       </motion.span>
-      {active !== null && (
-        <motion.div
-          initial={{ opacity: 0, scale: 0.85, y: 10 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.85, y: 10 }}
-          transition={menuTransition}
-        >
-          {active === item && (
-            <div
-              className="absolute left-1/2 z-1300 mt-0 min-w-65 -translate-x-1/2 rounded-2xl"
-              style={{ top: "100%" }}
+      <AnimatePresence>
+        {isActive && (
+          <motion.div
+            initial={{ x: direction * 48, opacity: direction !== 0 ? 0.4 : 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            exit={{ x: -direction * 48, opacity: direction !== 0 ? 0.4 : 0 }}
+            transition={{ duration: 0.2, ease: [0.25, 0.46, 0.45, 0.94] }}
+            className={`absolute left-1/2 z-1300 mt-0 -translate-x-1/2 ${wide ? "min-w-[540px]" : "min-w-65"}`}
+            style={{ top: "100%" }}
+          >
+            <motion.div
+              layout
+              transition={{
+                type: "spring",
+                mass: 0.4,
+                damping: 16,
+                stiffness: 220,
+              }}
+              className="border-border-card bg-primary-bg overflow-hidden rounded-2xl border backdrop-blur-sm"
             >
               <motion.div
-                transition={menuTransition}
-                layoutId="active"
                 layout
-                className="border-border-card bg-secondary-bg overflow-hidden rounded-2xl border backdrop-blur-sm"
+                className={
+                  wide
+                    ? "grid grid-cols-2 gap-2 p-3"
+                    : "flex flex-col gap-1 px-2 py-3"
+                }
               >
-                <motion.div layout className="flex flex-col gap-1 px-2 py-3">
-                  {children}
-                </motion.div>
+                {children}
               </motion.div>
-            </div>
-          )}
-        </motion.div>
-      )}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
@@ -212,6 +213,60 @@ export const Badge = ({
   return <span className={`${baseClasses} ${variantClasses}`}>{children}</span>;
 };
 
+export const NavDropdownItem = ({
+  href,
+  icon,
+  title,
+  description,
+  badge,
+  setActive,
+  className,
+  prefetch,
+}: {
+  href: string;
+  icon: string;
+  title: string;
+  description: string;
+  badge?: "coming-soon" | "new";
+  setActive?: (item: string | null) => void;
+  className?: string;
+  prefetch?: boolean;
+}) => {
+  return (
+    <Link
+      href={href}
+      prefetch={prefetch}
+      onClick={() => setActive?.(null)}
+      className={cn(
+        "group flex items-start gap-3 rounded-xl bg-secondary-bg px-2 py-2 transition-colors hover:bg-tertiary-bg",
+        className,
+      )}
+    >
+      <div className="bg-button-info/15 mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-md">
+        <Icon icon={icon} className="text-link h-4 w-4" inline={true} />
+      </div>
+      <div className="min-w-0 flex-1">
+        <div className="text-card-headline group-hover:text-link flex flex-wrap items-center gap-1.5 text-sm leading-tight font-semibold transition-colors">
+          {title}
+          {badge && (
+            <span className="bg-button-info/20 text-link rounded px-1.5 py-0.5 text-[9px] font-semibold tracking-wide uppercase">
+              {badge === "coming-soon" ? "Soon" : "New"}
+            </span>
+          )}
+        </div>
+        <div className="text-card-paragraph mt-0.5 text-xs leading-relaxed">
+          {description}
+        </div>
+      </div>
+      <Icon
+        icon="mdi:arrow-right"
+        className="text-tertiary-text group-hover:text-link mt-1 h-4 w-4 shrink-0 transition-colors"
+        inline={true}
+      />
+    </Link>
+  );
+};
+
 const UnreadNotificationBadge = ({ count }: { count: number }) => {
   if (count === 0) return null;
 
@@ -266,8 +321,10 @@ export const NavbarModern = ({
   setUnreadCount: React.Dispatch<React.SetStateAction<number>>;
 }) => {
   const isXlUp = useMediaQuery("(min-width: 1280px)");
-  const [active, setActive] = useState<string | null>(null);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const userMenuCloseTimer = React.useRef<ReturnType<typeof setTimeout> | null>(
+    null,
+  );
   const [utmModalOpen, setUtmModalOpen] = useState(false);
   const [notificationMenuOpen, setNotificationMenuOpen] = useState(false);
   const [notificationTab, setNotificationTab] = useState<"history" | "unread">(
@@ -318,6 +375,28 @@ export const NavbarModern = ({
   };
 
   const pathname = usePathname();
+  const [navMenuValue, setNavMenuValue] = useState("");
+  const navRootWrapperRef = React.useRef<HTMLDivElement>(null);
+  const triggerRefs = React.useRef<Record<string, HTMLButtonElement | null>>(
+    {},
+  );
+  const [viewportCenter, setViewportCenter] = useState<number | null>(null);
+
+  React.useEffect(() => {
+    if (
+      navMenuValue &&
+      triggerRefs.current[navMenuValue] &&
+      navRootWrapperRef.current
+    ) {
+      const trigger = triggerRefs.current[navMenuValue]!;
+      const root = navRootWrapperRef.current;
+      const triggerRect = trigger.getBoundingClientRect();
+      const rootRect = root.getBoundingClientRect();
+      setViewportCenter(
+        triggerRect.left - rootRect.left + triggerRect.width / 2,
+      );
+    }
+  }, [navMenuValue]);
   const {
     setShowLoginModal,
     setLoginModal,
@@ -363,7 +442,7 @@ export const NavbarModern = ({
   return (
     <div
       className={cn(
-        "bg-primary-bg/75 border-border-card border-b backdrop-blur-lg",
+        "bg-primary-bg/90 border-border-card border-b backdrop-blur-lg",
         className,
       )}
     >
@@ -393,105 +472,329 @@ export const NavbarModern = ({
 
         {/* Desktop Navigation */}
         <div
-          className="absolute left-1/2 flex -translate-x-1/2 transform items-center gap-2"
-          onMouseLeave={() => setActive(null)}
+          ref={navRootWrapperRef}
+          className="absolute left-1/2 -translate-x-1/2"
         >
-          {/* Changelogs */}
-          <NavLink href="/changelogs" setActive={setActive}>
-            Changelogs
-          </NavLink>
+          <NavigationMenu.Root
+            style={{ position: "relative" }}
+            delayDuration={0}
+            value={navMenuValue}
+            onValueChange={setNavMenuValue}
+          >
+            <NavigationMenu.List className="m-0 flex list-none items-center gap-2 p-0">
+              {/* Updates */}
+              <NavigationMenu.Item value="updates">
+                <NavigationMenu.Trigger
+                  ref={(el) => {
+                    triggerRefs.current["updates"] = el;
+                  }}
+                  className="group text-primary-text hover:bg-button-info-hover hover:text-form-button-text data-[state=open]:bg-button-info data-[state=open]:text-form-button-text flex cursor-pointer items-center gap-1 rounded-lg py-1 pr-2 pl-3 font-bold transition-colors duration-200 focus:outline-none"
+                >
+                  Updates
+                  <Icon
+                    icon="mdi:chevron-down"
+                    className="text-secondary-text group-data-[state=open]:text-form-button-text h-4 w-4 shrink-0 transition-transform duration-200 group-data-[state=open]:rotate-180"
+                    inline={true}
+                  />
+                </NavigationMenu.Trigger>
+                <NavigationMenu.Content
+                  style={{
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    animationDuration: "250ms",
+                    animationTimingFunction: "ease",
+                  }}
+                  onClick={() => setNavMenuValue("")}
+                  className="data-[motion=from-start]:animate-enterFromLeft data-[motion=from-end]:animate-enterFromRight data-[motion=to-start]:animate-exitToLeft data-[motion=to-end]:animate-exitToRight"
+                >
+                  <div className="grid w-[540px] grid-cols-2 gap-2 p-3">
+                    <NavDropdownItem
+                      href="/changelogs"
+                      icon="material-symbols:article-rounded"
+                      title="Game Changelogs"
+                      description="Latest Jailbreak updates and patch notes"
+                    />
+                    <NavDropdownItem
+                      href="/changelogs/timeline"
+                      icon="material-symbols:schedule-rounded"
+                      title="Timeline"
+                      description="A simplified tree view of every update at a glance"
+                    />
+                    <NavDropdownItem
+                      href="/values/changelogs"
+                      icon="material-symbols:history-rounded"
+                      title="Value Changelogs"
+                      description="Dig into every value update — the reasoning, who voted, and who made the final call"
+                      className="col-span-2"
+                    />
+                  </div>
+                </NavigationMenu.Content>
+              </NavigationMenu.Item>
 
-          {/* Seasons */}
-          <MenuItem setActive={setActive} active={active} item="Seasons">
-            <HoveredLink href="/seasons" setActive={setActive}>
-              Browse Seasons
-            </HoveredLink>
-            <HoveredLink href="/seasons/leaderboard" setActive={setActive}>
-              <div className="flex items-center gap-2">
-                <span>Season Leaderboard</span>
-              </div>
-            </HoveredLink>
-            <HoveredLink href="/seasons/will-i-make-it" setActive={setActive}>
-              <div className="flex items-center gap-2">
-                <span>Will I Make It</span>
-              </div>
-            </HoveredLink>
-            <HoveredLink href="/seasons/contracts" setActive={setActive}>
-              <div className="flex items-center gap-2">
-                <span>Weekly Contracts</span>
-              </div>
-            </HoveredLink>
-          </MenuItem>
+              {/* Seasons */}
+              <NavigationMenu.Item value="seasons">
+                <NavigationMenu.Trigger
+                  ref={(el) => {
+                    triggerRefs.current["seasons"] = el;
+                  }}
+                  className="group text-primary-text hover:bg-button-info-hover hover:text-form-button-text data-[state=open]:bg-button-info data-[state=open]:text-form-button-text flex cursor-pointer items-center gap-1 rounded-lg py-1 pr-2 pl-3 font-bold transition-colors duration-200 focus:outline-none"
+                >
+                  Seasons
+                  <Icon
+                    icon="mdi:chevron-down"
+                    className="text-secondary-text group-data-[state=open]:text-form-button-text h-4 w-4 shrink-0 transition-transform duration-200 group-data-[state=open]:rotate-180"
+                    inline={true}
+                  />
+                </NavigationMenu.Trigger>
+                <NavigationMenu.Content
+                  style={{
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    animationDuration: "250ms",
+                    animationTimingFunction: "ease",
+                  }}
+                  onClick={() => setNavMenuValue("")}
+                  className="data-[motion=from-start]:animate-enterFromLeft data-[motion=from-end]:animate-enterFromRight data-[motion=to-start]:animate-exitToLeft data-[motion=to-end]:animate-exitToRight"
+                >
+                  <div className="grid w-[540px] grid-cols-2 gap-2 p-3">
+                    <NavDropdownItem
+                      href="/seasons"
+                      icon="material-symbols:layers-rounded"
+                      title="Browse Seasons"
+                      description="Explore all game seasons and rewards"
+                    />
+                    <NavDropdownItem
+                      href="/seasons/leaderboard"
+                      icon="material-symbols:leaderboard-rounded"
+                      title="Season Leaderboard"
+                      description="See top-ranked players this season"
+                    />
+                    <NavDropdownItem
+                      href="/seasons/will-i-make-it"
+                      icon="material-symbols:trending-up-rounded"
+                      title="Will I Make It"
+                      description="Enter your level and XP to see if you'll hit level 10 before the season ends"
+                    />
+                    <NavDropdownItem
+                      href="/seasons/contracts"
+                      icon="material-symbols:task-alt-rounded"
+                      title="Weekly Contracts"
+                      description="Check this week's contracts and plan ahead without launching the game"
+                    />
+                  </div>
+                </NavigationMenu.Content>
+              </NavigationMenu.Item>
 
-          {/* Calculators */}
-          <NavLink href="/calculators" setActive={setActive}>
-            Calculators
-          </NavLink>
+              {/* Trading */}
+              <NavigationMenu.Item value="trading">
+                <NavigationMenu.Trigger
+                  ref={(el) => {
+                    triggerRefs.current["trading"] = el;
+                  }}
+                  className="group text-primary-text hover:bg-button-info-hover hover:text-form-button-text data-[state=open]:bg-button-info data-[state=open]:text-form-button-text flex cursor-pointer items-center gap-1 rounded-lg py-1 pr-2 pl-3 font-bold transition-colors duration-200 focus:outline-none"
+                >
+                  Trading
+                  <Icon
+                    icon="mdi:chevron-down"
+                    className="text-secondary-text group-data-[state=open]:text-form-button-text h-4 w-4 shrink-0 transition-transform duration-200 group-data-[state=open]:rotate-180"
+                    inline={true}
+                  />
+                </NavigationMenu.Trigger>
+                <NavigationMenu.Content
+                  style={{
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    animationDuration: "250ms",
+                    animationTimingFunction: "ease",
+                  }}
+                  onClick={() => setNavMenuValue("")}
+                  className="data-[motion=from-start]:animate-enterFromLeft data-[motion=from-end]:animate-enterFromRight data-[motion=to-start]:animate-exitToLeft data-[motion=to-end]:animate-exitToRight"
+                >
+                  <div className="grid w-[540px] grid-cols-2 gap-2 p-3">
+                    <NavDropdownItem
+                      href="/values"
+                      icon="material-symbols:price-check-rounded"
+                      title="Value List"
+                      description="Browse current item values and track market trends"
+                    />
+                    <NavDropdownItem
+                      href="/values/calculator"
+                      icon="material-symbols:calculate-rounded"
+                      title="Value Calculator"
+                      description="Compare items and get fair trade valuations"
+                    />
+                    <NavDropdownItem
+                      href="/trading"
+                      icon="material-symbols:swap-horiz-rounded"
+                      title="Trade Ads"
+                      description="Browse and post player trade listings"
+                    />
+                    <NavDropdownItem
+                      href="/dupes"
+                      icon="material-symbols:content-copy-rounded"
+                      title="Dupe Finder"
+                      description="Check if items are duped before you trade"
+                    />
+                    <NavDropdownItem
+                      href="/inventories"
+                      icon="material-symbols:inventory-2-rounded"
+                      title="Inventory Checker"
+                      description="View any player's full inventory and net worth"
+                    />
+                    <NavDropdownItem
+                      href="/og"
+                      icon="material-symbols:star-rounded"
+                      title="OG Finder"
+                      description="Discover who holds the rarest original items"
+                    />
+                    <NavDropdownItem
+                      href="/calculators/hyperchrome-pity"
+                      icon="material-symbols:percent-rounded"
+                      title="Hyperchrome Pity"
+                      description="Calculate how many robberies you need for the next Hyperchrome level"
+                      className="col-span-2"
+                    />
+                  </div>
+                </NavigationMenu.Content>
+              </NavigationMenu.Item>
 
-          {/* Values */}
-          <MenuItem setActive={setActive} active={active} item="Values">
-            <HoveredLink href="/values" setActive={setActive}>
-              Value List
-            </HoveredLink>
-            <HoveredLink href="/values/changelogs" setActive={setActive}>
-              Value Changelogs
-            </HoveredLink>
-            <HoveredLink href="/values/calculator" setActive={setActive}>
-              Value Calculator
-            </HoveredLink>
-            <HoveredLink href="/trading" setActive={setActive}>
-              Trade Ads
-            </HoveredLink>
-            <HoveredLink href="/dupes" setActive={setActive}>
-              <div className="flex items-center gap-2">
-                <span>Dupe Finder</span>
-                {!isFeatureEnabled("DUPE_FINDER") && (
-                  <Badge variant="coming-soon">Coming Soon</Badge>
-                )}
-              </div>
-            </HoveredLink>
-            <HoveredLink href="/inventories" setActive={setActive}>
-              <div className="flex items-center gap-2">
-                <span>Inventory Checker</span>
-                {!isFeatureEnabled("INVENTORY_CALCULATOR") && (
-                  <Badge variant="coming-soon">Coming Soon</Badge>
-                )}
-              </div>
-            </HoveredLink>
-            <HoveredLink href="/og" setActive={setActive}>
-              <div className="flex items-center gap-2">
-                <span>OG Finder</span>
-                {!isFeatureEnabled("OG_FINDER") && (
-                  <Badge variant="coming-soon">Coming Soon</Badge>
-                )}
-              </div>
-            </HoveredLink>
-          </MenuItem>
+              {/* Community */}
+              <NavigationMenu.Item value="community">
+                <NavigationMenu.Trigger
+                  ref={(el) => {
+                    triggerRefs.current["community"] = el;
+                  }}
+                  className="group text-primary-text hover:bg-button-info-hover hover:text-form-button-text data-[state=open]:bg-button-info data-[state=open]:text-form-button-text flex cursor-pointer items-center gap-1 rounded-lg py-1 pr-2 pl-3 font-bold transition-colors duration-200 focus:outline-none"
+                >
+                  Community
+                  <Icon
+                    icon="mdi:chevron-down"
+                    className="text-secondary-text group-data-[state=open]:text-form-button-text h-4 w-4 shrink-0 transition-transform duration-200 group-data-[state=open]:rotate-180"
+                    inline={true}
+                  />
+                </NavigationMenu.Trigger>
+                <NavigationMenu.Content
+                  style={{
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    animationDuration: "250ms",
+                    animationTimingFunction: "ease",
+                  }}
+                  onClick={() => setNavMenuValue("")}
+                  className="data-[motion=from-start]:animate-enterFromLeft data-[motion=from-end]:animate-enterFromRight data-[motion=to-start]:animate-exitToLeft data-[motion=to-end]:animate-exitToRight"
+                >
+                  <div className="grid w-[540px] grid-cols-2 gap-2 p-3">
+                    <NavDropdownItem
+                      href="/users"
+                      icon="material-symbols:person-search-rounded"
+                      title="User Search"
+                      description="Browse 30k+ Jailbreak Changelogs user profiles"
+                      prefetch={false}
+                    />
+                    <NavDropdownItem
+                      href="/leaderboard/money"
+                      icon="mdi:currency-usd"
+                      title="Money Leaderboard"
+                      description="The top richest players ranked from scanned in-game data"
+                    />
+                    <NavDropdownItem
+                      href="/robberies"
+                      icon="material-symbols:local-police-rounded"
+                      title="Robbery Tracker"
+                      description="Track recent in-game robberies"
+                    />
+                    <NavDropdownItem
+                      href="/bounties"
+                      icon="mdi:currency-usd"
+                      title="Bounty Tracker"
+                      description="View and track active bounties"
+                    />
+                    <NavDropdownItem
+                      href="/servers"
+                      icon="material-symbols:groups-rounded"
+                      title="Private Servers"
+                      description="Find and join private servers"
+                    />
+                    <NavDropdownItem
+                      href="/contributors"
+                      icon="material-symbols:groups-rounded"
+                      title="Meet the Team"
+                      description="The people behind this site"
+                    />
+                    <NavDropdownItem
+                      href="/testimonials"
+                      icon="material-symbols:rate-review-rounded"
+                      title="Testimonials"
+                      description="What players say about us"
+                    />
+                    <NavDropdownItem
+                      href="/supporting"
+                      icon="material-symbols:favorite-rounded"
+                      title="Support Us"
+                      description="Unlock perks like ad removal, custom avatars, and more"
+                    />
+                  </div>
+                </NavigationMenu.Content>
+              </NavigationMenu.Item>
+              {/* Arrow indicator — slides to track active trigger */}
+              <NavigationMenu.Indicator
+                style={{
+                  position: "absolute",
+                  top: "100%",
+                  zIndex: 1,
+                  display: "flex",
+                  alignItems: "flex-end",
+                  justifyContent: "center",
+                  height: "10px",
+                  overflow: "hidden",
+                  transition: "width 250ms ease, transform 250ms ease",
+                }}
+                className="data-[state=visible]:animate-fadeIn data-[state=hidden]:animate-fadeOut"
+              >
+                <svg
+                  width="11"
+                  height="5"
+                  viewBox="0 0 11 5"
+                  className="fill-border-primary"
+                >
+                  <path d="M0,5 L5.5,0 L11,5 Z" />
+                </svg>
+              </NavigationMenu.Indicator>
+            </NavigationMenu.List>
 
-          {/* Community */}
-          <MenuItem setActive={setActive} active={active} item="Community">
-            <HoveredLink href="/users" setActive={setActive} prefetch={false}>
-              User Search
-            </HoveredLink>
-            <HoveredLink href="/leaderboard/money" setActive={setActive}>
-              Money Leaderboard
-            </HoveredLink>
-            <HoveredLink href="/robberies" setActive={setActive}>
-              Robbery Tracker
-            </HoveredLink>
-            <HoveredLink href="/bounties" setActive={setActive}>
-              Bounty Tracker
-            </HoveredLink>
-            <HoveredLink href="/servers" setActive={setActive}>
-              Private Servers
-            </HoveredLink>
-            <HoveredLink href="/contributors" setActive={setActive}>
-              Meet the team
-            </HoveredLink>
-            <HoveredLink href="/testimonials" setActive={setActive}>
-              Testimonials
-            </HoveredLink>
-          </MenuItem>
+            {/* Viewport */}
+            <div
+              style={{
+                position: "absolute",
+                top: "100%",
+                left: viewportCenter !== null ? `${viewportCenter}px` : "50%",
+                transform: "translateX(-50%)",
+                zIndex: 1300,
+                perspective: "2000px",
+              }}
+            >
+              <NavigationMenu.Viewport
+                className="data-[state=open]:animate-scaleIn data-[state=closed]:animate-scaleOut"
+                style={{
+                  position: "relative",
+                  transformOrigin: "top center",
+                  marginTop: "10px",
+                  width: "var(--radix-navigation-menu-viewport-width)",
+                  height: "var(--radix-navigation-menu-viewport-height)",
+                  transition: "height 300ms ease",
+                  overflow: "hidden",
+                  borderRadius: "16px",
+                  border: "1px solid var(--color-border-card)",
+                  backgroundColor: "var(--color-primary-bg)",
+                  backdropFilter: "blur(8px)",
+                }}
+              />
+            </div>
+          </NavigationMenu.Root>
         </div>
 
         {/* Right side actions */}
@@ -520,7 +823,7 @@ export const NavbarModern = ({
                 <PopoverTrigger asChild>
                   <button
                     suppressHydrationWarning={true}
-                    className="border-border-card bg-secondary-bg text-secondary-text hover:bg-quaternary-bg hover:text-primary-text relative flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg border transition-all duration-200 hover:scale-105 active:scale-95"
+                    className="border-border-card bg-secondary-bg text-secondary-text hover:bg-quaternary-bg hover:text-primary-text relative flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg border transition-all duration-200"
                   >
                     <Icon
                       icon="mingcute:notification-line"
@@ -778,7 +1081,7 @@ export const NavbarModern = ({
             <TooltipTrigger asChild>
               <Link href="/messages" prefetch={false}>
                 <button
-                  className="border-border-card bg-secondary-bg text-secondary-text hover:bg-quaternary-bg hover:text-primary-text flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg border transition-all duration-200 hover:scale-105 active:scale-95"
+                  className="border-border-card bg-secondary-bg text-secondary-text hover:bg-quaternary-bg hover:text-primary-text flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg border transition-all duration-200"
                   aria-label="Messages"
                 >
                   <Icon
@@ -792,26 +1095,6 @@ export const NavbarModern = ({
             <TooltipContent>Messages</TooltipContent>
           </Tooltip>
 
-          {/* Support button */}
-          {shouldShowSupportButton && (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Link href="/supporting">
-                  <button className="border-border-card bg-secondary-bg text-secondary-text hover:bg-quaternary-bg hover:text-primary-text flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg border transition-all duration-200 hover:scale-105 active:scale-95">
-                    <Image
-                      src="/logos/kofi_symbol.svg"
-                      alt="Ko-fi"
-                      width={22}
-                      height={22}
-                      style={{ display: "block" }}
-                    />
-                  </button>
-                </Link>
-              </TooltipTrigger>
-              <TooltipContent>Support us</TooltipContent>
-            </Tooltip>
-          )}
-
           {/* Theme toggle */}
           <AnimatedThemeToggler />
 
@@ -822,10 +1105,25 @@ export const NavbarModern = ({
           ) : userData ? (
             <div
               className="relative"
-              onMouseEnter={() => setUserMenuOpen(true)}
-              onMouseLeave={() => setUserMenuOpen(false)}
+              onMouseEnter={() => {
+                if (userMenuCloseTimer.current)
+                  clearTimeout(userMenuCloseTimer.current);
+              }}
+              onMouseLeave={() => {
+                userMenuCloseTimer.current = setTimeout(
+                  () => setUserMenuOpen(false),
+                  150,
+                );
+              }}
             >
-              <button className="flex items-center gap-2 rounded-full p-1 transition-colors">
+              <button
+                className="flex items-center gap-2 rounded-full p-1 transition-colors"
+                onMouseEnter={() => {
+                  if (userMenuCloseTimer.current)
+                    clearTimeout(userMenuCloseTimer.current);
+                  setUserMenuOpen(true);
+                }}
+              >
                 <UserAvatar
                   userId={userData.id}
                   avatarHash={userData.avatar}
@@ -841,93 +1139,130 @@ export const NavbarModern = ({
               <AnimatePresence>
                 {userMenuOpen && (
                   <motion.div
-                    className="border-border-card bg-secondary-bg absolute right-0 z-1300 mt-0 w-64 rounded-lg border py-2 shadow-lg backdrop-blur-sm"
-                    initial={{ opacity: 0, scale: 0.85, y: 10 }}
+                    className="border-border-card bg-primary-bg absolute right-0 z-1300 mt-2 w-72 overflow-hidden rounded-2xl border shadow-lg"
+                    initial={{ opacity: 0, scale: 0.92, y: 8 }}
                     animate={{ opacity: 1, scale: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.85, y: 10 }}
+                    exit={{ opacity: 0, scale: 0.92, y: 8 }}
                     transition={menuTransition}
                   >
                     {/* User info */}
                     <Link
                       href={`/users/${userData.id}`}
-                      className="hover:bg-button-info-hover/10 border-border-secondary block border-b px-4 py-3 transition-colors"
+                      className="group hover:bg-tertiary-bg flex items-center gap-3 p-3 transition-colors"
                     >
-                      <div className="flex items-center gap-3">
-                        <UserAvatar
-                          userId={userData.id}
-                          avatarHash={userData.avatar}
-                          username={userData.username}
-                          size={10}
-                          custom_avatar={userData.custom_avatar}
-                          showBadge={false}
-                          settings={userData.settings}
-                          premiumType={userData.premiumtype}
-                        />
-                        <div>
-                          <div className="text-primary-text hover:text-link font-semibold transition-colors">
-                            {userData.global_name || userData.username}
-                          </div>
-                          <div className="text-secondary-text text-sm">
-                            @{userData.username}
-                          </div>
+                      <UserAvatar
+                        userId={userData.id}
+                        avatarHash={userData.avatar}
+                        username={userData.username}
+                        size={10}
+                        custom_avatar={userData.custom_avatar}
+                        showBadge={false}
+                        settings={userData.settings}
+                        premiumType={userData.premiumtype}
+                      />
+                      <div className="min-w-0 flex-1">
+                        <div className="text-primary-text group-hover:text-link truncate font-semibold transition-colors">
+                          {userData.global_name || userData.username}
+                        </div>
+                        <div className="text-secondary-text truncate text-xs">
+                          @{userData.username}
                         </div>
                       </div>
+                      <Icon
+                        icon="material-symbols:chevron-right-rounded"
+                        className="text-secondary-text group-hover:text-link h-4 w-4 shrink-0 transition-colors"
+                        inline={true}
+                      />
                     </Link>
 
                     {/* Menu items */}
-                    <div className="py-1">
+                    <div className="border-border-secondary border-t p-2">
                       {!userData.roblox_id && (
                         <button
-                          className="text-primary-text hover:bg-button-info-hover hover:text-form-button-text flex w-full cursor-pointer items-center gap-3 px-4 py-2 text-left text-sm transition-colors"
-                          onClick={() => {
-                            setLoginModal({ open: true, tab: "roblox" });
-                          }}
+                          className="hover:bg-tertiary-bg flex w-full cursor-pointer items-center gap-3 rounded-xl px-2 py-2 text-left transition-colors"
+                          onClick={() =>
+                            setLoginModal({ open: true, tab: "roblox" })
+                          }
                         >
-                          <RobloxIcon className="h-4 w-4" />
-                          Connect Roblox
+                          <div className="bg-button-info/15 flex h-8 w-8 shrink-0 items-center justify-center rounded-md">
+                            <RobloxIcon className="text-link h-4 w-4" />
+                          </div>
+                          <span className="text-primary-text text-sm font-medium">
+                            Connect Roblox
+                          </span>
                         </button>
                       )}
 
                       <Link
                         href="/settings"
-                        className="text-primary-text hover:bg-button-info-hover hover:text-form-button-text flex items-center gap-3 px-4 py-2 text-sm transition-colors"
+                        className="hover:bg-tertiary-bg flex items-center gap-3 rounded-xl px-2 py-2 transition-colors"
                       >
-                        <Icon
-                          icon="material-symbols:settings"
-                          className="h-4 w-4"
-                          inline={true}
-                        />
-                        Settings
+                        <div className="bg-button-info/15 flex h-8 w-8 shrink-0 items-center justify-center rounded-md">
+                          <Icon
+                            icon="material-symbols:settings-rounded"
+                            className="text-link h-4 w-4"
+                            inline={true}
+                          />
+                        </div>
+                        <span className="text-primary-text text-sm font-medium">
+                          Settings
+                        </span>
                       </Link>
+
+                      {shouldShowSupportButton && (
+                        <Link
+                          href="/supporting"
+                          className="hover:bg-tertiary-bg flex items-center gap-3 rounded-xl px-2 py-2 transition-colors"
+                        >
+                          <div className="bg-button-info/15 flex h-8 w-8 shrink-0 items-center justify-center rounded-md">
+                            <Icon
+                              icon="material-symbols:favorite-rounded"
+                              className="text-link h-4 w-4"
+                              inline={true}
+                            />
+                          </div>
+                          <span className="text-primary-text text-sm font-medium">
+                            Support Us
+                          </span>
+                        </Link>
+                      )}
 
                       {userData?.flags?.some((f) => f.flag === "is_owner") && (
                         <button
-                          className="text-primary-text hover:bg-button-info-hover hover:text-form-button-text flex w-full cursor-pointer items-center gap-3 px-4 py-2 text-left text-sm transition-colors"
+                          className="hover:bg-tertiary-bg flex w-full cursor-pointer items-center gap-3 rounded-xl px-2 py-2 text-left transition-colors"
                           onClick={() => {
                             setUtmModalOpen(true);
                             setUserMenuOpen(false);
                           }}
                         >
-                          <Icon
-                            icon="heroicons:link"
-                            className="h-4 w-4"
-                            inline={true}
-                          />
-                          Generate UTM Link
+                          <div className="bg-button-info/15 flex h-8 w-8 shrink-0 items-center justify-center rounded-md">
+                            <Icon
+                              icon="heroicons:link"
+                              className="text-link h-4 w-4"
+                              inline={true}
+                            />
+                          </div>
+                          <span className="text-primary-text text-sm font-medium">
+                            Generate UTM Link
+                          </span>
                         </button>
                       )}
 
                       <button
-                        className="hover:bg-button-danger/10 text-button-danger hover:text-button-danger flex w-full cursor-pointer items-center gap-3 px-4 py-2 text-left text-sm transition-colors"
+                        className="hover:bg-button-danger/10 flex w-full cursor-pointer items-center gap-3 rounded-xl px-2 py-2 text-left transition-colors"
                         onClick={handleLogout}
                         data-umami-event="Logout"
                       >
-                        <Icon
-                          icon="material-symbols:logout"
-                          className="h-4 w-4"
-                          inline={true}
-                        />
-                        Logout
+                        <div className="bg-button-danger/15 flex h-8 w-8 shrink-0 items-center justify-center rounded-md">
+                          <Icon
+                            icon="material-symbols:logout-rounded"
+                            className="text-button-danger h-4 w-4"
+                            inline={true}
+                          />
+                        </div>
+                        <span className="text-button-danger text-sm font-medium">
+                          Logout
+                        </span>
                       </button>
                     </div>
                   </motion.div>
