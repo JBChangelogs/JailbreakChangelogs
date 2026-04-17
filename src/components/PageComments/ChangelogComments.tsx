@@ -31,6 +31,10 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "../ui/button";
@@ -366,7 +370,9 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
   const [expandedComments, setExpandedComments] = useState<Set<number>>(
     new Set(),
   );
-  const [sortOrder, setSortOrder] = useState<"newest" | "oldest">("newest");
+  const [sortOrder, setSortOrder] = useState<
+    "newest" | "oldest" | "edited_newest" | "edited_oldest"
+  >("newest");
 
   // --- UI State (Modals & Loading) ---
   const [reportModalOpen, setReportModalOpen] = useState(false);
@@ -762,7 +768,11 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
       refreshCommentsFromServer(true);
 
       // If adding a new root comment, go to the first page to see it
-      if (sortOrder === "newest") {
+      if (
+        sortOrder === "newest" ||
+        sortOrder === "edited_newest" ||
+        sortOrder === "edited_oldest"
+      ) {
         setPage(1);
       } else {
         // If sorting by oldest, the new comment will be at the end
@@ -948,8 +958,13 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
     }
   };
 
-  // Sort comments based on sortOrder (newest vs oldest)
+  // Sort comments based on sortOrder
   const sortedComments = [...comments].sort((a, b) => {
+    if (sortOrder === "edited_newest" || sortOrder === "edited_oldest") {
+      const dateA = parseInt(a.edited_at ?? a.date);
+      const dateB = parseInt(b.edited_at ?? b.date);
+      return sortOrder === "edited_newest" ? dateB - dateA : dateA - dateB;
+    }
     const dateA = parseInt(a.date);
     const dateB = parseInt(b.date);
     return sortOrder === "newest" ? dateB - dateA : dateA - dateB;
@@ -973,6 +988,13 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
       // In Discord-style, replies appear in the main flow but show a preview
       const result = [...allComments]
         .sort((a, b) => {
+          if (sortOrder === "edited_newest" || sortOrder === "edited_oldest") {
+            const dateA = parseInt(a.edited_at ?? a.date);
+            const dateB = parseInt(b.edited_at ?? b.date);
+            return sortOrder === "edited_newest"
+              ? dateB - dateA
+              : dateA - dateB;
+          }
           const dateA = parseInt(a.date);
           const dateB = parseInt(b.date);
           return sortOrder === "newest" ? dateB - dateA : dateA - dateB;
@@ -1036,8 +1058,10 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
     textarea?.focus();
   }, [replyingToId]);
 
-  const toggleSortOrder = () => {
-    setSortOrder((prev) => (prev === "newest" ? "oldest" : "newest"));
+  const handleSortChange = (
+    order: "newest" | "oldest" | "edited_newest" | "edited_oldest",
+  ) => {
+    setSortOrder(order);
     setPage(1);
   };
 
@@ -1254,53 +1278,113 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
       >
         <div className="flex flex-col gap-4">
           <div>
-            <div className="flex items-start justify-between gap-2">
-              <h2
-                id="comments-header"
-                className="text-primary-text min-w-0 text-lg font-bold tracking-tight sm:text-xl"
-              >
-                {comments.length === 1
-                  ? "1 Comment for"
-                  : `${comments.length} Comments for`}{" "}
-                {type === "changelog" ? (
-                  `Changelog ${changelogId}: ${changelogTitle}`
-                ) : type === "season" ? (
-                  `Season ${changelogId}: ${changelogTitle}`
-                ) : type === "tradev2" ? (
-                  `Trade #${changelogId}`
-                ) : type === "inventory" ? (
-                  changelogTitle
-                ) : (
-                  <>
-                    {changelogTitle}{" "}
-                    <span className="text-secondary-text">({itemType})</span>
-                  </>
-                )}
-              </h2>
-              <Button
-                variant="default"
-                size="sm"
-                onClick={toggleSortOrder}
-                type="button"
-                className="mt-0.5 shrink-0"
-              >
-                {sortOrder === "newest" ? (
-                  <Icon icon="heroicons-outline:arrow-down" inline={true} />
-                ) : (
-                  <Icon icon="heroicons-outline:arrow-up" inline={true} />
-                )}
-                {sortOrder === "newest" ? "Newest First" : "Oldest First"}
-              </Button>
-            </div>
+            <h2
+              id="comments-header"
+              className="text-primary-text min-w-0 text-lg font-bold tracking-tight sm:text-xl"
+            >
+              {comments.length === 1
+                ? "1 Comment for"
+                : `${comments.length} Comments for`}{" "}
+              {type === "changelog" ? (
+                `Changelog ${changelogId}: ${changelogTitle}`
+              ) : type === "season" ? (
+                `Season ${changelogId}: ${changelogTitle}`
+              ) : type === "tradev2" ? (
+                `Trade #${changelogId}`
+              ) : type === "inventory" ? (
+                changelogTitle
+              ) : (
+                <>
+                  {changelogTitle}{" "}
+                  <span className="text-secondary-text">({itemType})</span>
+                </>
+              )}
+            </h2>
             {/* Disclaimer */}
             <p className="text-secondary-text mt-1 flex items-start gap-1 text-xs">
               <Icon
                 icon="heroicons:information-circle"
-                className="h-3.5 w-3.5 shrink-0"
+                className="mt-0.5 h-3.5 w-3.5 shrink-0"
               />
               Comments are posted by users and are not verified. Some
               information may be incorrect or misleading
             </p>
+            {/* Sort row */}
+            <div className="mt-2 flex justify-end">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <div className="text-secondary-text flex items-center gap-1 text-xs">
+                    <span>Sorted by:</span>
+                    <button
+                      type="button"
+                      className="text-primary-text flex cursor-pointer items-center gap-0.5 font-medium focus:outline-none"
+                    >
+                      {sortOrder === "newest"
+                        ? "Posted: Newest"
+                        : sortOrder === "oldest"
+                          ? "Posted: Oldest"
+                          : sortOrder === "edited_newest"
+                            ? "Edited: Newest"
+                            : "Edited: Oldest"}
+                      <Icon
+                        icon="heroicons:chevron-down"
+                        className="h-3.5 w-3.5 shrink-0"
+                        inline={true}
+                      />
+                    </button>
+                  </div>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  align="end"
+                  className="border-border-card bg-secondary-bg text-primary-text rounded-xl border p-1 shadow-lg"
+                >
+                  <DropdownMenuRadioGroup
+                    value={sortOrder}
+                    onValueChange={(v) =>
+                      handleSortChange(
+                        v as
+                          | "newest"
+                          | "oldest"
+                          | "edited_newest"
+                          | "edited_oldest",
+                      )
+                    }
+                  >
+                    <DropdownMenuLabel className="text-secondary-text px-3 py-1 text-xs tracking-widest uppercase">
+                      By Post Date
+                    </DropdownMenuLabel>
+                    <DropdownMenuRadioItem
+                      value="newest"
+                      className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
+                    >
+                      Newest First
+                    </DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem
+                      value="oldest"
+                      className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
+                    >
+                      Oldest First
+                    </DropdownMenuRadioItem>
+                    <DropdownMenuSeparator className="bg-border-primary/60" />
+                    <DropdownMenuLabel className="text-secondary-text px-3 py-1 text-xs tracking-widest uppercase">
+                      By Edit Date
+                    </DropdownMenuLabel>
+                    <DropdownMenuRadioItem
+                      value="edited_newest"
+                      className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
+                    >
+                      Newest First
+                    </DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem
+                      value="edited_oldest"
+                      className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
+                    >
+                      Oldest First
+                    </DropdownMenuRadioItem>
+                  </DropdownMenuRadioGroup>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
           </div>
 
           {/* New Comment Form */}
@@ -1690,7 +1774,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                                 className="h-4 w-4"
                               />
                             )}
-                            <span className="text-primary-text shrink-0 font-semibold">
+                            <span className="text-primary-text hover:text-link shrink-0 font-semibold transition-colors duration-200">
                               @
                               {parentHidden
                                 ? "Hidden User"
@@ -1879,71 +1963,73 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                                   <TooltipContent>Reply</TooltipContent>
                                 </Tooltip>
                               )}
-                              <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    className="text-primary-text hover:bg-quaternary-bg h-8 w-8 rounded-lg p-0 opacity-100 transition-all duration-200 data-[state=open]:opacity-100 lg:opacity-0 lg:group-hover:opacity-100"
-                                  >
-                                    <Icon
-                                      icon="heroicons:ellipsis-horizontal"
-                                      className="h-4 w-4"
-                                    />
-                                  </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent
-                                  align="end"
-                                  onCloseAutoFocus={(e) => {
-                                    if (editingCommentId !== null) {
-                                      e.preventDefault();
-                                    }
-                                  }}
-                                >
-                                  {currentUserId === comment.user_id ? (
-                                    <>
-                                      {/* Check if comment is still editable (within 1 hour) */}
-                                      {isCommentEditable(comment.date) && (
-                                        <DropdownMenuItem
-                                          onClick={() =>
-                                            handleEditClick(comment.id)
-                                          }
-                                        >
-                                          <Icon
-                                            icon="heroicons-outline:pencil"
-                                            className="mr-2 h-4 w-4"
-                                          />
-                                          Edit Comment
-                                        </DropdownMenuItem>
-                                      )}
-                                      <DropdownMenuItem
-                                        onClick={() =>
-                                          handleDeleteComment(comment.id)
-                                        }
-                                        className="text-button-danger focus:text-button-danger focus:bg-button-danger/10"
-                                      >
-                                        <Icon
-                                          icon="heroicons-outline:trash"
-                                          className="mr-2 h-4 w-4"
-                                        />
-                                        Delete Comment
-                                      </DropdownMenuItem>
-                                    </>
-                                  ) : (
-                                    <DropdownMenuItem
-                                      onClick={() =>
-                                        handleReportClick(comment.id)
-                                      }
+                              {isLoggedIn && (
+                                <DropdownMenu>
+                                  <DropdownMenuTrigger asChild>
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      className="text-primary-text hover:bg-quaternary-bg h-8 w-8 rounded-lg p-0 opacity-100 transition-all duration-200 data-[state=open]:opacity-100 lg:opacity-0 lg:group-hover:opacity-100"
                                     >
                                       <Icon
-                                        icon="heroicons-outline:flag"
-                                        className="mr-2 h-4 w-4"
+                                        icon="heroicons:ellipsis-horizontal"
+                                        className="h-4 w-4"
                                       />
-                                      Report Comment
-                                    </DropdownMenuItem>
-                                  )}
-                                </DropdownMenuContent>
-                              </DropdownMenu>
+                                    </Button>
+                                  </DropdownMenuTrigger>
+                                  <DropdownMenuContent
+                                    align="end"
+                                    onCloseAutoFocus={(e) => {
+                                      if (editingCommentId !== null) {
+                                        e.preventDefault();
+                                      }
+                                    }}
+                                  >
+                                    {currentUserId === comment.user_id ? (
+                                      <>
+                                        {/* Check if comment is still editable (within 1 hour) */}
+                                        {isCommentEditable(comment.date) && (
+                                          <DropdownMenuItem
+                                            onClick={() =>
+                                              handleEditClick(comment.id)
+                                            }
+                                          >
+                                            <Icon
+                                              icon="heroicons-outline:pencil"
+                                              className="mr-2 h-4 w-4"
+                                            />
+                                            Edit Comment
+                                          </DropdownMenuItem>
+                                        )}
+                                        <DropdownMenuItem
+                                          onClick={() =>
+                                            handleDeleteComment(comment.id)
+                                          }
+                                          className="text-button-danger focus:text-button-danger focus:bg-button-danger/10"
+                                        >
+                                          <Icon
+                                            icon="heroicons-outline:trash"
+                                            className="mr-2 h-4 w-4"
+                                          />
+                                          Delete Comment
+                                        </DropdownMenuItem>
+                                      </>
+                                    ) : (
+                                      <DropdownMenuItem
+                                        onClick={() =>
+                                          handleReportClick(comment.id)
+                                        }
+                                      >
+                                        <Icon
+                                          icon="heroicons-outline:flag"
+                                          className="mr-2 h-4 w-4"
+                                        />
+                                        Report Comment
+                                      </DropdownMenuItem>
+                                    )}
+                                  </DropdownMenuContent>
+                                </DropdownMenu>
+                              )}
                             </div>
                           </div>
 
