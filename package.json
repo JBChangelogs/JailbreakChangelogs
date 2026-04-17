@@ -12,8 +12,8 @@
     "lint:fix": "oxlint --fix",
     "type-check": "tsc --noEmit",
     "check": "bun run format:check && bun run type-check && bun run lint",
-    "format": "oxfmt src",
-    "format:check": "oxfmt --check src",
+    "format": "oxfmt 'src/**/*.{js,jsx,ts,tsx}'",
+    "format:check": "oxfmt --check 'src/**/*.{js,jsx,ts,tsx}'",
     "release": "bun --env-file=.env.local --bun release-it",
     "prepare": "husky"
   },
