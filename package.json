@@ -105,8 +105,7 @@
     "*.{js,jsx,ts,tsx}": [
       "oxlint --fix",
       "oxfmt"
-    ],
-    "**/*": "oxfmt"
+    ]
   },
   "browserslist": "> 1%",
   "version": "0.27.1"
