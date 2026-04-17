@@ -109,6 +109,7 @@ export default async function RootLayout({
               src={`https://umami.jailbreakchangelogs.com${umamiScriptName}`}
               data-website-id={umamiWebsiteId}
               data-domains="jailbreakchangelogs.com"
+              data-performance="true"
             />
           ) : null}
           {/* Nitro Pay Ads & GDPR - Always load script for consent prompts */}
@@ -249,6 +250,7 @@ export default async function RootLayout({
             src={`https://umami.jailbreakchangelogs.com${umamiScriptName}`}
             data-website-id={umamiWebsiteId}
             data-domains="jailbreakchangelogs.com"
+            data-performance="true"
           />
         ) : null}
         {/* Nitro Pay Ads & GDPR - Always load script for consent prompts */}
