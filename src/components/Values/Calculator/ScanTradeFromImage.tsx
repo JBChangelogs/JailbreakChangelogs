@@ -101,7 +101,7 @@ export function ScanTradeFromImage({ onScanSuccess }: ScanTradeFromImageProps) {
   );
 
   const scanFile = useCallback(
-    async (file: File) => {
+    async (file: File, source: "drag" | "paste" | "picker") => {
       if (!file.type.startsWith("image/")) {
         const message = "Please upload an image file.";
         setLastErrorMessage(message);
@@ -193,6 +193,10 @@ export function ScanTradeFromImage({ onScanSuccess }: ScanTradeFromImageProps) {
         onScanSuccess({ offering, requesting });
         setLastErrorMessage(null);
         toast.success("Trade screenshot scanned.", { id: toastId });
+        window.umami?.track("Trade Image Scanned", {
+          fileType: file.type.replace("image/", "") || "unknown",
+          source,
+        });
       } catch (error) {
         console.error("Scan trade image failed:", error);
         const message =
@@ -218,9 +222,13 @@ export function ScanTradeFromImage({ onScanSuccess }: ScanTradeFromImageProps) {
       "image/jpg": [".jpg"],
       "image/webp": [".webp"],
     },
-    onDrop: (acceptedFiles) => {
+    onDrop: (acceptedFiles, _rejected, event) => {
       const file = acceptedFiles[0];
-      if (file) void scanFile(file);
+      if (file) {
+        const source =
+          event instanceof Event && event.type === "drop" ? "drag" : "picker";
+        void scanFile(file, source);
+      }
     },
   });
 
@@ -244,7 +252,7 @@ export function ScanTradeFromImage({ onScanSuccess }: ScanTradeFromImageProps) {
         const file = item.getAsFile();
         if (!file) continue;
         event.preventDefault();
-        void scanFile(file);
+        void scanFile(file, "paste");
         return;
       }
     };
