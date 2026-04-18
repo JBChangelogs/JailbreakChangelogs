@@ -104,6 +104,7 @@ async function InventoryDataFetcher({
     return (
       <InventoryCheckerClient
         robloxId={robloxId}
+        originalSearchTerm={isUsername ? robloxId : undefined}
         error={usernameError}
         initialComments={initialComments}
         initialCommentUserMap={initialCommentUserMap}
@@ -146,6 +147,7 @@ async function InventoryDataFetcher({
     return (
       <InventoryCheckerClient
         robloxId={actualRobloxId}
+        originalSearchTerm={isUsername ? robloxId : undefined}
         error={errorMessage}
         initialComments={initialComments}
         initialCommentUserMap={initialCommentUserMap}
@@ -160,6 +162,7 @@ async function InventoryDataFetcher({
     return (
       <InventoryCheckerClient
         robloxId={actualRobloxId}
+        originalSearchTerm={isUsername ? robloxId : undefined}
         error="Failed to fetch inventory data. Please try again."
         initialComments={initialComments}
         initialCommentUserMap={initialCommentUserMap}
@@ -214,11 +217,14 @@ async function InventoryDataFetcher({
     }
   }
 
+  const originalSearchTerm = isUsername ? robloxId : undefined;
+
   return (
     <Suspense
       fallback={
         <InventoryCheckerClient
           robloxId={actualRobloxId}
+          originalSearchTerm={originalSearchTerm}
           initialData={result}
           isLoading={true}
           initialComments={commentsData?.comments || []}
@@ -230,6 +236,7 @@ async function InventoryDataFetcher({
     >
       <UserDataStreamer
         robloxId={actualRobloxId}
+        originalSearchTerm={originalSearchTerm}
         inventoryData={result}
         currentSeason={activeSeason}
         initialComments={commentsData?.comments || []}

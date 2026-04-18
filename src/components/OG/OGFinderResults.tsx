@@ -2,17 +2,16 @@
 
 import { useState, useMemo, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
+import Link from "next/link";
 import { RobloxUser, Item } from "@/types";
-import { useUsernameToId } from "@/hooks/useUsernameToId";
 import { UserConnectionData } from "@/app/inventories/types";
 import { useBatchUserData } from "@/hooks/useBatchUserData";
-import { MaxStreamsError } from "@/utils/api";
-import { toast } from "sonner";
+import { DefaultAvatar } from "@/utils/avatar";
 import OGFinderFAQ from "./OGFinderFAQ";
 import SearchForm from "./SearchForm";
 import TradeHistoryModal from "@/components/Modals/TradeHistoryModal";
 import { Icon } from "../ui/IconWrapper";
-import { logError } from "@/services/logger";
 import OGUserInfo from "./OGUserInfo";
 import OGFilters from "./OGFilters";
 import OGItemsGrid from "./OGItemsGrid";
@@ -52,6 +51,7 @@ interface OGFinderResultsProps {
   userConnectionData: UserConnectionData | null;
   error?: string;
   items?: Item[];
+  originalSearchTerm?: string;
 }
 
 export default function OGFinderResults({
@@ -61,12 +61,18 @@ export default function OGFinderResults({
   userConnectionData,
   error,
   items = [],
+  originalSearchTerm,
 }: OGFinderResultsProps) {
   const router = useRouter();
-  const { getId } = useUsernameToId();
 
   // State management
-  const [searchId, setSearchId] = useState(robloxId || "");
+  const [searchId, setSearchId] = useState(
+    originalSearchTerm || robloxId || "",
+  );
+
+  useEffect(() => {
+    setSearchId(originalSearchTerm || robloxId || "");
+  }, [originalSearchTerm, robloxId]);
   const [isLoading, setIsLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
@@ -85,6 +91,7 @@ export default function OGFinderResults({
   const [selectedItem, setSelectedItem] = useState<OGItem | null>(null);
   const [showHistoryModal, setShowHistoryModal] = useState(false);
   const [showNotificationSheet, setShowNotificationSheet] = useState(false);
+  const [avatarError, setAvatarError] = useState(false);
 
   // Extract all unique user IDs from OG data
   const allUserIds = useMemo(() => {
@@ -152,41 +159,11 @@ export default function OGFinderResults({
   };
 
   // Handle search
-  const handleSearch = async (searchValue: string) => {
+  const handleSearch = (searchValue: string) => {
     if (!searchValue.trim()) return;
 
-    const input = searchValue.trim();
-    const isNumeric = /^\d+$/.test(input);
-
     setIsLoading(true);
-    try {
-      const id = isNumeric ? input : await getId(input);
-      router.push(`/og/${id ?? input}`);
-    } catch (error) {
-      logError("Search error", error, {
-        component: "OGFinderResults",
-        action: "handleSearch",
-      });
-
-      // Check for max streams error - this is a temporary server issue
-      if (error instanceof MaxStreamsError) {
-        toast.error(
-          "Unable to search by username at this time due to a temporary server issue. Please use the user's Roblox ID to search instead.",
-          {
-            duration: 6000,
-          },
-        );
-      } else {
-        toast.error(
-          "Failed to find user. Please check the spelling and try again, or try searching by Roblox ID instead.",
-          {
-            duration: 5000,
-          },
-        );
-      }
-    } finally {
-      setIsLoading(false);
-    }
+    router.push(`/og/${searchValue.trim()}`);
   };
 
   // Filter and sort logic
@@ -464,23 +441,80 @@ export default function OGFinderResults({
       {!error &&
         (!initialData?.results || initialData.results.length === 0) && (
           <>
-            <div className="border-border-card bg-secondary-bg rounded-lg border p-6">
-              <div className="text-center">
-                <div className="mb-4 flex justify-center">
-                  <div className="bg-status-error/10 rounded-full p-3">
+            <div className="border-border-card bg-secondary-bg overflow-hidden rounded-lg border">
+              {/* Profile header */}
+              <div className="border-border-card bg-tertiary-bg flex items-center gap-4 border-b px-5 py-4">
+                <div className="bg-tertiary-bg relative h-14 w-14 shrink-0 overflow-hidden rounded-full">
+                  {!avatarError ? (
+                    <Image
+                      src={getUserAvatar(robloxId)}
+                      alt="Roblox Avatar"
+                      fill
+                      className="object-cover"
+                      unoptimized
+                      onError={() => setAvatarError(true)}
+                    />
+                  ) : (
+                    <DefaultAvatar />
+                  )}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-primary-text truncate font-semibold">
+                    {getUserDisplay(robloxId)}
+                  </p>
+                  <p className="text-secondary-text truncate text-sm">
+                    @{getUsername(robloxId)}
+                  </p>
+                  <Link
+                    href={`https://www.roblox.com/users/${robloxId}/profile`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    prefetch={false}
+                    className="text-link mt-1 inline-flex items-center gap-1 text-xs hover:underline"
+                  >
+                    Roblox profile
                     <Icon
-                      icon="heroicons:exclamation-triangle"
-                      className="text-status-error h-8 w-8"
+                      icon="heroicons:arrow-top-right-on-square"
+                      className="h-3 w-3"
+                    />
+                  </Link>
+                </div>
+              </div>
+
+              {/* No items message + actions */}
+              <div className="space-y-4 p-5">
+                <div className="flex items-start gap-3">
+                  <div className="bg-secondary-text/10 mt-0.5 shrink-0 rounded-full p-2">
+                    <Icon
+                      icon="heroicons:archive-box-x-mark"
+                      className="text-secondary-text h-5 w-5"
                     />
                   </div>
+                  <div>
+                    <p className="text-primary-text font-medium">
+                      No OG items logged yet
+                    </p>
+                    <p className="text-secondary-text mt-0.5 text-sm">
+                      Our bots haven&apos;t recorded any original items for this
+                      user yet. OG items are logged when a bot scans a trade
+                      server.
+                    </p>
+                  </div>
                 </div>
-                <h3 className="text-status-error mb-2 text-lg font-semibold">
-                  No OG Items Found
-                </h3>
-                <p className="text-secondary-text">
-                  No original items found for this user. Their items may not yet
-                  have been logged by our bots.
-                </p>
+
+                {/* Actions */}
+                <div className="flex flex-wrap gap-2">
+                  <Button asChild size="sm" variant="secondary">
+                    <Link href={`/inventories/${robloxId}`} prefetch={false}>
+                      Check Inventory
+                    </Link>
+                  </Button>
+                  <Button asChild size="sm" variant="secondary">
+                    <Link href={`/dupes/${robloxId}`} prefetch={false}>
+                      Check Dupes
+                    </Link>
+                  </Button>
+                </div>
               </div>
             </div>
             <OGFinderFAQ />

@@ -84,6 +84,7 @@ async function OGFinderDataFetcher({ robloxId }: { robloxId: string }) {
           robloxUsers={{}}
           userConnectionData={null}
           items={[]}
+          originalSearchTerm={robloxId}
         />
       );
     }
@@ -101,6 +102,7 @@ async function OGFinderDataFetcher({ robloxId }: { robloxId: string }) {
         robloxUsers={{}}
         userConnectionData={null}
         items={[]}
+        originalSearchTerm={isUsername ? robloxId : undefined}
       />
     );
   }
@@ -115,6 +117,7 @@ async function OGFinderDataFetcher({ robloxId }: { robloxId: string }) {
         robloxUsers={{}}
         userConnectionData={null}
         items={[]}
+        originalSearchTerm={isUsername ? robloxId : undefined}
       />
     );
   }
@@ -202,6 +205,7 @@ async function OGFinderDataFetcher({ robloxId }: { robloxId: string }) {
       robloxUsers={robloxUsers}
       userConnectionData={userConnectionData}
       items={items}
+      originalSearchTerm={isUsername ? robloxId : undefined}
     />
   );
 }

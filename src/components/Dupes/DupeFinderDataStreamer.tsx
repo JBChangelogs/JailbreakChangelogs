@@ -55,6 +55,7 @@ async function DupeFinderDataFetcher({ robloxId }: { robloxId: string }) {
         error={usernameError}
         isUserFound={false}
         items={[]}
+        originalSearchTerm={robloxId}
       />
     );
   }
@@ -72,6 +73,7 @@ async function DupeFinderDataFetcher({ robloxId }: { robloxId: string }) {
           error={result.error}
           isUserFound={true}
           items={[]}
+          originalSearchTerm={isUsername ? robloxId : undefined}
         />
       );
     } else {
@@ -82,6 +84,7 @@ async function DupeFinderDataFetcher({ robloxId }: { robloxId: string }) {
           error={result.error}
           isUserFound={false}
           items={[]}
+          originalSearchTerm={isUsername ? robloxId : undefined}
         />
       );
     }
@@ -93,8 +96,9 @@ async function DupeFinderDataFetcher({ robloxId }: { robloxId: string }) {
       <DupeFinderClient
         robloxId={actualRobloxId}
         error="No dupe data found for this user."
-        isUserFound={false}
+        isUserFound={true}
         items={[]}
+        originalSearchTerm={isUsername ? robloxId : undefined}
       />
     );
   }
@@ -144,6 +148,7 @@ async function DupeFinderDataFetcher({ robloxId }: { robloxId: string }) {
       isUserFound={true}
       robloxUsers={robloxUsers}
       items={items}
+      originalSearchTerm={isUsername ? robloxId : undefined}
     />
   );
 }

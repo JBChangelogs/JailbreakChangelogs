@@ -11,6 +11,7 @@ import { Item } from "@/types";
 
 interface UserDataStreamerProps {
   robloxId: string;
+  originalSearchTerm?: string;
   inventoryData: InventoryData;
   currentSeason: Season | null;
   initialComments?: CommentData[];
@@ -23,6 +24,7 @@ interface UserDataStreamerProps {
 // Loading component for user data - shows inventory immediately
 function UserDataLoadingFallback({
   robloxId,
+  originalSearchTerm,
   inventoryData,
   currentSeason,
   initialComments,
@@ -35,6 +37,7 @@ function UserDataLoadingFallback({
     <InventoryCheckerClient
       initialData={inventoryData}
       robloxId={robloxId}
+      originalSearchTerm={originalSearchTerm}
       robloxUsers={{}}
       userConnectionData={null}
       currentSeason={currentSeason}
@@ -51,6 +54,7 @@ function UserDataLoadingFallback({
 // Component that fetches user data in parallel with optimized batching
 async function UserDataFetcher({
   robloxId,
+  originalSearchTerm,
   inventoryData,
   currentSeason,
   initialComments,
@@ -96,6 +100,7 @@ async function UserDataFetcher({
     <InventoryCheckerClient
       initialData={inventoryData}
       robloxId={robloxId}
+      originalSearchTerm={originalSearchTerm}
       robloxUsers={userDataResult.robloxUsers}
       userConnectionData={userConnectionData}
       initialDupeData={userDataResult.dupeData}
@@ -112,6 +117,7 @@ async function UserDataFetcher({
 
 export default function UserDataStreamer({
   robloxId,
+  originalSearchTerm,
   inventoryData,
   currentSeason,
   initialComments,
@@ -125,6 +131,7 @@ export default function UserDataStreamer({
       fallback={
         <UserDataLoadingFallback
           robloxId={robloxId}
+          originalSearchTerm={originalSearchTerm}
           inventoryData={inventoryData}
           currentSeason={currentSeason}
           initialComments={initialComments}
@@ -137,6 +144,7 @@ export default function UserDataStreamer({
     >
       <UserDataFetcher
         robloxId={robloxId}
+        originalSearchTerm={originalSearchTerm}
         inventoryData={inventoryData}
         currentSeason={currentSeason}
         initialComments={initialComments}

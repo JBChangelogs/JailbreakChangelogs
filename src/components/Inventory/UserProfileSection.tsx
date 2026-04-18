@@ -59,6 +59,7 @@ export default function UserProfileSection({
   const scanCompletedRef = useRef(false);
 
   const [showScanModal, setShowScanModal] = useState(false);
+  const [avatarError, setAvatarError] = useState(false);
 
   // Check if current user is viewing their own inventory
   const isOwnInventory =
@@ -209,19 +210,20 @@ export default function UserProfileSection({
       {/* Avatar and User Info */}
       <div className="flex items-center gap-4">
         {/* Avatar */}
-        {getUserAvatar(userId) ? (
-          <Image
-            src={getUserAvatar(userId)!}
-            alt="Roblox Avatar"
-            width={64}
-            height={64}
-            className="bg-tertiary-bg shrink-0 rounded-full"
-          />
-        ) : (
-          <div className="bg-tertiary-bg text-tertiary-bg flex h-16 w-16 shrink-0 items-center justify-center rounded-full">
+        <div className="bg-tertiary-bg relative h-16 w-16 shrink-0 overflow-hidden rounded-full">
+          {!avatarError ? (
+            <Image
+              src={getUserAvatar(userId)}
+              alt="Roblox Avatar"
+              fill
+              className="object-cover"
+              unoptimized
+              onError={() => setAvatarError(true)}
+            />
+          ) : (
             <DefaultAvatar />
-          </div>
-        )}
+          )}
+        </div>
 
         {/* User Info */}
         <div className="min-w-0 flex-1">

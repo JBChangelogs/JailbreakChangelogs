@@ -1,11 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Icon } from "@/components/ui/IconWrapper";
-import { useUsernameToId } from "@/hooks/useUsernameToId";
-import { MaxStreamsError } from "@/utils/api";
-import { toast } from "sonner";
 
 interface DupeSearchInputProps {
   initialValue?: string;
@@ -21,48 +18,25 @@ export default function DupeSearchInput({
   className = "",
 }: DupeSearchInputProps) {
   const [searchId, setSearchId] = useState(initialValue);
+
+  useEffect(() => {
+    setSearchId(initialValue);
+  }, [initialValue]);
   const [isSearching, setIsSearching] = useState(false);
   const router = useRouter();
-  const { getId } = useUsernameToId();
 
-  const handleSearch = async (e: React.FormEvent) => {
+  const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     const input = searchId.trim();
     if (!input) return;
 
-    setIsSearching(true);
-    try {
-      const isNumeric = /^\d+$/.test(input);
-      const id = isNumeric ? input : await getId(input);
-
-      // Track dupe search with search term
-      if (typeof window !== "undefined" && window.umami) {
-        window.umami.track("Dupe Search", { searchTerm: input });
-      }
-
-      router.push(`/dupes/${id ?? input}`);
-    } catch (error) {
-      console.error("Error searching for user:", error);
-
-      // Check for max streams error - this is a temporary server issue
-      if (error instanceof MaxStreamsError) {
-        toast.error(
-          "Unable to search by username at this time due to a temporary server issue. Please use the user's Roblox ID to search instead.",
-          {
-            duration: 6000,
-          },
-        );
-      } else {
-        toast.error(
-          "Failed to find user. Please check the spelling and try again, or try searching by Roblox ID instead.",
-          {
-            duration: 5000,
-          },
-        );
-      }
-    } finally {
-      setIsSearching(false);
+    // Track dupe search with search term
+    if (typeof window !== "undefined" && window.umami) {
+      window.umami.track("Dupe Search", { searchTerm: input });
     }
+
+    setIsSearching(true);
+    router.push(`/dupes/${input}`);
   };
 
   // Use internal loading state or external loading state

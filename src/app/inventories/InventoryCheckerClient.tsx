@@ -3,6 +3,8 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
+import { DefaultAvatar } from "@/utils/avatar";
 import { Icon } from "@/components/ui/IconWrapper";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -14,10 +16,7 @@ import { RobloxUser, Item } from "@/types";
 import { InventoryData, InventoryItem, UserConnectionData } from "./types";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { Season } from "@/types/seasons";
-import { useUsernameToId } from "@/hooks/useUsernameToId";
 import { useBatchUserData } from "@/hooks/useBatchUserData";
-import { MaxStreamsError } from "@/utils/api";
-import { toast } from "sonner";
 
 import SearchForm from "@/components/Inventory/SearchForm";
 import UserStats from "@/components/Inventory/UserStats";
@@ -92,6 +91,7 @@ export default function InventoryCheckerClient({
     originalSearchTerm || robloxId || "",
   );
   const [internalIsLoading, setInternalIsLoading] = useState(false);
+  const [avatarError, setAvatarError] = useState(false);
   const [selectedItem, setSelectedItem] = useState<InventoryItem | null>(null);
   const [showHistoryModal, setShowHistoryModal] = useState(false);
   const forceShowErrorHandledRef = useRef<boolean>(false);
@@ -117,7 +117,6 @@ export default function InventoryCheckerClient({
   const hasAutoFetchedQueueRef = useRef(false);
 
   const router = useRouter();
-  const { getId } = useUsernameToId();
 
   // Auth context and scan functionality
   const { user, isAuthenticated, setLoginModal } = useAuthContext();
@@ -143,7 +142,13 @@ export default function InventoryCheckerClient({
 
   // Extract all user IDs from inventory data for batch fetching
   const allUserIds = useMemo(() => {
-    if (!currentData) return [];
+    if (!currentData) {
+      // In the "inventory not found" error state, still fetch the user's profile info
+      if (robloxId && /^\d+$/.test(robloxId) && isInventoryNotFoundError) {
+        return [robloxId];
+      }
+      return [];
+    }
 
     const userIds = new Set<string>();
 
@@ -193,7 +198,7 @@ export default function InventoryCheckerClient({
     }
 
     return Array.from(userIds);
-  }, [currentData, robloxId]);
+  }, [currentData, robloxId, isInventoryNotFoundError]);
 
   // Fetch all user data in batches and merge with initial data
   const { robloxUsers: batchedUsers } = useBatchUserData(allUserIds);
@@ -587,42 +592,18 @@ export default function InventoryCheckerClient({
 
   // Items data is now passed as props from server-side, no need to fetch
 
-  const handleSearch = async (e: React.FormEvent) => {
+  const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     const input = searchId.trim();
     if (!input) return;
 
-    setInternalIsLoading(true);
-    try {
-      const isNumeric = /^\d+$/.test(input);
-      const id = isNumeric ? input : await getId(input);
-
-      // Track inventory search with search term
-      if (typeof window !== "undefined" && window.umami) {
-        window.umami.track("Inventory Search", { searchTerm: input });
-      }
-
-      router.push(`/inventories/${id ?? input}`);
-    } catch (error) {
-      console.error("Error searching for user:", error);
-
-      // Check for max streams error - this is a temporary server issue
-      if (error instanceof MaxStreamsError) {
-        toast.error("Service Limitation", {
-          description:
-            "Unable to search by username due to temporary server issues. Please use a Roblox ID instead.",
-          duration: 6000,
-        });
-      } else {
-        toast.error("User Not Found", {
-          description:
-            "Please check the spelling or try searching by Roblox ID instead.",
-          duration: 5000,
-        });
-      }
-    } finally {
-      setInternalIsLoading(false);
+    // Track inventory search with search term
+    if (typeof window !== "undefined" && window.umami) {
+      window.umami.track("Inventory Search", { searchTerm: input });
     }
+
+    setInternalIsLoading(true);
+    router.push(`/inventories/${input}`);
   };
 
   const handleItemClick = (item: InventoryItem) => {
@@ -664,354 +645,490 @@ export default function InventoryCheckerClient({
           <>
             {/* Error Display */}
             {error && !initialData && (
-              <div className="border-border-card bg-secondary-bg rounded-lg border p-6">
-                <div className="text-center">
-                  <div className="mb-4 flex justify-center">
-                    <div className="bg-status-error/10 rounded-full p-3">
-                      <Icon
-                        icon="heroicons:exclamation-triangle"
-                        className="text-status-error h-8 w-8"
-                      />
-                    </div>
-                  </div>
-                  <h3 className="text-status-error mb-2 text-lg font-semibold">
-                    {error.includes("Server error")
-                      ? "Server Error"
-                      : "Unable to Load Inventory"}
-                  </h3>
-                  {!isInventoryNotFoundError && (
-                    <p className="text-secondary-text mb-4 wrap-break-word">
-                      {error}
-                    </p>
-                  )}
-
-                  {/* Show scan option for profile owner or login prompt for others */}
-                  {isOwnInventory ? (
-                    <div className="border-border-card bg-tertiary-bg mt-4 rounded-lg border p-4">
-                      <div className="space-y-3">
-                        <p className="text-primary-text mb-3 text-center text-sm">
-                          Your inventory hasn&apos;t been scanned yet.
+              <>
+                {/* Inventory not found — mini profile card for non-owner view */}
+                {isInventoryNotFoundError && !isOwnInventory && robloxId && (
+                  <div className="border-border-card bg-secondary-bg overflow-hidden rounded-lg border">
+                    {/* Profile header */}
+                    <div className="border-border-card bg-tertiary-bg flex items-center gap-4 border-b px-5 py-4">
+                      <div className="bg-tertiary-bg relative h-14 w-14 shrink-0 overflow-hidden rounded-full">
+                        {!avatarError ? (
+                          <Image
+                            src={`${INVENTORY_API_URL}/proxy/users/${robloxId}/avatar-headshot`}
+                            alt="Roblox Avatar"
+                            fill
+                            className="object-cover"
+                            unoptimized
+                            onError={() => setAvatarError(true)}
+                          />
+                        ) : (
+                          <DefaultAvatar />
+                        )}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-primary-text truncate font-semibold">
+                          {mergedRobloxUsers[robloxId]?.displayName ||
+                            originalSearchTerm ||
+                            robloxId}
                         </p>
-                        <div className="space-y-3">
-                          <div className="text-center">
-                            <p className="text-secondary-text text-sm">
-                              Wait for one of our bots to randomly join your
-                              trade server
-                            </p>
-                          </div>
-                          <div className="text-secondary-text text-center text-sm font-medium">
-                            OR
-                          </div>
-                          <div className="flex justify-center">
-                            <Button
-                              onClick={() => {
-                                if (
-                                  typeof window !== "undefined" &&
-                                  window.umami
-                                ) {
-                                  window.umami.track("Request Scan");
-                                }
-                                // Show Turnstile modal before scan
-                                if (
-                                  ENABLE_WS_SCAN &&
-                                  scanWebSocket.status !== "scanning" &&
-                                  scanWebSocket.status !== "connecting"
-                                ) {
-                                  setShowScanModal(true);
-                                }
-                              }}
-                              disabled={
-                                !ENABLE_WS_SCAN ||
-                                scanWebSocket.status === "scanning" ||
-                                scanWebSocket.status === "connecting"
-                              }
-                              variant="default"
-                              size="md"
-                              className="gap-2"
-                            >
-                              {scanWebSocket.status === "connecting" ? (
-                                <>
-                                  <svg
-                                    className="h-4 w-4 animate-spin"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                  >
-                                    <circle
-                                      className="opacity-25"
-                                      cx="12"
-                                      cy="12"
-                                      r="10"
-                                      stroke="currentColor"
-                                      strokeWidth="4"
-                                    />
-                                    <path
-                                      className="opacity-75"
-                                      fill="currentColor"
-                                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                                    />
-                                  </svg>
-                                  Connecting...
-                                </>
-                              ) : scanWebSocket.status === "scanning" ? (
-                                <>
-                                  <svg
-                                    className="h-4 w-4 animate-spin"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                  >
-                                    <circle
-                                      className="opacity-25"
-                                      cx="12"
-                                      cy="12"
-                                      r="10"
-                                      stroke="currentColor"
-                                      strokeWidth="4"
-                                    />
-                                    <path
-                                      className="opacity-75"
-                                      fill="currentColor"
-                                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                                    />
-                                  </svg>
-                                  {getScanActiveButtonLabel(
-                                    scanWebSocket.phase,
-                                    scanWebSocket.message,
-                                  )}
-                                </>
-                              ) : scanWebSocket.status === "completed" ? (
-                                <>
-                                  <svg
-                                    className="h-4 w-4"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                  >
-                                    <path
-                                      strokeLinecap="round"
-                                      strokeLinejoin="round"
-                                      strokeWidth={2}
-                                      d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                                    />
-                                  </svg>
-                                  Scan Complete
-                                </>
-                              ) : (
-                                <>
-                                  <svg
-                                    className="h-4 w-4"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                  >
-                                    <path
-                                      strokeLinecap="round"
-                                      strokeLinejoin="round"
-                                      strokeWidth={2}
-                                      d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                                    />
-                                  </svg>
-                                  {scanWebSocket.message &&
-                                  scanWebSocket.message.includes(
-                                    "recent scan",
-                                  ) ? (
-                                    <>
-                                      <svg
-                                        className="h-4 w-4"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        viewBox="0 0 24 24"
-                                      >
-                                        <path
-                                          strokeLinecap="round"
-                                          strokeLinejoin="round"
-                                          strokeWidth={2}
-                                          d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                                        />
-                                      </svg>
-                                      {scanWebSocket.message.includes(
-                                        "recent scan",
-                                      )
-                                        ? "Recent Scan Found"
-                                        : scanWebSocket.message.includes(
-                                              "User not found",
-                                            )
-                                          ? "User Not Found"
-                                          : scanWebSocket.message.includes(
-                                                "not in game",
-                                              )
-                                            ? "Not In Game"
-                                            : scanWebSocket.message}
-                                    </>
-                                  ) : scanWebSocket.message &&
-                                    scanWebSocket.message.includes(
-                                      "not found",
-                                    ) ? (
-                                    <>
-                                      <svg
-                                        className="h-4 w-4"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        viewBox="0 0 24 24"
-                                      >
-                                        <path
-                                          strokeLinecap="round"
-                                          strokeLinejoin="round"
-                                          strokeWidth={2}
-                                          d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"
-                                        />
-                                      </svg>
-                                      User Not Found
-                                    </>
-                                  ) : !ENABLE_WS_SCAN ? (
-                                    "Scanning Disabled"
-                                  ) : (
-                                    "Request a Scan"
-                                  )}
-                                </>
-                              )}
-                            </Button>
-                          </div>
-                          <div className="flex items-center justify-center gap-2">
-                            <p className="text-secondary-text text-xs">
-                              {isLoadingQueuePosition ? (
-                                "Checking queue position..."
-                              ) : queuePosition ? (
-                                <span className="text-primary-text font-medium">
-                                  Queue Position: #
-                                  {queuePosition.position.toLocaleString()}
-                                </span>
-                              ) : (
-                                queueStatusMessage || "Not in queue"
-                              )}
-                            </p>
-                            <button
-                              type="button"
-                              onClick={fetchQueuePosition}
-                              disabled={isLoadingQueuePosition}
-                              aria-label="Refresh queue position"
-                              className="text-secondary-text hover:text-primary-text cursor-pointer rounded p-0.5 transition-colors hover:bg-white/10 disabled:opacity-50"
-                            >
-                              <Icon
-                                icon="material-symbols:refresh"
-                                className={`h-4 w-4 ${isLoadingQueuePosition ? "animate-spin" : ""}`}
-                              />
-                            </button>
-                          </div>
-                        </div>
+                        <p className="text-secondary-text truncate text-sm">
+                          @
+                          {mergedRobloxUsers[robloxId]?.name ||
+                            originalSearchTerm ||
+                            robloxId}
+                        </p>
+                        <Link
+                          href={`https://www.roblox.com/users/${robloxId}/profile`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          prefetch={false}
+                          className="text-link mt-1 inline-flex items-center gap-1 text-xs hover:underline"
+                        >
+                          Roblox profile
+                          <Icon
+                            icon="heroicons:arrow-top-right-on-square"
+                            className="h-3 w-3"
+                          />
+                        </Link>
                       </div>
                     </div>
-                  ) : (
-                    <div className="border-border-card bg-tertiary-bg mt-4 rounded-lg border p-4">
-                      {isInventoryNotFoundError ? (
-                        <>
-                          <p className="text-primary-text mb-1 text-sm font-medium">
-                            No saved inventory found for this user.
+
+                    {/* No inventory message + actions */}
+                    <div className="space-y-4 p-5">
+                      <div className="flex items-start gap-3">
+                        <div className="bg-secondary-text/10 mt-0.5 shrink-0 rounded-full p-2">
+                          <Icon
+                            icon="heroicons:archive-box-x-mark"
+                            className="text-secondary-text h-5 w-5"
+                          />
+                        </div>
+                        <div>
+                          <p className="text-primary-text font-medium">
+                            No inventory found yet
                           </p>
-                          <p className="text-secondary-text text-sm">
-                            Try searching another username.
+                          <p className="text-secondary-text mt-0.5 text-sm">
+                            This user hasn&apos;t been scanned by our bots yet.
+                            Inventories are updated automatically when a bot
+                            joins their trade server.
                           </p>
-                          <div className="mt-3 flex items-center justify-center gap-2 text-center">
-                            <p className="text-secondary-text text-xs">
-                              {isLoadingQueuePosition ? (
-                                "Checking queue position..."
-                              ) : queuePosition ? (
-                                <span className="text-primary-text font-medium">
-                                  Queue Position: #
-                                  {queuePosition.position.toLocaleString()}
-                                </span>
-                              ) : (
-                                queueStatusMessage || "Not in queue"
-                              )}
-                            </p>
-                            <button
-                              type="button"
-                              onClick={fetchQueuePosition}
-                              disabled={isLoadingQueuePosition}
-                              aria-label="Refresh queue position"
-                              className="text-secondary-text hover:text-primary-text cursor-pointer rounded p-0.5 transition-colors hover:bg-white/10 disabled:opacity-50"
-                            >
-                              <Icon
-                                icon="material-symbols:refresh"
-                                className={`h-4 w-4 ${isLoadingQueuePosition ? "animate-spin" : ""}`}
-                              />
-                            </button>
-                          </div>
-                          <Button
-                            type="button"
-                            size="sm"
-                            variant="secondary"
-                            className="mt-2"
-                            onClick={() => {
-                              setSearchId("");
-                              window.scrollTo({ top: 0, behavior: "smooth" });
-                              const searchInput = document.getElementById(
-                                "searchInput",
-                              ) as HTMLInputElement | null;
-                              searchInput?.focus();
-                            }}
-                          >
-                            Search Another User
-                          </Button>
-                          {isAuthenticated && user?.roblox_id && (
-                            <div className="border-border-card mt-4 border-t pt-4">
-                              <p className="text-primary-text mb-1 text-sm font-medium">
-                                Looking for your inventory?
-                              </p>
-                              <Button asChild size="sm" className="mt-2">
-                                <Link
-                                  href={`/inventories/${user.roblox_id}`}
-                                  prefetch={false}
-                                >
-                                  View My Inventory
-                                </Link>
-                              </Button>
-                            </div>
-                          )}
-                        </>
-                      ) : (
-                        <>
-                          <p className="text-primary-text mb-1 text-sm font-medium">
-                            Looking for your inventory?
-                          </p>
-                          {isAuthenticated && user?.roblox_id ? (
-                            <Button asChild size="sm" className="mt-2">
-                              <Link
-                                href={`/inventories/${user.roblox_id}`}
-                                prefetch={false}
-                              >
-                                View My Inventory
-                              </Link>
-                            </Button>
+                        </div>
+                      </div>
+
+                      {/* Queue position */}
+                      <div className="flex items-center gap-1.5">
+                        <p className="text-secondary-text text-xs">
+                          {isLoadingQueuePosition ? (
+                            "Checking queue position..."
+                          ) : queuePosition ? (
+                            <span className="text-primary-text font-medium">
+                              Queue Position: #
+                              {queuePosition.position.toLocaleString()}
+                            </span>
                           ) : (
+                            queueStatusMessage || "Not in queue"
+                          )}
+                        </p>
+                        <button
+                          type="button"
+                          onClick={fetchQueuePosition}
+                          disabled={isLoadingQueuePosition}
+                          aria-label="Refresh queue position"
+                          className="text-secondary-text hover:text-primary-text cursor-pointer rounded p-0.5 transition-colors hover:bg-white/10 disabled:opacity-50"
+                        >
+                          <Icon
+                            icon="material-symbols:refresh"
+                            className={`h-4 w-4 ${isLoadingQueuePosition ? "animate-spin" : ""}`}
+                          />
+                        </button>
+                      </div>
+
+                      {/* Actions */}
+                      <div className="flex flex-wrap gap-2">
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="secondary"
+                          onClick={() => {
+                            setSearchId("");
+                            window.scrollTo({ top: 0, behavior: "smooth" });
+                            const searchInput = document.getElementById(
+                              "searchInput",
+                            ) as HTMLInputElement | null;
+                            searchInput?.focus();
+                          }}
+                        >
+                          Search Another User
+                        </Button>
+                        {isAuthenticated && user?.roblox_id && (
+                          <Button asChild size="sm">
+                            <Link
+                              href={`/inventories/${user.roblox_id}`}
+                              prefetch={false}
+                            >
+                              View My Inventory
+                            </Link>
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* All other errors (own inventory not found, server errors, etc.) */}
+                {(!isInventoryNotFoundError || isOwnInventory) && (
+                  <div className="border-border-card bg-secondary-bg rounded-lg border p-6">
+                    <div className="text-center">
+                      <div className="mb-4 flex justify-center">
+                        <div className="bg-status-error/10 rounded-full p-3">
+                          <Icon
+                            icon="heroicons:exclamation-triangle"
+                            className="text-status-error h-8 w-8"
+                          />
+                        </div>
+                      </div>
+                      <h3 className="text-status-error mb-2 text-lg font-semibold">
+                        {error.includes("Server error")
+                          ? "Server Error"
+                          : "Unable to Load Inventory"}
+                      </h3>
+                      {!isInventoryNotFoundError && (
+                        <p className="text-secondary-text mb-4 wrap-break-word">
+                          {error}
+                        </p>
+                      )}
+
+                      {/* Show scan option for profile owner or login prompt for others */}
+                      {isOwnInventory ? (
+                        <div className="border-border-card bg-tertiary-bg mt-4 rounded-lg border p-4">
+                          <div className="space-y-3">
+                            <p className="text-primary-text mb-3 text-center text-sm">
+                              Your inventory hasn&apos;t been scanned yet.
+                            </p>
+                            <div className="space-y-3">
+                              <div className="text-center">
+                                <p className="text-secondary-text text-sm">
+                                  Wait for one of our bots to randomly join your
+                                  trade server
+                                </p>
+                              </div>
+                              <div className="text-secondary-text text-center text-sm font-medium">
+                                OR
+                              </div>
+                              <div className="flex justify-center">
+                                <Button
+                                  onClick={() => {
+                                    if (
+                                      typeof window !== "undefined" &&
+                                      window.umami
+                                    ) {
+                                      window.umami.track("Request Scan");
+                                    }
+                                    // Show Turnstile modal before scan
+                                    if (
+                                      ENABLE_WS_SCAN &&
+                                      scanWebSocket.status !== "scanning" &&
+                                      scanWebSocket.status !== "connecting"
+                                    ) {
+                                      setShowScanModal(true);
+                                    }
+                                  }}
+                                  disabled={
+                                    !ENABLE_WS_SCAN ||
+                                    scanWebSocket.status === "scanning" ||
+                                    scanWebSocket.status === "connecting"
+                                  }
+                                  variant="default"
+                                  size="md"
+                                  className="gap-2"
+                                >
+                                  {scanWebSocket.status === "connecting" ? (
+                                    <>
+                                      <svg
+                                        className="h-4 w-4 animate-spin"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                      >
+                                        <circle
+                                          className="opacity-25"
+                                          cx="12"
+                                          cy="12"
+                                          r="10"
+                                          stroke="currentColor"
+                                          strokeWidth="4"
+                                        />
+                                        <path
+                                          className="opacity-75"
+                                          fill="currentColor"
+                                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                                        />
+                                      </svg>
+                                      Connecting...
+                                    </>
+                                  ) : scanWebSocket.status === "scanning" ? (
+                                    <>
+                                      <svg
+                                        className="h-4 w-4 animate-spin"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                      >
+                                        <circle
+                                          className="opacity-25"
+                                          cx="12"
+                                          cy="12"
+                                          r="10"
+                                          stroke="currentColor"
+                                          strokeWidth="4"
+                                        />
+                                        <path
+                                          className="opacity-75"
+                                          fill="currentColor"
+                                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                                        />
+                                      </svg>
+                                      {getScanActiveButtonLabel(
+                                        scanWebSocket.phase,
+                                        scanWebSocket.message,
+                                      )}
+                                    </>
+                                  ) : scanWebSocket.status === "completed" ? (
+                                    <>
+                                      <svg
+                                        className="h-4 w-4"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                      >
+                                        <path
+                                          strokeLinecap="round"
+                                          strokeLinejoin="round"
+                                          strokeWidth={2}
+                                          d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                                        />
+                                      </svg>
+                                      Scan Complete
+                                    </>
+                                  ) : (
+                                    <>
+                                      <svg
+                                        className="h-4 w-4"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                      >
+                                        <path
+                                          strokeLinecap="round"
+                                          strokeLinejoin="round"
+                                          strokeWidth={2}
+                                          d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                                        />
+                                      </svg>
+                                      {scanWebSocket.message &&
+                                      scanWebSocket.message.includes(
+                                        "recent scan",
+                                      ) ? (
+                                        <>
+                                          <svg
+                                            className="h-4 w-4"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                          >
+                                            <path
+                                              strokeLinecap="round"
+                                              strokeLinejoin="round"
+                                              strokeWidth={2}
+                                              d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                                            />
+                                          </svg>
+                                          {scanWebSocket.message.includes(
+                                            "recent scan",
+                                          )
+                                            ? "Recent Scan Found"
+                                            : scanWebSocket.message.includes(
+                                                  "User not found",
+                                                )
+                                              ? "User Not Found"
+                                              : scanWebSocket.message.includes(
+                                                    "not in game",
+                                                  )
+                                                ? "Not In Game"
+                                                : scanWebSocket.message}
+                                        </>
+                                      ) : scanWebSocket.message &&
+                                        scanWebSocket.message.includes(
+                                          "not found",
+                                        ) ? (
+                                        <>
+                                          <svg
+                                            className="h-4 w-4"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                          >
+                                            <path
+                                              strokeLinecap="round"
+                                              strokeLinejoin="round"
+                                              strokeWidth={2}
+                                              d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"
+                                            />
+                                          </svg>
+                                          User Not Found
+                                        </>
+                                      ) : !ENABLE_WS_SCAN ? (
+                                        "Scanning Disabled"
+                                      ) : (
+                                        "Request a Scan"
+                                      )}
+                                    </>
+                                  )}
+                                </Button>
+                              </div>
+                              <div className="flex items-center justify-center gap-2">
+                                <p className="text-secondary-text text-xs">
+                                  {isLoadingQueuePosition ? (
+                                    "Checking queue position..."
+                                  ) : queuePosition ? (
+                                    <span className="text-primary-text font-medium">
+                                      Queue Position: #
+                                      {queuePosition.position.toLocaleString()}
+                                    </span>
+                                  ) : (
+                                    queueStatusMessage || "Not in queue"
+                                  )}
+                                </p>
+                                <button
+                                  type="button"
+                                  onClick={fetchQueuePosition}
+                                  disabled={isLoadingQueuePosition}
+                                  aria-label="Refresh queue position"
+                                  className="text-secondary-text hover:text-primary-text cursor-pointer rounded p-0.5 transition-colors hover:bg-white/10 disabled:opacity-50"
+                                >
+                                  <Icon
+                                    icon="material-symbols:refresh"
+                                    className={`h-4 w-4 ${isLoadingQueuePosition ? "animate-spin" : ""}`}
+                                  />
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="border-border-card bg-tertiary-bg mt-4 rounded-lg border p-4">
+                          {isInventoryNotFoundError ? (
                             <>
-                              <p className="text-secondary-text text-sm">
-                                Login to request a scan.
+                              <p className="text-primary-text mb-1 text-sm font-medium">
+                                No saved inventory found for this user.
                               </p>
+                              <p className="text-secondary-text text-sm">
+                                Try searching another username.
+                              </p>
+                              <div className="mt-3 flex items-center justify-center gap-2 text-center">
+                                <p className="text-secondary-text text-xs">
+                                  {isLoadingQueuePosition ? (
+                                    "Checking queue position..."
+                                  ) : queuePosition ? (
+                                    <span className="text-primary-text font-medium">
+                                      Queue Position: #
+                                      {queuePosition.position.toLocaleString()}
+                                    </span>
+                                  ) : (
+                                    queueStatusMessage || "Not in queue"
+                                  )}
+                                </p>
+                                <button
+                                  type="button"
+                                  onClick={fetchQueuePosition}
+                                  disabled={isLoadingQueuePosition}
+                                  aria-label="Refresh queue position"
+                                  className="text-secondary-text hover:text-primary-text cursor-pointer rounded p-0.5 transition-colors hover:bg-white/10 disabled:opacity-50"
+                                >
+                                  <Icon
+                                    icon="material-symbols:refresh"
+                                    className={`h-4 w-4 ${isLoadingQueuePosition ? "animate-spin" : ""}`}
+                                  />
+                                </button>
+                              </div>
                               <Button
                                 type="button"
                                 size="sm"
+                                variant="secondary"
                                 className="mt-2"
                                 onClick={() => {
-                                  if (isAuthenticated) {
-                                    setLoginModal({
-                                      open: true,
-                                      tab: "roblox",
-                                    });
-                                  } else {
-                                    setLoginModal({ open: true });
-                                  }
+                                  setSearchId("");
+                                  window.scrollTo({
+                                    top: 0,
+                                    behavior: "smooth",
+                                  });
+                                  const searchInput = document.getElementById(
+                                    "searchInput",
+                                  ) as HTMLInputElement | null;
+                                  searchInput?.focus();
                                 }}
                               >
-                                Login
+                                Search Another User
                               </Button>
+                              {isAuthenticated && user?.roblox_id && (
+                                <div className="border-border-card mt-4 border-t pt-4">
+                                  <p className="text-primary-text mb-1 text-sm font-medium">
+                                    Looking for your inventory?
+                                  </p>
+                                  <Button asChild size="sm" className="mt-2">
+                                    <Link
+                                      href={`/inventories/${user.roblox_id}`}
+                                      prefetch={false}
+                                    >
+                                      View My Inventory
+                                    </Link>
+                                  </Button>
+                                </div>
+                              )}
+                            </>
+                          ) : (
+                            <>
+                              <p className="text-primary-text mb-1 text-sm font-medium">
+                                Looking for your inventory?
+                              </p>
+                              {isAuthenticated && user?.roblox_id ? (
+                                <Button asChild size="sm" className="mt-2">
+                                  <Link
+                                    href={`/inventories/${user.roblox_id}`}
+                                    prefetch={false}
+                                  >
+                                    View My Inventory
+                                  </Link>
+                                </Button>
+                              ) : (
+                                <>
+                                  <p className="text-secondary-text text-sm">
+                                    Login to request a scan.
+                                  </p>
+                                  <Button
+                                    type="button"
+                                    size="sm"
+                                    className="mt-2"
+                                    onClick={() => {
+                                      if (isAuthenticated) {
+                                        setLoginModal({
+                                          open: true,
+                                          tab: "roblox",
+                                        });
+                                      } else {
+                                        setLoginModal({ open: true });
+                                      }
+                                    }}
+                                  >
+                                    Login
+                                  </Button>
+                                </>
+                              )}
                             </>
                           )}
-                        </>
+                        </div>
                       )}
                     </div>
-                  )}
-                </div>
-              </div>
+                  </div>
+                )}
+              </>
             )}
 
             {/* User Stats and Inventory Items - Only show when no error and has data */}

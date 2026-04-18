@@ -20,6 +20,7 @@ interface DupeFinderResultsProps {
   robloxUsers: Record<string, RobloxUser>;
   userConnectionData: UserConnectionData | null;
   items: Item[]; // Items data passed from server
+  originalSearchTerm?: string;
 }
 
 export default function DupeFinderResults({
@@ -28,6 +29,7 @@ export default function DupeFinderResults({
   robloxUsers,
   userConnectionData,
   items,
+  originalSearchTerm,
 }: DupeFinderResultsProps) {
   // State management
   const [searchTerm, setSearchTerm] = useState("");
@@ -320,7 +322,7 @@ export default function DupeFinderResults({
   return (
     <div className="space-y-6">
       {/* Search Form */}
-      <DupeSearchInput initialValue={robloxId} />
+      <DupeSearchInput initialValue={originalSearchTerm || robloxId} />
 
       {/* User Info */}
       <DupeUserInfo

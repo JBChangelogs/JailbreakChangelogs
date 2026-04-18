@@ -3,9 +3,6 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { RobloxUser } from "@/types";
-import { useUsernameToId } from "@/hooks/useUsernameToId";
-import { toast } from "sonner";
-import { MaxStreamsError } from "@/utils/api";
 import OGFinderDataStreamer from "./OGFinderDataStreamer";
 import { Icon } from "@/components/ui/IconWrapper";
 import OGNotificationSheet from "./OGNotificationSheet";
@@ -57,49 +54,22 @@ export default function OGFinderClient({
   const [isSearching, setIsSearching] = useState(false);
   const [showNotificationSheet, setShowNotificationSheet] = useState(false);
   const router = useRouter();
-  const { getId } = useUsernameToId();
 
   // Compute loading state during render
   const isLoading = externalIsLoading || isSearching;
 
-  const handleSearch = async (e: React.FormEvent) => {
+  const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     const input = searchId.trim();
     if (!input) return;
 
-    setIsSearching(true);
-    try {
-      const isNumeric = /^\d+$/.test(input);
-      const id = isNumeric ? input : await getId(input);
-
-      // Track OG search with search term
-      if (typeof window !== "undefined" && window.umami) {
-        window.umami.track("OG Search", { searchTerm: input });
-      }
-
-      router.push(`/og/${id ?? input}`);
-    } catch (error) {
-      console.error("Error searching for user:", error);
-
-      // Check for max streams error - this is a temporary server issue
-      if (error instanceof MaxStreamsError) {
-        toast.error(
-          "Unable to search by username at this time due to a temporary server issue. Please use the user's Roblox ID to search instead.",
-          {
-            duration: 6000,
-          },
-        );
-      } else {
-        toast.error(
-          "Failed to find user. Please check the spelling and try again, or try searching by Roblox ID instead.",
-          {
-            duration: 5000,
-          },
-        );
-      }
-    } finally {
-      setIsSearching(false);
+    // Track OG search with search term
+    if (typeof window !== "undefined" && window.umami) {
+      window.umami.track("OG Search", { searchTerm: input });
     }
+
+    setIsSearching(true);
+    router.push(`/og/${input}`);
   };
 
   return (
