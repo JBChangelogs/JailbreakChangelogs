@@ -49,7 +49,7 @@ export default async function DupeFinderPage() {
 
         <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
           <h1 className="text-primary-text text-3xl font-bold">Dupe Finder</h1>
-          <Button asChild variant="outline" size="sm">
+          <Button asChild variant="default" size="sm">
             <Link href="/values" prefetch={false}>
               <Icon icon="heroicons:list-bullet" className="mr-2" />
               Values List

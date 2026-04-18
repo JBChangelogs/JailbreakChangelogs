@@ -76,7 +76,7 @@ export default function ConnectedBotsPolling() {
 
   if (error) {
     return (
-      <div className="mt-6">
+      <div>
         <div className="mb-4 flex items-center gap-3">
           <h2 className="text-secondary-text text-xl font-bold">
             Connected Bots
@@ -103,7 +103,7 @@ export default function ConnectedBotsPolling() {
 
   if (isLoading && !botsData) {
     return (
-      <div className="mt-6">
+      <div>
         <div className="mb-4 flex items-center gap-3">
           <h2 className="text-secondary-text text-xl font-bold">
             Connected Bots
@@ -147,7 +147,7 @@ export default function ConnectedBotsPolling() {
 
   if (allBots.length === 0) {
     return (
-      <div className="mt-6">
+      <div>
         <div className="mb-4 flex items-center gap-3">
           <h2 className="text-secondary-text text-xl font-bold">
             Connected Bots
@@ -194,7 +194,7 @@ export default function ConnectedBotsPolling() {
   }
 
   return (
-    <div className="mt-6">
+    <div>
       <div className="mb-0 flex items-center gap-3">
         <h2 className="text-secondary-text text-xl font-bold">
           Connected Bots
