@@ -393,7 +393,8 @@ export function useRealtimeNotificationsWebSocket(
 
             if (payload.action === "login") {
               if (payload.message) {
-                toast.success(payload.message);
+                const msg = payload.message;
+                setTimeout(() => toast.success(msg), 100);
               }
               return;
             }
