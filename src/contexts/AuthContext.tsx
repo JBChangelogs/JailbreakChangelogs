@@ -10,15 +10,18 @@ import React, {
   useRef,
 } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { AuthState, AuthResponse, UserData } from "@/types/auth";
+import { AuthState, UserData } from "@/types/auth";
 import {
   validateAuth,
   logout as authLogout,
-  handleTokenAuth,
-  type TokenAuthFlow,
   trackLogoutSource,
 } from "@/utils/auth";
-import { safeGetJSON } from "@/utils/safeStorage";
+import {
+  safeGetJSON,
+  safeSetJSON,
+  safeLocalStorage,
+} from "@/utils/safeStorage";
+import { PUBLIC_API_URL } from "@/utils/api";
 import { toast } from "sonner";
 import { useRealtimeNotificationsWebSocket } from "@/hooks/useRealtimeNotificationsWebSocket";
 
@@ -38,7 +41,6 @@ const trackUserStatus = (isAuthenticated: boolean, action?: string) => {
 };
 
 interface AuthContextType extends AuthState {
-  login: (token: string) => Promise<AuthResponse>;
   logout: () => Promise<void>;
   loginModalTab: "discord" | "roblox";
   setLoginModal: (config: {
@@ -52,6 +54,12 @@ interface AuthContextType extends AuthState {
 export const AuthContext = createContext<AuthContextType | undefined>(
   undefined,
 );
+
+function getJbclToken(): string | null {
+  if (typeof document === "undefined") return null;
+  const match = document.cookie.match(/(?:^|;\s*)jbcl_token=([^;]+)/);
+  return match ? decodeURIComponent(match[1]) : null;
+}
 
 interface AuthProviderProps {
   children: ReactNode;
@@ -71,15 +79,46 @@ export function AuthProvider({ children }: AuthProviderProps) {
     "discord",
   );
   const isUserActiveRef = useRef(true);
-  const tokenAuthProcessedRef = useRef(false);
 
   useRealtimeNotificationsWebSocket(
-    authState.isAuthenticated && !authState.isLoading,
+    (authState.isAuthenticated && !authState.isLoading) || !!getJbclToken(),
     pathname,
   );
 
   const initializeAuth = useCallback(async () => {
     try {
+      // Fast path: non-HttpOnly cookie is client-readable — fetch user directly
+      const token = getJbclToken();
+      if (token && !safeGetJSON("user", null)) {
+        try {
+          const response = await fetch(
+            `${PUBLIC_API_URL}/users/get/token?token=${encodeURIComponent(token)}`,
+            { cache: "no-store" },
+          );
+          if (response.ok) {
+            const user = (await response.json()) as UserData;
+            safeSetJSON("user", user);
+            safeLocalStorage.setItem("userid", user.id);
+            if (user.avatar) {
+              safeLocalStorage.setItem(
+                "avatar",
+                `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}?size=4096`,
+              );
+            }
+            setAuthState({
+              isAuthenticated: true,
+              user,
+              isLoading: false,
+              error: null,
+            });
+            trackUserStatus(true);
+            return;
+          }
+        } catch {
+          // fall through to existing flow
+        }
+      }
+
       // Check if we have user data in localStorage first
       const userData = safeGetJSON("user", null);
       if (userData) {
@@ -278,111 +317,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   }, [authState.isAuthenticated, authState.isLoading]);
 
-  const handleLogin = useCallback(
-    async (
-      token: string,
-      flow: TokenAuthFlow = "login",
-    ): Promise<AuthResponse> => {
-      try {
-        setAuthState((prev) => ({ ...prev, isLoading: true }));
-        const response = await handleTokenAuth(token, flow);
-
-        if (response.success && response.data) {
-          setAuthState({
-            isAuthenticated: true,
-            user: response.data,
-            isLoading: false,
-            error: null,
-          });
-
-          // Track user status in Clarity
-          trackUserStatus(true);
-        } else {
-          setAuthState({
-            isAuthenticated: false,
-            user: null,
-            isLoading: false,
-            error: response.error || "Login failed",
-          });
-
-          // Track user status in Clarity
-          trackUserStatus(false);
-        }
-
-        return response;
-      } catch (err) {
-        console.error("Login error:", err);
-        const errorMessage =
-          err instanceof Error ? err.message : "Login failed";
-        setAuthState({
-          isAuthenticated: false,
-          user: null,
-          isLoading: false,
-          error: errorMessage,
-        });
-
-        // Track user status in Clarity
-        trackUserStatus(false);
-        return { success: false, error: errorMessage };
-      }
-    },
-    [],
-  );
-
-  const clearTokenFromUrl = useCallback(() => {
-    if (typeof window === "undefined") return;
-
-    const currentUrl = new URL(window.location.href);
-    const hasToken = currentUrl.searchParams.has("token");
-    const hasAuthFlow = currentUrl.searchParams.has("auth_flow");
-    if (!hasToken && !hasAuthFlow) return;
-
-    if (hasToken) {
-      currentUrl.searchParams.delete("token");
-    }
-    if (hasAuthFlow) {
-      currentUrl.searchParams.delete("auth_flow");
-    }
-    window.history.replaceState({}, "", currentUrl.toString());
-  }, []);
-
   useEffect(() => {
-    if (typeof window === "undefined" || tokenAuthProcessedRef.current) {
-      return;
-    }
-
-    const token = new URL(window.location.href).searchParams.get("token");
-    if (!token) {
-      return;
-    }
-    const authFlowParam = new URL(window.location.href).searchParams.get(
-      "auth_flow",
-    );
-    const flow: TokenAuthFlow =
-      authFlowParam === "roblox-link" ? "roblox-link" : "login";
-
-    tokenAuthProcessedRef.current = true;
-    const tokenLoginTimeout = setTimeout(() => {
-      handleLogin(token, flow)
-        .then((response) => {
-          clearTokenFromUrl();
-          if (response.success) {
-            setShowLoginModal(false);
-          } else {
-            tokenAuthProcessedRef.current = false;
-          }
-        })
-        .catch((error) => {
-          console.error("Authentication error:", error);
-          clearTokenFromUrl();
-          tokenAuthProcessedRef.current = false;
-        });
-    }, 0);
-
-    return () => {
-      clearTimeout(tokenLoginTimeout);
-    };
-  }, [handleLogin, clearTokenFromUrl]);
+    if (typeof window === "undefined") return;
+    const url = new URL(window.location.href);
+    if (!url.searchParams.has("token")) return;
+    url.searchParams.delete("token");
+    window.history.replaceState({}, "", url.toString());
+  }, []);
 
   const handleLogout = async () => {
     try {
@@ -416,7 +357,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const contextValue: AuthContextType = {
     ...authState,
-    login: handleLogin,
     logout: handleLogout,
     loginModalTab,
     setLoginModal,
