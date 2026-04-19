@@ -1,8 +1,6 @@
 import { toast } from "sonner";
-import { UserData, AuthResponse } from "../types/auth";
+import { UserData } from "../types/auth";
 import { safeLocalStorage, safeSetJSON } from "./safeStorage";
-
-export type TokenAuthFlow = "login" | "roblox-link";
 
 let lastLogoutSource: string = "Unknown";
 let activeLogoutToast: string | number | null = null;
@@ -278,92 +276,6 @@ async function performAuthValidation(): Promise<boolean> {
     // For other errors, log them but don't log out; keep previous state
     console.error("Auth validation error:", error);
     return true;
-  }
-}
-
-export async function handleTokenAuth(
-  token: string,
-  flow: TokenAuthFlow = "login",
-): Promise<AuthResponse> {
-  const loginPromise = (async () => {
-    // Create AbortController for request cancellation
-    const abortController = new AbortController();
-    const timeoutId = setTimeout(() => abortController.abort(), 15000);
-
-    try {
-      const response = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ token }),
-        signal: abortController.signal,
-      });
-
-      clearTimeout(timeoutId);
-
-      if (!response.ok) {
-        throw new Error("Invalid or expired session token.");
-      }
-
-      const userData: UserData = await response.json();
-
-      // Set local storage
-      safeSetJSON("user", userData);
-      safeLocalStorage.setItem("userid", userData.id);
-
-      // Set avatar if available
-      if (userData.avatar) {
-        const avatarURL = `https://cdn.discordapp.com/avatars/${userData.id}/${userData.avatar}?size=4096`;
-        safeLocalStorage.setItem("avatar", avatarURL);
-      }
-
-      // Dispatch custom event for components to listen to
-      window.dispatchEvent(
-        new CustomEvent("authStateChanged", { detail: userData }),
-      );
-
-      return userData;
-    } catch (error) {
-      clearTimeout(timeoutId);
-      throw error;
-    }
-  })();
-
-  toast.promise(loginPromise, {
-    loading:
-      flow === "roblox-link"
-        ? "Connecting your Roblox account..."
-        : "Logging you in...",
-    success: (userData) =>
-      flow === "roblox-link"
-        ? {
-            message: "Successfully linked Roblox account",
-            description: `Connected to ${userData.roblox_username || "your Roblox account"}.`,
-          }
-        : {
-            message: `Welcome back, ${userData.username}!`,
-            description: "You have successfully signed in to your account.",
-          },
-    error: (error) => ({
-      message: "Login failed",
-      description:
-        error instanceof Error && error.name === "AbortError"
-          ? "The request timed out. Please try again."
-          : error instanceof Error
-            ? error.message
-            : "An unexpected error occurred during login.",
-    }),
-  });
-
-  try {
-    const userData = await loginPromise;
-    return { success: true, data: userData };
-  } catch (error) {
-    console.error("Token authentication error:", error);
-    return {
-      success: false,
-      error:
-        error instanceof Error ? error.message : "Failed to validate token",
-    };
   }
 }
 

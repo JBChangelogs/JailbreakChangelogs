@@ -391,6 +391,13 @@ export function useRealtimeNotificationsWebSocket(
               }
             }
 
+            if (payload.action === "login") {
+              if (payload.message) {
+                toast.success(payload.message);
+              }
+              return;
+            }
+
             if (payload.action === "refresh_trades") {
               window.dispatchEvent(
                 new CustomEvent("realtimeTrades", {
