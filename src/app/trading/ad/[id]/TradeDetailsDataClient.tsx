@@ -132,9 +132,9 @@ export default function TradeDetailsDataClient({
   initialItems = [],
 }: TradeDetailsDataClientProps) {
   const [trade, setTrade] = useState<TradeAd | null>(null);
-  const [status, setStatus] = useState<"loading" | "not_found" | "error">(
-    "loading",
-  );
+  const [status, setStatus] = useState<
+    "loading" | "not_found" | "error" | "unauthorized" | "forbidden"
+  >("loading");
 
   useEffect(() => {
     let isCancelled = false;
@@ -163,6 +163,16 @@ export default function TradeDetailsDataClient({
 
         if (response.status === 404) {
           if (!isCancelled) setStatus("not_found");
+          return;
+        }
+
+        if (response.status === 401) {
+          if (!isCancelled) setStatus("unauthorized");
+          return;
+        }
+
+        if (response.status === 403) {
+          if (!isCancelled) setStatus("forbidden");
           return;
         }
 
@@ -203,17 +213,38 @@ export default function TradeDetailsDataClient({
       return <Loading />;
     }
 
+    const eyebrow =
+      status === "not_found"
+        ? "404 error"
+        : status === "unauthorized"
+          ? "Sign in required"
+          : status === "forbidden"
+            ? "Roblox connection required"
+            : "Trading error";
+
+    const title =
+      status === "not_found"
+        ? "Trade not found"
+        : status === "unauthorized"
+          ? "Sign in to view this trade"
+          : status === "forbidden"
+            ? "Connect your Roblox account"
+            : "Failed to load trade";
+
+    const description =
+      status === "not_found"
+        ? "This trade is unavailable or has expired. Here are some helpful links:"
+        : status === "unauthorized"
+          ? "You need to sign in to view trade ads. Here are some helpful links:"
+          : status === "forbidden"
+            ? "You need to connect your Roblox account to view trade ads. Here are some helpful links:"
+            : "We couldn't load this trade right now. Here are some helpful links:";
+
     return (
       <NotFoundView
-        eyebrow={status === "not_found" ? "404 error" : "Trading error"}
-        title={
-          status === "not_found" ? "Trade not found" : "Failed to load trade"
-        }
-        description={
-          status === "not_found"
-            ? "This trade is unavailable or has expired. Here are some helpful links:"
-            : "We couldn't load this trade right now. Here are some helpful links:"
-        }
+        eyebrow={eyebrow}
+        title={title}
+        description={description}
         homeHref="/trading"
         homeLabel="Back to trading"
       />
