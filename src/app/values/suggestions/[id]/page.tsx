@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
+import { toast } from "sonner";
+import { useAuthContext } from "@/contexts/AuthContext";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import { Icon } from "@/components/ui/IconWrapper";
 import { UserAvatar } from "@/utils/avatar";
@@ -96,11 +98,15 @@ function VoterRow({ v }: { v: { created_at: number; user: SuggestionUser } }) {
 export default function ValueSuggestionDetailPage() {
   const { id } = useParams<{ id: string }>();
   const isMobile = useMediaQuery("(max-width:640px)");
+  const { isAuthenticated, user, setLoginModal } = useAuthContext();
 
   const [suggestion, setSuggestion] = useState<Suggestion | null>(null);
   const [item, setItem] = useState<Item | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [userVote, setUserVote] = useState<"upvote" | "downvote" | null>(null);
+  const [voteCounts, setVoteCounts] = useState({ up: 0, down: 0 });
+  const [voteLoading, setVoteLoading] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -122,6 +128,7 @@ export default function ValueSuggestionDetailPage() {
         }
         const data: Suggestion = await res.json();
         setSuggestion(data);
+        setVoteCounts({ up: data.upvotes, down: data.downvotes });
         try {
           const itemRes = await fetch(
             buildApiUrlWithDevToken(
@@ -141,6 +148,76 @@ export default function ValueSuggestionDetailPage() {
     };
     run();
   }, [id]);
+
+  useEffect(() => {
+    if (!suggestion || !user) return;
+    const hasUp = suggestion.votes.upvotes.some((v) => v.user.id === user.id);
+    const hasDown = suggestion.votes.downvotes.some(
+      (v) => v.user.id === user.id,
+    );
+    setUserVote(hasUp ? "upvote" : hasDown ? "downvote" : null);
+  }, [suggestion, user]);
+
+  const handleVote = async (type: "upvote" | "downvote") => {
+    if (!isAuthenticated) {
+      setLoginModal({ open: true });
+      return;
+    }
+    if (voteLoading) return;
+
+    const removing = userVote === type;
+    const prevVote = userVote;
+    const prevCounts = { ...voteCounts };
+
+    // Optimistic update
+    setUserVote(removing ? null : type);
+    setVoteCounts((prev) => {
+      const next = { ...prev };
+      if (removing) {
+        next[type === "upvote" ? "up" : "down"] -= 1;
+      } else {
+        if (prevVote) next[prevVote === "upvote" ? "up" : "down"] -= 1;
+        next[type === "upvote" ? "up" : "down"] += 1;
+      }
+      return next;
+    });
+
+    setVoteLoading(true);
+    try {
+      const url = buildApiUrlWithDevToken(
+        PUBLIC_API_URL!,
+        `/value-suggestions/${id}/vote`,
+      );
+      const res = await fetch(url, {
+        method: removing ? "DELETE" : "POST",
+        credentials: "include",
+        ...(removing
+          ? {}
+          : {
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ vote_type: type }),
+            }),
+      });
+      if (!res.ok) {
+        setUserVote(prevVote);
+        setVoteCounts(prevCounts);
+        const data = await res.json().catch(() => ({}));
+        if (res.status === 429) {
+          toast.error("You're voting too fast. Please wait a moment.");
+        } else {
+          toast.error(
+            data?.message ?? data?.error ?? "Failed to register vote.",
+          );
+        }
+      }
+    } catch {
+      setUserVote(prevVote);
+      setVoteCounts(prevCounts);
+      toast.error("Failed to register vote.");
+    } finally {
+      setVoteLoading(false);
+    }
+  };
 
   const categoryIcon = item ? getCategoryIcon(item.type) : null;
 
@@ -431,26 +508,44 @@ export default function ValueSuggestionDetailPage() {
                     </h2>
                   </div>
                   <div className="divide-border-card flex divide-x">
-                    <div className="bg-button-success/10 flex flex-1 items-center justify-center gap-2 py-4">
+                    <button
+                      type="button"
+                      onClick={() => handleVote("upvote")}
+                      disabled={voteLoading}
+                      className="bg-button-success/10 hover:bg-button-success/20 flex flex-1 cursor-pointer items-center justify-center gap-2 py-4 transition-colors focus:outline-none disabled:opacity-60"
+                    >
                       <Icon
-                        icon="material-symbols:thumb-up-rounded"
+                        icon={
+                          userVote === "upvote"
+                            ? "material-symbols:thumb-up-rounded"
+                            : "material-symbols:thumb-up-outline-rounded"
+                        }
                         className="text-button-success h-5 w-5"
                         inline
                       />
                       <span className="text-button-success text-xl font-bold">
-                        {suggestion.upvotes}
+                        {voteCounts.up}
                       </span>
-                    </div>
-                    <div className="bg-button-danger/10 flex flex-1 items-center justify-center gap-2 py-4">
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleVote("downvote")}
+                      disabled={voteLoading}
+                      className="bg-button-danger/10 hover:bg-button-danger/20 flex flex-1 cursor-pointer items-center justify-center gap-2 py-4 transition-colors focus:outline-none disabled:opacity-60"
+                    >
                       <Icon
-                        icon="material-symbols:thumb-down-rounded"
+                        icon={
+                          userVote === "downvote"
+                            ? "material-symbols:thumb-down-rounded"
+                            : "material-symbols:thumb-down-outline-rounded"
+                        }
                         className="text-button-danger h-5 w-5"
                         inline
                       />
                       <span className="text-button-danger text-xl font-bold">
-                        {suggestion.downvotes}
+                        {voteCounts.down}
                       </span>
-                    </div>
+                    </button>
                   </div>
                 </div>
               </div>
