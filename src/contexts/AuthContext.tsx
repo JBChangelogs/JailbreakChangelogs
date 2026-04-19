@@ -319,11 +319,22 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   useEffect(() => {
     if (typeof window === "undefined") return;
+    if (window.location.hostname !== "localhost") return;
     const url = new URL(window.location.href);
-    if (!url.searchParams.has("token")) return;
+    const token = url.searchParams.get("token");
+    if (!token) return;
     url.searchParams.delete("token");
     window.history.replaceState({}, "", url.toString());
-  }, []);
+    fetch("/api/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ token }),
+    })
+      .then((res) => {
+        if (res.ok) void initializeAuth();
+      })
+      .catch(console.error);
+  }, [initializeAuth]);
 
   const handleLogout = async () => {
     try {

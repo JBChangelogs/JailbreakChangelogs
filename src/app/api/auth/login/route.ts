@@ -34,7 +34,6 @@ export async function POST(request: Request) {
     const response = NextResponse.json(user, { status: 200 });
     const cookieParts = [
       `jbcl_token=${encodeURIComponent(token)}`,
-      "HttpOnly",
       "SameSite=Lax",
       "Path=/",
       `Max-Age=${60 * 60 * 24 * 30}`,
