@@ -621,14 +621,18 @@ export default function TradeAds({
         },
       );
 
-      if (response.status === 401) {
+      if (response.status === 401 || response.status === 403) {
         let body: unknown = null;
         try {
           body = (await response.json()) as unknown;
         } catch {
           body = null;
         }
-        throw new HttpStatusError("Unauthorized", 401, body);
+        throw new HttpStatusError(
+          response.status === 403 ? "Forbidden" : "Unauthorized",
+          response.status,
+          body,
+        );
       }
 
       if (response.status === 404) {
@@ -745,7 +749,10 @@ export default function TradeAds({
         setTradeAds(response.items);
         didSucceed = true;
       } catch (err) {
-        if (err instanceof HttpStatusError && err.status === 401) {
+        if (
+          err instanceof HttpStatusError &&
+          (err.status === 401 || err.status === 403)
+        ) {
           console.warn("Recent trade ads request unauthorized:", err.body);
           setTradeAds([]);
           setIsRecentTradesUnauthorized(true);
