@@ -394,7 +394,7 @@ export function useRealtimeNotificationsWebSocket(
             if (payload.action === "login") {
               if (payload.message) {
                 const msg = payload.message;
-                setTimeout(() => toast.success(msg), 100);
+                setTimeout(() => toast.success(msg), 500);
               }
               return;
             }
