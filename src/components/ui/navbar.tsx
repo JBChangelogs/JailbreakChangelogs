@@ -426,7 +426,8 @@ export const NavbarModern = ({
     pathname === "/values" ||
     pathname.startsWith("/item") ||
     pathname.startsWith("/trading") ||
-    pathname.startsWith("/values/changelogs");
+    pathname.startsWith("/values/changelogs") ||
+    pathname.startsWith("/values/suggestions");
 
   const handleLogout = async () => {
     try {
@@ -625,6 +626,12 @@ export const NavbarModern = ({
                       icon="material-symbols:calculate-rounded"
                       title="Value Calculator"
                       description="Compare items and get fair trade valuations"
+                    />
+                    <NavDropdownItem
+                      href="/values/suggestions"
+                      icon="material-symbols:lightbulb-outline-rounded"
+                      title="Value Suggestions"
+                      description="Submit and vote on community value change suggestions"
                     />
                     <NavDropdownItem
                       href="/trading"

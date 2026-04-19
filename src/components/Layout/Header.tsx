@@ -233,7 +233,8 @@ export default function Header() {
     pathname === "/values" ||
     pathname.startsWith("/item") ||
     pathname.startsWith("/trading") ||
-    pathname.startsWith("/values/changelogs");
+    pathname.startsWith("/values/changelogs") ||
+    pathname.startsWith("/values/suggestions");
   const [mobileOpen, setMobileOpen] = useState(false);
   const [utmModalOpen, setUtmModalOpen] = useState(false);
   const [notificationMenuOpen, setNotificationMenuOpen] = useState(false);
@@ -685,6 +686,12 @@ export default function Header() {
             href="/values/calculator"
             icon="material-symbols:calculate-rounded"
             label="Value Calculator"
+            onClick={handleDrawerToggle}
+          />
+          <MobileNavItem
+            href="/values/suggestions"
+            icon="material-symbols:lightbulb-outline-rounded"
+            label="Value Suggestions"
             onClick={handleDrawerToggle}
           />
           <MobileNavItem
