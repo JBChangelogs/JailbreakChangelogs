@@ -45,6 +45,19 @@ export const valueSortGroups: ValueSortGroup[] = [
     ],
   },
   {
+    label: "Circulation",
+    options: [
+      {
+        value: "unique-circulation-desc",
+        label: "Unique Circulation (High to Low)",
+      },
+      {
+        value: "unique-circulation-asc",
+        label: "Unique Circulation (Low to High)",
+      },
+    ],
+  },
+  {
     label: "Last Updated",
     options: [
       { value: "last-updated-desc", label: "Last Updated (Newest to Oldest)" },
