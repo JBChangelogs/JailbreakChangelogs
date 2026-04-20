@@ -782,7 +782,7 @@ export const NavbarModern = ({
                   height: "var(--radix-navigation-menu-viewport-height)",
                   transition: "height 100ms ease",
                   overflow: "hidden",
-                  borderRadius: "16px",
+                  borderRadius: "24px",
                   border: "1px solid var(--color-border-card)",
                   backgroundColor: "var(--color-primary-bg)",
                   backdropFilter: "blur(8px)",
