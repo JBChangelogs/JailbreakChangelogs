@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback, useRef } from "react";
+import DOMPurify from "dompurify";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import { Icon } from "@/components/ui/IconWrapper";
 import { Button } from "@/components/ui/button";
@@ -18,7 +19,6 @@ import {
   getVideoPath,
 } from "@/utils/images";
 import { getCategoryColor, getCategoryIcon } from "@/utils/categoryIcons";
-import { useMediaQuery } from "@mui/material";
 import Image from "next/image";
 import { toast } from "sonner";
 import Link from "next/link";
@@ -30,6 +30,13 @@ import {
   DropdownMenuRadioItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { UserDetailsTooltip } from "@/components/ui/UserDetailsTooltip";
+import type { UserData } from "@/types/auth";
 import type { Item } from "@/types/index";
 
 interface SuggestionLimits {
@@ -104,12 +111,14 @@ const statusColors: Record<string, string> = {
   rejected: "bg-red-500/20 text-primary-text border-red-500/30",
 };
 
+const stripHtml = (raw: string) =>
+  DOMPurify.sanitize(raw, { ALLOWED_TAGS: [], ALLOWED_ATTR: [] });
+
 const badgeBase =
   "inline-flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl";
 
 export default function ValueSuggestionsPage() {
   const { isAuthenticated, user, setLoginModal } = useAuthContext();
-  const isMobile = useMediaQuery("(max-width:640px)");
 
   // Suggestions list state
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
@@ -138,9 +147,6 @@ export default function ValueSuggestionsPage() {
   const [reason, setReason] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [showItemDropdown, setShowItemDropdown] = useState(false);
-  const [expandedReasons, setExpandedReasons] = useState<Set<number>>(
-    new Set(),
-  );
   const itemSearchRef = useRef<HTMLDivElement>(null);
 
   // Per-suggestion voting loading state
@@ -304,8 +310,9 @@ export default function ValueSuggestionsPage() {
 
   const filteredItems = items.filter(
     (item) =>
-      item.name.toLowerCase().includes(itemSearch.toLowerCase()) ||
-      item.type.toLowerCase().includes(itemSearch.toLowerCase()),
+      item.tradable === 1 &&
+      (item.name.toLowerCase().includes(itemSearch.toLowerCase()) ||
+        item.type.toLowerCase().includes(itemSearch.toLowerCase())),
   );
 
   const filteredSuggestions = suggestions.filter((s) => {
@@ -498,15 +505,6 @@ export default function ValueSuggestionsPage() {
   const minChars = limits?.min_characters ?? 350;
   const validFields = limits?.valid_fields ?? ["cash_value", "duped_value"];
 
-  const toggleReason = (id: number) => {
-    setExpandedReasons((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
-  };
-
   return (
     <main className="min-h-screen">
       <div className="container mx-auto mb-8 px-4 sm:px-6">
@@ -537,7 +535,8 @@ export default function ValueSuggestionsPage() {
               {isAuthenticated ? (
                 <Button
                   onClick={openForm}
-                  className="bg-button-info hover:bg-button-info-hover text-form-button-text flex items-center gap-2"
+                  variant={showForm ? "destructive" : "default"}
+                  className={`flex items-center gap-2 ${showForm ? "" : "bg-button-info hover:bg-button-info-hover text-form-button-text"}`}
                 >
                   <Icon
                     icon={
@@ -584,11 +583,32 @@ export default function ValueSuggestionsPage() {
                 </label>
                 {selectedItem ? (
                   <div className="border-border-card bg-tertiary-bg flex items-center justify-between rounded-lg border px-3 py-2.5">
-                    <span className="text-primary-text text-sm">
-                      {selectedItem.name}{" "}
-                      <span className="text-secondary-text">
-                        ({selectedItem.type})
+                    <span className="flex items-center gap-2 text-sm">
+                      <span className="text-primary-text">
+                        {selectedItem.name}
                       </span>
+                      {(() => {
+                        const icon = getCategoryIcon(selectedItem.type);
+                        return (
+                          <span
+                            className={`${badgeBase} text-primary-text`}
+                            style={{
+                              borderColor: getCategoryColor(selectedItem.type),
+                              backgroundColor: `${getCategoryColor(selectedItem.type)}22`,
+                            }}
+                          >
+                            {icon && (
+                              <icon.Icon
+                                className="mr-1 h-3 w-3"
+                                style={{
+                                  color: getCategoryColor(selectedItem.type),
+                                }}
+                              />
+                            )}
+                            {selectedItem.type}
+                          </span>
+                        );
+                      })()}
                     </span>
                     <button
                       type="button"
@@ -642,16 +662,17 @@ export default function ValueSuggestionsPage() {
                               }}
                               className="hover:bg-tertiary-bg flex w-full cursor-pointer items-center gap-2 px-3 py-2 text-left text-sm transition-colors"
                             >
-                              <span className="text-primary-text">
+                              <span className="text-primary-text min-w-0 flex-1 truncate">
                                 {item.name}
                               </span>
                               {(() => {
                                 const icon = getCategoryIcon(item.type);
                                 return (
                                   <span
-                                    className={`${badgeBase} bg-tertiary-bg/40 text-primary-text`}
+                                    className={`${badgeBase} text-primary-text shrink-0`}
                                     style={{
                                       borderColor: getCategoryColor(item.type),
+                                      backgroundColor: `${getCategoryColor(item.type)}22`,
                                     }}
                                   >
                                     {icon && (
@@ -842,7 +863,7 @@ export default function ValueSuggestionsPage() {
         {!loadingSuggestions && !suggestionsError && suggestions.length > 0 && (
           <div className="mb-4 flex flex-col gap-4 sm:flex-row">
             {/* Search */}
-            <div className="relative flex-1">
+            <div className="relative w-full sm:flex-1">
               <input
                 type="text"
                 placeholder="Search by item name..."
@@ -865,98 +886,99 @@ export default function ValueSuggestionsPage() {
               )}
             </div>
 
-            {/* Item type filter */}
-            <div className="sm:w-48">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <button
-                    type="button"
-                    className="border-border-card bg-secondary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus flex h-14 w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all duration-300 focus:ring-1 focus:outline-none"
-                  >
-                    <span className="truncate">
-                      {typeFilter === "All" ? "All Types" : typeFilter}
-                    </span>
-                    <Icon
-                      icon="heroicons:chevron-down"
-                      className="text-secondary-text h-5 w-5 shrink-0"
-                      inline
-                    />
-                  </button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent
-                  align="start"
-                  className="border-border-card bg-secondary-bg text-primary-text scrollbar-thin max-h-80 w-(--radix-popper-anchor-width) min-w-(--radix-popper-anchor-width) overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
-                >
-                  <DropdownMenuRadioGroup
-                    value={typeFilter}
-                    onValueChange={setTypeFilter}
-                  >
-                    <DropdownMenuRadioItem
-                      value="All"
-                      className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
+            {/* Item type + field filters — grid so they're side by side on mobile too */}
+            <div className="grid grid-cols-2 gap-4 sm:flex sm:gap-4">
+              <div className="sm:w-48">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button
+                      type="button"
+                      className="border-border-card bg-secondary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus flex h-14 w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all duration-300 focus:ring-1 focus:outline-none"
                     >
-                      All Types
-                    </DropdownMenuRadioItem>
-                    {suggestionItemTypes.map((type) => (
+                      <span className="truncate">
+                        {typeFilter === "All" ? "All Types" : typeFilter}
+                      </span>
+                      <Icon
+                        icon="heroicons:chevron-down"
+                        className="text-secondary-text h-5 w-5 shrink-0"
+                        inline
+                      />
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent
+                    align="start"
+                    className="border-border-card bg-secondary-bg text-primary-text scrollbar-thin max-h-80 w-(--radix-popper-anchor-width) min-w-(--radix-popper-anchor-width) overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
+                  >
+                    <DropdownMenuRadioGroup
+                      value={typeFilter}
+                      onValueChange={setTypeFilter}
+                    >
                       <DropdownMenuRadioItem
-                        key={type}
-                        value={type}
+                        value="All"
                         className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
                       >
-                        {type}
+                        All Types
                       </DropdownMenuRadioItem>
-                    ))}
-                  </DropdownMenuRadioGroup>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
+                      {suggestionItemTypes.map((type) => (
+                        <DropdownMenuRadioItem
+                          key={type}
+                          value={type}
+                          className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
+                        >
+                          {type}
+                        </DropdownMenuRadioItem>
+                      ))}
+                    </DropdownMenuRadioGroup>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
 
-            {/* Field filter */}
-            <div className="sm:w-48">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <button
-                    type="button"
-                    className="border-border-card bg-secondary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus flex h-14 w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all duration-300 focus:ring-1 focus:outline-none"
-                  >
-                    <span className="truncate">
-                      {fieldFilter === "All"
-                        ? "All Fields"
-                        : fieldLabel(fieldFilter)}
-                    </span>
-                    <Icon
-                      icon="heroicons:chevron-down"
-                      className="text-secondary-text h-5 w-5 shrink-0"
-                      inline
-                    />
-                  </button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent
-                  align="start"
-                  className="border-border-card bg-secondary-bg text-primary-text scrollbar-thin max-h-80 w-(--radix-popper-anchor-width) min-w-(--radix-popper-anchor-width) overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
-                >
-                  <DropdownMenuRadioGroup
-                    value={fieldFilter}
-                    onValueChange={setFieldFilter}
-                  >
-                    <DropdownMenuRadioItem
-                      value="All"
-                      className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
+              <div className="sm:w-48">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button
+                      type="button"
+                      className="border-border-card bg-secondary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus flex h-14 w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all duration-300 focus:ring-1 focus:outline-none"
                     >
-                      All Fields
-                    </DropdownMenuRadioItem>
-                    {suggestionFields.map((f) => (
+                      <span className="truncate">
+                        {fieldFilter === "All"
+                          ? "All Fields"
+                          : fieldLabel(fieldFilter)}
+                      </span>
+                      <Icon
+                        icon="heroicons:chevron-down"
+                        className="text-secondary-text h-5 w-5 shrink-0"
+                        inline
+                      />
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent
+                    align="start"
+                    className="border-border-card bg-secondary-bg text-primary-text scrollbar-thin max-h-80 w-(--radix-popper-anchor-width) min-w-(--radix-popper-anchor-width) overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
+                  >
+                    <DropdownMenuRadioGroup
+                      value={fieldFilter}
+                      onValueChange={setFieldFilter}
+                    >
                       <DropdownMenuRadioItem
-                        key={f}
-                        value={f}
+                        value="All"
                         className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
                       >
-                        {fieldLabel(f)}
+                        All Fields
                       </DropdownMenuRadioItem>
-                    ))}
-                  </DropdownMenuRadioGroup>
-                </DropdownMenuContent>
-              </DropdownMenu>
+                      {suggestionFields.map((f) => (
+                        <DropdownMenuRadioItem
+                          key={f}
+                          value={f}
+                          className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
+                        >
+                          {fieldLabel(f)}
+                        </DropdownMenuRadioItem>
+                      ))}
+                    </DropdownMenuRadioGroup>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
             </div>
           </div>
         )}
@@ -998,17 +1020,16 @@ export default function ValueSuggestionsPage() {
             </p>
           </div>
         ) : (
-          <div className="flex flex-col gap-3">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {filteredSuggestions.map((suggestion) => {
               const item = itemMap.get(suggestion.item_id);
-              const isExpanded = expandedReasons.has(suggestion.id);
-              const reasonTruncated = suggestion.reason.length > 300;
+              const cleanReason = stripHtml(suggestion.reason);
               const categoryIcon = item ? getCategoryIcon(item.type) : null;
 
               return (
                 <div
                   key={suggestion.id}
-                  className="border-border-card bg-secondary-bg group hover:border-border-card/80 relative overflow-hidden rounded-xl border transition-colors"
+                  className="border-border-card bg-secondary-bg group hover:border-border-card/80 relative flex flex-col overflow-hidden rounded-xl border transition-colors"
                 >
                   {/* Full-card link overlay — sits behind all interactive children */}
                   <Link
@@ -1017,266 +1038,257 @@ export default function ValueSuggestionsPage() {
                     className="absolute inset-0 z-0"
                     aria-label={`View suggestion #${suggestion.id}`}
                   />
-                  <div className="flex flex-col sm:flex-row">
-                    {/* Left column — image + votes */}
-                    <div className="flex shrink-0 flex-row sm:w-48 sm:flex-col">
-                      {/* Image */}
-                      <div
-                        className="bg-tertiary-bg relative w-36 shrink-0 overflow-hidden sm:w-full sm:rounded-none"
-                        style={{ aspectRatio: "16/9" }}
-                      >
-                        {item && isVideoItem(item.name) ? (
-                          <video
-                            src={getVideoPath(item.type, item.name)}
-                            className="h-full w-full object-cover"
-                            muted
-                            loop
-                          />
-                        ) : (
-                          <Image
-                            src={
-                              item
-                                ? getItemImagePath(item.type, item.name, true)
-                                : "/placeholder.png"
-                            }
-                            alt={item?.name ?? `Item #${suggestion.item_id}`}
-                            fill
-                            className="object-cover"
-                            onError={handleImageError}
-                          />
-                        )}
-                      </div>
 
-                      {/* Votes — sit below image on desktop, beside it on mobile */}
-                      {(() => {
-                        const userUpvoted = suggestion.votes.upvotes.some(
-                          (v) => v.user.id === user?.id,
-                        );
-                        const userDownvoted = suggestion.votes.downvotes.some(
-                          (v) => v.user.id === user?.id,
-                        );
-                        const isVoting = votingIds.has(suggestion.id);
-                        const hasVoters =
-                          suggestion.votes.upvotes.length > 0 ||
-                          suggestion.votes.downvotes.length > 0;
-                        return (
-                          <div className="border-border-card relative z-10 flex flex-1 flex-col sm:border-t">
-                            <div className="flex flex-1 items-stretch">
-                              <button
-                                type="button"
-                                onClick={(e) =>
-                                  handleVote(suggestion, "upvote", e)
-                                }
-                                disabled={isVoting}
-                                className="bg-button-success/10 hover:bg-button-success/20 flex flex-1 cursor-pointer items-center justify-center gap-1.5 py-2.5 transition-colors focus:outline-none disabled:opacity-60"
-                              >
-                                <Icon
-                                  icon={
-                                    userUpvoted
-                                      ? "material-symbols:thumb-up-rounded"
-                                      : "material-symbols:thumb-up-outline-rounded"
-                                  }
-                                  className="text-button-success h-4 w-4"
-                                  inline
-                                />
-                                <span className="text-button-success font-bold">
-                                  {suggestion.upvotes}
-                                </span>
-                              </button>
-                              <div className="border-border-card border-l" />
-                              <button
-                                type="button"
-                                onClick={(e) =>
-                                  handleVote(suggestion, "downvote", e)
-                                }
-                                disabled={isVoting}
-                                className="bg-button-danger/10 hover:bg-button-danger/20 flex flex-1 cursor-pointer items-center justify-center gap-1.5 py-2.5 transition-colors focus:outline-none disabled:opacity-60"
-                              >
-                                <Icon
-                                  icon={
-                                    userDownvoted
-                                      ? "material-symbols:thumb-down-rounded"
-                                      : "material-symbols:thumb-down-outline-rounded"
-                                  }
-                                  className="text-button-danger h-4 w-4"
-                                  inline
-                                />
-                                <span className="text-button-danger font-bold">
-                                  {suggestion.downvotes}
-                                </span>
-                              </button>
-                            </div>
-                            {hasVoters && (
-                              <button
-                                type="button"
-                                onClick={(e) =>
-                                  openVotersModal(suggestion, "up", e)
-                                }
-                                className="border-border-card bg-tertiary-bg text-secondary-text hover:bg-quaternary-bg hover:text-primary-text flex w-full cursor-pointer items-center justify-center gap-1.5 border-t py-1.5 text-xs transition-colors focus:outline-none"
-                              >
-                                <Icon
-                                  icon="material-symbols:group-outline-rounded"
-                                  className="h-3.5 w-3.5"
-                                  inline
-                                />
-                                View voters
-                              </button>
-                            )}
-                          </div>
-                        );
-                      })()}
-                    </div>
+                  {/* Image */}
+                  <Link
+                    href={`/values/suggestions/${suggestion.id}`}
+                    prefetch={false}
+                    className="bg-tertiary-bg relative block w-full overflow-hidden"
+                    style={{ aspectRatio: "16/9" }}
+                    tabIndex={-1}
+                    aria-hidden="true"
+                  >
+                    {item && isVideoItem(item.name) ? (
+                      <video
+                        src={getVideoPath(item.type, item.name)}
+                        className="h-full w-full object-cover"
+                        muted
+                        loop
+                      />
+                    ) : (
+                      <Image
+                        src={
+                          item
+                            ? getItemImagePath(item.type, item.name, true)
+                            : "/placeholder.png"
+                        }
+                        alt={item?.name ?? `Item #${suggestion.item_id}`}
+                        fill
+                        className="object-cover"
+                        onError={handleImageError}
+                      />
+                    )}
+                  </Link>
 
-                    {/* Right column — all content */}
-                    <div className="flex min-w-0 flex-1 flex-col gap-3 p-4">
-                      {/* Item name + badges row */}
-                      <div className="flex flex-wrap items-start justify-between gap-2">
-                        <div className="relative z-10 min-w-0">
-                          {item ? (
-                            <Link
-                              href={`/item/${encodeURIComponent(item.type)}/${encodeURIComponent(item.name)}`}
-                              prefetch={false}
-                              className="text-primary-text hover:text-link text-base font-bold wrap-break-word whitespace-normal transition-colors"
-                            >
-                              {item.name}
-                            </Link>
-                          ) : (
-                            <span className="text-primary-text text-base font-bold">
-                              Item #{suggestion.item_id}
-                            </span>
-                          )}
-                          <div className="mt-1.5 flex flex-wrap gap-1.5">
-                            {item && (
-                              <span
-                                className={`${badgeBase} bg-tertiary-bg/40 text-primary-text`}
-                                style={{
-                                  borderColor: getCategoryColor(item.type),
-                                }}
-                              >
-                                {categoryIcon && (
-                                  <categoryIcon.Icon
-                                    className="mr-1.5 h-3 w-3"
-                                    style={{
-                                      color: getCategoryColor(item.type),
-                                    }}
-                                  />
-                                )}
-                                {item.type}
-                              </span>
-                            )}
-                            <span
-                              className={`${badgeBase} border-border-card bg-tertiary-bg/40 text-primary-text`}
-                            >
-                              {fieldLabel(suggestion.field)}
-                            </span>
-                            <span
-                              className={`${badgeBase} capitalize ${
-                                statusColors[suggestion.status] ??
-                                "border-border-card bg-tertiary-bg/40 text-secondary-text"
-                              }`}
-                            >
-                              {suggestion.status}
-                            </span>
-                          </div>
-                        </div>
-                        {/* Arrow indicator — signals the card is clickable */}
-                        <Icon
-                          icon="material-symbols:arrow-forward-rounded"
-                          className="text-tertiary-text group-hover:text-link relative z-10 mt-0.5 h-4 w-4 shrink-0 transition-colors"
-                          inline
-                        />
-                      </div>
-
-                      {/* Value comparison — colored panels */}
-                      <div className="grid grid-cols-2 gap-2">
-                        <div className="min-w-0 p-3">
-                          <div className="text-button-danger mb-1 flex items-center gap-1.5 text-xs font-semibold tracking-wide uppercase">
-                            <Icon
-                              icon="mdi:minus-circle"
-                              className="h-3.5 w-3.5"
-                              inline
-                            />
-                            Old
-                          </div>
-                          <div
-                            className="text-secondary-text text-lg font-bold line-through"
-                            style={{
-                              wordBreak: "normal",
-                              overflowWrap: "anywhere",
-                            }}
-                          >
-                            {isMobile
-                              ? suggestion.current_value || "N/A"
-                              : formatFullValue(
-                                  suggestion.current_value || "N/A",
-                                )}
-                          </div>
-                        </div>
-                        <div className="min-w-0 p-3">
-                          <div className="text-button-success mb-1 flex items-center gap-1.5 text-xs font-semibold tracking-wide uppercase">
-                            <Icon
-                              icon="mdi:plus-circle"
-                              className="h-3.5 w-3.5"
-                              inline
-                            />
-                            New
-                          </div>
-                          <div
-                            className="text-primary-text text-lg font-bold"
-                            style={{
-                              wordBreak: "normal",
-                              overflowWrap: "anywhere",
-                            }}
-                          >
-                            {isMobile
-                              ? suggestion.suggested_value
-                              : formatFullValue(suggestion.suggested_value)}
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Reason */}
-                      <p className="text-secondary-text overflow-wrap-anywhere text-sm leading-relaxed break-words">
-                        {isExpanded || !reasonTruncated
-                          ? suggestion.reason
-                          : `${suggestion.reason.slice(0, 300)}...`}
-                        {reasonTruncated && (
+                  {/* Votes */}
+                  {(() => {
+                    const userUpvoted = suggestion.votes.upvotes.some(
+                      (v) => v.user.id === user?.id,
+                    );
+                    const userDownvoted = suggestion.votes.downvotes.some(
+                      (v) => v.user.id === user?.id,
+                    );
+                    const isVoting = votingIds.has(suggestion.id);
+                    const hasVoters =
+                      suggestion.votes.upvotes.length > 0 ||
+                      suggestion.votes.downvotes.length > 0;
+                    return (
+                      <div className="border-border-card relative z-10 flex flex-col border-t">
+                        <div className="flex items-stretch">
                           <button
-                            onClick={() => toggleReason(suggestion.id)}
-                            className="text-link hover:text-link-hover relative z-10 ml-1 text-xs transition-colors"
+                            type="button"
+                            onClick={(e) => handleVote(suggestion, "upvote", e)}
+                            disabled={isVoting}
+                            className="bg-button-success/10 hover:bg-button-success/20 flex flex-1 cursor-pointer items-center justify-center gap-1.5 py-2.5 transition-colors focus:outline-none disabled:opacity-60"
                           >
-                            {isExpanded ? "Show less" : "Read more"}
+                            <Icon
+                              icon={
+                                userUpvoted
+                                  ? "material-symbols:thumb-up-rounded"
+                                  : "material-symbols:thumb-up-outline-rounded"
+                              }
+                              className="text-button-success h-4 w-4"
+                              inline
+                            />
+                            <span className="text-button-success font-bold">
+                              {suggestion.upvotes}
+                            </span>
+                          </button>
+                          <div className="border-border-card border-l" />
+                          <button
+                            type="button"
+                            onClick={(e) =>
+                              handleVote(suggestion, "downvote", e)
+                            }
+                            disabled={isVoting}
+                            className="bg-button-danger/10 hover:bg-button-danger/20 flex flex-1 cursor-pointer items-center justify-center gap-1.5 py-2.5 transition-colors focus:outline-none disabled:opacity-60"
+                          >
+                            <Icon
+                              icon={
+                                userDownvoted
+                                  ? "material-symbols:thumb-down-rounded"
+                                  : "material-symbols:thumb-down-outline-rounded"
+                              }
+                              className="text-button-danger h-4 w-4"
+                              inline
+                            />
+                            <span className="text-button-danger font-bold">
+                              {suggestion.downvotes}
+                            </span>
+                          </button>
+                        </div>
+                        {hasVoters && (
+                          <button
+                            type="button"
+                            onClick={(e) =>
+                              openVotersModal(suggestion, "up", e)
+                            }
+                            className="border-border-card bg-tertiary-bg text-secondary-text hover:bg-quaternary-bg hover:text-primary-text flex w-full cursor-pointer items-center justify-center gap-1.5 border-t py-1.5 text-xs transition-colors focus:outline-none"
+                          >
+                            <Icon
+                              icon="material-symbols:group-outline-rounded"
+                              className="h-3.5 w-3.5"
+                              inline
+                            />
+                            View voters
                           </button>
                         )}
-                      </p>
+                      </div>
+                    );
+                  })()}
 
-                      {/* Footer */}
-                      <div className="relative z-10 mt-auto flex items-center gap-2 pt-1">
-                        <span className="text-secondary-text text-xs">
-                          Suggested by
-                        </span>
-                        <UserAvatar
-                          userId={suggestion.user.id}
-                          avatarHash={suggestion.user.avatar}
-                          username={suggestion.user.username}
-                          custom_avatar={
-                            suggestion.user.custom_avatar ?? undefined
-                          }
-                          premiumType={suggestion.user.premiumtype}
-                          settings={suggestion.user.settings}
-                          size={6}
-                          showBadge={false}
-                        />
-                        <Link
-                          href={`/users/${suggestion.user.id}`}
-                          prefetch={false}
-                          className="text-link hover:text-link-hover text-sm font-medium transition-colors"
+                  {/* Card content */}
+                  <div className="flex min-w-0 flex-1 flex-col gap-3 p-4">
+                    {/* Item name + badges */}
+                    <div className="flex flex-wrap items-start justify-between gap-2">
+                      <div className="relative z-10 min-w-0">
+                        {item ? (
+                          <Link
+                            href={`/item/${encodeURIComponent(item.type)}/${encodeURIComponent(item.name)}`}
+                            prefetch={false}
+                            className="text-primary-text hover:text-link text-base font-bold wrap-break-word whitespace-normal transition-colors"
+                          >
+                            {item.name}
+                          </Link>
+                        ) : (
+                          <span className="text-primary-text text-base font-bold">
+                            Item #{suggestion.item_id}
+                          </span>
+                        )}
+                        <div className="mt-1.5 flex flex-wrap gap-1.5">
+                          {item && (
+                            <span
+                              className={`${badgeBase} bg-tertiary-bg/40 text-primary-text`}
+                              style={{
+                                borderColor: getCategoryColor(item.type),
+                                backgroundColor: `${getCategoryColor(item.type)}22`,
+                              }}
+                            >
+                              {categoryIcon && (
+                                <categoryIcon.Icon
+                                  className="mr-1.5 h-3 w-3"
+                                  style={{ color: getCategoryColor(item.type) }}
+                                />
+                              )}
+                              {item.type}
+                            </span>
+                          )}
+                          <span
+                            className={`${badgeBase} border-border-card bg-tertiary-bg/40 text-primary-text`}
+                          >
+                            {fieldLabel(suggestion.field)}
+                          </span>
+                          <span
+                            className={`${badgeBase} capitalize ${
+                              statusColors[suggestion.status] ??
+                              "border-border-card bg-tertiary-bg/40 text-secondary-text"
+                            }`}
+                          >
+                            {suggestion.status}
+                          </span>
+                        </div>
+                      </div>
+                      <Icon
+                        icon="material-symbols:arrow-forward-rounded"
+                        className="text-tertiary-text group-hover:text-link relative z-10 mt-0.5 h-4 w-4 shrink-0 transition-colors"
+                        inline
+                      />
+                    </div>
+
+                    {/* Value comparison */}
+                    <div className="grid grid-cols-2 gap-2">
+                      <div className="min-w-0 p-3">
+                        <div className="text-button-danger mb-1 flex items-center gap-1.5 text-xs font-semibold tracking-wide uppercase">
+                          <Icon
+                            icon="mdi:minus-circle"
+                            className="h-3.5 w-3.5"
+                            inline
+                          />
+                          Old
+                        </div>
+                        <div
+                          className="text-secondary-text line-clamp-2 text-lg font-bold line-through"
+                          style={{
+                            wordBreak: "normal",
+                            overflowWrap: "anywhere",
+                          }}
                         >
-                          {suggestion.user.global_name ||
-                            suggestion.user.username}
-                        </Link>
-                        <span className="text-secondary-text text-xs">·</span>
-                        <span className="text-secondary-text text-xs">
+                          {formatFullValue(
+                            stripHtml(suggestion.current_value || "N/A"),
+                          )}
+                        </div>
+                      </div>
+                      <div className="min-w-0 p-3">
+                        <div className="text-button-success mb-1 flex items-center gap-1.5 text-xs font-semibold tracking-wide uppercase">
+                          <Icon
+                            icon="mdi:plus-circle"
+                            className="h-3.5 w-3.5"
+                            inline
+                          />
+                          New
+                        </div>
+                        <div
+                          className="text-primary-text line-clamp-2 text-lg font-bold"
+                          style={{
+                            wordBreak: "normal",
+                            overflowWrap: "anywhere",
+                          }}
+                        >
+                          {formatFullValue(
+                            stripHtml(suggestion.suggested_value),
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Reason */}
+                    <p className="text-secondary-text overflow-wrap-anywhere line-clamp-4 text-sm leading-relaxed break-words">
+                      {cleanReason}
+                    </p>
+
+                    {/* Footer */}
+                    <div className="relative z-10 mt-auto flex items-center gap-2 pt-1">
+                      <UserAvatar
+                        userId={suggestion.user.id}
+                        avatarHash={suggestion.user.avatar}
+                        username={suggestion.user.username}
+                        custom_avatar={
+                          suggestion.user.custom_avatar ?? undefined
+                        }
+                        premiumType={suggestion.user.premiumtype}
+                        settings={suggestion.user.settings}
+                        size={6}
+                        showBadge={false}
+                      />
+                      <div className="flex min-w-0 flex-col">
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Link
+                              href={`/users/${suggestion.user.id}`}
+                              prefetch={false}
+                              className="text-link hover:text-link-hover truncate text-sm font-medium transition-colors"
+                            >
+                              {suggestion.user.global_name ||
+                                suggestion.user.username}
+                            </Link>
+                          </TooltipTrigger>
+                          <TooltipContent className="max-w-sm min-w-75 p-0">
+                            <UserDetailsTooltip
+                              user={suggestion.user as unknown as UserData}
+                            />
+                          </TooltipContent>
+                        </Tooltip>
+                        <span className="text-tertiary-text text-xs">
                           {formatMessageDate(suggestion.created_at)}
                         </span>
                       </div>

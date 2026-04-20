@@ -662,7 +662,6 @@ export const NavbarModern = ({
                       icon="material-symbols:percent-rounded"
                       title="Hyperchrome Pity"
                       description="Calculate how many robberies you need for the next Hyperchrome level"
-                      className="col-span-2"
                     />
                   </div>
                 </NavigationMenu.Content>
