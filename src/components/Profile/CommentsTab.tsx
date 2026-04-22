@@ -7,6 +7,8 @@ import { Pagination } from "@/components/ui/Pagination";
 import Comment from "../ProfileComments/Comments";
 import { Icon } from "@/components/ui/IconWrapper";
 import { fetchCommentDetails } from "@/app/users/[id]/actions";
+import { PUBLIC_API_URL } from "@/utils/api";
+import { buildApiUrlWithDevToken } from "@/utils/apiDevToken";
 
 interface CommentData {
   id: number;
@@ -54,6 +56,62 @@ export default function CommentsTab({
   const [detailsLoading, setDetailsLoading] = useState(false);
   const commentsPerPage = 6;
 
+  const fetchChangelogDetailsClient = async (
+    commentsForLookup: CommentData[],
+  ): Promise<Record<string, unknown>> => {
+    if (!PUBLIC_API_URL) {
+      throw new Error("Missing PUBLIC_API_URL");
+    }
+    const apiBaseUrl = PUBLIC_API_URL;
+
+    const changelogIds = [
+      ...new Set(
+        commentsForLookup
+          .filter((comment) => comment.item_type.toLowerCase() === "changelog")
+          .map((comment) => comment.item_id.toString()),
+      ),
+    ];
+
+    if (changelogIds.length === 0) {
+      return {};
+    }
+
+    const changelogResponses = await Promise.all(
+      changelogIds.map(async (id) => {
+        try {
+          const response = await fetch(
+            buildApiUrlWithDevToken(apiBaseUrl, `/changelogs/${id}`),
+            {
+              credentials: "include",
+              headers: {
+                "User-Agent": "JailbreakChangelogs-Comments/1.0",
+              },
+            },
+          );
+
+          if (!response.ok) {
+            return null;
+          }
+
+          const data = await response.json();
+          return { id, data };
+        } catch {
+          return null;
+        }
+      }),
+    );
+
+    return changelogResponses.reduce(
+      (acc, entry) => {
+        if (entry) {
+          acc[entry.id] = entry.data;
+        }
+        return acc;
+      },
+      {} as Record<string, unknown>,
+    );
+  };
+
   // Trades are temporary, so exclude trade comments from profile history.
   const profileComments = comments.filter(
     (comment) => comment.item_type.toLowerCase() !== "tradev2",
@@ -88,10 +146,13 @@ export default function CommentsTab({
       const fetchDetails = async () => {
         setDetailsLoading(true);
         try {
-          const details = await fetchCommentDetails(commentsNeedingDetails);
+          const [details, changelogDetails] = await Promise.all([
+            fetchCommentDetails(commentsNeedingDetails),
+            fetchChangelogDetailsClient(commentsNeedingDetails),
+          ]);
           // Merge with shared cache
           const mergedDetails = {
-            changelogs: { ...sharedItemDetails, ...details.changelogs },
+            changelogs: { ...sharedItemDetails, ...changelogDetails },
             items: { ...sharedItemDetails, ...details.items },
             seasons: { ...sharedItemDetails, ...details.seasons },
             trades: { ...sharedItemDetails, ...details.trades },
