@@ -16,9 +16,10 @@ export default function TimelinePage() {
         if (!PUBLIC_API_URL) {
           throw new Error("Missing PUBLIC_API_URL");
         }
+        const apiBaseUrl = PUBLIC_API_URL;
 
         const response = await fetch(
-          buildApiUrlWithDevToken(PUBLIC_API_URL, "/changelogs"),
+          buildApiUrlWithDevToken(apiBaseUrl, "/changelogs"),
           {
             credentials: "include",
             headers: {

@@ -14,9 +14,10 @@ export default function ChangelogsPage() {
         if (!PUBLIC_API_URL) {
           throw new Error("Missing PUBLIC_API_URL");
         }
+        const apiBaseUrl = PUBLIC_API_URL;
 
         const response = await fetch(
-          buildApiUrlWithDevToken(PUBLIC_API_URL, "/changelogs/latest"),
+          buildApiUrlWithDevToken(apiBaseUrl, "/changelogs/latest"),
           {
             credentials: "include",
             headers: {
