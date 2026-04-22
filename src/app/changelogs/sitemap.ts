@@ -5,7 +5,7 @@ const BASE_URL = "https://jailbreakchangelogs.com";
 const ASSETS_URL = "https://assets.jailbreakchangelogs.com";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const response = await fetch(`${BASE_API_URL}/changelogs/list`);
+  const response = await fetch(`${BASE_API_URL}/changelogs`);
   const data = await response.json();
 
   return data.map((changelog: Changelog) => {

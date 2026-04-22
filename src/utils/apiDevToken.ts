@@ -20,7 +20,7 @@ export const buildApiUrlWithDevToken = (
     process.env.NODE_ENV;
   const isDevEnv = envName === "development";
 
-  const injectedToken = process.env.NEXT_PUBLIC_TRADE_DEV_TOKEN;
+  const injectedToken = process.env.NEXT_PUBLIC_DEV_TOKEN;
   const tokenParamName = options?.tokenParamName?.trim() || "token";
 
   const url = new URL(path.replace(/^\//, ""), normalizedBase);
