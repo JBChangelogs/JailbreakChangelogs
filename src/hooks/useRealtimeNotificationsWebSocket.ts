@@ -68,7 +68,7 @@ function getRealtimeWsUrl(): string | null {
   if (!baseUrl) return null;
 
   return buildApiUrlWithDevToken(baseUrl, "/realtime", {
-    tokenParamName: "jbcl_token",
+    tokenParamName: "token",
   });
 }
 

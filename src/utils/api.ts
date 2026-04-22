@@ -631,7 +631,7 @@ export async function fetchItemById(id: string): Promise<ItemDetails | null> {
 }
 
 export async function fetchChangelogList(): Promise<Changelog[]> {
-  const response = await fetch(`${BASE_API_URL}/changelogs/list`, {
+  const response = await fetch(`${BASE_API_URL}/changelogs`, {
     credentials: "include",
     headers: {
       "User-Agent": "JailbreakChangelogs-Changelogs/1.0",
@@ -642,7 +642,7 @@ export async function fetchChangelogList(): Promise<Changelog[]> {
 }
 
 export async function fetchChangelog(id: string): Promise<Changelog> {
-  const response = await fetch(`${BASE_API_URL}/changelogs/get?id=${id}`, {
+  const response = await fetch(`${BASE_API_URL}/changelogs/${id}`, {
     headers: {
       "User-Agent": "JailbreakChangelogs-Changelogs/1.0",
     },
