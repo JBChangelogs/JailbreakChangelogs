@@ -1,6 +1,6 @@
 "use server";
 
-import { fetchChangelog, fetchItemById, BASE_API_URL } from "@/utils/api";
+import { fetchItemById, BASE_API_URL } from "@/utils/api";
 import { fetchWithRetry } from "@/utils/fetchWithRetry";
 
 async function fetchSeason(id: string) {
@@ -120,14 +120,6 @@ export async function fetchCommentDetails(
 ) {
   try {
     // Group comments by type to batch fetch
-    const changelogIds = [
-      ...new Set(
-        comments
-          .filter((c) => c.item_type.toLowerCase() === "changelog")
-          .map((c) => c.item_id.toString()),
-      ),
-    ];
-
     const itemIds = [
       ...new Set(
         comments
@@ -152,25 +144,15 @@ export async function fetchCommentDetails(
       ),
     ];
 
-    // Batch fetch changelogs, items, and seasons (trades don't need details)
-    const [changelogs, items, seasons] = await Promise.all([
-      Promise.all(
-        changelogIds.map((id) => fetchChangelog(id).catch(() => null)),
-      ),
+    // Batch fetch non-changelog details server-side (changelogs are fetched client-side)
+    const [items, seasons] = await Promise.all([
       Promise.all(itemIds.map((id) => fetchItemById(id))),
       Promise.all(seasonIds.map((id) => fetchSeason(id))),
     ]);
 
     // Create lookup maps
-    const changelogMap: Record<string, unknown> = {};
     const itemMap: Record<string, unknown> = {};
     const seasonMap: Record<string, unknown> = {};
-
-    changelogIds.forEach((id, index) => {
-      if (changelogs[index]) {
-        changelogMap[id] = changelogs[index];
-      }
-    });
 
     itemIds.forEach((id, index) => {
       if (items[index]) {
@@ -185,7 +167,7 @@ export async function fetchCommentDetails(
     });
 
     return {
-      changelogs: changelogMap,
+      changelogs: {},
       items: itemMap,
       seasons: seasonMap,
       trades: {}, // Empty since we don't need trade details
