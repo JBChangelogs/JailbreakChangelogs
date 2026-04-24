@@ -6,9 +6,14 @@ import TimelineClient from "@/components/Timeline/TimelineClient";
 import TimelineLoading from "@/app/changelogs/timeline/loading";
 import { Changelog, PUBLIC_API_URL } from "@/utils/api";
 import { buildApiUrlWithDevToken } from "@/utils/apiDevToken";
+import RateLimitView from "@/components/Layout/RateLimitView";
 
 export default function TimelinePage() {
   const [changelogs, setChangelogs] = useState<Changelog[] | null>(null);
+  const [isRateLimited, setIsRateLimited] = useState(false);
+  const [rateLimitRetryAfter, setRateLimitRetryAfter] = useState<number | null>(
+    null,
+  );
 
   useEffect(() => {
     const loadTimeline = async () => {
@@ -29,6 +34,12 @@ export default function TimelinePage() {
         );
 
         if (!response.ok) {
+          if (response.status === 429) {
+            const raw = response.headers.get("retry-after");
+            setIsRateLimited(true);
+            setRateLimitRetryAfter(raw ? parseInt(raw, 10) : null);
+            return;
+          }
           throw new Error("Failed to fetch changelog list");
         }
 
@@ -43,6 +54,10 @@ export default function TimelinePage() {
 
     void loadTimeline();
   }, []);
+
+  if (isRateLimited) {
+    return <RateLimitView retryAfter={rateLimitRetryAfter} />;
+  }
 
   if (!changelogs) {
     return <TimelineLoading />;

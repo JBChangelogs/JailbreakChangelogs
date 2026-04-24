@@ -8,6 +8,7 @@ import { buildApiUrlWithDevToken } from "@/utils/apiDevToken";
 import { UserData } from "@/types/auth";
 import { notFound } from "next/navigation";
 import ChangelogRouteLoading from "@/app/changelogs/[id]/loading";
+import RateLimitView from "@/components/Layout/RateLimitView";
 
 interface ChangelogDetailsPageClientProps {
   changelogId: string;
@@ -25,6 +26,10 @@ export default function ChangelogDetailsPageClient({
     null,
   );
   const [isNotFound, setIsNotFound] = useState(false);
+  const [isRateLimited, setIsRateLimited] = useState(false);
+  const [rateLimitRetryAfter, setRateLimitRetryAfter] = useState<number | null>(
+    null,
+  );
 
   useEffect(() => {
     const loadPageData = async () => {
@@ -45,6 +50,12 @@ export default function ChangelogDetailsPageClient({
         );
 
         if (!listResponse.ok) {
+          if (listResponse.status === 429) {
+            const raw = listResponse.headers.get("retry-after");
+            setIsRateLimited(true);
+            setRateLimitRetryAfter(raw ? parseInt(raw, 10) : null);
+            return;
+          }
           throw new Error("Failed to fetch changelog list");
         }
 
@@ -72,6 +83,10 @@ export default function ChangelogDetailsPageClient({
 
     void loadPageData();
   }, [changelogId]);
+
+  if (isRateLimited) {
+    return <RateLimitView retryAfter={rateLimitRetryAfter} />;
+  }
 
   if (isNotFound) {
     notFound();
