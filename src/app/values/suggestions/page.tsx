@@ -85,11 +85,408 @@ interface SuggestionsResponse {
   size: number;
 }
 
+class RateLimitError extends Error {
+  retryAfter: number;
+  constructor(retryAfter: number) {
+    super("rate limited");
+    this.retryAfter = retryAfter;
+  }
+}
+
 const fieldLabel = (field: string) =>
   field
     .split("_")
     .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
     .join(" ");
+
+interface SuggestionFormProps {
+  items: Item[];
+  loadingItems: boolean;
+  limits: SuggestionLimits | null;
+  loadingLimits: boolean;
+  onSubmit: (payload: {
+    item: number;
+    field: string;
+    value: string;
+    reason: string;
+  }) => Promise<void>;
+  onCancel: () => void;
+}
+
+function SuggestionForm({
+  items,
+  loadingItems,
+  limits,
+  loadingLimits,
+  onSubmit,
+  onCancel: _onCancel,
+}: SuggestionFormProps) {
+  const [itemSearch, setItemSearch] = useState("");
+  const [selectedItem, setSelectedItem] = useState<Item | null>(null);
+  const [field, setField] = useState("cash_value");
+  const [suggestedValue, setSuggestedValue] = useState("");
+  const [suggestedValueError, setSuggestedValueError] = useState<string | null>(
+    null,
+  );
+  const [reason, setReason] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [showItemDropdown, setShowItemDropdown] = useState(false);
+  const [rateLimitUntil, setRateLimitUntil] = useState<number | null>(null);
+  const [rateLimitSecondsLeft, setRateLimitSecondsLeft] = useState(0);
+  const itemSearchRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!rateLimitUntil) return;
+    const tick = () => {
+      const left = Math.ceil((rateLimitUntil - Date.now()) / 1000);
+      if (left <= 0) {
+        setRateLimitUntil(null);
+        setRateLimitSecondsLeft(0);
+      } else {
+        setRateLimitSecondsLeft(left);
+      }
+    };
+    tick();
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
+  }, [rateLimitUntil]);
+
+  const minChars = limits?.min_characters ?? 350;
+  const validFields = limits?.valid_fields ?? ["cash_value", "duped_value"];
+
+  const filteredItems = items.filter(
+    (item) =>
+      item.tradable === 1 &&
+      (item.name.toLowerCase().includes(itemSearch.toLowerCase()) ||
+        item.type.toLowerCase().includes(itemSearch.toLowerCase())),
+  );
+
+  useEffect(() => {
+    const handleClick = (e: MouseEvent) => {
+      if (
+        itemSearchRef.current &&
+        !itemSearchRef.current.contains(e.target as Node)
+      ) {
+        setShowItemDropdown(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, []);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedItem) {
+      toast.error("Please select an item.");
+      return;
+    }
+    if (reason.length < minChars) {
+      toast.error(`Reason must be at least ${minChars} characters.`);
+      return;
+    }
+    setSubmitting(true);
+    try {
+      await onSubmit({
+        item: selectedItem.id,
+        field,
+        value: suggestedValue,
+        reason,
+      });
+      setSelectedItem(null);
+      setItemSearch("");
+      setSuggestedValue("");
+      setSuggestedValueError(null);
+      setReason("");
+      setField("cash_value");
+      setRateLimitUntil(null);
+    } catch (err) {
+      if (err instanceof RateLimitError) {
+        setRateLimitUntil(Date.now() + err.retryAfter * 1000);
+        setRateLimitSecondsLeft(err.retryAfter);
+      }
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <div className="border-border-card bg-secondary-bg mb-6 rounded-lg border p-6">
+      <h2 className="text-primary-text mb-4 text-lg font-semibold">
+        New Value Suggestion
+      </h2>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        {/* Item search */}
+        <div ref={itemSearchRef} className="relative">
+          <label
+            htmlFor="item-search"
+            className="text-secondary-text mb-1.5 block text-sm font-medium"
+          >
+            Item
+          </label>
+          {selectedItem ? (
+            <button
+              type="button"
+              className="border-border-card bg-tertiary-bg flex w-full cursor-pointer items-center justify-between rounded-lg border px-3 py-2.5"
+              onClick={() => {
+                setSelectedItem(null);
+                setItemSearch("");
+              }}
+            >
+              <span className="flex items-center gap-2 text-sm">
+                <span className="text-primary-text">{selectedItem.name}</span>
+                {(() => {
+                  const icon = getCategoryIcon(selectedItem.type);
+                  return (
+                    <span
+                      className={`${badgeBase} text-primary-text`}
+                      style={{
+                        borderColor: getCategoryColor(selectedItem.type),
+                        backgroundColor: `${getCategoryColor(selectedItem.type)}22`,
+                      }}
+                    >
+                      {icon && (
+                        <icon.Icon
+                          className="mr-1 h-3 w-3"
+                          style={{
+                            color: getCategoryColor(selectedItem.type),
+                          }}
+                        />
+                      )}
+                      {selectedItem.type}
+                    </span>
+                  );
+                })()}
+              </span>
+              <Icon
+                icon="material-symbols:close-rounded"
+                className="text-secondary-text h-4 w-4 shrink-0"
+                inline
+              />
+            </button>
+          ) : (
+            <>
+              <input
+                id="item-search"
+                type="text"
+                placeholder={
+                  loadingItems ? "Loading items..." : "Search for an item..."
+                }
+                disabled={loadingItems}
+                value={itemSearch}
+                onChange={(e) => {
+                  setItemSearch(e.target.value);
+                  setShowItemDropdown(true);
+                }}
+                onFocus={() => setShowItemDropdown(true)}
+                className="border-border-card bg-tertiary-bg text-primary-text placeholder:text-tertiary-text focus:border-button-info w-full rounded-lg border px-3 py-2.5 text-sm transition-colors outline-none disabled:opacity-50"
+              />
+              {showItemDropdown && itemSearch.length > 0 && (
+                <div className="border-border-card bg-secondary-bg absolute z-10 mt-1 max-h-60 w-full overflow-y-auto rounded-lg border shadow-lg">
+                  {filteredItems.length === 0 ? (
+                    <p className="text-secondary-text px-3 py-2 text-sm">
+                      No items found
+                    </p>
+                  ) : (
+                    filteredItems.slice(0, 50).map((item) => (
+                      <button
+                        key={item.id}
+                        type="button"
+                        onClick={() => {
+                          setSelectedItem(item);
+                          setItemSearch("");
+                          setShowItemDropdown(false);
+                        }}
+                        className="hover:bg-tertiary-bg flex w-full cursor-pointer items-center gap-2 px-3 py-2 text-left text-sm transition-colors"
+                      >
+                        <span className="text-primary-text min-w-0 flex-1 truncate">
+                          {item.name}
+                        </span>
+                        {(() => {
+                          const icon = getCategoryIcon(item.type);
+                          return (
+                            <span
+                              className={`${badgeBase} text-primary-text shrink-0`}
+                              style={{
+                                borderColor: getCategoryColor(item.type),
+                                backgroundColor: `${getCategoryColor(item.type)}22`,
+                              }}
+                            >
+                              {icon && (
+                                <icon.Icon
+                                  className="mr-1 h-3 w-3"
+                                  style={{
+                                    color: getCategoryColor(item.type),
+                                  }}
+                                />
+                              )}
+                              {item.type}
+                            </span>
+                          );
+                        })()}
+                      </button>
+                    ))
+                  )}
+                </div>
+              )}
+            </>
+          )}
+        </div>
+
+        {/* Field */}
+        <div>
+          <p className="text-secondary-text mb-1.5 block text-sm font-medium">
+            Field
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {loadingLimits ? (
+              <div className="text-secondary-text text-sm">
+                Loading fields...
+              </div>
+            ) : (
+              validFields.map((f) => (
+                <button
+                  key={f}
+                  type="button"
+                  onClick={() => {
+                    if (f === field) return;
+                    setField(f);
+                    setSuggestedValue("");
+                    setSuggestedValueError(null);
+                  }}
+                  className={`cursor-pointer rounded-lg border px-4 py-2 text-sm font-medium transition-colors ${
+                    field === f
+                      ? "bg-button-info border-button-info text-form-button-text"
+                      : "border-border-card bg-tertiary-bg text-secondary-text hover:border-button-info/50"
+                  }`}
+                >
+                  {fieldLabel(f)}
+                </button>
+              ))
+            )}
+          </div>
+        </div>
+
+        {/* Current value display */}
+        {selectedItem && (
+          <div className="border-border-card bg-tertiary-bg/50 rounded-lg border px-3 py-2.5">
+            <span className="text-secondary-text text-xs">
+              Current {fieldLabel(field)}:
+            </span>{" "}
+            <span className="text-primary-text text-sm font-medium">
+              {formatFullValue(
+                (selectedItem[field as keyof Item] as string) || "N/A",
+              )}
+            </span>
+          </div>
+        )}
+
+        {/* Suggested value */}
+        <div>
+          <label className="text-secondary-text mb-1.5 block text-sm font-medium">
+            Suggested {fieldLabel(field)}
+          </label>
+          <input
+            type="text"
+            placeholder={
+              ["cash_value", "duped_value"].includes(field)
+                ? "e.g. 50m, 500m, 500k, 10,000,000"
+                : `Enter suggested ${fieldLabel(field).toLowerCase()}...`
+            }
+            value={suggestedValue}
+            onChange={(e) => {
+              setSuggestedValue(e.target.value);
+              const isNumericField = ["cash_value", "duped_value"].includes(
+                field,
+              );
+              setSuggestedValueError(
+                isNumericField && e.target.value.trim()
+                  ? (parseValueInput(e.target.value).error ?? null)
+                  : null,
+              );
+            }}
+            required
+            className={`border-border-card bg-tertiary-bg text-primary-text placeholder:text-tertiary-text focus:border-button-info w-full rounded-lg border px-3 py-2.5 text-sm transition-colors outline-none ${suggestedValueError ? "border-red-500" : ""}`}
+          />
+          {suggestedValueError && (
+            <p className="mt-1 text-xs text-red-400">{suggestedValueError}</p>
+          )}
+        </div>
+
+        {/* Reason */}
+        <div>
+          <div className="mb-1.5 flex items-center justify-between">
+            <label className="text-secondary-text text-sm font-medium">
+              Reason for Suggested {fieldLabel(field)}
+            </label>
+            <span className="text-secondary-text text-xs">
+              {reason.length} / {minChars} min
+            </span>
+          </div>
+          <textarea
+            placeholder="Explain why this value should change. Include evidence, market observations, or trade history. Must be at least 350 characters."
+            value={reason}
+            onChange={(e) => setReason(e.target.value)}
+            required
+            rows={5}
+            className="border-border-card bg-tertiary-bg text-primary-text placeholder:text-tertiary-text focus:border-button-info w-full resize-none rounded-lg border px-3 py-2.5 text-sm transition-colors outline-none"
+          />
+        </div>
+
+        {rateLimitUntil && rateLimitSecondsLeft > 0 && (
+          <div className="text-primary-text flex items-center gap-2 rounded-lg border border-yellow-500/30 bg-yellow-500/10 px-3 py-2.5 text-sm">
+            <Icon
+              icon="material-symbols:timer-outline-rounded"
+              className="h-4 w-4 shrink-0"
+              inline
+            />
+            You&apos;re submitting too fast. Try again in{" "}
+            <span className="font-semibold tabular-nums">
+              {rateLimitSecondsLeft >= 60
+                ? `${Math.floor(rateLimitSecondsLeft / 60)}m ${rateLimitSecondsLeft % 60}s`
+                : `${rateLimitSecondsLeft}s`}
+            </span>
+          </div>
+        )}
+
+        <div className="flex justify-end">
+          <Button
+            type="submit"
+            disabled={
+              submitting ||
+              !!rateLimitUntil ||
+              !selectedItem ||
+              !suggestedValue.trim() ||
+              (["cash_value", "duped_value"].includes(field) &&
+                !parseValueInput(suggestedValue).valid) ||
+              reason.length < minChars
+            }
+            className="bg-button-info hover:bg-button-info-hover text-form-button-text flex items-center gap-2 disabled:opacity-50"
+          >
+            {submitting ? (
+              <>
+                <Icon
+                  icon="svg-spinners:ring-resize"
+                  className="h-4 w-4"
+                  inline
+                />
+                Submitting...
+              </>
+            ) : (
+              <>
+                <Icon
+                  icon="material-symbols:send-rounded"
+                  className="h-4 w-4"
+                  inline
+                />
+                Submit Suggestion
+              </>
+            )}
+          </Button>
+        </div>
+      </form>
+    </div>
+  );
+}
 
 // Accepts: 10000000 | 10,000,000 | 10.5m | 500k | 1.2b (case-insensitive)
 const VALUE_REGEX = /^(\d{1,3}(,\d{3})*|\d+)(\.\d+)?([kmbt]?)$/i;
@@ -137,17 +534,6 @@ export default function ValueSuggestionsPage() {
   const [showForm, setShowForm] = useState(false);
   const [limits, setLimits] = useState<SuggestionLimits | null>(null);
   const [loadingLimits, setLoadingLimits] = useState(false);
-  const [itemSearch, setItemSearch] = useState("");
-  const [selectedItem, setSelectedItem] = useState<Item | null>(null);
-  const [field, setField] = useState("cash_value");
-  const [suggestedValue, setSuggestedValue] = useState("");
-  const [suggestedValueError, setSuggestedValueError] = useState<string | null>(
-    null,
-  );
-  const [reason, setReason] = useState("");
-  const [submitting, setSubmitting] = useState(false);
-  const [showItemDropdown, setShowItemDropdown] = useState(false);
-  const itemSearchRef = useRef<HTMLDivElement>(null);
 
   // Per-suggestion voting loading state
   const [votingIds, setVotingIds] = useState<Set<number>>(new Set());
@@ -308,13 +694,6 @@ export default function ValueSuggestionsPage() {
   const [typeFilter, setTypeFilter] = useState("All");
   const [fieldFilter, setFieldFilter] = useState("All");
 
-  const filteredItems = items.filter(
-    (item) =>
-      item.tradable === 1 &&
-      (item.name.toLowerCase().includes(itemSearch.toLowerCase()) ||
-        item.type.toLowerCase().includes(itemSearch.toLowerCase())),
-  );
-
   const filteredSuggestions = suggestions.filter((s) => {
     const item = itemMap.get(s.item_id);
     const matchesSearch =
@@ -390,95 +769,52 @@ export default function ValueSuggestionsPage() {
     fetchItems();
   }, []);
 
-  // Close item dropdown on outside click
-  useEffect(() => {
-    const handleClick = (e: MouseEvent) => {
-      if (
-        itemSearchRef.current &&
-        !itemSearchRef.current.contains(e.target as Node)
-      ) {
-        setShowItemDropdown(false);
+  const handleFormSubmit = async (payload: {
+    item: number;
+    field: string;
+    value: string;
+    reason: string;
+  }) => {
+    const url = buildApiUrlWithDevToken(PUBLIC_API_URL!, "/value-suggestions");
+    const res = await fetch(url, {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        item: payload.item,
+        suggestion: {
+          field: payload.field,
+          value: payload.value,
+          reason: payload.reason,
+        },
+      }),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      if (res.status === 429) {
+        toast.error(
+          "You're submitting too fast. Please wait a moment and try again.",
+        );
+        const retryAfter = parseInt(res.headers.get("retry-after") ?? "60", 10);
+        throw new RateLimitError(retryAfter);
       }
-    };
-    document.addEventListener("mousedown", handleClick);
-    return () => document.removeEventListener("mousedown", handleClick);
-  }, []);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!isAuthenticated) {
-      setLoginModal({ open: true });
-      return;
-    }
-    if (!selectedItem) {
-      toast.error("Please select an item.");
-      return;
-    }
-    if (reason.length < minChars) {
-      toast.error(`Reason must be at least ${minChars} characters.`);
-      return;
-    }
-
-    setSubmitting(true);
-    try {
-      const url = buildApiUrlWithDevToken(
-        PUBLIC_API_URL!,
-        "/value-suggestions",
+      toast.error(
+        data?.message ?? data?.error ?? "Failed to submit suggestion.",
       );
-      const res = await fetch(url, {
-        method: "POST",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          item: selectedItem.id,
-          suggestion: {
-            field,
-            value: suggestedValue,
-            reason,
-          },
-        }),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        if (res.status === 429) {
-          toast.error(
-            "You're submitting too fast. Please wait a moment and try again.",
-          );
-        } else {
-          toast.error(
-            data?.message ?? data?.error ?? "Failed to submit suggestion.",
-          );
-        }
-        return;
-      }
-
-      toast.success("Suggestion submitted successfully!");
-      setSelectedItem(null);
-      setItemSearch("");
-      setSuggestedValue("");
-      setSuggestedValueError(null);
-      setReason("");
-      setField("cash_value");
-      setShowForm(false);
-      fetchSuggestions(1);
-      setPage(1);
-    } catch {
-      toast.error("An error occurred while submitting.");
-    } finally {
-      setSubmitting(false);
+      throw new Error("submission failed");
     }
+
+    toast.success("Suggestion submitted successfully!");
+    setShowForm(false);
+    fetchSuggestions(1);
+    setPage(1);
   };
 
   const openForm = async () => {
     if (showForm) {
       setShowForm(false);
-      setSuggestedValue("");
-      setSuggestedValueError(null);
-      setReason("");
-      setSelectedItem(null);
-      setItemSearch("");
       return;
     }
     setShowForm(true);
@@ -493,7 +829,6 @@ export default function ValueSuggestionsPage() {
       if (res.ok) {
         const data: SuggestionLimits = await res.json();
         setLimits(data);
-        if (data.valid_fields.length > 0) setField(data.valid_fields[0]);
       }
     } catch {
       // fall back to defaults if fetch fails
@@ -501,9 +836,6 @@ export default function ValueSuggestionsPage() {
       setLoadingLimits(false);
     }
   };
-
-  const minChars = limits?.min_characters ?? 350;
-  const validFields = limits?.valid_fields ?? ["cash_value", "duped_value"];
 
   return (
     <main className="min-h-screen">
@@ -568,274 +900,14 @@ export default function ValueSuggestionsPage() {
 
         {/* Submit Form */}
         {showForm && isAuthenticated && (
-          <div className="border-border-card bg-secondary-bg mb-6 rounded-lg border p-6">
-            <h2 className="text-primary-text mb-4 text-lg font-semibold">
-              New Value Suggestion
-            </h2>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              {/* Item search */}
-              <div ref={itemSearchRef} className="relative">
-                <label
-                  htmlFor="item-search"
-                  className="text-secondary-text mb-1.5 block text-sm font-medium"
-                >
-                  Item
-                </label>
-                {selectedItem ? (
-                  <div className="border-border-card bg-tertiary-bg flex items-center justify-between rounded-lg border px-3 py-2.5">
-                    <span className="flex items-center gap-2 text-sm">
-                      <span className="text-primary-text">
-                        {selectedItem.name}
-                      </span>
-                      {(() => {
-                        const icon = getCategoryIcon(selectedItem.type);
-                        return (
-                          <span
-                            className={`${badgeBase} text-primary-text`}
-                            style={{
-                              borderColor: getCategoryColor(selectedItem.type),
-                              backgroundColor: `${getCategoryColor(selectedItem.type)}22`,
-                            }}
-                          >
-                            {icon && (
-                              <icon.Icon
-                                className="mr-1 h-3 w-3"
-                                style={{
-                                  color: getCategoryColor(selectedItem.type),
-                                }}
-                              />
-                            )}
-                            {selectedItem.type}
-                          </span>
-                        );
-                      })()}
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setSelectedItem(null);
-                        setItemSearch("");
-                      }}
-                      className="text-secondary-text hover:text-primary-text ml-2 cursor-pointer transition-colors"
-                    >
-                      <Icon
-                        icon="material-symbols:close-rounded"
-                        className="h-4 w-4"
-                        inline
-                      />
-                    </button>
-                  </div>
-                ) : (
-                  <>
-                    <input
-                      id="item-search"
-                      type="text"
-                      placeholder={
-                        loadingItems
-                          ? "Loading items..."
-                          : "Search for an item..."
-                      }
-                      disabled={loadingItems}
-                      value={itemSearch}
-                      onChange={(e) => {
-                        setItemSearch(e.target.value);
-                        setShowItemDropdown(true);
-                      }}
-                      onFocus={() => setShowItemDropdown(true)}
-                      className="border-border-card bg-tertiary-bg text-primary-text placeholder:text-tertiary-text focus:border-button-info w-full rounded-lg border px-3 py-2.5 text-sm transition-colors outline-none disabled:opacity-50"
-                    />
-                    {showItemDropdown && itemSearch.length > 0 && (
-                      <div className="border-border-card bg-secondary-bg absolute z-10 mt-1 max-h-60 w-full overflow-y-auto rounded-lg border shadow-lg">
-                        {filteredItems.length === 0 ? (
-                          <p className="text-secondary-text px-3 py-2 text-sm">
-                            No items found
-                          </p>
-                        ) : (
-                          filteredItems.slice(0, 50).map((item) => (
-                            <button
-                              key={item.id}
-                              type="button"
-                              onClick={() => {
-                                setSelectedItem(item);
-                                setItemSearch("");
-                                setShowItemDropdown(false);
-                              }}
-                              className="hover:bg-tertiary-bg flex w-full cursor-pointer items-center gap-2 px-3 py-2 text-left text-sm transition-colors"
-                            >
-                              <span className="text-primary-text min-w-0 flex-1 truncate">
-                                {item.name}
-                              </span>
-                              {(() => {
-                                const icon = getCategoryIcon(item.type);
-                                return (
-                                  <span
-                                    className={`${badgeBase} text-primary-text shrink-0`}
-                                    style={{
-                                      borderColor: getCategoryColor(item.type),
-                                      backgroundColor: `${getCategoryColor(item.type)}22`,
-                                    }}
-                                  >
-                                    {icon && (
-                                      <icon.Icon
-                                        className="mr-1 h-3 w-3"
-                                        style={{
-                                          color: getCategoryColor(item.type),
-                                        }}
-                                      />
-                                    )}
-                                    {item.type}
-                                  </span>
-                                );
-                              })()}
-                            </button>
-                          ))
-                        )}
-                      </div>
-                    )}
-                  </>
-                )}
-              </div>
-
-              {/* Field */}
-              <div>
-                <p className="text-secondary-text mb-1.5 block text-sm font-medium">
-                  Field
-                </p>
-                <div className="flex flex-wrap gap-2">
-                  {loadingLimits ? (
-                    <div className="text-secondary-text text-sm">
-                      Loading fields...
-                    </div>
-                  ) : (
-                    validFields.map((f) => (
-                      <button
-                        key={f}
-                        type="button"
-                        onClick={() => {
-                          if (f === field) return;
-                          setField(f);
-                          setSuggestedValue("");
-                          setSuggestedValueError(null);
-                          setReason("");
-                        }}
-                        className={`cursor-pointer rounded-lg border px-4 py-2 text-sm font-medium transition-colors ${
-                          field === f
-                            ? "bg-button-info border-button-info text-form-button-text"
-                            : "border-border-card bg-tertiary-bg text-secondary-text hover:border-button-info/50"
-                        }`}
-                      >
-                        {fieldLabel(f)}
-                      </button>
-                    ))
-                  )}
-                </div>
-              </div>
-
-              {/* Current value display */}
-              {selectedItem && (
-                <div className="border-border-card bg-tertiary-bg/50 rounded-lg border px-3 py-2.5">
-                  <span className="text-secondary-text text-xs">
-                    Current {fieldLabel(field)}:
-                  </span>{" "}
-                  <span className="text-primary-text text-sm font-medium">
-                    {formatFullValue(
-                      (selectedItem[field as keyof Item] as string) || "N/A",
-                    )}
-                  </span>
-                </div>
-              )}
-
-              {/* Suggested value */}
-              <div>
-                <label className="text-secondary-text mb-1.5 block text-sm font-medium">
-                  Suggested {fieldLabel(field)}
-                </label>
-                <input
-                  type="text"
-                  placeholder={
-                    ["cash_value", "duped_value"].includes(field)
-                      ? "e.g. 50m, 500m, 500k, 10,000,000"
-                      : `Enter suggested ${fieldLabel(field).toLowerCase()}...`
-                  }
-                  value={suggestedValue}
-                  onChange={(e) => {
-                    setSuggestedValue(e.target.value);
-                    const isNumericField = [
-                      "cash_value",
-                      "duped_value",
-                    ].includes(field);
-                    setSuggestedValueError(
-                      isNumericField && e.target.value.trim()
-                        ? (parseValueInput(e.target.value).error ?? null)
-                        : null,
-                    );
-                  }}
-                  required
-                  className={`border-border-card bg-tertiary-bg text-primary-text placeholder:text-tertiary-text focus:border-button-info w-full rounded-lg border px-3 py-2.5 text-sm transition-colors outline-none ${suggestedValueError ? "border-red-500" : ""}`}
-                />
-                {suggestedValueError && (
-                  <p className="mt-1 text-xs text-red-400">
-                    {suggestedValueError}
-                  </p>
-                )}
-              </div>
-
-              {/* Reason */}
-              <div>
-                <div className="mb-1.5 flex items-center justify-between">
-                  <label className="text-secondary-text text-sm font-medium">
-                    Reason for Suggested {fieldLabel(field)}
-                  </label>
-                  <span className="text-secondary-text text-xs">
-                    {reason.length} / {minChars} min
-                  </span>
-                </div>
-                <textarea
-                  placeholder="Explain why this value should change. Include evidence, market observations, or trade history. Must be at least 350 characters."
-                  value={reason}
-                  onChange={(e) => setReason(e.target.value)}
-                  required
-                  rows={5}
-                  className="border-border-card bg-tertiary-bg text-primary-text placeholder:text-tertiary-text focus:border-button-info w-full resize-none rounded-lg border px-3 py-2.5 text-sm transition-colors outline-none"
-                />
-              </div>
-
-              <div className="flex justify-end">
-                <Button
-                  type="submit"
-                  disabled={
-                    submitting ||
-                    !selectedItem ||
-                    !suggestedValue.trim() ||
-                    (["cash_value", "duped_value"].includes(field) &&
-                      !parseValueInput(suggestedValue).valid) ||
-                    reason.length < minChars
-                  }
-                  className="bg-button-info hover:bg-button-info-hover text-form-button-text flex items-center gap-2 disabled:opacity-50"
-                >
-                  {submitting ? (
-                    <>
-                      <Icon
-                        icon="svg-spinners:ring-resize"
-                        className="h-4 w-4"
-                        inline
-                      />
-                      Submitting...
-                    </>
-                  ) : (
-                    <>
-                      <Icon
-                        icon="material-symbols:send-rounded"
-                        className="h-4 w-4"
-                        inline
-                      />
-                      Submit Suggestion
-                    </>
-                  )}
-                </Button>
-              </div>
-            </form>
-          </div>
+          <SuggestionForm
+            items={items}
+            loadingItems={loadingItems}
+            limits={limits}
+            loadingLimits={loadingLimits}
+            onSubmit={handleFormSubmit}
+            onCancel={() => setShowForm(false)}
+          />
         )}
 
         {/* Title row + field breakdown */}
