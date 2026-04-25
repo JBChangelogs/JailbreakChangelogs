@@ -365,7 +365,7 @@ export default function ValueSuggestionDetailPage() {
             {/* ── Content + Sidebar ── */}
             <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
               {/* Main — reason + voters */}
-              <div className="space-y-5 lg:col-span-2">
+              <div className="min-w-0 space-y-5 lg:col-span-2">
                 {/* Reason */}
                 <div className="border-border-card bg-tertiary-bg rounded-xl border">
                   <div className="border-border-card border-b px-5 py-3.5">
@@ -381,9 +381,9 @@ export default function ValueSuggestionDetailPage() {
                   <div className="p-5">
                     <p
                       className="text-secondary-text text-sm leading-relaxed break-words whitespace-pre-wrap"
-                      style={{ overflowWrap: "anywhere" }}
+                      style={{ overflowWrap: "break-word" }}
                     >
-                      {suggestion.reason}
+                      {suggestion.reason.trim() || "No reason provided."}
                     </p>
                   </div>
                 </div>

@@ -180,7 +180,7 @@ function SuggestionForm({
       toast.error("Please select an item.");
       return;
     }
-    if (reason.length < minChars) {
+    if (reason.trim().length < minChars) {
       toast.error(`Reason must be at least ${minChars} characters.`);
       return;
     }
@@ -190,7 +190,7 @@ function SuggestionForm({
         item: selectedItem.id,
         field,
         value: suggestedValue,
-        reason,
+        reason: reason.trim(),
       });
       setSelectedItem(null);
       setItemSearch("");
@@ -1133,7 +1133,7 @@ export default function ValueSuggestionsPage() {
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {filteredSuggestions.map((suggestion) => {
               const item = itemMap.get(suggestion.item_id);
-              const cleanReason = stripHtml(suggestion.reason);
+              const cleanReason = stripHtml(suggestion.reason).trim();
               const categoryIcon = item ? getCategoryIcon(item.type) : null;
 
               return (
@@ -1362,8 +1362,8 @@ export default function ValueSuggestionsPage() {
                     </div>
 
                     {/* Reason */}
-                    <p className="text-secondary-text overflow-wrap-anywhere line-clamp-4 text-sm leading-relaxed break-words">
-                      {cleanReason}
+                    <p className="text-secondary-text line-clamp-4 text-sm leading-relaxed break-words">
+                      {cleanReason || "No reason provided."}
                     </p>
 
                     {/* Footer */}
