@@ -1,16 +1,6 @@
-import {
-  fetchSeasonsList,
-  Season,
-  fetchComments,
-  CommentData,
-} from "@/utils/api";
-import { UserData } from "@/types/auth";
+import { fetchComments } from "@/utils/api";
 import SeasonDetailsClient from "@/components/Seasons/SeasonDetailsClient";
-import { notFound, redirect } from "next/navigation";
-
-export const revalidate = 120; // Revalidate every 2 minutes
-
-const LATEST_SEASON = 31;
+import NitroSeasonsRailAd from "@/components/Ads/NitroSeasonsRailAd";
 
 interface Props {
   params: Promise<{
@@ -18,71 +8,18 @@ interface Props {
   }>;
 }
 
-import NitroSeasonsRailAd from "@/components/Ads/NitroSeasonsRailAd";
-
 export default async function SeasonDetailsPage({ params }: Props) {
   const { id } = await params;
-
-  let seasonList: Season[];
-  let commentsData: {
-    comments: CommentData[];
-    userMap: Record<string, UserData>;
-  };
-
-  try {
-    const seasonListPromise = fetchSeasonsList();
-    const commentsDataPromise = fetchComments("season", id);
-
-    // Wait for both promises to resolve
-    [seasonList, commentsData] = await Promise.all([
-      seasonListPromise,
-      commentsDataPromise,
-    ]);
-  } catch (error) {
-    console.error("Error fetching season:", error);
-    notFound();
-  }
-
-  // Find the current season in the list, handling leading zeros
-  const currentSeason = seasonList.find(
-    (season: Season) =>
-      season.season.toString() === id || season.season === parseInt(id),
-  );
-
-  if (!currentSeason) {
-    notFound();
-  }
-
-  // Check if the season has valid rewards
-  if (
-    typeof currentSeason.rewards === "string" ||
-    !Array.isArray(currentSeason.rewards) ||
-    currentSeason.rewards.length === 0
-  ) {
-    // Redirect to latest season if current season has no rewards
-    const latestSeason = seasonList.find(
-      (s: Season) => s.season === LATEST_SEASON,
-    );
-    if (latestSeason) {
-      redirect(`/seasons/${latestSeason.season}`);
-    } else {
-      redirect(`/seasons/${LATEST_SEASON}`);
-    }
-  }
+  const commentsData = await fetchComments("season", id);
 
   return (
     <>
       <NitroSeasonsRailAd />
       <SeasonDetailsClient
-        seasonList={seasonList}
-        currentSeason={currentSeason}
         seasonId={id}
-        latestSeasonNumber={LATEST_SEASON}
         initialComments={commentsData.comments}
         initialUserMap={commentsData.userMap}
       />
     </>
   );
 }
-
-// This is a Server Component - it handles async operations

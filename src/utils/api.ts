@@ -1023,7 +1023,7 @@ export async function fetchSeasonContracts(): Promise<SeasonContractsResponse | 
 
 export async function fetchSeasonsList() {
   try {
-    const response = await fetch(`${BASE_API_URL}/seasons/list`, {
+    const response = await fetch(`${BASE_API_URL}/seasons`, {
       headers: {
         "User-Agent": "JailbreakChangelogs-Seasons/1.0",
       },
@@ -1046,7 +1046,7 @@ export async function fetchSeasonsList() {
 
 export async function fetchSeason(id: string) {
   try {
-    const response = await fetch(`${BASE_API_URL}/seasons/get?season=${id}`, {
+    const response = await fetch(`${BASE_API_URL}/seasons/${id}`, {
       headers: {
         "User-Agent": "JailbreakChangelogs-Seasons/1.0",
       },

@@ -2,12 +2,10 @@ import { Suspense } from "react";
 import {
   fetchInventoryData,
   fetchRobloxUserByUsername,
-  fetchLatestSeason,
   fetchComments,
   fetchItems,
   fetchUserNetworth,
   fetchUserMoneyHistory,
-  fetchSeason,
   MaxStreamsError,
 } from "@/utils/api";
 import { CommentData } from "@/utils/api";
@@ -21,39 +19,12 @@ interface InventoryDataStreamerProps {
   initialCommentUserMap?: Record<string, UserData>;
 }
 
-interface SeasonDateRange {
-  season: number;
-  start_date: number;
-  end_date: number;
-}
-
 // Component that fetches inventory data
 async function InventoryDataFetcher({
   robloxId,
   initialComments,
   initialCommentUserMap,
 }: InventoryDataStreamerProps) {
-  let seasonDates: SeasonDateRange[] = [];
-  try {
-    const seasonDatesResponse = await fetch(
-      "https://assets.jailbreakchangelogs.com/assets/json/season_dates.json",
-      { cache: "no-store" },
-    );
-    if (seasonDatesResponse.ok) {
-      const seasonDatesData = (await seasonDatesResponse.json()) as unknown;
-      if (Array.isArray(seasonDatesData)) {
-        seasonDates = seasonDatesData as SeasonDateRange[];
-      }
-    } else {
-      console.error(
-        "Failed to fetch season_dates.json:",
-        seasonDatesResponse.status,
-      );
-    }
-  } catch (error) {
-    console.error("Error fetching season_dates.json:", error);
-  }
-
   // Check if the input is a username (not a number) or a Roblox ID
   const isUsername = !/^\d+$/.test(robloxId);
 
@@ -114,26 +85,19 @@ async function InventoryDataFetcher({
     );
   }
 
-  const [
-    result,
-    currentSeason,
-    items,
-    networthData,
-    moneyHistoryData,
-    commentsData,
-  ] = await Promise.all([
-    fetchInventoryData(actualRobloxId),
-    fetchLatestSeason(),
-    fetchItems(),
-    fetchUserNetworth(actualRobloxId),
-    fetchUserMoneyHistory(actualRobloxId),
-    !initialComments || initialComments.length === 0
-      ? fetchComments("inventory", actualRobloxId)
-      : Promise.resolve({
-          comments: initialComments || [],
-          userMap: initialCommentUserMap || {},
-        }),
-  ]);
+  const [result, items, networthData, moneyHistoryData, commentsData] =
+    await Promise.all([
+      fetchInventoryData(actualRobloxId),
+      fetchItems(),
+      fetchUserNetworth(actualRobloxId),
+      fetchUserMoneyHistory(actualRobloxId),
+      !initialComments || initialComments.length === 0
+        ? fetchComments("inventory", actualRobloxId)
+        : Promise.resolve({
+            comments: initialComments || [],
+            userMap: initialCommentUserMap || {},
+          }),
+    ]);
 
   // Check if the result contains an error
   if (
@@ -172,51 +136,6 @@ async function InventoryDataFetcher({
     );
   }
 
-  // Determine correct season based on scan date
-  let activeSeason = currentSeason;
-
-  // TypeScript check to ensure result is InventoryData
-  const inventoryData = result as unknown as { updated_at: number };
-
-  if (inventoryData.updated_at && currentSeason) {
-    const updatedAt = inventoryData.updated_at;
-
-    // Find matching season in seasonDates
-    // If updatedAt is greater than current season start, use current season (default)
-    if (updatedAt < currentSeason.start_date) {
-      const matchedSeason = seasonDates.find(
-        (s) => updatedAt >= s.start_date && updatedAt <= s.end_date,
-      );
-
-      if (matchedSeason && matchedSeason.season !== currentSeason.season) {
-        try {
-          const historicalSeason = await fetchSeason(
-            matchedSeason.season.toString(),
-          );
-
-          if (historicalSeason) {
-            // Handle xp_data potentially being a string
-            let parsedXpData = historicalSeason.xp_data;
-            if (typeof parsedXpData === "string") {
-              try {
-                parsedXpData = JSON.parse(parsedXpData);
-              } catch (e) {
-                console.error("Failed to parse xp_data string", e);
-              }
-            }
-
-            activeSeason = {
-              ...historicalSeason,
-              xp_data: parsedXpData,
-            } as unknown as typeof currentSeason;
-          }
-        } catch (e) {
-          console.error("Failed to fetch historical season", e);
-        }
-      }
-    }
-  }
-
   const originalSearchTerm = isUsername ? robloxId : undefined;
 
   return (
@@ -238,7 +157,7 @@ async function InventoryDataFetcher({
         robloxId={actualRobloxId}
         originalSearchTerm={originalSearchTerm}
         inventoryData={result}
-        currentSeason={activeSeason}
+        currentSeason={null}
         initialComments={commentsData?.comments || []}
         initialCommentUserMap={commentsData?.userMap || {}}
         items={items}

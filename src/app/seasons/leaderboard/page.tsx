@@ -1,23 +1,87 @@
-import { fetchSeasonLeaderboard, fetchLatestSeason } from "@/utils/api";
+"use client";
+
+import { useEffect, useState } from "react";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import SeasonLeaderboardClient from "@/components/Leaderboard/SeasonLeaderboardClient";
+import SeasonLeaderboardLoading from "@/app/seasons/leaderboard/loading";
 import Link from "next/link";
 import { Icon } from "@iconify/react";
-
 import SeasonHeader from "@/components/Leaderboard/SeasonLeaderboardHeader";
-
-export const revalidate = 300; // Revalidate every 5 minutes
-
 import NitroSeasonsLeaderboardRailAd from "@/components/Ads/NitroSeasonsLeaderboardRailAd";
+import { Season } from "@/types/seasons";
+import {
+  PUBLIC_API_URL,
+  INVENTORY_API_URL,
+  INVENTORY_API_SOURCE_HEADER,
+} from "@/utils/api";
+import { buildApiUrlWithDevToken } from "@/utils/apiDevToken";
 
-export default async function SeasonLeaderboardPage() {
-  const [leaderboardResponse, latestSeason] = await Promise.all([
-    fetchSeasonLeaderboard(),
-    fetchLatestSeason(),
-  ]);
+interface SeasonLeaderboardEntry {
+  id: number;
+  total_exp: number;
+  name: string;
+  lvl: number;
+  exp: number;
+}
 
-  // Show fallback if no data
-  if (!leaderboardResponse.data || leaderboardResponse.data.length === 0) {
+export default function SeasonLeaderboardPage() {
+  const [leaderboard, setLeaderboard] = useState<
+    SeasonLeaderboardEntry[] | null
+  >(null);
+  const [updatedAt, setUpdatedAt] = useState<number>(0);
+  const [latestSeason, setLatestSeason] = useState<Season | null>(null);
+  const [isLoaded, setIsLoaded] = useState(false);
+
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const [leaderboardRes, seasonRes] = await Promise.all([
+          fetch(`${INVENTORY_API_URL}/seasons/leaderboard`, {
+            headers: {
+              "User-Agent": "JailbreakChangelogs-Inventory/1.0",
+              "X-Source": INVENTORY_API_SOURCE_HEADER,
+            },
+          }),
+          fetch(buildApiUrlWithDevToken(PUBLIC_API_URL!, "/seasons/latest"), {
+            credentials: "include",
+            headers: {
+              "User-Agent": "JailbreakChangelogs-Seasons/1.0",
+            },
+          }),
+        ]);
+
+        if (leaderboardRes.ok) {
+          const data = await leaderboardRes.json();
+          setLeaderboard(data.data ?? []);
+          setUpdatedAt(data.updated_at ?? 0);
+        } else {
+          setLeaderboard([]);
+        }
+
+        if (seasonRes.ok) {
+          setLatestSeason(await seasonRes.json());
+        }
+      } catch (error) {
+        console.error("Error loading leaderboard data:", error);
+        setLeaderboard([]);
+      } finally {
+        setIsLoaded(true);
+      }
+    };
+
+    void loadData();
+  }, []);
+
+  if (!isLoaded) {
+    return (
+      <>
+        <NitroSeasonsLeaderboardRailAd />
+        <SeasonLeaderboardLoading />
+      </>
+    );
+  }
+
+  if (!leaderboard || leaderboard.length === 0) {
     return (
       <>
         <NitroSeasonsLeaderboardRailAd />
@@ -27,7 +91,6 @@ export default async function SeasonLeaderboardPage() {
 
             <div className="flex min-h-[60vh] items-center justify-center">
               <div className="border-border-card bg-secondary-bg max-w-2xl rounded-lg border p-12 text-center">
-                {/* Icon */}
                 <div className="mb-8">
                   <div className="border-button-info/30 bg-button-info/20 mx-auto flex h-20 w-20 items-center justify-center rounded-full border">
                     <Icon
@@ -37,19 +100,16 @@ export default async function SeasonLeaderboardPage() {
                   </div>
                 </div>
 
-                {/* Main heading */}
                 <h2 className="text-primary-text mb-4 text-2xl font-bold">
                   No Leaderboard Data Available
                 </h2>
 
-                {/* Simple message */}
                 <div className="text-secondary-text mb-8 text-lg leading-relaxed">
                   <p>
                     Check back later for the latest season leaderboard rankings.
                   </p>
                 </div>
 
-                {/* Action buttons */}
                 <div className="flex justify-center">
                   <Link
                     href="/seasons"
@@ -83,8 +143,8 @@ export default async function SeasonLeaderboardPage() {
           </div>
 
           <SeasonLeaderboardClient
-            initialLeaderboard={leaderboardResponse.data}
-            updatedAt={leaderboardResponse.updated_at}
+            initialLeaderboard={leaderboard}
+            updatedAt={updatedAt}
             season={latestSeason}
           />
         </div>
