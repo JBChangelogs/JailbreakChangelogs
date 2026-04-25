@@ -31,6 +31,8 @@ export default function SeasonLeaderboardPage() {
   const [updatedAt, setUpdatedAt] = useState<number>(0);
   const [latestSeason, setLatestSeason] = useState<Season | null>(null);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [isSeasonRateLimited, setIsSeasonRateLimited] = useState(false);
+  const [seasonRetryAfter, setSeasonRetryAfter] = useState<number | null>(null);
 
   useEffect(() => {
     const loadData = async () => {
@@ -60,6 +62,10 @@ export default function SeasonLeaderboardPage() {
 
         if (seasonRes.ok) {
           setLatestSeason(await seasonRes.json());
+        } else if (seasonRes.status === 429) {
+          const raw = seasonRes.headers.get("retry-after");
+          setIsSeasonRateLimited(true);
+          setSeasonRetryAfter(raw ? parseInt(raw, 10) : null);
         }
       } catch (error) {
         console.error("Error loading leaderboard data:", error);
@@ -140,6 +146,21 @@ export default function SeasonLeaderboardPage() {
             <p className="text-secondary-text mt-2">
               Top 25 players ranked by their total xp
             </p>
+
+            {isSeasonRateLimited && (
+              <div className="mt-3 inline-flex items-center gap-2 rounded-lg border border-yellow-500/30 bg-yellow-500/10 px-3 py-2 text-sm">
+                <Icon
+                  icon="material-symbols:hourglass-outline"
+                  className="text-primary-text h-4 w-4 shrink-0"
+                />
+                <span className="text-primary-text">
+                  Season info unavailable — rate limited
+                  {seasonRetryAfter
+                    ? `. Try again in ${seasonRetryAfter}s`
+                    : ""}
+                </span>
+              </div>
+            )}
           </div>
 
           <SeasonLeaderboardClient

@@ -14,6 +14,7 @@ interface UserStatsProps {
   robloxUsers: Record<string, RobloxUser>;
   userConnectionData: UserConnectionData | null;
   currentSeason: Season | null;
+  seasonRateLimitMessage?: string;
   itemsData: Item[];
   initialNetworthData?: UserNetworthData[];
   showNonOgOnly: boolean;
@@ -25,6 +26,7 @@ export default function UserStats({
   robloxUsers,
   userConnectionData,
   currentSeason,
+  seasonRateLimitMessage,
   itemsData = [],
   initialNetworthData = [],
   showNonOgOnly,
@@ -179,6 +181,7 @@ export default function UserStats({
       <UserStatsSection
         currentData={initialData}
         currentSeason={currentSeason}
+        seasonRateLimitMessage={seasonRateLimitMessage}
         totalCashValue={totalCashValue}
         totalNetworth={totalNetworth}
         totalDupedValue={totalDupedValue}

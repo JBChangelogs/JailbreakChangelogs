@@ -12,11 +12,16 @@ import { Season } from "@/types/seasons";
 import { PUBLIC_API_URL } from "@/utils/api";
 import { buildApiUrlWithDevToken } from "@/utils/apiDevToken";
 import NitroSeasonsCalculatorRailAd from "@/components/Ads/NitroSeasonsCalculatorRailAd";
+import RateLimitView from "@/components/Layout/RateLimitView";
 
 export default function WillIMakeItPage() {
   const [season, setSeason] = useState<Season | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [isRateLimited, setIsRateLimited] = useState(false);
+  const [rateLimitRetryAfter, setRateLimitRetryAfter] = useState<number | null>(
+    null,
+  );
 
   useEffect(() => {
     const loadData = async () => {
@@ -36,6 +41,12 @@ export default function WillIMakeItPage() {
         );
 
         if (!res.ok) {
+          if (res.status === 429) {
+            const raw = res.headers.get("retry-after");
+            setIsRateLimited(true);
+            setRateLimitRetryAfter(raw ? parseInt(raw, 10) : null);
+            return;
+          }
           throw new Error("Failed to fetch latest season");
         }
 
@@ -50,6 +61,15 @@ export default function WillIMakeItPage() {
 
     void loadData();
   }, []);
+
+  if (isRateLimited) {
+    return (
+      <>
+        <NitroSeasonsCalculatorRailAd />
+        <RateLimitView retryAfter={rateLimitRetryAfter} />
+      </>
+    );
+  }
 
   if (!isLoaded) {
     return (

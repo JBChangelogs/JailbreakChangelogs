@@ -128,6 +128,9 @@ export default function InventoryCheckerClient({
   const [activeSeason, setActiveSeason] = useState<Season | null>(
     currentSeason,
   );
+  const [seasonRateLimitMessage, setSeasonRateLimitMessage] = useState<
+    string | undefined
+  >(undefined);
 
   useEffect(() => {
     const loadSeason = async () => {
@@ -140,7 +143,18 @@ export default function InventoryCheckerClient({
             headers: { "User-Agent": "JailbreakChangelogs-Inventory/1.0" },
           },
         );
-        if (!latestRes.ok) return;
+        if (!latestRes.ok) {
+          if (latestRes.status === 429) {
+            const raw = latestRes.headers.get("retry-after");
+            const seconds = raw ? parseInt(raw, 10) : null;
+            setSeasonRateLimitMessage(
+              seconds
+                ? `Season XP unavailable — try again in ${seconds}s`
+                : "Season XP unavailable — try again later",
+            );
+          }
+          return;
+        }
         const latest = (await latestRes.json()) as Season;
 
         let resolved = latest;
@@ -1219,6 +1233,7 @@ export default function InventoryCheckerClient({
                   userConnectionData={userConnectionData || null}
                   itemsData={itemsData}
                   currentSeason={activeSeason}
+                  seasonRateLimitMessage={seasonRateLimitMessage}
                   initialNetworthData={networthData}
                   showNonOgOnly={showNonOgOnly}
                   setShowNonOgOnly={setShowNonOgOnly}

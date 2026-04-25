@@ -1,12 +1,17 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { PUBLIC_API_URL } from "@/utils/api";
 import { buildApiUrlWithDevToken } from "@/utils/apiDevToken";
+import RateLimitView from "@/components/Layout/RateLimitView";
 
 export default function SeasonsPage() {
   const router = useRouter();
+  const [isRateLimited, setIsRateLimited] = useState(false);
+  const [rateLimitRetryAfter, setRateLimitRetryAfter] = useState<number | null>(
+    null,
+  );
 
   useEffect(() => {
     const redirectToLatest = async () => {
@@ -27,6 +32,12 @@ export default function SeasonsPage() {
         );
 
         if (!response.ok) {
+          if (response.status === 429) {
+            const raw = response.headers.get("retry-after");
+            setIsRateLimited(true);
+            setRateLimitRetryAfter(raw ? parseInt(raw, 10) : null);
+            return;
+          }
           throw new Error("Failed to fetch latest season");
         }
 
@@ -40,6 +51,10 @@ export default function SeasonsPage() {
 
     void redirectToLatest();
   }, [router]);
+
+  if (isRateLimited) {
+    return <RateLimitView retryAfter={rateLimitRetryAfter} />;
+  }
 
   return null;
 }

@@ -16,6 +16,7 @@ import { Season, CommentData, PUBLIC_API_URL } from "@/utils/api";
 import { buildApiUrlWithDevToken } from "@/utils/apiDevToken";
 import { UserData } from "@/types/auth";
 import SeasonRouteLoading from "@/app/seasons/[id]/loading";
+import RateLimitView from "@/components/Layout/RateLimitView";
 
 const LATEST_SEASON = 31;
 
@@ -36,6 +37,10 @@ export default function SeasonDetailsClient({
     null,
   );
   const [isNotFound, setIsNotFound] = useState(false);
+  const [isRateLimited, setIsRateLimited] = useState(false);
+  const [rateLimitRetryAfter, setRateLimitRetryAfter] = useState<number | null>(
+    null,
+  );
 
   useEffect(() => {
     const loadPageData = async () => {
@@ -55,6 +60,12 @@ export default function SeasonDetailsClient({
         );
 
         if (!response.ok) {
+          if (response.status === 429) {
+            const raw = response.headers.get("retry-after");
+            setIsRateLimited(true);
+            setRateLimitRetryAfter(raw ? parseInt(raw, 10) : null);
+            return;
+          }
           throw new Error("Failed to fetch season list");
         }
 
@@ -91,6 +102,10 @@ export default function SeasonDetailsClient({
 
     void loadPageData();
   }, [seasonId, router]);
+
+  if (isRateLimited) {
+    return <RateLimitView retryAfter={rateLimitRetryAfter} />;
+  }
 
   if (isNotFound) {
     notFound();

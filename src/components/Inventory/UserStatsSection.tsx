@@ -67,6 +67,7 @@ const gamepassData = {
 interface UserStatsSectionProps {
   currentData: InventoryData | null;
   currentSeason: Season | null;
+  seasonRateLimitMessage?: string;
   totalCashValue: number;
   totalNetworth: number;
   totalDupedValue: number;
@@ -143,6 +144,7 @@ const formatDate = (timestamp: number) => {
 export default function UserStatsSection({
   currentData,
   currentSeason,
+  seasonRateLimitMessage,
   totalCashValue,
   totalNetworth,
   totalDupedValue,
@@ -421,6 +423,7 @@ export default function UserStatsSection({
         currentLevel={currentData.level}
         currentXp={currentData.xp}
         season={currentSeason}
+        seasonRateLimitMessage={seasonRateLimitMessage}
       />
 
       {/* Total Values */}

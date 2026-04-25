@@ -8,6 +8,7 @@ interface XpProgressBarProps {
   currentXp: number;
   season: Season | null;
   bgStyle?: "primary" | "secondary";
+  seasonRateLimitMessage?: string;
 }
 
 export default function XpProgressBar({
@@ -15,9 +16,17 @@ export default function XpProgressBar({
   currentXp,
   season,
   bgStyle = "primary",
+  seasonRateLimitMessage,
 }: XpProgressBarProps) {
   // If no season data, don't show the progress bar
   if (!season || !season.xp_data || !season.xp_data.xp_rates) {
+    if (seasonRateLimitMessage) {
+      return (
+        <div className="mt-3 inline-flex items-center gap-2 rounded-lg border border-yellow-500/30 bg-yellow-500/10 px-3 py-2 text-sm">
+          <span className="text-primary-text">{seasonRateLimitMessage}</span>
+        </div>
+      );
+    }
     return null;
   }
 
