@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { notFound } from "next/navigation";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import SeasonHeader from "@/components/Seasons/SeasonHeader";
 import SeasonNavigation from "@/components/Seasons/SeasonNavigation";
@@ -11,36 +12,100 @@ import ChangelogComments from "@/components/PageComments/ChangelogComments";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { formatProfileDate } from "@/utils/timestamp";
-import { Season, CommentData } from "@/utils/api";
+import { Season, CommentData, PUBLIC_API_URL } from "@/utils/api";
+import { buildApiUrlWithDevToken } from "@/utils/apiDevToken";
 import { UserData } from "@/types/auth";
+import SeasonRouteLoading from "@/app/seasons/[id]/loading";
+
+const LATEST_SEASON = 31;
 
 interface SeasonDetailsClientProps {
-  seasonList: Season[];
-  currentSeason: Season;
   seasonId: string;
-  latestSeasonNumber: number;
   initialComments?: CommentData[];
   initialUserMap?: Record<string, UserData>;
 }
 
 export default function SeasonDetailsClient({
-  seasonList,
-  currentSeason,
-  latestSeasonNumber,
+  seasonId,
   initialComments = [],
   initialUserMap = {},
 }: SeasonDetailsClientProps) {
   const router = useRouter();
+  const [seasonList, setSeasonList] = useState<Season[] | null>(null);
+  const [currentSeasonState, setCurrentSeasonState] = useState<Season | null>(
+    null,
+  );
+  const [isNotFound, setIsNotFound] = useState(false);
 
-  // Use state to manage the current season
-  const [currentSeasonState, setCurrentSeasonState] = useState(currentSeason);
+  useEffect(() => {
+    const loadPageData = async () => {
+      try {
+        if (!PUBLIC_API_URL) {
+          throw new Error("Missing PUBLIC_API_URL");
+        }
+
+        const response = await fetch(
+          buildApiUrlWithDevToken(PUBLIC_API_URL, "/seasons"),
+          {
+            credentials: "include",
+            headers: {
+              "User-Agent": "JailbreakChangelogs-Seasons/1.0",
+            },
+          },
+        );
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch season list");
+        }
+
+        const data = (await response.json()) as Season[];
+
+        const matched = data.find(
+          (s) =>
+            s.season.toString() === seasonId ||
+            s.season === parseInt(seasonId, 10),
+        );
+
+        if (!matched) {
+          setIsNotFound(true);
+          return;
+        }
+
+        if (
+          typeof matched.rewards === "string" ||
+          !Array.isArray(matched.rewards) ||
+          matched.rewards.length === 0
+        ) {
+          const latestSeason = data.find((s) => s.is_current === 1);
+          router.replace(`/seasons/${latestSeason?.season ?? LATEST_SEASON}`);
+          return;
+        }
+
+        setSeasonList(data);
+        setCurrentSeasonState(matched);
+      } catch (error) {
+        console.error("Error loading season data:", error);
+        setIsNotFound(true);
+      }
+    };
+
+    void loadPageData();
+  }, [seasonId, router]);
+
+  if (isNotFound) {
+    notFound();
+  }
+
+  if (!seasonList || !currentSeasonState) {
+    return <SeasonRouteLoading />;
+  }
 
   const season = currentSeasonState;
+  const latestSeasonNumber =
+    seasonList.find((s) => s.is_current === 1)?.season ?? LATEST_SEASON;
 
-  // Get filtered season list for navigation
   const filteredSeasonList = seasonList
     .filter((s: Season) => {
-      // If rewards is a string "No rewards found", treat it as empty array
       if (typeof s.rewards === "string") {
         return false;
       }
@@ -54,22 +119,19 @@ export default function SeasonDetailsClient({
       ) => b.season - a.season,
     );
 
-  // Get current and next season data for header
   const currentSeasonForHeader =
     seasonList.find((s: Season) => s.season === latestSeasonNumber) || null;
   const nextSeasonForHeader =
     seasonList.find((s: Season) => s.season === latestSeasonNumber + 1) || null;
 
   const handleSeasonSelect = async (selectedId: string) => {
-    // Find the selected season from the already fetched data
     const selectedSeason = seasonList.find(
-      (season) =>
-        season.season.toString() === selectedId ||
-        season.season === parseInt(selectedId),
+      (s) =>
+        s.season.toString() === selectedId ||
+        s.season === parseInt(selectedId, 10),
     );
 
     if (selectedSeason) {
-      // Check if the season has valid rewards
       if (
         typeof selectedSeason.rewards === "string" ||
         !Array.isArray(selectedSeason.rewards) ||
@@ -79,29 +141,20 @@ export default function SeasonDetailsClient({
         return;
       }
 
-      // Update the URL without triggering a full page navigation
       window.history.pushState({}, "", `/seasons/${selectedId}`);
-
-      // Update the current season data directly
       setCurrentSeasonState(selectedSeason);
     } else {
-      // If the season is not in our list, navigate to fetch it
       router.replace(`/seasons/${selectedId}`);
     }
   };
 
   const handleGoToLatestSeason = () => {
-    // Find the current season (is_current: 1) from the already fetched data
-    const currentSeason = seasonList.find((season) => season.is_current === 1);
+    const currentSeason = seasonList.find((s) => s.is_current === 1);
 
     if (currentSeason) {
-      // Update the URL without triggering a full page navigation
       window.history.pushState({}, "", `/seasons/${currentSeason.season}`);
-
-      // Update the current season data directly
       setCurrentSeasonState(currentSeason);
     } else {
-      // Fallback to router navigation if current season not found
       router.push(`/seasons/${latestSeasonNumber}`);
     }
   };
@@ -244,7 +297,6 @@ export default function SeasonDetailsClient({
               <div className="space-y-4">
                 {season.rewards
                   .sort((a, b) => {
-                    // Check if requirements are percentage-based
                     const isPercentageA = a.requirement
                       .toLowerCase()
                       .includes("%");
@@ -252,11 +304,9 @@ export default function SeasonDetailsClient({
                       .toLowerCase()
                       .includes("%");
 
-                    // If one is percentage and other isn't, percentage goes last
                     if (isPercentageA && !isPercentageB) return 1;
                     if (!isPercentageA && isPercentageB) return -1;
 
-                    // If both are percentages, sort by the percentage number
                     if (isPercentageA && isPercentageB) {
                       const percentA = parseInt(
                         a.requirement.match(/\d+/)?.[0] || "0",
@@ -267,7 +317,6 @@ export default function SeasonDetailsClient({
                       return percentA - percentB;
                     }
 
-                    // If both are level-based, sort by level number
                     const levelA = parseInt(
                       a.requirement.match(/\d+/)?.[0] || "0",
                     );

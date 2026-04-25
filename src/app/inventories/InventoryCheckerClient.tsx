@@ -11,7 +11,8 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ThemeProvider } from "@mui/material";
 import React from "react";
 import { fetchMissingRobloxData } from "./actions";
-import { ENABLE_WS_SCAN, INVENTORY_API_URL } from "@/utils/api";
+import { ENABLE_WS_SCAN, INVENTORY_API_URL, PUBLIC_API_URL } from "@/utils/api";
+import { buildApiUrlWithDevToken } from "@/utils/apiDevToken";
 import { RobloxUser, Item } from "@/types";
 import { InventoryData, InventoryItem, UserConnectionData } from "./types";
 import { useAuthContext } from "@/contexts/AuthContext";
@@ -123,6 +124,83 @@ export default function InventoryCheckerClient({
   const scanWebSocket = useScanWebSocket(robloxId || "");
   const { modalState, openModal, closeModal } = useSupporterModal();
   const [showScanModal, setShowScanModal] = useState(false);
+
+  const [activeSeason, setActiveSeason] = useState<Season | null>(
+    currentSeason,
+  );
+
+  useEffect(() => {
+    const loadSeason = async () => {
+      if (!initialData || !PUBLIC_API_URL || externalIsLoading) return;
+      try {
+        const latestRes = await fetch(
+          buildApiUrlWithDevToken(PUBLIC_API_URL, "/seasons/latest"),
+          {
+            credentials: "include",
+            headers: { "User-Agent": "JailbreakChangelogs-Inventory/1.0" },
+          },
+        );
+        if (!latestRes.ok) return;
+        const latest = (await latestRes.json()) as Season;
+
+        let resolved = latest;
+        const updatedAt = initialData?.updated_at;
+
+        if (updatedAt && updatedAt < latest.start_date) {
+          try {
+            const datesRes = await fetch(
+              "https://assets.jailbreakchangelogs.com/assets/json/season_dates.json",
+              { cache: "no-store" },
+            );
+            if (datesRes.ok) {
+              const seasonDates = (await datesRes.json()) as {
+                season: number;
+                start_date: number;
+                end_date: number;
+              }[];
+              const matched = seasonDates.find(
+                (s) => updatedAt >= s.start_date && updatedAt <= s.end_date,
+              );
+              if (matched && matched.season !== latest.season) {
+                const historicalRes = await fetch(
+                  buildApiUrlWithDevToken(
+                    PUBLIC_API_URL,
+                    `/seasons/${matched.season}`,
+                  ),
+                  {
+                    credentials: "include",
+                    headers: {
+                      "User-Agent": "JailbreakChangelogs-Inventory/1.0",
+                    },
+                  },
+                );
+                if (historicalRes.ok) {
+                  const historical = await historicalRes.json();
+                  let parsedXpData = historical.xp_data;
+                  if (typeof parsedXpData === "string") {
+                    try {
+                      parsedXpData = JSON.parse(parsedXpData);
+                    } catch {
+                      // keep unparsed
+                    }
+                  }
+                  resolved = { ...historical, xp_data: parsedXpData } as Season;
+                }
+              }
+            }
+          } catch (e) {
+            console.error("Failed to fetch historical season", e);
+          }
+        }
+
+        setActiveSeason(resolved);
+      } catch (e) {
+        console.error("Error fetching season data", e);
+      }
+    };
+
+    void loadSeason();
+  }, [initialData, initialData?.updated_at, externalIsLoading]);
 
   // Check if current user is viewing their own inventory
   const isOwnInventory = isAuthenticated && user?.roblox_id === robloxId;
@@ -1140,7 +1218,7 @@ export default function InventoryCheckerClient({
                   robloxUsers={robloxUsers}
                   userConnectionData={userConnectionData || null}
                   itemsData={itemsData}
-                  currentSeason={currentSeason}
+                  currentSeason={activeSeason}
                   initialNetworthData={networthData}
                   showNonOgOnly={showNonOgOnly}
                   setShowNonOgOnly={setShowNonOgOnly}

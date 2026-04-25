@@ -1,26 +1,63 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import React from "react";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import { Icon } from "@/components/ui/IconWrapper";
-import { fetchLatestSeason } from "@/utils/api";
 import XpCalculator from "@/components/Seasons/XpCalculator";
 import XpImportantDates from "@/components/Seasons/XpImportantDates";
 import XpLevelRequirements from "@/components/Seasons/XpLevelRequirements";
+import WillIMakeItLoading from "@/app/seasons/will-i-make-it/loading";
 import { Season } from "@/types/seasons";
-
+import { PUBLIC_API_URL } from "@/utils/api";
+import { buildApiUrlWithDevToken } from "@/utils/apiDevToken";
 import NitroSeasonsCalculatorRailAd from "@/components/Ads/NitroSeasonsCalculatorRailAd";
 
-export default async function WillIMakeItPage() {
-  let season: Season | null = null;
-  let error: string | null = null;
+export default function WillIMakeItPage() {
+  const [season, setSeason] = useState<Season | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [isLoaded, setIsLoaded] = useState(false);
 
-  try {
-    season = await fetchLatestSeason();
-    if (!season) {
-      error = "Failed to load season data";
-    }
-  } catch (err) {
-    console.error("Error loading season data:", err);
-    error = "Failed to load season data";
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        if (!PUBLIC_API_URL) {
+          throw new Error("Missing PUBLIC_API_URL");
+        }
+
+        const res = await fetch(
+          buildApiUrlWithDevToken(PUBLIC_API_URL, "/seasons/latest"),
+          {
+            credentials: "include",
+            headers: {
+              "User-Agent": "JailbreakChangelogs-Seasons/1.0",
+            },
+          },
+        );
+
+        if (!res.ok) {
+          throw new Error("Failed to fetch latest season");
+        }
+
+        setSeason(await res.json());
+      } catch (err) {
+        console.error("Error loading season data:", err);
+        setError("Failed to load season data");
+      } finally {
+        setIsLoaded(true);
+      }
+    };
+
+    void loadData();
+  }, []);
+
+  if (!isLoaded) {
+    return (
+      <>
+        <NitroSeasonsCalculatorRailAd />
+        <WillIMakeItLoading />
+      </>
+    );
   }
 
   if (error || !season) {
@@ -53,9 +90,7 @@ export default async function WillIMakeItPage() {
             {season.season}: {season.title}
           </p>
 
-          {/* Season Info & Calculator Info Side by Side */}
           <div className="mb-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
-            {/* Season Info & Countdown Section */}
             <div className="border-border-card bg-secondary-bg rounded-lg border p-6">
               <XpImportantDates
                 season={season.season}
@@ -69,7 +104,6 @@ export default async function WillIMakeItPage() {
               />
             </div>
 
-            {/* Calculator Info Section */}
             <div className="border-border-card bg-secondary-bg rounded-lg border p-4">
               <h3 className="text-primary-text mb-3 flex items-center gap-2 text-lg font-semibold">
                 <Icon
@@ -109,10 +143,8 @@ export default async function WillIMakeItPage() {
             </div>
           </div>
 
-          {/* Main XP Calculator - Primary Feature */}
           <XpCalculator season={season} />
 
-          {/* XP Requirements by Level - Reference Information */}
           <div className="mt-6">
             <XpLevelRequirements season={season} />
           </div>

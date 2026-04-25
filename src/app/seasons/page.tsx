@@ -1,29 +1,45 @@
-import { permanentRedirect } from "next/navigation";
-import { notFound } from "next/navigation";
-import { fetchLatestSeason } from "@/utils/api";
+"use client";
 
-export const dynamic = "force-dynamic";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { PUBLIC_API_URL } from "@/utils/api";
+import { buildApiUrlWithDevToken } from "@/utils/apiDevToken";
 
-export default async function SeasonsPage() {
-  try {
-    const latestSeason = await fetchLatestSeason();
-    if (latestSeason && latestSeason.season) {
-      permanentRedirect(`/seasons/${latestSeason.season}`);
-    } else {
-      console.error("Invalid season data from API");
-      notFound();
-    }
-  } catch (error) {
-    if (
-      error &&
-      typeof error === "object" &&
-      "message" in error &&
-      error.message === "NEXT_REDIRECT"
-    ) {
-      throw error;
-    }
+export default function SeasonsPage() {
+  const router = useRouter();
 
-    console.error("Error fetching latest season:", error);
-    notFound();
-  }
+  useEffect(() => {
+    const redirectToLatest = async () => {
+      try {
+        if (!PUBLIC_API_URL) {
+          throw new Error("Missing PUBLIC_API_URL");
+        }
+
+        const response = await fetch(
+          buildApiUrlWithDevToken(PUBLIC_API_URL, "/seasons/latest"),
+          {
+            credentials: "include",
+            headers: {
+              "User-Agent": "JailbreakChangelogs-Seasons/1.0",
+            },
+            cache: "no-store",
+          },
+        );
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch latest season");
+        }
+
+        const latestSeason = await response.json();
+        router.replace(`/seasons/${latestSeason.season}`);
+      } catch (error) {
+        console.error("Error fetching latest season:", error);
+        router.replace("/seasons/31");
+      }
+    };
+
+    void redirectToLatest();
+  }, [router]);
+
+  return null;
 }
