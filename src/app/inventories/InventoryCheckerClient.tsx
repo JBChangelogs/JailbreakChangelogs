@@ -147,9 +147,11 @@ export default function InventoryCheckerClient({
           if (latestRes.status === 429) {
             const raw = latestRes.headers.get("retry-after");
             const seconds = raw ? parseInt(raw, 10) : null;
+            const formatWait = (s: number) =>
+              s >= 60 ? `${Math.floor(s / 60)}m ${s % 60}s` : `${s}s`;
             setSeasonRateLimitMessage(
               seconds
-                ? `Season XP unavailable — try again in ${seconds}s`
+                ? `Season XP unavailable — try again in ${formatWait(seconds)}`
                 : "Season XP unavailable — try again later",
             );
           }
