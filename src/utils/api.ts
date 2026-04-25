@@ -962,27 +962,6 @@ export async function fetchItemHoarders(
   }
 }
 
-export async function fetchLatestSeason() {
-  try {
-    const response = await fetch(`${BASE_API_URL}/seasons/latest`, {
-      headers: {
-        "User-Agent": "JailbreakChangelogs-Seasons/1.0",
-      },
-      next: { revalidate: 600 }, // Cache for 10 minutes
-    });
-
-    if (!response.ok) {
-      throw new Error("Failed to fetch latest season");
-    }
-
-    const data = await response.json();
-    return data;
-  } catch (error) {
-    console.error("[SERVER] Error fetching latest season:", error);
-    throw error; // Re-throw to allow error boundaries to handle it
-  }
-}
-
 export interface SeasonContract {
   team: "Criminal" | "Police";
   name: string;
