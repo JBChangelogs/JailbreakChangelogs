@@ -258,7 +258,17 @@ export default function Header() {
 
     const timeoutId = setTimeout(async () => {
       setIsLoadingNotifications(true);
-      const data = await fetchUnreadNotifications(page, limit);
+      let data = await fetchUnreadNotifications(page, limit);
+
+      // When paginating, viewing each page marks those notifications as seen,
+      // shrinking total_pages. If the requested page no longer exists, step
+      // back to the previous page so the user sees the actual last page.
+      if (data.items.length === 0 && page > 1) {
+        const prevPage = page - 1;
+        setNotificationPage(prevPage);
+        data = await fetchUnreadNotifications(prevPage, limit);
+      }
+
       setNotifications(data);
       const nextUnread =
         typeof data.unread_count === "number"
