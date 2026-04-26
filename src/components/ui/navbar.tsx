@@ -322,9 +322,8 @@ export const NavbarModern = ({
 }) => {
   const isXlUp = useMediaQuery("(min-width: 1280px)");
   const [userMenuOpen, setUserMenuOpen] = useState(false);
-  const userMenuCloseTimer = React.useRef<ReturnType<typeof setTimeout> | null>(
-    null,
-  );
+  const userMenuWrapperRef = React.useRef<HTMLDivElement>(null);
+  const userMenuDropdownRef = React.useRef<HTMLDivElement>(null);
   const [utmModalOpen, setUtmModalOpen] = useState(false);
   const [notificationMenuOpen, setNotificationMenuOpen] = useState(false);
   const [notificationTab, setNotificationTab] = useState<"history" | "unread">(
@@ -387,6 +386,8 @@ export const NavbarModern = ({
   const pathname = usePathname();
   const [navMenuValue, setNavMenuValue] = useState("");
   const navRootWrapperRef = React.useRef<HTMLDivElement>(null);
+  const navViewportWrapperRef = React.useRef<HTMLDivElement | null>(null);
+  const navCursorRef = React.useRef({ x: 0, y: 0 });
   const triggerRefs = React.useRef<Record<string, HTMLButtonElement | null>>(
     {},
   );
@@ -407,6 +408,93 @@ export const NavbarModern = ({
       );
     }
   }, [navMenuValue]);
+
+  // Passive global cursor tracker — keeps navCursorRef fresh without causing re-renders.
+  React.useEffect(() => {
+    const track = (e: MouseEvent) => {
+      navCursorRef.current = { x: e.clientX, y: e.clientY };
+    };
+    window.addEventListener("mousemove", track, { passive: true });
+    return () => window.removeEventListener("mousemove", track);
+  }, []);
+
+  // Only pass-through open events — all closing is owned by the mousemove effect below.
+  // Radix doesn't fire onValueChange("") when the cursor moves within the Root but off
+  // a trigger (e.g. horizontal exit), so we can't rely on its close signal at all.
+  const handleNavValueChange = (value: string) => {
+    if (value !== "") setNavMenuValue(value);
+  };
+
+  // Prediction-cone / safe-triangle for the nav menu.
+  // Mirrors the user-menu approach: global mousemove owns the close decision.
+  // Safe zone = active trigger rect ∪ any other trigger rect (smooth L↔R transitions)
+  //           ∪ viewport rect ∪ trapezoid cone between trigger bottom and viewport top.
+  React.useEffect(() => {
+    if (!navMenuValue) return;
+
+    let closeTimer: ReturnType<typeof setTimeout> | null = null;
+    const activeValue = navMenuValue;
+
+    const onMove = (e: MouseEvent) => {
+      navCursorRef.current = { x: e.clientX, y: e.clientY };
+      const { clientX: x, clientY: y } = e;
+
+      const activeTriggerEl = triggerRefs.current[activeValue];
+      const vEl = navViewportWrapperRef.current;
+      if (!activeTriggerEl || !vEl) return;
+
+      const tr = activeTriggerEl.getBoundingClientRect();
+      const vr = vEl.getBoundingClientRect();
+
+      const inActiveTrigger =
+        x >= tr.left && x <= tr.right && y >= tr.top && y <= tr.bottom;
+
+      // Keep open when hovering any trigger so L↔R transitions don't flicker
+      const inAnyTrigger =
+        inActiveTrigger ||
+        Object.values(triggerRefs.current).some((el) => {
+          if (!el) return false;
+          const r = el.getBoundingClientRect();
+          return x >= r.left && x <= r.right && y >= r.top && y <= r.bottom;
+        });
+
+      const inViewport =
+        vr.height > 0 &&
+        x >= vr.left &&
+        x <= vr.right &&
+        y >= vr.top &&
+        y <= vr.bottom;
+
+      const inCone = (() => {
+        const gap = vr.top - tr.bottom;
+        if (gap < 1 || y < tr.bottom || y > vr.top) return false;
+        const t = (y - tr.bottom) / gap;
+        return (
+          x >= tr.left + t * (vr.left - tr.left) &&
+          x <= tr.right + t * (vr.right - tr.right)
+        );
+      })();
+
+      const safe = inAnyTrigger || inViewport || inCone;
+
+      if (safe) {
+        if (closeTimer) {
+          clearTimeout(closeTimer);
+          closeTimer = null;
+        }
+      } else if (!closeTimer) {
+        closeTimer = setTimeout(() => {
+          setNavMenuValue((prev) => (prev === activeValue ? "" : prev));
+        }, 80);
+      }
+    };
+
+    window.addEventListener("mousemove", onMove);
+    return () => {
+      window.removeEventListener("mousemove", onMove);
+      if (closeTimer) clearTimeout(closeTimer);
+    };
+  }, [navMenuValue]);
   const {
     setShowLoginModal,
     setLoginModal,
@@ -422,6 +510,63 @@ export const NavbarModern = ({
   React.useEffect(() => {
     setMounted(true);
   }, []);
+
+  // Prediction-cone / safe-triangle for the user menu.
+  // Replaces the old onMouseLeave timer. Tracks the cursor globally and keeps
+  // the menu open while the pointer is inside the trigger, the dropdown panel,
+  // OR the trapezoid between them (so diagonal movement toward any menu item
+  // never accidentally closes it).
+  React.useEffect(() => {
+    if (!userMenuOpen) return;
+
+    let closeTimer: ReturnType<typeof setTimeout> | null = null;
+
+    const inRect = (x: number, y: number, r: DOMRect) =>
+      x >= r.left && x <= r.right && y >= r.top && y <= r.bottom;
+
+    // Linearly-interpolated trapezoid between wrapper bottom and dropdown top.
+    // At y=wrapperRect.bottom the cone is as narrow as the trigger button;
+    // at y=dropdownRect.top it is as wide as the dropdown panel.
+    const inCone = (
+      x: number,
+      y: number,
+      wr: DOMRect,
+      dr: DOMRect,
+    ): boolean => {
+      if (y < wr.bottom || y > dr.top) return false;
+      const t = (y - wr.bottom) / (dr.top - wr.bottom);
+      const l = wr.left + t * (dr.left - wr.left);
+      const r = wr.right + t * (dr.right - wr.right);
+      return x >= l && x <= r;
+    };
+
+    const onMove = (e: MouseEvent) => {
+      const wEl = userMenuWrapperRef.current;
+      const dEl = userMenuDropdownRef.current;
+      if (!wEl || !dEl) return;
+
+      const { clientX: x, clientY: y } = e;
+      const wr = wEl.getBoundingClientRect();
+      const dr = dEl.getBoundingClientRect();
+
+      const safe = inRect(x, y, wr) || inRect(x, y, dr) || inCone(x, y, wr, dr);
+
+      if (safe) {
+        if (closeTimer) {
+          clearTimeout(closeTimer);
+          closeTimer = null;
+        }
+      } else if (!closeTimer) {
+        closeTimer = setTimeout(() => setUserMenuOpen(false), 100);
+      }
+    };
+
+    window.addEventListener("mousemove", onMove);
+    return () => {
+      window.removeEventListener("mousemove", onMove);
+      if (closeTimer) clearTimeout(closeTimer);
+    };
+  }, [userMenuOpen]);
 
   useToastRuntimeRightOffset({
     enabled: isXlUp,
@@ -489,7 +634,7 @@ export const NavbarModern = ({
             style={{ position: "relative" }}
             delayDuration={0}
             value={navMenuValue}
-            onValueChange={setNavMenuValue}
+            onValueChange={handleNavValueChange}
           >
             <NavigationMenu.List className="m-0 flex list-none items-center gap-2 p-0">
               {/* Updates */}
@@ -783,6 +928,7 @@ export const NavbarModern = ({
               }}
             >
               <NavigationMenu.Viewport
+                ref={navViewportWrapperRef}
                 className="data-[state=open]:animate-scaleIn data-[state=closed]:animate-scaleOut"
                 style={{
                   position: "relative",
@@ -1108,26 +1254,10 @@ export const NavbarModern = ({
             // Show login button during SSR and initial hydration to prevent mismatch
             <Button onClick={() => setShowLoginModal(true)}>Login</Button>
           ) : userData ? (
-            <div
-              className="relative"
-              onMouseEnter={() => {
-                if (userMenuCloseTimer.current)
-                  clearTimeout(userMenuCloseTimer.current);
-              }}
-              onMouseLeave={() => {
-                userMenuCloseTimer.current = setTimeout(
-                  () => setUserMenuOpen(false),
-                  150,
-                );
-              }}
-            >
+            <div ref={userMenuWrapperRef} className="relative">
               <button
                 className="flex items-center gap-2 rounded-full p-1 transition-colors"
-                onMouseEnter={() => {
-                  if (userMenuCloseTimer.current)
-                    clearTimeout(userMenuCloseTimer.current);
-                  setUserMenuOpen(true);
-                }}
+                onMouseEnter={() => setUserMenuOpen(true)}
               >
                 <UserAvatar
                   userId={userData.id}
@@ -1141,138 +1271,145 @@ export const NavbarModern = ({
                 />
               </button>
 
-              <AnimatePresence>
-                {userMenuOpen && (
-                  <motion.div
-                    className="border-border-card bg-primary-bg absolute right-0 z-1300 mt-2 w-72 overflow-hidden rounded-2xl border shadow-lg"
-                    initial={{ opacity: 0, scale: 0.92, y: 8 }}
-                    animate={{ opacity: 1, scale: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.92, y: 8 }}
-                    transition={menuTransition}
-                  >
-                    {/* User info */}
-                    <Link
-                      href={`/users/${userData.id}`}
-                      className="group hover:bg-tertiary-bg flex items-center gap-3 p-3 transition-colors"
+              {/* pointer-events disabled as soon as userMenuOpen is false so the
+                  exit animation's ghost DOM doesn't capture clicks or hovers */}
+              <div style={{ pointerEvents: userMenuOpen ? "auto" : "none" }}>
+                <AnimatePresence>
+                  {userMenuOpen && (
+                    <motion.div
+                      ref={userMenuDropdownRef}
+                      className="border-border-card bg-primary-bg absolute right-0 z-1300 mt-2 w-72 overflow-hidden rounded-2xl border shadow-lg"
+                      initial={{ opacity: 0, scale: 0.92, y: 8 }}
+                      animate={{ opacity: 1, scale: 1, y: 0 }}
+                      exit={{ opacity: 0, scale: 0.92, y: 8 }}
+                      transition={menuTransition}
                     >
-                      <UserAvatar
-                        userId={userData.id}
-                        avatarHash={userData.avatar}
-                        username={userData.username}
-                        size={10}
-                        custom_avatar={userData.custom_avatar}
-                        showBadge={false}
-                        settings={userData.settings}
-                        premiumType={userData.premiumtype}
-                      />
-                      <div className="min-w-0 flex-1">
-                        <div className="text-primary-text group-hover:text-link truncate font-semibold transition-colors">
-                          {userData.global_name || userData.username}
-                        </div>
-                        <div className="text-secondary-text truncate text-xs">
-                          @{userData.username}
-                        </div>
-                      </div>
-                      <Icon
-                        icon="material-symbols:chevron-right-rounded"
-                        className="text-secondary-text group-hover:text-link h-4 w-4 shrink-0 transition-colors"
-                        inline={true}
-                      />
-                    </Link>
-
-                    {/* Menu items */}
-                    <div className="border-border-secondary border-t p-2">
-                      {!userData.roblox_id && (
-                        <button
-                          className="hover:bg-tertiary-bg flex w-full cursor-pointer items-center gap-3 rounded-xl px-2 py-2 text-left transition-colors"
-                          onClick={() =>
-                            setLoginModal({ open: true, tab: "roblox" })
-                          }
-                        >
-                          <div className="bg-button-info/15 flex h-8 w-8 shrink-0 items-center justify-center rounded-md">
-                            <RobloxIcon className="text-link h-4 w-4" />
-                          </div>
-                          <span className="text-primary-text text-sm font-medium">
-                            Connect Roblox
-                          </span>
-                        </button>
-                      )}
-
+                      {/* User info */}
                       <Link
-                        href="/settings"
-                        className="hover:bg-tertiary-bg flex items-center gap-3 rounded-xl px-2 py-2 transition-colors"
+                        href={`/users/${userData.id}`}
+                        className="group hover:bg-tertiary-bg flex items-center gap-3 p-3 transition-colors"
                       >
-                        <div className="bg-button-info/15 flex h-8 w-8 shrink-0 items-center justify-center rounded-md">
-                          <Icon
-                            icon="material-symbols:settings-rounded"
-                            className="text-link h-4 w-4"
-                            inline={true}
-                          />
+                        <UserAvatar
+                          userId={userData.id}
+                          avatarHash={userData.avatar}
+                          username={userData.username}
+                          size={10}
+                          custom_avatar={userData.custom_avatar}
+                          showBadge={false}
+                          settings={userData.settings}
+                          premiumType={userData.premiumtype}
+                        />
+                        <div className="min-w-0 flex-1">
+                          <div className="text-primary-text group-hover:text-link truncate font-semibold transition-colors">
+                            {userData.global_name || userData.username}
+                          </div>
+                          <div className="text-secondary-text truncate text-xs">
+                            @{userData.username}
+                          </div>
                         </div>
-                        <span className="text-primary-text text-sm font-medium">
-                          Settings
-                        </span>
+                        <Icon
+                          icon="material-symbols:chevron-right-rounded"
+                          className="text-secondary-text group-hover:text-link h-4 w-4 shrink-0 transition-colors"
+                          inline={true}
+                        />
                       </Link>
 
-                      {shouldShowSupportButton && (
+                      {/* Menu items */}
+                      <div className="border-border-secondary border-t p-2">
+                        {!userData.roblox_id && (
+                          <button
+                            className="hover:bg-tertiary-bg flex w-full cursor-pointer items-center gap-3 rounded-xl px-2 py-2 text-left transition-colors"
+                            onClick={() =>
+                              setLoginModal({ open: true, tab: "roblox" })
+                            }
+                          >
+                            <div className="bg-button-info/15 flex h-8 w-8 shrink-0 items-center justify-center rounded-md">
+                              <RobloxIcon className="text-link h-4 w-4" />
+                            </div>
+                            <span className="text-primary-text text-sm font-medium">
+                              Connect Roblox
+                            </span>
+                          </button>
+                        )}
+
                         <Link
-                          href="/supporting"
+                          href="/settings"
                           className="hover:bg-tertiary-bg flex items-center gap-3 rounded-xl px-2 py-2 transition-colors"
                         >
                           <div className="bg-button-info/15 flex h-8 w-8 shrink-0 items-center justify-center rounded-md">
                             <Icon
-                              icon="material-symbols:favorite-rounded"
+                              icon="material-symbols:settings-rounded"
                               className="text-link h-4 w-4"
                               inline={true}
                             />
                           </div>
                           <span className="text-primary-text text-sm font-medium">
-                            Support Us
+                            Settings
                           </span>
                         </Link>
-                      )}
 
-                      {userData?.flags?.some((f) => f.flag === "is_owner") && (
+                        {shouldShowSupportButton && (
+                          <Link
+                            href="/supporting"
+                            className="hover:bg-tertiary-bg flex items-center gap-3 rounded-xl px-2 py-2 transition-colors"
+                          >
+                            <div className="bg-button-info/15 flex h-8 w-8 shrink-0 items-center justify-center rounded-md">
+                              <Icon
+                                icon="material-symbols:favorite-rounded"
+                                className="text-link h-4 w-4"
+                                inline={true}
+                              />
+                            </div>
+                            <span className="text-primary-text text-sm font-medium">
+                              Support Us
+                            </span>
+                          </Link>
+                        )}
+
+                        {userData?.flags?.some(
+                          (f) => f.flag === "is_owner",
+                        ) && (
+                          <button
+                            className="hover:bg-tertiary-bg flex w-full cursor-pointer items-center gap-3 rounded-xl px-2 py-2 text-left transition-colors"
+                            onClick={() => {
+                              setUtmModalOpen(true);
+                              setUserMenuOpen(false);
+                            }}
+                          >
+                            <div className="bg-button-info/15 flex h-8 w-8 shrink-0 items-center justify-center rounded-md">
+                              <Icon
+                                icon="heroicons:link"
+                                className="text-link h-4 w-4"
+                                inline={true}
+                              />
+                            </div>
+                            <span className="text-primary-text text-sm font-medium">
+                              Generate UTM Link
+                            </span>
+                          </button>
+                        )}
+
                         <button
-                          className="hover:bg-tertiary-bg flex w-full cursor-pointer items-center gap-3 rounded-xl px-2 py-2 text-left transition-colors"
-                          onClick={() => {
-                            setUtmModalOpen(true);
-                            setUserMenuOpen(false);
-                          }}
+                          className="hover:bg-button-danger/10 flex w-full cursor-pointer items-center gap-3 rounded-xl px-2 py-2 text-left transition-colors"
+                          onClick={handleLogout}
+                          data-umami-event="Logout"
                         >
-                          <div className="bg-button-info/15 flex h-8 w-8 shrink-0 items-center justify-center rounded-md">
+                          <div className="bg-button-danger/15 flex h-8 w-8 shrink-0 items-center justify-center rounded-md">
                             <Icon
-                              icon="heroicons:link"
-                              className="text-link h-4 w-4"
+                              icon="material-symbols:logout-rounded"
+                              className="text-button-danger h-4 w-4"
                               inline={true}
                             />
                           </div>
-                          <span className="text-primary-text text-sm font-medium">
-                            Generate UTM Link
+                          <span className="text-button-danger text-sm font-medium">
+                            Logout
                           </span>
                         </button>
-                      )}
-
-                      <button
-                        className="hover:bg-button-danger/10 flex w-full cursor-pointer items-center gap-3 rounded-xl px-2 py-2 text-left transition-colors"
-                        onClick={handleLogout}
-                        data-umami-event="Logout"
-                      >
-                        <div className="bg-button-danger/15 flex h-8 w-8 shrink-0 items-center justify-center rounded-md">
-                          <Icon
-                            icon="material-symbols:logout-rounded"
-                            className="text-button-danger h-4 w-4"
-                            inline={true}
-                          />
-                        </div>
-                        <span className="text-button-danger text-sm font-medium">
-                          Logout
-                        </span>
-                      </button>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
             </div>
           ) : (
             <Button onClick={() => setShowLoginModal(true)}>Login</Button>
