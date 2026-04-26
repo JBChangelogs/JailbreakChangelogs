@@ -165,6 +165,14 @@ export default function InventoryBreakdown({
     return ids;
   }, [inventoryData.data, inventoryData.duplicates]);
 
+  const ogOwnedItemIds = useMemo(() => {
+    const ids = new Set<number>();
+    inventoryData.data
+      .filter((invItem) => invItem.isOriginalOwner)
+      .forEach((invItem) => ids.add(invItem.item_id));
+    return ids;
+  }, [inventoryData.data]);
+
   const includeUntradable = true;
   const [missingSearch, setMissingSearch] = useState("");
   const [missingTypeFilter, setMissingTypeFilter] = useState<string>("all");
@@ -223,6 +231,9 @@ export default function InventoryBreakdown({
       const ownedCount = typeItems.filter((item) => {
         return effectiveOwnedItemIds.has(item.id);
       }).length;
+      const ogOwnedCount = typeItems.filter((item) =>
+        ogOwnedItemIds.has(item.id),
+      ).length;
       const missing = typeItems
         .filter((item) => {
           if (UNVERIFIABLE_COLLECTION_ITEM_IDS.has(item.id)) return false;
@@ -237,6 +248,7 @@ export default function InventoryBreakdown({
         type,
         total: typeItems.length,
         owned: ownedCount,
+        ogOwned: ogOwnedCount,
         missing,
         missingCount,
         percentage,
@@ -251,7 +263,7 @@ export default function InventoryBreakdown({
     });
 
     return progress;
-  }, [effectiveOwnedItemIds, eligibleItems]);
+  }, [effectiveOwnedItemIds, ogOwnedItemIds, eligibleItems]);
 
   const overallProgress = useMemo(() => {
     const total = eligibleItems.length;
@@ -262,6 +274,16 @@ export default function InventoryBreakdown({
     const percentage = total > 0 ? (owned / total) * 100 : 0;
     return { total, owned, missingCount, percentage };
   }, [effectiveOwnedItemIds, eligibleItems]);
+
+  const ogOwnedProgress = useMemo(() => {
+    const total = eligibleItems.length;
+    const ogOwned = eligibleItems.filter((item) =>
+      ogOwnedItemIds.has(item.id),
+    ).length;
+    const ogMissing = total - ogOwned;
+    const percentage = total > 0 ? (ogOwned / total) * 100 : 0;
+    return { total, ogOwned, ogMissing, percentage };
+  }, [eligibleItems, ogOwnedItemIds]);
 
   const missingItemsAll = useMemo(() => {
     const missing = typeProgress.flatMap((progress) =>
@@ -443,6 +465,23 @@ export default function InventoryBreakdown({
       fill: getCategoryColor(entry.type),
     }));
 
+  const ogChartConfig = {
+    value: {
+      label: "OG Owned",
+      color: "var(--chart-1)",
+    },
+  } satisfies ChartConfig;
+
+  const ogChartData = typeProgress
+    .filter((entry) => entry.ogOwned > 0)
+    .map((entry) => ({
+      category: entry.type,
+      value: entry.ogOwned,
+      total: entry.total,
+      percentage: entry.total > 0 ? (entry.ogOwned / entry.total) * 100 : 0,
+      fill: getCategoryColor(entry.type),
+    }));
+
   return (
     <div className="space-y-6">
       <div className="border-border-card bg-secondary-bg rounded-lg border p-4">
@@ -520,9 +559,27 @@ export default function InventoryBreakdown({
         <div className="space-y-6 xl:col-span-8">
           <div className="border-border-card bg-secondary-bg rounded-lg border p-4">
             <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-              <h4 className="text-primary-text text-sm font-semibold">
-                Collection Progress
-              </h4>
+              <div className="flex items-center gap-1.5">
+                <h4 className="text-primary-text text-sm font-semibold">
+                  Collection Progress
+                </h4>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Icon
+                      icon="material-symbols:info-outline"
+                      className="text-secondary-text h-4 w-4 cursor-help"
+                      inline={true}
+                    />
+                  </TooltipTrigger>
+                  <TooltipContent
+                    side="top"
+                    className="bg-secondary-bg text-primary-text max-w-62.5 border-none shadow-(--color-card-shadow)"
+                  >
+                    How many of the {overallProgress.total} items in Jailbreak
+                    you own. Unverifiable items are assumed owned.
+                  </TooltipContent>
+                </Tooltip>
+              </div>
             </div>
 
             {itemsData.length === 0 ? (
@@ -704,9 +761,27 @@ export default function InventoryBreakdown({
 
                 <div className="border-border-card bg-tertiary-bg rounded-lg border p-3">
                   <div className="mb-2 flex items-center justify-between gap-3">
-                    <div className="text-primary-text text-sm font-semibold">
-                      Trackable Missing Items (
-                      {formatInventoryCount(missingItemsAll.length)})
+                    <div className="flex items-center gap-1.5">
+                      <div className="text-primary-text text-sm font-semibold">
+                        Trackable Missing Items (
+                        {formatInventoryCount(missingItemsAll.length)})
+                      </div>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Icon
+                            icon="material-symbols:info-outline"
+                            className="text-secondary-text h-4 w-4 cursor-help"
+                            inline={true}
+                          />
+                        </TooltipTrigger>
+                        <TooltipContent
+                          side="top"
+                          className="bg-secondary-bg text-primary-text max-w-62.5 border-none shadow-(--color-card-shadow)"
+                        >
+                          Items not in your inventory that can be confirmed
+                          missing. Excludes unverifiable items.
+                        </TooltipContent>
+                      </Tooltip>
                     </div>
                   </div>
                   {unverifiableCount > 0 && (
@@ -863,13 +938,27 @@ export default function InventoryBreakdown({
                     id="unverifiable-items"
                     className="border-border-card bg-tertiary-bg rounded-lg border p-3"
                   >
-                    <div className="text-primary-text mb-2 text-sm font-semibold">
-                      Unverifiable Items (
-                      {formatInventoryCount(unverifiableItemsAll.length)})
-                    </div>
-                    <div className="text-secondary-text mb-2 text-xs">
-                      Not returned by scans; assumed owned for completion and
-                      hidden from the missing list.
+                    <div className="mb-2 flex items-center gap-1.5">
+                      <div className="text-primary-text text-sm font-semibold">
+                        Unverifiable Items (
+                        {formatInventoryCount(unverifiableItemsAll.length)})
+                      </div>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Icon
+                            icon="material-symbols:info-outline"
+                            className="text-secondary-text h-4 w-4 cursor-help"
+                            inline={true}
+                          />
+                        </TooltipTrigger>
+                        <TooltipContent
+                          side="top"
+                          className="bg-secondary-bg text-primary-text max-w-62.5 border-none shadow-(--color-card-shadow)"
+                        >
+                          Items that inventory scans can&apos;t detect. They are
+                          assumed owned and excluded from the missing list.
+                        </TooltipContent>
+                      </Tooltip>
                     </div>
                     <div className="mb-2">
                       <div className="flex w-full flex-col gap-4 sm:flex-row">
@@ -1156,9 +1245,321 @@ export default function InventoryBreakdown({
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-12">
         <div className="space-y-6 xl:col-span-8">
           <div className="border-border-card bg-secondary-bg rounded-lg border p-4">
-            <h4 className="text-primary-text mb-3 text-sm font-semibold">
-              Inventory Breakdown
-            </h4>
+            <div className="mb-3 flex items-center gap-1.5">
+              <h4 className="text-primary-text text-sm font-semibold">
+                OG Owned
+              </h4>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Icon
+                    icon="material-symbols:info-outline"
+                    className="text-secondary-text h-4 w-4 cursor-help"
+                    inline={true}
+                  />
+                </TooltipTrigger>
+                <TooltipContent
+                  side="top"
+                  className="bg-secondary-bg text-primary-text max-w-62.5 border-none shadow-(--color-card-shadow)"
+                >
+                  Items where this player is the original owner in
+                  Jailbreak&apos;s records, regardless of trading history.
+                </TooltipContent>
+              </Tooltip>
+            </div>
+
+            {itemsData.length === 0 ? (
+              <div className="py-6 text-center">
+                <p className="text-secondary-text text-sm">
+                  Item list unavailable, can&apos;t calculate OG owned.
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <div className="bg-tertiary-bg flex h-8 w-full overflow-hidden rounded-lg">
+                  {ogOwnedProgress.ogOwned > 0 ? (
+                    typeProgress
+                      .filter((entry) => entry.ogOwned > 0)
+                      .map((entry) => {
+                        const width =
+                          (entry.ogOwned / ogOwnedProgress.ogOwned) * 100;
+                        return (
+                          <Tooltip key={entry.type}>
+                            <TooltipTrigger asChild>
+                              <div
+                                className="group relative"
+                                style={{
+                                  width: `${width}%`,
+                                  backgroundColor: getCategoryColor(entry.type),
+                                }}
+                              />
+                            </TooltipTrigger>
+                            <TooltipContent side="top">
+                              <div className="grid min-w-48 gap-1.5 text-xs">
+                                <div className="flex items-center gap-1.5">
+                                  <span
+                                    className="h-2.5 w-2.5 rounded-xs"
+                                    style={{
+                                      backgroundColor: getCategoryColor(
+                                        entry.type,
+                                      ),
+                                    }}
+                                  />
+                                  <span className="font-medium">
+                                    {entry.type}
+                                  </span>
+                                </div>
+                                <div className="flex items-center justify-between">
+                                  <span className="text-secondary-text">
+                                    OG Owned
+                                  </span>
+                                  <span className="text-primary-text font-mono font-medium tabular-nums">
+                                    {formatInventoryCount(entry.ogOwned)}/
+                                    {formatInventoryCount(entry.total)}
+                                  </span>
+                                </div>
+                                <div className="flex items-center justify-between">
+                                  <span className="text-secondary-text">
+                                    Completion
+                                  </span>
+                                  <span className="text-primary-text font-mono font-medium tabular-nums">
+                                    {formatPercentage(
+                                      entry.total > 0
+                                        ? (entry.ogOwned / entry.total) * 100
+                                        : 0,
+                                    )}
+                                    %
+                                  </span>
+                                </div>
+                              </div>
+                            </TooltipContent>
+                          </Tooltip>
+                        );
+                      })
+                  ) : (
+                    <div className="bg-tertiary-bg flex h-full w-full items-center justify-center">
+                      <span className="text-secondary-text text-xs">
+                        No items owned
+                      </span>
+                    </div>
+                  )}
+                </div>
+
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                  <div className="border-border-card bg-tertiary-bg rounded-lg border p-3 text-center">
+                    <div className="text-secondary-text mb-1 text-xs">
+                      OG Owned
+                    </div>
+                    <div className="text-primary-text font-mono text-lg font-bold tabular-nums">
+                      {formatInventoryCount(ogOwnedProgress.ogOwned)}/
+                      {formatInventoryCount(ogOwnedProgress.total)}
+                    </div>
+                  </div>
+                  <div className="border-border-card bg-tertiary-bg rounded-lg border p-3 text-center">
+                    <div className="text-secondary-text mb-1 text-xs">
+                      OG Missing
+                    </div>
+                    <div className="text-primary-text font-mono text-lg font-bold tabular-nums">
+                      {formatInventoryCount(ogOwnedProgress.ogMissing)}/
+                      {formatInventoryCount(ogOwnedProgress.total)}
+                    </div>
+                  </div>
+                  <div className="border-border-card bg-tertiary-bg rounded-lg border p-3 text-center">
+                    <div className="text-secondary-text mb-1 text-xs">
+                      Completion
+                    </div>
+                    <div className="text-primary-text font-mono text-lg font-bold tabular-nums">
+                      {formatPercentage(ogOwnedProgress.percentage)}%
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
+                  {typeProgress.map((entry) => {
+                    const categoryIcon = getCategoryIcon(entry.type);
+                    const ogPct =
+                      entry.total > 0 ? (entry.ogOwned / entry.total) * 100 : 0;
+                    return (
+                      <div
+                        key={entry.type}
+                        className="border-border-card bg-tertiary-bg flex items-center justify-between gap-3 rounded-lg border p-3 text-sm"
+                      >
+                        <div className="flex items-center gap-2">
+                          {categoryIcon ? (
+                            <categoryIcon.Icon
+                              className="h-4 w-4 shrink-0"
+                              style={{ color: getCategoryColor(entry.type) }}
+                            />
+                          ) : (
+                            <div
+                              className="h-3 w-3 shrink-0 rounded-sm"
+                              style={{
+                                backgroundColor: getCategoryColor(entry.type),
+                              }}
+                            />
+                          )}
+                          <span className="text-primary-text font-medium">
+                            {entry.type}
+                          </span>
+                        </div>
+                        <div className="flex flex-col items-end">
+                          <span className="text-primary-text text-xs font-semibold">
+                            {formatPercentage(ogPct)}%
+                          </span>
+                          <span className="text-primary-text font-mono text-xs font-semibold tabular-nums">
+                            {formatInventoryCount(entry.ogOwned)}/
+                            {formatInventoryCount(entry.total)}
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="xl:col-span-4">
+          <div
+            className="inventory-breakdown-sticky-card border-border-card bg-secondary-bg rounded-lg border p-4"
+            style={{ top: "calc(var(--header-height, 0px) + 16px)" }}
+          >
+            <div className="mb-2 text-center">
+              <div className="text-primary-text text-sm font-semibold">
+                OG Owned Pie Chart
+              </div>
+            </div>
+
+            {ogOwnedProgress.ogOwned === 0 ? (
+              <div className="py-10 text-center">
+                <p className="text-secondary-text text-sm">
+                  No OG owned items.
+                </p>
+              </div>
+            ) : (
+              <>
+                <ChartContainer
+                  config={ogChartConfig}
+                  className="[&_.recharts-pie-label-text]:fill-foreground mx-auto aspect-square h-[min(360px,calc(100vw-3rem))] max-h-90 w-full max-w-90"
+                >
+                  <PieChart>
+                    <ChartTooltip
+                      content={
+                        <ChartTooltipContent
+                          hideLabel={true}
+                          formatter={(value, name, item) => {
+                            const payloadData = item?.payload as
+                              | {
+                                  fill?: string;
+                                  total?: number;
+                                  percentage?: number;
+                                }
+                              | undefined;
+                            const swatchColor =
+                              item?.color ||
+                              payloadData?.fill ||
+                              "var(--color-primary-text)";
+
+                            return (
+                              <div className="flex min-w-48 flex-col gap-1.5 text-xs">
+                                <div className="flex items-center gap-1.5">
+                                  <span
+                                    className="h-2.5 w-2.5 rounded-xs"
+                                    style={{ backgroundColor: swatchColor }}
+                                  />
+                                  <span className="text-primary-text font-medium">
+                                    {name}
+                                  </span>
+                                </div>
+                                <div className="flex w-full items-center justify-between">
+                                  <span className="text-secondary-text">
+                                    OG Owned
+                                  </span>
+                                  <span className="text-primary-text font-mono font-medium tabular-nums">
+                                    {formatInventoryCount(Number(value))}/
+                                    {formatInventoryCount(
+                                      payloadData?.total || 0,
+                                    )}
+                                  </span>
+                                </div>
+                                <div className="flex w-full items-center justify-between">
+                                  <span className="text-secondary-text">
+                                    Completion
+                                  </span>
+                                  <span className="text-primary-text font-mono font-medium tabular-nums">
+                                    {formatPercentage(
+                                      payloadData?.percentage || 0,
+                                    )}
+                                    %
+                                  </span>
+                                </div>
+                              </div>
+                            );
+                          }}
+                        />
+                      }
+                    />
+                    <Pie
+                      data={ogChartData}
+                      dataKey="value"
+                      nameKey="category"
+                      innerRadius="58%"
+                      outerRadius="88%"
+                      strokeWidth={2}
+                    >
+                      {ogChartData.map((entry) => (
+                        <Cell key={entry.category} fill={entry.fill} />
+                      ))}
+                    </Pie>
+                  </PieChart>
+                </ChartContainer>
+                <div className="mt-3 flex flex-wrap items-center justify-center gap-x-4 gap-y-2">
+                  {ogChartData.map((entry) => (
+                    <div
+                      key={entry.category}
+                      className="flex items-center gap-2 text-sm"
+                    >
+                      <span
+                        className="h-3 w-3 shrink-0 rounded-full"
+                        style={{ backgroundColor: entry.fill }}
+                        aria-hidden="true"
+                      />
+                      <span className="text-primary-text">
+                        {entry.category}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-12">
+        <div className="space-y-6 xl:col-span-8">
+          <div className="border-border-card bg-secondary-bg rounded-lg border p-4">
+            <div className="mb-3 flex items-center gap-1.5">
+              <h4 className="text-primary-text text-sm font-semibold">
+                Inventory Breakdown
+              </h4>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Icon
+                    icon="material-symbols:info-outline"
+                    className="text-secondary-text h-4 w-4 cursor-help"
+                    inline={true}
+                  />
+                </TooltipTrigger>
+                <TooltipContent
+                  side="top"
+                  className="bg-secondary-bg text-primary-text max-w-62.5 border-none shadow-(--color-card-shadow)"
+                >
+                  How your clean inventory&apos;s total value is distributed
+                  across item categories.
+                </TooltipContent>
+              </Tooltip>
+            </div>
             {Object.keys(percentages).length > 0 ? (
               <>
                 <div className="bg-tertiary-bg mb-4 flex h-8 w-full overflow-hidden rounded-lg">
@@ -1353,9 +1754,27 @@ export default function InventoryBreakdown({
           <div className="grid grid-cols-1 gap-6 xl:grid-cols-12">
             <div className="xl:col-span-8">
               <div className="border-border-card bg-secondary-bg space-y-4 rounded-lg border p-4">
-                <h4 className="text-primary-text text-sm font-semibold">
-                  Duplicate Inventory Breakdown
-                </h4>
+                <div className="flex items-center gap-1.5">
+                  <h4 className="text-primary-text text-sm font-semibold">
+                    Duplicate Inventory Breakdown
+                  </h4>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Icon
+                        icon="material-symbols:info-outline"
+                        className="text-secondary-text h-4 w-4 cursor-help"
+                        inline={true}
+                      />
+                    </TooltipTrigger>
+                    <TooltipContent
+                      side="top"
+                      className="bg-secondary-bg text-primary-text max-w-62.5 border-none shadow-(--color-card-shadow)"
+                    >
+                      How your duplicated items&apos; total value is distributed
+                      across item categories.
+                    </TooltipContent>
+                  </Tooltip>
+                </div>
                 <div className="bg-tertiary-bg flex h-8 w-full overflow-hidden rounded-lg">
                   {sortedDuplicateEntries.map(([category, percentage]) => (
                     <Tooltip key={category}>
