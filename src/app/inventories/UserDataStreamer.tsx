@@ -105,7 +105,6 @@ async function UserDataFetcher({
       userConnectionData={userConnectionData}
       initialDupeData={userDataResult.dupeData}
       currentSeason={currentSeason}
-      remainingUserIds={undefined}
       initialComments={initialComments}
       initialCommentUserMap={initialCommentUserMap}
       items={items}

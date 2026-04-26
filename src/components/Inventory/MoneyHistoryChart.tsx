@@ -493,6 +493,7 @@ const MoneyHistoryChart = ({ initialData = [] }: MoneyHistoryChartProps) => {
                   stroke="var(--color-money)"
                   strokeWidth={3}
                   dot={false}
+                  isAnimationActive={false}
                   activeDot={{
                     r: 5,
                     fill: "var(--color-secondary-bg)",
@@ -592,6 +593,7 @@ const MoneyHistoryChart = ({ initialData = [] }: MoneyHistoryChartProps) => {
                   fill="var(--color-money)"
                   fillOpacity={0.7}
                   radius={[6, 6, 0, 0]}
+                  isAnimationActive={false}
                 />
               </BarChart>
             )}

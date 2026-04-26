@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ThemeProvider } from "@mui/material";
 import React from "react";
-import { fetchMissingRobloxData } from "./actions";
+
 import { ENABLE_WS_SCAN, INVENTORY_API_URL, PUBLIC_API_URL } from "@/utils/api";
 import { buildApiUrlWithDevToken } from "@/utils/apiDevToken";
 import { RobloxUser, Item } from "@/types";
@@ -47,6 +47,18 @@ import MoneyHistoryChart from "@/components/Inventory/MoneyHistoryChart";
 import NetworthHistoryChart from "@/components/Inventory/NetworthHistoryChart";
 import InventoryBreakdown from "@/components/Inventory/InventoryBreakdown";
 
+const MemoInventoryItems = React.memo(InventoryItems);
+const MemoDuplicatesTab = React.memo(DuplicatesTab);
+const MemoDupedItemsTab = React.memo(DupedItemsTab);
+const MemoNetworthHistoryChart = React.memo(NetworthHistoryChart);
+const MemoMoneyHistoryChart = React.memo(MoneyHistoryChart);
+const MemoInventoryBreakdown = React.memo(InventoryBreakdown, (prev, next) => {
+  const keys = (Object.keys(next) as Array<keyof typeof next>).filter(
+    (k) => k !== "isActive",
+  );
+  return keys.every((k) => Object.is(prev[k], next[k]));
+});
+
 const ChangelogComments = dynamic(
   () => import("@/components/PageComments/ChangelogComments"),
   {
@@ -64,7 +76,7 @@ interface InventoryCheckerClientProps {
   currentSeason?: Season | null;
   error?: string;
   isLoading?: boolean;
-  remainingUserIds?: string[];
+
   initialComments?: CommentData[];
   initialCommentUserMap?: Record<string, UserData>;
   items?: Item[]; // Items data passed from server
@@ -81,7 +93,6 @@ export default function InventoryCheckerClient({
   currentSeason = null,
   error,
   isLoading: externalIsLoading,
-  remainingUserIds = [],
   initialComments = [],
   initialCommentUserMap = {},
   items = [],
@@ -98,15 +109,12 @@ export default function InventoryCheckerClient({
   const forceShowErrorHandledRef = useRef<boolean>(false);
   const lastShownErrorRef = useRef<string | null>(null);
   const lastShownSuccessRef = useRef<string | null>(null);
-  const [robloxUsers, setRobloxUsers] = useState<Record<string, RobloxUser>>(
-    initialRobloxUsers || {},
-  );
-
   const [itemsData] = useState<Item[]>(items);
 
   const [networthData] = useState<UserNetworthData[]>(initialNetworthData);
   const [moneyHistoryData] = useState<MoneyHistory[]>(initialMoneyHistoryData);
   const [activeTab, setActiveTab] = useState(0);
+  const [mountedTabs, setMountedTabs] = useState<Set<number>>(new Set([0]));
   const [showNonOgOnly, setShowNonOgOnly] = useState(false);
   const [queuePosition, setQueuePosition] = useState<{
     position: number;
@@ -213,6 +221,18 @@ export default function InventoryCheckerClient({
   // Use refreshed data if available, otherwise use initial data
   const currentData = initialData;
 
+  const duplicatesTabData = useMemo(
+    () =>
+      currentData
+        ? {
+            data: currentData.data,
+            user_id: currentData.user_id,
+            duplicates: currentData.duplicates,
+          }
+        : null,
+    [currentData],
+  );
+
   // Keep search input in sync when route/context changes.
   useEffect(() => {
     setSearchId(originalSearchTerm || robloxId || "");
@@ -230,50 +250,22 @@ export default function InventoryCheckerClient({
 
     const userIds = new Set<string>();
 
-    // Add main user if available
-    if (robloxId) {
-      userIds.add(robloxId);
-    }
+    if (robloxId) userIds.add(robloxId);
 
-    // Add all item owners from inventory
-    currentData.data.forEach((item) => {
-      // Check info array for Current Owner
-      const currentOwnerInfo = item.info?.find(
-        (info) => info.title === "Current Owner",
-      );
-      if (currentOwnerInfo?.value && /^\d+$/.test(currentOwnerInfo.value)) {
-        userIds.add(currentOwnerInfo.value);
-      }
-
-      // Check info array for Original Owner
-      const originalOwnerInfo = item.info?.find(
-        (info) => info.title === "Original Owner",
-      );
-      if (originalOwnerInfo?.value && /^\d+$/.test(originalOwnerInfo.value)) {
-        userIds.add(originalOwnerInfo.value);
-      }
-    });
-
-    // Add all item owners from duplicate items
-    if (currentData.duplicates) {
-      currentData.duplicates.forEach((item) => {
-        // Check info array for Current Owner
-        const currentOwnerInfo = item.info?.find(
-          (info) => info.title === "Current Owner",
-        );
-        if (currentOwnerInfo?.value && /^\d+$/.test(currentOwnerInfo.value)) {
-          userIds.add(currentOwnerInfo.value);
-        }
-
-        // Check info array for Original Owner
-        const originalOwnerInfo = item.info?.find(
-          (info) => info.title === "Original Owner",
-        );
-        if (originalOwnerInfo?.value && /^\d+$/.test(originalOwnerInfo.value)) {
-          userIds.add(originalOwnerInfo.value);
+    const addOwners = (item: { info?: { title: string; value: string }[] }) => {
+      item.info?.forEach((info) => {
+        if (
+          (info.title === "Current Owner" || info.title === "Original Owner") &&
+          info.value &&
+          /^\d+$/.test(info.value)
+        ) {
+          userIds.add(info.value);
         }
       });
-    }
+    };
+
+    currentData.data.forEach(addOwners);
+    currentData.duplicates?.forEach(addOwners);
 
     return Array.from(userIds);
   }, [currentData, robloxId, isInventoryNotFoundError]);
@@ -282,9 +274,13 @@ export default function InventoryCheckerClient({
   const { robloxUsers: batchedUsers } = useBatchUserData(allUserIds);
 
   const mergedRobloxUsers = useMemo(
-    () => ({ ...robloxUsers, ...batchedUsers }),
-    [robloxUsers, batchedUsers],
+    () => Object.assign({}, initialRobloxUsers, batchedUsers),
+    [initialRobloxUsers, batchedUsers],
   );
+
+  // Defer robloxUsers updates so batch-load re-renders are low-priority and
+  // never block tab switches or other user interactions.
+  const deferredRobloxUsers = React.useDeferredValue(mergedRobloxUsers);
 
   // Function to handle data refresh
 
@@ -348,10 +344,11 @@ export default function InventoryCheckerClient({
     const handleHashChange = () => {
       const hash = window.location.hash.slice(1); // Remove the # symbol
 
+      let nextTab = 0;
       if (hash === "copies" && tabIndex.copies !== null) {
-        setActiveTab(tabIndex.copies);
+        nextTab = tabIndex.copies;
       } else if (hash === "dupes" && tabIndex.dupes !== null) {
-        setActiveTab(tabIndex.dupes);
+        nextTab = tabIndex.dupes;
       } else if (
         (hash === "money" ||
           hash === "networth" ||
@@ -359,14 +356,16 @@ export default function InventoryCheckerClient({
           hash === "charts") &&
         tabIndex.graphs !== null
       ) {
-        setActiveTab(tabIndex.graphs);
+        nextTab = tabIndex.graphs;
       } else if (hash === "breakdown" && tabIndex.breakdown !== null) {
-        setActiveTab(tabIndex.breakdown);
+        nextTab = tabIndex.breakdown;
       } else if (hash === "comments" && tabIndex.comments !== null) {
-        setActiveTab(tabIndex.comments);
-      } else {
-        setActiveTab(0);
+        nextTab = tabIndex.comments;
       }
+      setActiveTab(nextTab);
+      setMountedTabs((prev) =>
+        prev.has(nextTab) ? prev : new Set([...prev, nextTab]),
+      );
     };
 
     // Handle initial hash
@@ -592,6 +591,9 @@ export default function InventoryCheckerClient({
   // Function to handle tab changes
   const handleTabChange = (_: React.SyntheticEvent, newValue: number) => {
     setActiveTab(newValue);
+    setMountedTabs((prev) =>
+      prev.has(newValue) ? prev : new Set([...prev, newValue]),
+    );
 
     // Update hash based on selected tab
     if (newValue === 0) {
@@ -614,59 +616,19 @@ export default function InventoryCheckerClient({
   // Helper function to get user display name with progressive loading
   const getUserDisplay = useCallback(
     (userId: string) => {
-      const user = robloxUsers[userId] || initialRobloxUsers?.[userId];
+      const user = deferredRobloxUsers[userId];
       return user?.displayName || user?.name || userId;
     },
-    [robloxUsers, initialRobloxUsers],
+    [deferredRobloxUsers],
   );
 
   const getUsername = useCallback(
     (userId: string) => {
-      const user = robloxUsers[userId] || initialRobloxUsers?.[userId];
+      const user = deferredRobloxUsers[userId];
       return user?.name || userId;
     },
-    [robloxUsers, initialRobloxUsers],
+    [deferredRobloxUsers],
   );
-
-  // Background loading for remaining original owners (after initial 1000)
-  useEffect(() => {
-    if (remainingUserIds.length === 0) return;
-
-    const loadRemainingUsers = async () => {
-      const BATCH_SIZE = 100; // Load 100 users at a time
-      const DELAY_BETWEEN_BATCHES = 2000; // 2 second delay between batches
-
-      for (let i = 0; i < remainingUserIds.length; i += BATCH_SIZE) {
-        const batch = remainingUserIds.slice(i, i + BATCH_SIZE);
-
-        try {
-          const result = await fetchMissingRobloxData(batch);
-
-          // Update state with new user data
-          if (result.userData && typeof result.userData === "object") {
-            setRobloxUsers((prev) => ({ ...prev, ...result.userData }));
-          }
-        } catch (error) {
-          console.error(
-            `[INVENTORY] Failed to load batch ${Math.floor(i / BATCH_SIZE) + 1}:`,
-            error,
-          );
-        }
-
-        // Add delay between batches to avoid overwhelming the API
-        if (i + BATCH_SIZE < remainingUserIds.length) {
-          await new Promise((resolve) =>
-            setTimeout(resolve, DELAY_BETWEEN_BATCHES),
-          );
-        }
-      }
-    };
-
-    // Start loading after a short delay to let the initial page load
-    const timeoutId = setTimeout(loadRemainingUsers, 3000);
-
-    return () => clearTimeout(timeoutId);
-  }, [remainingUserIds, setRobloxUsers]);
 
   // Items data is now passed as props from server-side, no need to fetch
 
@@ -684,10 +646,10 @@ export default function InventoryCheckerClient({
     router.push(`/inventories/${input}`);
   };
 
-  const handleItemClick = (item: InventoryItem) => {
+  const handleItemClick = useCallback((item: InventoryItem) => {
     setSelectedItem(item);
     setShowHistoryModal(true);
-  };
+  }, []);
 
   const closeHistoryModal = () => {
     setShowHistoryModal(false);
@@ -1215,7 +1177,7 @@ export default function InventoryCheckerClient({
                 {/* User Stats */}
                 <UserStats
                   initialData={currentData}
-                  robloxUsers={robloxUsers}
+                  robloxUsers={initialRobloxUsers ?? {}}
                   userConnectionData={userConnectionData || null}
                   itemsData={itemsData}
                   currentSeason={activeSeason}
@@ -1240,78 +1202,109 @@ export default function InventoryCheckerClient({
 
                   {/* Tab Content */}
                   <div className="mt-4">
-                    {effectiveActiveTab === 0 && (
-                      <InventoryItems
+                    <div className={effectiveActiveTab === 0 ? "" : "hidden"}>
+                      <MemoInventoryItems
                         initialData={currentData}
-                        robloxUsers={mergedRobloxUsers}
+                        robloxUsers={deferredRobloxUsers}
                         onItemClick={handleItemClick}
                         itemsData={itemsData}
                         isOwnInventory={isOwnInventory}
                         showNonOgOnlyFromParent={showNonOgOnly}
                       />
-                    )}
+                    </div>
 
                     {tabIndex.copies !== null &&
-                      effectiveActiveTab === tabIndex.copies && (
-                        <DuplicatesTab
-                          initialData={{
-                            data: currentData.data,
-                            user_id: currentData.user_id,
-                            duplicates: currentData.duplicates,
-                          }}
-                          robloxUsers={mergedRobloxUsers}
-                          onItemClick={handleItemClick}
-                          itemsData={itemsData}
-                        />
+                      mountedTabs.has(tabIndex.copies) && (
+                        <div
+                          className={
+                            effectiveActiveTab === tabIndex.copies
+                              ? ""
+                              : "hidden"
+                          }
+                        >
+                          {duplicatesTabData && (
+                            <MemoDuplicatesTab
+                              initialData={duplicatesTabData}
+                              robloxUsers={deferredRobloxUsers}
+                              onItemClick={handleItemClick}
+                              itemsData={itemsData}
+                            />
+                          )}
+                        </div>
                       )}
 
                     {tabIndex.dupes !== null &&
-                      effectiveActiveTab === tabIndex.dupes &&
+                      mountedTabs.has(tabIndex.dupes) &&
                       currentData.duplicates && (
-                        <DupedItemsTab
-                          duplicates={currentData.duplicates}
-                          robloxUsers={mergedRobloxUsers}
-                          onItemClick={handleItemClick}
-                          itemsData={itemsData}
-                          userId={currentData.user_id}
-                        />
+                        <div
+                          className={
+                            effectiveActiveTab === tabIndex.dupes
+                              ? ""
+                              : "hidden"
+                          }
+                        >
+                          <MemoDupedItemsTab
+                            duplicates={currentData.duplicates}
+                            robloxUsers={deferredRobloxUsers}
+                            onItemClick={handleItemClick}
+                            itemsData={itemsData}
+                            userId={currentData.user_id}
+                          />
+                        </div>
                       )}
 
                     {tabIndex.graphs !== null &&
-                      effectiveActiveTab === tabIndex.graphs &&
+                      mountedTabs.has(tabIndex.graphs) &&
                       robloxId && (
-                        <div className="space-y-6">
-                          <div className="space-y-3">
-                            <h4 className="text-primary-text text-sm font-semibold">
-                              Networth Graph
-                            </h4>
-                            <NetworthHistoryChart
-                              userId={robloxId}
-                              initialData={networthData}
-                            />
-                          </div>
+                        <div
+                          className={
+                            effectiveActiveTab === tabIndex.graphs
+                              ? ""
+                              : "hidden"
+                          }
+                        >
+                          <div className="space-y-6">
+                            <div className="space-y-3">
+                              <h4 className="text-primary-text text-sm font-semibold">
+                                Networth Graph
+                              </h4>
+                              <MemoNetworthHistoryChart
+                                userId={robloxId}
+                                initialData={networthData}
+                              />
+                            </div>
 
-                          <div className="space-y-3">
-                            <h4 className="text-primary-text text-sm font-semibold">
-                              Money Graph
-                            </h4>
-                            <MoneyHistoryChart
-                              userId={robloxId}
-                              initialData={moneyHistoryData}
-                            />
+                            <div className="space-y-3">
+                              <h4 className="text-primary-text text-sm font-semibold">
+                                Money Graph
+                              </h4>
+                              <MemoMoneyHistoryChart
+                                userId={robloxId}
+                                initialData={moneyHistoryData}
+                              />
+                            </div>
                           </div>
                         </div>
                       )}
 
                     {tabIndex.breakdown !== null &&
-                      effectiveActiveTab === tabIndex.breakdown &&
+                      mountedTabs.has(tabIndex.breakdown) &&
                       robloxId && (
-                        <InventoryBreakdown
-                          networthData={networthData}
-                          username={getUserDisplay(robloxId)}
-                          itemsData={itemsData}
-                          inventoryData={currentData}
-                        />
+                        <div
+                          className={
+                            effectiveActiveTab === tabIndex.breakdown
+                              ? ""
+                              : "hidden"
+                          }
+                        >
+                          <MemoInventoryBreakdown
+                            networthData={networthData}
+                            username={getUserDisplay(robloxId)}
+                            itemsData={itemsData}
+                            inventoryData={currentData}
+                            isActive={effectiveActiveTab === tabIndex.breakdown}
+                          />
+                        </div>
                       )}
 
                     {tabIndex.comments !== null &&
