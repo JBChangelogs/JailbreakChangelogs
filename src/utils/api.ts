@@ -55,6 +55,7 @@ import {
 } from "@/types";
 import { UserData } from "@/types/auth";
 import { fetchWithRetry } from "@/utils/fetchWithRetry";
+import { buildApiUrlWithDevToken } from "@/utils/apiDevToken";
 
 export const BASE_API_URL =
   process.env.NEXT_PHASE === "phase-production-build" ||
@@ -2145,19 +2146,17 @@ export async function fetchNotificationHistory(
   size: number = 5,
 ): Promise<NotificationHistory> {
   try {
-    const response = await fetch(
-      `/api/notifications/history?page=${page}&size=${size}`,
-      {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        cache: "no-store",
-      },
+    const url = buildApiUrlWithDevToken(
+      PUBLIC_API_URL!,
+      `/notifications/history?page=${page}&size=${size}`,
     );
+    const response = await fetch(url, {
+      method: "GET",
+      credentials: "include",
+      cache: "no-store",
+    });
 
     if (!response.ok) {
-      // Return empty notification history on error
       return {
         items: [],
         total: 0,
@@ -2172,7 +2171,6 @@ export async function fetchNotificationHistory(
     return data as NotificationHistory;
   } catch (error) {
     console.error("Error fetching notification history:", error);
-    // Return empty notification history on error
     return {
       items: [],
       total: 0,
@@ -2184,28 +2182,22 @@ export async function fetchNotificationHistory(
   }
 }
 
-/**
- * Fetches unread notifications for the current user
- * Uses the Next.js API route which handles authentication via HttpOnly cookies
- */
 export async function fetchUnreadNotifications(
   page: number = 1,
   size: number = 5,
 ): Promise<NotificationHistory> {
   try {
-    const response = await fetch(
-      `/api/notifications?page=${page}&size=${size}`,
-      {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        cache: "no-store",
-      },
+    const url = buildApiUrlWithDevToken(
+      PUBLIC_API_URL!,
+      `/notifications?page=${page}&size=${size}`,
     );
+    const response = await fetch(url, {
+      method: "GET",
+      credentials: "include",
+      cache: "no-store",
+    });
 
     if (!response.ok) {
-      // Return empty notification history on error
       return {
         items: [],
         total: 0,
@@ -2220,7 +2212,6 @@ export async function fetchUnreadNotifications(
     return data as NotificationHistory;
   } catch (error) {
     console.error("Error fetching unread notifications:", error);
-    // Return empty notification history on error
     return {
       items: [],
       total: 0,
@@ -2232,17 +2223,15 @@ export async function fetchUnreadNotifications(
   }
 }
 
-/**
- * Fetch unread notification count for the current user
- * Uses the Next.js API route which handles authentication via HttpOnly cookies
- */
 export async function fetchUnreadNotificationCount(): Promise<number> {
   try {
-    const response = await fetch(`/api/notifications/unread`, {
+    const url = buildApiUrlWithDevToken(
+      PUBLIC_API_URL!,
+      "/notifications/unread",
+    );
+    const response = await fetch(url, {
       method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      credentials: "include",
       cache: "no-store",
     });
 
@@ -2260,17 +2249,24 @@ export async function fetchUnreadNotificationCount(): Promise<number> {
   }
 }
 
-/**
- * Clears all notification history
- * Uses the Next.js API route which handles authentication via HttpOnly cookies
- */
 export async function clearNotificationHistory(): Promise<boolean> {
   try {
-    const response = await fetch(`/api/notifications/history/clear`, {
+    const url = buildApiUrlWithDevToken(
+      PUBLIC_API_URL!,
+      "/notifications/history/clear",
+    );
+    const cookieMatch =
+      typeof document !== "undefined"
+        ? document.cookie.match(/(?:^|;\s*)jbcl_token=([^;]+)/)
+        : null;
+    const token = cookieMatch
+      ? decodeURIComponent(cookieMatch[1])
+      : (process.env.NEXT_PUBLIC_DEV_TOKEN ?? null);
+    const response = await fetch(url, {
       method: "DELETE",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ token }),
     });
 
     return response.ok;
