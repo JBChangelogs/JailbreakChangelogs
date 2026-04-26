@@ -228,6 +228,12 @@ export default function InventoryBreakdown({
     return ids;
   }, [ownedItemIds]);
 
+  const effectiveOgOwnedItemIds = useMemo(() => {
+    const ids = new Set<number>(ogOwnedItemIds);
+    UNVERIFIABLE_COLLECTION_ITEM_IDS.forEach((id) => ids.add(id));
+    return ids;
+  }, [ogOwnedItemIds]);
+
   const typeProgress = useMemo(() => {
     const byType = new Map<string, Item[]>();
     eligibleItems.forEach((item) => {
@@ -242,7 +248,7 @@ export default function InventoryBreakdown({
         return effectiveOwnedItemIds.has(item.id);
       }).length;
       const ogOwnedCount = typeItems.filter((item) =>
-        ogOwnedItemIds.has(item.id),
+        effectiveOgOwnedItemIds.has(item.id),
       ).length;
       const missing = typeItems
         .filter((item) => {
@@ -273,7 +279,7 @@ export default function InventoryBreakdown({
     });
 
     return progress;
-  }, [effectiveOwnedItemIds, ogOwnedItemIds, eligibleItems]);
+  }, [effectiveOwnedItemIds, effectiveOgOwnedItemIds, eligibleItems]);
 
   const overallProgress = useMemo(() => {
     const total = eligibleItems.length;
@@ -288,12 +294,12 @@ export default function InventoryBreakdown({
   const ogOwnedProgress = useMemo(() => {
     const total = eligibleItems.length;
     const ogOwned = eligibleItems.filter((item) =>
-      ogOwnedItemIds.has(item.id),
+      effectiveOgOwnedItemIds.has(item.id),
     ).length;
     const ogMissing = total - ogOwned;
     const percentage = total > 0 ? (ogOwned / total) * 100 : 0;
     return { total, ogOwned, ogMissing, percentage };
-  }, [eligibleItems, ogOwnedItemIds]);
+  }, [eligibleItems, effectiveOgOwnedItemIds]);
 
   const missingItemsAll = useMemo(() => {
     const missing = typeProgress.flatMap((progress) =>
