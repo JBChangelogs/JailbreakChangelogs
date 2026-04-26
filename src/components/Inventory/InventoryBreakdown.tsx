@@ -179,6 +179,8 @@ export default function InventoryBreakdown({
   const [unverifiableSearch, setUnverifiableSearch] = useState("");
   const [unverifiableTypeFilter, setUnverifiableTypeFilter] =
     useState<string>("all");
+  const [ogMissingSearch, setOgMissingSearch] = useState("");
+  const [ogMissingTypeFilter, setOgMissingTypeFilter] = useState<string>("all");
 
   const eligibleItems = useMemo(() => {
     if (includeUntradable) return itemsData;
@@ -379,6 +381,59 @@ export default function InventoryBreakdown({
       );
     });
   }, [unverifiableItemsAll, unverifiableSearch, unverifiableTypeFilter]);
+
+  const ogMissingItemsAll = useMemo(() => {
+    const items = eligibleItems
+      .filter((item) => !ogOwnedItemIds.has(item.id))
+      .map((item) => ({
+        id: item.id,
+        name: item.name,
+        type: item.type?.trim() || "Unknown",
+      }));
+    items.sort((a, b) => {
+      const aRank = VALUES_TYPE_ORDER_RANK.get(a.type.toLowerCase()) ?? 999;
+      const bRank = VALUES_TYPE_ORDER_RANK.get(b.type.toLowerCase()) ?? 999;
+      if (aRank !== bRank) return aRank - bRank;
+      const typeCompare = a.type.localeCompare(b.type);
+      if (typeCompare !== 0) return typeCompare;
+      return a.name.localeCompare(b.name);
+    });
+    return items;
+  }, [eligibleItems, ogOwnedItemIds]);
+
+  const ogMissingTypeOptions = useMemo(() => {
+    const seen = new Set<string>();
+    const uniqueTypes: string[] = [];
+    ogMissingItemsAll.forEach((item) => {
+      if (seen.has(item.type)) return;
+      seen.add(item.type);
+      uniqueTypes.push(item.type);
+    });
+    uniqueTypes.sort((a, b) => {
+      const aRank = VALUES_TYPE_ORDER_RANK.get(a.toLowerCase()) ?? 999;
+      const bRank = VALUES_TYPE_ORDER_RANK.get(b.toLowerCase()) ?? 999;
+      if (aRank !== bRank) return aRank - bRank;
+      return a.localeCompare(b);
+    });
+    return uniqueTypes;
+  }, [ogMissingItemsAll]);
+
+  const filteredOgMissingItems = useMemo(() => {
+    const typeFilter = ogMissingTypeFilter.trim().toLowerCase();
+    const typeFiltered =
+      typeFilter === "all"
+        ? ogMissingItemsAll
+        : ogMissingItemsAll.filter(
+            (item) => item.type.toLowerCase() === typeFilter,
+          );
+    const query = ogMissingSearch.trim().toLowerCase();
+    if (!query) return typeFiltered;
+    return typeFiltered.filter(
+      (item) =>
+        item.name.toLowerCase().includes(query) ||
+        item.type.toLowerCase().includes(query),
+    );
+  }, [ogMissingItemsAll, ogMissingSearch, ogMissingTypeFilter]);
 
   const scrollToUnverifiableSection = () => {
     const target = unverifiableSectionRef.current;
@@ -1413,6 +1468,173 @@ export default function InventoryBreakdown({
                       </div>
                     );
                   })}
+                </div>
+
+                <div className="border-border-card bg-tertiary-bg rounded-lg border p-3">
+                  <div className="mb-2 flex items-center gap-1.5">
+                    <div className="text-primary-text text-sm font-semibold">
+                      Trackable Missing OG Items (
+                      {formatInventoryCount(ogMissingItemsAll.length)})
+                    </div>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Icon
+                          icon="material-symbols:info-outline"
+                          className="text-secondary-text h-4 w-4 cursor-help"
+                          inline={true}
+                        />
+                      </TooltipTrigger>
+                      <TooltipContent
+                        side="top"
+                        className="bg-secondary-bg text-primary-text max-w-62.5 border-none shadow-(--color-card-shadow)"
+                      >
+                        Items in Jailbreak where this player is not the original
+                        owner, including items not in their inventory.
+                      </TooltipContent>
+                    </Tooltip>
+                  </div>
+                  <div className="mb-2">
+                    <div className="flex w-full flex-col gap-4 sm:flex-row">
+                      <div className="relative w-full sm:w-2/3">
+                        <input
+                          type="text"
+                          placeholder="Search missing OG items..."
+                          value={ogMissingSearch}
+                          onChange={(e) => setOgMissingSearch(e.target.value)}
+                          maxLength={80}
+                          className="border-border-card bg-secondary-bg text-primary-text placeholder-secondary-text focus:border-button-info w-full rounded-lg border px-3 py-2 pr-9 pl-9 text-sm transition-all duration-300 focus:outline-none"
+                        />
+                        <Icon
+                          icon="heroicons:magnifying-glass"
+                          className="text-secondary-text absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2"
+                        />
+                        {ogMissingSearch && (
+                          <button
+                            type="button"
+                            onClick={() => setOgMissingSearch("")}
+                            className="text-secondary-text hover:text-primary-text absolute top-1/2 right-2 h-6 w-6 -translate-y-1/2 cursor-pointer"
+                            aria-label="Clear non-OG item search"
+                          >
+                            <Icon icon="heroicons:x-mark" />
+                          </button>
+                        )}
+                      </div>
+                      <div className="w-full sm:w-1/3">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <button
+                              type="button"
+                              className="border-border-card bg-secondary-bg text-primary-text hover:bg-quaternary-bg flex w-full items-center justify-between gap-2 rounded-lg border px-3 py-2 text-sm"
+                              aria-label="Filter non-OG items by type"
+                            >
+                              <span className="truncate">
+                                {ogMissingTypeFilter === "all"
+                                  ? "All types"
+                                  : ogMissingTypeFilter}
+                              </span>
+                              <Icon
+                                icon="heroicons:chevron-down"
+                                className="text-secondary-text h-4 w-4"
+                                inline={true}
+                              />
+                            </button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent
+                            align="end"
+                            className="border-border-card bg-secondary-bg text-primary-text scrollbar-thin max-h-70 w-(--radix-popper-anchor-width) min-w-56 overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
+                          >
+                            <DropdownMenuRadioGroup
+                              value={ogMissingTypeFilter}
+                              onValueChange={(value) =>
+                                setOgMissingTypeFilter(value)
+                              }
+                            >
+                              <DropdownMenuRadioItem
+                                value="all"
+                                className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
+                              >
+                                All types
+                              </DropdownMenuRadioItem>
+                              {ogMissingTypeOptions.map((type) => (
+                                <DropdownMenuRadioItem
+                                  key={type}
+                                  value={type}
+                                  className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
+                                >
+                                  {type}
+                                </DropdownMenuRadioItem>
+                              ))}
+                            </DropdownMenuRadioGroup>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
+                    </div>
+                    {(ogMissingSearch.trim() ||
+                      ogMissingTypeFilter !== "all") && (
+                      <div className="text-secondary-text mt-1 text-xs">
+                        Showing{" "}
+                        {formatInventoryCount(filteredOgMissingItems.length)} of{" "}
+                        {formatInventoryCount(ogMissingItemsAll.length)}
+                      </div>
+                    )}
+                  </div>
+                  {ogMissingItemsAll.length === 0 ? (
+                    <p className="text-secondary-text text-sm">
+                      This player is the original owner of every item in
+                      Jailbreak.
+                    </p>
+                  ) : filteredOgMissingItems.length === 0 ? (
+                    <p className="text-secondary-text text-sm">
+                      No items match your search.
+                    </p>
+                  ) : (
+                    <div className="scrollbar-thin max-h-65 overflow-auto pr-1 text-sm">
+                      <ol className="divide-border-card/60 space-y-0 divide-y">
+                        {filteredOgMissingItems.map((item, idx) => (
+                          <li
+                            key={item.id}
+                            className="flex flex-col gap-2 py-2 sm:flex-row sm:items-center sm:gap-3"
+                          >
+                            <div className="flex min-w-0 items-center gap-3">
+                              <span className="text-secondary-text w-10 shrink-0 text-right font-mono text-xs font-medium tabular-nums">
+                                {idx + 1}.
+                              </span>
+                              <Link
+                                href={`/item/${encodeURIComponent(item.type.toLowerCase())}/${encodeURIComponent(item.name)}`}
+                                prefetch={false}
+                                className="text-primary-text hover:text-link min-w-0 flex-1 truncate text-sm font-semibold transition-colors"
+                              >
+                                {item.name}
+                              </Link>
+                            </div>
+                            <div className="flex justify-end sm:ml-auto">
+                              <span
+                                className="text-primary-text bg-tertiary-bg/40 inline-flex h-6 shrink-0 items-center gap-1.5 rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl"
+                                style={{
+                                  borderColor: getCategoryColor(item.type),
+                                }}
+                              >
+                                {(() => {
+                                  const categoryIcon = getCategoryIcon(
+                                    item.type,
+                                  );
+                                  return categoryIcon ? (
+                                    <categoryIcon.Icon
+                                      className="h-3 w-3"
+                                      style={{
+                                        color: getCategoryColor(item.type),
+                                      }}
+                                    />
+                                  ) : null;
+                                })()}
+                                {item.type}
+                              </span>
+                            </div>
+                          </li>
+                        ))}
+                      </ol>
+                    </div>
+                  )}
                 </div>
               </div>
             )}
