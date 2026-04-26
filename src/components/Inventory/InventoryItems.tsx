@@ -22,6 +22,17 @@ interface InventoryItemsProps {
   showNonOgOnlyFromParent?: boolean;
 }
 
+const parseNumericValue = (value: string | null): number => {
+  if (!value || value === "N/A") return -1;
+  const lower = value.toLowerCase();
+  const num = parseFloat(lower.replace(/[^0-9.]/g, ""));
+  if (Number.isNaN(num)) return -1;
+  if (lower.includes("k")) return num * 1_000;
+  if (lower.includes("m")) return num * 1_000_000;
+  if (lower.includes("b")) return num * 1_000_000_000;
+  return num;
+};
+
 export default function InventoryItems({
   initialData,
   robloxUsers,
@@ -238,17 +249,17 @@ export default function InventoryItems({
   };
 
   // Count duplicates across entire inventory for consistent numbering
-  const duplicateCounts = (() => {
+  const duplicateCounts = useMemo(() => {
     const counts = new Map<string, number>();
     mergedInventoryData.forEach((item) => {
       const key = `${item.categoryTitle}-${item.title}`;
       counts.set(key, (counts.get(key) || 0) + 1);
     });
     return counts;
-  })();
+  }, [mergedInventoryData]);
 
   // Recalculate counts when hiding duplicates
-  const filteredDuplicateCounts = (() => {
+  const filteredDuplicateCounts = useMemo(() => {
     if (!hideDuplicates) return duplicateCounts;
 
     const counts = new Map<string, number>();
@@ -262,22 +273,10 @@ export default function InventoryItems({
       }
     });
     return counts;
-  })();
-
-  // Parse values like "23.4m" -> 23400000
-  const parseNumericValue = (value: string | null): number => {
-    if (!value || value === "N/A") return -1;
-    const lower = value.toLowerCase();
-    const num = parseFloat(lower.replace(/[^0-9.]/g, ""));
-    if (Number.isNaN(num)) return -1;
-    if (lower.includes("k")) return num * 1_000;
-    if (lower.includes("m")) return num * 1_000_000;
-    if (lower.includes("b")) return num * 1_000_000_000;
-    return num;
-  };
+  }, [hideDuplicates, duplicateCounts, mergedInventoryData]);
 
   // Filter and sort logic
-  const filteredAndSortedItems = (() => {
+  const filteredAndSortedItems = useMemo(() => {
     const getLatestTime = (item: InventoryItem) => {
       if (item.history && item.history.length > 0) {
         const maxHistoryTime = Math.max(
@@ -1058,13 +1057,28 @@ export default function InventoryItems({
           return 0;
       }
     });
-  })();
+  }, [
+    showMissingItems,
+    mergedInventoryData,
+    currentItemsData,
+    searchTerm,
+    selectedCategories,
+    showOnlyLimited,
+    showOnlySeasonal,
+    showOnlyTradable,
+    showOnlyUntradable,
+    showOnlyOriginal,
+    showOnlyNonOriginal,
+    hideDuplicates,
+    sortOrder,
+    itemUnlockMetadataById,
+  ]);
 
   // Use the pre-calculated duplicate counts from full inventory
   const itemCounts = hideDuplicates ? filteredDuplicateCounts : duplicateCounts;
 
   // Create a map to track the order of duplicates based on creation date (using ALL items from full inventory)
-  const duplicateOrders = (() => {
+  const duplicateOrders = useMemo(() => {
     const orders = new Map<string, number>();
 
     // Group items by name using ALL items from full inventory
@@ -1095,10 +1109,10 @@ export default function InventoryItems({
     });
 
     return orders;
-  })();
+  }, [mergedInventoryData]);
 
   // Available categories
-  const availableCategories = (() => {
+  const availableCategories = useMemo(() => {
     const categories = new Set<string>();
     currentItemsData.forEach((item) => {
       if (item.type) {
@@ -1106,7 +1120,7 @@ export default function InventoryItems({
       }
     });
     return Array.from(categories).sort();
-  })();
+  }, [currentItemsData]);
 
   return (
     <div className="border-border-card bg-secondary-bg rounded-lg border p-6">

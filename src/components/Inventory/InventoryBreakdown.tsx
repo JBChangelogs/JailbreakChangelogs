@@ -32,6 +32,7 @@ interface InventoryBreakdownProps {
   username: string;
   itemsData: Item[];
   inventoryData: InventoryData;
+  isActive?: boolean;
 }
 
 const UNVERIFIABLE_COLLECTION_ITEM_IDS = new Set<number>([
@@ -62,7 +63,14 @@ export default function InventoryBreakdown({
   networthData,
   itemsData,
   inventoryData,
+  isActive = true,
 }: InventoryBreakdownProps) {
+  // Once the tab becomes active, keep charts rendered permanently to avoid
+  // re-mounting them on every tab switch (isActive changes are ignored by memo).
+  const hasBeenActiveRef = useRef(isActive);
+  if (isActive) hasBeenActiveRef.current = true;
+  const renderCharts = hasBeenActiveRef.current;
+
   // Get the latest networth data
   const latestData =
     networthData && networthData.length > 0 ? networthData[0] : null;
@@ -384,7 +392,11 @@ export default function InventoryBreakdown({
 
   const ogMissingItemsAll = useMemo(() => {
     const items = eligibleItems
-      .filter((item) => !ogOwnedItemIds.has(item.id))
+      .filter(
+        (item) =>
+          !ogOwnedItemIds.has(item.id) &&
+          !UNVERIFIABLE_COLLECTION_ITEM_IDS.has(item.id),
+      )
       .map((item) => ({
         id: item.id,
         name: item.name,
@@ -1174,125 +1186,129 @@ export default function InventoryBreakdown({
               </div>
             </div>
 
-            {overallProgress.missingCount === 0 ? (
-              <div className="py-10 text-center">
-                <p className="text-secondary-text text-sm">No missing items.</p>
-              </div>
-            ) : (
-              <>
-                <ChartContainer
-                  config={collectionChartConfig}
-                  className="[&_.recharts-pie-label-text]:fill-foreground mx-auto aspect-square h-[min(360px,calc(100vw-3rem))] max-h-90 w-full max-w-90"
-                >
-                  <PieChart>
-                    <ChartTooltip
-                      content={
-                        <ChartTooltipContent
-                          hideLabel={true}
-                          formatter={(value, name, item) => {
-                            const payloadData = item?.payload as
-                              | {
-                                  fill?: string;
-                                  owned?: number;
-                                  total?: number;
-                                  missingCount?: number;
-                                  percentage?: number;
-                                }
-                              | undefined;
-                            const swatchColor =
-                              item?.color ||
-                              payloadData?.fill ||
-                              "var(--color-primary-text)";
-
-                            return (
-                              <div className="flex min-w-48 flex-col gap-1.5 text-xs">
-                                <div className="flex items-center gap-1.5">
-                                  <span
-                                    className="h-2.5 w-2.5 rounded-xs"
-                                    style={{ backgroundColor: swatchColor }}
-                                  />
-                                  <span className="text-primary-text font-medium">
-                                    {name}
-                                  </span>
-                                </div>
-                                <div className="flex w-full items-center justify-between">
-                                  <span className="text-secondary-text">
-                                    Missing
-                                  </span>
-                                  <span className="text-primary-text font-mono font-medium tabular-nums">
-                                    {formatInventoryCount(
-                                      payloadData?.missingCount || 0,
-                                    )}
-                                    /
-                                    {formatInventoryCount(
-                                      payloadData?.total || 0,
-                                    )}
-                                  </span>
-                                </div>
-                                <div className="flex w-full items-center justify-between">
-                                  <span className="text-secondary-text">
-                                    Owned
-                                  </span>
-                                  <span className="text-primary-text font-mono font-medium tabular-nums">
-                                    {formatInventoryCount(
-                                      payloadData?.owned || 0,
-                                    )}
-                                    /
-                                    {formatInventoryCount(
-                                      payloadData?.total || 0,
-                                    )}
-                                  </span>
-                                </div>
-                                <div className="flex w-full items-center justify-between">
-                                  <span className="text-secondary-text">
-                                    Completion
-                                  </span>
-                                  <span className="text-primary-text font-mono font-medium tabular-nums">
-                                    {formatPercentage(
-                                      payloadData?.percentage || 0,
-                                    )}
-                                    %
-                                  </span>
-                                </div>
-                              </div>
-                            );
-                          }}
-                        />
-                      }
-                    />
-                    <Pie
-                      data={collectionChartData}
-                      dataKey="value"
-                      nameKey="category"
-                      innerRadius="58%"
-                      outerRadius="88%"
-                      strokeWidth={2}
-                    >
-                      {collectionChartData.map((entry) => (
-                        <Cell key={entry.category} fill={entry.fill} />
-                      ))}
-                    </Pie>
-                  </PieChart>
-                </ChartContainer>
-                <div className="mt-3 flex flex-wrap items-center justify-center gap-x-4 gap-y-2">
-                  {collectionChartData.map((entry) => (
-                    <div
-                      key={entry.category}
-                      className="flex items-center gap-2 text-sm"
-                    >
-                      <span
-                        className="h-3 w-3 shrink-0 rounded-full"
-                        style={{ backgroundColor: entry.fill }}
-                        aria-hidden="true"
-                      />
-                      <span className="text-primary-text">
-                        {entry.category}
-                      </span>
-                    </div>
-                  ))}
+            {renderCharts &&
+              (overallProgress.missingCount === 0 ? (
+                <div className="py-10 text-center">
+                  <p className="text-secondary-text text-sm">
+                    No missing items.
+                  </p>
                 </div>
-              </>
-            )}
+              ) : (
+                <>
+                  <ChartContainer
+                    config={collectionChartConfig}
+                    className="[&_.recharts-pie-label-text]:fill-foreground mx-auto aspect-square h-[min(360px,calc(100vw-3rem))] max-h-90 w-full max-w-90"
+                  >
+                    <PieChart>
+                      <ChartTooltip
+                        content={
+                          <ChartTooltipContent
+                            hideLabel={true}
+                            formatter={(value, name, item) => {
+                              const payloadData = item?.payload as
+                                | {
+                                    fill?: string;
+                                    owned?: number;
+                                    total?: number;
+                                    missingCount?: number;
+                                    percentage?: number;
+                                  }
+                                | undefined;
+                              const swatchColor =
+                                item?.color ||
+                                payloadData?.fill ||
+                                "var(--color-primary-text)";
+
+                              return (
+                                <div className="flex min-w-48 flex-col gap-1.5 text-xs">
+                                  <div className="flex items-center gap-1.5">
+                                    <span
+                                      className="h-2.5 w-2.5 rounded-xs"
+                                      style={{ backgroundColor: swatchColor }}
+                                    />
+                                    <span className="text-primary-text font-medium">
+                                      {name}
+                                    </span>
+                                  </div>
+                                  <div className="flex w-full items-center justify-between">
+                                    <span className="text-secondary-text">
+                                      Missing
+                                    </span>
+                                    <span className="text-primary-text font-mono font-medium tabular-nums">
+                                      {formatInventoryCount(
+                                        payloadData?.missingCount || 0,
+                                      )}
+                                      /
+                                      {formatInventoryCount(
+                                        payloadData?.total || 0,
+                                      )}
+                                    </span>
+                                  </div>
+                                  <div className="flex w-full items-center justify-between">
+                                    <span className="text-secondary-text">
+                                      Owned
+                                    </span>
+                                    <span className="text-primary-text font-mono font-medium tabular-nums">
+                                      {formatInventoryCount(
+                                        payloadData?.owned || 0,
+                                      )}
+                                      /
+                                      {formatInventoryCount(
+                                        payloadData?.total || 0,
+                                      )}
+                                    </span>
+                                  </div>
+                                  <div className="flex w-full items-center justify-between">
+                                    <span className="text-secondary-text">
+                                      Completion
+                                    </span>
+                                    <span className="text-primary-text font-mono font-medium tabular-nums">
+                                      {formatPercentage(
+                                        payloadData?.percentage || 0,
+                                      )}
+                                      %
+                                    </span>
+                                  </div>
+                                </div>
+                              );
+                            }}
+                          />
+                        }
+                      />
+                      <Pie
+                        data={collectionChartData}
+                        dataKey="value"
+                        nameKey="category"
+                        innerRadius="58%"
+                        outerRadius="88%"
+                        strokeWidth={2}
+                        isAnimationActive={false}
+                      >
+                        {collectionChartData.map((entry) => (
+                          <Cell key={entry.category} fill={entry.fill} />
+                        ))}
+                      </Pie>
+                    </PieChart>
+                  </ChartContainer>
+                  <div className="mt-3 flex flex-wrap items-center justify-center gap-x-4 gap-y-2">
+                    {collectionChartData.map((entry) => (
+                      <div
+                        key={entry.category}
+                        className="flex items-center gap-2 text-sm"
+                      >
+                        <span
+                          className="h-3 w-3 shrink-0 rounded-full"
+                          style={{ backgroundColor: entry.fill }}
+                          aria-hidden="true"
+                        />
+                        <span className="text-primary-text">
+                          {entry.category}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              ))}
           </div>
         </div>
       </div>
@@ -1489,10 +1505,27 @@ export default function InventoryBreakdown({
                         className="bg-secondary-bg text-primary-text max-w-62.5 border-none shadow-(--color-card-shadow)"
                       >
                         Items in Jailbreak where this player is not the original
-                        owner, including items not in their inventory.
+                        owner, including items not in their inventory. Excludes
+                        unverifiable items.
                       </TooltipContent>
                     </Tooltip>
                   </div>
+                  {unverifiableCount > 0 && (
+                    <div className="text-secondary-text mb-2 text-xs">
+                      Unverifiable:{" "}
+                      <span className="text-primary-text font-mono font-semibold tabular-nums">
+                        {formatInventoryCount(unverifiableCount)}
+                      </span>{" "}
+                      assumed owned. Hidden from missing list.
+                      <button
+                        type="button"
+                        onClick={scrollToUnverifiableSection}
+                        className="text-link hover:text-link-hover ml-2 cursor-pointer underline underline-offset-2"
+                      >
+                        View list
+                      </button>
+                    </div>
+                  )}
                   <div className="mb-2">
                     <div className="flex w-full flex-col gap-4 sm:flex-row">
                       <div className="relative w-full sm:w-2/3">
@@ -1652,108 +1685,110 @@ export default function InventoryBreakdown({
               </div>
             </div>
 
-            {ogOwnedProgress.ogOwned === 0 ? (
-              <div className="py-10 text-center">
-                <p className="text-secondary-text text-sm">
-                  No OG owned items.
-                </p>
-              </div>
-            ) : (
-              <>
-                <ChartContainer
-                  config={ogChartConfig}
-                  className="[&_.recharts-pie-label-text]:fill-foreground mx-auto aspect-square h-[min(360px,calc(100vw-3rem))] max-h-90 w-full max-w-90"
-                >
-                  <PieChart>
-                    <ChartTooltip
-                      content={
-                        <ChartTooltipContent
-                          hideLabel={true}
-                          formatter={(value, name, item) => {
-                            const payloadData = item?.payload as
-                              | {
-                                  fill?: string;
-                                  total?: number;
-                                  percentage?: number;
-                                }
-                              | undefined;
-                            const swatchColor =
-                              item?.color ||
-                              payloadData?.fill ||
-                              "var(--color-primary-text)";
-
-                            return (
-                              <div className="flex min-w-48 flex-col gap-1.5 text-xs">
-                                <div className="flex items-center gap-1.5">
-                                  <span
-                                    className="h-2.5 w-2.5 rounded-xs"
-                                    style={{ backgroundColor: swatchColor }}
-                                  />
-                                  <span className="text-primary-text font-medium">
-                                    {name}
-                                  </span>
-                                </div>
-                                <div className="flex w-full items-center justify-between">
-                                  <span className="text-secondary-text">
-                                    OG Owned
-                                  </span>
-                                  <span className="text-primary-text font-mono font-medium tabular-nums">
-                                    {formatInventoryCount(Number(value))}/
-                                    {formatInventoryCount(
-                                      payloadData?.total || 0,
-                                    )}
-                                  </span>
-                                </div>
-                                <div className="flex w-full items-center justify-between">
-                                  <span className="text-secondary-text">
-                                    Completion
-                                  </span>
-                                  <span className="text-primary-text font-mono font-medium tabular-nums">
-                                    {formatPercentage(
-                                      payloadData?.percentage || 0,
-                                    )}
-                                    %
-                                  </span>
-                                </div>
-                              </div>
-                            );
-                          }}
-                        />
-                      }
-                    />
-                    <Pie
-                      data={ogChartData}
-                      dataKey="value"
-                      nameKey="category"
-                      innerRadius="58%"
-                      outerRadius="88%"
-                      strokeWidth={2}
-                    >
-                      {ogChartData.map((entry) => (
-                        <Cell key={entry.category} fill={entry.fill} />
-                      ))}
-                    </Pie>
-                  </PieChart>
-                </ChartContainer>
-                <div className="mt-3 flex flex-wrap items-center justify-center gap-x-4 gap-y-2">
-                  {ogChartData.map((entry) => (
-                    <div
-                      key={entry.category}
-                      className="flex items-center gap-2 text-sm"
-                    >
-                      <span
-                        className="h-3 w-3 shrink-0 rounded-full"
-                        style={{ backgroundColor: entry.fill }}
-                        aria-hidden="true"
-                      />
-                      <span className="text-primary-text">
-                        {entry.category}
-                      </span>
-                    </div>
-                  ))}
+            {renderCharts &&
+              (ogOwnedProgress.ogOwned === 0 ? (
+                <div className="py-10 text-center">
+                  <p className="text-secondary-text text-sm">
+                    No OG owned items.
+                  </p>
                 </div>
-              </>
-            )}
+              ) : (
+                <>
+                  <ChartContainer
+                    config={ogChartConfig}
+                    className="[&_.recharts-pie-label-text]:fill-foreground mx-auto aspect-square h-[min(360px,calc(100vw-3rem))] max-h-90 w-full max-w-90"
+                  >
+                    <PieChart>
+                      <ChartTooltip
+                        content={
+                          <ChartTooltipContent
+                            hideLabel={true}
+                            formatter={(value, name, item) => {
+                              const payloadData = item?.payload as
+                                | {
+                                    fill?: string;
+                                    total?: number;
+                                    percentage?: number;
+                                  }
+                                | undefined;
+                              const swatchColor =
+                                item?.color ||
+                                payloadData?.fill ||
+                                "var(--color-primary-text)";
+
+                              return (
+                                <div className="flex min-w-48 flex-col gap-1.5 text-xs">
+                                  <div className="flex items-center gap-1.5">
+                                    <span
+                                      className="h-2.5 w-2.5 rounded-xs"
+                                      style={{ backgroundColor: swatchColor }}
+                                    />
+                                    <span className="text-primary-text font-medium">
+                                      {name}
+                                    </span>
+                                  </div>
+                                  <div className="flex w-full items-center justify-between">
+                                    <span className="text-secondary-text">
+                                      OG Owned
+                                    </span>
+                                    <span className="text-primary-text font-mono font-medium tabular-nums">
+                                      {formatInventoryCount(Number(value))}/
+                                      {formatInventoryCount(
+                                        payloadData?.total || 0,
+                                      )}
+                                    </span>
+                                  </div>
+                                  <div className="flex w-full items-center justify-between">
+                                    <span className="text-secondary-text">
+                                      Completion
+                                    </span>
+                                    <span className="text-primary-text font-mono font-medium tabular-nums">
+                                      {formatPercentage(
+                                        payloadData?.percentage || 0,
+                                      )}
+                                      %
+                                    </span>
+                                  </div>
+                                </div>
+                              );
+                            }}
+                          />
+                        }
+                      />
+                      <Pie
+                        data={ogChartData}
+                        dataKey="value"
+                        nameKey="category"
+                        innerRadius="58%"
+                        outerRadius="88%"
+                        strokeWidth={2}
+                        isAnimationActive={false}
+                      >
+                        {ogChartData.map((entry) => (
+                          <Cell key={entry.category} fill={entry.fill} />
+                        ))}
+                      </Pie>
+                    </PieChart>
+                  </ChartContainer>
+                  <div className="mt-3 flex flex-wrap items-center justify-center gap-x-4 gap-y-2">
+                    {ogChartData.map((entry) => (
+                      <div
+                        key={entry.category}
+                        className="flex items-center gap-2 text-sm"
+                      >
+                        <span
+                          className="h-3 w-3 shrink-0 rounded-full"
+                          style={{ backgroundColor: entry.fill }}
+                          aria-hidden="true"
+                        />
+                        <span className="text-primary-text">
+                          {entry.category}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              ))}
           </div>
         </div>
       </div>
@@ -1886,84 +1921,93 @@ export default function InventoryBreakdown({
                 Inventory Breakdown Pie Chart
               </div>
             </div>
-            <ChartContainer
-              config={categoryChartConfig}
-              className="[&_.recharts-pie-label-text]:fill-foreground mx-auto aspect-square h-[min(360px,calc(100vw-3rem))] max-h-90 w-full max-w-90"
-            >
-              <PieChart>
-                <ChartTooltip
-                  content={
-                    <ChartTooltipContent
-                      hideLabel={true}
-                      formatter={(value, name, item) => {
-                        const payloadData = item?.payload as
-                          | { fill?: string; amount?: number }
-                          | undefined;
-                        const swatchColor =
-                          item?.color ||
-                          payloadData?.fill ||
-                          "var(--color-primary-text)";
+            {renderCharts && (
+              <>
+                <ChartContainer
+                  config={categoryChartConfig}
+                  className="[&_.recharts-pie-label-text]:fill-foreground mx-auto aspect-square h-[min(360px,calc(100vw-3rem))] max-h-90 w-full max-w-90"
+                >
+                  <PieChart>
+                    <ChartTooltip
+                      content={
+                        <ChartTooltipContent
+                          hideLabel={true}
+                          formatter={(value, name, item) => {
+                            const payloadData = item?.payload as
+                              | { fill?: string; amount?: number }
+                              | undefined;
+                            const swatchColor =
+                              item?.color ||
+                              payloadData?.fill ||
+                              "var(--color-primary-text)";
 
-                        return (
-                          <div className="flex min-w-40 flex-col gap-1.5 text-xs">
-                            <div className="flex items-center gap-1.5">
-                              <span
-                                className="h-2.5 w-2.5 rounded-xs"
-                                style={{ backgroundColor: swatchColor }}
-                              />
-                              <span className="text-primary-text font-medium">
-                                {name}
-                              </span>
-                            </div>
-                            <div className="flex w-full items-center justify-between">
-                              <span className="text-secondary-text">
-                                Percentage
-                              </span>
-                              <span className="text-primary-text font-mono font-medium tabular-nums">
-                                {formatPercentage(Number(value))}%
-                              </span>
-                            </div>
-                            <div className="flex w-full items-center justify-between">
-                              <span className="text-secondary-text">Value</span>
-                              <span className="text-primary-text font-mono font-medium tabular-nums">
-                                ${formatNetworth(payloadData?.amount || 0)}
-                              </span>
-                            </div>
-                          </div>
-                        );
-                      }}
+                            return (
+                              <div className="flex min-w-40 flex-col gap-1.5 text-xs">
+                                <div className="flex items-center gap-1.5">
+                                  <span
+                                    className="h-2.5 w-2.5 rounded-xs"
+                                    style={{ backgroundColor: swatchColor }}
+                                  />
+                                  <span className="text-primary-text font-medium">
+                                    {name}
+                                  </span>
+                                </div>
+                                <div className="flex w-full items-center justify-between">
+                                  <span className="text-secondary-text">
+                                    Percentage
+                                  </span>
+                                  <span className="text-primary-text font-mono font-medium tabular-nums">
+                                    {formatPercentage(Number(value))}%
+                                  </span>
+                                </div>
+                                <div className="flex w-full items-center justify-between">
+                                  <span className="text-secondary-text">
+                                    Value
+                                  </span>
+                                  <span className="text-primary-text font-mono font-medium tabular-nums">
+                                    ${formatNetworth(payloadData?.amount || 0)}
+                                  </span>
+                                </div>
+                              </div>
+                            );
+                          }}
+                        />
+                      }
                     />
-                  }
-                />
-                <Pie
-                  data={categoryChartData}
-                  dataKey="value"
-                  nameKey="category"
-                  innerRadius="58%"
-                  outerRadius="88%"
-                  strokeWidth={2}
-                >
+                    <Pie
+                      data={categoryChartData}
+                      dataKey="value"
+                      nameKey="category"
+                      innerRadius="58%"
+                      outerRadius="88%"
+                      strokeWidth={2}
+                      isAnimationActive={false}
+                    >
+                      {categoryChartData.map((entry) => (
+                        <Cell key={entry.category} fill={entry.fill} />
+                      ))}
+                    </Pie>
+                  </PieChart>
+                </ChartContainer>
+                <div className="mt-3 flex flex-wrap items-center justify-center gap-x-4 gap-y-2">
                   {categoryChartData.map((entry) => (
-                    <Cell key={entry.category} fill={entry.fill} />
+                    <div
+                      key={entry.category}
+                      className="flex items-center gap-2 text-sm"
+                    >
+                      <span
+                        className="h-3 w-3 shrink-0 rounded-full"
+                        style={{ backgroundColor: entry.fill }}
+                        aria-hidden="true"
+                      />
+                      <span className="text-primary-text">
+                        {entry.category}
+                      </span>
+                    </div>
                   ))}
-                </Pie>
-              </PieChart>
-            </ChartContainer>
-            <div className="mt-3 flex flex-wrap items-center justify-center gap-x-4 gap-y-2">
-              {categoryChartData.map((entry) => (
-                <div
-                  key={entry.category}
-                  className="flex items-center gap-2 text-sm"
-                >
-                  <span
-                    className="h-3 w-3 shrink-0 rounded-full"
-                    style={{ backgroundColor: entry.fill }}
-                    aria-hidden="true"
-                  />
-                  <span className="text-primary-text">{entry.category}</span>
                 </div>
-              ))}
-            </div>
+              </>
+            )}
           </div>
         </div>
       </div>
@@ -2097,88 +2141,96 @@ export default function InventoryBreakdown({
                     Duplicate Inventory Breakdown Pie Chart
                   </div>
                 </div>
-                <ChartContainer
-                  config={categoryChartConfig}
-                  className="[&_.recharts-pie-label-text]:fill-foreground mx-auto aspect-square h-[min(360px,calc(100vw-3rem))] max-h-90 w-full max-w-90"
-                >
-                  <PieChart>
-                    <ChartTooltip
-                      content={
-                        <ChartTooltipContent
-                          hideLabel={true}
-                          formatter={(value, name, item) => {
-                            const payloadData = item?.payload as
-                              | { fill?: string; amount?: number }
-                              | undefined;
-                            const swatchColor =
-                              item?.color ||
-                              payloadData?.fill ||
-                              "var(--color-primary-text)";
+                {renderCharts && (
+                  <>
+                    <ChartContainer
+                      config={categoryChartConfig}
+                      className="[&_.recharts-pie-label-text]:fill-foreground mx-auto aspect-square h-[min(360px,calc(100vw-3rem))] max-h-90 w-full max-w-90"
+                    >
+                      <PieChart>
+                        <ChartTooltip
+                          content={
+                            <ChartTooltipContent
+                              hideLabel={true}
+                              formatter={(value, name, item) => {
+                                const payloadData = item?.payload as
+                                  | { fill?: string; amount?: number }
+                                  | undefined;
+                                const swatchColor =
+                                  item?.color ||
+                                  payloadData?.fill ||
+                                  "var(--color-primary-text)";
 
-                            return (
-                              <div className="flex min-w-40 flex-col gap-1.5 text-xs">
-                                <div className="flex items-center gap-1.5">
-                                  <span
-                                    className="h-2.5 w-2.5 rounded-xs"
-                                    style={{ backgroundColor: swatchColor }}
-                                  />
-                                  <span className="text-primary-text font-medium">
-                                    {name}
-                                  </span>
-                                </div>
-                                <div className="flex w-full items-center justify-between">
-                                  <span className="text-secondary-text">
-                                    Percentage
-                                  </span>
-                                  <span className="text-primary-text font-mono font-medium tabular-nums">
-                                    {formatPercentage(Number(value))}%
-                                  </span>
-                                </div>
-                                <div className="flex w-full items-center justify-between">
-                                  <span className="text-secondary-text">
-                                    Value
-                                  </span>
-                                  <span className="text-primary-text font-mono font-medium tabular-nums">
-                                    ${formatNetworth(payloadData?.amount || 0)}
-                                  </span>
-                                </div>
-                              </div>
-                            );
-                          }}
+                                return (
+                                  <div className="flex min-w-40 flex-col gap-1.5 text-xs">
+                                    <div className="flex items-center gap-1.5">
+                                      <span
+                                        className="h-2.5 w-2.5 rounded-xs"
+                                        style={{ backgroundColor: swatchColor }}
+                                      />
+                                      <span className="text-primary-text font-medium">
+                                        {name}
+                                      </span>
+                                    </div>
+                                    <div className="flex w-full items-center justify-between">
+                                      <span className="text-secondary-text">
+                                        Percentage
+                                      </span>
+                                      <span className="text-primary-text font-mono font-medium tabular-nums">
+                                        {formatPercentage(Number(value))}%
+                                      </span>
+                                    </div>
+                                    <div className="flex w-full items-center justify-between">
+                                      <span className="text-secondary-text">
+                                        Value
+                                      </span>
+                                      <span className="text-primary-text font-mono font-medium tabular-nums">
+                                        $
+                                        {formatNetworth(
+                                          payloadData?.amount || 0,
+                                        )}
+                                      </span>
+                                    </div>
+                                  </div>
+                                );
+                              }}
+                            />
+                          }
                         />
-                      }
-                    />
-                    <Pie
-                      data={duplicatesChartData}
-                      dataKey="value"
-                      nameKey="category"
-                      innerRadius="58%"
-                      outerRadius="88%"
-                      strokeWidth={2}
-                    >
+                        <Pie
+                          data={duplicatesChartData}
+                          dataKey="value"
+                          nameKey="category"
+                          innerRadius="58%"
+                          outerRadius="88%"
+                          strokeWidth={2}
+                          isAnimationActive={false}
+                        >
+                          {duplicatesChartData.map((entry) => (
+                            <Cell key={entry.category} fill={entry.fill} />
+                          ))}
+                        </Pie>
+                      </PieChart>
+                    </ChartContainer>
+                    <div className="mt-3 flex flex-wrap items-center justify-center gap-x-4 gap-y-2">
                       {duplicatesChartData.map((entry) => (
-                        <Cell key={entry.category} fill={entry.fill} />
+                        <div
+                          key={entry.category}
+                          className="flex items-center gap-2 text-sm"
+                        >
+                          <span
+                            className="h-3 w-3 shrink-0 rounded-full"
+                            style={{ backgroundColor: entry.fill }}
+                            aria-hidden="true"
+                          />
+                          <span className="text-primary-text">
+                            {entry.category}
+                          </span>
+                        </div>
                       ))}
-                    </Pie>
-                  </PieChart>
-                </ChartContainer>
-                <div className="mt-3 flex flex-wrap items-center justify-center gap-x-4 gap-y-2">
-                  {duplicatesChartData.map((entry) => (
-                    <div
-                      key={entry.category}
-                      className="flex items-center gap-2 text-sm"
-                    >
-                      <span
-                        className="h-3 w-3 shrink-0 rounded-full"
-                        style={{ backgroundColor: entry.fill }}
-                        aria-hidden="true"
-                      />
-                      <span className="text-primary-text">
-                        {entry.category}
-                      </span>
                     </div>
-                  ))}
-                </div>
+                  </>
+                )}
               </div>
             </div>
           </div>
