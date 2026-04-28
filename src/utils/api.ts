@@ -2146,9 +2146,17 @@ export async function fetchNotificationHistory(
   size: number = 5,
 ): Promise<NotificationHistory> {
   try {
+    const cookieMatch =
+      typeof document !== "undefined"
+        ? document.cookie.match(/(?:^|;\s*)jbcl_token=([^;]+)/)
+        : null;
+    const token = cookieMatch
+      ? decodeURIComponent(cookieMatch[1])
+      : (process.env.NEXT_PUBLIC_DEV_TOKEN ?? null);
+    const tokenParam = token ? `&token=${encodeURIComponent(token)}` : "";
     const url = buildApiUrlWithDevToken(
       PUBLIC_API_URL!,
-      `/notifications/history?page=${page}&size=${size}`,
+      `/notifications/history?page=${page}&size=${size}${tokenParam}`,
     );
     const response = await fetch(url, {
       method: "GET",
@@ -2187,9 +2195,17 @@ export async function fetchUnreadNotifications(
   size: number = 5,
 ): Promise<NotificationHistory> {
   try {
+    const cookieMatch =
+      typeof document !== "undefined"
+        ? document.cookie.match(/(?:^|;\s*)jbcl_token=([^;]+)/)
+        : null;
+    const token = cookieMatch
+      ? decodeURIComponent(cookieMatch[1])
+      : (process.env.NEXT_PUBLIC_DEV_TOKEN ?? null);
+    const tokenParam = token ? `&token=${encodeURIComponent(token)}` : "";
     const url = buildApiUrlWithDevToken(
       PUBLIC_API_URL!,
-      `/notifications?page=${page}&size=${size}`,
+      `/notifications?page=${page}&size=${size}${tokenParam}`,
     );
     const response = await fetch(url, {
       method: "GET",
@@ -2225,9 +2241,17 @@ export async function fetchUnreadNotifications(
 
 export async function fetchUnreadNotificationCount(): Promise<number> {
   try {
+    const cookieMatch =
+      typeof document !== "undefined"
+        ? document.cookie.match(/(?:^|;\s*)jbcl_token=([^;]+)/)
+        : null;
+    const token = cookieMatch
+      ? decodeURIComponent(cookieMatch[1])
+      : (process.env.NEXT_PUBLIC_DEV_TOKEN ?? null);
+    const tokenParam = token ? `?token=${encodeURIComponent(token)}` : "";
     const url = buildApiUrlWithDevToken(
       PUBLIC_API_URL!,
-      "/notifications/unread",
+      `/notifications/unread${tokenParam}`,
     );
     const response = await fetch(url, {
       method: "GET",
@@ -2274,6 +2298,129 @@ export async function clearNotificationHistory(): Promise<boolean> {
     console.error("Error clearing notification history:", error);
     return false;
   }
+}
+
+function getClientToken(): string | null {
+  const cookieMatch =
+    typeof document !== "undefined"
+      ? document.cookie.match(/(?:^|;\s*)jbcl_token=([^;]+)/)
+      : null;
+  return cookieMatch
+    ? decodeURIComponent(cookieMatch[1])
+    : (process.env.NEXT_PUBLIC_DEV_TOKEN ?? null);
+}
+
+export async function fetchEmailLinkedStatus(): Promise<{ linked: boolean }> {
+  try {
+    const token = getClientToken();
+    const tokenParam = token ? `?token=${encodeURIComponent(token)}` : "";
+    const url = buildApiUrlWithDevToken(
+      PUBLIC_API_URL!,
+      `/users/email/linked${tokenParam}`,
+    );
+    const response = await fetch(url, {
+      method: "GET",
+      credentials: "include",
+      cache: "no-store",
+    });
+    if (!response.ok) return { linked: false };
+    return response.json();
+  } catch {
+    return { linked: false };
+  }
+}
+
+export async function fetchEmailNotificationStatus(): Promise<{
+  enabled: boolean;
+}> {
+  try {
+    const token = getClientToken();
+    const tokenParam = token ? `?token=${encodeURIComponent(token)}` : "";
+    const url = buildApiUrlWithDevToken(
+      PUBLIC_API_URL!,
+      `/notifications/emails${tokenParam}`,
+    );
+    const response = await fetch(url, {
+      method: "GET",
+      credentials: "include",
+      cache: "no-store",
+    });
+    if (!response.ok) return { enabled: false };
+    return response.json();
+  } catch {
+    return { enabled: false };
+  }
+}
+
+export async function enableEmailNotifications(): Promise<{
+  ok: boolean;
+  status: number;
+  data: { message?: string; detail?: string; error?: string };
+}> {
+  const token = getClientToken();
+  const url = buildApiUrlWithDevToken(PUBLIC_API_URL!, "/notifications/emails");
+  const response = await fetch(url, {
+    method: "POST",
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ token }),
+    cache: "no-store",
+  });
+  const data = await response.json().catch(
+    () =>
+      ({ success: true }) as {
+        message?: string;
+        detail?: string;
+        error?: string;
+      },
+  );
+  return { ok: response.ok, status: response.status, data };
+}
+
+export async function disableEmailNotifications(): Promise<{
+  ok: boolean;
+  status: number;
+  data: { message?: string; detail?: string };
+}> {
+  const token = getClientToken();
+  const url = buildApiUrlWithDevToken(PUBLIC_API_URL!, "/notifications/emails");
+  const response = await fetch(url, {
+    method: "DELETE",
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ token }),
+    cache: "no-store",
+  });
+  const data = await response
+    .json()
+    .catch(() => ({ success: true }) as { message?: string; detail?: string });
+  return { ok: response.ok, status: response.status, data };
+}
+
+export async function unlinkEmail(): Promise<{
+  ok: boolean;
+  status: number;
+  data: { message?: string; detail?: string };
+}> {
+  const token = getClientToken();
+  const url = buildApiUrlWithDevToken(PUBLIC_API_URL!, "/users/email/unlink");
+  const response = await fetch(url, {
+    method: "DELETE",
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ token }),
+    cache: "no-store",
+  });
+  const data = await response
+    .json()
+    .catch(() => ({ success: true }) as { message?: string; detail?: string });
+  return { ok: response.ok, status: response.status, data };
+}
+
+export function getEmailLinkUrl(): string {
+  const token = getClientToken();
+  const redirectUrl = "https://jailbreakchangelogs.com/settings";
+  return `${PUBLIC_API_URL}/email/link?redirect=${encodeURIComponent(redirectUrl)}&owner=${token ?? ""}`;
 }
 
 export interface HomepageStats {
