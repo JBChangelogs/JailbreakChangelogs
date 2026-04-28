@@ -44,12 +44,12 @@ export async function fetchAvailableNotificationPreferences(): Promise<
   return Array.isArray(data) ? (data as NotificationPreferenceTitle[]) : [];
 }
 
-export async function fetchUserNotificationPreferences(): Promise<NotificationPreferencesResponse> {
-  const token = getClientToken();
-  const tokenParam = token ? `?token=${encodeURIComponent(token)}` : "";
+export async function fetchUserNotificationPreferences(
+  userId: string,
+): Promise<NotificationPreferencesResponse> {
   const url = buildApiUrlWithDevToken(
     PUBLIC_API_URL!,
-    `/notifications/preferences${tokenParam}`,
+    `/notifications/preferences?user_id=${encodeURIComponent(userId)}`,
   );
   const resp = await fetch(url, {
     method: "GET",

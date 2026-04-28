@@ -114,7 +114,7 @@ export default function SettingsPage() {
           // These hit Next.js API routes (server-side calls upstream)
           const [available, userPrefs] = await Promise.all([
             fetchAvailableNotificationPreferences(),
-            fetchUserNotificationPreferences(),
+            fetchUserNotificationPreferences(user!.id),
           ]);
 
           const explicitMap = new Map(
