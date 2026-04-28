@@ -7,6 +7,14 @@ import { Icon } from "@/components/ui/IconWrapper";
 import { toast } from "sonner";
 import { UserData } from "@/types/auth";
 import { Switch } from "@/components/ui/switch";
+import {
+  fetchEmailLinkedStatus,
+  fetchEmailNotificationStatus,
+  enableEmailNotifications,
+  disableEmailNotifications,
+  unlinkEmail,
+  getEmailLinkUrl,
+} from "@/utils/api";
 
 interface EmailNotificationSettingsProps {
   userData: UserData | null;
@@ -28,20 +36,12 @@ export const EmailNotificationSettings = ({
       if (!userData) return;
       setCheckingStatus(true);
       try {
-        const [linkedRes, enabledRes] = await Promise.all([
-          fetch("/api/users/email/linked", { cache: "no-store" }),
-          fetch("/api/notifications/emails/status", { cache: "no-store" }),
+        const [linkedData, enabledData] = await Promise.all([
+          fetchEmailLinkedStatus(),
+          fetchEmailNotificationStatus(),
         ]);
-
-        if (linkedRes.ok) {
-          const data = await linkedRes.json();
-          setIsLinked(data.linked === true);
-        }
-
-        if (enabledRes.ok) {
-          const data = await enabledRes.json();
-          setEnabled(data.enabled === true);
-        }
+        setIsLinked(linkedData.linked === true);
+        setEnabled(enabledData.enabled === true);
       } catch (e) {
         console.error("Failed to check email status", e);
       } finally {
@@ -57,79 +57,58 @@ export const EmailNotificationSettings = ({
 
     try {
       if (checked) {
-        const response = await fetch("/api/notifications/emails/enable", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          cache: "no-store",
-        });
-
-        let data: { message?: string; detail?: string } = {};
-        try {
-          data = await response.json();
-        } catch {}
-
-        if (response.ok) {
+        const { ok, status, data } = await enableEmailNotifications();
+        if (ok) {
           setEnabled(true);
           toast.success("Email Notifications Enabled", {
             description: "You will now receive email notifications.",
           });
           setIsLinked(true);
         } else {
-          if (response.status === 404) {
-            const errorMessage =
-              data.message || data.detail || "Please link your email first.";
+          if (status === 404) {
             toast.error("Email Not Linked", {
-              description: errorMessage,
+              description:
+                data.message || data.detail || "Please link your email first.",
             });
-          } else if (response.status >= 500) {
+          } else if (status >= 500) {
             toast.error("Error", {
               description: "Something went wrong. Please try again later.",
             });
           } else {
-            const errorMessage =
-              data.message || data.detail || "Failed to enable notifications.";
             toast.error("Error", {
-              description: errorMessage,
+              description:
+                data.message ||
+                data.detail ||
+                "Failed to enable notifications.",
             });
           }
           setEnabled(false);
         }
       } else {
-        const response = await fetch("/api/notifications/emails/disable", {
-          method: "DELETE",
-          headers: { "Content-Type": "application/json" },
-          cache: "no-store",
-        });
-
-        let data: { message?: string; detail?: string } = {};
-        try {
-          data = await response.json();
-        } catch {}
-
-        if (response.ok) {
+        const { ok, status, data } = await disableEmailNotifications();
+        if (ok) {
           setEnabled(false);
           toast.success("Email Notifications Disabled");
         } else {
-          if (response.status === 404) {
-            const errorMessage =
-              data.message || data.detail || "Please link your email first.";
+          if (status === 404) {
             toast.error("Email Not Linked", {
-              description: errorMessage,
+              description:
+                data.message || data.detail || "Please link your email first.",
             });
-            // Revert state since the action failed
             setEnabled(true);
-          } else if (response.status >= 500) {
+          } else if (status >= 500) {
             toast.error("Error", {
               description: "Something went wrong. Please try again later.",
             });
-            setEnabled(true); // Revert state on error
+            setEnabled(true);
           } else {
-            const errorMessage =
-              data.message || data.detail || "Failed to disable notifications.";
             toast.error("Error", {
-              description: errorMessage,
+              description:
+                data.message ||
+                data.detail ||
+                "Failed to disable notifications.",
             });
-            setEnabled(true); // Revert state on error
+            setEnabled(true);
           }
         }
       }
@@ -143,7 +122,7 @@ export const EmailNotificationSettings = ({
   };
 
   const handleLinkEmail = () => {
-    window.location.href = "/api/notifications/emails/link";
+    window.location.href = getEmailLinkUrl();
   };
 
   const handleUnlinkClick = () => {
@@ -153,27 +132,21 @@ export const EmailNotificationSettings = ({
   const handleUnlinkConfirm = async () => {
     setLoading(true);
     try {
-      const res = await fetch("/api/users/email/unlink", {
-        method: "DELETE",
-        cache: "no-store",
-      });
-      let data: { message?: string; detail?: string } = {};
-      try {
-        data = await res.json();
-      } catch {}
-      if (res.ok) {
+      const { ok, status, data } = await unlinkEmail();
+      if (ok) {
         toast.success("Email Unlinked");
         setIsLinked(false);
         setEnabled(false);
       } else {
-        if (res.status >= 500) {
+        if (status >= 500) {
           toast.error("Failed to unlink", {
             description: "Something went wrong. Please try again later.",
           });
         } else {
-          const errorMessage =
-            data.message || data.detail || "Failed to unlink email";
-          toast.error("Failed to unlink", { description: errorMessage });
+          toast.error("Failed to unlink", {
+            description:
+              data.message || data.detail || "Failed to unlink email",
+          });
         }
       }
     } catch {
