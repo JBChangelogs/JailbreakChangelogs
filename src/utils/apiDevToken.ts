@@ -8,10 +8,11 @@ type BuildApiUrlWithDevTokenOptions = {
  * for any endpoint (trades, messages, websocket handshakes, etc.).
  */
 export const buildApiUrlWithDevToken = (
-  baseUrl: string,
+  baseUrl: string | undefined,
   path: string,
   options?: BuildApiUrlWithDevTokenOptions,
 ): string => {
+  if (!baseUrl) throw new Error("buildApiUrlWithDevToken: baseUrl is required");
   const normalizedBase = baseUrl.endsWith("/") ? baseUrl : `${baseUrl}/`;
 
   const envName =

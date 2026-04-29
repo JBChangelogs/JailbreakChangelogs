@@ -31,7 +31,6 @@ export async function POST() {
     : undefined;
   const cookieParts = [
     "jbcl_token=",
-    "HttpOnly",
     "SameSite=Lax",
     "Path=/",
     "Max-Age=0",

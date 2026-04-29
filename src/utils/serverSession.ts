@@ -2,10 +2,11 @@
 
 import { cookies } from "next/headers";
 import { BASE_API_URL } from "@/utils/api";
+import { buildApiUrlWithDevToken } from "@/utils/apiDevToken";
 import type { UserData } from "@/types/auth";
 
 /**
- * Reads the auth token from HttpOnly cookies and fetches the current user on the server.
+ * Reads the auth token from the request cookie and fetches the current user on the server.
  * Returns null if missing/invalid.
  */
 export async function getCurrentUser(): Promise<UserData | null> {
@@ -21,9 +22,10 @@ export async function getCurrentUser(): Promise<UserData | null> {
 
     try {
       const response = await fetch(
-        `${BASE_API_URL}/users/get/token?token=${encodeURIComponent(token)}`,
+        buildApiUrlWithDevToken(BASE_API_URL, "/users/me"),
         {
           cache: "no-store",
+          credentials: "include",
           signal: controller.signal,
         },
       );
@@ -57,17 +59,4 @@ export async function getCurrentUser(): Promise<UserData | null> {
   }
 
   return null;
-}
-
-/**
- * Checks if the auth token cookie exists (without validating it).
- */
-export async function hasAuthSessionCookie(): Promise<boolean> {
-  try {
-    const cookieStore = await cookies();
-    const token = cookieStore.get("jbcl_token")?.value;
-    return !!token && token !== "undefined";
-  } catch {
-    return false;
-  }
 }

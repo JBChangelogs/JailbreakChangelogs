@@ -256,7 +256,7 @@ export default function UserProfileClient({
   additionalDataError,
 }: UserProfileClientProps) {
   const router = useRouter();
-  const { user: currentUser } = useAuthContext();
+  const { user: currentUser, isLoading: authLoading } = useAuthContext();
   const [user, setUser] = useState<User | null>(initialData?.user || null);
   const [loading] = useState(!initialData && !error);
   const [errorState] = useState<string | null>(error?.message || null);
@@ -320,6 +320,21 @@ export default function UserProfileClient({
       setIsAuthenticatedUser(false);
     }
   }, [currentUser]);
+
+  // Owner viewing their own private profile — resolve client-side instead of server-side
+  useEffect(() => {
+    if (
+      error?.message?.startsWith("PRIVATE_PROFILE:") &&
+      error?.code === 403 &&
+      currentUser?.id === userId
+    ) {
+      setUser({
+        ...currentUser,
+        banner: currentUser.banner ?? undefined,
+        custom_banner: currentUser.custom_banner ?? undefined,
+      });
+    }
+  }, [currentUser, error, userId]);
 
   // Update following status when currentUserId changes
   useEffect(() => {
@@ -668,7 +683,8 @@ export default function UserProfileClient({
     );
   }
 
-  if (errorCode) {
+  if (errorCode && !user) {
+    if (authLoading) return null;
     const hasPrivateProfilePrefix =
       !!errorState && errorState.startsWith("PRIVATE_PROFILE:");
     const isPrivateProfileError =

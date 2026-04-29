@@ -1,44 +1,58 @@
+"use client";
+
+import { use, useEffect, useState } from "react";
 import FavoriteButton from "@/components/Items/FavoriteButton";
 import { fetchUserFavorites } from "@/utils/api";
-import { getCurrentUser } from "@/utils/serverSession";
+import { useAuthContext } from "@/contexts/AuthContext";
 
 interface Props {
   itemId: number;
   initialFavoriteCountPromise: Promise<number | null>;
 }
 
-// Client component wrapper for Favorite functionality that can suspend
-export default async function FavoriteButtonServer({
+export default function FavoriteButtonServer({
   itemId,
   initialFavoriteCountPromise,
 }: Props) {
-  const [user, initialFavoriteCount] = await Promise.all([
-    getCurrentUser(),
-    initialFavoriteCountPromise,
-  ]);
-  const isAuthenticated = !!user;
+  const { user, isLoading: authLoading } = useAuthContext();
+  const initialFavoriteCount = use(initialFavoriteCountPromise);
+  const [isFavorited, setIsFavorited] = useState(false);
+  const [favLoading, setFavLoading] = useState(true);
 
-  let isFavorited = false;
-
-  // If user is logged in, fetch their favorite status for this item
-  if (isAuthenticated && user?.id) {
-    const favoritesData = await fetchUserFavorites(user.id);
-    if (favoritesData !== null && Array.isArray(favoritesData)) {
-      isFavorited = favoritesData.some((fav) => {
-        const favoriteId = String(fav.item_id);
-        if (favoriteId.includes("-")) {
-          const [parentId] = favoriteId.split("-");
-          return Number(parentId) === itemId;
-        }
-        return Number(favoriteId) === itemId;
-      });
+  useEffect(() => {
+    if (authLoading) return;
+    if (!user?.id) {
+      setFavLoading(false);
+      return;
     }
+    fetchUserFavorites(user.id)
+      .then((data) => {
+        if (data !== null && Array.isArray(data)) {
+          setIsFavorited(
+            data.some((fav) => {
+              const id = String(fav.item_id);
+              if (id.includes("-")) {
+                return Number(id.split("-")[0]) === itemId;
+              }
+              return Number(id) === itemId;
+            }),
+          );
+        }
+      })
+      .catch(() => {})
+      .finally(() => setFavLoading(false));
+  }, [authLoading, user?.id, itemId]);
+
+  if (authLoading || favLoading) {
+    return (
+      <div className="bg-secondary-bg h-8 w-24 animate-pulse rounded-lg" />
+    );
   }
 
   return (
     <FavoriteButton
       itemId={itemId}
-      isAuthenticated={isAuthenticated}
+      isAuthenticated={!!user}
       initialIsFavorited={isFavorited}
       initialCount={initialFavoriteCount || 0}
     />

@@ -1,4 +1,5 @@
 import { BASE_API_URL } from "@/utils/api";
+import { buildApiUrlWithDevToken } from "@/utils/apiDevToken";
 import { NextResponse } from "next/server";
 
 export async function POST(request: Request) {
@@ -12,8 +13,8 @@ export async function POST(request: Request) {
     }
 
     const resp = await fetch(
-      `${BASE_API_URL}/users/get/token?token=${encodeURIComponent(token)}`,
-      { cache: "no-store" },
+      buildApiUrlWithDevToken(BASE_API_URL, "/users/me"),
+      { cache: "no-store", credentials: "include" },
     );
     if (!resp.ok) {
       return new Response(JSON.stringify({ message: "Invalid token" }), {

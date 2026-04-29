@@ -5,7 +5,6 @@ import { toast } from "sonner";
 import { PUBLIC_API_URL } from "@/utils/api";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { useTheme } from "@/contexts/ThemeContext";
-import { hasAuthSessionCookie } from "@/utils/serverSession";
 
 export interface LoginModalController {
   tabValue: number;
@@ -48,7 +47,7 @@ export function useLoginModalController(): LoginModalController {
   }, [joinDiscord]);
 
   const handleRobloxLogin = useCallback(async () => {
-    const hasCookie = await hasAuthSessionCookie();
+    const hasCookie = !!document.cookie.match(/(?:^|;\s*)jbcl_token=([^;]+)/);
     if (!hasCookie) {
       toast.error("You must be logged in with Discord first", {
         duration: 3000,

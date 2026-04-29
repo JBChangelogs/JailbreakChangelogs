@@ -1,20 +1,26 @@
-"use server";
-
-import { fetchItemById, BASE_API_URL } from "@/utils/api";
+import { PUBLIC_API_URL } from "@/utils/api";
 import { fetchWithRetry } from "@/utils/fetchWithRetry";
 
 async function fetchSeason(id: string) {
   try {
-    const response = await fetch(`${BASE_API_URL}/seasons/get?season=${id}`);
+    const response = await fetch(`${PUBLIC_API_URL}/seasons/get?season=${id}`);
+    if (!response.ok) return null;
+    return await response.json();
+  } catch {
+    return null;
+  }
+}
 
-    if (!response.ok) {
-      return null;
-    }
-
-    const data = await response.json();
-    return data;
-  } catch (err) {
-    console.error("[SERVER ACTION] Error fetching season:", err);
+async function fetchItemById(id: string) {
+  try {
+    const response = await fetchWithRetry(
+      `${PUBLIC_API_URL}/items/get?id=${id}`,
+      undefined,
+      { maxRetries: 3, initialDelayMs: 800, timeoutMs: 10000 },
+    );
+    if (!response.ok) return null;
+    return await response.json();
+  } catch {
     return null;
   }
 }
@@ -22,27 +28,20 @@ async function fetchSeason(id: string) {
 export async function fetchFavoritesData(userId: string) {
   try {
     const response = await fetchWithRetry(
-      `${BASE_API_URL}/favorites/get?user=${userId}`,
+      `${PUBLIC_API_URL}/favorites/get?user=${userId}`,
       undefined,
-      {
-        maxRetries: 3,
-        initialDelayMs: 800,
-        timeoutMs: 10000,
-      },
+      { maxRetries: 3, initialDelayMs: 800, timeoutMs: 10000 },
     );
 
     if (!response.ok) {
-      if (response.status === 404) {
-        // No favorites found - this is not an error
-        return [];
-      }
+      if (response.status === 404) return [];
       throw new Error(`Failed to fetch favorites: ${response.status}`);
     }
 
     const data = await response.json();
     return Array.isArray(data) ? data : [];
   } catch (error) {
-    console.error("[SERVER ACTION] Failed to fetch favorites:", error);
+    console.error("Failed to fetch favorites:", error);
     return [];
   }
 }
@@ -51,75 +50,33 @@ export async function fetchFavoriteItemDetails(
   favorites: Array<{ item_id: string }>,
 ) {
   try {
-    if (!favorites || favorites.length === 0) {
-      return {};
-    }
+    if (!favorites || favorites.length === 0) return {};
 
-    // Fetch item details for each favorite
     const itemDetailsPromises = favorites.map(async (favorite) => {
       try {
-        const isSubItem = favorite.item_id.includes("-");
-
-        if (isSubItem) {
-          // For sub-items, use the sub-items endpoint
-          const [parentId] = favorite.item_id.split("-");
-          const response = await fetchWithRetry(
-            `${BASE_API_URL}/items/get/sub?parent_id=${parentId}`,
-            undefined,
-            {
-              maxRetries: 3,
-              initialDelayMs: 800,
-              timeoutMs: 10000,
-            },
-          );
-          if (response.ok) {
-            const itemDetails = await response.json();
-            return { [favorite.item_id]: itemDetails };
-          }
-        } else {
-          // For regular items, use the helper function
-          const itemDetails = await fetchItemById(favorite.item_id);
-          if (itemDetails) {
-            return { [favorite.item_id]: itemDetails };
-          }
-        }
-        return { [favorite.item_id]: null };
-      } catch (err) {
-        console.error(
-          "[SERVER ACTION] Error fetching item details for %s:",
-          favorite.item_id,
-          err,
-        );
+        const itemDetails = await fetchItemById(favorite.item_id);
+        return { [favorite.item_id]: itemDetails ?? null };
+      } catch {
         return { [favorite.item_id]: null };
       }
     });
 
     const itemDetailsArray = await Promise.all(itemDetailsPromises);
-
-    // Merge all item details into a single object
     const itemDetailsMap: Record<string, unknown> = {};
-    itemDetailsArray.forEach((details) => {
-      Object.assign(itemDetailsMap, details);
-    });
-
+    itemDetailsArray.forEach((details) =>
+      Object.assign(itemDetailsMap, details),
+    );
     return itemDetailsMap;
   } catch (error) {
-    console.error(
-      "[SERVER ACTION] Failed to fetch favorite item details:",
-      error,
-    );
+    console.error("Failed to fetch favorite item details:", error);
     return {};
   }
 }
 
 export async function fetchCommentDetails(
-  comments: Array<{
-    item_type: string;
-    item_id: number;
-  }>,
+  comments: Array<{ item_type: string; item_id: number }>,
 ) {
   try {
-    // Group comments by type to batch fetch
     const itemIds = [
       ...new Set(
         comments
@@ -144,37 +101,30 @@ export async function fetchCommentDetails(
       ),
     ];
 
-    // Batch fetch non-changelog details server-side (changelogs are fetched client-side)
     const [items, seasons] = await Promise.all([
       Promise.all(itemIds.map((id) => fetchItemById(id))),
       Promise.all(seasonIds.map((id) => fetchSeason(id))),
     ]);
 
-    // Create lookup maps
     const itemMap: Record<string, unknown> = {};
     const seasonMap: Record<string, unknown> = {};
 
     itemIds.forEach((id, index) => {
-      if (items[index]) {
-        itemMap[id] = items[index];
-      }
+      if (items[index]) itemMap[id] = items[index];
     });
-
     seasonIds.forEach((id, index) => {
-      if (seasons[index]) {
-        seasonMap[id] = seasons[index];
-      }
+      if (seasons[index]) seasonMap[id] = seasons[index];
     });
 
     return {
       changelogs: {},
       items: itemMap,
       seasons: seasonMap,
-      trades: {}, // Empty since we don't need trade details
-      inventories: {}, // Empty since we don't need inventory details for comments
+      trades: {},
+      inventories: {},
     };
   } catch (error) {
-    console.error("[SERVER ACTION] Failed to fetch comment details:", error);
+    console.error("Failed to fetch comment details:", error);
     return {
       changelogs: {},
       items: {},

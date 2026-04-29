@@ -1,4 +1,4 @@
-import { BASE_API_URL } from "@/utils/api";
+import { PUBLIC_API_URL } from "@/utils/api";
 import {
   fetchFavoritesData,
   fetchFavoriteItemDetails,
@@ -30,7 +30,7 @@ export class ProfileDataService {
   private static async fetchCommentsWithRetry(userId: string) {
     try {
       const response = await fetchWithRetry(
-        `${BASE_API_URL}/users/comments/get?author=${userId}`,
+        `${PUBLIC_API_URL}/users/comments/get?author=${userId}`,
         undefined,
         {
           maxRetries: 3,
@@ -79,7 +79,7 @@ export class ProfileDataService {
         favoritesData,
       ] = await Promise.all([
         fetchWithRetry(
-          `${BASE_API_URL}/users/followers/get?user=${userId}`,
+          `${PUBLIC_API_URL}/users/followers/get?user=${userId}`,
           undefined,
           {
             maxRetries: 2,
@@ -88,7 +88,7 @@ export class ProfileDataService {
           },
         ).catch(() => null),
         fetchWithRetry(
-          `${BASE_API_URL}/users/following/get?user=${userId}`,
+          `${PUBLIC_API_URL}/users/following/get?user=${userId}`,
           undefined,
           {
             maxRetries: 2,
@@ -97,7 +97,7 @@ export class ProfileDataService {
           },
         ).catch(() => null),
         fetchWithRetry(
-          `${BASE_API_URL}/users/description/get?user=${userId}&nocache=true`,
+          `${PUBLIC_API_URL}/users/description/get?user=${userId}&nocache=true`,
           undefined,
           {
             maxRetries: 2,
@@ -107,7 +107,7 @@ export class ProfileDataService {
         ).catch(() => null),
         this.fetchCommentsWithRetry(userId),
         fetchWithRetry(
-          `${BASE_API_URL}/servers/get?owner=${userId}`,
+          `${PUBLIC_API_URL}/servers/get?owner=${userId}`,
           undefined,
           {
             maxRetries: 2,
