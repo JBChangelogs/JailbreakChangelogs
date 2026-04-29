@@ -296,9 +296,15 @@ export default function Header() {
     setNotificationTimeoutId(timeoutId);
   };
 
-  const { setLoginModal, user: authUser, isAuthenticated } = useAuthContext();
+  const {
+    setLoginModal,
+    user: authUser,
+    isAuthenticated,
+    isLoading,
+  } = useAuthContext();
   const { resolvedTheme } = useTheme();
-  const userData = isAuthenticated ? authUser : null;
+  const showAuth = !isLoading && isAuthenticated;
+  const userData = showAuth ? authUser : null;
   useEscapeLogin();
 
   useEffect(() => {
@@ -877,7 +883,7 @@ export default function Header() {
                           className="text-primary-text h-4 w-4"
                           inline={true}
                         />
-                        {isAuthenticated && unreadCount > 0 && (
+                        {showAuth && unreadCount > 0 && (
                           <UnreadNotificationBadge count={unreadCount} />
                         )}
                       </button>
@@ -947,7 +953,7 @@ export default function Header() {
                       </div>
 
                       {/* Tabs */}
-                      {isAuthenticated && (
+                      {showAuth && (
                         <div className="border-border-secondary border-b">
                           <Tabs
                             value={notificationTab}
@@ -990,7 +996,7 @@ export default function Header() {
                       )}
 
                       {/* Manage Notifications Link */}
-                      {isAuthenticated && (
+                      {showAuth && (
                         <div className="border-border-secondary bg-secondary-bg/30 border-b px-4 py-2">
                           <p className="text-secondary-text text-xs">
                             Manage which notifications you receive in{" "}
@@ -1014,7 +1020,7 @@ export default function Header() {
                               Loading notifications...
                             </p>
                           </div>
-                        ) : !isAuthenticated ? (
+                        ) : !showAuth ? (
                           <div className="flex flex-col items-center justify-center px-4 py-8">
                             <p className="text-secondary-text text-center text-sm">
                               You must be logged in to view notifications
@@ -1133,7 +1139,7 @@ export default function Header() {
                       </div>
                     </PopoverContent>
                   </Popover>
-                  {isAuthenticated && (
+                  {showAuth && (
                     <Link
                       href="/messages"
                       className="flex items-center justify-center"

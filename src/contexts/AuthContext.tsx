@@ -11,11 +11,7 @@ import React, {
 } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { AuthState, UserData } from "@/types/auth";
-import {
-  validateAuth,
-  logout as authLogout,
-  trackLogoutSource,
-} from "@/utils/auth";
+import { logout as authLogout, trackLogoutSource } from "@/utils/auth";
 import {
   safeGetJSON,
   safeSetJSON,
@@ -25,21 +21,6 @@ import { PUBLIC_API_URL } from "@/utils/api";
 import { buildApiUrlWithDevToken } from "@/utils/apiDevToken";
 import { toast } from "sonner";
 import { useRealtimeNotificationsWebSocket } from "@/hooks/useRealtimeNotificationsWebSocket";
-
-// Helper function to track user status in Clarity
-const trackUserStatus = (isAuthenticated: boolean, action?: string) => {
-  if (typeof window !== "undefined" && window.clarity) {
-    if (action === "logout") {
-      window.clarity("set", "user_status", "logout");
-    } else {
-      window.clarity(
-        "set",
-        "user_status",
-        isAuthenticated ? "authenticated" : "anonymous",
-      );
-    }
-  }
-};
 
 interface AuthContextType extends AuthState {
   logout: () => Promise<void>;
@@ -88,87 +69,73 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const initializeAuth = useCallback(async () => {
     try {
-      // Fast path: non-HttpOnly cookie is client-readable — fetch user directly
       const token = getJbclToken();
-      if (token && !safeGetJSON("user", null)) {
-        try {
-          const response = await fetch(
-            buildApiUrlWithDevToken(PUBLIC_API_URL, "/users/me"),
-            { cache: "no-store", credentials: "include" },
-          );
-          if (response.ok) {
-            const user = (await response.json()) as UserData;
-            safeSetJSON("user", user);
-            safeLocalStorage.setItem("userid", user.id);
-            if (user.avatar) {
-              safeLocalStorage.setItem(
-                "avatar",
-                `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}?size=4096`,
-              );
-            }
-            setAuthState({
-              isAuthenticated: true,
-              user,
-              isLoading: false,
-              error: null,
-            });
-            trackUserStatus(true);
-            return;
+
+      if (!token) {
+        setAuthState({
+          isAuthenticated: false,
+          user: null,
+          isLoading: false,
+          error: null,
+        });
+        return;
+      }
+
+      // Show cached user immediately so the navbar renders without a flash
+      const cachedUser = safeGetJSON<UserData>("user", null);
+      if (cachedUser) {
+        setAuthState({
+          isAuthenticated: true,
+          user: cachedUser,
+          isLoading: false,
+          error: null,
+        });
+      }
+
+      // Refresh from /users/me in the background
+      try {
+        const response = await fetch(
+          buildApiUrlWithDevToken(PUBLIC_API_URL, "/users/me"),
+          { cache: "no-store", credentials: "include" },
+        );
+
+        if (response.ok) {
+          const user = (await response.json()) as UserData;
+          safeSetJSON("user", user);
+          safeLocalStorage.setItem("userid", user.id);
+          if (user.avatar) {
+            safeLocalStorage.setItem(
+              "avatar",
+              `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}?size=4096`,
+            );
           }
-        } catch {
-          // fall through to existing flow
-        }
-      }
-
-      // Check if we have user data in localStorage first
-      const userData = safeGetJSON("user", null);
-      if (userData) {
-        // Validate the session to ensure it's still valid
-        const isValid = await validateAuth();
-        if (isValid) {
-          // Re-read user data after validateAuth() to get any updates (e.g., Roblox fields)
-          const freshUserData = safeGetJSON("user", null);
           setAuthState({
             isAuthenticated: true,
-            user: freshUserData || userData,
+            user,
             isLoading: false,
             error: null,
           });
-
-          // Track user status in Clarity
-          trackUserStatus(true);
-          return;
-        }
-      }
-
-      // If no user data or validation failed, try to validate auth anyway
-      // This will check the HttpOnly cookie via the session API
-      const isValid = await validateAuth();
-      if (isValid) {
-        const freshUserData = safeGetJSON("user", null);
-        if (freshUserData) {
+        } else {
+          // Token is invalid — clear state
+          safeSetJSON("user", null);
           setAuthState({
-            isAuthenticated: true,
-            user: freshUserData,
+            isAuthenticated: false,
+            user: null,
             isLoading: false,
             error: null,
           });
-
-          // Track user status in Clarity
-          trackUserStatus(true);
-          return;
+        }
+      } catch {
+        // Network error — keep showing cached user if we have one
+        if (!cachedUser) {
+          setAuthState({
+            isAuthenticated: false,
+            user: null,
+            isLoading: false,
+            error: null,
+          });
         }
       }
-
-      setAuthState({
-        isAuthenticated: false,
-        user: null,
-        isLoading: false,
-        error: null,
-      });
-
-      // Track user status in Clarity
-      trackUserStatus(false);
     } catch (err) {
       console.error("Auth initialization error:", err);
       setAuthState({
@@ -177,9 +144,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
         isLoading: false,
         error: "Failed to initialize auth",
       });
-
-      // Track user status in Clarity
-      trackUserStatus(false);
     }
   }, []);
 
@@ -214,7 +178,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
       authInterval = setInterval(() => {
         if (isUserActiveRef.current) {
-          validateAuth().catch((error) => {
+          initializeAuth().catch((error) => {
             console.error("Auth validation error:", error);
           });
         }
@@ -249,8 +213,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
           isLoading: false,
           error: null,
         });
-        // Track user status in Clarity
-        trackUserStatus(true);
       } else {
         setAuthState({
           isAuthenticated: false,
@@ -258,8 +220,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
           isLoading: false,
           error: null,
         });
-        // Track user status in Clarity
-        trackUserStatus(false);
       }
     };
 
@@ -349,7 +309,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
       });
 
       // Track user status in Clarity
-      trackUserStatus(false, "logout");
       router.refresh();
     } catch (err) {
       console.error("Logout error:", err);
