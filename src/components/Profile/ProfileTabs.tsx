@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useMemo } from "react";
 import React from "react";
+import { useQueryState } from "nuqs";
 
 import AboutTab from "./AboutTab";
 import CommentsTab from "./CommentsTab";
@@ -137,7 +138,26 @@ export default function ProfileTabs({
   tradeAds = [],
 }: ProfileTabsProps) {
   "use memo";
-  const [value, setValue] = useState(0);
+  const [tabParam, setTabParam] = useQueryState("tab", {
+    defaultValue: "",
+    history: "push",
+    shallow: true,
+  });
+
+  const hasRobloxConnection = Boolean(user?.roblox_id);
+
+  const value = useMemo(() => {
+    const map: Record<string, number> = {
+      comments: 1,
+      favorites: 2,
+      servers: 3,
+      ...(hasRobloxConnection
+        ? { "trade-ads": 4, roblox: 4, inventory: 5 }
+        : {}),
+    };
+    const idx = tabParam ? (map[tabParam] ?? 0) : 0;
+    return Math.min(idx, hasRobloxConnection ? 5 : 3);
+  }, [tabParam, hasRobloxConnection]);
 
   // Create a shared cache of item details from both comments and favorites
   const sharedItemDetails = (() => {
@@ -153,67 +173,21 @@ export default function ProfileTabs({
     return cache;
   })();
 
-  // Hash navigation
-  useEffect(() => {
-    const handleHashChange = () => {
-      const hash = window.location.hash.slice(1); // Remove the # symbol
-      const hasRobloxConnection = Boolean(user?.roblox_id);
-      if (hash === "about") {
-        setValue(0);
-      } else if (hash === "comments") {
-        setValue(1);
-      } else if (hash === "favorites") {
-        setValue(2);
-      } else if (hash === "servers") {
-        setValue(3);
-      } else if (
-        (hash === "trade-ads" || hash === "roblox") &&
-        hasRobloxConnection
-      ) {
-        setValue(4);
-      } else if (hash === "inventory" && hasRobloxConnection) {
-        setValue(5);
-      } else {
-        setValue(0);
-      }
-    };
-
-    // Handle initial hash
-    handleHashChange();
-
-    // Listen for hash changes
-    window.addEventListener("hashchange", handleHashChange);
-    return () => window.removeEventListener("hashchange", handleHashChange);
-  }, [user?.roblox_id]);
-
   const handleChange = (newValue: number) => {
-    const hasRobloxConnection = Boolean(user?.roblox_id);
-    const tabsCount = hasRobloxConnection ? 6 : 4;
-    const normalizedValue = Math.max(0, Math.min(newValue, tabsCount - 1));
-    setValue(normalizedValue);
-    // Update hash based on selected tab
-    if (normalizedValue === 0) {
-      // Remove hash completely for About tab
-      history.pushState(null, "", window.location.pathname);
-    } else if (normalizedValue === 1) {
-      window.location.hash = "comments";
-    } else if (normalizedValue === 2) {
-      window.location.hash = "favorites";
-    } else if (normalizedValue === 3) {
-      window.location.hash = "servers";
-    } else if (hasRobloxConnection && normalizedValue === 4) {
-      window.location.hash = "trade-ads";
-    } else if (hasRobloxConnection && normalizedValue === 5) {
-      window.location.hash = "inventory";
-    }
+    const names: Record<number, string | null> = {
+      0: null,
+      1: "comments",
+      2: "favorites",
+      3: "servers",
+      4: "trade-ads",
+      5: "inventory",
+    };
+    void setTabParam(names[newValue] ?? null);
   };
 
   if (!user) {
     return null;
   }
-
-  // Calculate whether user has Roblox connection
-  const hasRobloxConnection = Boolean(user.roblox_id);
 
   return (
     <div className="w-full">

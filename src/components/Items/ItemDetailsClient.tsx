@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useMemo } from "react";
+import { useQueryState } from "nuqs";
 import Image from "next/image";
 import React, { Suspense } from "react";
 import dynamic from "next/dynamic";
@@ -129,7 +130,22 @@ export default function ItemDetailsClient({
   const [isHovered, setIsHovered] = useState(false);
   const [isBlueBirdRaised, setIsBlueBirdRaised] = useState(false);
   const [visibleLength, setVisibleLength] = useState(500);
-  const [activeTab, setActiveTab] = useState(0);
+  const [tabParam, setTabParam] = useQueryState("tab", {
+    defaultValue: "",
+    history: "push",
+    shallow: true,
+  });
+  const activeTab = useMemo(() => {
+    const map: Record<string, number> = {
+      charts: 1,
+      changes: 2,
+      dupes: 3,
+      hoarders: 4,
+      similar: 5,
+      comments: 6,
+    };
+    return tabParam ? (map[tabParam] ?? 0) : 0;
+  }, [tabParam]);
   const [activeChartTab, setActiveChartTab] = useState(0);
   const [itemMetadata, setItemMetadata] =
     useState<ItemUnlockMetadataEntry | null>(null);
@@ -171,25 +187,6 @@ export default function ItemDetailsClient({
   }, [isBlueBird]);
 
   const INITIAL_DESCRIPTION_LENGTH = 500;
-
-  useEffect(() => {
-    // Hash navigation
-    if (window.location.hash === "#comments") {
-      setTimeout(() => setActiveTab(6), 0);
-    } else if (window.location.hash === "#charts") {
-      setTimeout(() => setActiveTab(1), 0);
-    } else if (window.location.hash === "#changes") {
-      setTimeout(() => setActiveTab(2), 0);
-    } else if (window.location.hash === "#dupes") {
-      setTimeout(() => setActiveTab(3), 0);
-    } else if (window.location.hash === "#hoarders") {
-      setTimeout(() => setActiveTab(4), 0);
-    } else if (window.location.hash === "#similar") {
-      setTimeout(() => setActiveTab(5), 0);
-    } else {
-      setTimeout(() => setActiveTab(0), 0);
-    }
-  }, []);
 
   useEffect(() => {
     let isMounted = true;
@@ -256,29 +253,16 @@ export default function ItemDetailsClient({
   };
 
   const handleTabChange = (newValue: number) => {
-    setActiveTab(newValue);
-    const searchParams = new URLSearchParams(window.location.search);
-
-    if (newValue === 0) {
-      history.pushState(
-        null,
-        "",
-        window.location.pathname +
-          (searchParams.toString() ? `?${searchParams.toString()}` : ""),
-      );
-    } else if (newValue === 1) {
-      window.location.hash = "charts";
-    } else if (newValue === 2) {
-      window.location.hash = "changes";
-    } else if (newValue === 3) {
-      window.location.hash = "dupes";
-    } else if (newValue === 4) {
-      window.location.hash = "hoarders";
-    } else if (newValue === 5) {
-      window.location.hash = "similar";
-    } else if (newValue === 6) {
-      window.location.hash = "comments";
-    }
+    const names: Record<number, string | null> = {
+      0: null,
+      1: "charts",
+      2: "changes",
+      3: "dupes",
+      4: "hoarders",
+      5: "similar",
+      6: "comments",
+    };
+    void setTabParam(names[newValue] ?? null);
   };
 
   const currentItem = item;

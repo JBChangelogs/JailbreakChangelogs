@@ -1,6 +1,13 @@
 "use client";
 
-import React, { useState, useEffect, useCallback, useRef } from "react";
+import React, {
+  useState,
+  useEffect,
+  useCallback,
+  useRef,
+  useMemo,
+} from "react";
+import { useQueryState } from "nuqs";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { TradeAd } from "@/types/trading";
 import { TradeItem } from "@/types/trading";
@@ -111,9 +118,16 @@ export default function TradeAds({
   const [error, setError] = useState<string | null>(null);
   const [isRecentTradesUnauthorized, setIsRecentTradesUnauthorized] =
     useState(false);
-  const [activeTab, setActiveTab] = useState<"view" | "create" | "myads">(
-    "view",
-  );
+  const [tabParam, setTabParam] = useQueryState("tab", {
+    defaultValue: "",
+    history: "push",
+    shallow: true,
+  });
+  const activeTab = useMemo<"view" | "create" | "myads">(() => {
+    if (tabParam === "create") return "create";
+    if (tabParam === "myads") return "myads";
+    return "view";
+  }, [tabParam]);
   const [itemsInputMode, setItemsInputMode] = useState<"values" | "inventory">(
     "values",
   );
@@ -160,17 +174,16 @@ export default function TradeAds({
     new Promise<void>((resolve) => setTimeout(resolve, ms));
 
   const getTradingUrl = useCallback(
-    (targetPage: number, hash?: string) => {
+    (targetPage: number) => {
       const params = new URLSearchParams(searchParams.toString());
+      params.delete("tab");
       if (targetPage > 1) {
         params.set("page", String(targetPage));
       } else {
         params.delete("page");
       }
       const queryString = params.toString();
-      return `${pathname}${queryString ? `?${queryString}` : ""}${
-        hash ? `#${hash}` : ""
-      }`;
+      return `${pathname}${queryString ? `?${queryString}` : ""}`;
     },
     [pathname, searchParams],
   );
@@ -572,7 +585,7 @@ export default function TradeAds({
     })();
 
     router.replace(getTradingUrl(1));
-    setActiveTab("view");
+    void setTabParam(null);
   };
 
   const getDemandForItem = (it: TradeItem): string | undefined => {
@@ -838,39 +851,17 @@ export default function TradeAds({
   }, [isRecentTradesUnauthorized, isAuthenticated, page, refreshTradeAds]);
 
   useEffect(() => {
-    const handleHashChange = () => {
-      const hash = window.location.hash.slice(1);
-
-      // Redirect to view if trying to access myads without being logged in or having trade ads
-      if (hash === "myads" && (!currentUserId || userTradeAds.length === 0)) {
-        router.replace(getTradingUrl(1));
-        setActiveTab("view");
-        return;
-      }
-
-      if (hash === "create" || hash === "myads") {
-        setActiveTab(hash as "create" | "myads");
-      } else {
-        setActiveTab("view");
-      }
-    };
-
-    // Handle initial hash
-    handleHashChange();
-
-    window.addEventListener("hashchange", handleHashChange);
-    return () => {
-      window.removeEventListener("hashchange", handleHashChange);
-    };
-  }, [currentUserId, getTradingUrl, router, userTradeAds.length]);
+    if (tabParam !== "myads") return;
+    if (!currentUserId || userTradeAds.length === 0) {
+      void setTabParam(null);
+    }
+  }, [tabParam, currentUserId, userTradeAds.length, setTabParam]);
 
   const handleTabChange = (tab: "view" | "create" | "myads") => {
-    setActiveTab(tab);
     isSyncingPageWithUrlRef.current = true;
     setIsPageTransitionLoading(tab === "view");
-    setPage(1); // Reset to first page when changing tabs
-    const nextUrl = tab === "view" ? getTradingUrl(1) : getTradingUrl(1, tab);
-    router.push(nextUrl);
+    setPage(1);
+    void setTabParam(tab === "view" ? null : tab);
   };
 
   const handleDeleteTrade = async (tradeId: number) => {

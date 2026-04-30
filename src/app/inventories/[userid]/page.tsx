@@ -23,7 +23,6 @@ import NitroInventoryDetailRailAd from "@/components/Ads/NitroInventoryDetailRai
 export default async function InventoryCheckerPage({
   params,
 }: InventoryCheckerPageProps) {
-  // Check for inventory maintenance mode
   const { isInventoryMaintenanceMode } = await checkInventoryMaintenanceMode();
   if (isInventoryMaintenanceMode) {
     return (
@@ -34,19 +33,15 @@ export default async function InventoryCheckerPage({
     );
   }
 
-  // Check if Inventory Checker feature is enabled
   if (!isFeatureEnabled("INVENTORY_CALCULATOR")) {
     return <ComingSoon />;
   }
 
   const { userid } = await params;
 
-  // Allow both usernames and numeric IDs
-  // Let InventoryDataStreamer handle the username resolution
   const isNumeric = /^\d+$/.test(userid);
   const robloxId = parseInt(userid);
 
-  // Only validate numeric IDs, allow usernames to pass through
   if (isNumeric && (isNaN(robloxId) || robloxId <= 0)) {
     notFound();
   }

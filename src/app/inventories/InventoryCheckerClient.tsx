@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef, useMemo } from "react";
+import { useQueryState } from "nuqs";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
@@ -113,7 +114,11 @@ export default function InventoryCheckerClient({
 
   const [networthData] = useState<UserNetworthData[]>(initialNetworthData);
   const [moneyHistoryData] = useState<MoneyHistory[]>(initialMoneyHistoryData);
-  const [activeTab, setActiveTab] = useState(0);
+  const [tabParam, setTabParam] = useQueryState("tab", {
+    defaultValue: "",
+    history: "push",
+    shallow: true,
+  });
   const [mountedTabs, setMountedTabs] = useState<Set<number>>(new Set([0]));
   const [showNonOgOnly, setShowNonOgOnly] = useState(false);
   const [queuePosition, setQueuePosition] = useState<{
@@ -355,42 +360,24 @@ export default function InventoryCheckerClient({
     };
   }, [hasBreakdownData, hasComments, hasDuplicates, hasDupedItems, robloxId]);
 
-  // Hash navigation
-  useEffect(() => {
-    const handleHashChange = () => {
-      const hash = window.location.hash.slice(1); // Remove the # symbol
-
-      let nextTab = 0;
-      if (hash === "copies" && tabIndex.copies !== null) {
-        nextTab = tabIndex.copies;
-      } else if (hash === "dupes" && tabIndex.dupes !== null) {
-        nextTab = tabIndex.dupes;
-      } else if (
-        (hash === "money" ||
-          hash === "networth" ||
-          hash === "graphs" ||
-          hash === "charts") &&
-        tabIndex.graphs !== null
-      ) {
-        nextTab = tabIndex.graphs;
-      } else if (hash === "breakdown" && tabIndex.breakdown !== null) {
-        nextTab = tabIndex.breakdown;
-      } else if (hash === "comments" && tabIndex.comments !== null) {
-        nextTab = tabIndex.comments;
-      }
-      setActiveTab(nextTab);
-      setMountedTabs((prev) =>
-        prev.has(nextTab) ? prev : new Set([...prev, nextTab]),
-      );
+  // Derive active tab index from the ?tab= search param + available tabs
+  const activeTab = useMemo(() => {
+    const tabNameMap: Record<string, number | null> = {
+      breakdown: tabIndex.breakdown,
+      copies: tabIndex.copies,
+      dupes: tabIndex.dupes,
+      graphs: tabIndex.graphs,
+      comments: tabIndex.comments,
     };
+    return tabParam ? (tabNameMap[tabParam] ?? 0) : 0;
+  }, [tabParam, tabIndex]);
 
-    // Handle initial hash
-    handleHashChange();
-
-    // Listen for hash changes
-    window.addEventListener("hashchange", handleHashChange);
-    return () => window.removeEventListener("hashchange", handleHashChange);
-  }, [tabIndex]);
+  // Keep mountedTabs in sync so each tab's content is preserved once visited
+  useEffect(() => {
+    setMountedTabs((prev) =>
+      prev.has(activeTab) ? prev : new Set([...prev, activeTab]),
+    );
+  }, [activeTab]);
 
   // Derive active tab from robloxId to avoid setState in effect
   const effectiveActiveTab = activeTab > tabIndex.max ? 0 : activeTab;
@@ -606,26 +593,21 @@ export default function InventoryCheckerClient({
 
   // Function to handle tab changes
   const handleTabChange = (_: React.SyntheticEvent, newValue: number) => {
-    setActiveTab(newValue);
+    // Mount the tab immediately so content renders on the same frame
     setMountedTabs((prev) =>
       prev.has(newValue) ? prev : new Set([...prev, newValue]),
     );
 
-    // Update hash based on selected tab
-    if (newValue === 0) {
-      // Remove hash completely for Inventory Items tab
-      history.pushState(null, "", window.location.pathname);
-    } else if (tabIndex.copies !== null && newValue === tabIndex.copies) {
-      window.location.hash = "copies";
-    } else if (tabIndex.dupes !== null && newValue === tabIndex.dupes) {
-      window.location.hash = "dupes";
-    } else if (tabIndex.graphs !== null && newValue === tabIndex.graphs) {
-      window.location.hash = "graphs";
-    } else if (tabIndex.breakdown !== null && newValue === tabIndex.breakdown) {
-      window.location.hash = "breakdown";
-    } else if (tabIndex.comments !== null && newValue === tabIndex.comments) {
-      window.location.hash = "comments";
-    }
+    const tabIndexToName: Record<number, string> = {};
+    if (tabIndex.breakdown !== null)
+      tabIndexToName[tabIndex.breakdown] = "breakdown";
+    if (tabIndex.copies !== null) tabIndexToName[tabIndex.copies] = "copies";
+    if (tabIndex.dupes !== null) tabIndexToName[tabIndex.dupes] = "dupes";
+    if (tabIndex.graphs !== null) tabIndexToName[tabIndex.graphs] = "graphs";
+    if (tabIndex.comments !== null)
+      tabIndexToName[tabIndex.comments] = "comments";
+
+    void setTabParam(tabIndexToName[newValue] ?? null);
   };
 
   // Comments are provided server-side via initialComments prop

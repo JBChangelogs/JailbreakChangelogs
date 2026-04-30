@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useMemo, useRef } from "react";
+import { useQueryState } from "nuqs";
 import { TradeItem } from "@/types/trading";
 import TradeItemPickerV2 from "../../trading/TradeItemPickerV2";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
@@ -65,9 +66,16 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
   const [pickerActiveSide, setPickerActiveSide] = useState<
     "offering" | "requesting"
   >("offering");
-  const [activeTab, setActiveTab] = useState<"items" | "values" | "similar">(
-    "items",
-  );
+  const [tabParam, setTabParam] = useQueryState("calc", {
+    defaultValue: "",
+    history: "push",
+    shallow: true,
+  });
+  const activeTab = useMemo<"items" | "values" | "similar">(() => {
+    if (tabParam === "comparison") return "values";
+    if (tabParam === "similar") return "similar";
+    return "items";
+  }, [tabParam]);
   const [showRestoreModal, setShowRestoreModal] = useState(false);
   const [showClearConfirmModal, setShowClearConfirmModal] = useState(false);
   const [totalBasis, setTotalBasis] = useState<"offering" | "requesting">(
@@ -92,7 +100,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
 
   const focusItemsForSide = (side: "offering" | "requesting") => {
     setPickerActiveSide(side);
-    setActiveTab("items");
+    void setTabParam(null);
   };
 
   useEffect(() => {
@@ -274,27 +282,6 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
 
   useLockBodyScroll(showClearConfirmModal);
 
-  useEffect(() => {
-    const handleHashChange = () => {
-      const hash = window.location.hash.slice(1);
-      if (hash === "comparison") {
-        setActiveTab("values");
-      } else if (hash === "similar") {
-        setActiveTab("similar");
-      } else {
-        setActiveTab("items");
-      }
-    };
-
-    // Handle initial hash
-    handleHashChange();
-
-    window.addEventListener("hashchange", handleHashChange);
-    return () => {
-      window.removeEventListener("hashchange", handleHashChange);
-    };
-  }, []);
-
   /**
    * Restore prompt on mount if previously saved items exist in localStorage.
    * invalid JSON clears storage to avoid persistent errors.
@@ -324,15 +311,9 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
   }, []);
 
   const handleTabChange = (tab: "items" | "values" | "similar") => {
-    setActiveTab(tab);
-    if (tab === "values") {
-      window.location.hash = "comparison";
-    } else if (tab === "similar") {
-      window.location.hash = "similar";
-    } else {
-      const urlWithoutHash = window.location.pathname + window.location.search;
-      window.history.replaceState(null, "", urlWithoutHash);
-    }
+    if (tab === "values") void setTabParam("comparison");
+    else if (tab === "similar") void setTabParam("similar");
+    else void setTabParam(null);
   };
 
   /**

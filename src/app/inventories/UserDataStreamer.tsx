@@ -16,7 +16,7 @@ interface UserDataStreamerProps {
   currentSeason: Season | null;
   initialComments?: CommentData[];
   initialCommentUserMap?: Record<string, UserData>;
-  items: Item[]; // Items data passed from server
+  items: Item[];
   networthData: UserNetworthData[];
   moneyHistoryData: MoneyHistory[];
 }
@@ -76,9 +76,6 @@ async function UserDataFetcher({
     includeDupeData: true,
     context: "INVENTORY",
   });
-
-  // No remaining user IDs since we only fetch the main user
-  // const remainingUserIds: string[] = [];
 
   // Fetch connection data directly for the main user (like OG finder does)
   const userConnectionData = await fetchUserByRobloxId(robloxId).catch(

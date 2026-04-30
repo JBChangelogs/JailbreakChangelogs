@@ -33,6 +33,7 @@ import {
 import { getGitHubUrl } from "@/utils/version";
 import { Suspense } from "react";
 import QueryProvider from "@/components/QueryProvider";
+import { NuqsAdapter } from "nuqs/adapters/next/app";
 
 export const viewport: Viewport = {
   themeColor: "#2462cd",
@@ -209,7 +210,9 @@ export default async function RootLayout({
                             </HideOnAccessDenied>
                           </Suspense>
                           <main className="min-h-screen flex-1">
-                            <Suspense>{children}</Suspense>
+                            <NuqsAdapter>
+                              <Suspense>{children}</Suspense>
+                            </NuqsAdapter>
                           </main>
                           <HideOnAccessDenied>
                             <Footer
@@ -345,7 +348,9 @@ export default async function RootLayout({
                         </HideOnAccessDenied>
                       </Suspense>
                       <main className="min-h-screen flex-1">
-                        <Suspense>{children}</Suspense>
+                        <NuqsAdapter>
+                          <Suspense>{children}</Suspense>
+                        </NuqsAdapter>
                       </main>
                       <HideOnAccessDenied>
                         <Footer
