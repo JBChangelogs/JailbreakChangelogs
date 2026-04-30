@@ -53,9 +53,9 @@ interface SuggestionUser {
   custom_avatar: string | null;
   premiumtype: number;
   usernumber: number;
-  settings?: {
-    avatar_discord: number;
-    hide_presence?: number;
+  settings_v2?: {
+    custom_avatar: boolean;
+    hide_presence?: boolean;
   };
 }
 
@@ -1376,7 +1376,7 @@ export default function ValueSuggestionsPage() {
                           suggestion.user.custom_avatar ?? undefined
                         }
                         premiumType={suggestion.user.premiumtype}
-                        settings={suggestion.user.settings}
+                        settings={suggestion.user.settings_v2}
                         size={6}
                         showBadge={false}
                       />
@@ -1518,7 +1518,7 @@ export default function ValueSuggestionsPage() {
                           username={v.user.username}
                           custom_avatar={v.user.custom_avatar ?? undefined}
                           premiumType={v.user.premiumtype}
-                          settings={v.user.settings}
+                          settings={v.user.settings_v2}
                           size={10}
                           showBadge={false}
                         />

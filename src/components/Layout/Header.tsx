@@ -529,7 +529,7 @@ export default function Header() {
               size={10}
               custom_avatar={userData.custom_avatar}
               showBadge={false}
-              settings={userData.settings}
+              settings={userData.settings_v2}
               premiumType={userData.premiumtype}
             />
             <div className="min-w-0 flex-1">

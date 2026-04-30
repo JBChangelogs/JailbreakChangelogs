@@ -1598,15 +1598,15 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                   const flags = userData[comment.user_id]?.flags || [];
                   const premiumType = userData[comment.user_id]?.premiumtype;
                   const commentAuthorSettings =
-                    userData[comment.user_id]?.settings;
+                    userData[comment.user_id]?.settings_v2;
 
                   // Hide identity if:
-                  // 1. show_recent_comments is 0 (disabled), OR
-                  // 2. profile_public is 0 (private profile)
+                  // 1. show_recent_comments is false (disabled), OR
+                  // 2. profile_public is false (private profile)
                   // AND the viewer is not the comment author
                   const hideRecent =
-                    (commentAuthorSettings?.show_recent_comments === 0 ||
-                      commentAuthorSettings?.profile_public === 0) &&
+                    (commentAuthorSettings?.show_recent_comments === false ||
+                      commentAuthorSettings?.profile_public === false) &&
                     currentUserId !== comment.user_id;
 
                   // Truncation logic for long comments
@@ -1645,10 +1645,10 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
 
                   const parentHidden =
                     !!parentComment &&
-                    (userData[parentComment.user_id]?.settings
-                      ?.show_recent_comments === 0 ||
-                      userData[parentComment.user_id]?.settings
-                        ?.profile_public === 0) &&
+                    (userData[parentComment.user_id]?.settings_v2
+                      ?.show_recent_comments === false ||
+                      userData[parentComment.user_id]?.settings_v2
+                        ?.profile_public === false) &&
                     currentUserId !== parentComment.user_id;
 
                   const parentUsername =
@@ -1766,7 +1766,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                                   userData[parentComment.user_id]?.premiumtype
                                 }
                                 settings={
-                                  userData[parentComment.user_id]?.settings
+                                  userData[parentComment.user_id]?.settings_v2
                                 }
                                 custom_avatar={
                                   userData[parentComment.user_id]?.custom_avatar
@@ -1843,7 +1843,9 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                                   userData[comment.user_id]?.custom_avatar
                                 }
                                 showBadge={false}
-                                settings={userData[comment.user_id]?.settings}
+                                settings={
+                                  userData[comment.user_id]?.settings_v2
+                                }
                                 premiumType={
                                   userData[comment.user_id]?.premiumtype
                                 }
@@ -2384,7 +2386,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
             ? userData[
                 filteredComments.find((c) => c.id === reportingCommentId)
                   ?.user_id || ""
-              ]?.settings?.show_recent_comments === 0 &&
+              ]?.settings_v2?.show_recent_comments === false &&
               currentUserId !==
                 filteredComments.find((c) => c.id === reportingCommentId)
                   ?.user_id

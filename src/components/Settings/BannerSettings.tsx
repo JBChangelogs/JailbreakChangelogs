@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/tooltip";
 import { Icon } from "@/components/ui/IconWrapper";
 import { UserData } from "@/types/auth";
-import { updateBanner, updateSettings } from "@/services/settingsService";
+import { updateBanner, updateUserSettings } from "@/services/settingsService";
 import { toast } from "sonner";
 import { useSupporterModal } from "@/hooks/useSupporterModal";
 import SupporterModal from "../Modals/SupporterModal";
@@ -180,10 +180,7 @@ export const BannerSettings = ({
       // Perform auto-save
       try {
         await updateBanner(result.imageUrl);
-        await updateSettings({
-          ...userData.settings,
-          banner_discord: 0,
-        });
+        await updateUserSettings("custom_banner", true);
         onBannerUpdate(result.imageUrl);
 
         if (typeof window !== "undefined" && window.umami) {
@@ -240,11 +237,7 @@ export const BannerSettings = ({
     try {
       // Update the banner URL and settings to use custom banner instead of Discord
       const newBannerUrl = await updateBanner(customBannerUrl);
-      // Include all current settings when updating
-      await updateSettings({
-        ...userData.settings,
-        banner_discord: 0,
-      });
+      await updateUserSettings("custom_banner", true);
       onBannerUpdate(newBannerUrl);
       toast.success("Custom banner updated successfully");
 
@@ -263,7 +256,7 @@ export const BannerSettings = ({
 
   return (
     <>
-      <Box sx={{ mt: 2 }}>
+      <Box sx={{ mt: 2, mb: 3 }}>
         <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
           <Typography
             variant="subtitle1"

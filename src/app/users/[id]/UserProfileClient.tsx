@@ -10,7 +10,7 @@ import { Skeleton } from "@mui/material";
 import { Button } from "@/components/ui/button";
 import { Icon } from "../../../components/ui/IconWrapper";
 import { Banner } from "@/components/Profile/Banner";
-import { UserSettings, FollowingData } from "@/types/auth";
+import { UserSettingsV2, FollowingData } from "@/types/auth";
 import { toast } from "sonner";
 import dynamic from "next/dynamic";
 import { PUBLIC_API_URL } from "@/utils/api";
@@ -186,7 +186,7 @@ interface User {
   custom_avatar?: string;
   banner?: string;
   custom_banner?: string;
-  settings?: UserSettings;
+  settings_v2?: UserSettingsV2;
   presence?: {
     status: "Online" | "Offline";
     last_updated: number;
@@ -749,7 +749,7 @@ export default function UserProfileClient({
     notFound();
   }
 
-  if (user.settings?.profile_public === 0 && currentUserId !== user.id) {
+  if (user.settings_v2?.profile_public === false && currentUserId !== user.id) {
     return (
       <main className="min-h-screen pb-8">
         <div className="container mx-auto">
@@ -765,7 +765,7 @@ export default function UserProfileClient({
                     size={38}
                     custom_avatar={user.custom_avatar}
                     showBadge={false}
-                    settings={user.settings}
+                    settings={user.settings_v2}
                     premiumType={user.premiumtype}
                   />
                 </div>
@@ -831,7 +831,7 @@ export default function UserProfileClient({
             username={user.username}
             banner={user.banner}
             customBanner={user.custom_banner}
-            settings={user.settings}
+            settings={user.settings_v2}
             premiumType={user.premiumtype}
           />
 
@@ -847,13 +847,13 @@ export default function UserProfileClient({
                   size={38}
                   custom_avatar={user.custom_avatar}
                   isOnline={
-                    user.settings?.hide_presence === 1 &&
+                    user.settings_v2?.hide_presence === true &&
                     currentUserId !== user.id
                       ? false
                       : user.presence?.status === "Online"
                   }
                   showBadge={true}
-                  settings={user.settings}
+                  settings={user.settings_v2}
                   premiumType={user.premiumtype}
                 />
               </div>
@@ -884,7 +884,7 @@ export default function UserProfileClient({
                       <Skeleton variant="text" width="60%" height={16} />
                     ) : (
                       <>
-                        {user.settings?.hide_presence === 1 &&
+                        {user.settings_v2?.hide_presence === true &&
                         currentUserId !== user.id ? (
                           <p className="text-secondary-text text-sm">
                             Last seen: Hidden

@@ -100,7 +100,7 @@ export default function SupportersSection({
           shape="square"
           className="rounded-xl"
           premiumType={supporter.premiumtype}
-          settings={{ avatar_discord: 1 }}
+          settings={{ custom_avatar: false }}
         />
         <div className="min-w-0 flex-1 text-center">
           <Link href={`/users/${supporter.id}`} prefetch={false}>

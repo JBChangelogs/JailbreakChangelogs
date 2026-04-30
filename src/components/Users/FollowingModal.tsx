@@ -5,7 +5,7 @@ import { Icon } from "@/components/ui/IconWrapper";
 import { UserAvatar } from "@/utils/avatar";
 import Link from "next/link";
 import { toast } from "sonner";
-import { UserSettings } from "@/types/auth";
+import { UserSettingsV2 } from "@/types/auth";
 
 interface Following {
   user_id: string;
@@ -22,7 +22,7 @@ interface User {
   usernumber: number;
   accent_color: string;
   custom_avatar?: string;
-  settings?: UserSettings;
+  settings_v2?: UserSettingsV2;
   premiumtype?: number;
 }
 
@@ -86,7 +86,7 @@ const FollowingModal: React.FC<FollowingModalProps> = ({
       try {
         // Check privacy settings using the passed userData
         if (
-          userDataRef.current.settings?.hide_following === 1 &&
+          userDataRef.current.settings_v2?.hide_following === true &&
           !isOwnProfileRef.current
         ) {
           setIsPrivate(true);
@@ -155,7 +155,7 @@ const FollowingModal: React.FC<FollowingModalProps> = ({
               usernumber: followingItem.user.usernumber || 0,
               accent_color: followingItem.user.accent_color || "None",
               custom_avatar: followingItem.user.custom_avatar,
-              settings: followingItem.user.settings,
+              settings_v2: followingItem.user.settings_v2,
               premiumtype: followingItem.user.premiumtype,
             };
           }
@@ -341,7 +341,7 @@ const FollowingModal: React.FC<FollowingModalProps> = ({
                                 cdnSize={512}
                                 custom_avatar={user.custom_avatar}
                                 showBadge={false}
-                                settings={user.settings}
+                                settings={user.settings_v2}
                                 premiumType={user.premiumtype}
                               />
                               <div className="min-w-0 flex-1">

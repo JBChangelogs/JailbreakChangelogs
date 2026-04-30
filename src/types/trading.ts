@@ -66,8 +66,8 @@ export interface TradeAd {
     custom_avatar?: string;
     usernumber?: number;
     premiumtype?: number;
-    settings?: {
-      avatar_discord: number;
+    settings_v2?: {
+      custom_avatar: boolean;
     };
   };
 }

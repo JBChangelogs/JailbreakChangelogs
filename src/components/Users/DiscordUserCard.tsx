@@ -3,7 +3,7 @@
 import { UserBadges } from "@/components/Profile/UserBadges";
 import { UserAvatar } from "@/utils/avatar";
 import {
-  type UserSettings,
+  type UserSettingsV2,
   type UserPresence,
   type UserFlag,
 } from "@/types/auth";
@@ -16,7 +16,7 @@ interface DiscordUserCardProps {
     global_name: string;
     usernumber: number;
     custom_avatar?: string;
-    settings?: UserSettings;
+    settings_v2?: UserSettingsV2;
     premiumtype?: number;
     presence?: UserPresence;
     primary_guild?: {
@@ -44,7 +44,7 @@ export default function DiscordUserCard({
         cdnSize={512}
         custom_avatar={user.custom_avatar}
         showBadge={false}
-        settings={user.settings}
+        settings={user.settings_v2}
         premiumType={user.premiumtype}
       />
       <div className="min-w-0 flex-1">

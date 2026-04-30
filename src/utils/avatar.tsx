@@ -19,8 +19,8 @@ interface UserAvatarProps {
   isOnline?: boolean;
   showBadge?: boolean;
   settings?: {
-    avatar_discord: number;
-    hide_presence?: number;
+    custom_avatar?: boolean;
+    hide_presence?: boolean;
   };
   shape?: "circle" | "square";
   premiumType?: number;
@@ -142,19 +142,8 @@ const UserAvatarImpl = ({
   })();
 
   const getAvatarSource = () => {
-    if (settings?.avatar_discord === 1 && !imageError) {
-      if (avatarHash && avatarHash !== "None") {
-        const url = `https://cdn.discordapp.com/avatars/${userId}/${avatarHash}?size=${discordCdnSize}`;
-        return {
-          src: url,
-          alt: username ? `${username}'s profile picture` : "User avatar",
-          onError: () => setImageError(true),
-        };
-      }
-    }
-
     if (
-      settings?.avatar_discord === 0 &&
+      settings?.custom_avatar === true &&
       premiumType &&
       premiumType >= 2 &&
       custom_avatar &&
@@ -168,19 +157,12 @@ const UserAvatarImpl = ({
       };
     }
 
-    if (
-      settings?.avatar_discord === 0 &&
-      (!premiumType || premiumType < 2) &&
-      !imageError
-    ) {
-      if (avatarHash && avatarHash !== "None") {
-        const url = `https://cdn.discordapp.com/avatars/${userId}/${avatarHash}?size=${discordCdnSize}`;
-        return {
-          src: url,
-          alt: username ? `${username}'s profile picture` : "User avatar",
-          onError: () => setImageError(true),
-        };
-      }
+    if (!imageError && avatarHash && avatarHash !== "None") {
+      return {
+        src: `https://cdn.discordapp.com/avatars/${userId}/${avatarHash}?size=${discordCdnSize}`,
+        alt: username ? `${username}'s profile picture` : "User avatar",
+        onError: () => setImageError(true),
+      };
     }
 
     return null;
@@ -208,7 +190,7 @@ const UserAvatarImpl = ({
       <AvatarWrapper
         isOnline={isOnline}
         showBadge={showBadge}
-        isHidden={settings?.hide_presence === 1}
+        isHidden={settings?.hide_presence === true}
         shape={shape}
         premiumType={premiumType}
         className={wrapperClassName}
@@ -235,7 +217,7 @@ const UserAvatarImpl = ({
     <AvatarWrapper
       isOnline={isOnline}
       showBadge={showBadge}
-      isHidden={settings?.hide_presence === 1}
+      isHidden={settings?.hide_presence === true}
       shape={shape}
       premiumType={premiumType}
       className={wrapperClassName}
@@ -288,8 +270,8 @@ export const UserAvatar = memo(
     prev.premiumType === next.premiumType &&
     prev.className === next.className &&
     prev.onlineRingClassName === next.onlineRingClassName &&
-    (prev.settings?.avatar_discord ?? null) ===
-      (next.settings?.avatar_discord ?? null) &&
+    (prev.settings?.custom_avatar ?? null) ===
+      (next.settings?.custom_avatar ?? null) &&
     (prev.settings?.hide_presence ?? null) ===
       (next.settings?.hide_presence ?? null),
 );

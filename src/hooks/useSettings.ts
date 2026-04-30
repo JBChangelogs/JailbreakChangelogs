@@ -1,10 +1,12 @@
-import { useState } from "react";
-import { UserData, UserSettings } from "@/types/auth";
-import { updateSettings } from "@/services/settingsService";
+import { useState, useEffect } from "react";
+import { UserData, ApiSettingsResponse } from "@/types/auth";
+import {
+  fetchUserSettings,
+  updateUserSettings,
+} from "@/services/settingsService";
 import { toast } from "sonner";
 import { safeSetJSON } from "@/utils/safeStorage";
-
-import { settingsConfig } from "@/config/settings";
+import { formatSettingName } from "@/config/settings";
 
 export const useSettings = (
   userData: UserData | null,
@@ -16,123 +18,105 @@ export const useSettings = (
     requiredLimit?: string | number;
   }) => void,
 ) => {
-  // Calculate loading directly from userData (no Effect needed)
-  const loading = !userData;
+  const [settings, setSettings] = useState<ApiSettingsResponse | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  // Derive settings from userData during render (React's recommended approach)
-  const userDataSettings = userData?.settings || null;
+  useEffect(() => {
+    if (!userData?.id) return;
 
-  // Use state only for optimistic updates during changes
-  // Start with userData settings, but allow local overrides
-  const [optimisticSettings, setOptimisticSettings] =
-    useState<UserSettings | null>(null);
+    let mounted = true;
+    setLoading(true);
 
-  // Use optimistic settings if available, otherwise use userData settings
-  const settings = optimisticSettings || userDataSettings;
+    fetchUserSettings()
+      .then((data) => {
+        if (mounted) setSettings(data);
+      })
+      .catch(() => {
+        if (mounted) setSettings({});
+      })
+      .finally(() => {
+        if (mounted) setLoading(false);
+      });
 
-  const handleSettingChange = async (
-    name: keyof UserSettings,
-    value: number,
-  ) => {
+    return () => {
+      mounted = false;
+    };
+  }, [userData?.id]);
+
+  const handleSettingChange = async (name: string, value: boolean) => {
     if (!settings || !userData) return;
 
-    // Check if user is trying to enable custom avatar/banner but doesn't have Tier 2+
-    if (
-      (name === "avatar_discord" || name === "banner_discord") &&
-      value === 0
-    ) {
+    const needsPremium =
+      (name === "custom_avatar" && value === true) ||
+      (name === "custom_banner" && value === true);
+
+    if (needsPremium) {
       if (
         !userData.premiumtype ||
         userData.premiumtype < 2 ||
         userData.premiumtype > 3
       ) {
-        // Show supporter modal instead of making API call
         if (openModal) {
           openModal({
             feature:
-              name === "avatar_discord" ? "custom_avatar" : "custom_banner",
+              name === "custom_avatar" ? "custom_avatar" : "custom_banner",
             currentTier: userData.premiumtype || 0,
             requiredTier: 2,
             currentLimit: userData.premiumtype || 0,
             requiredLimit: "Supporter Tier 2",
           });
         }
-        return; // Don't proceed with the API call
+        return;
       }
     }
 
-    const displayName = settingsConfig[name]?.displayName || name;
+    const displayName = formatSettingName(name);
     const loadingToast = toast.loading("Updating Setting", {
       description: `Saving "${displayName}"...`,
     });
 
-    try {
-      // Update local state immediately for better UX
-      const newSettings = { ...settings, [name]: value } as UserSettings;
-      setOptimisticSettings(newSettings);
+    const prevSettings = settings;
+    const newSettings = Object.fromEntries(
+      Object.entries(settings).map(([catKey, cat]) => [
+        catKey,
+        {
+          ...cat,
+          settings: cat.settings.map((entry) =>
+            entry.name === name ? { ...entry, value } : entry,
+          ),
+        },
+      ]),
+    );
+    setSettings(newSettings);
 
-      // Update local storage
+    try {
+      await updateUserSettings(name, value);
+
       const updatedUser = {
         ...userData,
-        settings: newSettings,
+        settings_v2: {
+          ...userData.settings_v2,
+          [name]: value,
+        },
       };
       safeSetJSON("user", updatedUser);
-
-      // Prepare all settings for the API call
-      const updatedSettings = {
-        profile_public: newSettings.profile_public,
-        show_recent_comments: newSettings.show_recent_comments,
-        hide_following: newSettings.hide_following,
-        hide_followers: newSettings.hide_followers,
-        hide_favorites: newSettings.hide_favorites,
-        banner_discord: newSettings.banner_discord,
-        avatar_discord: newSettings.avatar_discord,
-        hide_presence: newSettings.hide_presence,
-        dms_allowed: newSettings.dms_allowed,
-      };
-
-      // Make API call to persist the change
-      await updateSettings(updatedSettings);
-
-      // Persist optimistic state as final local state
-      const finalUser = {
-        ...userData,
-        settings: newSettings,
-      };
-      safeSetJSON("user", finalUser);
-
-      // Dispatch authStateChanged event to notify other components
       window.dispatchEvent(
-        new CustomEvent("authStateChanged", { detail: finalUser }),
+        new CustomEvent("authStateChanged", { detail: updatedUser }),
       );
 
-      // Show success toast
       toast.success("Setting Updated", {
         id: loadingToast,
-        description: `"${displayName}" has been ${value === 1 ? "enabled" : "disabled"}.`,
+        description: `"${displayName}" has been ${value ? "enabled" : "disabled"}.`,
       });
 
-      // Track setting change
-      window.umami?.track("Update Setting", { setting: name, value: value });
+      window.umami?.track("Update Setting", { setting: name, value });
     } catch (error) {
-      console.error("Error updating settings:", error);
+      setSettings(prevSettings);
       const errorMessage =
         error instanceof Error ? error.message : "Failed to update settings";
       toast.error(errorMessage, { id: loadingToast });
-
-      // Revert local state on error - clear optimistic update
-      setOptimisticSettings(null);
-      const revertedUser = {
-        ...userData,
-        settings,
-      };
-      safeSetJSON("user", revertedUser);
     }
   };
 
-  return {
-    settings,
-    loading,
-    handleSettingChange,
-  };
+  return { settings, loading, handleSettingChange };
 };

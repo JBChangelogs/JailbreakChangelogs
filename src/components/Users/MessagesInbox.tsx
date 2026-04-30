@@ -57,7 +57,7 @@ import {
 } from "@/hooks/useOfferDetailsBatch";
 import { decode as decodeHtmlEntities } from "he";
 import { parseJsonWithLargeIds } from "@/utils/parseJsonWithLargeIds";
-import type { UserData, UserFlag, UserSettings } from "@/types/auth";
+import type { UserData, UserFlag, UserSettingsV2 } from "@/types/auth";
 
 type MessageUser = {
   id: string;
@@ -82,10 +82,7 @@ type MessageUser = {
     last_updated: number;
   };
   last_seen?: number | null;
-  settings?: {
-    avatar_discord: number;
-    hide_presence?: number;
-  } & Partial<UserSettings>;
+  settings_v2?: Partial<UserSettingsV2>;
 };
 
 type Message = {
@@ -633,14 +630,10 @@ function toMessageUser(raw: unknown): MessageUser | null {
   const id = data.id;
   const username = data.username;
   const avatar = data.avatar;
-  const rawSettings =
-    data.settings && typeof data.settings === "object"
-      ? (data.settings as Record<string, unknown>)
+  const rawSettingsV2 =
+    data.settings_v2 && typeof data.settings_v2 === "object"
+      ? (data.settings_v2 as Partial<UserSettingsV2>)
       : null;
-  const avatarDiscord =
-    rawSettings && typeof rawSettings.avatar_discord === "number"
-      ? rawSettings.avatar_discord
-      : 1;
 
   if (
     (typeof id !== "string" && typeof id !== "number") ||
@@ -650,10 +643,7 @@ function toMessageUser(raw: unknown): MessageUser | null {
     return null;
   }
 
-  const settings = {
-    ...(rawSettings ? (rawSettings as MessageUser["settings"]) : {}),
-    avatar_discord: avatarDiscord,
-  } satisfies MessageUser["settings"] as MessageUser["settings"];
+  const settings_v2: MessageUser["settings_v2"] = rawSettingsV2 ?? undefined;
 
   return {
     id: asId(id),
@@ -684,7 +674,7 @@ function toMessageUser(raw: unknown): MessageUser | null {
         ? (data.presence as MessageUser["presence"])
         : undefined,
     last_seen: typeof data.last_seen === "number" ? data.last_seen : null,
-    settings,
+    settings_v2,
     flags: Array.isArray(data.flags) ? (data.flags as UserFlag[]) : undefined,
     primary_guild:
       data.primary_guild && typeof data.primary_guild === "object"
@@ -740,7 +730,7 @@ function getDayKey(timestamp?: number): string | null {
 
 function hasAvatarSettingsData(user: MessageUser | null | undefined): boolean {
   if (!user) return false;
-  return typeof user.settings?.avatar_discord === "number";
+  return typeof user.settings_v2?.custom_avatar === "boolean";
 }
 
 function formatMessageText(value: string): string {
@@ -1109,7 +1099,7 @@ export default function MessagesInbox() {
   );
 
   const shouldHidePresence =
-    selectedUser?.settings?.hide_presence === 1 &&
+    selectedUser?.settings_v2?.hide_presence === true &&
     currentUser?.id !== selectedUser?.id;
   const isTargetOnline =
     !!selectedUser &&
@@ -2815,7 +2805,7 @@ export default function MessagesInbox() {
                         custom_avatar={user.custom_avatar}
                         size={8}
                         showBadge={false}
-                        settings={user.settings}
+                        settings={user.settings_v2}
                         premiumType={user.premiumtype}
                       />
                       <div className="min-w-0 flex-1">
@@ -2878,7 +2868,7 @@ export default function MessagesInbox() {
                         custom_avatar={conversation.user.custom_avatar}
                         size={9}
                         showBadge={false}
-                        settings={conversation.user.settings}
+                        settings={conversation.user.settings_v2}
                         premiumType={conversation.user.premiumtype}
                       />
                       <div className="min-w-0 flex-1">
@@ -2981,7 +2971,7 @@ export default function MessagesInbox() {
                         isOnline={isTargetOnline}
                         showBadge={true}
                         onlineRingClassName="ring-2"
-                        settings={selectedUser.settings}
+                        settings={selectedUser.settings_v2}
                         premiumType={selectedUser.premiumtype}
                       />
                     </Link>
@@ -3183,7 +3173,9 @@ export default function MessagesInbox() {
                                         custom_avatar={
                                           currentUserEnriched.custom_avatar
                                         }
-                                        settings={currentUserEnriched.settings}
+                                        settings={
+                                          currentUserEnriched.settings_v2
+                                        }
                                         premiumType={
                                           currentUserEnriched.premiumtype
                                         }
@@ -3201,7 +3193,7 @@ export default function MessagesInbox() {
                                         custom_avatar={
                                           selectedUser.custom_avatar
                                         }
-                                        settings={selectedUser.settings}
+                                        settings={selectedUser.settings_v2}
                                         premiumType={selectedUser.premiumtype}
                                         showBadge={false}
                                         size={5}
@@ -3796,7 +3788,7 @@ export default function MessagesInbox() {
                                           }
                                           size={4}
                                           showBadge={false}
-                                          settings={parentSender.settings}
+                                          settings={parentSender.settings_v2}
                                           premiumType={parentSender.premiumtype}
                                           className="h-4 w-4"
                                         />
@@ -3842,7 +3834,7 @@ export default function MessagesInbox() {
                                       custom_avatar={sender.custom_avatar}
                                       size={7}
                                       showBadge={false}
-                                      settings={sender.settings}
+                                      settings={sender.settings_v2}
                                       premiumType={sender.premiumtype}
                                     />
                                   </Link>

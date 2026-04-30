@@ -1,4 +1,19 @@
-import { UserSettings } from "@/types/auth";
+import { ApiSettingsResponse } from "@/types/auth";
+import { buildApiUrlWithDevToken } from "@/utils/apiDevToken";
+import { PUBLIC_API_URL } from "@/utils/api";
+
+export const fetchUserSettings = async (): Promise<ApiSettingsResponse> => {
+  const url = buildApiUrlWithDevToken(PUBLIC_API_URL!, "/settings/me");
+  const resp = await fetch(url, {
+    method: "GET",
+    credentials: "include",
+    cache: "no-store",
+  });
+  if (!resp.ok) {
+    throw new Error("Failed to fetch settings");
+  }
+  return resp.json();
+};
 
 export const updateBanner = async (url: string): Promise<string> => {
   const response = await fetch(`/api/users/banner/update`, {
@@ -52,53 +67,26 @@ export const updateAvatar = async (url: string): Promise<string> => {
   return url;
 };
 
-export const updateSettings = async (
-  settings: Partial<UserSettings>,
-): Promise<UserSettings> => {
-  // Create a request body with only the specific fields that should be sent to the API
-  const requestBody = {
-    profile_public: settings.profile_public,
-    show_recent_comments: settings.show_recent_comments,
-    hide_following: settings.hide_following,
-    hide_followers: settings.hide_followers,
-    hide_favorites: settings.hide_favorites,
-    banner_discord: settings.banner_discord,
-    avatar_discord: settings.avatar_discord,
-    hide_presence: settings.hide_presence,
-    dms_allowed: settings.dms_allowed,
-  };
-
-  // Remove any undefined or null values to keep the request body clean
-  Object.keys(requestBody).forEach((key) => {
-    if (
-      requestBody[key as keyof typeof requestBody] === undefined ||
-      requestBody[key as keyof typeof requestBody] === null
-    ) {
-      delete requestBody[key as keyof typeof requestBody];
-    }
-  });
-
-  const response = await fetch(`/api/users/settings/update`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(requestBody),
+export const updateUserSettings = async (
+  name: string,
+  value: boolean,
+): Promise<void> => {
+  const url = buildApiUrlWithDevToken(PUBLIC_API_URL!, "/settings/me");
+  const response = await fetch(url, {
+    method: "PATCH",
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ settings: [{ name, value }] }),
   });
 
   if (!response.ok) {
-    const errorData = await response.json();
-    let errorMessage = errorData.message || "Failed to update settings";
-
-    // Customize error messages to use "Supporter Tier" instead of "Premium Tier" for 403 responses
+    const errorData = await response.json().catch(() => ({}));
+    let errorMessage = errorData.message || "Failed to update setting";
     if (response.status === 403 && errorMessage.includes("premium tier")) {
       errorMessage = errorMessage.replace(/premium tier/gi, "Supporter Tier");
     }
-
     throw new Error(errorMessage);
   }
-
-  return response.json();
 };
 
 export const deleteAccount = async (): Promise<void> => {

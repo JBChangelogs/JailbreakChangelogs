@@ -4,11 +4,38 @@ export interface UserSettings {
   hide_following: number; // 0 = false, 1 = true
   hide_followers: number; // 0 = false, 1 = true
   hide_favorites: number; // 0 = false, 1 = true
-  banner_discord: number; // 0 = false, 1 = true
-  avatar_discord: number; // 0 = false, 1 = true
   hide_presence: number; // 0 = false, 1 = true
   dms_allowed: number; // 0 = false, 1 = true
   updated_at: number;
+}
+
+export interface ApiSettingEntry {
+  name: string;
+  value: boolean;
+  description: string;
+  index: number;
+}
+
+export interface ApiSettingCategory {
+  name: string;
+  description: string;
+  index: number;
+  settings: ApiSettingEntry[];
+}
+
+export type ApiSettingsResponse = Record<string, ApiSettingCategory>;
+
+export interface UserSettingsV2 {
+  profile_public: boolean;
+  show_recent_comments: boolean;
+  hide_following: boolean;
+  hide_followers: boolean;
+  hide_favorites: boolean;
+  custom_banner: boolean;
+  custom_avatar: boolean;
+  hide_connections: boolean;
+  hide_presence: boolean;
+  dms_allowed: boolean;
 }
 
 export interface UserPresence {
@@ -64,6 +91,7 @@ export interface UserData extends User {
 
   // Nested objects
   settings: UserSettings;
+  settings_v2?: UserSettingsV2;
   presence: UserPresence;
   custom_banner: CustomBanner | null;
   token: string;

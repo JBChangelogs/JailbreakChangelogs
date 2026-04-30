@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/tooltip";
 import { Icon } from "@/components/ui/IconWrapper";
 import { UserData } from "@/types/auth";
-import { updateAvatar, updateSettings } from "@/services/settingsService";
+import { updateAvatar, updateUserSettings } from "@/services/settingsService";
 import { toast } from "sonner";
 import { useSupporterModal } from "@/hooks/useSupporterModal";
 import SupporterModal from "../Modals/SupporterModal";
@@ -182,10 +182,7 @@ export const AvatarSettings = ({
       // Perform auto-save
       try {
         await updateAvatar(result.imageUrl);
-        await updateSettings({
-          ...userData.settings,
-          avatar_discord: 0,
-        });
+        await updateUserSettings("custom_avatar", true);
         onAvatarUpdate(result.imageUrl);
 
         if (typeof window !== "undefined" && window.umami) {
@@ -241,11 +238,7 @@ export const AvatarSettings = ({
     try {
       // Update the avatar URL and settings to use custom avatar instead of Discord
       const newAvatarUrl = await updateAvatar(customAvatarUrl);
-      // Include all current settings when updating
-      await updateSettings({
-        ...userData.settings,
-        avatar_discord: 0,
-      });
+      await updateUserSettings("custom_avatar", true);
       onAvatarUpdate(newAvatarUrl);
       toast.success("Custom avatar updated successfully");
 

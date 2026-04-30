@@ -29,7 +29,7 @@ interface CommentsTabProps {
   currentUserId?: string | null;
   userId: string;
   settings?: {
-    show_recent_comments?: number;
+    show_recent_comments?: boolean;
   };
   sharedItemDetails?: Record<string, unknown>;
 }
@@ -119,7 +119,7 @@ export default function CommentsTab({
 
   // Check if comments should be hidden
   const shouldHideComments =
-    settings?.show_recent_comments === 0 && currentUserId !== userId;
+    settings?.show_recent_comments === false && currentUserId !== userId;
 
   // Fetch comment details when comments are loaded
   useEffect(() => {

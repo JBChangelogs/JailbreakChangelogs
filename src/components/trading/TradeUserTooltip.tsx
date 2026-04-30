@@ -15,8 +15,8 @@ interface TradeUserTooltipProps {
     roblox_avatar?: string;
     accent_color?: string;
     custom_avatar?: string;
-    settings?: {
-      avatar_discord: number;
+    settings_v2?: {
+      custom_avatar: boolean;
     };
     premiumtype?: number;
   };
@@ -34,7 +34,7 @@ export const TradeUserTooltip: React.FC<TradeUserTooltipProps> = ({ user }) => {
           size={16}
           custom_avatar={user.custom_avatar}
           showBadge={false}
-          settings={user.settings}
+          settings={user.settings_v2}
           premiumType={user.premiumtype}
         />
 

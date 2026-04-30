@@ -10,8 +10,8 @@ interface UserData {
   global_name: string;
   accent_color: string;
   custom_avatar?: string;
-  settings?: {
-    avatar_discord: number;
+  settings_v2?: {
+    custom_avatar: boolean;
   };
   premiumtype?: number;
 }

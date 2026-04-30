@@ -2,13 +2,13 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { UserData } from "@/types/auth";
+import { UserData, UserSettingsV2 } from "@/types/auth";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { settingsConfig, SettingKey } from "@/config/settings";
+import { formatSettingName } from "@/config/settings";
 import { useSettings } from "@/hooks/useSettings";
 import { SettingToggle } from "@/components/Settings/SettingToggle";
 import { BannerSettings } from "@/components/Settings/BannerSettings";
@@ -221,10 +221,10 @@ export default function SettingsPage() {
       const updatedUser: UserData = {
         ...userData,
         custom_banner: newBannerUrl,
-        settings: {
-          ...userData.settings,
-          banner_discord: 0, // Set to use custom banner
-        },
+        settings_v2: {
+          ...userData.settings_v2,
+          custom_banner: true,
+        } as UserSettingsV2,
       };
       safeSetJSON("user", updatedUser);
       window.dispatchEvent(
@@ -238,10 +238,10 @@ export default function SettingsPage() {
       const updatedUser: UserData = {
         ...userData,
         custom_avatar: newAvatarUrl,
-        settings: {
-          ...userData.settings,
-          avatar_discord: 0, // Set to use custom avatar
-        },
+        settings_v2: {
+          ...userData.settings_v2,
+          custom_avatar: true,
+        } as UserSettingsV2,
       };
       safeSetJSON("user", updatedUser);
       window.dispatchEvent(
@@ -296,60 +296,17 @@ export default function SettingsPage() {
     return null;
   }
 
-  const settingsByCategory: Record<string, string[]> = {};
-  Object.keys(settings)
-    .filter((key) => key !== "updated_at" && key in settingsConfig)
-    .forEach((key) => {
-      const config = settingsConfig[key as SettingKey];
-      if (config && config.category !== "System") {
-        const { category } = config;
-        if (!settingsByCategory[category]) {
-          settingsByCategory[category] = [];
-        }
-        settingsByCategory[category].push(key);
-      }
-    });
+  const sortedCategories = Object.values(settings).sort(
+    (a, b) => a.index - b.index,
+  );
 
-  // Sort settings within categories
-  const LINKED_ORDER: Record<string, string[]> = {
-    Privacy: [
-      "dms_allowed",
-      "hide_presence",
-      "hide_favorites",
-      "hide_followers",
-      "hide_following",
-      "profile_public",
-      "show_recent_comments",
-    ],
-    Appearance: ["avatar_discord", "banner_discord"],
-  };
+  const settingsMap = Object.fromEntries(
+    Object.values(settings).flatMap((cat) =>
+      cat.settings.map((s) => [s.name, s]),
+    ),
+  );
 
-  Object.keys(settingsByCategory).forEach((category) => {
-    if (LINKED_ORDER[category]) {
-      settingsByCategory[category].sort((a, b) => {
-        const indexA = LINKED_ORDER[category].indexOf(a);
-        const indexB = LINKED_ORDER[category].indexOf(b);
-        if (indexA !== -1 && indexB !== -1) return indexA - indexB;
-        if (indexA !== -1) return -1;
-        if (indexB !== -1) return 1;
-        return 0;
-      });
-    }
-  });
-
-  const categoryOrder = ["Appearance", "Privacy"];
-  const orderedCategories = Object.keys(settingsByCategory).sort((a, b) => {
-    const indexA = categoryOrder.indexOf(a);
-    const indexB = categoryOrder.indexOf(b);
-
-    if (indexA === -1 && indexB === -1) return a.localeCompare(b);
-    if (indexA === -1) return 1;
-    if (indexB === -1) return -1;
-    return indexA - indexB;
-  });
-
-  const isSettingEnabled = (value: unknown) =>
-    value === 1 || value === "1" || value === true;
+  const isSettingEnabled = (name: string) => settingsMap[name]?.value === true;
 
   return (
     <div className="mx-auto min-h-screen w-full max-w-6xl px-4 py-4 sm:px-6 lg:px-8">
@@ -364,11 +321,11 @@ export default function SettingsPage() {
               Navigation
             </p>
             {[
-              ...orderedCategories.map((cat) => ({
-                id: cat.replace(/\s+/g, "_").toLowerCase(),
-                title: cat,
+              ...sortedCategories.map((cat) => ({
+                id: cat.name,
+                title: cat.name.charAt(0).toUpperCase() + cat.name.slice(1),
                 icon:
-                  cat === "Privacy"
+                  cat.name === "privacy"
                     ? "heroicons:lock-closed"
                     : "heroicons:sparkles",
               })),
@@ -416,16 +373,20 @@ export default function SettingsPage() {
 
         {/* Settings Content */}
         <div className="settings-content">
-          {orderedCategories.map((category) => {
-            const settingKeys = settingsByCategory[category];
+          {sortedCategories.map((cat) => {
+            const categoryDisplayName =
+              cat.name.charAt(0).toUpperCase() + cat.name.slice(1);
+            const sortedSettings = [...cat.settings].sort(
+              (a, b) => a.index - b.index,
+            );
+            const isAppearanceCat = cat.name === "appearance";
             return (
               <div
-                key={category}
-                id={category.replace(/\s+/g, "_").toLowerCase()}
+                key={cat.name}
+                id={cat.name}
                 className={`${cardClassName} text-primary-text mb-8 p-6`}
                 style={
-                  highlightSetting ===
-                    category.replace(/\s+/g, "_").toLowerCase() && showHighlight
+                  highlightSetting === cat.name && showHighlight
                     ? {
                         backgroundColor:
                           "color-mix(in srgb, var(--color-button-info), transparent 80%)",
@@ -434,12 +395,7 @@ export default function SettingsPage() {
                     : undefined
                 }
                 ref={(el) => {
-                  if (
-                    highlightSetting ===
-                      category.replace(/\s+/g, "_").toLowerCase() &&
-                    showHighlight &&
-                    el
-                  ) {
+                  if (highlightSetting === cat.name && showHighlight && el) {
                     setTimeout(() => {
                       (el as HTMLElement).scrollIntoView({
                         behavior: "smooth",
@@ -452,26 +408,23 @@ export default function SettingsPage() {
                 <h2 className="text-primary-text mb-2 flex items-center gap-1.5 text-xl font-bold">
                   <Icon
                     icon={
-                      category === "Privacy"
+                      cat.name === "privacy"
                         ? "heroicons:lock-closed"
                         : "heroicons:sparkles"
                     }
                     className="h-6 w-6"
                   />
-                  {category}
+                  {categoryDisplayName}
                   {userData?.flags?.some((f) => f.flag === "is_owner") && (
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <button
                           onClick={() => {
                             const url = new URL(window.location.href);
-                            const highlightVal = category
-                              .replace(/\s+/g, "_")
-                              .toLowerCase();
-                            url.searchParams.set("highlight", highlightVal);
+                            url.searchParams.set("highlight", cat.name);
                             navigator.clipboard.writeText(url.toString());
                             toast.success("Link Copied", {
-                              description: `The URL for the "${category}" section is now on your clipboard.`,
+                              description: `The URL for the "${categoryDisplayName}" section is now on your clipboard.`,
                             });
                           }}
                           className="text-secondary-text hover:text-link cursor-pointer transition-colors"
@@ -489,19 +442,19 @@ export default function SettingsPage() {
                     </Tooltip>
                   )}
                 </h2>
+                <p className="text-secondary-text mb-2 text-sm">
+                  {cat.description}
+                </p>
                 <div className="border-border-card mb-2 border-t" />
                 <div>
-                  {settingKeys.map((key) => {
-                    const typedKey = key as keyof typeof settings;
+                  {sortedSettings.map((entry) => {
                     const isHighlighted =
-                      highlightSetting === key && showHighlight;
-                    const isAppearanceToggle =
-                      key === "avatar_discord" || key === "banner_discord";
+                      highlightSetting === entry.name && showHighlight;
                     const isAppearanceUploadBusy =
                       isAvatarUploading || isBannerUploading;
                     return (
                       <div
-                        key={key}
+                        key={entry.name}
                         style={
                           isHighlighted
                             ? {
@@ -513,7 +466,6 @@ export default function SettingsPage() {
                         }
                         ref={(el) => {
                           if (isHighlighted && el) {
-                            // Scroll the highlighted setting into view after a short delay
                             setTimeout(() => {
                               (el as HTMLElement).scrollIntoView({
                                 behavior: "smooth",
@@ -524,27 +476,26 @@ export default function SettingsPage() {
                         }}
                       >
                         <SettingToggle
-                          name={typedKey}
-                          value={settings[typedKey]}
-                          config={settingsConfig[key as SettingKey]}
+                          name={entry.name}
+                          value={entry.value}
+                          description={entry.description}
+                          displayName={formatSettingName(entry.name)}
                           onChange={handleSettingChange}
-                          disabled={
-                            isAppearanceToggle && isAppearanceUploadBusy
-                          }
+                          disabled={isAppearanceCat && isAppearanceUploadBusy}
                           userData={userData}
                         />
-                        {category === "Appearance" &&
-                          key === "banner_discord" &&
-                          !isSettingEnabled(settings[typedKey]) && (
+                        {isAppearanceCat &&
+                          entry.name === "custom_banner" &&
+                          isSettingEnabled("custom_banner") && (
                             <BannerSettings
                               userData={userData}
                               onBannerUpdate={handleBannerUpdate}
                               onUploadStateChange={setIsBannerUploading}
                             />
                           )}
-                        {category === "Appearance" &&
-                          key === "avatar_discord" &&
-                          !isSettingEnabled(settings[typedKey]) && (
+                        {isAppearanceCat &&
+                          entry.name === "custom_avatar" &&
+                          isSettingEnabled("custom_avatar") && (
                             <AvatarSettings
                               userData={userData}
                               onAvatarUpdate={handleAvatarUpdate}
@@ -555,9 +506,9 @@ export default function SettingsPage() {
                     );
                   })}
                 </div>
-                {category === "Appearance" &&
-                  (!isSettingEnabled(settings.banner_discord) ||
-                    !isSettingEnabled(settings.avatar_discord)) && (
+                {isAppearanceCat &&
+                  (isSettingEnabled("custom_banner") ||
+                    isSettingEnabled("custom_avatar")) && (
                     <>
                       <div className="border-border-card my-2 border-t" />
                       <div className="flex flex-wrap gap-1.5">

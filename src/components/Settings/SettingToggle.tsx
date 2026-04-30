@@ -1,5 +1,4 @@
-import { SettingConfigItem } from "@/config/settings";
-import { UserSettings, UserData } from "@/types/auth";
+import { UserData } from "@/types/auth";
 import { Icon } from "@/components/ui/IconWrapper";
 import { toast } from "sonner";
 import { Switch } from "@/components/ui/switch";
@@ -10,10 +9,11 @@ import {
 } from "@/components/ui/tooltip";
 
 interface SettingToggleProps {
-  name: keyof UserSettings;
-  value: number | boolean | string;
-  config: SettingConfigItem;
-  onChange: (name: keyof UserSettings, value: number) => void;
+  name: string;
+  value: boolean;
+  description: string;
+  displayName: string;
+  onChange: (name: string, value: boolean) => void;
   disabled?: boolean;
   userData?: Pick<UserData, "flags"> | null;
 }
@@ -21,18 +21,17 @@ interface SettingToggleProps {
 export const SettingToggle = ({
   name,
   value,
-  config,
+  description,
+  displayName,
   onChange,
   disabled,
   userData,
 }: SettingToggleProps) => {
-  const isChecked = value === 1 || value === "1" || value === true;
-
   const handleCopyLink = () => {
     const url = new URL(window.location.href);
     url.searchParams.set("highlight", name);
     navigator.clipboard.writeText(url.toString());
-    toast.success(`Link for "${config.displayName}" copied!`);
+    toast.success(`Link for "${displayName}" copied!`);
   };
 
   return (
@@ -44,7 +43,7 @@ export const SettingToggle = ({
       >
         <div className="flex items-center gap-2">
           <label className="text-primary-text text-base font-medium">
-            {config.displayName}
+            {displayName}
           </label>
           {userData?.flags?.some((f) => f.flag === "is_owner") && (
             <Tooltip>
@@ -67,12 +66,12 @@ export const SettingToggle = ({
           )}
         </div>
         <Switch
-          checked={isChecked}
-          onCheckedChange={(checked) => onChange(name, checked ? 1 : 0)}
+          checked={value}
+          onCheckedChange={(checked) => onChange(name, checked)}
           disabled={disabled}
         />
       </div>
-      <p className="text-secondary-text text-sm">{config.description}</p>
+      <p className="text-secondary-text text-sm">{description}</p>
     </div>
   );
 };

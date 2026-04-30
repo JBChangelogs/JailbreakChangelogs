@@ -33,7 +33,7 @@ interface FavoritesTabProps {
   userId: string;
   currentUserId?: string | null;
   settings?: {
-    hide_favorites?: number;
+    hide_favorites?: boolean;
   };
   favorites?: FavoriteItem[];
   favoriteItemDetails?: Record<string, unknown>;
@@ -61,7 +61,7 @@ export default function FavoritesTab({
 
   // Check if favorites should be hidden
   const shouldHideFavorites =
-    settings?.hide_favorites === 1 && currentUserId !== userId;
+    settings?.hide_favorites === true && currentUserId !== userId;
 
   useEffect(() => {
     const processFavorites = () => {

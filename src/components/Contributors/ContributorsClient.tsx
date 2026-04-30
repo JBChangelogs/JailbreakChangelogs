@@ -258,7 +258,7 @@ export default function ContributorsClient({
               showBadge={false}
               className="border-0"
               custom_avatar={user.custom_avatar}
-              settings={user.settings}
+              settings={user.settings_v2}
               premiumType={user.premiumtype}
             />
           </div>

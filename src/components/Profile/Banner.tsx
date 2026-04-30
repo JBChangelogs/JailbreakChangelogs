@@ -1,6 +1,6 @@
 import { useState } from "react";
 import Image from "next/image";
-import { UserSettings } from "@/types/auth";
+import { UserSettingsV2 } from "@/types/auth";
 import { getBackgroundImageByIndex } from "@/utils/fisherYatesShuffle";
 
 interface BannerProps {
@@ -8,7 +8,7 @@ interface BannerProps {
   username: string;
   banner?: string;
   customBanner?: string;
-  settings?: UserSettings;
+  settings?: UserSettingsV2;
   premiumType?: number;
 }
 
@@ -53,27 +53,9 @@ export const Banner = ({
       };
     }
 
-    // If user wants to use Discord banner
-    if (settings?.banner_discord === 1) {
-      // Only show Discord banner if it exists and is not "None"
-      if (banner && banner !== "None") {
-        return {
-          src: getBannerUrl(userId, banner),
-          alt: "Profile banner",
-          onError: handleBannerError,
-        };
-      }
-      // If no Discord banner available, use the calculated fallback
-      return {
-        src: fallbackBanner,
-        alt: "Profile banner",
-      };
-    }
-
-    // If user has explicitly chosen to use custom banner (Discord toggle off)
-    // BUT only if they have Tier 2+ (custom banners require Tier 2+)
+    // Custom banner: enabled, has premium, and has a valid URL
     if (
-      settings?.banner_discord === 0 &&
+      settings?.custom_banner === true &&
       premiumType &&
       premiumType >= 2 &&
       customBanner &&
@@ -86,19 +68,15 @@ export const Banner = ({
       };
     }
 
-    // If user is Tier 1 or below but has custom banner setting, fall back to Discord banner
-    if (settings?.banner_discord === 0 && (!premiumType || premiumType < 2)) {
-      // Only show Discord banner if it exists and is not "None"
-      if (banner && banner !== "None") {
-        return {
-          src: getBannerUrl(userId, banner),
-          alt: "Profile banner",
-          onError: handleBannerError,
-        };
-      }
+    // Default: Discord banner
+    if (banner && banner !== "None") {
+      return {
+        src: getBannerUrl(userId, banner),
+        alt: "Profile banner",
+        onError: handleBannerError,
+      };
     }
 
-    // Default to the calculated fallback
     return {
       src: fallbackBanner,
       alt: "Profile banner",

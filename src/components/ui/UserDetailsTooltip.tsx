@@ -35,7 +35,7 @@ export const UserDetailsTooltip: React.FC<UserDetailsTooltipProps> = ({
             size={16}
             custom_avatar={user.custom_avatar}
             showBadge={false}
-            settings={user.settings}
+            settings={user.settings_v2}
             premiumType={user.premiumtype}
           />
         </Link>
@@ -99,7 +99,7 @@ export const UserDetailsTooltip: React.FC<UserDetailsTooltipProps> = ({
             </div>
 
             {/* Additional Info */}
-            {user.settings?.profile_public === 0 &&
+            {user.settings_v2?.profile_public === false &&
             currentUserId !== user.id ? (
               <p className="text-secondary-text text-sm italic">
                 Profile is private

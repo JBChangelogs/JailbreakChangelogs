@@ -762,7 +762,7 @@ const ServerList: React.FC<{
                         size={9}
                         custom_avatar={userData[server.owner].custom_avatar}
                         showBadge={false}
-                        settings={userData[server.owner].settings}
+                        settings={userData[server.owner].settings_v2}
                         premiumType={userData[server.owner].premiumtype}
                       />
                       <Link

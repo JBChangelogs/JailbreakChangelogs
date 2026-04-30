@@ -10,7 +10,7 @@ import FavoritesTab from "./FavoritesTab";
 import TradeAdsProfileTab from "./TradeAdsProfileTab";
 import ProfileInventoryTab from "./ProfileInventoryTab";
 import PrivateServersTab from "./PrivateServersTab";
-import { UserSettings } from "@/types/auth";
+import { UserSettingsV2 } from "@/types/auth";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { TradeAd } from "@/types/trading";
 
@@ -24,7 +24,7 @@ interface User {
   custom_avatar?: string;
   banner?: string;
   custom_banner?: string;
-  settings?: UserSettings;
+  settings_v2?: UserSettingsV2;
   presence?: {
     status: "Online" | "Offline";
     last_updated: number;
@@ -212,7 +212,7 @@ export default function ProfileTabs({
           error={commentsError}
           currentUserId={currentUserId}
           userId={user.id}
-          settings={user.settings}
+          settings={user.settings_v2}
           sharedItemDetails={sharedItemDetails}
         />
       </TabPanel>
@@ -220,7 +220,7 @@ export default function ProfileTabs({
         <FavoritesTab
           userId={user.id}
           currentUserId={currentUserId}
-          settings={user.settings}
+          settings={user.settings_v2}
           favorites={favorites}
           favoriteItemDetails={favoriteItemDetails}
           isLoadingAdditionalData={isLoadingAdditionalData}
