@@ -18,7 +18,6 @@ import {
   safeLocalStorage,
 } from "@/utils/safeStorage";
 import { PUBLIC_API_URL } from "@/utils/api";
-import { buildApiUrlWithDevToken } from "@/utils/apiDevToken";
 import { toast } from "sonner";
 import { useRealtimeNotificationsWebSocket } from "@/hooks/useRealtimeNotificationsWebSocket";
 
@@ -92,11 +91,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
         });
       }
 
-      // Refresh from /users/me in the background
+      // Refresh from token lookup in the background
       try {
         const response = await fetch(
-          buildApiUrlWithDevToken(PUBLIC_API_URL, "/users/me"),
-          { cache: "no-store", credentials: "include" },
+          `${PUBLIC_API_URL}/users/get/token?token=${encodeURIComponent(token)}`,
+          {
+            cache: "no-store",
+            credentials: "include",
+          },
         );
 
         if (response.ok) {

@@ -2,7 +2,6 @@
 
 import { cookies } from "next/headers";
 import { BASE_API_URL } from "@/utils/api";
-import { buildApiUrlWithDevToken } from "@/utils/apiDevToken";
 import type { UserData } from "@/types/auth";
 
 /**
@@ -22,7 +21,7 @@ export async function getCurrentUser(): Promise<UserData | null> {
 
     try {
       const response = await fetch(
-        buildApiUrlWithDevToken(BASE_API_URL, "/users/me"),
+        `${BASE_API_URL}/users/get/token?token=${encodeURIComponent(token)}`,
         {
           cache: "no-store",
           credentials: "include",
