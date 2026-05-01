@@ -14,7 +14,7 @@ export default function Error({
   reset: () => void;
 }) {
   useEffect(() => {
-    console.error("Values page error:", error);
+    console.error("Value suggestion details error:", error);
   }, [error]);
 
   return (
@@ -23,14 +23,14 @@ export default function Error({
         <div className="min-h-[calc(100vh-8rem)] lg:flex lg:items-center lg:gap-12">
           <div className="w-full lg:w-1/2">
             <p className="text-secondary-text text-sm font-medium">
-              Values error
+              Suggestion error
             </p>
             <h1 className="text-primary-text mt-3 text-2xl font-semibold md:text-3xl">
-              Failed to load values
+              Failed to load suggestion
             </h1>
             <p className="text-secondary-text mt-4">
-              Something went wrong while loading the values page. You can try
-              again or return home.
+              Something went wrong while loading this value suggestion. You can
+              try again or go back to the suggestions list.
             </p>
 
             <div className="mt-6 flex flex-col items-center gap-3 sm:flex-row">
@@ -50,9 +50,12 @@ export default function Error({
                 asChild
                 className="w-full sm:w-auto"
               >
-                <Link href="/">
-                  <Icon icon="heroicons-outline:home" className="h-5 w-5" />
-                  <span>Take me home</span>
+                <Link href="/values/suggestions">
+                  <Icon
+                    icon="heroicons-outline:arrow-left"
+                    className="h-5 w-5"
+                  />
+                  <span>Back to suggestions</span>
                 </Link>
               </Button>
             </div>

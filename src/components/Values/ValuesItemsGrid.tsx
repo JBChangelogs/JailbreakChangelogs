@@ -160,6 +160,26 @@ export default function ValuesItemsGrid({
     return message;
   };
 
+  const getEmptyStateTitle = () => {
+    if (rangeFilteredItems.length === 0 && items.length > 0) {
+      return "No results";
+    }
+
+    return getNoItemsMessage();
+  };
+
+  const getEmptyStateDescription = () => {
+    if (rangeFilteredItems.length === 0 && items.length > 0) {
+      return `No items found in the selected value range (${appliedMinValue.toLocaleString()} - ${
+        appliedMaxValue >= MAX_VALUE_RANGE
+          ? `${MAX_VALUE_RANGE.toLocaleString()}+`
+          : appliedMaxValue.toLocaleString()
+      })`;
+    }
+
+    return "Try adjusting your search or filter.";
+  };
+
   return (
     <>
       <div className="mb-4 flex flex-col gap-4">
@@ -209,14 +229,11 @@ export default function ValuesItemsGrid({
       <div className="mb-8 grid grid-cols-1 gap-4 min-[375px]:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {displayedItems.length === 0 ? (
           <div className="border-border-card bg-secondary-bg hover:border-border-focus col-span-full mb-4 rounded-lg border p-8 text-center transition-colors">
-            <p className="text-secondary-text text-lg">
-              {rangeFilteredItems.length === 0 && items.length > 0
-                ? `No items found in the selected value range (${appliedMinValue.toLocaleString()} - ${
-                    appliedMaxValue >= MAX_VALUE_RANGE
-                      ? `${MAX_VALUE_RANGE.toLocaleString()}+`
-                      : appliedMaxValue.toLocaleString()
-                  })`
-                : getNoItemsMessage()}
+            <h3 className="text-primary-text mb-1 font-semibold">
+              {getEmptyStateTitle()}
+            </h3>
+            <p className="text-secondary-text text-sm">
+              {getEmptyStateDescription()}
             </p>
             <div className="mt-4 flex flex-wrap justify-center gap-3">
               {rangeFilteredItems.length === 0 && items.length > 0 && (

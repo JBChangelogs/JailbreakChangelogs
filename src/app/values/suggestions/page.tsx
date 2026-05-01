@@ -728,6 +728,49 @@ export default function ValueSuggestionsPage() {
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState("All");
   const [fieldFilter, setFieldFilter] = useState("All");
+  const [isSearchHighlighted, setIsSearchHighlighted] = useState(false);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+
+  const handleSearchChange = (value: string) => {
+    setSearch(value);
+    setPage(1);
+  };
+
+  const handleTypeFilterChange = (value: string) => {
+    setTypeFilter(value);
+    setPage(1);
+  };
+
+  const handleFieldFilterChange = (value: string) => {
+    setFieldFilter(value);
+    setPage(1);
+  };
+
+  const handleClearAllFilters = () => {
+    setSearch("");
+    setTypeFilter("All");
+    setFieldFilter("All");
+    setPage(1);
+  };
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if ((event.ctrlKey || event.metaKey) && event.key === "f") {
+        event.preventDefault();
+        if (searchInputRef.current) {
+          searchInputRef.current.focus();
+          searchInputRef.current.select();
+          setIsSearchHighlighted(true);
+          setTimeout(() => setIsSearchHighlighted(false), 2000);
+        }
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, []);
 
   const filteredSuggestions = suggestions.filter((s) => {
     const item = itemMap.get(s.item_id);
@@ -968,126 +1011,148 @@ export default function ValueSuggestionsPage() {
 
         {/* Search + filter */}
         {!loadingSuggestions && !suggestionsError && suggestions.length > 0 && (
-          <div className="mb-4 flex flex-col gap-4 sm:flex-row">
-            {/* Search */}
-            <div className="relative w-full sm:flex-1">
-              <input
-                type="text"
-                placeholder="Search by item name..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="border-border-card bg-secondary-bg text-primary-text placeholder-secondary-text hover:border-border-focus focus:border-button-info h-14 w-full rounded-lg border px-4 pr-10 pl-10 transition-all duration-300 focus:outline-none"
-              />
+          <>
+            <div className="mb-4 flex flex-col gap-4 sm:flex-row">
+              {/* Search */}
+              <div className="relative w-full sm:flex-1">
+                <input
+                  ref={searchInputRef}
+                  type="text"
+                  placeholder="Search by item name..."
+                  value={search}
+                  onChange={(e) => handleSearchChange(e.target.value)}
+                  className={`border-border-card bg-secondary-bg text-primary-text placeholder-secondary-text hover:border-border-focus h-14 w-full rounded-lg border px-4 pr-10 pl-10 transition-all duration-300 focus:outline-none ${
+                    isSearchHighlighted
+                      ? "bg-button-info/10 shadow-button-info/20 border-button-info shadow-lg"
+                      : "focus:border-button-info"
+                  }`}
+                />
+                <Icon
+                  icon="heroicons:magnifying-glass"
+                  className="text-secondary-text absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2"
+                />
+                {search && (
+                  <button
+                    onClick={() => handleSearchChange("")}
+                    className="text-secondary-text hover:text-primary-text absolute top-1/2 right-3 h-5 w-5 -translate-y-1/2 cursor-pointer"
+                    aria-label="Clear search"
+                  >
+                    <Icon icon="heroicons:x-mark" />
+                  </button>
+                )}
+              </div>
+
+              {/* Item type + field filters — grid so they're side by side on mobile too */}
+              <div className="grid grid-cols-2 gap-4 sm:flex sm:gap-4">
+                <div className="sm:w-48">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <button
+                        type="button"
+                        className="border-border-card bg-secondary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus flex h-14 w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all duration-300 focus:ring-1 focus:outline-none"
+                      >
+                        <span className="truncate">
+                          {typeFilter === "All" ? "All Types" : typeFilter}
+                        </span>
+                        <Icon
+                          icon="heroicons:chevron-down"
+                          className="text-secondary-text h-5 w-5 shrink-0"
+                          inline
+                        />
+                      </button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent
+                      align="start"
+                      className="border-border-card bg-secondary-bg text-primary-text scrollbar-thin max-h-80 w-(--radix-popper-anchor-width) min-w-(--radix-popper-anchor-width) overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
+                    >
+                      <DropdownMenuRadioGroup
+                        value={typeFilter}
+                        onValueChange={handleTypeFilterChange}
+                      >
+                        <DropdownMenuRadioItem
+                          value="All"
+                          className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
+                        >
+                          All Types
+                        </DropdownMenuRadioItem>
+                        {suggestionItemTypes.map((type) => (
+                          <DropdownMenuRadioItem
+                            key={type}
+                            value={type}
+                            className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
+                          >
+                            {type}
+                          </DropdownMenuRadioItem>
+                        ))}
+                      </DropdownMenuRadioGroup>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+
+                <div className="sm:w-48">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <button
+                        type="button"
+                        className="border-border-card bg-secondary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus flex h-14 w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all duration-300 focus:ring-1 focus:outline-none"
+                      >
+                        <span className="truncate">
+                          {fieldFilter === "All"
+                            ? "All Fields"
+                            : fieldLabel(fieldFilter)}
+                        </span>
+                        <Icon
+                          icon="heroicons:chevron-down"
+                          className="text-secondary-text h-5 w-5 shrink-0"
+                          inline
+                        />
+                      </button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent
+                      align="start"
+                      className="border-border-card bg-secondary-bg text-primary-text scrollbar-thin max-h-80 w-(--radix-popper-anchor-width) min-w-(--radix-popper-anchor-width) overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
+                    >
+                      <DropdownMenuRadioGroup
+                        value={fieldFilter}
+                        onValueChange={handleFieldFilterChange}
+                      >
+                        <DropdownMenuRadioItem
+                          value="All"
+                          className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
+                        >
+                          All Fields
+                        </DropdownMenuRadioItem>
+                        {suggestionFields.map((f) => (
+                          <DropdownMenuRadioItem
+                            key={f}
+                            value={f}
+                            className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
+                          >
+                            {fieldLabel(f)}
+                          </DropdownMenuRadioItem>
+                        ))}
+                      </DropdownMenuRadioGroup>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+              </div>
+            </div>
+            <div className="text-secondary-text mt-2 mb-4 hidden items-center gap-1 text-xs lg:flex">
               <Icon
-                icon="heroicons:magnifying-glass"
-                className="text-secondary-text absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2"
+                icon="emojione:light-bulb"
+                className="text-sm text-yellow-500"
               />
-              {search && (
-                <button
-                  onClick={() => setSearch("")}
-                  className="text-secondary-text hover:text-primary-text absolute top-1/2 right-3 h-5 w-5 -translate-y-1/2 cursor-pointer"
-                  aria-label="Clear search"
-                >
-                  <Icon icon="heroicons:x-mark" />
-                </button>
-              )}
+              Helpful tip: Press{" "}
+              <kbd className="kbd kbd-sm border-border-card bg-tertiary-bg text-primary-text">
+                Ctrl
+              </kbd>
+              {" + "}
+              <kbd className="kbd kbd-sm border-border-card bg-tertiary-bg text-primary-text">
+                F
+              </kbd>{" "}
+              to quickly focus the search.
             </div>
-
-            {/* Item type + field filters — grid so they're side by side on mobile too */}
-            <div className="grid grid-cols-2 gap-4 sm:flex sm:gap-4">
-              <div className="sm:w-48">
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <button
-                      type="button"
-                      className="border-border-card bg-secondary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus flex h-14 w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all duration-300 focus:ring-1 focus:outline-none"
-                    >
-                      <span className="truncate">
-                        {typeFilter === "All" ? "All Types" : typeFilter}
-                      </span>
-                      <Icon
-                        icon="heroicons:chevron-down"
-                        className="text-secondary-text h-5 w-5 shrink-0"
-                        inline
-                      />
-                    </button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent
-                    align="start"
-                    className="border-border-card bg-secondary-bg text-primary-text scrollbar-thin max-h-80 w-(--radix-popper-anchor-width) min-w-(--radix-popper-anchor-width) overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
-                  >
-                    <DropdownMenuRadioGroup
-                      value={typeFilter}
-                      onValueChange={setTypeFilter}
-                    >
-                      <DropdownMenuRadioItem
-                        value="All"
-                        className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
-                      >
-                        All Types
-                      </DropdownMenuRadioItem>
-                      {suggestionItemTypes.map((type) => (
-                        <DropdownMenuRadioItem
-                          key={type}
-                          value={type}
-                          className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
-                        >
-                          {type}
-                        </DropdownMenuRadioItem>
-                      ))}
-                    </DropdownMenuRadioGroup>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-
-              <div className="sm:w-48">
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <button
-                      type="button"
-                      className="border-border-card bg-secondary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus flex h-14 w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all duration-300 focus:ring-1 focus:outline-none"
-                    >
-                      <span className="truncate">
-                        {fieldFilter === "All"
-                          ? "All Fields"
-                          : fieldLabel(fieldFilter)}
-                      </span>
-                      <Icon
-                        icon="heroicons:chevron-down"
-                        className="text-secondary-text h-5 w-5 shrink-0"
-                        inline
-                      />
-                    </button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent
-                    align="start"
-                    className="border-border-card bg-secondary-bg text-primary-text scrollbar-thin max-h-80 w-(--radix-popper-anchor-width) min-w-(--radix-popper-anchor-width) overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
-                  >
-                    <DropdownMenuRadioGroup
-                      value={fieldFilter}
-                      onValueChange={setFieldFilter}
-                    >
-                      <DropdownMenuRadioItem
-                        value="All"
-                        className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
-                      >
-                        All Fields
-                      </DropdownMenuRadioItem>
-                      {suggestionFields.map((f) => (
-                        <DropdownMenuRadioItem
-                          key={f}
-                          value={f}
-                          className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
-                        >
-                          {fieldLabel(f)}
-                        </DropdownMenuRadioItem>
-                      ))}
-                    </DropdownMenuRadioGroup>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-            </div>
-          </div>
+          </>
         )}
 
         {/* Cards */}
@@ -1109,22 +1174,26 @@ export default function ValueSuggestionsPage() {
             {suggestionsError}
           </div>
         ) : filteredSuggestions.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-16 text-center">
-            <div className="border-border-card bg-secondary-bg mb-4 rounded-full border p-4">
-              <Icon
-                icon="material-symbols:lightbulb-outline-rounded"
-                className="text-secondary-text h-8 w-8"
-                inline
-              />
-            </div>
+          <div className="border-border-card bg-secondary-bg rounded-lg border p-8 text-center">
             <h3 className="text-primary-text mb-1 font-semibold">
-              {suggestions.length === 0 ? "No suggestions yet" : "No results"}
+              {suggestions.length === 0
+                ? "No suggestions yet"
+                : search
+                  ? `No suggestions found matching "${search}"`
+                  : "No results"}
             </h3>
             <p className="text-secondary-text text-sm">
               {suggestions.length === 0
                 ? "Be the first to submit a value suggestion."
                 : "Try adjusting your search or filter."}
             </p>
+            {suggestions.length > 0 && (
+              <div className="mt-4 flex justify-center">
+                <Button onClick={handleClearAllFilters} variant="default">
+                  Clear All Filters
+                </Button>
+              </div>
+            )}
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">

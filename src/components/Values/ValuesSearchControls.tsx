@@ -439,11 +439,7 @@ export default function ValuesSearchControls({
             <kbd className="kbd kbd-sm border-border-card bg-tertiary-bg text-primary-text">
               F
             </kbd>{" "}
-            to quickly focus the search, or use{" "}
-            <kbd className="kbd kbd-sm border-border-card bg-tertiary-bg text-primary-text">
-              Shift
-            </kbd>{" "}
-            + click on an item card to open item details directly.
+            to quickly focus the search.
           </div>
         </div>
       </div>

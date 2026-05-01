@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
+import { notFound, useParams } from "next/navigation";
 import { toast } from "sonner";
 import { useAuthContext } from "@/contexts/AuthContext";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
@@ -105,6 +105,8 @@ export default function ValueSuggestionDetailPage() {
   const [item, setItem] = useState<Item | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [shouldShowNotFound, setShouldShowNotFound] = useState(false);
+  const [routeError, setRouteError] = useState<Error | null>(null);
   const [userVote, setUserVote] = useState<"upvote" | "downvote" | null>(null);
   const [voteCounts, setVoteCounts] = useState({ up: 0, down: 0 });
   const [voteLoading, setVoteLoading] = useState(false);
@@ -114,17 +116,21 @@ export default function ValueSuggestionDetailPage() {
     const run = async () => {
       setLoading(true);
       setError(null);
+      setShouldShowNotFound(false);
+      setRouteError(null);
       try {
         const res = await fetch(
           buildApiUrlWithDevToken(PUBLIC_API_URL!, `/value-suggestions/${id}`),
           { credentials: "include" },
         );
         if (!res.ok) {
-          setError(
-            res.status === 404
-              ? "Suggestion not found."
-              : "Failed to load suggestion.",
-          );
+          if (res.status === 404) {
+            setShouldShowNotFound(true);
+          } else if (res.status >= 500) {
+            setRouteError(new Error("Failed to load suggestion details."));
+          } else {
+            setError("Failed to load suggestion.");
+          }
           return;
         }
         const data: Suggestion = await res.json();
@@ -149,6 +155,14 @@ export default function ValueSuggestionDetailPage() {
     };
     run();
   }, [id]);
+
+  if (shouldShowNotFound) {
+    notFound();
+  }
+
+  if (routeError) {
+    throw routeError;
+  }
 
   useEffect(() => {
     if (!suggestion || !user) return;
