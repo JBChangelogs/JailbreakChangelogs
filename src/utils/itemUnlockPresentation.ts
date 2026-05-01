@@ -26,7 +26,7 @@ export function formatUnlockRequirementsTooltip(
   }
 
   if (hasSeason) {
-    return `Unlocked in Season ${season}.`;
+    return `Unlocked in OG Season ${season}.`;
   }
 
   if (hasLevel) {
