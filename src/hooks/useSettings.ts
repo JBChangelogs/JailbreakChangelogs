@@ -1,8 +1,14 @@
 import { useState, useEffect } from "react";
-import { UserData, ApiSettingsResponse, SupporterGift } from "@/types/auth";
+import {
+  UserData,
+  ApiSettingsResponse,
+  SupporterGift,
+  SupporterHistoryEntry,
+} from "@/types/auth";
 import {
   fetchUserSettings,
   fetchSupporterGifts,
+  fetchSupporterHistory,
   updateUserSettings,
 } from "@/services/settingsService";
 import { toast } from "sonner";
@@ -21,6 +27,9 @@ export const useSettings = (
 ) => {
   const [settings, setSettings] = useState<ApiSettingsResponse | null>(null);
   const [supporterGifts, setSupporterGifts] = useState<SupporterGift[]>([]);
+  const [supporterHistory, setSupporterHistory] = useState<
+    SupporterHistoryEntry[]
+  >([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -29,8 +38,12 @@ export const useSettings = (
     let mounted = true;
     setLoading(true);
 
-    Promise.allSettled([fetchUserSettings(), fetchSupporterGifts()])
-      .then(([settingsResult, giftsResult]) => {
+    Promise.allSettled([
+      fetchUserSettings(),
+      fetchSupporterGifts(),
+      fetchSupporterHistory(),
+    ])
+      .then(([settingsResult, giftsResult, historyResult]) => {
         if (!mounted) return;
 
         if (settingsResult.status === "fulfilled") {
@@ -44,11 +57,18 @@ export const useSettings = (
         } else {
           setSupporterGifts([]);
         }
+
+        if (historyResult.status === "fulfilled") {
+          setSupporterHistory(historyResult.value);
+        } else {
+          setSupporterHistory([]);
+        }
       })
       .catch(() => {
         if (!mounted) return;
         setSettings({});
         setSupporterGifts([]);
+        setSupporterHistory([]);
       })
       .finally(() => {
         if (mounted) setLoading(false);
@@ -138,6 +158,8 @@ export const useSettings = (
     settings,
     supporterGifts,
     setSupporterGifts,
+    supporterHistory,
+    setSupporterHistory,
     loading,
     handleSettingChange,
   };

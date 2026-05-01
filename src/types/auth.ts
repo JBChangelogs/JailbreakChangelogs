@@ -46,6 +46,11 @@ export interface SupporterLevel {
   url: string;
 }
 
+export interface SupporterHistoryEntry {
+  level: number;
+  created_at: number | null;
+}
+
 export interface UserSettingsV2 {
   profile_public: boolean;
   show_recent_comments: boolean;

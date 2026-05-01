@@ -1,6 +1,7 @@
 import {
   ApiSettingsResponse,
   SupporterGift,
+  SupporterHistoryEntry,
   SupporterLevel,
 } from "@/types/auth";
 import { buildApiUrlWithDevToken } from "@/utils/apiDevToken";
@@ -30,6 +31,77 @@ export const fetchSupporterGifts = async (): Promise<SupporterGift[]> => {
     throw new Error("Failed to fetch supporter gifts");
   }
   return resp.json();
+};
+
+export const fetchSupporterHistory = async (): Promise<
+  SupporterHistoryEntry[]
+> => {
+  const url = buildApiUrlWithDevToken(PUBLIC_API_URL!, "/supporter/history");
+  const resp = await fetch(url, {
+    method: "GET",
+    credentials: "include",
+    cache: "no-store",
+  });
+
+  if (!resp.ok) {
+    throw new Error(
+      await getResponseErrorMessage(resp, "Failed to fetch supporter history"),
+    );
+  }
+
+  const data = (await resp.json().catch(() => [])) as unknown;
+  if (!Array.isArray(data)) {
+    return [];
+  }
+
+  return data
+    .map((entry) => {
+      if (!entry || typeof entry !== "object") {
+        return null;
+      }
+
+      const rawLevel = (entry as { level?: unknown }).level;
+      const rawCreatedAt = (entry as { created_at?: unknown }).created_at;
+      const level =
+        typeof rawLevel === "number"
+          ? rawLevel
+          : Number.parseInt(String(rawLevel ?? ""), 10);
+      const createdAt =
+        rawCreatedAt == null
+          ? null
+          : typeof rawCreatedAt === "number"
+            ? rawCreatedAt
+            : Number.parseInt(String(rawCreatedAt), 10);
+
+      if (!Number.isFinite(level)) {
+        return null;
+      }
+
+      if (createdAt !== null && !Number.isFinite(createdAt)) {
+        return null;
+      }
+
+      return {
+        level,
+        created_at: createdAt,
+      } satisfies SupporterHistoryEntry;
+    })
+    .filter((entry): entry is SupporterHistoryEntry => entry !== null);
+};
+
+export const revertSupporterLevel = async (level: number): Promise<void> => {
+  const url = buildApiUrlWithDevToken(PUBLIC_API_URL!, `/supporter/${level}`);
+  const resp = await fetch(url, {
+    method: "PATCH",
+    credentials: "include",
+    cache: "no-store",
+  });
+
+  if (!resp.ok) {
+    throw new Error(
+      await getResponseErrorMessage(resp, "Failed to update supporter level"),
+    );
+  }
 };
 
 export const giftSupporterGift = async (
