@@ -1,6 +1,10 @@
-import { ApiSettingsResponse, SupporterGift } from "@/types/auth";
+import {
+  ApiSettingsResponse,
+  SupporterGift,
+  SupporterLevel,
+} from "@/types/auth";
 import { buildApiUrlWithDevToken } from "@/utils/apiDevToken";
-import { PUBLIC_API_URL } from "@/utils/api";
+import { getResponseErrorMessage, PUBLIC_API_URL } from "@/utils/api";
 
 export const fetchUserSettings = async (): Promise<ApiSettingsResponse> => {
   const url = buildApiUrlWithDevToken(PUBLIC_API_URL!, "/settings/me");
@@ -54,6 +58,27 @@ export const giftSupporterGift = async (
   }
 
   return resp.json().catch(() => ({ id: shareId }));
+};
+
+export const fetchSupporterGiftLevels = async (): Promise<SupporterLevel[]> => {
+  const url = `${PUBLIC_API_URL}/supporter/levels`;
+  const resp = await fetch(url, {
+    method: "GET",
+    credentials: "include",
+    cache: "no-store",
+  });
+
+  if (!resp.ok) {
+    throw new Error(
+      await getResponseErrorMessage(resp, "Failed to fetch supporter levels"),
+    );
+  }
+
+  const data = (await resp.json().catch(() => ({}))) as {
+    levels?: SupporterLevel[];
+  };
+
+  return Array.isArray(data.levels) ? data.levels : [];
 };
 
 export const updateBanner = async (url: string): Promise<string> => {

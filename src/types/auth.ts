@@ -35,6 +35,17 @@ export interface SupporterGift {
   created_at: number;
 }
 
+export interface SupporterLevel {
+  id: string;
+  name: string;
+  slug: string;
+  level: number;
+  is_gift: boolean;
+  price: number;
+  price_str: string;
+  url: string;
+}
+
 export interface UserSettingsV2 {
   profile_public: boolean;
   show_recent_comments: boolean;

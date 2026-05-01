@@ -34,7 +34,7 @@ const supporterTiers: SupporterTier[] = [
   },
   {
     name: "Supporter I",
-    price: "$1",
+    price: "$0.99",
     priceAlt: "or 100R$ on Roblox",
     features: [
       "**All Free tier benefits**",
@@ -50,7 +50,7 @@ const supporterTiers: SupporterTier[] = [
   },
   {
     name: "Supporter II",
-    price: "$3",
+    price: "$2.99",
     priceAlt: "or 200R$ on Roblox",
     features: [
       "**All Supporter I benefits**",
@@ -68,7 +68,7 @@ const supporterTiers: SupporterTier[] = [
   },
   {
     name: "Supporter III",
-    price: "$5",
+    price: "$4.99",
     priceAlt: "or 400R$ on Roblox",
     features: [
       "**All Supporter II benefits**",
