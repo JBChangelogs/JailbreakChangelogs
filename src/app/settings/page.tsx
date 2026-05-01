@@ -1219,8 +1219,8 @@ export default function SettingsPage() {
                           disabled={revertingSupporterLevel !== null}
                         >
                           {revertingSupporterLevel === entry.level
-                            ? "Returning..."
-                            : "Return to Tier"}
+                            ? "Downgrading..."
+                            : "Downgrade"}
                         </CustomButton>
                       ) : null}
                     </div>
