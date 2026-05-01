@@ -1,9 +1,6 @@
 export const metadata = {
   metadataBase: new URL("https://jailbreakchangelogs.com"),
-  title: {
-    template: "%s | Jailbreak Changelogs",
-    default: "Value Suggestions | Jailbreak Changelogs",
-  },
+  title: "Value Suggestions",
   description:
     "Submit and vote on community value suggestions for Roblox Jailbreak items. Help shape the most accurate trading values.",
   keywords: [

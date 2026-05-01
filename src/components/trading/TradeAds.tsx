@@ -816,21 +816,12 @@ export default function TradeAds({
       if (now - lastRealtimeRefreshAtRef.current < 4000) return;
       lastRealtimeRefreshAtRef.current = now;
 
-      const toastId = toast.loading(
-        "New trade ad(s) posted — refreshing the list...",
-      );
-
       void (async () => {
         isSyncingPageWithUrlRef.current = true;
         setPage(1);
         lastFetchedTradeAdsPageRef.current = 1;
         router.replace(getTradingUrl(1));
-        const ok = await refreshTradeAds(1);
-        if (ok) {
-          toast.success("Trade ads updated.", { id: toastId });
-        } else {
-          toast.error("Failed to refresh trade ads.", { id: toastId });
-        }
+        await refreshTradeAds(1);
       })();
     };
 

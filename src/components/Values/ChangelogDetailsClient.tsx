@@ -3,7 +3,8 @@
 import { useState, useMemo } from "react";
 import { useMediaQuery } from "@mui/material";
 import { Pagination } from "@/components/ui/Pagination";
-import { Dialog } from "@headlessui/react";
+import { Dialog, DialogPanel } from "@headlessui/react";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Masonry } from "@mui/lab";
 import { ThemeProvider } from "@mui/material/styles";
 import { darkTheme } from "@/theme/darkTheme";
@@ -1170,139 +1171,136 @@ export default function ChangelogDetailsClient({
         {/* Voters Dialog */}
         <Dialog
           open={votersOpen}
-          onClose={() => setVotersOpen(false)}
-          className="relative z-50"
+          onClose={() => {}}
+          className="relative z-3000"
         >
           <div
-            className="fixed inset-0 bg-black/30 backdrop-blur-sm"
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm"
             aria-hidden="true"
           />
 
           <div className="fixed inset-0 flex items-center justify-center p-4">
-            <div className="modal-container border-button-info bg-secondary-bg w-full max-w-120 min-w-[320px] rounded-lg border shadow-lg">
-              <div className="modal-header text-primary-text flex items-center justify-between px-6 py-4 text-2xl font-bold">
+            <DialogPanel className="border-border-card bg-secondary-bg hover:border-border-focus w-full max-w-md min-w-[320px] rounded-lg border shadow-xl">
+              <div className="text-primary-text flex items-center justify-between px-6 py-4 text-xl font-bold">
                 <span>Voters</span>
                 <button
                   onClick={() => setVotersOpen(false)}
-                  className="text-primary-text hover:text-primary-text cursor-pointer transition-colors"
+                  className="text-primary-text cursor-pointer transition-colors"
                 >
                   <Icon icon="heroicons:x-mark" className="h-5 w-5" />
                 </button>
               </div>
 
-              <div className="modal-content px-6 pt-3 pb-6">
-                <div className="border-border-card bg-primary-bg mb-4 flex rounded-lg border">
-                  <button
-                    onClick={() => setVotersTab("up")}
-                    className={`flex-1 cursor-pointer rounded-l-lg py-3 text-sm font-semibold transition-colors ${
-                      votersTab === "up"
-                        ? "bg-button-success/30 border-button-success text-primary-text border-b-2"
-                        : "text-tertiary-text hover:text-primary-text"
-                    }`}
-                  >
-                    <div className="flex flex-col items-center gap-1">
-                      <span className="text-base font-bold">Upvotes</span>
-                      <span className="text-xs font-semibold opacity-80">
-                        ({activeVoters?.upCount ?? 0})
-                      </span>
-                    </div>
-                  </button>
-                  <button
-                    onClick={() => setVotersTab("down")}
-                    className={`flex-1 cursor-pointer rounded-r-lg py-3 text-sm font-semibold transition-colors ${
-                      votersTab === "down"
-                        ? "bg-button-danger/20 border-button-danger text-primary-text border-b-2"
-                        : "text-tertiary-text hover:text-primary-text"
-                    }`}
-                  >
-                    <div className="flex flex-col items-center gap-1">
-                      <span className="text-base font-bold">Downvotes</span>
-                      <span className="text-xs font-semibold opacity-80">
-                        ({activeVoters?.downCount ?? 0})
-                      </span>
-                    </div>
-                  </button>
-                </div>
+              <div className="px-6 pb-6">
+                <Tabs
+                  value={votersTab}
+                  onValueChange={(v) => setVotersTab(v as "up" | "down")}
+                >
+                  <TabsList fullWidth className="mb-4">
+                    <TabsTrigger value="up" fullWidth>
+                      <div className="flex flex-col items-center gap-1 py-1">
+                        <span className="text-base font-bold">Upvotes</span>
+                        <span className="text-xs font-semibold opacity-80">
+                          ({activeVoters?.upCount ?? 0})
+                        </span>
+                      </div>
+                    </TabsTrigger>
+                    <TabsTrigger value="down" fullWidth>
+                      <div className="flex flex-col items-center gap-1 py-1">
+                        <span className="text-base font-bold">Downvotes</span>
+                        <span className="text-xs font-semibold opacity-80">
+                          ({activeVoters?.downCount ?? 0})
+                        </span>
+                      </div>
+                    </TabsTrigger>
+                  </TabsList>
 
-                <div className="max-h-100 space-y-3 overflow-y-auto">
-                  {(votersTab === "up"
-                    ? activeVoters?.up || []
-                    : activeVoters?.down || []
-                  ).length === 0 ? (
-                    <div className="text-secondary-text py-8 text-center">
-                      <div className="mb-2 text-lg font-semibold">
-                        {(votersTab === "up"
-                          ? activeVoters?.upCount || 0
-                          : activeVoters?.downCount || 0) === 0
-                          ? "No voters to display"
-                          : "Voter details not available"}
-                      </div>
-                      <div className="text-sm">
-                        {(votersTab === "up"
-                          ? activeVoters?.upCount || 0
-                          : activeVoters?.downCount || 0) === 0
-                          ? votersTab === "up"
-                            ? "This suggestion hasn't received any upvotes yet."
-                            : "This suggestion hasn't received any downvotes yet."
-                          : votersTab === "up"
-                            ? `This suggestion has ${activeVoters?.upCount || 0} upvote${(activeVoters?.upCount || 0) === 1 ? "" : "s"}, but individual voter details are not available.`
-                            : `This suggestion has ${activeVoters?.downCount || 0} downvote${(activeVoters?.downCount || 0) === 1 ? "" : "s"}, but individual voter details are not available.`}
-                      </div>
-                    </div>
-                  ) : (
-                    (votersTab === "up"
-                      ? activeVoters?.up || []
-                      : activeVoters?.down || []
-                    ).map((voter: VoteRecord) => (
-                      <div
-                        key={voter.id}
-                        className="border-border-card bg-tertiary-bg flex items-center gap-4 rounded-lg border px-4 py-3 transition-colors"
-                      >
-                        <div className="ring-border-primary relative h-10 w-10 shrink-0 overflow-hidden rounded-full ring-2">
-                          <DefaultAvatar />
-                          {voter.avatar_hash && (
-                            <Image
-                              src={`https://cdn.discordapp.com/avatars/${voter.id}/${voter.avatar_hash}?size=128`}
-                              alt={voter.name}
-                              fill
-                              className="object-cover"
-                              onError={(e) => {
-                                (
-                                  e as unknown as { currentTarget: HTMLElement }
-                                ).currentTarget.style.display = "none";
-                              }}
-                            />
+                  {(["up", "down"] as const).map((tab) => {
+                    const voters =
+                      tab === "up"
+                        ? activeVoters?.up || []
+                        : activeVoters?.down || [];
+                    const count =
+                      tab === "up"
+                        ? activeVoters?.upCount || 0
+                        : activeVoters?.downCount || 0;
+                    return (
+                      <TabsContent key={tab} value={tab}>
+                        <div className="max-h-96 space-y-3 overflow-y-auto">
+                          {voters.length === 0 ? (
+                            <div className="text-secondary-text py-8 text-center">
+                              <p className="mb-1 font-semibold">
+                                {count === 0
+                                  ? "No voters to display"
+                                  : "Voter details not available"}
+                              </p>
+                              <p className="text-sm">
+                                {count === 0
+                                  ? tab === "up"
+                                    ? "This suggestion hasn't received any upvotes yet."
+                                    : "This suggestion hasn't received any downvotes yet."
+                                  : tab === "up"
+                                    ? `This suggestion has ${count} upvote${count === 1 ? "" : "s"}, but individual voter details are not available.`
+                                    : `This suggestion has ${count} downvote${count === 1 ? "" : "s"}, but individual voter details are not available.`}
+                              </p>
+                            </div>
+                          ) : (
+                            voters.map((voter: VoteRecord) => (
+                              <div
+                                key={voter.id}
+                                className="border-border-card bg-tertiary-bg flex items-center gap-4 rounded-lg border px-4 py-3 transition-colors"
+                              >
+                                <div className="relative h-10 w-10 shrink-0">
+                                  <DefaultAvatar />
+                                  {voter.avatar_hash && (
+                                    <Image
+                                      src={`https://cdn.discordapp.com/avatars/${voter.id}/${voter.avatar_hash}?size=128`}
+                                      alt={voter.name}
+                                      fill
+                                      className="object-cover"
+                                      onError={(e) => {
+                                        (
+                                          e as unknown as {
+                                            currentTarget: HTMLElement;
+                                          }
+                                        ).currentTarget.style.display = "none";
+                                      }}
+                                    />
+                                  )}
+                                </div>
+                                <div className="min-w-0 flex-1">
+                                  <div className="text-primary-text mb-1 text-base font-bold">
+                                    <a
+                                      href={`https://discord.com/users/${voter.id}`}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="text-link hover:text-link-hover transition-colors hover:underline"
+                                    >
+                                      {voter.name.replace(/(.+)\1/, "$1")}
+                                    </a>
+                                  </div>
+                                  <div className="text-tertiary-text text-sm font-medium">
+                                    {new Date(
+                                      voter.timestamp * 1000,
+                                    ).toLocaleDateString("en-US", {
+                                      month: "short",
+                                      day: "numeric",
+                                      year: "numeric",
+                                      hour: "2-digit",
+                                      minute: "2-digit",
+                                    })}
+                                  </div>
+                                </div>
+                              </div>
+                            ))
                           )}
                         </div>
-                        <div className="min-w-0 flex-1">
-                          <div className="text-primary-text mb-1 text-base font-bold">
-                            <a
-                              href={`https://discord.com/users/${voter.id}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-link hover:text-link-hover transition-colors hover:underline"
-                            >
-                              {voter.name.replace(/(.+)\1/, "$1")}
-                            </a>
-                          </div>
-                          <div className="text-tertiary-text text-sm font-medium">
-                            {new Date(
-                              voter.timestamp * 1000,
-                            ).toLocaleDateString("en-US", {
-                              month: "short",
-                              day: "numeric",
-                              year: "numeric",
-                              hour: "2-digit",
-                              minute: "2-digit",
-                            })}
-                          </div>
-                        </div>
-                      </div>
-                    ))
-                  )}
-                </div>
+                      </TabsContent>
+                    );
+                  })}
+                </Tabs>
               </div>
-            </div>
+            </DialogPanel>
           </div>
         </Dialog>
       </div>

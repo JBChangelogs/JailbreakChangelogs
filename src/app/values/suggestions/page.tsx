@@ -36,6 +36,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { UserDetailsTooltip } from "@/components/ui/UserDetailsTooltip";
 import type { UserData } from "@/types/auth";
 import type { Item } from "@/types/index";
@@ -46,18 +47,29 @@ interface SuggestionLimits {
   valid_fields: string[];
 }
 
+interface UserSettings {
+  custom_avatar?: boolean;
+  hide_presence?: boolean | number;
+  profile_public?: boolean | number;
+  custom_banner?: boolean;
+  hide_connections?: boolean;
+  dms_allowed?: boolean | number;
+  allow_gifting?: boolean;
+  show_recent_comments?: boolean | number;
+  hide_following?: boolean | number;
+  hide_followers?: boolean | number;
+  hide_favorites?: boolean | number;
+}
+
 interface SuggestionUser {
   id: string;
-  username: string;
-  global_name: string;
-  avatar: string | null;
-  custom_avatar: string | null;
-  premiumtype: number;
-  usernumber: number;
-  settings_v2?: {
-    custom_avatar: boolean;
-    hide_presence?: boolean;
-  };
+  username?: string;
+  global_name?: string;
+  avatar?: string | null;
+  custom_avatar?: string | null;
+  premiumtype?: number;
+  usernumber?: number;
+  settings?: UserSettings;
 }
 
 interface Suggestion {
@@ -523,6 +535,134 @@ function SuggestionForm({
   );
 }
 
+interface EditReasonModalProps {
+  open: boolean;
+  onClose: () => void;
+  suggestion: Suggestion | null;
+  item: Item | null;
+  onSave: (reason: string) => Promise<void>;
+}
+
+function EditReasonModal({
+  open,
+  onClose,
+  suggestion,
+  item,
+  onSave,
+}: EditReasonModalProps) {
+  const [reason, setReason] = useState(suggestion?.reason ?? "");
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    if (suggestion) setReason(suggestion.reason);
+  }, [suggestion]);
+
+  const handleSave = async () => {
+    if (reason.trim().length < 350) {
+      toast.error("Reason must be at least 350 characters.");
+      return;
+    }
+    setSaving(true);
+    try {
+      await onSave(reason.trim());
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <Dialog open={open} onClose={() => {}} className="relative z-3000">
+      <div
+        className="fixed inset-0 bg-black/50 backdrop-blur-sm"
+        aria-hidden="true"
+      />
+      <div className="fixed inset-0 flex items-center justify-center p-4">
+        <DialogPanel className="border-border-card bg-secondary-bg hover:border-border-focus w-full max-w-lg min-w-[320px] rounded-lg border shadow-xl">
+          <div className="flex items-center justify-between px-6 py-4">
+            <div className="min-w-0">
+              <p className="text-primary-text truncate text-base font-bold">
+                {suggestion
+                  ? `Edit Suggestion #${suggestion.id} - ${item?.name ?? `Item #${suggestion.item_id}`} (${item?.type ?? ""})`
+                  : "Edit Suggestion"}
+              </p>
+            </div>
+            <button
+              onClick={onClose}
+              className="text-primary-text ml-3 shrink-0 cursor-pointer transition-colors"
+            >
+              <Icon icon="heroicons:x-mark" className="h-5 w-5" />
+            </button>
+          </div>
+
+          <div className="px-6 pb-6">
+            <div className="mb-2 flex items-center justify-between">
+              <span className="text-secondary-text text-sm font-medium">
+                Reason
+              </span>
+              <span className="text-secondary-text text-xs">
+                {reason.length} / 350 min
+              </span>
+            </div>
+            <textarea
+              value={reason}
+              onChange={(e) => setReason(e.target.value)}
+              rows={8}
+              className="border-border-card bg-tertiary-bg text-primary-text placeholder:text-tertiary-text focus:border-button-info mb-4 w-full resize-none rounded-lg border px-3 py-2.5 text-sm transition-colors outline-none"
+            />
+            <div className="flex justify-end gap-2">
+              <Button
+                type="button"
+                onClick={handleSave}
+                disabled={saving || reason.trim().length < 350}
+                className="bg-button-info hover:bg-button-info-hover text-form-button-text flex items-center gap-2 disabled:opacity-50"
+              >
+                {saving ? (
+                  <>
+                    <Spinner className="h-4 w-4" />
+                    Updating...
+                  </>
+                ) : (
+                  "Update"
+                )}
+              </Button>
+            </div>
+          </div>
+        </DialogPanel>
+      </div>
+    </Dialog>
+  );
+}
+
+function VoteRateLimitBanner({ until }: { until: number }) {
+  const [secondsLeft, setSecondsLeft] = useState(
+    Math.max(0, Math.ceil((until - Date.now()) / 1000)),
+  );
+
+  useEffect(() => {
+    const tick = () =>
+      setSecondsLeft(Math.max(0, Math.ceil((until - Date.now()) / 1000)));
+    tick();
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
+  }, [until]);
+
+  if (secondsLeft === 0) return null;
+
+  return (
+    <div className="border-border-card bg-tertiary-bg flex items-center justify-center gap-1.5 border-t px-3 py-1.5 text-xs text-yellow-400">
+      <Icon
+        icon="material-symbols:hourglass-empty-rounded"
+        className="h-3.5 w-3.5 shrink-0"
+        inline
+      />
+      Too fast — wait{" "}
+      {secondsLeft >= 60
+        ? `${Math.floor(secondsLeft / 60)}m ${secondsLeft % 60}s`
+        : `${secondsLeft}s`}
+    </div>
+  );
+}
+
 // Accepts: 10000000 | 10,000,000 | 10.5m | 500k | 1.2b (case-insensitive)
 const VALUE_REGEX = /^(\d{1,3}(,\d{3})*|\d+)(\.\d+)?([kmbt]?)$/i;
 const parseValueInput = (raw: string): { valid: boolean; error?: string } => {
@@ -572,6 +712,13 @@ export default function ValueSuggestionsPage() {
 
   // Per-suggestion voting loading state
   const [votingIds, setVotingIds] = useState<Set<number>>(new Set());
+  const [voteRateLimits, setVoteRateLimits] = useState<Map<number, number>>(
+    new Map(),
+  );
+
+  // Edit reason modal state
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [editTarget, setEditTarget] = useState<Suggestion | null>(null);
 
   const handleVote = async (
     suggestion: Suggestion,
@@ -676,9 +823,25 @@ export default function ValueSuggestionsPage() {
           prev.map((s) => (s.id === suggestion.id ? suggestion : s)),
         );
         const data = await res.json().catch(() => ({}));
-        if (res.status === 429)
+        if (res.status === 429) {
           toast.error("You're voting too fast. Please wait a moment.");
-        else
+          const retryAfter = parseInt(
+            res.headers.get("retry-after") ?? "60",
+            10,
+          );
+          const until = Date.now() + retryAfter * 1000;
+          setVoteRateLimits((prev) => new Map(prev).set(suggestion.id, until));
+          setTimeout(
+            () => {
+              setVoteRateLimits((prev) => {
+                const next = new Map(prev);
+                next.delete(suggestion.id);
+                return next;
+              });
+            },
+            retryAfter * 1000 + 500,
+          );
+        } else
           toast.error(
             data?.message ?? data?.error ?? "Failed to register vote.",
           );
@@ -695,6 +858,47 @@ export default function ValueSuggestionsPage() {
         return n;
       });
     }
+  };
+
+  const openEditModal = (suggestion: Suggestion, e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+    setEditTarget(suggestion);
+    setEditModalOpen(true);
+  };
+
+  const closeEditModal = () => {
+    setEditModalOpen(false);
+    setEditTarget(null);
+  };
+
+  const handleEditSave = async (reason: string) => {
+    if (!editTarget) return;
+    const url = buildApiUrlWithDevToken(
+      PUBLIC_API_URL!,
+      `/value-suggestions/${editTarget.id}`,
+    );
+    const res = await fetch(url, {
+      method: "PATCH",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        item: editTarget.item_id,
+        suggestion: { reason },
+      }),
+    });
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      toast.error(
+        data?.message ?? data?.error ?? "Failed to update suggestion.",
+      );
+      throw new Error("update failed");
+    }
+    setSuggestions((prev) =>
+      prev.map((s) => (s.id === editTarget.id ? { ...s, reason } : s)),
+    );
+    closeEditModal();
+    toast.success("Suggestion updated.");
   };
 
   // Voters modal state
@@ -827,6 +1031,20 @@ export default function ValueSuggestionsPage() {
 
   useEffect(() => {
     fetchSuggestions(page);
+  }, [fetchSuggestions, page]);
+
+  const lastRealtimeRefreshRef = useRef(0);
+  useEffect(() => {
+    const handler = (event: Event) => {
+      const e = event as CustomEvent<{ action?: string }>;
+      if (e.detail?.action !== "refresh_suggestions") return;
+      const now = Date.now();
+      if (now - lastRealtimeRefreshRef.current < 4000) return;
+      lastRealtimeRefreshRef.current = now;
+      void fetchSuggestions(page);
+    };
+    window.addEventListener("realtimeSuggestions", handler);
+    return () => window.removeEventListener("realtimeSuggestions", handler);
   }, [fetchSuggestions, page]);
 
   useEffect(() => {
@@ -1254,55 +1472,78 @@ export default function ValueSuggestionsPage() {
                     const userDownvoted = suggestion.votes.downvotes.some(
                       (v) => v.user.id === user?.id,
                     );
-                    const isVoting = votingIds.has(suggestion.id);
+                    const isVoting =
+                      votingIds.has(suggestion.id) ||
+                      voteRateLimits.has(suggestion.id);
                     const hasVoters =
                       suggestion.votes.upvotes.length > 0 ||
                       suggestion.votes.downvotes.length > 0;
                     return (
                       <div className="border-border-card relative z-10 flex flex-col border-t">
                         <div className="flex items-stretch">
-                          <button
-                            type="button"
-                            onClick={(e) => handleVote(suggestion, "upvote", e)}
-                            disabled={isVoting}
-                            className="bg-button-success/10 hover:bg-button-success/20 flex flex-1 cursor-pointer items-center justify-center gap-1.5 py-2.5 transition-colors focus:outline-none disabled:opacity-60"
-                          >
-                            <Icon
-                              icon={
-                                userUpvoted
-                                  ? "material-symbols:thumb-up-rounded"
-                                  : "material-symbols:thumb-up-outline-rounded"
-                              }
-                              className="text-button-success h-4 w-4"
-                              inline
-                            />
-                            <span className="text-button-success font-bold">
-                              {suggestion.upvotes}
-                            </span>
-                          </button>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <button
+                                type="button"
+                                onClick={(e) =>
+                                  handleVote(suggestion, "upvote", e)
+                                }
+                                disabled={isVoting}
+                                className="bg-button-success/10 hover:bg-button-success/20 flex flex-1 cursor-pointer items-center justify-center gap-1.5 py-2.5 transition-colors focus:outline-none disabled:cursor-not-allowed disabled:opacity-60"
+                              >
+                                <Icon
+                                  icon={
+                                    userUpvoted
+                                      ? "material-symbols:thumb-up-rounded"
+                                      : "material-symbols:thumb-up-outline-rounded"
+                                  }
+                                  className="text-button-success h-4 w-4"
+                                  inline
+                                />
+                                <span className="text-button-success font-bold">
+                                  {suggestion.upvotes}
+                                </span>
+                              </button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              {userUpvoted ? "Remove upvote" : "Upvote"}
+                            </TooltipContent>
+                          </Tooltip>
                           <div className="border-border-card border-l" />
-                          <button
-                            type="button"
-                            onClick={(e) =>
-                              handleVote(suggestion, "downvote", e)
-                            }
-                            disabled={isVoting}
-                            className="bg-button-danger/10 hover:bg-button-danger/20 flex flex-1 cursor-pointer items-center justify-center gap-1.5 py-2.5 transition-colors focus:outline-none disabled:opacity-60"
-                          >
-                            <Icon
-                              icon={
-                                userDownvoted
-                                  ? "material-symbols:thumb-down-rounded"
-                                  : "material-symbols:thumb-down-outline-rounded"
-                              }
-                              className="text-button-danger h-4 w-4"
-                              inline
-                            />
-                            <span className="text-button-danger font-bold">
-                              {suggestion.downvotes}
-                            </span>
-                          </button>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <button
+                                type="button"
+                                onClick={(e) =>
+                                  handleVote(suggestion, "downvote", e)
+                                }
+                                disabled={isVoting}
+                                className="bg-button-danger/10 hover:bg-button-danger/20 flex flex-1 cursor-pointer items-center justify-center gap-1.5 py-2.5 transition-colors focus:outline-none disabled:cursor-not-allowed disabled:opacity-60"
+                              >
+                                <Icon
+                                  icon={
+                                    userDownvoted
+                                      ? "material-symbols:thumb-down-rounded"
+                                      : "material-symbols:thumb-down-outline-rounded"
+                                  }
+                                  className="text-button-danger h-4 w-4"
+                                  inline
+                                />
+                                <span className="text-button-danger font-bold">
+                                  {suggestion.downvotes}
+                                </span>
+                              </button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              {userDownvoted ? "Remove downvote" : "Downvote"}
+                            </TooltipContent>
+                          </Tooltip>
                         </div>
+                        {voteRateLimits.has(suggestion.id) && (
+                          <VoteRateLimitBanner
+                            until={voteRateLimits.get(suggestion.id)!}
+                          />
+                        )}
                         {hasVoters && (
                           <button
                             type="button"
@@ -1360,7 +1601,7 @@ export default function ValueSuggestionsPage() {
                             </span>
                           )}
                           <span
-                            className={`${badgeBase} border-border-card bg-tertiary-bg/40 text-primary-text`}
+                            className={`${badgeBase} border-border-card bg-tertiary-bg text-primary-text`}
                           >
                             {fieldLabel(suggestion.field)}
                           </span>
@@ -1436,17 +1677,26 @@ export default function ValueSuggestionsPage() {
                     <div className="relative z-10 mt-auto flex items-center gap-2 pt-1">
                       <UserAvatar
                         userId={suggestion.user.id}
-                        avatarHash={suggestion.user.avatar}
-                        username={suggestion.user.username}
+                        avatarHash={suggestion.user.avatar ?? null}
+                        username={suggestion.user.username ?? ""}
                         custom_avatar={
                           suggestion.user.custom_avatar ?? undefined
                         }
-                        premiumType={suggestion.user.premiumtype}
-                        settings={suggestion.user.settings_v2}
+                        premiumType={suggestion.user.premiumtype ?? 0}
+                        settings={
+                          suggestion.user.settings
+                            ? {
+                                custom_avatar:
+                                  !!suggestion.user.settings.custom_avatar,
+                                hide_presence:
+                                  !!suggestion.user.settings.hide_presence,
+                              }
+                            : undefined
+                        }
                         size={6}
                         showBadge={false}
                       />
-                      <div className="flex min-w-0 flex-col">
+                      <div className="flex min-w-0 flex-1 flex-col">
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <Link
@@ -1455,19 +1705,42 @@ export default function ValueSuggestionsPage() {
                               className="text-link hover:text-link-hover truncate text-sm font-medium transition-colors"
                             >
                               {suggestion.user.global_name ||
-                                suggestion.user.username}
+                                suggestion.user.username ||
+                                `User #${suggestion.user.id}`}
                             </Link>
                           </TooltipTrigger>
-                          <TooltipContent className="max-w-sm min-w-75 p-0">
-                            <UserDetailsTooltip
-                              user={suggestion.user as unknown as UserData}
-                            />
-                          </TooltipContent>
+                          {suggestion.user.username && (
+                            <TooltipContent className="max-w-sm min-w-75 p-0">
+                              <UserDetailsTooltip
+                                user={suggestion.user as unknown as UserData}
+                              />
+                            </TooltipContent>
+                          )}
                         </Tooltip>
                         <span className="text-tertiary-text text-xs">
                           {formatMessageDate(suggestion.created_at)}
                         </span>
                       </div>
+                      {isAuthenticated &&
+                        user?.id === suggestion.user.id &&
+                        suggestion.status === "pending" && (
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <button
+                                type="button"
+                                onClick={(e) => openEditModal(suggestion, e)}
+                                className="text-secondary-text hover:text-primary-text shrink-0 cursor-pointer rounded p-1 transition-colors"
+                              >
+                                <Icon
+                                  icon="material-symbols:edit-outline-rounded"
+                                  className="h-4 w-4"
+                                  inline
+                                />
+                              </button>
+                            </TooltipTrigger>
+                            <TooltipContent>Update reason</TooltipContent>
+                          </Tooltip>
+                        )}
                     </div>
                   </div>
                 </div>
@@ -1491,12 +1764,17 @@ export default function ValueSuggestionsPage() {
         )}
       </div>
 
+      {/* Edit Reason Modal */}
+      <EditReasonModal
+        open={editModalOpen}
+        onClose={closeEditModal}
+        suggestion={editTarget}
+        item={editTarget ? (itemMap.get(editTarget.item_id) ?? null) : null}
+        onSave={handleEditSave}
+      />
+
       {/* Voters Modal */}
-      <Dialog
-        open={votersOpen}
-        onClose={() => setVotersOpen(false)}
-        className="relative z-3000"
-      >
+      <Dialog open={votersOpen} onClose={() => {}} className="relative z-3000">
         <div
           className="fixed inset-0 bg-black/50 backdrop-blur-sm"
           aria-hidden="true"
@@ -1514,109 +1792,116 @@ export default function ValueSuggestionsPage() {
             </div>
 
             <div className="px-6 pt-3 pb-6">
-              {/* Tabs */}
-              <div className="border-border-card bg-primary-bg mb-4 flex rounded-lg border">
-                <button
-                  onClick={() => setVotersTab("up")}
-                  className={`flex-1 cursor-pointer rounded-l-lg py-3 text-sm font-semibold transition-colors ${
-                    votersTab === "up"
-                      ? "bg-button-success/30 border-button-success text-primary-text border-b-2"
-                      : "text-tertiary-text hover:text-primary-text"
-                  }`}
-                >
-                  <div className="flex flex-col items-center gap-1">
-                    <span className="text-base font-bold">Upvotes</span>
-                    <span className="text-xs font-semibold opacity-80">
-                      ({activeVoters?.upCount ?? 0})
-                    </span>
-                  </div>
-                </button>
-                <button
-                  onClick={() => setVotersTab("down")}
-                  className={`flex-1 cursor-pointer rounded-r-lg py-3 text-sm font-semibold transition-colors ${
-                    votersTab === "down"
-                      ? "bg-button-danger/20 border-button-danger text-primary-text border-b-2"
-                      : "text-tertiary-text hover:text-primary-text"
-                  }`}
-                >
-                  <div className="flex flex-col items-center gap-1">
-                    <span className="text-base font-bold">Downvotes</span>
-                    <span className="text-xs font-semibold opacity-80">
-                      ({activeVoters?.downCount ?? 0})
-                    </span>
-                  </div>
-                </button>
-              </div>
-
-              {/* Voter list */}
-              <div className="max-h-96 space-y-3 overflow-y-auto">
-                {(votersTab === "up"
-                  ? (activeVoters?.up ?? [])
-                  : (activeVoters?.down ?? [])
-                ).length === 0 ? (
-                  <div className="text-secondary-text py-8 text-center">
-                    <p className="mb-1 font-semibold">
-                      {(votersTab === "up"
-                        ? activeVoters?.upCount
-                        : activeVoters?.downCount) === 0
-                        ? "No voters to display"
-                        : "Voter details not available"}
-                    </p>
-                    <p className="text-sm">
-                      {votersTab === "up"
-                        ? "This suggestion hasn't received any upvotes yet."
-                        : "This suggestion hasn't received any downvotes yet."}
-                    </p>
-                  </div>
-                ) : (
-                  (votersTab === "up"
-                    ? (activeVoters?.up ?? [])
-                    : (activeVoters?.down ?? [])
-                  ).map((v) => (
-                    <div
-                      key={v.user.id + v.created_at}
-                      className="border-border-card bg-tertiary-bg flex items-center gap-4 rounded-lg border px-4 py-3 transition-colors"
-                    >
-                      <div className="ring-border-primary relative h-10 w-10 shrink-0 overflow-hidden rounded-full ring-2">
-                        <UserAvatar
-                          userId={v.user.id}
-                          avatarHash={v.user.avatar}
-                          username={v.user.username}
-                          custom_avatar={v.user.custom_avatar ?? undefined}
-                          premiumType={v.user.premiumtype}
-                          settings={v.user.settings_v2}
-                          size={10}
-                          showBadge={false}
-                        />
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <div className="text-primary-text mb-1 text-base font-bold">
-                          <Link
-                            href={`/users/${v.user.id}`}
-                            prefetch={false}
-                            className="text-link hover:text-link-hover transition-colors hover:underline"
-                            onClick={() => setVotersOpen(false)}
-                          >
-                            {v.user.global_name || v.user.username}
-                          </Link>
-                        </div>
-                        <div className="text-tertiary-text text-sm font-medium">
-                          {new Date(v.created_at * 1000).toLocaleDateString(
-                            "en-US",
-                            {
-                              month: "short",
-                              day: "numeric",
-                              year: "numeric",
-                              hour: "2-digit",
-                              minute: "2-digit",
-                            },
-                          )}
-                        </div>
-                      </div>
+              <Tabs
+                value={votersTab}
+                onValueChange={(v) => setVotersTab(v as "up" | "down")}
+              >
+                <TabsList fullWidth className="mb-4">
+                  <TabsTrigger value="up" fullWidth>
+                    <div className="flex flex-col items-center gap-1 py-1">
+                      <span className="text-base font-bold">Upvotes</span>
+                      <span className="text-xs font-semibold opacity-80">
+                        ({activeVoters?.upCount ?? 0})
+                      </span>
                     </div>
-                  ))
-                )}
-              </div>
+                  </TabsTrigger>
+                  <TabsTrigger value="down" fullWidth>
+                    <div className="flex flex-col items-center gap-1 py-1">
+                      <span className="text-base font-bold">Downvotes</span>
+                      <span className="text-xs font-semibold opacity-80">
+                        ({activeVoters?.downCount ?? 0})
+                      </span>
+                    </div>
+                  </TabsTrigger>
+                </TabsList>
+
+                {(["up", "down"] as const).map((tab) => {
+                  const voters =
+                    tab === "up"
+                      ? (activeVoters?.up ?? [])
+                      : (activeVoters?.down ?? []);
+                  const count =
+                    tab === "up"
+                      ? activeVoters?.upCount
+                      : activeVoters?.downCount;
+                  return (
+                    <TabsContent key={tab} value={tab}>
+                      <div className="max-h-96 space-y-3 overflow-y-auto">
+                        {voters.length === 0 ? (
+                          <div className="text-secondary-text py-8 text-center">
+                            <p className="mb-1 font-semibold">
+                              {count === 0
+                                ? "No voters to display"
+                                : "Voter details not available"}
+                            </p>
+                            <p className="text-sm">
+                              {tab === "up"
+                                ? "This suggestion hasn't received any upvotes yet."
+                                : "This suggestion hasn't received any downvotes yet."}
+                            </p>
+                          </div>
+                        ) : (
+                          voters.map((v) => (
+                            <div
+                              key={v.user.id + v.created_at}
+                              className="border-border-card bg-tertiary-bg flex items-center gap-4 rounded-lg border px-4 py-3 transition-colors"
+                            >
+                              <div className="relative h-10 w-10 shrink-0">
+                                <UserAvatar
+                                  userId={v.user.id}
+                                  avatarHash={v.user.avatar ?? null}
+                                  username={v.user.username ?? ""}
+                                  custom_avatar={
+                                    v.user.custom_avatar ?? undefined
+                                  }
+                                  premiumType={v.user.premiumtype ?? 0}
+                                  settings={
+                                    v.user.settings
+                                      ? {
+                                          custom_avatar:
+                                            !!v.user.settings.custom_avatar,
+                                          hide_presence:
+                                            !!v.user.settings.hide_presence,
+                                        }
+                                      : undefined
+                                  }
+                                  size={10}
+                                  showBadge={false}
+                                />
+                              </div>
+                              <div className="min-w-0 flex-1">
+                                <div className="text-primary-text mb-1 text-base font-bold">
+                                  <Link
+                                    href={`/users/${v.user.id}`}
+                                    prefetch={false}
+                                    className="text-link hover:text-link-hover transition-colors hover:underline"
+                                    onClick={() => setVotersOpen(false)}
+                                  >
+                                    {v.user.global_name ||
+                                      v.user.username ||
+                                      `User #${v.user.id}`}
+                                  </Link>
+                                </div>
+                                <div className="text-tertiary-text text-sm font-medium">
+                                  {new Date(
+                                    v.created_at * 1000,
+                                  ).toLocaleDateString("en-US", {
+                                    month: "short",
+                                    day: "numeric",
+                                    year: "numeric",
+                                    hour: "2-digit",
+                                    minute: "2-digit",
+                                  })}
+                                </div>
+                              </div>
+                            </div>
+                          ))
+                        )}
+                      </div>
+                    </TabsContent>
+                  );
+                })}
+              </Tabs>
             </div>
           </DialogPanel>
         </div>

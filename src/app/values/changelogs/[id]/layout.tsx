@@ -16,7 +16,7 @@ export async function generateMetadata({
 
   return {
     metadataBase: new URL("https://jailbreakchangelogs.com"),
-    title: `Value Changelog #${id}`,
+    title: `Value Changelog #${id} | Jailbreak Changelogs`,
     description: `View value changes in this Jailbreak Changelogs Value update.`,
     alternates: {
       canonical: `/values/changelogs/${id}`,
