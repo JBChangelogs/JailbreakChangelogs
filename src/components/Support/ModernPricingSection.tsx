@@ -3,13 +3,20 @@
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useQueryState } from "nuqs";
+import { toast } from "sonner";
 import { getAllowedFileExtensions } from "@/config/settings";
+import { useAuthContext } from "@/contexts/AuthContext";
 import { useTheme } from "@/contexts/ThemeContext";
 import { Icon } from "@/components/ui/IconWrapper";
 import ImageModal from "@/components/ui/ImageModal";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface SupporterTier {
   name: string;
@@ -93,12 +100,21 @@ const CRYPTO_ADDRESSES = {
 export default function ModernPricingSection() {
   const BADGE_BASE_URL =
     "https://assets.jailbreakchangelogs.com/assets/website_icons";
-  const [isYearly, setIsYearly] = useState(false);
   const [highlightedTier, setHighlightedTier] = useState<number | null>(null);
-  const [copiedAddress, setCopiedAddress] = useState<string | null>(null);
-  const searchParams = useSearchParams();
-  const router = useRouter();
+  const [tabParam, setTabParam] = useQueryState("tab", {
+    defaultValue: "",
+    history: "push",
+    shallow: true,
+  });
+  const [tierParam, setTierParam] = useQueryState("tier", {
+    defaultValue: "",
+    history: "push",
+    shallow: true,
+  });
+  const { user } = useAuthContext();
   const { resolvedTheme } = useTheme();
+  const isYearly = tabParam === "roblox";
+  const isOwner = user?.flags?.some((f) => f.flag === "is_owner");
 
   // Dynamic image paths based on theme
   const kofiImagePath =
@@ -114,16 +130,35 @@ export default function ModernPricingSection() {
   const copyToClipboard = async (address: string, cryptoType: string) => {
     try {
       await navigator.clipboard.writeText(address);
-      setCopiedAddress(cryptoType);
-      setTimeout(() => setCopiedAddress(null), 2000);
+      toast.success(`${cryptoType} wallet address copied to clipboard.`);
     } catch (err) {
       console.error("Failed to copy address:", err);
+      toast.error(`Failed to copy ${cryptoType} wallet address.`);
+    }
+  };
+
+  const copyTierLink = async (tierNumber: number, tierName: string) => {
+    const url = new URL(window.location.href);
+    const paymentMethodLabel = isYearly ? "Roblox" : "Ko-fi";
+    if (isYearly) {
+      url.searchParams.set("tab", "roblox");
+    } else {
+      url.searchParams.delete("tab");
+    }
+    url.searchParams.set("tier", String(tierNumber));
+
+    try {
+      await navigator.clipboard.writeText(url.toString());
+      toast.success("Link Copied", {
+        description: `The ${paymentMethodLabel} URL for ${tierName} is now on your clipboard.`,
+      });
+    } catch (err) {
+      console.error("Failed to copy tier link:", err);
+      toast.error(`Failed to copy ${tierName} link.`);
     }
   };
 
   useEffect(() => {
-    const tierParam = searchParams.get("tier");
-
     if (tierParam) {
       const tierNumber = parseInt(tierParam, 10);
 
@@ -140,17 +175,20 @@ export default function ModernPricingSection() {
         }, 500); // 500ms delay
 
         // Clean up URL parameter after highlighting
-        setTimeout(() => {
-          router.replace("/supporting", { scroll: false });
+        const clearParamTimeoutId = setTimeout(() => {
+          void setTierParam(null);
         }, 2000); // Clean up after 2 seconds
 
-        return () => clearTimeout(timeoutId);
+        return () => {
+          clearTimeout(timeoutId);
+          clearTimeout(clearParamTimeoutId);
+        };
       } else {
         // Invalid tier parameter, clean up URL
-        router.replace("/supporting", { scroll: false });
+        void setTierParam(null);
       }
     }
-  }, [searchParams, router]);
+  }, [tierParam, setTierParam]);
 
   return (
     <section className="bg-primary-bg">
@@ -185,7 +223,9 @@ export default function ModernPricingSection() {
 
         <Tabs
           value={isYearly ? "roblox" : "kofi"}
-          onValueChange={(value) => setIsYearly(value === "roblox")}
+          onValueChange={(value) => {
+            void setTabParam(value === "roblox" ? "roblox" : null);
+          }}
           className="mt-6 w-full"
         >
           <TabsList fullWidth className="w-full">
@@ -198,7 +238,7 @@ export default function ModernPricingSection() {
           </TabsList>
         </Tabs>
 
-        <div className="-mx-6 mt-16 grid gap-6 sm:grid-cols-2 sm:gap-8 lg:grid-cols-4">
+        <div className="-mx-6 mt-12 grid gap-6 sm:grid-cols-2 sm:gap-8 lg:grid-cols-4">
           {supporterTiers.map((tier) => (
             <div
               key={tier.name}
@@ -206,11 +246,16 @@ export default function ModernPricingSection() {
                 tier.recommended
                   ? "border-button-info bg-secondary-bg border-2"
                   : "border-border-card bg-secondary-bg border"
-              } ${
-                highlightedTier === tier.tierNumber
-                  ? "ring-warning ring-opacity-75 scale-110 ring-4"
-                  : ""
               }`}
+              style={
+                highlightedTier === tier.tierNumber
+                  ? {
+                      backgroundColor:
+                        "color-mix(in srgb, var(--color-button-info), transparent 80%)",
+                      transition: "background-color 0.5s ease",
+                    }
+                  : undefined
+              }
             >
               <div className="mb-2 flex items-center gap-2">
                 <p className="text-primary-text text-lg font-medium">
@@ -230,6 +275,28 @@ export default function ModernPricingSection() {
                     className="object-contain"
                   />
                 )}
+                {isOwner && tier.tierNumber ? (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          copyTierLink(tier.tierNumber!, tier.name)
+                        }
+                        className="text-secondary-text hover:text-link cursor-pointer transition-colors"
+                        aria-label={`Copy ${tier.name} link`}
+                      >
+                        <Icon icon="heroicons:link" className="h-4 w-4" />
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent
+                      side="top"
+                      className="bg-secondary-bg text-primary-text border-none shadow-(--color-card-shadow)"
+                    >
+                      <p>Copy URL</p>
+                    </TooltipContent>
+                  </Tooltip>
+                ) : null}
               </div>
 
               <h4 className="text-primary-text mt-2 text-3xl font-semibold">
@@ -328,7 +395,7 @@ export default function ModernPricingSection() {
                   {isYearly ? "Support with Robux" : "Support with Ko-fi"}
                 </Button>
               ) : (
-                <div className="border-border-card bg-primary-bg text-primary-text mt-10 w-full rounded-md border px-4 py-2 text-center font-medium tracking-wide capitalize">
+                <div className="border-border-card bg-tertiary-bg text-primary-text mt-10 w-full rounded-md border px-4 py-2 text-center font-medium tracking-wide capitalize">
                   Already included
                 </div>
               )}
@@ -339,7 +406,7 @@ export default function ModernPricingSection() {
         {/* Important Information Section */}
         <div
           id="important-information"
-          className="bg-button-info/10 border-border-card mt-8 scroll-mt-24 rounded-lg border p-6"
+          className="bg-button-info/10 border-border-card mt-12 scroll-mt-24 rounded-lg border p-6"
         >
           <h3 className="text-primary-text mb-4 text-lg font-semibold">
             Important Information
@@ -504,7 +571,7 @@ export default function ModernPricingSection() {
               Send BTC, ETH, or LTC directly to support with crypto.
             </p>
             <div className="space-y-4">
-              <div className="border-border-card bg-surface-bg rounded-lg border p-4">
+              <div className="border-border-card bg-tertiary-bg rounded-lg border p-4">
                 <div className="text-primary-text mb-2 flex items-center justify-center gap-2">
                   <Icon
                     icon="token-branded:ltc"
@@ -513,34 +580,17 @@ export default function ModernPricingSection() {
                   />
                   <span className="font-semibold">Litecoin (LTC)</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <code className="text-secondary-text flex-1 text-xs break-all">
-                    {CRYPTO_ADDRESSES.LTC}
-                    <button
-                      onClick={() =>
-                        copyToClipboard(CRYPTO_ADDRESSES.LTC, "LTC")
-                      }
-                      className="text-button-info hover:text-button-info-hover ml-1 cursor-pointer transition-colors"
-                      title={
-                        copiedAddress === "LTC"
-                          ? "Copied!"
-                          : "Copy Litecoin address"
-                      }
-                    >
-                      <Icon
-                        icon={
-                          copiedAddress === "LTC"
-                            ? "heroicons:check"
-                            : "heroicons:clipboard"
-                        }
-                        className="h-4 w-4"
-                      />
-                    </button>
-                  </code>
-                </div>
+                <button
+                  type="button"
+                  onClick={() => copyToClipboard(CRYPTO_ADDRESSES.LTC, "LTC")}
+                  className="text-secondary-text hover:text-primary-text w-full cursor-pointer text-center text-xs break-all transition-colors"
+                  title="Copy Litecoin address"
+                >
+                  <code>{CRYPTO_ADDRESSES.LTC}</code>
+                </button>
               </div>
 
-              <div className="border-border-card bg-surface-bg rounded-lg border p-4">
+              <div className="border-border-card bg-tertiary-bg rounded-lg border p-4">
                 <div className="text-primary-text mb-2 flex items-center justify-center gap-2">
                   <Icon
                     icon="logos:ethereum"
@@ -549,34 +599,17 @@ export default function ModernPricingSection() {
                   />
                   <span className="font-semibold">Ethereum (ETH)</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <code className="text-secondary-text flex-1 text-xs break-all">
-                    {CRYPTO_ADDRESSES.ETH}
-                    <button
-                      onClick={() =>
-                        copyToClipboard(CRYPTO_ADDRESSES.ETH, "ETH")
-                      }
-                      className="text-button-info hover:text-button-info-hover ml-1 cursor-pointer transition-colors"
-                      title={
-                        copiedAddress === "ETH"
-                          ? "Copied!"
-                          : "Copy Ethereum address"
-                      }
-                    >
-                      <Icon
-                        icon={
-                          copiedAddress === "ETH"
-                            ? "heroicons:check"
-                            : "heroicons:clipboard"
-                        }
-                        className="h-4 w-4"
-                      />
-                    </button>
-                  </code>
-                </div>
+                <button
+                  type="button"
+                  onClick={() => copyToClipboard(CRYPTO_ADDRESSES.ETH, "ETH")}
+                  className="text-secondary-text hover:text-primary-text w-full cursor-pointer text-center text-xs break-all transition-colors"
+                  title="Copy Ethereum address"
+                >
+                  <code>{CRYPTO_ADDRESSES.ETH}</code>
+                </button>
               </div>
 
-              <div className="border-border-card bg-surface-bg rounded-lg border p-4">
+              <div className="border-border-card bg-tertiary-bg rounded-lg border p-4">
                 <div className="text-primary-text mb-2 flex items-center justify-center gap-2">
                   <Icon
                     icon="logos:bitcoin"
@@ -585,38 +618,21 @@ export default function ModernPricingSection() {
                   />
                   <span className="font-semibold">Bitcoin (BTC)</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <code className="text-secondary-text flex-1 text-xs break-all">
-                    {CRYPTO_ADDRESSES.BTC}
-                    <button
-                      onClick={() =>
-                        copyToClipboard(CRYPTO_ADDRESSES.BTC, "BTC")
-                      }
-                      className="text-button-info hover:text-button-info-hover ml-1 cursor-pointer transition-colors"
-                      title={
-                        copiedAddress === "BTC"
-                          ? "Copied!"
-                          : "Copy Bitcoin address"
-                      }
-                    >
-                      <Icon
-                        icon={
-                          copiedAddress === "BTC"
-                            ? "heroicons:check"
-                            : "heroicons:clipboard"
-                        }
-                        className="h-4 w-4"
-                      />
-                    </button>
-                  </code>
-                </div>
+                <button
+                  type="button"
+                  onClick={() => copyToClipboard(CRYPTO_ADDRESSES.BTC, "BTC")}
+                  className="text-secondary-text hover:text-primary-text w-full cursor-pointer text-center text-xs break-all transition-colors"
+                  title="Copy Bitcoin address"
+                >
+                  <code>{CRYPTO_ADDRESSES.BTC}</code>
+                </button>
               </div>
             </div>
           </div>
         </div>
 
         {/* Long-term Sponsor Section */}
-        <div className="border-border-card bg-secondary-bg mt-4 rounded-lg border p-4">
+        <div className="border-border-card bg-secondary-bg mt-12 rounded-lg border p-4">
           <div className="text-center">
             <h3 className="text-primary-text mb-2 text-lg font-semibold">
               Want to become a long-term sponsor?

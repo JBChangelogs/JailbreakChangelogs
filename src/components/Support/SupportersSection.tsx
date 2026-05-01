@@ -87,18 +87,17 @@ export default function SupportersSection({
   const renderSupporterCard = (supporter: Supporter) => (
     <div
       key={supporter.id}
-      className="border-border-card bg-secondary-bg hover:bg-quaternary-bg hover:shadow-card-shadow shrink-0 rounded-xl border p-6 shadow-md transition-all duration-200"
+      className="border-border-card bg-secondary-bg hover:bg-quaternary-bg hover:shadow-card-shadow shrink-0 rounded-xl border p-4 shadow-md transition-all duration-200"
       style={{ width: "280px" }}
     >
-      <div className="flex flex-col items-center space-y-4">
+      <div className="flex flex-col items-center gap-4">
         <UserAvatar
           userId={supporter.id}
           avatarHash={supporter.avatar || null}
           username={supporter.username}
           size={64}
           showBadge={false}
-          shape="square"
-          className="rounded-xl"
+          shape={supporter.premiumtype === 3 ? "square" : "circle"}
           premiumType={supporter.premiumtype}
           settings={{ custom_avatar: false }}
         />
@@ -136,9 +135,9 @@ export default function SupportersSection({
 
     return (
       <div className="mb-12">
-        <div className="mb-6 flex justify-center">
+        <div className="mb-12 flex justify-center">
           <h3
-            className={`inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-2xl font-bold text-black ${gradientClass}`}
+            className={`inline-flex items-center justify-center gap-2 rounded-lg px-6 py-3 text-2xl font-bold text-black ${gradientClass}`}
           >
             {tierName}
           </h3>
@@ -183,10 +182,26 @@ export default function SupportersSection({
   }
 
   return (
-    <div id="supporters-section" className="mt-8 py-8">
-      <h2 className="text-primary-text mb-12 text-center text-3xl font-bold lg:text-4xl">
+    <div id="supporters-section" className="pt-4 pb-8">
+      <h2 className="text-primary-text mb-8 text-center text-3xl font-bold lg:text-4xl">
         Made possible by our{" "}
-        <span className="text-button-info underline">supporters</span>
+        <span className="text-button-info relative inline-block">
+          supporters
+          <svg
+            className="absolute -bottom-1 left-0 hidden w-full sm:block"
+            viewBox="0 0 120 8"
+            preserveAspectRatio="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M0 4 Q 6 1, 12 4 T 24 4 T 36 4 T 48 4 T 60 4 T 72 4 T 84 4 T 96 4 T 108 4 T 120 4"
+              stroke="currentColor"
+              strokeWidth="2"
+              fill="none"
+              strokeLinecap="round"
+            />
+          </svg>
+        </span>
       </h2>
 
       <div className="container mx-auto px-4">
