@@ -524,6 +524,33 @@ export default function SettingsPage() {
       setRevertingSupporterLevel(null);
     }
   };
+  const handleRemoveSupporter = async () => {
+    if (!userData) {
+      return;
+    }
+
+    setRevertingSupporterLevel(0);
+    try {
+      await revertSupporterLevel(0);
+
+      const updatedUser: UserData = {
+        ...userData,
+        premiumtype: 0,
+      };
+      safeSetJSON("user", updatedUser);
+      window.dispatchEvent(
+        new CustomEvent("authStateChanged", { detail: updatedUser }),
+      );
+
+      toast.success("Supporter removed.");
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : "Failed to remove supporter",
+      );
+    } finally {
+      setRevertingSupporterLevel(null);
+    }
+  };
   const openPurchaseGiftModal = () => {
     setPurchaseGiftTab("gift");
     setPurchaseGiftModalOpen(true);
@@ -1237,6 +1264,33 @@ export default function SettingsPage() {
                     </div>
                   );
                 })}
+                {currentSupporterLevel > 0 && (
+                  <div className="bg-tertiary-bg border-border-card rounded-lg border p-4">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <div className="mb-1 flex items-center gap-2">
+                          <p className="text-primary-text text-sm font-semibold">
+                            Free Tier
+                          </p>
+                        </div>
+                        <p className="text-secondary-text text-xs">
+                          Remove your current supporter tier.
+                        </p>
+                      </div>
+                      <CustomButton
+                        type="button"
+                        size="sm"
+                        variant="destructive"
+                        onClick={handleRemoveSupporter}
+                        disabled={revertingSupporterLevel !== null}
+                      >
+                        {revertingSupporterLevel === 0
+                          ? "Removing..."
+                          : "Remove"}
+                      </CustomButton>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           ) : null}
