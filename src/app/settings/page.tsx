@@ -1,8 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { UserData, UserSettingsV2 } from "@/types/auth";
+import Image from "next/image";
+import { useQueryState } from "nuqs";
+import { Dialog, DialogPanel, DialogTitle } from "@headlessui/react";
+import { SupporterGift, UserData, UserSettingsV2 } from "@/types/auth";
 import {
   Tooltip,
   TooltipContent,
@@ -33,11 +36,27 @@ import {
   type NotificationPreferenceEntry,
 } from "@/services/notificationPreferencesService";
 import { EmailNotificationSettings } from "@/components/Settings/EmailNotificationSettings";
+import { giftSupporterGift } from "@/services/settingsService";
+import { searchUsers } from "@/utils/api";
+import { UserAvatar } from "@/utils/avatar";
+
+const BADGE_BASE_URL =
+  "https://assets.jailbreakchangelogs.com/assets/website_icons";
+const supporterIcons: Record<number, string> = {
+  1: `${BADGE_BASE_URL}/jbcl_supporter_1.svg`,
+  2: `${BADGE_BASE_URL}/jbcl_supporter_2.svg`,
+  3: `${BADGE_BASE_URL}/jbcl_supporter_3.svg`,
+};
 
 export default function SettingsPage() {
   const { user, isLoading } = useAuthContext();
   const { modalState, closeModal, openModal } = useSupporterModal();
   const router = useRouter();
+  const [highlightParam, setHighlightParam] = useQueryState("highlight", {
+    defaultValue: "",
+    history: "push",
+    shallow: true,
+  });
   const [showHighlight, setShowHighlight] = useState(false);
   const [highlightSetting, setHighlightSetting] = useState<string | null>(null);
   const [notificationPrefs, setNotificationPrefs] = useState<
@@ -61,37 +80,53 @@ export default function SettingsPage() {
     "border-border-card bg-secondary-bg rounded-xl border shadow-md";
 
   useEffect(() => {
-    // Check for highlight parameter in URL
-    const urlParams = new URLSearchParams(window.location.search);
-    const highlight = urlParams.get("highlight");
+    if (!highlightParam) return;
 
-    if (highlight) {
-      // Use setTimeout to defer state updates
-      const timer = setTimeout(() => {
-        setHighlightSetting(highlight);
-        setShowHighlight(true);
+    const timer = window.setTimeout(() => {
+      setHighlightSetting(highlightParam);
+      setShowHighlight(true);
+    }, 0);
 
-        // Clear highlight after 10 seconds
-        const clearTimer = setTimeout(() => {
-          setShowHighlight(false);
-          setHighlightSetting(null);
-          // Remove the highlight parameter from URL
-          const newUrl = window.location.pathname;
-          window.history.replaceState({}, "", newUrl);
-        }, 10000);
+    const clearTimer = window.setTimeout(() => {
+      setShowHighlight(false);
+      setHighlightSetting(null);
+      void setHighlightParam(null);
+    }, 10000);
 
-        return () => clearTimeout(clearTimer);
-      }, 0);
-
-      return () => clearTimeout(timer);
-    }
-  }, []);
+    return () => {
+      window.clearTimeout(timer);
+      window.clearTimeout(clearTimer);
+    };
+  }, [highlightParam, setHighlightParam]);
 
   const {
     settings,
+    supporterGifts,
+    setSupporterGifts,
     loading: settingsLoading,
     handleSettingChange,
   } = useSettings(userData, openModal);
+  const [giftingIds, setGiftingIds] = useState<Record<string, boolean>>({});
+  const [giftModalOpen, setGiftModalOpen] = useState(false);
+  const [giftModalStep, setGiftModalStep] = useState<"search" | "confirm">(
+    "search",
+  );
+  const [activeGift, setActiveGift] = useState<SupporterGift | null>(null);
+  const [giftSearchQuery, setGiftSearchQuery] = useState("");
+  const [giftSearchResults, setGiftSearchResults] = useState<UserData[]>([]);
+  const [giftSearchLoading, setGiftSearchLoading] = useState(false);
+  const [selectedGiftRecipient, setSelectedGiftRecipient] =
+    useState<UserData | null>(null);
+  const giftSearchTimeoutRef = useRef<number | null>(null);
+  const giftSearchRequestIdRef = useRef(0);
+
+  useEffect(() => {
+    return () => {
+      if (giftSearchTimeoutRef.current) {
+        window.clearTimeout(giftSearchTimeoutRef.current);
+      }
+    };
+  }, []);
 
   useEffect(() => {
     if (!isLoading && !user) {
@@ -250,6 +285,49 @@ export default function SettingsPage() {
     }
   };
 
+  useEffect(() => {
+    const trimmedQuery = giftSearchQuery.trim();
+    if (!giftModalOpen || !activeGift || !trimmedQuery) {
+      giftSearchRequestIdRef.current += 1;
+      setGiftSearchResults([]);
+      setGiftSearchLoading(false);
+      return;
+    }
+
+    const requestId = (giftSearchRequestIdRef.current += 1);
+    setGiftSearchLoading(true);
+
+    if (giftSearchTimeoutRef.current) {
+      window.clearTimeout(giftSearchTimeoutRef.current);
+    }
+
+    giftSearchTimeoutRef.current = window.setTimeout(async () => {
+      try {
+        const resultsRaw = await searchUsers(trimmedQuery, 5);
+        if (giftSearchRequestIdRef.current !== requestId) return;
+
+        const results = Array.isArray(resultsRaw)
+          ? resultsRaw.filter((result) => result?.id !== user?.id)
+          : [];
+        setGiftSearchResults(results);
+      } catch (error) {
+        if (giftSearchRequestIdRef.current !== requestId) return;
+        console.error("Error searching gift recipients:", error);
+        setGiftSearchResults([]);
+      } finally {
+        if (giftSearchRequestIdRef.current === requestId) {
+          setGiftSearchLoading(false);
+        }
+      }
+    }, 300);
+
+    return () => {
+      if (giftSearchTimeoutRef.current) {
+        window.clearTimeout(giftSearchTimeoutRef.current);
+      }
+    };
+  }, [activeGift, giftModalOpen, giftSearchQuery, user?.id]);
+
   if (loading || settingsLoading) {
     return (
       <div className="mx-auto min-h-screen w-full max-w-6xl px-4 py-4 sm:px-6 lg:px-8">
@@ -307,6 +385,102 @@ export default function SettingsPage() {
   );
 
   const isSettingEnabled = (name: string) => settingsMap[name]?.value === true;
+  const sortedSupporterGifts = [...supporterGifts].sort((a, b) => {
+    if (a.level !== b.level) return b.level - a.level;
+    return b.created_at - a.created_at;
+  });
+  const getSupporterGiftTierLabel = (level: number) => {
+    switch (level) {
+      case 1:
+        return "Supporter I";
+      case 2:
+        return "Supporter II";
+      case 3:
+        return "Supporter III";
+      default:
+        return `Supporter ${level}`;
+    }
+  };
+  const closeGiftModal = () => {
+    setGiftModalOpen(false);
+    setGiftModalStep("search");
+    setActiveGift(null);
+    setGiftSearchQuery("");
+    setGiftSearchResults([]);
+    setGiftSearchLoading(false);
+    setSelectedGiftRecipient(null);
+  };
+  const handleGiftModalDismiss = () => {
+    if (giftModalStep === "confirm") {
+      setGiftModalStep("search");
+      return;
+    }
+    closeGiftModal();
+  };
+  const openGiftModalForGift = (gift: SupporterGift) => {
+    setActiveGift(gift);
+    setGiftModalOpen(true);
+    setGiftModalStep("search");
+    setGiftSearchQuery("");
+    setGiftSearchResults([]);
+    setGiftSearchLoading(false);
+    setSelectedGiftRecipient(null);
+  };
+  const handleGiftSubmit = async () => {
+    if (!activeGift || !selectedGiftRecipient?.id) {
+      toast.error("Select a user from search results first.");
+      return;
+    }
+
+    setGiftingIds((prev) => ({ ...prev, [activeGift.share_id]: true }));
+    try {
+      await giftSupporterGift(activeGift.share_id, selectedGiftRecipient.id);
+      setSupporterGifts((prev) =>
+        prev.filter((gift) => gift.share_id !== activeGift.share_id),
+      );
+      toast.success("Gift sent successfully.");
+      closeGiftModal();
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : "Failed to gift purchase",
+      );
+    } finally {
+      setGiftingIds((prev) => ({ ...prev, [activeGift.share_id]: false }));
+    }
+  };
+  const handleRedeemForSelf = async (shareId: string) => {
+    if (!userData?.id) {
+      toast.error("You must be logged in to redeem this gift.");
+      return;
+    }
+
+    setGiftingIds((prev) => ({ ...prev, [shareId]: true }));
+    try {
+      await giftSupporterGift(shareId, userData.id);
+      setSupporterGifts((prev) =>
+        prev.filter((gift) => gift.share_id !== shareId),
+      );
+      if (activeGift?.share_id === shareId) {
+        closeGiftModal();
+      }
+      toast.success("Gift redeemed successfully.");
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : "Failed to redeem gift",
+      );
+    } finally {
+      setGiftingIds((prev) => ({ ...prev, [shareId]: false }));
+    }
+  };
+  const copySectionLink = (sectionId: string, sectionTitle: string) => {
+    const url = new URL(window.location.href);
+    url.searchParams.set("highlight", sectionId);
+    void setHighlightParam(sectionId);
+    navigator.clipboard.writeText(url.toString());
+    toast.success("Link Copied", {
+      description: `The URL for the "${sectionTitle}" section is now on your clipboard.`,
+    });
+  };
 
   return (
     <div className="mx-auto min-h-screen w-full max-w-6xl px-4 py-4 sm:px-6 lg:px-8">
@@ -343,6 +517,11 @@ export default function SettingsPage() {
                 id: "export",
                 title: "Export Data",
                 icon: "heroicons:arrow-down-tray",
+              },
+              {
+                id: "gifts",
+                title: "Purchased Gifts",
+                icon: "heroicons:gift",
               },
               {
                 id: "danger",
@@ -419,14 +598,9 @@ export default function SettingsPage() {
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <button
-                          onClick={() => {
-                            const url = new URL(window.location.href);
-                            url.searchParams.set("highlight", cat.name);
-                            navigator.clipboard.writeText(url.toString());
-                            toast.success("Link Copied", {
-                              description: `The URL for the "${categoryDisplayName}" section is now on your clipboard.`,
-                            });
-                          }}
+                          onClick={() =>
+                            copySectionLink(cat.name, categoryDisplayName)
+                          }
                           className="text-secondary-text hover:text-link cursor-pointer transition-colors"
                           aria-label="Copy category link"
                         >
@@ -635,14 +809,12 @@ export default function SettingsPage() {
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <button
-                      onClick={() => {
-                        const url = new URL(window.location.href);
-                        url.searchParams.set("highlight", "notifications");
-                        navigator.clipboard.writeText(url.toString());
-                        toast.success(
-                          'Link for "Notification Preferences" copied!',
-                        );
-                      }}
+                      onClick={() =>
+                        copySectionLink(
+                          "notifications",
+                          "Notification Preferences",
+                        )
+                      }
                       className="text-secondary-text hover:text-link cursor-pointer transition-colors"
                       aria-label="Copy section link"
                     >
@@ -744,6 +916,27 @@ export default function SettingsPage() {
             <h2 className="text-primary-text mb-2 flex items-center gap-1.5 text-xl font-bold">
               <Icon icon="heroicons:link" className="h-6 w-6" />
               Account Connections
+              {userData?.flags?.some((f) => f.flag === "is_owner") && (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button
+                      onClick={() =>
+                        copySectionLink("connections", "Account Connections")
+                      }
+                      className="text-secondary-text hover:text-link cursor-pointer transition-colors"
+                      aria-label="Copy section link"
+                    >
+                      <Icon icon="heroicons:link" className="h-4 w-4" />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent
+                    side="top"
+                    className="bg-secondary-bg text-primary-text border-none shadow-(--color-card-shadow)"
+                  >
+                    <p>Copy URL</p>
+                  </TooltipContent>
+                </Tooltip>
+              )}
             </h2>
             <div className="border-border-card mb-2 border-t" />
             <RobloxConnection userData={userData} />
@@ -756,9 +949,121 @@ export default function SettingsPage() {
             <h2 className="text-primary-text mb-2 flex items-center gap-1.5 text-xl font-bold">
               <Icon icon="heroicons:arrow-down-tray" className="h-6 w-6" />
               Export Data
+              {userData?.flags?.some((f) => f.flag === "is_owner") && (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button
+                      onClick={() => copySectionLink("export", "Export Data")}
+                      className="text-secondary-text hover:text-link cursor-pointer transition-colors"
+                      aria-label="Copy section link"
+                    >
+                      <Icon icon="heroicons:link" className="h-4 w-4" />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent
+                    side="top"
+                    className="bg-secondary-bg text-primary-text border-none shadow-(--color-card-shadow)"
+                  >
+                    <p>Copy URL</p>
+                  </TooltipContent>
+                </Tooltip>
+              )}
             </h2>
             <div className="border-border-card mb-2 border-t" />
             <ExportInventoryData />
+          </div>
+
+          <div
+            id="gifts"
+            className={`${cardClassName} text-primary-text mb-8 p-6`}
+          >
+            <h2 className="text-primary-text mb-2 flex items-center gap-1.5 text-xl font-bold">
+              <Icon icon="heroicons:gift" className="h-6 w-6" />
+              Purchased Gifts
+              {userData?.flags?.some((f) => f.flag === "is_owner") && (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button
+                      onClick={() =>
+                        copySectionLink("gifts", "Purchased Gifts")
+                      }
+                      className="text-secondary-text hover:text-link cursor-pointer transition-colors"
+                      aria-label="Copy section link"
+                    >
+                      <Icon icon="heroicons:link" className="h-4 w-4" />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent
+                    side="top"
+                    className="bg-secondary-bg text-primary-text border-none shadow-(--color-card-shadow)"
+                  >
+                    <p>Copy URL</p>
+                  </TooltipContent>
+                </Tooltip>
+              )}
+            </h2>
+            <p className="text-secondary-text mb-2 text-sm">
+              Supporter gifts purchased on your account.
+            </p>
+            <div className="border-border-card mb-3 border-t" />
+            {supporterGifts.length === 0 ? (
+              <p className="text-secondary-text text-sm">
+                No gifts purchased yet.
+              </p>
+            ) : (
+              <div className="max-h-[34rem] overflow-y-auto pr-1">
+                <div className="flex flex-col gap-3">
+                  {sortedSupporterGifts.map((gift) => (
+                    <div
+                      key={gift.id}
+                      className="bg-tertiary-bg border-border-card rounded-lg border p-4"
+                    >
+                      <div className="flex flex-col gap-3">
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <p className="text-primary-text text-sm font-semibold">
+                              {getSupporterGiftTierLabel(gift.level)}
+                            </p>
+                            {supporterIcons[gift.level] && (
+                              <Image
+                                src={supporterIcons[gift.level]}
+                                alt={getSupporterGiftTierLabel(gift.level)}
+                                width={18}
+                                height={18}
+                                className="object-contain"
+                              />
+                            )}
+                          </div>
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                          <CustomButton
+                            type="button"
+                            size="sm"
+                            variant="secondary"
+                            onClick={() => handleRedeemForSelf(gift.share_id)}
+                            disabled={!!giftingIds[gift.share_id]}
+                          >
+                            {giftingIds[gift.share_id]
+                              ? "Processing..."
+                              : "Self Redeem"}
+                          </CustomButton>
+                          <CustomButton
+                            type="button"
+                            size="sm"
+                            onClick={() => openGiftModalForGift(gift)}
+                            disabled={!!giftingIds[gift.share_id]}
+                          >
+                            {giftingIds[gift.share_id]
+                              ? "Processing..."
+                              : "Gift to User"}
+                          </CustomButton>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
           <div
@@ -773,6 +1078,25 @@ export default function SettingsPage() {
                 style={{ color: "var(--color-button-danger)" }}
               />
               Danger Zone
+              {userData?.flags?.some((f) => f.flag === "is_owner") && (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button
+                      onClick={() => copySectionLink("danger", "Danger Zone")}
+                      className="text-secondary-text hover:text-link cursor-pointer transition-colors"
+                      aria-label="Copy section link"
+                    >
+                      <Icon icon="heroicons:link" className="h-4 w-4" />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent
+                    side="top"
+                    className="bg-secondary-bg text-primary-text border-none shadow-(--color-card-shadow)"
+                  >
+                    <p>Copy URL</p>
+                  </TooltipContent>
+                </Tooltip>
+              )}
             </h2>
             <div
               className="mb-2 border-t"
@@ -794,6 +1118,229 @@ export default function SettingsPage() {
             currentLimit={modalState.currentLimit}
             requiredLimit={modalState.requiredLimit}
           />
+          <Dialog
+            open={giftModalOpen}
+            onClose={() => {}}
+            className="relative z-3000"
+          >
+            <div
+              className="fixed inset-0 bg-black/50 backdrop-blur-sm"
+              aria-hidden="true"
+            />
+            <div className="fixed inset-0 flex items-center justify-center p-4">
+              <DialogPanel className="border-border-card bg-secondary-bg hover:border-border-focus relative w-full max-w-md rounded-lg border shadow-xl">
+                <div className="border-border-card flex items-center justify-between border-b p-4">
+                  <div className="flex items-center gap-3">
+                    <div className="bg-button-info rounded-lg p-2">
+                      <Icon
+                        icon="heroicons:gift"
+                        className="text-form-button-text h-6 w-6"
+                      />
+                    </div>
+                    <div>
+                      <DialogTitle className="text-primary-text text-xl font-semibold">
+                        {giftModalStep === "search"
+                          ? "Gift to User"
+                          : "Confirm Gift"}
+                      </DialogTitle>
+                      <p className="text-secondary-text text-sm">
+                        {giftModalStep === "search"
+                          ? "Choose who should receive this gift."
+                          : "Review the recipient before sending."}
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleGiftModalDismiss}
+                    aria-label="Close"
+                    className="text-secondary-text hover:text-primary-text hover:bg-quaternary-bg focus-visible:ring-ring inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-md transition-colors focus-visible:ring-1 focus-visible:outline-none"
+                  >
+                    <Icon icon="heroicons:x-mark" className="h-5 w-5" />
+                  </button>
+                </div>
+
+                <div className="max-h-[calc(100vh-200px)] overflow-y-auto p-6">
+                  {giftModalStep === "search" ? (
+                    <div className="flex flex-col gap-4">
+                      {activeGift ? (
+                        <div className="bg-tertiary-bg border-border-card flex items-center gap-3 rounded-lg border p-4">
+                          {supporterIcons[activeGift.level] && (
+                            <Image
+                              src={supporterIcons[activeGift.level]}
+                              alt={getSupporterGiftTierLabel(activeGift.level)}
+                              width={24}
+                              height={24}
+                              className="object-contain"
+                            />
+                          )}
+                          <div>
+                            <p className="text-primary-text text-sm font-semibold">
+                              {getSupporterGiftTierLabel(activeGift.level)}
+                            </p>
+                          </div>
+                        </div>
+                      ) : null}
+
+                      <div className="relative">
+                        <Icon
+                          icon="heroicons:magnifying-glass"
+                          className="text-secondary-text pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2"
+                        />
+                        <input
+                          type="text"
+                          value={giftSearchQuery}
+                          onChange={(event) => {
+                            setGiftSearchQuery(event.target.value);
+                            setSelectedGiftRecipient(null);
+                          }}
+                          placeholder="Search user to gift..."
+                          className="border-border-card bg-tertiary-bg text-primary-text placeholder:text-secondary-text focus:border-button-info h-10 w-full rounded-lg border py-2 pr-3 pl-9 text-sm outline-none"
+                          autoComplete="off"
+                          spellCheck={false}
+                        />
+                      </div>
+
+                      {giftSearchQuery.trim() ? (
+                        giftSearchLoading ? (
+                          <div className="flex items-center justify-center gap-2 py-2">
+                            <Icon
+                              icon="lucide:loader-2"
+                              className="text-secondary-text h-4 w-4 animate-spin"
+                            />
+                            <span className="text-secondary-text text-sm">
+                              Searching users...
+                            </span>
+                          </div>
+                        ) : giftSearchResults.length > 0 ? (
+                          <div className="border-border-card bg-tertiary-bg overflow-hidden rounded-lg border">
+                            {giftSearchResults.map((result) => (
+                              <button
+                                key={result.id}
+                                type="button"
+                                onClick={() => {
+                                  setSelectedGiftRecipient(result);
+                                  setGiftModalStep("confirm");
+                                }}
+                                className="border-border-card hover:bg-quaternary-bg flex w-full cursor-pointer items-center gap-3 border-b px-4 py-3 text-left transition-colors last:border-b-0"
+                              >
+                                <UserAvatar
+                                  userId={result.id}
+                                  avatarHash={result.avatar}
+                                  username={result.username}
+                                  custom_avatar={result.custom_avatar}
+                                  size={8}
+                                  showBadge={false}
+                                  settings={result.settings_v2}
+                                  premiumType={result.premiumtype}
+                                />
+                                <div className="min-w-0 flex-1">
+                                  <p className="text-primary-text truncate text-sm font-medium">
+                                    {result.global_name &&
+                                    result.global_name !== "None"
+                                      ? result.global_name
+                                      : result.username}
+                                  </p>
+                                  <p className="text-secondary-text truncate text-xs">
+                                    @{result.username}
+                                  </p>
+                                </div>
+                              </button>
+                            ))}
+                          </div>
+                        ) : (
+                          <p className="text-secondary-text text-sm">
+                            No users found.
+                          </p>
+                        )
+                      ) : (
+                        <p className="text-secondary-text text-sm">
+                          Search for a user to open the gift confirmation.
+                        </p>
+                      )}
+                    </div>
+                  ) : activeGift && selectedGiftRecipient ? (
+                    <div className="flex flex-col gap-4">
+                      <div className="bg-tertiary-bg border-border-card flex items-center gap-3 rounded-lg border p-4">
+                        <UserAvatar
+                          userId={selectedGiftRecipient.id}
+                          avatarHash={selectedGiftRecipient.avatar}
+                          username={selectedGiftRecipient.username}
+                          custom_avatar={selectedGiftRecipient.custom_avatar}
+                          size={10}
+                          showBadge={false}
+                          settings={selectedGiftRecipient.settings_v2}
+                          premiumType={selectedGiftRecipient.premiumtype}
+                        />
+                        <div className="min-w-0 flex-1">
+                          <div className="mb-2 flex items-center gap-2">
+                            {supporterIcons[activeGift.level] && (
+                              <Image
+                                src={supporterIcons[activeGift.level]}
+                                alt={getSupporterGiftTierLabel(
+                                  activeGift.level,
+                                )}
+                                width={20}
+                                height={20}
+                                className="object-contain"
+                              />
+                            )}
+                            <p className="text-primary-text text-sm font-semibold">
+                              {getSupporterGiftTierLabel(activeGift.level)}
+                            </p>
+                          </div>
+                          <p className="text-primary-text truncate text-base font-semibold">
+                            {selectedGiftRecipient.global_name &&
+                            selectedGiftRecipient.global_name !== "None"
+                              ? selectedGiftRecipient.global_name
+                              : selectedGiftRecipient.username}
+                          </p>
+                          <p className="text-secondary-text truncate text-sm">
+                            @{selectedGiftRecipient.username}
+                          </p>
+                          <p className="text-primary-text mt-2 text-sm">
+                            You&apos;re about to gift{" "}
+                            <span className="font-semibold">
+                              {getSupporterGiftTierLabel(activeGift.level)}
+                            </span>{" "}
+                            to this user.
+                          </p>
+                          <p className="text-secondary-text mt-1 text-sm">
+                            Confirm to send the gift.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  ) : null}
+                </div>
+
+                <div className="border-border-card flex justify-end gap-2 border-t px-6 py-4">
+                  <CustomButton
+                    type="button"
+                    variant="secondary"
+                    onClick={handleGiftModalDismiss}
+                  >
+                    Cancel
+                  </CustomButton>
+                  {giftModalStep === "confirm" ? (
+                    <CustomButton
+                      type="button"
+                      onClick={handleGiftSubmit}
+                      disabled={
+                        !activeGift ||
+                        !selectedGiftRecipient?.id ||
+                        !!(activeGift && giftingIds[activeGift.share_id])
+                      }
+                    >
+                      {activeGift && giftingIds[activeGift.share_id]
+                        ? "Processing..."
+                        : "Confirm Gift"}
+                    </CustomButton>
+                  ) : null}
+                </div>
+              </DialogPanel>
+            </div>
+          </Dialog>
         </div>
       </div>
       <style jsx>{`

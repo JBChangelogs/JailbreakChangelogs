@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
-import { UserData, ApiSettingsResponse } from "@/types/auth";
+import { UserData, ApiSettingsResponse, SupporterGift } from "@/types/auth";
 import {
   fetchUserSettings,
+  fetchSupporterGifts,
   updateUserSettings,
 } from "@/services/settingsService";
 import { toast } from "sonner";
@@ -19,6 +20,7 @@ export const useSettings = (
   }) => void,
 ) => {
   const [settings, setSettings] = useState<ApiSettingsResponse | null>(null);
+  const [supporterGifts, setSupporterGifts] = useState<SupporterGift[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -27,12 +29,26 @@ export const useSettings = (
     let mounted = true;
     setLoading(true);
 
-    fetchUserSettings()
-      .then((data) => {
-        if (mounted) setSettings(data);
+    Promise.allSettled([fetchUserSettings(), fetchSupporterGifts()])
+      .then(([settingsResult, giftsResult]) => {
+        if (!mounted) return;
+
+        if (settingsResult.status === "fulfilled") {
+          setSettings(settingsResult.value);
+        } else {
+          setSettings({});
+        }
+
+        if (giftsResult.status === "fulfilled") {
+          setSupporterGifts(giftsResult.value);
+        } else {
+          setSupporterGifts([]);
+        }
       })
       .catch(() => {
-        if (mounted) setSettings({});
+        if (!mounted) return;
+        setSettings({});
+        setSupporterGifts([]);
       })
       .finally(() => {
         if (mounted) setLoading(false);
@@ -118,5 +134,11 @@ export const useSettings = (
     }
   };
 
-  return { settings, loading, handleSettingChange };
+  return {
+    settings,
+    supporterGifts,
+    setSupporterGifts,
+    loading,
+    handleSettingChange,
+  };
 };

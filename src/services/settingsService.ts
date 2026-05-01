@@ -1,4 +1,4 @@
-import { ApiSettingsResponse } from "@/types/auth";
+import { ApiSettingsResponse, SupporterGift } from "@/types/auth";
 import { buildApiUrlWithDevToken } from "@/utils/apiDevToken";
 import { PUBLIC_API_URL } from "@/utils/api";
 
@@ -13,6 +13,47 @@ export const fetchUserSettings = async (): Promise<ApiSettingsResponse> => {
     throw new Error("Failed to fetch settings");
   }
   return resp.json();
+};
+
+export const fetchSupporterGifts = async (): Promise<SupporterGift[]> => {
+  const url = buildApiUrlWithDevToken(PUBLIC_API_URL!, "/supporter/gifts");
+  const resp = await fetch(url, {
+    method: "GET",
+    credentials: "include",
+    cache: "no-store",
+  });
+  if (!resp.ok) {
+    throw new Error("Failed to fetch supporter gifts");
+  }
+  return resp.json();
+};
+
+export const giftSupporterGift = async (
+  shareId: string,
+  userId: string,
+): Promise<unknown> => {
+  const url = buildApiUrlWithDevToken(
+    PUBLIC_API_URL!,
+    `/supporter/gifts/${shareId}`,
+  );
+  const resp = await fetch(url, {
+    method: "POST",
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ user_id: userId }),
+    cache: "no-store",
+  });
+
+  if (!resp.ok) {
+    const data = await resp.json().catch(() => ({}));
+    throw new Error(
+      (data as { message?: string; error?: string }).message ||
+        (data as { message?: string; error?: string }).error ||
+        "Failed to gift supporter purchase",
+    );
+  }
+
+  return resp.json().catch(() => ({}));
 };
 
 export const updateBanner = async (url: string): Promise<string> => {

@@ -25,6 +25,16 @@ export interface ApiSettingCategory {
 
 export type ApiSettingsResponse = Record<string, ApiSettingCategory>;
 
+export interface SupporterGift {
+  id: number;
+  share_id: string;
+  user: string;
+  level: number;
+  purchase_id: string;
+  sku_id: string;
+  created_at: number;
+}
+
 export interface UserSettingsV2 {
   profile_public: boolean;
   show_recent_comments: boolean;
