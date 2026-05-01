@@ -1289,6 +1289,7 @@ export const NavbarModern = ({
                       animate={{ opacity: 1, scale: 1, y: 0 }}
                       exit={{ opacity: 0, scale: 0.92, y: 8 }}
                       transition={menuTransition}
+                      onClick={() => setUserMenuOpen(false)}
                     >
                       {/* User info */}
                       <Link

@@ -5,7 +5,7 @@ import { Icon } from "@/components/ui/IconWrapper";
 import { Pagination } from "@/components/ui/Pagination";
 import Link from "next/link";
 import Form from "next/form";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useQueryStates, parseAsInteger, parseAsString } from "nuqs";
 import { UserData } from "@/types/auth";
 import DiscordUserCard from "@/components/Users/DiscordUserCard";
 import {
@@ -51,11 +51,14 @@ function InlineSpinner() {
 
 export default function UserSearch() {
   const { user } = useAuthContext();
-  const searchParams = useSearchParams();
-  const router = useRouter();
-  const queryFromUrl = searchParams.get("query") || "";
-  const pageFromUrl = parseInt(searchParams.get("page") || "1");
-  const seedFromUrl = searchParams.get("seed");
+  const [
+    { query: queryFromUrl, page: pageFromUrl, seed: seedFromUrl },
+    setParams,
+  ] = useQueryStates({
+    query: parseAsString.withDefault(""),
+    page: parseAsInteger.withDefault(1),
+    seed: parseAsString,
+  });
 
   const [searchQuery, setSearchQuery] = useState(queryFromUrl);
   const [users, setUsers] = useState<UserData[]>([]);
@@ -156,10 +159,7 @@ export default function UserSearch() {
           if (pageNum === 1 && nextSeed) {
             setPaginationSeed(nextSeed);
             if (!seedFromUrl) {
-              const params = new URLSearchParams();
-              params.set("seed", nextSeed);
-              const queryString = params.toString();
-              router.replace(queryString ? `/users?${queryString}` : "/users");
+              void setParams({ seed: nextSeed }, { history: "replace" });
             }
           }
         } catch (error) {
@@ -176,7 +176,7 @@ export default function UserSearch() {
         }
       }, 300);
     },
-    [startNewRequest, usersPerPage, seedFromUrl, paginationSeed, router],
+    [startNewRequest, usersPerPage, seedFromUrl, paginationSeed, setParams],
   );
 
   // Initial fetch on mount
@@ -209,8 +209,6 @@ export default function UserSearch() {
     queryFromUrl,
   ]);
 
-  // Form submission is handled by Next.js Form component via URL navigation
-
   const handleClearSearch = () => {
     cancelPendingFetch();
     setSearchQuery("");
@@ -218,26 +216,19 @@ export default function UserSearch() {
     setTotalPages(0);
     setTotal(0);
     setIsLoading(true);
-    router.push("/users");
+    void setParams({ query: null, page: null, seed: null });
   };
 
   const handlePageChange = (
-    event: React.ChangeEvent<unknown>,
+    _event: React.ChangeEvent<unknown>,
     value: number,
   ) => {
-    const params = new URLSearchParams();
-    if (queryFromUrl) {
-      params.set("query", queryFromUrl);
-    }
-    if (!queryFromUrl && paginationSeed) {
-      params.set("seed", paginationSeed);
-    }
-    if (value > 1) {
-      params.set("page", value.toString());
-    }
-    const queryString = params.toString();
-    router.push(queryString ? `/users?${queryString}` : "/users");
+    void setParams({
+      page: value > 1 ? value : null,
+      ...(queryFromUrl ? {} : { seed: paginationSeed }),
+    });
   };
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setSearchQuery(value);
@@ -247,7 +238,7 @@ export default function UserSearch() {
       setTotalPages(0);
       setTotal(0);
       setIsLoading(true);
-      router.push("/users");
+      void setParams({ query: null, page: null, seed: null });
     }
   };
 

@@ -1393,7 +1393,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
               /* Collapsed trigger */
               <button
                 type="button"
-                className="border-border-card bg-form-input text-secondary-text hover:border-button-info w-full cursor-text rounded-lg border px-4 py-3 text-left text-sm transition-colors"
+                className="border-border-card bg-tertiary-bg text-secondary-text hover:border-button-info w-full cursor-text rounded-lg border px-4 py-3 text-left text-sm transition-colors"
                 onClick={() => {
                   if (!isLoggedIn) {
                     setLoginModal({ open: true });
@@ -1408,7 +1408,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
               </button>
             ) : (
               /* Expanded state */
-              <div className="border-border-card bg-form-input focus-within:border-button-info overflow-hidden rounded-lg border transition-colors">
+              <div className="border-border-card bg-tertiary-bg focus-within:border-button-info overflow-hidden rounded-lg border transition-colors">
                 <textarea
                   id="new-comment-textarea"
                   value={newComment}
@@ -2038,7 +2038,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                           {/* Content Section */}
                           <div className="pb-2">
                             {editingCommentId === comment.id ? (
-                              <div className="border-border-card bg-form-input focus-within:border-button-info -ml-12 overflow-hidden rounded-lg border transition-colors sm:-ml-[3.25rem] lg:ml-0">
+                              <div className="border-border-card bg-tertiary-bg focus-within:border-button-info -ml-12 overflow-hidden rounded-lg border transition-colors sm:-ml-[3.25rem] lg:ml-0">
                                 <textarea
                                   value={editContent}
                                   onChange={(e) =>
@@ -2227,7 +2227,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
 
                           {/* Inline Reply Form */}
                           {isLoggedIn && replyingToId === comment.id && (
-                            <div className="border-border-card bg-form-input focus-within:border-button-info mt-3 -ml-12 overflow-hidden rounded-lg border transition-colors sm:-ml-[3.25rem] lg:ml-0">
+                            <div className="border-border-card bg-tertiary-bg focus-within:border-button-info mt-3 -ml-12 overflow-hidden rounded-lg border transition-colors sm:-ml-[3.25rem] lg:ml-0">
                               <textarea
                                 value={replyContent}
                                 onChange={(e) =>

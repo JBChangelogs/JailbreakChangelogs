@@ -32,6 +32,7 @@ import { formatShortDate, formatCustomDate } from "@/utils/timestamp";
 import { useOptimizedRealTimeRelativeDate } from "@/hooks/useSharedTimer";
 import ProfileTabs from "@/components/Profile/ProfileTabs";
 import { useAuthContext } from "@/contexts/AuthContext";
+import { useTheme } from "@/contexts/ThemeContext";
 import { DiscordIcon } from "@/components/Icons/DiscordIcon";
 import { RobloxIcon } from "@/components/Icons/RobloxIcon";
 import type { TradeAd } from "@/types/trading";
@@ -248,6 +249,36 @@ interface UserProfileClientProps {
   additionalDataError?: string;
 }
 
+function accentToPageBg(hex: string, mode: "light" | "dark"): string {
+  if (!hex || hex.length < 6) return mode === "light" ? "#c4b5fd" : "#1a1530";
+  const r = parseInt(hex.slice(0, 2), 16) / 255;
+  const g = parseInt(hex.slice(2, 4), 16) / 255;
+  const b = parseInt(hex.slice(4, 6), 16) / 255;
+  const max = Math.max(r, g, b);
+  const min = Math.min(r, g, b);
+  const l = (max + min) / 2;
+  const d = max - min;
+  const s = d === 0 ? 0 : d / (1 - Math.abs(2 * l - 1));
+  let h = 0;
+  if (d !== 0) {
+    switch (max) {
+      case r:
+        h = ((g - b) / d) % 6;
+        break;
+      case g:
+        h = (b - r) / d + 2;
+        break;
+      case b:
+        h = (r - g) / d + 4;
+        break;
+    }
+    h = Math.round(h * 60);
+    if (h < 0) h += 360;
+  }
+  const sat = Math.round(Math.min(s * 100, 60));
+  return mode === "light" ? `hsl(${h}, ${sat}%, 88%)` : `hsl(${h}, 30%, 11%)`;
+}
+
 export default function UserProfileClient({
   userId,
   initialData,
@@ -256,6 +287,7 @@ export default function UserProfileClient({
   additionalDataError,
 }: UserProfileClientProps) {
   const router = useRouter();
+  const { resolvedTheme } = useTheme();
   const { user: currentUser, isLoading: authLoading } = useAuthContext();
   const [user, setUser] = useState<User | null>(initialData?.user || null);
   const [loading] = useState(!initialData && !error);
@@ -484,6 +516,24 @@ export default function UserProfileClient({
       isCancelled = true;
     };
   }, [currentUserId, isAuthenticatedUser, isBlockedByMe, user]);
+
+  const isOwner =
+    user?.flags?.some((f) => f.flag === "is_owner" && f.enabled !== false) ??
+    false;
+
+  useEffect(() => {
+    if (isOwner && user?.accent_color) {
+      document.body.style.backgroundColor = accentToPageBg(
+        user.accent_color,
+        resolvedTheme,
+      );
+    } else {
+      document.body.style.backgroundColor = "";
+    }
+    return () => {
+      document.body.style.backgroundColor = "";
+    };
+  }, [isOwner, resolvedTheme, user?.accent_color]);
 
   const handleBlockToggle = async () => {
     if (
@@ -1013,7 +1063,7 @@ export default function UserProfileClient({
                                 href={`https://discord.com/users/${user.id}`}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="text-primary-text bg-tertiary-bg/40 border-border-card hover:bg-quaternary-bg/60 inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium shadow-sm transition-all"
+                                className="text-primary-text bg-tertiary-bg border-border-card hover:bg-quaternary-bg/60 inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium shadow-sm transition-all"
                               >
                                 <DiscordIcon className="h-3.5 w-3.5" />
                                 Discord
@@ -1031,7 +1081,7 @@ export default function UserProfileClient({
                                   href={`https://www.roblox.com/users/${user.roblox_id}/profile`}
                                   target="_blank"
                                   rel="noopener noreferrer"
-                                  className="text-primary-text bg-tertiary-bg/40 border-border-card hover:bg-quaternary-bg/60 inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium shadow-sm transition-all"
+                                  className="text-primary-text bg-tertiary-bg border-border-card hover:bg-quaternary-bg/60 inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium shadow-sm transition-all"
                                 >
                                   <RobloxIcon className="h-3.5 w-3.5" />
                                   Roblox
