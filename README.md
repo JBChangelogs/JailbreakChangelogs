@@ -48,4 +48,4 @@ Contributions are always welcome! See [CONTRIBUTING.md](./CONTRIBUTING.md) for w
 - [Jalenzz16](https://github.com/Jalenzzz) — Co-founder & Lead Front-end Developer
 - [Jakobiis](https://github.com/Jakobiis/) — Co-founder, Lead Back-end Developer & API Architect
 - [linsonder6](https://github.com/linsonder6/) — Bot Scanning Developer
-- sencha — Bot Scanning Developer
+- [sencha](https://github.com/senchatf/) — Bot Scanning Developer
