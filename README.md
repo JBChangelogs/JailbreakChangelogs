@@ -1,113 +1,51 @@
-[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/jailbreakchangelogs)
-[![License](https://img.shields.io/badge/License-PolyForm%20NC%201.0.0-blue.svg)](./LICENSE)
-[![Discord](https://img.shields.io/discord/1286064050135896064?logo=discord&logoColor=white&label=discord&color=4d3dff)](https://discord.jailbreakchangelogs.com)
-[![Uptime Kuma Badge](https://uptime.jailbreakchangelogs.com/api/badge/8/status)](https://status.jailbreakchangelogs.com)
+<p align="center">
+  <img src="https://assets.jailbreakchangelogs.com/assets/logos/JBCL_Long_Transparent.png" alt="Jailbreak Changelogs" width="520">
+</p>
 
-[![Dependabot Updates](https://github.com/JBChangelogs/JailbreakChangelogs/actions/workflows/dependabot/dependabot-updates/badge.svg?branch=main)](https://github.com/JBChangelogs/JailbreakChangelogs/actions/workflows/dependabot/dependabot-updates)
-[![CodeQL](https://github.com/JBChangelogs/JailbreakChangelogs/actions/workflows/github-code-scanning/codeql/badge.svg?branch=main)](https://github.com/JBChangelogs/JailbreakChangelogs/actions/workflows/github-code-scanning/codeql)
-[![Type Check](https://github.com/JBChangelogs/JailbreakChangelogs/actions/workflows/type-check.yml/badge.svg?branch=main)](https://github.com/JBChangelogs/JailbreakChangelogs/actions/workflows/type-check.yml)
-[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/JBChangelogs/JailbreakChangelogs)
+<p align="center">
+  Your all-in-one Roblox Jailbreak platform for changelogs and game update tracking, values, trading, inventory lookups, OG item tracking, dupe detection, and more.
+</p>
 
-> [!CAUTION]
-> The only websites associated with this repository are the [main website](https://jailbreakchangelogs.com/) and the [testing website](https://testing.jailbreakchangelogs.com). We have no other affiliated websites or domains. Any other websites or platforms claiming to represent or provide content for this repo are not controlled by us.
+<p align="center">
+  <a href="https://jailbreakchangelogs.com"><strong>Website</strong></a> •
+  <a href="https://jailbreakchangelogs.com/faq">FAQ</a>
+</p>
 
-> [!NOTE]
-> This is a fan-made project operated by Jailbreak Changelogs LLC and is not affiliated with or endorsed by Badimo - the development team behind Roblox Jailbreak.
-
-![Logo](https://assets.jailbreakchangelogs.com/assets/logos/JBCL_Long_Game_Background.png)
-
-## big numbers = jbcl happy
-
-Leave us a ⭐ if you like the Jailbreak Changelogs project.
-
-[![Stargazers over time](https://starchart.cc/JBChangelogs/JailbreakChangelogs.svg?background=%23121317&axis=%23fffffe&line=%23017ffe)](https://starchart.cc/JBChangelogs/JailbreakChangelogs)
-
-# Jailbreak Changelogs
-
-Welcome to Jailbreak Changelogs - the ultimate hub for Roblox Jailbreak players. From tracking changelogs and seasonal progress to advanced trading tools and community features, we provide everything you need to enhance your Jailbreak experience in one comprehensive platform.
-
-## Website Features
-
-Our platform offers comprehensive Roblox Jailbreak related features:
-
-### Core Content
-
-- **Changelog Archive:** Access the complete history of Jailbreak updates, with detailed patch notes dating back to 2017.
-- **Season Tracking:** Stay updated on seasonal changes and rewards, with a comprehensive archive of all season prizes since December 2020.
-- **Season Contracts:** View current weekly contracts and their requirements for both Criminal and Police teams.
-- **XP Calculator:** Calculate if you'll make it to your target level with our "Will I Make It?" progress calculator.
-
-### Trading & Values
-
-- **Values Database:** View values for all tradable items in Roblox Jailbreak with historical price tracking.
-- **Values Calculator:** Calculate item values and trading worth with our comprehensive calculator.
-- **Trading System:** Post trade advertisements, browse listings, and find the perfect deals for in-game items.
-- **Trade Analytics:** Access official trading statistics from Badimo, including circulation numbers and trade frequency.
-
-### Player Tools
-
-- **Inventory Checker:** Check player inventories and item ownership with detailed item listings.
-- **OG Finder:** Find original owners of rare items and track item provenance.
-- **Dupe Detection:** Report and detect duplicated items to maintain trading integrity.
-- **Money Leaderboard:** View top players ranked by their total in-game money.
-
-### Community Features
-
-- **Private Servers:** Browse and submit private servers for grinding, hanging out, trading, and more.
-- **User Profiles:** Create customizable profiles with avatars, banners, and community engagement.
-- **Community Engagement:** Join discussions by commenting on changelogs, seasons, trades and more with secure OAuth authentication.
-
-### Discord Bot
-
-- **Inventory Commands:** Check player inventories directly from Discord with `/inventory` commands.
-- **OG Finder:** Find original owners of rare items using `/og` commands in Discord.
-- **Dupe Detection:** Report and check for duplicated items with `/dupe` commands.
-- **Season Tracking:** View latest season content and rewards without leaving Discord.
-- **Changelog Updates:** Get instant notifications about new updates and changes.
-- **Item Tracking:** Use `/item` and `/items` commands to view detailed item information.
-- **Trade Notifications:** Receive DMs when users want to trade with you from our platform.
-
-### Development
-
-- **Open Source:** Contribute to the project's development through our GitHub repository, making the platform better for everyone.
-
-## Acknowledgements
-
-- [Jalenzz16](https://github.com/Jalenzzz) - Co-founder & Lead Front-end Developer
-- [Jakobiis](https://github.com/Jakobiis/) - Co-founder, Lead Back-end Developer & API Architect
-- [linsonder6](https://github.com/linsonder6/) - Bot Scanning Developer
-- [sencha](#) - Bot Scanning Developer
-
-**Jailbreak Changelogs LLC** - The legal entity operating this platform
-
-## Contributing
-
-Contributions are always welcome!
-
-See [CONTRIBUTING.md](./CONTRIBUTING.md) for ways to get started.
-
-## FAQ
-
-Visit https://jailbreakchangelogs.com/faq
-
-## Stay Connected
-
-- Follow the devs and official game account on Twitter/X for real-time update notifications:
-  - [@asimo3089](https://x.com/asimo3089)
-  - [@badcc](https://x.com/badccvoid)
-  - [@badimo](https://x.com/badimo) (Official Jailbreak account)
-
-- Join our [Discord community](https://discord.jailbreakchangelogs.com/) to discuss changes and connect with other players or make feature requests.
-- For support, reach out to [support@jailbreakchangelogs.com](mailto:support@jailbreakchangelogs.com)
-
-## License
-
-This project is licensed under the PolyForm Noncommercial License 1.0.0.
-
-This is a noncommercial license: commercial use is not permitted without separate permission.
-
-For details, see the [LICENSE](./LICENSE) file in this repository.
+<p align="center">
+  <a href="./LICENSE"><img alt="License" src="https://img.shields.io/badge/License-PolyForm%20NC%201.0.0-blue.svg"></a>
+  <a href="https://discord.jailbreakchangelogs.com"><img alt="Discord" src="https://img.shields.io/discord/1286064050135896064?logo=discord&logoColor=white&label=Discord&color=4d3dff"></a>
+  <a href="https://status.jailbreakchangelogs.com"><img alt="Status" src="https://uptime.jailbreakchangelogs.com/api/badge/2/status"></a>
+  <a href="https://github.com/JBChangelogs/JailbreakChangelogs/actions/workflows/type-check.yml"><img alt="Type Check" src="https://github.com/JBChangelogs/JailbreakChangelogs/actions/workflows/type-check.yml/badge.svg?branch=main"></a>
+  <a href="https://deepwiki.com/JBChangelogs/JailbreakChangelogs"><img alt="Ask DeepWiki" src="https://deepwiki.com/badge.svg"></a>
+</p>
 
 ---
 
-We hope this project enhances your Roblox Jailbreak experience <
+> [!NOTE]
+> This is a fan-made project operated by Jailbreak Changelogs LLC and is not affiliated with or endorsed by Badimo — the development team behind Roblox Jailbreak.
+
+> [!CAUTION]
+> The only websites associated with this repository are [jailbreakchangelogs.com](https://jailbreakchangelogs.com) and [testing.jailbreakchangelogs.com](https://testing.jailbreakchangelogs.com). Any other websites claiming to represent this project are not controlled by us.
+
+---
+
+## Support the Project
+
+Leave us a ⭐ if you like the project, and consider [supporting us on Ko-fi](https://ko-fi.com/jailbreakchangelogs).
+
+[![Stargazers over time](https://starchart.cc/JBChangelogs/JailbreakChangelogs.svg?background=%23121317&axis=%23fffffe&line=%23017ffe)](https://starchart.cc/JBChangelogs/JailbreakChangelogs)
+
+---
+
+## Contributing
+
+Contributions are always welcome! See [CONTRIBUTING.md](./CONTRIBUTING.md) for ways to get started.
+
+---
+
+## Acknowledgements
+
+- [Jalenzz16](https://github.com/Jalenzzz) — Co-founder & Lead Front-end Developer
+- [Jakobiis](https://github.com/Jakobiis/) — Co-founder, Lead Back-end Developer & API Architect
+- [linsonder6](https://github.com/linsonder6/) — Bot Scanning Developer
+- sencha — Bot Scanning Developer
