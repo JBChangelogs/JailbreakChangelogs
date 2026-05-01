@@ -9,6 +9,7 @@ import { useTheme } from "@/contexts/ThemeContext";
 export interface LoginModalController {
   tabValue: number;
   joinDiscord: boolean;
+  hasJbclToken: boolean;
   resolvedTheme: string | undefined;
   showLoginModal: boolean;
   setJoinDiscord: (checked: boolean) => void;
@@ -22,9 +23,16 @@ export function useLoginModalController(): LoginModalController {
   const [joinDiscord, setJoinDiscord] = useState(false);
   const { showLoginModal, loginModalTab, setLoginModal } = useAuthContext();
   const { resolvedTheme } = useTheme();
-  const tabValue = loginModalTab === "roblox" ? 1 : 0;
+  const hasJbclToken =
+    typeof document !== "undefined" &&
+    /(?:^|;\s*)jbcl_token=([^;]+)/.test(document.cookie);
+  const tabValue = hasJbclToken && loginModalTab === "roblox" ? 1 : 0;
 
   const handleTabChange = (_event: SyntheticEvent, newValue: number) => {
+    if (!hasJbclToken) {
+      return;
+    }
+
     setLoginModal({
       open: showLoginModal,
       tab: newValue === 1 ? "roblox" : "discord",
@@ -76,6 +84,7 @@ export function useLoginModalController(): LoginModalController {
   return {
     tabValue,
     joinDiscord,
+    hasJbclToken,
     resolvedTheme,
     showLoginModal,
     setJoinDiscord,
