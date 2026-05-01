@@ -484,7 +484,7 @@ export default function SettingsPage() {
     entry: SupporterHistoryEntry,
     index: number,
   ) => `${entry.level}-${entry.created_at}-${index}`;
-  const handleSupporterLevelRevert = async (level: number) => {
+  const handleSupporterLevelUpdate = async (level: number) => {
     if (!userData) {
       return;
     }
@@ -533,6 +533,7 @@ export default function SettingsPage() {
   const sortedPurchaseLevels = [...purchaseGiftLevels].sort(
     (a, b) => a.level - b.level,
   );
+  const currentSupporterLevel = userData.premiumtype ?? 0;
   const selfPurchaseLevels = sortedPurchaseLevels.filter(
     (level) => !level.is_gift,
   );
@@ -1187,45 +1188,54 @@ export default function SettingsPage() {
               </p>
               <div className="border-border-card mb-3 border-t" />
               <div className="flex flex-col gap-3">
-                {sortedSupporterHistory.map((entry, index) => (
-                  <div
-                    key={getSupporterHistoryKey(entry, index)}
-                    className="bg-tertiary-bg border-border-card rounded-lg border p-4"
-                  >
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="min-w-0">
-                        <div className="mb-1 flex items-center gap-2">
-                          {supporterIcons[entry.level] && (
-                            <Image
-                              src={supporterIcons[entry.level]}
-                              alt={getSupporterTierLabel(entry.level)}
-                              width={18}
-                              height={18}
-                              className="object-contain"
-                            />
-                          )}
-                          <p className="text-primary-text text-sm font-semibold">
-                            {getSupporterTierLabel(entry.level)}
-                          </p>
+                {sortedSupporterHistory.map((entry, index) => {
+                  const isCurrentTier = currentSupporterLevel === entry.level;
+                  const isUpgrade = entry.level > currentSupporterLevel;
+
+                  return (
+                    <div
+                      key={getSupporterHistoryKey(entry, index)}
+                      className="bg-tertiary-bg border-border-card rounded-lg border p-4"
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          <div className="mb-1 flex items-center gap-2">
+                            {supporterIcons[entry.level] && (
+                              <Image
+                                src={supporterIcons[entry.level]}
+                                alt={getSupporterTierLabel(entry.level)}
+                                width={18}
+                                height={18}
+                                className="object-contain"
+                              />
+                            )}
+                            <p className="text-primary-text text-sm font-semibold">
+                              {getSupporterTierLabel(entry.level)}
+                            </p>
+                          </div>
                         </div>
+                        {!isCurrentTier ? (
+                          <CustomButton
+                            type="button"
+                            size="sm"
+                            onClick={() =>
+                              handleSupporterLevelUpdate(entry.level)
+                            }
+                            disabled={revertingSupporterLevel !== null}
+                          >
+                            {revertingSupporterLevel === entry.level
+                              ? isUpgrade
+                                ? "Upgrading..."
+                                : "Downgrading..."
+                              : isUpgrade
+                                ? "Upgrade"
+                                : "Downgrade"}
+                          </CustomButton>
+                        ) : null}
                       </div>
-                      {userData.premiumtype !== entry.level ? (
-                        <CustomButton
-                          type="button"
-                          size="sm"
-                          onClick={() =>
-                            handleSupporterLevelRevert(entry.level)
-                          }
-                          disabled={revertingSupporterLevel !== null}
-                        >
-                          {revertingSupporterLevel === entry.level
-                            ? "Downgrading..."
-                            : "Downgrade"}
-                        </CustomButton>
-                      ) : null}
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           ) : null}

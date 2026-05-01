@@ -11,6 +11,8 @@ import confetti from "canvas-confetti";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import { Dialog, DialogPanel, DialogTitle } from "@headlessui/react";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+import { safeSetJSON } from "@/utils/safeStorage";
+import { UserData } from "@/types/auth";
 
 export default function RedeemPage() {
   const [code, setCode] = useState("");
@@ -192,6 +194,17 @@ export default function RedeemPage() {
           premiumtype: data.premiumtype,
           message: data.message || "Code redeemed successfully",
         });
+
+        if (user) {
+          const updatedUser: UserData = {
+            ...user,
+            premiumtype: data.premiumtype,
+          };
+          safeSetJSON("user", updatedUser);
+          window.dispatchEvent(
+            new CustomEvent("authStateChanged", { detail: updatedUser }),
+          );
+        }
 
         setShowCelebrationModal(true);
 
