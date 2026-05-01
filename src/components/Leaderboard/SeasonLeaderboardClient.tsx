@@ -274,6 +274,7 @@ export default function SeasonLeaderboardClient({
                                 currentXp={user.exp}
                                 season={season}
                                 bgStyle="secondary"
+                                mobileSecondaryTextMode="xp"
                               />
                             </div>
                           </div>

@@ -9,6 +9,7 @@ interface XpProgressBarProps {
   season: Season | null;
   bgStyle?: "primary" | "secondary";
   seasonRateLimitMessage?: string;
+  mobileSecondaryTextMode?: "season" | "xp";
 }
 
 export default function XpProgressBar({
@@ -17,6 +18,7 @@ export default function XpProgressBar({
   season,
   bgStyle = "primary",
   seasonRateLimitMessage,
+  mobileSecondaryTextMode = "season",
 }: XpProgressBarProps) {
   // If no season data, don't show the progress bar
   if (!season || !season.xp_data || !season.xp_data.xp_rates) {
@@ -103,6 +105,10 @@ export default function XpProgressBar({
     clipPath: `inset(0 ${100 - progressPercentage}% 0 0)`,
     WebkitClipPath: `inset(0 ${100 - progressPercentage}% 0 0)`,
   };
+  const mobileSecondaryText =
+    mobileSecondaryTextMode === "xp"
+      ? `${currentXpInLevel.toLocaleString()}/${xpRequiredForNextLevel.toLocaleString()} XP`
+      : `SEASON ${season?.season || "?"}`;
 
   return (
     <div className="mt-3">
@@ -126,8 +132,8 @@ export default function XpProgressBar({
           <div className="absolute inset-0 flex flex-col justify-center px-2 sm:hidden">
             <div className="text-primary-text text-xs leading-tight font-bold">
               <div className="text-center">LEVEL {currentLevel}</div>
-              <div className="text-center text-[10px]">
-                SEASON {season?.season || "?"}
+              <div className="text-center text-[10px] leading-tight">
+                {mobileSecondaryText}
               </div>
             </div>
           </div>
@@ -165,8 +171,8 @@ export default function XpProgressBar({
           <div className="absolute inset-0 flex flex-col justify-center px-2 sm:hidden">
             <div className="text-xs leading-tight font-bold text-white">
               <div className="text-center">LEVEL {currentLevel}</div>
-              <div className="text-center text-[10px]">
-                SEASON {season?.season || "?"}
+              <div className="text-center text-[10px] leading-tight">
+                {mobileSecondaryText}
               </div>
             </div>
           </div>

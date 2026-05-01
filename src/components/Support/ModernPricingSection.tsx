@@ -202,7 +202,7 @@ export default function ModernPricingSection() {
           {supporterTiers.map((tier) => (
             <div
               key={tier.name}
-              className={`hover:bg-quaternary-bg transform rounded-lg px-6 py-4 transition-all duration-500 ${
+              className={`hover:bg-tertiary-bg transform rounded-lg px-6 py-4 transition-all duration-500 ${
                 tier.recommended
                   ? "border-button-info bg-secondary-bg border-2"
                   : "border-border-card bg-secondary-bg border"

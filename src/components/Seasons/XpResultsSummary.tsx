@@ -289,6 +289,7 @@ export default function XpResultsSummary({
             currentLevel={results.currentLevel}
             currentXp={getXpWithinCurrentLevel()}
             season={season}
+            mobileSecondaryTextMode="xp"
           />
         </div>
 
