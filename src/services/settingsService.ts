@@ -31,7 +31,7 @@ export const fetchSupporterGifts = async (): Promise<SupporterGift[]> => {
 export const giftSupporterGift = async (
   shareId: string,
   userId: string,
-): Promise<unknown> => {
+): Promise<{ id: string }> => {
   const url = buildApiUrlWithDevToken(
     PUBLIC_API_URL!,
     `/supporter/gifts/${shareId}`,
@@ -53,7 +53,7 @@ export const giftSupporterGift = async (
     );
   }
 
-  return resp.json().catch(() => ({}));
+  return resp.json().catch(() => ({ id: shareId }));
 };
 
 export const updateBanner = async (url: string): Promise<string> => {

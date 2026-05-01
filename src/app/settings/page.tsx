@@ -481,6 +481,27 @@ export default function SettingsPage() {
       description: `The URL for the "${sectionTitle}" section is now on your clipboard.`,
     });
   };
+  const getSectionHighlightStyle = (sectionId: string) =>
+    highlightSetting === sectionId && showHighlight
+      ? {
+          backgroundColor:
+            "color-mix(in srgb, var(--color-button-info), transparent 80%)",
+          transition: "background-color 0.5s ease",
+        }
+      : undefined;
+  const scrollHighlightedSectionIntoView = (
+    sectionId: string,
+    el: HTMLElement | null,
+  ) => {
+    if (highlightSetting === sectionId && showHighlight && el) {
+      setTimeout(() => {
+        el.scrollIntoView({
+          behavior: "smooth",
+          block: "center",
+        });
+      }, 100);
+    }
+  };
 
   return (
     <div className="mx-auto min-h-screen w-full max-w-6xl px-4 py-4 sm:px-6 lg:px-8">
@@ -912,6 +933,8 @@ export default function SettingsPage() {
           <div
             id="connections"
             className={`${cardClassName} text-primary-text mb-8 p-6`}
+            style={getSectionHighlightStyle("connections")}
+            ref={(el) => scrollHighlightedSectionIntoView("connections", el)}
           >
             <h2 className="text-primary-text mb-2 flex items-center gap-1.5 text-xl font-bold">
               <Icon icon="heroicons:link" className="h-6 w-6" />
@@ -945,6 +968,8 @@ export default function SettingsPage() {
           <div
             id="export"
             className={`${cardClassName} text-primary-text mb-8 p-6`}
+            style={getSectionHighlightStyle("export")}
+            ref={(el) => scrollHighlightedSectionIntoView("export", el)}
           >
             <h2 className="text-primary-text mb-2 flex items-center gap-1.5 text-xl font-bold">
               <Icon icon="heroicons:arrow-down-tray" className="h-6 w-6" />
@@ -976,6 +1001,8 @@ export default function SettingsPage() {
           <div
             id="gifts"
             className={`${cardClassName} text-primary-text mb-8 p-6`}
+            style={getSectionHighlightStyle("gifts")}
+            ref={(el) => scrollHighlightedSectionIntoView("gifts", el)}
           >
             <h2 className="text-primary-text mb-2 flex items-center gap-1.5 text-xl font-bold">
               <Icon icon="heroicons:gift" className="h-6 w-6" />
@@ -1069,6 +1096,8 @@ export default function SettingsPage() {
           <div
             id="danger"
             className={`${cardClassName} text-primary-text relative mb-8 p-6`}
+            style={getSectionHighlightStyle("danger")}
+            ref={(el) => scrollHighlightedSectionIntoView("danger", el)}
           >
             <div className="bg-button-danger absolute top-0 right-0 left-0 h-1 rounded-t-xl" />
             <h2 className="text-button-danger mb-2 flex items-center gap-1.5 text-xl font-bold">
