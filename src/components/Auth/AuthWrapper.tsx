@@ -1,6 +1,7 @@
 "use client";
 
 import { useAuthContext } from "@/contexts/AuthContext";
+import { Spinner } from "@/components/ui/Spinner";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
@@ -60,7 +61,7 @@ export default function AuthWrapper({
     return (
       fallback || (
         <div className="flex h-50 w-full items-center justify-center">
-          <div className="border-button-info h-8 w-8 animate-spin rounded-full border-b-2"></div>
+          <Spinner className="h-8 w-8" />
         </div>
       )
     );

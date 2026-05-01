@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback, useRef } from "react";
 import DOMPurify from "dompurify";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import { Icon } from "@/components/ui/IconWrapper";
+import { Spinner } from "@/components/ui/Spinner";
 import { Button } from "@/components/ui/button";
 import { Pagination } from "@/components/ui/Pagination";
 import { UserAvatar } from "@/utils/avatar";
@@ -502,11 +503,7 @@ function SuggestionForm({
           >
             {submitting ? (
               <>
-                <Icon
-                  icon="svg-spinners:ring-resize"
-                  className="h-4 w-4"
-                  inline
-                />
+                <Spinner className="h-4 w-4" />
                 Submitting...
               </>
             ) : (

@@ -21,6 +21,7 @@ import ExperimentalFeatureBanner from "@/components/ui/ExperimentalFeatureBanner
 import { useAuthContext } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
+import { Spinner } from "@/components/ui/Spinner";
 
 const BOUNTY_RANGE_MAX = 200_000;
 
@@ -459,7 +460,7 @@ function BountyTrackerContent() {
             )}
             {isCheckingBanStatus && (
               <div className="text-secondary-text mt-4 flex items-center justify-center gap-3 text-sm">
-                <div className="border-primary-border border-t-primary-accent h-5 w-5 animate-spin rounded-full border-2" />
+                <Spinner className="h-5 w-5" />
                 <span>Checking ban status...</span>
               </div>
             )}
@@ -579,7 +580,7 @@ function BountyTrackerContent() {
         {!isConnected && !hasData && (
           <div className="flex items-center justify-center py-20">
             <div className="text-center">
-              <div className="border-button-info mx-auto mb-4 h-12 w-12 animate-spin rounded-full border-b-2"></div>
+              <Spinner className="mx-auto mb-4 h-12 w-12" />
               <p className="text-secondary-text">
                 {isConnecting
                   ? "Connecting to bounty tracker..."

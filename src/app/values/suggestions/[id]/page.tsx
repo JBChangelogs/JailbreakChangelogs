@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { useAuthContext } from "@/contexts/AuthContext";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import { Icon } from "@/components/ui/IconWrapper";
+import { Spinner } from "@/components/ui/Spinner";
 import { UserAvatar } from "@/utils/avatar";
 import { buildApiUrlWithDevToken } from "@/utils/apiDevToken";
 import { PUBLIC_API_URL } from "@/utils/api";
@@ -228,11 +229,7 @@ export default function ValueSuggestionDetailPage() {
 
         {loading && (
           <div className="flex items-center justify-center py-32">
-            <Icon
-              icon="svg-spinners:ring-resize"
-              className="text-button-info h-8 w-8"
-              inline
-            />
+            <Spinner className="h-8 w-8" />
           </div>
         )}
 

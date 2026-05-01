@@ -3,6 +3,7 @@
 import * as React from "react";
 import { toast } from "sonner";
 import { Icon } from "@/components/ui/IconWrapper";
+import { Spinner } from "@/components/ui/Spinner";
 import { sanitizeText } from "@/utils/sanitizeText";
 import {
   ChatToolbarButton,
@@ -71,26 +72,7 @@ export function MessageComposer({
             disabled={!draft.trim() || isSending || overLimit > 0}
           >
             {isSending ? (
-              <svg
-                className="h-4 w-4 animate-spin"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-              >
-                <circle
-                  className="opacity-25"
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  strokeWidth="4"
-                />
-                <path
-                  className="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-                />
-              </svg>
+              <Spinner className="h-4 w-4" />
             ) : (
               <Icon icon="heroicons:paper-airplane" className="h-4 w-4" />
             )}

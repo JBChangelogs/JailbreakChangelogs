@@ -27,6 +27,7 @@ import {
 import { formatCustomDate } from "@/utils/timestamp";
 import { useOptimizedRealTimeRelativeDate } from "@/hooks/useSharedTimer";
 import { toast } from "sonner";
+import { Spinner } from "@/components/ui/Spinner";
 import {
   getNotificationActionLabel,
   parseNotificationUrl,
@@ -1115,7 +1116,7 @@ export const NavbarModern = ({
               <div className="max-h-96 overflow-y-auto">
                 {isLoadingNotifications ? (
                   <div className="flex min-h-50 flex-col items-center justify-center px-4 py-8">
-                    <div className="loading loading-spinner loading-md text-primary-text"></div>
+                    <Spinner className="h-8 w-8" />
                     <p className="text-secondary-text mt-3 text-center text-sm">
                       Loading notifications...
                     </p>

@@ -3,7 +3,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { Changelog } from "@/utils/api";
-import { Icon } from "@/components/ui/IconWrapper";
+import { Spinner } from "@/components/ui/Spinner";
 
 interface TimelineContentProps {
   changelogs: Changelog[];
@@ -98,10 +98,7 @@ const TimelineContent: React.FC<TimelineContentProps> = ({ changelogs }) => {
                 {changelog.image_url && (
                   <div className="relative aspect-video w-full">
                     <div className="bg-primary-bg absolute inset-0 flex items-center justify-center">
-                      <Icon
-                        icon="heroicons:arrow-path"
-                        className="text-link h-6 w-6 animate-spin"
-                      />
+                      <Spinner className="h-6 w-6" />
                     </div>
                     <Image
                       src={`https://assets.jailbreakchangelogs.com${changelog.image_url}`}

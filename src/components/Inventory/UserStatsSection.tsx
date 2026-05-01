@@ -14,6 +14,7 @@ import ScanHistoryModal from "../Modals/ScanHistoryModal";
 import { Icon } from "../ui/IconWrapper";
 import { Button } from "../ui/button";
 import { Switch } from "../ui/switch";
+import { Spinner } from "../ui/Spinner";
 
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 const gamepassData = {
@@ -843,10 +844,14 @@ export default function UserStatsSection({
                             disabled={isLoadingQueuePosition}
                             className="text-secondary-text hover:text-primary-text cursor-pointer rounded p-0.5 transition-colors hover:bg-white/10 disabled:opacity-50"
                           >
-                            <Icon
-                              icon="material-symbols:refresh"
-                              className={`h-4 w-4 ${isLoadingQueuePosition ? "animate-spin" : ""}`}
-                            />
+                            {isLoadingQueuePosition ? (
+                              <Spinner className="h-4 w-4" />
+                            ) : (
+                              <Icon
+                                icon="material-symbols:refresh"
+                                className="h-4 w-4"
+                              />
+                            )}
                           </button>
                         </TooltipTrigger>
                         <TooltipContent

@@ -25,6 +25,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Spinner } from "@/components/ui/Spinner";
 
 /**
  * Item type for partial items list
@@ -480,7 +481,7 @@ export default function OGNotificationSheet({
                   <div className="-mr-1 flex-1 overflow-y-auto pr-1">
                     {isLoadingItems || isLoadingNotifications ? (
                       <div className="flex flex-col items-center justify-center gap-4 py-20">
-                        <div className="border-button-info shadow-button-info/20 h-10 w-10 animate-spin rounded-full border-4 border-t-transparent shadow-lg" />
+                        <Spinner className="shadow-button-info/20 h-10 w-10 drop-shadow-lg" />
                         <p className="text-secondary-text text-sm font-medium">
                           Loading catalog...
                         </p>
@@ -624,7 +625,7 @@ export default function OGNotificationSheet({
 
         <div className="relative flex shrink-0 items-center">
           {isProcessing ? (
-            <div className="border-button-info h-4 w-4 animate-spin rounded-full border-2 border-t-transparent" />
+            <Spinner className="h-4 w-4" />
           ) : (
             <Checkbox
               checked={isNotified}

@@ -35,6 +35,7 @@ import { useSupporterModal } from "@/hooks/useSupporterModal";
 import { safeSetJSON } from "@/utils/safeStorage";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import { toast } from "sonner";
+import { Spinner } from "@/components/ui/Spinner";
 import { NotificationPreferenceToggle } from "@/components/Settings/NotificationPreferenceToggle";
 import { DesktopNotificationToggle } from "@/components/Settings/DesktopNotificationToggle";
 import {
@@ -1508,10 +1509,7 @@ export default function SettingsPage() {
                       {giftSearchQuery.trim() ? (
                         giftSearchLoading ? (
                           <div className="flex items-center justify-center gap-2 py-2">
-                            <Icon
-                              icon="lucide:loader-2"
-                              className="text-secondary-text h-4 w-4 animate-spin"
-                            />
+                            <Spinner className="h-4 w-4" />
                             <span className="text-secondary-text text-sm">
                               Searching users...
                             </span>
@@ -1689,10 +1687,7 @@ export default function SettingsPage() {
                     </div>
                     {purchaseGiftLevelsLoading ? (
                       <div className="flex items-center justify-center gap-2 py-6">
-                        <Icon
-                          icon="lucide:loader-2"
-                          className="text-secondary-text h-4 w-4 animate-spin"
-                        />
+                        <Spinner className="h-4 w-4" />
                         <span className="text-secondary-text text-sm">
                           Loading gift tiers...
                         </span>

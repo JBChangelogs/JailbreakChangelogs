@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { Icon } from "./IconWrapper";
+import { Spinner } from "./Spinner";
 
 interface RetryErrorDisplayProps {
   error: string;
@@ -60,7 +61,7 @@ export default function RetryErrorDisplay({
         <div className="relative">
           {isRetrying ? (
             // Spinner when retrying
-            <div className="border-button-info h-8 w-8 animate-spin rounded-full border-2 border-t-transparent"></div>
+            <Spinner className="h-8 w-8" />
           ) : (
             // Offline status icon when not retrying
             <div className="bg-status-error/10 flex h-8 w-8 items-center justify-center rounded-full">

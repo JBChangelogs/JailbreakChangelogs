@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { CircularProgress, Box } from "@mui/material";
+import { Spinner } from "@/components/ui/Spinner";
 import { Button } from "@/components/ui/button";
 import { Pagination } from "@/components/ui/Pagination";
 import Comment from "../ProfileComments/Comments";
@@ -233,14 +233,9 @@ export default function CommentsTab({
 
   if (loading) {
     return (
-      <Box
-        display="flex"
-        justifyContent="center"
-        alignItems="center"
-        minHeight={200}
-      >
-        <CircularProgress sx={{ color: "var(--color-button-info)" }} />
-      </Box>
+      <div className="flex min-h-[200px] items-center justify-center">
+        <Spinner className="h-8 w-8" />
+      </div>
     );
   }
 

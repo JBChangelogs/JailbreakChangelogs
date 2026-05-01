@@ -1,6 +1,7 @@
 "use client";
 
 import { useTheme } from "@/contexts/ThemeContext";
+import { Spinner } from "@/components/ui/Spinner";
 import { Toaster as Sonner } from "sonner";
 import type { CSSProperties } from "react";
 
@@ -29,7 +30,7 @@ const defaultClassNames: NonNullable<
     "[--toast-accent:var(--color-warning)] [&_[data-icon]]:text-[var(--toast-accent)]",
   info: "[--toast-accent:var(--color-button-info)] [&_[data-icon]]:text-[var(--toast-accent)] ",
   loading:
-    "[--toast-accent:var(--color-button-info)] [&_.sonner-loading-bar]:bg-[var(--toast-accent)] [&_.sonner-loader]:text-[var(--toast-accent)] [&_.sonner-loading-wrapper]:!left-[calc(0.75rem+10px)] [&_.sonner-loading-wrapper]:!top-[calc(0.75rem+10px)] [&_.sonner-loading-wrapper]:!-translate-x-1/2 [&_.sonner-loading-wrapper]:!-translate-y-1/2",
+    "[&_.sonner-loader]:!static [&_.sonner-loader]:!translate-none [&_.sonner-loader]:!transform-none [&_.sonner-loader]:flex [&_.sonner-loader]:items-center [&_.sonner-loader]:justify-center",
 };
 
 function mergeToastClassNames(
@@ -48,7 +49,7 @@ function mergeToastClassNames(
   return merged as NonNullable<ToasterProps["toastOptions"]>["classNames"];
 }
 
-const Toaster = ({ toastOptions, style, ...props }: ToasterProps) => {
+const Toaster = ({ toastOptions, style, icons, ...props }: ToasterProps) => {
   const { theme } = useTheme();
 
   return (
@@ -68,6 +69,10 @@ const Toaster = ({ toastOptions, style, ...props }: ToasterProps) => {
           defaultClassNames,
           toastOptions?.classNames,
         ),
+      }}
+      icons={{
+        loading: <Spinner className="h-4 w-4" />,
+        ...icons,
       }}
       {...props}
     />

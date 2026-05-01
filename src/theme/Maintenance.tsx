@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { useAuthContext } from "@/contexts/AuthContext";
+import { Spinner } from "@/components/ui/Spinner";
 import { canBypassMaintenance } from "@/utils/maintenance";
 import Image from "next/image";
 import { bangers } from "@/app/fonts";
@@ -25,7 +26,7 @@ export default function Maintenance() {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <div className="text-center">
-          <div className="mx-auto mb-4 h-12 w-12 animate-spin rounded-full border-b-2 border-white"></div>
+          <Spinner className="mx-auto mb-4 h-12 w-12" />
           <p className="text-white">Checking access...</p>
         </div>
       </div>

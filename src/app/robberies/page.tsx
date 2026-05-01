@@ -28,6 +28,7 @@ import NitroRobberiesTopAd from "@/components/Ads/NitroRobberiesTopAd";
 import NitroRobberiesRailAd from "@/components/Ads/NitroRobberiesRailAd";
 import TotalRobberiesLoggedPolling from "@/components/RobberyTracker/TotalRobberiesLoggedPolling";
 import { useAuthContext } from "@/contexts/AuthContext";
+import { Spinner } from "@/components/ui/Spinner";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -136,7 +137,7 @@ function RobberiesInitialEmptyState() {
   if (showInitialLoading) {
     return (
       <>
-        <div className="border-button-info mx-auto mb-4 h-12 w-12 animate-spin rounded-full border-b-2"></div>
+        <Spinner className="mx-auto mb-4 h-12 w-12" />
         <h3 className="text-secondary-text mb-2 text-lg font-medium">
           Loading robberies...
         </h3>
@@ -1081,7 +1082,7 @@ function RobberyTrackerContent() {
             )}
             {isCheckingBanStatus && (
               <div className="text-secondary-text mt-4 flex items-center justify-center gap-3 text-sm">
-                <div className="border-primary-border border-t-primary-accent h-5 w-5 animate-spin rounded-full border-2" />
+                <Spinner className="h-5 w-5" />
                 <span>Checking ban status...</span>
               </div>
             )}
@@ -1482,7 +1483,7 @@ function RobberyTrackerContent() {
           {!isConnected && !hasData && !requiresManualReconnect && (
             <div className="flex min-h-screen flex-col items-center justify-start py-20 pt-24">
               <div className="text-center">
-                <div className="border-button-info mx-auto mb-4 h-12 w-12 animate-spin rounded-full border-b-2"></div>
+                <Spinner className="mx-auto mb-4 h-12 w-12" />
                 <p className="text-secondary-text">
                   Connecting to robbery tracker...
                 </p>

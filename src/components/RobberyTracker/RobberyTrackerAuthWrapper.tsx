@@ -1,6 +1,7 @@
 "use client";
 
 import { useAuthContext } from "@/contexts/AuthContext";
+import { Spinner } from "@/components/ui/Spinner";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef } from "react";
@@ -70,7 +71,7 @@ export default function RobberyTrackerAuthWrapper({
     return (
       <div className="container mx-auto flex min-h-screen items-center justify-center px-4 py-8">
         <div className="text-center">
-          <div className="border-button-info mx-auto mb-4 h-12 w-12 animate-spin rounded-full border-b-2"></div>
+          <Spinner className="mx-auto mb-4 h-12 w-12" />
           <p className="text-secondary-text">Checking access...</p>
         </div>
       </div>

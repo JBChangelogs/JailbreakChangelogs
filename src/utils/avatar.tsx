@@ -2,12 +2,7 @@
 
 import Image from "next/image";
 import { memo, useState } from "react";
-import dynamic from "next/dynamic";
-
-const CircularProgress = dynamic(
-  () => import("@mui/material/CircularProgress"),
-  { ssr: false },
-);
+import { Spinner } from "@/components/ui/Spinner";
 
 interface UserAvatarProps {
   userId: string;
@@ -234,7 +229,7 @@ const UserAvatarImpl = ({
       >
         {isLoading && (
           <div className="absolute inset-0 flex items-center justify-center">
-            <CircularProgress size={24} sx={{ color: "#5865F2" }} />
+            <Spinner className="h-6 w-6" />
           </div>
         )}
         <div className="absolute inset-0">

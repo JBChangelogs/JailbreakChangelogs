@@ -10,6 +10,7 @@ import RobberyPlayersModal from "./RobberyPlayersModal";
 import { toast } from "sonner";
 import { useServerRegions } from "@/hooks/useServerRegions";
 import { buildRobloxServerDeepLink } from "./deepLink";
+import { Spinner } from "@/components/ui/Spinner";
 
 interface ServerBountyGroupProps {
   serverId: string;
@@ -172,7 +173,7 @@ export default function ServerBountyGroup({
                 `${regionData.city}, ${regionData.regionName}, ${regionData.country}`
               ) : (
                 <span className="inline-flex items-center gap-2">
-                  <Icon icon="svg-spinners:180-ring" className="h-3.5 w-3.5" />
+                  <Spinner className="h-3.5 w-3.5" />
                   Loading...
                 </span>
               )}

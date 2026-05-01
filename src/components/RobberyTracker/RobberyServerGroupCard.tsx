@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/tooltip";
 import { useRobberyTrackerLastJoinedServer } from "@/hooks/useRobberyTrackerLastJoinedServer";
 import { cn } from "@/lib/utils";
+import { Spinner } from "@/components/ui/Spinner";
 
 const ROBBERY_IMAGE_PRIORITY: string[] = [
   "Jewelry",
@@ -377,7 +378,7 @@ export default function RobberyServerGroupCard({
                 `${displayedRegionData.city}, ${displayedRegionData.regionName}, ${displayedRegionData.country}`
               ) : (
                 <span className="text-secondary-text inline-flex items-center gap-2">
-                  <Icon icon="svg-spinners:180-ring" className="h-3.5 w-3.5" />
+                  <Spinner className="h-3.5 w-3.5" />
                   Loading region...
                 </span>
               )}

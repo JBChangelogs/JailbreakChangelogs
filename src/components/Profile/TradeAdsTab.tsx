@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { CircularProgress, Box, Skeleton } from "@mui/material";
+import { Box, Skeleton } from "@mui/material";
 import {
   Tooltip,
   TooltipContent,
@@ -20,6 +20,7 @@ import {
   getTradeItemDetailHref,
   getTradeItemImagePath,
 } from "@/utils/tradeItems";
+import { Spinner } from "@/components/ui/Spinner";
 import type { TradeAd, TradeItem } from "@/types/trading";
 
 const getStatusColor = (status: string) => {
@@ -236,7 +237,7 @@ export default function TradeAdsTab({
         alignItems="center"
         minHeight={200}
       >
-        <CircularProgress sx={{ color: "var(--color-button-info)" }} />
+        <Spinner className="h-8 w-8" />
       </Box>
     );
   }

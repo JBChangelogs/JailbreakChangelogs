@@ -21,7 +21,7 @@
 
 import { Icon } from "../ui/IconWrapper";
 import React, { useState, useEffect, useCallback } from "react";
-import { CircularProgress } from "@mui/material";
+import { Spinner } from "@/components/ui/Spinner";
 import {
   Tooltip,
   TooltipContent,
@@ -1457,10 +1457,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                     >
                       {isSubmittingComment ? (
                         <>
-                          <CircularProgress
-                            size={14}
-                            className="text-form-button-text"
-                          />
+                          <Spinner className="h-3.5 w-3.5" />
                           Posting...
                         </>
                       ) : (
@@ -1478,10 +1475,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                   <div className="text-secondary-text hidden items-center gap-1.5 text-[11px] lg:flex">
                     {isSubmittingComment ? (
                       <>
-                        <CircularProgress
-                          size={12}
-                          className="text-border-focus"
-                        />
+                        <Spinner className="h-3 w-3" />
                         <span>Posting...</span>
                       </>
                     ) : (
@@ -1525,15 +1519,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
           {/* Comments List */}
           {isRefreshingComments ? (
             <div className="flex flex-col items-center justify-center py-12 text-center sm:py-16">
-              <div className="relative mb-6">
-                <div className="from-border-focus/20 to-button-info-hover/20 absolute inset-0 rounded-full bg-linear-to-r blur-xl"></div>
-                <div className="border-border-focus/30 bg-secondary-bg relative rounded-full border p-4">
-                  <CircularProgress
-                    size="2.5rem"
-                    className="text-border-focus flex"
-                  />
-                </div>
-              </div>
+              <Spinner className="mb-4 h-10 w-10" />
               <h3 className="text-primary-text mb-2 text-lg font-semibold sm:text-xl">
                 Fetching comments...
               </h3>
@@ -1800,10 +1786,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                         <div className="flex w-10 shrink-0 items-start pt-1.5">
                           {loadingUserData[comment.user_id] ? (
                             <div className="ring-border-focus/20 bg-tertiary-bg flex h-10 w-10 items-center justify-center rounded-full ring-2">
-                              <CircularProgress
-                                size={20}
-                                className="text-border-focus"
-                              />
+                              <Spinner className="h-5 w-5" />
                             </div>
                           ) : hideRecent ? (
                             <div className="ring-tertiary-text/20 border-border-card bg-primary-bg flex h-10 w-10 items-center justify-center rounded-full border ring-2">
@@ -2096,10 +2079,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                                     >
                                       {updatingCommentId === comment.id ? (
                                         <>
-                                          <CircularProgress
-                                            size={14}
-                                            className="text-form-button-text"
-                                          />
+                                          <Spinner className="h-3.5 w-3.5" />
                                           Updating...
                                         </>
                                       ) : (
@@ -2111,10 +2091,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                                   <div className="text-secondary-text hidden items-center gap-1.5 text-[11px] lg:flex">
                                     {updatingCommentId === comment.id ? (
                                       <>
-                                        <CircularProgress
-                                          size={12}
-                                          className="text-border-focus"
-                                        />
+                                        <Spinner className="h-3 w-3" />
                                         <span>Updating...</span>
                                       </>
                                     ) : (
@@ -2282,10 +2259,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                                   >
                                     {isSubmittingComment ? (
                                       <>
-                                        <CircularProgress
-                                          size={14}
-                                          className="text-form-button-text"
-                                        />
+                                        <Spinner className="h-3.5 w-3.5" />
                                         Posting...
                                       </>
                                     ) : (
@@ -2303,10 +2277,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                                 <div className="text-secondary-text hidden items-center gap-1.5 text-[11px] lg:flex">
                                   {isSubmittingComment ? (
                                     <>
-                                      <CircularProgress
-                                        size={12}
-                                        className="text-border-focus"
-                                      />
+                                      <Spinner className="h-3 w-3" />
                                       <span>Posting...</span>
                                     </>
                                   ) : (

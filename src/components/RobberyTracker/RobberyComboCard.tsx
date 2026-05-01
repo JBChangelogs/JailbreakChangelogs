@@ -15,6 +15,7 @@ import { buildRobloxServerDeepLink } from "./deepLink";
 import InlineTeamPlayers from "./InlineTeamPlayers";
 import { useRobberyTrackerLastJoinedServer } from "@/hooks/useRobberyTrackerLastJoinedServer";
 import { cn } from "@/lib/utils";
+import { Spinner } from "@/components/ui/Spinner";
 
 interface RobberyComboCardProps {
   comboId: string;
@@ -197,7 +198,7 @@ export default function RobberyComboCard({
                 `${regionData.city}, ${regionData.regionName}, ${regionData.country}`
               ) : (
                 <span className="text-secondary-text inline-flex items-center gap-2">
-                  <Icon icon="svg-spinners:180-ring" className="h-3.5 w-3.5" />
+                  <Spinner className="h-3.5 w-3.5" />
                   Loading region...
                 </span>
               )}

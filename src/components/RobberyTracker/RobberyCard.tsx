@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/tooltip";
 import { useRobberyTrackerLastJoinedServer } from "@/hooks/useRobberyTrackerLastJoinedServer";
 import { cn } from "@/lib/utils";
+import { Spinner } from "@/components/ui/Spinner";
 
 interface RobberyCardProps {
   robbery: RobberyData;
@@ -347,7 +348,7 @@ export default function RobberyCard({
                 `${displayedRegionData.city}, ${displayedRegionData.regionName}, ${displayedRegionData.country}`
               ) : (
                 <span className="text-secondary-text inline-flex items-center gap-2">
-                  <Icon icon="svg-spinners:180-ring" className="h-3.5 w-3.5" />
+                  <Spinner className="h-3.5 w-3.5" />
                   Loading region...
                 </span>
               )}

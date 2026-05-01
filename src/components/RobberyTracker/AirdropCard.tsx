@@ -15,6 +15,7 @@ import { buildRobloxServerDeepLink } from "./deepLink";
 import InlineTeamPlayers from "./InlineTeamPlayers";
 import { useRobberyTrackerLastJoinedServer } from "@/hooks/useRobberyTrackerLastJoinedServer";
 import { cn } from "@/lib/utils";
+import { Spinner } from "@/components/ui/Spinner";
 
 interface AirdropCardProps {
   airdrop: AirdropData;
@@ -221,7 +222,7 @@ export default function AirdropCard({ airdrop }: AirdropCardProps) {
                 `${regionData.city}, ${regionData.regionName}, ${regionData.country}`
               ) : (
                 <span className="text-secondary-text inline-flex items-center gap-2">
-                  <Icon icon="svg-spinners:180-ring" className="h-3.5 w-3.5" />
+                  <Spinner className="h-3.5 w-3.5" />
                   Loading region...
                 </span>
               )}
@@ -336,7 +337,7 @@ export default function AirdropCard({ airdrop }: AirdropCardProps) {
                 {isMapImageLoading && (
                   <div className="bg-secondary-bg/40 absolute inset-0 z-10 flex items-center justify-center rounded-lg backdrop-blur-sm">
                     <div className="text-secondary-text inline-flex items-center gap-2 text-sm font-medium">
-                      <Icon icon="svg-spinners:180-ring" className="h-5 w-5" />
+                      <Spinner className="h-5 w-5" />
                       Generating map...
                     </div>
                   </div>

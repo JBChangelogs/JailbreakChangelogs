@@ -32,6 +32,7 @@ import {
 import { ChatMessages } from "@/components/chat/chat-messages";
 import { MessageComposer } from "@/components/Users/MessageComposer";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+import { Spinner } from "@/components/ui/Spinner";
 import {
   ChatEvent,
   ChatEventAddon,
@@ -2778,10 +2779,7 @@ export default function MessagesInbox() {
               {userSearchQuery.trim() ? (
                 isUserSearchLoading ? (
                   <div className="flex items-center justify-center px-4 py-10">
-                    <Icon
-                      icon="lucide:loader-2"
-                      className="text-secondary-text h-5 w-5 animate-spin"
-                    />
+                    <Spinner className="h-5 w-5" />
                   </div>
                 ) : userSearchResults.length === 0 ? (
                   <p className="text-secondary-text px-4 py-4 text-sm">
@@ -3005,27 +3003,7 @@ export default function MessagesInbox() {
                             lastSeenTime
                           ) : (
                             <span className="inline-flex items-center gap-1">
-                              <svg
-                                className="text-secondary-text h-3 w-3 animate-spin"
-                                xmlns="http://www.w3.org/2000/svg"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                aria-hidden="true"
-                              >
-                                <circle
-                                  className="opacity-25"
-                                  cx="12"
-                                  cy="12"
-                                  r="10"
-                                  stroke="currentColor"
-                                  strokeWidth="4"
-                                />
-                                <path
-                                  className="opacity-75"
-                                  fill="currentColor"
-                                  d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
-                                />
-                              </svg>
+                              <Spinner className="h-3 w-3" />
                               Loading...
                             </span>
                           )}
@@ -3134,27 +3112,7 @@ export default function MessagesInbox() {
                         </div>
                         {activeOfferDetailsStatus.status === "loading" ? (
                           <p className="text-secondary-text flex items-center gap-2 text-xs">
-                            <svg
-                              className="h-3.5 w-3.5 animate-spin"
-                              xmlns="http://www.w3.org/2000/svg"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                              aria-hidden="true"
-                            >
-                              <circle
-                                className="opacity-25"
-                                cx="12"
-                                cy="12"
-                                r="10"
-                                stroke="currentColor"
-                                strokeWidth="4"
-                              />
-                              <path
-                                className="opacity-75"
-                                fill="currentColor"
-                                d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
-                              />
-                            </svg>
+                            <Spinner className="h-3.5 w-3.5" />
                             Loading offer details…
                           </p>
                         ) : activeOfferDetailsStatus.status === "loaded" ? (
@@ -3445,7 +3403,7 @@ export default function MessagesInbox() {
                     messages.length > 0 && (
                       <div className="pointer-events-none absolute inset-x-0 top-2 z-10 flex justify-center">
                         <div className="bg-tertiary-bg border-border-card text-secondary-text flex items-center gap-2 rounded-full border px-3 py-1 text-xs">
-                          <span className="inline-block h-3 w-3 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                          <Spinner className="h-3 w-3" />
                           Loading older messages
                         </div>
                       </div>
@@ -3453,7 +3411,7 @@ export default function MessagesInbox() {
                   {isLoadingMessages ? (
                     <div className="mx-auto my-auto flex flex-col items-center justify-center px-6 py-8 text-center">
                       <div className="border-border-card bg-tertiary-bg/40 flex h-14 w-14 items-center justify-center rounded-full border">
-                        <span className="text-secondary-text inline-block h-6 w-6 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                        <Spinner className="h-6 w-6" />
                       </div>
                       <p className="text-secondary-text mt-3 text-sm">
                         Loading messages…
@@ -3905,10 +3863,7 @@ export default function MessagesInbox() {
                                           }
                                         >
                                           {isSending ? (
-                                            <Icon
-                                              icon="lucide:loader-2"
-                                              className="mr-1 h-3 w-3 animate-spin"
-                                            />
+                                            <Spinner className="mr-1 h-3 w-3" />
                                           ) : null}
                                           Update
                                         </Button>

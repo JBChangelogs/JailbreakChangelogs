@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Dialog, CircularProgress } from "@mui/material";
+import { Dialog } from "@mui/material";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/IconWrapper";
+import { Spinner } from "@/components/ui/Spinner";
 import { UserAvatar } from "@/utils/avatar";
 import Link from "next/link";
 import { toast } from "sonner";
@@ -274,7 +275,7 @@ const FollowingModal: React.FC<FollowingModalProps> = ({
           <div className="modal-content max-h-100 overflow-y-auto p-6">
             {loading ? (
               <div className="flex justify-center py-4 sm:py-8">
-                <CircularProgress sx={{ color: "var(--color-button-info)" }} />
+                <Spinner className="h-8 w-8" />
               </div>
             ) : isPrivate ? (
               <div className="text-primary-text py-4 text-center text-sm sm:py-8">
