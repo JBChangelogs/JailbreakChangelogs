@@ -68,10 +68,27 @@ export default function DupeFinderClient({
   return (
     <div className="space-y-6">
       {!initialData && (
-        <DupeSearchInput
-          initialValue={originalSearchTerm || robloxId || ""}
-          isLoading={isLoading}
-        />
+        <>
+          <DupeSearchInput
+            initialValue={originalSearchTerm || robloxId || ""}
+            isLoading={isLoading}
+          />
+          <div className="text-secondary-text mt-2 hidden items-center gap-1 text-xs lg:flex">
+            <Icon
+              icon="emojione:light-bulb"
+              className="text-sm text-yellow-500"
+            />
+            Helpful tip: Press{" "}
+            <kbd className="kbd kbd-sm border-border-card bg-tertiary-bg text-primary-text">
+              Ctrl
+            </kbd>
+            {" + "}
+            <kbd className="kbd kbd-sm border-border-card bg-tertiary-bg text-primary-text">
+              F
+            </kbd>{" "}
+            to quickly focus the search.
+          </div>
+        </>
       )}
 
       {/* Results */}

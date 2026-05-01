@@ -666,6 +666,21 @@ export default function InventoryCheckerClient({
           isLoading={isLoading}
           externalIsLoading={externalIsLoading || false}
         />
+        <div className="text-secondary-text mt-2 hidden items-center gap-1 text-xs lg:flex">
+          <Icon
+            icon="emojione:light-bulb"
+            className="text-sm text-yellow-500"
+          />
+          Helpful tip: Press{" "}
+          <kbd className="kbd kbd-sm border-border-card bg-tertiary-bg text-primary-text">
+            Ctrl
+          </kbd>
+          {" + "}
+          <kbd className="kbd kbd-sm border-border-card bg-tertiary-bg text-primary-text">
+            F
+          </kbd>{" "}
+          to quickly focus the search.
+        </div>
 
         {isLoading || externalIsLoading ? (
           /* Loading Skeleton for User Data */

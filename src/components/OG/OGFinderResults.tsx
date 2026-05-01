@@ -416,6 +416,18 @@ export default function OGFinderResults({
           </span>
         </Button>
       </div>
+      <div className="text-secondary-text mt-2 hidden items-center gap-1 text-xs lg:flex">
+        <Icon icon="emojione:light-bulb" className="text-sm text-yellow-500" />
+        Helpful tip: Press{" "}
+        <kbd className="kbd kbd-sm border-border-card bg-tertiary-bg text-primary-text">
+          Ctrl
+        </kbd>
+        {" + "}
+        <kbd className="kbd kbd-sm border-border-card bg-tertiary-bg text-primary-text">
+          F
+        </kbd>{" "}
+        to quickly focus the search.
+      </div>
 
       {/* Error Display */}
       {error && (
@@ -535,22 +547,24 @@ export default function OGFinderResults({
             originalItemsCount={initialData?.count || 0}
           />
 
-          {/* Filters */}
-          <OGFilters
-            searchTerm={searchTerm}
-            setSearchTerm={setSearchTerm}
-            selectedCategories={selectedCategories}
-            setSelectedCategories={setSelectedCategories}
-            sortOrder={sortOrder}
-            setSortOrder={(order) => setSortOrder(order as typeof sortOrder)}
-            initialData={initialData}
-          />
-
           {/* Items Grid */}
           <div className="border-border-card bg-secondary-bg rounded-lg border p-6">
             <h2 className="text-primary-text mb-4 text-xl font-semibold">
               OG Items
             </h2>
+            <div className="mb-4">
+              <OGFilters
+                searchTerm={searchTerm}
+                setSearchTerm={setSearchTerm}
+                selectedCategories={selectedCategories}
+                setSelectedCategories={setSelectedCategories}
+                sortOrder={sortOrder}
+                setSortOrder={(order) =>
+                  setSortOrder(order as typeof sortOrder)
+                }
+                initialData={initialData}
+              />
+            </div>
             {/* Item Counter */}
             <div className="mb-4">
               <p className="text-secondary-text">

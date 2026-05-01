@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import { Icon } from "@/components/ui/IconWrapper";
 import { Spinner } from "@/components/ui/Spinner";
 
@@ -18,6 +19,29 @@ export default function SearchForm({
   isLoading,
   externalIsLoading,
 }: SearchFormProps) {
+  const searchInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if ((event.ctrlKey || event.metaKey) && event.key === "f") {
+        event.preventDefault();
+        if (searchInputRef.current) {
+          searchInputRef.current.scrollIntoView({
+            behavior: "smooth",
+            block: "center",
+          });
+          searchInputRef.current.focus();
+          searchInputRef.current.select();
+        }
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, []);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     handleSearch(e);
@@ -27,6 +51,7 @@ export default function SearchForm({
     <form onSubmit={handleSubmit}>
       <div className="relative flex items-center">
         <input
+          ref={searchInputRef}
           type="text"
           id="searchInput"
           value={searchId}

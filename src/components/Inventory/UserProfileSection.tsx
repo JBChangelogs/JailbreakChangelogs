@@ -211,7 +211,7 @@ export default function UserProfileSection({
       {/* Avatar and User Info */}
       <div className="flex items-center gap-4">
         {/* Avatar */}
-        <div className="bg-tertiary-bg relative h-16 w-16 shrink-0 overflow-hidden rounded-full">
+        <div className="bg-quaternary-bg relative h-16 w-16 shrink-0 overflow-hidden rounded-full">
           {!avatarError ? (
             <Image
               src={getUserAvatar(userId)}
@@ -251,7 +251,7 @@ export default function UserProfileSection({
                     target="_blank"
                     rel="noopener noreferrer"
                     prefetch={false}
-                    className="text-primary-text bg-tertiary-bg/40 border-border-card hover:bg-quaternary-bg/60 inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium shadow-sm transition-all"
+                    className="text-primary-text bg-quaternary-bg border-border-card hover:bg-quaternary-bg/80 inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium shadow-sm transition-all"
                   >
                     <DiscordIcon className="h-3.5 w-3.5 shrink-0" />
                     Discord
@@ -269,7 +269,7 @@ export default function UserProfileSection({
                   target="_blank"
                   rel="noopener noreferrer"
                   prefetch={false}
-                  className="text-primary-text bg-tertiary-bg/40 border-border-card hover:bg-quaternary-bg/60 inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium shadow-sm transition-all"
+                  className="text-primary-text bg-quaternary-bg border-border-card hover:bg-quaternary-bg/80 inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium shadow-sm transition-all"
                 >
                   <RobloxIcon className="h-3.5 w-3.5 shrink-0" />
                   Roblox
@@ -285,7 +285,7 @@ export default function UserProfileSection({
                   <Link
                     href={`/users/${userConnectionData.id}`}
                     prefetch={false}
-                    className="text-primary-text bg-tertiary-bg/40 border-border-card hover:bg-quaternary-bg/60 inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium shadow-sm transition-all"
+                    className="text-primary-text bg-quaternary-bg border-border-card hover:bg-quaternary-bg/80 inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium shadow-sm transition-all"
                   >
                     <Image
                       src="https://assets.jailbreakchangelogs.com/assets/logos/JBCL_Short_Transparent.webp"

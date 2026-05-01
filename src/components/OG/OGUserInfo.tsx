@@ -44,7 +44,7 @@ export default function OGUserInfo({
 
       {/* Roblox User Profile */}
       <div className="border-border-card bg-tertiary-bg mb-6 flex flex-col gap-4 rounded-lg border p-4 lg:flex-row lg:items-center lg:justify-between">
-        <div className="border-border-card bg-tertiary-bg relative h-16 w-16 shrink-0 overflow-hidden rounded-full border">
+        <div className="border-border-card bg-quaternary-bg relative h-16 w-16 shrink-0 overflow-hidden rounded-full border">
           {!avatarError ? (
             <Image
               src={getUserAvatar(robloxId)}
@@ -81,10 +81,10 @@ export default function OGUserInfo({
                     href={`https://discord.com/users/${userConnectionData.id}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="bg-tertiary-bg/40 border-border-card text-primary-text inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium transition-opacity hover:opacity-80"
+                    className="bg-quaternary-bg border-border-card text-primary-text inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium transition-opacity hover:opacity-80"
                   >
                     <DiscordIcon className="text-border-focus h-3.5 w-3.5 shrink-0" />
-                    <span className="text-sm font-semibold">Discord</span>
+                    Discord
                   </Link>
                 </TooltipTrigger>
                 <TooltipContent>Discord profile</TooltipContent>
@@ -98,10 +98,10 @@ export default function OGUserInfo({
                   href={`https://www.roblox.com/users/${robloxId}/profile`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="bg-tertiary-bg/40 border-border-card text-primary-text inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium transition-opacity hover:opacity-80"
+                  className="bg-quaternary-bg border-border-card text-primary-text inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium transition-opacity hover:opacity-80"
                 >
                   <RobloxIcon className="h-3.5 w-3.5 shrink-0" />
-                  <span className="text-sm font-semibold">Roblox</span>
+                  Roblox
                 </Link>
               </TooltipTrigger>
               <TooltipContent>Roblox profile</TooltipContent>
@@ -114,7 +114,7 @@ export default function OGUserInfo({
                   <Link
                     href={`/users/${userConnectionData.id}`}
                     prefetch={false}
-                    className="bg-tertiary-bg/40 border-border-card text-primary-text inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium transition-opacity hover:opacity-80"
+                    className="bg-quaternary-bg border-border-card text-primary-text inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium transition-opacity hover:opacity-80"
                   >
                     <Image
                       src="https://assets.jailbreakchangelogs.com/assets/logos/JBCL_Short_Transparent.webp"
@@ -123,7 +123,7 @@ export default function OGUserInfo({
                       height={16}
                       className="h-3.5 w-3.5 shrink-0"
                     />
-                    <span className="text-sm font-semibold">Website</span>
+                    Website
                   </Link>
                 </TooltipTrigger>
                 <TooltipContent>JBCL profile</TooltipContent>

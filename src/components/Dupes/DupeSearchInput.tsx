@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { Icon } from "@/components/ui/IconWrapper";
 import { Spinner } from "@/components/ui/Spinner";
@@ -19,6 +19,7 @@ export default function DupeSearchInput({
   className = "",
 }: DupeSearchInputProps) {
   const [searchId, setSearchId] = useState(initialValue);
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     setSearchId(initialValue);
@@ -43,10 +44,32 @@ export default function DupeSearchInput({
   // Use internal loading state or external loading state
   const isCurrentlyLoading = isLoading || isSearching;
 
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if ((event.ctrlKey || event.metaKey) && event.key === "f") {
+        event.preventDefault();
+        if (searchInputRef.current) {
+          searchInputRef.current.scrollIntoView({
+            behavior: "smooth",
+            block: "center",
+          });
+          searchInputRef.current.focus();
+          searchInputRef.current.select();
+        }
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, []);
+
   return (
     <form onSubmit={handleSearch} className={className}>
       <div className="relative flex items-center">
         <input
+          ref={searchInputRef}
           type="text"
           id="searchId"
           value={searchId}

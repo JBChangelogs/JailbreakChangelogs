@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { RobloxUser } from "@/types";
 import OGFinderDataStreamer from "./OGFinderDataStreamer";
@@ -54,6 +54,7 @@ export default function OGFinderClient({
   const [searchId, setSearchId] = useState(robloxId || "");
   const [isSearching, setIsSearching] = useState(false);
   const [showNotificationSheet, setShowNotificationSheet] = useState(false);
+  const searchInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
 
   // Compute loading state during render
@@ -73,6 +74,27 @@ export default function OGFinderClient({
     router.push(`/og/${input}`);
   };
 
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if ((event.ctrlKey || event.metaKey) && event.key === "f") {
+        event.preventDefault();
+        if (searchInputRef.current) {
+          searchInputRef.current.scrollIntoView({
+            behavior: "smooth",
+            block: "center",
+          });
+          searchInputRef.current.focus();
+          searchInputRef.current.select();
+        }
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, []);
+
   return (
     <div className="space-y-6">
       {/* Search Form and Notification Button */}
@@ -81,6 +103,7 @@ export default function OGFinderClient({
           <form onSubmit={handleSearch}>
             <div className="relative flex items-center">
               <input
+                ref={searchInputRef}
                 type="text"
                 id="searchId"
                 value={searchId}
@@ -155,6 +178,18 @@ export default function OGFinderClient({
             <span className="hidden sm:inline">Get Notified</span>
           </span>
         </Button>
+      </div>
+      <div className="text-secondary-text mt-2 hidden items-center gap-1 text-xs lg:flex">
+        <Icon icon="emojione:light-bulb" className="text-sm text-yellow-500" />
+        Helpful tip: Press{" "}
+        <kbd className="kbd kbd-sm border-border-card bg-tertiary-bg text-primary-text">
+          Ctrl
+        </kbd>
+        {" + "}
+        <kbd className="kbd kbd-sm border-border-card bg-tertiary-bg text-primary-text">
+          F
+        </kbd>{" "}
+        to quickly focus the search.
       </div>
 
       {/* Results */}
