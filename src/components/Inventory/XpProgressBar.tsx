@@ -7,7 +7,7 @@ interface XpProgressBarProps {
   currentLevel: number;
   currentXp: number;
   season: Season | null;
-  bgStyle?: "primary" | "secondary";
+  bgStyle?: "primary" | "secondary" | "tertiary" | "quaternary";
   seasonRateLimitMessage?: string;
   mobileSecondaryTextMode?: "season" | "xp";
 }
@@ -114,7 +114,7 @@ export default function XpProgressBar({
     <div className="mt-3">
       {/* Game-style Progress Bar - old design without rounded corners */}
       <div
-        className={`border-button-info relative h-8 w-full border-2 ${bgStyle === "secondary" ? "bg-secondary-bg" : "bg-primary-bg"}`}
+        className={`border-button-info relative h-8 w-full border-2 ${bgStyle === "secondary" ? "bg-secondary-bg" : bgStyle === "tertiary" ? "bg-tertiary-bg" : bgStyle === "quaternary" ? "bg-quaternary-bg" : "bg-primary-bg"}`}
       >
         {/* Progress Fill */}
         <div

@@ -273,7 +273,7 @@ export default function SeasonLeaderboardClient({
                                 currentLevel={user.lvl}
                                 currentXp={user.exp}
                                 season={season}
-                                bgStyle="secondary"
+                                bgStyle="quaternary"
                                 mobileSecondaryTextMode="xp"
                               />
                             </div>

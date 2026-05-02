@@ -424,6 +424,7 @@ export default function UserStatsSection({
         currentLevel={currentData.level}
         currentXp={currentData.xp}
         season={currentSeason}
+        bgStyle="tertiary"
         seasonRateLimitMessage={seasonRateLimitMessage}
       />
 
