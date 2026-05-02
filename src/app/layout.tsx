@@ -16,7 +16,6 @@ import AuthCheck from "@/components/Auth/AuthCheck";
 import { AppRouterCacheProvider } from "@mui/material-nextjs/v15-appRouter";
 import ThemeProvider from "@/components/ThemeProvider";
 import { ThemeProvider as CustomThemeProvider } from "@/contexts/ThemeContext";
-import SurveyProvider from "@/components/Survey/SurveyProvider";
 import { AuthProvider } from "@/contexts/AuthContext";
 import NitroAnchorCloseSupporterModal from "@/components/Ads/NitroAnchorCloseSupporterModal";
 import NitroVideoCloseSupporterModal from "@/components/Ads/NitroVideoCloseSupporterModal";
@@ -195,37 +194,35 @@ export default async function RootLayout({
                         <NitroAnchorCloseSupporterModal />
                         <NitroVideoCloseSupporterModal />
                       </AdErrorBoundary>
-                      <SurveyProvider>
-                        <div
-                          id="main-layout"
-                          className="flex min-h-screen flex-col"
+                      <div
+                        id="main-layout"
+                        className="flex min-h-screen flex-col"
+                      >
+                        <Suspense
+                          fallback={
+                            <div className="bg-primary-bg/75 border-border-card h-16 border-b backdrop-blur-lg" />
+                          }
                         >
-                          <Suspense
-                            fallback={
-                              <div className="bg-primary-bg/75 border-border-card h-16 border-b backdrop-blur-lg" />
-                            }
-                          >
-                            <HideOnAccessDenied>
-                              <Header />
-                            </HideOnAccessDenied>
-                          </Suspense>
-                          <main className="min-h-screen flex-1">
-                            <NuqsAdapter>
-                              <Suspense>{children}</Suspense>
-                            </NuqsAdapter>
-                          </main>
                           <HideOnAccessDenied>
-                            <Footer
-                              githubUrl={githubUrl}
-                              versionInfo={
-                                <Suspense fallback={<VersionInfoSkeleton />}>
-                                  <VersionInfoWrapper />
-                                </Suspense>
-                              }
-                            />
+                            <Header />
                           </HideOnAccessDenied>
-                        </div>
-                      </SurveyProvider>
+                        </Suspense>
+                        <main className="min-h-screen flex-1">
+                          <NuqsAdapter>
+                            <Suspense>{children}</Suspense>
+                          </NuqsAdapter>
+                        </main>
+                        <HideOnAccessDenied>
+                          <Footer
+                            githubUrl={githubUrl}
+                            versionInfo={
+                              <Suspense fallback={<VersionInfoSkeleton />}>
+                                <VersionInfoWrapper />
+                              </Suspense>
+                            }
+                          />
+                        </HideOnAccessDenied>
+                      </div>
                     </AuthProvider>
                   </MaintenanceBypass>
                 </QueryProvider>
@@ -336,34 +333,32 @@ export default async function RootLayout({
                   <NitroVideoPlayer />
                   <NitroAnchorCloseSupporterModal />
                   <NitroVideoCloseSupporterModal />
-                  <SurveyProvider>
-                    <div className="flex min-h-screen flex-col">
-                      <Suspense
-                        fallback={
-                          <div className="bg-primary-bg/75 border-border-card h-16 border-b backdrop-blur-lg" />
-                        }
-                      >
-                        <HideOnAccessDenied>
-                          <Header />
-                        </HideOnAccessDenied>
-                      </Suspense>
-                      <main className="min-h-screen flex-1">
-                        <NuqsAdapter>
-                          <Suspense>{children}</Suspense>
-                        </NuqsAdapter>
-                      </main>
+                  <div className="flex min-h-screen flex-col">
+                    <Suspense
+                      fallback={
+                        <div className="bg-primary-bg/75 border-border-card h-16 border-b backdrop-blur-lg" />
+                      }
+                    >
                       <HideOnAccessDenied>
-                        <Footer
-                          githubUrl={githubUrl}
-                          versionInfo={
-                            <Suspense fallback={<VersionInfoSkeleton />}>
-                              <VersionInfoWrapper />
-                            </Suspense>
-                          }
-                        />
+                        <Header />
                       </HideOnAccessDenied>
-                    </div>
-                  </SurveyProvider>
+                    </Suspense>
+                    <main className="min-h-screen flex-1">
+                      <NuqsAdapter>
+                        <Suspense>{children}</Suspense>
+                      </NuqsAdapter>
+                    </main>
+                    <HideOnAccessDenied>
+                      <Footer
+                        githubUrl={githubUrl}
+                        versionInfo={
+                          <Suspense fallback={<VersionInfoSkeleton />}>
+                            <VersionInfoWrapper />
+                          </Suspense>
+                        }
+                      />
+                    </HideOnAccessDenied>
+                  </div>
                 </AuthProvider>
               </QueryProvider>
             </ThemeProvider>
