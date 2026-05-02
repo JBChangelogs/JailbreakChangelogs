@@ -597,7 +597,7 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
                                 </Link>
                                 <div className="flex flex-wrap items-center gap-1.5">
                                   <span
-                                    className="text-primary-text bg-tertiary-bg/40 inline-flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl"
+                                    className="text-primary-text bg-tertiary-bg/40 inline-flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium backdrop-blur-xl"
                                     style={{
                                       borderColor: getCategoryColor(item.type),
                                     }}
@@ -618,7 +618,7 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
                                     {item.type}
                                   </span>
                                   {item.is_limited === 1 && (
-                                    <span className="text-primary-text border-border-card bg-tertiary-bg/40 inline-flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl">
+                                    <span className="text-primary-text border-border-card bg-tertiary-bg/40 inline-flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium backdrop-blur-xl">
                                       <Icon
                                         icon="mdi:clock"
                                         className="mr-1.5 h-3 w-3"
@@ -628,7 +628,7 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
                                     </span>
                                   )}
                                   {item.is_seasonal === 1 && (
-                                    <span className="text-primary-text border-border-card bg-tertiary-bg/40 inline-flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl">
+                                    <span className="text-primary-text border-border-card bg-tertiary-bg/40 inline-flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium backdrop-blur-xl">
                                       <Icon
                                         icon="noto-v1:snowflake"
                                         className="mr-1.5 h-3 w-3"
@@ -649,7 +649,7 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
                                       <span className="text-secondary-text text-xs font-medium whitespace-nowrap">
                                         Cash
                                       </span>
-                                      <span className="bg-button-info text-form-button-text inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold shadow-sm">
+                                      <span className="bg-button-info text-form-button-text inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold">
                                         {(() => {
                                           if (
                                             item.cash_value === null ||
@@ -666,7 +666,7 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
                                       <span className="text-secondary-text text-xs font-medium whitespace-nowrap">
                                         Duped
                                       </span>
-                                      <span className="bg-button-info text-form-button-text inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold shadow-sm">
+                                      <span className="bg-button-info text-form-button-text inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold">
                                         {(() => {
                                           if (
                                             item.duped_value === null ||
@@ -687,7 +687,7 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
                                         const d = item.demand ?? "N/A";
                                         return (
                                           <span
-                                            className={`${getDemandColor(d)} inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold shadow-sm`}
+                                            className={`${getDemandColor(d)} inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold`}
                                           >
                                             {d === "N/A" ? "Unknown" : d}
                                           </span>
@@ -701,7 +701,7 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
                                       <span
                                         className={`${getTrendColor(
                                           item.trend || "N/A",
-                                        )} inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold shadow-sm`}
+                                        )} inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold`}
                                       >
                                         {(() => {
                                           const trend = item.trend;

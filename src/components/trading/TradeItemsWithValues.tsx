@@ -116,7 +116,7 @@ const ItemRow: React.FC<ItemRowProps> = ({ item, isFirst = false }) => {
                 </span>
               )}
               <span
-                className="text-primary-text bg-tertiary-bg/40 flex h-6 items-center gap-1.5 rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl"
+                className="text-primary-text bg-tertiary-bg/40 flex h-6 items-center gap-1.5 rounded-lg border px-2.5 text-xs leading-none font-medium backdrop-blur-xl"
                 style={{
                   borderColor: getCategoryColor(item.type),
                 }}
@@ -133,7 +133,7 @@ const ItemRow: React.FC<ItemRowProps> = ({ item, isFirst = false }) => {
                 {item.type}
               </span>
               {(item.is_limited === 1 || item.data?.is_limited === 1) && (
-                <span className="text-primary-text border-border-card bg-tertiary-bg/40 inline-flex h-6 items-center gap-1.5 rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl">
+                <span className="text-primary-text border-border-card bg-tertiary-bg/40 inline-flex h-6 items-center gap-1.5 rounded-lg border px-2.5 text-xs leading-none font-medium backdrop-blur-xl">
                   <Icon
                     icon="mdi:clock"
                     className="h-3 w-3"
@@ -143,7 +143,7 @@ const ItemRow: React.FC<ItemRowProps> = ({ item, isFirst = false }) => {
                 </span>
               )}
               {(item.is_seasonal === 1 || item.data?.is_seasonal === 1) && (
-                <span className="text-primary-text border-border-card bg-tertiary-bg/40 inline-flex h-6 items-center gap-1.5 rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl">
+                <span className="text-primary-text border-border-card bg-tertiary-bg/40 inline-flex h-6 items-center gap-1.5 rounded-lg border px-2.5 text-xs leading-none font-medium backdrop-blur-xl">
                   <Icon
                     icon="noto-v1:snowflake"
                     className="h-3 w-3"
@@ -189,7 +189,7 @@ const ItemRow: React.FC<ItemRowProps> = ({ item, isFirst = false }) => {
               <span className="text-secondary-text text-xs font-medium">
                 Cash Value
               </span>
-              <span className="bg-button-info text-form-button-text inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold whitespace-nowrap shadow-sm min-[480px]:px-3">
+              <span className="bg-button-info text-form-button-text inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold whitespace-nowrap min-[480px]:px-3">
                 {item.cash_value === null || item.cash_value === "N/A"
                   ? "N/A"
                   : formatFullValue(parseCurrencyValue(item.cash_value))}
@@ -201,7 +201,7 @@ const ItemRow: React.FC<ItemRowProps> = ({ item, isFirst = false }) => {
               <span className="text-secondary-text text-xs font-medium">
                 Duped Value
               </span>
-              <span className="bg-button-info text-form-button-text inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold whitespace-nowrap shadow-sm min-[480px]:px-3">
+              <span className="bg-button-info text-form-button-text inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold whitespace-nowrap min-[480px]:px-3">
                 {item.duped_value === null || item.duped_value === "N/A"
                   ? "N/A"
                   : formatFullValue(parseCurrencyValue(item.duped_value))}
@@ -214,7 +214,7 @@ const ItemRow: React.FC<ItemRowProps> = ({ item, isFirst = false }) => {
                 Demand
               </span>
               <span
-                className={`${getDemandColor(item.demand || "N/A")} inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold whitespace-nowrap shadow-sm min-[480px]:px-3`}
+                className={`${getDemandColor(item.demand || "N/A")} inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold whitespace-nowrap min-[480px]:px-3`}
               >
                 {item.demand || "N/A"}
               </span>
@@ -226,7 +226,7 @@ const ItemRow: React.FC<ItemRowProps> = ({ item, isFirst = false }) => {
                 Trend
               </span>
               <span
-                className={`${getTrendColor(item.trend || "N/A")} inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold whitespace-nowrap shadow-sm min-[480px]:px-3`}
+                className={`${getTrendColor(item.trend || "N/A")} inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold whitespace-nowrap min-[480px]:px-3`}
               >
                 {item.trend || "N/A"}
               </span>
@@ -276,10 +276,10 @@ export default function TradeItemsWithValues({
                   Offering Side
                 </h3>
               </div>
-              <span className="text-primary-text border-status-success/40 bg-status-success/15 hidden h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl sm:inline-flex">
+              <span className="text-primary-text border-status-success/40 bg-status-success/15 hidden h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium backdrop-blur-xl sm:inline-flex">
                 Offering
               </span>
-              <span className="text-primary-text border-border-card bg-tertiary-bg/40 inline-flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl">
+              <span className="text-primary-text border-border-card bg-tertiary-bg/40 inline-flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium backdrop-blur-xl">
                 {offeringItems.reduce((sum, item) => sum + item.count, 0)} item
                 {offeringItems.reduce((sum, item) => sum + item.count, 0) !== 1
                   ? "s"
@@ -325,10 +325,10 @@ export default function TradeItemsWithValues({
                   Requesting Side
                 </h3>
               </div>
-              <span className="text-primary-text border-status-error/40 bg-status-error/15 hidden h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl sm:inline-flex">
+              <span className="text-primary-text border-status-error/40 bg-status-error/15 hidden h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium backdrop-blur-xl sm:inline-flex">
                 Requesting
               </span>
-              <span className="text-primary-text border-border-card bg-tertiary-bg/40 inline-flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl">
+              <span className="text-primary-text border-border-card bg-tertiary-bg/40 inline-flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium backdrop-blur-xl">
                 {requestingItems.reduce((sum, item) => sum + item.count, 0)}{" "}
                 item
                 {requestingItems.reduce((sum, item) => sum + item.count, 0) !==

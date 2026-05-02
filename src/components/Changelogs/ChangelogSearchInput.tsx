@@ -174,7 +174,7 @@ const ChangelogSearchInput: React.FC<ChangelogSearchInputProps> = ({
                     {item.mentions.map((mention) => (
                       <span
                         key={mention}
-                        className={`inline-flex h-6 items-center rounded-lg px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl ${getBadgeColor("mentions")} text-white`}
+                        className={`inline-flex h-6 items-center rounded-lg px-2.5 text-xs leading-none font-medium backdrop-blur-xl ${getBadgeColor("mentions")} text-white`}
                       >
                         @{mention}
                       </span>

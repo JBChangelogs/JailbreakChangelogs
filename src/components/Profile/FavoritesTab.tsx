@@ -236,7 +236,7 @@ export default function FavoritesTab({
                       <Skeleton variant="rounded" width={80} height={20} />
                     ) : (
                       <span
-                        className="text-primary-text bg-tertiary-bg/40 inline-flex h-6 w-fit items-center rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl"
+                        className="text-primary-text bg-tertiary-bg/40 inline-flex h-6 w-fit items-center rounded-lg border px-2.5 text-xs leading-none font-medium backdrop-blur-xl"
                         style={{
                           borderColor: getCategoryColor(itemType),
                         }}

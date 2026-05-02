@@ -96,7 +96,7 @@ export default function ImageModal({
                   alt={alt}
                   width={800}
                   height={600}
-                  className="h-auto max-h-[80vh] w-auto max-w-full rounded-lg shadow-2xl"
+                  className="h-auto max-h-[80vh] w-auto max-w-full rounded-lg shadow-md"
                   fetchPriority={fetchPriority || (priority ? "high" : "auto")}
                 />
               </div>

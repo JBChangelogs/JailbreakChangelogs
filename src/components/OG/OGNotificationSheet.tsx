@@ -391,7 +391,7 @@ export default function OGNotificationSheet({
                       tab: isAuthenticated ? "roblox" : "discord",
                     });
                   }}
-                  className="shadow-button-info/20 h-14 w-full text-base font-bold shadow-lg"
+                  className="h-14 w-full text-base font-bold"
                 >
                   {isAuthenticated
                     ? "Link Roblox Account"
@@ -607,7 +607,7 @@ export default function OGNotificationSheet({
           </p>
           <div className="mt-1 flex flex-wrap gap-2">
             <span
-              className="text-primary-text bg-tertiary-bg/40 inline-flex h-6 items-center gap-1.5 rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl"
+              className="text-primary-text bg-tertiary-bg/40 inline-flex h-6 items-center gap-1.5 rounded-lg border px-2.5 text-xs leading-none font-medium backdrop-blur-xl"
               style={{
                 borderColor: getCategoryColor(item.type),
               }}

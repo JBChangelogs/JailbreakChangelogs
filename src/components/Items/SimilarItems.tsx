@@ -448,7 +448,7 @@ const SimilarItems = ({
                   {/* Type Badge */}
                   <div className="flex flex-wrap gap-1">
                     <span
-                      className="text-primary-text bg-tertiary-bg/40 inline-flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl"
+                      className="text-primary-text bg-tertiary-bg/40 inline-flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium backdrop-blur-xl"
                       style={{
                         borderColor: getCategoryColor(item.type),
                       }}
@@ -465,7 +465,7 @@ const SimilarItems = ({
                       {item.type}
                     </span>
                     {(item.tradable === 0 || item.tradable === false) && (
-                      <span className="text-primary-text border-border-card bg-tertiary-bg/40 inline-flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl">
+                      <span className="text-primary-text border-border-card bg-tertiary-bg/40 inline-flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium backdrop-blur-xl">
                         {item.id === 713 ? "Reference Only" : "Non-Tradable"}
                       </span>
                     )}

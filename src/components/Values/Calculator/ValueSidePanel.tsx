@@ -38,7 +38,7 @@ const ValueItemRow: React.FC<ValueItemRowProps> = ({
           </h5>
           <div className="mt-2 flex flex-wrap items-center gap-2">
             <span
-              className="text-primary-text bg-tertiary-bg/40 flex h-6 items-center gap-1.5 rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl"
+              className="text-primary-text bg-tertiary-bg/40 flex h-6 items-center gap-1.5 rounded-lg border px-2.5 text-xs leading-none font-medium backdrop-blur-xl"
               style={{ borderColor: getCategoryColor(item.type) }}
             >
               {(() => {
@@ -53,7 +53,7 @@ const ValueItemRow: React.FC<ValueItemRowProps> = ({
               {item.type}
             </span>
             {(item.is_limited === 1 || item.data?.is_limited === 1) && (
-              <span className="text-primary-text border-border-card bg-tertiary-bg/40 inline-flex h-6 items-center gap-1.5 rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl">
+              <span className="text-primary-text border-border-card bg-tertiary-bg/40 inline-flex h-6 items-center gap-1.5 rounded-lg border px-2.5 text-xs leading-none font-medium backdrop-blur-xl">
                 <Icon
                   icon="mdi:clock"
                   className="h-3 w-3"
@@ -63,7 +63,7 @@ const ValueItemRow: React.FC<ValueItemRowProps> = ({
               </span>
             )}
             {(item.is_seasonal === 1 || item.data?.is_seasonal === 1) && (
-              <span className="text-primary-text border-border-card bg-tertiary-bg/40 inline-flex h-6 items-center gap-1.5 rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl">
+              <span className="text-primary-text border-border-card bg-tertiary-bg/40 inline-flex h-6 items-center gap-1.5 rounded-lg border px-2.5 text-xs leading-none font-medium backdrop-blur-xl">
                 <Icon
                   icon="noto-v1:snowflake"
                   className="h-3 w-3"
@@ -72,7 +72,7 @@ const ValueItemRow: React.FC<ValueItemRowProps> = ({
                 Seasonal
               </span>
             )}
-            <span className="text-primary-text border-border-card bg-tertiary-bg/40 inline-flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl">
+            <span className="text-primary-text border-border-card bg-tertiary-bg/40 inline-flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium backdrop-blur-xl">
               {selectedType === "duped" ? "Duped" : "Clean"}
             </span>
           </div>
@@ -109,7 +109,7 @@ const ValueItemRow: React.FC<ValueItemRowProps> = ({
             <span className="text-secondary-text text-xs font-medium">
               Cash Value
             </span>
-            <span className="bg-button-info text-form-button-text inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold whitespace-nowrap shadow-sm min-[480px]:px-3">
+            <span className="bg-button-info text-form-button-text inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold whitespace-nowrap min-[480px]:px-3">
               {item.cash_value === null || item.cash_value === "N/A"
                 ? "N/A"
                 : formatCurrencyValue(parseValueString(item.cash_value))}
@@ -119,7 +119,7 @@ const ValueItemRow: React.FC<ValueItemRowProps> = ({
             <span className="text-secondary-text text-xs font-medium">
               Duped Value
             </span>
-            <span className="bg-button-info text-form-button-text inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold whitespace-nowrap shadow-sm min-[480px]:px-3">
+            <span className="bg-button-info text-form-button-text inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold whitespace-nowrap min-[480px]:px-3">
               {item.duped_value === null || item.duped_value === "N/A"
                 ? "N/A"
                 : formatCurrencyValue(parseValueString(item.duped_value))}
@@ -130,7 +130,7 @@ const ValueItemRow: React.FC<ValueItemRowProps> = ({
               Demand
             </span>
             <span
-              className={`${getDemandColor(demand)} inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold whitespace-nowrap shadow-sm min-[480px]:px-3`}
+              className={`${getDemandColor(demand)} inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold whitespace-nowrap min-[480px]:px-3`}
             >
               {demand === "N/A" ? "Unknown" : demand}
             </span>
@@ -140,7 +140,7 @@ const ValueItemRow: React.FC<ValueItemRowProps> = ({
               Trend
             </span>
             <span
-              className={`${getTrendColor(trend || "N/A")} inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold whitespace-nowrap shadow-sm min-[480px]:px-3`}
+              className={`${getTrendColor(trend || "N/A")} inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold whitespace-nowrap min-[480px]:px-3`}
             >
               {trend === "N/A" ? "Unknown" : trend}
             </span>
@@ -170,7 +170,7 @@ export const ValueSidePanel: React.FC<ValueSidePanelProps> = ({
           </h4>
           <div className="flex gap-2">
             <span
-              className={`text-primary-text hidden h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl sm:inline-flex ${
+              className={`text-primary-text hidden h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium backdrop-blur-xl sm:inline-flex ${
                 side === "offering"
                   ? "border-status-success/40 bg-status-success/15"
                   : "border-status-error/40 bg-status-error/15"
@@ -178,7 +178,7 @@ export const ValueSidePanel: React.FC<ValueSidePanelProps> = ({
             >
               {sideLabel}
             </span>
-            <span className="text-primary-text border-border-card bg-tertiary-bg/40 inline-flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl">
+            <span className="text-primary-text border-border-card bg-tertiary-bg/40 inline-flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium backdrop-blur-xl">
               {items.length} item
               {items.length !== 1 ? "s" : ""}
             </span>

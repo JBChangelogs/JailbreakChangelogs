@@ -135,7 +135,7 @@ export const TotalSimilarItems: React.FC<TotalSimilarItemsProps> = ({
                   onClick={() => setSortMode("diff")}
                   className={`cursor-pointer px-4 py-2 text-sm font-medium transition-all duration-200 ${
                     sortMode === "diff"
-                      ? "bg-button-info text-form-button-text shadow-sm"
+                      ? "bg-button-info text-form-button-text"
                       : "bg-tertiary-bg text-secondary-text hover:text-primary-text"
                   }`}
                 >
@@ -145,7 +145,7 @@ export const TotalSimilarItems: React.FC<TotalSimilarItemsProps> = ({
                   onClick={() => setSortMode("demand-desc")}
                   className={`cursor-pointer px-4 py-2 text-sm font-medium transition-all duration-200 ${
                     sortMode === "demand-desc"
-                      ? "bg-button-info text-form-button-text shadow-sm"
+                      ? "bg-button-info text-form-button-text"
                       : "bg-tertiary-bg text-secondary-text hover:text-primary-text"
                   }`}
                 >
@@ -155,7 +155,7 @@ export const TotalSimilarItems: React.FC<TotalSimilarItemsProps> = ({
                   onClick={() => setSortMode("demand-asc")}
                   className={`cursor-pointer px-4 py-2 text-sm font-medium transition-all duration-200 ${
                     sortMode === "demand-asc"
-                      ? "bg-button-info text-form-button-text shadow-sm"
+                      ? "bg-button-info text-form-button-text"
                       : "bg-tertiary-bg text-secondary-text hover:text-primary-text"
                   }`}
                 >

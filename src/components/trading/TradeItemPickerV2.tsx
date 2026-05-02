@@ -747,7 +747,7 @@ export default function TradeItemPickerV2({
                       <span className="text-secondary-text text-xs font-medium whitespace-nowrap">
                         Cash
                       </span>
-                      <span className="bg-button-info text-form-button-text inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold shadow-sm">
+                      <span className="bg-button-info text-form-button-text inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold">
                         {formatValue(
                           item.cash_value ?? item.data?.cash_value,
                           isMobile,
@@ -758,7 +758,7 @@ export default function TradeItemPickerV2({
                       <span className="text-secondary-text text-xs font-medium whitespace-nowrap">
                         Duped
                       </span>
-                      <span className="bg-button-info text-form-button-text inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold shadow-sm">
+                      <span className="bg-button-info text-form-button-text inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold">
                         {formatValue(
                           item.duped_value ?? item.data?.duped_value,
                           isMobile,
@@ -773,7 +773,7 @@ export default function TradeItemPickerV2({
                         const d = item.demand ?? item.data?.demand ?? "N/A";
                         return (
                           <span
-                            className={`${getDemandColor(d)} inline-flex h-6 max-w-36 min-w-0 items-center truncate rounded-lg px-2 text-xs leading-none font-bold shadow-sm`}
+                            className={`${getDemandColor(d)} inline-flex h-6 max-w-36 min-w-0 items-center truncate rounded-lg px-2 text-xs leading-none font-bold`}
                           >
                             {d === "N/A" ? "Unknown" : d}
                           </span>
@@ -788,7 +788,7 @@ export default function TradeItemPickerV2({
                         const t = item.trend ?? item.data?.trend ?? "N/A";
                         return (
                           <span
-                            className={`${getTrendColor(t)} inline-flex h-6 max-w-36 min-w-0 items-center truncate rounded-lg px-2 text-xs leading-none font-bold shadow-sm`}
+                            className={`${getTrendColor(t)} inline-flex h-6 max-w-36 min-w-0 items-center truncate rounded-lg px-2 text-xs leading-none font-bold`}
                           >
                             {t === "N/A" ? "Unknown" : t}
                           </span>

@@ -300,7 +300,7 @@ export default function Comment({
             {/* Badge Second */}
             <div className="mb-2">
               <span
-                className="text-primary-text bg-tertiary-bg/40 inline-flex h-6 w-fit items-center rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl"
+                className="text-primary-text bg-tertiary-bg/40 inline-flex h-6 w-fit items-center rounded-lg border px-2.5 text-xs leading-none font-medium backdrop-blur-xl"
                 style={{
                   borderColor: getCategoryColor(item_type),
                 }}

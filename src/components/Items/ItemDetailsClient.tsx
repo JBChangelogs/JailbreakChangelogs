@@ -451,7 +451,7 @@ export default function ItemDetailsClient({
               </p>
               <div className="mt-2 flex flex-wrap gap-2">
                 <span
-                  className="text-primary-text bg-tertiary-bg/40 inline-flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl"
+                  className="text-primary-text bg-tertiary-bg/40 inline-flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium backdrop-blur-xl"
                   style={{
                     borderColor: getCategoryColor(currentItem.type),
                   }}
@@ -468,7 +468,7 @@ export default function ItemDetailsClient({
                   {currentItem.type}
                 </span>
                 {currentItem.is_limited === 1 && (
-                  <span className="text-primary-text border-border-card bg-tertiary-bg/40 inline-flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl">
+                  <span className="text-primary-text border-border-card bg-tertiary-bg/40 inline-flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium backdrop-blur-xl">
                     <Icon
                       icon="mdi:clock"
                       className="mr-1.5 h-3 w-3"
@@ -478,7 +478,7 @@ export default function ItemDetailsClient({
                   </span>
                 )}
                 {currentItem.is_seasonal === 1 && (
-                  <span className="text-primary-text border-border-card bg-tertiary-bg/40 inline-flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl">
+                  <span className="text-primary-text border-border-card bg-tertiary-bg/40 inline-flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium backdrop-blur-xl">
                     <Icon
                       icon="noto-v1:snowflake"
                       className="mr-1.5 h-3 w-3"
@@ -493,12 +493,12 @@ export default function ItemDetailsClient({
                     <TooltipTrigger asChild>
                       <div className="flex cursor-help items-center gap-1">
                         {typeof itemMetadata?.season === "number" && (
-                          <span className="bg-button-info text-form-button-text inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold shadow-sm">
+                          <span className="bg-button-info text-form-button-text inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold">
                             S{itemMetadata.season}
                           </span>
                         )}
                         {hasMetadataLevel && (
-                          <span className="bg-status-success text-form-button-text inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold shadow-sm">
+                          <span className="bg-status-success text-form-button-text inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold">
                             {formatUnlockLevelBadge(metadataLevel)}
                           </span>
                         )}
@@ -508,7 +508,7 @@ export default function ItemDetailsClient({
                   </Tooltip>
                 )}
                 {currentItem.tradable === 0 && (
-                  <span className="text-primary-text border-border-card bg-tertiary-bg/40 inline-flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl">
+                  <span className="text-primary-text border-border-card bg-tertiary-bg/40 inline-flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium backdrop-blur-xl">
                     {currentItem.id === 713 ? "Reference Only" : "Non-Tradable"}
                   </span>
                 )}

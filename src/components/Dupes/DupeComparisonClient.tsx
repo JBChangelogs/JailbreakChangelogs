@@ -334,7 +334,7 @@ export default function DupeComparisonClient({
             </Link>
             <div className="mb-2 flex flex-wrap items-center justify-center gap-2 md:justify-start">
               <span
-                className="text-primary-text bg-tertiary-bg/40 flex h-6 items-center gap-1.5 rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl"
+                className="text-primary-text bg-tertiary-bg/40 flex h-6 items-center gap-1.5 rounded-lg border px-2.5 text-xs leading-none font-medium backdrop-blur-xl"
                 style={{
                   borderColor: getCategoryColor(duplicateItem.categoryTitle),
                 }}
@@ -355,13 +355,13 @@ export default function DupeComparisonClient({
                 {duplicateItem.categoryTitle}
               </span>
               {sharedItemData.is_limited === 1 && (
-                <span className="text-primary-text border-border-card bg-tertiary-bg/40 inline-flex h-6 items-center gap-1.5 rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl">
+                <span className="text-primary-text border-border-card bg-tertiary-bg/40 inline-flex h-6 items-center gap-1.5 rounded-lg border px-2.5 text-xs leading-none font-medium backdrop-blur-xl">
                   <Icon icon="mdi:clock" className="h-3 w-3 text-[#ffd700]" />
                   Limited
                 </span>
               )}
               {sharedItemData.is_seasonal === 1 && (
-                <span className="text-primary-text border-border-card bg-tertiary-bg/40 inline-flex h-6 items-center gap-1.5 rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl">
+                <span className="text-primary-text border-border-card bg-tertiary-bg/40 inline-flex h-6 items-center gap-1.5 rounded-lg border px-2.5 text-xs leading-none font-medium backdrop-blur-xl">
                   <Icon
                     icon="noto-v1:snowflake"
                     className="h-3 w-3 text-[#40c0e7]"

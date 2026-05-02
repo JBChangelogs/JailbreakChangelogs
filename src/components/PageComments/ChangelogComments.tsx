@@ -1902,7 +1902,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                                       {type === "tradev2" &&
                                         trade &&
                                         comment.user_id === trade.author && (
-                                          <span className="from-button-info to-button-info-hover text-card-tag-text rounded-full bg-linear-to-r px-2 py-0.5 text-xs font-medium shadow-sm">
+                                          <span className="from-button-info to-button-info-hover text-card-tag-text rounded-full bg-linear-to-r px-2 py-0.5 text-xs font-medium">
                                             OP
                                           </span>
                                         )}

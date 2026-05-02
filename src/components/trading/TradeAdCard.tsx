@@ -181,7 +181,7 @@ const TradeSidePreview = ({
                       <div className="flex flex-wrap items-center gap-2">
                         {nameNode}
                         <span
-                          className="text-primary-text bg-tertiary-bg/40 inline-flex h-6 items-center gap-1.5 rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl"
+                          className="text-primary-text bg-tertiary-bg/40 inline-flex h-6 items-center gap-1.5 rounded-lg border px-2.5 text-xs leading-none font-medium backdrop-blur-xl"
                           style={{
                             borderColor: getCategoryColor(item.type),
                           }}

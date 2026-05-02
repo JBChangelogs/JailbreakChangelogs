@@ -542,12 +542,12 @@ export default function ItemChangelogs({
       <div className="border-border-card bg-secondary-bg mb-4 rounded-lg border p-3">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="text-primary-text border-border-card bg-tertiary-bg/40 inline-flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl">
+            <span className="text-primary-text border-border-card bg-tertiary-bg/40 inline-flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium backdrop-blur-xl">
               {displayableChanges.length} change
               {displayableChanges.length !== 1 ? "s" : ""}
             </span>
             {suggestionsCount > 0 && (
-              <span className="text-primary-text border-border-card bg-tertiary-bg/40 inline-flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl">
+              <span className="text-primary-text border-border-card bg-tertiary-bg/40 inline-flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium backdrop-blur-xl">
                 {suggestionsCount} suggestion{suggestionsCount !== 1 ? "s" : ""}
               </span>
             )}
@@ -555,7 +555,7 @@ export default function ItemChangelogs({
           <Button
             onClick={toggleSortOrder}
             size="sm"
-            className="text-primary-text border-border-card bg-tertiary-bg/40 hover:bg-quaternary-bg/30 h-6 w-full rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl sm:w-auto"
+            className="text-primary-text border-border-card bg-tertiary-bg/40 hover:bg-quaternary-bg/30 h-6 w-full rounded-lg border px-2.5 text-xs leading-none font-medium backdrop-blur-xl sm:w-auto"
           >
             {sortOrder === "newest" ? (
               <Icon icon="heroicons-outline:arrow-down" inline={true} />
@@ -635,7 +635,7 @@ export default function ItemChangelogs({
                     {change.suggestion_data && (
                       <div className="mb-2 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
                         <div className="flex items-center gap-2">
-                          <span className="text-primary-text border-border-card bg-tertiary-bg/40 inline-flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl">
+                          <span className="text-primary-text border-border-card bg-tertiary-bg/40 inline-flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium backdrop-blur-xl">
                             Suggestion #{change.suggestion_data.id}
                           </span>
                         </div>
@@ -872,7 +872,7 @@ export default function ItemChangelogs({
                               <div className="flex items-start gap-2 overflow-hidden">
                                 <div className="min-w-0 flex-1">
                                   <div className="text-primary-text mb-3 text-lg font-bold capitalize">
-                                    <span className="text-primary-text border-border-card bg-tertiary-bg/40 mb-2 inline-flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl">
+                                    <span className="text-primary-text border-border-card bg-tertiary-bg/40 mb-2 inline-flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium backdrop-blur-xl">
                                       {formatSuggestionTypeLabel(
                                         change.suggestion_data?.metadata
                                           ?.suggestion_type,

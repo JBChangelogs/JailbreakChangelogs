@@ -688,7 +688,7 @@ const stripHtml = (raw: string) =>
   DOMPurify.sanitize(raw, { ALLOWED_TAGS: [], ALLOWED_ATTR: [] });
 
 const badgeBase =
-  "inline-flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl";
+  "inline-flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium backdrop-blur-xl";
 
 export default function ValueSuggestionsPage() {
   const { isAuthenticated, user, setLoginModal } = useAuthContext();

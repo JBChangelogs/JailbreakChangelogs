@@ -179,7 +179,7 @@ export default function ValuesChangelogPage() {
                   <Button
                     onClick={toggleSortOrder}
                     size="sm"
-                    className="text-primary-text border-border-card bg-tertiary-bg/40 hover:bg-quaternary-bg/30 h-6 rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl"
+                    className="text-primary-text border-border-card bg-tertiary-bg/40 hover:bg-quaternary-bg/30 h-6 rounded-lg border px-2.5 text-xs leading-none font-medium backdrop-blur-xl"
                   >
                     {sortOrder === "newest" ? (
                       <Icon

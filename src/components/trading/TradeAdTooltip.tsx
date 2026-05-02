@@ -40,7 +40,7 @@ export const TradeAdTooltip: React.FC<TradeAdTooltipProps> = ({ item }) => {
         <div className="space-y-2 text-sm">
           <div className="flex flex-wrap items-center gap-2">
             <span
-              className="text-primary-text bg-tertiary-bg/40 flex h-6 items-center gap-1.5 rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl"
+              className="text-primary-text bg-tertiary-bg/40 flex h-6 items-center gap-1.5 rounded-lg border px-2.5 text-xs leading-none font-medium backdrop-blur-xl"
               style={{
                 borderColor: getCategoryColor(item.type),
               }}
@@ -57,7 +57,7 @@ export const TradeAdTooltip: React.FC<TradeAdTooltipProps> = ({ item }) => {
               {item.type}
             </span>
             {(item.is_limited === 1 || item.data?.is_limited === 1) && (
-              <span className="text-primary-text border-border-card bg-tertiary-bg/40 flex h-6 items-center gap-1.5 rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl">
+              <span className="text-primary-text border-border-card bg-tertiary-bg/40 flex h-6 items-center gap-1.5 rounded-lg border px-2.5 text-xs leading-none font-medium backdrop-blur-xl">
                 <Icon
                   icon="mdi:clock"
                   className="h-3 w-3"
@@ -67,7 +67,7 @@ export const TradeAdTooltip: React.FC<TradeAdTooltipProps> = ({ item }) => {
               </span>
             )}
             {(item.is_seasonal === 1 || item.data?.is_seasonal === 1) && (
-              <span className="text-primary-text border-border-card bg-tertiary-bg/40 flex h-6 items-center gap-1.5 rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl">
+              <span className="text-primary-text border-border-card bg-tertiary-bg/40 flex h-6 items-center gap-1.5 rounded-lg border px-2.5 text-xs leading-none font-medium backdrop-blur-xl">
                 <Icon
                   icon="noto-v1:snowflake"
                   className="h-3 w-3"
@@ -82,7 +82,7 @@ export const TradeAdTooltip: React.FC<TradeAdTooltipProps> = ({ item }) => {
               </span>
             )}
             {item.isOG && (
-              <span className="text-primary-text bg-tertiary-bg/40 border-border-card inline-flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium shadow-sm">
+              <span className="text-primary-text bg-tertiary-bg/40 border-border-card inline-flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium">
                 OG
               </span>
             )}

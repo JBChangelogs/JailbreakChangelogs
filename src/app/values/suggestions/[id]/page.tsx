@@ -87,7 +87,7 @@ const statusColors: Record<string, string> = {
 };
 
 const badgeBase =
-  "inline-flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl";
+  "inline-flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium backdrop-blur-xl";
 
 function VoterCard({ v }: { v: { created_at: number; user: SuggestionUser } }) {
   return (

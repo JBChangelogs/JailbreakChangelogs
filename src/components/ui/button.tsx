@@ -10,11 +10,11 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          "bg-button-info! text-form-button-text! shadow-lg hover:bg-button-info-hover! active:bg-button-info-active!",
+          "bg-button-info! text-form-button-text! hover:bg-button-info-hover! active:bg-button-info-active!",
         destructive:
-          "bg-status-error! text-form-button-text! shadow-lg hover:bg-status-error/90! active:bg-status-error!",
+          "bg-status-error! text-form-button-text! hover:bg-status-error/90! active:bg-status-error!",
         success:
-          "bg-status-success! text-form-button-text! shadow-lg hover:bg-status-success/90! active:bg-status-success!",
+          "bg-status-success! text-form-button-text! hover:bg-status-success/90! active:bg-status-success!",
         outline:
           "border-2! border-primary-text! text-primary-text! hover:bg-button-info-hover! hover:text-form-button-text! active:bg-button-info-active! active:text-form-button-text!",
         heroOutline:

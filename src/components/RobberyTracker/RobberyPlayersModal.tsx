@@ -182,7 +182,7 @@ export default function RobberyPlayersModal({
                           {getUserDisplay(player.user_id)}
                         </a>
                         <span
-                          className={`text-primary-text inline-flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl ${
+                          className={`text-primary-text inline-flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium backdrop-blur-xl ${
                             player.team === "Police"
                               ? "border-blue-500/30 bg-blue-500/20"
                               : "border-red-500/30 bg-red-500/20"

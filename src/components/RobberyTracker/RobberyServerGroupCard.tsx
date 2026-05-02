@@ -397,7 +397,7 @@ export default function RobberyServerGroupCard({
                           casinoRobberyInTop.metadata!.casino_code!,
                         )
                       }
-                      className="text-primary-text border-button-info/30 bg-button-info/20 hover:bg-button-info/30 group inline-flex h-6 cursor-pointer items-center gap-1.5 rounded-lg border px-2.5 font-mono text-xs leading-none font-medium shadow-2xl backdrop-blur-xl transition-colors"
+                      className="text-primary-text border-button-info/30 bg-button-info/20 hover:bg-button-info/30 group inline-flex h-6 cursor-pointer items-center gap-1.5 rounded-lg border px-2.5 font-mono text-xs leading-none font-medium backdrop-blur-xl transition-colors"
                     >
                       Code: {casinoRobberyInTop.metadata.casino_code}
                       <Icon

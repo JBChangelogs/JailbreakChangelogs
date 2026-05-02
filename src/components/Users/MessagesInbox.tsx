@@ -543,7 +543,7 @@ function OfferItems({
       ) : (
         <div className="mt-1 flex min-w-0 flex-wrap items-center gap-1.5">
           {visible.length === 0 ? (
-            <span className="text-primary-text border-border-card bg-tertiary-bg/40 inline-flex h-6 items-center rounded-lg border px-2.5 text-[11px] leading-none font-medium shadow-2xl backdrop-blur-xl">
+            <span className="text-primary-text border-border-card bg-tertiary-bg/40 inline-flex h-6 items-center rounded-lg border px-2.5 text-[11px] leading-none font-medium backdrop-blur-xl">
               —
             </span>
           ) : (
@@ -560,7 +560,7 @@ function OfferItems({
                 return (
                   <span
                     key={`${item.name}-${idx}`}
-                    className="text-primary-text border-border-card bg-tertiary-bg/40 inline-flex h-6 max-w-56 min-w-0 items-center gap-1.5 rounded-lg border px-2.5 text-[11px] leading-none font-medium shadow-2xl backdrop-blur-xl"
+                    className="text-primary-text border-border-card bg-tertiary-bg/40 inline-flex h-6 max-w-56 min-w-0 items-center gap-1.5 rounded-lg border px-2.5 text-[11px] leading-none font-medium backdrop-blur-xl"
                     title={
                       item.amount > 1
                         ? `${item.name} x${item.amount}`
@@ -592,7 +592,7 @@ function OfferItems({
               type="button"
               onClick={onExpand}
               className={cn(
-                "text-primary-text border-border-card bg-tertiary-bg/40 hover:bg-quaternary-bg/30 inline-flex h-6 items-center rounded-lg border px-2.5 text-[11px] leading-none font-medium shadow-2xl backdrop-blur-xl transition-colors",
+                "text-primary-text border-border-card bg-tertiary-bg/40 hover:bg-quaternary-bg/30 inline-flex h-6 items-center rounded-lg border px-2.5 text-[11px] leading-none font-medium backdrop-blur-xl transition-colors",
                 "text-link hover:text-link",
                 onExpand ? "cursor-pointer" : "cursor-default opacity-70",
               )}
@@ -606,7 +606,7 @@ function OfferItems({
               type="button"
               onClick={onCollapse}
               className={cn(
-                "text-primary-text border-border-card bg-tertiary-bg/40 hover:bg-quaternary-bg/30 inline-flex h-6 items-center rounded-lg border px-2.5 text-[11px] leading-none font-medium shadow-2xl backdrop-blur-xl transition-colors",
+                "text-primary-text border-border-card bg-tertiary-bg/40 hover:bg-quaternary-bg/30 inline-flex h-6 items-center rounded-lg border px-2.5 text-[11px] leading-none font-medium backdrop-blur-xl transition-colors",
                 "text-link hover:text-link",
                 onCollapse ? "cursor-pointer" : "cursor-default opacity-70",
               )}

@@ -634,7 +634,7 @@ export default function ChangelogDetailsClient({
                     {change.suggestion && (
                       <div className="mb-2 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
                         <div className="flex items-center gap-2">
-                          <span className="text-primary-text border-border-card bg-tertiary-bg/40 inline-flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl">
+                          <span className="text-primary-text border-border-card bg-tertiary-bg/40 inline-flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium backdrop-blur-xl">
                             Suggestion #{change.suggestion.id}
                           </span>
                         </div>
@@ -679,7 +679,7 @@ export default function ChangelogDetailsClient({
                             {change.item.name}
                           </Link>
                           <span
-                            className="text-primary-text bg-tertiary-bg/40 mt-1 inline-flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl"
+                            className="text-primary-text bg-tertiary-bg/40 mt-1 inline-flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium backdrop-blur-xl"
                             style={{
                               borderColor: getCategoryColor(change.item.type),
                             }}
@@ -911,7 +911,7 @@ export default function ChangelogDetailsClient({
                               <div className="flex items-start gap-2 overflow-hidden">
                                 <div className="min-w-0 flex-1">
                                   <div className="text-primary-text mb-3 text-lg font-bold capitalize">
-                                    <span className="text-primary-text border-border-card bg-tertiary-bg/40 mb-2 inline-flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl">
+                                    <span className="text-primary-text border-border-card bg-tertiary-bg/40 mb-2 inline-flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium backdrop-blur-xl">
                                       {formatSuggestionTypeLabel(
                                         change.suggestion?.metadata
                                           ?.suggestion_type,

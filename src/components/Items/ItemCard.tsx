@@ -328,12 +328,12 @@ export default function ItemCard({
                 <TooltipTrigger asChild>
                   <div className="absolute right-2 bottom-2 z-10 flex cursor-help items-center gap-1">
                     {typeof visibleItemMetadata?.season === "number" && (
-                      <span className="bg-button-info text-form-button-text inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold shadow-sm">
+                      <span className="bg-button-info text-form-button-text inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold">
                         S{visibleItemMetadata.season}
                       </span>
                     )}
                     {hasMetadataLevel && (
-                      <span className="bg-status-success text-form-button-text inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold shadow-sm">
+                      <span className="bg-status-success text-form-button-text inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold">
                         {formatUnlockLevelBadge(metadataLevel)}
                       </span>
                     )}
@@ -489,7 +489,7 @@ export default function ItemCard({
 
           <div className="flex flex-wrap gap-1 pb-2 sm:gap-2">
             <span
-              className="text-primary-text bg-tertiary-bg/40 flex h-5 items-center rounded-lg border px-2 text-[10px] leading-none font-medium shadow-2xl backdrop-blur-xl sm:h-6 sm:px-2.5 sm:text-xs"
+              className="text-primary-text bg-tertiary-bg/40 flex h-5 items-center rounded-lg border px-2 text-[10px] leading-none font-medium backdrop-blur-xl sm:h-6 sm:px-2.5 sm:text-xs"
               style={{
                 borderColor: getCategoryColor(item.type),
               }}
@@ -497,7 +497,7 @@ export default function ItemCard({
               {item.type}
             </span>
             {currentItemData.tradable === 0 && (
-              <span className="text-primary-text border-border-card bg-tertiary-bg/40 hidden h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl sm:inline-flex">
+              <span className="text-primary-text border-border-card bg-tertiary-bg/40 hidden h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium backdrop-blur-xl sm:inline-flex">
                 {currentItemData.id === 713 ? "Reference Only" : "Non-Tradable"}
               </span>
             )}
@@ -587,7 +587,7 @@ export default function ItemCard({
                     return null;
                   })()}
               </div>
-              <span className="bg-button-info text-form-button-text inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold shadow-sm min-[480px]:px-3">
+              <span className="bg-button-info text-form-button-text inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold min-[480px]:px-3">
                 {isMobile
                   ? currentItemData.cash_value
                   : formatFullValue(currentItemData.cash_value)}
@@ -617,7 +617,7 @@ export default function ItemCard({
                     return null;
                   })()}
               </div>
-              <span className="bg-button-info text-form-button-text inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold shadow-sm min-[480px]:px-3">
+              <span className="bg-button-info text-form-button-text inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold min-[480px]:px-3">
                 {isMobile
                   ? currentItemData.duped_value
                   : formatFullValue(currentItemData.duped_value)}
@@ -631,7 +631,7 @@ export default function ItemCard({
                 </span>
               </div>
               <span
-                className={`${getDemandColor(currentItemData.demand)} inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold whitespace-nowrap shadow-sm min-[480px]:px-3`}
+                className={`${getDemandColor(currentItemData.demand)} inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold whitespace-nowrap min-[480px]:px-3`}
               >
                 {demandLabel}
               </span>
@@ -645,7 +645,7 @@ export default function ItemCard({
                   </span>
                 </div>
                 <span
-                  className={`${getTrendColor(currentItemData.trend || "N/A")} inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold whitespace-nowrap shadow-sm min-[480px]:px-3`}
+                  className={`${getTrendColor(currentItemData.trend || "N/A")} inline-flex h-6 items-center rounded-lg px-2 text-xs leading-none font-bold whitespace-nowrap min-[480px]:px-3`}
                 >
                   {trendLabel}
                 </span>

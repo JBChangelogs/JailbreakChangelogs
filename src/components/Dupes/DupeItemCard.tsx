@@ -101,7 +101,7 @@ export default function DupeItemCard({
       {/* Duplicate Indicator */}
       {isDuplicate && duplicateNumber && (
         <div
-          className="bg-button-danger text-form-button-text absolute top-2 right-2 z-10 flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold shadow-lg"
+          className="bg-button-danger text-form-button-text absolute top-2 right-2 z-10 flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold"
           aria-label={`Duplicate item number ${duplicateNumber}`}
         >
           #{duplicateNumber}
@@ -124,7 +124,7 @@ export default function DupeItemCard({
         </h2>
         <div className="flex items-center gap-2">
           <span
-            className="text-primary-text bg-tertiary-bg/40 flex h-6 items-center gap-1.5 rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl"
+            className="text-primary-text bg-tertiary-bg/40 flex h-6 items-center gap-1.5 rounded-lg border px-2.5 text-xs leading-none font-medium backdrop-blur-xl"
             style={{
               borderColor: getCategoryColor(item.categoryTitle),
             }}
@@ -308,14 +308,14 @@ export default function DupeItemCard({
             <TooltipTrigger asChild>
               <div className="flex cursor-help items-center gap-2">
                 {typeof displayedSeason === "number" && (
-                  <div className="border-button-info bg-button-info flex h-8 w-8 items-center justify-center rounded-full border shadow-lg">
+                  <div className="border-button-info bg-button-info flex h-8 w-8 items-center justify-center rounded-full border">
                     <span className="text-form-button-text text-xs font-bold">
                       S{displayedSeason}
                     </span>
                   </div>
                 )}
                 {hasDisplayedLevel && (
-                  <div className="border-status-success bg-status-success flex h-8 w-8 items-center justify-center rounded-full border shadow-lg">
+                  <div className="border-status-success bg-status-success flex h-8 w-8 items-center justify-center rounded-full border">
                     <span className="text-form-button-text text-xs font-bold">
                       {formatUnlockLevelBadge(displayedLevel)}
                     </span>

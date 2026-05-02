@@ -617,7 +617,7 @@ export default function ProfileInventoryTab({
                   }`}
                 >
                   {item.copyCount > 1 && (
-                    <div className="bg-button-danger text-form-button-text absolute top-2 right-2 z-10 flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold shadow-lg">
+                    <div className="bg-button-danger text-form-button-text absolute top-2 right-2 z-10 flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold">
                       #{item.copyOrder}
                     </div>
                   )}
@@ -636,7 +636,7 @@ export default function ProfileInventoryTab({
                     </h2>
                     <div className="flex items-center gap-2">
                       <span
-                        className="text-primary-text bg-tertiary-bg/40 flex h-6 items-center gap-1.5 rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl"
+                        className="text-primary-text bg-tertiary-bg/40 flex h-6 items-center gap-1.5 rounded-lg border px-2.5 text-xs leading-none font-medium backdrop-blur-xl"
                         style={{
                           borderColor: categoryColor,
                         }}

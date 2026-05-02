@@ -17,9 +17,9 @@ interface TradeAdMetadataProps {
 const getStatusColor = (status: string) => {
   switch (status) {
     case "Pending":
-      return "text-primary-text border-border-card bg-tertiary-bg/40 rounded-lg border px-2.5 py-1 shadow-2xl backdrop-blur-xl";
+      return "text-primary-text border-border-card bg-tertiary-bg/40 rounded-lg border px-2.5 py-1 backdrop-blur-xl";
     case "Completed":
-      return "text-primary-text border-border-card bg-tertiary-bg/40 rounded-lg border px-2.5 py-1 shadow-2xl backdrop-blur-xl";
+      return "text-primary-text border-border-card bg-tertiary-bg/40 rounded-lg border px-2.5 py-1 backdrop-blur-xl";
     case "Expired":
       return "bg-status-error/10 text-status-error border-status-error/20";
     default:
