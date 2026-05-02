@@ -43,6 +43,55 @@ type SortOrder =
   | "alpha-asc"
   | "alpha-desc";
 
+const getLeaderboardRowStyle = (rank: number) => {
+  if (rank === 1) {
+    return {
+      backgroundColor: "hsl(45 100% 32% / 0.28)",
+      borderColor: "hsl(45 100% 50% / 0.5)",
+    };
+  }
+
+  if (rank === 2) {
+    return {
+      backgroundColor: "hsl(0 0% 70% / 0.22)",
+      borderColor: "hsl(0 0% 75% / 0.5)",
+    };
+  }
+
+  if (rank === 3) {
+    return {
+      backgroundColor: "hsl(30 100% 28% / 0.28)",
+      borderColor: "hsl(30 100% 50% / 0.5)",
+    };
+  }
+
+  return null;
+};
+
+const getLeaderboardRankBadgeStyle = (rank: number) => {
+  if (rank === 1) {
+    return {
+      background:
+        "linear-gradient(to right, hsl(45 100% 50%), hsl(45 100% 45%))",
+    };
+  }
+
+  if (rank === 2) {
+    return {
+      background: "linear-gradient(to right, hsl(0 0% 75%), hsl(0 0% 65%))",
+    };
+  }
+
+  if (rank === 3) {
+    return {
+      background:
+        "linear-gradient(to right, hsl(30 100% 50%), hsl(30 100% 45%))",
+    };
+  }
+
+  return null;
+};
+
 export default function DuplicatesTab({
   initialData,
   robloxUsers,
@@ -565,6 +614,9 @@ export default function DuplicatesTab({
                         leaderboardItem.title === item.title,
                     );
                   const rank = originalIndex + 1;
+                  const leaderboardRowStyle = getLeaderboardRowStyle(rank);
+                  const leaderboardRankBadgeStyle =
+                    getLeaderboardRankBadgeStyle(rank);
 
                   return (
                     <div
@@ -582,46 +634,17 @@ export default function DuplicatesTab({
                       <div
                         className={`mb-3 flex items-center justify-between rounded-lg border p-3 transition-colors ${
                           rank <= 3
-                            ? "hover:!bg-quaternary-bg"
+                            ? "hover:!bg-quaternary-bg isolate overflow-hidden"
                             : "border-border-card bg-tertiary-bg hover:bg-quaternary-bg"
                         }`}
-                        style={{
-                          ...(rank === 1 && {
-                            background:
-                              "linear-gradient(to right, hsl(45, 100%, 50%, 0.2), hsl(45, 100%, 45%, 0.2))",
-                            borderColor: "hsl(45, 100%, 50%, 0.5)",
-                          }),
-                          ...(rank === 2 && {
-                            background:
-                              "linear-gradient(to right, hsl(0, 0%, 75%, 0.2), hsl(0, 0%, 65%, 0.2))",
-                            borderColor: "hsl(0, 0%, 75%, 0.5)",
-                          }),
-                          ...(rank === 3 && {
-                            background:
-                              "linear-gradient(to right, hsl(30, 100%, 50%, 0.2), hsl(30, 100%, 45%, 0.2))",
-                            borderColor: "hsl(30, 100%, 50%, 0.5)",
-                          }),
-                        }}
+                        style={leaderboardRowStyle ?? undefined}
                       >
                         <div className="flex min-w-0 flex-1 items-center gap-3">
                           <span
                             className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-bold ${
                               rank <= 3 ? "text-black" : "text-primary-text"
                             }`}
-                            style={{
-                              ...(rank === 1 && {
-                                background:
-                                  "linear-gradient(to right, hsl(45, 100%, 50%), hsl(45, 100%, 45%))",
-                              }),
-                              ...(rank === 2 && {
-                                background:
-                                  "linear-gradient(to right, hsl(0, 0%, 75%), hsl(0, 0%, 65%))",
-                              }),
-                              ...(rank === 3 && {
-                                background:
-                                  "linear-gradient(to right, hsl(30, 100%, 50%), hsl(30, 100%, 45%))",
-                              }),
-                            }}
+                            style={leaderboardRankBadgeStyle ?? undefined}
                           >
                             #{rank}
                           </span>

@@ -1,7 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useRef, useState } from "react";
+import {
+  memo,
+  useDeferredValue,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 import { getCategoryColor, getCategoryIcon } from "@/utils/categoryIcons";
 import { UserNetworthData } from "@/utils/api";
 import { Icon } from "@/components/ui/IconWrapper";
@@ -35,6 +42,12 @@ interface InventoryBreakdownProps {
   isActive?: boolean;
 }
 
+interface InventoryListEntry {
+  id: number;
+  name: string;
+  type: string;
+}
+
 const UNVERIFIABLE_COLLECTION_ITEM_IDS = new Set<number>([
   903, 902, 142, 145, 534, 778, 293, 152, 467, 587, 713, 653, 171, 174, 176,
   185, 187, 655, 204, 640, 634, 709,
@@ -59,6 +72,255 @@ const VALUES_TYPE_ORDER_RANK = new Map<string, number>(
   VALUES_TYPE_ORDER.map((type, idx) => [type.toLowerCase(), idx]),
 );
 
+const secondaryFilterInputClassName =
+  "border-border-card bg-secondary-bg text-primary-text placeholder-secondary-text focus:border-button-info w-full rounded-lg border px-3 py-2 pr-9 pl-9 text-sm transition-all duration-300 focus:outline-none";
+
+const secondaryFilterDropdownTriggerClassName =
+  "border-border-card bg-secondary-bg text-primary-text hover:bg-quaternary-bg flex w-full items-center justify-between gap-2 rounded-lg border px-3 py-2 text-sm";
+
+const secondaryFilterDropdownContentClassName =
+  "border-border-card bg-secondary-bg text-primary-text scrollbar-thin max-h-70 w-(--radix-popper-anchor-width) min-w-56 overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg";
+
+const formatNetworth = (networth: number) => {
+  return new Intl.NumberFormat("en-US").format(networth);
+};
+
+const formatInventoryCount = (count: number) => {
+  return new Intl.NumberFormat("en-US").format(count);
+};
+
+const formatPercentage = (percentage: number): string => {
+  const truncated = Math.floor(percentage * 100) / 100;
+  return truncated.toFixed(2);
+};
+
+interface SearchableInventoryListSectionProps {
+  title: string;
+  tooltipContent: ReactNode;
+  items: InventoryListEntry[];
+  searchPlaceholder: string;
+  filterAriaLabel: string;
+  clearAriaLabel: string;
+  emptyMessage: string;
+  noResultsMessage: string;
+  helperContent?: ReactNode;
+  sectionRef?: React.RefObject<HTMLDivElement | null>;
+  sectionId?: string;
+}
+
+const SearchableInventoryListSection = memo(
+  function SearchableInventoryListSection({
+    title,
+    tooltipContent,
+    items,
+    searchPlaceholder,
+    filterAriaLabel,
+    clearAriaLabel,
+    emptyMessage,
+    noResultsMessage,
+    helperContent,
+    sectionRef,
+    sectionId,
+  }: SearchableInventoryListSectionProps) {
+    const [searchTerm, setSearchTerm] = useState("");
+    const [typeFilter, setTypeFilter] = useState<string>("all");
+    const deferredSearchTerm = useDeferredValue(searchTerm);
+
+    const typeOptions = useMemo(() => {
+      const seen = new Set<string>();
+      const uniqueTypes: string[] = [];
+      items.forEach((item) => {
+        if (seen.has(item.type)) return;
+        seen.add(item.type);
+        uniqueTypes.push(item.type);
+      });
+      uniqueTypes.sort((a, b) => {
+        const aRank = VALUES_TYPE_ORDER_RANK.get(a.toLowerCase()) ?? 999;
+        const bRank = VALUES_TYPE_ORDER_RANK.get(b.toLowerCase()) ?? 999;
+        if (aRank !== bRank) return aRank - bRank;
+        return a.localeCompare(b);
+      });
+      return uniqueTypes;
+    }, [items]);
+
+    const filteredItems = useMemo(() => {
+      const normalizedTypeFilter = typeFilter.trim().toLowerCase();
+      const typeFiltered =
+        normalizedTypeFilter === "all"
+          ? items
+          : items.filter(
+              (item) => item.type.toLowerCase() === normalizedTypeFilter,
+            );
+      const query = deferredSearchTerm.trim().toLowerCase();
+      if (!query) return typeFiltered;
+      return typeFiltered.filter(
+        (item) =>
+          item.name.toLowerCase().includes(query) ||
+          item.type.toLowerCase().includes(query),
+      );
+    }, [deferredSearchTerm, items, typeFilter]);
+
+    return (
+      <div
+        ref={sectionRef}
+        id={sectionId}
+        className="border-border-card bg-tertiary-bg rounded-lg border p-3"
+      >
+        <div className="mb-2 flex items-center gap-1.5">
+          <div className="text-primary-text text-sm font-semibold">
+            {title} ({formatInventoryCount(items.length)})
+          </div>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Icon
+                icon="material-symbols:info-outline"
+                className="text-secondary-text h-4 w-4 cursor-help"
+                inline={true}
+              />
+            </TooltipTrigger>
+            <TooltipContent
+              side="top"
+              className="bg-secondary-bg text-primary-text max-w-62.5 border-none shadow-(--color-card-shadow)"
+            >
+              {tooltipContent}
+            </TooltipContent>
+          </Tooltip>
+        </div>
+        {helperContent ? (
+          <div className="text-secondary-text mb-2 text-xs">
+            {helperContent}
+          </div>
+        ) : null}
+        <div className="mb-2">
+          <div className="flex w-full flex-col gap-4 sm:flex-row">
+            <div className="relative w-full sm:w-2/3">
+              <input
+                type="text"
+                placeholder={searchPlaceholder}
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                maxLength={80}
+                className={secondaryFilterInputClassName}
+              />
+              <Icon
+                icon="heroicons:magnifying-glass"
+                className="text-secondary-text absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2"
+              />
+              {searchTerm ? (
+                <button
+                  type="button"
+                  onClick={() => setSearchTerm("")}
+                  className="text-secondary-text hover:text-primary-text absolute top-1/2 right-2 h-6 w-6 -translate-y-1/2 cursor-pointer"
+                  aria-label={clearAriaLabel}
+                >
+                  <Icon icon="heroicons:x-mark" />
+                </button>
+              ) : null}
+            </div>
+            <div className="w-full sm:w-1/3">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button
+                    type="button"
+                    className={secondaryFilterDropdownTriggerClassName}
+                    aria-label={filterAriaLabel}
+                  >
+                    <span className="truncate">
+                      {typeFilter === "all" ? "All types" : typeFilter}
+                    </span>
+                    <Icon
+                      icon="heroicons:chevron-down"
+                      className="text-secondary-text h-4 w-4"
+                      inline={true}
+                    />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  align="end"
+                  className={secondaryFilterDropdownContentClassName}
+                >
+                  <DropdownMenuRadioGroup
+                    value={typeFilter}
+                    onValueChange={(value) => setTypeFilter(value)}
+                  >
+                    <DropdownMenuRadioItem
+                      value="all"
+                      className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
+                    >
+                      All types
+                    </DropdownMenuRadioItem>
+                    {typeOptions.map((type) => (
+                      <DropdownMenuRadioItem
+                        key={type}
+                        value={type}
+                        className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
+                      >
+                        {type}
+                      </DropdownMenuRadioItem>
+                    ))}
+                  </DropdownMenuRadioGroup>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          </div>
+          {(searchTerm.trim() || typeFilter !== "all") && (
+            <div className="text-secondary-text mt-1 text-xs">
+              Showing {formatInventoryCount(filteredItems.length)} of{" "}
+              {formatInventoryCount(items.length)}
+            </div>
+          )}
+        </div>
+        {items.length === 0 ? (
+          <p className="text-secondary-text text-sm">{emptyMessage}</p>
+        ) : filteredItems.length === 0 ? (
+          <p className="text-secondary-text text-sm">{noResultsMessage}</p>
+        ) : (
+          <div className="scrollbar-thin max-h-65 overflow-auto pr-1 text-sm">
+            <ol className="divide-border-card/60 space-y-0 divide-y">
+              {filteredItems.map((item, idx) => (
+                <li
+                  key={item.id}
+                  className="flex flex-col gap-2 py-2 sm:flex-row sm:items-center sm:gap-3"
+                >
+                  <div className="flex min-w-0 items-center gap-3">
+                    <span className="text-secondary-text w-10 shrink-0 text-right font-mono text-xs font-medium tabular-nums">
+                      {idx + 1}.
+                    </span>
+                    <Link
+                      href={`/item/${encodeURIComponent(item.type.toLowerCase())}/${encodeURIComponent(item.name)}`}
+                      prefetch={false}
+                      className="text-primary-text hover:text-link min-w-0 flex-1 truncate text-sm font-semibold transition-colors"
+                    >
+                      {item.name}
+                    </Link>
+                  </div>
+                  <div className="flex justify-end sm:ml-auto">
+                    <span
+                      className="text-primary-text bg-tertiary-bg/40 inline-flex h-6 shrink-0 items-center gap-1.5 rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl"
+                      style={{ borderColor: getCategoryColor(item.type) }}
+                    >
+                      {(() => {
+                        const categoryIcon = getCategoryIcon(item.type);
+                        return categoryIcon ? (
+                          <categoryIcon.Icon
+                            className="h-3 w-3"
+                            style={{ color: getCategoryColor(item.type) }}
+                          />
+                        ) : null;
+                      })()}
+                      {item.type}
+                    </span>
+                  </div>
+                </li>
+              ))}
+            </ol>
+          </div>
+        )}
+      </div>
+    );
+  },
+);
+
 export default function InventoryBreakdown({
   networthData,
   itemsData,
@@ -75,47 +337,35 @@ export default function InventoryBreakdown({
   const latestData =
     networthData && networthData.length > 0 ? networthData[0] : null;
 
-  // Format large numbers with commas for better readability
-  const formatNetworth = (networth: number) => {
-    return new Intl.NumberFormat("en-US").format(networth);
-  };
-
-  const formatInventoryCount = (count: number) => {
-    return new Intl.NumberFormat("en-US").format(count);
-  };
-
-  // Truncate percentage to 2 decimal places without rounding
-  const formatPercentage = (percentage: number): string => {
-    const truncated = Math.floor(percentage * 100) / 100;
-    return truncated.toFixed(2);
-  };
-
-  // Calculate category values using percentages and inventory_value
-  const calculateCategoryValues = (): Record<string, number> => {
+  const categoryValues = useMemo(() => {
     if (!latestData?.percentages || !latestData.inventory_value) return {};
 
-    const categoryValues: Record<string, number> = {};
+    const nextCategoryValues: Record<string, number> = {};
     const totalInventoryValue = latestData.inventory_value;
 
     Object.entries(latestData.percentages).forEach(([category, percentage]) => {
-      categoryValues[category] = (percentage / 100) * totalInventoryValue;
+      nextCategoryValues[category] = (percentage / 100) * totalInventoryValue;
     });
 
-    return categoryValues;
-  };
-
-  const categoryValues = calculateCategoryValues();
-  const sortedCategoryEntries = Object.entries(
-    latestData?.percentages || {},
-  ).sort(([, a], [, b]) => b - a);
-  const categoryChartData = sortedCategoryEntries.map(
-    ([category, percentage]) => ({
-      category,
-      percentage,
-      value: percentage,
-      amount: categoryValues[category] ?? 0,
-      fill: getCategoryColor(category),
-    }),
+    return nextCategoryValues;
+  }, [latestData]);
+  const sortedCategoryEntries = useMemo(
+    () =>
+      Object.entries(latestData?.percentages || {}).sort(
+        ([, a], [, b]) => b - a,
+      ),
+    [latestData?.percentages],
+  );
+  const categoryChartData = useMemo(
+    () =>
+      sortedCategoryEntries.map(([category, percentage]) => ({
+        category,
+        percentage,
+        value: percentage,
+        amount: categoryValues[category] ?? 0,
+        fill: getCategoryColor(category),
+      })),
+    [categoryValues, sortedCategoryEntries],
   );
   const categoryChartConfig = {
     percentage: {
@@ -124,15 +374,14 @@ export default function InventoryBreakdown({
     },
   } satisfies ChartConfig;
 
-  // Calculate duplicate category values client-side from inventoryData.duplicates + itemsData
-  const calculateDuplicateCategoryValues = (): Record<string, number> => {
+  const duplicateCategoryValues = useMemo(() => {
     if (
-      !itemsData ||
       itemsData.length === 0 ||
       !inventoryData.duplicates ||
       inventoryData.duplicates.length === 0
-    )
+    ) {
       return {};
+    }
 
     const parseVal = (val: string | null): number => {
       if (!val || val === "N/A") return 0;
@@ -148,21 +397,19 @@ export default function InventoryBreakdown({
     const itemsMap = new Map(
       itemsData.map((item) => [item.id.toString(), item]),
     );
-    const categoryValues: Record<string, number> = {};
+    const nextCategoryValues: Record<string, number> = {};
 
     inventoryData.duplicates.forEach((invItem) => {
       const item = itemsMap.get(invItem.item_id.toString());
-      if (item) {
-        const val = parseVal(item.duped_value);
-        categoryValues[invItem.categoryTitle] =
-          (categoryValues[invItem.categoryTitle] || 0) + val;
-      }
+      if (!item) return;
+
+      const val = parseVal(item.duped_value);
+      nextCategoryValues[invItem.categoryTitle] =
+        (nextCategoryValues[invItem.categoryTitle] || 0) + val;
     });
 
-    return categoryValues;
-  };
-
-  const duplicateCategoryValues = calculateDuplicateCategoryValues();
+    return nextCategoryValues;
+  }, [inventoryData.duplicates, itemsData]);
 
   const ownedItemIds = useMemo(() => {
     const ids = new Set<number>();
@@ -182,13 +429,6 @@ export default function InventoryBreakdown({
   }, [inventoryData.data]);
 
   const includeUntradable = true;
-  const [missingSearch, setMissingSearch] = useState("");
-  const [missingTypeFilter, setMissingTypeFilter] = useState<string>("all");
-  const [unverifiableSearch, setUnverifiableSearch] = useState("");
-  const [unverifiableTypeFilter, setUnverifiableTypeFilter] =
-    useState<string>("all");
-  const [ogMissingSearch, setOgMissingSearch] = useState("");
-  const [ogMissingTypeFilter, setOgMissingTypeFilter] = useState<string>("all");
 
   const eligibleItems = useMemo(() => {
     if (includeUntradable) return itemsData;
@@ -320,82 +560,6 @@ export default function InventoryBreakdown({
     return missing;
   }, [typeProgress]);
 
-  const missingTypeOptions = useMemo(() => {
-    const seen = new Set<string>();
-    const uniqueTypes: string[] = [];
-    typeProgress.forEach((entry) => {
-      if (seen.has(entry.type)) return;
-      seen.add(entry.type);
-      uniqueTypes.push(entry.type);
-    });
-
-    uniqueTypes.sort((a, b) => {
-      const aRank = VALUES_TYPE_ORDER_RANK.get(a.toLowerCase()) ?? 999;
-      const bRank = VALUES_TYPE_ORDER_RANK.get(b.toLowerCase()) ?? 999;
-      if (aRank !== bRank) return aRank - bRank;
-      return a.localeCompare(b);
-    });
-
-    return uniqueTypes;
-  }, [typeProgress]);
-
-  const filteredMissingItems = useMemo(() => {
-    const typeFilter = missingTypeFilter.trim().toLowerCase();
-    const typeFiltered =
-      typeFilter === "all"
-        ? missingItemsAll
-        : missingItemsAll.filter(
-            (item) => item.type.toLowerCase() === typeFilter,
-          );
-
-    const query = missingSearch.trim().toLowerCase();
-    if (!query) return typeFiltered;
-    return typeFiltered.filter((item) => {
-      return (
-        item.name.toLowerCase().includes(query) ||
-        item.type.toLowerCase().includes(query)
-      );
-    });
-  }, [missingItemsAll, missingSearch, missingTypeFilter]);
-
-  const unverifiableTypeOptions = useMemo(() => {
-    const seen = new Set<string>();
-    const uniqueTypes: string[] = [];
-    unverifiableItemsAll.forEach((entry) => {
-      if (seen.has(entry.type)) return;
-      seen.add(entry.type);
-      uniqueTypes.push(entry.type);
-    });
-
-    uniqueTypes.sort((a, b) => {
-      const aRank = VALUES_TYPE_ORDER_RANK.get(a.toLowerCase()) ?? 999;
-      const bRank = VALUES_TYPE_ORDER_RANK.get(b.toLowerCase()) ?? 999;
-      if (aRank !== bRank) return aRank - bRank;
-      return a.localeCompare(b);
-    });
-
-    return uniqueTypes;
-  }, [unverifiableItemsAll]);
-
-  const filteredUnverifiableItems = useMemo(() => {
-    const typeFilter = unverifiableTypeFilter.trim().toLowerCase();
-    const typeFiltered =
-      typeFilter === "all"
-        ? unverifiableItemsAll
-        : unverifiableItemsAll.filter(
-            (item) => item.type.toLowerCase() === typeFilter,
-          );
-
-    const query = unverifiableSearch.trim().toLowerCase();
-    if (!query) return typeFiltered;
-    return typeFiltered.filter((item) => {
-      return (
-        item.name.toLowerCase().includes(query) ||
-        item.type.toLowerCase().includes(query)
-      );
-    });
-  }, [unverifiableItemsAll, unverifiableSearch, unverifiableTypeFilter]);
-
   const ogMissingItemsAll = useMemo(() => {
     const items = eligibleItems
       .filter(
@@ -419,40 +583,6 @@ export default function InventoryBreakdown({
     return items;
   }, [eligibleItems, ogOwnedItemIds]);
 
-  const ogMissingTypeOptions = useMemo(() => {
-    const seen = new Set<string>();
-    const uniqueTypes: string[] = [];
-    ogMissingItemsAll.forEach((item) => {
-      if (seen.has(item.type)) return;
-      seen.add(item.type);
-      uniqueTypes.push(item.type);
-    });
-    uniqueTypes.sort((a, b) => {
-      const aRank = VALUES_TYPE_ORDER_RANK.get(a.toLowerCase()) ?? 999;
-      const bRank = VALUES_TYPE_ORDER_RANK.get(b.toLowerCase()) ?? 999;
-      if (aRank !== bRank) return aRank - bRank;
-      return a.localeCompare(b);
-    });
-    return uniqueTypes;
-  }, [ogMissingItemsAll]);
-
-  const filteredOgMissingItems = useMemo(() => {
-    const typeFilter = ogMissingTypeFilter.trim().toLowerCase();
-    const typeFiltered =
-      typeFilter === "all"
-        ? ogMissingItemsAll
-        : ogMissingItemsAll.filter(
-            (item) => item.type.toLowerCase() === typeFilter,
-          );
-    const query = ogMissingSearch.trim().toLowerCase();
-    if (!query) return typeFiltered;
-    return typeFiltered.filter(
-      (item) =>
-        item.name.toLowerCase().includes(query) ||
-        item.type.toLowerCase().includes(query),
-    );
-  }, [ogMissingItemsAll, ogMissingSearch, ogMissingTypeFilter]);
-
   const scrollToUnverifiableSection = () => {
     const target = unverifiableSectionRef.current;
     if (!target) return;
@@ -470,6 +600,104 @@ export default function InventoryBreakdown({
     window.scrollTo({ top, behavior: "smooth" });
   };
 
+  const networth = latestData?.networth ?? 0;
+  const inventoryCount = latestData?.inventory_count ?? 0;
+  const money = latestData?.money ?? 0;
+  const inventoryValue = latestData?.inventory_value;
+  const percentages = latestData?.percentages;
+  const duplicatesCount = latestData?.duplicates_count ?? 0;
+
+  const clientDuplicatesTotal = Object.values(duplicateCategoryValues).reduce(
+    (sum, v) => sum + v,
+    0,
+  );
+  const duplicatesValue =
+    clientDuplicatesTotal > 0
+      ? clientDuplicatesTotal
+      : latestData?.duplicates_value;
+  const clientDuplicatesPercentages = useMemo<Record<string, number>>(
+    () =>
+      clientDuplicatesTotal > 0
+        ? Object.fromEntries(
+            Object.entries(duplicateCategoryValues).map(([cat, val]) => [
+              cat,
+              (val / clientDuplicatesTotal) * 100,
+            ]),
+          )
+        : {},
+    [clientDuplicatesTotal, duplicateCategoryValues],
+  );
+  const sortedDuplicateEntries = useMemo(
+    () =>
+      Object.entries(
+        clientDuplicatesTotal > 0
+          ? clientDuplicatesPercentages
+          : latestData?.duplicates_percentages || {},
+      ).sort(([, a], [, b]) => b - a),
+    [
+      clientDuplicatesPercentages,
+      clientDuplicatesTotal,
+      latestData?.duplicates_percentages,
+    ],
+  );
+  const duplicatesChartData = useMemo(
+    () =>
+      sortedDuplicateEntries.map(([category, percentage]) => ({
+        category,
+        value: percentage,
+        amount: duplicateCategoryValues[category] ?? 0,
+        fill: getCategoryColor(category),
+      })),
+    [duplicateCategoryValues, sortedDuplicateEntries],
+  );
+
+  // Calculate total items including duplicates
+  const totalItems = inventoryCount + duplicatesCount;
+
+  const collectionChartConfig = {
+    value: {
+      label: "Completion",
+      color: "var(--chart-1)",
+    },
+  } satisfies ChartConfig;
+
+  const collectionChartData = useMemo(
+    () =>
+      typeProgress
+        .filter((entry) => entry.total > 0)
+        .map((entry) => ({
+          category: entry.type,
+          value: entry.percentage,
+          owned: entry.owned,
+          total: entry.total,
+          missingCount: entry.missingCount,
+          percentage: entry.percentage,
+          fill: getCategoryColor(entry.type),
+        })),
+    [typeProgress],
+  );
+
+  const ogChartConfig = {
+    value: {
+      label: "OG Owned",
+      color: "var(--chart-1)",
+    },
+  } satisfies ChartConfig;
+
+  const ogChartData = useMemo(
+    () =>
+      typeProgress
+        .filter((entry) => entry.ogOwned > 0)
+        .map((entry) => ({
+          category: entry.type,
+          value: entry.ogOwned,
+          total: entry.total,
+          percentage: entry.total > 0 ? (entry.ogOwned / entry.total) * 100 : 0,
+          fill: getCategoryColor(entry.type),
+        })),
+    [typeProgress],
+  );
+
   if (!latestData || !latestData.percentages) {
     return (
       <div className="border-border-card bg-secondary-bg rounded-lg border p-8 text-center">
@@ -480,80 +708,7 @@ export default function InventoryBreakdown({
     );
   }
 
-  const { networth, inventory_count, money, inventory_value, percentages } =
-    latestData;
-  const duplicatesCount = latestData.duplicates_count;
-
-  // Derive total and per-category percentages client-side
-  const clientDuplicatesTotal = Object.values(duplicateCategoryValues).reduce(
-    (sum, v) => sum + v,
-    0,
-  );
-  const duplicatesValue =
-    clientDuplicatesTotal > 0
-      ? clientDuplicatesTotal
-      : latestData.duplicates_value;
-  const clientDuplicatesPercentages: Record<string, number> =
-    clientDuplicatesTotal > 0
-      ? Object.fromEntries(
-          Object.entries(duplicateCategoryValues).map(([cat, val]) => [
-            cat,
-            (val / clientDuplicatesTotal) * 100,
-          ]),
-        )
-      : {};
-  const sortedDuplicateEntries = Object.entries(
-    clientDuplicatesTotal > 0
-      ? clientDuplicatesPercentages
-      : latestData.duplicates_percentages || {},
-  ).sort(([, a], [, b]) => b - a);
-  const duplicatesChartData = sortedDuplicateEntries.map(
-    ([category, percentage]) => ({
-      category,
-      value: percentage,
-      amount: duplicateCategoryValues[category] ?? 0,
-      fill: getCategoryColor(category),
-    }),
-  );
-
-  // Calculate total items including duplicates
-  const totalItems = inventory_count + (duplicatesCount || 0);
-
-  const collectionChartConfig = {
-    value: {
-      label: "Completion",
-      color: "var(--chart-1)",
-    },
-  } satisfies ChartConfig;
-
-  const collectionChartData = typeProgress
-    .filter((entry) => entry.total > 0)
-    .map((entry) => ({
-      category: entry.type,
-      value: entry.percentage,
-      owned: entry.owned,
-      total: entry.total,
-      missingCount: entry.missingCount,
-      percentage: entry.percentage,
-      fill: getCategoryColor(entry.type),
-    }));
-
-  const ogChartConfig = {
-    value: {
-      label: "OG Owned",
-      color: "var(--chart-1)",
-    },
-  } satisfies ChartConfig;
-
-  const ogChartData = typeProgress
-    .filter((entry) => entry.ogOwned > 0)
-    .map((entry) => ({
-      category: entry.type,
-      value: entry.ogOwned,
-      total: entry.total,
-      percentage: entry.total > 0 ? (entry.ogOwned / entry.total) * 100 : 0,
-      fill: getCategoryColor(entry.type),
-    }));
+  const safePercentages = percentages ?? {};
 
   return (
     <div className="space-y-6">
@@ -614,15 +769,15 @@ export default function InventoryBreakdown({
             </div>
             <div className="text-primary-text text-lg font-bold">
               $
-              {inventory_value !== undefined
-                ? formatNetworth(inventory_value)
+              {inventoryValue !== undefined
+                ? formatNetworth(inventoryValue)
                 : "0"}
             </div>
           </div>
           <div className="border-border-card bg-tertiary-bg rounded-lg border p-4 text-center">
             <div className="text-secondary-text mb-1 text-sm">Cash</div>
             <div className="text-primary-text text-lg font-bold">
-              ${money !== undefined ? formatNetworth(money) : "0"}
+              ${formatNetworth(money)}
             </div>
           </div>
         </div>
@@ -832,349 +987,48 @@ export default function InventoryBreakdown({
                   })}
                 </div>
 
-                <div className="border-border-card bg-tertiary-bg rounded-lg border p-3">
-                  <div className="mb-2 flex items-center justify-between gap-3">
-                    <div className="flex items-center gap-1.5">
-                      <div className="text-primary-text text-sm font-semibold">
-                        Trackable Missing Items (
-                        {formatInventoryCount(missingItemsAll.length)})
-                      </div>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Icon
-                            icon="material-symbols:info-outline"
-                            className="text-secondary-text h-4 w-4 cursor-help"
-                            inline={true}
-                          />
-                        </TooltipTrigger>
-                        <TooltipContent
-                          side="top"
-                          className="bg-secondary-bg text-primary-text max-w-62.5 border-none shadow-(--color-card-shadow)"
-                        >
-                          Items not in your inventory that can be confirmed
-                          missing. Excludes unverifiable items.
-                        </TooltipContent>
-                      </Tooltip>
-                    </div>
-                  </div>
-                  {unverifiableCount > 0 && (
-                    <div className="text-secondary-text mb-2 text-xs">
-                      {formatInventoryCount(unverifiableCount)} unverifiable
-                      items are assumed owned and excluded from this list.
-                    </div>
-                  )}
-                  <div className="mb-2">
-                    <div className="flex w-full flex-col gap-4 sm:flex-row">
-                      <div className="relative w-full sm:w-2/3">
-                        <input
-                          type="text"
-                          placeholder="Search missing items..."
-                          value={missingSearch}
-                          onChange={(e) => setMissingSearch(e.target.value)}
-                          maxLength={80}
-                          className="border-border-card bg-secondary-bg text-primary-text placeholder-secondary-text focus:border-button-info w-full rounded-lg border px-3 py-2 pr-9 pl-9 text-sm transition-all duration-300 focus:outline-none"
-                        />
-                        <Icon
-                          icon="heroicons:magnifying-glass"
-                          className="text-secondary-text absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2"
-                        />
-                        {missingSearch && (
-                          <button
-                            type="button"
-                            onClick={() => setMissingSearch("")}
-                            className="text-secondary-text hover:text-primary-text absolute top-1/2 right-2 h-6 w-6 -translate-y-1/2 cursor-pointer"
-                            aria-label="Clear missing item search"
-                          >
-                            <Icon icon="heroicons:x-mark" />
-                          </button>
-                        )}
-                      </div>
-                      <div className="w-full sm:w-1/3">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <button
-                              type="button"
-                              className="border-border-card bg-secondary-bg text-primary-text hover:bg-quaternary-bg flex w-full items-center justify-between gap-2 rounded-lg border px-3 py-2 text-sm"
-                              aria-label="Filter missing items by type"
-                            >
-                              <span className="truncate">
-                                {missingTypeFilter === "all"
-                                  ? "All types"
-                                  : missingTypeFilter}
-                              </span>
-                              <Icon
-                                icon="heroicons:chevron-down"
-                                className="text-secondary-text h-4 w-4"
-                                inline={true}
-                              />
-                            </button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent
-                            align="end"
-                            className="border-border-card bg-secondary-bg text-primary-text scrollbar-thin max-h-70 w-(--radix-popper-anchor-width) min-w-56 overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
-                          >
-                            <DropdownMenuRadioGroup
-                              value={missingTypeFilter}
-                              onValueChange={(value) =>
-                                setMissingTypeFilter(value)
-                              }
-                            >
-                              <DropdownMenuRadioItem
-                                value="all"
-                                className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
-                              >
-                                All types
-                              </DropdownMenuRadioItem>
-                              {missingTypeOptions.map((type) => (
-                                <DropdownMenuRadioItem
-                                  key={type}
-                                  value={type}
-                                  className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
-                                >
-                                  {type}
-                                </DropdownMenuRadioItem>
-                              ))}
-                            </DropdownMenuRadioGroup>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </div>
-                    </div>
-                    {(missingSearch.trim() || missingTypeFilter !== "all") && (
-                      <div className="text-secondary-text mt-1 text-xs">
-                        Showing{" "}
-                        {formatInventoryCount(filteredMissingItems.length)} of{" "}
-                        {formatInventoryCount(missingItemsAll.length)}
-                      </div>
-                    )}
-                  </div>
-                  {missingItemsAll.length === 0 ? (
-                    <p className="text-secondary-text text-sm">
-                      You have every item in this filter.
-                    </p>
-                  ) : filteredMissingItems.length === 0 ? (
-                    <p className="text-secondary-text text-sm">
-                      No missing items match your search.
-                    </p>
-                  ) : (
-                    <div className="scrollbar-thin max-h-65 overflow-auto pr-1 text-sm">
-                      <ol className="divide-border-card/60 space-y-0 divide-y">
-                        {filteredMissingItems.map((item, idx) => (
-                          <li
-                            key={item.id}
-                            className="flex flex-col gap-2 py-2 sm:flex-row sm:items-center sm:gap-3"
-                          >
-                            <div className="flex min-w-0 items-center gap-3">
-                              <span className="text-secondary-text w-10 shrink-0 text-right font-mono text-xs font-medium tabular-nums">
-                                {idx + 1}.
-                              </span>
-                              <Link
-                                href={`/item/${encodeURIComponent(item.type.toLowerCase())}/${encodeURIComponent(item.name)}`}
-                                prefetch={false}
-                                className="text-primary-text hover:text-link min-w-0 flex-1 truncate text-sm font-semibold transition-colors"
-                              >
-                                {item.name}
-                              </Link>
-                            </div>
-                            <div className="flex justify-end sm:ml-auto">
-                              <span
-                                className="text-primary-text bg-tertiary-bg/40 inline-flex h-6 shrink-0 items-center gap-1.5 rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl"
-                                style={{
-                                  borderColor: getCategoryColor(item.type),
-                                }}
-                              >
-                                {(() => {
-                                  const categoryIcon = getCategoryIcon(
-                                    item.type,
-                                  );
-                                  return categoryIcon ? (
-                                    <categoryIcon.Icon
-                                      className="h-3 w-3"
-                                      style={{
-                                        color: getCategoryColor(item.type),
-                                      }}
-                                    />
-                                  ) : null;
-                                })()}
-                                {item.type}
-                              </span>
-                            </div>
-                          </li>
-                        ))}
-                      </ol>
-                    </div>
-                  )}
-                </div>
+                <SearchableInventoryListSection
+                  title="Trackable Missing Items"
+                  tooltipContent={
+                    <>
+                      Items not in your inventory that can be confirmed missing.
+                      Excludes unverifiable items.
+                    </>
+                  }
+                  items={missingItemsAll}
+                  searchPlaceholder="Search missing items..."
+                  filterAriaLabel="Filter missing items by type"
+                  clearAriaLabel="Clear missing item search"
+                  emptyMessage="You have every item in this filter."
+                  noResultsMessage="No missing items match your search."
+                  helperContent={
+                    unverifiableCount > 0 ? (
+                      <>
+                        {formatInventoryCount(unverifiableCount)} unverifiable
+                        items are assumed owned and excluded from this list.
+                      </>
+                    ) : undefined
+                  }
+                />
 
                 {unverifiableItemsAll.length > 0 && (
-                  <div
-                    ref={unverifiableSectionRef}
-                    id="unverifiable-items"
-                    className="border-border-card bg-tertiary-bg rounded-lg border p-3"
-                  >
-                    <div className="mb-2 flex items-center gap-1.5">
-                      <div className="text-primary-text text-sm font-semibold">
-                        Unverifiable Items (
-                        {formatInventoryCount(unverifiableItemsAll.length)})
-                      </div>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Icon
-                            icon="material-symbols:info-outline"
-                            className="text-secondary-text h-4 w-4 cursor-help"
-                            inline={true}
-                          />
-                        </TooltipTrigger>
-                        <TooltipContent
-                          side="top"
-                          className="bg-secondary-bg text-primary-text max-w-62.5 border-none shadow-(--color-card-shadow)"
-                        >
-                          Items that inventory scans can&apos;t detect. They are
-                          assumed owned and excluded from the missing list.
-                        </TooltipContent>
-                      </Tooltip>
-                    </div>
-                    <div className="mb-2">
-                      <div className="flex w-full flex-col gap-4 sm:flex-row">
-                        <div className="relative w-full sm:w-2/3">
-                          <input
-                            type="text"
-                            placeholder="Search unverifiable items..."
-                            value={unverifiableSearch}
-                            onChange={(e) =>
-                              setUnverifiableSearch(e.target.value)
-                            }
-                            maxLength={80}
-                            className="border-border-card bg-secondary-bg text-primary-text placeholder-secondary-text focus:border-button-info w-full rounded-lg border px-3 py-2 pr-9 pl-9 text-sm transition-all duration-300 focus:outline-none"
-                          />
-                          <Icon
-                            icon="heroicons:magnifying-glass"
-                            className="text-secondary-text absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2"
-                          />
-                          {unverifiableSearch && (
-                            <button
-                              type="button"
-                              onClick={() => setUnverifiableSearch("")}
-                              className="text-secondary-text hover:text-primary-text absolute top-1/2 right-2 h-6 w-6 -translate-y-1/2 cursor-pointer"
-                              aria-label="Clear unverifiable item search"
-                            >
-                              <Icon icon="heroicons:x-mark" />
-                            </button>
-                          )}
-                        </div>
-                        <div className="w-full sm:w-1/3">
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <button
-                                type="button"
-                                className="border-border-card bg-secondary-bg text-primary-text hover:bg-quaternary-bg flex w-full items-center justify-between gap-2 rounded-lg border px-3 py-2 text-sm"
-                                aria-label="Filter unverifiable items by type"
-                              >
-                                <span className="truncate">
-                                  {unverifiableTypeFilter === "all"
-                                    ? "All types"
-                                    : unverifiableTypeFilter}
-                                </span>
-                                <Icon
-                                  icon="heroicons:chevron-down"
-                                  className="text-secondary-text h-4 w-4"
-                                  inline={true}
-                                />
-                              </button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent
-                              align="end"
-                              className="border-border-card bg-secondary-bg text-primary-text scrollbar-thin max-h-70 w-(--radix-popper-anchor-width) min-w-56 overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
-                            >
-                              <DropdownMenuRadioGroup
-                                value={unverifiableTypeFilter}
-                                onValueChange={(value) =>
-                                  setUnverifiableTypeFilter(value)
-                                }
-                              >
-                                <DropdownMenuRadioItem
-                                  value="all"
-                                  className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
-                                >
-                                  All types
-                                </DropdownMenuRadioItem>
-                                {unverifiableTypeOptions.map((type) => (
-                                  <DropdownMenuRadioItem
-                                    key={type}
-                                    value={type}
-                                    className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
-                                  >
-                                    {type}
-                                  </DropdownMenuRadioItem>
-                                ))}
-                              </DropdownMenuRadioGroup>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </div>
-                      </div>
-                      {(unverifiableSearch.trim() ||
-                        unverifiableTypeFilter !== "all") && (
-                        <div className="text-secondary-text mt-1 text-xs">
-                          Showing{" "}
-                          {formatInventoryCount(
-                            filteredUnverifiableItems.length,
-                          )}{" "}
-                          of {formatInventoryCount(unverifiableItemsAll.length)}
-                        </div>
-                      )}
-                    </div>
-                    {filteredUnverifiableItems.length === 0 ? (
-                      <p className="text-secondary-text text-sm">
-                        No unverifiable items match your search.
-                      </p>
-                    ) : (
-                      <div className="scrollbar-thin max-h-55 overflow-auto pr-1 text-sm">
-                        <ol className="divide-border-card/60 space-y-0 divide-y">
-                          {filteredUnverifiableItems.map((item, idx) => (
-                            <li
-                              key={item.id}
-                              className="flex flex-col gap-2 py-2 sm:flex-row sm:items-center sm:gap-3"
-                            >
-                              <div className="flex min-w-0 items-center gap-3">
-                                <span className="text-secondary-text w-10 shrink-0 text-right font-mono text-xs font-medium tabular-nums">
-                                  {idx + 1}.
-                                </span>
-                                <Link
-                                  href={`/item/${encodeURIComponent(item.type.toLowerCase())}/${encodeURIComponent(item.name)}`}
-                                  prefetch={false}
-                                  className="text-primary-text hover:text-link min-w-0 flex-1 truncate text-sm font-semibold transition-colors"
-                                >
-                                  {item.name}
-                                </Link>
-                              </div>
-                              <div className="flex justify-end sm:ml-auto">
-                                <span
-                                  className="text-primary-text bg-tertiary-bg/40 inline-flex h-6 shrink-0 items-center gap-1.5 rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl"
-                                  style={{
-                                    borderColor: getCategoryColor(item.type),
-                                  }}
-                                >
-                                  {(() => {
-                                    const categoryIcon = getCategoryIcon(
-                                      item.type,
-                                    );
-                                    return categoryIcon ? (
-                                      <categoryIcon.Icon
-                                        className="h-3 w-3"
-                                        style={{
-                                          color: getCategoryColor(item.type),
-                                        }}
-                                      />
-                                    ) : null;
-                                  })()}
-                                  {item.type}
-                                </span>
-                              </div>
-                            </li>
-                          ))}
-                        </ol>
-                      </div>
-                    )}
-                  </div>
+                  <SearchableInventoryListSection
+                    title="Unverifiable Items"
+                    tooltipContent={
+                      <>
+                        Items that inventory scans can&apos;t detect. They are
+                        assumed owned and excluded from the missing list.
+                      </>
+                    }
+                    items={unverifiableItemsAll}
+                    searchPlaceholder="Search unverifiable items..."
+                    filterAriaLabel="Filter unverifiable items by type"
+                    clearAriaLabel="Clear unverifiable item search"
+                    emptyMessage="No unverifiable items found."
+                    noResultsMessage="No unverifiable items match your search."
+                    sectionRef={unverifiableSectionRef}
+                    sectionId="unverifiable-items"
+                  />
                 )}
               </div>
             )}
@@ -1492,189 +1346,40 @@ export default function InventoryBreakdown({
                   })}
                 </div>
 
-                <div className="border-border-card bg-tertiary-bg rounded-lg border p-3">
-                  <div className="mb-2 flex items-center gap-1.5">
-                    <div className="text-primary-text text-sm font-semibold">
-                      Trackable Missing OG Items (
-                      {formatInventoryCount(ogMissingItemsAll.length)})
-                    </div>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Icon
-                          icon="material-symbols:info-outline"
-                          className="text-secondary-text h-4 w-4 cursor-help"
-                          inline={true}
-                        />
-                      </TooltipTrigger>
-                      <TooltipContent
-                        side="top"
-                        className="bg-secondary-bg text-primary-text max-w-62.5 border-none shadow-(--color-card-shadow)"
-                      >
-                        Items in Jailbreak where this player is not the original
-                        owner, including items not in their inventory. Excludes
-                        unverifiable items.
-                      </TooltipContent>
-                    </Tooltip>
-                  </div>
-                  {unverifiableCount > 0 && (
-                    <div className="text-secondary-text mb-2 text-xs">
-                      Unverifiable:{" "}
-                      <span className="text-primary-text font-mono font-semibold tabular-nums">
-                        {formatInventoryCount(unverifiableCount)}
-                      </span>{" "}
-                      assumed owned. Hidden from missing list.
-                      <button
-                        type="button"
-                        onClick={scrollToUnverifiableSection}
-                        className="text-link hover:text-link-hover ml-2 cursor-pointer underline underline-offset-2"
-                      >
-                        View list
-                      </button>
-                    </div>
-                  )}
-                  <div className="mb-2">
-                    <div className="flex w-full flex-col gap-4 sm:flex-row">
-                      <div className="relative w-full sm:w-2/3">
-                        <input
-                          type="text"
-                          placeholder="Search missing OG items..."
-                          value={ogMissingSearch}
-                          onChange={(e) => setOgMissingSearch(e.target.value)}
-                          maxLength={80}
-                          className="border-border-card bg-secondary-bg text-primary-text placeholder-secondary-text focus:border-button-info w-full rounded-lg border px-3 py-2 pr-9 pl-9 text-sm transition-all duration-300 focus:outline-none"
-                        />
-                        <Icon
-                          icon="heroicons:magnifying-glass"
-                          className="text-secondary-text absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2"
-                        />
-                        {ogMissingSearch && (
-                          <button
-                            type="button"
-                            onClick={() => setOgMissingSearch("")}
-                            className="text-secondary-text hover:text-primary-text absolute top-1/2 right-2 h-6 w-6 -translate-y-1/2 cursor-pointer"
-                            aria-label="Clear non-OG item search"
-                          >
-                            <Icon icon="heroicons:x-mark" />
-                          </button>
-                        )}
-                      </div>
-                      <div className="w-full sm:w-1/3">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <button
-                              type="button"
-                              className="border-border-card bg-secondary-bg text-primary-text hover:bg-quaternary-bg flex w-full items-center justify-between gap-2 rounded-lg border px-3 py-2 text-sm"
-                              aria-label="Filter non-OG items by type"
-                            >
-                              <span className="truncate">
-                                {ogMissingTypeFilter === "all"
-                                  ? "All types"
-                                  : ogMissingTypeFilter}
-                              </span>
-                              <Icon
-                                icon="heroicons:chevron-down"
-                                className="text-secondary-text h-4 w-4"
-                                inline={true}
-                              />
-                            </button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent
-                            align="end"
-                            className="border-border-card bg-secondary-bg text-primary-text scrollbar-thin max-h-70 w-(--radix-popper-anchor-width) min-w-56 overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
-                          >
-                            <DropdownMenuRadioGroup
-                              value={ogMissingTypeFilter}
-                              onValueChange={(value) =>
-                                setOgMissingTypeFilter(value)
-                              }
-                            >
-                              <DropdownMenuRadioItem
-                                value="all"
-                                className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
-                              >
-                                All types
-                              </DropdownMenuRadioItem>
-                              {ogMissingTypeOptions.map((type) => (
-                                <DropdownMenuRadioItem
-                                  key={type}
-                                  value={type}
-                                  className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
-                                >
-                                  {type}
-                                </DropdownMenuRadioItem>
-                              ))}
-                            </DropdownMenuRadioGroup>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </div>
-                    </div>
-                    {(ogMissingSearch.trim() ||
-                      ogMissingTypeFilter !== "all") && (
-                      <div className="text-secondary-text mt-1 text-xs">
-                        Showing{" "}
-                        {formatInventoryCount(filteredOgMissingItems.length)} of{" "}
-                        {formatInventoryCount(ogMissingItemsAll.length)}
-                      </div>
-                    )}
-                  </div>
-                  {ogMissingItemsAll.length === 0 ? (
-                    <p className="text-secondary-text text-sm">
-                      This player is the original owner of every item in
-                      Jailbreak.
-                    </p>
-                  ) : filteredOgMissingItems.length === 0 ? (
-                    <p className="text-secondary-text text-sm">
-                      No items match your search.
-                    </p>
-                  ) : (
-                    <div className="scrollbar-thin max-h-65 overflow-auto pr-1 text-sm">
-                      <ol className="divide-border-card/60 space-y-0 divide-y">
-                        {filteredOgMissingItems.map((item, idx) => (
-                          <li
-                            key={item.id}
-                            className="flex flex-col gap-2 py-2 sm:flex-row sm:items-center sm:gap-3"
-                          >
-                            <div className="flex min-w-0 items-center gap-3">
-                              <span className="text-secondary-text w-10 shrink-0 text-right font-mono text-xs font-medium tabular-nums">
-                                {idx + 1}.
-                              </span>
-                              <Link
-                                href={`/item/${encodeURIComponent(item.type.toLowerCase())}/${encodeURIComponent(item.name)}`}
-                                prefetch={false}
-                                className="text-primary-text hover:text-link min-w-0 flex-1 truncate text-sm font-semibold transition-colors"
-                              >
-                                {item.name}
-                              </Link>
-                            </div>
-                            <div className="flex justify-end sm:ml-auto">
-                              <span
-                                className="text-primary-text bg-tertiary-bg/40 inline-flex h-6 shrink-0 items-center gap-1.5 rounded-lg border px-2.5 text-xs leading-none font-medium shadow-2xl backdrop-blur-xl"
-                                style={{
-                                  borderColor: getCategoryColor(item.type),
-                                }}
-                              >
-                                {(() => {
-                                  const categoryIcon = getCategoryIcon(
-                                    item.type,
-                                  );
-                                  return categoryIcon ? (
-                                    <categoryIcon.Icon
-                                      className="h-3 w-3"
-                                      style={{
-                                        color: getCategoryColor(item.type),
-                                      }}
-                                    />
-                                  ) : null;
-                                })()}
-                                {item.type}
-                              </span>
-                            </div>
-                          </li>
-                        ))}
-                      </ol>
-                    </div>
-                  )}
-                </div>
+                <SearchableInventoryListSection
+                  title="Trackable Missing OG Items"
+                  tooltipContent={
+                    <>
+                      Items in Jailbreak where this player is not the original
+                      owner, including items not in their inventory. Excludes
+                      unverifiable items.
+                    </>
+                  }
+                  items={ogMissingItemsAll}
+                  searchPlaceholder="Search missing OG items..."
+                  filterAriaLabel="Filter non-OG items by type"
+                  clearAriaLabel="Clear non-OG item search"
+                  emptyMessage="This player is the original owner of every item in Jailbreak."
+                  noResultsMessage="No items match your search."
+                  helperContent={
+                    unverifiableCount > 0 ? (
+                      <>
+                        Unverifiable:{" "}
+                        <span className="text-primary-text font-mono font-semibold tabular-nums">
+                          {formatInventoryCount(unverifiableCount)}
+                        </span>{" "}
+                        assumed owned. Hidden from missing list.
+                        <button
+                          type="button"
+                          onClick={scrollToUnverifiableSection}
+                          className="text-link hover:text-link-hover ml-2 cursor-pointer underline underline-offset-2"
+                        >
+                          View list
+                        </button>
+                      </>
+                    ) : undefined
+                  }
+                />
               </div>
             )}
           </div>
@@ -1823,7 +1528,7 @@ export default function InventoryBreakdown({
                 </TooltipContent>
               </Tooltip>
             </div>
-            {Object.keys(percentages).length > 0 ? (
+            {Object.keys(safePercentages).length > 0 ? (
               <>
                 <div className="bg-tertiary-bg mb-4 flex h-8 w-full overflow-hidden rounded-lg">
                   {sortedCategoryEntries.map(([category, percentage]) => (
