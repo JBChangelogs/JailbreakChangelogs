@@ -1,7 +1,11 @@
 const nextConfig = {
   compress: true,
   poweredByHeader: false,
-  allowedDevOrigins: ["127.0.0.1", "localhost"],
+  allowedDevOrigins: [
+    "127.0.0.1",
+    "localhost",
+    "jbcl-frontend.jailbreakchangelogs.com",
+  ],
   reactCompiler: {
     compilationMode: "annotation",
   },
