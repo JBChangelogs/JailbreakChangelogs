@@ -26,7 +26,6 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { useMediaQuery } from "@mui/material";
 import Image from "next/image";
 import Link from "next/link";
 import type { Item } from "@/types/index";
@@ -130,7 +129,6 @@ function VoterCard({ v }: { v: { created_at: number; user: SuggestionUser } }) {
 
 export default function ValueSuggestionDetailPage() {
   const { id } = useParams<{ id: string }>();
-  const isMobile = useMediaQuery("(max-width:640px)");
   const { isAuthenticated, user, setLoginModal } = useAuthContext();
 
   const [suggestion, setSuggestion] = useState<Suggestion | null>(null);
@@ -437,42 +435,50 @@ export default function ValueSuggestionDetailPage() {
                     </span>
                   </div>
 
-                  <div className="flex flex-wrap items-center gap-2">
+                  <div>
                     <span className="text-secondary-text text-xs">
                       Suggested by
                     </span>
-                    <UserAvatar
-                      userId={suggestion.user.id}
-                      avatarHash={suggestion.user.avatar ?? null}
-                      username={suggestion.user.username ?? ""}
-                      custom_avatar={suggestion.user.custom_avatar ?? undefined}
-                      premiumType={suggestion.user.premiumtype ?? 0}
-                      settings={
-                        suggestion.user.settings
-                          ? {
-                              custom_avatar:
-                                !!suggestion.user.settings.custom_avatar,
-                              hide_presence:
-                                !!suggestion.user.settings.hide_presence,
-                            }
-                          : undefined
-                      }
-                      size={5}
-                      showBadge={false}
-                    />
-                    <Link
-                      href={`/users/${suggestion.user.id}`}
-                      prefetch={false}
-                      className="text-link hover:text-link-hover text-sm font-medium transition-colors"
-                    >
-                      {suggestion.user.global_name ||
-                        suggestion.user.username ||
-                        `User #${suggestion.user.id}`}
-                    </Link>
-                    <span className="text-tertiary-text text-xs">·</span>
-                    <span className="text-secondary-text text-xs">
-                      {formatMessageDate(suggestion.created_at)}
-                    </span>
+                    <div className="mt-1 flex items-start gap-2">
+                      <UserAvatar
+                        userId={suggestion.user.id}
+                        avatarHash={suggestion.user.avatar ?? null}
+                        username={suggestion.user.username ?? ""}
+                        custom_avatar={
+                          suggestion.user.custom_avatar ?? undefined
+                        }
+                        premiumType={suggestion.user.premiumtype ?? 0}
+                        settings={
+                          suggestion.user.settings
+                            ? {
+                                custom_avatar:
+                                  !!suggestion.user.settings.custom_avatar,
+                                hide_presence:
+                                  !!suggestion.user.settings.hide_presence,
+                              }
+                            : undefined
+                        }
+                        size={5}
+                        showBadge={false}
+                      />
+                      <div className="min-w-0">
+                        <Link
+                          href={`/users/${suggestion.user.id}`}
+                          prefetch={false}
+                          className="text-link hover:text-link-hover block text-sm font-medium transition-colors"
+                        >
+                          {suggestion.user.global_name ||
+                            suggestion.user.username ||
+                            `User #${suggestion.user.id}`}
+                        </Link>
+                        <p className="text-secondary-text mt-1 text-xs">
+                          Posted on {formatMessageDate(suggestion.created_at)}
+                          {suggestion.updated_at !== suggestion.created_at
+                            ? " (Edited)"
+                            : ""}
+                        </p>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -725,41 +731,45 @@ export default function ValueSuggestionDetailPage() {
                       {fieldLabel(suggestion.field)} Suggestion
                     </h2>
                   </div>
-                  <div className="space-y-4 p-5">
-                    {/* Current */}
-                    <div>
-                      <p className="text-secondary-text mb-1 text-xs font-medium tracking-wide uppercase">
-                        Current {fieldLabel(suggestion.field)}
-                      </p>
-                      <p
-                        className="text-secondary-text text-xl font-bold line-through"
-                        style={{ overflowWrap: "anywhere" }}
+                  <div className="grid grid-cols-2 gap-2 p-5">
+                    <div className="min-w-0 p-3">
+                      <div className="text-button-danger mb-1 flex items-center gap-1.5 text-xs font-semibold tracking-wide uppercase">
+                        <Icon
+                          icon="mdi:minus-circle"
+                          className="h-3.5 w-3.5"
+                          inline
+                        />
+                        Old
+                      </div>
+                      <div
+                        className="text-secondary-text text-lg font-bold line-through"
+                        style={{
+                          wordBreak: "normal",
+                          overflowWrap: "anywhere",
+                        }}
                       >
-                        {isMobile
-                          ? suggestion.current_value || "N/A"
-                          : formatFullValue(suggestion.current_value || "N/A")}
-                      </p>
+                        {formatFullValue(suggestion.current_value || "N/A")}
+                      </div>
                     </div>
 
-                    <Icon
-                      icon="material-symbols:arrow-downward-rounded"
-                      className="text-secondary-text h-4 w-4"
-                      inline
-                    />
-
-                    {/* Suggested */}
-                    <div>
-                      <p className="text-button-success mb-1 text-xs font-medium tracking-wide uppercase">
-                        Suggested {fieldLabel(suggestion.field)}
-                      </p>
-                      <p
-                        className="text-primary-text text-xl font-bold"
-                        style={{ overflowWrap: "anywhere" }}
+                    <div className="min-w-0 p-3">
+                      <div className="text-button-success mb-1 flex items-center gap-1.5 text-xs font-semibold tracking-wide uppercase">
+                        <Icon
+                          icon="mdi:plus-circle"
+                          className="h-3.5 w-3.5"
+                          inline
+                        />
+                        New
+                      </div>
+                      <div
+                        className="text-primary-text text-lg font-bold"
+                        style={{
+                          wordBreak: "normal",
+                          overflowWrap: "anywhere",
+                        }}
                       >
-                        {isMobile
-                          ? suggestion.suggested_value
-                          : formatFullValue(suggestion.suggested_value)}
-                      </p>
+                        {formatFullValue(suggestion.suggested_value)}
+                      </div>
                     </div>
                   </div>
                 </div>

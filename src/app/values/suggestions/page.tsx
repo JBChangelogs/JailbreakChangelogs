@@ -83,6 +83,7 @@ interface Suggestion {
   upvotes: number;
   downvotes: number;
   created_at: number;
+  updated_at: number;
   user: SuggestionUser;
   votes: {
     upvotes: { created_at: number; user: SuggestionUser }[];
@@ -1674,52 +1675,60 @@ export default function ValueSuggestionsPage() {
                     </p>
 
                     {/* Footer */}
-                    <div className="relative z-10 mt-auto flex items-center gap-2 pt-1">
-                      <UserAvatar
-                        userId={suggestion.user.id}
-                        avatarHash={suggestion.user.avatar ?? null}
-                        username={suggestion.user.username ?? ""}
-                        custom_avatar={
-                          suggestion.user.custom_avatar ?? undefined
-                        }
-                        premiumType={suggestion.user.premiumtype ?? 0}
-                        settings={
-                          suggestion.user.settings
-                            ? {
-                                custom_avatar:
-                                  !!suggestion.user.settings.custom_avatar,
-                                hide_presence:
-                                  !!suggestion.user.settings.hide_presence,
-                              }
-                            : undefined
-                        }
-                        size={6}
-                        showBadge={false}
-                      />
-                      <div className="flex min-w-0 flex-1 flex-col">
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Link
-                              href={`/users/${suggestion.user.id}`}
-                              prefetch={false}
-                              className="text-link hover:text-link-hover truncate text-sm font-medium transition-colors"
-                            >
-                              {suggestion.user.global_name ||
-                                suggestion.user.username ||
-                                `User #${suggestion.user.id}`}
-                            </Link>
-                          </TooltipTrigger>
-                          {suggestion.user.username && (
-                            <TooltipContent className="max-w-sm min-w-75 p-0">
-                              <UserDetailsTooltip
-                                user={suggestion.user as unknown as UserData}
-                              />
-                            </TooltipContent>
-                          )}
-                        </Tooltip>
-                        <span className="text-tertiary-text text-xs">
-                          {formatMessageDate(suggestion.created_at)}
-                        </span>
+                    <div className="relative z-10 mt-auto pt-1">
+                      <span className="text-secondary-text text-xs">
+                        Suggested by
+                      </span>
+                      <div className="mt-1 flex items-start gap-2">
+                        <UserAvatar
+                          userId={suggestion.user.id}
+                          avatarHash={suggestion.user.avatar ?? null}
+                          username={suggestion.user.username ?? ""}
+                          custom_avatar={
+                            suggestion.user.custom_avatar ?? undefined
+                          }
+                          premiumType={suggestion.user.premiumtype ?? 0}
+                          settings={
+                            suggestion.user.settings
+                              ? {
+                                  custom_avatar:
+                                    !!suggestion.user.settings.custom_avatar,
+                                  hide_presence:
+                                    !!suggestion.user.settings.hide_presence,
+                                }
+                              : undefined
+                          }
+                          size={6}
+                          showBadge={false}
+                        />
+                        <div className="min-w-0 flex-1">
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Link
+                                href={`/users/${suggestion.user.id}`}
+                                prefetch={false}
+                                className="text-link hover:text-link-hover block truncate text-sm font-medium transition-colors"
+                              >
+                                {suggestion.user.global_name ||
+                                  suggestion.user.username ||
+                                  `User #${suggestion.user.id}`}
+                              </Link>
+                            </TooltipTrigger>
+                            {suggestion.user.username && (
+                              <TooltipContent className="max-w-sm min-w-75 p-0">
+                                <UserDetailsTooltip
+                                  user={suggestion.user as unknown as UserData}
+                                />
+                              </TooltipContent>
+                            )}
+                          </Tooltip>
+                          <p className="text-secondary-text mt-1 text-xs">
+                            Posted on {formatMessageDate(suggestion.created_at)}
+                            {suggestion.updated_at !== suggestion.created_at
+                              ? " (Edited)"
+                              : ""}
+                          </p>
+                        </div>
                       </div>
                       {isAuthenticated &&
                         user?.id === suggestion.user.id &&
