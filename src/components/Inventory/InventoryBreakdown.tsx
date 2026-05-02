@@ -37,7 +37,7 @@ interface InventoryBreakdownProps {
 
 const UNVERIFIABLE_COLLECTION_ITEM_IDS = new Set<number>([
   903, 902, 142, 145, 534, 778, 293, 152, 467, 587, 713, 653, 171, 174, 176,
-  185, 187, 655, 204, 640, 634,
+  185, 187, 655, 204, 640, 634, 709,
 ]);
 
 const VALUES_TYPE_ORDER = [
