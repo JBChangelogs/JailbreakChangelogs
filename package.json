@@ -7,7 +7,8 @@
     "build": "next build",
     "build:analyze": "ANALYZE=true next build",
     "analyze": "next experimental-analyze",
-    "start": "next start",
+    "start": "next start -p 5500",
+    "start:cf": "sh ./scripts/start-with-tunnel.sh",
     "lint": "oxlint",
     "lint:fix": "oxlint --fix",
     "type-check": "tsc --noEmit",
@@ -103,7 +104,7 @@
     "typescript": "^5.9.3"
   },
   "lint-staged": {
-    "*.{js,jsx,ts,tsx}": [
+    "src/**/*.{js,jsx,ts,tsx}": [
       "oxlint --fix",
       "oxfmt"
     ]
