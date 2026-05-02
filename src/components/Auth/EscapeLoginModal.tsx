@@ -1,8 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import { Dialog, DialogPanel } from "@headlessui/react";
 import { useEscapeLogin } from "@/utils/escapeLogin";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogClose,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 
 export default function EscapeLoginModal() {
@@ -29,65 +36,63 @@ export default function EscapeLoginModal() {
   };
 
   return (
-    <Dialog open={showModal} onClose={handleClose} className="relative z-50">
-      <div
-        className="fixed inset-0 bg-black/30 backdrop-blur-sm"
-        aria-hidden="true"
-      />
-
-      <div className="fixed inset-0 flex items-center justify-center p-4">
-        <DialogPanel className="modal-container border-button-info bg-secondary-bg w-full max-w-120 min-w-[320px] rounded-lg border shadow-lg">
-          <div className="modal-header text-primary-text px-6 py-4 text-xl font-semibold">
+    <Dialog open={showModal} onOpenChange={(open) => !open && handleClose()}>
+      <DialogContent
+        className="bg-secondary-bg max-w-md rounded-lg p-0 backdrop-blur-none"
+        showClose
+        onEscapeKeyDown={(e) => e.preventDefault()}
+        aria-describedby={undefined}
+      >
+        <DialogHeader className="px-6 pt-6 pb-2">
+          <DialogTitle className="text-primary-text text-xl font-semibold">
             Login with Token
+          </DialogTitle>
+        </DialogHeader>
+
+        <form onSubmit={handleSubmit}>
+          <div className="px-6 pt-4 pb-6">
+            <label
+              htmlFor="token"
+              className="text-secondary-text mb-1 block text-xs tracking-wider uppercase"
+            >
+              Token
+            </label>
+            <input
+              type="text"
+              id="token"
+              value={token}
+              onChange={(e) => setToken(e.target.value)}
+              className="border-border-card bg-tertiary-bg text-primary-text hover:border-border-focus focus:border-button-info w-full rounded border p-3 text-sm focus:outline-none"
+              placeholder="Enter your authentication token"
+              required
+            />
+            {error && (
+              <p className="text-button-danger mt-1 text-xs">{error}</p>
+            )}
           </div>
 
-          <form onSubmit={handleSubmit}>
-            <div className="modal-content p-6">
-              <div className="mb-4">
-                <label
-                  htmlFor="token"
-                  className="text-secondary-text mb-1 text-xs tracking-wider uppercase"
-                >
-                  Token
-                </label>
-                <input
-                  type="text"
-                  id="token"
-                  value={token}
-                  onChange={(e) => setToken(e.target.value)}
-                  className="border-border-card bg-form-input text-primary-text hover:border-border-focus focus:border-button-info w-full cursor-pointer rounded border p-3 text-sm focus:outline-none"
-                  placeholder="Enter your authentication token"
-                  required
-                />
-                {error && (
-                  <p className="text-button-danger mt-1 text-xs">{error}</p>
-                )}
-              </div>
-            </div>
-
-            <div className="modal-footer flex justify-end gap-2 px-6 py-4">
+          <DialogFooter className="mt-4 gap-2 px-6 pt-2 pb-6">
+            <DialogClose asChild>
               <Button
                 type="button"
-                onClick={handleClose}
-                disabled={isLoading}
                 variant="ghost"
-                size="md"
+                size="sm"
+                disabled={isLoading}
               >
                 Cancel
               </Button>
-              <Button
-                type="submit"
-                disabled={!token.trim() || isLoading}
-                variant="default"
-                size="md"
-                className="min-w-25"
-              >
-                {isLoading ? "Logging in..." : "Login"}
-              </Button>
-            </div>
-          </form>
-        </DialogPanel>
-      </div>
+            </DialogClose>
+            <Button
+              type="submit"
+              disabled={!token.trim() || isLoading}
+              variant="default"
+              size="sm"
+            >
+              {isLoading ? "Logging in..." : "Login"}
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
     </Dialog>
   );
 }

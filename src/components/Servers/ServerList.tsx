@@ -4,7 +4,14 @@ import React from "react";
 import { Icon } from "@/components/ui/IconWrapper";
 import { formatProfileDate } from "@/utils/timestamp";
 import { useAuthContext } from "@/contexts/AuthContext";
-import { Dialog, DialogPanel } from "@headlessui/react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { toast } from "sonner";
 import AddServerModal from "./AddServerModal";
 import { Skeleton } from "@mui/material";
@@ -903,62 +910,47 @@ const ServerList: React.FC<{
         />
       )}
 
-      {deleteModalOpen && serverToDelete && (
-        <Dialog
-          open={deleteModalOpen}
-          onClose={() => {}}
-          className="relative z-3000"
+      <Dialog
+        open={deleteModalOpen && !!serverToDelete}
+        onOpenChange={(open) => !open && setDeleteModalOpen(false)}
+      >
+        <DialogContent
+          className="bg-secondary-bg max-w-md rounded-lg p-0 backdrop-blur-none"
+          showClose
+          onInteractOutside={(e) => e.preventDefault()}
+          aria-describedby={undefined}
         >
-          <div
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm"
-            aria-hidden="true"
-          />
+          <DialogHeader className="px-6 pt-6 pb-2">
+            <DialogTitle className="text-primary-text text-xl font-semibold">
+              Delete Server?
+            </DialogTitle>
+          </DialogHeader>
 
-          <div className="fixed inset-0 flex items-center justify-center p-4">
-            <DialogPanel className="border-border-card bg-secondary-bg hover:border-border-focus relative w-full max-w-md rounded-lg border shadow-xl">
-              <div className="border-border-card flex items-center justify-between border-b p-4">
-                <h2 className="text-primary-text text-xl font-semibold">
-                  Delete Server?
-                </h2>
-                <button
-                  type="button"
-                  onClick={() => setDeleteModalOpen(false)}
-                  aria-label="Close"
-                  className="text-secondary-text hover:text-primary-text hover:bg-quaternary-bg focus-visible:ring-ring inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-md transition-colors focus-visible:ring-1 focus-visible:outline-none"
-                >
-                  <Icon icon="heroicons:x-mark" className="h-5 w-5" />
-                </button>
-              </div>
+          <DialogDescription className="text-secondary-text px-6 pt-4 pb-6">
+            Are you sure you want to delete this server? This action cannot be
+            undone.
+          </DialogDescription>
 
-              <div className="p-6">
-                <p className="text-secondary-text">
-                  Are you sure you want to delete this server? This action
-                  cannot be undone.
-                </p>
-              </div>
-
-              <div className="border-border-card flex justify-end gap-2 border-t p-4">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  disabled={deletingServer}
-                  onClick={() => setDeleteModalOpen(false)}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  disabled={deletingServer}
-                  onClick={confirmDeleteServer}
-                >
-                  {deletingServer ? "Deleting..." : "Delete"}
-                </Button>
-              </div>
-            </DialogPanel>
-          </div>
-        </Dialog>
-      )}
+          <DialogFooter className="mt-4 gap-2 px-6 pt-2 pb-6">
+            <Button
+              variant="ghost"
+              size="sm"
+              disabled={deletingServer}
+              onClick={() => setDeleteModalOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              size="sm"
+              disabled={deletingServer}
+              onClick={confirmDeleteServer}
+            >
+              {deletingServer ? "Deleting..." : "Delete"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

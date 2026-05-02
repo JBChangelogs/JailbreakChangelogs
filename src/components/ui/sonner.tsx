@@ -55,10 +55,11 @@ const Toaster = ({ toastOptions, style, icons, ...props }: ToasterProps) => {
   return (
     <Sonner
       theme={theme as ToasterProps["theme"]}
-      className="toaster group z-4000!"
+      className="toaster group"
       style={
         {
           "--width": "440px",
+          zIndex: 10001,
           ...style,
         } as CSSProperties
       }
