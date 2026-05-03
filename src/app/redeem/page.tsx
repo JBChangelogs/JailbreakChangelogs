@@ -1,22 +1,32 @@
 "use client";
 
 import React, { useState, useEffect, useCallback, useRef } from "react";
+import { useQueryState } from "nuqs";
 import { useAuthContext } from "@/contexts/AuthContext";
 import Link from "next/link";
 import Image from "next/image";
 import { RobloxIcon } from "@/components/Icons/RobloxIcon";
 import { Icon } from "@/components/ui/IconWrapper";
 import { Button } from "@/components/ui/button";
-import confetti from "canvas-confetti";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
-import { Dialog, DialogPanel, DialogTitle } from "@headlessui/react";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogFooter,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { Spinner } from "@/components/ui/Spinner";
 import { safeSetJSON } from "@/utils/safeStorage";
 import { UserData } from "@/types/auth";
 
 export default function RedeemPage() {
-  const [code, setCode] = useState("");
+  const [code, setCode] = useQueryState("code", {
+    defaultValue: "",
+    history: "replace",
+    shallow: true,
+  });
   const [isValidating, setIsValidating] = useState(false);
   const [validationResult, setValidationResult] = useState<{
     valid: boolean;
@@ -38,68 +48,7 @@ export default function RedeemPage() {
   } | null>(null);
   const { isAuthenticated, user } = useAuthContext();
 
-  // Confetti function with custom colors
-  const triggerConfetti = (customColors?: string[]) => {
-    // Default random colors if none provided
-    const defaultPalette = [
-      "#FF6B6B",
-      "#4ECDC4",
-      "#45B7D1",
-      "#96CEB4",
-      "#FFEAA7",
-      "#DDA0DD",
-      "#98D8C8",
-      "#F7DC6F",
-      "#BB8FCE",
-      "#85C1E9",
-    ];
-
-    const colors =
-      customColors ||
-      defaultPalette.sort(() => 0.5 - Math.random()).slice(0, 2);
-    const end = Date.now() + 5 * 1000;
-
-    const frame = () => {
-      if (Date.now() > end) return;
-
-      confetti({
-        particleCount: 2,
-        angle: 60,
-        spread: 55,
-        startVelocity: 60,
-        origin: { x: 0, y: 0.5 },
-        colors: colors,
-        scalar: 2,
-        zIndex: 1300,
-      });
-      confetti({
-        particleCount: 2,
-        angle: 120,
-        spread: 55,
-        startVelocity: 60,
-        origin: { x: 1, y: 0.5 },
-        colors: colors,
-        scalar: 2,
-        zIndex: 1300,
-      });
-
-      requestAnimationFrame(frame);
-    };
-
-    frame();
-  };
-
   const lastValidatedCodeRef = useRef<string>("");
-
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const urlParams = new URLSearchParams(window.location.search);
-      const codeParam = urlParams.get("code");
-      if (codeParam) {
-        setCode(codeParam);
-      }
-    }
-  }, []);
 
   const validateCode = useCallback((codeToValidate: string) => {
     lastValidatedCodeRef.current = codeToValidate;
@@ -208,23 +157,7 @@ export default function RedeemPage() {
         }
 
         setShowCelebrationModal(true);
-
-        // Determine confetti colors based on tier
-        let confettiColors = ["#ffffff", "#4ECDC4"]; // Default
-        if (data.premiumtype === 1) confettiColors = ["#ffffff", "#cd7f32"]; // Bronze
-        if (data.premiumtype === 2) confettiColors = ["#ffffff", "#c0c0c0"]; // Silver
-        if (data.premiumtype === 3) confettiColors = ["#ffffff", "#ffd700"]; // Gold
-
-        triggerConfetti(confettiColors);
-
-        if (typeof window !== "undefined") {
-          const urlParams = new URLSearchParams(window.location.search);
-          if (urlParams.get("code")) {
-            urlParams.delete("code");
-            const newUrl = `${window.location.pathname}${urlParams.toString() ? "?" + urlParams.toString() : ""}`;
-            window.history.replaceState({}, "", newUrl);
-          }
-        }
+        setCode(null);
       } else if (response.status === 400) {
         const data = await response.text();
         if (data === '"Code already redeemed"') {
@@ -236,37 +169,16 @@ export default function RedeemPage() {
           setMessage({ text: "Invalid code format", type: "error" });
         }
 
-        if (typeof window !== "undefined") {
-          const urlParams = new URLSearchParams(window.location.search);
-          if (urlParams.get("code")) {
-            urlParams.delete("code");
-            const newUrl = `${window.location.pathname}${urlParams.toString() ? "?" + urlParams.toString() : ""}`;
-            window.history.replaceState({}, "", newUrl);
-          }
-        }
+        setCode(null);
       } else if (response.status === 404) {
         setMessage({ text: "Invalid Code", type: "error" });
-        if (typeof window !== "undefined") {
-          const urlParams = new URLSearchParams(window.location.search);
-          if (urlParams.get("code")) {
-            urlParams.delete("code");
-            const newUrl = `${window.location.pathname}${urlParams.toString() ? "?" + urlParams.toString() : ""}`;
-            window.history.replaceState({}, "", newUrl);
-          }
-        }
+        setCode(null);
       } else if (response.status === 409) {
         setMessage({
           text: "The code has already been redeemed",
           type: "error",
         });
-        if (typeof window !== "undefined") {
-          const urlParams = new URLSearchParams(window.location.search);
-          if (urlParams.get("code")) {
-            urlParams.delete("code");
-            const newUrl = `${window.location.pathname}${urlParams.toString() ? "?" + urlParams.toString() : ""}`;
-            window.history.replaceState({}, "", newUrl);
-          }
-        }
+        setCode(null);
       } else {
         setMessage({
           text: "An error occurred. Please try again.",
@@ -331,7 +243,7 @@ export default function RedeemPage() {
                     className={`mt-2 flex items-center space-x-2 text-sm ${
                       !validationResult.valid || validationResult.redeemed
                         ? "text-button-danger"
-                        : "text-button-info"
+                        : "text-link"
                     }`}
                   >
                     {!validationResult.valid || validationResult.redeemed ? (
@@ -631,11 +543,23 @@ export default function RedeemPage() {
               <code className="text-primary-text break-all">{code}</code>
             </p>
             {validationResult && validationResult.premiumtype > 0 && (
-              <p className="text-secondary-text mt-1 text-sm">
+              <p className="text-secondary-text mt-1 flex items-center gap-1 text-sm">
                 <span className="font-medium">Tier:</span>{" "}
                 <span className="text-primary-text">
-                  Tier {validationResult.premiumtype}
+                  Supporter{" "}
+                  {
+                    (["I", "II", "III"] as const)[
+                      validationResult.premiumtype - 1
+                    ]
+                  }
                 </span>
+                <Image
+                  src={`https://assets.jailbreakchangelogs.com/assets/website_icons/jbcl_supporter_${validationResult.premiumtype}.svg`}
+                  alt={`Supporter Tier ${validationResult.premiumtype}`}
+                  width={16}
+                  height={16}
+                  className="object-contain"
+                />
               </p>
             )}
           </div>
@@ -644,94 +568,64 @@ export default function RedeemPage() {
 
       <Dialog
         open={showCelebrationModal}
-        onClose={() => setShowCelebrationModal(false)}
-        className="relative z-50"
+        onOpenChange={setShowCelebrationModal}
       >
-        <div
-          className="bg-overlay-bg fixed inset-0 backdrop-blur-sm"
-          aria-hidden="true"
-        />
+        <DialogContent className="max-w-lg p-4 sm:p-8" showClose>
+          <div className="text-center">
+            {redeemedResult &&
+            redeemedResult.premiumtype >= 1 &&
+            redeemedResult.premiumtype <= 3 ? (
+              <Image
+                src={`https://assets.jailbreakchangelogs.com/assets/website_icons/jbcl_supporter_${redeemedResult.premiumtype}.svg`}
+                alt={`Supporter Tier ${redeemedResult.premiumtype}`}
+                width={80}
+                height={80}
+                className="mx-auto mb-6 object-contain"
+              />
+            ) : (
+              <Icon
+                icon="heroicons:trophy-solid"
+                className="mx-auto mb-6 h-20 w-20 text-yellow-500"
+              />
+            )}
 
-        <div className="fixed inset-0 flex items-center justify-center p-4">
-          <DialogPanel className="modal-container border-button-info bg-secondary-bg mx-auto w-full max-w-lg rounded-lg border p-4 shadow-lg sm:p-8">
-            <div className="absolute inset-0 overflow-hidden rounded-lg">
-              <div
-                className="absolute -top-4 left-1/4 h-2 w-2 animate-bounce rounded-full bg-yellow-400"
-                style={{ animationDelay: "0s", animationDuration: "1s" }}
-              ></div>
-              <div
-                className="absolute -top-4 left-1/2 h-2 w-2 animate-bounce rounded-full bg-blue-400"
-                style={{ animationDelay: "0.2s", animationDuration: "1s" }}
-              ></div>
-              <div
-                className="absolute -top-4 left-3/4 h-2 w-2 animate-bounce rounded-full bg-green-400"
-                style={{ animationDelay: "0.4s", animationDuration: "1s" }}
-              ></div>
-              <div
-                className="absolute -top-4 left-1/3 h-2 w-2 animate-bounce rounded-full bg-purple-400"
-                style={{ animationDelay: "0.6s", animationDuration: "1s" }}
-              ></div>
-              <div
-                className="absolute -top-4 left-2/3 h-2 w-2 animate-bounce rounded-full bg-pink-400"
-                style={{ animationDelay: "0.8s", animationDuration: "1s" }}
-              ></div>
-            </div>
+            <DialogTitle className="mb-4 text-3xl font-bold">
+              Code Redeemed Successfully!
+            </DialogTitle>
 
-            <div className="relative text-center">
-              <div className="bg-secondary-bg/50 border-border-card mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full border">
-                {redeemedResult &&
-                redeemedResult.premiumtype >= 1 &&
-                redeemedResult.premiumtype <= 3 ? (
-                  <Image
-                    src={`https://assets.jailbreakchangelogs.com/assets/website_icons/jbcl_supporter_${redeemedResult.premiumtype}.svg`}
-                    alt={`Supporter Tier ${redeemedResult.premiumtype}`}
-                    width={48}
-                    height={48}
-                    className="object-contain"
-                  />
-                ) : (
-                  <Icon
-                    icon="heroicons:trophy-solid"
-                    className="h-10 w-10 text-yellow-500"
-                  />
-                )}
-              </div>
+            <p className="text-secondary-text mb-4 text-lg">
+              The code has been successfully redeemed! You have received{" "}
+              <span className="text-primary-text font-bold">
+                {redeemedResult
+                  ? `Supporter Tier ${redeemedResult.premiumtype}`
+                  : "Supporter"}
+              </span>
+              .
+            </p>
 
-              <DialogTitle className="text-primary-text mb-4 text-3xl font-bold">
-                Code Redeemed Successfully!
-              </DialogTitle>
+            <p className="text-primary-text mb-6 text-base font-bold">
+              Thank you for your support!
+            </p>
+          </div>
 
-              <p className="text-secondary-text mb-4 text-lg">
-                The code has been successfully redeemed! You have received{" "}
-                <span className="text-primary-text font-bold">
-                  {redeemedResult
-                    ? `Supporter Tier ${redeemedResult.premiumtype}`
-                    : "Supporter"}
-                </span>
-                .
-              </p>
-
-              <p className="text-primary-text mb-6 text-base font-bold">
-                Thank you for your support!
-              </p>
-
-              <div className="flex flex-col gap-3 sm:flex-row">
-                <Link
-                  href={`/supporting${redeemedResult ? `?tier=${redeemedResult.premiumtype}` : ""}`}
-                  className="bg-button-info text-form-button-text hover:bg-button-info-hover w-full rounded-lg px-4 py-2 text-center transition-colors sm:flex-1"
-                >
-                  View Your New Benefits
-                </Link>
-                <Link
-                  href="/"
-                  className="bg-button-info text-form-button-text hover:bg-button-info-hover w-full rounded-lg px-4 py-2 transition-colors sm:flex-1"
-                >
-                  Get Started
-                </Link>
-              </div>
-            </div>
-          </DialogPanel>
-        </div>
+          <DialogFooter className="mt-4 gap-2 px-0 pt-2 pb-0">
+            <DialogClose asChild>
+              <Button variant="ghost" size="sm">
+                Close
+              </Button>
+            </DialogClose>
+            <Button asChild size="sm">
+              <Link
+                href={`/supporting${redeemedResult ? `?tier=${redeemedResult.premiumtype}` : ""}`}
+              >
+                View Your New Benefits
+              </Link>
+            </Button>
+            <Button asChild size="sm">
+              <Link href="/">Get Started</Link>
+            </Button>
+          </DialogFooter>
+        </DialogContent>
       </Dialog>
     </div>
   );
