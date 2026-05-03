@@ -7,141 +7,77 @@ interface SpinnerProps {
 export function Spinner({ className }: SpinnerProps) {
   return (
     <svg
-      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
       viewBox="0 0 24 24"
-      className={cn("text-tertiary-text", className)}
+      xmlns="http://www.w3.org/2000/svg"
+      className={cn("text-primary-text", className)}
       aria-hidden="true"
     >
-      <circle cx="12" cy="2" r="0" fill="currentColor">
-        <animate
-          attributeName="r"
-          begin="0"
-          calcMode="spline"
-          dur="1s"
-          keySplines="0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8"
-          repeatCount="indefinite"
-          values="0;2;0;0"
+      <style>{`.spinner_OSmW{transform-origin:center;animation:spinner_T6mA .75s step-end infinite}@keyframes spinner_T6mA{8.3%{transform:rotate(30deg)}16.6%{transform:rotate(60deg)}25%{transform:rotate(90deg)}33.3%{transform:rotate(120deg)}41.6%{transform:rotate(150deg)}50%{transform:rotate(180deg)}58.3%{transform:rotate(210deg)}66.6%{transform:rotate(240deg)}75%{transform:rotate(270deg)}83.3%{transform:rotate(300deg)}91.6%{transform:rotate(330deg)}100%{transform:rotate(360deg)}}`}</style>
+      <g className="spinner_OSmW">
+        <rect
+          x="11"
+          y="1"
+          width="2"
+          height="5"
+          opacity=".14"
+          fill="currentColor"
         />
-      </circle>
-      <circle
-        cx="12"
-        cy="2"
-        r="0"
-        fill="currentColor"
-        transform="rotate(45 12 12)"
-      >
-        <animate
-          attributeName="r"
-          begin="0.125s"
-          calcMode="spline"
-          dur="1s"
-          keySplines="0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8"
-          repeatCount="indefinite"
-          values="0;2;0;0"
+        <rect
+          x="11"
+          y="1"
+          width="2"
+          height="5"
+          transform="rotate(30 12 12)"
+          opacity=".29"
+          fill="currentColor"
         />
-      </circle>
-      <circle
-        cx="12"
-        cy="2"
-        r="0"
-        fill="currentColor"
-        transform="rotate(90 12 12)"
-      >
-        <animate
-          attributeName="r"
-          begin="0.25s"
-          calcMode="spline"
-          dur="1s"
-          keySplines="0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8"
-          repeatCount="indefinite"
-          values="0;2;0;0"
+        <rect
+          x="11"
+          y="1"
+          width="2"
+          height="5"
+          transform="rotate(60 12 12)"
+          opacity=".43"
+          fill="currentColor"
         />
-      </circle>
-      <circle
-        cx="12"
-        cy="2"
-        r="0"
-        fill="currentColor"
-        transform="rotate(135 12 12)"
-      >
-        <animate
-          attributeName="r"
-          begin="0.375s"
-          calcMode="spline"
-          dur="1s"
-          keySplines="0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8"
-          repeatCount="indefinite"
-          values="0;2;0;0"
+        <rect
+          x="11"
+          y="1"
+          width="2"
+          height="5"
+          transform="rotate(90 12 12)"
+          opacity=".57"
+          fill="currentColor"
         />
-      </circle>
-      <circle
-        cx="12"
-        cy="2"
-        r="0"
-        fill="currentColor"
-        transform="rotate(180 12 12)"
-      >
-        <animate
-          attributeName="r"
-          begin="0.5s"
-          calcMode="spline"
-          dur="1s"
-          keySplines="0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8"
-          repeatCount="indefinite"
-          values="0;2;0;0"
+        <rect
+          x="11"
+          y="1"
+          width="2"
+          height="5"
+          transform="rotate(120 12 12)"
+          opacity=".71"
+          fill="currentColor"
         />
-      </circle>
-      <circle
-        cx="12"
-        cy="2"
-        r="0"
-        fill="currentColor"
-        transform="rotate(225 12 12)"
-      >
-        <animate
-          attributeName="r"
-          begin="0.625s"
-          calcMode="spline"
-          dur="1s"
-          keySplines="0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8"
-          repeatCount="indefinite"
-          values="0;2;0;0"
+        <rect
+          x="11"
+          y="1"
+          width="2"
+          height="5"
+          transform="rotate(150 12 12)"
+          opacity=".86"
+          fill="currentColor"
         />
-      </circle>
-      <circle
-        cx="12"
-        cy="2"
-        r="0"
-        fill="currentColor"
-        transform="rotate(270 12 12)"
-      >
-        <animate
-          attributeName="r"
-          begin="0.75s"
-          calcMode="spline"
-          dur="1s"
-          keySplines="0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8"
-          repeatCount="indefinite"
-          values="0;2;0;0"
+        <rect
+          x="11"
+          y="1"
+          width="2"
+          height="5"
+          transform="rotate(180 12 12)"
+          fill="currentColor"
         />
-      </circle>
-      <circle
-        cx="12"
-        cy="2"
-        r="0"
-        fill="currentColor"
-        transform="rotate(315 12 12)"
-      >
-        <animate
-          attributeName="r"
-          begin="0.875s"
-          calcMode="spline"
-          dur="1s"
-          keySplines="0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8"
-          repeatCount="indefinite"
-          values="0;2;0;0"
-        />
-      </circle>
+      </g>
     </svg>
   );
 }

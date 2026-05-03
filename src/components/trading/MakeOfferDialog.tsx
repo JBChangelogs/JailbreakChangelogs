@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/IconWrapper";
 import Image from "next/image";
+import Link from "next/link";
 import { ItemGrid } from "@/components/trading/ItemGrid";
 import TradeItemPickerV2 from "@/components/trading/TradeItemPickerV2";
 import { TradeAd, TradeItem } from "@/types/trading";
@@ -591,7 +592,7 @@ export function MakeOfferDialog({
         className="bg-secondary-bg flex max-h-[90vh] max-w-3xl flex-col rounded-lg p-0 backdrop-blur-none"
         aria-describedby={undefined}
       >
-        <div className="border-border-card flex shrink-0 items-start justify-between gap-3 border-b px-6 pt-6 pb-4">
+        <div className="border-border-card flex shrink-0 items-start justify-between gap-3 px-6 pt-6 pb-4">
           <div className="flex min-w-0 items-start gap-3">
             <div className="border-border-card bg-primary-bg relative mt-0.5 h-10 w-10 shrink-0 overflow-hidden rounded-full border">
               {avatarSrc ? (
@@ -614,8 +615,16 @@ export function MakeOfferDialog({
                 Make Offer
               </DialogTitle>
               <p className="text-secondary-text truncate text-sm">
-                To {tradeOwnerName}
-                {tradeOwnerHandle ? ` (@${tradeOwnerHandle})` : ""}.
+                To{" "}
+                <Link
+                  href={`/users/${trade.user?.id}`}
+                  prefetch={false}
+                  className="text-link hover:text-link-hover transition-colors"
+                >
+                  {tradeOwnerName}
+                  {tradeOwnerHandle ? ` (@${tradeOwnerHandle})` : ""}
+                </Link>
+                .
               </p>
             </div>
           </div>
@@ -633,7 +642,7 @@ export function MakeOfferDialog({
         <div className="overflow-y-auto px-6 pt-4 pb-6">
           {!showCustom && (
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-              <div className="border-border-card bg-primary-bg rounded-lg border p-4">
+              <div className="border-border-card bg-tertiary-bg rounded-lg border p-4">
                 <h3 className="text-primary-text mb-1 text-sm font-semibold">
                   Quick Offer
                 </h3>
@@ -649,7 +658,7 @@ export function MakeOfferDialog({
                 </Button>
               </div>
 
-              <div className="border-border-card bg-primary-bg rounded-lg border p-4">
+              <div className="border-border-card bg-tertiary-bg rounded-lg border p-4">
                 <h3 className="text-primary-text mb-1 text-sm font-semibold">
                   Custom Offer
                 </h3>
