@@ -7,6 +7,8 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogFooter,
+  DialogClose,
 } from "@/components/ui/dialog";
 import Image from "next/image";
 import { getCategoryColor, getCategoryIcon } from "@/utils/categoryIcons";
@@ -366,6 +368,14 @@ export default function TradeHistoryModal({
             );
           })()}
         </div>
+
+        <DialogFooter className="mt-4 gap-2 px-6 pt-2 pb-6">
+          <DialogClose asChild>
+            <Button variant="ghost" size="sm">
+              Close
+            </Button>
+          </DialogClose>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

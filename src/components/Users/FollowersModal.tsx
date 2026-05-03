@@ -1,5 +1,12 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Dialog } from "@mui/material";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogClose,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/IconWrapper";
 import { Spinner } from "@/components/ui/Spinner";
@@ -262,152 +269,145 @@ const FollowersModal: React.FC<FollowersModalProps> = ({
   });
 
   return (
-    <Dialog
-      open={isOpen}
-      onClose={onClose}
-      className="relative z-50"
-      disableAutoFocus
-      disableEnforceFocus
-      disableRestoreFocus
-    >
-      <div
-        className="fixed inset-0 bg-black/30 backdrop-blur-sm"
-        aria-hidden="true"
-      />
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent
+        className="bg-secondary-bg max-w-120 rounded-lg p-0 backdrop-blur-none"
+        showClose
+        aria-describedby={undefined}
+      >
+        <DialogHeader className="px-6 pt-6 pb-2">
+          <DialogTitle className="text-primary-text text-xl font-semibold">
+            Followers ({followers.length})
+          </DialogTitle>
+        </DialogHeader>
 
-      <div className="fixed inset-0 flex items-center justify-center p-4">
-        <div className="modal-container border-button-info bg-primary-bg w-full max-w-120 min-w-[320px] rounded-lg border shadow-lg">
-          <div className="modal-header text-primary-text flex items-center justify-between px-6 py-4 text-xl font-semibold">
-            <span>Followers ({followers.length})</span>
-            <button
-              onClick={onClose}
-              className="text-primary-text hover:text-primary-text cursor-pointer transition-colors"
-            >
-              <Icon icon="heroicons:x-mark" className="h-5 w-5" />
-            </button>
-          </div>
-
-          <div className="modal-content max-h-100 overflow-y-auto p-6">
-            {loading ? (
-              <div className="flex justify-center py-4 sm:py-8">
-                <Spinner className="h-8 w-8" />
-              </div>
-            ) : isPrivate ? (
-              <div className="text-primary-text py-4 text-center text-sm sm:py-8">
-                This user has hidden their followers
-              </div>
-            ) : (
-              <>
-                <div className="mb-2 sm:mb-4">
-                  <div className="relative">
-                    <input
-                      type="text"
-                      placeholder="Search followers..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      className="border-border-card bg-secondary-bg text-primary-text placeholder-secondary-text hover:border-border-focus focus:border-button-info w-full rounded-lg border px-4 py-2 pr-10 pl-10 transition-all duration-300 focus:outline-none"
-                    />
-                    <Icon
-                      icon="heroicons:magnifying-glass"
-                      className="text-secondary-text absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2"
-                    />
-                    {searchQuery && (
-                      <button
-                        onClick={() => setSearchQuery("")}
-                        className="text-secondary-text hover:text-primary-text absolute top-1/2 right-3 h-5 w-5 -translate-y-1/2 cursor-pointer"
-                        aria-label="Clear search"
-                      >
-                        <Icon icon="heroicons:x-mark" />
-                      </button>
-                    )}
-                  </div>
+        <div className="max-h-[60vh] overflow-y-auto px-6 pt-4 pb-6">
+          {loading ? (
+            <div className="flex justify-center py-4 sm:py-8">
+              <Spinner className="h-8 w-8" />
+            </div>
+          ) : isPrivate ? (
+            <div className="text-primary-text py-4 text-center text-sm sm:py-8">
+              This user has hidden their followers
+            </div>
+          ) : (
+            <>
+              <div className="mb-2 sm:mb-4">
+                <div className="relative">
+                  <input
+                    type="text"
+                    placeholder="Search followers..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="border-border-card bg-tertiary-bg text-primary-text placeholder-secondary-text hover:border-border-focus focus:border-button-info w-full rounded-lg border px-4 py-2 pr-10 pl-10 transition-all duration-300 focus:outline-none"
+                  />
+                  <Icon
+                    icon="heroicons:magnifying-glass"
+                    className="text-secondary-text absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2"
+                  />
+                  {searchQuery && (
+                    <button
+                      onClick={() => setSearchQuery("")}
+                      className="text-secondary-text hover:text-primary-text absolute top-1/2 right-3 h-5 w-5 -translate-y-1/2 cursor-pointer"
+                      aria-label="Clear search"
+                    >
+                      <Icon icon="heroicons:x-mark" />
+                    </button>
+                  )}
                 </div>
-                {error ? (
-                  <div className="text-status-error py-4 text-center text-sm sm:py-8">
-                    {error}
-                  </div>
-                ) : filteredFollowers.length === 0 ? (
-                  <div className="text-primary-text py-4 text-center text-sm sm:py-8">
-                    {searchQuery ? "No results found" : "No followers yet"}
-                  </div>
-                ) : (
-                  <div className="space-y-1 sm:space-y-4">
-                    {filteredFollowers.map((follower) => {
-                      const user = followerDetails[follower.follower_id];
-                      if (!user) return null;
+              </div>
+              {error ? (
+                <div className="text-status-error py-4 text-center text-sm sm:py-8">
+                  {error}
+                </div>
+              ) : filteredFollowers.length === 0 ? (
+                <div className="text-primary-text py-4 text-center text-sm sm:py-8">
+                  {searchQuery ? "No results found" : "No followers yet"}
+                </div>
+              ) : (
+                <div className="space-y-1 sm:space-y-4">
+                  {filteredFollowers.map((follower) => {
+                    const user = followerDetails[follower.follower_id];
+                    if (!user) return null;
 
-                      return (
-                        <div
-                          key={follower.follower_id}
-                          className="group hover:bg-secondary-bg flex items-center justify-between rounded-lg p-1.5 transition-colors sm:p-3"
+                    return (
+                      <div
+                        key={follower.follower_id}
+                        className="group hover:bg-tertiary-bg flex items-center justify-between rounded-lg p-1.5 transition-colors sm:p-3"
+                      >
+                        <Link
+                          href={`/users/${user.id}`}
+                          prefetch={false}
+                          className="block flex-1"
                         >
-                          <Link
-                            href={`/users/${user.id}`}
-                            prefetch={false}
-                            className="block flex-1"
-                          >
-                            <div className="flex items-center space-x-1.5 sm:space-x-3">
-                              <UserAvatar
-                                userId={user.id}
-                                avatarHash={user.avatar}
-                                username={user.username}
-                                size={10}
-                                cdnSize={512}
-                                custom_avatar={user.custom_avatar}
-                                showBadge={false}
-                                settings={user.settings_v2}
-                                premiumType={user.premiumtype}
-                              />
-                              <div className="min-w-0 flex-1">
-                                <div className="flex items-center gap-1 sm:gap-2">
-                                  <h3 className="text-primary-text group-hover:text-link-hover max-w-45 truncate text-sm font-semibold transition-colors sm:max-w-62.5 sm:text-base">
-                                    {user.global_name &&
-                                    user.global_name !== "None"
-                                      ? user.global_name
-                                      : user.username}
-                                  </h3>
-                                  {isOwnProfile &&
-                                    !followingStatus[user.id] && (
-                                      <>
-                                        {!loadingFollow[user.id] && (
-                                          <span className="text-primary-text">
-                                            ·
-                                          </span>
-                                        )}
-                                        <Button
-                                          onClick={(e) => {
-                                            e.preventDefault();
-                                            e.stopPropagation();
-                                            handleFollow(user.id);
-                                          }}
-                                          disabled={loadingFollow[user.id]}
-                                          variant="ghost"
-                                          size="sm"
-                                          className="text-button-info hover:text-button-info-hover px-2"
-                                        >
-                                          {loadingFollow[user.id]
-                                            ? "..."
-                                            : "Follow"}
-                                        </Button>
-                                      </>
+                          <div className="flex items-center space-x-1.5 sm:space-x-3">
+                            <UserAvatar
+                              userId={user.id}
+                              avatarHash={user.avatar}
+                              username={user.username}
+                              size={10}
+                              cdnSize={512}
+                              custom_avatar={user.custom_avatar}
+                              showBadge={false}
+                              settings={user.settings_v2}
+                              premiumType={user.premiumtype}
+                            />
+                            <div className="min-w-0 flex-1">
+                              <div className="flex items-center gap-1 sm:gap-2">
+                                <h3 className="text-primary-text group-hover:text-link-hover max-w-45 truncate text-sm font-semibold transition-colors sm:max-w-62.5 sm:text-base">
+                                  {user.global_name &&
+                                  user.global_name !== "None"
+                                    ? user.global_name
+                                    : user.username}
+                                </h3>
+                                {isOwnProfile && !followingStatus[user.id] && (
+                                  <>
+                                    {!loadingFollow[user.id] && (
+                                      <span className="text-primary-text">
+                                        ·
+                                      </span>
                                     )}
-                                </div>
-                                <p className="text-secondary-text max-w-45 truncate text-[10px] sm:max-w-62.5 sm:text-sm">
-                                  @{user.username}
-                                </p>
+                                    <Button
+                                      onClick={(e) => {
+                                        e.preventDefault();
+                                        e.stopPropagation();
+                                        handleFollow(user.id);
+                                      }}
+                                      disabled={loadingFollow[user.id]}
+                                      variant="ghost"
+                                      size="sm"
+                                      className="text-button-info hover:text-button-info-hover px-2"
+                                    >
+                                      {loadingFollow[user.id]
+                                        ? "..."
+                                        : "Follow"}
+                                    </Button>
+                                  </>
+                                )}
                               </div>
+                              <p className="text-secondary-text max-w-45 truncate text-[10px] sm:max-w-62.5 sm:text-sm">
+                                @{user.username}
+                              </p>
                             </div>
-                          </Link>
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
-              </>
-            )}
-          </div>
+                          </div>
+                        </Link>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </>
+          )}
         </div>
-      </div>
+
+        <DialogFooter className="mt-4 gap-2 px-6 pt-2 pb-6">
+          <DialogClose asChild>
+            <Button variant="ghost" size="sm">
+              Close
+            </Button>
+          </DialogClose>
+        </DialogFooter>
+      </DialogContent>
     </Dialog>
   );
 };

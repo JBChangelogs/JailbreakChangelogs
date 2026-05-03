@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { INVENTORY_API_URL, INVENTORY_WS_URL } from "@/utils/api";
 import { RobberyData } from "./useRobberyTrackerWebSocket";
+import { buildApiUrlWithDevToken } from "@/utils/apiDevToken";
 
 /**
  * WebSocket hook for tracking mansion robbery status
@@ -74,7 +75,11 @@ export function useRobberyTrackerMansionsWebSocket(
       }
 
       try {
-        const wsUrl = `${INVENTORY_WS_URL}/tracker?type=mansions`;
+        const wsUrl = buildApiUrlWithDevToken(
+          INVENTORY_WS_URL,
+          "/tracker?type=mansions",
+          { tokenParamName: "token" },
+        );
 
         const ws = new WebSocket(wsUrl);
         wsRef.current = ws;

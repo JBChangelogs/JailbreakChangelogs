@@ -1,10 +1,17 @@
 "use client";
 
-import { Dialog, DialogPanel } from "@headlessui/react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogClose,
+} from "@/components/ui/dialog";
 import { useState, useMemo } from "react";
 import Image from "next/image";
 import { useRobloxBotsDataQuery } from "@/hooks/useRobloxDataQuery";
-import { Icon } from "@/components/ui/IconWrapper";
+import { Button } from "@/components/ui/button";
 import { DefaultAvatar } from "@/utils/avatar";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -46,7 +53,6 @@ export default function RobberyPlayersModal({
 
   const filteredPlayers = useMemo(() => {
     if (activeTab === "All") return players;
-    // Map "Criminals" tab to "Criminal" team name if needed, or just match exactly
     const teamName = activeTab === "Criminal" ? "Criminal" : "Police";
     return players.filter((p) => p.team === teamName);
   }, [activeTab, players]);
@@ -83,129 +89,124 @@ export default function RobberyPlayersModal({
     [players],
   );
 
-  if (!isOpen) return null;
-
   return (
-    <Dialog open={isOpen} onClose={onClose} className="relative z-3000">
-      <div
-        className="fixed inset-0 bg-black/50 backdrop-blur-sm"
-        aria-hidden="true"
-      />
-
-      <div className="fixed inset-0 flex items-center justify-center p-4">
-        <DialogPanel className="border-border-card bg-secondary-bg hover:border-border-focus relative flex max-h-[80vh] w-full max-w-150 min-w-[320px] flex-col overflow-hidden rounded-lg border shadow-xl">
-          {/* Header */}
-          <div className="border-border-card flex items-center justify-between border-b px-6 py-4">
-            <h2 className="text-primary-text text-xl font-semibold">
-              {filteredPlayers.length}{" "}
-              {activeTab === "Police"
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent
+        className="bg-secondary-bg max-w-150 rounded-lg p-0 backdrop-blur-none"
+        showClose
+        aria-describedby={undefined}
+      >
+        {/* Header */}
+        <DialogHeader className="px-6 pt-6 pb-2">
+          <DialogTitle className="text-primary-text text-xl font-semibold">
+            {filteredPlayers.length}{" "}
+            {activeTab === "Police"
+              ? filteredPlayers.length === 1
+                ? "Cop Player"
+                : "Cop Players"
+              : activeTab === "Criminal"
                 ? filteredPlayers.length === 1
-                  ? "Cop Player"
-                  : "Cop Players"
-                : activeTab === "Criminal"
-                  ? filteredPlayers.length === 1
-                    ? "Criminal Player"
-                    : "Criminal Players"
-                  : filteredPlayers.length === 1
-                    ? "Player"
-                    : "Players"}
-            </h2>
-            <button
-              type="button"
-              onClick={onClose}
-              aria-label="Close"
-              className="text-secondary-text hover:text-primary-text hover:bg-quaternary-bg focus-visible:ring-ring inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-md transition-colors focus-visible:ring-1 focus-visible:outline-none"
-            >
-              <Icon icon="heroicons:x-mark" className="h-5 w-5" />
-            </button>
-          </div>
+                  ? "Criminal Player"
+                  : "Criminal Players"
+                : filteredPlayers.length === 1
+                  ? "Player"
+                  : "Players"}
+          </DialogTitle>
+        </DialogHeader>
 
-          {/* Tabs */}
-          <div className="border-border-card border-b px-6">
-            <Tabs
-              value={activeTab}
-              onValueChange={(value) =>
-                setActiveTab(value as "All" | "Police" | "Criminal")
-              }
-            >
-              <TabsList fullWidth className="my-3">
-                <TabsTrigger value="All" fullWidth>
-                  Players ({players.length})
-                </TabsTrigger>
-                <TabsTrigger value="Police" fullWidth>
-                  Cops ({copsCount})
-                </TabsTrigger>
-                <TabsTrigger value="Criminal" fullWidth>
-                  Crims ({criminalsCount})
-                </TabsTrigger>
-              </TabsList>
-            </Tabs>
-          </div>
+        {/* Tabs */}
+        <div className="border-border-card border-b px-6">
+          <Tabs
+            value={activeTab}
+            onValueChange={(value) =>
+              setActiveTab(value as "All" | "Police" | "Criminal")
+            }
+          >
+            <TabsList fullWidth className="my-3">
+              <TabsTrigger value="All" fullWidth>
+                Players ({players.length})
+              </TabsTrigger>
+              <TabsTrigger value="Police" fullWidth>
+                Cops ({copsCount})
+              </TabsTrigger>
+              <TabsTrigger value="Criminal" fullWidth>
+                Crims ({criminalsCount})
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
+        </div>
 
-          {/* Content */}
-          <div className="flex-1 overflow-y-auto p-6">
-            {filteredPlayers.length > 0 ? (
-              <div className="space-y-3">
-                {filteredPlayers.map((player) => (
-                  <div
-                    key={player.user_id}
-                    className="border-border-card bg-tertiary-bg flex items-center gap-3 rounded-lg border p-3"
-                  >
-                    {/* Avatar */}
-                    <div className="bg-tertiary-bg h-10 w-10 shrink-0 overflow-hidden rounded-full">
-                      {robloxData?.usersData ? (
-                        <Image
-                          src={getUserAvatar(player.user_id)}
-                          alt={getUsername(player.user_id)}
-                          width={40}
-                          height={40}
-                          className="h-full w-full object-cover"
-                          onError={(e) => {
-                            e.currentTarget.src =
-                              "/assets/images/Placeholder.webp";
-                          }}
-                        />
-                      ) : (
-                        <DefaultAvatar />
-                      )}
+        {/* Content */}
+        <div className="max-h-[60vh] flex-1 overflow-y-auto px-6 pt-4 pb-6">
+          {filteredPlayers.length > 0 ? (
+            <div className="space-y-3">
+              {filteredPlayers.map((player) => (
+                <div
+                  key={player.user_id}
+                  className="border-border-card bg-tertiary-bg flex items-center gap-3 rounded-lg border p-3"
+                >
+                  {/* Avatar */}
+                  <div className="bg-tertiary-bg h-10 w-10 shrink-0 overflow-hidden rounded-full">
+                    {robloxData?.usersData ? (
+                      <Image
+                        src={getUserAvatar(player.user_id)}
+                        alt={getUsername(player.user_id)}
+                        width={40}
+                        height={40}
+                        className="h-full w-full object-cover"
+                        onError={(e) => {
+                          e.currentTarget.src =
+                            "/assets/images/Placeholder.webp";
+                        }}
+                      />
+                    ) : (
+                      <DefaultAvatar />
+                    )}
+                  </div>
+
+                  {/* User Info */}
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2">
+                      <a
+                        href={`https://www.roblox.com/users/${player.user_id}/profile`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-primary-text hover:text-link truncate font-medium transition-colors"
+                      >
+                        {getUserDisplay(player.user_id)}
+                      </a>
+                      <span
+                        className={`text-primary-text inline-flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium backdrop-blur-xl ${
+                          player.team === "Police"
+                            ? "border-blue-500/30 bg-blue-500/20"
+                            : "border-red-500/30 bg-red-500/20"
+                        }`}
+                      >
+                        {player.team === "Police" ? "Police" : "Criminal"}
+                      </span>
                     </div>
-
-                    {/* User Info */}
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-2">
-                        <a
-                          href={`https://www.roblox.com/users/${player.user_id}/profile`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-primary-text hover:text-link truncate font-medium transition-colors"
-                        >
-                          {getUserDisplay(player.user_id)}
-                        </a>
-                        <span
-                          className={`text-primary-text inline-flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium backdrop-blur-xl ${
-                            player.team === "Police"
-                              ? "border-blue-500/30 bg-blue-500/20"
-                              : "border-red-500/30 bg-red-500/20"
-                          }`}
-                        >
-                          {player.team === "Police" ? "Police" : "Criminal"}
-                        </span>
-                      </div>
-                      <div className="text-secondary-text text-sm">
-                        {getUsername(player.user_id)}
-                      </div>
+                    <div className="text-secondary-text text-sm">
+                      {getUsername(player.user_id)}
                     </div>
                   </div>
-                ))}
-              </div>
-            ) : (
-              <div className="text-secondary-text py-8 text-center">
-                {getEmptyMessage()}
-              </div>
-            )}
-          </div>
-        </DialogPanel>
-      </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-secondary-text py-8 text-center">
+              {getEmptyMessage()}
+            </div>
+          )}
+        </div>
+
+        <DialogFooter className="mt-4 gap-2 px-6 pt-2 pb-6">
+          <DialogClose asChild>
+            <Button variant="ghost" size="sm">
+              Close
+            </Button>
+          </DialogClose>
+        </DialogFooter>
+      </DialogContent>
     </Dialog>
   );
 }

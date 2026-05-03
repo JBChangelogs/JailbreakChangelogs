@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { INVENTORY_API_URL, INVENTORY_WS_URL } from "@/utils/api";
+import { buildApiUrlWithDevToken } from "@/utils/apiDevToken";
 
 /**
  * WebSocket hook for tracking bounties
@@ -98,7 +99,11 @@ export function useRobberyTrackerBountiesWebSocket(
       }
 
       try {
-        const wsUrl = `${INVENTORY_WS_URL}/tracker?type=bounties`;
+        const wsUrl = buildApiUrlWithDevToken(
+          INVENTORY_WS_URL,
+          "/tracker?type=bounties",
+          { tokenParamName: "token" },
+        );
 
         const ws = new WebSocket(wsUrl);
         wsRef.current = ws;
