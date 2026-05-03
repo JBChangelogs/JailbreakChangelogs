@@ -14,7 +14,7 @@ export default function Error({
   reset: () => void;
 }) {
   useEffect(() => {
-    console.error("Trading error:", error);
+    console.error("Season error:", error);
   }, [error]);
 
   return (
@@ -23,13 +23,13 @@ export default function Error({
         <div className="min-h-[calc(100vh-8rem)] lg:flex lg:items-center lg:gap-12">
           <div className="w-full lg:w-1/2">
             <p className="text-secondary-text text-sm font-medium">
-              Trading error
+              Season error
             </p>
             <h1 className="text-primary-text mt-3 text-2xl font-semibold md:text-3xl">
-              Failed to load trading
+              Failed to load season
             </h1>
             <p className="text-secondary-text mt-4">
-              Something went wrong while loading the trading page.
+              Something went wrong while loading this season.
             </p>
 
             <div className="mt-6 flex flex-col items-center gap-3 sm:flex-row">
@@ -49,12 +49,12 @@ export default function Error({
                 asChild
                 className="w-full sm:w-auto"
               >
-                <Link href="/">
+                <Link href="/seasons">
                   <Icon
                     icon="heroicons-outline:arrow-left"
                     className="h-5 w-5"
                   />
-                  <span>Back to home</span>
+                  <span>Back to seasons</span>
                 </Link>
               </Button>
             </div>

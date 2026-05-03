@@ -14,7 +14,7 @@ export default function Error({
   reset: () => void;
 }) {
   useEffect(() => {
-    console.error("Trading error:", error);
+    console.error("Messages error:", error);
   }, [error]);
 
   return (
@@ -23,13 +23,13 @@ export default function Error({
         <div className="min-h-[calc(100vh-8rem)] lg:flex lg:items-center lg:gap-12">
           <div className="w-full lg:w-1/2">
             <p className="text-secondary-text text-sm font-medium">
-              Trading error
+              Messages error
             </p>
             <h1 className="text-primary-text mt-3 text-2xl font-semibold md:text-3xl">
-              Failed to load trading
+              Failed to load messages
             </h1>
             <p className="text-secondary-text mt-4">
-              Something went wrong while loading the trading page.
+              Something went wrong while loading the messages page.
             </p>
 
             <div className="mt-6 flex flex-col items-center gap-3 sm:flex-row">

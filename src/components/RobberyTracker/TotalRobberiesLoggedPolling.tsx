@@ -22,7 +22,7 @@ export default function TotalRobberiesLoggedPolling({
   return (
     <div
       className={cn(
-        "border-border-card bg-secondary-bg/70 inline-flex items-center gap-4 rounded-xl border px-4 py-3 shadow-sm backdrop-blur",
+        "border-border-card bg-secondary-bg inline-flex items-center gap-4 rounded-xl border px-4 py-3 shadow-sm",
         className,
       )}
       aria-label="Total robberies logged"
