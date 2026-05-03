@@ -23,7 +23,14 @@ import { getCategoryColor, getCategoryIcon } from "@/utils/categoryIcons";
 import Image from "next/image";
 import { toast } from "sonner";
 import Link from "next/link";
-import { Dialog, DialogPanel } from "@headlessui/react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogClose,
+} from "@/components/ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -572,64 +579,61 @@ function EditReasonModal({
   };
 
   return (
-    <Dialog open={open} onClose={() => {}} className="relative z-3000">
-      <div
-        className="fixed inset-0 bg-black/50 backdrop-blur-sm"
-        aria-hidden="true"
-      />
-      <div className="fixed inset-0 flex items-center justify-center p-4">
-        <DialogPanel className="border-border-card bg-secondary-bg hover:border-border-focus w-full max-w-lg min-w-[320px] rounded-lg border shadow-xl">
-          <div className="flex items-center justify-between px-6 py-4">
-            <div className="min-w-0">
-              <p className="text-primary-text truncate text-base font-bold">
-                {suggestion
-                  ? `Edit Suggestion #${suggestion.id} - ${item?.name ?? `Item #${suggestion.item_id}`} (${item?.type ?? ""})`
-                  : "Edit Suggestion"}
-              </p>
-            </div>
-            <button
-              onClick={onClose}
-              className="text-primary-text ml-3 shrink-0 cursor-pointer transition-colors"
-            >
-              <Icon icon="heroicons:x-mark" className="h-5 w-5" />
-            </button>
-          </div>
+    <Dialog open={open} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent
+        showClose
+        className="bg-secondary-bg max-w-lg rounded-lg p-0 backdrop-blur-none"
+        aria-describedby={undefined}
+      >
+        <DialogHeader className="px-6 pt-6 pb-2">
+          <DialogTitle className="text-primary-text truncate text-base font-bold">
+            {suggestion
+              ? `Edit Suggestion #${suggestion.id} - ${item?.name ?? `Item #${suggestion.item_id}`} (${item?.type ?? ""})`
+              : "Edit Suggestion"}
+          </DialogTitle>
+        </DialogHeader>
 
-          <div className="px-6 pb-6">
-            <div className="mb-2 flex items-center justify-between">
-              <span className="text-secondary-text text-sm font-medium">
-                Reason
-              </span>
-              <span className="text-secondary-text text-xs">
-                {reason.length} / 350 min
-              </span>
-            </div>
-            <textarea
-              value={reason}
-              onChange={(e) => setReason(e.target.value)}
-              rows={8}
-              className="border-border-card bg-tertiary-bg text-primary-text placeholder:text-tertiary-text focus:border-button-info mb-4 w-full resize-none rounded-lg border px-3 py-2.5 text-sm transition-colors outline-none"
-            />
-            <div className="flex justify-end gap-2">
-              <Button
-                type="button"
-                onClick={handleSave}
-                disabled={saving || reason.trim().length < 350}
-                className="bg-button-info hover:bg-button-info-hover text-form-button-text flex items-center gap-2 disabled:opacity-50"
-              >
-                {saving ? (
-                  <>
-                    <Spinner className="h-4 w-4" />
-                    Updating...
-                  </>
-                ) : (
-                  "Update"
-                )}
-              </Button>
-            </div>
+        <div className="px-6 pt-4 pb-6">
+          <div className="mb-2 flex items-center justify-between">
+            <span className="text-secondary-text text-sm font-medium">
+              Reason
+            </span>
+            <span className="text-secondary-text text-xs">
+              {reason.length} / 350 min
+            </span>
           </div>
-        </DialogPanel>
-      </div>
+          <textarea
+            value={reason}
+            onChange={(e) => setReason(e.target.value)}
+            rows={8}
+            className="border-border-card bg-tertiary-bg text-primary-text placeholder:text-tertiary-text focus:border-button-info mb-4 w-full resize-none rounded-lg border px-3 py-2.5 text-sm transition-colors outline-none"
+          />
+
+          <DialogFooter className="mt-0 gap-2 px-0 pt-0 pb-0">
+            <DialogClose asChild>
+              <Button variant="ghost" size="sm" disabled={saving}>
+                Cancel
+              </Button>
+            </DialogClose>
+            <Button
+              type="button"
+              onClick={handleSave}
+              disabled={saving || reason.trim().length < 350}
+              size="sm"
+              className="bg-button-info hover:bg-button-info-hover text-form-button-text flex items-center gap-2 disabled:opacity-50"
+            >
+              {saving ? (
+                <>
+                  <Spinner className="h-4 w-4" />
+                  Updating...
+                </>
+              ) : (
+                "Update"
+              )}
+            </Button>
+          </DialogFooter>
+        </div>
+      </DialogContent>
     </Dialog>
   );
 }
@@ -1783,137 +1787,142 @@ export default function ValueSuggestionsPage() {
       />
 
       {/* Voters Modal */}
-      <Dialog open={votersOpen} onClose={() => {}} className="relative z-3000">
-        <div
-          className="fixed inset-0 bg-black/50 backdrop-blur-sm"
-          aria-hidden="true"
-        />
-        <div className="fixed inset-0 flex items-center justify-center p-4">
-          <DialogPanel className="border-border-card bg-secondary-bg hover:border-border-focus w-full max-w-md min-w-[320px] rounded-lg border shadow-xl">
-            <div className="text-primary-text flex items-center justify-between px-6 py-4 text-2xl font-bold">
-              <span>Voters</span>
-              <button
-                onClick={() => setVotersOpen(false)}
-                className="text-primary-text cursor-pointer transition-colors"
-              >
-                <Icon icon="heroicons:x-mark" className="h-5 w-5" />
-              </button>
-            </div>
+      <Dialog
+        open={votersOpen}
+        onOpenChange={(open) => !open && setVotersOpen(false)}
+      >
+        <DialogContent
+          showClose
+          className="bg-secondary-bg max-w-md rounded-lg p-0 backdrop-blur-none"
+          aria-describedby={undefined}
+        >
+          <DialogHeader className="px-6 pt-6 pb-2">
+            <DialogTitle className="text-primary-text text-left text-xl font-bold">
+              Voters
+            </DialogTitle>
+          </DialogHeader>
 
-            <div className="px-6 pt-3 pb-6">
-              <Tabs
-                value={votersTab}
-                onValueChange={(v) => setVotersTab(v as "up" | "down")}
-              >
-                <TabsList fullWidth className="mb-4">
-                  <TabsTrigger value="up" fullWidth>
-                    <div className="flex flex-col items-center gap-1 py-1">
-                      <span className="text-base font-bold">Upvotes</span>
-                      <span className="text-xs font-semibold opacity-80">
-                        ({activeVoters?.upCount ?? 0})
-                      </span>
-                    </div>
-                  </TabsTrigger>
-                  <TabsTrigger value="down" fullWidth>
-                    <div className="flex flex-col items-center gap-1 py-1">
-                      <span className="text-base font-bold">Downvotes</span>
-                      <span className="text-xs font-semibold opacity-80">
-                        ({activeVoters?.downCount ?? 0})
-                      </span>
-                    </div>
-                  </TabsTrigger>
-                </TabsList>
+          <div className="px-6 pt-4 pb-6">
+            <Tabs
+              value={votersTab}
+              onValueChange={(v) => setVotersTab(v as "up" | "down")}
+            >
+              <TabsList fullWidth className="mb-4">
+                <TabsTrigger value="up" fullWidth>
+                  <div className="flex flex-col items-center gap-1 py-1">
+                    <span className="text-base font-bold">Upvotes</span>
+                    <span className="text-xs font-semibold opacity-80">
+                      ({activeVoters?.upCount ?? 0})
+                    </span>
+                  </div>
+                </TabsTrigger>
+                <TabsTrigger value="down" fullWidth>
+                  <div className="flex flex-col items-center gap-1 py-1">
+                    <span className="text-base font-bold">Downvotes</span>
+                    <span className="text-xs font-semibold opacity-80">
+                      ({activeVoters?.downCount ?? 0})
+                    </span>
+                  </div>
+                </TabsTrigger>
+              </TabsList>
 
-                {(["up", "down"] as const).map((tab) => {
-                  const voters =
-                    tab === "up"
-                      ? (activeVoters?.up ?? [])
-                      : (activeVoters?.down ?? []);
-                  const count =
-                    tab === "up"
-                      ? activeVoters?.upCount
-                      : activeVoters?.downCount;
-                  return (
-                    <TabsContent key={tab} value={tab}>
-                      <div className="max-h-96 space-y-3 overflow-y-auto">
-                        {voters.length === 0 ? (
-                          <div className="text-secondary-text py-8 text-center">
-                            <p className="mb-1 font-semibold">
-                              {count === 0
-                                ? "No voters to display"
-                                : "Voter details not available"}
-                            </p>
-                            <p className="text-sm">
-                              {tab === "up"
-                                ? "This suggestion hasn't received any upvotes yet."
-                                : "This suggestion hasn't received any downvotes yet."}
-                            </p>
-                          </div>
-                        ) : (
-                          voters.map((v) => (
-                            <div
-                              key={v.user.id + v.created_at}
-                              className="border-border-card bg-tertiary-bg flex items-center gap-4 rounded-lg border px-4 py-3 transition-colors"
-                            >
-                              <div className="relative h-10 w-10 shrink-0">
-                                <UserAvatar
-                                  userId={v.user.id}
-                                  avatarHash={v.user.avatar ?? null}
-                                  username={v.user.username ?? ""}
-                                  custom_avatar={
-                                    v.user.custom_avatar ?? undefined
-                                  }
-                                  premiumType={v.user.premiumtype ?? 0}
-                                  settings={
-                                    v.user.settings
-                                      ? {
-                                          custom_avatar:
-                                            !!v.user.settings.custom_avatar,
-                                          hide_presence:
-                                            !!v.user.settings.hide_presence,
-                                        }
-                                      : undefined
-                                  }
-                                  size={10}
-                                  showBadge={false}
-                                />
+              {(["up", "down"] as const).map((tab) => {
+                const voters =
+                  tab === "up"
+                    ? (activeVoters?.up ?? [])
+                    : (activeVoters?.down ?? []);
+                const count =
+                  tab === "up"
+                    ? activeVoters?.upCount
+                    : activeVoters?.downCount;
+                return (
+                  <TabsContent key={tab} value={tab}>
+                    <div className="max-h-96 space-y-3 overflow-y-auto">
+                      {voters.length === 0 ? (
+                        <div className="text-secondary-text py-8 text-center">
+                          <p className="mb-1 font-semibold">
+                            {count === 0
+                              ? "No voters to display"
+                              : "Voter details not available"}
+                          </p>
+                          <p className="text-sm">
+                            {tab === "up"
+                              ? "This suggestion hasn't received any upvotes yet."
+                              : "This suggestion hasn't received any downvotes yet."}
+                          </p>
+                        </div>
+                      ) : (
+                        voters.map((v) => (
+                          <div
+                            key={v.user.id + v.created_at}
+                            className="border-border-card bg-tertiary-bg flex items-center gap-4 rounded-lg border px-4 py-3 transition-colors"
+                          >
+                            <div className="relative h-10 w-10 shrink-0">
+                              <UserAvatar
+                                userId={v.user.id}
+                                avatarHash={v.user.avatar ?? null}
+                                username={v.user.username ?? ""}
+                                custom_avatar={
+                                  v.user.custom_avatar ?? undefined
+                                }
+                                premiumType={v.user.premiumtype ?? 0}
+                                settings={
+                                  v.user.settings
+                                    ? {
+                                        custom_avatar:
+                                          !!v.user.settings.custom_avatar,
+                                        hide_presence:
+                                          !!v.user.settings.hide_presence,
+                                      }
+                                    : undefined
+                                }
+                                size={10}
+                                showBadge={false}
+                              />
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <div className="text-primary-text mb-1 text-base font-bold">
+                                <Link
+                                  href={`/users/${v.user.id}`}
+                                  prefetch={false}
+                                  className="text-link hover:text-link-hover transition-colors hover:underline"
+                                  onClick={() => setVotersOpen(false)}
+                                >
+                                  {v.user.global_name ||
+                                    v.user.username ||
+                                    `User #${v.user.id}`}
+                                </Link>
                               </div>
-                              <div className="min-w-0 flex-1">
-                                <div className="text-primary-text mb-1 text-base font-bold">
-                                  <Link
-                                    href={`/users/${v.user.id}`}
-                                    prefetch={false}
-                                    className="text-link hover:text-link-hover transition-colors hover:underline"
-                                    onClick={() => setVotersOpen(false)}
-                                  >
-                                    {v.user.global_name ||
-                                      v.user.username ||
-                                      `User #${v.user.id}`}
-                                  </Link>
-                                </div>
-                                <div className="text-tertiary-text text-sm font-medium">
-                                  {new Date(
-                                    v.created_at * 1000,
-                                  ).toLocaleDateString("en-US", {
-                                    month: "short",
-                                    day: "numeric",
-                                    year: "numeric",
-                                    hour: "2-digit",
-                                    minute: "2-digit",
-                                  })}
-                                </div>
+                              <div className="text-tertiary-text text-sm font-medium">
+                                {new Date(
+                                  v.created_at * 1000,
+                                ).toLocaleDateString("en-US", {
+                                  month: "short",
+                                  day: "numeric",
+                                  year: "numeric",
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                })}
                               </div>
                             </div>
-                          ))
-                        )}
-                      </div>
-                    </TabsContent>
-                  );
-                })}
-              </Tabs>
-            </div>
-          </DialogPanel>
-        </div>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </TabsContent>
+                );
+              })}
+            </Tabs>
+
+            <DialogFooter className="mt-4 gap-2 px-0 pt-2 pb-0">
+              <DialogClose asChild>
+                <Button variant="ghost" size="sm">
+                  Close
+                </Button>
+              </DialogClose>
+            </DialogFooter>
+          </div>
+        </DialogContent>
       </Dialog>
     </main>
   );

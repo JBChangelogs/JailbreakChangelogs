@@ -377,10 +377,10 @@ export default function TradeItemPickerV2({
                           onAddCustomType(customType.id, activeSide)
                         }
                         disabled={selectedOnSide}
-                        className={`border-border-card bg-secondary-bg flex aspect-square h-20 w-20 items-center justify-center rounded-lg border p-2 transition-colors md:h-24 md:w-24 ${
+                        className={`border-border-card bg-tertiary-bg flex aspect-square h-20 w-20 items-center justify-center rounded-lg border p-2 transition-colors md:h-24 md:w-24 ${
                           selectedOnSide
                             ? "cursor-not-allowed opacity-50"
-                            : "hover:bg-tertiary-bg cursor-pointer"
+                            : "hover:bg-quaternary-bg cursor-pointer"
                         }`}
                         aria-label={customType.label}
                       >
@@ -429,7 +429,7 @@ export default function TradeItemPickerV2({
                 setPage(1);
               }}
               placeholder="Search items by name or type..."
-              className="border-border-card bg-secondary-bg text-primary-text placeholder-secondary-text hover:border-border-focus focus:border-button-info h-14 min-h-14 w-full rounded-lg border px-4 py-2 pr-10 pl-10 transition-all duration-300 focus:outline-none"
+              className="border-border-card bg-tertiary-bg text-primary-text placeholder-secondary-text hover:border-border-focus focus:border-button-info h-14 min-h-14 w-full rounded-lg border px-4 py-2 pr-10 pl-10 transition-all duration-300 focus:outline-none"
             />
             <Icon
               icon="heroicons:magnifying-glass"
@@ -454,7 +454,7 @@ export default function TradeItemPickerV2({
               <DropdownMenuTrigger asChild>
                 <button
                   type="button"
-                  className="border-border-card bg-secondary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus flex h-14 min-h-14 w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all duration-300 focus:ring-1 focus:outline-none"
+                  className="border-border-card bg-tertiary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus flex h-14 min-h-14 w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all duration-300 focus:ring-1 focus:outline-none"
                   aria-label="Filter by category"
                 >
                   <span className="truncate">{filterLabel}</span>
@@ -467,7 +467,7 @@ export default function TradeItemPickerV2({
               </DropdownMenuTrigger>
               <DropdownMenuContent
                 align="start"
-                className="border-border-card bg-secondary-bg text-primary-text scrollbar-thin max-h-80 w-(--radix-popper-anchor-width) min-w-(--radix-popper-anchor-width) overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
+                className="border-border-card bg-tertiary-bg text-primary-text scrollbar-thin max-h-80 w-(--radix-popper-anchor-width) min-w-(--radix-popper-anchor-width) overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
               >
                 <DropdownMenuRadioGroup
                   value={filterSort}
@@ -505,7 +505,7 @@ export default function TradeItemPickerV2({
               <DropdownMenuTrigger asChild>
                 <button
                   type="button"
-                  className="border-border-card bg-secondary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus flex h-14 min-h-14 w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all duration-300 focus:ring-1 focus:outline-none"
+                  className="border-border-card bg-tertiary-bg text-primary-text focus:border-button-info focus:ring-button-info/50 hover:border-border-focus flex h-14 min-h-14 w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all duration-300 focus:ring-1 focus:outline-none"
                   aria-label="Sort items"
                 >
                   <span className="truncate">{sortLabel}</span>
@@ -518,7 +518,7 @@ export default function TradeItemPickerV2({
               </DropdownMenuTrigger>
               <DropdownMenuContent
                 align="start"
-                className="border-border-card bg-secondary-bg text-primary-text scrollbar-thin max-h-90 w-(--radix-popper-anchor-width) min-w-(--radix-popper-anchor-width) overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
+                className="border-border-card bg-tertiary-bg text-primary-text scrollbar-thin max-h-90 w-(--radix-popper-anchor-width) min-w-(--radix-popper-anchor-width) overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
               >
                 <DropdownMenuRadioGroup
                   value={valueSort}

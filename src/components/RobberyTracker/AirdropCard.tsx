@@ -4,7 +4,13 @@ import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import { Icon } from "@/components/ui/IconWrapper";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogPanel } from "@headlessui/react";
+import {
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  DialogFooter,
+  DialogClose,
+} from "@/components/ui/dialog";
 import { useOptimizedRealTimeRelativeDate } from "@/hooks/useSharedTimer";
 import { AirdropData } from "@/hooks/useRobberyTrackerAirdropsWebSocket";
 import { useServerRegions } from "@/hooks/useServerRegions";
@@ -304,57 +310,52 @@ export default function AirdropCard({ airdrop }: AirdropCardProps) {
       {/* Map Modal */}
       <Dialog
         open={isMapModalOpen}
-        onClose={() => setIsMapModalOpen(false)}
-        className="relative z-3000"
+        onOpenChange={(open) => !open && setIsMapModalOpen(false)}
       >
-        <div
-          className="fixed inset-0 bg-black/50 backdrop-blur-sm"
-          aria-hidden="true"
-        />
-        <div className="fixed inset-0 flex items-center justify-center p-4">
-          <DialogPanel className="border-border-card bg-secondary-bg hover:border-border-focus relative flex max-h-[90vh] w-full max-w-4xl flex-col overflow-hidden rounded-lg border shadow-xl">
-            <div className="border-border-card flex items-center justify-between border-b px-6 py-4">
-              <div className="min-w-0">
-                <div className="flex flex-wrap items-center gap-3">
-                  <h2 className="text-primary-text truncate text-xl font-semibold">
-                    {airdrop.location.replace(/([A-Z])/g, " $1").trim()} Airdrop
-                  </h2>
-                  {getDifficultyBadge()}
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={() => setIsMapModalOpen(false)}
-                aria-label="Close"
-                className="text-secondary-text hover:text-primary-text hover:bg-quaternary-bg focus-visible:ring-ring inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-md transition-colors focus-visible:ring-1 focus-visible:outline-none"
-              >
-                <Icon icon="heroicons:x-mark" className="h-5 w-5" />
-              </button>
+        <DialogContent
+          showClose
+          className="bg-secondary-bg flex max-h-[90vh] max-w-4xl flex-col overflow-hidden rounded-lg p-0 backdrop-blur-none"
+          aria-describedby={undefined}
+        >
+          <div className="shrink-0 px-6 pt-6 pr-12 pb-2">
+            <div className="flex flex-wrap items-center gap-3">
+              <DialogTitle className="text-primary-text truncate text-xl font-semibold">
+                {airdrop.location.replace(/([A-Z])/g, " $1").trim()} Airdrop
+              </DialogTitle>
+              {getDifficultyBadge()}
             </div>
+          </div>
 
-            <div className="flex-1 overflow-auto p-4">
-              <div className="relative">
-                {isMapImageLoading && (
-                  <div className="bg-secondary-bg/40 absolute inset-0 z-10 flex items-center justify-center rounded-lg backdrop-blur-sm">
-                    <div className="text-secondary-text inline-flex items-center gap-2 text-sm font-medium">
-                      <Spinner className="h-5 w-5" />
-                      Generating map...
-                    </div>
+          <div className="flex-1 overflow-auto p-4">
+            <div className="relative">
+              {isMapImageLoading && (
+                <div className="bg-secondary-bg/40 absolute inset-0 z-10 flex items-center justify-center rounded-lg backdrop-blur-sm">
+                  <div className="text-secondary-text inline-flex items-center gap-2 text-sm font-medium">
+                    <Spinner className="h-5 w-5" />
+                    Generating map...
                   </div>
-                )}
-                <Image
-                  src={mapImageUrl}
-                  alt="Airdrop Map Location"
-                  width={1200}
-                  height={800}
-                  className="h-auto w-full rounded-lg shadow-md"
-                  onLoad={() => setIsMapImageLoading(false)}
-                  onError={() => setIsMapImageLoading(false)}
-                />
-              </div>
+                </div>
+              )}
+              <Image
+                src={mapImageUrl}
+                alt="Airdrop Map Location"
+                width={1200}
+                height={800}
+                className="h-auto w-full rounded-lg shadow-md"
+                onLoad={() => setIsMapImageLoading(false)}
+                onError={() => setIsMapImageLoading(false)}
+              />
             </div>
-          </DialogPanel>
-        </div>
+          </div>
+
+          <DialogFooter className="shrink-0 px-6 pt-2 pb-6">
+            <DialogClose asChild>
+              <Button variant="ghost" size="sm">
+                Close
+              </Button>
+            </DialogClose>
+          </DialogFooter>
+        </DialogContent>
       </Dialog>
     </div>
   );

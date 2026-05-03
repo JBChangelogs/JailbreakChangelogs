@@ -3,7 +3,15 @@
 import { useState, useMemo } from "react";
 import { useMediaQuery } from "@mui/material";
 import { Pagination } from "@/components/ui/Pagination";
-import { Dialog, DialogPanel } from "@headlessui/react";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogClose,
+} from "@/components/ui/dialog";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Masonry } from "@mui/lab";
 import { ThemeProvider } from "@mui/material/styles";
@@ -1171,137 +1179,137 @@ export default function ChangelogDetailsClient({
         {/* Voters Dialog */}
         <Dialog
           open={votersOpen}
-          onClose={() => {}}
-          className="relative z-3000"
+          onOpenChange={(open) => !open && setVotersOpen(false)}
         >
-          <div
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm"
-            aria-hidden="true"
-          />
+          <DialogContent
+            showClose
+            className="bg-secondary-bg max-w-md rounded-lg p-0 backdrop-blur-none"
+            aria-describedby={undefined}
+          >
+            <DialogHeader className="px-6 pt-6 pb-2">
+              <DialogTitle className="text-primary-text text-left text-xl font-bold">
+                Voters
+              </DialogTitle>
+            </DialogHeader>
 
-          <div className="fixed inset-0 flex items-center justify-center p-4">
-            <DialogPanel className="border-border-card bg-secondary-bg hover:border-border-focus w-full max-w-md min-w-[320px] rounded-lg border shadow-xl">
-              <div className="text-primary-text flex items-center justify-between px-6 py-4 text-xl font-bold">
-                <span>Voters</span>
-                <button
-                  onClick={() => setVotersOpen(false)}
-                  className="text-primary-text cursor-pointer transition-colors"
-                >
-                  <Icon icon="heroicons:x-mark" className="h-5 w-5" />
-                </button>
-              </div>
+            <div className="px-6 pt-4 pb-6">
+              <Tabs
+                value={votersTab}
+                onValueChange={(v) => setVotersTab(v as "up" | "down")}
+              >
+                <TabsList fullWidth className="mb-4">
+                  <TabsTrigger value="up" fullWidth>
+                    <div className="flex flex-col items-center gap-1 py-1">
+                      <span className="text-base font-bold">Upvotes</span>
+                      <span className="text-xs font-semibold opacity-80">
+                        ({activeVoters?.upCount ?? 0})
+                      </span>
+                    </div>
+                  </TabsTrigger>
+                  <TabsTrigger value="down" fullWidth>
+                    <div className="flex flex-col items-center gap-1 py-1">
+                      <span className="text-base font-bold">Downvotes</span>
+                      <span className="text-xs font-semibold opacity-80">
+                        ({activeVoters?.downCount ?? 0})
+                      </span>
+                    </div>
+                  </TabsTrigger>
+                </TabsList>
 
-              <div className="px-6 pb-6">
-                <Tabs
-                  value={votersTab}
-                  onValueChange={(v) => setVotersTab(v as "up" | "down")}
-                >
-                  <TabsList fullWidth className="mb-4">
-                    <TabsTrigger value="up" fullWidth>
-                      <div className="flex flex-col items-center gap-1 py-1">
-                        <span className="text-base font-bold">Upvotes</span>
-                        <span className="text-xs font-semibold opacity-80">
-                          ({activeVoters?.upCount ?? 0})
-                        </span>
-                      </div>
-                    </TabsTrigger>
-                    <TabsTrigger value="down" fullWidth>
-                      <div className="flex flex-col items-center gap-1 py-1">
-                        <span className="text-base font-bold">Downvotes</span>
-                        <span className="text-xs font-semibold opacity-80">
-                          ({activeVoters?.downCount ?? 0})
-                        </span>
-                      </div>
-                    </TabsTrigger>
-                  </TabsList>
-
-                  {(["up", "down"] as const).map((tab) => {
-                    const voters =
-                      tab === "up"
-                        ? activeVoters?.up || []
-                        : activeVoters?.down || [];
-                    const count =
-                      tab === "up"
-                        ? activeVoters?.upCount || 0
-                        : activeVoters?.downCount || 0;
-                    return (
-                      <TabsContent key={tab} value={tab}>
-                        <div className="max-h-96 space-y-3 overflow-y-auto">
-                          {voters.length === 0 ? (
-                            <div className="text-secondary-text py-8 text-center">
-                              <p className="mb-1 font-semibold">
-                                {count === 0
-                                  ? "No voters to display"
-                                  : "Voter details not available"}
-                              </p>
-                              <p className="text-sm">
-                                {count === 0
-                                  ? tab === "up"
-                                    ? "This suggestion hasn't received any upvotes yet."
-                                    : "This suggestion hasn't received any downvotes yet."
-                                  : tab === "up"
-                                    ? `This suggestion has ${count} upvote${count === 1 ? "" : "s"}, but individual voter details are not available.`
-                                    : `This suggestion has ${count} downvote${count === 1 ? "" : "s"}, but individual voter details are not available.`}
-                              </p>
-                            </div>
-                          ) : (
-                            voters.map((voter: VoteRecord) => (
-                              <div
-                                key={voter.id}
-                                className="border-border-card bg-tertiary-bg flex items-center gap-4 rounded-lg border px-4 py-3 transition-colors"
-                              >
-                                <div className="relative h-10 w-10 shrink-0">
-                                  <DefaultAvatar />
-                                  {voter.avatar_hash && (
-                                    <Image
-                                      src={`https://cdn.discordapp.com/avatars/${voter.id}/${voter.avatar_hash}?size=128`}
-                                      alt={voter.name}
-                                      fill
-                                      className="object-cover"
-                                      onError={(e) => {
-                                        (
-                                          e as unknown as {
-                                            currentTarget: HTMLElement;
-                                          }
-                                        ).currentTarget.style.display = "none";
-                                      }}
-                                    />
-                                  )}
+                {(["up", "down"] as const).map((tab) => {
+                  const voters =
+                    tab === "up"
+                      ? activeVoters?.up || []
+                      : activeVoters?.down || [];
+                  const count =
+                    tab === "up"
+                      ? activeVoters?.upCount || 0
+                      : activeVoters?.downCount || 0;
+                  return (
+                    <TabsContent key={tab} value={tab}>
+                      <div className="max-h-96 space-y-3 overflow-y-auto">
+                        {voters.length === 0 ? (
+                          <div className="text-secondary-text py-8 text-center">
+                            <p className="mb-1 font-semibold">
+                              {count === 0
+                                ? "No voters to display"
+                                : "Voter details not available"}
+                            </p>
+                            <p className="text-sm">
+                              {count === 0
+                                ? tab === "up"
+                                  ? "This suggestion hasn't received any upvotes yet."
+                                  : "This suggestion hasn't received any downvotes yet."
+                                : tab === "up"
+                                  ? `This suggestion has ${count} upvote${count === 1 ? "" : "s"}, but individual voter details are not available.`
+                                  : `This suggestion has ${count} downvote${count === 1 ? "" : "s"}, but individual voter details are not available.`}
+                            </p>
+                          </div>
+                        ) : (
+                          voters.map((voter: VoteRecord) => (
+                            <div
+                              key={voter.id}
+                              className="border-border-card bg-tertiary-bg flex items-center gap-4 rounded-lg border px-4 py-3 transition-colors"
+                            >
+                              <div className="relative h-10 w-10 shrink-0">
+                                <DefaultAvatar />
+                                {voter.avatar_hash && (
+                                  <Image
+                                    src={`https://cdn.discordapp.com/avatars/${voter.id}/${voter.avatar_hash}?size=128`}
+                                    alt={voter.name}
+                                    fill
+                                    className="object-cover"
+                                    onError={(e) => {
+                                      (
+                                        e as unknown as {
+                                          currentTarget: HTMLElement;
+                                        }
+                                      ).currentTarget.style.display = "none";
+                                    }}
+                                  />
+                                )}
+                              </div>
+                              <div className="min-w-0 flex-1">
+                                <div className="text-primary-text mb-1 text-base font-bold">
+                                  <a
+                                    href={`https://discord.com/users/${voter.id}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-link hover:text-link-hover transition-colors hover:underline"
+                                  >
+                                    {voter.name.replace(/(.+)\1/, "$1")}
+                                  </a>
                                 </div>
-                                <div className="min-w-0 flex-1">
-                                  <div className="text-primary-text mb-1 text-base font-bold">
-                                    <a
-                                      href={`https://discord.com/users/${voter.id}`}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      className="text-link hover:text-link-hover transition-colors hover:underline"
-                                    >
-                                      {voter.name.replace(/(.+)\1/, "$1")}
-                                    </a>
-                                  </div>
-                                  <div className="text-tertiary-text text-sm font-medium">
-                                    {new Date(
-                                      voter.timestamp * 1000,
-                                    ).toLocaleDateString("en-US", {
-                                      month: "short",
-                                      day: "numeric",
-                                      year: "numeric",
-                                      hour: "2-digit",
-                                      minute: "2-digit",
-                                    })}
-                                  </div>
+                                <div className="text-tertiary-text text-sm font-medium">
+                                  {new Date(
+                                    voter.timestamp * 1000,
+                                  ).toLocaleDateString("en-US", {
+                                    month: "short",
+                                    day: "numeric",
+                                    year: "numeric",
+                                    hour: "2-digit",
+                                    minute: "2-digit",
+                                  })}
                                 </div>
                               </div>
-                            ))
-                          )}
-                        </div>
-                      </TabsContent>
-                    );
-                  })}
-                </Tabs>
-              </div>
-            </DialogPanel>
-          </div>
+                            </div>
+                          ))
+                        )}
+                      </div>
+                    </TabsContent>
+                  );
+                })}
+              </Tabs>
+
+              <DialogFooter className="mt-4 gap-2 px-0 pt-2 pb-0">
+                <DialogClose asChild>
+                  <Button variant="ghost" size="sm">
+                    Close
+                  </Button>
+                </DialogClose>
+              </DialogFooter>
+            </div>
+          </DialogContent>
         </Dialog>
       </div>
     </ThemeProvider>
