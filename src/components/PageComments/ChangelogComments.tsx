@@ -447,26 +447,20 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
       const tiers = Object.keys(COMMENT_CHAR_LIMITS)
         .map(Number)
         .sort((a, b) => a - b) as Array<keyof typeof COMMENT_CHAR_LIMITS>;
-      let requiredTier = requiredTierFromResponse ?? tiers[tiers.length - 1];
-      if (requiredTierFromResponse === undefined) {
-        const limitFromResponse =
-          typeof data?.character_limit === "number"
-            ? data.character_limit
-            : undefined;
-        if (limitFromResponse !== undefined) {
-          for (const tier of tiers) {
-            if (COMMENT_CHAR_LIMITS[tier] === limitFromResponse) {
-              requiredTier = tier;
-              break;
-            }
+
+      let requiredTier = requiredTierFromResponse;
+
+      if (requiredTier === undefined) {
+        // Find the first tier that satisfies the content length
+        for (const tier of tiers) {
+          if (contentLength <= COMMENT_CHAR_LIMITS[tier]) {
+            requiredTier = tier;
+            break;
           }
-        } else {
-          for (const tier of tiers) {
-            if (contentLength <= COMMENT_CHAR_LIMITS[tier]) {
-              requiredTier = tier;
-              break;
-            }
-          }
+        }
+        // If no tier satisfies it, default to the highest tier
+        if (requiredTier === undefined) {
+          requiredTier = tiers[tiers.length - 1];
         }
       }
 

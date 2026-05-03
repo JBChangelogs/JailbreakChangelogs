@@ -1,9 +1,16 @@
 "use client";
 
-import { Dialog, DialogPanel, DialogTitle } from "@headlessui/react";
-import { Icon } from "@/components/ui/IconWrapper";
 import { useRealTimeRelativeDate } from "@/hooks/useRealTimeRelativeDate";
 import { formatMessageDate } from "@/utils/timestamp";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogClose,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 
 interface ScanHistoryEntry {
   scan_id: string;
@@ -26,7 +33,7 @@ function ScanEntry({
   const relativeTime = useRealTimeRelativeDate(scan.created_at);
 
   return (
-    <div className="border-border-card bg-form-input rounded border p-4">
+    <div className="border-border-card bg-tertiary-bg rounded border p-4">
       <div>
         <h3 className="text-primary-text font-medium">Scan #{scanNumber}</h3>
         <p className="text-secondary-text text-sm">
@@ -42,65 +49,62 @@ export default function ScanHistoryModal({
   onClose,
   initialScanHistory = [],
 }: ScanHistoryModalProps) {
-  // Use the pre-fetched scan history data directly
   const scanHistory = initialScanHistory;
 
   return (
-    <Dialog open={isOpen} onClose={() => {}} className="relative z-50">
-      <div
-        className="fixed inset-0 bg-black/30 backdrop-blur-sm"
-        aria-hidden="true"
-      />
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent
+        className="bg-secondary-bg flex max-h-[80vh] max-w-[480px] flex-col rounded-lg p-0 backdrop-blur-none"
+        showClose
+        aria-describedby={undefined}
+      >
+        <DialogHeader className="shrink-0 px-6 pt-6 pb-2">
+          <DialogTitle className="text-primary-text text-xl font-semibold">
+            Scan History
+          </DialogTitle>
+        </DialogHeader>
 
-      <div className="fixed inset-0 flex items-center justify-center p-4">
-        <DialogPanel className="modal-container border-button-info bg-secondary-bg flex max-h-[60vh] w-full max-w-120 min-w-[320px] flex-col rounded-lg border shadow-lg">
-          <div className="modal-header text-primary-text flex shrink-0 items-center justify-between px-6 py-4 text-xl font-semibold">
-            <DialogTitle className="text-primary-text text-xl font-semibold">
-              Scan History
-            </DialogTitle>
-            <button
-              onClick={onClose}
-              className="text-secondary-text hover:text-primary-text cursor-pointer rounded-full p-1 transition-colors"
-            >
-              <Icon icon="heroicons:x-mark" className="h-6 w-6" />
-            </button>
-          </div>
+        <div className="flex-1 overflow-y-auto px-6 pt-4 pb-6">
+          {scanHistory.length >= 1000 && (
+            <div className="bg-button-info/10 border-button-info mb-4 rounded-lg border p-4">
+              <div className="text-primary-text mb-2 flex items-center gap-2 text-sm">
+                <span className="font-medium">Data Limitation</span>
+              </div>
+              <div className="text-secondary-text text-sm">
+                Showing the most recent{" "}
+                <span className="text-primary-text font-semibold">1,000</span>{" "}
+                scans for this user.
+              </div>
+            </div>
+          )}
 
-          <div className="modal-content flex-1 overflow-y-auto p-6">
-            {/* Notice for users with 1000+ scan history entries */}
-            {scanHistory.length >= 1000 && (
-              <div className="bg-button-info/10 border-button-info mb-4 rounded-lg border p-4">
-                <div className="text-primary-text mb-2 flex items-center gap-2 text-sm">
-                  <span className="font-medium">Data Limitation</span>
-                </div>
-                <div className="text-secondary-text text-sm">
-                  Showing the most recent{" "}
-                  <span className="text-primary-text font-semibold">1,000</span>{" "}
-                  scans for this user.
-                </div>
-              </div>
-            )}
+          {scanHistory.length === 0 ? (
+            <div className="py-8 text-center">
+              <p className="text-secondary-text">
+                No scan history found for this user.
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {scanHistory.map((scan, index) => (
+                <ScanEntry
+                  key={scan.scan_id}
+                  scan={scan}
+                  scanNumber={scanHistory.length - index}
+                />
+              ))}
+            </div>
+          )}
+        </div>
 
-            {scanHistory.length === 0 ? (
-              <div className="py-8 text-center">
-                <p className="text-secondary-text">
-                  No scan history found for this user.
-                </p>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {scanHistory.map((scan, index) => (
-                  <ScanEntry
-                    key={scan.scan_id}
-                    scan={scan}
-                    scanNumber={scanHistory.length - index}
-                  />
-                ))}
-              </div>
-            )}
-          </div>
-        </DialogPanel>
-      </div>
+        <DialogFooter className="mt-4 shrink-0 px-6 pt-2 pb-6">
+          <DialogClose asChild>
+            <Button variant="ghost" size="sm">
+              Close
+            </Button>
+          </DialogClose>
+        </DialogFooter>
+      </DialogContent>
     </Dialog>
   );
 }

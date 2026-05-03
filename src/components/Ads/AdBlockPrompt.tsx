@@ -5,9 +5,9 @@ import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import Image from "next/image";
 
-import { Icon } from "@/components/ui/IconWrapper";
-import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogFooter } from "@/components/ui/dialog";
 import { useAuthContext } from "@/contexts/AuthContext";
+import { Button } from "@/components/ui/button";
 
 // Simple ad block detection strategy:
 // 1. Show modal immediately if adblock is detected
@@ -78,12 +78,6 @@ const AdBlockPrompt = () => {
     setIsBlocking(false);
   };
 
-  const handleBackdropClick = (e: React.MouseEvent) => {
-    if (e.target === e.currentTarget) {
-      handleModalDismiss();
-    }
-  };
-
   const handleSupporterClick = () => {
     router.push("/supporting");
   };
@@ -91,7 +85,6 @@ const AdBlockPrompt = () => {
   if (
     isLoading ||
     canHideAds ||
-    !isBlocking ||
     isDismissed ||
     pathname === "/supporting" ||
     pathname === "/redeem" ||
@@ -102,25 +95,16 @@ const AdBlockPrompt = () => {
 
   // Show modal immediately
   return (
-    <div className="fixed inset-0 z-2147483647 flex items-center justify-center p-4">
-      <button
-        type="button"
-        className="bg-overlay-bg absolute inset-0 backdrop-blur-sm"
-        onClick={handleBackdropClick}
-        aria-label="Close ad block prompt"
-      />
-      <div className="bg-secondary-bg border-button-info relative z-10 mx-auto w-full max-w-150 overflow-hidden rounded-xl border shadow-xl">
-        {/* Close button */}
-        <button
-          type="button"
-          onClick={handleModalDismiss}
-          className="text-secondary-text hover:text-primary-text absolute top-4 right-4 z-10 cursor-pointer transition-colors"
-          aria-label="Close"
-        >
-          <Icon icon="material-symbols:close" className="h-6 w-6" />
-        </button>
-
-        <div className="flex flex-col items-center px-6 py-10 text-center md:px-10">
+    <Dialog
+      open={isBlocking}
+      onOpenChange={(open) => !open && handleModalDismiss()}
+    >
+      <DialogContent
+        className="bg-secondary-bg max-w-150 rounded-lg p-0 backdrop-blur-none"
+        showClose
+        aria-describedby={undefined}
+      >
+        <div className="flex flex-col items-center px-6 pt-10 text-center md:px-10">
           {/* Logo */}
           <div className="mb-6">
             <Image
@@ -139,7 +123,7 @@ const AdBlockPrompt = () => {
           </h2>
 
           {/* Message */}
-          <p className="text-secondary-text mb-8 text-base leading-relaxed">
+          <p className="text-secondary-text text-sm leading-relaxed">
             Ads help us keep our content free and accessible to everyone. By
             allowing ads, you&apos;re directly supporting the developers and the
             website.
@@ -148,30 +132,28 @@ const AdBlockPrompt = () => {
             Please consider whitelisting our site — it only takes a moment, and
             it makes a big difference.
           </p>
+        </div>
 
-          {/* Alternative Option */}
-          <div className="mb-4 w-full sm:mb-8">
-            <Button
-              onClick={handleSupporterClick}
-              data-umami-event="Adblock Prompt - Become Supporter"
-              className="w-full max-w-xs tracking-wide uppercase"
-            >
-              Become A Supporter
-            </Button>
-          </div>
-
-          {/* Dismiss Link */}
+        <DialogFooter className="mt-4 gap-2 px-6 pt-2 pb-10 sm:pb-6">
           <Button
             onClick={handleModalDismiss}
             data-umami-event="Adblock Prompt - Remind Later"
             variant="ghost"
-            className="text-secondary-text hover:text-primary-text hover:bg-transparent hover:underline"
+            size="sm"
           >
             Remind Me Later
           </Button>
-        </div>
-      </div>
-    </div>
+          <Button
+            onClick={handleSupporterClick}
+            data-umami-event="Adblock Prompt - Become Supporter"
+            size="sm"
+            className="tracking-wide uppercase"
+          >
+            Become A Supporter
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 };
 

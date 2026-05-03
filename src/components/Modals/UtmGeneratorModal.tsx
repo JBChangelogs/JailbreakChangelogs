@@ -1,5 +1,11 @@
 import React, { useState, useMemo } from "react";
-import { Dialog, DialogPanel } from "@headlessui/react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { Icon } from "@/components/ui/IconWrapper";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -87,149 +93,137 @@ export const UtmGeneratorModal: React.FC<UtmGeneratorModalProps> = ({
   };
 
   return (
-    <Dialog open={isOpen} onClose={() => {}} className="relative z-3000">
-      <div
-        className="fixed inset-0 bg-black/50 backdrop-blur-sm"
-        aria-hidden="true"
-      />
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent
+        className="bg-secondary-bg max-w-lg rounded-lg p-0 backdrop-blur-none"
+        showClose
+        aria-describedby={undefined}
+      >
+        <DialogHeader className="px-6 pt-6 pb-2">
+          <DialogTitle className="text-primary-text text-xl font-bold">
+            UTM Parameter Generator
+          </DialogTitle>
+          <p className="text-secondary-text text-sm">
+            Create tracking URLs with UTM parameters
+          </p>
+        </DialogHeader>
 
-      <div className="fixed inset-0 flex items-center justify-center p-4">
-        <DialogPanel className="border-border-card bg-secondary-bg hover:border-border-focus relative w-full max-w-lg rounded-lg border shadow-xl">
-          <div className="border-border-card flex items-center justify-between border-b p-4">
-            <div>
-              <h2 className="text-primary-text text-xl font-bold">
-                UTM Parameter Generator
-              </h2>
-              <p className="text-secondary-text text-sm">
-                Create tracking URLs with UTM parameters
+        <div className="max-h-[calc(100vh-200px)] overflow-y-auto px-6 pt-4 pb-6">
+          <div className="space-y-4">
+            <div className="space-y-1">
+              <label
+                htmlFor="utm-source"
+                className="text-primary-text text-sm font-medium"
+              >
+                Campaign Source (optional)
+              </label>
+              <input
+                id="utm-source"
+                type="text"
+                value={source}
+                onChange={(e) => setSource(e.target.value)}
+                placeholder="e.g., google, newsletter, facebook"
+                className="border-border-secondary bg-tertiary-bg text-primary-text placeholder:text-secondary-text/50 focus:border-button-info w-full rounded-lg border px-3 py-2 focus:outline-none"
+              />
+              <p className="text-secondary-text text-xs">
+                The referrer (e.g., google, newsletter)
               </p>
             </div>
-            <button
-              onClick={onClose}
-              aria-label="Close"
-              className="text-secondary-text hover:text-primary-text hover:bg-quaternary-bg focus-visible:ring-ring inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-md transition-colors focus-visible:ring-1 focus-visible:outline-none"
-            >
-              <Icon icon="heroicons:x-mark" className="h-5 w-5" />
-            </button>
-          </div>
 
-          <div className="max-h-[calc(100vh-200px)] overflow-y-auto p-6">
-            <div className="space-y-4">
-              <div className="space-y-1">
-                <label
-                  htmlFor="utm-source"
-                  className="text-primary-text text-sm font-medium"
-                >
-                  Campaign Source (optional)
-                </label>
-                <input
-                  id="utm-source"
-                  type="text"
-                  value={source}
-                  onChange={(e) => setSource(e.target.value)}
-                  placeholder="e.g., google, newsletter, facebook"
-                  className="border-border-secondary bg-tertiary-bg text-primary-text placeholder:text-secondary-text/50 focus:border-button-info w-full rounded-lg border px-3 py-2 focus:outline-none"
-                />
-                <p className="text-secondary-text text-xs">
-                  The referrer (e.g., google, newsletter)
-                </p>
-              </div>
-
-              <div className="space-y-1">
-                <label
-                  htmlFor="utm-medium"
-                  className="text-primary-text text-sm font-medium"
-                >
-                  Campaign Medium (optional)
-                </label>
-                <input
-                  id="utm-medium"
-                  type="text"
-                  value={medium}
-                  onChange={(e) => setMedium(e.target.value)}
-                  placeholder="e.g., cpc, email, social"
-                  className="border-border-secondary bg-tertiary-bg text-primary-text placeholder:text-secondary-text/50 focus:border-button-info w-full rounded-lg border px-3 py-2 focus:outline-none"
-                />
-                <p className="text-secondary-text text-xs">
-                  Marketing medium (e.g., cpc, email, social)
-                </p>
-              </div>
-
-              <div className="space-y-1">
-                <label
-                  htmlFor="utm-campaign"
-                  className="text-primary-text text-sm font-medium"
-                >
-                  Campaign Name (optional)
-                </label>
-                <input
-                  id="utm-campaign"
-                  type="text"
-                  value={campaign}
-                  onChange={(e) => setCampaign(e.target.value)}
-                  placeholder="e.g., spring_sale, product_launch"
-                  className="border-border-secondary bg-tertiary-bg text-primary-text placeholder:text-secondary-text/50 focus:border-button-info w-full rounded-lg border px-3 py-2 focus:outline-none"
-                />
-                <p className="text-secondary-text text-xs">
-                  Product, promo code, or slogan
-                </p>
-              </div>
-
-              <div className="space-y-1">
-                <label
-                  htmlFor="utm-term"
-                  className="text-primary-text text-sm font-medium"
-                >
-                  Campaign Term (optional)
-                </label>
-                <input
-                  id="utm-term"
-                  type="text"
-                  value={term}
-                  onChange={(e) => setTerm(e.target.value)}
-                  placeholder="e.g., running+shoes"
-                  className="border-border-secondary bg-tertiary-bg text-primary-text placeholder:text-secondary-text/50 focus:border-button-info w-full rounded-lg border px-3 py-2 focus:outline-none"
-                />
-                <p className="text-secondary-text text-xs">
-                  Identify paid search keywords
-                </p>
-              </div>
-
-              <div className="space-y-1">
-                <label
-                  htmlFor="utm-content"
-                  className="text-primary-text text-sm font-medium"
-                >
-                  Campaign Content (optional)
-                </label>
-                <input
-                  id="utm-content"
-                  type="text"
-                  value={content}
-                  onChange={(e) => setContent(e.target.value)}
-                  placeholder="e.g., logo_link, text_link"
-                  className="border-border-secondary bg-tertiary-bg text-primary-text placeholder:text-secondary-text/50 focus:border-button-info w-full rounded-lg border px-3 py-2 focus:outline-none"
-                />
-                <p className="text-secondary-text text-xs">
-                  Differentiate ads or links
-                </p>
-              </div>
-
-              {generatedUrl &&
-                (source || medium || campaign || term || content) && (
-                  <div className="bg-tertiary-bg mt-6 rounded-lg p-4">
-                    <p className="text-primary-text mb-2 text-sm font-medium">
-                      Generated URL
-                    </p>
-                    <p className="text-secondary-text text-sm break-all">
-                      {generatedUrl}
-                    </p>
-                  </div>
-                )}
+            <div className="space-y-1">
+              <label
+                htmlFor="utm-medium"
+                className="text-primary-text text-sm font-medium"
+              >
+                Campaign Medium (optional)
+              </label>
+              <input
+                id="utm-medium"
+                type="text"
+                value={medium}
+                onChange={(e) => setMedium(e.target.value)}
+                placeholder="e.g., cpc, email, social"
+                className="border-border-secondary bg-tertiary-bg text-primary-text placeholder:text-secondary-text/50 focus:border-button-info w-full rounded-lg border px-3 py-2 focus:outline-none"
+              />
+              <p className="text-secondary-text text-xs">
+                Marketing medium (e.g., cpc, email, social)
+              </p>
             </div>
+
+            <div className="space-y-1">
+              <label
+                htmlFor="utm-campaign"
+                className="text-primary-text text-sm font-medium"
+              >
+                Campaign Name (optional)
+              </label>
+              <input
+                id="utm-campaign"
+                type="text"
+                value={campaign}
+                onChange={(e) => setCampaign(e.target.value)}
+                placeholder="e.g., spring_sale, product_launch"
+                className="border-border-secondary bg-tertiary-bg text-primary-text placeholder:text-secondary-text/50 focus:border-button-info w-full rounded-lg border px-3 py-2 focus:outline-none"
+              />
+              <p className="text-secondary-text text-xs">
+                Product, promo code, or slogan
+              </p>
+            </div>
+
+            <div className="space-y-1">
+              <label
+                htmlFor="utm-term"
+                className="text-primary-text text-sm font-medium"
+              >
+                Campaign Term (optional)
+              </label>
+              <input
+                id="utm-term"
+                type="text"
+                value={term}
+                onChange={(e) => setTerm(e.target.value)}
+                placeholder="e.g., running+shoes"
+                className="border-border-secondary bg-tertiary-bg text-primary-text placeholder:text-secondary-text/50 focus:border-button-info w-full rounded-lg border px-3 py-2 focus:outline-none"
+              />
+              <p className="text-secondary-text text-xs">
+                Identify paid search keywords
+              </p>
+            </div>
+
+            <div className="space-y-1">
+              <label
+                htmlFor="utm-content"
+                className="text-primary-text text-sm font-medium"
+              >
+                Campaign Content (optional)
+              </label>
+              <input
+                id="utm-content"
+                type="text"
+                value={content}
+                onChange={(e) => setContent(e.target.value)}
+                placeholder="e.g., logo_link, text_link"
+                className="border-border-secondary bg-tertiary-bg text-primary-text placeholder:text-secondary-text/50 focus:border-button-info w-full rounded-lg border px-3 py-2 focus:outline-none"
+              />
+              <p className="text-secondary-text text-xs">
+                Differentiate ads or links
+              </p>
+            </div>
+
+            {generatedUrl &&
+              (source || medium || campaign || term || content) && (
+                <div className="bg-tertiary-bg mt-6 rounded-lg p-4">
+                  <p className="text-primary-text mb-2 text-sm font-medium">
+                    Generated URL
+                  </p>
+                  <p className="text-secondary-text text-sm break-all">
+                    {generatedUrl}
+                  </p>
+                </div>
+              )}
           </div>
 
-          <div className="border-border-card flex justify-end gap-2 border-t p-4">
+          <DialogFooter className="mt-4 gap-2 pt-2">
             <Button
               type="button"
               size="sm"
@@ -242,9 +236,9 @@ export const UtmGeneratorModal: React.FC<UtmGeneratorModalProps> = ({
               <Icon icon="heroicons:document-duplicate" className="h-4 w-4" />
               Copy
             </Button>
-          </div>
-        </DialogPanel>
-      </div>
+          </DialogFooter>
+        </div>
+      </DialogContent>
     </Dialog>
   );
 };

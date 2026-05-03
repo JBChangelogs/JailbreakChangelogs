@@ -1,5 +1,11 @@
 import React, { useState } from "react";
-import { Dialog, DialogPanel } from "@headlessui/react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { Button } from "../ui/button";
@@ -53,63 +59,62 @@ const ReportCommentModal: React.FC<ReportCommentModalProps> = ({
   };
 
   return (
-    <>
-      <Dialog open={open} onClose={onClose} className="relative z-50">
-        <div
-          className="fixed inset-0 bg-black/30 backdrop-blur-sm"
-          aria-hidden="true"
-        />
+    <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
+      <DialogContent
+        className="bg-tertiary-bg max-w-[480px] rounded-lg p-0 backdrop-blur-none"
+        showClose
+        aria-describedby={undefined}
+      >
+        <DialogHeader className="px-6 pt-6 pb-2">
+          <DialogTitle className="text-primary-text text-xl font-semibold">
+            Report Comment #{commentId} by {commentOwner}
+          </DialogTitle>
+        </DialogHeader>
 
-        <div className="fixed inset-0 flex items-center justify-center p-4">
-          <DialogPanel className="modal-container border-button-info bg-secondary-bg w-full max-w-120 min-w-[320px] rounded-lg border shadow-lg">
-            <div className="modal-header text-primary-text px-6 py-4 text-xl font-semibold">
-              Report Comment #{commentId} by {commentOwner}
+        <div className="px-6 pt-4 pb-6">
+          <div className="border-button-info bg-tertiary-bg mb-4 max-h-50 cursor-not-allowed overflow-y-auto rounded border p-3">
+            <div className="text-secondary-text mb-1 text-xs tracking-wider uppercase">
+              Comment Content
             </div>
-            <div className="modal-content p-6">
-              <div className="border-button-info bg-secondary-bg mb-4 max-h-50 cursor-not-allowed overflow-y-auto rounded border p-3">
-                <div className="text-secondary-text mb-1 text-xs tracking-wider uppercase">
-                  Comment Content
-                </div>
-                <div className="text-primary-text text-sm wrap-break-word whitespace-pre-wrap">
-                  {commentContent}
-                </div>
-              </div>
-              <div className="relative">
-                <textarea
-                  value={reportReason}
-                  onChange={handleReasonChange}
-                  placeholder="Please provide a reason for reporting this comment..."
-                  className="border-border-card bg-form-input text-primary-text hover:border-border-focus focus:border-button-info min-h-30 w-full resize-y rounded border p-3 text-sm focus:outline-none"
-                />
-                <div
-                  className={`absolute right-2 bottom-2 text-xs ${reportReason.length >= MAX_REASON_LENGTH ? "text-button-danger" : "text-secondary-text"}`}
-                >
-                  {reportReason.length}/{MAX_REASON_LENGTH}
-                </div>
-              </div>
+            <div className="text-primary-text text-sm wrap-break-word whitespace-pre-wrap">
+              {commentContent}
             </div>
-            <div className="modal-footer flex justify-end gap-2 px-6 py-4">
-              <Button
-                variant="ghost"
-                size="md"
-                onClick={onClose}
-                disabled={isSubmitting}
-              >
-                Cancel
-              </Button>
-              <Button
-                variant="default"
-                size="md"
-                onClick={handleSubmit}
-                disabled={!reportReason.trim() || isSubmitting}
-              >
-                {isSubmitting ? "Submitting..." : "Submit Report"}
-              </Button>
+          </div>
+          <div className="relative">
+            <textarea
+              value={reportReason}
+              onChange={handleReasonChange}
+              placeholder="Please provide a reason for reporting this comment..."
+              className="border-border-card bg-tertiary-bg text-primary-text hover:border-border-focus focus:border-button-info min-h-30 w-full resize-y rounded border p-3 text-sm focus:outline-none"
+            />
+            <div
+              className={`absolute right-2 bottom-2 text-xs ${reportReason.length >= MAX_REASON_LENGTH ? "text-button-danger" : "text-secondary-text"}`}
+            >
+              {reportReason.length}/{MAX_REASON_LENGTH}
             </div>
-          </DialogPanel>
+          </div>
         </div>
-      </Dialog>
-    </>
+
+        <DialogFooter className="mt-4 gap-2 px-6 pt-2 pb-6">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onClose}
+            disabled={isSubmitting}
+          >
+            Cancel
+          </Button>
+          <Button
+            variant="default"
+            size="sm"
+            onClick={handleSubmit}
+            disabled={!reportReason.trim() || isSubmitting}
+          >
+            {isSubmitting ? "Submitting..." : "Submit Report"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 };
 
