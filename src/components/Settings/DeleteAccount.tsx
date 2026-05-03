@@ -5,7 +5,13 @@ import { useAuthContext } from "@/contexts/AuthContext";
 import { Icon } from "@/components/ui/IconWrapper";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 export const DeleteAccount = () => {
   const [open, setOpen] = useState(false);
@@ -84,59 +90,61 @@ export const DeleteAccount = () => {
         Delete Account
       </Button>
 
-      <ConfirmDialog
-        isOpen={open}
-        onClose={handleClose}
-        onConfirm={handleDelete}
-        closeOnConfirm={false}
-        title="Delete Account"
-        confirmText={
-          !showFinalWarning
-            ? timeLeft > 0
-              ? `Please wait ${timeLeft}s`
-              : "Delete Account"
-            : "Confirm Delete"
-        }
-        confirmVariant="destructive"
-        confirmDisabled={!showFinalWarning && timeLeft > 0}
-      >
-        {!showFinalWarning ? (
-          <>
-            <div className="text-button-danger mb-4 flex items-center gap-2">
-              <Icon
-                icon="heroicons:exclamation-triangle"
-                className="h-6 w-6"
-                style={{ color: "var(--color-button-danger)" }}
-              />
-              <span className="text-lg font-semibold">Warning</span>
-            </div>
-            <p className="text-primary-text mb-6">
-              Are you sure you want to delete your account?
-            </p>
+      <Dialog open={open} onOpenChange={(val) => !val && handleClose()}>
+        <DialogContent showClose>
+          <DialogHeader>
+            <DialogTitle>Delete Account</DialogTitle>
+          </DialogHeader>
 
-            {error && (
-              <div className="mt-2 rounded bg-red-100 p-2 text-red-800">
-                {error}
+          <div className="py-4">
+            {!showFinalWarning ? (
+              <>
+                <p className="text-primary-text mb-6">
+                  Are you sure you want to delete your account? This action is
+                  permanent and cannot be undone.
+                </p>
+
+                {error && (
+                  <div className="mt-2 rounded bg-red-100 p-2 text-red-800">
+                    {error}
+                  </div>
+                )}
+              </>
+            ) : (
+              <div className="py-2 text-center">
+                <Icon
+                  icon="heroicons:exclamation-triangle"
+                  className="mx-auto mb-2 h-12 w-12"
+                  style={{ color: "var(--color-button-danger)" }}
+                />
+                <h6 className="text-button-danger mb-2 text-lg font-bold">
+                  Final Warning
+                </h6>
+                <p className="text-primary-text">
+                  This is your last chance to cancel. Once you click delete,
+                  your account will be permanently removed.
+                </p>
               </div>
             )}
-          </>
-        ) : (
-          <div className="py-2 text-center">
-            <Icon
-              icon="heroicons:exclamation-triangle"
-              className="mx-auto mb-2 h-12 w-12"
-              style={{ color: "var(--color-button-danger)" }}
-            />
-            <h6 className="text-button-danger mb-2 text-lg font-bold">
-              Final Warning
-            </h6>
-            <p className="text-primary-text">
-              This is your last chance to cancel. Once you click delete, your
-              account will be permanently removed.
-            </p>
           </div>
-        )}
-      </ConfirmDialog>
+
+          <DialogFooter>
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={handleDelete}
+              disabled={!showFinalWarning && timeLeft > 0}
+              className="w-full sm:w-auto"
+            >
+              {!showFinalWarning
+                ? timeLeft > 0
+                  ? `Please wait ${timeLeft}s`
+                  : "Delete Account"
+                : "Confirm Delete"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

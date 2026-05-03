@@ -335,7 +335,7 @@ export default function SupporterModal({
           </div>
 
           {/* Action Buttons */}
-          <DialogFooter className="mt-4 gap-2 pt-2">
+          <DialogFooter className="mt-4 gap-2 px-6 pt-2 pb-6">
             <DialogClose asChild>
               <Button variant="ghost" size="sm">
                 Maybe Later

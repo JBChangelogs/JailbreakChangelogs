@@ -2,6 +2,15 @@ import React from "react";
 import { TradeItem } from "@/types/trading";
 import { safeLocalStorage } from "@/utils/safeStorage";
 import { Button } from "../../ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+  DialogClose,
+} from "@/components/ui/dialog";
 
 interface ClearConfirmModalProps {
   isOpen: boolean;
@@ -27,25 +36,22 @@ export const ClearConfirmModal: React.FC<ClearConfirmModalProps> = ({
   saveItemsToLocalStorage,
   handleStartNew,
 }) => {
-  if (!isOpen) return null;
-
   return (
-    <div className="fixed inset-0 z-50">
-      <div
-        className="fixed inset-0 bg-black/50 backdrop-blur-sm"
-        aria-hidden="true"
-        onClick={onClose}
-      />
-      <div className="fixed inset-0 flex items-center justify-center p-4">
-        <div className="modal-container border-border-card bg-secondary-bg mx-auto w-full max-w-sm rounded-lg border p-6 shadow-lg">
-          <div className="modal-header text-primary-text mb-2 text-xl font-bold">
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent
+        showClose
+        className="bg-secondary-bg max-w-sm rounded-lg p-0 backdrop-blur-none"
+      >
+        <DialogHeader className="px-6 pt-6 pb-2">
+          <DialogTitle className="text-primary-text text-left text-xl font-bold">
             Clear Calculator?
-          </div>
-          <div className="modal-content mb-6">
-            <p className="text-secondary-text text-sm">
-              Choose what to clear. This action cannot be undone.
-            </p>
-          </div>
+          </DialogTitle>
+          <DialogDescription className="text-secondary-text mt-1 text-left text-sm">
+            Choose what to clear. This action cannot be undone.
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="px-6 pt-4 pb-6">
           <div className="mb-4 flex flex-col gap-3">
             <Button
               onClick={() => {
@@ -86,13 +92,16 @@ export const ClearConfirmModal: React.FC<ClearConfirmModalProps> = ({
               Clear Both
             </Button>
           </div>
-          <div className="modal-footer flex justify-end pt-2">
-            <Button variant="ghost" onClick={onClose} className="px-4">
-              Cancel
-            </Button>
-          </div>
+
+          <DialogFooter className="mt-4 gap-2 px-0 pt-2 pb-0">
+            <DialogClose asChild>
+              <Button variant="ghost" size="sm">
+                Cancel
+              </Button>
+            </DialogClose>
+          </DialogFooter>
         </div>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 };

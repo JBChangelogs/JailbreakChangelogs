@@ -6,6 +6,15 @@ import { ItemGrid } from "./ItemGrid";
 import { Skeleton } from "@mui/material";
 import { toast } from "sonner";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+  DialogClose,
+} from "@/components/ui/dialog";
 import Link from "next/link";
 import { useSupporterModal } from "@/hooks/useSupporterModal";
 import SupporterModal from "../Modals/SupporterModal";
@@ -691,7 +700,7 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
     return (
       <div className="space-y-6">
         {/* Expiration Time Selection Skeleton */}
-        <div className="rounded-lg border p-4">
+        <div className="border-border-card rounded-lg border p-4">
           <Skeleton variant="text" width={200} height={24} className="mb-4" />
           <div className="flex items-center gap-4">
             <Skeleton
@@ -709,7 +718,7 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
 
         {/* Offering and Requesting Items Skeleton */}
         <div className="space-y-6 md:flex md:space-y-0 md:space-x-6">
-          <div className="flex-1 rounded-lg border p-4">
+          <div className="border-border-card flex-1 rounded-lg border p-4">
             <Skeleton variant="text" width={100} height={24} className="mb-4" />
             <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-4">
               {[...Array(8)].map((_, i) => (
@@ -724,7 +733,7 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
             </div>
           </div>
 
-          <div className="flex-1 rounded-lg border p-4">
+          <div className="border-border-card flex-1 rounded-lg border p-4">
             <Skeleton variant="text" width={100} height={24} className="mb-4" />
             <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-4">
               {[...Array(8)].map((_, i) => (
@@ -806,100 +815,74 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
             confirmVariant="default"
           />
 
-          {/* Clear Confirmation Modal - Multi-option like calculator */}
-          {showClearConfirmModal && (
-            <div className="fixed inset-0 z-3000">
-              <div
-                className="fixed inset-0 bg-black/50 backdrop-blur-sm"
-                aria-hidden="true"
-                onClick={() => setShowClearConfirmModal(false)}
-              />
-              <div className="fixed inset-0 flex items-center justify-center p-4">
-                <div
-                  className="border-border-card bg-secondary-bg hover:border-border-focus relative mx-auto w-full max-w-md rounded-lg border shadow-xl"
-                  onClick={(event) => event.stopPropagation()}
-                  onKeyDown={(event) => {
-                    if (event.key === "Enter" || event.key === " ") {
-                      event.stopPropagation();
-                    }
-                  }}
-                  role="dialog"
-                  aria-modal="true"
-                  tabIndex={-1}
-                >
-                  <div className="border-border-card flex items-center justify-between border-b p-4">
-                    <h2 className="text-primary-text text-xl font-semibold">
-                      Clear Trade Ad?
-                    </h2>
-                    <button
-                      type="button"
-                      onClick={() => setShowClearConfirmModal(false)}
-                      aria-label="Close"
-                      className="text-secondary-text hover:text-primary-text hover:bg-quaternary-bg focus-visible:ring-ring inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-md transition-colors focus-visible:ring-1 focus-visible:outline-none"
-                    >
-                      <Icon icon="heroicons:x-mark" className="h-5 w-5" />
-                    </button>
-                  </div>
+          {/* Clear Confirmation Modal */}
+          <Dialog
+            open={showClearConfirmModal}
+            onOpenChange={(open) => !open && setShowClearConfirmModal(false)}
+          >
+            <DialogContent
+              showClose
+              className="bg-secondary-bg max-w-sm rounded-lg p-0 backdrop-blur-none"
+            >
+              <DialogHeader className="px-6 pt-6 pb-2">
+                <DialogTitle className="text-primary-text text-left text-xl font-bold">
+                  Clear Trade Ad?
+                </DialogTitle>
+                <DialogDescription className="text-secondary-text mt-1 text-left text-sm">
+                  Choose what to clear. This action cannot be undone.
+                </DialogDescription>
+              </DialogHeader>
 
-                  <div className="p-6">
-                    <p className="text-secondary-text text-sm">
-                      Choose what to clear. This action cannot be undone.
-                    </p>
-
-                    <div className="mt-6 grid grid-cols-1 gap-3">
-                      <UiButton
-                        onClick={() => {
-                          setOfferingItems([]);
-                          if (requestingItems.length === 0) {
-                            safeLocalStorage.removeItem("tradeAdFormItems");
-                          } else {
-                            saveItemsToLocalStorage(
-                              [],
-                              requestingItems,
-                              tradeNote,
-                            );
-                          }
-                          setShowClearConfirmModal(false);
-                        }}
-                        variant="outline"
-                        className="border-button-success! text-button-success! bg-button-success/10! hover:bg-button-success/20! active:bg-button-success/20! w-full"
-                      >
-                        Clear Offering
-                      </UiButton>
-                      <UiButton
-                        onClick={() => {
-                          setRequestingItems([]);
-                          if (offeringItems.length === 0) {
-                            safeLocalStorage.removeItem("tradeAdFormItems");
-                          } else {
-                            saveItemsToLocalStorage(
-                              offeringItems,
-                              [],
-                              tradeNote,
-                            );
-                          }
-                          setShowClearConfirmModal(false);
-                        }}
-                        variant="outline"
-                        className="border-button-danger! text-button-danger! bg-button-danger/10! hover:bg-button-danger/20! active:bg-button-danger/20! w-full"
-                      >
-                        Clear Requesting
-                      </UiButton>
-                      <UiButton
-                        onClick={() => {
-                          handleStartNewTradeAd();
-                        }}
-                        variant="destructive"
-                        className="w-full"
-                      >
-                        Clear Both
-                      </UiButton>
-                    </div>
-                  </div>
+              <div className="px-6 pt-4 pb-6">
+                <div className="mb-4 flex flex-col gap-3">
+                  <UiButton
+                    onClick={() => {
+                      setOfferingItems([]);
+                      if (requestingItems.length === 0) {
+                        safeLocalStorage.removeItem("tradeAdFormItems");
+                      } else {
+                        saveItemsToLocalStorage([], requestingItems, tradeNote);
+                      }
+                      setShowClearConfirmModal(false);
+                    }}
+                    variant="outline"
+                    className="border-button-success! text-button-success! bg-button-success/10! hover:bg-button-success/20! active:bg-button-success/20!"
+                  >
+                    Clear Offering
+                  </UiButton>
+                  <UiButton
+                    onClick={() => {
+                      setRequestingItems([]);
+                      if (offeringItems.length === 0) {
+                        safeLocalStorage.removeItem("tradeAdFormItems");
+                      } else {
+                        saveItemsToLocalStorage(offeringItems, [], tradeNote);
+                      }
+                      setShowClearConfirmModal(false);
+                    }}
+                    variant="outline"
+                    className="border-button-danger! text-button-danger! bg-button-danger/10! hover:bg-button-danger/20! active:bg-button-danger/20!"
+                  >
+                    Clear Requesting
+                  </UiButton>
+                  <UiButton
+                    onClick={() => handleStartNewTradeAd()}
+                    variant="destructive"
+                  >
+                    Clear Both
+                  </UiButton>
                 </div>
+
+                <DialogFooter className="mt-4 gap-2 px-0 pt-2 pb-0">
+                  <DialogClose asChild>
+                    <UiButton variant="ghost" size="sm">
+                      Cancel
+                    </UiButton>
+                  </DialogClose>
+                </DialogFooter>
               </div>
-            </div>
-          )}
+            </DialogContent>
+          </Dialog>
 
           <SupporterModal
             isOpen={modalState.isOpen}

@@ -5,7 +5,14 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { useQueryState } from "nuqs";
-import { Dialog, DialogPanel, DialogTitle } from "@headlessui/react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogClose,
+} from "@/components/ui/dialog";
 import {
   SupporterGift,
   SupporterHistoryEntry,
@@ -1479,208 +1486,204 @@ export default function SettingsPage() {
           />
           <Dialog
             open={giftModalOpen}
-            onClose={() => {}}
-            className="relative z-3000"
+            onOpenChange={(open) => !open && handleGiftModalDismiss()}
           >
-            <div
-              className="fixed inset-0 bg-black/50 backdrop-blur-sm"
-              aria-hidden="true"
-            />
-            <div className="fixed inset-0 flex items-center justify-center p-4">
-              <DialogPanel className="border-border-card bg-secondary-bg hover:border-border-focus relative w-full max-w-md rounded-lg border shadow-xl">
-                <div className="border-border-card flex items-center justify-between border-b p-4">
-                  <div className="flex items-center gap-3">
-                    <div className="bg-button-info rounded-lg p-2">
+            <DialogContent
+              className="bg-secondary-bg max-w-md rounded-lg p-0 backdrop-blur-none"
+              showClose
+              aria-describedby={undefined}
+            >
+              <DialogHeader className="px-6 pt-6 pb-2">
+                <div className="flex items-center gap-3">
+                  <div className="bg-button-info rounded-lg p-2">
+                    <Icon
+                      icon="heroicons:gift"
+                      className="text-form-button-text h-6 w-6"
+                    />
+                  </div>
+                  <div className="flex flex-col text-left">
+                    <DialogTitle className="text-primary-text text-xl font-semibold">
+                      {giftModalStep === "search"
+                        ? "Gift to User"
+                        : "Confirm Gift"}
+                    </DialogTitle>
+                    <p className="text-secondary-text mt-1 text-sm font-normal">
+                      {giftModalStep === "search"
+                        ? "Choose who should receive this gift."
+                        : "Review the recipient before sending."}
+                    </p>
+                  </div>
+                </div>
+              </DialogHeader>
+
+              <div className="max-h-[calc(100vh-200px)] overflow-y-auto px-6 pt-4 pb-6">
+                {giftModalStep === "search" ? (
+                  <div className="flex flex-col gap-4">
+                    {activeGift ? (
+                      <div className="bg-tertiary-bg border-border-card flex items-center gap-3 rounded-lg border p-4">
+                        {supporterIcons[activeGift.level] && (
+                          <Image
+                            src={supporterIcons[activeGift.level]}
+                            alt={getSupporterGiftTierLabel(activeGift.level)}
+                            width={24}
+                            height={24}
+                            className="object-contain"
+                          />
+                        )}
+                        <div>
+                          <p className="text-primary-text text-sm font-semibold">
+                            {getSupporterGiftTierLabel(activeGift.level)}
+                          </p>
+                        </div>
+                      </div>
+                    ) : null}
+
+                    <div className="relative">
                       <Icon
-                        icon="heroicons:gift"
-                        className="text-form-button-text h-6 w-6"
+                        icon="heroicons:magnifying-glass"
+                        className="text-secondary-text pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2"
+                      />
+                      <input
+                        type="text"
+                        value={giftSearchQuery}
+                        onChange={(event) => {
+                          setGiftSearchQuery(event.target.value);
+                          setSelectedGiftRecipient(null);
+                        }}
+                        placeholder="Search user to gift..."
+                        className="border-border-card bg-tertiary-bg text-primary-text placeholder:text-secondary-text focus:border-button-info h-10 w-full rounded-lg border py-2 pr-3 pl-9 text-sm outline-none"
+                        autoComplete="off"
+                        spellCheck={false}
                       />
                     </div>
-                    <div>
-                      <DialogTitle className="text-primary-text text-xl font-semibold">
-                        {giftModalStep === "search"
-                          ? "Gift to User"
-                          : "Confirm Gift"}
-                      </DialogTitle>
-                      <p className="text-secondary-text text-sm">
-                        {giftModalStep === "search"
-                          ? "Choose who should receive this gift."
-                          : "Review the recipient before sending."}
-                      </p>
-                    </div>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={handleGiftModalDismiss}
-                    aria-label="Close"
-                    className="text-secondary-text hover:text-primary-text hover:bg-quaternary-bg focus-visible:ring-ring inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-md transition-colors focus-visible:ring-1 focus-visible:outline-none"
-                  >
-                    <Icon icon="heroicons:x-mark" className="h-5 w-5" />
-                  </button>
-                </div>
 
-                <div className="max-h-[calc(100vh-200px)] overflow-y-auto p-6">
-                  {giftModalStep === "search" ? (
-                    <div className="flex flex-col gap-4">
-                      {activeGift ? (
-                        <div className="bg-tertiary-bg border-border-card flex items-center gap-3 rounded-lg border p-4">
+                    {giftSearchQuery.trim() ? (
+                      giftSearchLoading ? (
+                        <div className="flex items-center justify-center gap-2 py-2">
+                          <Spinner className="h-4 w-4" />
+                          <span className="text-secondary-text text-sm">
+                            Searching users...
+                          </span>
+                        </div>
+                      ) : giftSearchResults.length > 0 ? (
+                        <div className="border-border-card bg-tertiary-bg overflow-hidden rounded-lg border">
+                          {giftSearchResults.map((result) => (
+                            <button
+                              key={result.id}
+                              type="button"
+                              onClick={() => {
+                                setSelectedGiftRecipient(result);
+                                setGiftModalStep("confirm");
+                              }}
+                              className="border-border-card hover:bg-quaternary-bg flex w-full cursor-pointer items-center gap-3 border-b px-4 py-3 text-left transition-colors last:border-b-0"
+                            >
+                              <UserAvatar
+                                userId={result.id}
+                                avatarHash={result.avatar}
+                                username={result.username}
+                                custom_avatar={result.custom_avatar}
+                                size={8}
+                                showBadge={false}
+                                settings={result.settings_v2}
+                                premiumType={result.premiumtype}
+                              />
+                              <div className="min-w-0 flex-1">
+                                <p className="text-primary-text truncate text-sm font-medium">
+                                  {result.global_name &&
+                                  result.global_name !== "None"
+                                    ? result.global_name
+                                    : result.username}
+                                </p>
+                                <p className="text-secondary-text truncate text-xs">
+                                  @{result.username}
+                                </p>
+                              </div>
+                            </button>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-secondary-text text-sm">
+                          No users found.
+                        </p>
+                      )
+                    ) : (
+                      <p className="text-secondary-text text-sm">
+                        Search for a user to open the gift confirmation.
+                      </p>
+                    )}
+                  </div>
+                ) : activeGift && selectedGiftRecipient ? (
+                  <div className="flex flex-col gap-4">
+                    <div className="bg-tertiary-bg border-border-card flex items-center gap-3 rounded-lg border p-4">
+                      <UserAvatar
+                        userId={selectedGiftRecipient.id}
+                        avatarHash={selectedGiftRecipient.avatar}
+                        username={selectedGiftRecipient.username}
+                        custom_avatar={selectedGiftRecipient.custom_avatar}
+                        size={10}
+                        showBadge={false}
+                        settings={selectedGiftRecipient.settings_v2}
+                        premiumType={selectedGiftRecipient.premiumtype}
+                      />
+                      <div className="min-w-0 flex-1">
+                        <div className="mb-2 flex items-center gap-2">
                           {supporterIcons[activeGift.level] && (
                             <Image
                               src={supporterIcons[activeGift.level]}
                               alt={getSupporterGiftTierLabel(activeGift.level)}
-                              width={24}
-                              height={24}
+                              width={20}
+                              height={20}
                               className="object-contain"
                             />
                           )}
-                          <div>
-                            <p className="text-primary-text text-sm font-semibold">
-                              {getSupporterGiftTierLabel(activeGift.level)}
-                            </p>
-                          </div>
-                        </div>
-                      ) : null}
-
-                      <div className="relative">
-                        <Icon
-                          icon="heroicons:magnifying-glass"
-                          className="text-secondary-text pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2"
-                        />
-                        <input
-                          type="text"
-                          value={giftSearchQuery}
-                          onChange={(event) => {
-                            setGiftSearchQuery(event.target.value);
-                            setSelectedGiftRecipient(null);
-                          }}
-                          placeholder="Search user to gift..."
-                          className="border-border-card bg-tertiary-bg text-primary-text placeholder:text-secondary-text focus:border-button-info h-10 w-full rounded-lg border py-2 pr-3 pl-9 text-sm outline-none"
-                          autoComplete="off"
-                          spellCheck={false}
-                        />
-                      </div>
-
-                      {giftSearchQuery.trim() ? (
-                        giftSearchLoading ? (
-                          <div className="flex items-center justify-center gap-2 py-2">
-                            <Spinner className="h-4 w-4" />
-                            <span className="text-secondary-text text-sm">
-                              Searching users...
-                            </span>
-                          </div>
-                        ) : giftSearchResults.length > 0 ? (
-                          <div className="border-border-card bg-tertiary-bg overflow-hidden rounded-lg border">
-                            {giftSearchResults.map((result) => (
-                              <button
-                                key={result.id}
-                                type="button"
-                                onClick={() => {
-                                  setSelectedGiftRecipient(result);
-                                  setGiftModalStep("confirm");
-                                }}
-                                className="border-border-card hover:bg-quaternary-bg flex w-full cursor-pointer items-center gap-3 border-b px-4 py-3 text-left transition-colors last:border-b-0"
-                              >
-                                <UserAvatar
-                                  userId={result.id}
-                                  avatarHash={result.avatar}
-                                  username={result.username}
-                                  custom_avatar={result.custom_avatar}
-                                  size={8}
-                                  showBadge={false}
-                                  settings={result.settings_v2}
-                                  premiumType={result.premiumtype}
-                                />
-                                <div className="min-w-0 flex-1">
-                                  <p className="text-primary-text truncate text-sm font-medium">
-                                    {result.global_name &&
-                                    result.global_name !== "None"
-                                      ? result.global_name
-                                      : result.username}
-                                  </p>
-                                  <p className="text-secondary-text truncate text-xs">
-                                    @{result.username}
-                                  </p>
-                                </div>
-                              </button>
-                            ))}
-                          </div>
-                        ) : (
-                          <p className="text-secondary-text text-sm">
-                            No users found.
+                          <p className="text-primary-text text-sm font-semibold">
+                            {getSupporterGiftTierLabel(activeGift.level)}
                           </p>
-                        )
-                      ) : (
-                        <p className="text-secondary-text text-sm">
-                          Search for a user to open the gift confirmation.
+                        </div>
+                        <p className="text-primary-text truncate text-base font-semibold">
+                          {selectedGiftRecipient.global_name &&
+                          selectedGiftRecipient.global_name !== "None"
+                            ? selectedGiftRecipient.global_name
+                            : selectedGiftRecipient.username}
                         </p>
-                      )}
-                    </div>
-                  ) : activeGift && selectedGiftRecipient ? (
-                    <div className="flex flex-col gap-4">
-                      <div className="bg-tertiary-bg border-border-card flex items-center gap-3 rounded-lg border p-4">
-                        <UserAvatar
-                          userId={selectedGiftRecipient.id}
-                          avatarHash={selectedGiftRecipient.avatar}
-                          username={selectedGiftRecipient.username}
-                          custom_avatar={selectedGiftRecipient.custom_avatar}
-                          size={10}
-                          showBadge={false}
-                          settings={selectedGiftRecipient.settings_v2}
-                          premiumType={selectedGiftRecipient.premiumtype}
-                        />
-                        <div className="min-w-0 flex-1">
-                          <div className="mb-2 flex items-center gap-2">
-                            {supporterIcons[activeGift.level] && (
-                              <Image
-                                src={supporterIcons[activeGift.level]}
-                                alt={getSupporterGiftTierLabel(
-                                  activeGift.level,
-                                )}
-                                width={20}
-                                height={20}
-                                className="object-contain"
-                              />
-                            )}
-                            <p className="text-primary-text text-sm font-semibold">
-                              {getSupporterGiftTierLabel(activeGift.level)}
-                            </p>
-                          </div>
-                          <p className="text-primary-text truncate text-base font-semibold">
-                            {selectedGiftRecipient.global_name &&
-                            selectedGiftRecipient.global_name !== "None"
-                              ? selectedGiftRecipient.global_name
-                              : selectedGiftRecipient.username}
-                          </p>
-                          <p className="text-secondary-text truncate text-sm">
-                            @{selectedGiftRecipient.username}
-                          </p>
-                          <p className="text-primary-text mt-2 text-sm">
-                            You&apos;re about to gift{" "}
-                            <span className="font-semibold">
-                              {getSupporterGiftTierLabel(activeGift.level)}
-                            </span>{" "}
-                            to this user.
-                          </p>
-                          <p className="text-secondary-text mt-1 text-sm">
-                            Confirm to send the gift.
-                          </p>
-                        </div>
+                        <p className="text-secondary-text truncate text-sm">
+                          @{selectedGiftRecipient.username}
+                        </p>
+                        <p className="text-primary-text mt-2 text-sm">
+                          You&apos;re about to gift{" "}
+                          <span className="font-semibold">
+                            {getSupporterGiftTierLabel(activeGift.level)}
+                          </span>{" "}
+                          to this user.
+                        </p>
+                        <p className="text-secondary-text mt-1 text-sm">
+                          Confirm to send the gift.
+                        </p>
                       </div>
                     </div>
-                  ) : null}
-                </div>
+                  </div>
+                ) : null}
 
-                <div className="border-border-card flex justify-end gap-2 border-t px-6 py-4">
-                  <CustomButton
-                    type="button"
-                    variant="secondary"
-                    onClick={handleGiftModalDismiss}
-                  >
-                    Cancel
-                  </CustomButton>
+                <DialogFooter className="mt-4 gap-2 pt-2">
+                  <DialogClose asChild>
+                    <CustomButton
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={(e) => {
+                        if (giftModalStep === "confirm") {
+                          e.preventDefault();
+                          handleGiftModalDismiss();
+                        }
+                      }}
+                    >
+                      {giftModalStep === "confirm" ? "Back" : "Cancel"}
+                    </CustomButton>
+                  </DialogClose>
                   {giftModalStep === "confirm" ? (
                     <CustomButton
                       type="button"
+                      size="sm"
                       onClick={handleGiftSubmit}
                       disabled={
                         !activeGift ||
@@ -1693,206 +1696,193 @@ export default function SettingsPage() {
                         : "Confirm Gift"}
                     </CustomButton>
                   ) : null}
-                </div>
-              </DialogPanel>
-            </div>
+                </DialogFooter>
+              </div>
+            </DialogContent>
           </Dialog>
           <Dialog
             open={purchaseGiftModalOpen}
-            onClose={() => {}}
-            className="relative z-3000"
+            onOpenChange={(open) => !open && closePurchaseGiftModal()}
           >
-            <div
-              className="fixed inset-0 bg-black/50 backdrop-blur-sm"
-              aria-hidden="true"
-            />
-            <div className="fixed inset-0 flex items-center justify-center p-4">
-              <DialogPanel className="border-border-card bg-secondary-bg hover:border-border-focus relative w-full max-w-md rounded-lg border shadow-xl">
-                <div className="border-border-card flex items-center justify-between border-b p-4">
-                  <h2 className="text-primary-text text-xl font-semibold">
-                    Purchase Gift
-                  </h2>
-                  <button
-                    type="button"
-                    onClick={closePurchaseGiftModal}
-                    aria-label="Close"
-                    className="text-secondary-text hover:text-primary-text hover:bg-quaternary-bg focus-visible:ring-ring inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-md transition-colors focus-visible:ring-1 focus-visible:outline-none"
-                  >
-                    <Icon icon="heroicons:x-mark" className="h-5 w-5" />
-                  </button>
-                </div>
+            <DialogContent
+              className="bg-secondary-bg max-w-md rounded-lg p-0 backdrop-blur-none"
+              showClose
+              aria-describedby={undefined}
+            >
+              <DialogHeader className="px-6 pt-6 pb-2">
+                <DialogTitle className="text-primary-text text-left text-xl font-semibold">
+                  Purchase Gift
+                </DialogTitle>
+              </DialogHeader>
 
-                <div className="max-h-[calc(100vh-200px)] overflow-y-auto p-6">
-                  <div className="flex flex-col gap-3">
-                    <div className="border-border-card bg-tertiary-bg/45 rounded-lg border p-4">
-                      <p className="text-primary-text text-sm font-medium">
-                        Buy a supporter tier for yourself or purchase a gift to
-                        redeem later or send to someone else. View supporter
-                        benefits{" "}
-                        <Link
-                          href="/supporting"
-                          prefetch={false}
-                          className="text-link hover:text-link-hover transition-colors"
-                        >
-                          here
-                        </Link>
-                        .
-                      </p>
-                    </div>
-                    {purchaseGiftLevelsLoading ? (
-                      <div className="flex items-center justify-center gap-2 py-6">
-                        <Spinner className="h-4 w-4" />
-                        <span className="text-secondary-text text-sm">
-                          Loading gift tiers...
-                        </span>
-                      </div>
-                    ) : purchaseGiftLevelsError ? (
-                      <p className="text-button-danger text-sm">
-                        {purchaseGiftLevelsError}
-                      </p>
-                    ) : purchaseGiftLevels.length === 0 ? (
-                      <p className="text-secondary-text text-sm">
-                        No gift tiers are available right now.
-                      </p>
-                    ) : (
-                      <Tabs
-                        value={purchaseGiftTab}
-                        onValueChange={(value) =>
-                          setPurchaseGiftTab(value as "self" | "gift")
-                        }
-                        className="w-full"
+              <div className="max-h-[calc(100vh-200px)] overflow-y-auto px-6 pt-4 pb-6">
+                <div className="flex flex-col gap-3">
+                  <div className="border-border-card bg-tertiary-bg/45 rounded-lg border p-4">
+                    <p className="text-primary-text text-sm font-medium">
+                      Buy a supporter tier for yourself or purchase a gift to
+                      redeem later or send to someone else. View supporter
+                      benefits{" "}
+                      <Link
+                        href="/supporting"
+                        prefetch={false}
+                        className="text-link hover:text-link-hover transition-colors"
                       >
-                        <TabsList fullWidth className="w-full">
-                          <TabsTrigger value="self" fullWidth>
-                            For Yourself
-                          </TabsTrigger>
-                          <TabsTrigger value="gift" fullWidth>
-                            As Gift
-                          </TabsTrigger>
-                        </TabsList>
-                        <TabsContent value="self" className="mt-4">
-                          <div className="flex flex-col gap-3">
-                            {selfPurchaseLevels.map((level) => (
-                              <div
-                                key={level.id}
-                                className="bg-tertiary-bg border-border-card flex items-center justify-between gap-3 rounded-lg border p-4"
-                              >
-                                <div className="min-w-0">
-                                  <div className="mb-1 flex items-center gap-2">
-                                    {supporterIcons[level.level] && (
-                                      <Image
-                                        src={supporterIcons[level.level]}
-                                        alt={level.name}
-                                        width={18}
-                                        height={18}
-                                        className="object-contain"
-                                      />
-                                    )}
-                                    <p className="text-primary-text text-sm font-semibold">
-                                      {level.name}
-                                    </p>
-                                  </div>
-                                  <p className="text-secondary-text text-sm">
-                                    ${level.price_str}
-                                  </p>
-                                </div>
-                                <CustomButton
-                                  type="button"
-                                  size="sm"
-                                  onClick={() =>
-                                    window.open(
-                                      level.url,
-                                      "_blank",
-                                      "noopener,noreferrer",
-                                    )
-                                  }
-                                >
-                                  Buy Tier
-                                </CustomButton>
-                              </div>
-                            ))}
-                          </div>
-                        </TabsContent>
-                        <TabsContent value="gift" className="mt-4">
-                          <div className="flex flex-col gap-3">
-                            {giftPurchaseLevels.map((level) => (
-                              <div
-                                key={level.id}
-                                className="bg-tertiary-bg border-border-card flex items-center justify-between gap-3 rounded-lg border p-4"
-                              >
-                                <div className="min-w-0">
-                                  <div className="mb-1 flex items-center gap-2">
-                                    {supporterIcons[level.level] && (
-                                      <Image
-                                        src={supporterIcons[level.level]}
-                                        alt={level.name}
-                                        width={18}
-                                        height={18}
-                                        className="object-contain"
-                                      />
-                                    )}
-                                    <p className="text-primary-text text-sm font-semibold">
-                                      {level.name}
-                                    </p>
-                                  </div>
-                                  <p className="text-secondary-text text-sm">
-                                    ${level.price_str}
-                                  </p>
-                                </div>
-                                <CustomButton
-                                  type="button"
-                                  size="sm"
-                                  onClick={() =>
-                                    window.open(
-                                      level.url,
-                                      "_blank",
-                                      "noopener,noreferrer",
-                                    )
-                                  }
-                                >
-                                  Buy Gift
-                                </CustomButton>
-                              </div>
-                            ))}
-                          </div>
-                        </TabsContent>
-                      </Tabs>
-                    )}
-                    {!purchaseGiftLevelsLoading &&
-                    !purchaseGiftLevelsError &&
-                    purchaseGiftLevels.length > 0 ? (
-                      <p className="text-secondary-text pt-1 text-center text-sm">
-                        <Link
-                          href="/privacy"
-                          prefetch={false}
-                          className="text-link hover:text-link-hover transition-colors"
-                        >
-                          Privacy Policy
-                        </Link>
-                        {" | "}
-                        <Link
-                          href="/tos"
-                          prefetch={false}
-                          className="text-link hover:text-link-hover transition-colors"
-                        >
-                          Terms of Service
-                        </Link>
-                      </p>
-                    ) : null}
+                        here
+                      </Link>
+                      .
+                    </p>
                   </div>
+                  {purchaseGiftLevelsLoading ? (
+                    <div className="flex items-center justify-center gap-2 py-6">
+                      <Spinner className="h-4 w-4" />
+                      <span className="text-secondary-text text-sm">
+                        Loading gift tiers...
+                      </span>
+                    </div>
+                  ) : purchaseGiftLevelsError ? (
+                    <p className="text-button-danger text-sm">
+                      {purchaseGiftLevelsError}
+                    </p>
+                  ) : purchaseGiftLevels.length === 0 ? (
+                    <p className="text-secondary-text text-sm">
+                      No gift tiers are available right now.
+                    </p>
+                  ) : (
+                    <Tabs
+                      value={purchaseGiftTab}
+                      onValueChange={(value) =>
+                        setPurchaseGiftTab(value as "self" | "gift")
+                      }
+                      className="w-full"
+                    >
+                      <TabsList fullWidth className="w-full">
+                        <TabsTrigger value="self" fullWidth>
+                          For Yourself
+                        </TabsTrigger>
+                        <TabsTrigger value="gift" fullWidth>
+                          As Gift
+                        </TabsTrigger>
+                      </TabsList>
+                      <TabsContent value="self" className="mt-4">
+                        <div className="flex flex-col gap-3">
+                          {selfPurchaseLevels.map((level) => (
+                            <div
+                              key={level.id}
+                              className="bg-tertiary-bg border-border-card flex items-center justify-between gap-3 rounded-lg border p-4"
+                            >
+                              <div className="min-w-0">
+                                <div className="mb-1 flex items-center gap-2">
+                                  {supporterIcons[level.level] && (
+                                    <Image
+                                      src={supporterIcons[level.level]}
+                                      alt={level.name}
+                                      width={18}
+                                      height={18}
+                                      className="object-contain"
+                                    />
+                                  )}
+                                  <p className="text-primary-text text-sm font-semibold">
+                                    {level.name}
+                                  </p>
+                                </div>
+                                <p className="text-secondary-text text-sm">
+                                  ${level.price_str}
+                                </p>
+                              </div>
+                              <CustomButton
+                                type="button"
+                                size="sm"
+                                onClick={() =>
+                                  window.open(
+                                    level.url,
+                                    "_blank",
+                                    "noopener,noreferrer",
+                                  )
+                                }
+                              >
+                                Buy Tier
+                              </CustomButton>
+                            </div>
+                          ))}
+                        </div>
+                      </TabsContent>
+                      <TabsContent value="gift" className="mt-4">
+                        <div className="flex flex-col gap-3">
+                          {giftPurchaseLevels.map((level) => (
+                            <div
+                              key={level.id}
+                              className="bg-tertiary-bg border-border-card flex items-center justify-between gap-3 rounded-lg border p-4"
+                            >
+                              <div className="min-w-0">
+                                <div className="mb-1 flex items-center gap-2">
+                                  {supporterIcons[level.level] && (
+                                    <Image
+                                      src={supporterIcons[level.level]}
+                                      alt={level.name}
+                                      width={18}
+                                      height={18}
+                                      className="object-contain"
+                                    />
+                                  )}
+                                  <p className="text-primary-text text-sm font-semibold">
+                                    {level.name}
+                                  </p>
+                                </div>
+                                <p className="text-secondary-text text-sm">
+                                  ${level.price_str}
+                                </p>
+                              </div>
+                              <CustomButton
+                                type="button"
+                                size="sm"
+                                onClick={() =>
+                                  window.open(
+                                    level.url,
+                                    "_blank",
+                                    "noopener,noreferrer",
+                                  )
+                                }
+                              >
+                                Buy Gift
+                              </CustomButton>
+                            </div>
+                          ))}
+                        </div>
+                      </TabsContent>
+                    </Tabs>
+                  )}
+                  {!purchaseGiftLevelsLoading &&
+                  !purchaseGiftLevelsError &&
+                  purchaseGiftLevels.length > 0 ? (
+                    <p className="text-secondary-text pt-1 text-center text-sm">
+                      <Link
+                        href="/privacy"
+                        prefetch={false}
+                        className="text-link hover:text-link-hover transition-colors"
+                      >
+                        Privacy Policy
+                      </Link>
+                      {" | "}
+                      <Link
+                        href="/tos"
+                        prefetch={false}
+                        className="text-link hover:text-link-hover transition-colors"
+                      >
+                        Terms of Service
+                      </Link>
+                    </p>
+                  ) : null}
                 </div>
 
-                <div className="border-border-card flex justify-end gap-2 border-t px-6 py-4">
-                  <CustomButton
-                    type="button"
-                    variant="secondary"
-                    onClick={closePurchaseGiftModal}
-                  >
-                    Close
-                  </CustomButton>
-                </div>
-              </DialogPanel>
-            </div>
+                <DialogFooter className="mt-4 gap-2 pt-2">
+                  <DialogClose asChild>
+                    <CustomButton type="button" variant="ghost" size="sm">
+                      Cancel
+                    </CustomButton>
+                  </DialogClose>
+                </DialogFooter>
+              </div>
+            </DialogContent>
           </Dialog>
         </div>
       </div>

@@ -799,12 +799,11 @@ export default function TradeAds({
   }, [page, pageFromUrl]);
 
   useEffect(() => {
-    if (activeTab !== "view") return;
     if (initialTradeAds.length > 0) return;
     if (lastFetchedTradeAdsPageRef.current === page) return;
     lastFetchedTradeAdsPageRef.current = page;
     void refreshTradeAds(page);
-  }, [activeTab, initialTradeAds.length, page, refreshTradeAds]);
+  }, [initialTradeAds.length, page, refreshTradeAds]);
 
   useEffect(() => {
     const handler = (event: Event) => {
