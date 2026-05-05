@@ -7,7 +7,6 @@ import { Item, FilterSort, FavoriteItem } from "@/types";
 import { sortAndFilterItems, parseCashValue } from "@/utils/values";
 import CategoryIcons from "@/components/Items/CategoryIcons";
 import { fetchUserFavorites } from "@/utils/api";
-import { useDebounce } from "@/hooks/useDebounce";
 import { useAuthContext } from "@/contexts/AuthContext";
 import TradingGuides from "./TradingGuides";
 import ValuesSearchControls from "./ValuesSearchControls";
@@ -34,7 +33,8 @@ export default function ValuesClient({
   const items = use(itemsPromise);
   const lastUpdated = use(lastUpdatedPromise);
 
-  const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
+  const [clearSearchTrigger, setClearSearchTrigger] = useState(0);
 
   const validFilterSorts = useMemo(
     () => filterOptions.map((option) => option.value),
@@ -63,7 +63,6 @@ export default function ValuesClient({
   const [sortedItems, setSortedItems] = useState<Item[]>([]);
   const [favorites, setFavorites] = useState<number[]>([]);
   const searchSectionRef = useRef<HTMLDivElement>(null);
-  const debouncedSearchTerm = useDebounce(searchTerm, 300);
   const DYNAMIC_MAX_VALUE = useMemo(() => {
     return items.reduce((currentMax, item) => {
       if (item.tradable === 1) {
@@ -213,8 +212,8 @@ export default function ValuesClient({
       </div>
 
       <ValuesSearchControls
-        searchTerm={searchTerm}
-        setSearchTerm={setSearchTerm}
+        onDebouncedSearchChange={setDebouncedSearchTerm}
+        clearTrigger={clearSearchTrigger}
         filterSort={filterSort}
         setFilterSort={setFilterSort}
         valueSort={valueSort}
@@ -251,7 +250,7 @@ export default function ValuesClient({
             onClearAllFilters={() => {
               setFilterSort("name-all-items");
               setValueSort("cash-desc");
-              setSearchTerm("");
+              setClearSearchTrigger((prev) => prev + 1);
               setRangeValue([0, DYNAMIC_MAX_VALUE]);
               setAppliedMinValue(0);
               setAppliedMaxValue(DYNAMIC_MAX_VALUE);

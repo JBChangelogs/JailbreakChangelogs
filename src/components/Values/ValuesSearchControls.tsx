@@ -3,6 +3,7 @@
 import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import { Icon } from "../ui/IconWrapper";
 import { FilterSort, ValueSort } from "@/types";
+import { useDebounce } from "@/hooks/useDebounce";
 import { useIsAuthenticated } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { Slider } from "@/components/ui/slider";
@@ -24,8 +25,8 @@ import { valueSortGroups, getValueSortLabel } from "./valuesSortOptions";
 import { trackFilterSortEvent } from "@/utils/umami";
 
 interface ValuesSearchControlsProps {
-  searchTerm: string;
-  setSearchTerm: (term: string) => void;
+  onDebouncedSearchChange: (term: string) => void;
+  clearTrigger: number;
   filterSort: FilterSort;
   setFilterSort: (sort: FilterSort) => void;
   valueSort: ValueSort;
@@ -40,8 +41,8 @@ interface ValuesSearchControlsProps {
 }
 
 export default function ValuesSearchControls({
-  searchTerm,
-  setSearchTerm,
+  onDebouncedSearchChange,
+  clearTrigger,
   filterSort,
   setFilterSort,
   valueSort,
@@ -56,6 +57,16 @@ export default function ValuesSearchControls({
   const isAuthenticated = useIsAuthenticated();
   const [isSearchHighlighted, setIsSearchHighlighted] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const debouncedSearchTerm = useDebounce(searchTerm, 300);
+
+  useEffect(() => {
+    onDebouncedSearchChange(debouncedSearchTerm);
+  }, [debouncedSearchTerm, onDebouncedSearchChange]);
+
+  useEffect(() => {
+    if (clearTrigger > 0) setSearchTerm("");
+  }, [clearTrigger]);
 
   // Local state for the slider visual position to ensure 60fps movement
   const [localRange, setLocalRange] = useState(rangeValue);
