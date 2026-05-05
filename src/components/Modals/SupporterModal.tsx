@@ -173,7 +173,7 @@ export default function SupporterModal({
             </DialogTitle>
             <DialogDescription className="text-secondary-text mt-1 text-sm">
               Upgrade your supporter tier to unlock this feature.
-              <span className="mt-1 block text-xs italic opacity-70">
+              <span className="text-link mt-1 block text-xs">
                 One-time purchase • Non-refundable • Keep perks forever
               </span>
             </DialogDescription>
@@ -181,7 +181,7 @@ export default function SupporterModal({
         </DialogHeader>
 
         <div
-          className="max-h-[60vh] overflow-y-auto px-6 pt-4 pb-6 sm:max-h-[75vh]"
+          className="max-h-[60vh] overflow-y-auto px-6 pt-4 pb-4 sm:max-h-[75vh]"
           style={{
             scrollbarWidth: "thin",
             scrollbarColor: "var(--color-border-primary) transparent",
@@ -200,7 +200,7 @@ export default function SupporterModal({
           </div>
 
           {/* Supporter Tiers */}
-          <div className="mb-6">
+          <div>
             <h3 className="text-primary-text mb-4 text-lg font-semibold">
               Recommended Supporter Tier
             </h3>
@@ -333,19 +333,19 @@ export default function SupporterModal({
               })()}
             </div>
           </div>
-
-          {/* Action Buttons */}
-          <DialogFooter className="mt-4 gap-2 px-6 pt-2 pb-6">
-            <DialogClose asChild>
-              <Button variant="ghost" size="sm">
-                Maybe Later
-              </Button>
-            </DialogClose>
-            <Button asChild size="sm">
-              <Link href="/supporting">View All Supporter Benefits</Link>
-            </Button>
-          </DialogFooter>
         </div>
+
+        {/* Action Buttons */}
+        <DialogFooter className="gap-2 px-6 pt-2 pb-6">
+          <DialogClose asChild>
+            <Button variant="ghost" size="sm">
+              Maybe Later
+            </Button>
+          </DialogClose>
+          <Button asChild size="sm">
+            <Link href="/supporting">View All Supporter Benefits</Link>
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
