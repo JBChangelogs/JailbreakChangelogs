@@ -97,13 +97,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "daily" as const,
     },
     {
-      url: `${BASE_URL}/calculators`,
-      lastModified: new Date().toISOString(),
-      priority: 0.8,
-      changeFrequency: "monthly" as const,
-    },
-    {
-      url: `${BASE_URL}/calculators/hyperchrome-pity`,
+      url: `${BASE_URL}/hyperchrome-pity`,
       lastModified: new Date().toISOString(),
       priority: 0.7,
       changeFrequency: "monthly" as const,

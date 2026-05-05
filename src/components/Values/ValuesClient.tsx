@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useRef, useMemo } from "react";
 import { use } from "react";
-import { useRouter } from "next/navigation";
 import { Icon } from "@/components/ui/IconWrapper";
 import { Item, FilterSort, FavoriteItem } from "@/types";
 import { sortAndFilterItems, parseCashValue } from "@/utils/values";
@@ -20,7 +19,6 @@ import { valueSortOptions } from "./valuesSortOptions";
 import NitroValuesVideoPlayer from "@/components/Ads/NitroValuesVideoPlayer";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { toast } from "sonner";
 
 interface ValuesClientProps {
   itemsPromise: Promise<Item[]>;
@@ -31,7 +29,6 @@ export default function ValuesClient({
   itemsPromise,
   lastUpdatedPromise,
 }: ValuesClientProps) {
-  const router = useRouter();
   const { user } = useAuthContext();
 
   const items = use(itemsPromise);
@@ -126,13 +123,6 @@ export default function ValuesClient({
   }, [user]);
 
   useEffect(() => {
-    if (window.location.hash !== "#hyper-pity-calc") return;
-
-    toast.message("Hyperchrome Pity Calculator moved to /calculators.");
-    router.replace("/calculators/hyperchrome-pity");
-  }, [router]);
-
-  useEffect(() => {
     const updateSortedItems = async () => {
       const favoritesData = favorites.map((id) => ({ item_id: String(id) }));
       const sorted = await sortAndFilterItems(
@@ -181,7 +171,7 @@ export default function ValuesClient({
                 </Link>
               </Button>
               <Button asChild>
-                <Link href="/calculators/hyperchrome-pity" prefetch={false}>
+                <Link href="/hyperchrome-pity" prefetch={false}>
                   Hyperchrome Pity Calculator
                 </Link>
               </Button>

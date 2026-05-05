@@ -144,17 +144,20 @@ const MobileNavSection = ({
   title,
   sectionIcon,
   children,
+  open,
+  onToggle,
 }: {
   title: string;
   sectionIcon: string;
   children: React.ReactNode;
+  open: boolean;
+  onToggle: () => void;
 }) => {
-  const [open, setOpen] = useState(true);
   return (
     <div>
       <button
         type="button"
-        onClick={() => setOpen((o) => !o)}
+        onClick={onToggle}
         className="hover:bg-button-info-hover/10 flex w-full items-center justify-between px-4 py-2.5 transition-colors"
       >
         <div className="flex items-center gap-2.5">
@@ -237,6 +240,9 @@ export default function Header() {
     pathname.startsWith("/values/changelogs") ||
     pathname.startsWith("/values/suggestions");
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [openNavSection, setOpenNavSection] = useState<string>("Updates");
+  const toggleNavSection = (title: string) =>
+    setOpenNavSection((prev) => (prev === title ? "" : title));
   const [utmModalOpen, setUtmModalOpen] = useState(false);
   const [notificationMenuOpen, setNotificationMenuOpen] = useState(false);
   const [notificationTab, setNotificationTab] = useState<"history" | "unread">(
@@ -473,43 +479,6 @@ export default function Header() {
     }
   };
 
-  const prevMobileSheetOpenRef = useRef(false);
-  useEffect(() => {
-    if (typeof window === "undefined" || typeof document === "undefined")
-      return;
-    if (prevMobileSheetOpenRef.current === mobileOpen) return;
-    prevMobileSheetOpenRef.current = mobileOpen;
-
-    const w = window as Window & { __jbMobileSheetOpenCount?: number };
-    const current = w.__jbMobileSheetOpenCount ?? 0;
-    const next = mobileOpen ? current + 1 : Math.max(0, current - 1);
-    w.__jbMobileSheetOpenCount = next;
-
-    if (next > 0) {
-      document.body.dataset.mobileSheetOpen = "true";
-    } else {
-      delete document.body.dataset.mobileSheetOpen;
-    }
-    window.dispatchEvent(new Event("jb-sheet-toggle"));
-
-    return () => {
-      if (!prevMobileSheetOpenRef.current) return;
-      prevMobileSheetOpenRef.current = false;
-
-      const w = window as Window & { __jbMobileSheetOpenCount?: number };
-      const current = w.__jbMobileSheetOpenCount ?? 0;
-      const next = Math.max(0, current - 1);
-      w.__jbMobileSheetOpenCount = next;
-
-      if (next > 0) {
-        document.body.dataset.mobileSheetOpen = "true";
-      } else {
-        delete document.body.dataset.mobileSheetOpen;
-      }
-      window.dispatchEvent(new Event("jb-sheet-toggle"));
-    };
-  }, [mobileOpen]);
-
   const handleDrawerToggle = () => {
     setMobileOpen((prev) => !prev);
   };
@@ -638,6 +607,8 @@ export default function Header() {
         <MobileNavSection
           title="Updates"
           sectionIcon="material-symbols:article-rounded"
+          open={openNavSection === "Updates"}
+          onToggle={() => toggleNavSection("Updates")}
         >
           <MobileNavItem
             href="/changelogs"
@@ -662,6 +633,8 @@ export default function Header() {
         <MobileNavSection
           title="Seasons"
           sectionIcon="material-symbols:layers-rounded"
+          open={openNavSection === "Seasons"}
+          onToggle={() => toggleNavSection("Seasons")}
         >
           <MobileNavItem
             href="/seasons"
@@ -692,6 +665,8 @@ export default function Header() {
         <MobileNavSection
           title="Trading"
           sectionIcon="material-symbols:price-check-rounded"
+          open={openNavSection === "Trading"}
+          onToggle={() => toggleNavSection("Trading")}
         >
           <MobileNavItem
             href="/values"
@@ -736,7 +711,7 @@ export default function Header() {
             onClick={handleDrawerToggle}
           />
           <MobileNavItem
-            href="/calculators/hyperchrome-pity"
+            href="/hyperchrome-pity"
             icon="material-symbols:percent-rounded"
             label="Hyperchrome Pity"
             onClick={handleDrawerToggle}
@@ -746,6 +721,8 @@ export default function Header() {
         <MobileNavSection
           title="Community"
           sectionIcon="material-symbols:groups-rounded"
+          open={openNavSection === "Community"}
+          onToggle={() => toggleNavSection("Community")}
         >
           <MobileNavItem
             href="/users"

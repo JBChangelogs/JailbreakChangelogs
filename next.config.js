@@ -70,6 +70,15 @@ const nextConfig = {
       },
     ],
   },
+  async redirects() {
+    return [
+      {
+        source: "/calculators/hyperchrome-pity",
+        destination: "/hyperchrome-pity",
+        permanent: true,
+      },
+    ];
+  },
   async rewrites() {
     return [
       {

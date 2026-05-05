@@ -1,8 +1,7 @@
 "use client";
 
 import { canHideAdsForPremiumType } from "@/utils/supporterAccess";
-import { useEffect, useMemo, useRef, useSyncExternalStore } from "react";
-import { useMediaQuery } from "@mui/material";
+import { useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { removeAdReference } from "@/utils/nitroAds";
@@ -14,60 +13,10 @@ type NitroAdsWithRemove = {
   removeAd?: (id: string) => void;
 };
 
-function useMobileSheetOpen() {
-  return useSyncExternalStore(
-    (onStoreChange) => {
-      if (typeof window === "undefined") {
-        return () => {};
-      }
-      const handler = () => onStoreChange();
-      window.addEventListener("jb-sheet-toggle", handler);
-      return () => {
-        window.removeEventListener("jb-sheet-toggle", handler);
-      };
-    },
-    () =>
-      typeof document === "undefined"
-        ? ""
-        : (document.body?.dataset.mobileSheetOpen ?? ""),
-    () => "",
-  );
-}
-
-function useItemSheetOpen() {
-  return useSyncExternalStore(
-    (onStoreChange) => {
-      if (typeof window === "undefined") {
-        return () => {};
-      }
-      const handler = () => onStoreChange();
-      window.addEventListener("jb-sheet-toggle", handler);
-      return () => {
-        window.removeEventListener("jb-sheet-toggle", handler);
-      };
-    },
-    () =>
-      typeof document === "undefined"
-        ? ""
-        : (document.body?.dataset.itemSheetOpen ?? ""),
-    () => "",
-  );
-}
-
 export default function NitroVideoPlayer() {
   const { user, isLoading } = useAuthContext();
   const pathname = usePathname();
   const createdRef = useRef(false);
-  const isSheetScreen = useMediaQuery("(max-width: 1024px)");
-  const mobileSheetState = useMobileSheetOpen();
-  const itemSheetState = useItemSheetOpen();
-  const isMobileSheetOpen = mobileSheetState === "true";
-  const isItemSheetOpen = itemSheetState === "true";
-
-  const disableFloatingPlayer = useMemo(
-    () => isItemSheetOpen || (isSheetScreen && isMobileSheetOpen),
-    [isItemSheetOpen, isSheetScreen, isMobileSheetOpen],
-  );
 
   useEffect(() => {
     const tier = user?.premiumtype ?? 0;
@@ -79,7 +28,7 @@ export default function NitroVideoPlayer() {
       pathname === "/values/calculator";
 
     const shouldSuppressFloatingPlayer =
-      isSupporter || hasDedicatedVideoNcPlayer || disableFloatingPlayer;
+      isSupporter || hasDedicatedVideoNcPlayer;
 
     const removeFloatingPlayer = () => {
       const el = document.getElementById(VIDEO_PLAYER_ID);
@@ -147,7 +96,7 @@ export default function NitroVideoPlayer() {
     ).catch(() => {
       createdRef.current = false;
     });
-  }, [user?.premiumtype, isLoading, pathname, disableFloatingPlayer]);
+  }, [user?.premiumtype, isLoading, pathname]);
 
   return null;
 }
