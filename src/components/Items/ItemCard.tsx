@@ -262,7 +262,7 @@ export default function ItemCard({
     if (timestamp === null) return "Never";
     return relativeTime;
   };
-  const itemUrl = `/item/${item.type.toLowerCase()}/${item.name}`;
+  const itemUrl = `/item/${encodeURIComponent(item.type)}/${encodeURIComponent(item.name)}`;
   const demandLabel =
     currentItemData.demand === "N/A" ? "Unknown" : currentItemData.demand;
   const trendLabel =

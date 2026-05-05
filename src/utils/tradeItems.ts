@@ -35,9 +35,9 @@ export const canUseTradeItemDetailLink = (item: TradeItemLike): boolean => {
 
 export const getTradeItemDetailHref = (item: TradeItemLike): string | null => {
   if (!canUseTradeItemDetailLink(item)) return null;
-  const type = normalizeString(item.type).toLowerCase();
+  const type = normalizeString(item.type);
   const name = normalizeString(item.base_name) || normalizeString(item.name);
-  return `/item/${type}/${name}`;
+  return `/item/${encodeURIComponent(type)}/${encodeURIComponent(name)}`;
 };
 
 export const getTradeItemImagePath = (

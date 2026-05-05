@@ -30,7 +30,7 @@ export default function ItemActionModal({
     // Navigate to item page - we'll need to construct the URL based on item data
     // For now, we'll use a generic approach
     router.push(
-      `/item/${encodeURIComponent(item.categoryTitle?.toLowerCase() || "unknown")}/${encodeURIComponent(item.title)}`,
+      `/item/${encodeURIComponent(item.categoryTitle || "unknown")}/${encodeURIComponent(item.title)}`,
     );
   };
 

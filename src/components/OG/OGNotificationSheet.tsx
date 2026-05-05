@@ -571,7 +571,7 @@ export default function OGNotificationSheet({
   function renderItemCard(item: PartialItem) {
     const isNotified = notifiedItemIds.includes(String(item.id));
     const isProcessing = processingItemId === item.id;
-    const itemUrl = `/item/${item.type.toLowerCase()}/${item.name}`;
+    const itemUrl = `/item/${encodeURIComponent(item.type)}/${encodeURIComponent(item.name)}`;
     const categoryIcon = getCategoryIcon(item.type);
 
     return (

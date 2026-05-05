@@ -192,7 +192,7 @@ export const TotalSimilarItems: React.FC<TotalSimilarItemsProps> = ({
             return (
               <Link
                 key={`${item.id}`}
-                href={`/item/${item.type.toLowerCase()}/${item.name}`}
+                href={`/item/${encodeURIComponent(item.type)}/${encodeURIComponent(item.name)}`}
                 prefetch={false}
                 className="group"
               >

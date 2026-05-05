@@ -968,7 +968,7 @@ export default function InventoryBreakdown({
                                 {idx + 1}.
                               </span>
                               <Link
-                                href={`/item/${encodeURIComponent(item.type.toLowerCase())}/${encodeURIComponent(item.name)}`}
+                                href={`/item/${encodeURIComponent(item.type)}/${encodeURIComponent(item.name)}`}
                                 prefetch={false}
                                 className="text-primary-text hover:text-link min-w-0 flex-1 truncate text-sm font-semibold transition-colors"
                               >
@@ -1139,7 +1139,7 @@ export default function InventoryBreakdown({
                                   {idx + 1}.
                                 </span>
                                 <Link
-                                  href={`/item/${encodeURIComponent(item.type.toLowerCase())}/${encodeURIComponent(item.name)}`}
+                                  href={`/item/${encodeURIComponent(item.type)}/${encodeURIComponent(item.name)}`}
                                   prefetch={false}
                                   className="text-primary-text hover:text-link min-w-0 flex-1 truncate text-sm font-semibold transition-colors"
                                 >
@@ -1639,7 +1639,7 @@ export default function InventoryBreakdown({
                                 {idx + 1}.
                               </span>
                               <Link
-                                href={`/item/${encodeURIComponent(item.type.toLowerCase())}/${encodeURIComponent(item.name)}`}
+                                href={`/item/${encodeURIComponent(item.type)}/${encodeURIComponent(item.name)}`}
                                 prefetch={false}
                                 className="text-primary-text hover:text-link min-w-0 flex-1 truncate text-sm font-semibold transition-colors"
                               >

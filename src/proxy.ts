@@ -64,7 +64,7 @@ function isNumericId(segment: string) {
 }
 
 function toCanonicalItemPath(itemType: string, itemName: string) {
-  return `/item/${encodeURIComponent(itemType.toLowerCase())}/${encodeURIComponent(itemName)}`;
+  return `/item/${encodeURIComponent(itemType)}/${encodeURIComponent(itemName)}`;
 }
 
 function isAllowedWithoutTesterRole(request: NextRequest): boolean {

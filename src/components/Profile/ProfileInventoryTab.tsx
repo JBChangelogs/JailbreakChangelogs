@@ -614,7 +614,7 @@ export default function ProfileInventoryTab({
             {displayedItems.map((item) => {
               const categoryColor = getCategoryColor(item.type);
               const categoryIcon = getCategoryIcon(item.type);
-              const itemHref = `/item/${encodeURIComponent(item.type.toLowerCase())}/${encodeURIComponent(item.name)}`;
+              const itemHref = `/item/${encodeURIComponent(item.type)}/${encodeURIComponent(item.name)}`;
 
               const imgSrc = getItemImagePath(item.type, item.name, true);
               const isVideo = isVideoItem(item.name);
