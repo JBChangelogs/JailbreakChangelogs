@@ -100,8 +100,18 @@ export default async function RootLayout({
 
   if (isMaintenanceMode) {
     return (
-      <html lang="en" className={`${GeistSans.variable} ${GeistMono.variable}`}>
+      <html
+        lang="en"
+        className={`${GeistSans.variable} ${GeistMono.variable}`}
+        suppressHydrationWarning
+      >
         <head>
+          {/* Apply saved theme class before React hydrates to prevent FOUC */}
+          <script
+            dangerouslySetInnerHTML={{
+              __html: `(function(){try{var t=localStorage.getItem('theme');if(t==='light'||t==='dark'){document.documentElement.classList.add(t);}}catch(e){}})();`,
+            }}
+          />
           {/* Umami Analytics */}
           {umamiWebsiteId ? (
             <Script
@@ -235,8 +245,18 @@ export default async function RootLayout({
   }
 
   return (
-    <html lang="en" className={`${GeistSans.variable} ${GeistMono.variable}`}>
+    <html
+      lang="en"
+      className={`${GeistSans.variable} ${GeistMono.variable}`}
+      suppressHydrationWarning
+    >
       <head>
+        {/* Apply saved theme class before React hydrates to prevent FOUC */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var t=localStorage.getItem('theme');if(t==='light'||t==='dark'){document.documentElement.classList.add(t);}}catch(e){}})();`,
+          }}
+        />
         {/* Preconnect to external asset domains */}
         <link rel="preconnect" href="https://assets.jailbreakchangelogs.com" />
         <link

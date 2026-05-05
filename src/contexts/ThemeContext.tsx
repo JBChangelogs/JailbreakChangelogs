@@ -49,8 +49,15 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     return "dark";
   };
 
-  const [theme, setTheme] = useState<Theme>(getInitialTheme);
+  // Always start with "dark" to match the server render and avoid hydration
+  // mismatches. The actual theme is read from localStorage in useEffect below.
+  const [theme, setTheme] = useState<Theme>("dark");
   const resolvedTheme = theme;
+
+  useEffect(() => {
+    const savedTheme = getInitialTheme();
+    setTheme(savedTheme);
+  }, []);
 
   useEffect(() => {
     const root = document.documentElement;
