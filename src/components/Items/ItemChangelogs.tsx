@@ -346,7 +346,7 @@ export default function ItemChangelogs({
 
   if (changes.length === 0) {
     return (
-      <div className="bg-secondary-bg rounded-lg p-8 text-center">
+      <div className="border-border-card bg-secondary-bg rounded-lg border p-8 text-center">
         <div className="border-button-info/30 bg-button-info/20 mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full border">
           <svg
             className="text-button-info h-8 w-8"

@@ -20,6 +20,7 @@ interface ValuesItemsGridProps {
   MAX_VALUE_RANGE: number;
   onResetValueRange: () => void;
   onClearAllFilters: () => void;
+  onClearCategoryFilter: () => void;
   filterSort: string;
   valueSort: string;
   debouncedSearchTerm: string;
@@ -34,6 +35,7 @@ export default function ValuesItemsGrid({
   MAX_VALUE_RANGE,
   onResetValueRange,
   onClearAllFilters,
+  onClearCategoryFilter,
   filterSort,
   valueSort,
   debouncedSearchTerm,
@@ -93,6 +95,8 @@ export default function ValuesItemsGrid({
     (page - 1) * itemsPerPage,
     page * itemsPerPage,
   );
+
+  const hasCategoryActive = filterSort !== "name-all-items";
 
   const handlePageChange = (
     event: React.ChangeEvent<unknown>,
@@ -239,6 +243,11 @@ export default function ValuesItemsGrid({
               {rangeFilteredItems.length === 0 && items.length > 0 && (
                 <Button onClick={onResetValueRange} variant="default">
                   Reset Value Range
+                </Button>
+              )}
+              {debouncedSearchTerm && hasCategoryActive && (
+                <Button onClick={onClearCategoryFilter} variant="secondary">
+                  Search All Categories
                 </Button>
               )}
               <Button onClick={onClearAllFilters} variant="default">

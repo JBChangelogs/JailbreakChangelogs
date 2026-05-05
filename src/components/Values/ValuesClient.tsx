@@ -256,6 +256,7 @@ export default function ValuesClient({
               setAppliedMinValue(0);
               setAppliedMaxValue(DYNAMIC_MAX_VALUE);
             }}
+            onClearCategoryFilter={() => setFilterSort("name-all-items")}
             filterSort={filterSort}
             valueSort={valueSort}
             debouncedSearchTerm={debouncedSearchTerm}

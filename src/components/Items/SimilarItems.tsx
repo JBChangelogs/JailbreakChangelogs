@@ -376,7 +376,7 @@ const SimilarItems = ({
           ))}
         </div>
       ) : similarItems.length === 0 ? (
-        <div className="bg-secondary-bg rounded-lg p-8 text-center">
+        <div className="border-border-card bg-secondary-bg rounded-lg border p-8 text-center">
           <div className="border-button-info/30 bg-button-info/20 mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full border">
             <Icon
               icon="heroicons-outline:sparkles"

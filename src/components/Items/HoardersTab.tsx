@@ -84,7 +84,7 @@ export default function HoardersTab({ itemName, itemType }: HoardersTabProps) {
   // Loading state
   if (isLoadingHoarders) {
     return (
-      <div className="bg-secondary-bg rounded-lg p-8 text-center">
+      <div className="border-border-card bg-secondary-bg rounded-lg border p-8 text-center">
         <div className="text-secondary-text animate-pulse text-lg font-semibold">
           Loading hoarders...
         </div>
@@ -95,7 +95,7 @@ export default function HoardersTab({ itemName, itemType }: HoardersTabProps) {
   // Error state
   if (hoardersError) {
     return (
-      <div className="bg-secondary-bg rounded-lg p-8 text-center">
+      <div className="border-border-card bg-secondary-bg rounded-lg border p-8 text-center">
         <h3 className="text-primary-text mb-2 text-xl font-semibold">
           Error Loading Hoarders
         </h3>
@@ -109,7 +109,7 @@ export default function HoardersTab({ itemName, itemType }: HoardersTabProps) {
   // Empty state (no hoarders)
   if (hoarders.length === 0) {
     return (
-      <div className="bg-secondary-bg rounded-lg p-8 text-center">
+      <div className="border-border-card bg-secondary-bg rounded-lg border p-8 text-center">
         <div className="border-button-info/30 bg-button-info/20 mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full border">
           <svg
             className="text-button-info h-8 w-8"
@@ -183,7 +183,7 @@ export default function HoardersTab({ itemName, itemType }: HoardersTabProps) {
 
       {/* Empty State for Search */}
       {filteredHoarders.length === 0 && searchTerm.trim() && (
-        <div className="bg-secondary-bg rounded-lg p-8 text-center">
+        <div className="border-border-card bg-secondary-bg rounded-lg border p-8 text-center">
           <div className="border-button-info/30 bg-button-info/20 mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full border">
             <Icon
               icon="heroicons:magnifying-glass"
