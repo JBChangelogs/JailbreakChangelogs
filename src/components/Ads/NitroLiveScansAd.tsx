@@ -99,7 +99,9 @@ export default function NitroLiveScansAd({ className }: Props) {
       }
     };
 
-    if (isLoading || isSupporter) {
+    if (isLoading) return;
+
+    if (isSupporter) {
       clearContainers();
       createdRef.current = false;
       return;

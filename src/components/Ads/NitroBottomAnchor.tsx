@@ -47,7 +47,9 @@ export default function NitroBottomAnchor() {
     const tier = user?.premiumtype ?? 0;
     const isSupporter = canHideAdsForPremiumType(tier);
 
-    if (isLoading || disableAnchor || isAccessDeniedRoute) {
+    if (isLoading) return;
+
+    if (disableAnchor || isAccessDeniedRoute) {
       const el = document.getElementById(ANCHOR_ID);
       if (el) {
         el.remove();
@@ -68,7 +70,9 @@ export default function NitroBottomAnchor() {
       removeAd();
 
       const observer = new MutationObserver(() => {
-        removeAd();
+        if (document.getElementById(ANCHOR_ID)) {
+          removeAd();
+        }
       });
 
       observer.observe(document.body, {

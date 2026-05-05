@@ -32,6 +32,8 @@ export default function RobberyTrackerAuthWrapper({
   const { isAuthenticated, isLoading, setShowLoginModal } = useAuthContext();
   const router = useRouter();
   const hasRedirected = useRef(false);
+  const hasAuthenticated = useRef(false);
+  if (isAuthenticated) hasAuthenticated.current = true;
 
   useEffect(() => {
     // If auth is not required, do nothing
@@ -66,8 +68,9 @@ export default function RobberyTrackerAuthWrapper({
     return <>{children}</>;
   }
 
-  // Show loading while auth is being checked
-  if (isLoading) {
+  // Show loading while auth is being checked, but only if children have never been shown.
+  // This prevents unmounting children (and their ads) on subsequent loading flips.
+  if (isLoading && !hasAuthenticated.current) {
     return (
       <div className="container mx-auto flex min-h-screen items-center justify-center px-4 py-8">
         <div className="text-center">

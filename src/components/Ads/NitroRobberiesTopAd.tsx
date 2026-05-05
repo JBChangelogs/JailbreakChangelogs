@@ -27,6 +27,8 @@ export default function NitroRobberiesTopAd({ className }: Props) {
   const { user, isLoading } = useAuthContext();
   const containerRef = useRef<HTMLDivElement | null>(null);
   const createdRef = useRef(false);
+  const isLoadingRef = useRef(isLoading);
+  isLoadingRef.current = isLoading;
   const tier = user?.premiumtype ?? 0;
   // Tier 1 (Supporter) still sees ads, Tier 2 & 3 (Server Booster & Partner) do not
   const isSupporter = canHideAdsForPremiumType(tier);
@@ -38,7 +40,9 @@ export default function NitroRobberiesTopAd({ className }: Props) {
       }
     };
 
-    if (isLoading || isSupporter) {
+    if (isLoadingRef.current) return;
+
+    if (isSupporter) {
       clearContainer();
       createdRef.current = false;
       return;
@@ -69,9 +73,9 @@ export default function NitroRobberiesTopAd({ className }: Props) {
       clearContainer();
       createdRef.current = false;
     };
-  }, [isLoading, isSupporter]);
+  }, [isSupporter]);
 
-  if (isLoading || isSupporter) {
+  if (isSupporter) {
     return null;
   }
 

@@ -18,8 +18,9 @@ export default function NitroGridAd({ adId, className }: NitroGridAdProps) {
   const isSupporter = canHideAdsForPremiumType(tier);
 
   useEffect(() => {
-    if (isLoading || isSupporter) {
-      // If user becomes supporter, remove ad if it exists
+    if (isLoading) return;
+
+    if (isSupporter) {
       const el = document.getElementById(adId);
       if (el) el.remove();
       return;

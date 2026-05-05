@@ -38,7 +38,9 @@ export default function NitroCalculatorAd({ className }: Props) {
       }
     };
 
-    if (isLoading || isSupporter) {
+    if (isLoading) return;
+
+    if (isSupporter) {
       clearContainer();
       createdRef.current = false;
       return;

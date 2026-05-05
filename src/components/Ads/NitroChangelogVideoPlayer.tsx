@@ -45,7 +45,9 @@ export default function NitroChangelogVideoPlayer({ className }: Props) {
       }
     };
 
-    if (isLoading || isSupporter) {
+    if (isLoading) return;
+
+    if (isSupporter) {
       clearContainer();
       createdRef.current = false;
       return;

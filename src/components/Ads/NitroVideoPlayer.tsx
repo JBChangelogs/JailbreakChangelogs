@@ -79,10 +79,7 @@ export default function NitroVideoPlayer() {
       pathname === "/values/calculator";
 
     const shouldSuppressFloatingPlayer =
-      isLoading ||
-      isSupporter ||
-      hasDedicatedVideoNcPlayer ||
-      disableFloatingPlayer;
+      isSupporter || hasDedicatedVideoNcPlayer || disableFloatingPlayer;
 
     const removeFloatingPlayer = () => {
       const el = document.getElementById(VIDEO_PLAYER_ID);
@@ -101,27 +98,25 @@ export default function NitroVideoPlayer() {
 
     if (typeof window === "undefined") return;
 
+    // While auth is resolving, don't create the ad yet but don't destroy it either.
+    if (isLoading) return;
+
     if (shouldSuppressFloatingPlayer) {
-      // Ensure floating player is completely removed on disallowed pages
-      // and for supporters, and keep removing it if Nitro tries to
-      // recreate it while on these routes.
       removeFloatingPlayer();
 
       const observer = new MutationObserver(() => {
-        removeFloatingPlayer();
+        if (document.getElementById(VIDEO_PLAYER_ID)) {
+          removeFloatingPlayer();
+        }
       });
 
       observer.observe(document.body, {
         childList: true,
         subtree: true,
-        attributes: true,
       });
-
-      const interval = window.setInterval(removeFloatingPlayer, 250);
 
       return () => {
         observer.disconnect();
-        window.clearInterval(interval);
       };
     }
 
