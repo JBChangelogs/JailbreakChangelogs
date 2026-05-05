@@ -573,7 +573,7 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
                             <div className="flex grow flex-col p-2">
                               <div className="space-y-1.5">
                                 <Link
-                                  href={`/item/${encodeURIComponent(item.type.toLowerCase())}/${encodeURIComponent(item.name)}`}
+                                  href={`/item/${encodeURIComponent(item.type)}/${encodeURIComponent(item.name)}`}
                                   prefetch={false}
                                   className="text-primary-text hover:text-link max-w-full cursor-pointer text-sm font-semibold transition-colors"
                                   onClick={(e) => {

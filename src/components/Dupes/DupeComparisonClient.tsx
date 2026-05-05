@@ -325,7 +325,7 @@ export default function DupeComparisonClient({
           </div>
           <div className="flex-1">
             <Link
-              href={`/item/${duplicateItem.categoryTitle}/${duplicateItem.title}`}
+              href={`/item/${encodeURIComponent(duplicateItem.categoryTitle)}/${encodeURIComponent(duplicateItem.title)}`}
               className="group mb-3 inline-flex items-center justify-center gap-3 transition-opacity md:justify-start"
             >
               <h2 className="text-primary-text group-hover:text-link-hover text-3xl font-bold transition-colors">

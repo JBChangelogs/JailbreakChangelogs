@@ -409,7 +409,7 @@ const SimilarItems = ({
           {similarItems.map((item) => (
             <Link
               key={item.id}
-              href={`/item/${item.type.toLowerCase()}/${item.name}`}
+              href={`/item/${encodeURIComponent(item.type)}/${encodeURIComponent(item.name)}`}
               className="group block"
               prefetch={false}
             >

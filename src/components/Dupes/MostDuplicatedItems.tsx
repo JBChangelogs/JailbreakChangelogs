@@ -45,7 +45,7 @@ export default function MostDuplicatedItems({
                     </span>
                     <div className="flex min-w-0 flex-col gap-1">
                       <Link
-                        href={`/item/${encodeURIComponent(item.type.toLowerCase())}/${encodeURIComponent(item.name)}`}
+                        href={`/item/${encodeURIComponent(item.type)}/${encodeURIComponent(item.name)}`}
                         prefetch={false}
                         className="text-primary-text hover:text-link truncate text-sm font-semibold transition-colors"
                       >

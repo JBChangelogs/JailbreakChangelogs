@@ -650,7 +650,7 @@ export default function DuplicatesTab({
                           </span>
                           <div className="flex min-w-0 flex-col gap-1">
                             <Link
-                              href={`/item/${encodeURIComponent(item.category.toLowerCase())}/${encodeURIComponent(item.title)}`}
+                              href={`/item/${encodeURIComponent(item.category)}/${encodeURIComponent(item.title)}`}
                               prefetch={false}
                               className="text-primary-text hover:text-link truncate text-sm font-semibold transition-colors"
                             >

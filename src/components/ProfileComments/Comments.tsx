@@ -268,7 +268,7 @@ export default function Comment({
               ? `/trading/ad/${item_id}`
               : item_type.toLowerCase() === "inventory"
                 ? `/inventories/${item_id}`
-                : `/item/${item_type.toLowerCase()}/${itemDetails?.name}`
+                : `/item/${encodeURIComponent(item_type)}/${encodeURIComponent(itemDetails?.name || "")}`
       }
       prefetch={false}
       className="group block"

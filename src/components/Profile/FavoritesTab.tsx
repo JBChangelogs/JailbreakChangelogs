@@ -159,7 +159,7 @@ export default function FavoritesTab({
       imageName = itemData.data.name;
       // Create URL for sub-item
       const baseName = itemData.data.name;
-      itemUrl = `/item/${itemType.toLowerCase()}/${baseName}?variant=${itemData.sub_name}`;
+      itemUrl = `/item/${encodeURIComponent(itemType)}/${encodeURIComponent(baseName)}?variant=${itemData.sub_name}`;
     } else {
       // For regular items, use the details.item data
       const itemData = favorite.details?.item;
@@ -180,7 +180,7 @@ export default function FavoritesTab({
         imageName = itemName;
         // Create URL for regular item
         const baseName = itemName;
-        itemUrl = `/item/${itemType.toLowerCase()}/${baseName}`;
+        itemUrl = `/item/${encodeURIComponent(itemType)}/${encodeURIComponent(baseName)}`;
       }
     }
 

@@ -419,8 +419,7 @@ export default function ItemDetailsClient({
                 <p className="text-secondary-text mb-3 text-sm leading-relaxed">
                   Jailbreak Changelogs has partnered with Trading Core to build
                   our value list through community engagement. Share your
-                  insights about this {currentItem.type.toLowerCase()} -{" "}
-                  {currentItem.name}.
+                  insights about this {currentItem.type} - {currentItem.name}.
                 </p>
                 <Button asChild className="gap-2">
                   <a

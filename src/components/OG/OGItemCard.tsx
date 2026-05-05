@@ -129,7 +129,7 @@ export default function OGItemCard({
           className={`${bangers.className} text-primary-text mb-1 text-2xl tracking-wide wrap-break-word`}
         >
           <Link
-            href={`/item/${encodeURIComponent(item.categoryTitle.toLowerCase())}/${encodeURIComponent(item.title)}`}
+            href={`/item/${encodeURIComponent(item.categoryTitle)}/${encodeURIComponent(item.title)}`}
             onClick={(e) => e.stopPropagation()}
             className="hover:text-link-hover transition-colors"
             prefetch={false}

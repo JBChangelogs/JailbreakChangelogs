@@ -110,7 +110,6 @@ async function generateFAQJsonLd(
 async function generateBreadcrumbJsonLd(
   item: ItemDetails | null,
   itemType: string,
-  itemName: string,
 ): Promise<string | null> {
   if (!item) return null;
 
@@ -137,7 +136,7 @@ async function generateBreadcrumbJsonLd(
       "@type": "ListItem",
       position: 4,
       name: item.name,
-      item: `https://jailbreakchangelogs.com/item/${itemType}/${itemName}`,
+      item: `https://jailbreakchangelogs.com/item/${encodeURIComponent(item.type)}/${encodeURIComponent(item.name)}`,
     },
   ];
 
@@ -160,8 +159,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   try {
     const { type, name } = await params;
     const item = await fetchItem(type, name);
-    const itemName = decodeURIComponent(name);
-    const itemType = decodeURIComponent(type);
     if (!item) {
       return {
         metadataBase: new URL("https://jailbreakchangelogs.com"),
@@ -195,6 +192,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const imageUrl = getItemImagePath(item.type, item.name, false, true);
     const finalImageUrl = imageUrl || FALLBACK_IMAGE;
     const isFallbackImage = finalImageUrl === FALLBACK_IMAGE;
+
+    // Use the exact case from the database for canonical URLs
+    const canonicalPath = `/item/${encodeURIComponent(item.type)}/${encodeURIComponent(item.name)}`;
+    const fullUrl = `https://jailbreakchangelogs.com${canonicalPath}`;
+
     return {
       metadataBase: new URL("https://jailbreakchangelogs.com"),
       title: `${item.name} (${item.type})`,
@@ -203,7 +205,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
           ? `${item.description.slice(0, 155)}...`
           : `View details about ${item.name}, a ${item.type} in Jailbreak.`,
       alternates: {
-        canonical: `/item/${itemType}/${itemName}`,
+        canonical: canonicalPath,
       },
       openGraph: {
         title: `${item.name} (${item.type}) | Roblox Jailbreak`,
@@ -212,7 +214,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
             ? `${item.description.slice(0, 155)}...`
             : `View details about ${item.name}, a ${item.type} in Jailbreak.`,
         type: "website",
-        url: `https://jailbreakchangelogs.com/item/${itemType}/${itemName}`,
+        url: fullUrl,
         siteName: "Jailbreak Changelogs",
         images: [
           {
@@ -235,14 +237,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     };
   } catch {
     const { type, name } = await params;
-    const itemName = decodeURIComponent(name);
-    const itemType = decodeURIComponent(type);
     return {
       metadataBase: new URL("https://jailbreakchangelogs.com"),
       title: "Error",
       description: "An error occurred while loading the item details.",
       alternates: {
-        canonical: `/item/${itemType}/${itemName}`,
+        canonical: `/item/${type}/${name}`,
       },
       openGraph: {
         title: "Error | Jailbreak Changelogs",
@@ -279,7 +279,7 @@ export default async function ItemLayout({
   const { type, name } = await params;
   const item = await fetchItem(type, name);
   const faqJsonLdData = await generateFAQJsonLd(item);
-  const breadcrumbJsonLdData = await generateBreadcrumbJsonLd(item, type, name);
+  const breadcrumbJsonLdData = await generateBreadcrumbJsonLd(item, type);
 
   return (
     <>
