@@ -29,20 +29,6 @@ export default function HyperchromeCalculatorModal({
   onClose,
   asPage = false,
 }: HyperchromeCalculatorProps) {
-  const setMobileSheetOpen = (isOpen: boolean) => {
-    if (typeof window === "undefined") return;
-    const w = window as Window & { __jbMobileSheetOpenCount?: number };
-    const current = w.__jbMobileSheetOpenCount ?? 0;
-    const next = isOpen ? current + 1 : Math.max(0, current - 1);
-    w.__jbMobileSheetOpenCount = next;
-    if (next > 0) {
-      document.body.dataset.mobileSheetOpen = "true";
-    } else {
-      delete document.body.dataset.mobileSheetOpen;
-    }
-    window.dispatchEvent(new Event("jb-sheet-toggle"));
-  };
-
   const hyperchromeRobberyImages = [
     { name: "HyperRed", robbery: "Tomb" },
     { name: "HyperOrange", robbery: "Museum" },
@@ -195,18 +181,6 @@ export default function HyperchromeCalculatorModal({
     }
     // oxlint-disable-next-line react-hooks/exhaustive-deps
   }, [isSmallServer]);
-
-  useEffect(() => {
-    if (asPage) return;
-
-    setMobileSheetOpen(open);
-
-    return () => {
-      if (open) {
-        setMobileSheetOpen(false);
-      }
-    };
-  }, [asPage, open]);
 
   if (!mounted) {
     if (asPage) {

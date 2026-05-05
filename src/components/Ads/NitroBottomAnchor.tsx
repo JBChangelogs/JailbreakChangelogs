@@ -1,53 +1,26 @@
 "use client";
 
 import { canHideAdsForPremiumType } from "@/utils/supporterAccess";
-import { useEffect, useRef, useMemo, useSyncExternalStore } from "react";
-import { useMediaQuery } from "@mui/material";
+import { useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { registerAdInstance, removeAdReference } from "@/utils/nitroAds";
 
 const ANCHOR_ID = "np-bottom-anchor";
 
-function useMobileSheetOpen() {
-  return useSyncExternalStore(
-    (onStoreChange) => {
-      if (typeof window === "undefined") {
-        return () => {};
-      }
-      const handler = () => onStoreChange();
-      window.addEventListener("jb-sheet-toggle", handler);
-      return () => {
-        window.removeEventListener("jb-sheet-toggle", handler);
-      };
-    },
-    () =>
-      typeof document === "undefined"
-        ? ""
-        : (document.body?.dataset.mobileSheetOpen ?? ""),
-    () => "",
-  );
-}
-
 export default function NitroBottomAnchor() {
   const { user, isLoading } = useAuthContext();
   const pathname = usePathname();
   const createdRef = useRef(false);
-  const isSheetScreen = useMediaQuery("(max-width: 1024px)");
-  const mobileSheetState = useMobileSheetOpen();
-  const isMobileSheetOpen = mobileSheetState === "true";
-
-  const disableAnchor = useMemo(
-    () => isSheetScreen && isMobileSheetOpen,
-    [isSheetScreen, isMobileSheetOpen],
-  );
   const isAccessDeniedRoute = pathname === "/access-denied";
 
   useEffect(() => {
     const tier = user?.premiumtype ?? 0;
     const isSupporter = canHideAdsForPremiumType(tier);
 
-    if (isLoading || disableAnchor || isAccessDeniedRoute) {
+    if (isLoading) return;
+
+    if (isAccessDeniedRoute) {
       const el = document.getElementById(ANCHOR_ID);
       if (el) {
         el.remove();
@@ -132,7 +105,7 @@ export default function NitroBottomAnchor() {
     return () => {
       removeAdReference(ANCHOR_ID);
     };
-  }, [user?.premiumtype, isLoading, disableAnchor, isAccessDeniedRoute]);
+  }, [user?.premiumtype, isLoading, isAccessDeniedRoute]);
 
   return null;
 }

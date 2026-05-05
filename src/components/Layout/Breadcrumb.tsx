@@ -218,22 +218,6 @@ export default function Breadcrumb({
         }
       }
 
-      // Special handling for calculators route
-      if (pathSegments[0] === "calculators") {
-        if (index === 0) {
-          return {
-            label: "Calculators",
-            href: "/calculators",
-          };
-        }
-        if (index === 1 && segment === "hyperchrome-pity") {
-          return {
-            label: "Hyperchrome Pity",
-            href: "/calculators/hyperchrome-pity",
-          };
-        }
-      }
-
       // Special handling for settings route
       if (pathSegments[0] === "settings") {
         if (index === 0) {

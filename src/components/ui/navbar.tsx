@@ -806,7 +806,7 @@ export const NavbarModern = ({
                       description="Discover who holds the rarest original items"
                     />
                     <NavDropdownItem
-                      href="/calculators/hyperchrome-pity"
+                      href="/hyperchrome-pity"
                       icon="material-symbols:percent-rounded"
                       title="Hyperchrome Pity"
                       description="Calculate how many robberies you need for the next Hyperchrome level"

@@ -99,12 +99,6 @@ const platformGroups = [
         title: "Seasons & Rewards",
         description: "See season rewards, contracts, and your progress tools.",
       },
-      {
-        href: "/calculators",
-        icon: "mdi:calculator",
-        title: "Calculators",
-        description: "Use XP and progression calculators to plan ahead.",
-      },
     ],
   },
   {
