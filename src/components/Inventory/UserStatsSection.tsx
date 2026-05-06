@@ -916,6 +916,7 @@ export default function UserStatsSection({
       <ScanHistoryModal
         isOpen={isScanHistoryModalOpen}
         onClose={() => setIsScanHistoryModalOpen(false)}
+        isLoading={isLoadingScanHistory}
         initialScanHistory={scanHistory}
       />
     </div>

@@ -5,7 +5,12 @@ import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import Image from "next/image";
 
-import { Dialog, DialogContent, DialogFooter } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 
@@ -118,9 +123,9 @@ const AdBlockPrompt = () => {
           </div>
 
           {/* Title */}
-          <h2 className="text-primary-text mb-4 text-2xl font-bold">
+          <DialogTitle className="text-primary-text mb-4 text-2xl font-bold">
             We noticed you&apos;re using an ad blocker.
-          </h2>
+          </DialogTitle>
 
           {/* Message */}
           <p className="text-secondary-text text-sm leading-relaxed">
