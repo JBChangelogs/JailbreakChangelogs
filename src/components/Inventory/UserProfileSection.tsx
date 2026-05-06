@@ -9,7 +9,7 @@ import { RobloxIcon } from "@/components/Icons/RobloxIcon";
 import { DefaultAvatar } from "@/utils/avatar";
 import { VerifiedBadgeIcon } from "@/components/Icons/VerifiedBadgeIcon";
 import { useAuthContext } from "@/contexts/AuthContext";
-import { useScanWebSocket } from "@/hooks/useScanWebSocket";
+import { UseScanWebSocketReturn } from "@/hooks/useScanWebSocket";
 import { useSupporterModal } from "@/hooks/useSupporterModal";
 import SupporterModal from "@/components/Modals/SupporterModal";
 
@@ -42,6 +42,7 @@ interface UserProfileSectionProps {
   getUserAvatar: (userId: string) => string;
   getHasVerifiedBadge: (userId: string) => boolean;
   currentData: InventoryData;
+  scanWebSocket: UseScanWebSocketReturn;
 }
 
 export default function UserProfileSection({
@@ -52,10 +53,10 @@ export default function UserProfileSection({
   getUserAvatar,
   getHasVerifiedBadge,
   currentData,
+  scanWebSocket,
 }: UserProfileSectionProps) {
   const { user, isAuthenticated, setLoginModal } = useAuthContext();
   const { modalState, openModal, closeModal } = useSupporterModal();
-  const scanWebSocket = useScanWebSocket(currentData?.user_id || "");
   const scanCompletedRef = useRef(false);
 
   const [showScanModal, setShowScanModal] = useState(false);
@@ -157,6 +158,12 @@ export default function UserProfileSection({
           currentLimit: currentLimit,
           requiredLimit: "Supporter III",
         });
+      } else if (scanWebSocket.phase === "server_full") {
+        showScanErrorToast(
+          "Server Full",
+          undefined,
+          "The trade server is full. Please try again in a moment.",
+        );
       } else if (
         scanWebSocket.error &&
         scanWebSocket.error.includes("recent scan")

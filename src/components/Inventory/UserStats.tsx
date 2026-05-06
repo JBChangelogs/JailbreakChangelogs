@@ -4,7 +4,7 @@ import { useCallback, useMemo } from "react";
 import { RobloxUser, Item } from "@/types";
 import { Season } from "@/types/seasons";
 import { InventoryData, UserConnectionData } from "@/app/inventories/types";
-import { useScanWebSocket } from "@/hooks/useScanWebSocket";
+import { UseScanWebSocketReturn } from "@/hooks/useScanWebSocket";
 import UserProfileSection from "./UserProfileSection";
 import UserStatsSection from "./UserStatsSection";
 import { UserNetworthData } from "@/utils/api";
@@ -18,6 +18,7 @@ interface UserStatsProps {
   initialNetworthData?: UserNetworthData[];
   showNonOgOnly: boolean;
   setShowNonOgOnly: (val: boolean) => void;
+  scanWebSocket: UseScanWebSocketReturn;
 }
 
 export default function UserStats({
@@ -29,10 +30,8 @@ export default function UserStats({
   initialNetworthData = [],
   showNonOgOnly,
   setShowNonOgOnly,
+  scanWebSocket,
 }: UserStatsProps) {
-  // WebSocket for real-time updates
-  useScanWebSocket(initialData.user_id);
-
   // Helper functions
   const getUserDisplay = useCallback(
     (userId: string) => {
@@ -172,6 +171,7 @@ export default function UserStats({
           getUserAvatar={getUserAvatar}
           getHasVerifiedBadge={getHasVerifiedBadge}
           currentData={initialData}
+          scanWebSocket={scanWebSocket}
         />
       )}
 

@@ -23,7 +23,7 @@ interface ScanStatus {
   expiresAt?: number;
 }
 
-interface UseScanWebSocketReturn {
+export interface UseScanWebSocketReturn {
   status: ScanStatus["status"];
   phase: ScanPhase | undefined;
   message: string | undefined;
@@ -97,6 +97,10 @@ export function useScanWebSocket(userId: string): UseScanWebSocketReturn {
       );
       setStatus("error");
       setPhase("error");
+
+      if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+        wsRef.current.close();
+      }
     }, 180000); // 3 minutes
   }, [clearScanTimers]);
 
@@ -222,6 +226,12 @@ export function useScanWebSocket(userId: string): UseScanWebSocketReturn {
               setPhase("failed_not_in_server");
 
               setTimeout(() => {
+                if (
+                  wsRef.current &&
+                  wsRef.current.readyState === WebSocket.OPEN
+                ) {
+                  wsRef.current.close();
+                }
                 setStatus("idle");
                 setMessage(undefined);
                 setProgress(undefined);
@@ -237,6 +247,12 @@ export function useScanWebSocket(userId: string): UseScanWebSocketReturn {
               setProgress(undefined);
 
               setTimeout(() => {
+                if (
+                  wsRef.current &&
+                  wsRef.current.readyState === WebSocket.OPEN
+                ) {
+                  wsRef.current.close();
+                }
                 setStatus("idle");
                 setMessage(undefined);
                 setProgress(undefined);

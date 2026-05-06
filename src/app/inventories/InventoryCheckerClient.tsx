@@ -1190,6 +1190,7 @@ export default function InventoryCheckerClient({
                   initialNetworthData={networthData}
                   showNonOgOnly={showNonOgOnly}
                   setShowNonOgOnly={setShowNonOgOnly}
+                  scanWebSocket={scanWebSocket}
                 />
 
                 {/* Tabbed Interface */}
