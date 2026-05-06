@@ -97,10 +97,6 @@ export function useScanWebSocket(userId: string): UseScanWebSocketReturn {
       );
       setStatus("error");
       setPhase("error");
-
-      if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
-        wsRef.current.close();
-      }
     }, 180000); // 3 minutes
   }, [clearScanTimers]);
 
@@ -226,17 +222,26 @@ export function useScanWebSocket(userId: string): UseScanWebSocketReturn {
               setPhase("failed_not_in_server");
 
               setTimeout(() => {
-                if (
-                  wsRef.current &&
-                  wsRef.current.readyState === WebSocket.OPEN
-                ) {
-                  wsRef.current.close();
-                  setStatus("idle");
-                  setMessage(undefined);
-                  setProgress(undefined);
-                  setError(undefined);
-                }
+                setStatus("idle");
+                setMessage(undefined);
+                setProgress(undefined);
+                setError(undefined);
               }, 2000);
+            } else if (
+              data.message &&
+              data.message.toLowerCase().includes("server full")
+            ) {
+              setError("Server Full");
+              setStatus("error");
+              setPhase("server_full");
+              setProgress(undefined);
+
+              setTimeout(() => {
+                setStatus("idle");
+                setMessage(undefined);
+                setProgress(undefined);
+                setError(undefined);
+              }, 5000);
             } else if (
               data.message &&
               data.message.toLowerCase().includes("user found")

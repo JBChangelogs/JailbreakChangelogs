@@ -8,6 +8,7 @@ export type ScanPhase =
   | "scanning"
   | "completed"
   | "failed_not_in_server"
+  | "server_full"
   | "error";
 
 function formatQueueMessage(message: string): string {
