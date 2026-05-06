@@ -267,6 +267,9 @@ const TradeSidePreview = ({
           <span className="border-status-error/20 bg-status-error/80 text-form-button-text inline-flex h-6 items-center rounded-lg border px-2.5 py-0.5">
             Duped: {formatTradeValue(dupedTotal)}
           </span>
+          <span className="border-border-card bg-quaternary-bg text-primary-text inline-flex h-6 items-center rounded-lg border px-2.5 py-0.5">
+            Total: {formatTradeValue(cashTotal + dupedTotal)}
+          </span>
         </div>
       )}
     </section>
