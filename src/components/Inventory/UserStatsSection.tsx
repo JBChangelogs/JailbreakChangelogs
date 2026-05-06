@@ -870,7 +870,7 @@ export default function UserStatsSection({
                   </div>
 
                   {/* View Scan History Button */}
-                  <div className="pt-2">
+                  <div>
                     <Button
                       onClick={handleOpenScanHistory}
                       disabled={isLoadingScanHistory}
