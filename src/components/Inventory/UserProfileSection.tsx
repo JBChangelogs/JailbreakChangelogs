@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { InventoryData, UserConnectionData } from "@/app/inventories/types";
@@ -10,22 +10,9 @@ import { DefaultAvatar } from "@/utils/avatar";
 import { VerifiedBadgeIcon } from "@/components/Icons/VerifiedBadgeIcon";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { UseScanWebSocketReturn } from "@/hooks/useScanWebSocket";
-import { useSupporterModal } from "@/hooks/useSupporterModal";
-import SupporterModal from "@/components/Modals/SupporterModal";
-
 import ScanInventoryModal from "@/components/Modals/ScanInventoryModal";
 import { ENABLE_WS_SCAN } from "@/utils/api";
-import {
-  showScanLoadingToast,
-  updateScanLoadingToast,
-  dismissScanLoadingToast,
-  showScanSuccessToast,
-  showScanErrorToast,
-} from "@/utils/scanToasts";
-import {
-  formatScanProgressMessage,
-  getScanActiveButtonLabel,
-} from "@/utils/scanProgressMessage";
+import { getScanActiveButtonLabel } from "@/utils/scanProgressMessage";
 import { Button } from "../ui/button";
 
 import {
@@ -57,8 +44,6 @@ export default function UserProfileSection({
   scanWebSocket,
 }: UserProfileSectionProps) {
   const { user, isAuthenticated, setLoginModal } = useAuthContext();
-  const { modalState, openModal, closeModal } = useSupporterModal();
-  const scanCompletedRef = useRef(false);
 
   const [showScanModal, setShowScanModal] = useState(false);
   const [avatarError, setAvatarError] = useState(false);
@@ -93,125 +78,6 @@ export default function UserProfileSection({
       setShowScanModal(false);
     }
   };
-
-  useEffect(() => {
-    if (scanWebSocket.status === "connecting") {
-      scanCompletedRef.current = false;
-      showScanLoadingToast("Connecting to scan service...");
-    }
-
-    if (scanWebSocket.status === "scanning" && !scanCompletedRef.current) {
-      updateScanLoadingToast(
-        formatScanProgressMessage(
-          scanWebSocket.phase,
-          scanWebSocket.message,
-          scanWebSocket.progress,
-        ),
-      );
-    }
-
-    if (
-      scanWebSocket.status === "completed" &&
-      scanWebSocket.phase === "queued" &&
-      !scanCompletedRef.current
-    ) {
-      scanCompletedRef.current = true;
-      showScanSuccessToast(
-        formatScanProgressMessage(
-          scanWebSocket.phase,
-          scanWebSocket.message,
-          scanWebSocket.progress,
-        ),
-      );
-    }
-
-    if (scanWebSocket.status === "error") {
-      scanCompletedRef.current = true;
-      if (
-        scanWebSocket.error &&
-        scanWebSocket.error.includes("No bots available")
-      ) {
-        showScanErrorToast(
-          "No scan bots are currently online. Please try again later.",
-        );
-      } else if (scanWebSocket.phase === "failed_not_in_server") {
-        showScanErrorToast(
-          "User not found in game. Please join a trade server and try again.",
-        );
-      } else if (
-        scanWebSocket.error &&
-        scanWebSocket.error.includes("high enough supporter")
-      ) {
-        showScanErrorToast("You need to be Supporter III to use this feature.");
-        const userTier = user?.premiumtype || 0;
-        const TIER_NAMES = {
-          0: "Free",
-          1: "Supporter I",
-          2: "Supporter II",
-          3: "Supporter III",
-        };
-        const currentLimit =
-          TIER_NAMES[userTier as keyof typeof TIER_NAMES] || "Unknown";
-        openModal({
-          feature: "inventory_scan",
-          currentTier: userTier,
-          requiredTier: 3,
-          currentLimit: currentLimit,
-          requiredLimit: "Supporter III",
-        });
-      } else if (scanWebSocket.phase === "server_full") {
-        showScanErrorToast(
-          "Server Full",
-          undefined,
-          "The trade server is full. Please try again in a moment.",
-        );
-      } else if (
-        scanWebSocket.error &&
-        scanWebSocket.error.includes("recent scan")
-      ) {
-        let message =
-          "You have a recent scan. Please wait before requesting another scan.";
-
-        if (scanWebSocket.expiresAt) {
-          const now = Math.floor(Date.now() / 1000);
-          const remainingSeconds = scanWebSocket.expiresAt - now;
-
-          if (remainingSeconds > 0) {
-            let timeText;
-            if (remainingSeconds < 60) {
-              timeText = `${remainingSeconds} seconds`;
-            } else if (remainingSeconds < 3600) {
-              const minutes = Math.ceil(remainingSeconds / 60);
-              timeText = `${minutes} minute${minutes !== 1 ? "s" : ""}`;
-            } else {
-              const hours = Math.floor(remainingSeconds / 3600);
-              const minutes = Math.ceil((remainingSeconds % 3600) / 60);
-              timeText = `${hours}h ${minutes}m`;
-            }
-            message = `You have a recent scan. Please wait ${timeText} before requesting another scan.`;
-          }
-        }
-
-        showScanErrorToast(message);
-      } else if (scanWebSocket.error) {
-        showScanErrorToast(scanWebSocket.error);
-      }
-    }
-
-    if (scanWebSocket.status === "idle") {
-      dismissScanLoadingToast();
-      scanCompletedRef.current = false;
-    }
-  }, [
-    scanWebSocket.message,
-    scanWebSocket.phase,
-    scanWebSocket.status,
-    scanWebSocket.error,
-    scanWebSocket.progress,
-    scanWebSocket.expiresAt,
-    openModal,
-    user?.premiumtype,
-  ]);
 
   return (
     <div className="border-border-card bg-tertiary-bg mb-6 flex flex-col gap-4 rounded-lg border p-4 xl:flex-row xl:items-start xl:justify-between">
@@ -476,17 +342,6 @@ export default function UserProfileSection({
           </div>
         </div>
       )}
-
-      {/* Supporter Modal */}
-      <SupporterModal
-        isOpen={modalState.isOpen}
-        onClose={closeModal}
-        feature={modalState.feature}
-        currentTier={modalState.currentTier || 0}
-        requiredTier={modalState.requiredTier || 1}
-        currentLimit={modalState.currentLimit}
-        requiredLimit={modalState.requiredLimit}
-      />
 
       {/* Scan Inventory Modal with Turnstile */}
       <ScanInventoryModal

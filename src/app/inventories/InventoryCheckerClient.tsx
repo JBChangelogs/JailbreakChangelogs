@@ -454,17 +454,9 @@ export default function InventoryCheckerClient({
     fetchQueuePosition();
   }, [robloxId, error, initialData, fetchQueuePosition]);
 
-  // Handle scan status updates (for error state scanning)
+  // Handle scan status updates
   useEffect(() => {
     if (!isOwnInventory) {
-      return;
-    }
-
-    if (error && initialData) {
-      return;
-    }
-
-    if (!error || initialData) {
       return;
     }
 
