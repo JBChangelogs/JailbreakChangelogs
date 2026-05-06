@@ -512,6 +512,12 @@ export default function InventoryCheckerClient({
         showScanErrorToast(
           "User not found in game. Please join a trade server and try again.",
         );
+      } else if (scanPhase === "server_full") {
+        showScanErrorToast(
+          "Server Full",
+          undefined,
+          "The trade server is full. Please try again in a moment.",
+        );
       } else if (scanError && scanError.includes("high enough supporter")) {
         showScanErrorToast("You need to be Supporter III to use this feature.");
         const tierNames = [
