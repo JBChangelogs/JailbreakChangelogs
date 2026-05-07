@@ -297,16 +297,6 @@ export function useScanWebSocket(userId: string): UseScanWebSocketReturn {
               setProgress(100);
               setStatus("completed");
               setPhase("queued");
-
-              setTimeout(() => {
-                if (wsRef.current) {
-                  wsRef.current.close();
-                  setStatus("idle");
-                  setMessage(undefined);
-                  setProgress(undefined);
-                  setError(undefined);
-                }
-              }, 5000);
             } else {
               if (data.data && data.data.position) {
                 const position = data.data.position;
