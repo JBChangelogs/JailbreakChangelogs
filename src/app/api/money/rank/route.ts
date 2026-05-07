@@ -1,4 +1,7 @@
 import { fetchUserMoneyRank } from "@/utils/api";
+import { createLogger } from "@/services/logger";
+
+const log = createLogger("API");
 
 export async function GET(request: Request) {
   try {
@@ -29,7 +32,7 @@ export async function GET(request: Request) {
       headers: { "content-type": "application/json" },
     });
   } catch (error) {
-    console.error("Error in money rank API:", error);
+    log.error("Error in money rank API:", error);
     return new Response(JSON.stringify({ error: "Internal server error" }), {
       status: 500,
       headers: { "content-type": "application/json" },

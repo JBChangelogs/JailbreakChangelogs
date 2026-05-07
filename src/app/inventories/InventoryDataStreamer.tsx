@@ -8,6 +8,9 @@ import {
   fetchUserMoneyHistory,
   MaxStreamsError,
 } from "@/utils/api";
+import { createLogger } from "@/services/logger";
+
+const log = createLogger("INVENTORY");
 import { CommentData } from "@/utils/api";
 import { UserData } from "@/types/auth";
 import InventoryCheckerClient from "./InventoryCheckerClient";
@@ -50,7 +53,7 @@ async function InventoryDataFetcher({
         usernameError = `Username "${truncatedUsername}" not found. Please check the spelling and try again.`;
       }
     } catch (error) {
-      console.error("Error fetching user by username:", error);
+      log.error("Error fetching user by username", error);
       const truncatedUsername =
         robloxId.length > 50 ? `${robloxId.substring(0, 47)}...` : robloxId;
 

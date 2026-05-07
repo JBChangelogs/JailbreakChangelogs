@@ -10,7 +10,9 @@ import {
   DupeFinderResponse,
 } from "@/types/userData";
 import { UserConnectionData } from "@/app/inventories/types";
-import { logInfo, logError } from "@/services/logger";
+import { createLogger } from "@/services/logger";
+
+const log = createLogger("INVENTORY");
 
 interface InventoryItem {
   info: Array<{ title: string; value: string }>;
@@ -65,13 +67,8 @@ export class UserDataService {
       return validUserIds;
     }
 
-    logInfo(
-      `Large dataset detected: ${validUserIds.length} unique users. Implementing fallback strategy.`,
-      {
-        component: context,
-        count: validUserIds.length,
-        action: "dataset_optimization",
-      },
+    log.info(
+      `[${context}] Large dataset: ${validUserIds.length} unique users, applying fallback strategy.`,
     );
 
     // For large datasets, we need to prioritize users
@@ -99,10 +96,7 @@ export class UserDataService {
     // Prepare fetch promises
     const fetchPromises: Promise<unknown>[] = [
       fetchRobloxUsersBatch(finalUserIds).catch((error) => {
-        logError(`Failed to fetch user data`, error, {
-          component: context,
-          action: "fetch_users",
-        });
+        log.error(`[${context}] Failed to fetch user data`, error);
         return {};
       }),
     ];
@@ -115,10 +109,10 @@ export class UserDataService {
             !(error instanceof Error) ||
             !error.message.startsWith("PRIVATE_PROFILE:")
           ) {
-            logError(`Failed to fetch user connection data`, error, {
-              component: context,
-              action: "fetch_connection",
-            });
+            log.error(
+              `[${context}] Failed to fetch user connection data`,
+              error,
+            );
           }
           return null;
         }),
@@ -128,10 +122,7 @@ export class UserDataService {
     if (includeDupeData && finalUserIds.length > 0) {
       fetchPromises.push(
         fetchDupeFinderData(finalUserIds[0]).catch((error) => {
-          logError(`Failed to fetch dupe data`, error, {
-            component: context,
-            action: "fetch_dupes",
-          });
+          log.error(`[${context}] Failed to fetch dupe data`, error);
           return { error: "Failed to fetch dupe data" };
         }),
       );
@@ -146,10 +137,7 @@ export class UserDataService {
         if (result.status === "fulfilled") {
           return result.value;
         } else {
-          console.warn(
-            `[SERVER] UserDataService: Promise ${index} failed:`,
-            result.reason,
-          );
+          log.warn(`UserDataService: Promise ${index} failed`, result.reason);
           // Return appropriate defaults based on the promise index
           if (index === 0) return null; // user data
           if (index === 1) return null; // user connection data
@@ -335,14 +323,8 @@ export class UserDataService {
     const mainUserId = userIds[0]; // Assuming first ID is the main user
     const finalUserIds = [mainUserId, ...sortedOwners];
 
-    logInfo(
-      `Reduced from ${userIds.length} to ${finalUserIds.length} users for performance.`,
-      {
-        component: context,
-        originalCount: userIds.length,
-        optimizedCount: finalUserIds.length,
-        action: "performance_optimization",
-      },
+    log.info(
+      `[${context}] Reduced users from ${userIds.length} to ${finalUserIds.length} for performance.`,
     );
 
     return finalUserIds;
@@ -388,14 +370,8 @@ export class UserDataService {
     const mainUserId = userIds[0]; // Assuming first ID is the main user
     const finalUserIds = [mainUserId, ...sortedOwners];
 
-    logInfo(
-      `Reduced from ${userIds.length} to ${finalUserIds.length} users for performance.`,
-      {
-        component: context,
-        originalCount: userIds.length,
-        optimizedCount: finalUserIds.length,
-        action: "performance_optimization",
-      },
+    log.info(
+      `[${context}] Reduced users from ${userIds.length} to ${finalUserIds.length} for performance.`,
     );
 
     return finalUserIds;

@@ -6,6 +6,9 @@ import {
   MaxStreamsError,
 } from "@/utils/api";
 import DupeFinderClient from "./DupeFinderClient";
+import { createLogger } from "@/services/logger";
+
+const log = createLogger("INVENTORY");
 
 interface DupeFinderDataStreamerProps {
   robloxId: string;
@@ -29,7 +32,7 @@ async function DupeFinderDataFetcher({ robloxId }: { robloxId: string }) {
         usernameError = `Username "${robloxId}" not found. Please check the spelling and try again.`;
       }
     } catch (error) {
-      console.error("Error fetching user by username:", error);
+      log.error("Error fetching user by username:", error);
 
       // Check for max streams error - this is a temporary server issue
       if (error instanceof MaxStreamsError) {
@@ -105,11 +108,11 @@ async function DupeFinderDataFetcher({ robloxId }: { robloxId: string }) {
 
   const [mainUserData, items] = await Promise.all([
     fetchRobloxUsersBatch([actualRobloxId]).catch((error) => {
-      console.error("Failed to fetch main user data:", error);
+      log.error("Failed to fetch main user data:", error);
       return {};
     }),
     fetchItems().catch((error) => {
-      console.error("Failed to fetch items metadata:", error);
+      log.error("Failed to fetch items metadata:", error);
       return [];
     }),
   ]);

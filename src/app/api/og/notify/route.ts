@@ -1,4 +1,7 @@
 import { NextResponse } from "next/server";
+import { createLogger } from "@/services/logger";
+
+const log = createLogger("NOTIFY");
 
 export const dynamic = "force-dynamic";
 
@@ -41,7 +44,7 @@ export async function GET(request: Request) {
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error(`OG notify API error: ${response.status} - ${errorText}`);
+      log.error(`OG notify API error: ${response.status} - ${errorText}`);
       let errorResponse: Record<string, unknown> = {
         error: "Failed to fetch OG notifications",
       };
@@ -59,7 +62,7 @@ export async function GET(request: Request) {
     const data = await response.json();
     return NextResponse.json(data);
   } catch (error) {
-    console.error("Error fetching OG notifications:", error);
+    log.error("Error fetching OG notifications:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 },
@@ -104,7 +107,7 @@ export async function POST(request: Request) {
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error(`OG notify API error: ${response.status} - ${errorText}`);
+      log.error(`OG notify API error: ${response.status} - ${errorText}`);
       let errorResponse: Record<string, unknown> = {
         error: "Failed to add OG notification",
       };
@@ -122,7 +125,7 @@ export async function POST(request: Request) {
     const data = await response.json();
     return NextResponse.json(data);
   } catch (error) {
-    console.error("Error adding OG notification:", error);
+    log.error("Error adding OG notification:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 },
@@ -167,7 +170,7 @@ export async function DELETE(request: Request) {
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error(`OG notify API error: ${response.status} - ${errorText}`);
+      log.error(`OG notify API error: ${response.status} - ${errorText}`);
       let errorResponse: Record<string, unknown> = {
         error: "Failed to remove OG notification",
       };
@@ -185,7 +188,7 @@ export async function DELETE(request: Request) {
     const data = await response.json();
     return NextResponse.json(data);
   } catch (error) {
-    console.error("Error removing OG notification:", error);
+    log.error("Error removing OG notification:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 },

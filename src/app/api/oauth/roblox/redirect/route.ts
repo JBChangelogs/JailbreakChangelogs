@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { PUBLIC_API_URL } from "@/utils/api";
+import { createLogger } from "@/services/logger";
+
+const log = createLogger("API");
 
 export async function GET(request: NextRequest) {
   try {
@@ -25,7 +28,7 @@ export async function GET(request: NextRequest) {
     // Redirect to the Roblox OAuth URL
     return NextResponse.redirect(oauthUrl);
   } catch (error) {
-    console.error("Error in Roblox OAuth redirect BFF:", error);
+    log.error("Error in Roblox OAuth redirect BFF:", error);
     return NextResponse.json(
       { message: "Internal Server Error" },
       { status: 500 },

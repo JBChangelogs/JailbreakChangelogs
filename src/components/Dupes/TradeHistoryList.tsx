@@ -1,6 +1,9 @@
 "use client";
 
+import { createLogger } from "@/services/logger";
 import { useMemo, useState, useEffect } from "react";
+
+const log = createLogger("UI");
 import Image from "next/image";
 import { DupeFinderHistoryEntry } from "@/types";
 import { VerifiedBadgeIcon } from "@/components/Icons/VerifiedBadgeIcon";
@@ -124,7 +127,7 @@ export default function TradeHistoryList({
 
         setFetchedUsers(processedUsers);
       } catch (error) {
-        console.error("Failed to fetch users:", error);
+        log.error("Failed to fetch users", error);
       }
     };
 

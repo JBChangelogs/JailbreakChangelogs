@@ -17,6 +17,9 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { createLogger } from "@/services/logger";
+
+const log = createLogger("UI");
 
 interface SupporterTier {
   name: string;
@@ -132,7 +135,7 @@ export default function ModernPricingSection() {
       await navigator.clipboard.writeText(address);
       toast.success(`${cryptoType} wallet address copied to clipboard.`);
     } catch (err) {
-      console.error("Failed to copy address:", err);
+      log.error("Failed to copy address:", err);
       toast.error(`Failed to copy ${cryptoType} wallet address.`);
     }
   };
@@ -153,7 +156,7 @@ export default function ModernPricingSection() {
         description: `The ${paymentMethodLabel} URL for ${tierName} is now on your clipboard.`,
       });
     } catch (err) {
-      console.error("Failed to copy tier link:", err);
+      log.error("Failed to copy tier link:", err);
       toast.error(`Failed to copy ${tierName} link.`);
     }
   };

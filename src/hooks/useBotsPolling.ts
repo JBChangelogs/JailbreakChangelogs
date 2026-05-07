@@ -3,6 +3,9 @@
 import { useState, useEffect, useCallback } from "react";
 import { pollBotsData } from "@/app/api/bots/actions";
 import { type ConnectedBotsResponse, type QueueInfo } from "@/utils/api";
+import { createLogger } from "@/services/logger";
+
+const log = createLogger("API");
 
 interface BotsPollingData {
   botsData: ConnectedBotsResponse | null;
@@ -50,7 +53,7 @@ export function useBotsPolling(intervalMs: number = 30000) {
           pollingStopped: false,
         });
       } else {
-        console.error(
+        log.error(
           `[POLLING] Failed to fetch data at ${timestamp}:`,
           result.error,
         );
@@ -62,7 +65,7 @@ export function useBotsPolling(intervalMs: number = 30000) {
         }));
       }
     } catch (error) {
-      console.error(`[POLLING] Network error at ${timestamp}:`, error);
+      log.error(`[POLLING] Network error at ${timestamp}:`, error);
       setData((prev) => ({
         ...prev,
         error: "Network error",

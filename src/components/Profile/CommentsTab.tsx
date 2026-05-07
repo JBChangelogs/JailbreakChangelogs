@@ -1,6 +1,9 @@
 "use client";
 
+import { createLogger } from "@/services/logger";
 import { useState, useEffect } from "react";
+
+const log = createLogger("UI");
 import { Spinner } from "@/components/ui/Spinner";
 import { Button } from "@/components/ui/button";
 import { Pagination } from "@/components/ui/Pagination";
@@ -160,7 +163,7 @@ export default function CommentsTab({
           };
           setCommentDetails(mergedDetails);
         } catch (error) {
-          console.error("Error fetching comment details:", error);
+          log.error("Error fetching comment details", error);
         } finally {
           setDetailsLoading(false);
         }

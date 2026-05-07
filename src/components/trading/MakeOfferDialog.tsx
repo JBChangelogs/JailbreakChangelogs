@@ -28,6 +28,9 @@ import { sanitizeText } from "@/utils/sanitizeText";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { INVENTORY_API_SOURCE_HEADER, INVENTORY_API_URL } from "@/utils/api";
 import { shouldRetryResponseStatus } from "@/utils/fetchWithRetry";
+import { createLogger } from "@/services/logger";
+
+const log = createLogger("UI");
 
 const CUSTOM_TRADE_TYPES = [
   { id: "adds", label: "Adds" },
@@ -520,7 +523,7 @@ export function MakeOfferDialog({
       resetForm();
       onClose();
     } catch (err) {
-      console.error("Error sending offer:", err);
+      log.error("Error sending offer:", err);
       toast.error(err instanceof Error ? err.message : "Failed to send offer");
     } finally {
       setSubmitting(false);
@@ -569,7 +572,7 @@ export function MakeOfferDialog({
       resetForm();
       onClose();
     } catch (err) {
-      console.error("Error sending offer:", err);
+      log.error("Error sending offer:", err);
       toast.error(err instanceof Error ? err.message : "Failed to send offer");
     } finally {
       setSubmitting(false);

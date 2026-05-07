@@ -1,6 +1,9 @@
 "use server";
 
 import { fetchRobloxUsersBatch } from "@/utils/api";
+import { createLogger } from "@/services/logger";
+
+const log = createLogger("INVENTORY");
 
 export async function fetchMissingRobloxData(userIds: string[]) {
   try {
@@ -19,10 +22,7 @@ export async function fetchMissingRobloxData(userIds: string[]) {
       avatarData: {}, // No avatar data needed for original owners
     };
   } catch (error) {
-    console.error(
-      "[SERVER ACTION] Failed to fetch missing Roblox data:",
-      error,
-    );
+    log.error("[SERVER ACTION] Failed to fetch missing Roblox data", error);
     return { userData: {}, avatarData: {} };
   }
 }

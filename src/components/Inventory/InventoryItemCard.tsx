@@ -1,6 +1,9 @@
 "use client";
 
+import { createLogger } from "@/services/logger";
 import Image from "next/image";
+
+const log = createLogger("UI");
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { InventoryItem } from "@/app/inventories/types";
@@ -98,7 +101,7 @@ export default function InventoryItemCard({
         setItemUnlockMetadata(metadataById.get(item.item_id) ?? null);
       })
       .catch((error) => {
-        console.error("Error loading item unlock metadata:", error);
+        log.error("Error loading item unlock metadata", error);
         if (isMounted) setItemUnlockMetadata(null);
       });
 

@@ -3,6 +3,9 @@
 import { canHideAdsForPremiumType } from "@/utils/supporterAccess";
 import { useEffect, useRef } from "react";
 import { useAuthContext } from "@/contexts/AuthContext";
+import { createLogger } from "@/services/logger";
+
+const log = createLogger("UI");
 
 type NitroAdConfig = {
   sizes: string[][];
@@ -101,10 +104,7 @@ export default function NitroHomepageAd({ className }: Props) {
       // Mobile config
       Promise.resolve(nitroAds.createAd(SLOT_ID_MOBILE, MOBILE_CONFIG)).catch(
         (error) => {
-          console.warn(
-            "[Nitro Ad] Failed to create homepage mobile ad:",
-            error,
-          );
+          log.warn("[Nitro Ad] Failed to create homepage mobile ad:", error);
         },
       );
 
@@ -121,14 +121,11 @@ export default function NitroHomepageAd({ className }: Props) {
       }
       Promise.resolve(nitroAds.createAd(SLOT_ID_DESKTOP, desktopConfig)).catch(
         (error) => {
-          console.warn(
-            "[Nitro Ad] Failed to create homepage desktop ad:",
-            error,
-          );
+          log.warn("[Nitro Ad] Failed to create homepage desktop ad:", error);
         },
       );
     } catch (error) {
-      console.warn("[Nitro Ad] Error initializing homepage ads:", error);
+      log.warn("[Nitro Ad] Error initializing homepage ads:", error);
     }
 
     return () => {

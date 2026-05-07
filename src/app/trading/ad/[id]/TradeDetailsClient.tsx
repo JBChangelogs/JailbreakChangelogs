@@ -39,6 +39,9 @@ import {
   isCustomTradeItem,
 } from "@/utils/tradeItems";
 import { getCategoryColor, getCategoryIcon } from "@/utils/categoryIcons";
+import { createLogger } from "@/services/logger";
+
+const log = createLogger("UI");
 
 import {
   Tooltip,
@@ -553,7 +556,7 @@ export default function TradeDetailsClient({
           ),
         });
       } catch (err) {
-        console.error("Error checking offer status:", err);
+        log.error("Error checking offer status:", err);
         if (!isCancelled) {
           setOfferState({
             status: "error",
@@ -813,7 +816,7 @@ export default function TradeDetailsClient({
       });
       router.push("/trading");
     } catch (error) {
-      console.error("Error deleting trade ad:", error);
+      log.error("Error deleting trade ad:", error);
       toast.error("Failed to delete trade ad", { id: toastId });
     } finally {
       setIsDeleting(false);

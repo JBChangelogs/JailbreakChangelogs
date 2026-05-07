@@ -59,6 +59,9 @@ import {
 import { decode as decodeHtmlEntities } from "he";
 import { parseJsonWithLargeIds } from "@/utils/parseJsonWithLargeIds";
 import type { UserData, UserFlag, UserSettingsV2 } from "@/types/auth";
+import { createLogger } from "@/services/logger";
+
+const log = createLogger("UI");
 
 type MessageUser = {
   id: string;
@@ -1267,7 +1270,7 @@ export default function MessagesInbox() {
         const data = await response.json();
         return toMessageUser(data);
       } catch (error) {
-        console.error("Error loading user by id:", error);
+        log.error("Error loading user by id:", error);
         return null;
       } finally {
         userLookupPendingRef.current.delete(id);
@@ -1336,7 +1339,7 @@ export default function MessagesInbox() {
         );
       } catch (error) {
         if (userSearchRequestIdRef.current !== requestId) return;
-        console.error("Error searching users:", error);
+        log.error("Error searching users:", error);
         setUserSearchResults([]);
       } finally {
         if (userSearchRequestIdRef.current === requestId) {
@@ -1484,7 +1487,7 @@ export default function MessagesInbox() {
         });
       } catch (error) {
         if (isCancelled) return;
-        console.error("Error fetching conversations:", error);
+        log.error("Error fetching conversations:", error);
         setConversations([]);
         setTotalConversations(null);
         setSelectedUserId(null);
@@ -1530,6 +1533,11 @@ export default function MessagesInbox() {
         );
 
         if (!response.ok) {
+          const body = await response.json().catch(() => ({}));
+          log.error("fetch blocked users failed", {
+            status: response.status,
+            body,
+          });
           throw new Error("Failed to fetch blocked users");
         }
 
@@ -1559,7 +1567,7 @@ export default function MessagesInbox() {
         }
       } catch (error) {
         if (!isCancelled) {
-          console.error("Error fetching blocked users:", error);
+          log.error("Error fetching blocked users:", error);
           setBlockedByMeByUserId({});
         }
       }
@@ -1686,7 +1694,7 @@ export default function MessagesInbox() {
       });
     } catch (error) {
       messagesPageRef.current = currentPage;
-      console.error("Error loading older messages:", error);
+      log.error("Error loading older messages:", error);
       toast.error(
         error instanceof Error
           ? error.message
@@ -1763,7 +1771,7 @@ export default function MessagesInbox() {
         }
       } catch (error) {
         if (!isCancelled) {
-          console.error("Error fetching messages:", error);
+          log.error("Error fetching messages:", error);
           setMessages([]);
           toast.error(
             error instanceof Error ? error.message : "Failed to load messages",
@@ -2128,6 +2136,11 @@ export default function MessagesInbox() {
       );
 
       if (!response.ok) {
+        const body = await response.json().catch(() => ({}));
+        log.error(shouldBlock ? "block user failed" : "unblock user failed", {
+          status: response.status,
+          body,
+        });
         throw new Error(
           shouldBlock ? "Failed to block user" : "Failed to unblock user",
         );
@@ -2419,7 +2432,7 @@ export default function MessagesInbox() {
       }
     } catch (error) {
       pendingOwnSendScrollRef.current = false;
-      console.error("Error sending message:", error);
+      log.error("Error sending message:", error);
       const message =
         error instanceof Error && error.message
           ? error.message
@@ -2555,7 +2568,7 @@ export default function MessagesInbox() {
       setEditContent("");
       toast.success("Message edited", { id: toastId });
     } catch (error) {
-      console.error("Error editing message:", error);
+      log.error("Error editing message:", error);
       toast.error(
         error instanceof Error ? error.message : "Failed to edit message",
         { id: toastId },
@@ -2654,7 +2667,7 @@ export default function MessagesInbox() {
         );
         return sortConversationsByLatestMessage(updated);
       });
-      console.error("Error deleting message:", error);
+      log.error("Error deleting message:", error);
       toast.error(
         error instanceof Error ? error.message : "Failed to delete message",
         { id: toastId },

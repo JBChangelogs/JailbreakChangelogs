@@ -1,4 +1,7 @@
 import { fetchMoneyLeaderboard } from "@/utils/api";
+import { createLogger } from "@/services/logger";
+
+const log = createLogger("API");
 
 export async function GET() {
   try {
@@ -9,7 +12,7 @@ export async function GET() {
       headers: { "content-type": "application/json" },
     });
   } catch (error) {
-    console.error("[API] Error fetching money leaderboard:", error);
+    log.error("[API] Error fetching money leaderboard:", error);
 
     return new Response(
       JSON.stringify({ error: "Failed to fetch money leaderboard" }),

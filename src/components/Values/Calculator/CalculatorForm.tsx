@@ -28,6 +28,9 @@ import { SimilarItemsTab } from "./SimilarItemsTab";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScanTradeFromImage } from "./ScanTradeFromImage";
 import { toast } from "sonner";
+import { createLogger } from "@/services/logger";
+
+const log = createLogger("UI");
 
 interface CalculatorFormProps {
   initialItems?: TradeItem[];
@@ -302,7 +305,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
         }
       }
     } catch (error) {
-      console.error(
+      log.error(
         "Failed to parse stored calculator items from localStorage:",
         error,
       );
@@ -356,7 +359,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
         setRequestingItems(mapItems(requesting || []));
         setShowRestoreModal(false);
       } catch (error) {
-        console.error("Error restoring items:", error);
+        log.error("Error restoring items:", error);
       }
     }
   };

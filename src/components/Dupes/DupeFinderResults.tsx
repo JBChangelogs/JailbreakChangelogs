@@ -6,7 +6,9 @@ import { UserConnectionData } from "@/app/inventories/types";
 import { useBatchUserData } from "@/hooks/useBatchUserData";
 import TradeHistoryModal from "@/components/Modals/TradeHistoryModal";
 import { Icon } from "../ui/IconWrapper";
-import { logError } from "@/services/logger";
+import { createLogger } from "@/services/logger";
+
+const log = createLogger("UI");
 import DupeUserInfo from "./DupeUserInfo";
 import DupeFilters from "./DupeFilters";
 import DupeItemsGrid from "./DupeItemsGrid";
@@ -127,10 +129,7 @@ export default function DupeFinderResults({
 
         setTotalDupedValue(totalDuped);
       } catch (error) {
-        logError("Error calculating duped value", error, {
-          component: "DupeFinderResults",
-          action: "calculateTotalDupedValue",
-        });
+        log.error("Error calculating duped value", error);
         setTotalDupedValue(0);
       }
     };

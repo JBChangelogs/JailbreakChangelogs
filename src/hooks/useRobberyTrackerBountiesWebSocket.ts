@@ -3,6 +3,9 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { INVENTORY_API_URL, INVENTORY_WS_URL } from "@/utils/api";
 import { buildApiUrlWithDevToken } from "@/utils/apiDevToken";
+import { createLogger } from "@/services/logger";
+
+const log = createLogger("WS");
 
 /**
  * WebSocket hook for tracking bounties
@@ -126,7 +129,7 @@ export function useRobberyTrackerBountiesWebSocket(
               try {
                 wsRef.current.send(JSON.stringify({ action: "ping" }));
               } catch (err) {
-                console.error("[BOUNTY TRACKER WS] Ping send failed:", err);
+                log.error("Bounty tracker: Ping send failed", err);
               }
             }
           }, 30000); // Ping every 30 seconds
@@ -140,7 +143,7 @@ export function useRobberyTrackerBountiesWebSocket(
               setBounties(data.data);
             }
           } catch (err) {
-            console.error("[BOUNTY TRACKER WS] Parse error:", err);
+            log.error("Bounty tracker: Parse error", err);
             setError("Failed to parse server response");
           }
         });
@@ -207,13 +210,16 @@ export function useRobberyTrackerBountiesWebSocket(
           }
         });
 
-        ws.addEventListener("error", (err) => {
-          console.error("[BOUNTY TRACKER WS] Error:", err);
+        ws.addEventListener("error", (event) => {
+          log.error(
+            "Bounty tracker: Socket error",
+            (event.target as WebSocket)?.url,
+          );
           setError("Connection error");
           setIsConnected(false);
         });
       } catch (err) {
-        console.error("[BOUNTY TRACKER WS] Connection error:", err);
+        log.error("Bounty tracker: Connection error", err);
         setError("Connection error");
       }
     },
@@ -249,6 +255,11 @@ export function useRobberyTrackerBountiesWebSocket(
         { cache: "no-store" },
       );
       if (!response.ok) {
+        const body = await response.json().catch(() => ({}));
+        log.error("Bounty tracker: Ban status check failed", {
+          status: response.status,
+          body,
+        });
         throw new Error("Ban status check failed");
       }
       const data = (await response.json()) as {
@@ -274,7 +285,7 @@ export function useRobberyTrackerBountiesWebSocket(
         connect(true);
       }
     } catch (err) {
-      console.error("[BOUNTY TRACKER WS] Ban status check error:", err);
+      log.error("Bounty tracker: Ban status check error", err);
       setError("Failed to check ban status");
     }
   }, [connect, userId]);

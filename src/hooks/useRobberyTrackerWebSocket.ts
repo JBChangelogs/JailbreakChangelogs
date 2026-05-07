@@ -3,6 +3,9 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { INVENTORY_API_URL, INVENTORY_WS_URL } from "@/utils/api";
 import { buildApiUrlWithDevToken } from "@/utils/apiDevToken";
+import { createLogger } from "@/services/logger";
+
+const log = createLogger("WS");
 
 /**
  * WebSocket hook for tracking robbery status
@@ -148,7 +151,7 @@ export function useRobberyTrackerWebSocket(
               try {
                 wsRef.current.send(JSON.stringify({ action: "ping" }));
               } catch (err) {
-                console.error("[ROBBERY TRACKER WS] Ping send failed:", err);
+                log.error("Robbery tracker: Ping send failed", err);
               }
             }
           }, 30000); // Ping every 30 seconds
@@ -162,7 +165,7 @@ export function useRobberyTrackerWebSocket(
               setRobberies(data.data);
             }
           } catch (err) {
-            console.error("[ROBBERY TRACKER WS] Parse error:", err);
+            log.error("Robbery tracker: Parse error", err);
             setError("Failed to parse server response");
           }
         });
@@ -229,13 +232,16 @@ export function useRobberyTrackerWebSocket(
           }
         });
 
-        ws.addEventListener("error", (err) => {
-          console.error("[ROBBERY TRACKER WS] Error:", err);
+        ws.addEventListener("error", (event) => {
+          log.error(
+            "Robbery tracker: Socket error",
+            (event.target as WebSocket)?.url,
+          );
           setError("Connection error");
           setIsConnected(false);
         });
       } catch (err) {
-        console.error("[ROBBERY TRACKER WS] Connection error:", err);
+        log.error("Robbery tracker: Connection error", err);
         setError("Connection error");
       }
     },
@@ -271,6 +277,11 @@ export function useRobberyTrackerWebSocket(
         { cache: "no-store" },
       );
       if (!response.ok) {
+        const body = await response.json().catch(() => ({}));
+        log.error("Robbery tracker: Ban status check failed", {
+          status: response.status,
+          body,
+        });
         throw new Error("Ban status check failed");
       }
       const data = (await response.json()) as {
@@ -296,7 +307,7 @@ export function useRobberyTrackerWebSocket(
         connect(true);
       }
     } catch (err) {
-      console.error("[ROBBERY TRACKER WS] Ban status check error:", err);
+      log.error("Robbery tracker: Ban status check error", err);
       setError("Failed to check ban status");
     }
   }, [connect, userId]);

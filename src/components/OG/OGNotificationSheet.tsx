@@ -26,6 +26,9 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Spinner } from "@/components/ui/Spinner";
+import { createLogger } from "@/services/logger";
+
+const log = createLogger("NOTIFY");
 
 /**
  * Item type for partial items list
@@ -78,12 +81,14 @@ export default function OGNotificationSheet({
         cache: "no-store",
       });
       if (!response.ok) {
+        const body = await response.json().catch(() => ({}));
+        log.error("fetch items failed", { status: response.status, body });
         throw new Error("Failed to fetch items");
       }
       const data = await response.json();
       setItems(data);
     } catch (error) {
-      console.error("Error fetching items:", error);
+      log.error("Error fetching items:", error);
       toast.error("Failed to load items", {
         description: "Please check your connection and try again.",
       });
@@ -105,8 +110,14 @@ export default function OGNotificationSheet({
         cache: "no-store",
       });
       if (!response.ok) {
+        const body = await response.json().catch(() => ({}));
         if (response.status === 429) {
-          console.log("OG Notify limit reached (GET)");
+          log.info("OG Notify limit reached (GET)");
+        } else {
+          log.error("fetch notifications failed", {
+            status: response.status,
+            body,
+          });
         }
         throw new Error("Failed to fetch notifications");
       }
@@ -115,7 +126,7 @@ export default function OGNotificationSheet({
       const ids = Array.isArray(data) ? data.map((id) => String(id)) : [];
       setNotifiedItemIds(ids);
     } catch (error) {
-      console.error("Error fetching notifications:", error);
+      log.error("Error fetching notifications:", error);
     } finally {
       setIsLoadingNotifications(false);
     }
@@ -175,9 +186,9 @@ export default function OGNotificationSheet({
         let errorData: OGNotifyError = {};
         try {
           errorData = await response.json();
-          console.log("OG Notification 429 Error Data:", errorData);
+          log.info("OG Notification 429 Error Data:", errorData);
         } catch (e) {
-          console.error("Failed to parse 429 response", e);
+          log.error("Failed to parse 429 response", e);
         }
 
         toast.dismiss(toastId);
@@ -263,7 +274,7 @@ export default function OGNotificationSheet({
         }
       }
     } catch (error) {
-      console.error("Error toggling notification:", error);
+      log.error("Error toggling notification:", error);
       toast.error("Update Failed", {
         id: toastId,
         description: "Failed to update notification. Please try again.",

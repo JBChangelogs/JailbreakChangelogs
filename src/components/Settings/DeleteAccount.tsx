@@ -1,5 +1,8 @@
+import { createLogger } from "@/services/logger";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+
+const log = createLogger("UI");
 import { deleteAccount } from "@/services/settingsService";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { Icon } from "@/components/ui/IconWrapper";
@@ -64,7 +67,7 @@ export const DeleteAccount = () => {
         router.push("/");
       }, 1000);
     } catch (error) {
-      console.error("Error deleting account:", error);
+      log.error("Error deleting account", error);
       setError(
         error instanceof Error ? error.message : "Failed to delete account",
       );

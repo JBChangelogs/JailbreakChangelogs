@@ -1,4 +1,7 @@
 import { BASE_API_URL } from "@/utils/api";
+import { createLogger } from "@/services/logger";
+
+const log = createLogger("API");
 
 export async function GET() {
   try {
@@ -13,6 +16,11 @@ export async function GET() {
     );
 
     if (!response.ok) {
+      const body = await response.text();
+      log.error(`Weekly changelog summary API error`, {
+        status: response.status,
+        body,
+      });
       throw new Error("Failed to fetch weekly changelog summary");
     }
 
@@ -23,7 +31,7 @@ export async function GET() {
       headers: { "content-type": "application/json" },
     });
   } catch (error) {
-    console.error("[API] Error fetching weekly changelog summary:", error);
+    log.error("[API] Error fetching weekly changelog summary:", error);
 
     return new Response(
       JSON.stringify({ error: "Failed to fetch weekly changelog summary" }),

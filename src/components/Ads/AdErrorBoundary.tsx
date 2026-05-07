@@ -1,6 +1,9 @@
 "use client";
 
 import { ReactNode, Component, ErrorInfo } from "react";
+import { createLogger } from "@/services/logger";
+
+const log = createLogger("UI");
 
 interface Props {
   children: ReactNode;
@@ -35,7 +38,7 @@ export default class AdErrorBoundary extends Component<Props, State> {
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
     // Log error for monitoring (third-party scripts, ad network issues)
-    console.warn("Ad component error caught:", {
+    log.warn("Ad component error caught:", {
       error: error.message,
       stack: error.stack,
       componentStack: errorInfo.componentStack,

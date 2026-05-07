@@ -3,6 +3,9 @@
 import { canHideAdsForPremiumType } from "@/utils/supporterAccess";
 import { useEffect, useRef } from "react";
 import { useAuthContext } from "@/contexts/AuthContext";
+import { createLogger } from "@/services/logger";
+
+const log = createLogger("UI");
 
 type NitroAdsWithRemove = {
   createAd?: (id: string, config: typeof CHANGES_CONFIG) => Promise<void>;
@@ -66,7 +69,7 @@ export default function NitroChangelogVideoPlayer({ className }: Props) {
     try {
       Promise.resolve(nitroAds.createAd(SLOT_ID, CHANGES_CONFIG)).catch(
         (error) => {
-          console.warn(
+          log.warn(
             "[Nitro Ad] Failed to create changelog video player ad:",
             error,
           );
@@ -74,7 +77,7 @@ export default function NitroChangelogVideoPlayer({ className }: Props) {
         },
       );
     } catch (error) {
-      console.warn(
+      log.warn(
         "[Nitro Ad] Error initializing changelog video player ad:",
         error,
       );

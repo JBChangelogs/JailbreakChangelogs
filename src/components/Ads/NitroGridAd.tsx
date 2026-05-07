@@ -3,6 +3,9 @@
 import { canHideAdsForPremiumType } from "@/utils/supporterAccess";
 import { useEffect, useRef } from "react";
 import { useAuthContext } from "@/contexts/AuthContext";
+import { createLogger } from "@/services/logger";
+
+const log = createLogger("UI");
 
 interface NitroGridAdProps {
   adId: string;
@@ -55,18 +58,12 @@ export default function NitroGridAd({ adId, className }: NitroGridAdProps) {
                   }),
                 ).catch((error) => {
                   // Silently handle ad creation errors
-                  console.warn(
-                    `[Nitro Ad] Failed to create ad ${adId}:`,
-                    error,
-                  );
+                  log.warn(`[Nitro Ad] Failed to create ad ${adId}:`, error);
                   createdRef.current = false;
                 });
               } catch (error) {
                 // Catch synchronous errors
-                console.warn(
-                  `[Nitro Ad] Error initializing ad ${adId}:`,
-                  error,
-                );
+                log.warn(`[Nitro Ad] Error initializing ad ${adId}:`, error);
                 createdRef.current = false;
               }
             }

@@ -1,6 +1,9 @@
 "use client";
 
+import { createLogger } from "@/services/logger";
 import { useEffect } from "react";
+
+const log = createLogger("UI");
 import { useAuthContext } from "@/contexts/AuthContext";
 
 export default function UmamiIdentity() {
@@ -24,7 +27,7 @@ export default function UmamiIdentity() {
 
         window.umami.identify(user.id, sessionData);
       } catch (error) {
-        console.error("Failed to identify user in Umami:", error);
+        log.error("Failed to identify user in Umami", error);
       }
     }
   }, [isAuthenticated, user]);

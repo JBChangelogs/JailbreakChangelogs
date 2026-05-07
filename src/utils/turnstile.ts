@@ -1,3 +1,7 @@
+import { createLogger } from "@/services/logger";
+
+const log = createLogger("API");
+
 /**
  * Cloudflare Turnstile validation utilities
  */
@@ -116,7 +120,7 @@ export async function validateTurnstileToken(
       throw error;
     }
   } catch (error) {
-    console.error("Turnstile validation error:", error);
+    log.error("Turnstile validation error", error);
     return {
       success: false,
       "error-codes": ["internal-error"],

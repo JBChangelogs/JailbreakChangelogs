@@ -1,4 +1,7 @@
+import { createLogger } from "@/services/logger";
 import { Box, Typography, Divider, Skeleton } from "@mui/material";
+
+const log = createLogger("UI");
 import {
   Tooltip,
   TooltipContent,
@@ -165,7 +168,7 @@ export default function Comment({
               playsInline
               className="h-full w-full object-cover"
               onError={(e) => {
-                console.error(
+                log.error(
                   `Failed to load video: ${getVideoPath(itemDetails.type, itemDetails.name)}`,
                 );
                 // Use a simple image replacement since handleImageError expects an img element

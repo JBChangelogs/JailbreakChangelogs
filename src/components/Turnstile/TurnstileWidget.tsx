@@ -1,6 +1,9 @@
 "use client";
 
+import { createLogger } from "@/services/logger";
 import { Turnstile, TurnstileInstance } from "@marsidev/react-turnstile";
+
+const log = createLogger("UI");
 import { useRef, useCallback, useEffect } from "react";
 import { TurnstileAction } from "@/utils/turnstile";
 
@@ -35,7 +38,7 @@ export default function TurnstileWidget({
   );
 
   const handleError = useCallback(() => {
-    console.error("Turnstile error occurred");
+    log.error("Turnstile error occurred");
     onError?.();
   }, [onError]);
 

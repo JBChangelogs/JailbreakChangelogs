@@ -1,7 +1,10 @@
 "use client";
 
+import { createLogger } from "@/services/logger";
 import { useQuery } from "@tanstack/react-query";
 import { pollBotsData } from "@/app/api/bots/actions";
+
+const log = createLogger("API");
 
 export function useBotsPollingQuery(intervalMs: number = 30000) {
   return useQuery({
@@ -15,8 +18,8 @@ export function useBotsPollingQuery(intervalMs: number = 30000) {
 
         return result.data;
       } else {
-        console.error(
-          `[POLLING] Failed to fetch data at ${timestamp}:`,
+        log.error(
+          `[POLLING] Failed to fetch data at ${timestamp}`,
           result.error,
         );
         throw new Error(result.error || "Failed to fetch bots data");

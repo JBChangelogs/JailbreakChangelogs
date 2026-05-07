@@ -17,6 +17,9 @@ import { Switch } from "../ui/switch";
 import { Spinner } from "../ui/Spinner";
 
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
+import { createLogger } from "@/services/logger";
+
+const log = createLogger("UI");
 const gamepassData = {
   PremiumGarage: {
     link: "https://www.roblox.com/game-pass/2725211/Pro-Garage",
@@ -199,12 +202,17 @@ export default function UserStatsSection({
         `/api/inventories/scan-history?id=${encodeURIComponent(userId)}`,
       );
       if (!response.ok) {
+        const body = await response.json().catch(() => ({}));
+        log.error("fetch scan history failed", {
+          status: response.status,
+          body,
+        });
         throw new Error("Failed to fetch scan history");
       }
       const data = await response.json();
       setScanHistory(Array.isArray(data) ? data : []);
     } catch (error) {
-      console.error("Error fetching scan history:", error);
+      log.error("Error fetching scan history:", error);
       setScanHistory([]);
     } finally {
       setIsLoadingScanHistory(false);
@@ -251,10 +259,15 @@ export default function UserStatsSection({
           setQueuePosition(null);
         }
       } else {
+        const body = await response.json().catch(() => ({}));
+        log.error("fetch queue position failed", {
+          status: response.status,
+          body,
+        });
         throw new Error(`Failed to fetch queue position: ${response.status}`);
       }
     } catch (error) {
-      console.error("Error fetching queue position:", error);
+      log.error("Error fetching queue position:", error);
       setQueueError("Failed to fetch queue position");
       setQueuePosition(null);
     } finally {

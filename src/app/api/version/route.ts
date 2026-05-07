@@ -1,5 +1,8 @@
 import { NextResponse } from "next/server";
 import { getWebsiteVersion } from "@/utils/version";
+import { createLogger } from "@/services/logger";
+
+const log = createLogger("API");
 
 export const revalidate = 3600;
 
@@ -10,7 +13,7 @@ export async function GET() {
       status: 200,
     });
   } catch (error) {
-    console.error("Error in /api/version:", error);
+    log.error("Error in /api/version:", error);
     return NextResponse.json(
       {
         version: "unknown",

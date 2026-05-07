@@ -1,4 +1,7 @@
 import { cache } from "react";
+import { createLogger } from "@/services/logger";
+
+const log = createLogger("API");
 
 export interface ChangelogEntry {
   version: string;
@@ -82,9 +85,12 @@ export const getCachedChangelogEntries = cache(
       });
 
       if (!response.ok) {
-        console.error(
-          `Error fetching releases: ${response.status} ${response.statusText}`,
-        );
+        const body = await response.json().catch(() => ({}));
+        log.error("fetch releases failed", {
+          status: response.status,
+          statusText: response.statusText,
+          body,
+        });
         return [];
       }
 
@@ -92,7 +98,7 @@ export const getCachedChangelogEntries = cache(
 
       return releases.map(mapGithubReleaseToEntry);
     } catch (error) {
-      console.error("Error fetching changelogs from GitHub:", error);
+      log.error("Error fetching changelogs from GitHub:", error);
       return [];
     }
   },
@@ -144,7 +150,7 @@ export const getChangelogEntryBySlug = cache(
       const release: GithubRelease = await response.json();
       return mapGithubReleaseToEntry(release);
     } catch (error) {
-      console.error(`Error fetching single release ${slug}:`, error);
+      log.error(`Error fetching single release ${slug}:`, error);
       return null;
     }
   },

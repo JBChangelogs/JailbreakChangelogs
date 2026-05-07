@@ -1,6 +1,9 @@
 "use client";
 
+import { createLogger } from "@/services/logger";
 import React from "react";
+
+const log = createLogger("UI");
 import { Icon } from "@/components/ui/IconWrapper";
 import { formatProfileDate } from "@/utils/timestamp";
 import { useAuthContext } from "@/contexts/AuthContext";
@@ -230,7 +233,7 @@ const ServerList: React.FC<{
           });
         }
       } catch (err) {
-        console.error("Error fetching user data:", err);
+        log.error("Error fetching user data", err);
       } finally {
         // Mark as no longer loading
         setLoadingUsers((prev) => {

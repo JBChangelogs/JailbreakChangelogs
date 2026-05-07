@@ -57,6 +57,9 @@ import {
   formatUnlockRequirementsTooltip,
   hasUnlockLevel,
 } from "@/utils/itemUnlockPresentation";
+import { createLogger } from "@/services/logger";
+
+const log = createLogger("UI");
 
 interface ItemDetailsClientProps {
   item: ItemDetails;
@@ -165,7 +168,7 @@ export default function ItemDetailsClient({
         const playPromise = videoRef.current.play();
         if (playPromise !== undefined) {
           playPromise.catch((error) => {
-            console.error("Error playing drift video:", error);
+            log.error("Error playing drift video:", error);
           });
         }
       } else {
@@ -197,7 +200,7 @@ export default function ItemDetailsClient({
         setItemMetadata(metadataById.get(item.id) ?? null);
       })
       .catch((error) => {
-        console.error("Error loading item metadata:", error);
+        log.error("Error loading item metadata:", error);
         if (isMounted) setItemMetadata(null);
       });
 
@@ -244,7 +247,7 @@ export default function ItemDetailsClient({
               setIsPlaying(true);
             })
             .catch((error) => {
-              console.error("Error playing audio:", error);
+              log.error("Error playing audio:", error);
               setIsPlaying(false);
             });
         }

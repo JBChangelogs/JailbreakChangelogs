@@ -1,6 +1,9 @@
 import InventoryCheckerClient from "./InventoryCheckerClient";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import { fetchUserScansLeaderboard, UserScan } from "@/utils/api";
+import { createLogger } from "@/services/logger";
+
+const log = createLogger("INVENTORY");
 import { Suspense } from "react";
 import ExperimentalFeatureBanner from "@/components/ui/ExperimentalFeatureBanner";
 import ComingSoon from "@/components/ui/ComingSoon";
@@ -112,7 +115,7 @@ async function LeaderboardSection() {
   try {
     leaderboard = await fetchUserScansLeaderboard();
   } catch (error) {
-    console.error("[SERVER] Error in LeaderboardSection:", error);
+    log.error("[SERVER] Error in LeaderboardSection", error);
     leaderboard = [];
   }
 

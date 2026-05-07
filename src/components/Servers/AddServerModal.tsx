@@ -1,6 +1,9 @@
 "use client";
 
+import { createLogger } from "@/services/logger";
 import React from "react";
+
+const log = createLogger("UI");
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { useAuthContext } from "@/contexts/AuthContext";
@@ -279,7 +282,7 @@ const AddServerModal: React.FC<AddServerModalProps> = ({
       toast.error("An error occurred while saving the server", {
         id: savingToastId,
       });
-      console.error("Save server error:", err);
+      log.error("Save server error", err);
     } finally {
       setLoading(false);
     }

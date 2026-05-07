@@ -1,6 +1,9 @@
+import { createLogger } from "@/services/logger";
 import { useEffect, useMemo, useState } from "react";
 import { buildApiUrlWithDevToken } from "@/utils/apiDevToken";
 import { parseJsonWithLargeIds } from "@/utils/parseJsonWithLargeIds";
+
+const log = createLogger("API");
 
 export type OfferDetailsBatchEntry = {
   trade?: number | string;
@@ -84,7 +87,7 @@ export function useOfferDetailsBatch(events: OfferDetailsBatchEntry[]) {
         setMap(next);
         setStatus("loaded");
       } catch (err) {
-        console.error("Batch offer details fetch error:", err);
+        log.error("Batch offer details fetch error", err);
         setMap({});
         setStatus("error");
       }

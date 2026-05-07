@@ -56,6 +56,9 @@ import {
 import { UserData } from "@/types/auth";
 import { fetchWithRetry } from "@/utils/fetchWithRetry";
 import { buildApiUrlWithDevToken } from "@/utils/apiDevToken";
+import { createLogger } from "@/services/logger";
+
+const log = createLogger("API");
 
 export const BASE_API_URL =
   process.env.NEXT_PHASE === "phase-production-build" ||
@@ -239,6 +242,8 @@ export const fetchPaginatedUsers = async (
     signal,
   });
   if (!response.ok) {
+    const body = await response.json().catch(() => ({}));
+    log.error("fetchPaginatedUsers failed", { status: response.status, body });
     throw new Error("Failed to fetch paginated users");
   }
   const data = await response.json();
@@ -261,6 +266,8 @@ export const searchUsers = async (
     },
   );
   if (!response.ok) {
+    const body = await response.json().catch(() => ({}));
+    log.error("searchUsers failed", { status: response.status, body });
     throw new Error("Failed to search users");
   }
   const data = await response.json();
@@ -290,8 +297,7 @@ export async function fetchUserById(id: string) {
         throw new Error(`NOT_FOUND: User not found with id ${id}`);
       }
 
-      // Log error response for other types of errors
-      console.error("Error response:", {
+      log.error(`fetchUserById: Error response ${response.status}`, {
         status: response.status,
         statusText: response.statusText,
         data: JSON.stringify(data, null, 2),
@@ -308,7 +314,7 @@ export async function fetchUserById(id: string) {
     return data;
   } catch (error) {
     if (!hasMessagePrefix(error, USER_ACCESS_ERROR_PREFIXES)) {
-      console.error("Error fetching user by ID:", error);
+      log.error("Error fetching user by ID", error);
     }
 
     // Re-throw BANNED_USER and NOT_FOUND errors so calling code can handle them
@@ -359,8 +365,7 @@ export async function fetchUserByIdForOG(id: string) {
         throwUserAccessErrorFrom403(data);
       }
 
-      // Log error response for other types of errors
-      console.error("Error response:", {
+      log.error(`fetchUserByIdForOG: Error response ${response.status}`, {
         status: response.status,
         statusText: response.statusText,
         data: JSON.stringify(data, null, 2),
@@ -377,7 +382,7 @@ export async function fetchUserByIdForOG(id: string) {
     return data;
   } catch (error) {
     if (!hasMessagePrefix(error, USER_ACCESS_ERROR_PREFIXES)) {
-      console.error("Error fetching user by ID for OG:", error);
+      log.error("Error fetching user by ID for OG", error);
     }
 
     // Re-throw BANNED_USER errors so calling code can handle them
@@ -420,8 +425,7 @@ export async function fetchUserByIdForMetadata(id: string) {
         throw new Error(`NOT_FOUND: User not found with id ${id}`);
       }
 
-      // Log error response for other types of errors
-      console.error("Error response:", {
+      log.error(`fetchUserByIdForMetadata: Error response ${response.status}`, {
         status: response.status,
         statusText: response.statusText,
         data: JSON.stringify(data, null, 2),
@@ -438,7 +442,7 @@ export async function fetchUserByIdForMetadata(id: string) {
     return data;
   } catch (error) {
     if (!hasMessagePrefix(error, USER_ACCESS_ERROR_PREFIXES)) {
-      console.error("Error fetching user by ID for metadata:", error);
+      log.error("Error fetching user by ID for metadata", error);
     }
 
     // Re-throw BANNED_USER and NOT_FOUND errors so calling code can handle them
@@ -475,9 +479,8 @@ export async function fetchUserByRobloxId(robloxId: string) {
         throwUserAccessErrorFrom403(data);
       }
 
-      // Log error response for other types of errors (skip 404s as they're expected)
       if (response.status !== 404) {
-        console.error("Error response:", {
+        log.error(`fetchUserByRobloxId: Error response ${response.status}`, {
           status: response.status,
           statusText: response.statusText,
           data: JSON.stringify(data, null, 2),
@@ -500,7 +503,7 @@ export async function fetchUserByRobloxId(robloxId: string) {
       !error.message.includes("404") &&
       !hasMessagePrefix(error, USER_ACCESS_ERROR_PREFIXES)
     ) {
-      console.error("Error fetching user by Roblox ID:", error);
+      log.error("Error fetching user by Roblox ID", error);
     }
 
     // Re-throw PRIVATE_PROFILE/BANNED_USER errors so calling code can handle them
@@ -526,11 +529,15 @@ export async function fetchItems() {
       },
       next: { revalidate: 300 }, // Cache for 5 minutes
     });
-    if (!response.ok) throw new Error("Failed to fetch items");
+    if (!response.ok) {
+      const body = await response.json().catch(() => ({}));
+      log.error("fetchItems failed", { status: response.status, body });
+      throw new Error("Failed to fetch items");
+    }
     const data = await response.json();
     return data as Item[];
   } catch (error) {
-    console.error("[SERVER] Error fetching items:", error);
+    log.error("Error fetching items", error);
     throw error; // Re-throw to allow error boundaries to handle it
   }
 }
@@ -538,7 +545,7 @@ export async function fetchItems() {
 export async function fetchLastUpdated(items: Item[]) {
   try {
     if (!items || items.length === 0) {
-      console.log("No items provided for last updated");
+      log.info("No items provided for last updated");
       return null;
     }
 
@@ -561,7 +568,7 @@ export async function fetchLastUpdated(items: Item[]) {
         : mostRecentItem.last_updated;
     return rawTimestamp;
   } catch (err) {
-    console.error("Error getting last updated time:", err);
+    log.error("Error getting last updated time", err);
     return null;
   }
 }
@@ -594,7 +601,7 @@ export async function fetchItem(
     if (err instanceof Error && err.name === "AbortError") {
       return null;
     }
-    console.error("[SERVER] Error fetching item:", err);
+    log.error("Error fetching item", err);
     return null;
   }
 }
@@ -626,7 +633,7 @@ export async function fetchItemById(id: string): Promise<ItemDetails | null> {
     if (err instanceof Error && err.name === "AbortError") {
       return null;
     }
-    console.error("[SERVER] Error fetching item by ID:", err);
+    log.error("Error fetching item by ID", err);
     return null;
   }
 }
@@ -638,7 +645,11 @@ export async function fetchChangelogList(): Promise<Changelog[]> {
       "User-Agent": "JailbreakChangelogs-Changelogs/1.0",
     },
   });
-  if (!response.ok) throw new Error("Failed to fetch changelog list");
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}));
+    log.error("fetchChangelogList failed", { status: response.status, body });
+    throw new Error("Failed to fetch changelog list");
+  }
   return response.json();
 }
 
@@ -648,7 +659,11 @@ export async function fetchChangelog(id: string): Promise<Changelog> {
       "User-Agent": "JailbreakChangelogs-Changelogs/1.0",
     },
   });
-  if (!response.ok) throw new Error("Failed to fetch changelog");
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}));
+    log.error("fetchChangelog failed", { status: response.status, body });
+    throw new Error("Failed to fetch changelog");
+  }
   return response.json();
 }
 
@@ -659,7 +674,11 @@ export async function fetchLatestChangelog(): Promise<Changelog> {
     },
     cache: "no-store",
   });
-  if (!response.ok) throw new Error("Failed to fetch latest changelog");
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}));
+    log.error("fetchLatestChangelog failed", { status: response.status, body });
+    throw new Error("Failed to fetch latest changelog");
+  }
   return response.json();
 }
 
@@ -680,13 +699,18 @@ export async function fetchItemsChangelog(id: string) {
     }
 
     if (!response.ok) {
+      const body = await response.json().catch(() => ({}));
+      log.error("fetchItemsChangelog failed", {
+        status: response.status,
+        body,
+      });
       throw new Error("Failed to fetch items changelog");
     }
 
     const data = await response.json();
     return data;
   } catch (err) {
-    console.error("[SERVER] Error fetching items changelog:", err);
+    log.error("Error fetching items changelog", err);
     return null;
   }
 }
@@ -703,12 +727,14 @@ export async function fetchItemChanges(id: string) {
       return [] as unknown[];
     }
     if (!response.ok) {
+      const body = await response.json().catch(() => ({}));
+      log.error("fetchItemChanges failed", { status: response.status, body });
       throw new Error("Failed to fetch item changes");
     }
     const data = await response.json();
     return data;
   } catch (err) {
-    console.error("[SERVER] Error fetching item changes:", err);
+    log.error("Error fetching item changes", err);
     return [] as unknown[];
   }
 }
@@ -732,9 +758,8 @@ export async function fetchUsersBatch(userIds: string[]) {
       if (response.status === 404) {
         return {};
       }
-      console.error(
-        `Failed to fetch users batch: ${response.status} ${response.statusText}`,
-      );
+      const body = await response.json().catch(() => ({}));
+      log.error("fetchUsersBatch: Failed", { status: response.status, body });
       throw new Error("Failed to fetch users batch");
     }
 
@@ -782,8 +807,7 @@ export async function fetchUsersBatch(userIds: string[]) {
 
     return userMap;
   } catch (error) {
-    console.error("Error fetching users batch:", error);
-    // Silently fail to prevent Railway log spam - return empty user map
+    log.error("Error fetching users batch", error);
     return {};
   }
 }
@@ -801,6 +825,11 @@ export async function fetchDupeFinderData(userId: string) {
       if (response.status === 404) {
         return { error: "No recorded dupes found for this user." };
       }
+      const body = await response.json().catch(() => ({}));
+      log.error("fetchDupeFinderData failed", {
+        status: response.status,
+        body,
+      });
       throw new Error("Failed to fetch dupe finder data");
     }
 
@@ -825,13 +854,18 @@ export async function fetchDuplicatesCount() {
       if (response.status === 404) {
         return { total_duplicates: 0, total_duplicates_str: "0" };
       }
+      const body = await response.json().catch(() => ({}));
+      log.error("fetchDuplicatesCount failed", {
+        status: response.status,
+        body,
+      });
       throw new Error("Failed to fetch duplicates count");
     }
 
     const data = await response.json();
     return data;
   } catch (err) {
-    console.error("[SERVER] Error fetching duplicates count:", err);
+    log.error("Error fetching duplicates count", err);
     return { total_duplicates: 0, total_duplicates_str: "0" };
   }
 }
@@ -850,6 +884,11 @@ export async function fetchTotalRobberiesLogged(): Promise<number> {
       if (response.status === 404) {
         return 0;
       }
+      const body = await response.json().catch(() => ({}));
+      log.error("fetchTotalRobberiesLogged failed", {
+        status: response.status,
+        body,
+      });
       throw new Error("Failed to fetch total robberies logged");
     }
 
@@ -857,7 +896,7 @@ export async function fetchTotalRobberiesLogged(): Promise<number> {
     const parsed = Number(text);
     return Number.isFinite(parsed) ? parsed : 0;
   } catch (err) {
-    console.error("[SERVER] Error fetching total robberies logged:", err);
+    log.error("Error fetching total robberies logged", err);
     return 0;
   }
 }
@@ -885,6 +924,11 @@ export async function fetchMostDuplicatedItems(): Promise<DuplicatedItem[]> {
       if (response.status === 404) {
         return [];
       }
+      const body = await response.json().catch(() => ({}));
+      log.error("fetchMostDuplicatedItems failed", {
+        status: response.status,
+        body,
+      });
       throw new Error(
         `Failed to fetch most duplicated items: ${response.status}`,
       );
@@ -893,7 +937,7 @@ export async function fetchMostDuplicatedItems(): Promise<DuplicatedItem[]> {
     const data = await response.json();
     return Array.isArray(data) ? data : [];
   } catch (err) {
-    console.error("[SERVER] Error fetching most duplicated items:", err);
+    log.error("Error fetching most duplicated items", err);
     return [];
   }
 }
@@ -916,13 +960,18 @@ export async function fetchDuplicateVariants(
     }
 
     if (!response.ok) {
+      const body = await response.json().catch(() => ({}));
+      log.error("fetchDuplicateVariants failed", {
+        status: response.status,
+        body,
+      });
       throw new Error(`Failed to fetch duplicate variants: ${response.status}`);
     }
 
     const data = await response.json();
     return data;
   } catch (err) {
-    console.error("[SERVER] Error fetching duplicate variants:", err);
+    log.error("Error fetching duplicate variants", err);
     return null;
   }
 }
@@ -952,13 +1001,15 @@ export async function fetchItemHoarders(
       if (response.status === 404) {
         return [];
       }
+      const body = await response.json().catch(() => ({}));
+      log.error("fetchItemHoarders failed", { status: response.status, body });
       throw new Error(`Failed to fetch item hoarders: ${response.status}`);
     }
 
     const data = await response.json();
     return Array.isArray(data) ? data : [];
   } catch (err) {
-    console.error("[SERVER] Error fetching item hoarders:", err);
+    log.error("Error fetching item hoarders", err);
     return [];
   }
 }
@@ -990,13 +1041,18 @@ export async function fetchSeasonContracts(): Promise<SeasonContractsResponse | 
       if (response.status === 404) {
         return null;
       }
+      const body = await response.json().catch(() => ({}));
+      log.error("fetchSeasonContracts failed", {
+        status: response.status,
+        body,
+      });
       throw new Error("Failed to fetch season contracts");
     }
 
     const data = await response.json();
     return data as SeasonContractsResponse;
   } catch (err) {
-    console.error("[SERVER] Error fetching season contracts:", err);
+    log.error("Error fetching season contracts", err);
     return null;
   }
 }
@@ -1013,13 +1069,15 @@ export async function fetchSeasonsList() {
       if (response.status === 404) {
         return [];
       }
+      const body = await response.json().catch(() => ({}));
+      log.error("fetchSeasonsList failed", { status: response.status, body });
       throw new Error("Failed to fetch seasons list");
     }
 
     const data = await response.json();
     return data;
   } catch (err) {
-    console.error("[SERVER] Error fetching seasons list:", err);
+    log.error("Error fetching seasons list", err);
     return [];
   }
 }
@@ -1040,7 +1098,7 @@ export async function fetchSeason(id: string) {
     const data = await response.json();
     return data;
   } catch (err) {
-    console.error("[SERVER] Error fetching season:", err);
+    log.error("Error fetching season", err);
     return null;
   }
 }
@@ -1059,13 +1117,15 @@ export async function fetchItemFavorites(id: string) {
     }
 
     if (!response.ok) {
+      const body = await response.json().catch(() => ({}));
+      log.error("fetchItemFavorites failed", { status: response.status, body });
       throw new Error("Failed to fetch item favorites");
     }
 
     const data = await response.json();
     return data;
   } catch (err) {
-    console.error("[SERVER] Error fetching item favorites:", err);
+    log.error("Error fetching item favorites", err);
     return null;
   }
 }
@@ -1098,6 +1158,8 @@ export async function fetchUserFavorites(userId: string) {
     }
 
     if (!response.ok) {
+      const body = await response.json().catch(() => ({}));
+      log.error("fetchUserFavorites failed", { status: response.status, body });
       throw new Error("Failed to fetch user favorites");
     }
 
@@ -1109,11 +1171,11 @@ export async function fetchUserFavorites(userId: string) {
 
     // Handle AbortError specifically - don't treat it as a real error
     if (err instanceof Error && err.name === "AbortError") {
-      console.log("User favorites request was aborted");
+      log.info("User favorites request was aborted");
       return null; // Return null for aborted requests
     }
 
-    console.error("[CLIENT] Error fetching user favorites:", err);
+    log.error("Error fetching user favorites", err);
     return null;
   }
 }
@@ -1132,13 +1194,15 @@ export async function fetchItemHistory(id: string) {
     }
 
     if (!response.ok) {
+      const body = await response.json().catch(() => ({}));
+      log.error("fetchItemHistory failed", { status: response.status, body });
       throw new Error("Failed to fetch item history");
     }
 
     const data = await response.json();
     return data;
   } catch (err) {
-    console.error("[CLIENT] Error fetching item history:", err);
+    log.error("Error fetching item history", err);
     return null;
   }
 }
@@ -1159,13 +1223,15 @@ export async function fetchItemsByType(type: string) {
     }
 
     if (!response.ok) {
+      const body = await response.json().catch(() => ({}));
+      log.error("fetchItemsByType failed", { status: response.status, body });
       throw new Error("Failed to fetch items by type");
     }
 
     const data = await response.json();
     return data;
   } catch (err) {
-    console.error("[SERVER] Error fetching items by type:", err);
+    log.error("Error fetching items by type", err);
     return null;
   }
 }
@@ -1205,6 +1271,8 @@ export async function fetchComments(
     }
 
     if (!response.ok) {
+      const body = await response.json().catch(() => ({}));
+      log.error("fetchComments failed", { status: response.status, body });
       throw new Error("Failed to fetch comments");
     }
 
@@ -1222,7 +1290,7 @@ export async function fetchComments(
 
     return { comments: commentsArray, userMap: {} };
   } catch (err) {
-    console.error("[SERVER] Error fetching comments:", err);
+    log.error("Error fetching comments", err);
     return { comments: [], userMap: {} };
   }
 }
@@ -1238,8 +1306,8 @@ export async function fetchInventoryData(robloxId: string) {
 
     if (!response.ok) {
       if (response.status !== 404 && response.status !== 500) {
-        console.error(
-          `[SERVER] Inventory API returned ${response.status} for ID: ${robloxId}`,
+        log.error(
+          `fetchInventoryData: API returned ${response.status} for ID: ${robloxId}`,
         );
       }
 
@@ -1309,9 +1377,7 @@ export async function fetchRobloxUsersBatch(userIds: string[]) {
       .map((id) => parseInt(id, 10));
 
     if (validUserIds.length === 0) {
-      console.warn(
-        "[SERVER] fetchRobloxUsersBatch: No valid userIds found after filtering, returning empty data",
-      );
+      log.warn("fetchRobloxUsersBatch: No valid userIds found after filtering");
       return { data: [] };
     }
 
@@ -1343,11 +1409,11 @@ export async function fetchRobloxUsersBatch(userIds: string[]) {
 
       return {};
     } catch (err) {
-      console.error("[SERVER] fetchRobloxUsersBatch: Network error:", err);
+      log.error("fetchRobloxUsersBatch: Network error", err);
       return {};
     }
   } catch (err) {
-    console.error("[SERVER] fetchRobloxUsersBatch: Unexpected error:", err);
+    log.error("fetchRobloxUsersBatch: Unexpected error", err);
     return null;
   }
 }
@@ -1365,8 +1431,8 @@ export async function fetchRobloxUsersBatchLeaderboard(userIds: string[]) {
       .map((id) => parseInt(id, 10));
 
     if (validUserIds.length === 0) {
-      console.warn(
-        "[SERVER] fetchRobloxUsersBatchLeaderboard: No valid userIds found after filtering, returning empty data",
+      log.warn(
+        "fetchRobloxUsersBatchLeaderboard: No valid userIds found after filtering",
       );
       return {};
     }
@@ -1384,9 +1450,11 @@ export async function fetchRobloxUsersBatchLeaderboard(userIds: string[]) {
 
       if (!response.ok) {
         if (response.status !== 404) {
-          console.error(
-            `[SERVER] fetchRobloxUsersBatchLeaderboard: Failed with status ${response.status} ${response.statusText}`,
-          );
+          const body = await response.json().catch(() => ({}));
+          log.error("fetchRobloxUsersBatchLeaderboard: Failed", {
+            status: response.status,
+            body,
+          });
         }
         return {};
       }
@@ -1395,8 +1463,8 @@ export async function fetchRobloxUsersBatchLeaderboard(userIds: string[]) {
       if (data && typeof data === "object") {
         return data;
       } else {
-        console.warn(
-          "[SERVER] fetchRobloxUsersBatchLeaderboard: Returned invalid data structure:",
+        log.warn(
+          "fetchRobloxUsersBatchLeaderboard: Invalid data structure",
           data,
         );
         return {};
@@ -1405,10 +1473,7 @@ export async function fetchRobloxUsersBatchLeaderboard(userIds: string[]) {
       return {};
     }
   } catch (err) {
-    console.error(
-      "[SERVER] fetchRobloxUsersBatchLeaderboard: Unexpected error:",
-      err,
-    );
+    log.error("fetchRobloxUsersBatchLeaderboard: Unexpected error", err);
     return null;
   }
 }
@@ -1464,13 +1529,18 @@ export async function fetchItemCountStats(): Promise<ItemCountStats | null> {
       if (response.status === 404) {
         return null;
       }
+      const body = await response.json().catch(() => ({}));
+      log.error("fetchItemCountStats failed", {
+        status: response.status,
+        body,
+      });
       throw new Error("Failed to fetch item count stats");
     }
 
     const data = await response.json();
     return data as ItemCountStats;
   } catch {
-    console.error("[SERVER] Error fetching item count stats");
+    log.error("Error fetching item count stats");
     return null;
   }
 }
@@ -1488,13 +1558,18 @@ export async function fetchUserScansLeaderboard(): Promise<UserScan[]> {
       if (response.status === 404) {
         return [];
       }
+      const body = await response.json().catch(() => ({}));
+      log.error("fetchUserScansLeaderboard failed", {
+        status: response.status,
+        body,
+      });
       throw new Error("Failed to fetch user scans leaderboard");
     }
 
     const data = await response.json();
     return data as UserScan[];
   } catch (err) {
-    console.error("[SERVER] Error fetching user scans leaderboard:", err);
+    log.error("Error fetching user scans leaderboard", err);
     return [];
   }
 }
@@ -1517,13 +1592,18 @@ export async function fetchMoneyLeaderboard(): Promise<
       if (response.status === 404) {
         return [];
       }
+      const body = await response.json().catch(() => ({}));
+      log.error("fetchMoneyLeaderboard failed", {
+        status: response.status,
+        body,
+      });
       throw new Error("Failed to fetch money leaderboard");
     }
 
     const data = await response.json();
     return data as MoneyLeaderboardEntry[];
   } catch (err) {
-    console.error("[SERVER] Error fetching money leaderboard:", err);
+    log.error("Error fetching money leaderboard", err);
     return [];
   }
 }
@@ -1546,6 +1626,11 @@ export async function fetchSeasonLeaderboard(): Promise<SeasonLeaderboardRespons
       if (response.status === 404) {
         return { data: [], updated_at: 0 };
       }
+      const body = await response.json().catch(() => ({}));
+      log.error("fetchSeasonLeaderboard failed", {
+        status: response.status,
+        body,
+      });
       throw new Error("Failed to fetch season leaderboard");
     }
 
@@ -1555,7 +1640,7 @@ export async function fetchSeasonLeaderboard(): Promise<SeasonLeaderboardRespons
       updated_at: data.updated_at,
     };
   } catch (err) {
-    console.error("[SERVER] Error fetching season leaderboard:", err);
+    log.error("Error fetching season leaderboard", err);
     return { data: [], updated_at: 0 };
   }
 }
@@ -1590,13 +1675,15 @@ export async function fetchUserNetworth(
       if (response.status === 404) {
         return [];
       }
+      const body = await response.json().catch(() => ({}));
+      log.error("fetchUserNetworth failed", { status: response.status, body });
       throw new Error("Failed to fetch user networth");
     }
 
     const data = await response.json();
     return data as UserNetworthData[];
   } catch (err) {
-    console.error("[SERVER] Error fetching user networth:", err);
+    log.error("Error fetching user networth", err);
     return [];
   }
 }
@@ -1617,13 +1704,15 @@ export async function fetchUserMoneyRank(robloxId: string) {
       if (response.status === 404) {
         return null;
       }
+      const body = await response.json().catch(() => ({}));
+      log.error("fetchUserMoneyRank failed", { status: response.status, body });
       throw new Error("Failed to fetch user money rank");
     }
 
     const data = await response.json();
     return data;
   } catch (err) {
-    console.error("[SERVER] Error fetching user money rank:", err);
+    log.error("Error fetching user money rank", err);
     return null;
   }
 }
@@ -1680,9 +1769,11 @@ export async function fetchOfficialScanBots(): Promise<OfficialBotUser[]> {
     });
 
     if (!response.ok) {
-      console.error(
-        `[SERVER] fetchOfficialScanBots: Failed with status ${response.status} ${response.statusText}`,
-      );
+      const body = await response.json().catch(() => ({}));
+      log.error("fetchOfficialScanBots: Failed", {
+        status: response.status,
+        body,
+      });
       return [];
     }
 
@@ -1690,13 +1781,10 @@ export async function fetchOfficialScanBots(): Promise<OfficialBotUser[]> {
     if (Array.isArray(data)) {
       return data as OfficialBotUser[];
     }
-    console.warn(
-      "[SERVER] fetchOfficialScanBots: Unexpected response shape:",
-      data,
-    );
+    log.warn("fetchOfficialScanBots: Unexpected response shape", data);
     return [];
   } catch (err) {
-    console.error("[SERVER] fetchOfficialScanBots: Unexpected error:", err);
+    log.error("fetchOfficialScanBots: Unexpected error", err);
     return [];
   }
 }
@@ -1738,7 +1826,8 @@ export async function fetchConnectedBots(
       });
 
       if (!response.ok) {
-        throw new Error(`Status ${response.status} ${response.statusText}`);
+        const body = await response.json().catch(() => ({}));
+        throw new Error(`Status ${response.status}: ${JSON.stringify(body)}`);
       }
 
       const data = await response.json();
@@ -1760,8 +1849,8 @@ export async function fetchConnectedBots(
     }
   }
 
-  console.error(
-    "[SERVER] fetchConnectedBots: All attempts failed:",
+  log.error(
+    "fetchConnectedBots: All attempts failed",
     lastError?.message || lastError,
   );
   return null;
@@ -1823,7 +1912,8 @@ export async function fetchQueueInfo(
       });
 
       if (!response.ok) {
-        throw new Error(`Status ${response.status} ${response.statusText}`);
+        const body = await response.json().catch(() => ({}));
+        throw new Error(`Status ${response.status}: ${JSON.stringify(body)}`);
       }
 
       const data = await response.json();
@@ -1844,8 +1934,8 @@ export async function fetchQueueInfo(
     }
   }
 
-  console.error(
-    "[SERVER] fetchQueueInfo: All attempts failed:",
+  log.error(
+    "fetchQueueInfo: All attempts failed",
     lastError?.message || lastError,
   );
   return null;
@@ -1903,14 +1993,14 @@ export async function fetchRobloxUserByUsername(username: string) {
         }
       } catch (parseError) {
         // If we can't read the response, use the status-based error
-        console.error(
-          `[SERVER] fetchRobloxUserByUsername: Failed to parse error response:`,
+        log.error(
+          "fetchRobloxUserByUsername: Failed to parse error response",
           parseError,
         );
       }
 
-      console.error(
-        `[SERVER] fetchRobloxUserByUsername: Failed with status ${response.status} ${response.statusText}`,
+      log.error(
+        `fetchRobloxUserByUsername: Failed with status ${response.status} ${response.statusText}`,
         errorMessage,
       );
 
@@ -1941,8 +2031,8 @@ export async function fetchRobloxUserByUsername(username: string) {
       return null;
     }
   } catch (err) {
-    console.error(
-      "[SERVER] fetchRobloxUserByUsername: Error fetching user by username:",
+    log.error(
+      "fetchRobloxUserByUsername: Error fetching user by username",
       err,
     );
     // Re-throw the error so it can be properly handled upstream
@@ -1969,13 +2059,18 @@ export async function fetchUsersWithFlags(): Promise<UserWithFlags[]> {
     });
 
     if (!response.ok) {
-      throw new Error("Failed to fetch users with flags");
+      const body = await response.json().catch(() => ({}));
+      log.error("Error fetching users with flags", {
+        status: response.status,
+        body,
+      });
+      return [];
     }
 
     const data = await response.json();
     return data as UserWithFlags[];
-  } catch {
-    console.error("[SERVER] Error fetching users with flags");
+  } catch (err) {
+    log.error("Error fetching users with flags", err);
     return [];
   }
 }
@@ -2006,8 +2101,10 @@ export async function fetchOGSearchData(
       clearTimeout(timeoutId);
 
       if (!response.ok) {
-        console.error(
-          `[SERVER] OG Search API returned ${response.status} for ID: ${robloxId} (attempt ${attempt + 1})`,
+        const body = await response.json().catch(() => ({}));
+        log.error(
+          `fetchOGSearchData: API returned ${response.status} for ID: ${robloxId} (attempt ${attempt + 1})`,
+          { status: response.status, body },
         );
 
         // Don't retry on 404 - user not found
@@ -2046,8 +2143,8 @@ export async function fetchOGSearchData(
         err instanceof Error &&
         (err.name === "AbortError" || err.message.includes("fetch"))
       ) {
-        console.warn(
-          `[SERVER] OG Search request failed (attempt ${attempt + 1}/${maxRetries + 1}):`,
+        log.warn(
+          `fetchOGSearchData: Request failed (attempt ${attempt + 1}/${maxRetries + 1})`,
           err.message,
         );
 
@@ -2058,19 +2155,13 @@ export async function fetchOGSearchData(
       }
 
       // For other errors, don't retry
-      console.error(
-        "[SERVER] Non-retryable error fetching OG search data:",
-        err,
-      );
+      log.error("fetchOGSearchData: Non-retryable error", err);
       break;
     }
   }
 
   // All retries failed
-  console.error(
-    "[SERVER] All retry attempts failed for OG search data:",
-    lastError,
-  );
+  log.error("fetchOGSearchData: All retry attempts failed", lastError);
 
   if (lastError instanceof Error && lastError.name === "AbortError") {
     return {
@@ -2105,13 +2196,15 @@ export async function fetchSupporters(): Promise<Supporter[]> {
     });
 
     if (!response.ok) {
+      const body = await response.json().catch(() => ({}));
+      log.error("fetchSupporters failed", { status: response.status, body });
       throw new Error("Failed to fetch supporters");
     }
 
     const data = await response.json();
     return data as Supporter[];
   } catch (err) {
-    console.error("[SERVER] Error fetching supporters:", err);
+    log.error("Error fetching supporters", err);
     return [];
   }
 }
@@ -2157,7 +2250,7 @@ export async function fetchNotificationHistory(
     const data = await response.json();
     return data as NotificationHistory;
   } catch (error) {
-    console.error("Error fetching notification history:", error);
+    log.error("Error fetching notification history", error);
     return {
       items: [],
       total: 0,
@@ -2206,7 +2299,7 @@ export async function fetchUnreadNotifications(
     const data = await response.json();
     return data as NotificationHistory;
   } catch (error) {
-    console.error("Error fetching unread notifications:", error);
+    log.error("Error fetching unread notifications", error);
     return {
       items: [],
       total: 0,
@@ -2247,7 +2340,7 @@ export async function fetchUnreadNotificationCount(): Promise<number> {
       ? Math.max(0, data.unread_count)
       : 0;
   } catch (error) {
-    console.error("Error fetching unread notification count:", error);
+    log.error("Error fetching unread notification count", error);
     return 0;
   }
 }
@@ -2274,7 +2367,7 @@ export async function clearNotificationHistory(): Promise<boolean> {
 
     return response.ok;
   } catch (error) {
-    console.error("Error clearing notification history:", error);
+    log.error("Error clearing notification history", error);
     return false;
   }
 }
@@ -2429,12 +2522,14 @@ export async function fetchHomepageStats(): Promise<HomepageStats | null> {
     });
 
     if (!response.ok) {
+      const body = await response.json().catch(() => ({}));
+      log.error("fetchHomepageStats failed", { status: response.status, body });
       throw new Error(`Failed to fetch homepage stats: ${response.status}`);
     }
 
     return (await response.json()) as HomepageStats;
   } catch (error) {
-    console.error("[SERVER] Error fetching homepage stats:", error);
+    log.error("Error fetching homepage stats", error);
     return null;
   }
 }
@@ -2459,10 +2554,20 @@ export async function fetchHomepageImpactStats(): Promise<HomepageImpactStats | 
     ]);
 
     if (!countResponse.ok) {
+      const body = await countResponse.json().catch(() => ({}));
+      log.error("fetchHomepageImpactStats: items/count failed", {
+        status: countResponse.status,
+        body,
+      });
       throw new Error(`Failed to fetch items/count: ${countResponse.status}`);
     }
 
     if (!duplicatesResponse.ok) {
+      const body = await duplicatesResponse.json().catch(() => ({}));
+      log.error("fetchHomepageImpactStats: items/duplicates/count failed", {
+        status: duplicatesResponse.status,
+        body,
+      });
       throw new Error(
         `Failed to fetch items/duplicates/count: ${duplicatesResponse.status}`,
       );
@@ -2479,7 +2584,7 @@ export async function fetchHomepageImpactStats(): Promise<HomepageImpactStats | 
       total_duplicates: duplicates.total_duplicates ?? 0,
     };
   } catch (error) {
-    console.error("[SERVER] Error fetching homepage impact stats:", error);
+    log.error("Error fetching homepage impact stats", error);
     return null;
   }
 }

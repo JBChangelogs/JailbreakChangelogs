@@ -1,5 +1,8 @@
 import { NextResponse } from "next/server";
 import { BASE_API_URL } from "@/utils/api";
+import { createLogger } from "@/services/logger";
+
+const log = createLogger("API");
 
 export async function GET(request: Request) {
   try {
@@ -50,9 +53,7 @@ export async function GET(request: Request) {
       }
 
       const errorText = await response.text();
-      console.error(
-        `Users search API error: ${response.status} - ${errorText}`,
-      );
+      log.error(`Users search API error: ${response.status} - ${errorText}`);
       return NextResponse.json(
         { error: "Failed to search users" },
         { status: response.status },
@@ -62,7 +63,7 @@ export async function GET(request: Request) {
     const data = await response.json();
     return NextResponse.json(data);
   } catch (error) {
-    console.error("Error searching users:", error);
+    log.error("Error searching users:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 },

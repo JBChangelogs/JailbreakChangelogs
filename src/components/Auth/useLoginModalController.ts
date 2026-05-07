@@ -1,6 +1,9 @@
 "use client";
 
+import { createLogger } from "@/services/logger";
 import { useState, useCallback, type SyntheticEvent } from "react";
+
+const log = createLogger("AUTH");
 import { toast } from "sonner";
 import { PUBLIC_API_URL } from "@/utils/api";
 import { useAuthContext } from "@/contexts/AuthContext";
@@ -74,7 +77,7 @@ export function useLoginModalController(): LoginModalController {
 
       window.location.href = oauthRedirect;
     } catch (error) {
-      console.error("Error initiating Roblox OAuth:", error);
+      log.error("Error initiating Roblox OAuth", error);
       toast.error("Failed to start Roblox authentication", {
         duration: 4000,
       });

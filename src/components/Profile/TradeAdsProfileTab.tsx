@@ -8,6 +8,9 @@ import { Pagination } from "@/components/ui/Pagination";
 import { TradeAdCard } from "@/components/trading/TradeAdCard";
 import { Icon } from "@/components/ui/IconWrapper";
 import { buildApiUrlWithDevToken } from "@/utils/apiDevToken";
+import { createLogger } from "@/services/logger";
+
+const log = createLogger("UI");
 
 interface User {
   id: string;
@@ -205,6 +208,11 @@ export default function TradeAdsProfileTab({
         }
 
         if (!response.ok) {
+          const body = await response.json().catch(() => ({}));
+          log.error("fetch trade ads failed", {
+            status: response.status,
+            body,
+          });
           throw new Error(`Failed to fetch trade ads (${response.status})`);
         }
 

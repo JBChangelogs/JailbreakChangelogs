@@ -45,6 +45,9 @@ import {
 import dynamic from "next/dynamic";
 import { CommentData, UserNetworthData, MoneyHistory } from "@/utils/api";
 import { UserData } from "@/types/auth";
+import { createLogger } from "@/services/logger";
+
+const log = createLogger("INVENTORY");
 import MoneyHistoryChart from "@/components/Inventory/MoneyHistoryChart";
 import NetworthHistoryChart from "@/components/Inventory/NetworthHistoryChart";
 import InventoryBreakdown from "@/components/Inventory/InventoryBreakdown";
@@ -219,13 +222,13 @@ export default function InventoryCheckerClient({
               }
             }
           } catch (e) {
-            console.error("Failed to fetch historical season", e);
+            log.error("Failed to fetch historical season", e);
           }
         }
 
         setActiveSeason(resolved);
       } catch (e) {
-        console.error("Error fetching season data", e);
+        log.error("Error fetching season data", e);
       }
     };
 
@@ -410,6 +413,11 @@ export default function InventoryCheckerClient({
         { cache: "no-store" },
       );
       if (!response.ok) {
+        const body = await response.json().catch(() => ({}));
+        log.error("queue position request failed", {
+          status: response.status,
+          body,
+        });
         throw new Error(`Queue request failed: ${response.status}`);
       }
 
@@ -430,7 +438,7 @@ export default function InventoryCheckerClient({
         setQueueStatusMessage(data.error || "Not in queue");
       }
     } catch (queueError) {
-      console.error("Error fetching queue position:", queueError);
+      log.error("Error fetching queue position:", queueError);
       setQueuePosition(null);
       setQueueStatusMessage("Failed to fetch queue position");
     } finally {

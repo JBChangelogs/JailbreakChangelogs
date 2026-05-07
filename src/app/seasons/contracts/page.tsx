@@ -15,6 +15,9 @@ import {
   INVENTORY_API_SOURCE_HEADER,
 } from "@/utils/api";
 import { buildApiUrlWithDevToken } from "@/utils/apiDevToken";
+import { createLogger } from "@/services/logger";
+
+const log = createLogger("UI");
 
 interface SeasonContract {
   team: "Criminal" | "Police";
@@ -67,7 +70,7 @@ export default function SeasonContractsPage() {
           setLatestSeason(await seasonRes.json());
         }
       } catch (error) {
-        console.error("Error loading contracts data:", error);
+        log.error("Error loading contracts data", error);
         setContracts([]);
       } finally {
         setIsLoaded(true);

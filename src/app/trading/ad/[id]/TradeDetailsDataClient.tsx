@@ -8,6 +8,9 @@ import NotFoundView from "@/components/Layout/NotFoundView";
 import { buildApiUrlWithDevToken } from "@/utils/apiDevToken";
 import TradeDetailsClient from "./TradeDetailsClient";
 import Loading from "./loading";
+import { createLogger } from "@/services/logger";
+
+const log = createLogger("UI");
 
 interface V2TradeItemInfo {
   cash_value?: string | null;
@@ -177,6 +180,8 @@ export default function TradeDetailsDataClient({
         }
 
         if (!response.ok) {
+          const body = await response.json().catch(() => ({}));
+          log.error("fetch trade failed", { status: response.status, body });
           throw new Error("Failed to fetch trade");
         }
 

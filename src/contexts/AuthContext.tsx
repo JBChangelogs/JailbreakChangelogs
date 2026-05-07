@@ -20,6 +20,9 @@ import {
 import { PUBLIC_API_URL } from "@/utils/api";
 import { toast } from "sonner";
 import { useRealtimeNotificationsWebSocket } from "@/hooks/useRealtimeNotificationsWebSocket";
+import { createLogger } from "@/services/logger";
+
+const log = createLogger("AUTH");
 
 interface AuthContextType extends AuthState {
   logout: () => Promise<void>;
@@ -139,7 +142,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         }
       }
     } catch (err) {
-      console.error("Auth initialization error:", err);
+      log.error("Auth initialization error", err);
       setAuthState({
         isAuthenticated: false,
         user: null,
@@ -181,7 +184,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       authInterval = setInterval(() => {
         if (isUserActiveRef.current) {
           initializeAuth().catch((error) => {
-            console.error("Auth validation error:", error);
+            log.error("Auth validation error", error);
           });
         }
       }, 600000); // Check every 10 minutes when active (reduced frequency)
@@ -296,7 +299,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       .then((res) => {
         if (res.ok) void initializeAuth();
       })
-      .catch(console.error);
+      .catch((e) => log.error("Dev login fetch error", e));
   }, [initializeAuth]);
 
   const handleLogout = async () => {
@@ -313,7 +316,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       // Track user status in Clarity
       router.refresh();
     } catch (err) {
-      console.error("Logout error:", err);
+      log.error("Logout error", err);
       // Errors are now handled by toast.promise in authLogout()
     }
   };
@@ -374,7 +377,7 @@ export const getCurrentUserPremiumType = (): number => {
       return userData.premiumtype || 0;
     }
   } catch (error) {
-    console.error("Error parsing user data:", error);
+    log.error("Error parsing user data", error);
   }
 
   return 0;

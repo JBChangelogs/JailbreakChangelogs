@@ -57,6 +57,9 @@ import CommentTimestamp from "./CommentTimestamp";
 import { toast } from "sonner";
 import DOMPurify from "dompurify";
 import { Pagination } from "@/components/ui/Pagination";
+import { createLogger } from "@/services/logger";
+
+const log = createLogger("UI");
 
 /**
  * Checks if a comment is still within its 1-hour edit window.
@@ -601,7 +604,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
           });
         }
       } catch (error) {
-        console.error("Error fetching user data:", error);
+        log.error("Error fetching user data:", error);
         setFailedUserData((prev) => {
           const newSet = new Set(prev);
           usersToFetch.forEach((userId) => {
@@ -647,7 +650,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
         // We no longer fetch user data for all comments here.
         // It is now handled by the useEffect that watches currentComments.
       } catch (err) {
-        console.error("Error refreshing comments:", err);
+        log.error("Error refreshing comments:", err);
       } finally {
         if (!silent) setIsRefreshingComments(false);
       }
@@ -937,6 +940,8 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
         body: JSON.stringify({ id: commentId, item_type: type }),
       });
       if (!response.ok) {
+        const body = await response.json().catch(() => ({}));
+        log.error("delete comment failed", { status: response.status, body });
         throw new Error("Failed to delete comment");
       }
       // Comment successfully deleted, track with analytics
@@ -1236,6 +1241,8 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
       });
 
       if (!response.ok) {
+        const body = await response.json().catch(() => ({}));
+        log.error("report comment failed", { status: response.status, body });
         throw new Error("Failed to report comment");
       }
 

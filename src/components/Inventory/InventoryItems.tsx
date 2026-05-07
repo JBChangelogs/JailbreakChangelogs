@@ -1,6 +1,9 @@
 "use client";
 
+import { createLogger } from "@/services/logger";
 import { useEffect, useState, useMemo } from "react";
+
+const log = createLogger("UI");
 import Link from "next/link";
 import { RobloxUser, Item } from "@/types";
 import { InventoryData, InventoryItem } from "@/app/inventories/types";
@@ -98,7 +101,7 @@ export default function InventoryItems({
         setItemUnlockMetadataById(metadata);
       })
       .catch((error) => {
-        console.error("Error loading item unlock metadata:", error);
+        log.error("Error loading item unlock metadata", error);
         if (isMounted) setItemUnlockMetadataById(null);
       });
 

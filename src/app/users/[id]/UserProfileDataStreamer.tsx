@@ -3,7 +3,9 @@ import { fetchUserById } from "@/utils/api";
 import UserProfileClient from "./UserProfileClient";
 import { UserSettings, UserFlag } from "@/types/auth";
 import { ProfileDataService } from "@/services/profileDataService";
-import { logError } from "@/services/logger";
+import { createLogger } from "@/services/logger";
+
+const log = createLogger("API");
 import type { TradeAd } from "@/types/trading";
 
 interface CommentData {
@@ -134,10 +136,7 @@ async function AdditionalDataFetcher({
     // Fetch additional data using the shared service
     profileData = await ProfileDataService.fetchProfileData(userId);
   } catch (err: unknown) {
-    logError("Error fetching additional user data", err, {
-      component: "UserProfileDataStreamer",
-      action: "fetch_additional_data",
-    });
+    log.error("Error fetching additional user data", err);
 
     // Use default data if fetching fails
     profileData = ProfileDataService.getDefaultProfileData();
@@ -199,10 +198,7 @@ async function UserProfileDataFetcher({ userId }: { userId: string }) {
         errorMessage.startsWith("BANNED_USER:")
       )
     ) {
-      logError("Error fetching user profile data", error, {
-        component: "UserProfileDataStreamer",
-        action: "fetch_user_profile",
-      });
+      log.error("Error fetching user profile data", error);
     }
 
     // Handle private profile errors

@@ -1,6 +1,9 @@
 import { toast } from "sonner";
 import { UserData } from "../types/auth";
 import { safeLocalStorage, safeSetJSON } from "./safeStorage";
+import { createLogger } from "@/services/logger";
+
+const log = createLogger("AUTH");
 
 let lastLogoutSource: string = "Unknown";
 let activeLogoutToast: string | number | null = null;
@@ -124,11 +127,7 @@ export async function logout() {
   const source = lastLogoutSource || "Direct API Call";
 
   const logoutPromise = (async () => {
-    console.group("🔐 Logout Process");
-    console.log("📝 Logout Details:", {
-      Source: source,
-      Timestamp: new Date().toISOString(),
-    });
+    log.info(`Logout initiated from: ${source}`);
 
     // Create AbortController for request cancellation
     const abortController = new AbortController();
@@ -143,21 +142,20 @@ export async function logout() {
       clearTimeout(timeoutId);
 
       if (!response.ok) {
+        const body = await response.json().catch(() => ({}));
+        log.error("clear session failed", { status: response.status, body });
         throw new Error("Failed to clear session");
       }
 
       clearAuthData("user-initiated logout");
-      console.groupEnd();
     } catch (error) {
       clearTimeout(timeoutId);
       if (error instanceof Error && error.name === "AbortError") {
-        console.log("Logout request was aborted, clearing auth data locally");
+        log.info("Logout request was aborted, clearing auth data locally");
         clearAuthData("logout request aborted");
-        console.groupEnd();
         return;
       }
-      console.error("❌ Error During Logout:", error);
-      console.groupEnd();
+      log.error("Error during logout", error);
       throw error;
     }
   })();
@@ -179,7 +177,7 @@ export async function logout() {
 }
 
 function clearAuthData(reason: string) {
-  console.log(`Clearing auth data. Reason: ${reason}`);
+  log.info(`Clearing auth data. Reason: ${reason}`);
 
   safeLocalStorage.removeItem("user");
   safeLocalStorage.removeItem("userid");
@@ -240,8 +238,8 @@ async function performAuthValidation(): Promise<boolean> {
 
     const contentType = response.headers.get("content-type");
     if (!response.ok || !contentType?.includes("application/json")) {
-      console.warn(
-        "Auth validation request returned non-JSON response (likely a 404 or dev compilation state). Skipping validation update.",
+      log.warn(
+        "Auth validation returned non-JSON response (likely 404 or dev compilation state), skipping",
       );
       return true; // Keep previous state when request is aborted or not ready
     }
@@ -267,14 +265,12 @@ async function performAuthValidation(): Promise<boolean> {
 
     // Handle AbortError specifically - don't treat it as a real error
     if (error instanceof Error && error.name === "AbortError") {
-      console.log(
-        "Auth validation request was aborted, keeping previous state",
-      );
+      log.info("Auth validation request was aborted, keeping previous state");
       return true; // Keep previous state when request is aborted
     }
 
     // For other errors, log them but don't log out; keep previous state
-    console.error("Auth validation error:", error);
+    log.error("Auth validation error", error);
     return true;
   }
 }
@@ -289,8 +285,8 @@ export function isAuthenticated(): boolean {
 export function getToken(): string | null {
   // Token is HttpOnly, so we can't access it from client-side
   // This function is deprecated and should not be used
-  console.warn(
-    "getToken() is deprecated - token is HttpOnly and cannot be accessed from client-side",
+  log.warn(
+    "getToken() is deprecated — token is HttpOnly and cannot be accessed client-side",
   );
   return null;
 }

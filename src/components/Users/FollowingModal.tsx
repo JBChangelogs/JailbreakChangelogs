@@ -1,4 +1,7 @@
+import { createLogger } from "@/services/logger";
 import React, { useState, useEffect, useRef } from "react";
+
+const log = createLogger("UI");
 import {
   Dialog,
   DialogContent,
@@ -120,6 +123,11 @@ const FollowingModal: React.FC<FollowingModalProps> = ({
         }
 
         if (!response.ok) {
+          const body = await response.json().catch(() => ({}));
+          log.error("fetch following failed", {
+            status: response.status,
+            body,
+          });
           throw new Error("Failed to fetch following");
         }
 
@@ -171,7 +179,7 @@ const FollowingModal: React.FC<FollowingModalProps> = ({
 
         setFollowingDetails(detailsMap);
       } catch (err) {
-        console.error("Error fetching following:", err);
+        log.error("Error fetching following", err);
         setError("Failed to load following");
       } finally {
         setLoading(false);
@@ -205,6 +213,11 @@ const FollowingModal: React.FC<FollowingModalProps> = ({
       );
 
       if (!response.ok) {
+        const body = await response.json().catch(() => ({}));
+        log.error(
+          isCurrentlyFollowing ? "unfollow user failed" : "follow user failed",
+          { status: response.status, body },
+        );
         throw new Error(
           isCurrentlyFollowing
             ? "Failed to unfollow user"

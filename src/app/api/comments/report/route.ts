@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { BASE_API_URL } from "@/utils/api";
+import { createLogger } from "@/services/logger";
+
+const log = createLogger("API");
 
 export async function POST(request: Request) {
   const { comment_id, reason } = (await request.json()) as {
@@ -30,7 +33,7 @@ export async function POST(request: Request) {
       const loggedText = isHtml
         ? `HTML Error Page (Status ${upstream.status})`
         : text.slice(0, 100);
-      console.error("Comment report failed:", loggedText);
+      log.error("Comment report failed:", loggedText);
     }
     return NextResponse.json(
       { message: "Failed to report comment" },

@@ -3,6 +3,9 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { INVENTORY_WS_URL, ENABLE_WS_SCAN } from "@/utils/api";
 import type { ScanPhase } from "@/utils/scanProgressMessage";
+import { createLogger } from "@/services/logger";
+
+const log = createLogger("SCAN");
 
 /**
  * WebSocket hook for managing inventory scan operations
@@ -152,7 +155,7 @@ export function useScanWebSocket(userId: string): UseScanWebSocketReturn {
               });
               wsRef.current.send(heartbeatMsg);
             } catch (err) {
-              console.error("[SCAN WS] Status check send failed:", err);
+              log.error("[SCAN WS] Status check send failed:", err);
             }
           }
         }, 30000);
@@ -335,7 +338,7 @@ export function useScanWebSocket(userId: string): UseScanWebSocketReturn {
             }
           }
         } catch (err) {
-          console.error("[SCAN WS] Parse error:", err);
+          log.error("[SCAN WS] Parse error:", err);
           setError("Invalid response from server - connection may be unstable");
           setStatus("error");
         }
@@ -388,14 +391,14 @@ export function useScanWebSocket(userId: string): UseScanWebSocketReturn {
       });
 
       ws.addEventListener("error", (err) => {
-        console.error("[SCAN WS] Error:", err);
+        log.error("[SCAN WS] Error:", err);
         setError("WebSocket connection error");
         setStatus("error");
         setPhase("error");
         setIsConnected(false);
       });
     } catch (err) {
-      console.error("[SCAN WS] Connection error:", err);
+      log.error("[SCAN WS] Connection error:", err);
       setError("Failed to connect to scan service");
       setStatus("error");
       setPhase("error");

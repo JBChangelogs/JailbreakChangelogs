@@ -3,7 +3,9 @@ import {
   fetchFavoritesData,
   fetchFavoriteItemDetails,
 } from "@/app/users/[id]/actions";
-import { logError, logApiError } from "@/services/logger";
+import { createLogger } from "@/services/logger";
+
+const log = createLogger("API");
 import { fetchWithRetry } from "@/utils/fetchWithRetry";
 import type { TradeAd } from "@/types/trading";
 
@@ -41,14 +43,11 @@ export class ProfileDataService {
 
       if (!response.ok) {
         if (response.status !== 404) {
-          logApiError(
-            "/users/comments/get",
-            response.status,
-            "Error fetching comments",
-            {
-              component: "ProfileDataService",
-            },
-          );
+          const body = await response.json().catch(() => ({}));
+          log.error(`Error fetching comments — /users/comments/get`, {
+            status: response.status,
+            body,
+          });
         }
         return [];
       }
@@ -56,10 +55,7 @@ export class ProfileDataService {
       const commentsData = await response.json();
       return Array.isArray(commentsData) ? commentsData : [];
     } catch (error) {
-      logError("Error fetching comments with retry", error, {
-        component: "ProfileDataService",
-        action: "fetch_comments_with_retry",
-      });
+      log.error("Error fetching comments with retry", error);
       return [];
     }
   }
@@ -148,10 +144,7 @@ export class ProfileDataService {
         tradeAds: [],
       };
     } catch (error) {
-      logError("Error fetching profile data", error, {
-        component: "ProfileDataService",
-        action: "fetch_profile_data",
-      });
+      log.error("Error fetching profile data", error);
       throw error;
     }
   }

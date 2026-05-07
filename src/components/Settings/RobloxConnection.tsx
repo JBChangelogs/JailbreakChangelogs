@@ -1,5 +1,8 @@
+import { createLogger } from "@/services/logger";
 import { useState } from "react";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+
+const log = createLogger("UI");
 import { Icon } from "@/components/ui/IconWrapper";
 import { toast } from "sonner";
 import { safeGetJSON, safeSetJSON } from "@/utils/safeStorage";
@@ -44,9 +47,19 @@ export const RobloxConnection = ({ userData }: RobloxConnectionProps) => {
       );
 
       if (!response.ok) {
-        const errorData = await response.json();
+        const errorData = await response.json().catch(() => ({}));
+        log.error("disconnect Roblox account failed", {
+          status: response.status,
+          body: errorData,
+        });
         throw new Error(
-          errorData.message || "Failed to disconnect Roblox account",
+          (errorData as { message?: string; error?: string; detail?: string })
+            .message ??
+            (errorData as { message?: string; error?: string; detail?: string })
+              .error ??
+            (errorData as { message?: string; error?: string; detail?: string })
+              .detail ??
+            "Failed to disconnect Roblox account",
         );
       }
 
@@ -72,7 +85,7 @@ export const RobloxConnection = ({ userData }: RobloxConnectionProps) => {
 
       handleClose();
     } catch (error) {
-      console.error("Error disconnecting Roblox account:", error);
+      log.error("Error disconnecting Roblox account", error);
       setError(
         error instanceof Error
           ? error.message

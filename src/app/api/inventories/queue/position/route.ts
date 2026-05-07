@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { INVENTORY_API_URL } from "@/utils/api";
+import { createLogger } from "@/services/logger";
+
+const log = createLogger("INVENTORY");
 
 export const dynamic = "force-dynamic";
 
@@ -56,9 +59,7 @@ export async function GET(request: NextRequest) {
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error(
-        `Queue position API error: ${response.status} - ${errorText}`,
-      );
+      log.error(`Queue position API error: ${response.status} - ${errorText}`);
       return NextResponse.json(
         { error: "Failed to fetch queue position" },
         { status: response.status },
@@ -75,7 +76,7 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error("Error fetching queue position:", error);
+    log.error("Error fetching queue position:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 },

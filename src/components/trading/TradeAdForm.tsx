@@ -39,6 +39,9 @@ import {
 } from "@/components/ui/tooltip";
 import { getResponseErrorMessage } from "@/utils/api";
 import { buildApiUrlWithDevToken } from "@/utils/apiDevToken";
+import { createLogger } from "@/services/logger";
+
+const log = createLogger("UI");
 
 interface TradeAdFormProps {
   onSuccess?: (createdTrade?: unknown) => void;
@@ -313,7 +316,7 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
         }
       }
     } catch (error) {
-      console.error("Failed to parse stored items from localStorage:", error);
+      log.error("Failed to parse stored items from localStorage:", error);
       safeLocalStorage.removeItem("tradeAdFormItems");
     }
   }, [isAuthenticated]);
@@ -350,7 +353,7 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
         setTradeNote(note || "");
       }
     } catch (error) {
-      console.error("Failed to restore items from localStorage:", error);
+      log.error("Failed to restore items from localStorage:", error);
     } finally {
       setShowRestoreModal(false);
     }
@@ -685,7 +688,7 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
         }
       }
     } catch (err) {
-      console.error("Error with trade ad:", err);
+      log.error("Error with trade ad:", err);
       const errorMessage =
         err instanceof Error && err.message
           ? err.message

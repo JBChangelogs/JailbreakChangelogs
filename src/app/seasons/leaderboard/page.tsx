@@ -15,6 +15,9 @@ import {
   INVENTORY_API_SOURCE_HEADER,
 } from "@/utils/api";
 import { buildApiUrlWithDevToken } from "@/utils/apiDevToken";
+import { createLogger } from "@/services/logger";
+
+const log = createLogger("UI");
 
 interface SeasonLeaderboardEntry {
   id: number;
@@ -68,7 +71,7 @@ export default function SeasonLeaderboardPage() {
           setSeasonRetryAfter(raw ? parseInt(raw, 10) : null);
         }
       } catch (error) {
-        console.error("Error loading leaderboard data:", error);
+        log.error("Error loading leaderboard data", error);
         setLeaderboard([]);
       } finally {
         setIsLoaded(true);

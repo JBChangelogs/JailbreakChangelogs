@@ -1,5 +1,8 @@
 import { NextResponse } from "next/server";
 import { BASE_API_URL } from "@/utils/api";
+import { createLogger } from "@/services/logger";
+
+const log = createLogger("API");
 
 export const dynamic = "force-dynamic";
 
@@ -45,7 +48,7 @@ export async function GET(request: Request) {
       },
     });
   } catch (error) {
-    console.error("Error fetching followers:", error);
+    log.error("Error fetching followers:", error);
     return NextResponse.json(
       { message: "Failed to fetch followers" },
       { status: 500 },

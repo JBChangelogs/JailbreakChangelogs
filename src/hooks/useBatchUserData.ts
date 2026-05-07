@@ -1,5 +1,8 @@
+import { createLogger } from "@/services/logger";
 import { useState, useEffect, useRef, useMemo } from "react";
 import { RobloxUser } from "@/types";
+
+const log = createLogger("API");
 
 interface UseBatchUserDataOptions {
   batchSize?: number;
@@ -118,7 +121,7 @@ export function useBatchUserData(
           }
         })
         .catch((error: Error) => {
-          console.error(`Failed to fetch batch ${batchIndex}:`, error);
+          log.error(`Failed to fetch batch ${batchIndex}`, error);
           completedBatches++;
 
           // Update progress even on error

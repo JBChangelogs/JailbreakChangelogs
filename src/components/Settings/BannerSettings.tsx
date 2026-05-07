@@ -3,6 +3,7 @@ import { cn } from "@/lib/utils";
 import { Box, TextField, Typography } from "@mui/material";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
+import { createLogger } from "@/services/logger";
 
 import {
   Tooltip,
@@ -17,6 +18,8 @@ import { useSupporterModal } from "@/hooks/useSupporterModal";
 import SupporterModal from "../Modals/SupporterModal";
 import { UPLOAD_CONFIG } from "@/config/settings";
 import { validateFile } from "@/utils/fileValidation";
+
+const log = createLogger("UI");
 
 interface BannerSettingsProps {
   userData: UserData;
@@ -97,7 +100,7 @@ export const BannerSettings = ({
 
       setIsValidBanner(true);
     } catch (error) {
-      console.error("Error validating banner:", error);
+      log.error("Error validating banner:", error);
       setBannerError("Invalid banner URL");
     }
   }, []);
@@ -189,7 +192,7 @@ export const BannerSettings = ({
           });
         }
       } catch (saveError) {
-        console.warn("Auto-save failed after upload:", saveError);
+        log.warn("Auto-save failed after upload:", saveError);
         // We still consider the upload a success if the image was uploaded
       }
 
@@ -214,7 +217,7 @@ export const BannerSettings = ({
     try {
       await uploadAndSave;
     } catch (error) {
-      console.error("Banner upload error:", error);
+      log.error("Banner upload error:", error);
       // Reset file input on error
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
@@ -246,7 +249,7 @@ export const BannerSettings = ({
         window.umami.track("Custom Banner Updated", { url: customBannerUrl });
       }
     } catch (error) {
-      console.error("Error updating banner:", error);
+      log.error("Error updating banner:", error);
       setBannerError(
         error instanceof Error ? error.message : "Failed to update banner",
       );

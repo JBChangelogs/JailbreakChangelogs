@@ -1,5 +1,8 @@
 import { NextResponse } from "next/server";
 import { UPLOAD_CONFIG, getAllowedFileExtensions } from "@/config/settings";
+import { createLogger } from "@/services/logger";
+
+const log = createLogger("UPLOAD");
 
 // Increase route timeout for large file uploads (5 minutes)
 // vgy.me can take over a minute to process large files
@@ -93,7 +96,7 @@ function validateFileContent(buffer: Uint8Array, mimeType: string): boolean {
         }
       }
       if (matches) {
-        console.warn("Suspicious file content detected:", {
+        log.warn("Suspicious file content detected", {
           pattern: pattern
             .map((b) => "0x" + b.toString(16).toUpperCase())
             .join(" "),
@@ -121,11 +124,10 @@ export async function POST(request: Request) {
     const file = formData.get("file") as File;
 
     // Security logging - tracks all upload attempts
-    console.log("File upload attempt:", {
+    log.info("File upload attempt", {
       fileName: file?.name,
       fileSize: file?.size,
       mimeType: file?.type,
-      timestamp: new Date().toISOString(),
       userAgent: request.headers.get("user-agent"),
     });
 
@@ -142,7 +144,7 @@ export async function POST(request: Request) {
         file.type as (typeof UPLOAD_CONFIG.ALLOWED_FILE_TYPES)[number],
       )
     ) {
-      console.warn("Invalid MIME type:", {
+      log.warn("Invalid MIME type", {
         fileName: file.name,
         mimeType: file.type,
       });
@@ -161,7 +163,7 @@ export async function POST(request: Request) {
       .substring(file.name.lastIndexOf("."));
 
     if (!allowedExtensions.includes(fileExtension)) {
-      console.warn("Invalid file extension:", {
+      log.warn("Invalid file extension", {
         fileName: file.name,
         extension: fileExtension,
       });
@@ -173,7 +175,7 @@ export async function POST(request: Request) {
 
     // SECURITY LAYER 3: Extension-MIME consistency check
     if (!validateExtensionMimeMatch(file.name, file.type)) {
-      console.warn("Extension-MIME type mismatch:", {
+      log.warn("Extension-MIME type mismatch", {
         fileName: file.name,
         mimeType: file.type,
         extension: fileExtension,
@@ -200,7 +202,7 @@ export async function POST(request: Request) {
 
     const isValidImage = validateMagicBytes(uint8Array);
     if (!isValidImage) {
-      console.warn("Invalid magic bytes:", {
+      log.warn("Invalid magic bytes", {
         fileName: file.name,
         mimeType: file.type,
         firstBytes: Array.from(uint8Array.slice(0, 8))
@@ -215,7 +217,7 @@ export async function POST(request: Request) {
 
     // SECURITY LAYER 5: Malicious content detection
     if (!validateFileContent(uint8Array, file.type)) {
-      console.error("Suspicious file content detected:", {
+      log.error("Suspicious file content detected", {
         fileName: file.name,
         mimeType: file.type,
         fileSize: file.size,
@@ -228,7 +230,7 @@ export async function POST(request: Request) {
 
     // All security validation passed
     validationPassed = true;
-    console.log("File validation passed:", {
+    log.info("File validation passed", {
       fileName: file.name,
       fileSize: file.size,
       mimeType: file.type,
@@ -244,7 +246,7 @@ export async function POST(request: Request) {
       vgyFormData.append("userkey", userkey);
     }
 
-    console.log("Uploading to vgy.me:", {
+    log.info("Uploading to vgy.me", {
       fileName: file.name,
       fileSize: file.size,
       fileType: file.type,
@@ -259,7 +261,7 @@ export async function POST(request: Request) {
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error("vgy.me upload failed:", errorText);
+      log.error("vgy.me upload failed", errorText);
 
       // Handle specific HTTP status codes
       if (response.status === 502) {
@@ -362,12 +364,11 @@ export async function POST(request: Request) {
     const processingTime = Date.now() - startTime;
 
     // Comprehensive error logging for security monitoring
-    console.error("Upload error:", {
+    log.error("Upload error", {
       error: error instanceof Error ? error.message : "Unknown error",
       stack: error instanceof Error ? error.stack : undefined,
       validationPassed,
       processingTime,
-      timestamp: new Date().toISOString(),
     });
 
     // Handle specific error types

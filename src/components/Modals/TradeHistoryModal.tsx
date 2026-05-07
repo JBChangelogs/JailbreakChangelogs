@@ -1,6 +1,9 @@
 "use client";
 
+import { createLogger } from "@/services/logger";
 import { useMemo, useState, useEffect } from "react";
+
+const log = createLogger("UI");
 import { usePathname } from "next/navigation";
 import {
   Dialog,
@@ -122,6 +125,11 @@ export default function TradeHistoryModal({
         );
 
         if (!response.ok) {
+          const body = await response.json().catch(() => ({}));
+          log.error("fetch trade history users failed", {
+            status: response.status,
+            body,
+          });
           return;
         }
 
@@ -150,7 +158,7 @@ export default function TradeHistoryModal({
 
         setFetchedUsers(processedUsers);
       } catch (error) {
-        console.error("Failed to fetch users:", error);
+        log.error("Failed to fetch users", error);
       }
     };
 

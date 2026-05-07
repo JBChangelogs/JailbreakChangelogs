@@ -33,6 +33,9 @@ import {
   DropdownMenuRadioItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { createLogger } from "@/services/logger";
+
+const log = createLogger("UI");
 
 interface TradeAdsProps {
   initialTradeAds?: TradeAd[];
@@ -766,14 +769,14 @@ export default function TradeAds({
           err instanceof HttpStatusError &&
           (err.status === 401 || err.status === 403)
         ) {
-          console.warn("Recent trade ads request unauthorized:", err.body);
+          log.warn("Recent trade ads request unauthorized:", err.body);
           setTradeAds([]);
           setIsRecentTradesUnauthorized(true);
           setError(null);
           return false;
         }
 
-        console.error("Error refreshing trade ads:", err);
+        log.error("Error refreshing trade ads:", err);
         setError("Failed to refresh trade ads");
         return false;
       } finally {
@@ -862,7 +865,7 @@ export default function TradeAds({
       await deleteTradeAd(tradeId);
       toast.success("Trade ad deleted successfully", { id: toastId });
     } catch (error) {
-      console.error("Error deleting trade ad:", error);
+      log.error("Error deleting trade ad:", error);
       toast.error("Failed to delete trade ad", { id: toastId });
       // Refresh the trade ads list to ensure consistency
       refreshTradeAds();

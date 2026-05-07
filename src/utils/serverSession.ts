@@ -3,6 +3,9 @@
 import { cookies } from "next/headers";
 import { BASE_API_URL } from "@/utils/api";
 import type { UserData } from "@/types/auth";
+import { createLogger } from "@/services/logger";
+
+const log = createLogger("AUTH");
 
 /**
  * Reads the auth token from the request cookie and fetches the current user on the server.
@@ -33,6 +36,8 @@ export async function getCurrentUser(): Promise<UserData | null> {
         if (response.status === 401 || response.status === 404) {
           return null;
         }
+        const body = await response.json().catch(() => ({}));
+        log.error("session fetch failed", { status: response.status, body });
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 

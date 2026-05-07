@@ -9,6 +9,9 @@ import {
 import { Icon } from "@/components/ui/IconWrapper";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { createLogger } from "@/services/logger";
+
+const log = createLogger("UI");
 
 interface UtmGeneratorModalProps {
   isOpen: boolean;
@@ -48,7 +51,7 @@ export const UtmGeneratorModal: React.FC<UtmGeneratorModalProps> = ({
 
       return url.toString();
     } catch (e) {
-      console.error("Error generating URL:", e);
+      log.error("Error generating URL:", e);
       return "";
     }
   }, [isOpen, source, medium, campaign, term, content]);
@@ -77,7 +80,7 @@ export const UtmGeneratorModal: React.FC<UtmGeneratorModalProps> = ({
 
         window.umami.track("Generate UTM Link", payload);
       } catch (e) {
-        console.error("Error tracking UTM generation:", e);
+        log.error("Error tracking UTM generation:", e);
       }
     }
 

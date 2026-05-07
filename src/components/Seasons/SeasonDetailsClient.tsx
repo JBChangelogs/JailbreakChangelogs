@@ -1,6 +1,9 @@
 "use client";
 
+import { createLogger } from "@/services/logger";
 import { useEffect, useState } from "react";
+
+const log = createLogger("UI");
 import { useRouter } from "next/navigation";
 import { notFound } from "next/navigation";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
@@ -95,7 +98,7 @@ export default function SeasonDetailsClient({
         setSeasonList(data);
         setCurrentSeasonState(matched);
       } catch (error) {
-        console.error("Error loading season data:", error);
+        log.error("Error loading season data", error);
         setIsNotFound(true);
       }
     };

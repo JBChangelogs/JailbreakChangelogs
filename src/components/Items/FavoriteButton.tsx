@@ -1,6 +1,9 @@
 "use client";
 
+import { createLogger } from "@/services/logger";
 import { useState } from "react";
+
+const log = createLogger("UI");
 import { toast } from "sonner";
 import { Icon } from "@/components/ui/IconWrapper";
 
@@ -56,7 +59,7 @@ export default function FavoriteButton({
         toast.error("Failed to update favorite status");
       }
     } catch (error) {
-      console.error("Error updating favorite status:", error);
+      log.error("Error updating favorite status", error);
       toast.error("Failed to update favorite status");
     } finally {
       setIsLoading(false);

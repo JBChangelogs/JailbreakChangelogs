@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 import { INVENTORY_API_URL } from "@/utils/api";
 import { cookies } from "next/headers";
+import { createLogger } from "@/services/logger";
+
+const log = createLogger("API");
 
 export async function POST() {
   try {
@@ -30,7 +33,7 @@ export async function POST() {
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error("Export failed:", response.status, errorText);
+      log.error("Export failed:", { status: response.status, body: errorText });
       return NextResponse.json(
         { error: "Export failed" },
         { status: response.status },
@@ -40,7 +43,7 @@ export async function POST() {
     const data = await response.json();
     return NextResponse.json(data);
   } catch (error) {
-    console.error("Export error:", error);
+    log.error("Export error:", error);
     return NextResponse.json(
       { error: "Internal Server Error" },
       { status: 500 },

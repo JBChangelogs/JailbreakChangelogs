@@ -5,6 +5,9 @@ import { useVirtualizer } from "@tanstack/react-virtual";
 import { useQuery } from "@tanstack/react-query";
 import Image from "next/image";
 import { Icon } from "@/components/ui/IconWrapper";
+import { createLogger } from "@/services/logger";
+
+const log = createLogger("UI");
 
 interface ItemDupedUser {
   hasVerifiedBadge: boolean;
@@ -51,6 +54,8 @@ export default function DupesTab({ itemId }: DupesTabProps) {
         if (response.status === 404) {
           return [];
         }
+        const body = await response.json().catch(() => ({}));
+        log.error("fetch dupes failed", { status: response.status, body });
         throw new Error("Failed to fetch dupes");
       }
       return response.json() as Promise<ItemDupedUser[]>;

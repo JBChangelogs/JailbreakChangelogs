@@ -1,230 +1,119 @@
-/**
- * Centralized logging service to replace console statements throughout the application.
- * Provides structured logging with different levels and context-aware formatting.
- */
+export type LogModule =
+  | "API"
+  | "AUTH"
+  | "WS"
+  | "SOCKET"
+  | "STORAGE"
+  | "UPLOAD"
+  | "UI"
+  | "SCAN"
+  | "NOTIFY"
+  | "OG"
+  | "INVENTORY"
+  | (string & {});
 
-export enum LogLevel {
-  DEBUG = 0,
-  INFO = 1,
-  WARN = 2,
-  ERROR = 3,
+type LogLevel = "DEBUG" | "INFO" | "WARN" | "ERROR";
+
+const MODULE_COLORS: Record<string, string> = {
+  API: "#4fc3f7",
+  AUTH: "#81c784",
+  WS: "#ffb74d",
+  SOCKET: "#ffb74d",
+  STORAGE: "#ce93d8",
+  UPLOAD: "#ff8a65",
+  UI: "#80cbc4",
+  SCAN: "#f48fb1",
+  NOTIFY: "#fff176",
+  OG: "#a5d6a7",
+  INVENTORY: "#90caf9",
+};
+
+const LEVEL_COLORS: Record<LogLevel, string> = {
+  DEBUG: "#9e9e9e",
+  INFO: "#4fc3f7",
+  WARN: "#ffb74d",
+  ERROR: "#ef5350",
+};
+
+// Cached per page load — null means not yet checked
+let _clientDebug: boolean | null = null;
+
+function shouldLog(): boolean {
+  // Server-side always logs (goes to terminal, not browser console)
+  if (typeof window === "undefined") return true;
+
+  if (_clientDebug === null) {
+    try {
+      const fromStorage = localStorage.getItem("jbcl_debug") === "1";
+      const fromUrl = new URLSearchParams(window.location.search).has(
+        "jbcl_debug",
+      );
+      _clientDebug = fromStorage || fromUrl;
+    } catch {
+      _clientDebug = false;
+    }
+    if (_clientDebug) {
+      console.log(
+        '%c[JBCL] Debug logging enabled. To disable: localStorage.removeItem("jbcl_debug")',
+        "color: #81c784; font-weight: bold; font-size: 12px",
+      );
+    }
+  }
+
+  return _clientDebug;
 }
 
-export interface LogContext {
-  component?: string;
-  action?: string;
-  userId?: string;
-  robloxId?: string;
-  [key: string]: unknown;
-}
-
-class Logger {
-  private static instance: Logger;
-  private logLevel: LogLevel;
-  private isDevelopment: boolean;
-
-  private constructor() {
-    this.isDevelopment = process.env.NODE_ENV === "development";
-    this.logLevel = this.isDevelopment ? LogLevel.DEBUG : LogLevel.WARN;
-  }
-
-  public static getInstance(): Logger {
-    if (!Logger.instance) {
-      Logger.instance = new Logger();
-    }
-    return Logger.instance;
-  }
-
-  /**
-   * Set the minimum log level for the application
-   */
-  public setLogLevel(level: LogLevel): void {
-    this.logLevel = level;
-  }
-
-  /**
-   * Format log message with context
-   */
-  private formatMessage(
-    level: string,
-    message: string,
-    context?: LogContext,
-  ): string {
-    const timestamp = new Date().toISOString();
-    const contextStr = context
-      ? ` [${Object.entries(context)
-          .map(([k, v]) => `${k}=${v}`)
-          .join(", ")}]`
-      : "";
-    return `[${timestamp}] ${level}${contextStr}: ${message}`;
-  }
-
-  /**
-   * Check if a log level should be output
-   */
-  private shouldLog(level: LogLevel): boolean {
-    return level >= this.logLevel;
-  }
-
-  /**
-   * Debug level logging - only in development
-   */
-  public debug(message: string, context?: LogContext): void {
-    if (this.shouldLog(LogLevel.DEBUG)) {
-      console.log(this.formatMessage("DEBUG", message, context));
-    }
-  }
-
-  /**
-   * Info level logging
-   */
-  public info(message: string, context?: LogContext): void {
-    if (this.shouldLog(LogLevel.INFO)) {
-      console.info(this.formatMessage("INFO", message, context));
-    }
-  }
-
-  /**
-   * Warning level logging
-   */
-  public warn(message: string, context?: LogContext): void {
-    if (this.shouldLog(LogLevel.WARN)) {
-      console.warn(this.formatMessage("WARN", message, context));
-    }
-  }
-
-  /**
-   * Error level logging
-   */
-  public error(
-    message: string,
-    error?: Error | unknown,
-    context?: LogContext,
-  ): void {
-    if (this.shouldLog(LogLevel.ERROR)) {
-      const errorStr =
-        error instanceof Error ? error.stack || error.message : String(error);
-      console.error(this.formatMessage("ERROR", message, context), errorStr);
-    }
-  }
-
-  /**
-   * Log API errors with structured context
-   */
-  public apiError(
-    endpoint: string,
-    status: number,
-    message: string,
-    context?: LogContext,
-  ): void {
-    this.error(`API Error: ${endpoint}`, undefined, {
-      ...context,
-      endpoint,
-      status,
-      action: "api_call",
-    });
-  }
-
-  /**
-   * Log user actions for debugging
-   */
-  public userAction(
-    action: string,
-    userId?: string,
-    context?: LogContext,
-  ): void {
-    this.info(`User Action: ${action}`, {
-      ...context,
-      action,
-      userId,
-    });
-  }
-
-  /**
-   * Log performance metrics
-   */
-  public performance(
-    operation: string,
-    duration: number,
-    context?: LogContext,
-  ): void {
-    this.info(`Performance: ${operation}`, {
-      ...context,
-      operation,
-      duration: `${duration}ms`,
-    });
-  }
-
-  /**
-   * Log data fetching operations
-   */
-  public dataFetch(
-    operation: string,
-    count: number,
-    context?: LogContext,
-  ): void {
-    this.info(`Data Fetch: ${operation}`, {
-      ...context,
-      operation,
-      count,
-    });
-  }
-
-  /**
-   * Log WebSocket events
-   */
-  public websocket(event: string, status: string, context?: LogContext): void {
-    this.info(`WebSocket: ${event}`, {
-      ...context,
-      event,
-      status,
-    });
-  }
-}
-
-// Export singleton instance
-export const logger = Logger.getInstance();
-
-// Convenience functions for common use cases
-export const logError = (
+function emit(
+  level: LogLevel,
+  module: string,
   message: string,
-  error?: Error | unknown,
-  context?: LogContext,
-) => logger.error(message, error, context);
+  extra?: unknown,
+): void {
+  if (!shouldLog()) return;
 
-export const logInfo = (message: string, context?: LogContext) =>
-  logger.info(message, context);
+  const ts = new Date().toISOString().split("T")[1].slice(0, -1);
+  const modColor = MODULE_COLORS[module] ?? "#e0e0e0";
+  const lvlColor = LEVEL_COLORS[level];
 
-export const logWarn = (message: string, context?: LogContext) =>
-  logger.warn(message, context);
+  const consoleFn =
+    level === "ERROR"
+      ? console.error
+      : level === "WARN"
+        ? console.warn
+        : level === "INFO"
+          ? console.info
+          : console.log;
 
-export const logDebug = (message: string, context?: LogContext) =>
-  logger.debug(message, context);
+  const fmt = `%c[JBCL]%c ${ts} %c[${module}]%c ${level}:%c ${message}`;
+  const styles = [
+    "color: #4fc3f7; font-weight: bold",
+    "color: #b0bec5; font-size: 11px",
+    `color: ${modColor}; font-weight: bold`,
+    `color: ${lvlColor}; font-weight: bold`,
+    "color: inherit",
+  ];
 
-export const logApiError = (
-  endpoint: string,
-  status: number,
-  message: string,
-  context?: LogContext,
-) => logger.apiError(endpoint, status, message, context);
+  if (extra !== undefined) {
+    consoleFn(fmt, ...styles, extra);
+  } else {
+    consoleFn(fmt, ...styles);
+  }
+}
 
-export const logUserAction = (
-  action: string,
-  userId?: string,
-  context?: LogContext,
-) => logger.userAction(action, userId, context);
+export function createLogger(module: LogModule) {
+  return {
+    debug: (message: string, extra?: unknown) =>
+      emit("DEBUG", module, message, extra),
+    info: (message: string, extra?: unknown) =>
+      emit("INFO", module, message, extra),
+    warn: (message: string, extra?: unknown) =>
+      emit("WARN", module, message, extra),
+    error: (message: string, extra?: unknown) =>
+      emit("ERROR", module, message, extra),
+  };
+}
 
-export const logPerformance = (
-  operation: string,
-  duration: number,
-  context?: LogContext,
-) => logger.performance(operation, duration, context);
-
-export const logDataFetch = (
-  operation: string,
-  count: number,
-  context?: LogContext,
-) => logger.dataFetch(operation, count, context);
-
-export const logWebSocket = (event: string, status: string) =>
-  logger.websocket(event, status);
+// Eagerly check on client so the banner fires at module load, not first log call
+if (typeof window !== "undefined") {
+  shouldLog();
+}

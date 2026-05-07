@@ -3,6 +3,9 @@
 import { useRef, useCallback } from "react";
 import { INVENTORY_API_URL } from "@/utils/api";
 import { ServerRegionData } from "./useRobberyTrackerWebSocket";
+import { createLogger } from "@/services/logger";
+
+const log = createLogger("WS");
 
 /**
  * Hook to fetch server region data in batches without persistent caching
@@ -62,10 +65,11 @@ export function useServerRegions() {
           const response = await fetch(url);
 
           if (!response.ok) {
-            console.error(
-              `[REGION FETCH] Failed to fetch regions:`,
-              response.status,
-            );
+            const body = await response.json().catch(() => ({}));
+            log.error(`[REGION FETCH] Failed to fetch regions`, {
+              status: response.status,
+              body,
+            });
             // Set null for all IDs in this batch on error
             batch.forEach((id) => {
               allResults[id] = null;
@@ -82,7 +86,7 @@ export function useServerRegions() {
 
         return allResults;
       } catch (error) {
-        console.error(
+        log.error(
           `[REGION FETCH] Error fetching regions (${validIds.join(", ")}):`,
           error,
         );

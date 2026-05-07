@@ -1,5 +1,8 @@
 import { NextResponse } from "next/server";
 import { BASE_API_URL } from "@/utils/api";
+import { createLogger } from "@/services/logger";
+
+const log = createLogger("API");
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -23,9 +26,7 @@ export async function GET() {
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error(
-        `Servers list API error: ${response.status} - ${errorText}`,
-      );
+      log.error(`Servers list API error: ${response.status} - ${errorText}`);
       return NextResponse.json(
         { error: "Failed to fetch servers" },
         { status: response.status },
@@ -42,7 +43,7 @@ export async function GET() {
       },
     });
   } catch (error) {
-    console.error("Error fetching servers list:", error);
+    log.error("Error fetching servers list:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 },

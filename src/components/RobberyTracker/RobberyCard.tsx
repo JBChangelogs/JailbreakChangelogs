@@ -1,6 +1,9 @@
 "use client";
 
+import { createLogger } from "@/services/logger";
 import { useEffect, useState } from "react";
+
+const log = createLogger("UI");
 import Image from "next/image";
 import { Icon } from "@/components/ui/IconWrapper";
 import { Button } from "@/components/ui/button";
@@ -214,7 +217,7 @@ export default function RobberyCard({
         duration: 2000,
       });
     } catch (err) {
-      console.error("Failed to copy casino code:", err);
+      log.error("Failed to copy casino code", err);
       toast.error("Failed to copy casino code");
     }
   };

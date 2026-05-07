@@ -1,3 +1,7 @@
+import { createLogger } from "@/services/logger";
+
+const log = createLogger("API");
+
 /**
  * Determines which GitHub branch to fetch version data from based on Railway environment
  */
@@ -49,7 +53,7 @@ export async function getWebsiteVersion(): Promise<{
       commitUrl: data.html_url,
     };
   } catch (error) {
-    console.error("Failed to fetch version data:", error);
+    log.error("Failed to fetch version data", error);
     return {
       version: "unknown",
       date: Date.now(),

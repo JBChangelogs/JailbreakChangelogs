@@ -3,6 +3,9 @@
 import { useEffect } from "react";
 import Link from "next/link";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
+import { createLogger } from "@/services/logger";
+
+const log = createLogger("UI");
 
 export default function Error({
   error,
@@ -12,7 +15,7 @@ export default function Error({
   reset: () => void;
 }) {
   useEffect(() => {
-    console.error("Changelog details error:", error);
+    log.error("Changelog details error", error);
   }, [error]);
 
   return (

@@ -14,6 +14,9 @@ import { UserAvatar } from "@/utils/avatar";
 import Link from "next/link";
 import { toast } from "sonner";
 import { UserSettingsV2 } from "@/types/auth";
+import { createLogger } from "@/services/logger";
+
+const log = createLogger("UI");
 
 interface Follower {
   user_id: string;
@@ -126,6 +129,11 @@ const FollowersModal: React.FC<FollowersModalProps> = ({
         }
 
         if (!response.ok) {
+          const body = await response.json().catch(() => ({}));
+          log.error("fetch followers failed", {
+            status: response.status,
+            body,
+          });
           throw new Error("Failed to fetch followers");
         }
 
@@ -165,7 +173,7 @@ const FollowersModal: React.FC<FollowersModalProps> = ({
 
         setFollowerDetails(detailsMap);
       } catch (err) {
-        console.error("Error fetching followers:", err);
+        log.error("Error fetching followers:", err);
         setError("Failed to load followers");
       } finally {
         setLoading(false);
@@ -211,7 +219,7 @@ const FollowersModal: React.FC<FollowersModalProps> = ({
 
         setFollowingStatus(statusMap);
       } catch (err) {
-        console.error("Error fetching following status:", err);
+        log.error("Error fetching following status:", err);
       }
     };
 
@@ -238,6 +246,8 @@ const FollowersModal: React.FC<FollowersModalProps> = ({
       });
 
       if (!response.ok) {
+        const body = await response.json().catch(() => ({}));
+        log.error("follow user failed", { status: response.status, body });
         throw new Error("Failed to follow user");
       }
 
@@ -251,7 +261,7 @@ const FollowersModal: React.FC<FollowersModalProps> = ({
       // Trigger a refetch by toggling isOpen or calling fetchFollowers directly
       // The useEffect will handle the refetch when isOpen changes
     } catch (err) {
-      console.error("Error following user:", err);
+      log.error("Error following user:", err);
       toast.error("Failed to follow user");
     } finally {
       setLoadingFollow((prev) => ({ ...prev, [followerId]: false }));

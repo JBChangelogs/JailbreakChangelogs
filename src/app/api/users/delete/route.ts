@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { BASE_API_URL } from "@/utils/api";
+import { createLogger } from "@/services/logger";
+
+const log = createLogger("API");
 
 export async function DELETE() {
   try {
@@ -20,7 +23,7 @@ export async function DELETE() {
 
     if (!resp.ok) {
       const err = await resp.text();
-      console.error("Account deletion failed:", err);
+      log.error("Account deletion failed:", err);
       return NextResponse.json(
         { message: "Failed to delete account" },
         { status: resp.status },

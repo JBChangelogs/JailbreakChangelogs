@@ -26,6 +26,9 @@ import {
 import { getCategoryColor, getCategoryIcon } from "@/utils/categoryIcons";
 import { bangers } from "@/app/fonts";
 import { Spinner } from "@/components/ui/Spinner";
+import { createLogger } from "@/services/logger";
+
+const log = createLogger("UI");
 
 interface InventoryApiItem {
   id: number | string;
@@ -345,7 +348,14 @@ export default function ProfileInventoryTab({
           signal: controller.signal,
         });
 
-        if (!response.ok) return;
+        if (!response.ok) {
+          const body = await response.json().catch(() => ({}));
+          log.error("fetch inventory owners failed", {
+            status: response.status,
+            body,
+          });
+          return;
+        }
 
         const data = (await response.json()) as unknown;
         if (!data || typeof data !== "object" || Array.isArray(data)) return;

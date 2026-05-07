@@ -8,6 +8,9 @@ import {
 } from "@/utils/api";
 import { RobloxUser } from "@/types";
 import OGFinderResults from "./OGFinderResults";
+import { createLogger } from "@/services/logger";
+
+const log = createLogger("OG");
 
 interface OGSearchData {
   results: Array<{
@@ -58,7 +61,7 @@ async function OGFinderDataFetcher({ robloxId }: { robloxId: string }) {
         fetchError = `Username "${robloxId}" not found. Please check the spelling and try again.`;
       }
     } catch (error) {
-      console.error("Error fetching user by username:", error);
+      log.error("Error fetching user by username:", error);
 
       // Check for max streams error - this is a temporary server issue
       if (error instanceof MaxStreamsError) {
@@ -155,7 +158,7 @@ async function OGFinderDataFetcher({ robloxId }: { robloxId: string }) {
   // Item owners will be fetched client-side in batches
   const [mainUserData, userConnectionData, items] = await Promise.all([
     fetchRobloxUsersBatch([actualRobloxId]).catch((error) => {
-      console.error("Failed to fetch main user data:", error);
+      log.error("Failed to fetch main user data:", error);
       return {};
     }),
     fetchUserByRobloxId(actualRobloxId).catch((error) => {
@@ -163,12 +166,12 @@ async function OGFinderDataFetcher({ robloxId }: { robloxId: string }) {
         !(error instanceof Error) ||
         !error.message.startsWith("PRIVATE_PROFILE:")
       ) {
-        console.error("Failed to fetch user connection data:", error);
+        log.error("Failed to fetch user connection data:", error);
       }
       return null;
     }),
     fetchItems().catch((error) => {
-      console.error("Failed to fetch items metadata:", error);
+      log.error("Failed to fetch items metadata:", error);
       return [];
     }),
   ]);

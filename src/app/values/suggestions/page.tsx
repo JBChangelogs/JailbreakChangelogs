@@ -1,6 +1,9 @@
 "use client";
 
 import { useEffect, useState, useCallback, useRef } from "react";
+import { createLogger } from "@/services/logger";
+
+const log = createLogger("API");
 import DOMPurify from "dompurify";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import { Icon } from "@/components/ui/IconWrapper";
@@ -846,12 +849,15 @@ export default function ValueSuggestionsPage() {
             },
             retryAfter * 1000 + 500,
           );
-        } else
+        } else {
+          log.error(`Vote failed ${res.status}`, data);
           toast.error(
             data?.message ?? data?.error ?? "Failed to register vote.",
           );
+        }
       }
-    } catch {
+    } catch (err) {
+      log.error("Vote request threw", err);
       setSuggestions((prev) =>
         prev.map((s) => (s.id === suggestion.id ? suggestion : s)),
       );
@@ -894,6 +900,7 @@ export default function ValueSuggestionsPage() {
     });
     if (!res.ok) {
       const data = await res.json().catch(() => ({}));
+      log.error("update suggestion failed", { status: res.status, body: data });
       toast.error(
         data?.message ?? data?.error ?? "Failed to update suggestion.",
       );
@@ -1020,7 +1027,11 @@ export default function ValueSuggestionsPage() {
         `/value-suggestions/recent?page=${p}`,
       );
       const res = await fetch(url, { credentials: "include" });
-      if (!res.ok) throw new Error("Failed to fetch suggestions");
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        log.error("fetch suggestions failed", { status: res.status, body });
+        throw new Error("Failed to fetch suggestions");
+      }
       const data: SuggestionsResponse = await res.json();
       setSuggestions(data.items ?? []);
       setTotalPages(data.total_pages ?? 1);
@@ -1057,7 +1068,11 @@ export default function ValueSuggestionsPage() {
       try {
         const url = buildApiUrlWithDevToken(PUBLIC_API_URL!, "/items/list");
         const res = await fetch(url);
-        if (!res.ok) throw new Error("Failed to fetch items");
+        if (!res.ok) {
+          const body = await res.json().catch(() => ({}));
+          log.error("fetch items failed", { status: res.status, body });
+          throw new Error("Failed to fetch items");
+        }
         const data: Item[] = await res.json();
         setItems(data);
         setItemMap(new Map(data.map((item) => [item.id, item])));

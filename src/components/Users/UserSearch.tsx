@@ -18,6 +18,9 @@ import { UserDetailsTooltip } from "../ui/UserDetailsTooltip";
 import { useAuthContext } from "@/contexts/AuthContext";
 import UserCardSkeleton from "./UserCardSkeleton";
 import { Spinner } from "@/components/ui/Spinner";
+import { createLogger } from "@/services/logger";
+
+const log = createLogger("UI");
 
 function InlineSpinner() {
   return (
@@ -95,7 +98,7 @@ export default function UserSearch() {
         } catch (error) {
           if (signal.aborted || latestRequestIdRef.current !== requestId)
             return;
-          console.error("Error searching users:", error);
+          log.error("Error searching users:", error);
           setUsers([]);
           setTotalPages(0);
           setTotal(0);
@@ -146,7 +149,7 @@ export default function UserSearch() {
         } catch (error) {
           if (signal.aborted || latestRequestIdRef.current !== requestId)
             return;
-          console.error("Error fetching users:", error);
+          log.error("Error fetching users:", error);
           setUsers([]);
           setTotalPages(0);
           setTotal(0);

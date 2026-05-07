@@ -5,6 +5,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { Icon } from "@/components/ui/IconWrapper";
 import { Button } from "@/components/ui/button";
+import { createLogger } from "@/services/logger";
+
+const log = createLogger("UI");
 
 export default function Error({
   error,
@@ -14,7 +17,7 @@ export default function Error({
   reset: () => void;
 }) {
   useEffect(() => {
-    console.error("User profile error:", error);
+    log.error("User profile error", error);
   }, [error]);
 
   return (

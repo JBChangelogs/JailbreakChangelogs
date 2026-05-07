@@ -3,6 +3,9 @@
 import { canHideAdsForPremiumType } from "@/utils/supporterAccess";
 import { useEffect, useRef } from "react";
 import { useAuthContext } from "@/contexts/AuthContext";
+import { createLogger } from "@/services/logger";
+
+const log = createLogger("UI");
 
 type NitroAdsWithRemove = {
   createAd?: (id: string, config: typeof ITEMS_CONFIG) => Promise<void>;
@@ -66,18 +69,12 @@ export default function NitroItemsVideoPlayer({ className }: Props) {
     try {
       Promise.resolve(nitroAds.createAd(SLOT_ID, ITEMS_CONFIG)).catch(
         (error) => {
-          console.warn(
-            "[Nitro Ad] Failed to create items video player ad:",
-            error,
-          );
+          log.warn("[Nitro Ad] Failed to create items video player ad:", error);
           createdRef.current = false;
         },
       );
     } catch (error) {
-      console.warn(
-        "[Nitro Ad] Error initializing items video player ad:",
-        error,
-      );
+      log.warn("[Nitro Ad] Error initializing items video player ad:", error);
       createdRef.current = false;
     }
 

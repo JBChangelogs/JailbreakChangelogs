@@ -1,6 +1,9 @@
 "use server";
 
 import { fetchRobloxUsersBatchLeaderboard } from "@/utils/api";
+import { createLogger } from "@/services/logger";
+
+const log = createLogger("API");
 
 export async function fetchLeaderboardUserData(userIds: string[]) {
   try {
@@ -19,10 +22,7 @@ export async function fetchLeaderboardUserData(userIds: string[]) {
       avatarData: {}, // Avatars now use direct URLs client-side
     };
   } catch (error) {
-    console.error(
-      "[SERVER ACTION] Failed to fetch leaderboard user data:",
-      error,
-    );
+    log.error("[SERVER ACTION] Failed to fetch leaderboard user data", error);
     return {
       userData: {},
       avatarData: {},

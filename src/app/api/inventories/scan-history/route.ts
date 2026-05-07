@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { INVENTORY_API_URL } from "@/utils/api";
+import { createLogger } from "@/services/logger";
+
+const log = createLogger("INVENTORY");
 
 export async function GET(request: NextRequest) {
   try {
@@ -37,7 +40,7 @@ export async function GET(request: NextRequest) {
       }
 
       const errorText = await response.text();
-      console.error(`Inventory API error: ${response.status} - ${errorText}`);
+      log.error(`Inventory API error: ${response.status} - ${errorText}`);
       return NextResponse.json(
         { error: "Failed to fetch scan history" },
         { status: response.status },
@@ -54,11 +57,11 @@ export async function GET(request: NextRequest) {
       return NextResponse.json([]);
     } else {
       // Unexpected response format
-      console.error("Unexpected scan history response format:", data);
+      log.error("Unexpected scan history response format:", data);
       return NextResponse.json([]);
     }
   } catch (error) {
-    console.error("Error fetching scan history:", error);
+    log.error("Error fetching scan history:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 },

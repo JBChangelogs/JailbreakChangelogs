@@ -2,6 +2,9 @@
 
 import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
+import { createLogger } from "@/services/logger";
+
+const log = createLogger("UI");
 
 export default function ItemError({
   error,
@@ -11,7 +14,7 @@ export default function ItemError({
   reset: () => void;
 }) {
   useEffect(() => {
-    console.error("Item page error:", error);
+    log.error("Item page error", error);
   }, [error]);
 
   return (

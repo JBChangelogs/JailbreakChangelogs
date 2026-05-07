@@ -1,6 +1,9 @@
 "use client";
 
+import { createLogger } from "@/services/logger";
 import Link from "next/link";
+
+const log = createLogger("UI");
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { AppBar, Toolbar, Box, useMediaQuery } from "@mui/material";
@@ -474,7 +477,7 @@ export default function Header() {
       trackLogoutSource("Header Component");
       await logout();
     } catch (err) {
-      console.error("Logout error:", err);
+      log.error("Logout error", err);
       // Errors are now handled by toast.promise in logout()
     }
   };

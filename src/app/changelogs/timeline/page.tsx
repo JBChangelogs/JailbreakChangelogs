@@ -7,6 +7,9 @@ import TimelineLoading from "@/app/changelogs/timeline/loading";
 import { Changelog, PUBLIC_API_URL } from "@/utils/api";
 import { buildApiUrlWithDevToken } from "@/utils/apiDevToken";
 import RateLimitView from "@/components/Layout/RateLimitView";
+import { createLogger } from "@/services/logger";
+
+const log = createLogger("UI");
 
 export default function TimelinePage() {
   const [changelogs, setChangelogs] = useState<Changelog[] | null>(null);
@@ -40,6 +43,11 @@ export default function TimelinePage() {
             setRateLimitRetryAfter(raw ? parseInt(raw, 10) : null);
             return;
           }
+          const body = await response.json().catch(() => ({}));
+          log.error("fetch changelog list failed", {
+            status: response.status,
+            body,
+          });
           throw new Error("Failed to fetch changelog list");
         }
 
@@ -47,7 +55,7 @@ export default function TimelinePage() {
         const sorted = [...data].sort((a, b) => b.id - a.id);
         setChangelogs(sorted);
       } catch (error) {
-        console.error("Error loading changelog timeline:", error);
+        log.error("Error loading changelog timeline", error);
         setChangelogs([]);
       }
     };

@@ -1,6 +1,9 @@
 "use client";
 
 import { useEffect } from "react";
+import { createLogger } from "@/services/logger";
+
+const log = createLogger("UI");
 
 export default function Error({
   error,
@@ -10,7 +13,7 @@ export default function Error({
   reset: () => void;
 }) {
   useEffect(() => {
-    console.error(error);
+    log.error("Values changelogs error", error);
 
     if (window.umami) {
       window.umami.track("Error", error);

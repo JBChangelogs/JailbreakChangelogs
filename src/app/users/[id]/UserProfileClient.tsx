@@ -15,6 +15,7 @@ import { toast } from "sonner";
 import dynamic from "next/dynamic";
 import { PUBLIC_API_URL } from "@/utils/api";
 import { buildApiUrlWithDevToken } from "@/utils/apiDevToken";
+import { createLogger } from "@/services/logger";
 
 import { UserBadges } from "@/components/Profile/UserBadges";
 import {
@@ -50,6 +51,8 @@ const FollowingModal = dynamic(
   },
 );
 import type { UserFlag } from "@/types/auth";
+
+const log = createLogger("UI");
 
 // Global audio instance to prevent overlapping playback
 let globalSuperIdolAudio: HTMLAudioElement | null = null;
@@ -393,7 +396,7 @@ export default function UserProfileClient({
             );
           setIsFollowing(isUserFollowing);
         } catch (error: unknown) {
-          console.error("Error fetching following status:", error);
+          log.error("Error fetching following status:", error);
         } finally {
           setIsLoadingFollow(false);
         }
@@ -432,6 +435,11 @@ export default function UserProfileClient({
         );
 
         if (!response.ok) {
+          const body = await response.json().catch(() => ({}));
+          log.error("fetch blocked users failed", {
+            status: response.status,
+            body,
+          });
           throw new Error("Failed to fetch blocked users");
         }
 
@@ -455,7 +463,7 @@ export default function UserProfileClient({
         }
       } catch (error) {
         if (!isCancelled) {
-          console.error("Error fetching blocked status:", error);
+          log.error("Error fetching blocked status:", error);
           setIsBlockedByMe(false);
         }
       }
@@ -504,7 +512,7 @@ export default function UserProfileClient({
         setCanMessageFromProfile(response.status === 200);
       } catch (error) {
         if (isCancelled) return;
-        console.error("Error checking profile messaging permission:", error);
+        log.error("Error checking profile messaging permission:", error);
         // Fallback: keep message button visible unless backend explicitly forbids.
         setCanMessageFromProfile(true);
       }
@@ -575,13 +583,18 @@ export default function UserProfileClient({
       );
 
       if (!response.ok) {
+        const body = await response.json().catch(() => ({}));
+        log.error("block/unblock user failed", {
+          status: response.status,
+          body,
+        });
         throw new Error(fallbackErrorMessage);
       }
 
       setIsBlockedByMe((prev) => !prev);
       toast.success(successMessage, { id: toastId });
     } catch (error) {
-      console.error("Error toggling blocked status:", error);
+      log.error("Error toggling blocked status:", error);
       toast.error(
         error instanceof Error && error.message
           ? error.message
@@ -621,9 +634,11 @@ export default function UserProfileClient({
       }
 
       if (!response.ok) {
+        const body = await response.json().catch(() => ({}));
         const errorMessage = isFollowing
           ? "Failed to unfollow user"
           : "Failed to follow user";
+        log.error(errorMessage, { status: response.status, body });
         toast.error(errorMessage);
         return;
       }
@@ -650,7 +665,7 @@ export default function UserProfileClient({
         location: "User Profile",
       });
     } catch (error) {
-      console.error("Error updating follow status:", error);
+      log.error("Error updating follow status:", error);
       toast.error(
         isFollowing ? "Failed to unfollow user" : "Failed to follow user",
       );

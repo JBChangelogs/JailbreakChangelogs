@@ -1,6 +1,9 @@
 "use client";
 
+import { createLogger } from "@/services/logger";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
+
+const log = createLogger("UI");
 import { useDropzone } from "react-dropzone";
 import { toast } from "sonner";
 import { Icon } from "@/components/ui/IconWrapper";
@@ -198,7 +201,7 @@ export function ScanTradeFromImage({ onScanSuccess }: ScanTradeFromImageProps) {
           source,
         });
       } catch (error) {
-        console.error("Scan trade image failed:", error);
+        log.error("Scan trade image failed", error);
         const message =
           error instanceof Error ? error.message : "Failed to scan image";
         setLastErrorMessage(message);

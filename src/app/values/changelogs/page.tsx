@@ -54,6 +54,9 @@ interface ChangelogGroup {
 }
 
 import NitroValuesChangelogsRailAd from "@/components/Ads/NitroValuesChangelogsRailAd";
+import { createLogger } from "@/services/logger";
+
+const log = createLogger("UI");
 
 export default function ValuesChangelogPage() {
   const [changelogs, setChangelogs] = useState<ChangelogGroup[]>([]);
@@ -74,6 +77,11 @@ export default function ValuesChangelogPage() {
           },
         );
         if (!response.ok) {
+          const body = await response.json().catch(() => ({}));
+          log.error("fetch changelogs failed", {
+            status: response.status,
+            body,
+          });
           throw new Error("Failed to fetch changelogs");
         }
         const data = await response.json();

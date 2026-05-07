@@ -1,8 +1,11 @@
 "use client";
 
+import { createLogger } from "@/services/logger";
 import { useState, useEffect } from "react";
 // import { PUBLIC_API_URL } from '@/utils/api';
 import { safeLocalStorage, safeSetJSON } from "@/utils/safeStorage";
+
+const log = createLogger("AUTH");
 
 const ESCAPE_COUNT_THRESHOLD = 5;
 const ESCAPE_TIMEOUT = 2000; // 2 seconds
@@ -16,13 +19,15 @@ async function validateToken(token: string) {
     });
 
     if (!response.ok) {
+      const body = await response.json().catch(() => ({}));
+      log.error("validate token failed", { status: response.status, body });
       throw new Error("Failed to validate token");
     }
 
     const data = await response.json();
     return { success: true, data };
   } catch (error) {
-    console.error("Error validating token:", error);
+    log.error("Error validating token", error);
     return { success: false, error: "Failed to validate token" };
   }
 }

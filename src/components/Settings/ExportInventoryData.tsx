@@ -1,6 +1,9 @@
+import { createLogger } from "@/services/logger";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+
+const log = createLogger("UI");
 
 export const ExportInventoryData = () => {
   const [loading, setLoading] = useState(false);
@@ -13,6 +16,8 @@ export const ExportInventoryData = () => {
       });
 
       if (!response.ok) {
+        const body = await response.json().catch(() => ({}));
+        log.error("export data failed", { status: response.status, body });
         throw new Error("Failed to export data");
       }
 
@@ -29,7 +34,7 @@ export const ExportInventoryData = () => {
         toast.error("Unexpected response from server");
       }
     } catch (error) {
-      console.error("Export error:", error);
+      log.error("Export error", error);
       toast.error("Failed to schedule export. Please try again later.");
     } finally {
       setLoading(false);

@@ -1,5 +1,8 @@
 import { NextResponse } from "next/server";
 import { BASE_API_URL } from "@/utils/api";
+import { createLogger } from "@/services/logger";
+
+const log = createLogger("API");
 
 export async function GET(request: Request) {
   try {
@@ -62,7 +65,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json(parsed);
   } catch (error) {
-    console.error("Error fetching user by id:", error);
+    log.error("Error fetching user by id:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 },

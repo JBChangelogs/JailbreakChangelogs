@@ -6,6 +6,9 @@ import {
 } from "@/types/auth";
 import { buildApiUrlWithDevToken } from "@/utils/apiDevToken";
 import { getResponseErrorMessage, PUBLIC_API_URL } from "@/utils/api";
+import { createLogger } from "@/services/logger";
+
+const log = createLogger("API");
 
 export const fetchUserSettings = async (): Promise<ApiSettingsResponse> => {
   const url = buildApiUrlWithDevToken(PUBLIC_API_URL!, "/settings/me");
@@ -165,8 +168,19 @@ export const updateBanner = async (url: string): Promise<string> => {
   });
 
   if (!response.ok) {
-    const errorData = await response.json();
-    let errorMessage = errorData.message || "Failed to update banner";
+    const errorData = await response.json().catch(() => ({}));
+    log.error("update banner failed", {
+      status: response.status,
+      body: errorData,
+    });
+    let errorMessage =
+      (errorData as { message?: string; error?: string; detail?: string })
+        .message ??
+      (errorData as { message?: string; error?: string; detail?: string })
+        .error ??
+      (errorData as { message?: string; error?: string; detail?: string })
+        .detail ??
+      "Failed to update banner";
 
     // Customize error messages to use "Supporter Tier" instead of "Premium Tier" for 403 responses
     if (response.status === 403 && errorMessage.includes("premium tier")) {
@@ -191,8 +205,19 @@ export const updateAvatar = async (url: string): Promise<string> => {
   });
 
   if (!response.ok) {
-    const errorData = await response.json();
-    let errorMessage = errorData.message || "Failed to update avatar";
+    const errorData = await response.json().catch(() => ({}));
+    log.error("update avatar failed", {
+      status: response.status,
+      body: errorData,
+    });
+    let errorMessage =
+      (errorData as { message?: string; error?: string; detail?: string })
+        .message ??
+      (errorData as { message?: string; error?: string; detail?: string })
+        .error ??
+      (errorData as { message?: string; error?: string; detail?: string })
+        .detail ??
+      "Failed to update avatar";
 
     // Customize error messages to use "Supporter Tier" instead of "Premium Tier" for 403 responses
     if (response.status === 403 && errorMessage.includes("premium tier")) {
@@ -219,7 +244,18 @@ export const updateUserSettings = async (
 
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}));
-    let errorMessage = errorData.message || "Failed to update setting";
+    log.error("update user settings failed", {
+      status: response.status,
+      body: errorData,
+    });
+    let errorMessage =
+      (errorData as { message?: string; error?: string; detail?: string })
+        .message ??
+      (errorData as { message?: string; error?: string; detail?: string })
+        .error ??
+      (errorData as { message?: string; error?: string; detail?: string })
+        .detail ??
+      "Failed to update setting";
     if (response.status === 403 && errorMessage.includes("premium tier")) {
       errorMessage = errorMessage.replace(/premium tier/gi, "Supporter Tier");
     }
@@ -236,7 +272,19 @@ export const deleteAccount = async (): Promise<void> => {
   });
 
   if (!response.ok) {
-    const errorData = await response.json();
-    throw new Error(errorData.message || "Failed to delete account");
+    const errorData = await response.json().catch(() => ({}));
+    log.error("delete account failed", {
+      status: response.status,
+      body: errorData,
+    });
+    throw new Error(
+      (errorData as { message?: string; error?: string; detail?: string })
+        .message ??
+        (errorData as { message?: string; error?: string; detail?: string })
+          .error ??
+        (errorData as { message?: string; error?: string; detail?: string })
+          .detail ??
+        "Failed to delete account",
+    );
   }
 };

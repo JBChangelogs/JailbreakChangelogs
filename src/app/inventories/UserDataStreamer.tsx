@@ -4,7 +4,9 @@ import { InventoryData } from "./types";
 import { Season } from "@/types/seasons";
 import { UserDataService } from "@/services/userDataService";
 import { fetchUserByRobloxId } from "@/utils/api";
-import { logError } from "@/services/logger";
+import { createLogger } from "@/services/logger";
+
+const log = createLogger("INVENTORY");
 import { CommentData, UserNetworthData, MoneyHistory } from "@/utils/api";
 import { UserData } from "@/types/auth";
 import { Item } from "@/types";
@@ -84,10 +86,7 @@ async function UserDataFetcher({
         !(error instanceof Error) ||
         !error.message.startsWith("PRIVATE_PROFILE:")
       ) {
-        logError("Failed to fetch user connection data", error, {
-          component: "INVENTORY",
-          action: "fetch_connection",
-        });
+        log.error("Failed to fetch user connection data", error);
       }
       return null;
     },

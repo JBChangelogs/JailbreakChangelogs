@@ -1,7 +1,6 @@
-/**
- * Safe localStorage utilities that handle SecurityError exceptions
- * that occur in private browsing mode or other restricted contexts
- */
+import { createLogger } from "@/services/logger";
+
+const log = createLogger("STORAGE");
 
 export const safeLocalStorage = {
   /**
@@ -14,7 +13,7 @@ export const safeLocalStorage = {
       if (typeof window === "undefined") return null;
       return localStorage.getItem(key);
     } catch (error) {
-      console.warn(`Failed to get localStorage item "${key}":`, error);
+      log.warn(`Failed to get localStorage item "${key}"`, error);
       return null;
     }
   },
@@ -31,7 +30,7 @@ export const safeLocalStorage = {
       localStorage.setItem(key, value);
       return true;
     } catch (error) {
-      console.warn(`Failed to set localStorage item "${key}":`, error);
+      log.warn(`Failed to set localStorage item "${key}"`, error);
       return false;
     }
   },
@@ -47,7 +46,7 @@ export const safeLocalStorage = {
       localStorage.removeItem(key);
       return true;
     } catch (error) {
-      console.warn(`Failed to remove localStorage item "${key}":`, error);
+      log.warn(`Failed to remove localStorage item "${key}"`, error);
       return false;
     }
   },
@@ -62,7 +61,7 @@ export const safeLocalStorage = {
       localStorage.clear();
       return true;
     } catch (error) {
-      console.warn("Failed to clear localStorage:", error);
+      log.warn("Failed to clear localStorage", error);
       return false;
     }
   },
@@ -95,7 +94,7 @@ export const safeSessionStorage = {
       if (typeof window === "undefined") return null;
       return sessionStorage.getItem(key);
     } catch (error) {
-      console.warn(`Failed to get sessionStorage item "${key}":`, error);
+      log.warn(`Failed to get sessionStorage item "${key}"`, error);
       return null;
     }
   },
@@ -112,7 +111,7 @@ export const safeSessionStorage = {
       sessionStorage.setItem(key, value);
       return true;
     } catch (error) {
-      console.warn(`Failed to set sessionStorage item "${key}":`, error);
+      log.warn(`Failed to set sessionStorage item "${key}"`, error);
       return false;
     }
   },
@@ -128,7 +127,7 @@ export const safeSessionStorage = {
       sessionStorage.removeItem(key);
       return true;
     } catch (error) {
-      console.warn(`Failed to remove sessionStorage item "${key}":`, error);
+      log.warn(`Failed to remove sessionStorage item "${key}"`, error);
       return false;
     }
   },
@@ -143,7 +142,7 @@ export const safeSessionStorage = {
       sessionStorage.clear();
       return true;
     } catch (error) {
-      console.warn("Failed to clear sessionStorage:", error);
+      log.warn("Failed to clear sessionStorage", error);
       return false;
     }
   },
@@ -181,10 +180,7 @@ export const safeGetJSON = <T>(
   try {
     return JSON.parse(item) as T;
   } catch (error) {
-    console.warn(
-      `Failed to parse JSON from localStorage item "${key}":`,
-      error,
-    );
+    log.warn(`Failed to parse JSON from localStorage item "${key}"`, error);
     return defaultValue;
   }
 };
@@ -200,8 +196,8 @@ export const safeSetJSON = (key: string, value: unknown): boolean => {
     const jsonString = JSON.stringify(value);
     return safeLocalStorage.setItem(key, jsonString);
   } catch (error) {
-    console.warn(
-      `Failed to stringify and store JSON in localStorage item "${key}":`,
+    log.warn(
+      `Failed to stringify and store JSON in localStorage item "${key}"`,
       error,
     );
     return false;

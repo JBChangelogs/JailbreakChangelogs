@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { BASE_API_URL } from "@/utils/api";
+import { createLogger } from "@/services/logger";
+
+const log = createLogger("API");
 
 export async function POST(request: Request) {
   const { content, item_id, item_type, parent_id } = (await request.json()) as {
@@ -38,7 +41,7 @@ export async function POST(request: Request) {
       // If parsing fails (e.g., HTML error page), use a default error structure
       // Don't log 404 or 403 as errors
       if (upstream.status !== 404 && upstream.status !== 403) {
-        console.error("Comment add failed: Non-JSON response", upstream.status);
+        log.error("Comment add failed: Non-JSON response", upstream.status);
       }
       errorBody = {
         error: "unknown_error",

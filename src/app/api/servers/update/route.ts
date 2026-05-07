@@ -6,6 +6,9 @@ import {
   validatePrivateServerLink,
   validateServerRulesText,
 } from "@/utils/serverValidation";
+import { createLogger } from "@/services/logger";
+
+const log = createLogger("API");
 
 export async function POST(request: Request) {
   const cookieStore = await cookies();
@@ -57,7 +60,7 @@ export async function POST(request: Request) {
       const loggedText = isHtml
         ? `HTML Error Page (Status ${upstream.status})`
         : text.slice(0, 100);
-      console.error("Server update failed:", loggedText);
+      log.error("Server update failed:", loggedText);
     }
     return NextResponse.json(
       { message: "Failed to update server" },

@@ -1,6 +1,9 @@
 "use client";
 
+import { createLogger } from "@/services/logger";
 import { useState, useEffect, useRef, useMemo } from "react";
+
+const log = createLogger("UI");
 import { use } from "react";
 import { Icon } from "@/components/ui/IconWrapper";
 import { Item, FilterSort, FavoriteItem } from "@/types";
@@ -113,7 +116,7 @@ export default function ValuesClient({
             setFavorites(favoriteIds);
           }
         } catch (err) {
-          console.error("Error loading favorites:", err);
+          log.error("Error loading favorites", err);
         }
       }
     };

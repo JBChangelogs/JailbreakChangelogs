@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { BASE_API_URL } from "@/utils/api";
+import { createLogger } from "@/services/logger";
+
+const log = createLogger("API");
 
 export async function POST(request: Request) {
   const { id } = (await request.json()) as { id?: number };
@@ -30,7 +33,7 @@ export async function POST(request: Request) {
       const loggedText = isHtml
         ? `HTML Error Page (Status ${upstream.status})`
         : text.slice(0, 100);
-      console.error("Trade offer failed:", loggedText);
+      log.error("Trade offer failed:", loggedText);
     }
     return NextResponse.json(
       { message: "Failed to make trade offer" },

@@ -59,6 +59,9 @@ import {
 } from "@/services/settingsService";
 import { searchUsers } from "@/utils/api";
 import { UserAvatar } from "@/utils/avatar";
+import { createLogger } from "@/services/logger";
+
+const log = createLogger("UI");
 
 const BADGE_BASE_URL =
   "https://assets.jailbreakchangelogs.com/assets/website_icons";
@@ -349,7 +352,7 @@ export default function SettingsPage() {
         setGiftSearchResults(results);
       } catch (error) {
         if (giftSearchRequestIdRef.current !== requestId) return;
-        console.error("Error searching gift recipients:", error);
+        log.error("Error searching gift recipients", error);
         setGiftSearchResults([]);
       } finally {
         if (giftSearchRequestIdRef.current === requestId) {

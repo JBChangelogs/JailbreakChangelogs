@@ -4,6 +4,9 @@ import { useState } from "react";
 import { Icon } from "@/components/ui/IconWrapper";
 import Snackbar from "@mui/material/Snackbar";
 import MuiAlert from "@mui/material/Alert";
+import { createLogger } from "@/services/logger";
+
+const log = createLogger("UI");
 
 interface CopyButtonProps {
   text: string;
@@ -21,7 +24,7 @@ export default function CopyButton({ text, className = "" }: CopyButtonProps) {
       setSnackbarOpen(true);
       setTimeout(() => setCopied(false), 2000);
     } catch (err) {
-      console.error("Failed to copy text:", err);
+      log.error("Failed to copy text", err);
     }
   };
 

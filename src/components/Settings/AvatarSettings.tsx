@@ -17,6 +17,9 @@ import { useSupporterModal } from "@/hooks/useSupporterModal";
 import SupporterModal from "../Modals/SupporterModal";
 import { UPLOAD_CONFIG } from "@/config/settings";
 import { validateFile } from "@/utils/fileValidation";
+import { createLogger } from "@/services/logger";
+
+const log = createLogger("UI");
 
 interface AvatarSettingsProps {
   userData: UserData;
@@ -99,7 +102,7 @@ export const AvatarSettings = ({
 
       setIsValidAvatar(true);
     } catch (error) {
-      console.error("Error validating avatar:", error);
+      log.error("Error validating avatar:", error);
       setAvatarError("Invalid avatar URL");
     }
   }, []);
@@ -191,7 +194,7 @@ export const AvatarSettings = ({
           });
         }
       } catch (saveError) {
-        console.warn("Auto-save failed after upload:", saveError);
+        log.warn("Auto-save failed after upload:", saveError);
       }
 
       return result.imageUrl;
@@ -215,7 +218,7 @@ export const AvatarSettings = ({
     try {
       await uploadAndSave;
     } catch (error) {
-      console.error("Avatar upload error:", error);
+      log.error("Avatar upload error:", error);
       // Reset file input on error
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
@@ -247,7 +250,7 @@ export const AvatarSettings = ({
         window.umami.track("Custom Avatar Updated", { url: customAvatarUrl });
       }
     } catch (error) {
-      console.error("Error updating avatar:", error);
+      log.error("Error updating avatar:", error);
       setAvatarError(
         error instanceof Error ? error.message : "Failed to update avatar",
       );

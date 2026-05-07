@@ -20,6 +20,9 @@ import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { Spinner } from "@/components/ui/Spinner";
 import { safeSetJSON } from "@/utils/safeStorage";
 import { UserData } from "@/types/auth";
+import { createLogger } from "@/services/logger";
+
+const log = createLogger("UI");
 
 export default function RedeemPage() {
   const [code, setCode] = useQueryState("code", {
@@ -90,7 +93,7 @@ export default function RedeemPage() {
           setValidationResult(null);
         }
       } catch (err) {
-        console.error("Validation error:", err);
+        log.error("Validation error", err);
         if (lastValidatedCodeRef.current === currentCode) {
           setValidationResult(null);
         }

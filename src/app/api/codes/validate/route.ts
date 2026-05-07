@@ -1,5 +1,8 @@
 import { NextResponse } from "next/server";
 import { BASE_API_URL } from "@/utils/api";
+import { createLogger } from "@/services/logger";
+
+const log = createLogger("API");
 
 export const dynamic = "force-dynamic";
 
@@ -56,7 +59,7 @@ export async function GET(request: Request) {
       { status: upstream.status },
     );
   } catch (error) {
-    console.error("Error validating code:", error);
+    log.error("Error validating code:", error);
     return NextResponse.json(
       { message: "Internal Server Error" },
       { status: 500 },

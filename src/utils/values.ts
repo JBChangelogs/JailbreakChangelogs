@@ -1,5 +1,8 @@
+import { createLogger } from "@/services/logger";
 import { Item, FilterSort, ValueSort } from "@/types";
 import { fetchItemUnlockMetadataById } from "@/utils/itemUnlockMetadata";
+
+const log = createLogger("UI");
 
 export const demandOrder = [
   "Close to none",
@@ -507,7 +510,7 @@ export const sortAndFilterItems = async (
     valueSort === "season-level-desc"
   ) {
     const metadataById = await fetchItemUnlockMetadataById().catch((error) => {
-      console.error("Error loading item unlock metadata:", error);
+      log.error("Error loading item unlock metadata", error);
       return null;
     });
 

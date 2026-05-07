@@ -5,6 +5,9 @@ import { useRouter } from "next/navigation";
 import { PUBLIC_API_URL } from "@/utils/api";
 import { buildApiUrlWithDevToken } from "@/utils/apiDevToken";
 import RateLimitView from "@/components/Layout/RateLimitView";
+import { createLogger } from "@/services/logger";
+
+const log = createLogger("UI");
 
 export default function SeasonsPage() {
   const router = useRouter();
@@ -38,13 +41,18 @@ export default function SeasonsPage() {
             setRateLimitRetryAfter(raw ? parseInt(raw, 10) : null);
             return;
           }
+          const body = await response.json().catch(() => ({}));
+          log.error("fetch latest season failed", {
+            status: response.status,
+            body,
+          });
           throw new Error("Failed to fetch latest season");
         }
 
         const latestSeason = await response.json();
         router.replace(`/seasons/${latestSeason.season}`);
       } catch (error) {
-        console.error("Error fetching latest season:", error);
+        log.error("Error fetching latest season", error);
         router.replace("/seasons/31");
       }
     };

@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { BASE_API_URL } from "@/utils/api";
+import { createLogger } from "@/services/logger";
+
+const log = createLogger("API");
 
 export async function POST(request: Request) {
   const { code } = (await request.json()) as { code?: string };
@@ -30,7 +33,7 @@ export async function POST(request: Request) {
       const loggedText = isHtml
         ? `HTML Error Page (Status ${upstream.status})`
         : text.slice(0, 100);
-      console.error("Code redeem failed:", loggedText);
+      log.error("Code redeem failed:", loggedText);
     }
     return NextResponse.json(
       { message: "Failed to redeem code" },

@@ -9,6 +9,9 @@ import {
 } from "@/utils/notificationUrl";
 import { showDesktopNotification } from "@/utils/desktopNotifications";
 import { buildApiUrlWithDevToken } from "@/utils/apiDevToken";
+import { createLogger } from "@/services/logger";
+
+const log = createLogger("WS");
 
 interface RealtimeNotificationContent {
   title?: string;
@@ -198,9 +201,7 @@ export function useRealtimeNotificationsWebSocket(
       try {
         const wsUrl = getRealtimeWsUrl();
         if (!wsUrl) {
-          console.warn(
-            "[REALTIME NOTIFICATIONS WS] Missing NEXT_PUBLIC_WS_URL.",
-          );
+          log.warn("Missing NEXT_PUBLIC_WS_URL");
           return;
         }
 
@@ -358,10 +359,7 @@ export function useRealtimeNotificationsWebSocket(
                       ) {
                         return;
                       }
-                      console.error(
-                        "[REALTIME NOTIFICATIONS WS] Failed to play notification sound:",
-                        error,
-                      );
+                      log.error("Failed to play notification sound", error);
                     });
                   }
                 }
@@ -524,10 +522,7 @@ export function useRealtimeNotificationsWebSocket(
                 ) {
                   return;
                 }
-                console.error(
-                  "[REALTIME NOTIFICATIONS WS] Failed to play notification sound:",
-                  error,
-                );
+                log.error("Failed to play notification sound", error);
               });
             }
 
@@ -543,10 +538,7 @@ export function useRealtimeNotificationsWebSocket(
               }),
             );
           } catch (error) {
-            console.error(
-              "[REALTIME NOTIFICATIONS WS] Message parse error:",
-              error,
-            );
+            log.error("Message parse error", error);
           }
         });
 
@@ -619,11 +611,11 @@ export function useRealtimeNotificationsWebSocket(
           }
         });
 
-        ws.addEventListener("error", (error) => {
-          console.error("[REALTIME NOTIFICATIONS WS] Connection error:", error);
+        ws.addEventListener("error", (event) => {
+          log.error("Connection error", (event.target as WebSocket)?.url);
         });
       } catch (error) {
-        console.error("[REALTIME NOTIFICATIONS WS] Failed to connect:", error);
+        log.error("Failed to connect", error);
       }
     };
 

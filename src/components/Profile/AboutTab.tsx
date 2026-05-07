@@ -1,6 +1,9 @@
 "use client";
 
+import { createLogger } from "@/services/logger";
 import { useState, useEffect } from "react";
+
+const log = createLogger("UI");
 import { Button } from "@/components/ui/button";
 
 import {
@@ -95,6 +98,8 @@ export default function AboutTab({
       });
 
       if (!response.ok) {
+        const body = await response.json().catch(() => ({}));
+        log.error("update bio failed", { status: response.status, body });
         throw new Error("Failed to update bio");
       }
 
@@ -111,7 +116,7 @@ export default function AboutTab({
       toast.success("Bio updated successfully");
       setIsEditingBio(false);
     } catch (error) {
-      console.error("Error updating bio:", error);
+      log.error("Error updating bio", error);
       toast.error("Failed to update bio");
     } finally {
       setIsSavingBio(false);

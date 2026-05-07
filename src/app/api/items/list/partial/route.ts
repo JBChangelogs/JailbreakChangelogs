@@ -1,5 +1,8 @@
 import { NextResponse } from "next/server";
 import { BASE_API_URL } from "@/utils/api";
+import { createLogger } from "@/services/logger";
+
+const log = createLogger("API");
 
 export const dynamic = "force-dynamic";
 
@@ -26,9 +29,8 @@ export async function GET() {
     });
 
     if (!response.ok) {
-      console.error(
-        `Items API error: ${response.status} - ${response.statusText}`,
-      );
+      const body = await response.text();
+      log.error(`Items API error`, { status: response.status, body });
       return NextResponse.json(
         { error: "Failed to fetch items" },
         { status: response.status },
@@ -48,7 +50,7 @@ export async function GET() {
 
     return NextResponse.json(partialItems);
   } catch (error) {
-    console.error("Error fetching partial items list:", error);
+    log.error("Error fetching partial items list:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 },

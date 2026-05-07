@@ -1,6 +1,9 @@
 "use client";
 
+import { createLogger } from "@/services/logger";
 import { useAuthContext } from "@/contexts/AuthContext";
+
+const log = createLogger("UI");
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { formatRelativeDate, formatCustomDate } from "@/utils/timestamp";
@@ -36,7 +39,7 @@ export default function UserRankDisplay() {
           setUserRank(null);
         }
       } catch (error) {
-        console.error("Error fetching user rank:", error);
+        log.error("Error fetching user rank", error);
       } finally {
         setIsLoading(false);
       }

@@ -5,6 +5,9 @@ import {
   fetchQueueInfo,
   fetchRobloxUsersBatch,
 } from "@/utils/api";
+import { createLogger } from "@/services/logger";
+
+const log = createLogger("API");
 
 export async function pollBotsData() {
   try {
@@ -21,7 +24,7 @@ export async function pollBotsData() {
       },
     };
   } catch (error) {
-    console.error("Failed to fetch bots data:", error);
+    log.error("Failed to fetch bots data:", error);
     return {
       success: false,
       error: "Failed to fetch bots data",
@@ -54,7 +57,7 @@ export async function fetchRobloxDataForBots(botIds: string[]) {
       },
     };
   } catch (error) {
-    console.error("Failed to fetch Roblox data for bots:", error);
+    log.error("Failed to fetch Roblox data for bots:", error);
     return {
       success: false,
       error: "Failed to fetch Roblox data for bots",
@@ -87,7 +90,7 @@ export async function fetchRobloxDataForUser(userId: string) {
       },
     };
   } catch (error) {
-    console.error("Failed to fetch Roblox data for user:", error);
+    log.error("Failed to fetch Roblox data for user:", error);
     return {
       success: false,
       error: "Failed to fetch Roblox data for user",
@@ -104,7 +107,7 @@ export async function pollConnectedBots() {
       data: botsData,
     };
   } catch (error) {
-    console.error("[SERVER ACTION] Failed to poll connected bots:", error);
+    log.error("[SERVER ACTION] Failed to poll connected bots:", error);
     return {
       success: false,
       error: "Failed to fetch connected bots",
@@ -121,7 +124,7 @@ export async function pollQueueInfo() {
       data: queueInfo,
     };
   } catch (error) {
-    console.error("[SERVER ACTION] Failed to poll queue info:", error);
+    log.error("[SERVER ACTION] Failed to poll queue info:", error);
     return {
       success: false,
       error: "Failed to fetch queue info",

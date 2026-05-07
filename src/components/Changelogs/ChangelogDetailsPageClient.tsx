@@ -1,6 +1,9 @@
 "use client";
 
+import { createLogger } from "@/services/logger";
 import { useEffect, useState } from "react";
+
+const log = createLogger("UI");
 import ChangelogDetailsClient from "@/components/Changelogs/ChangelogDetailsClient";
 import NitroChangelogRailAd from "@/components/Ads/NitroChangelogRailAd";
 import { Changelog, CommentData, PUBLIC_API_URL } from "@/utils/api";
@@ -76,7 +79,7 @@ export default function ChangelogDetailsPageClient({
         setChangelogList(sortedChangelogList);
         setCurrentChangelog(matched);
       } catch (error) {
-        console.error("Error loading changelog page data:", error);
+        log.error("Error loading changelog page data", error);
         setIsNotFound(true);
       }
     };

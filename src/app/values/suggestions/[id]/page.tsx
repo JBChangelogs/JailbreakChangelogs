@@ -11,6 +11,9 @@ import { Spinner } from "@/components/ui/Spinner";
 import { UserAvatar } from "@/utils/avatar";
 import { buildApiUrlWithDevToken } from "@/utils/apiDevToken";
 import { PUBLIC_API_URL } from "@/utils/api";
+import { createLogger } from "@/services/logger";
+
+const log = createLogger("UI");
 import { formatMessageDate } from "@/utils/timestamp";
 import { formatFullValue } from "@/utils/values";
 import {
@@ -176,6 +179,11 @@ export default function ValueSuggestionDetailPage() {
           } else if (res.status >= 500) {
             setRouteError(new Error("Failed to load suggestion details."));
           } else {
+            const body = await res.json().catch(() => ({}));
+            log.error("fetch suggestion failed", {
+              status: res.status,
+              body,
+            });
             setError("Failed to load suggestion.");
           }
           return;

@@ -1,6 +1,9 @@
 "use client";
 
+import { createLogger } from "@/services/logger";
 import { useEffect } from "react";
+
+const log = createLogger("AUTH");
 import { usePathname } from "next/navigation";
 import { validateAuth } from "@/utils/auth";
 
@@ -15,7 +18,7 @@ export default function AuthCheck() {
     // Always validate auth on route changes
     // The validateAuth function will check the session API
     validateAuth().catch((error) => {
-      console.error("Auth validation error:", error);
+      log.error("Auth validation error", error);
     });
   }, [pathname]);
 

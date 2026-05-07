@@ -1,8 +1,11 @@
 "use client";
 
+import { createLogger } from "@/services/logger";
 import { useState } from "react";
 import { toast } from "sonner";
 import { useAuthContext } from "@/contexts/AuthContext";
+
+const log = createLogger("UI");
 import { sanitizeText } from "@/utils/sanitizeText";
 import {
   Dialog,
@@ -66,14 +69,18 @@ export default function ReportIssueModal({
         }),
       });
 
-      if (!response.ok) throw new Error("Failed to submit issue");
+      if (!response.ok) {
+        const body = await response.json().catch(() => ({}));
+        log.error("submit issue failed", { status: response.status, body });
+        throw new Error("Failed to submit issue");
+      }
 
       toast.success("Issue reported successfully");
       setTitle("");
       setDescription("");
       onClose();
     } catch (error) {
-      console.error("Error submitting issue:", error);
+      log.error("Error submitting issue", error);
       toast.error("Failed to submit issue. Please try again.");
     } finally {
       setIsSubmitting(false);

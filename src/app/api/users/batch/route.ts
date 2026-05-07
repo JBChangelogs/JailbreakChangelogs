@@ -1,5 +1,8 @@
 import { NextResponse } from "next/server";
 import { BASE_API_URL } from "@/utils/api";
+import { createLogger } from "@/services/logger";
+
+const log = createLogger("API");
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -33,7 +36,7 @@ export async function GET(request: Request) {
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error(`Users batch API error: ${response.status} - ${errorText}`);
+      log.error(`Users batch API error: ${response.status} - ${errorText}`);
       return NextResponse.json(
         { error: "Failed to fetch users" },
         { status: response.status },
@@ -50,7 +53,7 @@ export async function GET(request: Request) {
       },
     });
   } catch (error) {
-    console.error("Error fetching users batch:", error);
+    log.error("Error fetching users batch:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 },

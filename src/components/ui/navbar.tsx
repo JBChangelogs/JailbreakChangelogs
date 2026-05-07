@@ -1,5 +1,8 @@
 "use client";
+import { createLogger } from "@/services/logger";
 import React, { useState } from "react";
+
+const log = createLogger("UI");
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
@@ -590,7 +593,7 @@ export const NavbarModern = ({
       await logout();
       setUserMenuOpen(false);
     } catch (err) {
-      console.error("Logout error:", err);
+      log.error("Logout error", err);
     }
   };
 

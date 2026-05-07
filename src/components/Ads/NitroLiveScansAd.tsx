@@ -3,6 +3,9 @@
 import { canHideAdsForPremiumType } from "@/utils/supporterAccess";
 import { useEffect, useRef } from "react";
 import { useAuthContext } from "@/contexts/AuthContext";
+import { createLogger } from "@/services/logger";
+
+const log = createLogger("UI");
 
 type NitroAdConfig = {
   sizes: string[][];
@@ -126,34 +129,25 @@ export default function NitroLiveScansAd({ className }: Props) {
       // Mobile config
       Promise.resolve(nitroAds.createAd(SLOT_ID_MOBILE, MOBILE_CONFIG)).catch(
         (error) => {
-          console.warn(
-            "[Nitro Ad] Failed to create live scans mobile ad:",
-            error,
-          );
+          log.warn("[Nitro Ad] Failed to create live scans mobile ad:", error);
         },
       );
 
       // Tablet config
       Promise.resolve(nitroAds.createAd(SLOT_ID_TABLET, TABLET_CONFIG)).catch(
         (error) => {
-          console.warn(
-            "[Nitro Ad] Failed to create live scans tablet ad:",
-            error,
-          );
+          log.warn("[Nitro Ad] Failed to create live scans tablet ad:", error);
         },
       );
 
       // Desktop config
       Promise.resolve(nitroAds.createAd(SLOT_ID_DESKTOP, DESKTOP_CONFIG)).catch(
         (error) => {
-          console.warn(
-            "[Nitro Ad] Failed to create live scans desktop ad:",
-            error,
-          );
+          log.warn("[Nitro Ad] Failed to create live scans desktop ad:", error);
         },
       );
     } catch (error) {
-      console.warn("[Nitro Ad] Error initializing live scans ads:", error);
+      log.warn("[Nitro Ad] Error initializing live scans ads:", error);
     }
 
     return () => {

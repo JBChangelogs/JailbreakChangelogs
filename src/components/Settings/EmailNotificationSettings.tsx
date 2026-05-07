@@ -21,6 +21,9 @@ interface EmailNotificationSettingsProps {
 }
 
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+import { createLogger } from "@/services/logger";
+
+const log = createLogger("UI");
 
 export const EmailNotificationSettings = ({
   userData,
@@ -43,7 +46,7 @@ export const EmailNotificationSettings = ({
         setIsLinked(linkedData.linked === true);
         setEnabled(enabledData.enabled === true);
       } catch (e) {
-        console.error("Failed to check email status", e);
+        log.error("Failed to check email status", e);
       } finally {
         setCheckingStatus(false);
       }
@@ -113,7 +116,7 @@ export const EmailNotificationSettings = ({
         }
       }
     } catch (error) {
-      console.error("Error toggling email notifications:", error);
+      log.error("Error toggling email notifications:", error);
       toast.error("Something went wrong");
       setEnabled(!checked);
     } finally {

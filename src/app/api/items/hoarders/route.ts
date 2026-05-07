@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { fetchItemHoarders } from "@/utils/api";
+import { createLogger } from "@/services/logger";
+
+const log = createLogger("API");
 
 export const dynamic = "force-dynamic";
 
@@ -20,7 +23,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(hoarders);
   } catch (error) {
-    console.error("Error fetching item hoarders:", error);
+    log.error("Error fetching item hoarders:", error);
     return NextResponse.json(
       { error: "Failed to fetch hoarders" },
       { status: 500 },

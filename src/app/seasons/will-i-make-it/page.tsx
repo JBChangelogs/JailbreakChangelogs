@@ -13,6 +13,9 @@ import { PUBLIC_API_URL } from "@/utils/api";
 import { buildApiUrlWithDevToken } from "@/utils/apiDevToken";
 import NitroSeasonsCalculatorRailAd from "@/components/Ads/NitroSeasonsCalculatorRailAd";
 import RateLimitView from "@/components/Layout/RateLimitView";
+import { createLogger } from "@/services/logger";
+
+const log = createLogger("UI");
 
 export default function WillIMakeItPage() {
   const [season, setSeason] = useState<Season | null>(null);
@@ -47,12 +50,14 @@ export default function WillIMakeItPage() {
             setRateLimitRetryAfter(raw ? parseInt(raw, 10) : null);
             return;
           }
+          const body = await res.json().catch(() => ({}));
+          log.error("fetch latest season failed", { status: res.status, body });
           throw new Error("Failed to fetch latest season");
         }
 
         setSeason(await res.json());
       } catch (err) {
-        console.error("Error loading season data:", err);
+        log.error("Error loading season data", err);
         setError("Failed to load season data");
       } finally {
         setIsLoaded(true);

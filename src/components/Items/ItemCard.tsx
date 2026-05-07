@@ -1,6 +1,7 @@
 import { Item } from "@/types";
 import Image from "next/image";
 import Link from "next/link";
+import { createLogger } from "@/services/logger";
 import { useMediaQuery } from "@mui/material";
 import {
   getItemImagePath,
@@ -36,6 +37,8 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+
+const log = createLogger("UI");
 
 interface ItemCardProps {
   item: Item;
@@ -76,7 +79,7 @@ export default function ItemCard({
             const playPromise = videoRef.current.play();
             if (playPromise !== undefined) {
               playPromise.catch((error) => {
-                console.error("Error playing video:", error);
+                log.error("Error playing video:", error);
               });
             }
           } else {
@@ -109,7 +112,7 @@ export default function ItemCard({
         const playPromise = videoRef.current.play();
         if (playPromise !== undefined) {
           playPromise.catch((error) => {
-            console.error("Error playing drift video:", error);
+            log.error("Error playing drift video:", error);
           });
         }
       } else {
@@ -141,7 +144,7 @@ export default function ItemCard({
         setItemMetadata(metadataById.get(item.id) ?? null);
       })
       .catch((error) => {
-        console.error("Error loading item metadata:", error);
+        log.error("Error loading item metadata:", error);
         if (isMounted) setItemMetadata(null);
       });
 
@@ -184,7 +187,7 @@ export default function ItemCard({
         toast.error("Failed to update favorite status");
       }
     } catch (error) {
-      console.error("Error updating favorite status:", error);
+      log.error("Error updating favorite status:", error);
       toast.error("Failed to update favorite status");
     }
   };
@@ -230,7 +233,7 @@ export default function ItemCard({
               setIsPlaying(true);
             })
             .catch((error) => {
-              console.error("Error playing audio:", error);
+              log.error("Error playing audio:", error);
               setIsPlaying(false);
             });
         }

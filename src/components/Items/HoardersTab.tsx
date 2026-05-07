@@ -8,6 +8,9 @@ import { ItemHoarder } from "@/utils/api";
 import Image from "next/image";
 import Link from "next/link";
 import { Icon } from "@/components/ui/IconWrapper";
+import { createLogger } from "@/services/logger";
+
+const log = createLogger("UI");
 
 interface HoardersTabProps {
   itemName: string;
@@ -31,6 +34,8 @@ export default function HoardersTab({ itemName, itemType }: HoardersTabProps) {
         `/api/items/hoarders?name=${encodeURIComponent(itemName)}&type=${encodeURIComponent(itemType)}`,
       );
       if (!response.ok) {
+        const body = await response.json().catch(() => ({}));
+        log.error("fetch hoarders failed", { status: response.status, body });
         throw new Error("Failed to fetch hoarders");
       }
       return response.json() as Promise<ItemHoarder[]>;

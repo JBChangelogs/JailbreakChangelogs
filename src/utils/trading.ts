@@ -1,5 +1,8 @@
+import { createLogger } from "@/services/logger";
 import { getResponseErrorMessage } from "@/utils/api";
 import { buildApiUrlWithDevToken } from "@/utils/apiDevToken";
+
+const log = createLogger("UI");
 
 export const deleteTradeAd = async (tradeId: number): Promise<boolean> => {
   try {
@@ -31,7 +34,7 @@ export const deleteTradeAd = async (tradeId: number): Promise<boolean> => {
 
     return true;
   } catch (error) {
-    console.error("Error deleting trade ad:", error);
+    log.error("Error deleting trade ad", error);
     throw error;
   }
 };

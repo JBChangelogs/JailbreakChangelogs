@@ -5,6 +5,9 @@ import { useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { registerAdInstance, removeAdReference } from "@/utils/nitroAds";
+import { createLogger } from "@/services/logger";
+
+const log = createLogger("UI");
 
 const ANCHOR_ID = "np-bottom-anchor";
 
@@ -94,12 +97,12 @@ export default function NitroBottomAnchor() {
         })
         .catch((error) => {
           // Silently handle ad creation errors per Nitropay best practices
-          console.warn(`[Nitro Ad] Failed to create bottom anchor ad:`, error);
+          log.warn(`[Nitro Ad] Failed to create bottom anchor ad:`, error);
           createdRef.current = false;
         });
     } catch (error) {
       // Catch synchronous errors
-      console.warn(`[Nitro Ad] Error initializing bottom anchor ad:`, error);
+      log.warn(`[Nitro Ad] Error initializing bottom anchor ad:`, error);
       createdRef.current = false;
     }
 

@@ -1,6 +1,9 @@
 "use client";
 
+import { createLogger } from "@/services/logger";
 import { useState, useEffect } from "react";
+
+const log = createLogger("UI");
 import { formatFullDate } from "@/utils/timestamp";
 import RailwayBadge from "./RailwayBadge";
 
@@ -26,12 +29,17 @@ export default function VersionInfo({ initialData }: VersionInfoProps = {}) {
       try {
         const response = await fetch("/api/version");
         if (!response.ok) {
+          const body = await response.json().catch(() => ({}));
+          log.error("fetch version info failed", {
+            status: response.status,
+            body,
+          });
           throw new Error("Failed to fetch version info");
         }
         const data: VersionInfoState = await response.json();
         setVersionInfo(data);
       } catch (error) {
-        console.error("Error fetching version info:", error);
+        log.error("Error fetching version info", error);
         const fallback: VersionInfoState = {
           version: "unknown",
           date: Date.now(),

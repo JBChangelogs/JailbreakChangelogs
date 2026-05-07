@@ -4,6 +4,9 @@ import { canHideAdsForPremiumType } from "@/utils/supporterAccess";
 import { useEffect, useRef } from "react";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
+import { createLogger } from "@/services/logger";
+
+const log = createLogger("UI");
 
 type NitroAdsWithRemove = {
   createAd?: (id: string, config: typeof CALCULATOR_CONFIG) => Promise<void>;
@@ -59,12 +62,12 @@ export default function NitroCalculatorAd({ className }: Props) {
     try {
       Promise.resolve(nitroAds.createAd(SLOT_ID, CALCULATOR_CONFIG)).catch(
         (error) => {
-          console.warn("[Nitro Ad] Failed to create calculator ad:", error);
+          log.warn("[Nitro Ad] Failed to create calculator ad:", error);
           createdRef.current = false;
         },
       );
     } catch (error) {
-      console.warn("[Nitro Ad] Error initializing calculator ad:", error);
+      log.warn("[Nitro Ad] Error initializing calculator ad:", error);
       createdRef.current = false;
     }
 

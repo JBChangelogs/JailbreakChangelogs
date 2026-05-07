@@ -1,6 +1,9 @@
 "use client";
 
 import React from "react";
+import { createLogger } from "@/services/logger";
+
+const log = createLogger("UI");
 
 interface ErrorBoundaryState {
   hasError: boolean;
@@ -28,7 +31,7 @@ class ValuesErrorBoundary extends React.Component<
       error.message.includes("insertBefore") ||
       error.message.includes("appendChild")
     ) {
-      console.warn("DOM manipulation error caught by error boundary:", error);
+      log.warn("DOM manipulation error caught by error boundary:", error);
       return { hasError: true, error };
     }
     // Re-throw other errors
@@ -36,7 +39,7 @@ class ValuesErrorBoundary extends React.Component<
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error("ValuesErrorBoundary caught an error:", error, errorInfo);
+    log.error("ValuesErrorBoundary caught an error", { error, errorInfo });
   }
 
   resetError = () => {

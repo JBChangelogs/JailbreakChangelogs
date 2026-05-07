@@ -1,6 +1,9 @@
 "use client";
 
+import { createLogger } from "@/services/logger";
 import { useState, useEffect } from "react";
+
+const log = createLogger("UI");
 import { Box, Skeleton, Divider } from "@mui/material";
 import { Button } from "@/components/ui/button";
 import { Pagination } from "@/components/ui/Pagination";
@@ -94,7 +97,7 @@ export default function FavoritesTab({
           setFavorites([]);
         }
       } catch (err) {
-        console.error("Error processing favorites:", err);
+        log.error("Error processing favorites", err);
         setError(
           err instanceof Error ? err.message : "Failed to process favorites",
         );

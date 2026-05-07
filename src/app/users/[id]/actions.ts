@@ -1,5 +1,8 @@
 import { PUBLIC_API_URL } from "@/utils/api";
 import { fetchWithRetry } from "@/utils/fetchWithRetry";
+import { createLogger } from "@/services/logger";
+
+const log = createLogger("API");
 
 async function fetchSeason(id: string) {
   try {
@@ -35,13 +38,15 @@ export async function fetchFavoritesData(userId: string) {
 
     if (!response.ok) {
       if (response.status === 404) return [];
+      const body = await response.json().catch(() => ({}));
+      log.error("fetch favorites failed", { status: response.status, body });
       throw new Error(`Failed to fetch favorites: ${response.status}`);
     }
 
     const data = await response.json();
     return Array.isArray(data) ? data : [];
   } catch (error) {
-    console.error("Failed to fetch favorites:", error);
+    log.error("Failed to fetch favorites:", error);
     return [];
   }
 }
@@ -68,7 +73,7 @@ export async function fetchFavoriteItemDetails(
     );
     return itemDetailsMap;
   } catch (error) {
-    console.error("Failed to fetch favorite item details:", error);
+    log.error("Failed to fetch favorite item details:", error);
     return {};
   }
 }
@@ -124,7 +129,7 @@ export async function fetchCommentDetails(
       inventories: {},
     };
   } catch (error) {
-    console.error("Failed to fetch comment details:", error);
+    log.error("Failed to fetch comment details:", error);
     return {
       changelogs: {},
       items: {},

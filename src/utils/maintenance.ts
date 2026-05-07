@@ -1,6 +1,9 @@
+import { createLogger } from "@/services/logger";
 import type { Metadata } from "next";
 import type { UserData, UserFlag } from "@/types/auth";
 import { safeGetJSON } from "@/utils/safeStorage";
+
+const log = createLogger("API");
 
 export async function checkMaintenanceMode(): Promise<{
   isMaintenanceMode: boolean;
@@ -33,7 +36,7 @@ export function canBypassMaintenance(): boolean {
 
     return !!testerFlag;
   } catch (error) {
-    console.error("Error checking maintenance bypass:", error);
+    log.error("Error checking maintenance bypass", error);
     return false;
   }
 }

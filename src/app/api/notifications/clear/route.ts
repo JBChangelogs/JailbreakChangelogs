@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 import { BASE_API_URL } from "@/utils/api";
 import { cookies } from "next/headers";
+import { createLogger } from "@/services/logger";
+
+const log = createLogger("API");
 
 export async function DELETE() {
   try {
@@ -33,7 +36,7 @@ export async function DELETE() {
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error(
+      log.error(
         `Clear unread notifications API error: ${response.status} - ${errorText}`,
       );
       return NextResponse.json(
@@ -45,7 +48,7 @@ export async function DELETE() {
     const data = await response.json();
     return NextResponse.json(data);
   } catch (error) {
-    console.error("Error clearing unread notifications:", error);
+    log.error("Error clearing unread notifications:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 },
