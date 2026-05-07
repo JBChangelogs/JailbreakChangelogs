@@ -4,7 +4,7 @@ buildCommand = "bun run build"
 
 [deploy]
 startCommand = "next start -p ${PORT:-8080}"
-healthcheckPath = "/api/healthcheck"
+healthcheckPath = "/"
 healthcheckTimeout = 30
 restartPolicyType = "on_failure"
 maxRestartRetries = 10
