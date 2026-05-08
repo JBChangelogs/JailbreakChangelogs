@@ -2,7 +2,11 @@ import Link from "next/link";
 import Image from "next/image";
 import type { Metadata } from "next";
 import { getRandomBackgroundImage } from "@/utils/fisherYatesShuffle";
-import { fetchHomepageImpactStats, fetchHomepageStats } from "@/utils/api";
+import {
+  fetchHomepageImpactStats,
+  fetchHomepageStats,
+  fetchNetworthCap,
+} from "@/utils/api";
 import { Icon } from "../components/ui/IconWrapper";
 import { DiscordIcon } from "@/components/Icons/DiscordIcon";
 import HeroBackgroundCarousel from "@/components/Home/HeroBackgroundCarousel";
@@ -151,9 +155,28 @@ type HeroStatCard = {
   label: string;
   icon: string;
   value: number;
+  decimals?: number;
   prefix?: string;
+  unit?: string;
   suffix?: string;
+  suffixLarge?: boolean;
+  badge?: string;
 };
+
+function compactCount(n: number): {
+  value: number;
+  decimals: number;
+  unit?: string;
+} {
+  if (n >= 1_000_000) {
+    return {
+      value: Math.round((n / 1_000_000) * 10) / 10,
+      decimals: 1,
+      unit: "M",
+    };
+  }
+  return { value: n, decimals: 0 };
+}
 
 const BADIMO_TESTIMONIAL_NAME = "Badimo";
 
@@ -168,11 +191,13 @@ const pickRandomTestimonials = (items: Testimonial[], count: number) => {
 
 export default async function Home() {
   const initialImage = getRandomBackgroundImage();
-  const [impactStats, homepageStats, testimonials] = await Promise.all([
-    fetchHomepageImpactStats(),
-    fetchHomepageStats(),
-    getTestimonials(),
-  ]);
+  const [impactStats, homepageStats, networthCap, testimonials] =
+    await Promise.all([
+      fetchHomepageImpactStats(),
+      fetchHomepageStats(),
+      fetchNetworthCap(),
+      getTestimonials(),
+    ]);
 
   const legacyStats: HeroStatCard[] = [
     {
@@ -195,31 +220,57 @@ export default async function Home() {
       icon: "mdi:comment-text",
       value: homepageStats?.total_comments ?? 0,
     },
-    {
-      label: "Value List Items",
-      icon: "mdi:archive",
-      value: homepageStats?.total_items ?? 0,
-    },
   ];
 
   const impactStatsCards: HeroStatCard[] = [
     {
       label: "Items Tracked",
       icon: "mdi:shape",
-      value: impactStats?.items_tracked ?? 0,
+      ...compactCount(impactStats?.items_tracked ?? 0),
       suffix: " and counting",
+      badge: "All time",
     },
     {
       label: "Inventories Scanned",
       icon: "mdi:account-search",
-      value: impactStats?.users_scanned ?? 0,
+      ...compactCount(impactStats?.users_scanned ?? 0),
       suffix: " and counting",
+      badge: "All time",
     },
     {
-      label: "Item Duplicates",
-      icon: "mdi:content-copy",
-      value: impactStats?.total_duplicates ?? 0,
-      suffix: " and counting",
+      label: "Total Networth",
+      icon: "mdi:cash-multiple",
+      value:
+        Math.round(((networthCap?.total_networth ?? 0) / 1_000_000_000) * 10) /
+        10,
+      decimals: 1,
+      suffix: "B",
+      suffixLarge: true,
+      badge: "Last 24 hours",
+    },
+    {
+      label: "Clean Networth",
+      icon: "mdi:cash-check",
+      value:
+        Math.round(
+          ((networthCap?.total_clean_networth ?? 0) / 1_000_000_000) * 10,
+        ) / 10,
+      decimals: 1,
+      suffix: "B",
+      suffixLarge: true,
+      badge: "Last 24 hours",
+    },
+    {
+      label: "Duped Networth",
+      icon: "mdi:cash-remove",
+      value:
+        Math.round(
+          ((networthCap?.total_duped_networth ?? 0) / 1_000_000_000) * 10,
+        ) / 10,
+      decimals: 1,
+      suffix: "B",
+      suffixLarge: true,
+      badge: "Last 24 hours",
     },
   ];
 
@@ -398,7 +449,7 @@ export default async function Home() {
                   View Testimonials
                 </Link>
               </Button>
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-5">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
                 {legacyStats.map((stat, i) => (
                   <div
                     key={stat.label}
@@ -409,14 +460,7 @@ export default async function Home() {
                       } as React.CSSProperties
                     }
                   >
-                    <div className="mb-2 flex items-center gap-2">
-                      <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-white/15">
-                        <Icon
-                          icon={stat.icon}
-                          className="h-5 w-5 text-white"
-                          inline={true}
-                        />
-                      </div>
+                    <div className="mb-2">
                       <span className="text-xs font-medium text-white/85 uppercase">
                         {stat.label}
                       </span>
@@ -425,7 +469,13 @@ export default async function Home() {
                       {stat.prefix ?? ""}
                       <CountUpNumber value={stat.value} />
                       {stat.suffix ? (
-                        <span className="text-sm font-medium text-white/85">
+                        <span
+                          className={
+                            stat.suffixLarge
+                              ? "text-2xl font-bold text-white"
+                              : "text-sm font-medium text-white/85"
+                          }
+                        >
                           {stat.suffix}
                         </span>
                       ) : null}
@@ -433,7 +483,7 @@ export default async function Home() {
                   </div>
                 ))}
               </div>
-              <div className="mt-3 grid grid-cols-1 gap-3 md:grid-cols-3">
+              <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-5">
                 {impactStatsCards.map((stat, i) => (
                   <div
                     key={stat.label}
@@ -444,23 +494,42 @@ export default async function Home() {
                       } as React.CSSProperties
                     }
                   >
-                    <div className="mb-2 flex items-center gap-2">
-                      <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-white/15">
-                        <Icon
-                          icon={stat.icon}
-                          className="h-5 w-5 text-white"
-                          inline={true}
-                        />
-                      </div>
-                      <span className="text-xs font-medium text-white/85 uppercase">
+                    <div className="mb-2">
+                      <span className="block text-xs font-medium text-white/85 uppercase">
                         {stat.label}
                       </span>
+                      {stat.badge ? (
+                        <span className="text-[10px] font-medium tracking-wide text-white/45 uppercase">
+                          {stat.badge}
+                        </span>
+                      ) : null}
                     </div>
                     <p className="text-3xl leading-none font-bold text-white">
                       {stat.prefix ?? ""}
-                      <CountUpNumber value={stat.value} />
+                      {stat.unit !== undefined || stat.suffixLarge ? (
+                        new Intl.NumberFormat("en-US", {
+                          minimumFractionDigits: stat.decimals ?? 0,
+                          maximumFractionDigits: stat.decimals ?? 0,
+                        }).format(stat.value)
+                      ) : (
+                        <CountUpNumber
+                          value={stat.value}
+                          decimals={stat.decimals}
+                        />
+                      )}
+                      {stat.unit ? (
+                        <span className="text-2xl font-bold text-white">
+                          {stat.unit}
+                        </span>
+                      ) : null}
                       {stat.suffix ? (
-                        <span className="text-sm font-medium text-white/85">
+                        <span
+                          className={
+                            stat.suffixLarge
+                              ? "text-2xl font-bold text-white"
+                              : "text-sm font-medium text-white/85"
+                          }
+                        >
                           {stat.suffix}
                         </span>
                       ) : null}

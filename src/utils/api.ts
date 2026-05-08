@@ -2512,6 +2512,16 @@ export interface HomepageImpactStats {
   total_duplicates: number;
 }
 
+export interface NetworthCapStats {
+  total_networth: number;
+  total_duped_networth: number;
+  total_clean_networth: number;
+  total_networth_str: string;
+  total_duped_networth_str: string;
+  total_clean_networth_str: string;
+  duplicates_percentage: number;
+}
+
 export async function fetchHomepageStats(): Promise<HomepageStats | null> {
   try {
     const response = await fetch(`${BASE_API_URL}/stats/homepage`, {
@@ -2530,6 +2540,27 @@ export async function fetchHomepageStats(): Promise<HomepageStats | null> {
     return (await response.json()) as HomepageStats;
   } catch (error) {
     log.error("Error fetching homepage stats", error);
+    return null;
+  }
+}
+
+export async function fetchNetworthCap(): Promise<NetworthCapStats | null> {
+  try {
+    const response = await fetch(`${INVENTORY_API_URL}/networth/cap`, {
+      next: { revalidate: 10800 }, // Revalidate every 3 hours
+      headers: {
+        "User-Agent": "JailbreakChangelogs-HomepageStats/1.0",
+        "X-Source": INVENTORY_API_SOURCE_HEADER,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch networth/cap: ${response.status}`);
+    }
+
+    return (await response.json()) as NetworthCapStats;
+  } catch (error) {
+    console.error("[SERVER] Error fetching networth cap:", error);
     return null;
   }
 }
