@@ -34,7 +34,7 @@ interface NetworthHistoryChartProps {
   initialData?: UserNetworthData[];
 }
 
-type DateRange = "10" | "25" | "50" | "all";
+type DateRange = "10" | "25" | "50" | "100" | "250" | "all";
 type ChartType = "area" | "bar";
 
 const BASE_DATE_RANGE_OPTIONS: {
@@ -44,6 +44,8 @@ const BASE_DATE_RANGE_OPTIONS: {
   { value: "10", label: "Last 10 scans" },
   { value: "25", label: "Last 25 scans" },
   { value: "50", label: "Last 50 scans" },
+  { value: "100", label: "Last 100 scans" },
+  { value: "250", label: "Last 250 scans" },
 ];
 
 const NetworthHistoryChart = ({
@@ -167,6 +169,8 @@ const NetworthHistoryChart = ({
     "10": 10,
     "25": 25,
     "50": 50,
+    "100": 100,
+    "250": 250,
     all: null,
   };
 
