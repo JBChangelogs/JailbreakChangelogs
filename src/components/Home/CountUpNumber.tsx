@@ -12,6 +12,7 @@ import {
 interface CountUpNumberProps {
   value: number;
   durationMs?: number;
+  decimals?: number;
 }
 
 function getDuration(delta: number, override?: number): number {
@@ -26,14 +27,23 @@ function getDuration(delta: number, override?: number): number {
 export default function CountUpNumber({
   value,
   durationMs,
+  decimals = 0,
 }: CountUpNumberProps) {
   const shouldReduceMotion = useReducedMotion();
   const motionValue = useMotionValue(0);
   const prevValue = useRef(0);
-  const numberFormatter = useMemo(() => new Intl.NumberFormat("en-US"), []);
+  const numberFormatter = useMemo(
+    () =>
+      new Intl.NumberFormat("en-US", {
+        minimumFractionDigits: decimals,
+        maximumFractionDigits: decimals,
+      }),
+    [decimals],
+  );
 
+  const factor = Math.pow(10, decimals);
   const rounded = useTransform(motionValue, (latest) =>
-    numberFormatter.format(Math.max(0, Math.round(latest))),
+    numberFormatter.format(Math.round(Math.max(0, latest) * factor) / factor),
   );
 
   useEffect(() => {
