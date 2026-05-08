@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, useAnimationFrame, useMotionValue } from "framer-motion";
+import { motion, useAnimationFrame, useMotionValue } from "motion/react";
 import { useRef } from "react";
 
 interface SupporterCarouselProps {

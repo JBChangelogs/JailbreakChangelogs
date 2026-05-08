@@ -11,7 +11,7 @@ import { Pagination } from "@/components/ui/Pagination";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import dynamic from "next/dynamic";
 import { useState, useEffect, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "motion/react";
 import { logout, trackLogoutSource } from "@/utils/auth";
 import { toast } from "sonner";
 import LoginModal from "../Auth/LoginModal";

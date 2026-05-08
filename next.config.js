@@ -11,7 +11,21 @@ const nextConfig = {
   },
   experimental: {
     webpackMemoryOptimizations: true,
-    optimizePackageImports: ["@mui/material", "radix-ui"],
+    optimizePackageImports: [
+      "@mui/material",
+      "@mui/lab",
+      "@mui/x-date-pickers",
+      "@radix-ui/react-checkbox",
+      "@radix-ui/react-dialog",
+      "@radix-ui/react-dropdown-menu",
+      "@radix-ui/react-navigation-menu",
+      "@radix-ui/react-popover",
+      "@radix-ui/react-slider",
+      "@radix-ui/react-slot",
+      "@radix-ui/react-switch",
+      "@radix-ui/react-tabs",
+      "lucide-react",
+    ],
   },
   turbopack: {
     rules: {

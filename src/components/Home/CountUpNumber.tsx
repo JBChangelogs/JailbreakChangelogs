@@ -7,7 +7,7 @@ import {
   useReducedMotion,
   useTransform,
   motion,
-} from "framer-motion";
+} from "motion/react";
 
 interface CountUpNumberProps {
   value: number;

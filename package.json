@@ -58,7 +58,6 @@
     "dompurify": "^3.4.2",
     "embla-carousel-autoplay": "^8.6.0",
     "embla-carousel-react": "^8.6.0",
-    "framer-motion": "^12.38.0",
     "geist": "^1.7.0",
     "he": "^1.2.0",
     "lucide-react": "^0.577.0",
