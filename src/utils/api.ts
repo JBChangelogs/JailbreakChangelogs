@@ -2508,7 +2508,9 @@ export interface HomepageStats {
 
 export interface HomepageImpactStats {
   items_tracked: number;
+  items_tracked_str: string;
   users_scanned: number;
+  users_scanned_str: string;
   total_duplicates: number;
 }
 
@@ -2611,7 +2613,9 @@ export async function fetchHomepageImpactStats(): Promise<HomepageImpactStats | 
 
     return {
       items_tracked: counts.item_count ?? 0,
+      items_tracked_str: counts.item_count_str ?? "0",
       users_scanned: counts.user_count ?? 0,
+      users_scanned_str: counts.user_count_str ?? "0",
       total_duplicates: duplicates.total_duplicates ?? 0,
     };
   } catch (error) {
