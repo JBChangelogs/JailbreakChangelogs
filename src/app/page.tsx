@@ -155,28 +155,12 @@ type HeroStatCard = {
   label: string;
   icon: string;
   value: number;
+  valueStr?: string;
   decimals?: number;
   prefix?: string;
-  unit?: string;
   suffix?: string;
-  suffixLarge?: boolean;
   badge?: string;
 };
-
-function compactCount(n: number): {
-  value: number;
-  decimals: number;
-  unit?: string;
-} {
-  if (n >= 1_000_000) {
-    return {
-      value: Math.round((n / 1_000_000) * 10) / 10,
-      decimals: 1,
-      unit: "M",
-    };
-  }
-  return { value: n, decimals: 0 };
-}
 
 const BADIMO_TESTIMONIAL_NAME = "Badimo";
 
@@ -226,50 +210,38 @@ export default async function Home() {
     {
       label: "Items Tracked",
       icon: "mdi:shape",
-      ...compactCount(impactStats?.items_tracked ?? 0),
+      value: impactStats?.items_tracked ?? 0,
+      valueStr: impactStats?.items_tracked_str,
       suffix: " and counting",
       badge: "All time",
     },
     {
       label: "Inventories Scanned",
       icon: "mdi:account-search",
-      ...compactCount(impactStats?.users_scanned ?? 0),
+      value: impactStats?.users_scanned ?? 0,
+      valueStr: impactStats?.users_scanned_str,
       suffix: " and counting",
       badge: "All time",
     },
     {
       label: "Total Networth",
       icon: "mdi:cash-multiple",
-      value:
-        Math.round(((networthCap?.total_networth ?? 0) / 1_000_000_000) * 10) /
-        10,
-      decimals: 1,
-      suffix: "B",
-      suffixLarge: true,
+      value: networthCap?.total_networth ?? 0,
+      valueStr: networthCap?.total_networth_str,
       badge: "Last 24 hours",
     },
     {
       label: "Clean Networth",
       icon: "mdi:cash-check",
-      value:
-        Math.round(
-          ((networthCap?.total_clean_networth ?? 0) / 1_000_000_000) * 10,
-        ) / 10,
-      decimals: 1,
-      suffix: "B",
-      suffixLarge: true,
+      value: networthCap?.total_clean_networth ?? 0,
+      valueStr: networthCap?.total_clean_networth_str,
       badge: "Last 24 hours",
     },
     {
       label: "Duped Networth",
       icon: "mdi:cash-remove",
-      value:
-        Math.round(
-          ((networthCap?.total_duped_networth ?? 0) / 1_000_000_000) * 10,
-        ) / 10,
-      decimals: 1,
-      suffix: "B",
-      suffixLarge: true,
+      value: networthCap?.total_duped_networth ?? 0,
+      valueStr: networthCap?.total_duped_networth_str,
       badge: "Last 24 hours",
     },
   ];
@@ -469,13 +441,7 @@ export default async function Home() {
                       {stat.prefix ?? ""}
                       <CountUpNumber value={stat.value} />
                       {stat.suffix ? (
-                        <span
-                          className={
-                            stat.suffixLarge
-                              ? "text-2xl font-bold text-white"
-                              : "text-sm font-medium text-white/85"
-                          }
-                        >
+                        <span className="text-sm font-medium text-white/85">
                           {stat.suffix}
                         </span>
                       ) : null}
@@ -506,30 +472,14 @@ export default async function Home() {
                     </div>
                     <p className="text-3xl leading-none font-bold text-white">
                       {stat.prefix ?? ""}
-                      {stat.unit !== undefined || stat.suffixLarge ? (
-                        new Intl.NumberFormat("en-US", {
-                          minimumFractionDigits: stat.decimals ?? 0,
-                          maximumFractionDigits: stat.decimals ?? 0,
-                        }).format(stat.value)
-                      ) : (
+                      {stat.valueStr ?? (
                         <CountUpNumber
                           value={stat.value}
                           decimals={stat.decimals}
                         />
                       )}
-                      {stat.unit ? (
-                        <span className="text-2xl font-bold text-white">
-                          {stat.unit}
-                        </span>
-                      ) : null}
                       {stat.suffix ? (
-                        <span
-                          className={
-                            stat.suffixLarge
-                              ? "text-2xl font-bold text-white"
-                              : "text-sm font-medium text-white/85"
-                          }
-                        >
+                        <span className="text-sm font-medium text-white/85">
                           {stat.suffix}
                         </span>
                       ) : null}
