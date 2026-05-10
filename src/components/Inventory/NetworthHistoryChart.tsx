@@ -26,7 +26,6 @@ import {
   ChartTooltipContent,
   type ChartConfig,
 } from "@/components/ui/chart";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { UserNetworthData } from "@/utils/api";
 
 interface NetworthHistoryChartProps {
@@ -56,7 +55,7 @@ const NetworthHistoryChart = ({
   );
 
   const [dateRange, setDateRange] = useState<DateRange>("all");
-  const [chartType, setChartType] = useState<ChartType>("area");
+  const [chartType] = useState<ChartType>("area");
   const [loading] = useState(false);
   const chartId = useId().replace(/:/g, "");
   const networthGradientId = `fill-networth-${chartId}`;
@@ -207,34 +206,6 @@ const NetworthHistoryChart = ({
     networth: item.networth,
   }));
 
-  const aggregateByWindow = <T,>(
-    data: T[],
-    maxBars: number,
-    reducer: (chunk: T[]) => T,
-  ): T[] => {
-    if (data.length <= maxBars) return data;
-    const windowSize = Math.ceil(data.length / maxBars);
-    const aggregated: T[] = [];
-    for (let i = 0; i < data.length; i += windowSize) {
-      aggregated.push(reducer(data.slice(i, i + windowSize)));
-    }
-    return aggregated;
-  };
-
-  const avg = (values: number[]) =>
-    values.length === 0
-      ? 0
-      : values.reduce((sum, value) => sum + value, 0) / values.length;
-
-  const barNetworthChartData = aggregateByWindow(
-    networthChartData,
-    36,
-    (chunk) => ({
-      timestamp: chunk[chunk.length - 1].timestamp,
-      networth: Math.round(avg(chunk.map((entry) => entry.networth))),
-    }),
-  );
-
   const getNiceStep = (rangeValue: number, targetTicks = 6) => {
     if (rangeValue <= 0) return 1;
     const roughStep = rangeValue / (targetTicks - 1);
@@ -278,8 +249,7 @@ const NetworthHistoryChart = ({
     return [axisMin, axisMax];
   };
 
-  const displayedNetworthChartData =
-    chartType === "bar" ? barNetworthChartData : networthChartData;
+  const displayedNetworthChartData = networthChartData;
   const [networthAxisMin, networthAxisMax] = getYAxisDomain(
     displayedNetworthChartData,
   );
@@ -334,29 +304,15 @@ const NetworthHistoryChart = ({
           </div>
         </div>
 
-        <div className="mb-4 grid grid-cols-2 gap-2">
-          <Tabs
-            className="w-full"
-            value={chartType}
-            onValueChange={(value) => setChartType(value as ChartType)}
-          >
-            <TabsList className="h-10 w-full" fullWidth>
-              <TabsTrigger value="area" className="h-8.5 px-3" fullWidth>
-                Line
-              </TabsTrigger>
-              <TabsTrigger value="bar" className="h-8.5 px-3" fullWidth>
-                Bar
-              </TabsTrigger>
-            </TabsList>
-          </Tabs>
+        <div className="mb-4 flex justify-end">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button
                 type="button"
-                className="border-border-card bg-tertiary-bg text-primary-text hover:border-border-focus inline-flex h-10 w-full items-center justify-between rounded-lg border px-3 text-sm transition-colors"
+                className="border-border-card bg-tertiary-bg text-primary-text hover:border-border-focus inline-flex h-10 w-full max-w-[200px] items-center justify-between rounded-lg border px-3 text-sm transition-colors"
                 aria-label="Select chart date range"
               >
-                <span>{currentDateRangeLabel}</span>
+                <span className="truncate">{currentDateRangeLabel}</span>
                 <Icon
                   icon="heroicons:chevron-down"
                   className="text-secondary-text h-4 w-4"
@@ -513,7 +469,7 @@ const NetworthHistoryChart = ({
             ) : (
               <BarChart
                 accessibilityLayer
-                data={barNetworthChartData}
+                data={networthChartData}
                 margin={{ left: 6, right: 6 }}
               >
                 <CartesianGrid
