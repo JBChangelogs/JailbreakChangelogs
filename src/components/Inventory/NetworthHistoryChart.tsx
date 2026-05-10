@@ -231,7 +231,7 @@ const NetworthHistoryChart = ({
     36,
     (chunk) => ({
       timestamp: chunk[chunk.length - 1].timestamp,
-      networth: avg(chunk.map((entry) => entry.networth)),
+      networth: Math.round(avg(chunk.map((entry) => entry.networth))),
     }),
   );
 
