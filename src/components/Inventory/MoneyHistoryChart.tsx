@@ -229,7 +229,7 @@ const MoneyHistoryChart = ({ initialData = [] }: MoneyHistoryChartProps) => {
 
   const barMoneyChartData = aggregateByWindow(moneyChartData, 36, (chunk) => ({
     timestamp: chunk[chunk.length - 1].timestamp,
-    money: avg(chunk.map((entry) => entry.money)),
+    money: Math.round(avg(chunk.map((entry) => entry.money))),
   }));
 
   const getNiceStep = (rangeValue: number, targetTicks = 6) => {
