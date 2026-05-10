@@ -721,7 +721,7 @@ export async function fetchItemChanges(id: string) {
       headers: {
         "User-Agent": "JailbreakChangelogs-Changelogs/1.0",
       },
-      next: { revalidate: 300 }, // Cache for 5 minutes
+      cache: "no-store", // Response exceeds Next.js 2MB cache limit
     });
     if (response.status === 404) {
       return [] as unknown[];
