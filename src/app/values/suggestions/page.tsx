@@ -95,6 +95,7 @@ interface Suggestion {
   created_at: number;
   updated_at: number;
   user: SuggestionUser;
+  item?: Item;
   votes: {
     upvotes: { created_at: number; user: SuggestionUser }[];
     downvotes: { created_at: number; user: SuggestionUser }[];
@@ -710,7 +711,6 @@ export default function ValueSuggestionsPage() {
 
   // Items state (for form dropdown)
   const [items, setItems] = useState<Item[]>([]);
-  const [itemMap, setItemMap] = useState<Map<number, Item>>(new Map());
   const [loadingItems, setLoadingItems] = useState(true);
 
   // Form state
@@ -989,7 +989,7 @@ export default function ValueSuggestionsPage() {
   }, []);
 
   const filteredSuggestions = suggestions.filter((s) => {
-    const item = itemMap.get(s.item_id);
+    const item = s.item;
     const matchesSearch =
       !search ||
       (item?.name ?? `Item #${s.item_id}`)
@@ -1001,11 +1001,7 @@ export default function ValueSuggestionsPage() {
   });
 
   const suggestionItemTypes = Array.from(
-    new Set(
-      suggestions
-        .map((s) => itemMap.get(s.item_id)?.type)
-        .filter(Boolean) as string[],
-    ),
+    new Set(suggestions.map((s) => s.item?.type).filter(Boolean) as string[]),
   ).sort();
 
   const suggestionFields = Array.from(
@@ -1075,7 +1071,6 @@ export default function ValueSuggestionsPage() {
         }
         const data: Item[] = await res.json();
         setItems(data);
-        setItemMap(new Map(data.map((item) => [item.id, item])));
       } catch {
         // silently fail — form can still show without items
       } finally {
@@ -1436,7 +1431,7 @@ export default function ValueSuggestionsPage() {
         ) : (
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {filteredSuggestions.map((suggestion) => {
-              const item = itemMap.get(suggestion.item_id);
+              const item = suggestion.item;
               const cleanReason = stripHtml(suggestion.reason).trim();
               const categoryIcon = item ? getCategoryIcon(item.type) : null;
 
@@ -1797,7 +1792,7 @@ export default function ValueSuggestionsPage() {
         open={editModalOpen}
         onClose={closeEditModal}
         suggestion={editTarget}
-        item={editTarget ? (itemMap.get(editTarget.item_id) ?? null) : null}
+        item={editTarget ? (editTarget.item ?? null) : null}
         onSave={handleEditSave}
       />
 

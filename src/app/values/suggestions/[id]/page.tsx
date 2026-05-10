@@ -71,6 +71,7 @@ interface Suggestion {
   created_at: number;
   updated_at: number;
   user: SuggestionUser;
+  item?: Item;
   votes: {
     upvotes: { created_at: number; user: SuggestionUser }[];
     downvotes: { created_at: number; user: SuggestionUser }[];
@@ -191,16 +192,8 @@ export default function ValueSuggestionDetailPage() {
         const data: Suggestion = await res.json();
         setSuggestion(data);
         setVoteCounts({ up: data.upvotes, down: data.downvotes });
-        try {
-          const itemRes = await fetch(
-            buildApiUrlWithDevToken(
-              PUBLIC_API_URL!,
-              `/items/get?id=${data.item_id}`,
-            ),
-          );
-          if (itemRes.ok) setItem(await itemRes.json());
-        } catch {
-          /* non-fatal */
+        if (data.item) {
+          setItem(data.item);
         }
       } catch {
         setError("Failed to load suggestion.");
