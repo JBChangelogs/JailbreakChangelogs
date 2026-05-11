@@ -210,6 +210,7 @@ function SuggestionForm({
       return;
     }
     setSubmitting(true);
+    setSuggestedValueError(null);
     try {
       await onSubmit({
         item: selectedItem.id,
@@ -224,10 +225,19 @@ function SuggestionForm({
       setReason("");
       setField("cash_value");
       setRateLimitUntil(null);
-    } catch (err) {
+    } catch (err: unknown) {
       if (err instanceof RateLimitError) {
         setRateLimitUntil(Date.now() + err.retryAfter * 1000);
         setRateLimitSecondsLeft(err.retryAfter);
+      } else if (typeof err === "object" && err !== null && "response" in err) {
+        const responseErr = err as {
+          response: { data: { field?: string; message?: string } };
+        };
+        if (responseErr.response?.data?.field === field) {
+          setSuggestedValueError(
+            responseErr.response?.data?.message || "Invalid value.",
+          );
+        }
       }
     } finally {
       setSubmitting(false);
@@ -425,7 +435,7 @@ function SuggestionForm({
               );
               setSuggestedValueError(
                 isNumericField && e.target.value.trim()
-                  ? (parseValueInput(e.target.value).error ?? null)
+                  ? (parseValueInput().error ?? null)
                   : null,
               );
             }}
@@ -519,8 +529,6 @@ function SuggestionForm({
               !!rateLimitUntil ||
               !selectedItem ||
               !suggestedValue.trim() ||
-              (["cash_value", "duped_value"].includes(field) &&
-                !parseValueInput(suggestedValue).valid) ||
               reason.length < minChars
             }
             className="bg-button-info hover:bg-button-info-hover text-form-button-text flex items-center gap-2 disabled:opacity-50"
@@ -672,17 +680,7 @@ function VoteRateLimitBanner({ until }: { until: number }) {
   );
 }
 
-// Accepts: 10000000 | 10,000,000 | 10.5m | 500k | 1.2b (case-insensitive)
-const VALUE_REGEX = /^(\d{1,3}(,\d{3})*|\d+)(\.\d+)?([kmbt]?)$/i;
-const parseValueInput = (raw: string): { valid: boolean; error?: string } => {
-  const trimmed = raw.trim();
-  if (!trimmed) return { valid: false, error: "Value is required." };
-  if (!VALUE_REGEX.test(trimmed))
-    return {
-      valid: false,
-      error:
-        "Enter a numeric value like 10000000, 10,000,000, 500k, 50m, or 500m.",
-    };
+const parseValueInput = (): { valid: boolean; error?: string } => {
   return { valid: true };
 };
 
@@ -1098,7 +1096,6 @@ export default function ValueSuggestionsPage() {
     });
 
     const data = await res.json();
-
     if (!res.ok) {
       if (res.status === 429) {
         toast.error(
@@ -1110,7 +1107,7 @@ export default function ValueSuggestionsPage() {
       toast.error(
         data?.message ?? data?.error ?? "Failed to submit suggestion.",
       );
-      throw new Error("submission failed");
+      throw { response: { status: res.status, data } };
     }
 
     toast.success("Suggestion submitted successfully!");
