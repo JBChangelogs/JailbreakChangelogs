@@ -1,139 +1,107 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useCallback } from "react";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import { ThemeProvider, Skeleton } from "@mui/material";
 import { darkTheme } from "@/theme/darkTheme";
 import ValuesChangelogHeader from "@/components/Values/ValuesChangelogHeader";
 import { PUBLIC_API_URL } from "@/utils/api";
+import { buildApiUrlWithDevToken } from "@/utils/apiDevToken";
 import Link from "next/link";
-import { formatMessageDate } from "@/utils/timestamp";
+import { formatMessageDate, formatRelativeDate } from "@/utils/timestamp";
+import { formatFullValue } from "@/utils/values";
 import { Icon } from "@/components/ui/IconWrapper";
+import { Pagination } from "@/components/ui/Pagination";
 import { Button } from "@/components/ui/button";
-import { useVirtualizer } from "@tanstack/react-virtual";
-
-interface ChangeData {
-  change_id: number;
-  item: {
-    id: number;
-    name: string;
-    type: string;
-    creator: string;
-    cash_value: string;
-    duped_value: string;
-    tradable: number;
-  };
-  changed_by: string;
-  reason: string | null;
-  changes: {
-    old: {
-      cash_value?: string;
-      duped_value?: string;
-      tradable?: number;
-      last_updated?: number;
-      [key: string]: string | number | undefined;
-    };
-    new: {
-      cash_value?: string;
-      duped_value?: string;
-      tradable?: number;
-      last_updated?: number;
-      [key: string]: string | number | undefined;
-    };
-  };
-  posted: number;
-  created_at: number;
-  id: number;
-}
-
-interface ChangelogGroup {
-  id: number;
-  change_count: number;
-  change_data: ChangeData[];
-  created_at: number;
-}
-
+import { getCategoryColor, getCategoryIcon } from "@/utils/categoryIcons";
 import NitroValuesChangelogsRailAd from "@/components/Ads/NitroValuesChangelogsRailAd";
 import { createLogger } from "@/services/logger";
 
 const log = createLogger("UI");
 
+const badgeBase =
+  "inline-flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium backdrop-blur-xl";
+
+const fieldLabel = (field: string) =>
+  field
+    .replace(/_/g, " ")
+    .split(" ")
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(" ");
+
+interface EntryItem {
+  id: number;
+  name: string;
+  type: string;
+}
+
+interface ChangelogEntry {
+  id: number;
+  field: string;
+  current_value: string;
+  suggested_value: string;
+  upvotes: number;
+  downvotes: number;
+  item: EntryItem;
+}
+
+interface ValueChangelog {
+  id: number;
+  created_at: number;
+  count: number;
+  entries: ChangelogEntry[];
+}
+
+interface ValueChangelogsResponse {
+  total: number;
+  items: ValueChangelog[];
+  page: number;
+  total_pages: number;
+  size: number;
+}
+
+const MAX_ENTRIES_SHOWN = 5;
+
 export default function ValuesChangelogPage() {
-  const [changelogs, setChangelogs] = useState<ChangelogGroup[]>([]);
+  const [changelogs, setChangelogs] = useState<ValueChangelog[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [total, setTotal] = useState(0);
   const [sortOrder, setSortOrder] = useState<"newest" | "oldest">("newest");
-  const parentRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    const fetchChangelogs = async () => {
-      try {
-        const response = await fetch(
-          `${PUBLIC_API_URL}/items/changelogs/list`,
-          {
-            headers: {
-              "User-Agent": "JailbreakChangelogs-ValueHistory/1.0",
-            },
-          },
-        );
-        if (!response.ok) {
-          const body = await response.json().catch(() => ({}));
-          log.error("fetch changelogs failed", {
-            status: response.status,
-            body,
-          });
-          throw new Error("Failed to fetch changelogs");
-        }
-        const data = await response.json();
-        setChangelogs(data);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "An error occurred");
-      } finally {
-        setLoading(false);
+  const fetchChangelogs = useCallback(async (p: number) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const url = buildApiUrlWithDevToken(
+        PUBLIC_API_URL!,
+        `/value-changelogs?page=${p}`,
+      );
+      const res = await fetch(url, { credentials: "include" });
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        log.error("fetch value changelogs failed", {
+          status: res.status,
+          body,
+        });
+        throw new Error("Failed to fetch changelogs");
       }
-    };
-
-    fetchChangelogs();
+      const data: ValueChangelogsResponse = await res.json();
+      setChangelogs(data.items ?? []);
+      setTotalPages(data.total_pages ?? 1);
+      setTotal(data.total ?? 0);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "An error occurred");
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
-  const toggleSortOrder = () => {
-    setSortOrder((prev) => (prev === "newest" ? "oldest" : "newest"));
-  };
-
-  const sortedChangelogs = [...changelogs].sort((a, b) => {
-    return sortOrder === "newest"
-      ? b.created_at - a.created_at
-      : a.created_at - b.created_at;
-  });
-
-  // Find the changelog with the highest ID (latest)
-  const latestChangelogId =
-    changelogs.length > 0 ? Math.max(...changelogs.map((c) => c.id)) : null;
-
-  // Organize changelogs into rows for grid virtualization
-  // Each row contains 2 changelogs (responsive grid)
-  const getChangelogsPerRow = () => {
-    if (typeof window === "undefined") return 2; // Default for SSR
-    const width = window.innerWidth;
-    if (width < 768) return 1; // md breakpoint
-    return 2; // md and above
-  };
-
-  const changelogsPerRow = getChangelogsPerRow();
-  const rows: ChangelogGroup[][] = [];
-  for (let i = 0; i < sortedChangelogs.length; i += changelogsPerRow) {
-    rows.push(sortedChangelogs.slice(i, i + changelogsPerRow));
-  }
-
-  // TanStack Virtual setup for performance with large changelog datasets
-  // Only renders visible rows (~10-15 at a time) for 60FPS scrolling
-
-  const virtualizer = useVirtualizer({
-    count: rows.length,
-    getScrollElement: () => parentRef.current,
-    estimateSize: () => 200, // Estimate height for each row
-    overscan: 5, // Render 5 extra rows above/below viewport for smooth scrolling
-  });
+  useEffect(() => {
+    void fetchChangelogs(page);
+  }, [fetchChangelogs, page]);
 
   return (
     <>
@@ -144,34 +112,28 @@ export default function ValuesChangelogPage() {
             <Breadcrumb />
             <ValuesChangelogHeader />
 
-            {/* H1 heading for SEO */}
             <h1 className="sr-only">
               Roblox Jailbreak Values Changelogs & History
             </h1>
 
             {loading ? (
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                {[...Array(10)].map((_, i) => (
+              <div className="flex flex-col gap-4">
+                {[...Array(4)].map((_, i) => (
                   <div
                     key={i}
-                    className="border-border-card bg-tertiary-bg rounded-lg border p-4"
+                    className="border-border-card bg-secondary-bg rounded-xl border p-4"
                   >
-                    <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
-                      <div>
-                        <Skeleton variant="text" width={120} height={24} />
-                        <Skeleton
-                          variant="text"
-                          width={80}
-                          height={20}
-                          className="mt-1"
-                        />
+                    <div className="mb-3 flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Skeleton variant="text" width={130} height={24} />
+                        <Skeleton variant="rounded" width={60} height={22} />
                       </div>
-                      <Skeleton
-                        variant="text"
-                        width={150}
-                        height={20}
-                        className="mt-2 lg:mt-0"
-                      />
+                      <Skeleton variant="text" width={100} height={20} />
+                    </div>
+                    <div className="flex flex-col gap-2">
+                      {[...Array(2)].map((_, j) => (
+                        <Skeleton key={j} variant="rounded" height={52} />
+                      ))}
                     </div>
                   </div>
                 ))}
@@ -180,138 +142,250 @@ export default function ValuesChangelogPage() {
               <div className="text-button-danger mt-8 text-center">{error}</div>
             ) : (
               <>
-                <div className="mb-4 flex flex-col md:flex-row md:items-center md:justify-between">
-                  <p className="text-secondary-text mb-2 md:mb-0">
-                    Total Changelogs: {changelogs.length}
+                <div className="mb-4 flex items-center justify-between">
+                  <p className="text-secondary-text text-sm">
+                    Total Changelogs: {total}
                   </p>
                   <Button
-                    onClick={toggleSortOrder}
+                    onClick={() =>
+                      setSortOrder((prev) =>
+                        prev === "newest" ? "oldest" : "newest",
+                      )
+                    }
                     size="sm"
                     className="text-primary-text border-border-card bg-tertiary-bg/40 hover:bg-quaternary-bg/30 h-6 rounded-lg border px-2.5 text-xs leading-none font-medium backdrop-blur-xl"
                   >
-                    {sortOrder === "newest" ? (
-                      <Icon
-                        icon="heroicons-outline:arrow-down"
-                        className="h-4 w-4"
-                        inline={true}
-                      />
-                    ) : (
-                      <Icon
-                        icon="heroicons-outline:arrow-up"
-                        className="h-4 w-4"
-                        inline={true}
-                      />
-                    )}
+                    <Icon
+                      icon={
+                        sortOrder === "newest"
+                          ? "heroicons-outline:arrow-down"
+                          : "heroicons-outline:arrow-up"
+                      }
+                      className="h-4 w-4"
+                      inline={true}
+                    />
                     {sortOrder === "newest" ? "Newest First" : "Oldest First"}
                   </Button>
                 </div>
 
-                {/* Virtualized changelogs container */}
-                <div className="border-border-card bg-secondary-bg rounded-lg border">
-                  <div
-                    ref={parentRef}
-                    className="scrollbar-thin scrollbar-track-transparent scrollbar-thumb-border-primary hover:scrollbar-thumb-border-focus h-240 overflow-y-auto"
-                    style={{
-                      scrollbarWidth: "thin",
-                      scrollbarColor: "var(--color-border-primary) transparent",
-                    }}
-                  >
-                    {sortedChangelogs.length === 0 ? (
-                      <div className="flex flex-col items-center justify-center py-16 text-center">
-                        <div className="relative mb-6">
-                          <div className="from-border-focus/20 to-button-info-hover/20 absolute inset-0 rounded-full bg-linear-to-r blur-xl"></div>
-                          <div className="border-border-focus/30 bg-secondary-bg relative rounded-full border p-4">
-                            <Icon
-                              icon="heroicons-outline:arrow-down"
-                              className="text-border-focus h-8 w-8 sm:h-10 sm:w-10"
-                              inline={true}
-                            />
-                          </div>
-                        </div>
-                        <h3 className="text-primary-text mb-2 text-lg font-semibold sm:text-xl">
-                          No changelogs found
-                        </h3>
-                        <p className="text-secondary-text max-w-md text-sm leading-relaxed sm:text-base">
-                          No changelogs are available at this time.
-                        </p>
-                      </div>
-                    ) : (
-                      <div
-                        style={{
-                          height: `${virtualizer.getTotalSize()}px`,
-                          width: "100%",
-                          position: "relative",
-                        }}
-                      >
-                        {virtualizer.getVirtualItems().map((virtualRow) => {
-                          const rowChangelogs = rows[virtualRow.index];
-                          const rowIndex = virtualRow.index;
+                {changelogs.length === 0 ? (
+                  <div className="border-border-card bg-secondary-bg rounded-xl border p-16 text-center">
+                    <h3 className="text-primary-text text-lg font-semibold">
+                      No changelogs found
+                    </h3>
+                  </div>
+                ) : (
+                  <div className="flex flex-col gap-4">
+                    {[...changelogs]
+                      .sort((a, b) =>
+                        sortOrder === "newest"
+                          ? b.created_at - a.created_at
+                          : a.created_at - b.created_at,
+                      )
+                      .map((changelog) => {
+                        const isLatest =
+                          changelog.id ===
+                          Math.max(...changelogs.map((c) => c.id));
+                        const visibleEntries = changelog.entries.slice(
+                          0,
+                          MAX_ENTRIES_SHOWN,
+                        );
+                        const remaining =
+                          changelog.count - visibleEntries.length;
 
-                          return (
+                        return (
+                          <div key={changelog.id} className="group relative">
+                            <Link
+                              href={`/values/changelogs/${changelog.id}`}
+                              prefetch={false}
+                              className="absolute inset-0 z-0"
+                              aria-label={`View changelog #${changelog.id}`}
+                            />
                             <div
-                              key={`row-${rowIndex}`}
-                              data-index={virtualRow.index}
-                              ref={virtualizer.measureElement}
-                              style={{
-                                position: "absolute",
-                                top: 0,
-                                left: 0,
-                                width: "100%",
-                                transform: `translateY(${virtualRow.start}px)`,
-                              }}
+                              className={`rounded-xl border p-4 transition-colors duration-200 ${
+                                isLatest
+                                  ? "from-button-info/10 to-button-info-hover/10 shadow-button-info/20 border-button-info bg-linear-to-r shadow-lg"
+                                  : "border-border-card bg-secondary-bg group-hover:border-border-focus"
+                              }`}
                             >
-                              <div className="grid grid-cols-1 gap-2 p-2 md:grid-cols-2">
-                                {rowChangelogs.map((changelog) => {
-                                  const isLatest =
-                                    changelog.id === latestChangelogId;
-                                  return (
-                                    <Link
-                                      key={changelog.id}
-                                      href={`/values/changelogs/${changelog.id}`}
-                                      prefetch={false}
-                                      className="group block"
+                              {/* Header */}
+                              <div className="mb-3">
+                                <div className="flex items-center gap-2">
+                                  <h3 className="text-primary-text group-hover:text-link text-base font-bold transition-colors">
+                                    Changelog #{changelog.id}
+                                  </h3>
+                                  {isLatest && (
+                                    <span
+                                      className={`${badgeBase} bg-button-info/20 border-button-info text-primary-text`}
                                     >
-                                      <div
-                                        className={`rounded-lg border p-4 transition-all duration-200 ${
-                                          isLatest
-                                            ? "from-button-info/10 to-button-info-hover/10 shadow-button-info/20 border-button-info bg-linear-to-r shadow-lg"
-                                            : "border-border-card bg-tertiary-bg"
-                                        }`}
+                                      Latest
+                                    </span>
+                                  )}
+                                </div>
+                                <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+                                  <span
+                                    className={`${badgeBase} border-border-card bg-tertiary-bg/40 text-secondary-text`}
+                                  >
+                                    {changelog.count}{" "}
+                                    {changelog.count === 1
+                                      ? "change"
+                                      : "changes"}
+                                  </span>
+                                  {Array.from(
+                                    new Set(
+                                      changelog.entries.map((e) => e.field),
+                                    ),
+                                  )
+                                    .sort()
+                                    .map((field) => (
+                                      <span
+                                        key={field}
+                                        className={`${badgeBase} border-border-card bg-tertiary-bg/40 text-secondary-text`}
                                       >
-                                        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
-                                          <div>
-                                            <div className="flex items-center gap-2">
-                                              <h3 className="text-primary-text group-hover:text-link text-lg font-semibold transition-colors">
-                                                Changelog #{changelog.id}
-                                              </h3>
-                                              {isLatest && (
-                                                <span className="bg-button-info text-form-button-text rounded-full px-2 py-0.5 text-xs font-medium">
-                                                  Latest
-                                                </span>
-                                              )}
-                                            </div>
-                                            <p className="text-secondary-text text-sm">
-                                              {changelog.change_count} changes
-                                            </p>
-                                          </div>
-                                          <p className="text-secondary-text mt-2 text-sm lg:mt-0">
-                                            {formatMessageDate(
-                                              changelog.created_at,
+                                        {fieldLabel(field)}
+                                      </span>
+                                    ))}
+                                </div>
+                              </div>
+
+                              {/* Entry rows */}
+                              <div className="flex flex-col gap-2">
+                                {visibleEntries.map((entry) => {
+                                  const color = getCategoryColor(
+                                    entry.item.type,
+                                  );
+                                  const categoryIcon = getCategoryIcon(
+                                    entry.item.type,
+                                  );
+                                  return (
+                                    <div
+                                      key={entry.id}
+                                      className="border-border-card bg-tertiary-bg flex flex-col gap-2 rounded-lg border px-3 py-2.5"
+                                    >
+                                      {/* Row 1: item name + badges */}
+                                      <div className="flex flex-wrap items-center gap-1.5">
+                                        <Link
+                                          href={`/item/${encodeURIComponent(entry.item.type)}/${encodeURIComponent(entry.item.name)}`}
+                                          prefetch={false}
+                                          className="text-primary-text hover:text-link relative z-10 text-sm font-semibold transition-colors"
+                                        >
+                                          {entry.item.name}
+                                        </Link>
+                                        <span
+                                          className={`${badgeBase} bg-tertiary-bg/40 text-primary-text`}
+                                          style={{
+                                            borderColor: color,
+                                            backgroundColor: `${color}22`,
+                                          }}
+                                        >
+                                          {categoryIcon && (
+                                            <categoryIcon.Icon
+                                              className="mr-1.5 h-3 w-3 shrink-0"
+                                              style={{ color }}
+                                            />
+                                          )}
+                                          {entry.item.type}
+                                        </span>
+                                        <span
+                                          className={`${badgeBase} border-border-card bg-tertiary-bg text-primary-text`}
+                                        >
+                                          {fieldLabel(entry.field)}
+                                        </span>
+                                      </div>
+
+                                      {/* Row 2: old → new + votes */}
+                                      <div className="flex flex-wrap items-center gap-3">
+                                        <div className="flex items-center gap-1.5">
+                                          <Icon
+                                            icon="mdi:minus-circle"
+                                            className="text-button-danger h-3.5 w-3.5 shrink-0"
+                                            inline
+                                          />
+                                          <span className="text-secondary-text text-sm font-bold line-through">
+                                            {formatFullValue(
+                                              entry.current_value || "N/A",
                                             )}
-                                          </p>
+                                          </span>
+                                        </div>
+                                        <Icon
+                                          icon="material-symbols:arrow-forward-rounded"
+                                          className="text-tertiary-text h-3.5 w-3.5 shrink-0"
+                                          inline
+                                        />
+                                        <div className="flex items-center gap-1.5">
+                                          <Icon
+                                            icon="mdi:plus-circle"
+                                            className="text-button-success h-3.5 w-3.5 shrink-0"
+                                            inline
+                                          />
+                                          <span className="text-primary-text text-sm font-bold">
+                                            {formatFullValue(
+                                              entry.suggested_value,
+                                            )}
+                                          </span>
+                                        </div>
+
+                                        {/* Votes */}
+                                        <div className="border-border-card ml-auto flex items-stretch overflow-hidden rounded-lg border">
+                                          <div className="bg-button-success/10 flex items-center gap-1 px-2 py-1">
+                                            <Icon
+                                              icon="material-symbols:thumb-up-rounded"
+                                              className="text-button-success h-3.5 w-3.5"
+                                              inline
+                                            />
+                                            <span className="text-button-success text-xs font-bold">
+                                              {entry.upvotes}
+                                            </span>
+                                          </div>
+                                          <div className="border-border-card border-l" />
+                                          <div className="bg-button-danger/10 flex items-center gap-1 px-2 py-1">
+                                            <Icon
+                                              icon="material-symbols:thumb-down-rounded"
+                                              className="text-button-danger h-3.5 w-3.5"
+                                              inline
+                                            />
+                                            <span className="text-button-danger text-xs font-bold">
+                                              {entry.downvotes}
+                                            </span>
+                                          </div>
                                         </div>
                                       </div>
-                                    </Link>
+                                    </div>
                                   );
                                 })}
+
+                                {remaining > 0 && (
+                                  <div className="border-border-card bg-tertiary-bg text-secondary-text rounded-lg border px-3 py-2 text-center text-sm">
+                                    +{remaining} more{" "}
+                                    {remaining === 1 ? "change" : "changes"}
+                                  </div>
+                                )}
                               </div>
+
+                              {/* Footer date */}
+                              <p className="text-secondary-text mt-3 text-xs">
+                                Posted {formatMessageDate(changelog.created_at)}{" "}
+                                ({formatRelativeDate(changelog.created_at)})
+                              </p>
                             </div>
-                          );
-                        })}
-                      </div>
-                    )}
+                          </div>
+                        );
+                      })}
                   </div>
-                </div>
+                )}
+
+                {totalPages > 1 && (
+                  <div className="mt-6 flex justify-center">
+                    <Pagination
+                      count={totalPages}
+                      page={page}
+                      onChange={(_, value) => {
+                        setPage(value);
+                        window.scrollTo({ top: 0, behavior: "smooth" });
+                      }}
+                    />
+                  </div>
+                )}
               </>
             )}
           </div>
