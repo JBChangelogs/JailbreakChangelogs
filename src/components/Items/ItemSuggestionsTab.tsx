@@ -11,6 +11,8 @@ import { buildApiUrlWithDevToken } from "@/utils/apiDevToken";
 import { PUBLIC_API_URL } from "@/utils/api";
 import { formatMessageDate } from "@/utils/timestamp";
 import { formatFullValue } from "@/utils/values";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import { createLogger } from "@/services/logger";
 import { toast } from "sonner";
 import Link from "next/link";
@@ -435,11 +437,9 @@ export default function ItemSuggestionsTab({
             suggestion.votes.downvotes.length > 0;
           const isExpanded = expandedReasons.has(suggestion.id);
           const reasonText = suggestion.reason ?? "";
-          const isTruncated = reasonText.length > MAX_REASON_LENGTH;
-          const displayReason =
-            isExpanded || !isTruncated
-              ? reasonText
-              : reasonText.slice(0, MAX_REASON_LENGTH) + "...";
+          const isTruncated =
+            reasonText.length > MAX_REASON_LENGTH ||
+            reasonText.split("\n").length > 5;
 
           return (
             <div
@@ -591,9 +591,63 @@ export default function ItemSuggestionsTab({
                 {/* Reason */}
                 {reasonText && (
                   <div>
-                    <p className="text-secondary-text text-sm leading-relaxed break-words">
-                      {displayReason}
-                    </p>
+                    <div
+                      className={`text-secondary-text overflow-hidden text-sm leading-relaxed break-words transition-all duration-200 ${
+                        isTruncated && !isExpanded ? "max-h-36" : ""
+                      }`}
+                    >
+                      <ReactMarkdown
+                        remarkPlugins={[remarkGfm]}
+                        components={{
+                          h1: ({ children }) => (
+                            <h1 className="text-primary-text mt-3 mb-1.5 text-base font-bold first:mt-0">
+                              {children}
+                            </h1>
+                          ),
+                          h2: ({ children }) => (
+                            <h2 className="text-primary-text mt-3 mb-1 text-base font-semibold first:mt-0">
+                              {children}
+                            </h2>
+                          ),
+                          h3: ({ children }) => (
+                            <h3 className="text-primary-text mt-2 mb-1 text-sm font-semibold first:mt-0">
+                              {children}
+                            </h3>
+                          ),
+                          p: ({ children }) => (
+                            <p className="mb-2 last:mb-0">{children}</p>
+                          ),
+                          ul: ({ children }) => (
+                            <ul className="mb-2 list-inside list-disc space-y-0.5 last:mb-0">
+                              {children}
+                            </ul>
+                          ),
+                          ol: ({ children }) => (
+                            <ol className="mb-2 list-inside list-decimal space-y-0.5 last:mb-0">
+                              {children}
+                            </ol>
+                          ),
+                          em: (props) => <em className="italic" {...props} />,
+                          strong: (props) => (
+                            <b
+                              className="text-primary-text font-semibold"
+                              {...props}
+                            />
+                          ),
+                        }}
+                      >
+                        {(() => {
+                          const withBold = reasonText.replace(
+                            /(Common Trades?:?)/gi,
+                            "**$1**",
+                          );
+                          return withBold
+                            .split(/\n\n+/)
+                            .map((part) => part.replace(/\n/g, "\n\n"))
+                            .join("\n\n");
+                        })()}
+                      </ReactMarkdown>
+                    </div>
                     {isTruncated && (
                       <button
                         onClick={() =>

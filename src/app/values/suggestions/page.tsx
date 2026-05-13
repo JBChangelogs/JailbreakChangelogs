@@ -16,6 +16,8 @@ import { buildApiUrlWithDevToken } from "@/utils/apiDevToken";
 import { PUBLIC_API_URL } from "@/utils/api";
 import { formatMessageDate } from "@/utils/timestamp";
 import { formatFullValue } from "@/utils/values";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import {
   getItemImagePath,
   handleImageError,
@@ -1474,7 +1476,6 @@ export default function ValueSuggestionsPage() {
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {filteredSuggestions.map((suggestion) => {
               const item = suggestion.item;
-              const cleanReason = stripHtml(suggestion.reason).trim();
               const categoryIcon = item ? getCategoryIcon(item.type) : null;
 
               return (
@@ -1726,9 +1727,61 @@ export default function ValueSuggestionsPage() {
                     </div>
 
                     {/* Reason */}
-                    <p className="text-secondary-text line-clamp-4 text-sm leading-relaxed break-words">
-                      {cleanReason || "No reason provided."}
-                    </p>
+                    <div className="text-secondary-text line-clamp-4 text-sm leading-relaxed break-words">
+                      {suggestion.reason?.trim() ? (
+                        <ReactMarkdown
+                          remarkPlugins={[remarkGfm]}
+                          components={{
+                            h1: ({ children }) => (
+                              <h1 className="text-primary-text text-sm font-bold">
+                                {children}
+                              </h1>
+                            ),
+                            h2: ({ children }) => (
+                              <h2 className="text-primary-text text-sm font-bold">
+                                {children}
+                              </h2>
+                            ),
+                            h3: ({ children }) => (
+                              <h3 className="text-primary-text text-sm font-semibold">
+                                {children}
+                              </h3>
+                            ),
+                            p: ({ children }) => <p>{children}</p>,
+                            ul: ({ children }) => (
+                              <ul className="list-inside list-disc">
+                                {children}
+                              </ul>
+                            ),
+                            ol: ({ children }) => (
+                              <ol className="list-inside list-decimal">
+                                {children}
+                              </ol>
+                            ),
+                            em: (props) => <em className="italic" {...props} />,
+                            strong: (props) => (
+                              <b
+                                className="text-primary-text font-semibold"
+                                {...props}
+                              />
+                            ),
+                          }}
+                        >
+                          {(() => {
+                            const withBold = suggestion.reason.replace(
+                              /(Common Trades?:?)/gi,
+                              "**$1**",
+                            );
+                            return withBold
+                              .split(/\n\n+/)
+                              .map((part) => part.replace(/\n/g, "\n\n"))
+                              .join("\n\n");
+                          })()}
+                        </ReactMarkdown>
+                      ) : (
+                        <span>No reason provided.</span>
+                      )}
+                    </div>
 
                     {/* Footer */}
                     <div className="relative z-10 mt-auto pt-1">

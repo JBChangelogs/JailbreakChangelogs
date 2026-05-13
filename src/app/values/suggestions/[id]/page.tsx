@@ -16,6 +16,8 @@ import { createLogger } from "@/services/logger";
 const log = createLogger("UI");
 import { formatMessageDate } from "@/utils/timestamp";
 import { formatFullValue } from "@/utils/values";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import {
   getItemImagePath,
   handleImageError,
@@ -161,6 +163,7 @@ export default function ValueSuggestionDetailPage() {
   const [isEditing, setIsEditing] = useState(false);
   const [editReason, setEditReason] = useState("");
   const [editSaving, setEditSaving] = useState(false);
+  const [reasonExpanded, setReasonExpanded] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -562,12 +565,97 @@ export default function ValueSuggestionDetailPage() {
                           </button>
                         </div>
                       </div>
+                    ) : suggestion.reason.trim() ? (
+                      (() => {
+                        const isLong =
+                          suggestion.reason.split("\n").length > 5 ||
+                          suggestion.reason.length > 400;
+                        const mdContent = (() => {
+                          const withBold = suggestion.reason.replace(
+                            /(Common Trades?:?)/gi,
+                            "**$1**",
+                          );
+                          return withBold
+                            .split(/\n\n+/)
+                            .map((part) => part.replace(/\n/g, "\n\n"))
+                            .join("\n\n");
+                        })();
+                        return (
+                          <div>
+                            <div
+                              className={`text-secondary-text overflow-hidden text-sm leading-relaxed break-words transition-all duration-200 ${
+                                isLong && !reasonExpanded ? "max-h-36" : ""
+                              }`}
+                            >
+                              <ReactMarkdown
+                                remarkPlugins={[remarkGfm]}
+                                components={{
+                                  h1: ({ children }) => (
+                                    <h1 className="text-primary-text mt-3 mb-1.5 text-lg font-bold first:mt-0">
+                                      {children}
+                                    </h1>
+                                  ),
+                                  h2: ({ children }) => (
+                                    <h2 className="text-primary-text mt-3 mb-1 text-base font-semibold first:mt-0">
+                                      {children}
+                                    </h2>
+                                  ),
+                                  h3: ({ children }) => (
+                                    <h3 className="text-primary-text mt-2 mb-1 text-sm font-semibold first:mt-0">
+                                      {children}
+                                    </h3>
+                                  ),
+                                  p: ({ children }) => (
+                                    <p className="mb-2 last:mb-0">{children}</p>
+                                  ),
+                                  ul: ({ children }) => (
+                                    <ul className="mb-2 list-inside list-disc space-y-0.5 last:mb-0">
+                                      {children}
+                                    </ul>
+                                  ),
+                                  ol: ({ children }) => (
+                                    <ol className="mb-2 list-inside list-decimal space-y-0.5 last:mb-0">
+                                      {children}
+                                    </ol>
+                                  ),
+                                  em: (props) => (
+                                    <em className="italic" {...props} />
+                                  ),
+                                  strong: (props) => (
+                                    <b
+                                      className="text-primary-text font-semibold"
+                                      {...props}
+                                    />
+                                  ),
+                                }}
+                              >
+                                {mdContent}
+                              </ReactMarkdown>
+                            </div>
+                            {isLong && (
+                              <button
+                                type="button"
+                                onClick={() => setReasonExpanded((v) => !v)}
+                                className="text-link hover:text-link-hover mt-2 flex cursor-pointer items-center gap-1 text-sm font-medium transition-colors hover:underline"
+                              >
+                                <Icon
+                                  icon={
+                                    reasonExpanded
+                                      ? "heroicons-outline:chevron-up"
+                                      : "heroicons-outline:chevron-down"
+                                  }
+                                  className="h-4 w-4"
+                                  inline
+                                />
+                                {reasonExpanded ? "Show Less" : "Read More"}
+                              </button>
+                            )}
+                          </div>
+                        );
+                      })()
                     ) : (
-                      <p
-                        className="text-secondary-text text-sm leading-relaxed break-words whitespace-pre-wrap"
-                        style={{ overflowWrap: "break-word" }}
-                      >
-                        {suggestion.reason.trim() || "No reason provided."}
+                      <p className="text-secondary-text text-sm leading-relaxed">
+                        No reason provided.
                       </p>
                     )}
                   </div>
