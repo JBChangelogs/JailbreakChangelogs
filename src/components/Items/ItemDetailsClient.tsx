@@ -33,6 +33,7 @@ const ItemValueChart = dynamic(
 import { ValueHistory } from "@/components/Items/ItemValueChart";
 import HoardersTab from "@/components/Items/HoardersTab";
 import DupesTab from "@/components/Items/DupesTab";
+import ItemSuggestionsTab from "@/components/Items/ItemSuggestionsTab";
 import {
   handleImageError,
   getItemImagePath,
@@ -84,6 +85,7 @@ const ItemDetailsTabs = React.memo(
       "Details",
       "Charts",
       "Changes",
+      "Suggestions",
       "Dupes",
       "Hoarders",
       "Similar Items",
@@ -142,10 +144,11 @@ export default function ItemDetailsClient({
     const map: Record<string, number> = {
       charts: 1,
       changes: 2,
-      dupes: 3,
-      hoarders: 4,
-      similar: 5,
-      comments: 6,
+      suggestions: 3,
+      dupes: 4,
+      hoarders: 5,
+      similar: 6,
+      comments: 7,
     };
     return tabParam ? (map[tabParam] ?? 0) : 0;
   }, [tabParam]);
@@ -260,10 +263,11 @@ export default function ItemDetailsClient({
       0: null,
       1: "charts",
       2: "changes",
-      3: "dupes",
-      4: "hoarders",
-      5: "similar",
-      6: "comments",
+      3: "suggestions",
+      4: "dupes",
+      5: "hoarders",
+      6: "similar",
+      7: "comments",
     };
     void setTabParam(names[newValue] ?? null);
   };
@@ -772,21 +776,27 @@ export default function ItemDetailsClient({
 
             {activeTab === 3 && (
               <div className="space-y-6">
-                <DupesTab itemId={item.id} />
+                <ItemSuggestionsTab itemId={item.id} />
               </div>
             )}
 
             {activeTab === 4 && (
               <div className="space-y-6">
-                <HoardersTab itemName={item.name} itemType={item.type} />
+                <DupesTab itemId={item.id} />
               </div>
             )}
 
             {activeTab === 5 && (
+              <div className="space-y-6">
+                <HoardersTab itemName={item.name} itemType={item.type} />
+              </div>
+            )}
+
+            {activeTab === 6 && (
               <div className="space-y-6">{similarItemsSlot}</div>
             )}
 
-            {activeTab === 6 && item && commentsSlot}
+            {activeTab === 7 && item && commentsSlot}
           </div>
         </div>
       </div>
