@@ -97,7 +97,7 @@ interface SuggestionData {
     upvotes: number;
     downvotes: number;
     voters?: Array<{
-      id: number;
+      id: string | number;
       name: string;
       avatar: string;
       avatar_hash?: string;
@@ -130,7 +130,7 @@ interface ChangeData {
 }
 
 type VoteRecord = {
-  id: number;
+  id: string | number;
   name: string;
   avatar: string;
   avatar_hash?: string;

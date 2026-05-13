@@ -14,6 +14,7 @@ import { Icon } from "@/components/ui/IconWrapper";
 import { Pagination } from "@/components/ui/Pagination";
 import { Button } from "@/components/ui/button";
 import { getCategoryColor, getCategoryIcon } from "@/utils/categoryIcons";
+import { UserAvatar } from "@/utils/avatar";
 import NitroValuesChangelogsRailAd from "@/components/Ads/NitroValuesChangelogsRailAd";
 import { createLogger } from "@/services/logger";
 
@@ -35,6 +36,19 @@ interface EntryItem {
   type: string;
 }
 
+interface EntryUser {
+  id: string;
+  username?: string;
+  global_name?: string;
+  avatar?: string | null;
+  custom_avatar?: string | null;
+  premiumtype?: number;
+  settings?: {
+    custom_avatar?: boolean;
+    hide_presence?: boolean | number;
+  };
+}
+
 interface ChangelogEntry {
   id: number;
   field: string;
@@ -43,6 +57,7 @@ interface ChangelogEntry {
   upvotes: number;
   downvotes: number;
   item: EntryItem;
+  user: EntryUser;
 }
 
 interface ValueChangelog {
@@ -362,8 +377,64 @@ export default function ValuesChangelogPage() {
                                 )}
                               </div>
 
+                              {/* Contributors */}
+                              {(() => {
+                                const seen = new Set<string>();
+                                const contributors = changelog.entries.reduce<
+                                  EntryUser[]
+                                >((acc, e) => {
+                                  if (!seen.has(e.user.id)) {
+                                    seen.add(e.user.id);
+                                    acc.push(e.user);
+                                  }
+                                  return acc;
+                                }, []);
+                                return (
+                                  <div className="mt-3 flex flex-wrap items-center gap-2">
+                                    <span className="text-secondary-text text-xs">
+                                      Contributors:
+                                    </span>
+                                    {contributors.map((u) => (
+                                      <Link
+                                        key={u.id}
+                                        href={`/users/${u.id}`}
+                                        prefetch={false}
+                                        className="relative z-10 flex items-center gap-1.5"
+                                      >
+                                        <UserAvatar
+                                          userId={u.id}
+                                          avatarHash={u.avatar ?? null}
+                                          username={u.username ?? ""}
+                                          custom_avatar={
+                                            u.custom_avatar ?? undefined
+                                          }
+                                          premiumType={u.premiumtype ?? 0}
+                                          settings={
+                                            u.settings
+                                              ? {
+                                                  custom_avatar:
+                                                    !!u.settings.custom_avatar,
+                                                  hide_presence:
+                                                    !!u.settings.hide_presence,
+                                                }
+                                              : undefined
+                                          }
+                                          size={5}
+                                          showBadge={false}
+                                        />
+                                        <span className="text-link hover:text-link-hover text-xs font-medium transition-colors">
+                                          {u.global_name ||
+                                            u.username ||
+                                            `User #${u.id}`}
+                                        </span>
+                                      </Link>
+                                    ))}
+                                  </div>
+                                );
+                              })()}
+
                               {/* Footer date */}
-                              <p className="text-secondary-text mt-3 text-xs">
+                              <p className="text-secondary-text mt-2 text-xs">
                                 Posted {formatMessageDate(changelog.created_at)}{" "}
                                 ({formatRelativeDate(changelog.created_at)})
                               </p>
