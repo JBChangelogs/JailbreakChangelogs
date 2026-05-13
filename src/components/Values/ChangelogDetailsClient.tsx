@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { useMediaQuery } from "@mui/material";
 import { Pagination } from "@/components/ui/Pagination";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,7 +12,6 @@ import {
   DialogClose,
 } from "@/components/ui/dialog";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Masonry } from "@mui/lab";
 import { ThemeProvider } from "@mui/material/styles";
 import { darkTheme } from "@/theme/darkTheme";
 import Image from "next/image";
@@ -29,6 +27,7 @@ import { getCategoryColor, getCategoryIcon } from "@/utils/categoryIcons";
 import { formatMessageDate } from "@/utils/timestamp";
 import { formatFullValue, formatPrice } from "@/utils/values";
 import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import ChangelogDetailsHeader from "./ChangelogDetailsHeader";
 import { Icon } from "../ui/IconWrapper";
 import {
@@ -185,9 +184,10 @@ export default function ChangelogDetailsClient({
   const [expandedChanges, setExpandedChanges] = useState<Set<string>>(
     new Set(),
   );
+  const [expandedReasons, setExpandedReasons] = useState<Set<number>>(
+    new Set(),
+  );
   const itemsPerPage = 12;
-  const isAtLeast1024 = useMediaQuery("(min-width:1024px)");
-  const isAtLeast1440 = useMediaQuery("(min-width:1440px)");
 
   const toggleChangeExpand = (
     changeId: number,
@@ -624,15 +624,7 @@ export default function ChangelogDetailsClient({
 
             {/* Changes Grid */}
             {paginatedChanges.length > 0 ? (
-              <Masonry
-                columns={isAtLeast1440 ? 3 : isAtLeast1024 ? 2 : 1}
-                spacing={2}
-                sx={{
-                  width: "100%",
-                  overflow: "hidden",
-                  transition: "height 0.2s ease-in-out",
-                }}
-              >
+              <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-2 xl:grid-cols-3">
                 {paginatedChanges.map((change) => (
                   <div
                     key={change.change_id}
@@ -651,7 +643,7 @@ export default function ChangelogDetailsClient({
 
                     {/* Item Header */}
                     <div className="mb-4 flex flex-wrap items-center gap-3">
-                      <div className="bg-tertiary-bg relative h-16 w-16 overflow-hidden rounded-lg">
+                      <div className="bg-tertiary-bg relative aspect-video w-28 shrink-0 overflow-hidden rounded-lg">
                         {isVideoItem(change.item.name) ? (
                           <video
                             src={getVideoPath(
@@ -670,9 +662,8 @@ export default function ChangelogDetailsClient({
                               true,
                             )}
                             alt={change.item.name}
-                            width={64}
-                            height={64}
-                            className="h-full w-full object-cover"
+                            fill
+                            className="object-cover"
                             onError={handleImageError}
                           />
                         )}
@@ -829,30 +820,109 @@ export default function ChangelogDetailsClient({
                             </div>
                           </div>
                         </div>
-                        <div className="text-secondary-text mb-4 text-sm leading-relaxed font-medium">
-                          <ReactMarkdown
-                            components={{
-                              strong: (props) => (
-                                <b className="text-primary-text" {...props} />
-                              ),
-                            }}
-                          >
-                            {(() => {
-                              const reason =
-                                change.suggestion.data.reason || "";
-                              // Replace Common Trades with bold
-                              const withBold = reason.replace(
-                                /(Common Trades?:?)/gi,
-                                "**$1**",
-                              );
-                              // Convert single newlines to double newlines, preserving existing double newlines
-                              return withBold
-                                .split(/\n\n+/)
-                                .map((part) => part.replace(/\n/g, "\n\n"))
-                                .join("\n\n");
-                            })()}
-                          </ReactMarkdown>
-                        </div>
+                        {(() => {
+                          const reason = change.suggestion.data.reason || "";
+                          const isLong =
+                            reason.split("\n").length > 5 ||
+                            reason.length > 400;
+                          const isExpanded = expandedReasons.has(
+                            change.suggestion.id,
+                          );
+                          const mdContent = (() => {
+                            const withBold = reason.replace(
+                              /(Common Trades?:?)/gi,
+                              "**$1**",
+                            );
+                            return withBold
+                              .split(/\n\n+/)
+                              .map((part) => part.replace(/\n/g, "\n\n"))
+                              .join("\n\n");
+                          })();
+                          return (
+                            <div className="mb-4">
+                              <div
+                                className={`text-secondary-text overflow-hidden text-sm leading-relaxed font-medium transition-all duration-200 ${
+                                  isLong && !isExpanded ? "max-h-36" : ""
+                                }`}
+                              >
+                                <ReactMarkdown
+                                  remarkPlugins={[remarkGfm]}
+                                  components={{
+                                    h1: ({ children }) => (
+                                      <h1 className="text-primary-text mt-3 mb-1.5 text-base font-bold first:mt-0">
+                                        {children}
+                                      </h1>
+                                    ),
+                                    h2: ({ children }) => (
+                                      <h2 className="text-primary-text mt-3 mb-1 text-base font-semibold first:mt-0">
+                                        {children}
+                                      </h2>
+                                    ),
+                                    h3: ({ children }) => (
+                                      <h3 className="text-primary-text mt-2 mb-1 text-sm font-semibold first:mt-0">
+                                        {children}
+                                      </h3>
+                                    ),
+                                    p: ({ children }) => (
+                                      <p className="mb-2 last:mb-0">
+                                        {children}
+                                      </p>
+                                    ),
+                                    ul: ({ children }) => (
+                                      <ul className="mb-2 list-inside list-disc space-y-0.5 last:mb-0">
+                                        {children}
+                                      </ul>
+                                    ),
+                                    ol: ({ children }) => (
+                                      <ol className="mb-2 list-inside list-decimal space-y-0.5 last:mb-0">
+                                        {children}
+                                      </ol>
+                                    ),
+                                    em: (props) => (
+                                      <em className="italic" {...props} />
+                                    ),
+                                    strong: (props) => (
+                                      <b
+                                        className="text-primary-text font-semibold"
+                                        {...props}
+                                      />
+                                    ),
+                                  }}
+                                >
+                                  {mdContent}
+                                </ReactMarkdown>
+                              </div>
+                              {isLong && (
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    setExpandedReasons((prev) => {
+                                      const next = new Set(prev);
+                                      if (next.has(change.suggestion!.id)) {
+                                        next.delete(change.suggestion!.id);
+                                      } else {
+                                        next.add(change.suggestion!.id);
+                                      }
+                                      return next;
+                                    })
+                                  }
+                                  className="text-link hover:text-link-hover mt-2 flex cursor-pointer items-center gap-1 text-sm font-medium transition-colors hover:underline"
+                                >
+                                  <Icon
+                                    icon={
+                                      isExpanded
+                                        ? "heroicons-outline:chevron-up"
+                                        : "heroicons-outline:chevron-down"
+                                    }
+                                    className="h-4 w-4"
+                                    inline
+                                  />
+                                  {isExpanded ? "Show Less" : "Read More"}
+                                </button>
+                              )}
+                            </div>
+                          );
+                        })()}
 
                         <div className="text-secondary-text text-xs font-semibold tracking-wide uppercase">
                           Suggested on{" "}
@@ -1133,7 +1203,7 @@ export default function ChangelogDetailsClient({
                     </div>
                   </div>
                 ))}
-              </Masonry>
+              </div>
             ) : (
               <div className="text-primary-text py-8 text-center">
                 <p className="mb-2 text-lg font-medium">No changes found</p>
