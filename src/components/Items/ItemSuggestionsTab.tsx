@@ -6,7 +6,7 @@ import { Pagination } from "@/components/ui/Pagination";
 import { Spinner } from "@/components/ui/Spinner";
 import { Button } from "@/components/ui/button";
 import { UserAvatar } from "@/utils/avatar";
-import { useAuthContext } from "@/contexts/AuthContext";
+// RE-ADD: voting — import { useAuthContext } from "@/contexts/AuthContext";
 import { buildApiUrlWithDevToken } from "@/utils/apiDevToken";
 import { PUBLIC_API_URL } from "@/utils/api";
 import { formatMessageDate } from "@/utils/timestamp";
@@ -14,7 +14,7 @@ import { formatFullValue } from "@/utils/values";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { createLogger } from "@/services/logger";
-import { toast } from "sonner";
+// RE-ADD: voting — import { toast } from "sonner";
 import Link from "next/link";
 import {
   Tooltip,
@@ -97,35 +97,27 @@ const badgeBase =
 
 const MAX_REASON_LENGTH = 300;
 
-function VoteRateLimitBanner({ until }: { until: number }) {
-  const [secondsLeft, setSecondsLeft] = useState(
-    Math.max(0, Math.ceil((until - Date.now()) / 1000)),
-  );
-
-  useEffect(() => {
-    const tick = () =>
-      setSecondsLeft(Math.max(0, Math.ceil((until - Date.now()) / 1000)));
-    tick();
-    const id = setInterval(tick, 1000);
-    return () => clearInterval(id);
-  }, [until]);
-
-  if (secondsLeft === 0) return null;
-
-  return (
-    <div className="border-border-card bg-tertiary-bg flex items-center justify-center gap-1.5 border-t px-3 py-1.5 text-xs text-yellow-400">
-      <Icon
-        icon="material-symbols:hourglass-empty-rounded"
-        className="h-3.5 w-3.5 shrink-0"
-        inline
-      />
-      Too fast — wait{" "}
-      {secondsLeft >= 60
-        ? `${Math.floor(secondsLeft / 60)}m ${secondsLeft % 60}s`
-        : `${secondsLeft}s`}
-    </div>
-  );
-}
+// RE-ADD: voting — VoteRateLimitBanner (shown below vote buttons when rate limited)
+// function VoteRateLimitBanner({ until }: { until: number }) {
+//   const [secondsLeft, setSecondsLeft] = useState(
+//     Math.max(0, Math.ceil((until - Date.now()) / 1000)),
+//   );
+//   useEffect(() => {
+//     const tick = () =>
+//       setSecondsLeft(Math.max(0, Math.ceil((until - Date.now()) / 1000)));
+//     tick();
+//     const id = setInterval(tick, 1000);
+//     return () => clearInterval(id);
+//   }, [until]);
+//   if (secondsLeft === 0) return null;
+//   return (
+//     <div className="border-border-card bg-tertiary-bg flex items-center justify-center gap-1.5 border-t px-3 py-1.5 text-xs text-yellow-400">
+//       <Icon icon="material-symbols:hourglass-empty-rounded" className="h-3.5 w-3.5 shrink-0" inline />
+//       Too fast — wait{" "}
+//       {secondsLeft >= 60 ? `${Math.floor(secondsLeft / 60)}m ${secondsLeft % 60}s` : `${secondsLeft}s`}
+//     </div>
+//   );
+// }
 
 interface ItemSuggestionsTabProps {
   itemId: number;
@@ -135,7 +127,7 @@ export default function ItemSuggestionsTab({
   itemId,
 }: ItemSuggestionsTabProps) {
   "use no memo";
-  const { isAuthenticated, user, setLoginModal } = useAuthContext();
+  // RE-ADD: voting — const { isAuthenticated, user, setLoginModal } = useAuthContext();
 
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [totalPages, setTotalPages] = useState(1);
@@ -145,10 +137,11 @@ export default function ItemSuggestionsTab({
   const [error, setError] = useState<string | null>(null);
   const [empty, setEmpty] = useState(false);
 
-  const [votingIds, setVotingIds] = useState<Set<number>>(new Set());
-  const [voteRateLimits, setVoteRateLimits] = useState<Map<number, number>>(
-    new Map(),
-  );
+  // RE-ADD: voting state
+  // const [votingIds, setVotingIds] = useState<Set<number>>(new Set());
+  // const [voteRateLimits, setVoteRateLimits] = useState<Map<number, number>>(
+  //   new Map(),
+  // );
 
   const [expandedReasons, setExpandedReasons] = useState<Set<number>>(
     new Set(),
@@ -208,146 +201,8 @@ export default function ItemSuggestionsTab({
     fetchSuggestions(page);
   }, [fetchSuggestions, page]);
 
-  const handleVote = async (
-    suggestion: Suggestion,
-    type: "upvote" | "downvote",
-    e: React.MouseEvent,
-  ) => {
-    e.stopPropagation();
-    e.preventDefault();
-    if (!isAuthenticated) {
-      setLoginModal({ open: true });
-      return;
-    }
-    if (votingIds.has(suggestion.id)) return;
-
-    const removing =
-      type === "upvote"
-        ? suggestion.votes.upvotes.some((v) => v.user.id === user?.id)
-        : suggestion.votes.downvotes.some((v) => v.user.id === user?.id);
-
-    setSuggestions((prev) =>
-      prev.map((s) => {
-        if (s.id !== suggestion.id) return s;
-        const wasUpvoted = s.votes.upvotes.some((v) => v.user.id === user?.id);
-        const wasDownvoted = s.votes.downvotes.some(
-          (v) => v.user.id === user?.id,
-        );
-        let upvotes = s.upvotes;
-        let downvotes = s.downvotes;
-        let upList = s.votes.upvotes;
-        let downList = s.votes.downvotes;
-
-        const userEntry = user
-          ? {
-              created_at: Math.floor(Date.now() / 1000),
-              user: {
-                id: user.id,
-                username: user.username,
-                global_name: user.global_name,
-                avatar: user.avatar,
-                custom_avatar: user.custom_avatar ?? null,
-                premiumtype: user.premiumtype ?? 0,
-                usernumber: user.usernumber ?? 0,
-                settings: user.settings as unknown as UserSettings | undefined,
-              },
-            }
-          : null;
-
-        if (removing) {
-          if (type === "upvote") {
-            upvotes--;
-            upList = upList.filter((v) => v.user.id !== user?.id);
-          } else {
-            downvotes--;
-            downList = downList.filter((v) => v.user.id !== user?.id);
-          }
-        } else {
-          if (wasUpvoted) {
-            upvotes--;
-            upList = upList.filter((v) => v.user.id !== user?.id);
-          }
-          if (wasDownvoted) {
-            downvotes--;
-            downList = downList.filter((v) => v.user.id !== user?.id);
-          }
-          if (type === "upvote") {
-            upvotes++;
-            if (userEntry) upList = [...upList, userEntry];
-          } else {
-            downvotes++;
-            if (userEntry) downList = [...downList, userEntry];
-          }
-        }
-        return {
-          ...s,
-          upvotes,
-          downvotes,
-          votes: { upvotes: upList, downvotes: downList },
-        };
-      }),
-    );
-
-    setVotingIds((prev) => new Set(prev).add(suggestion.id));
-    try {
-      const url = buildApiUrlWithDevToken(
-        PUBLIC_API_URL!,
-        `/value-suggestions/${suggestion.id}/vote`,
-      );
-      const res = await fetch(url, {
-        method: removing ? "DELETE" : "POST",
-        credentials: "include",
-        ...(removing
-          ? {}
-          : {
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ vote_type: type }),
-            }),
-      });
-      if (!res.ok) {
-        setSuggestions((prev) =>
-          prev.map((s) => (s.id === suggestion.id ? suggestion : s)),
-        );
-        const data = await res.json().catch(() => ({}));
-        if (res.status === 429) {
-          toast.error("You're voting too fast. Please wait a moment.");
-          const retryAfter = parseInt(
-            res.headers.get("retry-after") ?? "60",
-            10,
-          );
-          const until = Date.now() + retryAfter * 1000;
-          setVoteRateLimits((prev) => new Map(prev).set(suggestion.id, until));
-          setTimeout(
-            () => {
-              setVoteRateLimits((prev) => {
-                const next = new Map(prev);
-                next.delete(suggestion.id);
-                return next;
-              });
-            },
-            retryAfter * 1000 + 500,
-          );
-        } else {
-          log.error(`Vote failed ${res.status}`, data);
-          toast.error(
-            data?.message ?? data?.error ?? "Failed to register vote.",
-          );
-        }
-      }
-    } catch (err) {
-      log.error("Vote request threw", err);
-      setSuggestions((prev) =>
-        prev.map((s) => (s.id === suggestion.id ? suggestion : s)),
-      );
-      toast.error("Failed to register vote.");
-    } finally {
-      setVotingIds((prev) => {
-        const n = new Set(prev);
-        n.delete(suggestion.id);
-        return n;
-      });
-    }
-  };
+  // RE-ADD: voting — restore handleVote here
+  // const handleVote = async (...) => { ... };
 
   const openVotersModal = (
     suggestion: Suggestion,
@@ -424,14 +279,10 @@ export default function ItemSuggestionsTab({
       {/* Suggestion cards */}
       <div className="space-y-3">
         {suggestions.map((suggestion) => {
-          const userUpvoted = suggestion.votes.upvotes.some(
-            (v) => v.user.id === user?.id,
-          );
-          const userDownvoted = suggestion.votes.downvotes.some(
-            (v) => v.user.id === user?.id,
-          );
-          const isVoting =
-            votingIds.has(suggestion.id) || voteRateLimits.has(suggestion.id);
+          // RE-ADD: voting computed vars (userUpvoted, userDownvoted, isVoting)
+          // const userUpvoted = suggestion.votes.upvotes.some((v) => v.user.id === user?.id);
+          // const userDownvoted = suggestion.votes.downvotes.some((v) => v.user.id === user?.id);
+          // const isVoting = votingIds.has(suggestion.id) || voteRateLimits.has(suggestion.id);
           const hasVoters =
             suggestion.votes.upvotes.length > 0 ||
             suggestion.votes.downvotes.length > 0;
@@ -446,62 +297,30 @@ export default function ItemSuggestionsTab({
               key={suggestion.id}
               className="border-border-card bg-secondary-bg overflow-hidden rounded-xl border"
             >
-              {/* Votes + voters — stacked, full width */}
+              {/* Votes — static display only; RE-ADD: make interactive (onClick handleVote, disabled/isVoting, userUpvoted/userDownvoted icons) */}
               <div className="border-border-card flex flex-col border-b">
                 <div className="flex items-stretch">
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <button
-                        type="button"
-                        onClick={(e) => handleVote(suggestion, "upvote", e)}
-                        disabled={isVoting}
-                        className="bg-button-success/10 hover:bg-button-success/20 flex flex-1 cursor-pointer items-center justify-center gap-1.5 py-2.5 transition-colors focus:outline-none disabled:cursor-not-allowed disabled:opacity-60"
-                      >
-                        <Icon
-                          icon={
-                            userUpvoted
-                              ? "material-symbols:thumb-up-rounded"
-                              : "material-symbols:thumb-up-outline-rounded"
-                          }
-                          className="text-button-success h-4 w-4"
-                          inline
-                        />
-                        <span className="text-button-success font-bold">
-                          {suggestion.upvotes}
-                        </span>
-                      </button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      {userUpvoted ? "Remove upvote" : "Upvote"}
-                    </TooltipContent>
-                  </Tooltip>
+                  <div className="bg-button-success/10 flex flex-1 items-center justify-center gap-1.5 py-2.5">
+                    <Icon
+                      icon="material-symbols:thumb-up-outline-rounded"
+                      className="text-button-success h-4 w-4"
+                      inline
+                    />
+                    <span className="text-button-success font-bold">
+                      {suggestion.upvotes}
+                    </span>
+                  </div>
                   <div className="border-border-card border-l" />
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <button
-                        type="button"
-                        onClick={(e) => handleVote(suggestion, "downvote", e)}
-                        disabled={isVoting}
-                        className="bg-button-danger/10 hover:bg-button-danger/20 flex flex-1 cursor-pointer items-center justify-center gap-1.5 py-2.5 transition-colors focus:outline-none disabled:cursor-not-allowed disabled:opacity-60"
-                      >
-                        <Icon
-                          icon={
-                            userDownvoted
-                              ? "material-symbols:thumb-down-rounded"
-                              : "material-symbols:thumb-down-outline-rounded"
-                          }
-                          className="text-button-danger h-4 w-4"
-                          inline
-                        />
-                        <span className="text-button-danger font-bold">
-                          {suggestion.downvotes}
-                        </span>
-                      </button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      {userDownvoted ? "Remove downvote" : "Downvote"}
-                    </TooltipContent>
-                  </Tooltip>
+                  <div className="bg-button-danger/10 flex flex-1 items-center justify-center gap-1.5 py-2.5">
+                    <Icon
+                      icon="material-symbols:thumb-down-outline-rounded"
+                      className="text-button-danger h-4 w-4"
+                      inline
+                    />
+                    <span className="text-button-danger font-bold">
+                      {suggestion.downvotes}
+                    </span>
+                  </div>
                 </div>
                 {hasVoters && (
                   <button
@@ -516,11 +335,6 @@ export default function ItemSuggestionsTab({
                     />
                     View voters
                   </button>
-                )}
-                {voteRateLimits.has(suggestion.id) && (
-                  <VoteRateLimitBanner
-                    until={voteRateLimits.get(suggestion.id)!}
-                  />
                 )}
               </div>
 
