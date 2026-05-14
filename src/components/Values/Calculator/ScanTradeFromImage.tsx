@@ -4,6 +4,7 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { toast } from "sonner";
 import { Icon } from "@/components/ui/IconWrapper";
+import { buildApiUrlWithDevToken } from "@/utils/apiDevToken";
 
 export interface ScannedTradeItem {
   name: string;
@@ -134,7 +135,8 @@ export function ScanTradeFromImage({ onScanSuccess }: ScanTradeFromImageProps) {
         const formData = new FormData();
         formData.set("image", file);
 
-        const response = await fetch(`${baseUrl}/trade`, {
+        const url = buildApiUrlWithDevToken(baseUrl, "/trade");
+        const response = await fetch(url, {
           method: "POST",
           body: formData,
           credentials: "include",

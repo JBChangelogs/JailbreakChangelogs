@@ -30,7 +30,7 @@ import { toast } from "sonner";
 
 interface CalculatorFormProps {
   initialItems?: TradeItem[];
-  itemsInputMode?: "picker" | "scan" | "inventory";
+  itemsInputMode?: "picker" | "inventory";
 }
 
 export const CalculatorForm: React.FC<CalculatorFormProps> = ({
@@ -499,6 +499,9 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
     toast.success(
       `Filled ${newOffering.length} offering and ${newRequesting.length} requesting items.`,
     );
+    if (activeTab !== "values") {
+      handleTabChange("values");
+    }
   };
 
   const handleRemoveItem = (
@@ -590,11 +593,6 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
 
   return (
     <div className="space-y-6">
-      {itemsInputMode === "scan" && (
-        <div>
-          <ScanTradeFromImage onScanSuccess={handleScanTradeSuccess} />
-        </div>
-      )}
       {/* Restore Modal */}
       <ConfirmDialog
         isOpen={showRestoreModal}
@@ -621,6 +619,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
 
       {/* Trade Sides */}
       <div className="space-y-4">
+        <ScanTradeFromImage onScanSuccess={handleScanTradeSuccess} />
         <ActionButtons
           onSwapSides={handleSwapSides}
           onClearSides={handleClearSides}
@@ -726,7 +725,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
                     activeSide={pickerActiveSide}
                     onActiveSideChange={setPickerActiveSide}
                   />
-                ) : itemsInputMode === "inventory" ? (
+                ) : (
                   <div>
                     {isAuthLoading ? (
                       <div className="border-border-card bg-secondary-bg rounded-lg border p-6 text-center">
@@ -802,12 +801,6 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
                         onActiveSideChange={setPickerActiveSide}
                       />
                     )}
-                  </div>
-                ) : (
-                  <div className="border-border-card bg-secondary-bg rounded-lg border p-6 text-center">
-                    <p className="text-secondary-text text-sm">
-                      Use the scan box above to upload a trade screenshot.
-                    </p>
                   </div>
                 )}
               </div>

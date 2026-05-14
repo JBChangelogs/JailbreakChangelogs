@@ -10,9 +10,9 @@ export function CalculatorClient({
 }: {
   initialItems: TradeItem[];
 }) {
-  const [itemsInputMode, setItemsInputMode] = useState<
-    "picker" | "scan" | "inventory"
-  >("picker");
+  const [itemsInputMode, setItemsInputMode] = useState<"picker" | "inventory">(
+    "picker",
+  );
 
   return (
     <>
@@ -20,7 +20,7 @@ export function CalculatorClient({
         <Tabs
           value={itemsInputMode}
           onValueChange={(v) => {
-            setItemsInputMode(v as "picker" | "scan" | "inventory");
+            setItemsInputMode(v as "picker" | "inventory");
             // Return the calculator UI to the Items tab when switching input modes.
             const urlWithoutHash =
               window.location.pathname + window.location.search;
@@ -29,9 +29,6 @@ export function CalculatorClient({
           }}
         >
           <TabsList fullWidth>
-            <TabsTrigger value="scan" fullWidth>
-              Scan Image
-            </TabsTrigger>
             <TabsTrigger value="inventory" fullWidth>
               Inventory
             </TabsTrigger>
