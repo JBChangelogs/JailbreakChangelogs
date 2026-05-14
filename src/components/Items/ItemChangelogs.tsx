@@ -581,7 +581,7 @@ export default function ItemChangelogs({
       {/* Virtualized changelogs container */}
       <div
         ref={parentRef}
-        className="scrollbar-thin scrollbar-track-transparent scrollbar-thumb-border-primary hover:scrollbar-thumb-border-focus h-[60rem] overflow-y-auto"
+        className="scrollbar-thumb-border-primary hover:scrollbar-thumb-border-focus h-[60rem] scrollbar-thin scrollbar-track-transparent overflow-y-auto"
         style={{
           scrollbarWidth: "thin",
           scrollbarColor: "var(--color-border-primary) transparent",

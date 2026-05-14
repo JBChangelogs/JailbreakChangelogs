@@ -531,7 +531,7 @@ export default function ProfileInventoryTab({
             </DropdownMenuTrigger>
             <DropdownMenuContent
               align="start"
-              className="border-border-card bg-secondary-bg text-primary-text scrollbar-thin w-(--radix-popper-anchor-width) min-w-56 overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
+              className="border-border-card bg-secondary-bg text-primary-text w-(--radix-popper-anchor-width) min-w-56 scrollbar-thin overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
             >
               <DropdownMenuRadioGroup
                 value={typeFilter}

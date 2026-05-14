@@ -541,7 +541,7 @@ export default function DuplicatesTab({
               </DropdownMenuTrigger>
               <DropdownMenuContent
                 align="start"
-                className="border-border-card bg-tertiary-bg text-primary-text scrollbar-thin max-h-70 w-(--radix-popper-anchor-width) min-w-(--radix-popper-anchor-width) overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
+                className="border-border-card bg-tertiary-bg text-primary-text max-h-70 w-(--radix-popper-anchor-width) min-w-(--radix-popper-anchor-width) scrollbar-thin overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
               >
                 <DropdownMenuRadioGroup
                   value={selectedLeaderboardCategoryValue}
@@ -592,7 +592,7 @@ export default function DuplicatesTab({
           filteredLeaderboardItems.length > 0 && (
             <div
               ref={parentRef}
-              className="scrollbar-thin scrollbar-track-transparent scrollbar-thumb-border-primary hover:scrollbar-thumb-border-focus max-h-96 overflow-y-auto rounded-lg"
+              className="scrollbar-thumb-border-primary hover:scrollbar-thumb-border-focus max-h-96 scrollbar-thin scrollbar-track-transparent overflow-y-auto rounded-lg"
               style={{
                 scrollbarWidth: "thin",
                 scrollbarColor: "var(--color-border-primary) transparent",
@@ -749,7 +749,7 @@ export default function DuplicatesTab({
             </DropdownMenuTrigger>
             <DropdownMenuContent
               align="start"
-              className="border-border-card bg-secondary-bg text-primary-text scrollbar-thin max-h-80 w-(--radix-popper-anchor-width) min-w-(--radix-popper-anchor-width) overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
+              className="border-border-card bg-secondary-bg text-primary-text max-h-80 w-(--radix-popper-anchor-width) min-w-(--radix-popper-anchor-width) scrollbar-thin overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
             >
               <DropdownMenuRadioGroup
                 value={selectedCategoryValue}
@@ -802,7 +802,7 @@ export default function DuplicatesTab({
             </DropdownMenuTrigger>
             <DropdownMenuContent
               align="start"
-              className="border-border-card bg-secondary-bg text-primary-text scrollbar-thin max-h-80 w-(--radix-popper-anchor-width) min-w-(--radix-popper-anchor-width) overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
+              className="border-border-card bg-secondary-bg text-primary-text max-h-80 w-(--radix-popper-anchor-width) min-w-(--radix-popper-anchor-width) scrollbar-thin overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
             >
               <DropdownMenuRadioGroup
                 value={sortOrder}

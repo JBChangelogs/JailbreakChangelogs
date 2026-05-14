@@ -459,7 +459,7 @@ export default function OGNotificationSheet({
                       <DropdownMenuContent
                         align="start"
                         container={sheetContentRef.current}
-                        className="border-border-card bg-tertiary-bg text-primary-text scrollbar-thin max-h-70 w-(--radix-popper-anchor-width) min-w-(--radix-popper-anchor-width) overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
+                        className="border-border-card bg-tertiary-bg text-primary-text max-h-70 w-(--radix-popper-anchor-width) min-w-(--radix-popper-anchor-width) scrollbar-thin overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
                       >
                         <DropdownMenuCheckboxItem
                           checked={selectedType === "all"}

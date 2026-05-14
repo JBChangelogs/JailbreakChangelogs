@@ -275,7 +275,7 @@ const SearchableInventoryListSection = memo(
         ) : filteredItems.length === 0 ? (
           <p className="text-secondary-text text-sm">{noResultsMessage}</p>
         ) : (
-          <div className="scrollbar-thin max-h-65 overflow-auto pr-1 text-sm">
+          <div className="max-h-65 scrollbar-thin overflow-auto pr-1 text-sm">
             <ol className="divide-border-card/60 space-y-0 divide-y">
               {filteredItems.map((item, idx) => (
                 <li

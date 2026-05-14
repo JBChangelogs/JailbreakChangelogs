@@ -145,7 +145,7 @@ export default function SeasonLeaderboardClient({
           <div className="border-border-card bg-secondary-bg rounded-lg border p-4">
             <div
               ref={parentRef}
-              className="scrollbar-thin scrollbar-track-transparent scrollbar-thumb-border-primary hover:scrollbar-thumb-border-focus h-192 overflow-y-auto pr-2"
+              className="scrollbar-thumb-border-primary hover:scrollbar-thumb-border-focus h-192 scrollbar-thin scrollbar-track-transparent overflow-y-auto pr-2"
               style={{
                 scrollbarWidth: "thin",
                 scrollbarColor: "var(--color-border-primary) transparent",

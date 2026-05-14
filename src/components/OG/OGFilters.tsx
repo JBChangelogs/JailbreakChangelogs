@@ -140,7 +140,7 @@ export default function OGFilters({
           </DropdownMenuTrigger>
           <DropdownMenuContent
             align="start"
-            className="border-border-card bg-tertiary-bg text-primary-text scrollbar-thin max-h-80 w-(--radix-popper-anchor-width) min-w-(--radix-popper-anchor-width) overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
+            className="border-border-card bg-tertiary-bg text-primary-text max-h-80 w-(--radix-popper-anchor-width) min-w-(--radix-popper-anchor-width) scrollbar-thin overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
           >
             <DropdownMenuRadioGroup
               value={selectedCategoryValue}
@@ -196,7 +196,7 @@ export default function OGFilters({
           </DropdownMenuTrigger>
           <DropdownMenuContent
             align="start"
-            className="border-border-card bg-tertiary-bg text-primary-text scrollbar-thin max-h-80 w-(--radix-popper-anchor-width) min-w-(--radix-popper-anchor-width) overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
+            className="border-border-card bg-tertiary-bg text-primary-text max-h-80 w-(--radix-popper-anchor-width) min-w-(--radix-popper-anchor-width) scrollbar-thin overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
           >
             <DropdownMenuRadioGroup
               value={sortOrder}
