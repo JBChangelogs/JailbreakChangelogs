@@ -511,7 +511,6 @@ function BotStatusCard({
                     data-umami-event="Join Server"
                     data-umami-event-tracker="Connected_Bots"
                     data-umami-event-term={displayName}
-                    data-umami-event-jobid={jobId}
                     onClick={() => {
                       setIsJoining(true);
                       const joiningToastId = toast.loading("Joining server...");

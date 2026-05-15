@@ -9,27 +9,32 @@ import { useOptimizedRealTimeRelativeDate } from "@/hooks/useSharedTimer";
 import RobberyPlayersModal from "./RobberyPlayersModal";
 import { toast } from "sonner";
 import { useServerRegions } from "@/hooks/useServerRegions";
+import { ServerRegionData } from "@/hooks/useRobberyTrackerWebSocket";
 import { buildRobloxServerDeepLink } from "./deepLink";
 import { Spinner } from "@/components/ui/Spinner";
 
 interface ServerBountyGroupProps {
   serverId: string;
   bounties: BountyData[];
+  regionData?: ServerRegionData | null;
+  useExternalRegionData?: boolean;
 }
 
 export default function ServerBountyGroup({
   serverId,
   bounties,
+  regionData: externalRegionData,
+  useExternalRegionData = false,
 }: ServerBountyGroupProps) {
   const [isPlayersModalOpen, setIsPlayersModalOpen] = React.useState(false);
   const [isJoining, setIsJoining] = React.useState(false);
-  const [regionData, setRegionData] = useState<{
-    city: string;
-    regionName: string;
-    country: string;
-  } | null>(null);
+  const [internalRegionData, setInternalRegionData] =
+    useState<ServerRegionData | null>(null);
 
   const { fetchRegionData } = useServerRegions();
+  const regionData = useExternalRegionData
+    ? (externalRegionData ?? null)
+    : internalRegionData;
 
   // Calculate total bounty value for the server
   const totalBounty = bounties.reduce((sum, b) => sum + b.bounty, 0);
@@ -64,17 +69,14 @@ export default function ServerBountyGroup({
 
   const serverTime = bounties[0]?.server_time;
 
-  // Fetch region data for this server
   useEffect(() => {
-    if (jobId) {
-      fetchRegionData([jobId]).then((results) => {
-        const data = results[jobId];
-        if (data) {
-          setRegionData(data);
-        }
-      });
-    }
-  }, [jobId, fetchRegionData]);
+    if (useExternalRegionData || !jobId) return;
+
+    fetchRegionData([jobId]).then((results) => {
+      const data = results[jobId];
+      if (data) setInternalRegionData(data);
+    });
+  }, [useExternalRegionData, jobId, fetchRegionData]);
 
   return (
     <div className="border-border-card flex flex-col overflow-hidden rounded-xl border">
@@ -142,7 +144,6 @@ export default function ServerBountyGroup({
                 data-umami-event="Join Server"
                 data-umami-event-tracker="Bounty_Tracker"
                 data-umami-event-term="Bounty"
-                data-umami-event-jobid={jobId}
                 onClick={() => {
                   setIsJoining(true);
                   const joiningToastId = toast.loading("Joining server...");

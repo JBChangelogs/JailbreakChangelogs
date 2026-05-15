@@ -5,6 +5,7 @@ import {
   useMemo,
   useEffect,
   useRef,
+  useCallback,
   type CSSProperties,
 } from "react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
@@ -22,6 +23,7 @@ import RobberyComboCard from "@/components/RobberyTracker/RobberyComboCard";
 import AirdropCard from "@/components/RobberyTracker/AirdropCard";
 import RobberyServerGroupCard from "@/components/RobberyTracker/RobberyServerGroupCard";
 import RobberyTrackerAuthWrapper from "@/components/RobberyTracker/RobberyTrackerAuthWrapper";
+import { useServerRegions } from "@/hooks/useServerRegions";
 import ExperimentalFeatureBanner from "@/components/ui/ExperimentalFeatureBanner";
 import { Button } from "@/components/ui/button";
 import NitroRobberiesTopAd from "@/components/Ads/NitroRobberiesTopAd";
@@ -379,6 +381,8 @@ function RobberyTrackerContent() {
   const [serverRegionsByJobId, setServerRegionsByJobId] = useState<
     Record<string, ServerRegionData | null>
   >({});
+  const { fetchRegionData } = useServerRegions();
+  const fetchedRegionIdsRef = useRef<Set<string>>(new Set());
 
   useEffect(() => {
     safeSessionStorage.setItem(
@@ -774,12 +778,49 @@ function RobberyTrackerContent() {
     return next;
   }, [activeView, robberies, serverRegionsByJobId]);
 
-  const handleRegionData = (jobId: string, data: ServerRegionData | null) => {
-    setServerRegionsByJobId((prev) => {
-      if (prev[jobId] != null || data == null) return prev;
-      return { ...prev, [jobId]: data };
-    });
-  };
+  const mergeRegionResults = useCallback(
+    (results: Record<string, ServerRegionData | null>) => {
+      setServerRegionsByJobId((prev) => {
+        const next = { ...prev };
+        let changed = false;
+        for (const [id, data] of Object.entries(results)) {
+          if (!(id in next)) {
+            next[id] = data;
+            changed = true;
+          }
+        }
+        return changed ? next : prev;
+      });
+    },
+    [],
+  );
+
+  useEffect(() => {
+    if (activeView !== "robberies") return;
+    const ids: string[] = [];
+    for (const robbery of robberies) {
+      if (robbery.region_data) continue;
+      const id = robbery.region_id || robbery.server?.job_id || robbery.job_id;
+      if (!id || fetchedRegionIdsRef.current.has(id)) continue;
+      ids.push(id);
+      fetchedRegionIdsRef.current.add(id);
+    }
+    if (ids.length === 0) return;
+    fetchRegionData(ids).then(mergeRegionResults);
+  }, [robberies, activeView, fetchRegionData, mergeRegionResults]);
+
+  useEffect(() => {
+    if (activeView !== "airdrops") return;
+    const ids: string[] = [];
+    for (const airdrop of airdrops) {
+      const id = airdrop.server?.job_id;
+      if (!id || fetchedRegionIdsRef.current.has(id)) continue;
+      ids.push(id);
+      fetchedRegionIdsRef.current.add(id);
+    }
+    if (ids.length === 0) return;
+    fetchRegionData(ids).then(mergeRegionResults);
+  }, [airdrops, activeView, fetchRegionData, mergeRegionResults]);
 
   // Filter and sort Mansions (simpler as no type filtering)
   const filteredMansions = useMemo(() => {
@@ -1724,6 +1765,10 @@ function RobberyTrackerContent() {
                             serverId={combo.serverId}
                             robberies={combo.robberies}
                             comboLabel={combo.comboLabel}
+                            regionData={
+                              mergedServerRegionsByJobId[combo.serverId]
+                            }
+                            useExternalRegionData
                           />
                         ))}
                       </div>
@@ -1750,10 +1795,7 @@ function RobberyTrackerContent() {
                             serverId={group.jobId}
                             robberies={group.robberies}
                             regionData={mergedServerRegionsByJobId[group.jobId]}
-                            useExternalRegionData={
-                              mergedServerRegionsByJobId[group.jobId] != null
-                            }
-                            onRegionData={handleRegionData}
+                            useExternalRegionData
                           />
                         ))}
                       </div>
@@ -1780,10 +1822,7 @@ function RobberyTrackerContent() {
                             key={`${robbery.marker_name}-${jobId}-${robbery.timestamp}`}
                             robbery={robbery}
                             regionData={mergedServerRegionsByJobId[jobId]}
-                            useExternalRegionData={
-                              mergedServerRegionsByJobId[jobId] != null
-                            }
-                            onRegionData={handleRegionData}
+                            useExternalRegionData
                           />
                         );
                       })}
@@ -1937,6 +1976,10 @@ function RobberyTrackerContent() {
                         <AirdropCard
                           key={`${airdrop.location}-${airdrop.color}-${airdrop.server?.job_id || index}-${airdrop.timestamp}`}
                           airdrop={airdrop}
+                          regionData={
+                            serverRegionsByJobId[airdrop.server?.job_id ?? ""]
+                          }
+                          useExternalRegionData
                         />
                       ))}
                     </div>

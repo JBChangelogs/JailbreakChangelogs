@@ -6,6 +6,7 @@ import {
   useMemo,
   useEffect,
   useRef,
+  useCallback,
   type CSSProperties,
 } from "react";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
@@ -16,6 +17,8 @@ import {
 
 import { Icon } from "@/components/ui/IconWrapper";
 import ServerBountyGroup from "@/components/RobberyTracker/ServerBountyGroup";
+import { useServerRegions } from "@/hooks/useServerRegions";
+import { ServerRegionData } from "@/hooks/useRobberyTrackerWebSocket";
 import RobberyTrackerAuthWrapper from "@/components/RobberyTracker/RobberyTrackerAuthWrapper";
 import ExperimentalFeatureBanner from "@/components/ui/ExperimentalFeatureBanner";
 import { useAuthContext } from "@/contexts/AuthContext";
@@ -239,6 +242,28 @@ function BountyTrackerContent() {
     0,
     BOUNTY_RANGE_MAX,
   ]);
+  const [serverRegionsByJobId, setServerRegionsByJobId] = useState<
+    Record<string, ServerRegionData | null>
+  >({});
+  const { fetchRegionData } = useServerRegions();
+  const fetchedRegionIdsRef = useRef<Set<string>>(new Set());
+
+  const mergeRegionResults = useCallback(
+    (results: Record<string, ServerRegionData | null>) => {
+      setServerRegionsByJobId((prev) => {
+        const next = { ...prev };
+        let changed = false;
+        for (const [id, data] of Object.entries(results)) {
+          if (!(id in next)) {
+            next[id] = data;
+            changed = true;
+          }
+        }
+        return changed ? next : prev;
+      });
+    },
+    [],
+  );
 
   const formatBountyAmount = (amount: number) => `$${amount.toLocaleString()}`;
 
@@ -296,6 +321,18 @@ function BountyTrackerContent() {
         group.totalBounty >= minSelected && group.totalBounty <= maxSelected,
     );
   }, [groupedServerData, totalBountyRange]);
+
+  useEffect(() => {
+    const ids: string[] = [];
+    for (const group of serverGroups) {
+      if (!group.serverId || fetchedRegionIdsRef.current.has(group.serverId))
+        continue;
+      ids.push(group.serverId);
+      fetchedRegionIdsRef.current.add(group.serverId);
+    }
+    if (ids.length === 0) return;
+    fetchRegionData(ids).then(mergeRegionResults);
+  }, [serverGroups, fetchRegionData, mergeRegionResults]);
 
   // Calculate bounty statistics
   const bountyStats = useMemo(() => {
@@ -628,6 +665,8 @@ function BountyTrackerContent() {
                     key={group.serverId}
                     serverId={group.serverId}
                     bounties={group.bounties}
+                    regionData={serverRegionsByJobId[group.serverId]}
+                    useExternalRegionData
                   />
                 ))}
               </div>
