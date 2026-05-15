@@ -193,7 +193,7 @@ export default function SupporterModal({
 
           {/* Content */}
           <div
-            className="modal-content scrollbar-thin scrollbar-track-transparent scrollbar-thumb-border-primary hover:scrollbar-thumb-border-focus overflow-y-auto p-6"
+            className="modal-content scrollbar-thumb-border-primary hover:scrollbar-thumb-border-focus scrollbar-thin scrollbar-track-transparent overflow-y-auto p-6"
             style={{
               scrollbarWidth: "thin",
               scrollbarColor: "var(--color-border-primary) transparent",

@@ -432,7 +432,6 @@ export default function RobberyCard({
                     : "Robbery_Tracker"
                 }
                 data-umami-event-term={displayName}
-                data-umami-event-jobid={jobId}
                 onClick={() => {
                   setIsJoining(true);
                   setLastJoined({

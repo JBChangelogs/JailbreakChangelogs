@@ -202,7 +202,7 @@ export default function ValuesChangelogPage() {
                 <div className="border-border-card bg-secondary-bg rounded-lg border">
                   <div
                     ref={parentRef}
-                    className="scrollbar-thin scrollbar-track-transparent scrollbar-thumb-border-primary hover:scrollbar-thumb-border-focus h-240 overflow-y-auto"
+                    className="scrollbar-thumb-border-primary hover:scrollbar-thumb-border-focus h-240 scrollbar-thin scrollbar-track-transparent overflow-y-auto"
                     style={{
                       scrollbarWidth: "thin",
                       scrollbarColor: "var(--color-border-primary) transparent",

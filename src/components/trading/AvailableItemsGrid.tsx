@@ -356,7 +356,7 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
                 </DropdownMenuTrigger>
                 <DropdownMenuContent
                   align="start"
-                  className="border-border-card bg-primary-bg text-primary-text scrollbar-thin max-h-80 w-(--radix-popper-anchor-width) min-w-(--radix-popper-anchor-width) overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
+                  className="border-border-card bg-primary-bg text-primary-text max-h-80 w-(--radix-popper-anchor-width) min-w-(--radix-popper-anchor-width) scrollbar-thin overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
                 >
                   <DropdownMenuRadioGroup
                     value={filterSort}
@@ -406,7 +406,7 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
                 </DropdownMenuTrigger>
                 <DropdownMenuContent
                   align="start"
-                  className="border-border-card bg-primary-bg text-primary-text scrollbar-thin max-h-80 w-(--radix-popper-anchor-width) min-w-(--radix-popper-anchor-width) overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
+                  className="border-border-card bg-primary-bg text-primary-text max-h-80 w-(--radix-popper-anchor-width) min-w-(--radix-popper-anchor-width) scrollbar-thin overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
                 >
                   <DropdownMenuRadioGroup
                     value={valueSort}
@@ -472,7 +472,7 @@ const AvailableItemsGrid: React.FC<AvailableItemsGridProps> = ({
           {/* Results count */}
           <div
             ref={parentRef}
-            className="scrollbar-thin scrollbar-track-transparent scrollbar-thumb-border-primary hover:scrollbar-thumb-border-focus mb-8 h-240 overflow-y-auto"
+            className="scrollbar-thumb-border-primary hover:scrollbar-thumb-border-focus mb-8 h-240 scrollbar-thin scrollbar-track-transparent overflow-y-auto"
             style={{
               scrollbarWidth: "thin",
               scrollbarColor: "var(--color-border-primary) transparent",

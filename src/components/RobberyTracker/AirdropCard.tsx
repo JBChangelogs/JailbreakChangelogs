@@ -18,15 +18,25 @@ import { cn } from "@/lib/utils";
 
 interface AirdropCardProps {
   airdrop: AirdropData;
+  regionData?: ServerRegionData | null;
+  useExternalRegionData?: boolean;
 }
 
-export default function AirdropCard({ airdrop }: AirdropCardProps) {
+export default function AirdropCard({
+  airdrop,
+  regionData: externalRegionData,
+  useExternalRegionData = false,
+}: AirdropCardProps) {
   const [isMapModalOpen, setIsMapModalOpen] = useState(false);
   const [isMapImageLoading, setIsMapImageLoading] = useState(false);
   const [isJoining, setIsJoining] = useState(false);
   const [despawnCountdown, setDespawnCountdown] = useState<string | null>(null);
-  const [regionData, setRegionData] = useState<ServerRegionData | null>(null);
+  const [internalRegionData, setInternalRegionData] =
+    useState<ServerRegionData | null>(null);
   const { fetchRegionData } = useServerRegions();
+  const regionData = useExternalRegionData
+    ? (externalRegionData ?? null)
+    : internalRegionData;
 
   // Get difficulty based on color
   const getDifficulty = (color: string): string => {
@@ -115,15 +125,13 @@ export default function AirdropCard({ airdrop }: AirdropCardProps) {
   }, [airdrop.gone_at]);
 
   useEffect(() => {
-    if (jobId) {
-      fetchRegionData([jobId]).then((results) => {
-        const data = results[jobId];
-        if (data) {
-          setRegionData(data);
-        }
-      });
-    }
-  }, [jobId, fetchRegionData]);
+    if (useExternalRegionData || !jobId) return;
+
+    fetchRegionData([jobId]).then((results) => {
+      const data = results[jobId];
+      if (data) setInternalRegionData(data);
+    });
+  }, [useExternalRegionData, jobId, fetchRegionData]);
 
   // Format server time as 12-hour clock with AM/PM
   const formatServerTime = (serverTime: number) => {
@@ -248,7 +256,6 @@ export default function AirdropCard({ airdrop }: AirdropCardProps) {
                   data-umami-event="Join Server"
                   data-umami-event-tracker="Airdrop_Tracker"
                   data-umami-event-term={`${airdrop.color} Airdrop`}
-                  data-umami-event-jobid={jobId}
                   onClick={() => {
                     setIsJoining(true);
                     setLastJoined({

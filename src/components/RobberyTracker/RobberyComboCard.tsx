@@ -21,6 +21,8 @@ interface RobberyComboCardProps {
   serverId: string;
   robberies: RobberyData[];
   comboLabel: string;
+  regionData?: ServerRegionData | null;
+  useExternalRegionData?: boolean;
 }
 
 export default function RobberyComboCard({
@@ -28,10 +30,16 @@ export default function RobberyComboCard({
   serverId,
   robberies,
   comboLabel,
+  regionData: externalRegionData,
+  useExternalRegionData = false,
 }: RobberyComboCardProps) {
   const [isJoining, setIsJoining] = useState(false);
-  const [regionData, setRegionData] = useState<ServerRegionData | null>(null);
+  const [internalRegionData, setInternalRegionData] =
+    useState<ServerRegionData | null>(null);
   const { fetchRegionData } = useServerRegions();
+  const regionData = useExternalRegionData
+    ? (externalRegionData ?? null)
+    : internalRegionData;
   const { lastJoined, setLastJoined } = useRobberyTrackerLastJoinedServer();
   const isLastJoined = Boolean(
     serverId &&
@@ -66,13 +74,13 @@ export default function RobberyComboCard({
   const comboImageUrl = comboImageUrls[comboId];
 
   useEffect(() => {
-    if (!serverId) return;
+    if (useExternalRegionData || !serverId) return;
 
     fetchRegionData([serverId]).then((results) => {
       const data = results[serverId];
-      if (data) setRegionData(data);
+      if (data) setInternalRegionData(data);
     });
-  }, [serverId, fetchRegionData]);
+  }, [useExternalRegionData, serverId, fetchRegionData]);
 
   const formatServerTime = (serverTime: number) => {
     const hours24 = Math.floor(serverTime);
@@ -220,7 +228,6 @@ export default function RobberyComboCard({
               data-umami-event="Join Server"
               data-umami-event-tracker="Robbery_Tracker"
               data-umami-event-term="Power Combo"
-              data-umami-event-jobid={serverId}
               onClick={() => {
                 setIsJoining(true);
                 setLastJoined({

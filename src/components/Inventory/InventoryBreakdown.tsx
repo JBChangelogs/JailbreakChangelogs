@@ -911,7 +911,7 @@ export default function InventoryBreakdown({
                           </DropdownMenuTrigger>
                           <DropdownMenuContent
                             align="end"
-                            className="border-border-card bg-secondary-bg text-primary-text scrollbar-thin max-h-70 w-(--radix-popper-anchor-width) min-w-56 overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
+                            className="border-border-card bg-secondary-bg text-primary-text max-h-70 w-(--radix-popper-anchor-width) min-w-56 scrollbar-thin overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
                           >
                             <DropdownMenuRadioGroup
                               value={missingTypeFilter}
@@ -956,7 +956,7 @@ export default function InventoryBreakdown({
                       No missing items match your search.
                     </p>
                   ) : (
-                    <div className="scrollbar-thin max-h-65 overflow-auto pr-1 text-sm">
+                    <div className="max-h-65 scrollbar-thin overflow-auto pr-1 text-sm">
                       <ol className="divide-border-card/60 space-y-0 divide-y">
                         {filteredMissingItems.map((item, idx) => (
                           <li
@@ -1083,7 +1083,7 @@ export default function InventoryBreakdown({
                             </DropdownMenuTrigger>
                             <DropdownMenuContent
                               align="end"
-                              className="border-border-card bg-secondary-bg text-primary-text scrollbar-thin max-h-70 w-(--radix-popper-anchor-width) min-w-56 overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
+                              className="border-border-card bg-secondary-bg text-primary-text max-h-70 w-(--radix-popper-anchor-width) min-w-56 scrollbar-thin overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
                             >
                               <DropdownMenuRadioGroup
                                 value={unverifiableTypeFilter}
@@ -1127,7 +1127,7 @@ export default function InventoryBreakdown({
                         No unverifiable items match your search.
                       </p>
                     ) : (
-                      <div className="scrollbar-thin max-h-55 overflow-auto pr-1 text-sm">
+                      <div className="max-h-55 scrollbar-thin overflow-auto pr-1 text-sm">
                         <ol className="divide-border-card/60 space-y-0 divide-y">
                           {filteredUnverifiableItems.map((item, idx) => (
                             <li
@@ -1580,7 +1580,7 @@ export default function InventoryBreakdown({
                           </DropdownMenuTrigger>
                           <DropdownMenuContent
                             align="end"
-                            className="border-border-card bg-secondary-bg text-primary-text scrollbar-thin max-h-70 w-(--radix-popper-anchor-width) min-w-56 overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
+                            className="border-border-card bg-secondary-bg text-primary-text max-h-70 w-(--radix-popper-anchor-width) min-w-56 scrollbar-thin overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
                           >
                             <DropdownMenuRadioGroup
                               value={ogMissingTypeFilter}
@@ -1627,7 +1627,7 @@ export default function InventoryBreakdown({
                       No items match your search.
                     </p>
                   ) : (
-                    <div className="scrollbar-thin max-h-65 overflow-auto pr-1 text-sm">
+                    <div className="max-h-65 scrollbar-thin overflow-auto pr-1 text-sm">
                       <ol className="divide-border-card/60 space-y-0 divide-y">
                         {filteredOgMissingItems.map((item, idx) => (
                           <li

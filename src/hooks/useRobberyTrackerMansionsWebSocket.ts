@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { INVENTORY_API_URL, INVENTORY_WS_URL } from "@/utils/api";
+import { buildApiUrlWithDevToken } from "@/utils/apiDevToken";
 import { RobberyData } from "./useRobberyTrackerWebSocket";
 
 /**
@@ -74,7 +75,10 @@ export function useRobberyTrackerMansionsWebSocket(
       }
 
       try {
-        const wsUrl = `${INVENTORY_WS_URL}/tracker?type=mansions`;
+        const wsUrl = buildApiUrlWithDevToken(
+          INVENTORY_WS_URL,
+          "/tracker?type=mansions",
+        );
 
         const ws = new WebSocket(wsUrl);
         wsRef.current = ws;

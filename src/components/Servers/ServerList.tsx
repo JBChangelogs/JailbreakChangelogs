@@ -598,7 +598,7 @@ const ServerList: React.FC<{
                 </DropdownMenuTrigger>
                 <DropdownMenuContent
                   align="end"
-                  className="border-border-card bg-secondary-bg text-primary-text scrollbar-thin max-h-60 w-(--radix-popper-anchor-width) min-w-(--radix-popper-anchor-width) overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
+                  className="border-border-card bg-secondary-bg text-primary-text max-h-60 w-(--radix-popper-anchor-width) min-w-(--radix-popper-anchor-width) scrollbar-thin overflow-x-hidden overflow-y-auto rounded-xl border p-1 shadow-lg"
                 >
                   <DropdownMenuRadioGroup
                     value={sortOption}
