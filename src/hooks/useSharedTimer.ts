@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import { formatRelativeDate } from "@/utils/timestamp";
+import { formatRelativeDate } from "@/utils/helpers/timestamp";
 
 interface TimerSubscriber {
   id: string;

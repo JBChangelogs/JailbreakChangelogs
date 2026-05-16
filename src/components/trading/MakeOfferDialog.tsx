@@ -21,13 +21,19 @@ import {
   getTradeItemIdentifier,
   isCustomTradeItem,
   tradeItemIdsEqual,
-} from "@/utils/tradeItems";
-import { createTradeOffer, CreateTradeOfferPayload } from "@/utils/trading";
-import { DefaultAvatar } from "@/utils/avatar";
-import { sanitizeText } from "@/utils/sanitizeText";
+} from "@/utils/trading/tradeItems";
+import {
+  createTradeOffer,
+  CreateTradeOfferPayload,
+} from "@/utils/trading/core";
+import { DefaultAvatar } from "@/utils/ui/avatar";
+import { sanitizeText } from "@/utils/ui/sanitizeText";
 import { useAuthContext } from "@/contexts/AuthContext";
-import { INVENTORY_API_SOURCE_HEADER, INVENTORY_API_URL } from "@/utils/api";
-import { shouldRetryResponseStatus } from "@/utils/fetchWithRetry";
+import {
+  INVENTORY_API_SOURCE_HEADER,
+  INVENTORY_API_URL,
+} from "@/utils/api/api";
+import { shouldRetryResponseStatus } from "@/utils/api/fetchWithRetry";
 import { createLogger } from "@/services/logger";
 
 const log = createLogger("UI");

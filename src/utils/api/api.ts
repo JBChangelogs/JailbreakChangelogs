@@ -54,8 +54,8 @@ import {
   DuplicateVariantsResponse,
 } from "@/types";
 import { UserData } from "@/types/auth";
-import { fetchWithRetry } from "@/utils/fetchWithRetry";
-import { buildApiUrlWithDevToken } from "@/utils/apiDevToken";
+import { fetchWithRetry } from "@/utils/api/fetchWithRetry";
+import { buildApiUrlWithDevToken } from "@/utils/api/apiDevToken";
 import { createLogger } from "@/services/logger";
 
 const log = createLogger("API");

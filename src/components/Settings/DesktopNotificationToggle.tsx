@@ -9,7 +9,7 @@ import {
   isDesktopNotificationsSupported,
   requestDesktopNotificationPermission,
   setDesktopNotificationsEnabled,
-} from "@/utils/desktopNotifications";
+} from "@/utils/notifications/desktopNotifications";
 
 export function DesktopNotificationToggle() {
   const [enabled, setEnabled] = useState(getDesktopNotificationsEnabled);

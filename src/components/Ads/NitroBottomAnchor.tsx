@@ -1,10 +1,13 @@
 "use client";
 
-import { canHideAdsForPremiumType } from "@/utils/supporterAccess";
+import { canHideAdsForPremiumType } from "@/utils/auth/supporterAccess";
 import { useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
 import { useAuthContext } from "@/contexts/AuthContext";
-import { registerAdInstance, removeAdReference } from "@/utils/nitroAds";
+import {
+  registerAdInstance,
+  removeAdReference,
+} from "@/utils/analytics/nitroAds";
 import { createLogger } from "@/services/logger";
 
 const log = createLogger("UI");

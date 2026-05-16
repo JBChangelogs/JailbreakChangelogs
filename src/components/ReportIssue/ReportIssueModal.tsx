@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { useAuthContext } from "@/contexts/AuthContext";
 
 const log = createLogger("UI");
-import { sanitizeText } from "@/utils/sanitizeText";
+import { sanitizeText } from "@/utils/ui/sanitizeText";
 import {
   Dialog,
   DialogContent,

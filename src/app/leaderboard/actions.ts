@@ -1,6 +1,6 @@
 "use server";
 
-import { fetchRobloxUsersBatchLeaderboard } from "@/utils/api";
+import { fetchRobloxUsersBatchLeaderboard } from "@/utils/api/api";
 import { createLogger } from "@/services/logger";
 
 const log = createLogger("API");

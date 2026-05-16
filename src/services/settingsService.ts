@@ -4,8 +4,8 @@ import {
   SupporterHistoryEntry,
   SupporterLevel,
 } from "@/types/auth";
-import { buildApiUrlWithDevToken } from "@/utils/apiDevToken";
-import { getResponseErrorMessage, PUBLIC_API_URL } from "@/utils/api";
+import { buildApiUrlWithDevToken } from "@/utils/api/apiDevToken";
+import { getResponseErrorMessage, PUBLIC_API_URL } from "@/utils/api/api";
 import { createLogger } from "@/services/logger";
 
 const log = createLogger("API");

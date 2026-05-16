@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { FilterSort, ValueSort } from "@/types";
-import { safeSessionStorage } from "@/utils/safeStorage";
+import { safeSessionStorage } from "@/utils/storage/safeStorage";
 
 type StorageKeys = {
   filterSort?: string;

@@ -7,11 +7,11 @@ import {
   fetchUserNetworth,
   fetchUserMoneyHistory,
   MaxStreamsError,
-} from "@/utils/api";
+} from "@/utils/api/api";
 import { createLogger } from "@/services/logger";
 
 const log = createLogger("INVENTORY");
-import { CommentData } from "@/utils/api";
+import { CommentData } from "@/utils/api/api";
 import { UserData } from "@/types/auth";
 import InventoryCheckerClient from "./InventoryCheckerClient";
 import UserDataStreamer from "./UserDataStreamer";

@@ -1,4 +1,4 @@
-import { fetchMoneyLeaderboard } from "@/utils/api";
+import { fetchMoneyLeaderboard } from "@/utils/api/api";
 import { createLogger } from "@/services/logger";
 
 const log = createLogger("API");

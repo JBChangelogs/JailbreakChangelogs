@@ -1,13 +1,13 @@
 "use client";
 
 import React, { useMemo, useState } from "react";
-import { Changelog } from "@/utils/api";
+import { Changelog } from "@/utils/api/api";
 import { Icon } from "@/components/ui/IconWrapper";
 import {
   getYearStatistics,
   getCurrentDateString,
   isCurrentYear,
-} from "@/utils/changelogStats";
+} from "@/utils/changelogs/changelogStats";
 
 interface UpdateStatisticsCardProps {
   changelogs?: Changelog[];

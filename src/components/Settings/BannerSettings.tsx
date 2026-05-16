@@ -17,7 +17,7 @@ import { toast } from "sonner";
 import { useSupporterModal } from "@/hooks/useSupporterModal";
 import SupporterModal from "../Modals/SupporterModal";
 import { UPLOAD_CONFIG } from "@/config/settings";
-import { validateFile } from "@/utils/fileValidation";
+import { validateFile } from "@/utils/storage/fileValidation";
 
 const log = createLogger("UI");
 

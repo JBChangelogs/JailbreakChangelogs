@@ -1,7 +1,7 @@
 import React from "react";
 import Link from "next/link";
 import { RobloxIcon } from "@/components/Icons/RobloxIcon";
-import { UserAvatar } from "@/utils/avatar";
+import { UserAvatar } from "@/utils/ui/avatar";
 
 interface TradeUserTooltipProps {
   user: {

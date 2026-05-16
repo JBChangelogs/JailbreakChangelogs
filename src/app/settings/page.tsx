@@ -39,7 +39,7 @@ import { ExportInventoryData } from "@/components/Settings/ExportInventoryData";
 import { useAuthContext } from "@/contexts/AuthContext";
 import SupporterModal from "@/components/Modals/SupporterModal";
 import { useSupporterModal } from "@/hooks/useSupporterModal";
-import { safeSetJSON } from "@/utils/safeStorage";
+import { safeSetJSON } from "@/utils/storage/safeStorage";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import { toast } from "sonner";
 import { Spinner } from "@/components/ui/Spinner";
@@ -57,8 +57,8 @@ import {
   giftSupporterGift,
   revertSupporterLevel,
 } from "@/services/settingsService";
-import { searchUsers } from "@/utils/api";
-import { UserAvatar } from "@/utils/avatar";
+import { searchUsers } from "@/utils/api/api";
+import { UserAvatar } from "@/utils/ui/avatar";
 import { createLogger } from "@/services/logger";
 
 const log = createLogger("UI");

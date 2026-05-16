@@ -13,8 +13,8 @@ import DupeUserInfo from "./DupeUserInfo";
 import DupeFilters from "./DupeFilters";
 import DupeItemsGrid from "./DupeItemsGrid";
 import DupeSearchInput from "./DupeSearchInput";
-import { mergeDupeFinderArrayWithMetadata } from "@/utils/inventoryMerge";
-import { getDupedValueForItem } from "@/utils/dupeUtils";
+import { mergeDupeFinderArrayWithMetadata } from "@/utils/trading/inventoryMerge";
+import { getDupedValueForItem } from "@/utils/trading/dupeUtils";
 
 interface DupeFinderResultsProps {
   initialData: DupeFinderItem[];

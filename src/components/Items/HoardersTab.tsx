@@ -4,7 +4,7 @@ import { useRef, useMemo, useState } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { useQuery } from "@tanstack/react-query";
 import { useBatchUserData } from "@/hooks/useBatchUserData";
-import { ItemHoarder } from "@/utils/api";
+import { ItemHoarder } from "@/utils/api/api";
 import Image from "next/image";
 import Link from "next/link";
 import { Icon } from "@/components/ui/IconWrapper";

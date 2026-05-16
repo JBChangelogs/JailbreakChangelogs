@@ -4,8 +4,11 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/IconWrapper";
-import { INVENTORY_API_SOURCE_HEADER, INVENTORY_API_URL } from "@/utils/api";
-import { shouldRetryResponseStatus } from "@/utils/fetchWithRetry";
+import {
+  INVENTORY_API_SOURCE_HEADER,
+  INVENTORY_API_URL,
+} from "@/utils/api/api";
+import { shouldRetryResponseStatus } from "@/utils/api/fetchWithRetry";
 import Image from "next/image";
 import { Pagination } from "@/components/ui/Pagination";
 import {
@@ -22,8 +25,8 @@ import {
   getDriftVideoPath,
   getVideoPath,
   handleImageError,
-} from "@/utils/images";
-import { getCategoryColor, getCategoryIcon } from "@/utils/categoryIcons";
+} from "@/utils/ui/images";
+import { getCategoryColor, getCategoryIcon } from "@/utils/items/categoryIcons";
 import { bangers } from "@/app/fonts";
 import { Spinner } from "@/components/ui/Spinner";
 import { createLogger } from "@/services/logger";

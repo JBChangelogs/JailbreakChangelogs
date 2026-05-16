@@ -5,7 +5,7 @@ import {
   fetchUserByRobloxId,
   fetchItems,
   MaxStreamsError,
-} from "@/utils/api";
+} from "@/utils/api/api";
 import { RobloxUser } from "@/types";
 import OGFinderResults from "./OGFinderResults";
 import { createLogger } from "@/services/logger";

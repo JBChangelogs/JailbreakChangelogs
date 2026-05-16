@@ -1,6 +1,6 @@
 import { createLogger } from "@/services/logger";
-import { getResponseErrorMessage } from "@/utils/api";
-import { buildApiUrlWithDevToken } from "@/utils/apiDevToken";
+import { getResponseErrorMessage } from "@/utils/api/api";
+import { buildApiUrlWithDevToken } from "@/utils/api/apiDevToken";
 
 const log = createLogger("UI");
 

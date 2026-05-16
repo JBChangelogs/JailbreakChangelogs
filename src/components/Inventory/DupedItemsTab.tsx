@@ -5,7 +5,7 @@ import Link from "next/link";
 import { RobloxUser, Item } from "@/types";
 import { InventoryItem } from "@/app/inventories/types";
 import InventoryItemsGrid from "./InventoryItemsGrid";
-import { mergeInventoryArrayWithMetadata } from "@/utils/inventoryMerge";
+import { mergeInventoryArrayWithMetadata } from "@/utils/trading/inventoryMerge";
 import { Icon } from "../ui/IconWrapper";
 import {
   DropdownMenu,

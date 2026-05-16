@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { convertUrlsToLinks } from "@/utils/urlConverter";
+import { convertUrlsToLinks } from "@/utils/ui/urlConverter";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { Button } from "@/components/ui/button";
 import {
@@ -16,10 +16,10 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Icon } from "@/components/ui/IconWrapper";
 import Link from "next/link";
 import ReactMarkdown from "react-markdown";
-import { formatFullValue, formatPrice } from "@/utils/values";
-import { formatCustomDate } from "@/utils/timestamp";
+import { formatFullValue, formatPrice } from "@/utils/trading/values";
+import { formatCustomDate } from "@/utils/helpers/timestamp";
 import Image from "next/image";
-import { DefaultAvatar } from "@/utils/avatar";
+import { DefaultAvatar } from "@/utils/ui/avatar";
 import type { UserData } from "@/types/auth";
 
 type ItemChangeValue = string | number | boolean | null;

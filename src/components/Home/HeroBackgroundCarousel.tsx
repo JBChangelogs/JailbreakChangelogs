@@ -5,7 +5,7 @@ import { useEffect, useState, useCallback, useMemo } from "react";
 import {
   BACKGROUNDS_BASE_URL,
   TOTAL_BACKGROUND_IMAGES,
-} from "@/utils/fisherYatesShuffle";
+} from "@/utils/helpers/fisherYatesShuffle";
 
 export default function HeroBackgroundCarousel({
   initialImage,

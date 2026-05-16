@@ -1,4 +1,4 @@
-import { getItemImagePath } from "@/utils/images";
+import { getItemImagePath } from "@/utils/ui/images";
 
 type TradeItemLike = {
   id?: string | number | null;

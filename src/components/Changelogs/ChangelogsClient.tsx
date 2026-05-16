@@ -3,7 +3,7 @@
 import { use } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { Changelog } from "@/utils/api";
+import { Changelog } from "@/utils/api/api";
 import Image from "next/image";
 
 interface ChangelogsClientProps {

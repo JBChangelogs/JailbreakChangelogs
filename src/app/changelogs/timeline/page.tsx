@@ -4,8 +4,8 @@ import { useEffect, useState } from "react";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import TimelineClient from "@/components/Timeline/TimelineClient";
 import TimelineLoading from "@/app/changelogs/timeline/loading";
-import { Changelog, PUBLIC_API_URL } from "@/utils/api";
-import { buildApiUrlWithDevToken } from "@/utils/apiDevToken";
+import { Changelog, PUBLIC_API_URL } from "@/utils/api/api";
+import { buildApiUrlWithDevToken } from "@/utils/api/apiDevToken";
 import RateLimitView from "@/components/Layout/RateLimitView";
 import { createLogger } from "@/services/logger";
 

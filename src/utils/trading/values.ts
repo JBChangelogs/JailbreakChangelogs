@@ -1,6 +1,6 @@
 import { createLogger } from "@/services/logger";
 import { Item, FilterSort, ValueSort } from "@/types";
-import { fetchItemUnlockMetadataById } from "@/utils/itemUnlockMetadata";
+import { fetchItemUnlockMetadataById } from "@/utils/items/itemUnlockMetadata";
 
 const log = createLogger("UI");
 

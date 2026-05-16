@@ -1,7 +1,11 @@
 import { Icon } from "@/components/ui/IconWrapper";
 import Image from "next/image";
-import { formatFullValue, formatPrice, getValueChange } from "@/utils/values";
-import { getDemandColor, getTrendColor } from "@/utils/badgeColors";
+import {
+  formatFullValue,
+  formatPrice,
+  getValueChange,
+} from "@/utils/trading/values";
+import { getDemandColor, getTrendColor } from "@/utils/items/badgeColors";
 import { RecentChange } from "@/types";
 
 interface ItemValuesProps {

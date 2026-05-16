@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import NextError from "next/error";
 import { notFound, useRouter } from "next/navigation";
-import { UserAvatar } from "@/utils/avatar";
+import { UserAvatar } from "@/utils/ui/avatar";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import { Skeleton } from "@mui/material";
 import { Button } from "@/components/ui/button";
@@ -13,8 +13,8 @@ import { Banner } from "@/components/Profile/Banner";
 import { UserSettingsV2, FollowingData } from "@/types/auth";
 import { toast } from "sonner";
 import dynamic from "next/dynamic";
-import { PUBLIC_API_URL } from "@/utils/api";
-import { buildApiUrlWithDevToken } from "@/utils/apiDevToken";
+import { PUBLIC_API_URL } from "@/utils/api/api";
+import { buildApiUrlWithDevToken } from "@/utils/api/apiDevToken";
 import { createLogger } from "@/services/logger";
 
 import { UserBadges } from "@/components/Profile/UserBadges";
@@ -29,7 +29,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { formatShortDate, formatCustomDate } from "@/utils/timestamp";
+import { formatShortDate, formatCustomDate } from "@/utils/helpers/timestamp";
 import { useOptimizedRealTimeRelativeDate } from "@/hooks/useSharedTimer";
 import ProfileTabs from "@/components/Profile/ProfileTabs";
 import { useAuthContext } from "@/contexts/AuthContext";

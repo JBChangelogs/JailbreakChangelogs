@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { safeSessionStorage } from "@/utils/safeStorage";
+import { safeSessionStorage } from "@/utils/storage/safeStorage";
 
 const ROBBERY_TRACKER_LAST_JOINED_STORAGE_KEY =
   "robberyTrackerLastJoinedTarget";

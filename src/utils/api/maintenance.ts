@@ -1,7 +1,7 @@
 import { createLogger } from "@/services/logger";
 import type { Metadata } from "next";
 import type { UserData, UserFlag } from "@/types/auth";
-import { safeGetJSON } from "@/utils/safeStorage";
+import { safeGetJSON } from "@/utils/storage/safeStorage";
 
 const log = createLogger("API");
 

@@ -7,7 +7,7 @@ const log = createLogger("UI");
 import { useDropzone } from "react-dropzone";
 import { toast } from "sonner";
 import { Icon } from "@/components/ui/IconWrapper";
-import { buildApiUrlWithDevToken } from "@/utils/apiDevToken";
+import { buildApiUrlWithDevToken } from "@/utils/api/apiDevToken";
 
 export interface ScannedTradeItem {
   name: string;

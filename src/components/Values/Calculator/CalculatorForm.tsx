@@ -10,13 +10,16 @@ import {
   safeLocalStorage,
   safeGetJSON,
   safeSetJSON,
-} from "@/utils/safeStorage";
+} from "@/utils/storage/safeStorage";
 import NitroCalculatorAd from "@/components/Ads/NitroCalculatorAd";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { useAuthContext } from "@/contexts/AuthContext";
-import { INVENTORY_API_SOURCE_HEADER, INVENTORY_API_URL } from "@/utils/api";
-import { shouldRetryResponseStatus } from "@/utils/fetchWithRetry";
+import {
+  INVENTORY_API_SOURCE_HEADER,
+  INVENTORY_API_URL,
+} from "@/utils/api/api";
+import { shouldRetryResponseStatus } from "@/utils/api/fetchWithRetry";
 
 // Import extracted components and utilities
 import { parseValueString, formatTotalValue } from "./calculatorUtils";

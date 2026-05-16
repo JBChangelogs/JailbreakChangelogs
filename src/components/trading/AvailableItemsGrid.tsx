@@ -8,18 +8,18 @@ import {
   handleImageError,
   isVideoItem,
   getVideoPath,
-} from "@/utils/images";
+} from "@/utils/ui/images";
 import {
   filterByValueSort,
   sortByValueSort,
   formatFullValue,
-} from "@/utils/values";
-import { getDemandColor, getTrendColor } from "@/utils/badgeColors";
+} from "@/utils/trading/values";
+import { getDemandColor, getTrendColor } from "@/utils/items/badgeColors";
 import {
   CategoryIconBadge,
   getCategoryColor,
   getCategoryIcon,
-} from "@/utils/categoryIcons";
+} from "@/utils/items/categoryIcons";
 import { Icon } from "../ui/IconWrapper";
 import Image from "next/image";
 import Link from "next/link";
@@ -47,7 +47,7 @@ import {
   valueSortOptions,
 } from "@/components/Values/valuesSortOptions";
 import { useValueSortState } from "@/hooks/useValueSortState";
-import { trackFilterSortEvent } from "@/utils/umami";
+import { trackFilterSortEvent } from "@/utils/analytics/umami";
 
 interface AvailableItemsGridProps {
   items: TradeItem[];

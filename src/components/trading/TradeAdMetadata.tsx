@@ -1,6 +1,6 @@
 import React from "react";
 import { useRealTimeRelativeDate } from "@/hooks/useRealTimeRelativeDate";
-import { formatCustomDate } from "@/utils/timestamp";
+import { formatCustomDate } from "@/utils/helpers/timestamp";
 
 import {
   Tooltip,

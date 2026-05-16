@@ -2,7 +2,7 @@ import {
   fetchRobloxUsersBatch,
   fetchUserByRobloxId,
   fetchDupeFinderData,
-} from "@/utils/api";
+} from "@/utils/api/api";
 import { RobloxUser } from "@/types";
 import {
   RobloxUsersResponse,

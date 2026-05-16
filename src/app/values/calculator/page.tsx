@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import { CalculatorClient } from "./CalculatorClient";
-import { fetchItems } from "@/utils/api";
+import { fetchItems } from "@/utils/api/api";
 import Loading from "./loading";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import CalculatorDescription from "@/components/Values/Calculator/CalculatorDescription";

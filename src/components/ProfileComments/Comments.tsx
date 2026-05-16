@@ -7,7 +7,10 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { formatRelativeDate, formatCustomDate } from "@/utils/timestamp";
+import {
+  formatRelativeDate,
+  formatCustomDate,
+} from "@/utils/helpers/timestamp";
 import Link from "next/link";
 import Image from "next/image";
 import {
@@ -15,10 +18,10 @@ import {
   isVideoItem,
   handleImageError,
   getVideoPath,
-} from "@/utils/images";
-import { getCategoryColor } from "@/utils/categoryIcons";
+} from "@/utils/ui/images";
+import { getCategoryColor } from "@/utils/items/categoryIcons";
 import { ItemDetails } from "@/types";
-import { convertUrlsToLinks } from "@/utils/urlConverter";
+import { convertUrlsToLinks } from "@/utils/ui/urlConverter";
 
 interface CommentProps {
   id: number;

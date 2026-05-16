@@ -11,8 +11,8 @@ import {
   CategoryIconBadge,
   getCategoryColor,
   getCategoryIcon,
-} from "@/utils/categoryIcons";
-import { formatCustomDate } from "@/utils/timestamp";
+} from "@/utils/items/categoryIcons";
+import { formatCustomDate } from "@/utils/helpers/timestamp";
 import TradeHistoryList from "./TradeHistoryList";
 import {
   getItemImagePath,
@@ -21,7 +21,7 @@ import {
   getDriftVideoPath,
   getVideoPath,
   handleImageError,
-} from "@/utils/images";
+} from "@/utils/ui/images";
 
 interface DupeComparisonClientProps {
   ogItem: DupeFinderItem;

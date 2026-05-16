@@ -1,5 +1,5 @@
 import React from "react";
-import { getWebsiteVersion } from "@/utils/version";
+import { getWebsiteVersion } from "@/utils/trading/version";
 import VersionInfo from "./VersionInfo";
 
 export default async function VersionInfoWrapper() {

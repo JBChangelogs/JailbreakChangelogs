@@ -8,8 +8,8 @@ import { useDebounce } from "@/hooks/useDebounce";
 import InventoryItemsGrid from "./InventoryItemsGrid";
 import { Item, RobloxUser } from "@/types";
 import { InventoryItem } from "@/app/inventories/types";
-import { mergeInventoryArrayWithMetadata } from "@/utils/inventoryMerge";
-import { getCategoryIcon, getCategoryColor } from "@/utils/categoryIcons";
+import { mergeInventoryArrayWithMetadata } from "@/utils/trading/inventoryMerge";
+import { getCategoryIcon, getCategoryColor } from "@/utils/items/categoryIcons";
 import {
   DropdownMenu,
   DropdownMenuContent,

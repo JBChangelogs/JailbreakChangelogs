@@ -27,8 +27,8 @@ import {
 import {
   validatePrivateServerLink,
   validateServerRulesText,
-} from "@/utils/serverValidation";
-import { sanitizeText } from "@/utils/sanitizeText";
+} from "@/utils/api/serverValidation";
+import { sanitizeText } from "@/utils/ui/sanitizeText";
 
 interface AddServerModalProps {
   isOpen: boolean;

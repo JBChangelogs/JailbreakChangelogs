@@ -1,4 +1,4 @@
-import { Changelog } from "./api";
+import { Changelog } from "@/utils/api/api";
 
 /**
  * Extracts the year from a changelog title

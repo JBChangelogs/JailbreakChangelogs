@@ -1,4 +1,4 @@
-import { fetchMostDuplicatedItems } from "@/utils/api";
+import { fetchMostDuplicatedItems } from "@/utils/api/api";
 import MostDuplicatedItems from "./MostDuplicatedItems";
 
 export default async function MostDuplicatedItemsServer() {

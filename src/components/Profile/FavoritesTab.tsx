@@ -21,9 +21,12 @@ import {
   getItemImagePath,
   isVideoItem,
   getVideoPath,
-} from "@/utils/images";
-import { getCategoryColor } from "@/utils/categoryIcons";
-import { formatRelativeDate, formatCustomDate } from "@/utils/timestamp";
+} from "@/utils/ui/images";
+import { getCategoryColor } from "@/utils/items/categoryIcons";
+import {
+  formatRelativeDate,
+  formatCustomDate,
+} from "@/utils/helpers/timestamp";
 import { ItemDetails, FavoriteItem } from "@/types";
 
 interface FavoriteWithDetails extends FavoriteItem {

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import { UserSettingsV2 } from "@/types/auth";
-import { getBackgroundImageByIndex } from "@/utils/fisherYatesShuffle";
+import { getBackgroundImageByIndex } from "@/utils/helpers/fisherYatesShuffle";
 
 interface BannerProps {
   userId: string;

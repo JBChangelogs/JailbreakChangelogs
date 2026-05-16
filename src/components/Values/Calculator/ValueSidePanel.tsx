@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { TradeItem } from "@/types/trading";
 import { Icon } from "@/components/ui/IconWrapper";
-import { getCategoryColor, getCategoryIcon } from "@/utils/categoryIcons";
-import { getDemandColor, getTrendColor } from "@/utils/badgeColors";
+import { getCategoryColor, getCategoryIcon } from "@/utils/items/categoryIcons";
+import { getDemandColor, getTrendColor } from "@/utils/items/badgeColors";
 import { formatCurrencyValue, parseValueString } from "./calculatorUtils";
 
 interface ValueSidePanelProps {

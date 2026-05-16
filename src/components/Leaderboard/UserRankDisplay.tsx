@@ -6,7 +6,10 @@ import { useAuthContext } from "@/contexts/AuthContext";
 const log = createLogger("UI");
 import { useEffect, useState } from "react";
 import Image from "next/image";
-import { formatRelativeDate, formatCustomDate } from "@/utils/timestamp";
+import {
+  formatRelativeDate,
+  formatCustomDate,
+} from "@/utils/helpers/timestamp";
 
 interface UserRankData {
   user_id: string;

@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Changelog } from "@/utils/api";
+import { Changelog } from "@/utils/api/api";
 import UpdateStatisticsCard from "@/components/common/UpdateStatisticsCard";
 import NitroChangelogVideoPlayer from "@/components/Ads/NitroChangelogVideoPlayer";
 

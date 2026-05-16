@@ -1,4 +1,4 @@
-import { PUBLIC_API_URL } from "@/utils/api";
+import { PUBLIC_API_URL } from "@/utils/api/api";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(request: NextRequest) {

@@ -6,13 +6,13 @@ import Link from "next/link";
 import { InventoryData, UserConnectionData } from "@/app/inventories/types";
 import { DiscordIcon } from "@/components/Icons/DiscordIcon";
 import { RobloxIcon } from "@/components/Icons/RobloxIcon";
-import { DefaultAvatar } from "@/utils/avatar";
+import { DefaultAvatar } from "@/utils/ui/avatar";
 import { VerifiedBadgeIcon } from "@/components/Icons/VerifiedBadgeIcon";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { UseScanWebSocketReturn } from "@/hooks/useScanWebSocket";
 import ScanInventoryModal from "@/components/Modals/ScanInventoryModal";
-import { ENABLE_WS_SCAN } from "@/utils/api";
-import { getScanActiveButtonLabel } from "@/utils/scanProgressMessage";
+import { ENABLE_WS_SCAN } from "@/utils/api/api";
+import { getScanActiveButtonLabel } from "@/utils/notifications/scanProgressMessage";
 import { Button } from "../ui/button";
 
 import {

@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { DuplicatedItem } from "@/utils/api";
-import { getCategoryIcon, getCategoryColor } from "@/utils/categoryIcons";
+import { DuplicatedItem } from "@/utils/api/api";
+import { getCategoryIcon, getCategoryColor } from "@/utils/items/categoryIcons";
 
 interface MostDuplicatedItemsProps {
   items: DuplicatedItem[];

@@ -39,7 +39,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { safeSessionStorage } from "@/utils/safeStorage";
+import { safeSessionStorage } from "@/utils/storage/safeStorage";
 
 type TimeSort = "newest" | "oldest";
 type ServerSize = "all" | "big" | "small";

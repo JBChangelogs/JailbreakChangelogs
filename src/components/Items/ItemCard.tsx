@@ -12,25 +12,28 @@ import {
   getHornAudioPath,
   getDriftVideoPath,
   getVideoPath,
-} from "@/utils/images";
-import { formatCustomDate } from "@/utils/timestamp";
+} from "@/utils/ui/images";
+import { formatCustomDate } from "@/utils/helpers/timestamp";
 import { useOptimizedRealTimeRelativeDate } from "@/hooks/useSharedTimer";
-import { formatFullValue, getValueChange } from "@/utils/values";
-import { getDemandColor, getTrendColor } from "@/utils/badgeColors";
+import { formatFullValue, getValueChange } from "@/utils/trading/values";
+import { getDemandColor, getTrendColor } from "@/utils/items/badgeColors";
 import {
   fetchItemUnlockMetadataById,
   ItemUnlockMetadataEntry,
-} from "@/utils/itemUnlockMetadata";
+} from "@/utils/items/itemUnlockMetadata";
 import {
   formatUnlockLevelBadge,
   formatUnlockRequirementsTooltip,
   hasUnlockLevel,
-} from "@/utils/itemUnlockPresentation";
+} from "@/utils/items/itemUnlockPresentation";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { useIsAuthenticated } from "@/contexts/AuthContext";
 import { usePathname } from "next/navigation";
-import { CategoryIconBadge, getCategoryColor } from "@/utils/categoryIcons";
+import {
+  CategoryIconBadge,
+  getCategoryColor,
+} from "@/utils/items/categoryIcons";
 import { Icon } from "@/components/ui/IconWrapper";
 import {
   Tooltip,

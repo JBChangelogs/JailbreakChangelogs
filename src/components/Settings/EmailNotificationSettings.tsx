@@ -14,7 +14,7 @@ import {
   disableEmailNotifications,
   unlinkEmail,
   getEmailLinkUrl,
-} from "@/utils/api";
+} from "@/utils/api/api";
 
 interface EmailNotificationSettingsProps {
   userData: UserData | null;

@@ -13,7 +13,7 @@ import {
   HYPERCHROME_MANSION_PITY_SMALL,
   HYPERCHROME_PITY_PUBLIC,
   HYPERCHROME_PITY_SMALL,
-} from "@/utils/hyperchrome";
+} from "@/utils/items/hyperchrome";
 import { toast } from "sonner";
 import { Button } from "../ui/button";
 import { Switch } from "@/components/ui/switch";

@@ -1,10 +1,10 @@
 "use client";
 
-import { canHideAdsForPremiumType } from "@/utils/supporterAccess";
+import { canHideAdsForPremiumType } from "@/utils/auth/supporterAccess";
 import { useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
 import { useAuthContext } from "@/contexts/AuthContext";
-import { removeAdReference } from "@/utils/nitroAds";
+import { removeAdReference } from "@/utils/analytics/nitroAds";
 
 const VIDEO_PLAYER_ID = "np-video-player";
 

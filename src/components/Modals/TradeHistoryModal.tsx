@@ -14,7 +14,7 @@ import {
   DialogClose,
 } from "@/components/ui/dialog";
 import Image from "next/image";
-import { getCategoryColor, getCategoryIcon } from "@/utils/categoryIcons";
+import { getCategoryColor, getCategoryIcon } from "@/utils/items/categoryIcons";
 import { VerifiedBadgeIcon } from "@/components/Icons/VerifiedBadgeIcon";
 import { RobloxUser } from "@/types";
 import { Button } from "@/components/ui/button";

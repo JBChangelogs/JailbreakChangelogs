@@ -1,6 +1,6 @@
 "use server";
 
-import { fetchRobloxUsersBatch } from "@/utils/api";
+import { fetchRobloxUsersBatch } from "@/utils/api/api";
 import { createLogger } from "@/services/logger";
 
 const log = createLogger("INVENTORY");

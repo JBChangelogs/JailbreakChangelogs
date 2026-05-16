@@ -1,6 +1,6 @@
 import { toast } from "sonner";
-import { UserData } from "../types/auth";
-import { safeLocalStorage, safeSetJSON } from "./safeStorage";
+import { UserData } from "@/types/auth";
+import { safeLocalStorage, safeSetJSON } from "@/utils/storage/safeStorage";
 import { createLogger } from "@/services/logger";
 
 const log = createLogger("AUTH");

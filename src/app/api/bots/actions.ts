@@ -4,7 +4,7 @@ import {
   fetchConnectedBots,
   fetchQueueInfo,
   fetchRobloxUsersBatch,
-} from "@/utils/api";
+} from "@/utils/api/api";
 import { createLogger } from "@/services/logger";
 
 const log = createLogger("API");

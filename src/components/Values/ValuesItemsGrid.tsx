@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Pagination } from "@/components/ui/Pagination";
 import ItemCard from "@/components/Items/ItemCard";
 import { Item } from "@/types";
-import { getEffectiveCashValue } from "@/utils/values";
+import { getEffectiveCashValue } from "@/utils/trading/values";
 import NitroGridAd from "@/components/Ads/NitroGridAd";
 import NitroValuesTopAd from "@/components/Ads/NitroValuesTopAd";
 import React from "react";

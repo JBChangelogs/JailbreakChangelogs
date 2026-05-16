@@ -3,7 +3,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { CommentData, getResponseErrorMessage } from "@/utils/api";
+import { CommentData, getResponseErrorMessage } from "@/utils/api/api";
 import { UserData } from "@/types/auth";
 import { DiscordIcon } from "@/components/Icons/DiscordIcon";
 import { Icon } from "@/components/ui/IconWrapper";
@@ -15,30 +15,30 @@ import {
   fetchTradeOffers,
   respondToTradeOfferV2,
   type TradeOfferV2,
-} from "@/utils/trading";
-import { buildApiUrlWithDevToken } from "@/utils/apiDevToken";
+} from "@/utils/trading/core";
+import { buildApiUrlWithDevToken } from "@/utils/api/apiDevToken";
 import { toast } from "sonner";
 import { TradeAd, TradeItem } from "@/types/trading";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { useAuthContext } from "@/contexts/AuthContext";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { DefaultAvatar } from "@/utils/avatar";
+import { DefaultAvatar } from "@/utils/ui/avatar";
 import { UserBadges } from "@/components/Profile/UserBadges";
 import { useRealTimeRelativeDate } from "@/hooks/useRealTimeRelativeDate";
-import { formatCustomDate } from "@/utils/timestamp";
+import { formatCustomDate } from "@/utils/helpers/timestamp";
 import TradeItemHoverTooltip from "@/components/trading/TradeItemHoverTooltip";
 import { MakeOfferDialog } from "@/components/trading/MakeOfferDialog";
-import { handleImageError } from "@/utils/images";
-import { sanitizeText } from "@/utils/sanitizeText";
-import { consumeMakeOfferLoadingToastId } from "@/utils/makeOfferToasts";
+import { handleImageError } from "@/utils/ui/images";
+import { sanitizeText } from "@/utils/ui/sanitizeText";
+import { consumeMakeOfferLoadingToastId } from "@/utils/trading/makeOfferToasts";
 import {
   getTradeItemDetailHref,
   getTradeItemIdentifier,
   getTradeItemImagePath,
   isCustomTradeItem,
-} from "@/utils/tradeItems";
-import { getCategoryColor, getCategoryIcon } from "@/utils/categoryIcons";
+} from "@/utils/trading/tradeItems";
+import { getCategoryColor, getCategoryIcon } from "@/utils/items/categoryIcons";
 import { createLogger } from "@/services/logger";
 
 const log = createLogger("UI");

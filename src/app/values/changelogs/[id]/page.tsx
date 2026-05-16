@@ -3,8 +3,8 @@
 import { useEffect, useState } from "react";
 import { useParams, notFound } from "next/navigation";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
-import { PUBLIC_API_URL } from "@/utils/api";
-import { buildApiUrlWithDevToken } from "@/utils/apiDevToken";
+import { PUBLIC_API_URL } from "@/utils/api/api";
+import { buildApiUrlWithDevToken } from "@/utils/api/apiDevToken";
 import ChangelogDetailsClient from "@/components/Values/ChangelogDetailsClient";
 import NitroValuesChangelogsRailAd from "@/components/Ads/NitroValuesChangelogsRailAd";
 import Loading from "./loading";

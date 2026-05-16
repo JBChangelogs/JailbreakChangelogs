@@ -3,7 +3,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { Icon } from "@/components/ui/IconWrapper";
 import { cn } from "@/lib/utils";
-import { fetchTotalRobberiesLogged } from "@/utils/api";
+import { fetchTotalRobberiesLogged } from "@/utils/api/api";
 
 export default function TotalRobberiesLoggedPolling({
   className,

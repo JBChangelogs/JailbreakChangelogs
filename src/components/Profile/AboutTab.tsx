@@ -12,12 +12,12 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Icon } from "../ui/IconWrapper";
-import { formatCustomDate } from "@/utils/timestamp";
+import { formatCustomDate } from "@/utils/helpers/timestamp";
 import { useRealTimeRelativeDate } from "@/hooks/useRealTimeRelativeDate";
 import { toast } from "sonner";
 import { useAuthContext } from "@/contexts/AuthContext";
-import { convertUrlsToLinks } from "@/utils/urlConverter";
-import { sanitizeText } from "@/utils/sanitizeText";
+import { convertUrlsToLinks } from "@/utils/ui/urlConverter";
+import { sanitizeText } from "@/utils/ui/sanitizeText";
 
 interface AboutTabProps {
   user: {

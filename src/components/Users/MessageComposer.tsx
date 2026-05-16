@@ -4,7 +4,7 @@ import * as React from "react";
 import { toast } from "sonner";
 import { Icon } from "@/components/ui/IconWrapper";
 import { Spinner } from "@/components/ui/Spinner";
-import { sanitizeText } from "@/utils/sanitizeText";
+import { sanitizeText } from "@/utils/ui/sanitizeText";
 import {
   ChatToolbarButton,
   ChatToolbarTextarea,

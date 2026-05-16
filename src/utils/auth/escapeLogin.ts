@@ -2,8 +2,8 @@
 
 import { createLogger } from "@/services/logger";
 import { useState, useEffect } from "react";
-// import { PUBLIC_API_URL } from '@/utils/api';
-import { safeLocalStorage, safeSetJSON } from "@/utils/safeStorage";
+// import { PUBLIC_API_URL } from '@/utils/api/api';
+import { safeLocalStorage, safeSetJSON } from "@/utils/storage/safeStorage";
 
 const log = createLogger("AUTH");
 

@@ -1,6 +1,6 @@
 import React from "react";
 import { TradeItem } from "@/types/trading";
-import { safeLocalStorage } from "@/utils/safeStorage";
+import { safeLocalStorage } from "@/utils/storage/safeStorage";
 import { Button } from "../../ui/button";
 import {
   Dialog,

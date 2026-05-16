@@ -13,8 +13,8 @@ import {
   PUBLIC_API_URL,
   INVENTORY_API_URL,
   INVENTORY_API_SOURCE_HEADER,
-} from "@/utils/api";
-import { buildApiUrlWithDevToken } from "@/utils/apiDevToken";
+} from "@/utils/api/api";
+import { buildApiUrlWithDevToken } from "@/utils/api/apiDevToken";
 import { createLogger } from "@/services/logger";
 
 const log = createLogger("UI");

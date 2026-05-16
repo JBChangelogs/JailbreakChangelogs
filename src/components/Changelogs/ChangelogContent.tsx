@@ -5,12 +5,12 @@ import {
   parseMarkdown,
   extractContentInfo,
   getBadgeColor,
-} from "@/utils/changelogs";
-import { CommentData } from "@/utils/api";
+} from "@/utils/changelogs/changelogs";
+import { CommentData } from "@/utils/api/api";
 import { UserData } from "@/types/auth";
 import dynamic from "next/dynamic";
 import ChangelogSummary from "./ChangelogSummary";
-import { isFeatureEnabled } from "@/utils/featureFlags";
+import { isFeatureEnabled } from "@/utils/api/featureFlags";
 
 // Dynamic imports for heavy components
 const ChangelogMediaEmbed = dynamic(() => import("./ChangelogMediaEmbed"), {

@@ -3,9 +3,9 @@ import { Icon } from "../ui/IconWrapper";
 import { Button } from "../ui/button";
 import { toast } from "sonner";
 import { Spinner } from "../ui/Spinner";
-import { isFeatureEnabled } from "@/utils/featureFlags";
-import { PUBLIC_API_URL } from "@/utils/api";
-import { buildApiUrlWithDevToken } from "@/utils/apiDevToken";
+import { isFeatureEnabled } from "@/utils/api/featureFlags";
+import { PUBLIC_API_URL } from "@/utils/api/api";
+import { buildApiUrlWithDevToken } from "@/utils/api/apiDevToken";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 

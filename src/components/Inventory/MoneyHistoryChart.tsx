@@ -26,7 +26,7 @@ import {
   ChartTooltipContent,
   type ChartConfig,
 } from "@/components/ui/chart";
-import { MoneyHistory } from "@/utils/api";
+import { MoneyHistory } from "@/utils/api/api";
 
 interface MoneyHistoryChartProps {
   userId: string;

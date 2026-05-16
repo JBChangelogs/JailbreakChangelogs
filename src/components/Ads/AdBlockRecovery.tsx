@@ -1,6 +1,6 @@
 "use client";
 
-import { canHideAdsForPremiumType } from "@/utils/supporterAccess";
+import { canHideAdsForPremiumType } from "@/utils/auth/supporterAccess";
 import { usePathname } from "next/navigation";
 import Script from "next/script";
 import { useAuthContext } from "@/contexts/AuthContext";

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getWebsiteVersion } from "@/utils/version";
+import { getWebsiteVersion } from "@/utils/trading/version";
 import { createLogger } from "@/services/logger";
 
 const log = createLogger("API");

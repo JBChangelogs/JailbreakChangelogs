@@ -2,9 +2,9 @@ import React, { useState } from "react";
 import { TradeItem } from "@/types/trading";
 import Link from "next/link";
 import { Icon } from "@/components/ui/IconWrapper";
-import { getCategoryColor, getCategoryIcon } from "@/utils/categoryIcons";
-import { getDemandColor, getTrendColor } from "@/utils/badgeColors";
-import { getTradeItemDetailHref } from "@/utils/tradeItems";
+import { getCategoryColor, getCategoryIcon } from "@/utils/items/categoryIcons";
+import { getDemandColor, getTrendColor } from "@/utils/items/badgeColors";
+import { getTradeItemDetailHref } from "@/utils/trading/tradeItems";
 
 interface TradeItemsWithValuesProps {
   offering: TradeItem[];

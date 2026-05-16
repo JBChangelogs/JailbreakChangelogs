@@ -1,5 +1,5 @@
-import { buildApiUrlWithDevToken } from "@/utils/apiDevToken";
-import { PUBLIC_API_URL } from "@/utils/api";
+import { buildApiUrlWithDevToken } from "@/utils/api/apiDevToken";
+import { PUBLIC_API_URL } from "@/utils/api/api";
 
 export type NotificationPreferenceTitle = string;
 

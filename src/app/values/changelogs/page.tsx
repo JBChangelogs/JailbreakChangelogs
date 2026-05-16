@@ -5,16 +5,19 @@ import Breadcrumb from "@/components/Layout/Breadcrumb";
 import { ThemeProvider, Skeleton } from "@mui/material";
 import { darkTheme } from "@/theme/darkTheme";
 import ValuesChangelogHeader from "@/components/Values/ValuesChangelogHeader";
-import { PUBLIC_API_URL } from "@/utils/api";
-import { buildApiUrlWithDevToken } from "@/utils/apiDevToken";
+import { PUBLIC_API_URL } from "@/utils/api/api";
+import { buildApiUrlWithDevToken } from "@/utils/api/apiDevToken";
 import Link from "next/link";
-import { formatMessageDate, formatRelativeDate } from "@/utils/timestamp";
-import { formatFullValue } from "@/utils/values";
+import {
+  formatMessageDate,
+  formatRelativeDate,
+} from "@/utils/helpers/timestamp";
+import { formatFullValue } from "@/utils/trading/values";
 import { Icon } from "@/components/ui/IconWrapper";
 import { Pagination } from "@/components/ui/Pagination";
 import { Button } from "@/components/ui/button";
-import { getCategoryColor, getCategoryIcon } from "@/utils/categoryIcons";
-import { UserAvatar } from "@/utils/avatar";
+import { getCategoryColor, getCategoryIcon } from "@/utils/items/categoryIcons";
+import { UserAvatar } from "@/utils/ui/avatar";
 import NitroValuesChangelogsRailAd from "@/components/Ads/NitroValuesChangelogsRailAd";
 import { createLogger } from "@/services/logger";
 

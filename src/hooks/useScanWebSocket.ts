@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import { INVENTORY_WS_URL, ENABLE_WS_SCAN } from "@/utils/api";
-import type { ScanPhase } from "@/utils/scanProgressMessage";
+import { INVENTORY_WS_URL, ENABLE_WS_SCAN } from "@/utils/api/api";
+import type { ScanPhase } from "@/utils/notifications/scanProgressMessage";
 import { createLogger } from "@/services/logger";
 
 const log = createLogger("SCAN");

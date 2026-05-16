@@ -10,16 +10,16 @@ import {
 import { Button } from "@/components/ui/button";
 import { Pagination } from "@/components/ui/Pagination";
 import { useOptimizedRealTimeRelativeDate } from "@/hooks/useSharedTimer";
-import { formatCustomDate } from "@/utils/timestamp";
+import { formatCustomDate } from "@/utils/helpers/timestamp";
 import Image from "next/image";
 import Link from "next/link";
-import { handleImageError, isVideoItem, getVideoPath } from "@/utils/images";
-import { getCategoryColor } from "@/utils/categoryIcons";
+import { handleImageError, isVideoItem, getVideoPath } from "@/utils/ui/images";
+import { getCategoryColor } from "@/utils/items/categoryIcons";
 import { Icon } from "@/components/ui/IconWrapper";
 import {
   getTradeItemDetailHref,
   getTradeItemImagePath,
-} from "@/utils/tradeItems";
+} from "@/utils/trading/tradeItems";
 import { Spinner } from "@/components/ui/Spinner";
 import type { TradeAd, TradeItem } from "@/types/trading";
 

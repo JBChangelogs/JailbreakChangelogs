@@ -1,11 +1,11 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import type { CommentData } from "@/utils/api";
+import type { CommentData } from "@/utils/api/api";
 import type { UserData } from "@/types/auth";
 import type { TradeAd, TradeItem } from "@/types/trading";
 import NotFoundView from "@/components/Layout/NotFoundView";
-import { buildApiUrlWithDevToken } from "@/utils/apiDevToken";
+import { buildApiUrlWithDevToken } from "@/utils/api/apiDevToken";
 import TradeDetailsClient from "./TradeDetailsClient";
 import Loading from "./loading";
 import { createLogger } from "@/services/logger";

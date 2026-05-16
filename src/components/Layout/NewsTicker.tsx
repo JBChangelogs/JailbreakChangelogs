@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { isFeatureEnabled } from "@/utils/featureFlags";
-import { safeLocalStorage } from "@/utils/safeStorage";
+import { isFeatureEnabled } from "@/utils/api/featureFlags";
+import { safeLocalStorage } from "@/utils/storage/safeStorage";
 
 export default function NewsTicker() {
   const shouldShowTicker = isFeatureEnabled("NEWS_TICKER");

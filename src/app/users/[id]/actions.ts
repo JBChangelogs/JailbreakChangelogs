@@ -1,5 +1,5 @@
-import { PUBLIC_API_URL } from "@/utils/api";
-import { fetchWithRetry } from "@/utils/fetchWithRetry";
+import { PUBLIC_API_URL } from "@/utils/api/api";
+import { fetchWithRetry } from "@/utils/api/fetchWithRetry";
 import { createLogger } from "@/services/logger";
 
 const log = createLogger("API");

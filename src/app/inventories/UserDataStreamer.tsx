@@ -3,11 +3,11 @@ import InventoryCheckerClient from "./InventoryCheckerClient";
 import { InventoryData } from "./types";
 import { Season } from "@/types/seasons";
 import { UserDataService } from "@/services/userDataService";
-import { fetchUserByRobloxId } from "@/utils/api";
+import { fetchUserByRobloxId } from "@/utils/api/api";
 import { createLogger } from "@/services/logger";
 
 const log = createLogger("INVENTORY");
-import { CommentData, UserNetworthData, MoneyHistory } from "@/utils/api";
+import { CommentData, UserNetworthData, MoneyHistory } from "@/utils/api/api";
 import { UserData } from "@/types/auth";
 import { Item } from "@/types";
 

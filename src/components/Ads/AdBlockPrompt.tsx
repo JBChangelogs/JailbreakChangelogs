@@ -1,6 +1,6 @@
 "use client";
 
-import { canHideAdsForPremiumType } from "@/utils/supporterAccess";
+import { canHideAdsForPremiumType } from "@/utils/auth/supporterAccess";
 import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import Image from "next/image";

@@ -5,7 +5,7 @@ import React from "react";
 
 const log = createLogger("UI");
 import { Icon } from "@/components/ui/IconWrapper";
-import { formatProfileDate } from "@/utils/timestamp";
+import { formatProfileDate } from "@/utils/helpers/timestamp";
 import { useAuthContext } from "@/contexts/AuthContext";
 import {
   Dialog,
@@ -27,11 +27,11 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { UserAvatar } from "@/utils/avatar";
+import { UserAvatar } from "@/utils/ui/avatar";
 import DOMPurify from "dompurify";
 import type { UserData } from "@/types/auth";
 import { Button } from "@/components/ui/button";
-import { sanitizeText } from "@/utils/sanitizeText";
+import { sanitizeText } from "@/utils/ui/sanitizeText";
 import {
   DropdownMenu,
   DropdownMenuContent,

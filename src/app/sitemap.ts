@@ -1,5 +1,5 @@
 import type { MetadataRoute } from "next";
-import { isFeatureEnabled } from "@/utils/featureFlags";
+import { isFeatureEnabled } from "@/utils/api/featureFlags";
 
 const BASE_URL = "https://jailbreakchangelogs.com";
 

@@ -11,13 +11,13 @@ import React, {
 } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { AuthState, UserData } from "@/types/auth";
-import { logout as authLogout, trackLogoutSource } from "@/utils/auth";
+import { logout as authLogout, trackLogoutSource } from "@/utils/auth/auth";
 import {
   safeGetJSON,
   safeSetJSON,
   safeLocalStorage,
-} from "@/utils/safeStorage";
-import { PUBLIC_API_URL } from "@/utils/api";
+} from "@/utils/storage/safeStorage";
+import { PUBLIC_API_URL } from "@/utils/api/api";
 import { toast } from "sonner";
 import { useRealtimeNotificationsWebSocket } from "@/hooks/useRealtimeNotificationsWebSocket";
 import { createLogger } from "@/services/logger";

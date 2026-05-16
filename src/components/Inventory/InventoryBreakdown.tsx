@@ -9,8 +9,8 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { getCategoryColor, getCategoryIcon } from "@/utils/categoryIcons";
-import { UserNetworthData } from "@/utils/api";
+import { getCategoryColor, getCategoryIcon } from "@/utils/items/categoryIcons";
+import { UserNetworthData } from "@/utils/api/api";
 import { Icon } from "@/components/ui/IconWrapper";
 import {
   DropdownMenu,

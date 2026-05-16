@@ -5,7 +5,7 @@ import { useState, useCallback, type SyntheticEvent } from "react";
 
 const log = createLogger("AUTH");
 import { toast } from "sonner";
-import { PUBLIC_API_URL } from "@/utils/api";
+import { PUBLIC_API_URL } from "@/utils/api/api";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { useTheme } from "@/contexts/ThemeContext";
 

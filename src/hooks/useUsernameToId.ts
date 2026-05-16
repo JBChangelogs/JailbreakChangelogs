@@ -1,7 +1,7 @@
 "use client";
 
 import { useQueryClient } from "@tanstack/react-query";
-import { fetchRobloxUserByUsername, MaxStreamsError } from "@/utils/api";
+import { fetchRobloxUserByUsername, MaxStreamsError } from "@/utils/api/api";
 
 type RobloxUserLookup = {
   id?: number;

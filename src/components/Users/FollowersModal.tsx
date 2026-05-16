@@ -10,7 +10,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/IconWrapper";
 import { Spinner } from "@/components/ui/Spinner";
-import { UserAvatar } from "@/utils/avatar";
+import { UserAvatar } from "@/utils/ui/avatar";
 import Link from "next/link";
 import { toast } from "sonner";
 import { UserSettingsV2 } from "@/types/auth";

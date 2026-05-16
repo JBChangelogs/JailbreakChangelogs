@@ -2,7 +2,7 @@
 
 import { use, useEffect, useState } from "react";
 import FavoriteButton from "@/components/Items/FavoriteButton";
-import { fetchUserFavorites } from "@/utils/api";
+import { fetchUserFavorites } from "@/utils/api/api";
 import { useAuthContext } from "@/contexts/AuthContext";
 
 interface Props {

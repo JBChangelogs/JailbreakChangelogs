@@ -4,7 +4,7 @@ import { ThemeProvider } from "@mui/material";
 import { darkTheme } from "@/theme/darkTheme";
 import TimelineHeader from "./TimelineHeader";
 import TimelineContent from "./TimelineContent";
-import { Changelog } from "@/utils/api";
+import { Changelog } from "@/utils/api/api";
 
 interface TimelineClientProps {
   changelogs: Changelog[];

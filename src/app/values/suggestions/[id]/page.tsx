@@ -8,14 +8,14 @@ import Breadcrumb from "@/components/Layout/Breadcrumb";
 import { Icon } from "@/components/ui/IconWrapper";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/Spinner";
-import { UserAvatar } from "@/utils/avatar";
-import { buildApiUrlWithDevToken } from "@/utils/apiDevToken";
-import { PUBLIC_API_URL } from "@/utils/api";
+import { UserAvatar } from "@/utils/ui/avatar";
+import { buildApiUrlWithDevToken } from "@/utils/api/apiDevToken";
+import { PUBLIC_API_URL } from "@/utils/api/api";
 import { createLogger } from "@/services/logger";
 
 const log = createLogger("UI");
-import { formatMessageDate } from "@/utils/timestamp";
-import { formatFullValue } from "@/utils/values";
+import { formatMessageDate } from "@/utils/helpers/timestamp";
+import { formatFullValue } from "@/utils/trading/values";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import {
@@ -23,8 +23,8 @@ import {
   handleImageError,
   isVideoItem,
   getVideoPath,
-} from "@/utils/images";
-import { getCategoryColor, getCategoryIcon } from "@/utils/categoryIcons";
+} from "@/utils/ui/images";
+import { getCategoryColor, getCategoryIcon } from "@/utils/items/categoryIcons";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import {
   Tooltip,

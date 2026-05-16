@@ -15,19 +15,19 @@ import {
   getDriftVideoPath,
   getVideoPath,
   handleImageError,
-} from "@/utils/images";
-import { getCategoryIcon, getCategoryColor } from "@/utils/categoryIcons";
+} from "@/utils/ui/images";
+import { getCategoryIcon, getCategoryColor } from "@/utils/items/categoryIcons";
 import { VerifiedBadgeIcon } from "@/components/Icons/VerifiedBadgeIcon";
-import { formatFullValue } from "@/utils/values";
+import { formatFullValue } from "@/utils/trading/values";
 import {
   fetchItemUnlockMetadataById,
   ItemUnlockMetadataEntry,
-} from "@/utils/itemUnlockMetadata";
+} from "@/utils/items/itemUnlockMetadata";
 import {
   formatUnlockLevelBadge,
   formatUnlockRequirementsTooltip,
   hasUnlockLevel,
-} from "@/utils/itemUnlockPresentation";
+} from "@/utils/items/itemUnlockPresentation";
 
 import {
   Tooltip,

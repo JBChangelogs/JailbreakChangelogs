@@ -6,9 +6,9 @@ import {
   handleImageError,
   isVideoItem,
   getVideoPath,
-} from "@/utils/images";
+} from "@/utils/ui/images";
 import TradeItemHoverTooltip from "../../trading/TradeItemHoverTooltip";
-import { isCustomTradeItem } from "@/utils/tradeItems";
+import { isCustomTradeItem } from "@/utils/trading/tradeItems";
 
 import { Tooltip, TooltipTrigger } from "@/components/ui/tooltip";
 

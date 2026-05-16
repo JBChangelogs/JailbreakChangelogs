@@ -1,4 +1,4 @@
-import { fetchComments } from "@/utils/api";
+import { fetchComments } from "@/utils/api/api";
 import SeasonDetailsClient from "@/components/Seasons/SeasonDetailsClient";
 import NitroSeasonsRailAd from "@/components/Ads/NitroSeasonsRailAd";
 

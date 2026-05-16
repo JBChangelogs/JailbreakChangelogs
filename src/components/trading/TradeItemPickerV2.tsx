@@ -7,12 +7,12 @@ import { TradeItem } from "@/types/trading";
 import { toast } from "sonner";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Icon } from "@/components/ui/IconWrapper";
-import { CategoryIconBadge } from "@/utils/categoryIcons";
-import { getDemandColor, getTrendColor } from "@/utils/badgeColors";
-import { formatCurrencyValue as formatCompactCurrencyValue } from "@/utils/currency";
+import { CategoryIconBadge } from "@/utils/items/categoryIcons";
+import { getDemandColor, getTrendColor } from "@/utils/items/badgeColors";
+import { formatCurrencyValue as formatCompactCurrencyValue } from "@/utils/trading/currency";
 import { Pagination } from "@/components/ui/Pagination";
 import { FilterSort, ValueSort } from "@/types";
-import { filterByValueSort, sortByValueSort } from "@/utils/values";
+import { filterByValueSort, sortByValueSort } from "@/utils/trading/values";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -36,8 +36,8 @@ import {
   getTradeItemImagePath,
   isCustomTradeItem,
   getTradeItemIdentifier,
-} from "@/utils/tradeItems";
-import { handleImageError } from "@/utils/images";
+} from "@/utils/trading/tradeItems";
+import { handleImageError } from "@/utils/ui/images";
 import {
   Tooltip,
   TooltipContent,

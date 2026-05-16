@@ -5,21 +5,21 @@ import { Icon } from "@/components/ui/IconWrapper";
 import { TradeAd, TradeItem } from "@/types/trading";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { useRealTimeRelativeDate } from "@/hooks/useRealTimeRelativeDate";
-import { formatCustomDate } from "@/utils/timestamp";
-import { handleImageError } from "@/utils/images";
+import { formatCustomDate } from "@/utils/helpers/timestamp";
+import { handleImageError } from "@/utils/ui/images";
 import Image from "next/image";
 import { Button } from "../ui/button";
 import TradeItemHoverTooltip from "./TradeItemHoverTooltip";
-import { DefaultAvatar } from "@/utils/avatar";
+import { DefaultAvatar } from "@/utils/ui/avatar";
 import { UserBadges } from "@/components/Profile/UserBadges";
 import {
   getTradeItemDetailHref,
   getTradeItemImagePath,
   isCustomTradeItem,
-} from "@/utils/tradeItems";
-import { getCategoryColor, getCategoryIcon } from "@/utils/categoryIcons";
-import { sanitizeText } from "@/utils/sanitizeText";
-import { startMakeOfferLoadingToast } from "@/utils/makeOfferToasts";
+} from "@/utils/trading/tradeItems";
+import { getCategoryColor, getCategoryIcon } from "@/utils/items/categoryIcons";
+import { sanitizeText } from "@/utils/ui/sanitizeText";
+import { startMakeOfferLoadingToast } from "@/utils/trading/makeOfferToasts";
 
 import {
   Tooltip,

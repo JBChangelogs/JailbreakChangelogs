@@ -1,7 +1,7 @@
 import React from "react";
 import Image from "next/image";
-import { DefaultAvatar } from "@/utils/avatar";
-import { formatMessageDate } from "@/utils/timestamp";
+import { DefaultAvatar } from "@/utils/ui/avatar";
+import { formatMessageDate } from "@/utils/helpers/timestamp";
 
 interface UserData {
   id: string;

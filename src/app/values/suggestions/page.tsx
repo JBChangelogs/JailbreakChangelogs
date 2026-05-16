@@ -10,12 +10,12 @@ import { Icon } from "@/components/ui/IconWrapper";
 import { Spinner } from "@/components/ui/Spinner";
 import { Button } from "@/components/ui/button";
 import { Pagination } from "@/components/ui/Pagination";
-import { UserAvatar } from "@/utils/avatar";
+import { UserAvatar } from "@/utils/ui/avatar";
 import { useAuthContext } from "@/contexts/AuthContext";
-import { buildApiUrlWithDevToken } from "@/utils/apiDevToken";
-import { PUBLIC_API_URL } from "@/utils/api";
-import { formatMessageDate } from "@/utils/timestamp";
-import { formatFullValue } from "@/utils/values";
+import { buildApiUrlWithDevToken } from "@/utils/api/apiDevToken";
+import { PUBLIC_API_URL } from "@/utils/api/api";
+import { formatMessageDate } from "@/utils/helpers/timestamp";
+import { formatFullValue } from "@/utils/trading/values";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import {
@@ -23,8 +23,8 @@ import {
   handleImageError,
   isVideoItem,
   getVideoPath,
-} from "@/utils/images";
-import { getCategoryColor, getCategoryIcon } from "@/utils/categoryIcons";
+} from "@/utils/ui/images";
+import { getCategoryColor, getCategoryIcon } from "@/utils/items/categoryIcons";
 import Image from "next/image";
 import { toast } from "sonner";
 import Link from "next/link";

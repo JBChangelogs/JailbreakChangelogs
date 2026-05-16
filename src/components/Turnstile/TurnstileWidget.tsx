@@ -5,7 +5,7 @@ import { Turnstile, TurnstileInstance } from "@marsidev/react-turnstile";
 
 const log = createLogger("UI");
 import { useRef, useCallback, useEffect } from "react";
-import { TurnstileAction } from "@/utils/turnstile";
+import { TurnstileAction } from "@/utils/auth/turnstile";
 
 interface TurnstileWidgetProps {
   siteKey: string;

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Icon } from "../../components/ui/IconWrapper";
-import { getRandomBackgroundImage } from "@/utils/fisherYatesShuffle";
+import { getRandomBackgroundImage } from "@/utils/helpers/fisherYatesShuffle";
 import HeroBackgroundCarousel from "@/components/Home/HeroBackgroundCarousel";
 
 export default function BotPage() {

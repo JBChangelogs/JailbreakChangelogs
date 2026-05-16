@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useCallback } from "react";
-import { INVENTORY_API_URL } from "@/utils/api";
+import { INVENTORY_API_URL } from "@/utils/api/api";
 import { ServerRegionData } from "./useRobberyTrackerWebSocket";
 import { createLogger } from "@/services/logger";
 

@@ -1,5 +1,5 @@
 import { Item } from "@/types";
-import { parseCurrencyValue } from "@/utils/currency";
+import { parseCurrencyValue } from "@/utils/trading/currency";
 
 export const getDupedValueForItem = (itemData: Item): number => {
   const dupedValue = parseCurrencyValue(itemData.duped_value);

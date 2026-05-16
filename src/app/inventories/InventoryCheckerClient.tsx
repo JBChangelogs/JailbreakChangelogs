@@ -5,15 +5,19 @@ import { useQueryState } from "nuqs";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { DefaultAvatar } from "@/utils/avatar";
+import { DefaultAvatar } from "@/utils/ui/avatar";
 import { Icon } from "@/components/ui/IconWrapper";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ThemeProvider } from "@mui/material";
 import React from "react";
 
-import { ENABLE_WS_SCAN, INVENTORY_API_URL, PUBLIC_API_URL } from "@/utils/api";
-import { buildApiUrlWithDevToken } from "@/utils/apiDevToken";
+import {
+  ENABLE_WS_SCAN,
+  INVENTORY_API_URL,
+  PUBLIC_API_URL,
+} from "@/utils/api/api";
+import { buildApiUrlWithDevToken } from "@/utils/api/apiDevToken";
 import { RobloxUser, Item } from "@/types";
 import { InventoryData, InventoryItem, UserConnectionData } from "./types";
 import { useAuthContext } from "@/contexts/AuthContext";
@@ -36,14 +40,14 @@ import {
   dismissScanLoadingToast,
   showScanSuccessToast,
   showScanErrorToast,
-} from "@/utils/scanToasts";
+} from "@/utils/notifications/scanToasts";
 import { Spinner } from "@/components/ui/Spinner";
 import {
   formatScanProgressMessage,
   getScanActiveButtonLabel,
-} from "@/utils/scanProgressMessage";
+} from "@/utils/notifications/scanProgressMessage";
 import dynamic from "next/dynamic";
-import { CommentData, UserNetworthData, MoneyHistory } from "@/utils/api";
+import { CommentData, UserNetworthData, MoneyHistory } from "@/utils/api/api";
 import { UserData } from "@/types/auth";
 import { createLogger } from "@/services/logger";
 

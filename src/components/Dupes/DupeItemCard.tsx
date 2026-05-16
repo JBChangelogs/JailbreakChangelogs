@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { DupeFinderItem, Item } from "@/types";
-import { formatCurrencyValue } from "@/utils/currency";
+import { formatCurrencyValue } from "@/utils/trading/currency";
 import {
   getItemImagePath,
   isVideoItem,
@@ -11,13 +11,13 @@ import {
   getDriftVideoPath,
   getVideoPath,
   handleImageError,
-} from "@/utils/images";
-import { getCategoryIcon, getCategoryColor } from "@/utils/categoryIcons";
+} from "@/utils/ui/images";
+import { getCategoryIcon, getCategoryColor } from "@/utils/items/categoryIcons";
 import {
   formatUnlockLevelBadge,
   formatUnlockRequirementsTooltip,
   hasUnlockLevel,
-} from "@/utils/itemUnlockPresentation";
+} from "@/utils/items/itemUnlockPresentation";
 
 import {
   Tooltip,

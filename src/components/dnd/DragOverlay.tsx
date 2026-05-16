@@ -2,8 +2,8 @@ import React from "react";
 import { DragOverlay as DndKitDragOverlay } from "@dnd-kit/core";
 import { TradeItem } from "@/types/trading";
 import Image from "next/image";
-import { getItemImagePath, handleImageError } from "@/utils/images";
-import { getCategoryColor } from "@/utils/categoryIcons";
+import { getItemImagePath, handleImageError } from "@/utils/ui/images";
+import { getCategoryColor } from "@/utils/items/categoryIcons";
 
 interface CustomDragOverlayProps {
   item: TradeItem | null;

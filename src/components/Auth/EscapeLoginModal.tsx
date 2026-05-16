@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useEscapeLogin } from "@/utils/escapeLogin";
+import { useEscapeLogin } from "@/utils/auth/escapeLogin";
 import {
   Dialog,
   DialogContent,

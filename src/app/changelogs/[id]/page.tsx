@@ -1,5 +1,5 @@
 import ChangelogDetailsPageClient from "@/components/Changelogs/ChangelogDetailsPageClient";
-import { fetchComments } from "@/utils/api";
+import { fetchComments } from "@/utils/api/api";
 
 interface Props {
   params: Promise<{

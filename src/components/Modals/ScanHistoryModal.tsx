@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRealTimeRelativeDate } from "@/hooks/useRealTimeRelativeDate";
-import { formatMessageDate } from "@/utils/timestamp";
+import { formatMessageDate } from "@/utils/helpers/timestamp";
 import {
   Dialog,
   DialogContent,

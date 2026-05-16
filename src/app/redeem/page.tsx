@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/dialog";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { Spinner } from "@/components/ui/Spinner";
-import { safeSetJSON } from "@/utils/safeStorage";
+import { safeSetJSON } from "@/utils/storage/safeStorage";
 import { UserData } from "@/types/auth";
 import { createLogger } from "@/services/logger";
 

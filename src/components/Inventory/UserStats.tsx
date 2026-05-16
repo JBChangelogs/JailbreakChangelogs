@@ -7,7 +7,7 @@ import { InventoryData, UserConnectionData } from "@/app/inventories/types";
 import { UseScanWebSocketReturn } from "@/hooks/useScanWebSocket";
 import UserProfileSection from "./UserProfileSection";
 import UserStatsSection from "./UserStatsSection";
-import { UserNetworthData } from "@/utils/api";
+import { UserNetworthData } from "@/utils/api/api";
 
 interface UserStatsProps {
   initialData: InventoryData;

@@ -15,7 +15,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
-import { getCategoryColor, getCategoryIcon } from "@/utils/categoryIcons";
+import { getCategoryColor, getCategoryIcon } from "@/utils/items/categoryIcons";
 import SupporterModal from "@/components/Modals/SupporterModal";
 import { useSupporterModal } from "@/hooks/useSupporterModal";
 import {

@@ -1,12 +1,12 @@
 import Link from "next/link";
 import Image from "next/image";
 import type { Metadata } from "next";
-import { getRandomBackgroundImage } from "@/utils/fisherYatesShuffle";
+import { getRandomBackgroundImage } from "@/utils/helpers/fisherYatesShuffle";
 import {
   fetchHomepageImpactStats,
   fetchHomepageStats,
   fetchNetworthCap,
-} from "@/utils/api";
+} from "@/utils/api/api";
 import { Icon } from "../components/ui/IconWrapper";
 import { DiscordIcon } from "@/components/Icons/DiscordIcon";
 import HeroBackgroundCarousel from "@/components/Home/HeroBackgroundCarousel";

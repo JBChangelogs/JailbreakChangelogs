@@ -45,7 +45,7 @@ import {
 } from "@radix-ui/react-avatar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useMemo } from "react";
-import { formatDiscordTimestamp } from "@/utils/timestamp";
+import { formatDiscordTimestamp } from "@/utils/helpers/timestamp";
 
 /**
  * Preset format names for `ChatEventTime`.

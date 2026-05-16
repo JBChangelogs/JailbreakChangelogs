@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { isFeatureEnabled } from "@/utils/featureFlags";
+import { isFeatureEnabled } from "@/utils/api/featureFlags";
 
 export default function ServiceAvailabilityTicker() {
   // Check if service availability ticker should be shown using feature flags

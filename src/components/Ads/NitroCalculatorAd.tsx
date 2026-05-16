@@ -1,6 +1,6 @@
 "use client";
 
-import { canHideAdsForPremiumType } from "@/utils/supporterAccess";
+import { canHideAdsForPremiumType } from "@/utils/auth/supporterAccess";
 import { useEffect, useRef } from "react";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";

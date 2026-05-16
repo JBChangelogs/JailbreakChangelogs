@@ -15,17 +15,17 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { ThemeProvider } from "@mui/material/styles";
 import { darkTheme } from "@/theme/darkTheme";
 import Image from "next/image";
-import { DefaultAvatar } from "@/utils/avatar";
+import { DefaultAvatar } from "@/utils/ui/avatar";
 import Link from "next/link";
 import {
   getItemImagePath,
   handleImageError,
   isVideoItem,
   getVideoPath,
-} from "@/utils/images";
-import { getCategoryColor, getCategoryIcon } from "@/utils/categoryIcons";
-import { formatMessageDate } from "@/utils/timestamp";
-import { formatFullValue, formatPrice } from "@/utils/values";
+} from "@/utils/ui/images";
+import { getCategoryColor, getCategoryIcon } from "@/utils/items/categoryIcons";
+import { formatMessageDate } from "@/utils/helpers/timestamp";
+import { formatFullValue, formatPrice } from "@/utils/trading/values";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import ChangelogDetailsHeader from "./ChangelogDetailsHeader";

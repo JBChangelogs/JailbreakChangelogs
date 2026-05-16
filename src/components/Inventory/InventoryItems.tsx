@@ -10,11 +10,11 @@ import { InventoryData, InventoryItem } from "@/app/inventories/types";
 import InventoryFilters from "./InventoryFilters";
 import InventoryItemsGrid from "./InventoryItemsGrid";
 import { Icon } from "../ui/IconWrapper";
-import { mergeInventoryArrayWithMetadata } from "@/utils/inventoryMerge";
+import { mergeInventoryArrayWithMetadata } from "@/utils/trading/inventoryMerge";
 import {
   fetchItemUnlockMetadataById,
   ItemUnlockMetadataEntry,
-} from "@/utils/itemUnlockMetadata";
+} from "@/utils/items/itemUnlockMetadata";
 
 interface InventoryItemsProps {
   initialData: InventoryData;

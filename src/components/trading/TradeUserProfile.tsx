@@ -5,7 +5,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { UserAvatar } from "@/utils/avatar";
+import { UserAvatar } from "@/utils/ui/avatar";
 import { UserDetailsTooltip } from "@/components/ui/UserDetailsTooltip";
 import RobloxTradeUser from "./RobloxTradeUser";
 import type { UserData } from "@/types/auth";

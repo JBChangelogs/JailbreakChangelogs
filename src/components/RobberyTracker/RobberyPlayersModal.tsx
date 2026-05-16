@@ -12,7 +12,7 @@ import { useState, useMemo } from "react";
 import Image from "next/image";
 import { useRobloxBotsDataQuery } from "@/hooks/useRobloxDataQuery";
 import { Button } from "@/components/ui/button";
-import { DefaultAvatar } from "@/utils/avatar";
+import { DefaultAvatar } from "@/utils/ui/avatar";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface Player {

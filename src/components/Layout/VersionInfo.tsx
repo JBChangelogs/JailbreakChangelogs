@@ -4,7 +4,7 @@ import { createLogger } from "@/services/logger";
 import { useState, useEffect } from "react";
 
 const log = createLogger("UI");
-import { formatFullDate } from "@/utils/timestamp";
+import { formatFullDate } from "@/utils/helpers/timestamp";
 import RailwayBadge from "./RailwayBadge";
 
 export interface VersionInfoState {

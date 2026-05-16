@@ -1,7 +1,7 @@
 import { createLogger } from "@/services/logger";
 import { useEffect, useMemo, useState } from "react";
-import { buildApiUrlWithDevToken } from "@/utils/apiDevToken";
-import { parseJsonWithLargeIds } from "@/utils/parseJsonWithLargeIds";
+import { buildApiUrlWithDevToken } from "@/utils/api/apiDevToken";
+import { parseJsonWithLargeIds } from "@/utils/api/parseJsonWithLargeIds";
 
 const log = createLogger("API");
 

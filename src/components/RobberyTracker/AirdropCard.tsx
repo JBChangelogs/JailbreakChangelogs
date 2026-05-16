@@ -15,7 +15,7 @@ import { useOptimizedRealTimeRelativeDate } from "@/hooks/useSharedTimer";
 import { AirdropData } from "@/hooks/useRobberyTrackerAirdropsWebSocket";
 import { useServerRegions } from "@/hooks/useServerRegions";
 import { ServerRegionData } from "@/hooks/useRobberyTrackerWebSocket";
-import { INVENTORY_API_URL } from "@/utils/api";
+import { INVENTORY_API_URL } from "@/utils/api/api";
 import { toast } from "sonner";
 import { buildRobloxServerDeepLink } from "./deepLink";
 import InlineTeamPlayers from "./InlineTeamPlayers";

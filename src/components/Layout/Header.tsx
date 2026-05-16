@@ -12,12 +12,12 @@ import { Sheet, SheetContent } from "@/components/ui/sheet";
 import dynamic from "next/dynamic";
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { logout, trackLogoutSource } from "@/utils/auth";
+import { logout, trackLogoutSource } from "@/utils/auth/auth";
 import { toast } from "sonner";
 import LoginModal from "../Auth/LoginModal";
 import EscapeLoginModal from "../Auth/EscapeLoginModal";
-import { useEscapeLogin } from "@/utils/escapeLogin";
-import { UserAvatar } from "@/utils/avatar";
+import { useEscapeLogin } from "@/utils/auth/escapeLogin";
+import { UserAvatar } from "@/utils/ui/avatar";
 import { RobloxIcon } from "@/components/Icons/RobloxIcon";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { useTheme } from "@/contexts/ThemeContext";
@@ -58,12 +58,12 @@ import {
   clearNotificationHistory,
   NotificationHistory,
   NotificationItem,
-} from "@/utils/api";
-import { formatCompactDateTime } from "@/utils/timestamp";
+} from "@/utils/api/api";
+import { formatCompactDateTime } from "@/utils/helpers/timestamp";
 import {
   getNotificationActionLabel,
   parseNotificationUrl,
-} from "@/utils/notificationUrl";
+} from "@/utils/notifications/notificationUrl";
 import { UtmGeneratorModal } from "@/components/Modals/UtmGeneratorModal";
 import { useOptimizedRealTimeRelativeDate } from "@/hooks/useSharedTimer";
 import { useToastRuntimeRightOffset } from "@/hooks/useToastRuntimeRightOffset";

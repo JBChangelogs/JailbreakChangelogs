@@ -24,21 +24,24 @@ import {
   safeLocalStorage,
   safeGetJSON,
   safeSetJSON,
-} from "@/utils/safeStorage";
+} from "@/utils/storage/safeStorage";
 import { DndContext, DragEndEvent, DragStartEvent } from "@dnd-kit/core";
 import { DroppableZone } from "@/components/dnd/DroppableZone";
 import { CustomDragOverlay } from "@/components/dnd/DragOverlay";
-import { isCustomTradeItem, tradeItemIdsEqual } from "@/utils/tradeItems";
+import {
+  isCustomTradeItem,
+  tradeItemIdsEqual,
+} from "@/utils/trading/tradeItems";
 import TradeItemPickerV2 from "./TradeItemPickerV2";
-import { sanitizeText } from "@/utils/sanitizeText";
+import { sanitizeText } from "@/utils/ui/sanitizeText";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { getResponseErrorMessage } from "@/utils/api";
-import { buildApiUrlWithDevToken } from "@/utils/apiDevToken";
+import { getResponseErrorMessage } from "@/utils/api/api";
+import { buildApiUrlWithDevToken } from "@/utils/api/apiDevToken";
 import { createLogger } from "@/services/logger";
 
 const log = createLogger("UI");

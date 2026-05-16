@@ -3,19 +3,19 @@
 import { useState, useCallback, use, useMemo } from "react";
 
 import { ItemDetails } from "@/types";
-import { demandOrder } from "@/utils/values";
+import { demandOrder } from "@/utils/trading/values";
 import Image from "next/image";
 import {
   handleImageError,
   getItemImagePath,
   isVideoItem,
   getVideoPath,
-} from "@/utils/images";
+} from "@/utils/ui/images";
 import Link from "next/link";
 import { Icon } from "@/components/ui/IconWrapper";
-import { formatFullValue } from "@/utils/values";
-import { getCategoryColor, getCategoryIcon } from "@/utils/categoryIcons";
-import { getTrendColor, getDemandColor } from "@/utils/badgeColors";
+import { formatFullValue } from "@/utils/trading/values";
+import { getCategoryColor, getCategoryIcon } from "@/utils/items/categoryIcons";
+import { getTrendColor, getDemandColor } from "@/utils/items/badgeColors";
 import {
   DropdownMenu,
   DropdownMenuContent,

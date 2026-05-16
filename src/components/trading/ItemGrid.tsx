@@ -2,13 +2,13 @@ import React from "react";
 import Image from "next/image";
 import { Tooltip, TooltipTrigger } from "@/components/ui/tooltip";
 import { TradeItem } from "@/types/trading";
-import { handleImageError, isVideoItem, getVideoPath } from "@/utils/images";
+import { handleImageError, isVideoItem, getVideoPath } from "@/utils/ui/images";
 import TradeItemHoverTooltip from "./TradeItemHoverTooltip";
 import {
   getTradeItemImagePath,
   isCustomTradeItem,
   tradeItemIdsEqual,
-} from "@/utils/tradeItems";
+} from "@/utils/trading/tradeItems";
 
 interface ItemGridProps {
   items: TradeItem[];

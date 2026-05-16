@@ -1,10 +1,10 @@
 import React from "react";
 import Link from "next/link";
 import { TradeItem } from "@/types/trading";
-import { getCategoryColor, getCategoryIcon } from "@/utils/categoryIcons";
-import { formatFullValue } from "@/utils/values";
-import { getDemandColor, getTrendColor } from "@/utils/badgeColors";
-import { getTradeItemDetailHref } from "@/utils/tradeItems";
+import { getCategoryColor, getCategoryIcon } from "@/utils/items/categoryIcons";
+import { formatFullValue } from "@/utils/trading/values";
+import { getDemandColor, getTrendColor } from "@/utils/items/badgeColors";
+import { getTradeItemDetailHref } from "@/utils/trading/tradeItems";
 import { Icon } from "@/components/ui/IconWrapper";
 
 interface TradeAdTooltipProps {

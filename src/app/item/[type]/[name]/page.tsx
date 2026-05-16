@@ -3,7 +3,7 @@ import {
   fetchItemsByType,
   fetchItemFavorites,
   fetchItemHistory,
-} from "@/utils/api";
+} from "@/utils/api/api";
 import ItemDetailsClient from "@/components/Items/ItemDetailsClient";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";

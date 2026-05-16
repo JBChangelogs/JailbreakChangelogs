@@ -5,11 +5,11 @@ import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 const log = createLogger("UI");
 import { Icon } from "@/components/ui/IconWrapper";
 import { toast } from "sonner";
-import { safeGetJSON, safeSetJSON } from "@/utils/safeStorage";
+import { safeGetJSON, safeSetJSON } from "@/utils/storage/safeStorage";
 import { UserData } from "@/types/auth";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
-import { PUBLIC_API_URL } from "@/utils/api";
+import { PUBLIC_API_URL } from "@/utils/api/api";
 
 interface RobloxConnectionProps {
   userData: {

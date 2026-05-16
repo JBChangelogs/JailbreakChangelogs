@@ -1,4 +1,4 @@
-import { fetchComments } from "@/utils/api";
+import { fetchComments } from "@/utils/api/api";
 import ChangelogComments from "@/components/PageComments/ChangelogComments";
 
 interface Props {

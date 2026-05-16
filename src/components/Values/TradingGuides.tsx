@@ -3,9 +3,9 @@
 import { useState } from "react";
 import { YouTubeEmbed } from "@next/third-parties/google";
 import { Icon } from "@/components/ui/IconWrapper";
-import { demandOrder, trendOrder } from "@/utils/values";
+import { demandOrder, trendOrder } from "@/utils/trading/values";
 import { ValueSort } from "@/types";
-import { trendDescriptions } from "@/utils/tradingDefinitions";
+import { trendDescriptions } from "@/utils/trading/tradingDefinitions";
 
 interface TradingGuidesProps {
   valueSort: ValueSort;

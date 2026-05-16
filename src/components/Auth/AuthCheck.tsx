@@ -5,7 +5,7 @@ import { useEffect } from "react";
 
 const log = createLogger("AUTH");
 import { usePathname } from "next/navigation";
-import { validateAuth } from "@/utils/auth";
+import { validateAuth } from "@/utils/auth/auth";
 
 /**
  * This component checks authentication status on route changes

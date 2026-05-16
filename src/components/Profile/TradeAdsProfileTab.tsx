@@ -7,7 +7,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Pagination } from "@/components/ui/Pagination";
 import { TradeAdCard } from "@/components/trading/TradeAdCard";
 import { Icon } from "@/components/ui/IconWrapper";
-import { buildApiUrlWithDevToken } from "@/utils/apiDevToken";
+import { buildApiUrlWithDevToken } from "@/utils/api/apiDevToken";
 import { createLogger } from "@/services/logger";
 
 const log = createLogger("UI");

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { INVENTORY_API_URL } from "@/utils/api";
+import { INVENTORY_API_URL } from "@/utils/api/api";
 import { cookies } from "next/headers";
 import { createLogger } from "@/services/logger";
 

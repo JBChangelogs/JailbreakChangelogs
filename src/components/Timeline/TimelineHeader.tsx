@@ -3,7 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Changelog } from "@/utils/api";
+import { Changelog } from "@/utils/api/api";
 import UpdateStatisticsCard from "@/components/common/UpdateStatisticsCard";
 
 interface TimelineHeaderProps {

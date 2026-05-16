@@ -38,13 +38,13 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "../ui/button";
-import { CommentData } from "@/utils/api";
-import { sanitizeText } from "@/utils/sanitizeText";
+import { CommentData } from "@/utils/api/api";
+import { sanitizeText } from "@/utils/ui/sanitizeText";
 import {
   refreshComments,
   fetchUsersBatchAction,
 } from "@/app/api/comments/actions";
-import { UserAvatar } from "@/utils/avatar";
+import { UserAvatar } from "@/utils/ui/avatar";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { UserData } from "@/types/auth";
 import Link from "next/link";

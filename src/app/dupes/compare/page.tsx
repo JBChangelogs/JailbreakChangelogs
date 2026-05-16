@@ -1,4 +1,4 @@
-import { fetchDuplicateVariants, fetchItems } from "@/utils/api";
+import { fetchDuplicateVariants, fetchItems } from "@/utils/api/api";
 import DupeComparisonClient from "@/components/Dupes/DupeComparisonClient";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import { notFound } from "next/navigation";

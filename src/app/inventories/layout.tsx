@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { getInventoryMaintenanceMetadata } from "@/utils/maintenance";
+import { getInventoryMaintenanceMetadata } from "@/utils/api/maintenance";
 
 export async function generateMetadata(): Promise<Metadata> {
   // Check for inventory maintenance mode first

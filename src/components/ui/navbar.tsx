@@ -11,7 +11,7 @@ import * as NavigationMenu from "@radix-ui/react-navigation-menu";
 import { cn } from "@/lib/utils";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { useTheme } from "@/contexts/ThemeContext";
-import { UserAvatar } from "@/utils/avatar";
+import { UserAvatar } from "@/utils/ui/avatar";
 import { RobloxIcon } from "@/components/Icons/RobloxIcon";
 import dynamic from "next/dynamic";
 import { useMediaQuery } from "@mui/material";
@@ -26,15 +26,15 @@ import {
   fetchUnreadNotifications,
   clearNotificationHistory,
   NotificationHistory,
-} from "@/utils/api";
-import { formatCustomDate } from "@/utils/timestamp";
+} from "@/utils/api/api";
+import { formatCustomDate } from "@/utils/helpers/timestamp";
 import { useOptimizedRealTimeRelativeDate } from "@/hooks/useSharedTimer";
 import { toast } from "sonner";
 import { Spinner } from "@/components/ui/Spinner";
 import {
   getNotificationActionLabel,
   parseNotificationUrl,
-} from "@/utils/notificationUrl";
+} from "@/utils/notifications/notificationUrl";
 
 const AnimatedThemeToggler = dynamic(
   () =>

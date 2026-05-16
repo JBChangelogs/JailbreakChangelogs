@@ -20,8 +20,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { UserAvatar } from "@/utils/avatar";
-import { getCategoryColor, getCategoryIcon } from "@/utils/categoryIcons";
+import { UserAvatar } from "@/utils/ui/avatar";
+import { getCategoryColor, getCategoryIcon } from "@/utils/items/categoryIcons";
 import { cn } from "@/lib/utils";
 import { Chat } from "@/components/chat/chat";
 import {
@@ -43,21 +43,21 @@ import {
 } from "@/components/chat/chat-event";
 import { useOptimizedRealTimeRelativeDate } from "@/hooks/useSharedTimer";
 import { useAuthContext } from "@/contexts/AuthContext";
-import { sanitizeText } from "@/utils/sanitizeText";
+import { sanitizeText } from "@/utils/ui/sanitizeText";
 import {
   PUBLIC_API_URL,
   getRateLimitMessage,
   getResponseErrorMessage,
   searchUsers,
-} from "@/utils/api";
-import { respondToTradeOfferV2 } from "@/utils/trading";
-import { buildApiUrlWithDevToken } from "@/utils/apiDevToken";
+} from "@/utils/api/api";
+import { respondToTradeOfferV2 } from "@/utils/trading/core";
+import { buildApiUrlWithDevToken } from "@/utils/api/apiDevToken";
 import {
   useOfferDetailsBatch,
   type TradeOfferDetails,
 } from "@/hooks/useOfferDetailsBatch";
 import { decode as decodeHtmlEntities } from "he";
-import { parseJsonWithLargeIds } from "@/utils/parseJsonWithLargeIds";
+import { parseJsonWithLargeIds } from "@/utils/api/parseJsonWithLargeIds";
 import type { UserData, UserFlag, UserSettingsV2 } from "@/types/auth";
 import { createLogger } from "@/services/logger";
 

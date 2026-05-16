@@ -2,13 +2,13 @@
 
 import { useCallback, useEffect, useRef } from "react";
 import { toast } from "sonner";
-import { ENABLE_REALTIME_NOTIFICATIONS_WS, WS_URL } from "@/utils/api";
+import { ENABLE_REALTIME_NOTIFICATIONS_WS, WS_URL } from "@/utils/api/api";
 import {
   getNotificationActionLabel,
   parseNotificationUrl,
-} from "@/utils/notificationUrl";
-import { showDesktopNotification } from "@/utils/desktopNotifications";
-import { buildApiUrlWithDevToken } from "@/utils/apiDevToken";
+} from "@/utils/notifications/notificationUrl";
+import { showDesktopNotification } from "@/utils/notifications/desktopNotifications";
+import { buildApiUrlWithDevToken } from "@/utils/api/apiDevToken";
 import { createLogger } from "@/services/logger";
 
 const log = createLogger("WS");

@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { formatMessageDate } from "@/utils/timestamp";
+import { formatMessageDate } from "@/utils/helpers/timestamp";
 import { Icon } from "../ui/IconWrapper";
 import { bangers } from "@/app/fonts";
 

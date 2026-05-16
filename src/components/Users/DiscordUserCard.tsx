@@ -1,7 +1,7 @@
 "use client";
 
 import { UserBadges } from "@/components/Profile/UserBadges";
-import { UserAvatar } from "@/utils/avatar";
+import { UserAvatar } from "@/utils/ui/avatar";
 import {
   type UserSettingsV2,
   type UserPresence,

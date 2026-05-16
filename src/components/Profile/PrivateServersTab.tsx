@@ -1,8 +1,8 @@
 import React from "react";
 import { Icon } from "@/components/ui/IconWrapper";
 import { Button } from "@/components/ui/button";
-import { formatProfileDate } from "@/utils/timestamp";
-import { sanitizeText } from "@/utils/sanitizeText";
+import { formatProfileDate } from "@/utils/helpers/timestamp";
+import { sanitizeText } from "@/utils/ui/sanitizeText";
 import Link from "next/link";
 import { toast } from "sonner";
 

@@ -26,7 +26,7 @@ import {
   ChartTooltipContent,
   type ChartConfig,
 } from "@/components/ui/chart";
-import { UserNetworthData } from "@/utils/api";
+import { UserNetworthData } from "@/utils/api/api";
 
 interface NetworthHistoryChartProps {
   userId: string;

@@ -10,8 +10,8 @@ import { Pagination } from "@/components/ui/Pagination";
 import Comment from "../ProfileComments/Comments";
 import { Icon } from "@/components/ui/IconWrapper";
 import { fetchCommentDetails } from "@/app/users/[id]/actions";
-import { PUBLIC_API_URL } from "@/utils/api";
-import { buildApiUrlWithDevToken } from "@/utils/apiDevToken";
+import { PUBLIC_API_URL } from "@/utils/api/api";
+import { buildApiUrlWithDevToken } from "@/utils/api/apiDevToken";
 
 interface CommentData {
   id: number;

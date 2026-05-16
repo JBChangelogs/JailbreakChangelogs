@@ -17,15 +17,21 @@ import { TradeAdSkeleton } from "./TradeAdSkeleton";
 import { Pagination } from "@/components/ui/Pagination";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/IconWrapper";
-import { deleteTradeAd } from "@/utils/trading";
+import { deleteTradeAd } from "@/utils/trading/core";
 import { toast } from "sonner";
 import { TradeAdForm } from "./TradeAdForm";
 import { useAuthContext } from "@/contexts/AuthContext";
-import { buildApiUrlWithDevToken } from "@/utils/apiDevToken";
-import { shouldRetryResponseStatus } from "@/utils/fetchWithRetry";
-import { isCustomTradeItem, tradeItemIdsEqual } from "@/utils/tradeItems";
+import { buildApiUrlWithDevToken } from "@/utils/api/apiDevToken";
+import { shouldRetryResponseStatus } from "@/utils/api/fetchWithRetry";
+import {
+  isCustomTradeItem,
+  tradeItemIdsEqual,
+} from "@/utils/trading/tradeItems";
 import { Checkbox } from "@/components/ui/checkbox";
-import { INVENTORY_API_SOURCE_HEADER, INVENTORY_API_URL } from "@/utils/api";
+import {
+  INVENTORY_API_SOURCE_HEADER,
+  INVENTORY_API_URL,
+} from "@/utils/api/api";
 import {
   DropdownMenu,
   DropdownMenuContent,

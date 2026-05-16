@@ -1,6 +1,6 @@
 import React from "react";
 import { Icon } from "@/components/ui/IconWrapper";
-import { getBadgeColor, highlightText } from "@/utils/changelogs";
+import { getBadgeColor, highlightText } from "@/utils/changelogs/changelogs";
 
 interface SearchResult {
   id: number;

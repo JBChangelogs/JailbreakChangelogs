@@ -9,7 +9,7 @@ import { useQuery } from "@tanstack/react-query";
 import { fetchLeaderboardUserData } from "@/app/leaderboard/actions";
 import { Icon } from "@/components/ui/IconWrapper";
 import { Button } from "@/components/ui/button";
-import { DefaultAvatar } from "@/utils/avatar";
+import { DefaultAvatar } from "@/utils/ui/avatar";
 
 interface UserScan {
   user_id: string;

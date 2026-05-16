@@ -1,4 +1,4 @@
-import { fetchItemChanges, fetchUsersBatch } from "@/utils/api";
+import { fetchItemChanges, fetchUsersBatch } from "@/utils/api/api";
 import ItemChangelogs, { Change } from "@/components/Items/ItemChangelogs";
 
 interface Props {

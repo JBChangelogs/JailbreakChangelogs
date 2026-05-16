@@ -9,7 +9,7 @@ import { Icon } from "@/components/ui/IconWrapper";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import CreatorLink from "@/components/Items/CreatorLink";
 import ItemValues from "@/components/Items/ItemValues";
-import { getCategoryColor, getCategoryIcon } from "@/utils/categoryIcons";
+import { getCategoryColor, getCategoryIcon } from "@/utils/items/categoryIcons";
 import NitroItemsVideoPlayer from "@/components/Ads/NitroItemsVideoPlayer";
 import NitroItemMobileAd from "@/components/Ads/NitroItemMobileAd";
 import {
@@ -43,21 +43,21 @@ import {
   getHornAudioPath,
   getDriftVideoPath,
   getVideoPath,
-} from "@/utils/images";
-import { formatCustomDate } from "@/utils/timestamp";
+} from "@/utils/ui/images";
+import { formatCustomDate } from "@/utils/helpers/timestamp";
 import { useOptimizedRealTimeRelativeDate } from "@/hooks/useSharedTimer";
-import { CategoryIconBadge } from "@/utils/categoryIcons";
-import { convertUrlsToLinks } from "@/utils/urlConverter";
+import { CategoryIconBadge } from "@/utils/items/categoryIcons";
+import { convertUrlsToLinks } from "@/utils/ui/urlConverter";
 import { ItemDetails } from "@/types";
 import {
   fetchItemUnlockMetadataById,
   ItemUnlockMetadataEntry,
-} from "@/utils/itemUnlockMetadata";
+} from "@/utils/items/itemUnlockMetadata";
 import {
   formatUnlockLevelBadge,
   formatUnlockRequirementsTooltip,
   hasUnlockLevel,
-} from "@/utils/itemUnlockPresentation";
+} from "@/utils/items/itemUnlockPresentation";
 import { createLogger } from "@/services/logger";
 
 const log = createLogger("UI");

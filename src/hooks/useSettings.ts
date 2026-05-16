@@ -12,7 +12,7 @@ import {
   updateUserSettings,
 } from "@/services/settingsService";
 import { toast } from "sonner";
-import { safeSetJSON } from "@/utils/safeStorage";
+import { safeSetJSON } from "@/utils/storage/safeStorage";
 import { formatSettingName } from "@/config/settings";
 
 export const useSettings = (

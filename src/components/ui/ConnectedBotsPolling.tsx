@@ -6,10 +6,10 @@ import {
   useRobloxBotsDataQuery,
   useRobloxUserDataQuery,
 } from "@/hooks/useRobloxDataQuery";
-import { type ConnectedBot } from "@/utils/api";
+import { type ConnectedBot } from "@/utils/api/api";
 import { type RobloxUser } from "@/types";
 import { useOptimizedRealTimeRelativeDate } from "@/hooks/useSharedTimer";
-import { formatCustomDate } from "@/utils/timestamp";
+import { formatCustomDate } from "@/utils/helpers/timestamp";
 import Image from "next/image";
 import Link from "next/link";
 import RetryErrorDisplay from "./RetryErrorDisplay";

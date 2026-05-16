@@ -4,8 +4,8 @@ import Breadcrumb from "@/components/Layout/Breadcrumb";
 import { Suspense } from "react";
 import ExperimentalFeatureBanner from "@/components/ui/ExperimentalFeatureBanner";
 import ComingSoon from "@/components/ui/ComingSoon";
-import { isFeatureEnabled } from "@/utils/featureFlags";
-import { checkOGFinderMaintenanceMode } from "@/utils/maintenance";
+import { isFeatureEnabled } from "@/utils/api/featureFlags";
+import { checkOGFinderMaintenanceMode } from "@/utils/api/maintenance";
 import FeatureMaintenance from "@/theme/FeatureMaintenance";
 import PremiumAwareLayout from "@/components/Layout/PremiumAwareLayout";
 

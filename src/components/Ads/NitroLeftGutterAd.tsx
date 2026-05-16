@@ -1,10 +1,13 @@
 "use client";
 
-import { canHideAdsForPremiumType } from "@/utils/supporterAccess";
+import { canHideAdsForPremiumType } from "@/utils/auth/supporterAccess";
 import { useEffect, useRef } from "react";
 import { useMediaQuery } from "@mui/material";
-import type { NitroAdInstance } from "@/utils/nitroAds";
-import { registerAdInstance, removeAdReference } from "@/utils/nitroAds";
+import type { NitroAdInstance } from "@/utils/analytics/nitroAds";
+import {
+  registerAdInstance,
+  removeAdReference,
+} from "@/utils/analytics/nitroAds";
 
 type AdSize = [string, string];
 

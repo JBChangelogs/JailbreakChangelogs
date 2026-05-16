@@ -4,8 +4,8 @@ import { useState, useEffect, useRef, useMemo, useLayoutEffect } from "react";
 import Image from "next/image";
 import { useDebounce } from "@/hooks/useDebounce";
 import { useVirtualizer } from "@tanstack/react-virtual";
-import { DefaultAvatar } from "@/utils/avatar";
-import { formatMessageDate } from "@/utils/timestamp";
+import { DefaultAvatar } from "@/utils/ui/avatar";
+import { formatMessageDate } from "@/utils/helpers/timestamp";
 import { Season } from "@/types/seasons";
 import XpProgressBar from "@/components/Inventory/XpProgressBar";
 

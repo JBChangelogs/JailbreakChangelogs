@@ -1,6 +1,6 @@
 import React, { Suspense } from "react";
-import { fetchComments } from "@/utils/api";
-import { fetchItems } from "@/utils/api";
+import { fetchComments } from "@/utils/api/api";
+import { fetchItems } from "@/utils/api/api";
 import TradeDetailsDataClient from "./TradeDetailsDataClient";
 import Loading from "./loading";
 

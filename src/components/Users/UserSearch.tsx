@@ -13,7 +13,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { fetchPaginatedUsers, searchUsers } from "@/utils/api";
+import { fetchPaginatedUsers, searchUsers } from "@/utils/api/api";
 import { UserDetailsTooltip } from "../ui/UserDetailsTooltip";
 import { useAuthContext } from "@/contexts/AuthContext";
 import UserCardSkeleton from "./UserCardSkeleton";

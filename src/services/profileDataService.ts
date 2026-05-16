@@ -1,4 +1,4 @@
-import { PUBLIC_API_URL } from "@/utils/api";
+import { PUBLIC_API_URL } from "@/utils/api/api";
 import {
   fetchFavoritesData,
   fetchFavoriteItemDetails,
@@ -6,7 +6,7 @@ import {
 import { createLogger } from "@/services/logger";
 
 const log = createLogger("API");
-import { fetchWithRetry } from "@/utils/fetchWithRetry";
+import { fetchWithRetry } from "@/utils/api/fetchWithRetry";
 import type { TradeAd } from "@/types/trading";
 
 export interface ProfileDataResult {

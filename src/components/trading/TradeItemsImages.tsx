@@ -3,12 +3,12 @@ import { TradeItem } from "@/types/trading";
 import Image from "next/image";
 import Link from "next/link";
 import { Tooltip, TooltipTrigger } from "@/components/ui/tooltip";
-import { handleImageError, isVideoItem, getVideoPath } from "@/utils/images";
+import { handleImageError, isVideoItem, getVideoPath } from "@/utils/ui/images";
 import TradeItemHoverTooltip from "./TradeItemHoverTooltip";
 import {
   getTradeItemDetailHref,
   getTradeItemImagePath,
-} from "@/utils/tradeItems";
+} from "@/utils/trading/tradeItems";
 
 interface TradeItemsImagesProps {
   offering: TradeItem[];

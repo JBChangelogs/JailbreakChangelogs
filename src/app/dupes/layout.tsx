@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { getDupeFinderMaintenanceMetadata } from "@/utils/maintenance";
+import { getDupeFinderMaintenanceMetadata } from "@/utils/api/maintenance";
 
 export async function generateMetadata(): Promise<Metadata> {
   const maintenanceMetadata = await getDupeFinderMaintenanceMetadata();

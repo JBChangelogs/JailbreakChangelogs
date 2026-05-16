@@ -1,4 +1,4 @@
-import { getCurrentUser } from "@/utils/serverSession";
+import { getCurrentUser } from "@/utils/auth/serverSession";
 import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";

@@ -28,8 +28,8 @@ import UmamiIdentity from "@/components/Analytics/UmamiIdentity";
 import {
   checkMaintenanceMode,
   getMaintenanceMetadata,
-} from "@/utils/maintenance";
-import { getGitHubUrl } from "@/utils/version";
+} from "@/utils/api/maintenance";
+import { getGitHubUrl } from "@/utils/trading/version";
 import { Suspense } from "react";
 import QueryProvider from "@/components/QueryProvider";
 import { NuqsAdapter } from "nuqs/adapters/next/app";

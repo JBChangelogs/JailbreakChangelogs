@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { fetchItemCountStats, fetchDuplicatesCount } from "@/utils/api";
+import { fetchItemCountStats, fetchDuplicatesCount } from "@/utils/api/api";
 import CountUpNumber from "@/components/Home/CountUpNumber";
 
 export default function StatsPolling() {
