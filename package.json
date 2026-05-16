@@ -93,7 +93,6 @@
     "@types/node": "25",
     "@types/react": "19.2.14",
     "@types/react-dom": "19.2.3",
-    "daisyui": "^5.5.19",
     "husky": "^9.1.7",
     "lint-staged": "17",
     "oxfmt": "0.49",

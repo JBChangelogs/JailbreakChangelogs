@@ -206,12 +206,15 @@ export default function XpResultsSummary({
       <div className="border-border-card bg-secondary-bg rounded-lg border p-6">
         {/* XP Mode Toggle */}
         <div className="mb-6 overflow-x-auto">
-          <div role="tablist" className="tabs min-w-max">
+          <div
+            role="tablist"
+            className="border-border-card flex min-w-max rounded-lg border p-1"
+          >
             <button
               role="tab"
               aria-selected={xpMode === "normal"}
               onClick={() => setXpMode("normal")}
-              className={`tab ${xpMode === "normal" ? "tab-active" : ""}`}
+              className={`rounded-md px-4 py-1.5 text-sm font-medium transition-colors ${xpMode === "normal" ? "bg-accent text-white" : "text-secondary-text hover:text-primary-text"}`}
             >
               Normal XP
             </button>
@@ -219,7 +222,7 @@ export default function XpResultsSummary({
               role="tab"
               aria-selected={xpMode === "double"}
               onClick={() => setXpMode("double")}
-              className={`tab ${xpMode === "double" ? "tab-active" : ""}`}
+              className={`rounded-md px-4 py-1.5 text-sm font-medium transition-colors ${xpMode === "double" ? "bg-accent text-white" : "text-secondary-text hover:text-primary-text"}`}
             >
               Double XP Weekend
             </button>
