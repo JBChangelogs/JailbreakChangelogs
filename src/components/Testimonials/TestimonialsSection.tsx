@@ -1,8 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { Masonry } from "@mui/lab";
-import { useMediaQuery } from "@mui/material";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 import type { Testimonial } from "@/components/Testimonials/testimonialsData";
 import {
   TESTIMONIALS_BASE_URL,
@@ -24,22 +23,14 @@ export default function TestimonialsSection({
   return (
     <section className="py-8">
       <div className="container mx-auto px-6">
-        <Masonry
-          columns={columns}
-          spacing={3}
-          sx={{
-            width: "100%",
-            overflow: "hidden",
-            transition: "height 0.2s ease-in-out",
-          }}
-        >
+        <div style={{ columns: columns, columnGap: "24px" }}>
           {testimonials.map((testimonial, index) => (
             <a
               key={`${testimonial.name}-${index}`}
               href={testimonial.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="border-border-card bg-secondary-bg hover:bg-quaternary-bg group flex flex-col rounded-xl border p-6 shadow-md transition-all duration-200"
+              className="border-border-card bg-secondary-bg hover:bg-quaternary-bg group mb-6 block flex break-inside-avoid flex-col rounded-xl border p-6 shadow-md transition-all duration-200"
             >
               <div className="mb-4 flex items-start gap-4">
                 <div className="shrink-0">
@@ -69,7 +60,7 @@ export default function TestimonialsSection({
               </blockquote>
             </a>
           ))}
-        </Masonry>
+        </div>
       </div>
     </section>
   );

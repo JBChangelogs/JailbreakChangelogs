@@ -3,7 +3,7 @@ import { useAuthContext } from "@/contexts/AuthContext";
 import { TradeItem } from "@/types/trading";
 import { UserData } from "@/types/auth";
 import { ItemGrid } from "./ItemGrid";
-import { Skeleton } from "@mui/material";
+import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import {
@@ -707,17 +707,12 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
       <div className="space-y-6">
         {/* Expiration Time Selection Skeleton */}
         <div className="border-border-card rounded-lg border p-4">
-          <Skeleton variant="text" width={200} height={24} className="mb-4" />
+          <Skeleton style={{ width: 200, height: 24 }} className="mb-4" />
           <div className="flex items-center gap-4">
-            <Skeleton
-              variant="rectangular"
-              width="100%"
-              height={40}
-              className="rounded-lg"
-            />
+            <Skeleton className="w-full rounded-none" style={{ height: 40 }} />
             <div className="space-y-2">
-              <Skeleton variant="text" width={120} height={20} />
-              <Skeleton variant="text" width={180} height={20} />
+              <Skeleton style={{ width: 120, height: 20 }} />
+              <Skeleton style={{ width: 180, height: 20 }} />
             </div>
           </div>
         </div>
@@ -725,30 +720,26 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
         {/* Offering and Requesting Items Skeleton */}
         <div className="space-y-6 md:flex md:space-y-0 md:space-x-6">
           <div className="border-border-card flex-1 rounded-lg border p-4">
-            <Skeleton variant="text" width={100} height={24} className="mb-4" />
+            <Skeleton style={{ width: 100, height: 24 }} className="mb-4" />
             <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-4">
               {[...Array(8)].map((_, i) => (
                 <Skeleton
                   key={i}
-                  variant="rectangular"
-                  width="100%"
-                  height={120}
-                  className="rounded-lg"
+                  className="w-full rounded-none"
+                  style={{ height: 120 }}
                 />
               ))}
             </div>
           </div>
 
           <div className="border-border-card flex-1 rounded-lg border p-4">
-            <Skeleton variant="text" width={100} height={24} className="mb-4" />
+            <Skeleton style={{ width: 100, height: 24 }} className="mb-4" />
             <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-4">
               {[...Array(8)].map((_, i) => (
                 <Skeleton
                   key={i}
-                  variant="rectangular"
-                  width="100%"
-                  height={120}
-                  className="rounded-lg"
+                  className="w-full rounded-none"
+                  style={{ height: 120 }}
                 />
               ))}
             </div>
@@ -758,30 +749,24 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
         {/* Submit Button Skeleton */}
         <div className="flex justify-end gap-3">
           <Skeleton
-            variant="rectangular"
-            width={120}
-            height={36}
-            className="rounded-lg"
+            className="rounded-none"
+            style={{ width: 120, height: 36 }}
           />
           <Skeleton
-            variant="rectangular"
-            width={140}
-            height={36}
-            className="rounded-lg"
+            className="rounded-none"
+            style={{ width: 140, height: 36 }}
           />
         </div>
 
         {/* Available Items Grid Skeleton */}
         <div className="mb-8">
-          <Skeleton variant="text" width={200} height={24} className="mb-4" />
+          <Skeleton style={{ width: 200, height: 24 }} className="mb-4" />
           <div className="grid grid-cols-4 gap-4">
             {[...Array(12)].map((_, i) => (
               <Skeleton
                 key={i}
-                variant="rectangular"
-                width="100%"
-                height={120}
-                className="rounded-lg"
+                className="w-full rounded-none"
+                style={{ height: 120 }}
               />
             ))}
           </div>

@@ -1,9 +1,6 @@
 "use client";
 
-import dynamic from "next/dynamic";
-const Skeleton = dynamic(() => import("@mui/material/Skeleton"), {
-  ssr: false,
-});
+import { Skeleton } from "@/components/ui/skeleton";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { FilterSort } from "@/types";
@@ -241,10 +238,8 @@ export default function Breadcrumb({
         <div className="text-secondary-text flex min-w-0 flex-wrap items-center">
           <div className="flex items-center">
             <Skeleton
-              variant="circular"
-              width={20}
-              height={20}
-              className="bg-secondary-bg"
+              className="rounded-full"
+              style={{ width: 20, height: 20 }}
             />
           </div>
           <div className="flex items-center">
@@ -262,12 +257,7 @@ export default function Breadcrumb({
                 />
               </svg>
             </span>
-            <Skeleton
-              variant="rounded"
-              width={120}
-              height={24}
-              className="bg-secondary-bg"
-            />
+            <Skeleton style={{ width: 120, height: 24 }} />
           </div>
           <div className="flex items-center">
             <span className="text-secondary-text mx-2">
@@ -284,12 +274,7 @@ export default function Breadcrumb({
                 />
               </svg>
             </span>
-            <Skeleton
-              variant="rounded"
-              width={160}
-              height={24}
-              className="bg-secondary-bg"
-            />
+            <Skeleton style={{ width: 160, height: 24 }} />
           </div>
         </div>
       </div>

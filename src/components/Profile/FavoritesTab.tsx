@@ -4,7 +4,7 @@ import { createLogger } from "@/services/logger";
 import { useState, useEffect } from "react";
 
 const log = createLogger("UI");
-import { Box, Skeleton, Divider } from "@mui/material";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Pagination } from "@/components/ui/Pagination";
 
@@ -203,7 +203,7 @@ export default function FavoritesTab({
         href={itemUrl}
         className="group block"
       >
-        <Box className="border-border-card bg-tertiary-bg rounded-lg border p-3 shadow-sm transition-colors">
+        <div className="border-border-card bg-tertiary-bg rounded-lg border p-3 shadow-sm transition-colors">
           <div className="mb-2 flex items-center">
             <div className="relative mr-3 h-16 w-16 shrink-0 overflow-hidden rounded-md md:h-18 md:w-32">
               {isVideo ? (
@@ -228,7 +228,7 @@ export default function FavoritesTab({
             <div className="flex-1">
               <div className="flex items-start justify-between">
                 {isLoadingItem ? (
-                  <Skeleton variant="text" width="80%" height={20} />
+                  <Skeleton className="w-4/5" style={{ height: 20 }} />
                 ) : (
                   <span className="text-primary-text group-hover:text-link font-medium transition-colors">
                     {itemName}
@@ -239,7 +239,7 @@ export default function FavoritesTab({
                 {itemType && (
                   <div className="mb-1">
                     {isLoadingItem ? (
-                      <Skeleton variant="rounded" width={80} height={20} />
+                      <Skeleton style={{ width: 80, height: 20 }} />
                     ) : (
                       <span
                         className="text-primary-text bg-tertiary-bg/40 inline-flex h-6 w-fit items-center rounded-lg border px-2.5 text-xs leading-none font-medium backdrop-blur-xl"
@@ -256,9 +256,7 @@ export default function FavoritesTab({
             </div>
           </div>
 
-          <Divider
-            sx={{ my: 1, backgroundColor: "var(--color-border-primary)" }}
-          />
+          <hr className="border-border my-2 border-t" />
 
           <div className="flex items-center justify-start text-xs">
             <Tooltip>
@@ -272,7 +270,7 @@ export default function FavoritesTab({
               </TooltipContent>
             </Tooltip>
           </div>
-        </Box>
+        </div>
       </Link>
     );
   };
@@ -290,28 +288,24 @@ export default function FavoritesTab({
           </div>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             {[...Array(6)].map((_, index) => (
-              <Box key={index} className="rounded-lg border p-3 shadow-sm">
+              <div key={index} className="rounded-lg border p-3 shadow-sm">
                 <div className="mb-2 flex items-center">
                   <div className="relative mr-3 h-16 w-16 shrink-0 overflow-hidden rounded-md md:h-18 md:w-32">
-                    <Skeleton
-                      variant="rectangular"
-                      width="100%"
-                      height="100%"
-                    />
+                    <Skeleton className="h-full w-full rounded-none" />
                   </div>
                   <div className="flex-1">
                     <div className="flex items-start justify-between">
-                      <Skeleton variant="text" width={120} height={24} />
+                      <Skeleton style={{ width: 120, height: 24 }} />
                     </div>
                     <div className="text-secondary-text text-xs">
                       <div className="mb-1">
-                        <Skeleton variant="rounded" width={80} height={20} />
+                        <Skeleton style={{ width: 80, height: 20 }} />
                       </div>
-                      <Skeleton variant="text" width={140} height={16} />
+                      <Skeleton style={{ width: 140, height: 16 }} />
                     </div>
                   </div>
                 </div>
-              </Box>
+              </div>
             ))}
           </div>
         </div>

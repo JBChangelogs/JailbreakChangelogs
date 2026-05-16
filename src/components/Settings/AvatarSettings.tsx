@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { cn } from "@/lib/utils";
-import { Box, Typography } from "@mui/material";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 
@@ -260,15 +259,11 @@ export const AvatarSettings = ({
 
   return (
     <>
-      <Box sx={{ mt: 2, mb: 3 }}>
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
-          <Typography
-            variant="subtitle1"
-            component="div"
-            sx={{ color: "var(--color-primary-text)" }}
-          >
+      <div className="mt-4 mb-6">
+        <div className="mb-2 flex items-center gap-2">
+          <div className="text-primary-text text-base font-medium">
             Custom Avatar URL
-          </Typography>
+          </div>
           <Tooltip>
             <TooltipTrigger asChild>
               <Image
@@ -286,11 +281,10 @@ export const AvatarSettings = ({
               <p>Supporter Tier II</p>
             </TooltipContent>
           </Tooltip>
-        </Box>
-        <Typography
-          variant="body2"
-          sx={{
-            mb: 1,
+        </div>
+        <p
+          className="mb-2 text-sm"
+          style={{
             color:
               userData?.premiumtype &&
               userData.premiumtype >= 2 &&
@@ -308,16 +302,9 @@ export const AvatarSettings = ({
           {userData?.premiumtype && userData.premiumtype >= 2
             ? "Upload an image file or enter a direct link to your image"
             : "🔒 Upgrade to Supporter Tier 2 to unlock custom avatars"}
-        </Typography>
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: { xs: "column", sm: "row" },
-            gap: 1,
-            alignItems: { xs: "stretch", sm: "flex-start" },
-          }}
-        >
-          <Box sx={{ flex: 1, mb: { xs: 1, sm: 0 } }}>
+        </p>
+        <div className="flex flex-col items-stretch gap-2 sm:flex-row sm:items-start">
+          <div className="mb-2 flex-1 sm:mb-0">
             <input
               type="url"
               placeholder={
@@ -344,18 +331,8 @@ export const AvatarSettings = ({
             {avatarError && (
               <p className="text-button-danger mt-1 text-xs">{avatarError}</p>
             )}
-          </Box>
-          <Box
-            sx={{
-              display: "flex",
-              gap: 1,
-              flexDirection: "row",
-              width: { xs: "100%", sm: "auto" },
-              "@media (max-width:359px)": {
-                flexDirection: "column",
-              },
-            }}
-          >
+          </div>
+          <div className="flex w-full flex-row gap-2 sm:w-auto">
             <Button
               variant="default"
               size="md"
@@ -420,9 +397,9 @@ export const AvatarSettings = ({
             >
               Update
             </Button>
-          </Box>
-        </Box>
-      </Box>
+          </div>
+        </div>
+      </div>
 
       {/* Supporter Modal */}
       <SupporterModal

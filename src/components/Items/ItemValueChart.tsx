@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, use, useId } from "react";
-import { Skeleton } from "@mui/material";
+import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 import { Icon } from "@/components/ui/IconWrapper";
 import {
@@ -89,44 +89,22 @@ const ItemValueChart = ({
     return (
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <Skeleton
-            variant="text"
-            width="30%"
-            height={24}
-            className="bg-secondary-bg"
-          />
+          <Skeleton className="w-[30%]" style={{ height: 24 }} />
           <div className="flex gap-2">
             {DATE_RANGE_OPTIONS.map(({ value: range }) => (
-              <Skeleton
-                key={range}
-                variant="rounded"
-                width={60}
-                height={32}
-                className="bg-secondary-bg"
-              />
+              <Skeleton key={range} style={{ width: 60, height: 32 }} />
             ))}
           </div>
         </div>
         <div className="relative">
-          <Skeleton
-            variant="rectangular"
-            height={400}
-            className="bg-secondary-bg rounded-lg"
-          />
+          <Skeleton className="rounded-none" style={{ height: 400 }} />
           <div className="absolute inset-0 flex items-center justify-center">
             <div className="text-center">
               <Skeleton
-                variant="circular"
-                width={40}
-                height={40}
-                className="bg-button-info mx-auto mb-2"
+                className="mx-auto mb-2 rounded-full"
+                style={{ width: 40, height: 40 }}
               />
-              <Skeleton
-                variant="text"
-                width="60%"
-                height={20}
-                className="bg-secondary-bg"
-              />
+              <Skeleton className="w-[60%]" style={{ height: 20 }} />
             </div>
           </div>
         </div>

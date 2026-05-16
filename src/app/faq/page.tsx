@@ -1,11 +1,5 @@
 "use client";
 
-import {
-  Accordion,
-  AccordionSummary,
-  AccordionDetails,
-  Typography,
-} from "@mui/material";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import { Icon } from "@/components/ui/IconWrapper";
 
@@ -148,54 +142,29 @@ export default function FAQPage() {
 
         <div className="space-y-4">
           {faqs.map((faq, index) => (
-            <Accordion
+            <div
               key={index}
-              defaultExpanded={index === 0}
-              sx={{
-                color: "var(--color-primary-text)",
-                "&:before": {
-                  display: "none",
-                },
-
-                "& .MuiAccordionSummary-root": {
-                  backgroundColor: "var(--color-secondary-bg)",
-                  "&:hover": {
-                    backgroundColor: "var(--color-quaternary-bg)",
-                  },
-                },
-                "&:hover": {
-                  borderColor: "var(--color-button-info)",
-                },
-                transition: "border-color 0.2s ease-in-out",
-              }}
+              className="border-border-card overflow-hidden rounded-lg border"
             >
-              <AccordionSummary
-                expandIcon={
+              <details
+                className="border-border-card group border-b"
+                open={index === 0}
+              >
+                <summary className="bg-secondary-bg hover:bg-quaternary-bg flex cursor-pointer list-none items-center justify-between px-4 py-4 transition-colors [&::-webkit-details-marker]:hidden">
+                  <span className="text-primary-text font-semibold">
+                    {faq.question}
+                  </span>
                   <Icon
                     icon="heroicons-outline:chevron-down"
-                    className="h-6 w-6"
-                    style={{ color: "var(--color-primary-text)" }}
+                    className="text-secondary-text h-5 w-5 transition-transform group-open:rotate-180"
                   />
-                }
-                sx={{
-                  "& .MuiAccordionSummary-content": {
-                    margin: "12px 0",
-                  },
-                }}
-              >
-                <Typography className="text-primary-text font-semibold">
-                  {faq.question}
-                </Typography>
-              </AccordionSummary>
-              <AccordionDetails
-                sx={{ backgroundColor: "var(--color-tertiary-bg)" }}
-              >
-                <Typography
-                  className="text-secondary-text"
+                </summary>
+                <div
+                  className="bg-tertiary-bg text-secondary-text px-4 pt-3 pb-4"
                   dangerouslySetInnerHTML={{ __html: faq.answer }}
                 />
-              </AccordionDetails>
-            </Accordion>
+              </details>
+            </div>
           ))}
         </div>
       </div>

@@ -6,7 +6,7 @@ import NextError from "next/error";
 import { notFound, useRouter } from "next/navigation";
 import { UserAvatar } from "@/utils/ui/avatar";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
-import { Skeleton } from "@mui/material";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Icon } from "../../../components/ui/IconWrapper";
 import { Banner } from "@/components/Profile/Banner";
@@ -681,43 +681,52 @@ export default function UserProfileClient({
           <Breadcrumb loading={true} />
           <div className="border-border-card overflow-hidden rounded-lg border shadow-md">
             {/* Banner skeleton */}
-            <Skeleton variant="rectangular" height={256} />
+            <Skeleton className="rounded-none" style={{ height: 256 }} />
 
             {/* Profile Content skeleton */}
             <div className="p-3 sm:p-4 md:p-6">
               <div className="flex flex-col items-center gap-3 md:flex-row md:items-start md:gap-6">
                 {/* Avatar skeleton */}
                 <div className="relative -mt-16 md:-mt-24">
-                  <Skeleton variant="circular" width={96} height={96} />
+                  <Skeleton
+                    className="rounded-full"
+                    style={{ width: 96, height: 96 }}
+                  />
                 </div>
 
                 <div className="w-full flex-1 text-center md:text-left">
                   <div className="flex flex-col items-center justify-between md:flex-row md:items-start">
                     <div>
                       {/* Username skeleton */}
-                      <Skeleton variant="text" width={160} height={28} />
+                      <Skeleton style={{ width: 160, height: 28 }} />
                       {/* Handle skeleton */}
-                      <Skeleton variant="text" width={128} height={16} />
+                      <Skeleton style={{ width: 128, height: 16 }} />
                       {/* Last seen skeleton */}
-                      <Skeleton variant="text" width={192} height={12} />
+                      <Skeleton style={{ width: 192, height: 12 }} />
                       {/* Member since skeleton */}
-                      <Skeleton variant="text" width={224} height={12} />
+                      <Skeleton style={{ width: 224, height: 12 }} />
 
                       {/* Follower/Following skeleton */}
                       <div className="mt-2 flex items-center justify-center space-x-4 md:justify-start">
-                        <Skeleton variant="text" width={80} height={16} />
-                        <Skeleton variant="text" width={80} height={16} />
+                        <Skeleton style={{ width: 80, height: 16 }} />
+                        <Skeleton style={{ width: 80, height: 16 }} />
                       </div>
 
                       {/* Connection icons skeleton */}
                       <div className="mt-2 flex items-center justify-center space-x-3 md:justify-start">
-                        <Skeleton variant="circular" width={20} height={20} />
-                        <Skeleton variant="circular" width={20} height={20} />
+                        <Skeleton
+                          className="rounded-full"
+                          style={{ width: 20, height: 20 }}
+                        />
+                        <Skeleton
+                          className="rounded-full"
+                          style={{ width: 20, height: 20 }}
+                        />
                       </div>
                     </div>
 
                     {/* Button skeleton */}
-                    <Skeleton variant="rounded" width={112} height={40} />
+                    <Skeleton style={{ width: 112, height: 40 }} />
                   </div>
                 </div>
               </div>
@@ -727,18 +736,18 @@ export default function UserProfileClient({
             <div className="mt-2 md:mt-6">
               <div className="border-b">
                 <div className="flex gap-4 overflow-x-auto p-2">
-                  <Skeleton variant="rounded" width={80} height={32} />
-                  <Skeleton variant="rounded" width={80} height={32} />
-                  <Skeleton variant="rounded" width={80} height={32} />
-                  <Skeleton variant="rounded" width={80} height={32} />
+                  <Skeleton style={{ width: 80, height: 32 }} />
+                  <Skeleton style={{ width: 80, height: 32 }} />
+                  <Skeleton style={{ width: 80, height: 32 }} />
+                  <Skeleton style={{ width: 80, height: 32 }} />
                 </div>
               </div>
               <div className="p-3 sm:p-4">
                 {/* Tab content skeleton */}
                 <div className="space-y-4">
-                  <Skeleton variant="rounded" height={80} />
-                  <Skeleton variant="rounded" height={80} />
-                  <Skeleton variant="rounded" height={80} />
+                  <Skeleton style={{ height: 80 }} />
+                  <Skeleton style={{ height: 80 }} />
+                  <Skeleton style={{ height: 80 }} />
                 </div>
               </div>
             </div>
@@ -946,7 +955,7 @@ export default function UserProfileClient({
                     </p>
 
                     {isLoadingAdditionalData ? (
-                      <Skeleton variant="text" width="60%" height={16} />
+                      <Skeleton className="w-3/5" style={{ height: 16 }} />
                     ) : (
                       <>
                         {user.settings_v2?.hide_presence === true &&
@@ -999,12 +1008,7 @@ export default function UserProfileClient({
                     )}
 
                     {isLoadingAdditionalData ? (
-                      <Skeleton
-                        variant="text"
-                        width="80%"
-                        height={20}
-                        sx={{ mb: 1 }}
-                      />
+                      <Skeleton className="w-4/5" style={{ height: 20 }} />
                     ) : (
                       user.created_at && (
                         <p className="text-secondary-text mb-1 text-base">
@@ -1031,8 +1035,8 @@ export default function UserProfileClient({
                     <div className="mt-2 flex items-center justify-center space-x-4 md:justify-start">
                       {isLoadingAdditionalData ? (
                         <>
-                          <Skeleton variant="text" width={80} height={20} />
-                          <Skeleton variant="text" width={80} height={20} />
+                          <Skeleton style={{ width: 80, height: 20 }} />
+                          <Skeleton style={{ width: 80, height: 20 }} />
                         </>
                       ) : (
                         <>
@@ -1067,8 +1071,8 @@ export default function UserProfileClient({
                     <div className="mt-2 mb-5 flex flex-wrap items-center justify-center gap-2 md:mb-0 md:justify-start">
                       {isLoadingAdditionalData ? (
                         <>
-                          <Skeleton variant="rounded" width={100} height={32} />
-                          <Skeleton variant="rounded" width={100} height={32} />
+                          <Skeleton style={{ width: 100, height: 32 }} />
+                          <Skeleton style={{ width: 100, height: 32 }} />
                         </>
                       ) : (
                         <>

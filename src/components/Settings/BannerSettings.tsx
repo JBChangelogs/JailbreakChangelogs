@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { cn } from "@/lib/utils";
-import { Box, TextField, Typography } from "@mui/material";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import { createLogger } from "@/services/logger";
@@ -259,15 +258,11 @@ export const BannerSettings = ({
 
   return (
     <>
-      <Box sx={{ mt: 2, mb: 3 }}>
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
-          <Typography
-            variant="subtitle1"
-            component="div"
-            sx={{ color: "var(--color-primary-text)" }}
-          >
+      <div className="mt-4 mb-6">
+        <div className="mb-2 flex items-center gap-2">
+          <div className="text-primary-text text-base font-medium">
             Custom Banner URL
-          </Typography>
+          </div>
           <Tooltip>
             <TooltipTrigger asChild>
               <Image
@@ -285,11 +280,10 @@ export const BannerSettings = ({
               <p>Supporter Tier II</p>
             </TooltipContent>
           </Tooltip>
-        </Box>
-        <Typography
-          variant="body2"
-          sx={{
-            mb: 1,
+        </div>
+        <p
+          className="mb-2 text-sm"
+          style={{
             color:
               userData?.premiumtype &&
               userData.premiumtype >= 2 &&
@@ -309,19 +303,11 @@ export const BannerSettings = ({
           userData.premiumtype <= 3
             ? "Upload an image file or enter a direct link to your image"
             : "🔒 Upgrade to Supporter Tier 2 to unlock custom banners"}
-        </Typography>
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: { xs: "column", sm: "row" },
-            gap: 1,
-            alignItems: { xs: "stretch", sm: "flex-start" },
-          }}
-        >
-          <Box sx={{ flex: 1, mb: { xs: 1, sm: 0 } }}>
-            <TextField
-              fullWidth
-              size="small"
+        </p>
+        <div className="flex flex-col items-stretch gap-2 sm:flex-row sm:items-start">
+          <div className="mb-2 flex-1 sm:mb-0">
+            <input
+              type="url"
               placeholder={
                 userData?.premiumtype && userData.premiumtype >= 2
                   ? "Your custom banner URL here"
@@ -329,73 +315,25 @@ export const BannerSettings = ({
               }
               value={customBannerUrl}
               onChange={handleCustomBannerChange}
-              variant="outlined"
               disabled={
                 !userData?.premiumtype ||
                 userData.premiumtype < 2 ||
                 isUploading
               }
-              error={!!bannerError}
-              helperText={bannerError}
-              sx={{
-                "& .MuiOutlinedInput-root": {
-                  "& fieldset": {
-                    borderColor: "var(--color-border-card)",
-                  },
-                  "&:hover fieldset": {
-                    borderColor: "var(--color-button-info)",
-                  },
-                  "&.Mui-focused fieldset": {
-                    borderColor: "var(--color-button-info)",
-                    borderWidth: "1px",
-                  },
-                  backgroundColor: "var(--color-tertiary-bg)",
-                  height: "40px",
-                },
-                "& .MuiOutlinedInput-root.Mui-disabled": {
-                  backgroundColor:
-                    "color-mix(in srgb, var(--color-tertiary-bg), black 12%)",
-                  opacity: 0.7,
-                  cursor: "not-allowed",
-                  "& fieldset": {
-                    borderColor:
-                      "color-mix(in srgb, var(--color-border-card), white 12%)",
-                  },
-                },
-                "& .MuiInputBase-input": {
-                  color: "var(--color-primary-text)",
-                  "&::placeholder": {
-                    color: "var(--color-tertiary-text)",
-                    opacity: 1,
-                  },
-                },
-                "& .MuiInputBase-input.Mui-disabled": {
-                  color: "var(--color-primary-text) !important",
-                  WebkitTextFillColor: "var(--color-primary-text) !important",
-                  cursor: "not-allowed",
-                  "&::placeholder": {
-                    color: "var(--color-tertiary-text) !important",
-                    opacity: 1,
-                  },
-                },
-                "& .MuiFormHelperText-root": {
-                  marginTop: "4px",
-                  color: "var(--color-button-danger) !important",
-                },
-              }}
+              className={cn(
+                "border-border-card bg-tertiary-bg text-primary-text placeholder:text-tertiary-text h-10 w-full rounded-md border px-3 text-sm transition-colors outline-none",
+                "focus:border-button-info",
+                (!userData?.premiumtype ||
+                  userData.premiumtype < 2 ||
+                  isUploading) &&
+                  "cursor-not-allowed border-[color-mix(in_srgb,var(--color-border-card),white_12%)] bg-[color-mix(in_srgb,var(--color-tertiary-bg),black_12%)] opacity-70",
+              )}
             />
-          </Box>
-          <Box
-            sx={{
-              display: "flex",
-              gap: 1,
-              flexDirection: "row",
-              width: { xs: "100%", sm: "auto" },
-              "@media (max-width:359px)": {
-                flexDirection: "column",
-              },
-            }}
-          >
+            {bannerError && (
+              <p className="text-button-danger mt-1 text-xs">{bannerError}</p>
+            )}
+          </div>
+          <div className="flex w-full flex-row gap-2 sm:w-auto">
             <Button
               variant="default"
               size="md"
@@ -460,9 +398,9 @@ export const BannerSettings = ({
             >
               Update
             </Button>
-          </Box>
-        </Box>
-      </Box>
+          </div>
+        </div>
+      </div>
 
       {/* Supporter Modal */}
       <SupporterModal

@@ -14,7 +14,7 @@ import { useTheme } from "@/contexts/ThemeContext";
 import { UserAvatar } from "@/utils/ui/avatar";
 import { RobloxIcon } from "@/components/Icons/RobloxIcon";
 import dynamic from "next/dynamic";
-import { useMediaQuery } from "@mui/material";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 import {
   Tooltip,
   TooltipContent,

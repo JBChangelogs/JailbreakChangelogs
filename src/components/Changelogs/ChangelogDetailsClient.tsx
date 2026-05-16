@@ -2,14 +2,12 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { ThemeProvider } from "@mui/material";
 import {
   extractContentInfo,
   getContentPreview,
 } from "@/utils/changelogs/changelogs";
 import { useDebounce } from "@/hooks/useDebounce";
-import { darkTheme } from "@/theme/darkTheme";
-import { Skeleton } from "@mui/material";
+import { Skeleton } from "@/components/ui/skeleton";
 import dynamic from "next/dynamic";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import { Changelog, CommentData } from "@/utils/api/api";
@@ -42,34 +40,29 @@ const ChangelogContent = dynamic(
     loading: () => (
       <div className="grid grid-cols-1 gap-8 sm:grid-cols-12">
         <div className="sm:col-span-12 lg:col-span-8">
-          <Skeleton
-            variant="text"
-            height={80}
-            sx={{ bgcolor: "var(--color-secondary-bg)", mb: 4 }}
-          />
+          <Skeleton className="mb-4" style={{ height: 80 }} />
           <div className="space-y-8">
             {[...Array(3)].map((_, i) => (
               <div key={i} className="space-y-4">
-                <Skeleton
-                  variant="text"
-                  width="60%"
-                  height={40}
-                  sx={{ bgcolor: "var(--color-secondary-bg)" }}
-                />
+                <Skeleton className="w-3/5" style={{ height: 40 }} />
                 <div className="space-y-2">
                   {[...Array(4)].map((_, j) => (
                     <div key={j} className="flex items-start gap-2">
                       <Skeleton
-                        variant="circular"
-                        width={24}
-                        height={24}
-                        sx={{ bgcolor: "var(--color-secondary-bg)", mt: 0.5 }}
+                        className="rounded-full"
+                        style={{ width: 24, height: 24 }}
                       />
                       <Skeleton
-                        variant="text"
-                        width={`${j === 0 ? "90%" : j === 1 ? "85%" : j === 2 ? "75%" : "80%"}`}
-                        height={24}
-                        sx={{ bgcolor: "var(--color-secondary-bg)" }}
+                        className={
+                          j === 0
+                            ? "w-[90%]"
+                            : j === 1
+                              ? "w-[85%]"
+                              : j === 2
+                                ? "w-[75%]"
+                                : "w-[80%]"
+                        }
+                        style={{ height: 24 }}
                       />
                     </div>
                   ))}
@@ -79,11 +72,7 @@ const ChangelogContent = dynamic(
           </div>
         </div>
         <div className="space-y-8 sm:col-span-12 lg:col-span-4">
-          <Skeleton
-            variant="rectangular"
-            height={200}
-            sx={{ bgcolor: "var(--color-secondary-bg)", borderRadius: "8px" }}
-          />
+          <Skeleton className="rounded-none" style={{ height: 200 }} />
         </div>
       </div>
     ),
@@ -257,34 +246,32 @@ export default function ChangelogDetailsClient({
   };
 
   return (
-    <ThemeProvider theme={darkTheme}>
-      <main className="min-h-screen">
-        <div className="container mx-auto mb-8 px-4 sm:px-6">
-          <Breadcrumb />
-          <ChangelogHeader changelogs={changelogList} />
-          <ChangelogFilter
-            changelogList={changelogList}
-            selectedId={selectedId}
-            onChangelogSelect={handleChangelogSelect}
-            searchQuery={searchQuery}
-            searchResults={searchResults}
-            isSearchFocused={isSearchFocused}
-            onSearchChange={handleSearch}
-            onSearchFocus={setIsSearchFocused}
-          />
+    <main className="min-h-screen">
+      <div className="container mx-auto mb-8 px-4 sm:px-6">
+        <Breadcrumb />
+        <ChangelogHeader changelogs={changelogList} />
+        <ChangelogFilter
+          changelogList={changelogList}
+          selectedId={selectedId}
+          onChangelogSelect={handleChangelogSelect}
+          searchQuery={searchQuery}
+          searchResults={searchResults}
+          isSearchFocused={isSearchFocused}
+          onSearchChange={handleSearch}
+          onSearchFocus={setIsSearchFocused}
+        />
 
-          <ChangelogContent
-            title={changelog.title}
-            sections={changelog.sections}
-            imageUrl={changelog.image_url}
-            changelogId={changelog.id}
-            onChangelogSelect={handleChangelogSelect}
-            changelogList={changelogList}
-            initialComments={initialComments}
-            initialUserMap={initialUserMap}
-          />
-        </div>
-      </main>
-    </ThemeProvider>
+        <ChangelogContent
+          title={changelog.title}
+          sections={changelog.sections}
+          imageUrl={changelog.image_url}
+          changelogId={changelog.id}
+          onChangelogSelect={handleChangelogSelect}
+          changelogList={changelogList}
+          initialComments={initialComments}
+          initialUserMap={initialUserMap}
+        />
+      </div>
+    </main>
   );
 }

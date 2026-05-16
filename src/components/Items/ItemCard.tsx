@@ -2,7 +2,7 @@ import { Item } from "@/types";
 import Image from "next/image";
 import Link from "next/link";
 import { createLogger } from "@/services/logger";
-import { useMediaQuery } from "@mui/material";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 import {
   getItemImagePath,
   handleImageError,

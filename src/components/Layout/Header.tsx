@@ -6,7 +6,7 @@ import Link from "next/link";
 const log = createLogger("UI");
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { AppBar, Toolbar, Box, useMediaQuery } from "@mui/material";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { Pagination } from "@/components/ui/Pagination";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import dynamic from "next/dynamic";
@@ -807,14 +807,9 @@ export default function Header() {
           <OfflineDetector />
           <NewsTicker />
           <div className="relative z-10">
-            <AppBar
-              position="static"
-              color="transparent"
-              elevation={0}
-              className="bg-primary-bg/75 border-border-card border-b backdrop-blur-lg"
-            >
-              <Toolbar className="flex items-center justify-between">
-                <Box className="flex items-center">
+            <div className="bg-primary-bg/75 border-border-card border-b backdrop-blur-lg">
+              <div className="flex items-center justify-between px-4">
+                <div className="flex items-center">
                   <Link href="/" style={{ display: "block" }}>
                     <Image
                       src={
@@ -832,8 +827,8 @@ export default function Header() {
                       className="h-9 w-auto sm:h-12"
                     />
                   </Link>
-                </Box>
-                <Box className="flex items-center gap-2">
+                </div>
+                <div className="flex items-center gap-2">
                   {/* Notification icon */}
                   <Popover
                     open={notificationMenuOpen}
@@ -1154,9 +1149,9 @@ export default function Header() {
                       <path d="M64,384H448V341.33H64Zm0-106.67H448V234.67H64ZM64,128v42.67H448V128Z" />
                     </svg>
                   </button>
-                </Box>
-              </Toolbar>
-            </AppBar>
+                </div>
+              </div>
+            </div>
           </div>
 
           {/* Mobile Drawer */}

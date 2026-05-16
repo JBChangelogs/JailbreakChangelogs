@@ -1,22 +1,6 @@
 "use client";
 
 import React from "react";
-import dynamic from "next/dynamic";
-
-const Accordion = dynamic(() => import("@mui/material/Accordion"), {
-  ssr: false,
-});
-const AccordionSummary = dynamic(
-  () => import("@mui/material/AccordionSummary"),
-  { ssr: false },
-);
-const AccordionDetails = dynamic(
-  () => import("@mui/material/AccordionDetails"),
-  { ssr: false },
-);
-const Typography = dynamic(() => import("@mui/material/Typography"), {
-  ssr: false,
-});
 import { Icon } from "@/components/ui/IconWrapper";
 
 const faqs = [
@@ -45,10 +29,10 @@ const faqs = [
         they have them) will be scanned and added to results.
         <br />
         <br />
-        ℹ️ This question is asked often — if your OG item isn’t visible, it
-        doesn’t mean it’s gone. It simply means the current owner hasn’t been
-        scanned yet. In rare cases, the user may have been banned from Jailbreak
-        as well.
+        ℹ️ This question is asked often — if your OG item isn&apos;t visible, it
+        doesn&apos;t mean it&apos;s gone. It simply means the current owner
+        hasn&apos;t been scanned yet. In rare cases, the user may have been
+        banned from Jailbreak as well.
       </>
     ),
   },
@@ -71,58 +55,36 @@ const faqs = [
 
 const OGFinderFAQ: React.FC = () => {
   return (
-    <div className="border-border-card bg-secondary-bg hover:border-border-focus mt-8 rounded-lg border p-6">
+    <div className="border-border-card bg-secondary-bg mt-8 rounded-lg border p-6">
       <h3 className="text-primary-text mb-4 text-xl font-semibold">
         Frequently Asked Questions
       </h3>
 
-      <div className="space-y-4">
+      <div className="space-y-2">
         {faqs.map((faq, index) => (
-          <Accordion
+          <div
             key={index}
-            defaultExpanded={index === 0}
-            sx={{
-              color: "var(--color-primary-text)",
-              backgroundColor: "var(--color-tertiary-bg)",
-              border: "1px solid var(--color-border-primary)",
-              borderRadius: "8px",
-              "&:before": {
-                display: "none",
-              },
-              "& .MuiAccordionSummary-root": {
-                backgroundColor: "var(--color-tertiary-bg)",
-                "&:hover": {
-                  backgroundColor: "var(--color-quaternary-bg)",
-                },
-              },
-            }}
+            className="border-border-card overflow-hidden rounded-lg border"
           >
-            <AccordionSummary
-              expandIcon={
+            <details open={index === 0} className="group">
+              <summary className="bg-tertiary-bg hover:bg-quaternary-bg flex cursor-pointer list-none items-center justify-between px-4 py-3 transition-colors [&::-webkit-details-marker]:hidden">
+                <span className="text-primary-text font-semibold">
+                  {faq.question}
+                </span>
                 <Icon
                   icon="heroicons-outline:chevron-down"
-                  className="h-6 w-6"
-                  style={{ color: "var(--color-secondary-text)" }}
+                  className="text-secondary-text h-5 w-5 transition-transform group-open:rotate-180"
                 />
-              }
-              sx={{
-                "& .MuiAccordionSummary-content": {
-                  margin: "12px 0",
-                },
-              }}
-            >
-              <Typography className="text-primary-text font-semibold">
-                {faq.question}
-              </Typography>
-            </AccordionSummary>
-            <AccordionDetails
-              sx={{ backgroundColor: "var(--color-primary-bg)" }}
-            >
-              <Typography className="text-secondary-text">
-                {faq.answer}
-              </Typography>
-            </AccordionDetails>
-          </Accordion>
+              </summary>
+              <div className="bg-tertiary-bg px-4 pt-3 pb-4">
+                {typeof faq.answer === "string" ? (
+                  <p className="text-secondary-text">{faq.answer}</p>
+                ) : (
+                  <div className="text-secondary-text">{faq.answer}</div>
+                )}
+              </div>
+            </details>
+          </div>
         ))}
       </div>
     </div>

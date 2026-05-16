@@ -1,12 +1,6 @@
 "use client";
 
 import React from "react";
-import {
-  Accordion,
-  AccordionSummary,
-  AccordionDetails,
-  Typography,
-} from "@mui/material";
 import { Icon } from "@/components/ui/IconWrapper";
 
 const faqs = [
@@ -107,51 +101,35 @@ const DupeFinderFAQ: React.FC = () => {
 
       <div className="space-y-4">
         {faqs.map((faq, index) => (
-          <Accordion
+          <div
             key={index}
-            defaultExpanded={index === 0}
-            sx={{
-              color: "var(--color-primary-text)",
-              backgroundColor: "var(--color-tertiary-bg)",
-              border: "1px solid var(--color-border-primary)",
-              borderRadius: "8px",
-              "&:before": {
-                display: "none",
-              },
-              "& .MuiAccordionSummary-root": {
-                backgroundColor: "var(--color-tertiary-bg)",
-                "&:hover": {
-                  backgroundColor: "var(--color-quaternary-bg)",
-                },
-              },
-            }}
+            className="border-border-card overflow-hidden rounded-lg border"
           >
-            <AccordionSummary
-              expandIcon={
+            <details
+              className="border-border-card group border-b"
+              open={index === 0}
+            >
+              <summary className="bg-tertiary-bg hover:bg-quaternary-bg flex cursor-pointer list-none items-center justify-between px-4 py-4 transition-colors [&::-webkit-details-marker]:hidden">
+                <span className="text-primary-text font-semibold">
+                  {faq.question}
+                </span>
                 <Icon
                   icon="heroicons-outline:chevron-down"
-                  className="h-6 w-6"
-                  style={{ color: "var(--color-secondary-text)" }}
+                  className="text-secondary-text h-5 w-5 transition-transform group-open:rotate-180"
                 />
-              }
-              sx={{
-                "& .MuiAccordionSummary-content": {
-                  margin: "12px 0",
-                },
-              }}
-            >
-              <Typography className="text-primary-text font-semibold">
-                {faq.question}
-              </Typography>
-            </AccordionSummary>
-            <AccordionDetails
-              sx={{ backgroundColor: "var(--color-primary-bg)" }}
-            >
-              <Typography className="text-secondary-text">
-                {faq.answer}
-              </Typography>
-            </AccordionDetails>
-          </Accordion>
+              </summary>
+              {typeof faq.answer === "string" ? (
+                <div
+                  className="bg-tertiary-bg text-secondary-text px-4 pt-3 pb-4"
+                  dangerouslySetInnerHTML={{ __html: faq.answer }}
+                />
+              ) : (
+                <div className="bg-tertiary-bg text-secondary-text px-4 pt-3 pb-4">
+                  {faq.answer}
+                </div>
+              )}
+            </details>
+          </div>
         ))}
       </div>
     </div>

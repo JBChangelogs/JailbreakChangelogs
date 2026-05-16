@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import AddServerModal from "./AddServerModal";
-import { Skeleton } from "@mui/material";
+import { Skeleton } from "@/components/ui/skeleton";
 import Image from "next/image";
 import Link from "next/link";
 import { Pagination } from "@/components/ui/Pagination";
@@ -435,19 +435,9 @@ const ServerList: React.FC<{
       <div>
         <div className="mb-4 flex items-center justify-between px-4 lg:px-0">
           <div className="flex items-center">
-            <Skeleton
-              variant="text"
-              width={120}
-              height={24}
-              sx={{ bgcolor: "var(--color-secondary-bg)" }}
-            />
+            <Skeleton style={{ width: 120, height: 24 }} />
           </div>
-          <Skeleton
-            variant="rounded"
-            width={120}
-            height={40}
-            sx={{ bgcolor: "var(--color-secondary-bg)" }}
-          />
+          <Skeleton style={{ width: 120, height: 40 }} />
         </div>
 
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
@@ -458,101 +448,39 @@ const ServerList: React.FC<{
             >
               <div className="mb-4 flex items-start justify-between gap-3">
                 <div className="min-w-0">
-                  <Skeleton
-                    variant="text"
-                    width={110}
-                    height={24}
-                    sx={{ bgcolor: "var(--color-tertiary-bg)" }}
-                  />
-                  <Skeleton
-                    variant="text"
-                    width={90}
-                    height={16}
-                    sx={{ bgcolor: "var(--color-tertiary-bg)" }}
-                  />
+                  <Skeleton style={{ width: 110, height: 24 }} />
+                  <Skeleton style={{ width: 90, height: 16 }} />
                 </div>
-                <Skeleton
-                  variant="rounded"
-                  width={90}
-                  height={28}
-                  sx={{ bgcolor: "var(--color-tertiary-bg)" }}
-                />
+                <Skeleton style={{ width: 90, height: 28 }} />
               </div>
 
               <div className="border-border-card bg-tertiary-bg mb-4 rounded-lg border p-3">
-                <Skeleton
-                  variant="text"
-                  width={90}
-                  height={16}
-                  sx={{ bgcolor: "var(--color-secondary-bg)" }}
-                />
+                <Skeleton style={{ width: 90, height: 16 }} />
                 <div className="mt-2 flex items-center gap-2">
                   <Skeleton
-                    variant="circular"
-                    width={32}
-                    height={32}
-                    sx={{ bgcolor: "var(--color-secondary-bg)" }}
+                    className="rounded-full"
+                    style={{ width: 32, height: 32 }}
                   />
-                  <Skeleton
-                    variant="text"
-                    width={130}
-                    height={22}
-                    sx={{ bgcolor: "var(--color-secondary-bg)" }}
-                  />
+                  <Skeleton style={{ width: 130, height: 22 }} />
                 </div>
               </div>
 
               <div className="mb-4 flex flex-wrap gap-2">
-                <Skeleton
-                  variant="rounded"
-                  width={130}
-                  height={28}
-                  sx={{ bgcolor: "var(--color-tertiary-bg)" }}
-                />
-                <Skeleton
-                  variant="rounded"
-                  width={120}
-                  height={28}
-                  sx={{ bgcolor: "var(--color-tertiary-bg)" }}
-                />
+                <Skeleton style={{ width: 130, height: 28 }} />
+                <Skeleton style={{ width: 120, height: 28 }} />
               </div>
 
               <div className="border-border-card bg-tertiary-bg rounded-lg border p-3 sm:p-4">
-                <Skeleton
-                  variant="text"
-                  width={70}
-                  height={20}
-                  sx={{ bgcolor: "var(--color-secondary-bg)" }}
-                />
+                <Skeleton style={{ width: 70, height: 20 }} />
                 <div className="mt-2 space-y-2">
-                  <Skeleton
-                    variant="text"
-                    width="100%"
-                    height={16}
-                    sx={{ bgcolor: "var(--color-secondary-bg)" }}
-                  />
-                  <Skeleton
-                    variant="text"
-                    width="85%"
-                    height={16}
-                    sx={{ bgcolor: "var(--color-secondary-bg)" }}
-                  />
+                  <Skeleton className="w-full" style={{ height: 16 }} />
+                  <Skeleton style={{ width: "85%", height: 16 }} />
                 </div>
               </div>
 
               <div className="border-border-card mt-4 flex items-center justify-between border-t pt-4">
-                <Skeleton
-                  variant="rounded"
-                  width={90}
-                  height={32}
-                  sx={{ bgcolor: "var(--color-tertiary-bg)" }}
-                />
-                <Skeleton
-                  variant="rounded"
-                  width={100}
-                  height={32}
-                  sx={{ bgcolor: "var(--color-tertiary-bg)" }}
-                />
+                <Skeleton style={{ width: 90, height: 32 }} />
+                <Skeleton style={{ width: 100, height: 32 }} />
               </div>
             </div>
           ))}
@@ -809,11 +737,7 @@ const ServerList: React.FC<{
                       )}
                     </div>
                   ) : (
-                    <Skeleton
-                      variant="text"
-                      width={100}
-                      sx={{ bgcolor: "var(--color-secondary-bg)" }}
-                    />
+                    <Skeleton style={{ width: 100 }} />
                   )}
                 </div>
               </div>

@@ -1,5 +1,5 @@
 import { createLogger } from "@/services/logger";
-import { Box, Typography, Divider, Skeleton } from "@mui/material";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const log = createLogger("UI");
 import {
@@ -279,28 +279,17 @@ export default function Comment({
       prefetch={false}
       className="group block"
     >
-      <Box className="border-border-card bg-tertiary-bg rounded-lg border p-3 shadow-sm transition-colors">
+      <div className="border-border-card bg-tertiary-bg rounded-lg border p-3 shadow-sm transition-colors">
         <div className="mb-2 flex">
           {renderThumbnail()}
           <div className="min-w-0 flex-1">
             {/* Item Title/Name First */}
             {getItemName() ? (
-              <Typography
-                variant="body2"
-                className="text-primary-text group-hover:text-link mb-1 font-medium transition-colors"
-                sx={{
-                  maxWidth: "100%",
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                  display: "-webkit-box",
-                  WebkitLineClamp: 2,
-                  WebkitBoxOrient: "vertical",
-                }}
-              >
+              <p className="text-primary-text group-hover:text-link mb-1 line-clamp-2 max-w-full overflow-hidden font-medium text-ellipsis transition-colors">
                 {getItemName()}
-              </Typography>
+              </p>
             ) : (
-              <Skeleton variant="text" width="80%" height={20} sx={{ mb: 1 }} />
+              <Skeleton className="mb-1 w-4/5" style={{ height: 20 }} />
             )}
 
             {/* Badge Second */}
@@ -318,58 +307,34 @@ export default function Comment({
             {/* Comment Content Third */}
             {typeof parent_id === "number" && (
               <div className="bg-primary-bg/40 border-border-card mb-2 rounded-md border px-2 py-1">
-                <Typography
-                  variant="caption"
-                  className="text-secondary-text block truncate text-[11px] font-medium"
-                >
+                <span className="text-secondary-text block truncate text-xs text-[11px] font-medium">
                   Reply to{" "}
                   {parentComment?.author
                     ? `@${parentComment.author}`
                     : `comment #${parent_id}`}
-                </Typography>
+                </span>
                 {parentComment?.content && (
-                  <Typography
-                    variant="caption"
-                    className="text-secondary-text/80 block truncate text-[11px]"
-                  >
+                  <span className="text-secondary-text/80 block truncate text-xs text-[11px]">
                     {parentComment.content}
-                  </Typography>
+                  </span>
                 )}
               </div>
             )}
-            <Typography
-              variant="body2"
-              className="text-secondary-text wrap-break-word whitespace-pre-wrap"
-              sx={{
-                overflowWrap: "break-word",
-                wordBreak: "break-word",
-                maxWidth: "100%",
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-                display: "-webkit-box",
-                WebkitLineClamp: 4,
-                WebkitBoxOrient: "vertical",
-              }}
-            >
+            <p className="text-secondary-text line-clamp-4 max-w-full overflow-hidden break-words wrap-break-word text-ellipsis whitespace-pre-wrap">
               {convertUrlsToLinks(content, true)}
-            </Typography>
+            </p>
           </div>
         </div>
 
-        <Divider
-          sx={{ my: 1, backgroundColor: "var(--color-border-primary)" }}
-        />
+        <hr className="border-border my-2 border-t" />
 
         <div className="flex items-center justify-start text-xs">
           <div className="flex items-center gap-1">
             <Tooltip>
               <TooltipTrigger asChild>
-                <Typography
-                  variant="caption"
-                  className="text-secondary-text cursor-help"
-                >
+                <span className="text-secondary-text cursor-help text-xs">
                   Posted {formattedDate}
-                </Typography>
+                </span>
               </TooltipTrigger>
               <TooltipContent
                 side="top"
@@ -383,13 +348,11 @@ export default function Comment({
               </TooltipContent>
             </Tooltip>
             {edited_at && (
-              <Typography variant="caption" className="text-secondary-text">
-                (edited)
-              </Typography>
+              <span className="text-secondary-text text-xs">(edited)</span>
             )}
           </div>
         </div>
-      </Box>
+      </div>
     </Link>
   );
 }

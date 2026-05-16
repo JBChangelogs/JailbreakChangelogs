@@ -13,7 +13,6 @@ import VersionInfoSkeleton from "@/components/Layout/VersionInfoSkeleton";
 import { Toaster } from "@/components/ui/sonner";
 import NextTopLoader from "nextjs-toploader";
 import AuthCheck from "@/components/Auth/AuthCheck";
-import { AppRouterCacheProvider } from "@mui/material-nextjs/v15-appRouter";
 import ThemeProvider from "@/components/ThemeProvider";
 import { ThemeProvider as CustomThemeProvider } from "@/contexts/ThemeContext";
 import { AuthProvider } from "@/contexts/AuthContext";
@@ -166,79 +165,77 @@ export default async function RootLayout({
               </div>
             </div>
           </noscript>
-          <AppRouterCacheProvider options={{ enableCssLayer: true }}>
-            <CustomThemeProvider>
-              <ThemeProvider>
-                <QueryProvider>
-                  <Toaster
-                    position="top-right"
-                    dir="ltr"
-                    expand
-                    offset={{
-                      top: "calc(var(--header-height, 0px) + 16px)",
-                      right: "var(--toast-runtime-right, 16px)",
-                    }}
+          <CustomThemeProvider>
+            <ThemeProvider>
+              <QueryProvider>
+                <Toaster
+                  position="top-right"
+                  dir="ltr"
+                  expand
+                  offset={{
+                    top: "calc(var(--header-height, 0px) + 16px)",
+                    right: "var(--toast-runtime-right, 16px)",
+                  }}
+                />
+                <MaintenanceBypass>
+                  <NextTopLoader
+                    color="var(--color-button-info)"
+                    initialPosition={0.08}
+                    crawlSpeed={200}
+                    height={3}
+                    crawl={true}
+                    showSpinner={false}
+                    easing="ease"
+                    speed={200}
+                    shadow="0 0 10px var(--color-button-info),0 0 5px var(--color-button-info)"
+                    zIndex={1600}
                   />
-                  <MaintenanceBypass>
-                    <NextTopLoader
-                      color="var(--color-button-info)"
-                      initialPosition={0.08}
-                      crawlSpeed={200}
-                      height={3}
-                      crawl={true}
-                      showSpinner={false}
-                      easing="ease"
-                      speed={200}
-                      shadow="0 0 10px var(--color-button-info),0 0 5px var(--color-button-info)"
-                      zIndex={1600}
-                    />
 
-                    <AuthCheck />
-                    <AuthProvider>
-                      <UmamiIdentity />
-                      <AdBlockRecovery />
-                      <AdBlockPrompt />
-                      <AdErrorBoundary>
-                        <NitroBottomAnchor />
-                        <NitroVideoPlayer />
-                        <NitroAnchorCloseSupporterModal />
-                        <NitroVideoCloseSupporterModal />
-                      </AdErrorBoundary>
-                      <div
-                        id="main-layout"
-                        className="flex min-h-screen flex-col"
+                  <AuthCheck />
+                  <AuthProvider>
+                    <UmamiIdentity />
+                    <AdBlockRecovery />
+                    <AdBlockPrompt />
+                    <AdErrorBoundary>
+                      <NitroBottomAnchor />
+                      <NitroVideoPlayer />
+                      <NitroAnchorCloseSupporterModal />
+                      <NitroVideoCloseSupporterModal />
+                    </AdErrorBoundary>
+                    <div
+                      id="main-layout"
+                      className="flex min-h-screen flex-col"
+                    >
+                      <Suspense
+                        fallback={
+                          <div className="bg-primary-bg/75 border-border-card h-16 border-b backdrop-blur-lg" />
+                        }
                       >
-                        <Suspense
-                          fallback={
-                            <div className="bg-primary-bg/75 border-border-card h-16 border-b backdrop-blur-lg" />
-                          }
-                        >
-                          <HideOnAccessDenied>
-                            <Header />
-                          </HideOnAccessDenied>
-                        </Suspense>
-                        <main className="min-h-screen flex-1">
-                          <NuqsAdapter>
-                            <Suspense>{children}</Suspense>
-                          </NuqsAdapter>
-                        </main>
                         <HideOnAccessDenied>
-                          <Footer
-                            githubUrl={githubUrl}
-                            versionInfo={
-                              <Suspense fallback={<VersionInfoSkeleton />}>
-                                <VersionInfoWrapper />
-                              </Suspense>
-                            }
-                          />
+                          <Header />
                         </HideOnAccessDenied>
-                      </div>
-                    </AuthProvider>
-                  </MaintenanceBypass>
-                </QueryProvider>
-              </ThemeProvider>
-            </CustomThemeProvider>
-          </AppRouterCacheProvider>
+                      </Suspense>
+                      <main className="min-h-screen flex-1">
+                        <NuqsAdapter>
+                          <Suspense>{children}</Suspense>
+                        </NuqsAdapter>
+                      </main>
+                      <HideOnAccessDenied>
+                        <Footer
+                          githubUrl={githubUrl}
+                          versionInfo={
+                            <Suspense fallback={<VersionInfoSkeleton />}>
+                              <VersionInfoWrapper />
+                            </Suspense>
+                          }
+                        />
+                      </HideOnAccessDenied>
+                    </div>
+                  </AuthProvider>
+                </MaintenanceBypass>
+              </QueryProvider>
+            </ThemeProvider>
+          </CustomThemeProvider>
         </body>
       </html>
     );
@@ -318,72 +315,70 @@ export default async function RootLayout({
             </div>
           </div>
         </noscript>
-        <AppRouterCacheProvider options={{ enableCssLayer: true }}>
-          <CustomThemeProvider>
-            <ThemeProvider>
-              <QueryProvider>
-                <Toaster
-                  position="top-right"
-                  dir="ltr"
-                  expand
-                  offset={{
-                    top: "calc(var(--header-height, 0px) + 16px)",
-                    right: "var(--toast-runtime-right, 16px)",
-                  }}
-                />
-                <NextTopLoader
-                  color="var(--color-button-info)"
-                  initialPosition={0.08}
-                  crawlSpeed={200}
-                  height={3}
-                  crawl={true}
-                  showSpinner={false}
-                  easing="ease"
-                  speed={200}
-                  shadow="0 0 10px var(--color-button-info),0 0 5px var(--color-button-info)"
-                  zIndex={1600}
-                />
+        <CustomThemeProvider>
+          <ThemeProvider>
+            <QueryProvider>
+              <Toaster
+                position="top-right"
+                dir="ltr"
+                expand
+                offset={{
+                  top: "calc(var(--header-height, 0px) + 16px)",
+                  right: "var(--toast-runtime-right, 16px)",
+                }}
+              />
+              <NextTopLoader
+                color="var(--color-button-info)"
+                initialPosition={0.08}
+                crawlSpeed={200}
+                height={3}
+                crawl={true}
+                showSpinner={false}
+                easing="ease"
+                speed={200}
+                shadow="0 0 10px var(--color-button-info),0 0 5px var(--color-button-info)"
+                zIndex={1600}
+              />
 
-                <AuthCheck />
-                <AuthProvider>
-                  <UmamiIdentity />
-                  <AdBlockRecovery />
-                  <AdBlockPrompt />
-                  <NitroBottomAnchor />
-                  <NitroVideoPlayer />
-                  <NitroAnchorCloseSupporterModal />
-                  <NitroVideoCloseSupporterModal />
-                  <div className="flex min-h-screen flex-col">
-                    <Suspense
-                      fallback={
-                        <div className="bg-primary-bg/75 border-border-card h-16 border-b backdrop-blur-lg" />
-                      }
-                    >
-                      <HideOnAccessDenied>
-                        <Header />
-                      </HideOnAccessDenied>
-                    </Suspense>
-                    <main className="min-h-screen flex-1">
-                      <NuqsAdapter>
-                        <Suspense>{children}</Suspense>
-                      </NuqsAdapter>
-                    </main>
+              <AuthCheck />
+              <AuthProvider>
+                <UmamiIdentity />
+                <AdBlockRecovery />
+                <AdBlockPrompt />
+                <NitroBottomAnchor />
+                <NitroVideoPlayer />
+                <NitroAnchorCloseSupporterModal />
+                <NitroVideoCloseSupporterModal />
+                <div className="flex min-h-screen flex-col">
+                  <Suspense
+                    fallback={
+                      <div className="bg-primary-bg/75 border-border-card h-16 border-b backdrop-blur-lg" />
+                    }
+                  >
                     <HideOnAccessDenied>
-                      <Footer
-                        githubUrl={githubUrl}
-                        versionInfo={
-                          <Suspense fallback={<VersionInfoSkeleton />}>
-                            <VersionInfoWrapper />
-                          </Suspense>
-                        }
-                      />
+                      <Header />
                     </HideOnAccessDenied>
-                  </div>
-                </AuthProvider>
-              </QueryProvider>
-            </ThemeProvider>
-          </CustomThemeProvider>
-        </AppRouterCacheProvider>
+                  </Suspense>
+                  <main className="min-h-screen flex-1">
+                    <NuqsAdapter>
+                      <Suspense>{children}</Suspense>
+                    </NuqsAdapter>
+                  </main>
+                  <HideOnAccessDenied>
+                    <Footer
+                      githubUrl={githubUrl}
+                      versionInfo={
+                        <Suspense fallback={<VersionInfoSkeleton />}>
+                          <VersionInfoWrapper />
+                        </Suspense>
+                      }
+                    />
+                  </HideOnAccessDenied>
+                </div>
+              </AuthProvider>
+            </QueryProvider>
+          </ThemeProvider>
+        </CustomThemeProvider>
       </body>
     </html>
   );

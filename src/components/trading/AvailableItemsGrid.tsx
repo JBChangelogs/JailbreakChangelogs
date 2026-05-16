@@ -26,7 +26,7 @@ import Link from "next/link";
 import { FilterSort, ValueSort } from "@/types";
 import { useDebounce } from "@/hooks/useDebounce";
 import { useVirtualizer } from "@tanstack/react-virtual";
-import { useMediaQuery } from "@mui/material";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { Button } from "../ui/button";
 import {
   DropdownMenu,

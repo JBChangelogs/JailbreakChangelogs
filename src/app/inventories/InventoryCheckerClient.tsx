@@ -9,7 +9,6 @@ import { DefaultAvatar } from "@/utils/ui/avatar";
 import { Icon } from "@/components/ui/IconWrapper";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ThemeProvider } from "@mui/material";
 import React from "react";
 
 import {
@@ -666,469 +665,448 @@ export default function InventoryCheckerClient({
   };
 
   return (
-    <ThemeProvider theme={{}}>
-      <div className="space-y-6">
-        {/* Search Form */}
-        <SearchForm
-          searchId={searchId}
-          setSearchId={setSearchId}
-          handleSearch={handleSearch}
-          isLoading={isLoading}
-          externalIsLoading={externalIsLoading || false}
-        />
-        <div className="text-secondary-text mt-2 hidden items-center gap-1 text-xs lg:flex">
-          <Icon
-            icon="emojione:light-bulb"
-            className="text-sm text-yellow-500"
-          />
-          Helpful tip: Press{" "}
-          <kbd className="kbd kbd-sm border-border-card bg-tertiary-bg text-primary-text">
-            Ctrl
-          </kbd>
-          {" + "}
-          <kbd className="kbd kbd-sm border-border-card bg-tertiary-bg text-primary-text">
-            F
-          </kbd>{" "}
-          to quickly focus the search.
-        </div>
+    <div className="space-y-6">
+      {/* Search Form */}
+      <SearchForm
+        searchId={searchId}
+        setSearchId={setSearchId}
+        handleSearch={handleSearch}
+        isLoading={isLoading}
+        externalIsLoading={externalIsLoading || false}
+      />
+      <div className="text-secondary-text mt-2 hidden items-center gap-1 text-xs lg:flex">
+        <Icon icon="emojione:light-bulb" className="text-sm text-yellow-500" />
+        Helpful tip: Press{" "}
+        <kbd className="kbd kbd-sm border-border-card bg-tertiary-bg text-primary-text">
+          Ctrl
+        </kbd>
+        {" + "}
+        <kbd className="kbd kbd-sm border-border-card bg-tertiary-bg text-primary-text">
+          F
+        </kbd>{" "}
+        to quickly focus the search.
+      </div>
 
-        {isLoading || externalIsLoading ? (
-          /* Loading Skeleton for User Data */
-          <div className="border-border-card bg-secondary-bg min-h-50 rounded-lg border p-6 shadow-sm">
-            <div className="animate-pulse space-y-4">
-              <div className="flex items-center gap-4">
-                <div className="bg-button-secondary h-16 w-16 rounded-full"></div>
-                <div className="flex-1">
-                  <div className="bg-button-secondary mb-2 h-6 w-32 rounded"></div>
-                  <div className="bg-button-secondary h-4 w-24 rounded"></div>
-                </div>
+      {isLoading || externalIsLoading ? (
+        /* Loading Skeleton for User Data */
+        <div className="border-border-card bg-secondary-bg min-h-50 rounded-lg border p-6 shadow-sm">
+          <div className="animate-pulse space-y-4">
+            <div className="flex items-center gap-4">
+              <div className="bg-button-secondary h-16 w-16 rounded-full"></div>
+              <div className="flex-1">
+                <div className="bg-button-secondary mb-2 h-6 w-32 rounded"></div>
+                <div className="bg-button-secondary h-4 w-24 rounded"></div>
               </div>
             </div>
           </div>
-        ) : (
-          <>
-            {/* Error Display */}
-            {error && !initialData && (
-              <>
-                {/* Inventory not found — mini profile card for non-owner view */}
-                {isInventoryNotFoundError && !isOwnInventory && robloxId && (
-                  <div className="border-border-card bg-secondary-bg overflow-hidden rounded-lg border">
-                    {/* Profile header */}
-                    <div className="border-border-card bg-tertiary-bg flex items-center gap-4 border-b px-5 py-4">
-                      <div className="bg-tertiary-bg relative h-14 w-14 shrink-0 overflow-hidden rounded-full">
-                        {!avatarError ? (
-                          <Image
-                            src={`${INVENTORY_API_URL}/proxy/users/${robloxId}/avatar-headshot`}
-                            alt="Roblox Avatar"
-                            fill
-                            className="object-cover"
-                            unoptimized
-                            onError={() => setAvatarError(true)}
-                          />
-                        ) : (
-                          <DefaultAvatar />
-                        )}
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <p className="text-primary-text truncate font-semibold">
-                          {mergedRobloxUsers[robloxId]?.displayName ||
-                            originalSearchTerm ||
-                            robloxId}
-                        </p>
-                        <p className="text-secondary-text truncate text-sm">
-                          @
-                          {mergedRobloxUsers[robloxId]?.name ||
-                            originalSearchTerm ||
-                            robloxId}
-                        </p>
-                        <Link
-                          href={`https://www.roblox.com/users/${robloxId}/profile`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          prefetch={false}
-                          className="text-link mt-1 inline-flex items-center gap-1 text-xs hover:underline"
-                        >
-                          Roblox profile
-                          <Icon
-                            icon="heroicons:arrow-top-right-on-square"
-                            className="h-3 w-3"
-                          />
-                        </Link>
-                      </div>
+        </div>
+      ) : (
+        <>
+          {/* Error Display */}
+          {error && !initialData && (
+            <>
+              {/* Inventory not found — mini profile card for non-owner view */}
+              {isInventoryNotFoundError && !isOwnInventory && robloxId && (
+                <div className="border-border-card bg-secondary-bg overflow-hidden rounded-lg border">
+                  {/* Profile header */}
+                  <div className="border-border-card bg-tertiary-bg flex items-center gap-4 border-b px-5 py-4">
+                    <div className="bg-tertiary-bg relative h-14 w-14 shrink-0 overflow-hidden rounded-full">
+                      {!avatarError ? (
+                        <Image
+                          src={`${INVENTORY_API_URL}/proxy/users/${robloxId}/avatar-headshot`}
+                          alt="Roblox Avatar"
+                          fill
+                          className="object-cover"
+                          unoptimized
+                          onError={() => setAvatarError(true)}
+                        />
+                      ) : (
+                        <DefaultAvatar />
+                      )}
                     </div>
-
-                    {/* No inventory message + actions */}
-                    <div className="space-y-4 p-5">
-                      <div className="flex items-start gap-3">
-                        <div className="bg-secondary-text/10 mt-0.5 shrink-0 rounded-full p-2">
-                          <Icon
-                            icon="heroicons:archive-box-x-mark"
-                            className="text-secondary-text h-5 w-5"
-                          />
-                        </div>
-                        <div>
-                          <p className="text-primary-text font-medium">
-                            No inventory found yet
-                          </p>
-                          <p className="text-secondary-text mt-0.5 text-sm">
-                            This user hasn&apos;t been scanned by our bots yet.
-                            Inventories are updated automatically when a bot
-                            joins their trade server.
-                          </p>
-                        </div>
-                      </div>
-
-                      {/* Queue position */}
-                      <div className="flex items-center gap-1.5">
-                        <p className="text-secondary-text text-xs">
-                          {isLoadingQueuePosition ? (
-                            "Checking queue position..."
-                          ) : queuePosition ? (
-                            <span className="text-primary-text font-medium">
-                              Queue Position: #
-                              {queuePosition.position.toLocaleString()}
-                            </span>
-                          ) : (
-                            queueStatusMessage || "Not in queue"
-                          )}
-                        </p>
-                        <button
-                          type="button"
-                          onClick={fetchQueuePosition}
-                          disabled={isLoadingQueuePosition}
-                          aria-label="Refresh queue position"
-                          className="text-secondary-text hover:text-primary-text cursor-pointer rounded p-0.5 transition-colors hover:bg-white/10 disabled:opacity-50"
-                        >
-                          {isLoadingQueuePosition ? (
-                            <Spinner className="h-4 w-4" />
-                          ) : (
-                            <Icon
-                              icon="material-symbols:refresh"
-                              className="h-4 w-4"
-                            />
-                          )}
-                        </button>
-                      </div>
-
-                      {/* Actions */}
-                      <div className="flex flex-wrap gap-2">
-                        <Button
-                          type="button"
-                          size="sm"
-                          variant="secondary"
-                          onClick={() => {
-                            setSearchId("");
-                            window.scrollTo({ top: 0, behavior: "smooth" });
-                            const searchInput = document.getElementById(
-                              "searchInput",
-                            ) as HTMLInputElement | null;
-                            searchInput?.focus();
-                          }}
-                        >
-                          Search Another User
-                        </Button>
-                        {isAuthenticated && user?.roblox_id && (
-                          <Button asChild size="sm">
-                            <Link
-                              href={`/inventories/${user.roblox_id}`}
-                              prefetch={false}
-                            >
-                              View My Inventory
-                            </Link>
-                          </Button>
-                        )}
-                      </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-primary-text truncate font-semibold">
+                        {mergedRobloxUsers[robloxId]?.displayName ||
+                          originalSearchTerm ||
+                          robloxId}
+                      </p>
+                      <p className="text-secondary-text truncate text-sm">
+                        @
+                        {mergedRobloxUsers[robloxId]?.name ||
+                          originalSearchTerm ||
+                          robloxId}
+                      </p>
+                      <Link
+                        href={`https://www.roblox.com/users/${robloxId}/profile`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        prefetch={false}
+                        className="text-link mt-1 inline-flex items-center gap-1 text-xs hover:underline"
+                      >
+                        Roblox profile
+                        <Icon
+                          icon="heroicons:arrow-top-right-on-square"
+                          className="h-3 w-3"
+                        />
+                      </Link>
                     </div>
                   </div>
-                )}
 
-                {/* All other errors (own inventory not found, server errors, etc.) */}
-                {(!isInventoryNotFoundError || isOwnInventory) && (
-                  <div className="border-border-card bg-secondary-bg rounded-lg border p-6">
-                    <div className="text-center">
-                      <div className="mb-4 flex justify-center">
-                        <div className="bg-status-error/10 rounded-full p-3">
-                          <Icon
-                            icon="heroicons:exclamation-triangle"
-                            className="text-status-error h-8 w-8"
-                          />
-                        </div>
+                  {/* No inventory message + actions */}
+                  <div className="space-y-4 p-5">
+                    <div className="flex items-start gap-3">
+                      <div className="bg-secondary-text/10 mt-0.5 shrink-0 rounded-full p-2">
+                        <Icon
+                          icon="heroicons:archive-box-x-mark"
+                          className="text-secondary-text h-5 w-5"
+                        />
                       </div>
-                      <h3 className="text-status-error mb-2 text-lg font-semibold">
-                        {error.includes("Server error")
-                          ? "Server Error"
-                          : "Unable to Load Inventory"}
-                      </h3>
-                      {!isInventoryNotFoundError && (
-                        <p className="text-secondary-text mb-4 wrap-break-word">
-                          {error}
+                      <div>
+                        <p className="text-primary-text font-medium">
+                          No inventory found yet
                         </p>
-                      )}
+                        <p className="text-secondary-text mt-0.5 text-sm">
+                          This user hasn&apos;t been scanned by our bots yet.
+                          Inventories are updated automatically when a bot joins
+                          their trade server.
+                        </p>
+                      </div>
+                    </div>
 
-                      {/* Show scan option for profile owner or login prompt for others */}
-                      {isOwnInventory ? (
-                        <div className="border-border-card bg-tertiary-bg mt-4 rounded-lg border p-4">
+                    {/* Queue position */}
+                    <div className="flex items-center gap-1.5">
+                      <p className="text-secondary-text text-xs">
+                        {isLoadingQueuePosition ? (
+                          "Checking queue position..."
+                        ) : queuePosition ? (
+                          <span className="text-primary-text font-medium">
+                            Queue Position: #
+                            {queuePosition.position.toLocaleString()}
+                          </span>
+                        ) : (
+                          queueStatusMessage || "Not in queue"
+                        )}
+                      </p>
+                      <button
+                        type="button"
+                        onClick={fetchQueuePosition}
+                        disabled={isLoadingQueuePosition}
+                        aria-label="Refresh queue position"
+                        className="text-secondary-text hover:text-primary-text cursor-pointer rounded p-0.5 transition-colors hover:bg-white/10 disabled:opacity-50"
+                      >
+                        {isLoadingQueuePosition ? (
+                          <Spinner className="h-4 w-4" />
+                        ) : (
+                          <Icon
+                            icon="material-symbols:refresh"
+                            className="h-4 w-4"
+                          />
+                        )}
+                      </button>
+                    </div>
+
+                    {/* Actions */}
+                    <div className="flex flex-wrap gap-2">
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="secondary"
+                        onClick={() => {
+                          setSearchId("");
+                          window.scrollTo({ top: 0, behavior: "smooth" });
+                          const searchInput = document.getElementById(
+                            "searchInput",
+                          ) as HTMLInputElement | null;
+                          searchInput?.focus();
+                        }}
+                      >
+                        Search Another User
+                      </Button>
+                      {isAuthenticated && user?.roblox_id && (
+                        <Button asChild size="sm">
+                          <Link
+                            href={`/inventories/${user.roblox_id}`}
+                            prefetch={false}
+                          >
+                            View My Inventory
+                          </Link>
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* All other errors (own inventory not found, server errors, etc.) */}
+              {(!isInventoryNotFoundError || isOwnInventory) && (
+                <div className="border-border-card bg-secondary-bg rounded-lg border p-6">
+                  <div className="text-center">
+                    <div className="mb-4 flex justify-center">
+                      <div className="bg-status-error/10 rounded-full p-3">
+                        <Icon
+                          icon="heroicons:exclamation-triangle"
+                          className="text-status-error h-8 w-8"
+                        />
+                      </div>
+                    </div>
+                    <h3 className="text-status-error mb-2 text-lg font-semibold">
+                      {error.includes("Server error")
+                        ? "Server Error"
+                        : "Unable to Load Inventory"}
+                    </h3>
+                    {!isInventoryNotFoundError && (
+                      <p className="text-secondary-text mb-4 wrap-break-word">
+                        {error}
+                      </p>
+                    )}
+
+                    {/* Show scan option for profile owner or login prompt for others */}
+                    {isOwnInventory ? (
+                      <div className="border-border-card bg-tertiary-bg mt-4 rounded-lg border p-4">
+                        <div className="space-y-3">
+                          <p className="text-primary-text mb-3 text-center text-sm">
+                            Your inventory hasn&apos;t been scanned yet.
+                          </p>
                           <div className="space-y-3">
-                            <p className="text-primary-text mb-3 text-center text-sm">
-                              Your inventory hasn&apos;t been scanned yet.
-                            </p>
-                            <div className="space-y-3">
-                              <div className="text-center">
-                                <p className="text-secondary-text text-sm">
-                                  Wait for one of our bots to randomly join your
-                                  trade server
-                                </p>
-                              </div>
-                              <div className="text-secondary-text text-center text-sm font-medium">
-                                OR
-                              </div>
-                              <div className="flex justify-center">
-                                <Button
-                                  onClick={() => {
-                                    if (
-                                      typeof window !== "undefined" &&
-                                      window.umami
-                                    ) {
-                                      window.umami.track("Request Scan");
-                                    }
-                                    // Show Turnstile modal before scan
-                                    if (
-                                      ENABLE_WS_SCAN &&
-                                      scanWebSocket.status !== "scanning" &&
-                                      scanWebSocket.status !== "connecting"
-                                    ) {
-                                      setShowScanModal(true);
-                                    }
-                                  }}
-                                  disabled={
-                                    !ENABLE_WS_SCAN ||
-                                    scanWebSocket.status === "scanning" ||
-                                    scanWebSocket.status === "connecting"
+                            <div className="text-center">
+                              <p className="text-secondary-text text-sm">
+                                Wait for one of our bots to randomly join your
+                                trade server
+                              </p>
+                            </div>
+                            <div className="text-secondary-text text-center text-sm font-medium">
+                              OR
+                            </div>
+                            <div className="flex justify-center">
+                              <Button
+                                onClick={() => {
+                                  if (
+                                    typeof window !== "undefined" &&
+                                    window.umami
+                                  ) {
+                                    window.umami.track("Request Scan");
                                   }
-                                  variant="default"
-                                  size="md"
-                                  className="gap-2"
-                                >
-                                  {scanWebSocket.status === "connecting" ? (
-                                    <>
-                                      <Spinner className="h-4 w-4" />
-                                      Connecting...
-                                    </>
-                                  ) : scanWebSocket.status === "scanning" ? (
-                                    <>
-                                      <Spinner className="h-4 w-4" />
-                                      {getScanActiveButtonLabel(
-                                        scanWebSocket.phase,
-                                        scanWebSocket.message,
-                                      )}
-                                    </>
-                                  ) : scanWebSocket.status === "completed" ? (
-                                    <>
-                                      <svg
-                                        className="h-4 w-4"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        viewBox="0 0 24 24"
-                                      >
-                                        <path
-                                          strokeLinecap="round"
-                                          strokeLinejoin="round"
-                                          strokeWidth={2}
-                                          d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                                        />
-                                      </svg>
-                                      Scan Complete
-                                    </>
-                                  ) : (
-                                    <>
-                                      <svg
-                                        className="h-4 w-4"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        viewBox="0 0 24 24"
-                                      >
-                                        <path
-                                          strokeLinecap="round"
-                                          strokeLinejoin="round"
-                                          strokeWidth={2}
-                                          d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                                        />
-                                      </svg>
-                                      {scanWebSocket.message &&
-                                      scanWebSocket.message.includes(
-                                        "recent scan",
-                                      ) ? (
-                                        <>
-                                          <svg
-                                            className="h-4 w-4"
-                                            fill="none"
-                                            stroke="currentColor"
-                                            viewBox="0 0 24 24"
-                                          >
-                                            <path
-                                              strokeLinecap="round"
-                                              strokeLinejoin="round"
-                                              strokeWidth={2}
-                                              d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                                            />
-                                          </svg>
-                                          {scanWebSocket.message.includes(
-                                            "recent scan",
-                                          )
-                                            ? "Recent Scan Found"
-                                            : scanWebSocket.message.includes(
-                                                  "User not found",
-                                                )
-                                              ? "User Not Found"
-                                              : scanWebSocket.message.includes(
-                                                    "not in game",
-                                                  )
-                                                ? "Not In Game"
-                                                : scanWebSocket.message}
-                                        </>
-                                      ) : scanWebSocket.message &&
-                                        scanWebSocket.message.includes(
-                                          "not found",
-                                        ) ? (
-                                        <>
-                                          <svg
-                                            className="h-4 w-4"
-                                            fill="none"
-                                            stroke="currentColor"
-                                            viewBox="0 0 24 24"
-                                          >
-                                            <path
-                                              strokeLinecap="round"
-                                              strokeLinejoin="round"
-                                              strokeWidth={2}
-                                              d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"
-                                            />
-                                          </svg>
-                                          User Not Found
-                                        </>
-                                      ) : !ENABLE_WS_SCAN ? (
-                                        "Scanning Disabled"
-                                      ) : (
-                                        "Request a Scan"
-                                      )}
-                                    </>
-                                  )}
-                                </Button>
-                              </div>
-                              <div className="flex items-center justify-center gap-2">
-                                <p className="text-secondary-text text-xs">
-                                  {isLoadingQueuePosition ? (
-                                    "Checking queue position..."
-                                  ) : queuePosition ? (
-                                    <span className="text-primary-text font-medium">
-                                      Queue Position: #
-                                      {queuePosition.position.toLocaleString()}
-                                    </span>
-                                  ) : (
-                                    queueStatusMessage || "Not in queue"
-                                  )}
-                                </p>
-                                <button
-                                  type="button"
-                                  onClick={fetchQueuePosition}
-                                  disabled={isLoadingQueuePosition}
-                                  aria-label="Refresh queue position"
-                                  className="text-secondary-text hover:text-primary-text cursor-pointer rounded p-0.5 transition-colors hover:bg-white/10 disabled:opacity-50"
-                                >
-                                  {isLoadingQueuePosition ? (
+                                  // Show Turnstile modal before scan
+                                  if (
+                                    ENABLE_WS_SCAN &&
+                                    scanWebSocket.status !== "scanning" &&
+                                    scanWebSocket.status !== "connecting"
+                                  ) {
+                                    setShowScanModal(true);
+                                  }
+                                }}
+                                disabled={
+                                  !ENABLE_WS_SCAN ||
+                                  scanWebSocket.status === "scanning" ||
+                                  scanWebSocket.status === "connecting"
+                                }
+                                variant="default"
+                                size="md"
+                                className="gap-2"
+                              >
+                                {scanWebSocket.status === "connecting" ? (
+                                  <>
                                     <Spinner className="h-4 w-4" />
-                                  ) : (
-                                    <Icon
-                                      icon="material-symbols:refresh"
+                                    Connecting...
+                                  </>
+                                ) : scanWebSocket.status === "scanning" ? (
+                                  <>
+                                    <Spinner className="h-4 w-4" />
+                                    {getScanActiveButtonLabel(
+                                      scanWebSocket.phase,
+                                      scanWebSocket.message,
+                                    )}
+                                  </>
+                                ) : scanWebSocket.status === "completed" ? (
+                                  <>
+                                    <svg
                                       className="h-4 w-4"
-                                    />
-                                  )}
-                                </button>
-                              </div>
+                                      fill="none"
+                                      stroke="currentColor"
+                                      viewBox="0 0 24 24"
+                                    >
+                                      <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                                      />
+                                    </svg>
+                                    Scan Complete
+                                  </>
+                                ) : (
+                                  <>
+                                    <svg
+                                      className="h-4 w-4"
+                                      fill="none"
+                                      stroke="currentColor"
+                                      viewBox="0 0 24 24"
+                                    >
+                                      <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                                      />
+                                    </svg>
+                                    {scanWebSocket.message &&
+                                    scanWebSocket.message.includes(
+                                      "recent scan",
+                                    ) ? (
+                                      <>
+                                        <svg
+                                          className="h-4 w-4"
+                                          fill="none"
+                                          stroke="currentColor"
+                                          viewBox="0 0 24 24"
+                                        >
+                                          <path
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            strokeWidth={2}
+                                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                                          />
+                                        </svg>
+                                        {scanWebSocket.message.includes(
+                                          "recent scan",
+                                        )
+                                          ? "Recent Scan Found"
+                                          : scanWebSocket.message.includes(
+                                                "User not found",
+                                              )
+                                            ? "User Not Found"
+                                            : scanWebSocket.message.includes(
+                                                  "not in game",
+                                                )
+                                              ? "Not In Game"
+                                              : scanWebSocket.message}
+                                      </>
+                                    ) : scanWebSocket.message &&
+                                      scanWebSocket.message.includes(
+                                        "not found",
+                                      ) ? (
+                                      <>
+                                        <svg
+                                          className="h-4 w-4"
+                                          fill="none"
+                                          stroke="currentColor"
+                                          viewBox="0 0 24 24"
+                                        >
+                                          <path
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            strokeWidth={2}
+                                            d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"
+                                          />
+                                        </svg>
+                                        User Not Found
+                                      </>
+                                    ) : !ENABLE_WS_SCAN ? (
+                                      "Scanning Disabled"
+                                    ) : (
+                                      "Request a Scan"
+                                    )}
+                                  </>
+                                )}
+                              </Button>
+                            </div>
+                            <div className="flex items-center justify-center gap-2">
+                              <p className="text-secondary-text text-xs">
+                                {isLoadingQueuePosition ? (
+                                  "Checking queue position..."
+                                ) : queuePosition ? (
+                                  <span className="text-primary-text font-medium">
+                                    Queue Position: #
+                                    {queuePosition.position.toLocaleString()}
+                                  </span>
+                                ) : (
+                                  queueStatusMessage || "Not in queue"
+                                )}
+                              </p>
+                              <button
+                                type="button"
+                                onClick={fetchQueuePosition}
+                                disabled={isLoadingQueuePosition}
+                                aria-label="Refresh queue position"
+                                className="text-secondary-text hover:text-primary-text cursor-pointer rounded p-0.5 transition-colors hover:bg-white/10 disabled:opacity-50"
+                              >
+                                {isLoadingQueuePosition ? (
+                                  <Spinner className="h-4 w-4" />
+                                ) : (
+                                  <Icon
+                                    icon="material-symbols:refresh"
+                                    className="h-4 w-4"
+                                  />
+                                )}
+                              </button>
                             </div>
                           </div>
                         </div>
-                      ) : (
-                        <div className="border-border-card bg-tertiary-bg mt-4 rounded-lg border p-4">
-                          {isInventoryNotFoundError ? (
-                            <>
-                              <p className="text-primary-text mb-1 text-sm font-medium">
-                                No saved inventory found for this user.
+                      </div>
+                    ) : (
+                      <div className="border-border-card bg-tertiary-bg mt-4 rounded-lg border p-4">
+                        {isInventoryNotFoundError ? (
+                          <>
+                            <p className="text-primary-text mb-1 text-sm font-medium">
+                              No saved inventory found for this user.
+                            </p>
+                            <p className="text-secondary-text text-sm">
+                              Try searching another username.
+                            </p>
+                            <div className="mt-3 flex items-center justify-center gap-2 text-center">
+                              <p className="text-secondary-text text-xs">
+                                {isLoadingQueuePosition ? (
+                                  "Checking queue position..."
+                                ) : queuePosition ? (
+                                  <span className="text-primary-text font-medium">
+                                    Queue Position: #
+                                    {queuePosition.position.toLocaleString()}
+                                  </span>
+                                ) : (
+                                  queueStatusMessage || "Not in queue"
+                                )}
                               </p>
-                              <p className="text-secondary-text text-sm">
-                                Try searching another username.
-                              </p>
-                              <div className="mt-3 flex items-center justify-center gap-2 text-center">
-                                <p className="text-secondary-text text-xs">
-                                  {isLoadingQueuePosition ? (
-                                    "Checking queue position..."
-                                  ) : queuePosition ? (
-                                    <span className="text-primary-text font-medium">
-                                      Queue Position: #
-                                      {queuePosition.position.toLocaleString()}
-                                    </span>
-                                  ) : (
-                                    queueStatusMessage || "Not in queue"
-                                  )}
-                                </p>
-                                <button
-                                  type="button"
-                                  onClick={fetchQueuePosition}
-                                  disabled={isLoadingQueuePosition}
-                                  aria-label="Refresh queue position"
-                                  className="text-secondary-text hover:text-primary-text cursor-pointer rounded p-0.5 transition-colors hover:bg-white/10 disabled:opacity-50"
-                                >
-                                  {isLoadingQueuePosition ? (
-                                    <Spinner className="h-4 w-4" />
-                                  ) : (
-                                    <Icon
-                                      icon="material-symbols:refresh"
-                                      className="h-4 w-4"
-                                    />
-                                  )}
-                                </button>
-                              </div>
-                              <Button
+                              <button
                                 type="button"
-                                size="sm"
-                                variant="secondary"
-                                className="mt-2"
-                                onClick={() => {
-                                  setSearchId("");
-                                  window.scrollTo({
-                                    top: 0,
-                                    behavior: "smooth",
-                                  });
-                                  const searchInput = document.getElementById(
-                                    "searchInput",
-                                  ) as HTMLInputElement | null;
-                                  searchInput?.focus();
-                                }}
+                                onClick={fetchQueuePosition}
+                                disabled={isLoadingQueuePosition}
+                                aria-label="Refresh queue position"
+                                className="text-secondary-text hover:text-primary-text cursor-pointer rounded p-0.5 transition-colors hover:bg-white/10 disabled:opacity-50"
                               >
-                                Search Another User
-                              </Button>
-                              {isAuthenticated && user?.roblox_id && (
-                                <div className="border-border-card mt-4 border-t pt-4">
-                                  <p className="text-primary-text mb-1 text-sm font-medium">
-                                    Looking for your inventory?
-                                  </p>
-                                  <Button asChild size="sm" className="mt-2">
-                                    <Link
-                                      href={`/inventories/${user.roblox_id}`}
-                                      prefetch={false}
-                                    >
-                                      View My Inventory
-                                    </Link>
-                                  </Button>
-                                </div>
-                              )}
-                            </>
-                          ) : (
-                            <>
-                              <p className="text-primary-text mb-1 text-sm font-medium">
-                                Looking for your inventory?
-                              </p>
-                              {isAuthenticated && user?.roblox_id ? (
+                                {isLoadingQueuePosition ? (
+                                  <Spinner className="h-4 w-4" />
+                                ) : (
+                                  <Icon
+                                    icon="material-symbols:refresh"
+                                    className="h-4 w-4"
+                                  />
+                                )}
+                              </button>
+                            </div>
+                            <Button
+                              type="button"
+                              size="sm"
+                              variant="secondary"
+                              className="mt-2"
+                              onClick={() => {
+                                setSearchId("");
+                                window.scrollTo({
+                                  top: 0,
+                                  behavior: "smooth",
+                                });
+                                const searchInput = document.getElementById(
+                                  "searchInput",
+                                ) as HTMLInputElement | null;
+                                searchInput?.focus();
+                              }}
+                            >
+                              Search Another User
+                            </Button>
+                            {isAuthenticated && user?.roblox_id && (
+                              <div className="border-border-card mt-4 border-t pt-4">
+                                <p className="text-primary-text mb-1 text-sm font-medium">
+                                  Looking for your inventory?
+                                </p>
                                 <Button asChild size="sm" className="mt-2">
                                   <Link
                                     href={`/inventories/${user.roblox_id}`}
@@ -1137,247 +1115,257 @@ export default function InventoryCheckerClient({
                                     View My Inventory
                                   </Link>
                                 </Button>
-                              ) : (
-                                <>
-                                  <p className="text-secondary-text text-sm">
-                                    Login to request a scan.
-                                  </p>
-                                  <Button
-                                    type="button"
-                                    size="sm"
-                                    className="mt-2"
-                                    onClick={() => {
-                                      if (isAuthenticated) {
-                                        setLoginModal({
-                                          open: true,
-                                          tab: "roblox",
-                                        });
-                                      } else {
-                                        setLoginModal({ open: true });
-                                      }
-                                    }}
-                                  >
-                                    Login
-                                  </Button>
-                                </>
-                              )}
-                            </>
-                          )}
-                        </div>
-                      )}
-                    </div>
+                              </div>
+                            )}
+                          </>
+                        ) : (
+                          <>
+                            <p className="text-primary-text mb-1 text-sm font-medium">
+                              Looking for your inventory?
+                            </p>
+                            {isAuthenticated && user?.roblox_id ? (
+                              <Button asChild size="sm" className="mt-2">
+                                <Link
+                                  href={`/inventories/${user.roblox_id}`}
+                                  prefetch={false}
+                                >
+                                  View My Inventory
+                                </Link>
+                              </Button>
+                            ) : (
+                              <>
+                                <p className="text-secondary-text text-sm">
+                                  Login to request a scan.
+                                </p>
+                                <Button
+                                  type="button"
+                                  size="sm"
+                                  className="mt-2"
+                                  onClick={() => {
+                                    if (isAuthenticated) {
+                                      setLoginModal({
+                                        open: true,
+                                        tab: "roblox",
+                                      });
+                                    } else {
+                                      setLoginModal({ open: true });
+                                    }
+                                  }}
+                                >
+                                  Login
+                                </Button>
+                              </>
+                            )}
+                          </>
+                        )}
+                      </div>
+                    )}
                   </div>
-                )}
-              </>
-            )}
+                </div>
+              )}
+            </>
+          )}
 
-            {/* User Stats and Inventory Items - Only show when no error and has data */}
-            {!error && initialData && currentData && (
-              <>
-                {/* User Stats */}
-                <UserStats
-                  initialData={currentData}
-                  robloxUsers={initialRobloxUsers ?? {}}
-                  userConnectionData={userConnectionData || null}
-                  itemsData={itemsData}
-                  currentSeason={activeSeason}
-                  seasonRateLimitMessage={seasonRateLimitMessage}
-                  initialNetworthData={networthData}
-                  showNonOgOnly={showNonOgOnly}
-                  setShowNonOgOnly={setShowNonOgOnly}
-                  scanWebSocket={scanWebSocket}
+          {/* User Stats and Inventory Items - Only show when no error and has data */}
+          {!error && initialData && currentData && (
+            <>
+              {/* User Stats */}
+              <UserStats
+                initialData={currentData}
+                robloxUsers={initialRobloxUsers ?? {}}
+                userConnectionData={userConnectionData || null}
+                itemsData={itemsData}
+                currentSeason={activeSeason}
+                seasonRateLimitMessage={seasonRateLimitMessage}
+                initialNetworthData={networthData}
+                showNonOgOnly={showNonOgOnly}
+                setShowNonOgOnly={setShowNonOgOnly}
+                scanWebSocket={scanWebSocket}
+              />
+
+              {/* Tabbed Interface */}
+              <div className="mt-6">
+                <InventoryOverflowTabs
+                  value={effectiveActiveTab}
+                  onChange={(e, idx) =>
+                    handleTabChange(e as unknown as React.SyntheticEvent, idx)
+                  }
+                  hasComments={Boolean(robloxId)}
+                  hasDuplicates={hasDuplicates}
+                  hasDupedItems={hasDupedItems}
+                  hasBreakdown={hasBreakdownData}
+                  robloxId={robloxId}
                 />
 
-                {/* Tabbed Interface */}
-                <div className="mt-6">
-                  <InventoryOverflowTabs
-                    value={effectiveActiveTab}
-                    onChange={(e, idx) =>
-                      handleTabChange(e as unknown as React.SyntheticEvent, idx)
-                    }
-                    hasComments={Boolean(robloxId)}
-                    hasDuplicates={hasDuplicates}
-                    hasDupedItems={hasDupedItems}
-                    hasBreakdown={hasBreakdownData}
-                    robloxId={robloxId}
-                  />
+                {/* Tab Content */}
+                <div className="mt-4">
+                  <div className={effectiveActiveTab === 0 ? "" : "hidden"}>
+                    <MemoInventoryItems
+                      initialData={currentData}
+                      robloxUsers={deferredRobloxUsers}
+                      onItemClick={handleItemClick}
+                      itemsData={itemsData}
+                      isOwnInventory={isOwnInventory}
+                      showNonOgOnlyFromParent={showNonOgOnly}
+                    />
+                  </div>
 
-                  {/* Tab Content */}
-                  <div className="mt-4">
-                    <div className={effectiveActiveTab === 0 ? "" : "hidden"}>
-                      <MemoInventoryItems
-                        initialData={currentData}
-                        robloxUsers={deferredRobloxUsers}
-                        onItemClick={handleItemClick}
-                        itemsData={itemsData}
-                        isOwnInventory={isOwnInventory}
-                        showNonOgOnlyFromParent={showNonOgOnly}
-                      />
-                    </div>
-
-                    {tabIndex.copies !== null &&
-                      mountedTabs.has(tabIndex.copies) && (
-                        <div
-                          className={
-                            effectiveActiveTab === tabIndex.copies
-                              ? ""
-                              : "hidden"
-                          }
-                        >
-                          {duplicatesTabData && (
-                            <MemoDuplicatesTab
-                              initialData={duplicatesTabData}
-                              robloxUsers={deferredRobloxUsers}
-                              onItemClick={handleItemClick}
-                              itemsData={itemsData}
-                            />
-                          )}
-                        </div>
-                      )}
-
-                    {tabIndex.dupes !== null &&
-                      mountedTabs.has(tabIndex.dupes) &&
-                      currentData.duplicates && (
-                        <div
-                          className={
-                            effectiveActiveTab === tabIndex.dupes
-                              ? ""
-                              : "hidden"
-                          }
-                        >
-                          <MemoDupedItemsTab
-                            duplicates={currentData.duplicates}
+                  {tabIndex.copies !== null &&
+                    mountedTabs.has(tabIndex.copies) && (
+                      <div
+                        className={
+                          effectiveActiveTab === tabIndex.copies ? "" : "hidden"
+                        }
+                      >
+                        {duplicatesTabData && (
+                          <MemoDuplicatesTab
+                            initialData={duplicatesTabData}
                             robloxUsers={deferredRobloxUsers}
                             onItemClick={handleItemClick}
                             itemsData={itemsData}
-                            userId={currentData.user_id}
                           />
-                        </div>
-                      )}
+                        )}
+                      </div>
+                    )}
 
-                    {tabIndex.graphs !== null &&
-                      mountedTabs.has(tabIndex.graphs) &&
-                      robloxId && (
-                        <div
-                          className={
-                            effectiveActiveTab === tabIndex.graphs
-                              ? ""
-                              : "hidden"
-                          }
-                        >
-                          <div className="space-y-6">
-                            <div className="space-y-3">
-                              <h4 className="text-primary-text text-sm font-semibold">
-                                Networth Graph
-                              </h4>
-                              <MemoNetworthHistoryChart
-                                userId={robloxId}
-                                initialData={networthData}
-                              />
-                            </div>
+                  {tabIndex.dupes !== null &&
+                    mountedTabs.has(tabIndex.dupes) &&
+                    currentData.duplicates && (
+                      <div
+                        className={
+                          effectiveActiveTab === tabIndex.dupes ? "" : "hidden"
+                        }
+                      >
+                        <MemoDupedItemsTab
+                          duplicates={currentData.duplicates}
+                          robloxUsers={deferredRobloxUsers}
+                          onItemClick={handleItemClick}
+                          itemsData={itemsData}
+                          userId={currentData.user_id}
+                        />
+                      </div>
+                    )}
 
-                            <div className="space-y-3">
-                              <h4 className="text-primary-text text-sm font-semibold">
-                                Money Graph
-                              </h4>
-                              <MemoMoneyHistoryChart
-                                userId={robloxId}
-                                initialData={moneyHistoryData}
-                              />
-                            </div>
+                  {tabIndex.graphs !== null &&
+                    mountedTabs.has(tabIndex.graphs) &&
+                    robloxId && (
+                      <div
+                        className={
+                          effectiveActiveTab === tabIndex.graphs ? "" : "hidden"
+                        }
+                      >
+                        <div className="space-y-6">
+                          <div className="space-y-3">
+                            <h4 className="text-primary-text text-sm font-semibold">
+                              Networth Graph
+                            </h4>
+                            <MemoNetworthHistoryChart
+                              userId={robloxId}
+                              initialData={networthData}
+                            />
+                          </div>
+
+                          <div className="space-y-3">
+                            <h4 className="text-primary-text text-sm font-semibold">
+                              Money Graph
+                            </h4>
+                            <MemoMoneyHistoryChart
+                              userId={robloxId}
+                              initialData={moneyHistoryData}
+                            />
                           </div>
                         </div>
-                      )}
+                      </div>
+                    )}
 
-                    {tabIndex.breakdown !== null &&
-                      mountedTabs.has(tabIndex.breakdown) &&
-                      robloxId && (
-                        <div
-                          className={
-                            effectiveActiveTab === tabIndex.breakdown
-                              ? ""
-                              : "hidden"
-                          }
-                        >
-                          <MemoInventoryBreakdown
-                            networthData={networthData}
-                            username={getUserDisplay(robloxId)}
-                            itemsData={itemsData}
-                            inventoryData={currentData}
-                            isActive={effectiveActiveTab === tabIndex.breakdown}
-                          />
-                        </div>
-                      )}
-
-                    {tabIndex.comments !== null &&
-                      effectiveActiveTab === tabIndex.comments &&
-                      robloxId && (
-                        <ChangelogComments
-                          changelogId={robloxId}
-                          changelogTitle={`${getUserDisplay(robloxId)}'s Inventory`}
-                          type="inventory"
-                          inventory={{ owner: robloxId }}
-                          initialComments={initialComments}
-                          initialUserMap={initialCommentUserMap}
+                  {tabIndex.breakdown !== null &&
+                    mountedTabs.has(tabIndex.breakdown) &&
+                    robloxId && (
+                      <div
+                        className={
+                          effectiveActiveTab === tabIndex.breakdown
+                            ? ""
+                            : "hidden"
+                        }
+                      >
+                        <MemoInventoryBreakdown
+                          networthData={networthData}
+                          username={getUserDisplay(robloxId)}
+                          itemsData={itemsData}
+                          inventoryData={currentData}
+                          isActive={effectiveActiveTab === tabIndex.breakdown}
                         />
-                      )}
-                  </div>
+                      </div>
+                    )}
+
+                  {tabIndex.comments !== null &&
+                    effectiveActiveTab === tabIndex.comments &&
+                    robloxId && (
+                      <ChangelogComments
+                        changelogId={robloxId}
+                        changelogTitle={`${getUserDisplay(robloxId)}'s Inventory`}
+                        type="inventory"
+                        inventory={{ owner: robloxId }}
+                        initialComments={initialComments}
+                        initialUserMap={initialCommentUserMap}
+                      />
+                    )}
                 </div>
+              </div>
 
-                {/* Trade History Modal */}
-                {showHistoryModal && selectedItem && (
-                  <TradeHistoryModal
-                    isOpen={showHistoryModal}
-                    onClose={closeHistoryModal}
-                    item={selectedItem}
-                    username={robloxId ? getUsername(robloxId) : undefined}
-                    isDupeTab={
-                      (hasDupedItems &&
-                        tabIndex.dupes !== null &&
-                        effectiveActiveTab === tabIndex.dupes) ||
-                      (selectedItem?.is_duplicated ?? false)
-                    }
-                  />
-                )}
-              </>
-            )}
+              {/* Trade History Modal */}
+              {showHistoryModal && selectedItem && (
+                <TradeHistoryModal
+                  isOpen={showHistoryModal}
+                  onClose={closeHistoryModal}
+                  item={selectedItem}
+                  username={robloxId ? getUsername(robloxId) : undefined}
+                  isDupeTab={
+                    (hasDupedItems &&
+                      tabIndex.dupes !== null &&
+                      effectiveActiveTab === tabIndex.dupes) ||
+                    (selectedItem?.is_duplicated ?? false)
+                  }
+                />
+              )}
+            </>
+          )}
 
-            {/* Supporter Modal */}
-            <SupporterModal
-              isOpen={modalState.isOpen}
-              onClose={closeModal}
-              feature={modalState.feature}
-              currentTier={modalState.currentTier || user?.premiumtype || 0}
-              requiredTier={modalState.requiredTier || 3}
-              currentLimit={modalState.currentLimit}
-              requiredLimit={modalState.requiredLimit}
-            />
+          {/* Supporter Modal */}
+          <SupporterModal
+            isOpen={modalState.isOpen}
+            onClose={closeModal}
+            feature={modalState.feature}
+            currentTier={modalState.currentTier || user?.premiumtype || 0}
+            requiredTier={modalState.requiredTier || 3}
+            currentLimit={modalState.currentLimit}
+            requiredLimit={modalState.requiredLimit}
+          />
 
-            {/* Scan Inventory Modal with Turnstile */}
-            <ScanInventoryModal
-              isOpen={showScanModal}
-              onClose={() => {
-                if (
-                  scanWebSocket.status !== "scanning" &&
-                  scanWebSocket.status !== "connecting"
-                ) {
-                  setShowScanModal(false);
-                }
-              }}
-              onSuccess={(turnstileToken) => {
-                scanWebSocket.startScan(turnstileToken);
+          {/* Scan Inventory Modal with Turnstile */}
+          <ScanInventoryModal
+            isOpen={showScanModal}
+            onClose={() => {
+              if (
+                scanWebSocket.status !== "scanning" &&
+                scanWebSocket.status !== "connecting"
+              ) {
                 setShowScanModal(false);
-              }}
-              isScanning={
-                scanWebSocket.status === "scanning" ||
-                scanWebSocket.status === "connecting"
               }
-              bypassTurnstile={shouldBypassTurnstile}
-            />
-          </>
-        )}
-      </div>
-    </ThemeProvider>
+            }}
+            onSuccess={(turnstileToken) => {
+              scanWebSocket.startScan(turnstileToken);
+              setShowScanModal(false);
+            }}
+            isScanning={
+              scanWebSocket.status === "scanning" ||
+              scanWebSocket.status === "connecting"
+            }
+            bypassTurnstile={shouldBypassTurnstile}
+          />
+        </>
+      )}
+    </div>
   );
 }
 

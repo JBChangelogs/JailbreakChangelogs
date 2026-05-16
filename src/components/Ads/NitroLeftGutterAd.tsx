@@ -2,7 +2,7 @@
 
 import { canHideAdsForPremiumType } from "@/utils/auth/supporterAccess";
 import { useEffect, useRef } from "react";
-import { useMediaQuery } from "@mui/material";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 import type { NitroAdInstance } from "@/utils/analytics/nitroAds";
 import {
   registerAdInstance,

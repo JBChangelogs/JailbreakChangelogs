@@ -1,6 +1,5 @@
 "use client";
 
-import { Typography } from "@mui/material";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import { Icon } from "@/components/ui/IconWrapper";
 import Link from "next/link";
@@ -31,17 +30,17 @@ export default function TermsOfServicePage() {
         </p>
 
         <div className="border-border-card bg-secondary-bg rounded-lg border p-6 transition-colors">
-          <Typography className="text-primary-text">
+          <p className="text-primary-text">
             Please read these Terms of Service carefully before using Jailbreak
             Changelogs.
-          </Typography>
+          </p>
 
           <div className="mt-6 space-y-6">
             <div>
               <h2 className="text-primary-text mb-4 text-xl font-semibold">
                 1. Acceptance of Terms
               </h2>
-              <Typography className="text-secondary-text">
+              <p className="text-secondary-text">
                 By accessing and using Jailbreak Changelogs, you accept and
                 agree to be bound by the terms and provisions of this agreement.
                 You confirm that you&apos;re at least 13 years old and meet the
@@ -55,17 +54,17 @@ export default function TermsOfServicePage() {
                 the services, then these terms also apply to you and you&apos;re
                 responsible for your child&apos;s activity on the services,
                 including purchases made by them.
-              </Typography>
+              </p>
             </div>
 
             <div>
               <h2 className="text-primary-text mb-4 text-xl font-semibold">
                 2. Use License
               </h2>
-              <Typography className="text-secondary-text mb-4">
+              <p className="text-secondary-text mb-4">
                 Permission is granted to access and use our website materials
                 for personal, non-commercial viewing only.
-              </Typography>
+              </p>
               <ul className="text-secondary-text mb-4 list-inside list-disc space-y-1">
                 <li>You must not modify or copy these materials</li>
                 <li>
@@ -76,24 +75,24 @@ export default function TermsOfServicePage() {
                   software
                 </li>
               </ul>
-              <Typography className="text-secondary-text mb-4">
+              <p className="text-secondary-text mb-4">
                 Our source code is licensed separately under the PolyForm
                 Noncommercial License 1.0.0. If you obtain a copy of the source
                 code, your rights to use, modify, and distribute that code are
                 governed by that license.
-              </Typography>
+              </p>
               <div className="mt-2 ml-4">
                 <h3 className="text-primary-text mb-2 text-lg font-semibold">
                   API Terms of Service
                 </h3>
-                <Typography className="text-secondary-text mb-2">
+                <p className="text-secondary-text mb-2">
                   By accessing our API, you accept that we reserve the right to
                   restrict or revoke your access and block IP address(es) at our
                   sole discretion.
-                </Typography>
-                <Typography className="text-secondary-text mb-2">
+                </p>
+                <p className="text-secondary-text mb-2">
                   Violations include, but are not limited to:
-                </Typography>
+                </p>
                 <ul className="text-secondary-text list-inside list-disc space-y-1">
                   <li>Sending excessive or spammy requests</li>
                   <li>Engaging in abusive behavior towards the API</li>
@@ -115,7 +114,7 @@ export default function TermsOfServicePage() {
               <h2 className="text-primary-text mb-4 text-xl font-semibold">
                 3. Disclaimer
               </h2>
-              <Typography className="text-secondary-text">
+              <p className="text-secondary-text">
                 The materials on our website are provided on an &apos;as
                 is&apos; basis. We make no warranties, expressed or implied, and
                 hereby disclaim and negate all other warranties including,
@@ -123,38 +122,38 @@ export default function TermsOfServicePage() {
                 merchantability, fitness for a particular purpose, or
                 non-infringement of intellectual property or other violation of
                 rights.
-              </Typography>
+              </p>
             </div>
 
             <div>
               <h2 className="text-primary-text mb-4 text-xl font-semibold">
                 4. Limitations
               </h2>
-              <Typography className="text-secondary-text">
+              <p className="text-secondary-text">
                 In no event shall Jailbreak Changelogs LLC or its suppliers be
                 liable for any damages (including, without limitation, damages
                 for loss of data or profit, or due to business interruption)
                 arising out of the use or inability to use the materials on our
                 website.
-              </Typography>
+              </p>
             </div>
 
             <div>
               <h2 className="text-primary-text mb-4 text-xl font-semibold">
                 5. Revisions and Errata
               </h2>
-              <Typography className="text-secondary-text">
+              <p className="text-secondary-text">
                 We reserve the right to make changes to our Terms of Service at
                 any time without notice. By using this website, you are agreeing
                 to be bound by the current version of these Terms of Service.
-              </Typography>
+              </p>
             </div>
 
             <div>
               <h2 className="text-primary-text mb-4 text-xl font-semibold">
                 6. Refund Policy
               </h2>
-              <Typography className="text-secondary-text">
+              <p className="text-secondary-text">
                 All supporter purchases are one-time only and non-refundable. By
                 making a supporter purchase, you acknowledge and agree that you
                 will not be entitled to a refund for any reason. For more
@@ -167,18 +166,18 @@ export default function TermsOfServicePage() {
                   Supporter page
                 </Link>
                 .
-              </Typography>
+              </p>
             </div>
 
             <div>
               <h2 className="text-primary-text mb-4 text-xl font-semibold">
                 7. Contact Information
               </h2>
-              <Typography className="text-secondary-text">
+              <p className="text-secondary-text">
                 If you have any questions about these Terms of Service, please
                 contact us:
-              </Typography>
-              <Typography className="text-secondary-text mt-2">
+              </p>
+              <p className="text-secondary-text mt-2">
                 Email:{" "}
                 <a
                   href="mailto:support@jailbreakchangelogs.com"
@@ -186,7 +185,7 @@ export default function TermsOfServicePage() {
                 >
                   support@jailbreakchangelogs.com
                 </a>
-              </Typography>
+              </p>
             </div>
           </div>
         </div>

@@ -1,95 +1,64 @@
-import { Container, Grid, Box, Skeleton, Paper } from "@mui/material";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function SettingsLoading() {
   return (
-    <Container maxWidth="lg" sx={{ minHeight: "100vh", py: 4 }}>
-      <Grid container spacing={4}>
+    <div className="container mx-auto min-h-screen max-w-7xl py-8">
+      <div className="grid grid-cols-12 gap-4">
         {/* Sidebar Skeleton */}
-        <Grid
-          size={{ xs: 12, lg: 3 }}
-          sx={{
-            display: { xs: "none", lg: "block" },
-          }}
-        >
-          <Paper
-            elevation={1}
-            sx={{
-              p: 2,
-              borderRadius: 3,
-              backgroundColor: "var(--color-secondary-bg)",
-              backgroundImage: "none",
-              border: "1px solid var(--color-border-primary)",
-            }}
-          >
+        <div className="hidden lg:col-span-3 lg:block">
+          <div className="bg-secondary-bg border-border-primary rounded-2xl border p-4">
             <Skeleton
-              variant="text"
-              width="60%"
-              height={32}
-              sx={{ mb: 2, mx: 2 }}
+              style={{ width: "60%", height: 32 }}
+              className="mx-2 mb-2"
             />
             {[1, 2, 3, 4, 5, 6].map((i) => (
-              <Box key={i} sx={{ px: 2, py: 1.5 }}>
+              <div key={i} className="px-2 py-[0.375rem]">
                 <Skeleton
-                  variant="rectangular"
-                  width="100%"
-                  height={36}
-                  sx={{ borderRadius: 2 }}
+                  className="rounded-none"
+                  style={{ width: "100%", height: 36 }}
                 />
-              </Box>
+              </div>
             ))}
-          </Paper>
-        </Grid>
+          </div>
+        </div>
 
         {/* Content Skeleton */}
-        <Grid size={{ xs: 12, lg: 9 }}>
+        <div className="col-span-12 lg:col-span-9">
           {[1, 2, 3].map((i) => (
-            <Paper
+            <div
               key={i}
-              elevation={1}
-              sx={{
-                mb: 4,
-                p: 3,
-                backgroundColor: "var(--color-secondary-bg)",
-                borderRadius: 3,
-                backgroundImage: "none",
-                border: "1px solid var(--color-border-primary)",
-              }}
+              className="border-border-primary bg-secondary-bg mb-8 rounded-2xl border p-6"
             >
-              <Box
-                sx={{ display: "flex", alignItems: "center", gap: 2, mb: 3 }}
-              >
-                <Skeleton variant="circular" width={32} height={32} />
-                <Skeleton variant="text" width="40%" height={40} />
-              </Box>
+              <div className="mb-6 flex items-center gap-2">
+                <Skeleton
+                  className="rounded-full"
+                  style={{ width: 32, height: 32 }}
+                />
+                <Skeleton style={{ width: "40%", height: 40 }} />
+              </div>
 
-              <Box sx={{ display: "flex", flexDirection: "column", gap: 4 }}>
+              <div className="flex flex-col gap-4">
                 {[1, 2, 3].map((j) => (
-                  <Box key={j}>
+                  <div key={j}>
                     <Skeleton
-                      variant="text"
-                      width="30%"
-                      height={28}
-                      sx={{ mb: 1 }}
+                      style={{ width: "30%", height: 28 }}
+                      className="mb-1"
                     />
                     <Skeleton
-                      variant="text"
-                      width="80%"
-                      height={20}
-                      sx={{ mb: 2 }}
+                      style={{ width: "80%", height: 20 }}
+                      className="mb-2"
                     />
                     <Skeleton
-                      variant="rectangular"
-                      width={44}
-                      height={24}
-                      sx={{ borderRadius: 10 }}
+                      className="rounded-none"
+                      style={{ width: 44, height: 24 }}
                     />
-                  </Box>
+                  </div>
                 ))}
-              </Box>
-            </Paper>
+              </div>
+            </div>
           ))}
-        </Grid>
-      </Grid>
-    </Container>
+        </div>
+      </div>
+    </div>
   );
 }

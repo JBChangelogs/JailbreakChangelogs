@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Box, Skeleton } from "@mui/material";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Tooltip,
   TooltipContent,
@@ -107,7 +107,7 @@ export default function TradeAdsTab({
           <div className="flex-1">
             <div className="flex items-start justify-between">
               {isLoadingAdditionalData ? (
-                <Skeleton variant="text" width="80%" height={20} />
+                <Skeleton className="w-4/5" style={{ height: 20 }} />
               ) : itemUrl ? (
                 <Link
                   href={itemUrl}
@@ -124,7 +124,7 @@ export default function TradeAdsTab({
             <div className="text-secondary-text text-xs">
               <div className="mb-1">
                 {isLoadingAdditionalData ? (
-                  <Skeleton variant="rounded" width={80} height={20} />
+                  <Skeleton style={{ width: 80, height: 20 }} />
                 ) : (
                   <span
                     className="text-primary-text bg-tertiary-bg/40 inline-flex h-6 w-fit items-center rounded-lg border px-2.5 text-xs leading-none font-medium backdrop-blur-xl"
@@ -231,14 +231,9 @@ export default function TradeAdsTab({
 
   if (loading) {
     return (
-      <Box
-        display="flex"
-        justifyContent="center"
-        alignItems="center"
-        minHeight={200}
-      >
+      <div className="flex min-h-[200px] items-center justify-center">
         <Spinner className="h-8 w-8" />
-      </Box>
+      </div>
     );
   }
 
