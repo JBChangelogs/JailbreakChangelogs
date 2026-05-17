@@ -32,6 +32,12 @@ import {
 import { ChatMessages } from "@/components/chat/chat-messages";
 import { MessageComposer } from "@/components/Users/MessageComposer";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuTrigger,
+} from "@/components/ui/context-menu";
 import { Spinner } from "@/components/ui/Spinner";
 import {
   ChatEvent,
@@ -764,6 +770,11 @@ export default function MessagesInbox() {
   const [deletingMessageId, setDeletingMessageId] = useState<string | null>(
     null,
   );
+  const [reportingMessage, setReportingMessage] = useState<Message | null>(
+    null,
+  );
+  const [reportReason, setReportReason] = useState("");
+  const [isSubmittingReport, setIsSubmittingReport] = useState(false);
   const [replyingToMessage, setReplyingToMessage] = useState<Message | null>(
     null,
   );
@@ -2684,6 +2695,50 @@ export default function MessagesInbox() {
     await handleSendMessage(failedMessage.content);
   };
 
+  const handleReportMessage = async () => {
+    if (!reportingMessage || !selectedUserId || !reportReason.trim()) return;
+    if (!PUBLIC_API_URL) {
+      toast.error("API URL is not configured");
+      return;
+    }
+
+    setIsSubmittingReport(true);
+    const toastId = toast.loading("Submitting report...");
+
+    try {
+      const response = await fetch(
+        buildApiUrlWithDevToken(
+          PUBLIC_API_URL,
+          `/messages/${encodeURIComponent(selectedUserId)}/${encodeURIComponent(reportingMessage.id)}/report`,
+        ),
+        {
+          method: "POST",
+          credentials: "include",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ reason: reportReason.trim() }),
+        },
+      );
+
+      if (!response.ok) {
+        throw new Error(
+          await getResponseErrorMessage(response, "Failed to submit report"),
+        );
+      }
+
+      toast.success("Report submitted", { id: toastId });
+      setReportingMessage(null);
+      setReportReason("");
+    } catch (error) {
+      log.error("Error reporting message:", error);
+      toast.error(
+        error instanceof Error ? error.message : "Failed to submit report",
+        { id: toastId },
+      );
+    } finally {
+      setIsSubmittingReport(false);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="h-[calc(100dvh-5rem)] overflow-hidden px-4 pb-4">
@@ -3533,6 +3588,101 @@ export default function MessagesInbox() {
 
                       const isMessageMenuActive =
                         activeMessageId === message.id;
+
+                      const renderMenuItems = (
+                        Item: React.ComponentType<{
+                          onClick?: React.MouseEventHandler;
+                          className?: string;
+                          children?: React.ReactNode;
+                        }>,
+                        skipShiftKey = false,
+                      ) => (
+                        <>
+                          {message.status !== "failed" && (
+                            <Item onClick={() => setReplyingToMessage(message)}>
+                              <Icon
+                                icon="heroicons-outline:reply"
+                                className="mr-2 h-4 w-4"
+                              />
+                              Reply
+                            </Item>
+                          )}
+                          {!isOwnMessage && message.status !== "failed" && (
+                            <Item
+                              onClick={() => {
+                                setReportingMessage(message);
+                                setReportReason("");
+                              }}
+                              className="text-button-danger focus:bg-button-danger/10 focus:text-button-danger"
+                            >
+                              <Icon
+                                icon="heroicons-outline:flag"
+                                className="mr-2 h-4 w-4"
+                              />
+                              Report Message
+                            </Item>
+                          )}
+                          {isOwnMessage && message.status !== "failed" && (
+                            <>
+                              <Item
+                                onClick={() => {
+                                  setEditingMessageId(message.id);
+                                  setEditContent(message.content);
+                                }}
+                              >
+                                <Icon
+                                  icon="heroicons-outline:pencil"
+                                  className="mr-2 h-4 w-4"
+                                />
+                                Edit Message
+                              </Item>
+                              <Item
+                                onClick={(e: React.MouseEvent) =>
+                                  void handleDeleteMessage(
+                                    message.id,
+                                    skipShiftKey ? false : e.shiftKey,
+                                  )
+                                }
+                                className="text-button-danger focus:bg-button-danger/10 focus:text-button-danger"
+                              >
+                                <Icon
+                                  icon="heroicons-outline:trash"
+                                  className="mr-2 h-4 w-4"
+                                />
+                                Delete Message
+                              </Item>
+                            </>
+                          )}
+                          {isOwnMessage && message.status === "failed" && (
+                            <>
+                              <Item
+                                onClick={() =>
+                                  void handleRetryFailedMessage(message)
+                                }
+                              >
+                                <Icon
+                                  icon="lucide:rotate-cw"
+                                  className="mr-2 h-4 w-4"
+                                />
+                                Retry
+                              </Item>
+                              <Item
+                                onClick={() =>
+                                  void handleDeleteMessage(message.id, true)
+                                }
+                                className="text-button-danger focus:bg-button-danger/10 focus:text-button-danger"
+                              >
+                                <Icon
+                                  icon="heroicons-outline:trash"
+                                  className="mr-2 h-4 w-4"
+                                />
+                                Remove
+                              </Item>
+                            </>
+                          )}
+                        </>
+                      );
+
                       const messageMenu = (
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
@@ -3557,408 +3707,360 @@ export default function MessagesInbox() {
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
-                            {message.status !== "failed" && (
-                              <DropdownMenuItem
-                                onClick={() => {
-                                  setReplyingToMessage(message);
-                                }}
-                              >
-                                <Icon
-                                  icon="heroicons-outline:reply"
-                                  className="mr-2 h-4 w-4"
-                                />
-                                Reply
-                              </DropdownMenuItem>
-                            )}
-                            {isOwnMessage && message.status !== "failed" && (
-                              <>
-                                <DropdownMenuItem
-                                  onClick={() => {
-                                    setEditingMessageId(message.id);
-                                    setEditContent(message.content);
-                                  }}
-                                >
-                                  <Icon
-                                    icon="heroicons-outline:pencil"
-                                    className="mr-2 h-4 w-4"
-                                  />
-                                  Edit Message
-                                </DropdownMenuItem>
-                                <DropdownMenuItem
-                                  onClick={(e) =>
-                                    void handleDeleteMessage(
-                                      message.id,
-                                      e.shiftKey,
-                                    )
-                                  }
-                                  className="text-button-danger focus:bg-button-danger/10 focus:text-button-danger"
-                                >
-                                  <Icon
-                                    icon="heroicons-outline:trash"
-                                    className="mr-2 h-4 w-4"
-                                  />
-                                  Delete Message
-                                </DropdownMenuItem>
-                              </>
-                            )}
-                            {isOwnMessage && message.status === "failed" && (
-                              <>
-                                <DropdownMenuItem
-                                  onClick={() =>
-                                    void handleRetryFailedMessage(message)
-                                  }
-                                >
-                                  <Icon
-                                    icon="lucide:rotate-cw"
-                                    className="mr-2 h-4 w-4"
-                                  />
-                                  Retry
-                                </DropdownMenuItem>
-                                <DropdownMenuItem
-                                  onClick={() =>
-                                    void handleDeleteMessage(message.id, true)
-                                  }
-                                  className="text-button-danger focus:bg-button-danger/10 focus:text-button-danger"
-                                >
-                                  <Icon
-                                    icon="heroicons-outline:trash"
-                                    className="mr-2 h-4 w-4"
-                                  />
-                                  Remove
-                                </DropdownMenuItem>
-                              </>
-                            )}
+                            {renderMenuItems(DropdownMenuItem)}
                           </DropdownMenuContent>
                         </DropdownMenu>
                       );
 
                       return (
-                        <div
-                          key={domId}
-                          id={`message-${domId}`}
-                          className="group"
-                          data-message-row
-                        >
-                          {showDaySeparator &&
-                            typeof message.createdAt === "number" && (
-                              <ChatEvent className="items-center gap-2 py-2">
-                                <div className="border-secondary-text/30 flex-1 border-t" />
-                                <ChatEventTime
-                                  timestamp={message.createdAt}
-                                  format="longDate"
-                                  className="text-secondary-text min-w-max text-xs font-semibold"
-                                />
-                                <div className="border-secondary-text/30 flex-1 border-t" />
-                              </ChatEvent>
-                            )}
-                          <ChatEvent
-                            className={cn(
-                              "group-hover:bg-tertiary-bg relative w-full flex-col items-start rounded-md py-0.5 transition-colors",
-                              message.parentId && "mt-0.5",
-                            )}
-                            onClick={(event) => {
-                              if (editingMessageId) return;
-                              if (message.status === "pending") return;
+                        <ContextMenu key={domId}>
+                          <ContextMenuTrigger asChild>
+                            <div
+                              id={`message-${domId}`}
+                              className="group"
+                              data-message-row
+                            >
+                              {showDaySeparator &&
+                                typeof message.createdAt === "number" && (
+                                  <ChatEvent className="items-center gap-2 py-2">
+                                    <div className="border-secondary-text/30 flex-1 border-t" />
+                                    <ChatEventTime
+                                      timestamp={message.createdAt}
+                                      format="longDate"
+                                      className="text-secondary-text min-w-max text-xs font-semibold"
+                                    />
+                                    <div className="border-secondary-text/30 flex-1 border-t" />
+                                  </ChatEvent>
+                                )}
+                              <ChatEvent
+                                className={cn(
+                                  "group-hover:bg-tertiary-bg relative w-full flex-col items-start rounded-md py-0.5 transition-colors",
+                                  message.parentId && "mt-0.5",
+                                )}
+                                onClick={(event) => {
+                                  if (editingMessageId) return;
+                                  if (message.status === "pending") return;
 
-                              const target = event.target as HTMLElement | null;
-                              if (
-                                target?.closest(
-                                  "a,button,textarea,input,select,[role='menuitem']",
-                                )
-                              ) {
-                                return;
-                              }
-
-                              setActiveMessageId((prev) =>
-                                prev === message.id ? null : message.id,
-                              );
-                            }}
-                          >
-                            {message.parentId && (
-                              <div className="-mb-1 flex items-center gap-2 sm:gap-3">
-                                <div className="flex w-10 shrink-0 justify-end @md/chat:w-12">
-                                  <div className="border-secondary-text/40 h-3 w-8 translate-x-2 translate-y-2 rounded-tl-md border-t-2 border-l-2" />
-                                </div>
-                                {(() => {
-                                  const parentMsg = messages.find(
-                                    (m) => m.id === message.parentId,
-                                  );
-                                  if (!parentMsg) {
-                                    return (
-                                      <div className="text-secondary-text/80 flex min-w-0 items-center gap-1.5 overflow-hidden rounded px-1 text-xs italic">
-                                        This message has been deleted
-                                      </div>
-                                    );
+                                  const target =
+                                    event.target as HTMLElement | null;
+                                  if (
+                                    target?.closest(
+                                      "a,button,textarea,input,select,[role='menuitem']",
+                                    )
+                                  ) {
+                                    return;
                                   }
-                                  const isParentOwn =
-                                    asId(parentMsg.senderId) ===
-                                    asId(currentUser?.id);
-                                  const parentSender = isParentOwn
-                                    ? (currentUserEnriched ??
-                                      currentUserMessageUser)
-                                    : selectedUser;
-                                  const parentDisplayName = parentSender
-                                    ? getDisplayName(parentSender)
-                                    : "Unknown";
-                                  return (
-                                    <button
-                                      type="button"
-                                      className="text-secondary-text/80 flex min-w-0 cursor-pointer items-center gap-1.5 overflow-hidden rounded px-1 text-xs transition-opacity hover:opacity-100"
-                                      onClick={() => {
-                                        const el = document.getElementById(
-                                          `message-${getMessageDomId(parentMsg)}`,
+
+                                  setActiveMessageId((prev) =>
+                                    prev === message.id ? null : message.id,
+                                  );
+                                }}
+                              >
+                                {message.parentId && (
+                                  <div className="-mb-1 flex items-center gap-2 sm:gap-3">
+                                    <div className="flex w-10 shrink-0 justify-end @md/chat:w-12">
+                                      <div className="border-secondary-text/40 h-3 w-8 translate-x-2 translate-y-2 rounded-tl-md border-t-2 border-l-2" />
+                                    </div>
+                                    {(() => {
+                                      const parentMsg = messages.find(
+                                        (m) => m.id === message.parentId,
+                                      );
+                                      if (!parentMsg) {
+                                        return (
+                                          <div className="text-secondary-text/80 flex min-w-0 items-center gap-1.5 overflow-hidden rounded px-1 text-xs italic">
+                                            This message has been deleted
+                                          </div>
                                         );
-                                        const container =
-                                          messagesContainerRef.current;
-                                        if (el && container) {
-                                          const rect =
-                                            el.getBoundingClientRect();
-                                          const containerRect =
-                                            container.getBoundingClientRect();
+                                      }
+                                      const isParentOwn =
+                                        asId(parentMsg.senderId) ===
+                                        asId(currentUser?.id);
+                                      const parentSender = isParentOwn
+                                        ? (currentUserEnriched ??
+                                          currentUserMessageUser)
+                                        : selectedUser;
+                                      const parentDisplayName = parentSender
+                                        ? getDisplayName(parentSender)
+                                        : "Unknown";
+                                      return (
+                                        <button
+                                          type="button"
+                                          className="text-secondary-text/80 flex min-w-0 cursor-pointer items-center gap-1.5 overflow-hidden rounded px-1 text-xs transition-opacity hover:opacity-100"
+                                          onClick={() => {
+                                            const el = document.getElementById(
+                                              `message-${getMessageDomId(parentMsg)}`,
+                                            );
+                                            const container =
+                                              messagesContainerRef.current;
+                                            if (el && container) {
+                                              const rect =
+                                                el.getBoundingClientRect();
+                                              const containerRect =
+                                                container.getBoundingClientRect();
 
-                                          const isVisible =
-                                            rect.top >= containerRect.top &&
-                                            rect.bottom <= containerRect.bottom;
+                                              const isVisible =
+                                                rect.top >= containerRect.top &&
+                                                rect.bottom <=
+                                                  containerRect.bottom;
 
-                                          if (!isVisible) {
-                                            const relativeTop =
-                                              el.offsetTop -
-                                              container.offsetTop;
-                                            container.scrollTo({
-                                              top:
-                                                relativeTop -
-                                                container.clientHeight / 2 +
-                                                el.clientHeight / 2,
-                                              behavior: "smooth",
-                                            });
-                                          }
-                                          el.classList.add(
-                                            "bg-button-info/10",
-                                            "transition-colors",
-                                            "duration-500",
-                                          );
-                                          setTimeout(
-                                            () =>
-                                              el.classList.remove(
+                                              if (!isVisible) {
+                                                const relativeTop =
+                                                  el.offsetTop -
+                                                  container.offsetTop;
+                                                container.scrollTo({
+                                                  top:
+                                                    relativeTop -
+                                                    container.clientHeight / 2 +
+                                                    el.clientHeight / 2,
+                                                  behavior: "smooth",
+                                                });
+                                              }
+                                              el.classList.add(
                                                 "bg-button-info/10",
                                                 "transition-colors",
                                                 "duration-500",
-                                              ),
-                                            1500,
-                                          );
-                                        }
-                                      }}
-                                    >
-                                      {parentSender && (
-                                        <UserAvatar
-                                          userId={parentSender.id}
-                                          avatarHash={parentSender.avatar}
-                                          username={parentSender.username}
-                                          custom_avatar={
-                                            parentSender.custom_avatar
-                                          }
-                                          size={4}
-                                          showBadge={false}
-                                          settings={parentSender.settings_v2}
-                                          premiumType={parentSender.premiumtype}
-                                          className="h-4 w-4"
-                                        />
-                                      )}
-                                      <span className="text-primary-text shrink-0 font-semibold">
-                                        @{parentDisplayName}
-                                      </span>
-                                      <span className="text-secondary-text max-w-50 truncate sm:max-w-100">
-                                        {formatMessageText(parentMsg.content)}
-                                      </span>
-                                    </button>
-                                  );
-                                })()}
-                              </div>
-                            )}
-                            <div className="relative flex w-full items-start gap-2">
-                              <ChatEventAddon
-                                className={cn(
-                                  isGroupedWithPrevious
-                                    ? "justify-end pr-1"
-                                    : undefined,
+                                              );
+                                              setTimeout(
+                                                () =>
+                                                  el.classList.remove(
+                                                    "bg-button-info/10",
+                                                    "transition-colors",
+                                                    "duration-500",
+                                                  ),
+                                                1500,
+                                              );
+                                            }
+                                          }}
+                                        >
+                                          {parentSender && (
+                                            <UserAvatar
+                                              userId={parentSender.id}
+                                              avatarHash={parentSender.avatar}
+                                              username={parentSender.username}
+                                              custom_avatar={
+                                                parentSender.custom_avatar
+                                              }
+                                              size={4}
+                                              showBadge={false}
+                                              settings={
+                                                parentSender.settings_v2
+                                              }
+                                              premiumType={
+                                                parentSender.premiumtype
+                                              }
+                                              className="h-4 w-4"
+                                            />
+                                          )}
+                                          <span className="text-primary-text shrink-0 font-semibold">
+                                            @{parentDisplayName}
+                                          </span>
+                                          <span className="text-secondary-text max-w-50 truncate sm:max-w-100">
+                                            {formatMessageText(
+                                              parentMsg.content,
+                                            )}
+                                          </span>
+                                        </button>
+                                      );
+                                    })()}
+                                  </div>
                                 )}
-                              >
-                                {isGroupedWithPrevious ? (
-                                  typeof message.createdAt === "number" ? (
-                                    <ChatEventTime
-                                      timestamp={message.createdAt}
-                                      format="time"
-                                      className="text-secondary-text invisible text-[10px] group-hover:visible"
-                                    />
-                                  ) : null
-                                ) : (
-                                  <Link
-                                    href={`/users/${sender.id}`}
-                                    prefetch={false}
-                                    className="cursor-pointer"
-                                    aria-label={`View ${getDisplayName(sender)} profile`}
+                                <div className="relative flex w-full items-start gap-2">
+                                  <ChatEventAddon
+                                    className={cn(
+                                      isGroupedWithPrevious
+                                        ? "justify-end pr-1"
+                                        : undefined,
+                                    )}
                                   >
-                                    <UserAvatar
-                                      userId={sender.id}
-                                      avatarHash={sender.avatar}
-                                      username={sender.username}
-                                      custom_avatar={sender.custom_avatar}
-                                      size={7}
-                                      showBadge={false}
-                                      settings={sender.settings_v2}
-                                      premiumType={sender.premiumtype}
-                                    />
-                                  </Link>
-                                )}
-                              </ChatEventAddon>
-                              <ChatEventBody>
-                                {!isGroupedWithPrevious ? (
-                                  <ChatEventTitle className="w-full items-start">
-                                    <div className="flex min-w-0 flex-col items-start gap-0.5 sm:flex-row sm:items-center sm:gap-2">
+                                    {isGroupedWithPrevious ? (
+                                      typeof message.createdAt === "number" ? (
+                                        <ChatEventTime
+                                          timestamp={message.createdAt}
+                                          format="time"
+                                          className="text-secondary-text invisible text-[10px] group-hover:visible"
+                                        />
+                                      ) : null
+                                    ) : (
                                       <Link
                                         href={`/users/${sender.id}`}
                                         prefetch={false}
-                                        className="text-primary-text hover:text-link cursor-pointer truncate text-sm font-medium transition-colors sm:text-base"
+                                        className="cursor-pointer"
+                                        aria-label={`View ${getDisplayName(sender)} profile`}
                                       >
-                                        {getDisplayName(sender)}
-                                      </Link>
-                                      {typeof message.createdAt ===
-                                        "number" && (
-                                        <ChatEventTime
-                                          timestamp={message.createdAt}
-                                          format="discord"
-                                          className="text-secondary-text text-xs"
+                                        <UserAvatar
+                                          userId={sender.id}
+                                          avatarHash={sender.avatar}
+                                          username={sender.username}
+                                          custom_avatar={sender.custom_avatar}
+                                          size={7}
+                                          showBadge={false}
+                                          settings={sender.settings_v2}
+                                          premiumType={sender.premiumtype}
                                         />
-                                      )}
-                                    </div>
-                                  </ChatEventTitle>
-                                ) : null}
-                                {editingMessageId === message.id ? (
-                                  <div className="mt-2 space-y-3">
-                                    <div className="space-y-2">
-                                      <textarea
-                                        value={editContent}
-                                        onChange={(e) =>
-                                          setEditContent(e.target.value)
-                                        }
-                                        disabled={isSending}
-                                        rows={3}
-                                        className="border-border-card bg-form-input text-primary-text focus:border-button-info w-full resize-y rounded border p-3 text-sm focus:outline-none"
-                                        autoCorrect="off"
-                                        autoComplete="off"
-                                        spellCheck="false"
-                                        autoCapitalize="off"
-                                        onKeyDown={(e) => {
-                                          if (e.key === "Escape") {
-                                            setEditingMessageId(null);
-                                            setEditContent("");
-                                          }
-                                          if (
-                                            e.key === "Enter" &&
-                                            !e.shiftKey
-                                          ) {
-                                            e.preventDefault();
-                                            void handleEditMessage(message.id);
-                                          }
-                                        }}
-                                      />
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                      <div className="flex items-center gap-2 lg:hidden">
-                                        <Button
-                                          size="sm"
-                                          className="h-8 px-4 text-xs"
-                                          onClick={() =>
-                                            void handleEditMessage(message.id)
-                                          }
-                                          disabled={
-                                            isSending || !editContent.trim()
-                                          }
-                                        >
-                                          {isSending ? (
-                                            <Spinner className="mr-1 h-3 w-3" />
-                                          ) : null}
-                                          Update
-                                        </Button>
-                                        <Button
-                                          size="sm"
-                                          variant="ghost"
-                                          className="text-secondary-text h-8 px-4 text-xs"
-                                          onClick={() => {
-                                            setEditingMessageId(null);
-                                            setEditContent("");
-                                          }}
-                                          disabled={isSending}
-                                        >
-                                          Cancel
-                                        </Button>
-                                      </div>
-                                      <div className="text-secondary-text hidden text-[11px] lg:block">
-                                        Esc to{" "}
-                                        <button
-                                          type="button"
-                                          className="text-link cursor-pointer hover:underline disabled:cursor-not-allowed disabled:opacity-60"
-                                          onClick={() => {
-                                            setEditingMessageId(null);
-                                            setEditContent("");
-                                          }}
-                                          disabled={isSending}
-                                        >
-                                          cancel
-                                        </button>{" "}
-                                        • Enter to{" "}
-                                        <button
-                                          type="button"
-                                          className="text-link cursor-pointer hover:underline disabled:cursor-not-allowed disabled:opacity-60"
-                                          onClick={() =>
-                                            void handleEditMessage(message.id)
-                                          }
-                                          disabled={
-                                            isSending || !editContent.trim()
-                                          }
-                                        >
-                                          save
-                                        </button>
-                                      </div>
-                                    </div>
-                                  </div>
-                                ) : (
-                                  <div className="flex w-full items-start gap-2">
-                                    <div className="min-w-0 flex-1">
-                                      <ChatEventContent
-                                        className={cn(
-                                          "wrap-break-word whitespace-pre-wrap",
-                                          message.status === "pending"
-                                            ? "text-secondary-text/70"
-                                            : message.status === "failed"
-                                              ? "text-red-400/90"
-                                              : "text-primary-text",
-                                        )}
-                                      >
-                                        {formatMessageText(
-                                          message.content ?? "",
-                                        )}
-                                        {message.updatedAt &&
-                                          message.updatedAt !==
-                                            message.createdAt && (
-                                            <span className="text-secondary-text ml-1.5 text-[10px]">
-                                              (edited)
-                                            </span>
+                                      </Link>
+                                    )}
+                                  </ChatEventAddon>
+                                  <ChatEventBody>
+                                    {!isGroupedWithPrevious ? (
+                                      <ChatEventTitle className="w-full items-start">
+                                        <div className="flex min-w-0 flex-col items-start gap-0.5 sm:flex-row sm:items-center sm:gap-2">
+                                          <Link
+                                            href={`/users/${sender.id}`}
+                                            prefetch={false}
+                                            className="text-primary-text hover:text-link cursor-pointer truncate text-sm font-medium transition-colors sm:text-base"
+                                          >
+                                            {getDisplayName(sender)}
+                                          </Link>
+                                          {typeof message.createdAt ===
+                                            "number" && (
+                                            <ChatEventTime
+                                              timestamp={message.createdAt}
+                                              format="discord"
+                                              className="text-secondary-text text-xs"
+                                            />
                                           )}
-                                      </ChatEventContent>
-                                    </div>
-                                  </div>
-                                )}
-                              </ChatEventBody>
-                              {editingMessageId !== message.id &&
-                                message.status !== "pending" && (
-                                  <div className="absolute top-0 right-0 z-10">
-                                    {messageMenu}
-                                  </div>
-                                )}
+                                        </div>
+                                      </ChatEventTitle>
+                                    ) : null}
+                                    {editingMessageId === message.id ? (
+                                      <div className="mt-2 space-y-3">
+                                        <div className="space-y-2">
+                                          <textarea
+                                            value={editContent}
+                                            onChange={(e) =>
+                                              setEditContent(e.target.value)
+                                            }
+                                            disabled={isSending}
+                                            rows={3}
+                                            className="border-border-card bg-form-input text-primary-text focus:border-button-info w-full resize-y rounded border p-3 text-sm focus:outline-none"
+                                            autoCorrect="off"
+                                            autoComplete="off"
+                                            spellCheck="false"
+                                            autoCapitalize="off"
+                                            onKeyDown={(e) => {
+                                              if (e.key === "Escape") {
+                                                setEditingMessageId(null);
+                                                setEditContent("");
+                                              }
+                                              if (
+                                                e.key === "Enter" &&
+                                                !e.shiftKey
+                                              ) {
+                                                e.preventDefault();
+                                                void handleEditMessage(
+                                                  message.id,
+                                                );
+                                              }
+                                            }}
+                                          />
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                          <div className="flex items-center gap-2 lg:hidden">
+                                            <Button
+                                              size="sm"
+                                              className="h-8 px-4 text-xs"
+                                              onClick={() =>
+                                                void handleEditMessage(
+                                                  message.id,
+                                                )
+                                              }
+                                              disabled={
+                                                isSending || !editContent.trim()
+                                              }
+                                            >
+                                              {isSending ? (
+                                                <Spinner className="mr-1 h-3 w-3" />
+                                              ) : null}
+                                              Update
+                                            </Button>
+                                            <Button
+                                              size="sm"
+                                              variant="ghost"
+                                              className="text-secondary-text h-8 px-4 text-xs"
+                                              onClick={() => {
+                                                setEditingMessageId(null);
+                                                setEditContent("");
+                                              }}
+                                              disabled={isSending}
+                                            >
+                                              Cancel
+                                            </Button>
+                                          </div>
+                                          <div className="text-secondary-text hidden text-[11px] lg:block">
+                                            Esc to{" "}
+                                            <button
+                                              type="button"
+                                              className="text-link cursor-pointer hover:underline disabled:cursor-not-allowed disabled:opacity-60"
+                                              onClick={() => {
+                                                setEditingMessageId(null);
+                                                setEditContent("");
+                                              }}
+                                              disabled={isSending}
+                                            >
+                                              cancel
+                                            </button>{" "}
+                                            • Enter to{" "}
+                                            <button
+                                              type="button"
+                                              className="text-link cursor-pointer hover:underline disabled:cursor-not-allowed disabled:opacity-60"
+                                              onClick={() =>
+                                                void handleEditMessage(
+                                                  message.id,
+                                                )
+                                              }
+                                              disabled={
+                                                isSending || !editContent.trim()
+                                              }
+                                            >
+                                              save
+                                            </button>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    ) : (
+                                      <div className="flex w-full items-start gap-2">
+                                        <div className="min-w-0 flex-1">
+                                          <ChatEventContent
+                                            className={cn(
+                                              "wrap-break-word whitespace-pre-wrap",
+                                              message.status === "pending"
+                                                ? "text-secondary-text/70"
+                                                : message.status === "failed"
+                                                  ? "text-red-400/90"
+                                                  : "text-primary-text",
+                                            )}
+                                          >
+                                            {formatMessageText(
+                                              message.content ?? "",
+                                            )}
+                                            {message.updatedAt &&
+                                              message.updatedAt !==
+                                                message.createdAt && (
+                                                <span className="text-secondary-text ml-1.5 text-[10px]">
+                                                  (edited)
+                                                </span>
+                                              )}
+                                          </ChatEventContent>
+                                        </div>
+                                      </div>
+                                    )}
+                                  </ChatEventBody>
+                                  {editingMessageId !== message.id &&
+                                    message.status !== "pending" && (
+                                      <div className="absolute top-0 right-0 z-10">
+                                        {messageMenu}
+                                      </div>
+                                    )}
+                                </div>
+                              </ChatEvent>
                             </div>
-                          </ChatEvent>
-                        </div>
+                          </ContextMenuTrigger>
+                          {message.status !== "pending" && (
+                            <ContextMenuContent>
+                              {renderMenuItems(ContextMenuItem, true)}
+                            </ContextMenuContent>
+                          )}
+                        </ContextMenu>
                       );
                     })
                   )}
@@ -4039,6 +4141,68 @@ export default function MessagesInbox() {
             clicking <span className="font-semibold">Delete Message</span> to
             skip this confirmation.
           </p>
+        </div>
+      </ConfirmDialog>
+
+      <ConfirmDialog
+        isOpen={!!reportingMessage}
+        onClose={() => {
+          setReportingMessage(null);
+          setReportReason("");
+        }}
+        onConfirm={() => void handleReportMessage()}
+        title="Report Message"
+        confirmText="Submit Report"
+        confirmVariant="destructive"
+        confirmDisabled={!reportReason.trim() || isSubmittingReport}
+        closeOnConfirm={false}
+      >
+        <div className="space-y-3">
+          {reportingMessage && selectedUser && (
+            <div className="border-border-card bg-tertiary-bg/50 rounded-lg border p-3">
+              <div className="flex items-center gap-3">
+                <div className="shrink-0">
+                  <UserAvatar
+                    userId={selectedUser.id}
+                    avatarHash={selectedUser.avatar}
+                    username={selectedUser.username}
+                    custom_avatar={selectedUser.custom_avatar}
+                    size={7}
+                    showBadge={false}
+                    settings={selectedUser.settings_v2}
+                    premiumType={selectedUser.premiumtype}
+                  />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-center gap-x-2">
+                    <span className="text-primary-text text-sm font-medium">
+                      {getDisplayName(selectedUser)}
+                    </span>
+                    {typeof reportingMessage.createdAt === "number" && (
+                      <ChatEventTime
+                        timestamp={reportingMessage.createdAt}
+                        format="discord"
+                        className="text-secondary-text text-xs"
+                      />
+                    )}
+                  </div>
+                  <p className="text-primary-text/80 mt-0.5 line-clamp-4 text-sm break-words">
+                    {formatMessageText(reportingMessage.content)}
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+          <p className="text-secondary-text text-sm">
+            Please describe why you are reporting this message.
+          </p>
+          <textarea
+            className="border-border-card bg-tertiary-bg text-primary-text placeholder:text-secondary-text focus:ring-border-focus w-full resize-none rounded-lg border px-3 py-2 text-sm focus:ring-2 focus:outline-none"
+            rows={4}
+            placeholder="Explain why you're reporting this message..."
+            value={reportReason}
+            onChange={(e) => setReportReason(e.target.value)}
+          />
         </div>
       </ConfirmDialog>
     </div>
