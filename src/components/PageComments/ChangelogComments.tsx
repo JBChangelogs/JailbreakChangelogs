@@ -38,7 +38,12 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "../ui/button";
-import { CommentData } from "@/utils/api/api";
+import {
+  CommentData,
+  PUBLIC_API_URL,
+  getResponseErrorMessage,
+} from "@/utils/api/api";
+import { buildApiUrlWithDevToken } from "@/utils/api/apiDevToken";
 import { sanitizeText } from "@/utils/ui/sanitizeText";
 import {
   refreshComments,
@@ -1227,32 +1232,36 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
   const handleReportSubmit = async (reason: string) => {
     if (!reason.trim() || !reportingCommentId) return;
 
+    const toastId = toast.loading("Submitting report...");
     try {
-      const sanitizedReason = sanitizeText(reason.trim());
-      const response = await fetch(`/api/comments/report`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
+      const response = await fetch(
+        buildApiUrlWithDevToken(PUBLIC_API_URL, "/comments/report"),
+        {
+          method: "POST",
+          credentials: "include",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            comment_id: reportingCommentId,
+            reason: reason.trim(),
+          }),
         },
-        body: JSON.stringify({
-          comment_id: reportingCommentId,
-          reason: sanitizedReason,
-        }),
-      });
+      );
 
       if (!response.ok) {
-        const body = await response.json().catch(() => ({}));
-        log.error("report comment failed", { status: response.status, body });
-        throw new Error("Failed to report comment");
+        throw new Error(
+          await getResponseErrorMessage(response, "Failed to submit report"),
+        );
       }
 
-      toast.success("We have successfully received your report");
+      toast.success("Report submitted", { id: toastId });
       setReportModalOpen(false);
       setReportReason("");
       setReportingCommentId(null);
     } catch (err) {
+      log.error("Error reporting comment:", err);
       toast.error(
-        err instanceof Error ? err.message : "Failed to report comment",
+        err instanceof Error ? err.message : "Failed to submit report",
+        { id: toastId },
       );
     }
   };
@@ -2005,6 +2014,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                                         onClick={() =>
                                           handleReportClick(comment.id)
                                         }
+                                        className="text-button-danger hover:bg-button-danger/10 focus:bg-button-danger/10 focus:text-button-danger"
                                       >
                                         <Icon
                                           icon="heroicons-outline:flag"
@@ -2337,40 +2347,42 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
       </div>
 
       {/* Replace the old Dialog with the new ReportCommentModal */}
-      <ReportCommentModal
-        open={reportModalOpen}
-        onClose={() => {
-          setReportModalOpen(false);
-          setReportReason("");
-          setReportingCommentId(null);
-        }}
-        onSubmit={handleReportSubmit}
-        reportReason={reportReason}
-        setReportReason={setReportReason}
-        commentContent={
-          reportingCommentId
-            ? filteredComments.find((c) => c.id === reportingCommentId)
-                ?.content || ""
-            : ""
-        }
-        commentOwner={
-          reportingCommentId
-            ? userData[
-                filteredComments.find((c) => c.id === reportingCommentId)
-                  ?.user_id || ""
-              ]?.settings_v2?.show_recent_comments === false &&
-              currentUserId !==
-                filteredComments.find((c) => c.id === reportingCommentId)
-                  ?.user_id
-              ? "Hidden User"
-              : userData[
-                  filteredComments.find((c) => c.id === reportingCommentId)
-                    ?.user_id || ""
-                ]?.username || "Unknown User"
-            : ""
-        }
-        commentId={reportingCommentId || 0}
-      />
+      {(() => {
+        const reportingComment = reportingCommentId
+          ? filteredComments.find((c) => c.id === reportingCommentId)
+          : null;
+        const reportingUserId = reportingComment?.user_id || "";
+        const reportingUserData = userData[reportingUserId];
+        const isHidden =
+          reportingUserData?.settings_v2?.show_recent_comments === false &&
+          currentUserId !== reportingUserId;
+        return (
+          <ReportCommentModal
+            open={reportModalOpen}
+            onClose={() => {
+              setReportModalOpen(false);
+              setReportReason("");
+              setReportingCommentId(null);
+            }}
+            onSubmit={handleReportSubmit}
+            reportReason={reportReason}
+            setReportReason={setReportReason}
+            commentContent={reportingComment?.content || ""}
+            commentOwner={
+              isHidden
+                ? "Hidden User"
+                : reportingUserData?.username || "Unknown User"
+            }
+            commentId={reportingCommentId || 0}
+            commentUserId={reportingUserId}
+            commentAvatar={reportingUserData?.avatar}
+            commentCustomAvatar={reportingUserData?.custom_avatar}
+            commentDate={reportingComment?.date || ""}
+            commentPremiumType={reportingUserData?.premiumtype}
+            commentSettings={reportingUserData?.settings_v2}
+          />
+        );
+      })()}
 
       {/* Supporter Modal */}
       <SupporterModal
