@@ -574,6 +574,22 @@ export default function Header() {
                 </span>
               </button>
             )}
+            <Link
+              href="/reports"
+              onClick={handleDrawerToggle}
+              className="hover:bg-tertiary-bg flex cursor-pointer items-center gap-3 rounded-xl px-2 py-2 transition-colors"
+            >
+              <div className="bg-button-info/15 flex h-8 w-8 shrink-0 items-center justify-center rounded-md">
+                <Icon
+                  icon="heroicons:flag"
+                  className="text-link h-4 w-4"
+                  inline={true}
+                />
+              </div>
+              <span className="text-primary-text text-sm font-medium">
+                My Reports
+              </span>
+            </Link>
             <button
               type="button"
               onClick={handleLogout}

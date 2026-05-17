@@ -1400,6 +1400,23 @@ export const NavbarModern = ({
                           </button>
                         )}
 
+                        <Link
+                          href="/reports"
+                          className="hover:bg-tertiary-bg flex items-center gap-3 rounded-xl px-2 py-2 transition-colors"
+                          onClick={() => setUserMenuOpen(false)}
+                        >
+                          <div className="bg-button-info/15 flex h-8 w-8 shrink-0 items-center justify-center rounded-md">
+                            <Icon
+                              icon="heroicons:flag"
+                              className="text-link h-4 w-4"
+                              inline={true}
+                            />
+                          </div>
+                          <span className="text-primary-text text-sm font-medium">
+                            My Reports
+                          </span>
+                        </Link>
+
                         <button
                           className="hover:bg-button-danger/10 flex w-full cursor-pointer items-center gap-3 rounded-xl px-2 py-2 text-left transition-colors"
                           onClick={handleLogout}
