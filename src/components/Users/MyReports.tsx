@@ -18,6 +18,57 @@ import { convertUrlsToLinks } from "@/utils/ui/urlConverter";
 
 const log = createLogger("UI");
 
+function SpoilerImage({
+  src,
+  alt,
+  rounded = false,
+}: {
+  src: string;
+  alt: string;
+  rounded?: boolean;
+}) {
+  const [revealed, setRevealed] = useState(false);
+
+  return (
+    <div
+      className={`relative cursor-pointer overflow-hidden ${rounded ? "inline-block rounded-full" : "rounded-lg"}`}
+      onClick={(e) => {
+        e.stopPropagation();
+        setRevealed(true);
+      }}
+    >
+      <Image
+        src={src}
+        alt={alt}
+        {...(rounded
+          ? { width: 64, height: 64 }
+          : {
+              width: 0,
+              height: 0,
+              sizes: "100vw",
+              style: { width: "100%", height: "auto" },
+            })}
+        className={`transition-all duration-500 ${rounded ? "rounded-full object-cover" : "rounded-lg"} ${!revealed ? "scale-110 blur-2xl" : "blur-0 scale-100"}`}
+        unoptimized
+      />
+      {!revealed && (
+        <div className="absolute inset-0 flex items-center justify-center bg-black/30">
+          {rounded ? (
+            <Icon
+              icon="solar:eye-outline"
+              className="h-6 w-6 text-white drop-shadow"
+            />
+          ) : (
+            <span className="rounded-md border border-white/30 bg-white/20 px-2 py-0.5 text-xs font-semibold tracking-widest text-white uppercase backdrop-blur-md">
+              Spoiler
+            </span>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export interface ReportMetadataComment {
   id: number;
   date: string;
@@ -43,10 +94,16 @@ export interface ReportMetadataMessage {
   recipient_id: string | number;
 }
 
+export interface ReportMetadataUsername {
+  username: string;
+  global_name: string;
+  last_updated: number;
+}
+
 export interface ReportMetadata {
   comment?: ReportMetadataComment;
   avatar?: string;
-  username?: string;
+  username?: string | ReportMetadataUsername;
   global_name?: string;
   banner?: string | null;
   custom_banner?: string;
@@ -166,14 +223,7 @@ export function ReportContext({ report }: { report: Report }) {
         return (
           <div className="border-border-card bg-tertiary-bg mt-2 rounded-lg border p-3">
             <p className="text-secondary-text mb-2 text-xs">Reported avatar</p>
-            <Image
-              src={metadata.avatar}
-              alt="Reported avatar"
-              width={64}
-              height={64}
-              className="border-border-card rounded-full border object-cover"
-              unoptimized
-            />
+            <SpoilerImage src={metadata.avatar} alt="Reported avatar" rounded />
           </div>
         );
       }
@@ -184,15 +234,9 @@ export function ReportContext({ report }: { report: Report }) {
         return (
           <div className="border-border-card bg-tertiary-bg mt-2 rounded-lg border p-3">
             <p className="text-secondary-text mb-2 text-xs">Reported banner</p>
-            <Image
+            <SpoilerImage
               src={(metadata.custom_banner ?? metadata.banner) as string}
               alt="Reported banner"
-              width={0}
-              height={0}
-              sizes="100vw"
-              className="border-border-card rounded-lg border"
-              style={{ width: "100%", height: "auto" }}
-              unoptimized
             />
           </div>
         );
@@ -200,12 +244,23 @@ export function ReportContext({ report }: { report: Report }) {
       return null;
 
     case "username": {
-      const hasGlobalName =
-        metadata.global_name && metadata.global_name !== "None";
+      const usernameObj =
+        metadata.username && typeof metadata.username === "object"
+          ? metadata.username
+          : null;
+      const usernameStr = usernameObj
+        ? usernameObj.username
+        : typeof metadata.username === "string"
+          ? metadata.username
+          : undefined;
+      const globalNameStr = usernameObj
+        ? usernameObj.global_name
+        : metadata.global_name;
+      const hasGlobalName = globalNameStr && globalNameStr !== "None";
       const displayName = hasGlobalName
-        ? `${metadata.global_name}${metadata.username ? ` (@${metadata.username})` : ""}`
-        : metadata.username
-          ? `@${metadata.username}`
+        ? `${globalNameStr}${usernameStr ? ` (@${usernameStr})` : ""}`
+        : usernameStr
+          ? `@${usernameStr}`
           : "";
       return (
         <div className="border-border-card bg-tertiary-bg mt-2 rounded-lg border p-3">
