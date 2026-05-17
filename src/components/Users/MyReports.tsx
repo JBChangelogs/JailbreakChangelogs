@@ -4,7 +4,6 @@ import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useQueryState } from "nuqs";
 import Image from "next/image";
-import { useAuthContext } from "@/contexts/AuthContext";
 import { PUBLIC_API_URL } from "@/utils/api/api";
 import { buildApiUrlWithDevToken } from "@/utils/api/apiDevToken";
 import { createLogger } from "@/services/logger";
@@ -307,7 +306,6 @@ export function ReportContext({ report }: { report: Report }) {
 
 export default function MyReports() {
   const router = useRouter();
-  const { user, isLoading: authLoading } = useAuthContext();
   const [pageParam, setPageParam] = useQueryState("page", {
     defaultValue: "1",
     history: "push",
@@ -322,87 +320,53 @@ export default function MyReports() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchReports = useCallback(
-    async (currentPage: number) => {
-      if (!user) return;
-      setLoading(true);
-      setError(null);
-      try {
-        const url = buildApiUrlWithDevToken(
-          PUBLIC_API_URL,
-          `/reports/me?page=${currentPage}`,
-        );
-        const response = await fetch(url, {
-          credentials: "include",
-          cache: "no-store",
-        });
+  const fetchReports = useCallback(async (currentPage: number) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const url = buildApiUrlWithDevToken(
+        PUBLIC_API_URL,
+        `/reports/me?page=${currentPage}`,
+      );
+      const response = await fetch(url, {
+        credentials: "include",
+        cache: "no-store",
+      });
 
-        if (!response.ok) {
-          const body = await response.json().catch(() => ({}));
-          if (response.status === 404) {
-            setReports([]);
-            setTotalPages(1);
-            setTotal(0);
-            return;
-          }
-          log.error("Failed to fetch reports", {
-            status: response.status,
-            body,
-          });
-          throw new Error(
-            (body as { message?: string })?.message ?? "Failed to load reports",
-          );
+      if (!response.ok) {
+        const body = await response.json().catch(() => ({}));
+        if (response.status === 404) {
+          setReports([]);
+          setTotalPages(1);
+          setTotal(0);
+          return;
         }
-
-        const data: ReportsResponse = await response.json();
-        setReports(data.items ?? []);
-        setTotalPages(data.total_pages ?? 1);
-        setTotal(data.total ?? 0);
-      } catch (err) {
-        log.error("Error fetching reports:", err);
-        setError(err instanceof Error ? err.message : "Failed to load reports");
-      } finally {
-        setLoading(false);
+        log.error("Failed to fetch reports", { status: response.status, body });
+        throw new Error(
+          (body as { message?: string })?.message ?? "Failed to load reports",
+        );
       }
-    },
-    [user],
-  );
+
+      const data: ReportsResponse = await response.json();
+      setReports(data.items ?? []);
+      setTotalPages(data.total_pages ?? 1);
+      setTotal(data.total ?? 0);
+    } catch (err) {
+      log.error("Error fetching reports:", err);
+      setError(err instanceof Error ? err.message : "Failed to load reports");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
-    if (!authLoading && !user) {
-      router.push("/");
-    }
-  }, [user, authLoading, router]);
-
-  useEffect(() => {
-    if (!authLoading && user) {
-      void fetchReports(page);
-    }
-  }, [authLoading, user, page, fetchReports]);
+    void fetchReports(page);
+  }, [page, fetchReports]);
 
   const handlePageChange = (_: React.ChangeEvent<unknown>, value: number) => {
     void setPageParam(String(value));
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
-
-  if (authLoading) {
-    return (
-      <main className="min-h-screen">
-        <div className="container mx-auto max-w-7xl px-4 py-4">
-          <Breadcrumb />
-          <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
-            {[1, 2, 3, 4].map((i) => (
-              <Skeleton key={i} style={{ height: 160 }} />
-            ))}
-          </div>
-        </div>
-      </main>
-    );
-  }
-
-  if (!user) {
-    return null;
-  }
 
   return (
     <main className="min-h-screen pb-8">
