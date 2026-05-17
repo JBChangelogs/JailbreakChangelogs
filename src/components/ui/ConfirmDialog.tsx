@@ -45,6 +45,7 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent
         showClose
+        aria-describedby={undefined}
         className="bg-secondary-bg max-w-md rounded-lg p-0 backdrop-blur-none"
       >
         <DialogHeader className="px-6 pt-6 pb-2">

@@ -808,7 +808,7 @@ export default function Header() {
           <NewsTicker />
           <div className="relative z-10">
             <div className="bg-primary-bg/75 border-border-card border-b backdrop-blur-lg">
-              <div className="flex items-center justify-between px-4">
+              <div className="flex items-center justify-between px-4 py-1">
                 <div className="flex items-center">
                   <Link href="/" style={{ display: "block" }}>
                     <Image

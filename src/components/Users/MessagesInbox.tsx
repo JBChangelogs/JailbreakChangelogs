@@ -4196,13 +4196,21 @@ export default function MessagesInbox() {
           <p className="text-secondary-text text-sm">
             Please describe why you are reporting this message.
           </p>
-          <textarea
-            className="border-border-card bg-tertiary-bg text-primary-text placeholder:text-secondary-text focus:ring-border-focus w-full resize-none rounded-lg border px-3 py-2 text-sm focus:ring-2 focus:outline-none"
-            rows={4}
-            placeholder="Explain why you're reporting this message..."
-            value={reportReason}
-            onChange={(e) => setReportReason(e.target.value)}
-          />
+          <div>
+            <textarea
+              className="border-border-card bg-tertiary-bg text-primary-text placeholder:text-secondary-text focus:ring-border-focus w-full resize-none rounded-lg border px-3 py-2 text-sm focus:ring-2 focus:outline-none"
+              rows={4}
+              maxLength={500}
+              placeholder="Explain why you're reporting this message..."
+              value={reportReason}
+              onChange={(e) => setReportReason(e.target.value)}
+            />
+            <p
+              className={`mt-1 text-right text-xs ${reportReason.length >= 500 ? "text-red-500" : "text-secondary-text"}`}
+            >
+              {reportReason.length}/500
+            </p>
+          </div>
         </div>
       </ConfirmDialog>
     </div>

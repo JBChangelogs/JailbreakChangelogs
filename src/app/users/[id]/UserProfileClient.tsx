@@ -13,7 +13,7 @@ import { Banner } from "@/components/Profile/Banner";
 import { UserSettingsV2, FollowingData } from "@/types/auth";
 import { toast } from "sonner";
 import dynamic from "next/dynamic";
-import { PUBLIC_API_URL } from "@/utils/api/api";
+import { PUBLIC_API_URL, getResponseErrorMessage } from "@/utils/api/api";
 import { buildApiUrlWithDevToken } from "@/utils/api/apiDevToken";
 import { createLogger } from "@/services/logger";
 
@@ -27,8 +27,15 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+import { convertUrlsToLinks } from "@/utils/ui/urlConverter";
+import { sanitizeText } from "@/utils/ui/sanitizeText";
 import { formatShortDate, formatCustomDate } from "@/utils/helpers/timestamp";
 import { useOptimizedRealTimeRelativeDate } from "@/hooks/useSharedTimer";
 import ProfileTabs from "@/components/Profile/ProfileTabs";
@@ -326,6 +333,22 @@ export default function UserProfileClient({
     initialData?.favoriteItemDetails || {},
   );
   const [tradeAds] = useState<TradeAd[]>(initialData?.tradeAds || []);
+  const [isReportDescriptionOpen, setIsReportDescriptionOpen] = useState(false);
+  const [reportDescriptionReason, setReportDescriptionReason] = useState("");
+  const [isSubmittingDescriptionReport, setIsSubmittingDescriptionReport] =
+    useState(false);
+  const [isReportAvatarOpen, setIsReportAvatarOpen] = useState(false);
+  const [reportAvatarReason, setReportAvatarReason] = useState("");
+  const [isSubmittingAvatarReport, setIsSubmittingAvatarReport] =
+    useState(false);
+  const [isReportBannerOpen, setIsReportBannerOpen] = useState(false);
+  const [reportBannerReason, setReportBannerReason] = useState("");
+  const [isSubmittingBannerReport, setIsSubmittingBannerReport] =
+    useState(false);
+  const [isReportUsernameOpen, setIsReportUsernameOpen] = useState(false);
+  const [reportUsernameReason, setReportUsernameReason] = useState("");
+  const [isSubmittingUsernameReport, setIsSubmittingUsernameReport] =
+    useState(false);
 
   const parseJsonWithLargeIds = (raw: string): unknown =>
     JSON.parse(
@@ -603,6 +626,162 @@ export default function UserProfileClient({
       );
     } finally {
       setIsBlockingAction(false);
+    }
+  };
+
+  const handleReportDescription = async () => {
+    if (!user || !reportDescriptionReason.trim()) return;
+
+    setIsSubmittingDescriptionReport(true);
+    const toastId = toast.loading("Submitting report...");
+    try {
+      const response = await fetch(
+        buildApiUrlWithDevToken(PUBLIC_API_URL, "/users/description/report"),
+        {
+          method: "POST",
+          credentials: "include",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            user_id: user.id,
+            reason: reportDescriptionReason.trim(),
+          }),
+        },
+      );
+
+      if (!response.ok) {
+        throw new Error(
+          await getResponseErrorMessage(response, "Failed to submit report"),
+        );
+      }
+
+      toast.success("Report submitted", { id: toastId });
+      setIsReportDescriptionOpen(false);
+      setReportDescriptionReason("");
+    } catch (error) {
+      log.error("Error reporting description:", error);
+      toast.error(
+        error instanceof Error ? error.message : "Failed to submit report",
+        { id: toastId },
+      );
+    } finally {
+      setIsSubmittingDescriptionReport(false);
+    }
+  };
+
+  const handleReportAvatar = async () => {
+    if (!user || !reportAvatarReason.trim()) return;
+
+    setIsSubmittingAvatarReport(true);
+    const toastId = toast.loading("Submitting report...");
+    try {
+      const response = await fetch(
+        buildApiUrlWithDevToken(PUBLIC_API_URL, "/users/avatar/report"),
+        {
+          method: "POST",
+          credentials: "include",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            user_id: user.id,
+            reason: reportAvatarReason.trim(),
+          }),
+        },
+      );
+
+      if (!response.ok) {
+        throw new Error(
+          await getResponseErrorMessage(response, "Failed to submit report"),
+        );
+      }
+
+      toast.success("Report submitted", { id: toastId });
+      setIsReportAvatarOpen(false);
+      setReportAvatarReason("");
+    } catch (error) {
+      log.error("Error reporting avatar:", error);
+      toast.error(
+        error instanceof Error ? error.message : "Failed to submit report",
+        { id: toastId },
+      );
+    } finally {
+      setIsSubmittingAvatarReport(false);
+    }
+  };
+
+  const handleReportBanner = async () => {
+    if (!user || !reportBannerReason.trim()) return;
+
+    setIsSubmittingBannerReport(true);
+    const toastId = toast.loading("Submitting report...");
+    try {
+      const response = await fetch(
+        buildApiUrlWithDevToken(PUBLIC_API_URL, "/users/banner/report"),
+        {
+          method: "POST",
+          credentials: "include",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            user_id: user.id,
+            reason: reportBannerReason.trim(),
+          }),
+        },
+      );
+
+      if (!response.ok) {
+        throw new Error(
+          await getResponseErrorMessage(response, "Failed to submit report"),
+        );
+      }
+
+      toast.success("Report submitted", { id: toastId });
+      setIsReportBannerOpen(false);
+      setReportBannerReason("");
+    } catch (error) {
+      log.error("Error reporting banner:", error);
+      toast.error(
+        error instanceof Error ? error.message : "Failed to submit report",
+        { id: toastId },
+      );
+    } finally {
+      setIsSubmittingBannerReport(false);
+    }
+  };
+
+  const handleReportUsername = async () => {
+    if (!user || !reportUsernameReason.trim()) return;
+
+    setIsSubmittingUsernameReport(true);
+    const toastId = toast.loading("Submitting report...");
+    try {
+      const response = await fetch(
+        buildApiUrlWithDevToken(PUBLIC_API_URL, "/users/username/report"),
+        {
+          method: "POST",
+          credentials: "include",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            user_id: user.id,
+            reason: reportUsernameReason.trim(),
+          }),
+        },
+      );
+
+      if (!response.ok) {
+        throw new Error(
+          await getResponseErrorMessage(response, "Failed to submit report"),
+        );
+      }
+
+      toast.success("Report submitted", { id: toastId });
+      setIsReportUsernameOpen(false);
+      setReportUsernameReason("");
+    } catch (error) {
+      log.error("Error reporting username:", error);
+      toast.error(
+        error instanceof Error ? error.message : "Failed to submit report",
+        { id: toastId },
+      );
+    } finally {
+      setIsSubmittingUsernameReport(false);
     }
   };
 
@@ -1187,6 +1366,134 @@ export default function UserProfileClient({
                                 Message
                               </DropdownMenuItem>
                             )}
+                            {/* Mobile (< sm): flat items — alphabetical */}
+                            <DropdownMenuItem
+                              onClick={() => {
+                                setIsReportAvatarOpen(true);
+                                setReportAvatarReason("");
+                              }}
+                              className="text-button-danger hover:bg-button-danger/10 focus:bg-button-danger/10 focus:text-button-danger rounded-none px-3 py-2 sm:hidden"
+                            >
+                              <Icon
+                                icon="heroicons:flag"
+                                className="mr-2 h-4 w-4"
+                              />
+                              Report Avatar
+                            </DropdownMenuItem>
+                            {(user.banner ?? user.custom_banner) && (
+                              <DropdownMenuItem
+                                onClick={() => {
+                                  setIsReportBannerOpen(true);
+                                  setReportBannerReason("");
+                                }}
+                                className="text-button-danger hover:bg-button-danger/10 focus:bg-button-danger/10 focus:text-button-danger rounded-none px-3 py-2 sm:hidden"
+                              >
+                                <Icon
+                                  icon="heroicons:flag"
+                                  className="mr-2 h-4 w-4"
+                                />
+                                Report Banner
+                              </DropdownMenuItem>
+                            )}
+                            {bio && (
+                              <DropdownMenuItem
+                                onClick={() => {
+                                  setIsReportDescriptionOpen(true);
+                                  setReportDescriptionReason("");
+                                }}
+                                className="text-button-danger hover:bg-button-danger/10 focus:bg-button-danger/10 focus:text-button-danger rounded-none px-3 py-2 sm:hidden"
+                              >
+                                <Icon
+                                  icon="heroicons:flag"
+                                  className="mr-2 h-4 w-4"
+                                />
+                                Report Description
+                              </DropdownMenuItem>
+                            )}
+                            <DropdownMenuItem
+                              onClick={() => {
+                                setIsReportUsernameOpen(true);
+                                setReportUsernameReason("");
+                              }}
+                              className="text-button-danger hover:bg-button-danger/10 focus:bg-button-danger/10 focus:text-button-danger rounded-none px-3 py-2 sm:hidden"
+                            >
+                              <Icon
+                                icon="heroicons:flag"
+                                className="mr-2 h-4 w-4"
+                              />
+                              Report Username
+                            </DropdownMenuItem>
+                            {/* Desktop (≥ sm): nested submenu — alphabetical */}
+                            <div className="hidden sm:contents">
+                              <DropdownMenuSub>
+                                <DropdownMenuSubTrigger className="text-button-danger hover:bg-button-danger/10 focus:bg-button-danger/10 focus:text-button-danger data-[state=open]:bg-button-danger/10 data-[state=open]:text-button-danger rounded-none px-3 py-2">
+                                  <Icon
+                                    icon="heroicons:flag"
+                                    className="mr-2 h-4 w-4"
+                                  />
+                                  Report
+                                </DropdownMenuSubTrigger>
+                                <DropdownMenuSubContent className="p-0">
+                                  <DropdownMenuItem
+                                    onClick={() => {
+                                      setIsReportAvatarOpen(true);
+                                      setReportAvatarReason("");
+                                    }}
+                                    className="rounded-none px-3 py-2"
+                                  >
+                                    <Icon
+                                      icon="heroicons:user-circle"
+                                      className="mr-2 h-4 w-4"
+                                    />
+                                    Avatar
+                                  </DropdownMenuItem>
+                                  {(user.banner ?? user.custom_banner) && (
+                                    <DropdownMenuItem
+                                      onClick={() => {
+                                        setIsReportBannerOpen(true);
+                                        setReportBannerReason("");
+                                      }}
+                                      className="rounded-none px-3 py-2"
+                                    >
+                                      <Icon
+                                        icon="heroicons:photo"
+                                        className="mr-2 h-4 w-4"
+                                      />
+                                      Banner
+                                    </DropdownMenuItem>
+                                  )}
+                                  {bio && (
+                                    <DropdownMenuItem
+                                      onClick={() => {
+                                        setIsReportDescriptionOpen(true);
+                                        setReportDescriptionReason("");
+                                      }}
+                                      className="rounded-none px-3 py-2"
+                                    >
+                                      <Icon
+                                        icon="heroicons:document-text"
+                                        className="mr-2 h-4 w-4"
+                                      />
+                                      Description
+                                    </DropdownMenuItem>
+                                  )}
+                                  <DropdownMenuItem
+                                    onClick={() => {
+                                      setIsReportUsernameOpen(true);
+                                      setReportUsernameReason("");
+                                    }}
+                                    className="rounded-none px-3 py-2"
+                                  >
+                                    <Icon
+                                      icon="heroicons:at-symbol"
+                                      className="mr-2 h-4 w-4"
+                                    />
+                                    Username
+                                  </DropdownMenuItem>
+                                </DropdownMenuSubContent>
+                              </DropdownMenuSub>
+                            </div>
+                            <DropdownMenuSeparator className="my-0" />
                             <DropdownMenuItem
                               onClick={() => void handleBlockToggle()}
                               disabled={isBlockingAction}
@@ -1289,6 +1596,230 @@ export default function UserProfileClient({
         }}
         userData={user}
       />
+      <ConfirmDialog
+        isOpen={isReportDescriptionOpen}
+        onClose={() => {
+          setIsReportDescriptionOpen(false);
+          setReportDescriptionReason("");
+        }}
+        onConfirm={() => void handleReportDescription()}
+        title="Report Description"
+        confirmText="Submit Report"
+        confirmVariant="destructive"
+        confirmDisabled={
+          !reportDescriptionReason.trim() || isSubmittingDescriptionReport
+        }
+        closeOnConfirm={false}
+      >
+        <div className="space-y-3">
+          {bio && (
+            <div className="border-border-card bg-tertiary-bg/50 rounded-lg border p-3">
+              <div className="flex items-start gap-3">
+                <div className="shrink-0">
+                  <UserAvatar
+                    userId={user.id}
+                    avatarHash={user.avatar}
+                    username={user.username}
+                    custom_avatar={user.custom_avatar}
+                    size={7}
+                    showBadge={false}
+                    settings={user.settings_v2}
+                    premiumType={user.premiumtype}
+                  />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <span className="text-primary-text text-sm font-medium">
+                    {user.global_name && user.global_name !== "None"
+                      ? user.global_name
+                      : user.username}
+                  </span>
+                  <p className="text-primary-text/80 mt-0.5 line-clamp-4 text-sm break-words whitespace-pre-wrap">
+                    {convertUrlsToLinks(sanitizeText(bio))}
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+          <p className="text-secondary-text text-sm">
+            Please describe why you are reporting this description.
+          </p>
+          <div>
+            <textarea
+              className="border-border-card bg-tertiary-bg text-primary-text placeholder:text-secondary-text focus:ring-border-focus w-full resize-none rounded-lg border px-3 py-2 text-sm focus:ring-2 focus:outline-none"
+              rows={4}
+              maxLength={500}
+              placeholder="Explain why you're reporting this description..."
+              value={reportDescriptionReason}
+              onChange={(e) => setReportDescriptionReason(e.target.value)}
+            />
+            <p
+              className={`mt-1 text-right text-xs ${reportDescriptionReason.length >= 500 ? "text-red-500" : "text-secondary-text"}`}
+            >
+              {reportDescriptionReason.length}/500
+            </p>
+          </div>
+        </div>
+      </ConfirmDialog>
+      <ConfirmDialog
+        isOpen={isReportAvatarOpen}
+        onClose={() => {
+          setIsReportAvatarOpen(false);
+          setReportAvatarReason("");
+        }}
+        onConfirm={() => void handleReportAvatar()}
+        title="Report Avatar"
+        confirmText="Submit Report"
+        confirmVariant="destructive"
+        confirmDisabled={!reportAvatarReason.trim() || isSubmittingAvatarReport}
+        closeOnConfirm={false}
+      >
+        <div className="space-y-3">
+          <div className="border-border-card bg-tertiary-bg/50 flex items-center gap-3 rounded-lg border p-3">
+            <UserAvatar
+              userId={user.id}
+              avatarHash={user.avatar}
+              username={user.username}
+              custom_avatar={user.custom_avatar}
+              size={16}
+              showBadge={false}
+              settings={user.settings_v2}
+              premiumType={user.premiumtype}
+            />
+            <span className="text-primary-text text-sm font-medium">
+              {user.global_name && user.global_name !== "None"
+                ? user.global_name
+                : user.username}
+            </span>
+          </div>
+          <p className="text-secondary-text text-sm">
+            Please describe why you are reporting this avatar.
+          </p>
+          <div>
+            <textarea
+              className="border-border-card bg-tertiary-bg text-primary-text placeholder:text-secondary-text focus:ring-border-focus w-full resize-none rounded-lg border px-3 py-2 text-sm focus:ring-2 focus:outline-none"
+              rows={4}
+              maxLength={500}
+              placeholder="Explain why you're reporting this avatar..."
+              value={reportAvatarReason}
+              onChange={(e) => setReportAvatarReason(e.target.value)}
+            />
+            <p
+              className={`mt-1 text-right text-xs ${reportAvatarReason.length >= 500 ? "text-red-500" : "text-secondary-text"}`}
+            >
+              {reportAvatarReason.length}/500
+            </p>
+          </div>
+        </div>
+      </ConfirmDialog>
+      <ConfirmDialog
+        isOpen={isReportBannerOpen}
+        onClose={() => {
+          setIsReportBannerOpen(false);
+          setReportBannerReason("");
+        }}
+        onConfirm={() => void handleReportBanner()}
+        title="Report Banner"
+        confirmText="Submit Report"
+        confirmVariant="destructive"
+        confirmDisabled={!reportBannerReason.trim() || isSubmittingBannerReport}
+        closeOnConfirm={false}
+      >
+        <div className="space-y-3">
+          <div className="border-border-card bg-tertiary-bg/50 overflow-hidden rounded-lg border">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={
+                user.settings_v2?.custom_banner === true &&
+                user.premiumtype &&
+                user.premiumtype >= 2 &&
+                user.custom_banner &&
+                user.custom_banner !== "N/A"
+                  ? user.custom_banner
+                  : user.banner && user.banner !== "None"
+                    ? `https://cdn.discordapp.com/banners/${user.id}/${user.banner}?size=512`
+                    : undefined
+              }
+              alt={`${user.username}'s banner`}
+              className="object-contain"
+              style={{ width: "100%", height: "auto" }}
+            />
+          </div>
+          <p className="text-secondary-text text-sm">
+            Please describe why you are reporting this banner.
+          </p>
+          <div>
+            <textarea
+              className="border-border-card bg-tertiary-bg text-primary-text placeholder:text-secondary-text focus:ring-border-focus w-full resize-none rounded-lg border px-3 py-2 text-sm focus:ring-2 focus:outline-none"
+              rows={4}
+              maxLength={500}
+              placeholder="Explain why you're reporting this banner..."
+              value={reportBannerReason}
+              onChange={(e) => setReportBannerReason(e.target.value)}
+            />
+            <p
+              className={`mt-1 text-right text-xs ${reportBannerReason.length >= 500 ? "text-red-500" : "text-secondary-text"}`}
+            >
+              {reportBannerReason.length}/500
+            </p>
+          </div>
+        </div>
+      </ConfirmDialog>
+      <ConfirmDialog
+        isOpen={isReportUsernameOpen}
+        onClose={() => {
+          setIsReportUsernameOpen(false);
+          setReportUsernameReason("");
+        }}
+        onConfirm={() => void handleReportUsername()}
+        title="Report Username"
+        confirmText="Submit Report"
+        confirmVariant="destructive"
+        confirmDisabled={
+          !reportUsernameReason.trim() || isSubmittingUsernameReport
+        }
+        closeOnConfirm={false}
+      >
+        <div className="space-y-3">
+          <div className="border-border-card bg-tertiary-bg/50 flex items-center gap-3 rounded-lg border p-3">
+            <UserAvatar
+              userId={user.id}
+              avatarHash={user.avatar}
+              username={user.username}
+              custom_avatar={user.custom_avatar}
+              size={7}
+              showBadge={false}
+              settings={user.settings_v2}
+              premiumType={user.premiumtype}
+            />
+            <div>
+              <p className="text-primary-text text-sm font-medium">
+                {user.global_name && user.global_name !== "None"
+                  ? user.global_name
+                  : user.username}
+              </p>
+              <p className="text-secondary-text text-xs">@{user.username}</p>
+            </div>
+          </div>
+          <p className="text-secondary-text text-sm">
+            Please describe why you are reporting this username.
+          </p>
+          <div>
+            <textarea
+              className="border-border-card bg-tertiary-bg text-primary-text placeholder:text-secondary-text focus:ring-border-focus w-full resize-none rounded-lg border px-3 py-2 text-sm focus:ring-2 focus:outline-none"
+              rows={4}
+              maxLength={500}
+              placeholder="Explain why you're reporting this username..."
+              value={reportUsernameReason}
+              onChange={(e) => setReportUsernameReason(e.target.value)}
+            />
+            <p
+              className={`mt-1 text-right text-xs ${reportUsernameReason.length >= 500 ? "text-red-500" : "text-secondary-text"}`}
+            >
+              {reportUsernameReason.length}/500
+            </p>
+          </div>
+        </div>
+      </ConfirmDialog>
     </main>
   );
 }
