@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { useQueryState } from "nuqs";
 import Image from "next/image";
@@ -14,6 +14,17 @@ import Breadcrumb from "@/components/Layout/Breadcrumb";
 import { formatCustomDate } from "@/utils/helpers/timestamp";
 import { sanitizeText } from "@/utils/ui/sanitizeText";
 import { convertUrlsToLinks } from "@/utils/ui/urlConverter";
+import { UserAvatar } from "@/utils/ui/avatar";
+import type { UserData } from "@/types/auth";
+import { useDebounce } from "@/hooks/useDebounce";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const log = createLogger("UI");
 
@@ -161,22 +172,22 @@ export function getStatusStyle(status: string): {
   className: string;
 } {
   const normalized = status.toLowerCase();
-  if (normalized === "pending review" || normalized === "pending") {
+  if (normalized === "pending review") {
     return {
       label: "Pending Review",
       className:
         "bg-yellow-500/15 text-primary-text border border-yellow-500/30",
     };
   }
-  if (normalized === "resolved") {
+  if (normalized === "action taken") {
     return {
-      label: "Resolved",
+      label: "Action Taken",
       className: "bg-green-500/15 text-primary-text border border-green-500/30",
     };
   }
-  if (normalized === "dismissed") {
+  if (normalized === "denied") {
     return {
-      label: "Dismissed",
+      label: "Denied",
       className: "text-primary-text border-border-card bg-tertiary-bg border",
     };
   }
@@ -184,6 +195,20 @@ export function getStatusStyle(status: string): {
     label: status.charAt(0).toUpperCase() + status.slice(1),
     className: "text-primary-text border-border-card bg-tertiary-bg border",
   };
+}
+
+export function getReportedUserId(report: Report): string | null {
+  switch (report.type) {
+    case "comment":
+      return report.metadata.comment?.user_id ?? null;
+    case "message":
+      return report.metadata.message?.user_id ?? null;
+    case "description":
+      return report.metadata.description?.user_id ?? null;
+    default:
+      // avatar, banner, username — ref is the reported user's Discord ID
+      return report.ref;
+  }
 }
 
 export function ReportContext({ report }: { report: Report }) {
@@ -319,6 +344,37 @@ export default function MyReports() {
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [reportedUsers, setReportedUsers] = useState<Record<string, UserData>>(
+    {},
+  );
+
+  const [searchTerm, setSearchTerm] = useState("");
+  const [typeFilter, setTypeFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const debouncedSearch = useDebounce(searchTerm, 300);
+
+  const filteredReports = useMemo(() => {
+    return reports.filter((report) => {
+      if (typeFilter !== "all" && report.type !== typeFilter) return false;
+      if (
+        statusFilter !== "all" &&
+        report.status.toLowerCase() !== statusFilter
+      )
+        return false;
+      if (debouncedSearch) {
+        const q = debouncedSearch.toLowerCase();
+        const reportedId = getReportedUserId(report);
+        const reportedUser = reportedId ? reportedUsers[reportedId] : undefined;
+        const matches =
+          report.ref.toLowerCase().includes(q) ||
+          (reportedId?.toLowerCase().includes(q) ?? false) ||
+          (reportedUser?.username.toLowerCase().includes(q) ?? false) ||
+          (reportedUser?.global_name?.toLowerCase().includes(q) ?? false);
+        if (!matches) return false;
+      }
+      return true;
+    });
+  }, [reports, typeFilter, statusFilter, debouncedSearch, reportedUsers]);
 
   const fetchReports = useCallback(async (currentPage: number) => {
     setLoading(true);
@@ -348,9 +404,35 @@ export default function MyReports() {
       }
 
       const data: ReportsResponse = await response.json();
-      setReports(data.items ?? []);
+      const items = data.items ?? [];
+      setReports(items);
       setTotalPages(data.total_pages ?? 1);
       setTotal(data.total ?? 0);
+
+      const ids = [
+        ...new Set(
+          items.map(getReportedUserId).filter((id): id is string => !!id),
+        ),
+      ];
+      if (ids.length > 0) {
+        try {
+          const usersRes = await fetch(
+            `/api/users/batch?ids=${encodeURIComponent(ids.join(","))}`,
+            { cache: "no-store" },
+          );
+          if (usersRes.ok) {
+            const usersArr = (await usersRes.json()) as UserData[];
+            setReportedUsers(
+              usersArr.reduce<Record<string, UserData>>((acc, u) => {
+                acc[u.id] = u;
+                return acc;
+              }, {}),
+            );
+          }
+        } catch {
+          // non-critical
+        }
+      }
     } catch (err) {
       log.error("Error fetching reports:", err);
       setError(err instanceof Error ? err.message : "Failed to load reports");
@@ -370,10 +452,10 @@ export default function MyReports() {
 
   return (
     <main className="min-h-screen pb-8">
-      <div className="container mx-auto max-w-7xl px-4 py-4">
+      <div className="container mx-auto max-w-7xl px-4">
         <Breadcrumb />
 
-        <div className="mt-4 mb-4 flex items-center gap-2">
+        <div className="mb-4 flex items-center gap-2">
           <Icon icon="heroicons:flag" className="text-primary-text h-5 w-5" />
           <h1 className="text-primary-text text-lg font-semibold">
             My Reports
@@ -383,12 +465,195 @@ export default function MyReports() {
           )}
         </div>
 
-        {loading ? (
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            {[1, 2, 3, 4].map((i) => (
-              <Skeleton key={i} style={{ height: 160 }} />
-            ))}
+        {/* Search and filter controls */}
+        <div className="mb-6 flex flex-col gap-4 lg:flex-row">
+          {/* Search input */}
+          <div className="w-full lg:w-1/3">
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="Search by ref ID, user ID, or username..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="border-border-card bg-secondary-bg text-primary-text placeholder-secondary-text hover:border-border-focus focus:border-button-info h-14 w-full rounded-lg border px-4 pr-10 pl-10 transition-all duration-300 focus:outline-none"
+              />
+              <Icon
+                icon="heroicons:magnifying-glass"
+                className="text-secondary-text absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2"
+              />
+              {searchTerm && (
+                <button
+                  onClick={() => setSearchTerm("")}
+                  className="text-secondary-text hover:text-primary-text absolute top-1/2 right-3 h-5 w-5 -translate-y-1/2 cursor-pointer"
+                  aria-label="Clear search"
+                >
+                  <Icon icon="heroicons:x-mark" />
+                </button>
+              )}
+            </div>
           </div>
+
+          {/* Type and status dropdowns */}
+          <div className="grid w-full grid-cols-2 gap-4 lg:flex lg:flex-1 lg:gap-4">
+            {/* Type filter */}
+            <div className="col-span-1 w-full lg:w-1/2">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button
+                    type="button"
+                    className="border-border-card bg-secondary-bg text-primary-text focus:border-button-info hover:border-border-focus flex h-14 w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all duration-300 focus:outline-none"
+                  >
+                    <span className="truncate">
+                      {typeFilter === "all"
+                        ? "All Types"
+                        : getTypeLabel(typeFilter)}
+                    </span>
+                    <Icon
+                      icon="heroicons:chevron-down"
+                      className="text-secondary-text h-5 w-5 shrink-0"
+                    />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  align="start"
+                  className="border-border-card bg-secondary-bg text-primary-text w-(--radix-popper-anchor-width) min-w-(--radix-popper-anchor-width) rounded-xl border p-1 shadow-lg"
+                >
+                  <DropdownMenuRadioGroup
+                    value={typeFilter}
+                    onValueChange={setTypeFilter}
+                  >
+                    {[
+                      { value: "all", label: "All Types" },
+                      { value: "avatar", label: "Avatar" },
+                      { value: "banner", label: "Banner" },
+                      { value: "comment", label: "Comment" },
+                      { value: "description", label: "Description" },
+                      { value: "message", label: "Message" },
+                      { value: "username", label: "Username" },
+                    ].map((opt) => (
+                      <DropdownMenuRadioItem
+                        key={opt.value}
+                        value={opt.value}
+                        className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
+                      >
+                        {opt.label}
+                      </DropdownMenuRadioItem>
+                    ))}
+                  </DropdownMenuRadioGroup>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+
+            {/* Status filter */}
+            <div className="col-span-1 w-full lg:w-1/2">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button
+                    type="button"
+                    className="border-border-card bg-secondary-bg text-primary-text focus:border-button-info hover:border-border-focus flex h-14 w-full items-center justify-between rounded-lg border px-4 py-2 text-sm transition-all duration-300 focus:outline-none"
+                  >
+                    <span className="truncate">
+                      {statusFilter === "all"
+                        ? "All Statuses"
+                        : getStatusStyle(statusFilter).label ||
+                          statusFilter
+                            .split(" ")
+                            .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+                            .join(" ")}
+                    </span>
+                    <Icon
+                      icon="heroicons:chevron-down"
+                      className="text-secondary-text h-5 w-5 shrink-0"
+                    />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  align="start"
+                  className="border-border-card bg-secondary-bg text-primary-text w-(--radix-popper-anchor-width) min-w-(--radix-popper-anchor-width) rounded-xl border p-1 shadow-lg"
+                >
+                  <DropdownMenuRadioGroup
+                    value={statusFilter}
+                    onValueChange={setStatusFilter}
+                  >
+                    {[
+                      { value: "all", label: "All Statuses" },
+                      { value: "action taken", label: "Action Taken" },
+                      { value: "denied", label: "Denied" },
+                      { value: "pending review", label: "Pending Review" },
+                    ].map((opt) => (
+                      <DropdownMenuRadioItem
+                        key={opt.value}
+                        value={opt.value}
+                        className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
+                      >
+                        {opt.label}
+                      </DropdownMenuRadioItem>
+                    ))}
+                  </DropdownMenuRadioGroup>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          </div>
+        </div>
+
+        {loading ? (
+          <>
+            {/* Search controls skeleton */}
+            <div className="mb-6 flex flex-col gap-4 lg:flex-row">
+              <div className="w-full lg:w-1/3">
+                <Skeleton style={{ height: 56 }} />
+              </div>
+              <div className="grid w-full grid-cols-2 gap-4 lg:flex lg:flex-1 lg:gap-4">
+                <Skeleton style={{ height: 56 }} />
+                <Skeleton style={{ height: 56 }} />
+              </div>
+            </div>
+            {/* Card grid skeleton */}
+            <div className="grid grid-cols-1 items-start gap-4 sm:grid-cols-2">
+              {[1, 2, 3, 4].map((i) => (
+                <div
+                  key={i}
+                  className="border-border-card bg-secondary-bg flex flex-col rounded-lg border p-4 shadow-sm"
+                >
+                  {/* Badge row + date */}
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex gap-2">
+                      <Skeleton style={{ width: 64, height: 22 }} />
+                      <Skeleton style={{ width: 100, height: 22 }} />
+                    </div>
+                    <Skeleton style={{ width: 80, height: 16 }} />
+                  </div>
+                  {/* Reported user row */}
+                  <div className="mt-2 flex items-center gap-2">
+                    <Skeleton style={{ width: 78, height: 14 }} />
+                    <Skeleton
+                      style={{ width: 28, height: 28 }}
+                      className="rounded-full"
+                    />
+                    <Skeleton style={{ width: 90, height: 14 }} />
+                  </div>
+                  {/* Content preview box */}
+                  <div className="border-border-card bg-tertiary-bg mt-2 rounded-lg border p-3">
+                    <Skeleton style={{ width: 100, height: 12 }} />
+                    <Skeleton
+                      style={{ width: "100%", height: 14 }}
+                      className="mt-1"
+                    />
+                  </div>
+                  {/* Reason */}
+                  <Skeleton
+                    style={{ width: "75%", height: 14 }}
+                    className="mt-2"
+                  />
+                  {/* IDs */}
+                  <div className="mt-1 space-y-1">
+                    <Skeleton style={{ width: 130, height: 12 }} />
+                    <Skeleton style={{ width: 170, height: 12 }} />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
         ) : error ? (
           <div className="border-border-card bg-secondary-bg rounded-lg border p-8 text-center shadow-sm">
             <Icon
@@ -417,11 +682,62 @@ export default function MyReports() {
               Reports you submit will appear here.
             </p>
           </div>
+        ) : filteredReports.length === 0 ? (
+          <div className="border-border-card bg-secondary-bg rounded-lg border p-8 text-center">
+            <Icon
+              icon="heroicons:magnifying-glass"
+              className="text-secondary-text mx-auto mb-3 h-10 w-10 opacity-40"
+            />
+            <p className="text-primary-text font-medium">
+              {(() => {
+                let msg = "No reports found";
+                if (debouncedSearch) msg += ` matching "${debouncedSearch}"`;
+                if (typeFilter !== "all")
+                  msg += ` in ${getTypeLabel(typeFilter)}`;
+                if (statusFilter !== "all")
+                  msg += ` with ${getStatusStyle(statusFilter).label} status`;
+                return msg;
+              })()}
+            </p>
+            <p className="text-secondary-text mt-1 text-sm">
+              Try adjusting your search or filter.
+            </p>
+            <div className="mt-4 flex flex-wrap justify-center gap-3">
+              {debouncedSearch &&
+                (typeFilter !== "all" || statusFilter !== "all") && (
+                  <Button variant="secondary" onClick={() => setSearchTerm("")}>
+                    Clear Search
+                  </Button>
+                )}
+              <Button
+                variant="default"
+                onClick={() => {
+                  setSearchTerm("");
+                  setTypeFilter("all");
+                  setStatusFilter("all");
+                }}
+              >
+                Clear All Filters
+              </Button>
+            </div>
+          </div>
         ) : (
           <>
             <div className="grid grid-cols-1 items-start gap-4 sm:grid-cols-2">
-              {reports.map((report) => {
+              {filteredReports.map((report) => {
                 const statusStyle = getStatusStyle(report.status);
+                const reportedId = getReportedUserId(report);
+                const reportedUser = reportedId
+                  ? reportedUsers[reportedId]
+                  : undefined;
+                const hasGlobalName =
+                  reportedUser?.global_name &&
+                  reportedUser.global_name !== "None";
+                const reportedDisplayName = reportedUser
+                  ? hasGlobalName
+                    ? reportedUser.global_name
+                    : `@${reportedUser.username}`
+                  : null;
                 return (
                   <div
                     key={String(report.id)}
@@ -438,11 +754,47 @@ export default function MyReports() {
                         >
                           {statusStyle.label}
                         </span>
+                        <span className="text-secondary-text font-mono text-xs">
+                          #{report.id}
+                        </span>
                       </div>
                       <span className="text-secondary-text text-xs">
                         {formatCustomDate(report.created_at * 1000)}
                       </span>
                     </div>
+
+                    {reportedUser && reportedDisplayName && (
+                      <div className="mt-2 flex items-center gap-2">
+                        <span className="text-secondary-text text-xs">
+                          Reported user:
+                        </span>
+                        <button
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            router.push(`/users/${reportedUser.id}`);
+                          }}
+                          className="flex cursor-pointer items-center gap-1.5 transition-opacity hover:opacity-80"
+                        >
+                          <UserAvatar
+                            userId={reportedUser.id}
+                            avatarHash={reportedUser.avatar}
+                            username={reportedUser.username}
+                            custom_avatar={reportedUser.custom_avatar}
+                            settings={{
+                              custom_avatar:
+                                reportedUser.settings_v2?.custom_avatar,
+                            }}
+                            premiumType={reportedUser.premiumtype}
+                            size={7}
+                            showBadge={false}
+                          />
+                          <span className="text-link hover:text-link-hover text-xs font-medium transition-colors">
+                            {reportedDisplayName}
+                          </span>
+                        </button>
+                      </div>
+                    )}
 
                     <ReportContext report={report} />
 
@@ -452,12 +804,6 @@ export default function MyReports() {
                     </p>
 
                     <div className="mt-1 space-y-0.5 text-xs">
-                      <p className="text-secondary-text">
-                        Report ID:{" "}
-                        <span className="text-primary-text font-mono">
-                          {report.id}
-                        </span>
-                      </p>
                       <p className="text-secondary-text">
                         Reference ID:{" "}
                         <span className="text-primary-text truncate font-mono">

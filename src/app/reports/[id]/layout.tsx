@@ -1,7 +1,7 @@
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Report Details",
+  title: "Report Details | Jailbreak Changelogs",
   robots: { index: false, follow: false },
 };
 

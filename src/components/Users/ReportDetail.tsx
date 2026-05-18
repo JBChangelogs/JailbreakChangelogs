@@ -12,9 +12,12 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import { formatCustomDate } from "@/utils/helpers/timestamp";
+import { UserAvatar } from "@/utils/ui/avatar";
+import type { UserData } from "@/types/auth";
 import {
   Report,
   ReportContext,
+  getReportedUserId,
   getTypeLabel,
   getStatusStyle,
 } from "@/components/Users/MyReports";
@@ -27,6 +30,7 @@ export default function ReportDetail({ reportId }: { reportId: string }) {
   const [report, setReport] = useState<Report | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [reportedUser, setReportedUser] = useState<UserData | null>(null);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -57,6 +61,22 @@ export default function ReportDetail({ reportId }: { reportId: string }) {
       })
       .finally(() => setLoading(false));
   }, [authLoading, user, reportId]);
+
+  useEffect(() => {
+    if (!report) return;
+    const id = getReportedUserId(report);
+    if (!id) return;
+
+    fetch(`/api/users/batch?ids=${encodeURIComponent(id)}`, {
+      cache: "no-store",
+    })
+      .then(async (res) => {
+        if (!res.ok) return;
+        const arr = (await res.json()) as UserData[];
+        if (arr.length > 0) setReportedUser(arr[0]);
+      })
+      .catch(() => undefined);
+  }, [report]);
 
   if (authLoading || (!report && loading)) {
     return (
@@ -102,6 +122,13 @@ export default function ReportDetail({ reportId }: { reportId: string }) {
   if (!report) return null;
 
   const statusStyle = getStatusStyle(report.status);
+  const hasGlobalName =
+    reportedUser?.global_name && reportedUser.global_name !== "None";
+  const reportedDisplayName = reportedUser
+    ? hasGlobalName
+      ? reportedUser.global_name
+      : `@${reportedUser.username}`
+    : null;
 
   return (
     <main className="min-h-screen pb-8">
@@ -151,6 +178,31 @@ export default function ReportDetail({ reportId }: { reportId: string }) {
 
           {/* Metadata rows */}
           <div className="border-border-card bg-tertiary-bg divide-border-card divide-y rounded-lg border text-xs">
+            {reportedUser && reportedDisplayName && (
+              <div className="flex items-center justify-between px-3 py-2">
+                <span className="text-secondary-text">Reported user</span>
+                <button
+                  onClick={() => router.push(`/users/${reportedUser.id}`)}
+                  className="flex cursor-pointer items-center gap-1.5 transition-opacity hover:opacity-80"
+                >
+                  <UserAvatar
+                    userId={reportedUser.id}
+                    avatarHash={reportedUser.avatar}
+                    username={reportedUser.username}
+                    custom_avatar={reportedUser.custom_avatar}
+                    settings={{
+                      custom_avatar: reportedUser.settings_v2?.custom_avatar,
+                    }}
+                    premiumType={reportedUser.premiumtype}
+                    size={7}
+                    showBadge={false}
+                  />
+                  <span className="text-link hover:text-link-hover font-medium transition-colors">
+                    {reportedDisplayName}
+                  </span>
+                </button>
+              </div>
+            )}
             <div className="flex items-center justify-between px-3 py-2">
               <span className="text-secondary-text">Report ID</span>
               <span className="text-primary-text font-mono">
