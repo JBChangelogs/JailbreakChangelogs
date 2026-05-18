@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { toast } from "sonner";
 import type { UserFlag } from "@/types/auth";
 import Image from "next/image";
@@ -27,6 +27,9 @@ interface UserBadgesProps {
   noContainer?: boolean;
 }
 
+const BADGE_BASE_URL =
+  "https://assets.jailbreakchangelogs.com/assets/website_icons";
+
 export const UserBadges = ({
   usernumber,
   premiumType,
@@ -38,385 +41,15 @@ export const UserBadges = ({
   customBgClass,
   noContainer = false,
 }: UserBadgesProps) => {
-  const badges = [];
-
+  const [failedFlagCount, setFailedFlagCount] = useState(0);
   const badgeSize = { sm: 16, md: 20, lg: 24 }[size];
-  const badimoSize = { sm: 20, md: 24, lg: 28 }[size]; // Scaled down to fit container
   const containerHeight = { sm: "h-7", md: "h-9", lg: "h-11" }[size];
-  const BADGE_BASE_URL =
-    "https://assets.jailbreakchangelogs.com/assets/website_icons";
 
   const sortedFlags = flags
-    .filter((f) => f.enabled !== false)
-    .sort((a, b) => (a.index ?? 0) - (b.index ?? 0));
-
-  const handleOwnerBadgeClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    const ownerFlag = sortedFlags.find((f) => f.flag === "is_owner");
-    toast.success(
-      ownerFlag?.description || "This user created Jailbreak Changelogs!",
-      {
-        icon: (
-          <Image
-            src={`${BADGE_BASE_URL}/jbcl_owner.svg`}
-            alt="Owner"
-            width={20}
-            height={20}
-          />
-        ),
-      },
-    );
-  };
-
-  const handleEarlyAdopterBadgeClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    toast.success(
-      "This badge is awarded to the first 100 people to sign up to Jailbreak Changelogs!",
-      {
-        duration: 4000,
-        icon: (
-          <Image
-            src={`${BADGE_BASE_URL}/jbcl_early_adopter.svg`}
-            alt="Early Adopter"
-            width={20}
-            height={20}
-          />
-        ),
-      },
-    );
-  };
-
-  const handleTesterBadgeClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    const testerFlag = sortedFlags.find((f) => f.flag === "is_tester");
-    toast.success(
-      testerFlag?.description ||
-        "This user is a trusted tester of Jailbreak Changelogs!",
-      {
-        duration: 4000,
-        icon: (
-          <Image
-            src={`${BADGE_BASE_URL}/jbcl_tester.svg`}
-            alt="Tester"
-            width={20}
-            height={20}
-            className="object-contain"
-          />
-        ),
-      },
-    );
-  };
-
-  const handleVTMBadgeClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    const vtmFlag = sortedFlags.find((f) => f.flag === "is_vtm");
-    toast.success(
-      vtmFlag?.description || "This user is a Trading Core Value Team Manager!",
-      {
-        duration: 4000,
-        icon: (
-          <Image
-            src={`${BADGE_BASE_URL}/jbcl_value_team_manager.svg`}
-            alt="Value Team Manager"
-            width={20}
-            height={20}
-            className="object-contain"
-          />
-        ),
-      },
-    );
-  };
-
-  const handleVTBadgeClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    const vtFlag = sortedFlags.find((f) => f.flag === "is_vt");
-    toast.success(
-      vtFlag?.description ||
-        "This user is a member of the Trading Core Value Team!",
-      {
-        duration: 4000,
-        icon: (
-          <Image
-            src={`${BADGE_BASE_URL}/jbcl_value_team.svg`}
-            alt="Value Team"
-            width={20}
-            height={20}
-            className="object-contain"
-          />
-        ),
-      },
-    );
-  };
-
-  const handlePartnerBadgeClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    const partnerFlag = sortedFlags.find((f) => f.flag === "is_partner");
-    toast.success(
-      partnerFlag?.description ||
-        "This user is a partner of Jailbreak Changelogs!",
-      {
-        duration: 4000,
-        icon: (
-          <Image
-            src={`${BADGE_BASE_URL}/jbcl_partner.svg`}
-            alt="Partner"
-            width={20}
-            height={20}
-            className="object-contain"
-          />
-        ),
-      },
-    );
-  };
-
-  const handleContributorBadgeClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    const contributorFlag = sortedFlags.find(
-      (f) => f.flag === "is_contributor",
-    );
-    toast.success(
-      contributorFlag?.description ||
-        "This user contributed to Jailbreak Changelogs!",
-      {
-        duration: 4000,
-        icon: (
-          <Image
-            src={`${BADGE_BASE_URL}/jbcl_contributor.svg`}
-            alt="Contributor"
-            width={20}
-            height={20}
-            className="object-contain"
-          />
-        ),
-      },
-    );
-  };
-
-  const handleDeveloperBadgeClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    const developerFlag = sortedFlags.find((f) => f.flag === "is_developer");
-    toast.success(
-      developerFlag?.description ||
-        "This user is a developer for Jailbreak Changelogs!",
-      {
-        duration: 4000,
-        icon: (
-          <Image
-            src={`${BADGE_BASE_URL}/jbcl_developer.svg`}
-            alt="Developer"
-            width={20}
-            height={20}
-            className="object-contain"
-          />
-        ),
-      },
-    );
-  };
-
-  const handleDesignerBadgeClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    const designerFlag = sortedFlags.find((f) => f.flag === "is_designer");
-    toast.success(
-      designerFlag?.description ||
-        "This user is a graphic designer for Jailbreak Changelogs!",
-      {
-        duration: 4000,
-        icon: (
-          <Image
-            src={`${BADGE_BASE_URL}/jbcl_designer.svg`}
-            alt="Designer"
-            width={20}
-            height={20}
-            className="object-contain"
-          />
-        ),
-      },
-    );
-  };
-
-  const handleBadimoBadgeClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    const badimoFlag = sortedFlags.find((f) => f.flag === "is_badimo");
-    toast.success(
-      badimoFlag?.description || "This user is an official Badimo developer",
-      {
-        duration: 4000,
-        icon: (
-          <Image
-            src="https://assets.jailbreakchangelogs.com/assets/images/badimo_transparent.png"
-            alt="Badimo"
-            width={20}
-            height={20}
-            className="object-contain"
-          />
-        ),
-      },
-    );
-  };
-
-  const handlePremiumBadgeClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (!premiumType || premiumType < 1 || premiumType > 3) return;
-    const premiumMessages: Record<number, string> = {
-      1: "This user has Supporter Type 1!",
-      2: "This user has Supporter Type 2!",
-      3: "This user has Supporter Type 3!",
-    };
-    const premiumIcons: Record<number, string> = {
-      1: `${BADGE_BASE_URL}/jbcl_supporter_1.svg`,
-      2: `${BADGE_BASE_URL}/jbcl_supporter_2.svg`,
-      3: `${BADGE_BASE_URL}/jbcl_supporter_3.svg`,
-    };
-    toast.success(premiumMessages[premiumType], {
-      duration: 4000,
-      icon: (
-        <Image
-          src={premiumIcons[premiumType]}
-          alt={`Supporter Type ${premiumType}`}
-          width={20}
-          height={20}
-          className="object-contain"
-        />
-      ),
-    });
-  };
-
-  const createBadge = (flag: UserFlag) => {
-    switch (flag.flag) {
-      case "is_owner":
-        return renderTooltipWrapper(
-          flag.flag,
-          <Image
-            src={`${BADGE_BASE_URL}/jbcl_owner.svg`}
-            alt="Owner"
-            width={badgeSize}
-            height={badgeSize}
-            className="cursor-pointer"
-            onClick={handleOwnerBadgeClick}
-          />,
-          "Website Owner",
-        );
-      case "is_tester":
-        return renderTooltipWrapper(
-          flag.flag,
-          <Image
-            src={`${BADGE_BASE_URL}/jbcl_tester.svg`}
-            alt="Tester"
-            width={badgeSize}
-            height={badgeSize}
-            className="cursor-pointer"
-            onClick={handleTesterBadgeClick}
-          />,
-          "Trusted Tester",
-        );
-      case "is_vtm":
-        return renderTooltipWrapper(
-          flag.flag,
-          <Image
-            src={`${BADGE_BASE_URL}/jbcl_value_team_manager.svg`}
-            alt="Value Team Manager"
-            width={badgeSize}
-            height={badgeSize}
-            className="cursor-pointer"
-            onClick={handleVTMBadgeClick}
-          />,
-          "Value Team Manager",
-        );
-      case "is_vt":
-        return renderTooltipWrapper(
-          flag.flag,
-          <Image
-            src={`${BADGE_BASE_URL}/jbcl_value_team.svg`}
-            alt="Value Team Member"
-            width={badgeSize}
-            height={badgeSize}
-            className="cursor-pointer"
-            onClick={handleVTBadgeClick}
-          />,
-          "Value Team Member",
-        );
-      case "is_partner":
-        return renderTooltipWrapper(
-          flag.flag,
-          <Image
-            src={`${BADGE_BASE_URL}/jbcl_partner.svg`}
-            alt="Partner"
-            width={badgeSize}
-            height={badgeSize}
-            className="cursor-pointer"
-            onClick={handlePartnerBadgeClick}
-          />,
-          "Partner",
-        );
-      case "is_contributor":
-        return renderTooltipWrapper(
-          flag.flag,
-          <Image
-            src={`${BADGE_BASE_URL}/jbcl_contributor.svg`}
-            alt="Contributor"
-            width={badgeSize}
-            height={badgeSize}
-            className="cursor-pointer"
-            onClick={handleContributorBadgeClick}
-          />,
-          "Contributor",
-        );
-      case "is_developer":
-        return renderTooltipWrapper(
-          flag.flag,
-          <Image
-            src={`${BADGE_BASE_URL}/jbcl_developer.svg`}
-            alt="Developer"
-            width={badgeSize}
-            height={badgeSize}
-            className="cursor-pointer"
-            onClick={handleDeveloperBadgeClick}
-          />,
-          "Developer",
-        );
-      case "is_designer":
-        return renderTooltipWrapper(
-          flag.flag,
-          <Image
-            src={`${BADGE_BASE_URL}/jbcl_designer.svg`}
-            alt="Designer"
-            width={badgeSize}
-            height={badgeSize}
-            className="cursor-pointer"
-            onClick={handleDesignerBadgeClick}
-          />,
-          "Graphic Designer",
-        );
-      case "is_badimo":
-        return renderTooltipWrapper(
-          flag.flag,
-          <Image
-            src="https://assets.jailbreakchangelogs.com/assets/images/badimo_transparent.png"
-            alt="Badimo"
-            width={badimoSize}
-            height={badimoSize}
-            className="cursor-pointer"
-            onClick={handleBadimoBadgeClick}
-          />,
-          "Badimo Developer",
-        );
-      case "is_early_adopter":
-        return renderTooltipWrapper(
-          flag.flag,
-          <Image
-            src={`${BADGE_BASE_URL}/jbcl_early_adopter.svg`}
-            alt="Early Adopter"
-            width={badgeSize}
-            height={badgeSize}
-            className="cursor-pointer"
-            onClick={handleEarlyAdopterBadgeClick}
-          />,
-          "Early Adopter",
-        );
-      default:
-        return null;
-    }
-  };
+    .filter((f) => f.enabled !== false && f.flag !== null)
+    .sort((a, b) => (a.index ?? 0) - (b.index ?? 0)) as (UserFlag & {
+    flag: string;
+  })[];
 
   const renderTooltipWrapper = (
     key: string,
@@ -433,31 +66,76 @@ export const UserBadges = ({
     );
   };
 
-  sortedFlags.forEach((flag) => {
-    const badge = createBadge(flag);
-    if (badge) badges.push(badge);
-  });
+  const handleFlagClick = (
+    e: React.MouseEvent,
+    flag: UserFlag & { flag: string },
+  ) => {
+    e.stopPropagation();
+    toast.success(flag.description || flag.flag, {
+      duration: 4000,
+      icon: (
+        <Image
+          src={getFlagIconUrl(flag.flag)}
+          alt={flag.flag}
+          width={20}
+          height={20}
+          className="object-contain"
+        />
+      ),
+    });
+  };
 
-  if (premiumType && premiumType >= 1 && premiumType <= 3) {
-    const premiumIcons: Record<number, string> = {
-      1: `${BADGE_BASE_URL}/jbcl_supporter_1.svg`,
-      2: `${BADGE_BASE_URL}/jbcl_supporter_2.svg`,
-      3: `${BADGE_BASE_URL}/jbcl_supporter_3.svg`,
-    };
-    const premiumBadge = (
+  const getFlagIconUrl = (f: string) => {
+    const name = f.startsWith("is_") ? f.slice(3) : f;
+    return `${BADGE_BASE_URL}/jbcl_${name}.svg`;
+  };
+
+  const badges: React.ReactNode[] = sortedFlags.map((flag) =>
+    renderTooltipWrapper(
+      flag.flag,
       <Image
-        src={premiumIcons[premiumType]}
-        alt={`Supporter Type ${premiumType}`}
+        src={getFlagIconUrl(flag.flag)}
+        alt={flag.flag}
         width={badgeSize}
         height={badgeSize}
         className="cursor-pointer"
-        onClick={handlePremiumBadgeClick}
-      />
-    );
+        onClick={(e) => handleFlagClick(e, flag)}
+        onError={(e) => {
+          (e.currentTarget as HTMLImageElement).style.display = "none";
+          setFailedFlagCount((c) => c + 1);
+        }}
+      />,
+      flag.description || flag.flag,
+    ),
+  );
+
+  if (premiumType && premiumType >= 1 && premiumType <= 3) {
+    const handlePremiumClick = (e: React.MouseEvent) => {
+      e.stopPropagation();
+      toast.success(`This user has Supporter Type ${premiumType}!`, {
+        duration: 4000,
+        icon: (
+          <Image
+            src={`${BADGE_BASE_URL}/jbcl_supporter_${premiumType}.svg`}
+            alt={`Supporter Type ${premiumType}`}
+            width={20}
+            height={20}
+            className="object-contain"
+          />
+        ),
+      });
+    };
     badges.push(
       renderTooltipWrapper(
         "premium",
-        premiumBadge,
+        <Image
+          src={`${BADGE_BASE_URL}/jbcl_supporter_${premiumType}.svg`}
+          alt={`Supporter Type ${premiumType}`}
+          width={badgeSize}
+          height={badgeSize}
+          className="cursor-pointer"
+          onClick={handlePremiumClick}
+        />,
         `Supporter Type ${premiumType}`,
       ),
     );
@@ -467,17 +145,37 @@ export const UserBadges = ({
     usernumber <= 100 &&
     !sortedFlags.some((f) => f.flag === "is_early_adopter")
   ) {
-    const earlyBadge = (
-      <Image
-        src={`${BADGE_BASE_URL}/jbcl_early_adopter.svg`}
-        alt="Early Adopter"
-        width={badgeSize}
-        height={badgeSize}
-        className="cursor-pointer"
-        onClick={handleEarlyAdopterBadgeClick}
-      />
+    const handleEarlyAdopterClick = (e: React.MouseEvent) => {
+      e.stopPropagation();
+      toast.success(
+        "This badge is awarded to the first 100 people to sign up to Jailbreak Changelogs!",
+        {
+          duration: 4000,
+          icon: (
+            <Image
+              src={`${BADGE_BASE_URL}/jbcl_early_adopter.svg`}
+              alt="Early Adopter"
+              width={20}
+              height={20}
+            />
+          ),
+        },
+      );
+    };
+    badges.push(
+      renderTooltipWrapper(
+        "early",
+        <Image
+          src={`${BADGE_BASE_URL}/jbcl_early_adopter.svg`}
+          alt="Early Adopter"
+          width={badgeSize}
+          height={badgeSize}
+          className="cursor-pointer"
+          onClick={handleEarlyAdopterClick}
+        />,
+        "Early Adopter",
+      ),
     );
-    badges.push(renderTooltipWrapper("early", earlyBadge, "Early Adopter"));
   }
 
   let guildBadge = null;
@@ -518,7 +216,7 @@ export const UserBadges = ({
 
   return (
     <div className={`inline-flex items-stretch gap-2 ${className}`}>
-      {badges.length > 0 &&
+      {badges.length - failedFlagCount > 0 &&
         (noContainer ? (
           <div className="flex items-center gap-1">{badges}</div>
         ) : (
