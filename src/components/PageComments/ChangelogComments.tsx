@@ -601,6 +601,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
         setComments(commentsArray);
         setTotalPages(data.total_pages ?? 1);
         setTotalComments(data.total ?? 0);
+        setPage(data.page ?? targetPage);
 
         setUserData((prev) => ({ ...prev, ...userMap }));
       } catch (err) {
