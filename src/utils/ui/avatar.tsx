@@ -195,7 +195,7 @@ const UserAvatarImpl = ({
       <AvatarWrapper
         isOnline={isOnline}
         showBadge={showBadge}
-        isHidden={settings?.hide_presence === true}
+        isHidden={Boolean(settings?.hide_presence)}
         shape={shape}
         premiumType={premiumType}
         className={wrapperClassName}
@@ -222,7 +222,7 @@ const UserAvatarImpl = ({
     <AvatarWrapper
       isOnline={isOnline}
       showBadge={showBadge}
-      isHidden={settings?.hide_presence === true}
+      isHidden={Boolean(settings?.hide_presence)}
       shape={shape}
       premiumType={premiumType}
       className={wrapperClassName}

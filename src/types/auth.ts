@@ -1,12 +1,17 @@
+/** Settings embedded in comment user data and returned as settings_v2 from /users/get */
 export interface UserSettings {
-  profile_public: number; // 0 = false, 1 = true
-  show_recent_comments: number; // 0 = false, 1 = true
-  hide_following: number; // 0 = false, 1 = true
-  hide_followers: number; // 0 = false, 1 = true
-  hide_favorites: number; // 0 = false, 1 = true
-  hide_presence: number; // 0 = false, 1 = true
-  dms_allowed: number; // 0 = false, 1 = true
-  updated_at: number;
+  profile_public: boolean;
+  show_recent_comments: boolean;
+  hide_following: boolean;
+  hide_followers: boolean;
+  hide_favorites: boolean;
+  custom_banner: boolean;
+  custom_avatar: boolean;
+  hide_connections: boolean;
+  hide_presence: boolean;
+  dms_allowed: boolean;
+  allow_gifting: boolean;
+  updated_at?: number;
 }
 
 export interface ApiSettingEntry {
@@ -51,18 +56,8 @@ export interface SupporterHistoryEntry {
   created_at: number | null;
 }
 
-export interface UserSettingsV2 {
-  profile_public: boolean;
-  show_recent_comments: boolean;
-  hide_following: boolean;
-  hide_followers: boolean;
-  hide_favorites: boolean;
-  custom_banner: boolean;
-  custom_avatar: boolean;
-  hide_connections: boolean;
-  hide_presence: boolean;
-  dms_allowed: boolean;
-}
+/** Settings returned as settings_v2 from /users/get — same shape as UserSettings */
+export type UserSettingsV2 = UserSettings;
 
 export interface UserPresence {
   status: "Online" | "Offline";

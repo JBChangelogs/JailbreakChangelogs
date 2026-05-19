@@ -108,6 +108,9 @@ interface MoreItem {
   depth: number;
 }
 
+const formatWait = (s: number) =>
+  s >= 60 ? `${Math.floor(s / 60)}m ${s % 60}s` : `${s}s`;
+
 /**
  * Cleans up comment text by removing excess whitespace and empty lines.
  */
@@ -268,21 +271,6 @@ const handleCommentApiError = (
     return true;
   }
 
-  if (data?.error === "rate_limit") {
-    const tryAgain = data.try_again;
-    let message = data.message || "You're posting too fast!";
-    if (tryAgain) {
-      const remaining = Math.max(0, tryAgain - Math.floor(Date.now() / 1000));
-      if (remaining > 0) {
-        message += ` Please try again in ${remaining} seconds.`;
-      }
-    }
-    toast.error("Rate Limit Exceeded", {
-      description: message,
-    });
-    return true;
-  }
-
   if (data?.error === "invalid_token") {
     toast.error("Session Expired", {
       description: data.message || "Please log in again to post a comment.",
@@ -371,6 +359,13 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
   );
   const [isSubmittingComment, setIsSubmittingComment] = useState(false);
   const [isRefreshingComments, setIsRefreshingComments] = useState(false);
+  const [rateLimitState, setRateLimitState] = useState<{
+    seconds: number;
+    nonce: number;
+  } | null>(null);
+  const [rateLimitSecondsLeft, setRateLimitSecondsLeft] = useState<
+    number | null
+  >(null);
 
   // --- Pagination ---
   const [page, setPage] = useState(1);
@@ -465,6 +460,32 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
     },
     [COMMENT_CHAR_LIMITS, currentUserPremiumType, openModal],
   );
+
+  const triggerRateLimit = useCallback((seconds: number) => {
+    setRateLimitState({ seconds, nonce: Date.now() });
+    toast.error("Too many requests. Please try again shortly.");
+  }, []);
+
+  useEffect(() => {
+    if (!rateLimitState) return;
+    setRateLimitSecondsLeft(rateLimitState.seconds);
+    const id = setInterval(() => {
+      setRateLimitSecondsLeft((prev) => {
+        if (prev === null || prev <= 1) {
+          clearInterval(id);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(id);
+  }, [rateLimitState]);
+
+  useEffect(() => {
+    if (rateLimitSecondsLeft !== 0) return;
+    setRateLimitSecondsLeft(null);
+    setRateLimitState(null);
+  }, [rateLimitSecondsLeft]);
 
   // Set isClient to true on mount to avoid hydration mismatches for browser-only features
   useEffect(() => {
@@ -630,6 +651,21 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
           errorData = null;
         }
 
+        if (response.status === 429 || errorData?.error === "rate_limit") {
+          const retryHeader = response.headers.get("Retry-After");
+          let seconds = 60;
+          if (typeof errorData?.try_again === "number") {
+            seconds = Math.max(
+              1,
+              errorData.try_again - Math.floor(Date.now() / 1000),
+            );
+          } else if (retryHeader) {
+            seconds = Math.max(1, parseInt(retryHeader, 10));
+          }
+          triggerRateLimit(seconds);
+          return;
+        }
+
         if (
           handleCommentLengthError(
             errorData,
@@ -661,9 +697,6 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
         addedCommentData?.comment_id ||
         addedCommentData?.ID;
 
-      toast.success("Comment posted successfully", {
-        description: "You have 1 hour to edit your comment.",
-      });
       setNewComment("");
       setIsCommentFormExpanded(false);
 
@@ -745,6 +778,21 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
         } catch {
           // Fallback if not JSON
           errorData = null;
+        }
+
+        if (response.status === 429 || errorData?.error === "rate_limit") {
+          const retryHeader = response.headers.get("Retry-After");
+          let seconds = 60;
+          if (typeof errorData?.try_again === "number") {
+            seconds = Math.max(
+              1,
+              errorData.try_again - Math.floor(Date.now() / 1000),
+            );
+          } else if (retryHeader) {
+            seconds = Math.max(1, parseInt(retryHeader, 10));
+          }
+          triggerRateLimit(seconds);
+          return;
         }
 
         if (
@@ -945,6 +993,21 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
           errorData = null;
         }
 
+        if (response.status === 429 || errorData?.error === "rate_limit") {
+          const retryHeader = response.headers.get("Retry-After");
+          let seconds = 60;
+          if (typeof errorData?.try_again === "number") {
+            seconds = Math.max(
+              1,
+              errorData.try_again - Math.floor(Date.now() / 1000),
+            );
+          } else if (retryHeader) {
+            seconds = Math.max(1, parseInt(retryHeader, 10));
+          }
+          triggerRateLimit(seconds);
+          return;
+        }
+
         if (
           handleCommentLengthError(
             errorData,
@@ -974,9 +1037,6 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
       const realId =
         addedReplyData?.id || addedReplyData?.comment_id || addedReplyData?.ID;
 
-      toast.success("Reply posted successfully", {
-        description: "You have 1 hour to edit your comment.",
-      });
       setReplyContent("");
       setReplyingToId(null);
 
@@ -1099,6 +1159,9 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
     }
   };
 
+  const isRateLimited =
+    rateLimitSecondsLeft !== null && rateLimitSecondsLeft > 0;
+
   const containerBgClass =
     type === "tradev2" ? "bg-tertiary-bg" : "bg-secondary-bg";
 
@@ -1182,17 +1245,34 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
             </div>
           </div>
 
+          {/* Rate Limit Banner */}
+          {isRateLimited && (
+            <div className="flex items-center gap-2 rounded-lg border border-yellow-500/30 bg-yellow-500/10 px-3 py-2 text-sm">
+              <Icon
+                icon="heroicons:clock"
+                className="h-4 w-4 shrink-0 text-yellow-500"
+              />
+              <span className="text-primary-text">
+                You&apos;re posting too fast. Try again in{" "}
+                <span className="font-semibold tabular-nums">
+                  {formatWait(rateLimitSecondsLeft!)}
+                </span>
+              </span>
+            </div>
+          )}
+
           {/* New Comment Form */}
           <form id="new-comment-form" onSubmit={handleSubmitComment}>
             {!isCommentFormExpanded ? (
               /* Collapsed trigger */
               <button
                 type="button"
-                className="border-border-card bg-tertiary-bg text-secondary-text hover:border-button-info w-full cursor-text rounded-lg border px-4 py-3 text-left text-sm transition-colors"
+                disabled={isRateLimited}
+                className="border-border-card bg-tertiary-bg text-secondary-text hover:border-button-info w-full cursor-text rounded-lg border px-4 py-3 text-left text-sm transition-colors disabled:cursor-not-allowed disabled:opacity-60"
                 onClick={() => {
                   if (!isLoggedIn) {
                     setLoginModal({ open: true });
-                  } else {
+                  } else if (!isRateLimited) {
                     setIsCommentFormExpanded(true);
                   }
                 }}
@@ -1210,7 +1290,8 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                   onChange={(e) => setNewComment(e.target.value)}
                   placeholder="Write a comment..."
                   rows={4}
-                  className="text-primary-text placeholder-secondary-text w-full resize-none bg-transparent p-3 text-sm focus:outline-none"
+                  disabled={isRateLimited}
+                  className="text-primary-text placeholder-secondary-text w-full resize-none bg-transparent p-3 text-sm focus:outline-none disabled:opacity-60"
                   autoCorrect="off"
                   autoComplete="off"
                   spellCheck="false"
@@ -1222,7 +1303,11 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                     }
                     if (e.key === "Enter" && !e.shiftKey) {
                       e.preventDefault();
-                      if (newComment.trim() && !isSubmittingComment) {
+                      if (
+                        newComment.trim() &&
+                        !isSubmittingComment &&
+                        !isRateLimited
+                      ) {
                         e.currentTarget.form?.requestSubmit();
                       }
                     }
@@ -1245,7 +1330,11 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                     <Button
                       type="submit"
                       size="sm"
-                      disabled={!newComment.trim() || isSubmittingComment}
+                      disabled={
+                        !newComment.trim() ||
+                        isSubmittingComment ||
+                        isRateLimited
+                      }
                       data-umami-event="Post Comment"
                       data-umami-event-type={type}
                       data-umami-event-context-id={changelogId.toString()}
@@ -1290,9 +1379,17 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                         <button
                           type="button"
                           className="text-link cursor-pointer hover:underline disabled:cursor-not-allowed disabled:opacity-60"
-                          disabled={!newComment.trim() || isSubmittingComment}
+                          disabled={
+                            !newComment.trim() ||
+                            isSubmittingComment ||
+                            isRateLimited
+                          }
                           onClick={() => {
-                            if (newComment.trim() && !isSubmittingComment) {
+                            if (
+                              newComment.trim() &&
+                              !isSubmittingComment &&
+                              !isRateLimited
+                            ) {
                               document
                                 .querySelector<HTMLFormElement>(
                                   "#new-comment-form",
@@ -1838,7 +1935,8 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                                 }
                                 id={`reply-textarea-${comment.id}`}
                                 rows={2}
-                                className="text-primary-text placeholder-secondary-text w-full resize-none bg-transparent p-3 text-sm focus:outline-none"
+                                disabled={isRateLimited}
+                                className="text-primary-text placeholder-secondary-text w-full resize-none bg-transparent p-3 text-sm focus:outline-none disabled:opacity-60"
                                 placeholder="Write a reply..."
                                 autoCorrect="off"
                                 autoComplete="off"
@@ -1853,7 +1951,8 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                                     e.preventDefault();
                                     if (
                                       replyContent.trim() &&
-                                      !isSubmittingComment
+                                      !isSubmittingComment &&
+                                      !isRateLimited
                                     ) {
                                       void handleSubmitReply(comment.id);
                                     }
@@ -1877,7 +1976,8 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                                     size="sm"
                                     disabled={
                                       !replyContent.trim() ||
-                                      isSubmittingComment
+                                      isSubmittingComment ||
+                                      isRateLimited
                                     }
                                     onClick={() =>
                                       handleSubmitReply(comment.id)
@@ -1925,7 +2025,8 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                                         className="text-link cursor-pointer hover:underline disabled:cursor-not-allowed disabled:opacity-60"
                                         disabled={
                                           !replyContent.trim() ||
-                                          isSubmittingComment
+                                          isSubmittingComment ||
+                                          isRateLimited
                                         }
                                         onClick={() =>
                                           void handleSubmitReply(comment.id)
