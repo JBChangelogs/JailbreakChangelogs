@@ -11,6 +11,7 @@ interface UserAvatarProps {
   size?: number;
   cdnSize?: number;
   custom_avatar?: string;
+  forceAvatarUrl?: string;
   isOnline?: boolean;
   showBadge?: boolean;
   settings?: {
@@ -116,6 +117,7 @@ const UserAvatarImpl = ({
   size = 12,
   cdnSize,
   custom_avatar,
+  forceAvatarUrl,
   isOnline,
   showBadge = true,
   settings,
@@ -137,6 +139,14 @@ const UserAvatarImpl = ({
   })();
 
   const getAvatarSource = () => {
+    if (forceAvatarUrl && !imageError) {
+      return {
+        src: forceAvatarUrl,
+        alt: username ? `${username}'s profile picture` : "User avatar",
+        onError: () => setImageError(true),
+      };
+    }
+
     if (
       settings?.custom_avatar === true &&
       premiumType &&

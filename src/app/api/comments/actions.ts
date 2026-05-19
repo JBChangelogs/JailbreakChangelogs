@@ -1,6 +1,6 @@
 "use server";
 
-import { fetchComments, fetchUsersBatch } from "@/utils/api/api";
+import { fetchComments } from "@/utils/api/api";
 import { createLogger } from "@/services/logger";
 
 const log = createLogger("API");
@@ -22,23 +22,6 @@ export async function refreshComments(
     return {
       success: false,
       error: "Failed to fetch comments",
-    };
-  }
-}
-
-export async function fetchUsersBatchAction(userIds: string[]) {
-  try {
-    const userMap = await fetchUsersBatch(userIds);
-
-    return {
-      success: true,
-      data: userMap,
-    };
-  } catch (error) {
-    log.error("[SERVER ACTION] Failed to fetch users batch:", error);
-    return {
-      success: false,
-      error: "Failed to fetch user data",
     };
   }
 }

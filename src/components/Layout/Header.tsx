@@ -318,6 +318,10 @@ export default function Header() {
   useEscapeLogin();
 
   useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
     if (!isAuthenticated) return;
 
     let cancelled = false;

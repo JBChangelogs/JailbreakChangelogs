@@ -18,7 +18,7 @@ interface ReportCommentModalProps {
   commentCustomAvatar?: string | null;
   commentDate: string;
   commentPremiumType?: number;
-  commentSettings?: UserData["settings_v2"];
+  commentSettings?: UserData["settings"];
 }
 
 const MAX_REASON_LENGTH = 500;
