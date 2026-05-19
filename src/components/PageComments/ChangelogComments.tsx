@@ -199,7 +199,7 @@ const sanitizeHTML = (html: string): string => {
  */
 interface CommentApiErrorData {
   error?: string;
-  flagged?: string[];
+  flagged?: { word: string; source: string }[];
   try_again?: number;
   message?: string;
   character_limit?: number;
@@ -265,8 +265,18 @@ const handleCommentApiError = (
     const flagged = data.flagged || [];
     const message =
       data.message || "Please remove profanity from your comment.";
-    toast.error("Profanity Detected", {
-      description: `${message}${flagged.length > 0 ? ` Flagged: ${flagged.join(", ")}` : ""}`,
+    toast.error(formatErrorTitle(data.error), {
+      description: (
+        <span>
+          {message}
+          {flagged.length > 0 && (
+            <>
+              <br />
+              Flagged: {flagged.map((f) => f.word).join(", ")}
+            </>
+          )}
+        </span>
+      ),
     });
     return true;
   }
