@@ -35,6 +35,7 @@ import {
   getNotificationActionLabel,
   parseNotificationUrl,
 } from "@/utils/notifications/notificationUrl";
+import { renderNotifDescription } from "@/utils/notifications/notifMarkdown";
 
 const AnimatedThemeToggler = dynamic(
   () =>
@@ -1151,8 +1152,8 @@ export const NavbarModern = ({
                                 {notif.title}
                               </p>
                             </div>
-                            <p className="text-secondary-text mt-1 text-xs wrap-break-word whitespace-normal">
-                              {notif.description}
+                            <p className="text-secondary-text mt-1 text-xs wrap-break-word">
+                              {renderNotifDescription(notif.description)}
                             </p>
                             {shouldHideViewAction ? null : urlInfo.isWhitelisted ? (
                               urlInfo.isJailbreakChangelogs &&

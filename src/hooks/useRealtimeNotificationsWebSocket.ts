@@ -8,6 +8,7 @@ import {
   parseNotificationUrl,
 } from "@/utils/notifications/notificationUrl";
 import { showDesktopNotification } from "@/utils/notifications/desktopNotifications";
+import { stripNotifMarkdown } from "@/utils/notifications/notifMarkdown";
 import { buildApiUrlWithDevToken } from "@/utils/api/apiDevToken";
 import { createLogger } from "@/services/logger";
 
@@ -437,8 +438,9 @@ export function useRealtimeNotificationsWebSocket(
 
             const { title, description, link } = notificationData;
             const notificationTitle = title || "New notification";
-            const notificationDescription =
-              description || "You received a new notification.";
+            const notificationDescription = stripNotifMarkdown(
+              description || "You received a new notification.",
+            );
             const type = notificationPayload.type || "unknown";
             const toastId = `realtime-notification:${type}:${link || notificationTitle}`;
             const shouldHideViewAction =
