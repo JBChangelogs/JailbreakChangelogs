@@ -15,6 +15,7 @@ import {
   fetchTradeOffers,
   respondToTradeOfferV2,
   type TradeOfferV2,
+  type TradeOfferV2User,
 } from "@/utils/trading/core";
 import { buildApiUrlWithDevToken } from "@/utils/api/apiDevToken";
 import { toast } from "sonner";
@@ -752,6 +753,7 @@ export default function TradeDetailsClient({
   const handleOfferResponse = async (
     offerId: number,
     action: OfferResponseAction,
+    offerUser?: TradeOfferV2User | null,
   ) => {
     if (!isOwner) return;
 
@@ -762,9 +764,23 @@ export default function TradeDetailsClient({
 
     try {
       await respondToTradeOfferV2(trade.id, offerId, action);
-      toast.success(action === "accept" ? "Offer accepted" : "Offer declined", {
-        id: toastId,
-      });
+      if (action === "accept") {
+        const offerUserId = offerUser?.id;
+        toast.success("Offer accepted", {
+          id: toastId,
+          ...(offerUserId
+            ? {
+                action: {
+                  label: "Message them",
+                  onClick: () =>
+                    router.push(`/messages/${encodeURIComponent(offerUserId)}`),
+                },
+              }
+            : {}),
+        });
+      } else {
+        toast.success("Offer declined", { id: toastId });
+      }
       setOffersRefreshToken((prev) => prev + 1);
     } catch (err) {
       const message =
@@ -1372,6 +1388,31 @@ export default function TradeDetailsClient({
                                     {offerStatusLabel}
                                   </span>
 
+                                  {offerStatusValue === 1 &&
+                                    ((isOwner && offerUser?.id) ||
+                                      (isOfferOwner && trade.user?.id)) && (
+                                      <Button
+                                        type="button"
+                                        size="sm"
+                                        variant="default"
+                                        className="h-6! px-2.5!"
+                                        onClick={() => {
+                                          const targetId = isOwner
+                                            ? offerUser?.id
+                                            : trade.user?.id;
+                                          if (targetId)
+                                            router.push(
+                                              `/messages/${encodeURIComponent(targetId)}`,
+                                            );
+                                        }}
+                                      >
+                                        <Icon icon="heroicons-outline:chat-bubble-left-ellipsis" />
+                                        <span className="hidden sm:inline">
+                                          Message
+                                        </span>
+                                      </Button>
+                                    )}
+
                                   {isOwner && isPendingOffer && (
                                     <>
                                       <Button
@@ -1384,6 +1425,7 @@ export default function TradeDetailsClient({
                                           void handleOfferResponse(
                                             offer.id,
                                             "accept",
+                                            offer.user,
                                           )
                                         }
                                         aria-label="Accept offer"
