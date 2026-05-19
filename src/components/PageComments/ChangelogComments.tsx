@@ -31,19 +31,14 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "../ui/button";
-import { CommentData } from "@/utils/api";
+import { CommentData, PUBLIC_API_URL, flattenComments } from "@/utils/api";
+import { buildApiUrlWithDevToken } from "@/utils/apiDevToken";
 import { sanitizeText } from "@/utils/sanitizeText";
-import {
-  refreshComments,
-  fetchUsersBatchAction,
-} from "@/app/api/comments/actions";
 import { UserAvatar } from "@/utils/avatar";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { UserData } from "@/types/auth";
@@ -51,8 +46,8 @@ import Link from "next/link";
 import ReportCommentModal from "./ReportCommentModal";
 import SupporterModal from "../Modals/SupporterModal";
 import { useSupporterModal } from "@/hooks/useSupporterModal";
-import { UserDetailsTooltip } from "@/components/ui/UserDetailsTooltip";
 import { UserBadges } from "@/components/Profile/UserBadges";
+import { UserDetailsTooltip } from "@/components/ui/UserDetailsTooltip";
 import CommentTimestamp from "./CommentTimestamp";
 import { toast } from "sonner";
 import DOMPurify from "dompurify";
@@ -114,22 +109,6 @@ const cleanCommentText = (text: string): string => {
     .map((line) => line.trim())
     .filter((line) => line.length > 0)
     .join("\n");
-};
-
-/**
- * Strips all HTML tags from a string.
- * Uses a loop to ensure all nested tags are removed, preventing
- * incomplete sanitization vulnerabilities (CodeQL js/incomplete-multi-character-sanitization).
- */
-const stripHTML = (html: string): string => {
-  if (!html) return "";
-  let current = html;
-  let previous;
-  do {
-    previous = current;
-    current = current.replace(/<[^>]*>?/gm, "");
-  } while (current !== previous);
-  return current;
 };
 
 /**
@@ -370,9 +349,11 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
   const [expandedComments, setExpandedComments] = useState<Set<number>>(
     new Set(),
   );
-  const [sortOrder, setSortOrder] = useState<
-    "newest" | "oldest" | "edited_newest" | "edited_oldest"
-  >("newest");
+  const [expandedReplies, setExpandedReplies] = useState<Set<number>>(
+    new Set(),
+  );
+  const [sortOrder, setSortOrder] = useState("newest");
+  const [availableSorts, setAvailableSorts] = useState<string[]>([]);
 
   // --- UI State (Modals & Loading) ---
   const [reportModalOpen, setReportModalOpen] = useState(false);
@@ -383,20 +364,10 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
   const [isSubmittingComment, setIsSubmittingComment] = useState(false);
   const [isRefreshingComments, setIsRefreshingComments] = useState(false);
 
-  // --- Data Fetching State ---
-  const [loadingUserData, setLoadingUserData] = useState<
-    Record<string, boolean>
-  >({});
-  const [failedUserData, setFailedUserData] = useState<Set<string>>(new Set());
-
   // --- Pagination ---
   const [page, setPage] = useState(1);
-  const itemsPerPage = 10;
-
-  // Tracks a comment ID to scroll to + flash after a cross-page navigation
-  const [pendingScrollToId, setPendingScrollToId] = useState<number | null>(
-    null,
-  );
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalComments, setTotalComments] = useState(0);
 
   // Controls whether the new comment form is expanded
   const [isCommentFormExpanded, setIsCommentFormExpanded] = useState(false);
@@ -498,6 +469,17 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
     setIsClient(true);
   }, []);
 
+  useEffect(() => {
+    fetch(`${PUBLIC_API_URL}/comments/sorts`)
+      .then((r) => r.json())
+      .then((data: unknown) => {
+        if (Array.isArray(data) && data.every((s) => typeof s === "string")) {
+          setAvailableSorts(data as string[]);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
   /**
    * Syncs the local state with the global AuthContext.
    * Listens for both internal context changes and external 'authStateChanged' events
@@ -535,12 +517,12 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
       handleAuthChange as EventListener,
     );
 
-    // Sync current user with userData for optimistic updates
+    // Always merge auth user data so optimistic comments have Roblox fields
     if (user) {
-      setUserData((prev) => {
-        if (prev[user.id]) return prev;
-        return { ...prev, [user.id]: user as UserData };
-      });
+      setUserData((prev) => ({
+        ...prev,
+        [user.id]: { ...prev[user.id], ...user } as UserData,
+      }));
     }
 
     return () => {
@@ -552,113 +534,49 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
   }, [isAuthenticated, user]);
 
   /**
-   * Fetches user profile data for a batch of user IDs.
-   * This is used to populate avatars, usernames, and badges for commenters.
-   */
-  const fetchUserData = useCallback(
-    async (userIds: string[]) => {
-      if (userIds.length === 0) return;
-
-      // Filter out users we already have data for, are loading, or have failed
-      const usersToFetch = userIds.filter(
-        (userId) =>
-          !userData[userId] &&
-          !loadingUserData[userId] &&
-          !failedUserData.has(userId),
-      );
-
-      if (usersToFetch.length === 0) return;
-
-      try {
-        setLoadingUserData((prev) => {
-          const newState = { ...prev };
-          usersToFetch.forEach((userId) => {
-            newState[userId] = true;
-          });
-          return newState;
-        });
-
-        const result = await fetchUsersBatchAction(usersToFetch);
-
-        if (!result.success) {
-          throw new Error(result.error || "Failed to fetch user data");
-        }
-
-        const resolvedIds = new Set(Object.keys(result.data || {}));
-        const unresolvedIds = usersToFetch.filter((id) => !resolvedIds.has(id));
-
-        setUserData((prev) => {
-          const newState = { ...prev };
-          Object.entries(result.data || {}).forEach(([userId, user]) => {
-            newState[userId] = user as UserData;
-          });
-          return newState;
-        });
-
-        // Prevent endless retries when upstream returns partial/empty data
-        // for requested IDs (common when some users are missing or API fails soft).
-        if (unresolvedIds.length > 0) {
-          setFailedUserData((prev) => {
-            const newSet = new Set(prev);
-            unresolvedIds.forEach((userId) => {
-              newSet.add(userId);
-            });
-            return newSet;
-          });
-        }
-      } catch (error) {
-        console.error("Error fetching user data:", error);
-        setFailedUserData((prev) => {
-          const newSet = new Set(prev);
-          usersToFetch.forEach((userId) => {
-            newSet.add(userId);
-          });
-          return newSet;
-        });
-      } finally {
-        setLoadingUserData((prev) => {
-          const newState = { ...prev };
-          usersToFetch.forEach((userId) => {
-            newState[userId] = false;
-          });
-          return newState;
-        });
-      }
-    },
-    [userData, loadingUserData, failedUserData],
-  );
-
-  /**
    * Refreshes the comment list from the server.
+   * User data is embedded in each comment by the API, so no separate fetch needed.
    * @param silent If true, suppresses loading indicators for a seamless update.
    */
   const refreshCommentsFromServer = useCallback(
-    async (silent = false) => {
+    async (silent = false, targetPage = 1, sort?: string) => {
       if (!silent) setIsRefreshingComments(true);
       try {
-        const result = await refreshComments(
-          type === "item" ? itemType || type : type,
-          changelogId.toString(),
+        const commentType = type === "item" ? itemType || type : type;
+        const url = buildApiUrlWithDevToken(
+          PUBLIC_API_URL!,
+          `/comments/${commentType}/${changelogId}`,
         );
-
-        if (!result.success) {
-          throw new Error(result.error || "Failed to fetch comments");
+        const urlWithPage = new URL(url);
+        urlWithPage.searchParams.set("page", String(targetPage));
+        const effectiveSort = sort ?? sortOrder;
+        if (effectiveSort !== "newest") {
+          urlWithPage.searchParams.set("sort", effectiveSort);
         }
 
-        const commentsArray = Array.isArray(result.data?.comments)
-          ? result.data.comments
-          : [];
-        setComments(commentsArray);
+        const res = await fetch(urlWithPage.toString(), {
+          credentials: "include",
+        });
 
-        // We no longer fetch user data for all comments here.
-        // It is now handled by the useEffect that watches currentComments.
+        if (!res.ok) {
+          throw new Error("Failed to fetch comments");
+        }
+
+        const data = await res.json();
+        const { comments: commentsArray, userMap } = flattenComments(data);
+
+        setComments(commentsArray);
+        setTotalPages(data.total_pages ?? 1);
+        setTotalComments(data.total ?? 0);
+
+        setUserData((prev) => ({ ...prev, ...userMap }));
       } catch (err) {
         console.error("Error refreshing comments:", err);
       } finally {
         if (!silent) setIsRefreshingComments(false);
       }
     },
-    [changelogId, type, itemType],
+    [changelogId, type, itemType, sortOrder],
   );
 
   // Refresh comments when changelogId changes with simple debouncing
@@ -670,7 +588,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
     setPage(1);
 
     const timeoutId = setTimeout(() => {
-      refreshCommentsFromServer();
+      refreshCommentsFromServer(false, 1);
     }, 300);
 
     return () => clearTimeout(timeoutId);
@@ -687,17 +605,19 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
     setIsSubmittingComment(true);
 
     try {
-      const response = await fetch(`/api/comments/add`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
+      const response = await fetch(
+        buildApiUrlWithDevToken(PUBLIC_API_URL!, "/comments"),
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({
+            content: cleanCommentText(newComment),
+            item_id: changelogId,
+            item_type: type === "item" ? itemType : type,
+          }),
         },
-        body: JSON.stringify({
-          content: cleanCommentText(newComment),
-          item_id: changelogId,
-          item_type: type === "item" ? itemType : type,
-        }),
-      });
+      );
 
       if (!response.ok) {
         let errorData;
@@ -763,23 +683,9 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
       // Visually add the optimistic comment
       setComments((prev) => [optimisticComment, ...prev]);
 
-      // Always trigger a silent refresh to sync with server state (official IDs, timestamps, etc)
-      // without showing loading spinners or flickering
-      refreshCommentsFromServer(true);
-
-      // If adding a new root comment, go to the first page to see it
-      if (
-        sortOrder === "newest" ||
-        sortOrder === "edited_newest" ||
-        sortOrder === "edited_oldest"
-      ) {
-        setPage(1);
-      } else {
-        // If sorting by oldest, the new comment will be at the end
-        const totalWithNew = comments.length + 1;
-        const newTotalPages = Math.ceil(totalWithNew / itemsPerPage);
-        setPage(newTotalPages);
-      }
+      // Refresh page 1 to sync with server (newest comment will be there)
+      setPage(1);
+      refreshCommentsFromServer(true, 1);
 
       // Track comment post
       if (typeof window !== "undefined" && window.umami) {
@@ -801,7 +707,9 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
     if (!editContent.trim() || updatingCommentId === commentId) return;
 
     // Find the original comment to compare content
-    const originalComment = comments.find((c) => c.id === commentId);
+    const originalComment =
+      comments.find((c) => c.id === commentId) ??
+      comments.flatMap((c) => c.replies ?? []).find((r) => r.id === commentId);
     if (!originalComment) return;
 
     const normalizedEditContent = cleanCommentText(editContent);
@@ -818,17 +726,15 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
     try {
       setUpdatingCommentId(commentId);
 
-      const response = await fetch(`/api/comments/edit`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
+      const response = await fetch(
+        buildApiUrlWithDevToken(PUBLIC_API_URL!, `/comments/${commentId}`),
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ content: normalizedEditContent }),
         },
-        body: JSON.stringify({
-          id: commentId,
-          content: normalizedEditContent,
-          item_type: type,
-        }),
-      });
+      );
 
       if (!response.ok) {
         let errorData;
@@ -871,27 +777,28 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
       setEditingCommentId(null);
       setEditContent("");
 
-      // Merge server response into the existing comment, preserving required fields
-      setComments((prev) =>
-        prev.map((c) => {
-          if (c.id !== commentId) return c;
+      const applyEdit = (c: CommentData): CommentData => {
+        if (c.id !== commentId) return c;
+        return {
+          ...c,
+          ...(normalizedUpdate || {}),
+          content: normalizedUpdate?.content ?? normalizedEditContent,
+          edited_at:
+            normalizedUpdate?.edited_at !== undefined
+              ? normalizedUpdate.edited_at
+              : Math.floor(Date.now() / 1000).toString(),
+        };
+      };
 
-          return {
-            ...c,
-            ...(normalizedUpdate || {}),
-            // Fallback to local edited content if upstream omitted it.
-            content: normalizedUpdate?.content ?? normalizedEditContent,
-            // Ensure edited state is visible immediately even if API omits edited_at.
-            edited_at:
-              normalizedUpdate?.edited_at !== undefined
-                ? normalizedUpdate.edited_at
-                : Math.floor(Date.now() / 1000).toString(),
-          };
-        }),
+      setComments((prev) =>
+        prev.map((c) => ({
+          ...applyEdit(c),
+          replies: c.replies?.map(applyEdit),
+        })),
       );
 
       // Keep local state synced with canonical backend shape for replies/comments.
-      refreshCommentsFromServer(true);
+      refreshCommentsFromServer(true, page);
 
       // Track comment edit
       if (typeof window !== "undefined" && window.umami) {
@@ -911,37 +818,29 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
    */
   const handleDeleteComment = async (commentId: number) => {
     // Keep a copy of current comments for restoration if delete fails
-    const previousComments = [...comments];
+    const previousComments = comments.map((c) => ({
+      ...c,
+      replies: [...(c.replies ?? [])],
+    }));
 
-    // Optimistically remove the comment and all its descendants from UI
-    // Since the backend handles cascading delete, we must do the same to stay in sync
-    setComments((prev) => {
-      const idsToRemove = new Set([commentId]);
-      let sizeBefore;
-      do {
-        sizeBefore = idsToRemove.size;
-        prev.forEach((c) => {
-          if (
-            c.parent_id &&
-            typeof c.parent_id === "number" &&
-            idsToRemove.has(c.parent_id)
-          ) {
-            idsToRemove.add(c.id);
-          }
-        });
-      } while (idsToRemove.size > sizeBefore);
-
-      return prev.filter((c) => !idsToRemove.has(c.id));
-    });
+    const isTopLevel = comments.some((c) => c.id === commentId);
+    setComments((prev) =>
+      isTopLevel
+        ? prev.filter((c) => c.id !== commentId)
+        : prev.map((c) => ({
+            ...c,
+            replies: c.replies?.filter((r) => r.id !== commentId),
+          })),
+    );
 
     try {
-      const response = await fetch(`/api/comments/delete`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
+      const response = await fetch(
+        buildApiUrlWithDevToken(PUBLIC_API_URL!, `/comments/${commentId}`),
+        {
+          method: "DELETE",
+          credentials: "include",
         },
-        body: JSON.stringify({ id: commentId, item_type: type }),
-      });
+      );
       if (!response.ok) {
         throw new Error("Failed to delete comment");
       }
@@ -958,87 +857,11 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
     }
   };
 
-  // Sort comments based on sortOrder
-  const sortedComments = [...comments].sort((a, b) => {
-    if (sortOrder === "edited_newest" || sortOrder === "edited_oldest") {
-      const dateA = parseInt(a.edited_at ?? a.date);
-      const dateB = parseInt(b.edited_at ?? b.date);
-      return sortOrder === "edited_newest" ? dateB - dateA : dateA - dateB;
-    }
-    const dateA = parseInt(a.date);
-    const dateB = parseInt(b.date);
-    return sortOrder === "newest" ? dateB - dateA : dateA - dateB;
-  });
+  const filteredComments = comments;
 
-  // Filter out comments from users whose data fetch failed to maintain UI quality
-  const filteredComments = sortedComments.filter(
-    (comment) => !failedUserData.has(comment.user_id),
+  const currentComments: (ThreadedComment | MoreItem)[] = comments.map(
+    (comment) => ({ ...comment, depth: 0 }),
   );
-
-  /**
-   * Build a threaded / nested order of comments.
-   * Currently implements a Discord-style flat thread where replies
-   * appear in the main flow but show context of the parent comment.
-   */
-  const buildThreadedComments = useCallback(
-    (allComments: CommentData[]): (ThreadedComment | MoreItem)[] => {
-      if (!allComments || allComments.length === 0) return [];
-
-      // Simply sort all comments chronologically by their own dates
-      // In Discord-style, replies appear in the main flow but show a preview
-      const result = [...allComments]
-        .sort((a, b) => {
-          if (sortOrder === "edited_newest" || sortOrder === "edited_oldest") {
-            const dateA = parseInt(a.edited_at ?? a.date);
-            const dateB = parseInt(b.edited_at ?? b.date);
-            return sortOrder === "edited_newest"
-              ? dateB - dateA
-              : dateA - dateB;
-          }
-          const dateA = parseInt(a.date);
-          const dateB = parseInt(b.date);
-          return sortOrder === "newest" ? dateB - dateA : dateA - dateB;
-        })
-        .map((comment) => ({
-          ...comment,
-          depth: 0,
-        }));
-
-      return result;
-    },
-    [sortOrder],
-  );
-
-  const threadedComments: (ThreadedComment | MoreItem)[] =
-    buildThreadedComments(filteredComments);
-
-  // Pagination Logic Constants
-  const totalPages = Math.ceil(threadedComments.length / itemsPerPage);
-  const startIndex = (page - 1) * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
-  const currentComments: (ThreadedComment | MoreItem)[] =
-    threadedComments.slice(startIndex, endIndex);
-
-  /**
-   * Automatically fetch user profile data for all users in comments.
-   * We need user data for all comments to properly display hidden identity
-   * for users with privacy settings enabled (show_recent_comments or profile_public).
-   */
-  useEffect(() => {
-    if (comments.length > 0) {
-      const userIds = comments.map((comment) => comment.user_id);
-      // Determine which IDs need fetching
-      const uniqueIds = Array.from(new Set(userIds)).filter(Boolean);
-      const idsToFetch = uniqueIds.filter(
-        (id) =>
-          !userData[id] && !loadingUserData[id] && !failedUserData.has(id),
-      );
-
-      if (idsToFetch.length > 0) {
-        fetchUserData(idsToFetch);
-      }
-    }
-  }, [comments, userData, loadingUserData, failedUserData, fetchUserData]);
 
   // Focus the new comment textarea when the form expands
   useEffect(() => {
@@ -1058,31 +881,20 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
     textarea?.focus();
   }, [replyingToId]);
 
-  const handleSortChange = (
-    order: "newest" | "oldest" | "edited_newest" | "edited_oldest",
-  ) => {
+  const handleSortChange = (order: string) => {
     setSortOrder(order);
     setPage(1);
+    void refreshCommentsFromServer(false, 1, order);
   };
 
-  // After a cross-page navigation, scroll to and flash the pending comment once it's in the DOM
-  useEffect(() => {
-    if (pendingScrollToId === null) return;
-    const el = document.getElementById(`comment-${pendingScrollToId}`);
-    if (!el) return;
-    setPendingScrollToId(null);
-    el.scrollIntoView({ behavior: "smooth", block: "center" });
-    el.classList.add("bg-button-info/20", "transition-colors", "duration-500");
-    setTimeout(
-      () =>
-        el.classList.remove(
-          "bg-button-info/20",
-          "transition-colors",
-          "duration-500",
-        ),
-      1500,
-    );
-  }, [pendingScrollToId, page]);
+  const toggleReplies = (commentId: number) => {
+    setExpandedReplies((prev) => {
+      const next = new Set(prev);
+      if (next.has(commentId)) next.delete(commentId);
+      else next.add(commentId);
+      return next;
+    });
+  };
 
   const toggleCommentExpand = (commentId: number) => {
     setExpandedComments((prev) => {
@@ -1105,18 +917,20 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
     setIsSubmittingComment(true);
 
     try {
-      const response = await fetch(`/api/comments/add`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
+      const response = await fetch(
+        buildApiUrlWithDevToken(PUBLIC_API_URL!, "/comments"),
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({
+            content: cleanCommentText(replyContent),
+            item_id: changelogId,
+            item_type: type === "item" ? itemType : type,
+            parent_id: parentId,
+          }),
         },
-        body: JSON.stringify({
-          content: cleanCommentText(replyContent),
-          item_id: changelogId,
-          item_type: type === "item" ? itemType : type,
-          parent_id: parentId,
-        }),
-      });
+      );
 
       if (!response.ok) {
         let errorData;
@@ -1177,15 +991,17 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
         ...addedReplyData,
       };
 
-      // Visually add the optimistic reply
-      setComments((prev) => [optimisticReply, ...prev]);
+      // Append optimistic reply under the parent and expand its replies
+      setComments((prev) =>
+        prev.map((c) =>
+          c.id === parentId
+            ? { ...c, replies: [...(c.replies ?? []), optimisticReply] }
+            : c,
+        ),
+      );
+      setExpandedReplies((prev) => new Set([...prev, parentId]));
 
-      // Always trigger a silent refresh to sync with server state (official IDs, timestamps, etc)
-      // without showing loading spinners or flickering
-      refreshCommentsFromServer(true);
-
-      // We don't necessarily change the page for replies as they are
-      // attached to their parents which might be on the current page.
+      refreshCommentsFromServer(true, page);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Failed to post reply");
     } finally {
@@ -1194,7 +1010,11 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
   };
 
   const handleEditClick = (commentId: number) => {
-    const comment = filteredComments.find((c) => c.id === commentId);
+    const comment =
+      filteredComments.find((c) => c.id === commentId) ??
+      filteredComments
+        .flatMap((c) => c.replies ?? [])
+        .find((r) => r.id === commentId);
     if (comment) {
       setReplyingToId(null);
       setReplyContent("");
@@ -1230,16 +1050,18 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
 
     try {
       const sanitizedReason = sanitizeText(reason.trim());
-      const response = await fetch(`/api/comments/report`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
+      const response = await fetch(
+        buildApiUrlWithDevToken(PUBLIC_API_URL!, "/comments/report"),
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({
+            comment_id: reportingCommentId,
+            reason: sanitizedReason,
+          }),
         },
-        body: JSON.stringify({
-          comment_id: reportingCommentId,
-          reason: sanitizedReason,
-        }),
-      });
+      );
 
       if (!response.ok) {
         throw new Error("Failed to report comment");
@@ -1261,7 +1083,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
     value: number,
   ) => {
     setPage(value);
-    // Optional: Scroll to top of comments section
+    void refreshCommentsFromServer(false, value);
     const commentsHeader = document.querySelector("#comments-header");
     if (commentsHeader) {
       commentsHeader.scrollIntoView({ behavior: "smooth" });
@@ -1282,9 +1104,9 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
               id="comments-header"
               className="text-primary-text min-w-0 text-lg font-bold tracking-tight sm:text-xl"
             >
-              {comments.length === 1
+              {totalComments === 1
                 ? "1 Comment for"
-                : `${comments.length} Comments for`}{" "}
+                : `${totalComments} Comments for`}{" "}
               {type === "changelog" ? (
                 `Changelog ${changelogId}: ${changelogTitle}`
               ) : type === "season" ? (
@@ -1319,13 +1141,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                       type="button"
                       className="text-primary-text flex cursor-pointer items-center gap-0.5 font-medium focus:outline-none"
                     >
-                      {sortOrder === "newest"
-                        ? "Posted: Newest"
-                        : sortOrder === "oldest"
-                          ? "Posted: Oldest"
-                          : sortOrder === "edited_newest"
-                            ? "Edited: Newest"
-                            : "Edited: Oldest"}
+                      {sortOrder.charAt(0).toUpperCase() + sortOrder.slice(1)}
                       <Icon
                         icon="heroicons:chevron-down"
                         className="h-3.5 w-3.5 shrink-0"
@@ -1340,47 +1156,17 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                 >
                   <DropdownMenuRadioGroup
                     value={sortOrder}
-                    onValueChange={(v) =>
-                      handleSortChange(
-                        v as
-                          | "newest"
-                          | "oldest"
-                          | "edited_newest"
-                          | "edited_oldest",
-                      )
-                    }
+                    onValueChange={handleSortChange}
                   >
-                    <DropdownMenuLabel className="text-secondary-text px-3 py-1 text-xs tracking-widest uppercase">
-                      By Post Date
-                    </DropdownMenuLabel>
-                    <DropdownMenuRadioItem
-                      value="newest"
-                      className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
-                    >
-                      Newest First
-                    </DropdownMenuRadioItem>
-                    <DropdownMenuRadioItem
-                      value="oldest"
-                      className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
-                    >
-                      Oldest First
-                    </DropdownMenuRadioItem>
-                    <DropdownMenuSeparator className="bg-border-primary/60" />
-                    <DropdownMenuLabel className="text-secondary-text px-3 py-1 text-xs tracking-widest uppercase">
-                      By Edit Date
-                    </DropdownMenuLabel>
-                    <DropdownMenuRadioItem
-                      value="edited_newest"
-                      className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
-                    >
-                      Newest First
-                    </DropdownMenuRadioItem>
-                    <DropdownMenuRadioItem
-                      value="edited_oldest"
-                      className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
-                    >
-                      Oldest First
-                    </DropdownMenuRadioItem>
+                    {availableSorts.map((s) => (
+                      <DropdownMenuRadioItem
+                        key={s}
+                        value={s}
+                        className="focus:bg-quaternary-bg focus:text-primary-text cursor-pointer rounded-lg px-3 py-2 text-sm"
+                      >
+                        {s.charAt(0).toUpperCase() + s.slice(1)}
+                      </DropdownMenuRadioItem>
+                    ))}
                   </DropdownMenuRadioGroup>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -1594,19 +1380,28 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
 
                   const comment = item as CommentData;
 
-                  // Setup permissions and display flags
-                  const flags = userData[comment.user_id]?.flags || [];
-                  const premiumType = userData[comment.user_id]?.premiumtype;
                   const commentAuthorSettings =
                     userData[comment.user_id]?.settings;
 
-                  // Hide identity if:
-                  // 1. show_recent_comments is 0 (disabled), OR
-                  // 2. profile_public is 0 (private profile)
-                  // AND the viewer is not the comment author
+                  // For trade/inventory contexts, prefer Roblox identity
+                  const isRobloxContext =
+                    type === "tradev2" || type === "inventory";
+                  const robloxAvatarUrl =
+                    isRobloxContext && userData[comment.user_id]?.roblox_avatar
+                      ? userData[comment.user_id].roblox_avatar
+                      : undefined;
+                  const displayName = isRobloxContext
+                    ? userData[comment.user_id]?.roblox_display_name ||
+                      userData[comment.user_id]?.roblox_username ||
+                      userData[comment.user_id]?.username ||
+                      comment.author
+                    : userData[comment.user_id]?.username || comment.author;
+
+                  // Hide identity if show_recent_comments or profile_public is falsy
+                  // and the viewer is not the comment author
                   const hideRecent =
-                    (commentAuthorSettings?.show_recent_comments === 0 ||
-                      commentAuthorSettings?.profile_public === 0) &&
+                    (!commentAuthorSettings?.show_recent_comments ||
+                      !commentAuthorSettings?.profile_public) &&
                     currentUserId !== comment.user_id;
 
                   // Truncation logic for long comments
@@ -1633,179 +1428,21 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                     visibleContent = commentContent;
                   }
 
-                  // Context for replies
-                  const isReply =
-                    typeof comment.parent_id === "number" &&
-                    comment.parent_id !== null;
-
-                  const parentComment =
-                    isReply && typeof comment.parent_id === "number"
-                      ? filteredComments.find((c) => c.id === comment.parent_id)
-                      : null;
-
-                  const parentHidden =
-                    !!parentComment &&
-                    (userData[parentComment.user_id]?.settings
-                      ?.show_recent_comments === 0 ||
-                      userData[parentComment.user_id]?.settings
-                        ?.profile_public === 0) &&
-                    currentUserId !== parentComment.user_id;
-
-                  const parentUsername =
-                    parentComment && !parentHidden
-                      ? userData[parentComment.user_id]?.username ||
-                        parentComment.author
-                      : null;
-
-                  const depth = comment.depth || 0;
-                  const isMaxDepth = depth >= 7;
+                  const replyCount = comment.replies?.length ?? 0;
 
                   return (
                     <div
                       id={`comment-${comment.id}`}
                       key={comment.id}
-                      className={`group relative transition-all duration-200 ${
-                        depth === 0 ? "py-2" : "py-1.5"
-                      }`}
+                      className="group relative py-2 transition-all duration-200"
                     >
-                      {/*
-                         Discord-style Reply Context 
-                         Shows which comment this is replying to with a curved line transition.
-                      */}
-                      {isReply && parentComment && (
-                        <div className="mb-1 flex items-center gap-2 sm:gap-3">
-                          {/* Spine Alignment Column (The curved line) */}
-                          <div className="flex w-10 shrink-0 justify-end">
-                            <div className="border-secondary-text/40 h-3 w-5 translate-x-2 translate-y-1.5 rounded-tl-md border-t-2 border-l-2" />
-                          </div>
-
-                          {/*
-                             Parent Content Preview
-                             Allows users to jump back to the parent comment.
-                          */}
-                          <button
-                            type="button"
-                            className="text-secondary-text/80 -ml-1 flex min-w-0 cursor-pointer items-center gap-1.5 overflow-hidden rounded px-1 text-xs transition-opacity hover:opacity-100"
-                            onClick={() => {
-                              // Find which page the parent comment lives on
-                              const parentIndex = threadedComments.findIndex(
-                                (c) =>
-                                  !("isMore" in c) &&
-                                  (c as CommentData).id === parentComment.id,
-                              );
-                              const targetPage =
-                                parentIndex >= 0
-                                  ? Math.floor(parentIndex / itemsPerPage) + 1
-                                  : null;
-
-                              const el = document.getElementById(
-                                `comment-${parentComment.id}`,
-                              );
-
-                              if (el) {
-                                // Parent is already rendered on the current page
-                                el.scrollIntoView({
-                                  behavior: "smooth",
-                                  block: "center",
-                                });
-                                el.classList.add(
-                                  "bg-button-info/20",
-                                  "transition-colors",
-                                  "duration-500",
-                                );
-                                setTimeout(
-                                  () =>
-                                    el.classList.remove(
-                                      "bg-button-info/20",
-                                      "transition-colors",
-                                      "duration-500",
-                                    ),
-                                  1500,
-                                );
-                              } else if (
-                                targetPage !== null &&
-                                targetPage !== page
-                              ) {
-                                // Parent is on a different page — navigate there first,
-                                // the useEffect will handle the scroll once it renders
-                                setPage(targetPage);
-                                setPendingScrollToId(parentComment.id);
-                              }
-                            }}
-                          >
-                            {parentHidden ? (
-                              <div className="ring-tertiary-text/20 border-border-card bg-primary-bg flex h-4 w-4 shrink-0 items-center justify-center rounded-full border ring-1">
-                                <svg
-                                  className="text-secondary-text h-2.5 w-2.5"
-                                  fill="none"
-                                  viewBox="0 0 24 24"
-                                  stroke="currentColor"
-                                >
-                                  <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth={2}
-                                    d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
-                                  />
-                                </svg>
-                              </div>
-                            ) : (
-                              <UserAvatar
-                                userId={parentComment.user_id}
-                                avatarHash={
-                                  userData[parentComment.user_id]?.avatar
-                                }
-                                username={
-                                  userData[parentComment.user_id]?.username ||
-                                  parentComment.author
-                                }
-                                size={4}
-                                cdnSize={512}
-                                showBadge={false}
-                                premiumType={
-                                  userData[parentComment.user_id]?.premiumtype
-                                }
-                                settings={
-                                  userData[parentComment.user_id]?.settings
-                                }
-                                custom_avatar={
-                                  userData[parentComment.user_id]?.custom_avatar
-                                }
-                                className="h-4 w-4"
-                              />
-                            )}
-                            <span className="text-primary-text hover:text-link shrink-0 font-semibold transition-colors duration-200">
-                              @
-                              {parentHidden
-                                ? "Hidden User"
-                                : parentUsername || "Unknown"}
-                            </span>
-                            <span
-                              className="text-secondary-text max-w-50 truncate sm:max-w-100"
-                              dangerouslySetInnerHTML={{
-                                __html: sanitizeHTML(
-                                  stripHTML(parentComment.content),
-                                ),
-                              }}
-                            />
-                          </button>
-                        </div>
-                      )}
-
                       <div className="flex gap-2 sm:gap-3">
                         {/*
                            Avatar Gutter
                            Left side of the comment containing the user's avatar.
                         */}
                         <div className="flex w-10 shrink-0 items-start pt-1.5">
-                          {loadingUserData[comment.user_id] ? (
-                            <div className="ring-border-focus/20 bg-tertiary-bg flex h-10 w-10 items-center justify-center rounded-full ring-2">
-                              <CircularProgress
-                                size={20}
-                                className="text-border-focus"
-                              />
-                            </div>
-                          ) : hideRecent ? (
+                          {hideRecent ? (
                             <div className="ring-tertiary-text/20 border-border-card bg-primary-bg flex h-10 w-10 items-center justify-center rounded-full border ring-2">
                               {/* Lock icon for hidden users */}
                               <svg
@@ -1833,10 +1470,8 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                               <UserAvatar
                                 userId={comment.user_id}
                                 avatarHash={userData[comment.user_id]?.avatar}
-                                username={
-                                  userData[comment.user_id]?.username ||
-                                  comment.author
-                                }
+                                username={displayName}
+                                forceAvatarUrl={robloxAvatarUrl}
                                 size={10}
                                 cdnSize={512}
                                 custom_avatar={
@@ -1862,12 +1497,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                             <div className="flex min-w-0 flex-1 items-start gap-2 sm:gap-3">
                               <div className="flex min-w-0 flex-col">
                                 <div className="flex flex-wrap items-center gap-2">
-                                  {loadingUserData[comment.user_id] ? (
-                                    <>
-                                      <div className="bg-button-secondary h-5 w-30 animate-pulse rounded" />
-                                      <div className="bg-button-secondary h-4 w-20 animate-pulse rounded" />
-                                    </>
-                                  ) : hideRecent ? (
+                                  {hideRecent ? (
                                     <span className="text-primary-text text-sm font-semibold">
                                       Hidden User
                                     </span>
@@ -1882,8 +1512,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                                               prefetch={false}
                                               className="text-primary-text hover:text-link block max-w-30 truncate text-sm font-semibold transition-colors duration-200 sm:max-w-50 sm:text-base"
                                             >
-                                              {userData[comment.user_id]
-                                                ?.username || comment.author}
+                                              {displayName}
                                             </Link>
                                           </TooltipTrigger>
                                           <TooltipContent className="max-w-sm min-w-75 p-0">
@@ -1895,22 +1524,23 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                                           </TooltipContent>
                                         </Tooltip>
 
-                                        {/* User Badges (Legacy, Premium, Staff, etc) */}
-                                        {!hideRecent &&
-                                          userData[comment.user_id] && (
-                                            <UserBadges
-                                              usernumber={
-                                                userData[comment.user_id]
-                                                  .usernumber
-                                              }
-                                              premiumType={premiumType}
-                                              flags={flags}
-                                              primary_guild={undefined}
-                                              size="md"
-                                              customBgClass="bg-primary-bg/50"
-                                              noContainer={true}
-                                            />
-                                          )}
+                                        {userData[comment.user_id] && (
+                                          <UserBadges
+                                            usernumber={
+                                              userData[comment.user_id]
+                                                .usernumber
+                                            }
+                                            premiumType={
+                                              userData[comment.user_id]
+                                                .premiumtype
+                                            }
+                                            flags={[]}
+                                            primary_guild={undefined}
+                                            size="sm"
+                                            customBgClass="bg-primary-bg/50"
+                                            noContainer={true}
+                                          />
+                                        )}
                                       </div>
 
                                       {/* Special OP badge for trade ad authors */}
@@ -2149,76 +1779,61 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                               </div>
                             ) : (
                               <div>
-                                {loadingUserData[comment.user_id] ? (
-                                  <div className="space-y-2">
-                                    <div className="bg-button-secondary h-5 w-full animate-pulse rounded" />
-                                    <div className="bg-button-secondary h-5 w-[90%] animate-pulse rounded" />
-                                    <div className="bg-button-secondary h-5 w-[80%] animate-pulse rounded" />
-                                  </div>
-                                ) : (
-                                  <>
-                                    {/* isReply check moved to top */}
-                                    {isMaxDepth && depth > 7 && (
-                                      <div className="text-secondary-text/70 mb-2 flex items-center gap-1.5 text-xs italic">
-                                        <Icon
-                                          icon="heroicons:arrow-right"
-                                          className="h-3 w-3"
-                                        />
-                                        <span>
-                                          Showing nested thread (level {depth})
-                                        </span>
-                                      </div>
-                                    )}
-                                    <div className="prose prose-sm max-w-none">
-                                      {isClient ? (
-                                        <p
-                                          className="text-primary-text text-sm leading-relaxed wrap-break-word whitespace-pre-wrap"
-                                          dangerouslySetInnerHTML={{
-                                            __html: convertUrlsToLinksHTML(
-                                              processMentions(
-                                                sanitizeHTML(visibleContent),
-                                              ),
-                                            ),
-                                          }}
-                                        />
-                                      ) : (
-                                        <p className="text-primary-text text-sm leading-relaxed wrap-break-word whitespace-pre-wrap">
-                                          {visibleContent}
-                                        </p>
-                                      )}
-
-                                      {shouldTruncate && (
-                                        <Button
-                                          variant="link"
-                                          onClick={() =>
-                                            toggleCommentExpand(comment.id)
-                                          }
-                                          className="mt-2 h-auto p-0 font-medium"
-                                        >
-                                          {isExpanded ? (
-                                            <>
-                                              <Icon
-                                                icon="mdi:chevron-up"
-                                                className="h-4 w-4"
-                                                inline={true}
-                                              />
-                                              Show less
-                                            </>
-                                          ) : (
-                                            <>
-                                              <Icon
-                                                icon="mdi:chevron-down"
-                                                className="h-4 w-4"
-                                                inline={true}
-                                              />
-                                              Read more
-                                            </>
-                                          )}
-                                        </Button>
-                                      )}
+                                <>
+                                  {false && (
+                                    <div className="hidden">
+                                      <span></span>
                                     </div>
-                                  </>
-                                )}
+                                  )}
+                                  <div className="prose prose-sm max-w-none">
+                                    {isClient ? (
+                                      <p
+                                        className="text-primary-text text-sm leading-relaxed wrap-break-word whitespace-pre-wrap"
+                                        dangerouslySetInnerHTML={{
+                                          __html: convertUrlsToLinksHTML(
+                                            processMentions(
+                                              sanitizeHTML(visibleContent),
+                                            ),
+                                          ),
+                                        }}
+                                      />
+                                    ) : (
+                                      <p className="text-primary-text text-sm leading-relaxed wrap-break-word whitespace-pre-wrap">
+                                        {visibleContent}
+                                      </p>
+                                    )}
+
+                                    {shouldTruncate && (
+                                      <Button
+                                        variant="link"
+                                        onClick={() =>
+                                          toggleCommentExpand(comment.id)
+                                        }
+                                        className="mt-2 h-auto p-0 font-medium"
+                                      >
+                                        {isExpanded ? (
+                                          <>
+                                            <Icon
+                                              icon="mdi:chevron-up"
+                                              className="h-4 w-4"
+                                              inline={true}
+                                            />
+                                            Show less
+                                          </>
+                                        ) : (
+                                          <>
+                                            <Icon
+                                              icon="mdi:chevron-down"
+                                              className="h-4 w-4"
+                                              inline={true}
+                                            />
+                                            Read more
+                                          </>
+                                        )}
+                                      </Button>
+                                    )}
+                                  </div>
+                                </>
                               </div>
                             )}
                           </div>
@@ -2340,6 +1955,333 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                               </div>
                             </div>
                           )}
+
+                          {/* Reddit-style replies */}
+                          {replyCount > 0 && (
+                            <button
+                              type="button"
+                              className="text-link hover:text-link-hover mt-2 flex cursor-pointer items-center gap-1 text-xs font-medium transition-colors"
+                              onClick={() => toggleReplies(comment.id)}
+                            >
+                              <Icon
+                                icon={
+                                  expandedReplies.has(comment.id)
+                                    ? "heroicons:chevron-up"
+                                    : "heroicons:chevron-down"
+                                }
+                                className="h-3.5 w-3.5"
+                                inline={true}
+                              />
+                              {expandedReplies.has(comment.id)
+                                ? "Hide replies"
+                                : `${replyCount} ${replyCount === 1 ? "reply" : "replies"}`}
+                            </button>
+                          )}
+
+                          {expandedReplies.has(comment.id) &&
+                            comment.replies &&
+                            comment.replies.length > 0 && (
+                              <div className="border-border-card mt-3 space-y-3 border-l-2 pl-3 sm:pl-4">
+                                {comment.replies.map((reply) => {
+                                  const replyUser = userData[reply.user_id];
+                                  const replyHideRecent =
+                                    (!replyUser?.settings
+                                      ?.show_recent_comments ||
+                                      !replyUser?.settings?.profile_public) &&
+                                    currentUserId !== reply.user_id;
+                                  const replyDisplayName = isRobloxContext
+                                    ? replyUser?.roblox_display_name ||
+                                      replyUser?.roblox_username ||
+                                      replyUser?.username ||
+                                      reply.author
+                                    : replyUser?.username || reply.author;
+                                  const replyRobloxAvatarUrl =
+                                    isRobloxContext && replyUser?.roblox_avatar
+                                      ? replyUser.roblox_avatar
+                                      : undefined;
+
+                                  return (
+                                    <div
+                                      id={`comment-${reply.id}`}
+                                      key={reply.id}
+                                      className="group flex gap-2 sm:gap-3"
+                                    >
+                                      {/* Reply avatar */}
+                                      <div className="flex w-8 shrink-0 items-start pt-1">
+                                        {replyHideRecent ? (
+                                          <div className="ring-tertiary-text/20 border-border-card bg-primary-bg flex h-8 w-8 items-center justify-center rounded-full border ring-1">
+                                            <svg
+                                              className="text-secondary-text h-4 w-4"
+                                              fill="none"
+                                              viewBox="0 0 24 24"
+                                              stroke="currentColor"
+                                            >
+                                              <path
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                                strokeWidth={2}
+                                                d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                                              />
+                                            </svg>
+                                          </div>
+                                        ) : (
+                                          <div
+                                            className={
+                                              replyUser?.premiumtype === 3
+                                                ? "rounded-sm"
+                                                : "rounded-full"
+                                            }
+                                          >
+                                            <UserAvatar
+                                              userId={reply.user_id}
+                                              avatarHash={
+                                                replyUser?.avatar ?? null
+                                              }
+                                              username={replyDisplayName}
+                                              forceAvatarUrl={
+                                                replyRobloxAvatarUrl
+                                              }
+                                              size={8}
+                                              cdnSize={256}
+                                              custom_avatar={
+                                                replyUser?.custom_avatar
+                                              }
+                                              showBadge={false}
+                                              settings={replyUser?.settings}
+                                              premiumType={
+                                                replyUser?.premiumtype
+                                              }
+                                            />
+                                          </div>
+                                        )}
+                                      </div>
+
+                                      {/* Reply content */}
+                                      <div className="min-w-0 flex-1">
+                                        <div className="flex items-start justify-between gap-2 pb-1">
+                                          <div className="flex min-w-0 flex-col">
+                                            {replyHideRecent ? (
+                                              <span className="text-primary-text text-sm font-semibold">
+                                                Hidden User
+                                              </span>
+                                            ) : (
+                                              <div className="flex flex-wrap items-center gap-1.5">
+                                                <Link
+                                                  href={`/users/${reply.user_id}`}
+                                                  prefetch={false}
+                                                  className="text-primary-text hover:text-link max-w-30 truncate text-sm font-semibold transition-colors sm:max-w-50"
+                                                >
+                                                  {replyDisplayName}
+                                                </Link>
+                                                {replyUser && (
+                                                  <UserBadges
+                                                    usernumber={
+                                                      replyUser.usernumber
+                                                    }
+                                                    premiumType={
+                                                      replyUser.premiumtype
+                                                    }
+                                                    flags={[]}
+                                                    primary_guild={undefined}
+                                                    size="sm"
+                                                    customBgClass="bg-primary-bg/50"
+                                                    noContainer={true}
+                                                  />
+                                                )}
+                                              </div>
+                                            )}
+                                            <CommentTimestamp
+                                              date={reply.date}
+                                              editedAt={reply.edited_at}
+                                              commentId={reply.id}
+                                            />
+                                          </div>
+
+                                          {/* Reply action menu */}
+                                          {isLoggedIn && (
+                                            <div className="flex items-center gap-1">
+                                              <DropdownMenu>
+                                                <DropdownMenuTrigger asChild>
+                                                  <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    className="text-primary-text hover:bg-quaternary-bg h-7 w-7 rounded-lg p-0 opacity-100 transition-all duration-200 lg:opacity-0 lg:group-hover:opacity-100"
+                                                  >
+                                                    <Icon
+                                                      icon="heroicons:ellipsis-horizontal"
+                                                      className="h-4 w-4"
+                                                    />
+                                                  </Button>
+                                                </DropdownMenuTrigger>
+                                                <DropdownMenuContent align="end">
+                                                  {currentUserId ===
+                                                  reply.user_id ? (
+                                                    <>
+                                                      {isCommentEditable(
+                                                        reply.date,
+                                                      ) && (
+                                                        <DropdownMenuItem
+                                                          onClick={() =>
+                                                            handleEditClick(
+                                                              reply.id,
+                                                            )
+                                                          }
+                                                        >
+                                                          <Icon
+                                                            icon="heroicons-outline:pencil"
+                                                            className="mr-2 h-4 w-4"
+                                                          />
+                                                          Edit
+                                                        </DropdownMenuItem>
+                                                      )}
+                                                      <DropdownMenuItem
+                                                        onClick={() =>
+                                                          handleDeleteComment(
+                                                            reply.id,
+                                                          )
+                                                        }
+                                                        className="text-button-danger focus:text-button-danger focus:bg-button-danger/10"
+                                                      >
+                                                        <Icon
+                                                          icon="heroicons-outline:trash"
+                                                          className="mr-2 h-4 w-4"
+                                                        />
+                                                        Delete
+                                                      </DropdownMenuItem>
+                                                    </>
+                                                  ) : (
+                                                    <DropdownMenuItem
+                                                      onClick={() =>
+                                                        handleReportClick(
+                                                          reply.id,
+                                                        )
+                                                      }
+                                                    >
+                                                      <Icon
+                                                        icon="heroicons-outline:flag"
+                                                        className="mr-2 h-4 w-4"
+                                                      />
+                                                      Report
+                                                    </DropdownMenuItem>
+                                                  )}
+                                                </DropdownMenuContent>
+                                              </DropdownMenu>
+                                            </div>
+                                          )}
+                                        </div>
+
+                                        {/* Reply body or edit form */}
+                                        {editingCommentId === reply.id ? (
+                                          <div className="border-border-card bg-form-input focus-within:border-button-info overflow-hidden rounded-lg border transition-colors">
+                                            <textarea
+                                              value={editContent}
+                                              onChange={(e) =>
+                                                setEditContent(e.target.value)
+                                              }
+                                              disabled={
+                                                updatingCommentId === reply.id
+                                              }
+                                              id={`edit-textarea-${reply.id}`}
+                                              rows={3}
+                                              className="text-primary-text placeholder-secondary-text w-full resize-none bg-transparent p-3 text-sm focus:outline-none disabled:opacity-50"
+                                              autoCorrect="off"
+                                              autoComplete="off"
+                                              spellCheck="false"
+                                              autoCapitalize="off"
+                                              onKeyDown={(e) => {
+                                                if (e.key === "Escape") {
+                                                  setEditingCommentId(null);
+                                                  setEditContent("");
+                                                }
+                                                if (
+                                                  e.key === "Enter" &&
+                                                  !e.shiftKey
+                                                ) {
+                                                  e.preventDefault();
+                                                  if (
+                                                    editContent.trim() &&
+                                                    updatingCommentId !==
+                                                      reply.id
+                                                  )
+                                                    void handleEditComment(
+                                                      reply.id,
+                                                    );
+                                                }
+                                              }}
+                                            />
+                                            <div className="border-border-card flex items-center justify-end gap-2 border-t px-3 py-2">
+                                              <Button
+                                                size="sm"
+                                                variant="ghost"
+                                                disabled={
+                                                  updatingCommentId === reply.id
+                                                }
+                                                onClick={() => {
+                                                  setEditingCommentId(null);
+                                                  setEditContent("");
+                                                }}
+                                              >
+                                                Cancel
+                                              </Button>
+                                              <Button
+                                                size="sm"
+                                                onClick={() =>
+                                                  handleEditComment(reply.id)
+                                                }
+                                                disabled={
+                                                  !editContent.trim() ||
+                                                  updatingCommentId === reply.id
+                                                }
+                                              >
+                                                {updatingCommentId ===
+                                                reply.id ? (
+                                                  <>
+                                                    <CircularProgress
+                                                      size={14}
+                                                      className="text-form-button-text"
+                                                    />{" "}
+                                                    Updating...
+                                                  </>
+                                                ) : (
+                                                  "Update"
+                                                )}
+                                              </Button>
+                                            </div>
+                                          </div>
+                                        ) : (
+                                          <p
+                                            className="text-primary-text text-sm leading-relaxed wrap-break-word whitespace-pre-wrap"
+                                            dangerouslySetInnerHTML={
+                                              isClient
+                                                ? {
+                                                    __html:
+                                                      convertUrlsToLinksHTML(
+                                                        processMentions(
+                                                          sanitizeHTML(
+                                                            sanitizeText(
+                                                              reply.content ||
+                                                                "",
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      ),
+                                                  }
+                                                : undefined
+                                            }
+                                          >
+                                            {!isClient
+                                              ? sanitizeText(
+                                                  reply.content || "",
+                                                )
+                                              : undefined}
+                                          </p>
+                                        )}
+                                      </div>
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            )}
                         </div>
                       </div>
                     </div>
@@ -2379,23 +2321,72 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                 ?.content || ""
             : ""
         }
-        commentOwner={
+        commentOwner={(() => {
+          if (!reportingCommentId) return "";
+          const rc = filteredComments.find((c) => c.id === reportingCommentId);
+          const ruid = rc?.user_id || "";
+          const hidden =
+            !userData[ruid]?.settings?.show_recent_comments &&
+            currentUserId !== ruid;
+          if (hidden) return "Hidden User";
+          if (type === "tradev2" || type === "inventory")
+            return (
+              userData[ruid]?.roblox_display_name ||
+              userData[ruid]?.roblox_username ||
+              userData[ruid]?.username ||
+              "Unknown User"
+            );
+          return userData[ruid]?.username || "Unknown User";
+        })()}
+        commentId={reportingCommentId || 0}
+        commentUserId={
+          reportingCommentId
+            ? filteredComments.find((c) => c.id === reportingCommentId)
+                ?.user_id || ""
+            : ""
+        }
+        commentAvatar={(() => {
+          if (!reportingCommentId) return null;
+          const ruid =
+            filteredComments.find((c) => c.id === reportingCommentId)
+              ?.user_id || "";
+          if (
+            (type === "tradev2" || type === "inventory") &&
+            userData[ruid]?.roblox_avatar
+          )
+            return userData[ruid].roblox_avatar;
+          return userData[ruid]?.avatar ?? null;
+        })()}
+        commentCustomAvatar={
+          reportingCommentId
+            ? (userData[
+                filteredComments.find((c) => c.id === reportingCommentId)
+                  ?.user_id || ""
+              ]?.custom_avatar ?? null)
+            : null
+        }
+        commentDate={
+          reportingCommentId
+            ? filteredComments.find((c) => c.id === reportingCommentId)?.date ||
+              ""
+            : ""
+        }
+        commentPremiumType={
           reportingCommentId
             ? userData[
                 filteredComments.find((c) => c.id === reportingCommentId)
                   ?.user_id || ""
-              ]?.settings?.show_recent_comments === 0 &&
-              currentUserId !==
-                filteredComments.find((c) => c.id === reportingCommentId)
-                  ?.user_id
-              ? "Hidden User"
-              : userData[
-                  filteredComments.find((c) => c.id === reportingCommentId)
-                    ?.user_id || ""
-                ]?.username || "Unknown User"
-            : ""
+              ]?.premiumtype
+            : undefined
         }
-        commentId={reportingCommentId || 0}
+        commentSettings={
+          reportingCommentId
+            ? userData[
+                filteredComments.find((c) => c.id === reportingCommentId)
+                  ?.user_id || ""
+              ]?.settings
+            : undefined
+        }
       />
 
       {/* Supporter Modal */}

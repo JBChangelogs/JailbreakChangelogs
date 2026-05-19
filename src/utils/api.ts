@@ -1191,18 +1191,81 @@ export async function fetchItemsByType(type: string) {
   }
 }
 
+export interface CommentAuthor {
+  id: string;
+  username: string;
+  avatar: string | null;
+  custom_avatar: string | null;
+  premiumtype: number;
+  usernumber: number;
+  settings: {
+    profile_public: boolean;
+    show_recent_comments: boolean;
+    hide_following: boolean;
+    hide_followers: boolean;
+    hide_favorites: boolean;
+    custom_banner: boolean;
+    custom_avatar: boolean;
+    hide_connections: boolean;
+    hide_presence: boolean;
+    dms_allowed: boolean;
+    allow_gifting: boolean;
+  } | null;
+  flags?: Array<{ flag: string | null; enabled?: boolean }>;
+}
+
 export interface CommentData {
   id: number;
-  author: string;
   content: string;
   date: string;
   item_id: number;
   item_type: string;
-  user_id: string;
   edited_at: string | null;
-  owner: string;
   parent_id?: number | null;
-  depth?: number; // Local UI only
+  user: CommentAuthor;
+  replies?: CommentData[];
+  // normalized for component lookups
+  user_id: string;
+  author: string;
+  owner: string;
+  depth?: number;
+}
+
+function normalizeComment(raw: CommentData, keepReplies = false): CommentData {
+  const replies = keepReplies
+    ? (raw.replies ?? []).map((r) => normalizeComment(r, false))
+    : undefined;
+  return {
+    ...raw,
+    user_id: raw.user?.id ?? "",
+    author: raw.user?.username ?? "",
+    owner: "",
+    replies,
+  };
+}
+
+export function flattenComments(data: { items?: CommentData[] }): {
+  comments: CommentData[];
+  userMap: Record<string, UserData>;
+} {
+  const rawItems: CommentData[] = Array.isArray(data.items) ? data.items : [];
+  const comments: CommentData[] = [];
+  const userMap: Record<string, UserData> = {};
+
+  for (const item of rawItems) {
+    const normalized = normalizeComment(item, true);
+    comments.push(normalized);
+
+    if (normalized.user?.id)
+      userMap[normalized.user.id] = normalized.user as unknown as UserData;
+
+    for (const reply of normalized.replies ?? []) {
+      if (reply.user?.id)
+        userMap[reply.user.id] = reply.user as unknown as UserData;
+    }
+  }
+
+  return { comments, userMap };
 }
 
 export async function fetchComments(
@@ -1213,7 +1276,7 @@ export async function fetchComments(
   try {
     const commentType = type === "item" ? itemType : type;
     const response = await fetch(
-      `${BASE_API_URL}/comments/get?type=${commentType}&id=${id}&nocache=true`,
+      `${BASE_API_URL}/comments/${commentType}/${id}`,
       {
         headers: {
           "User-Agent": "JailbreakChangelogs-Comments/1.0",
@@ -1230,18 +1293,8 @@ export async function fetchComments(
     }
 
     const data = await response.json();
-    const commentsArray = Array.isArray(data) ? data : [];
-
-    // Fetch user data for comments server-side
-    if (commentsArray.length > 0) {
-      const userIds = Array.from(
-        new Set(commentsArray.map((comment) => comment.user_id)),
-      ).filter(Boolean) as string[];
-      const userMap = await fetchUsersBatch(userIds);
-      return { comments: commentsArray, userMap };
-    }
-
-    return { comments: commentsArray, userMap: {} };
+    const { comments: commentsArray, userMap } = flattenComments(data);
+    return { comments: commentsArray, userMap };
   } catch (err) {
     console.error("[SERVER] Error fetching comments:", err);
     return { comments: [], userMap: {} };

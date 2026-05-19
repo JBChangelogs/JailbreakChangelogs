@@ -237,6 +237,7 @@ export default function Header() {
     pathname.startsWith("/item") ||
     pathname.startsWith("/trading") ||
     pathname.startsWith("/values/changelogs");
+  const [mounted, setMounted] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [openNavSection, setOpenNavSection] = useState<string>("Updates");
   const toggleNavSection = (title: string) =>
@@ -305,6 +306,10 @@ export default function Header() {
   const { resolvedTheme } = useTheme();
   const userData = isAuthenticated ? authUser : null;
   useEscapeLogin();
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     if (!isAuthenticated) return;
@@ -1103,7 +1108,7 @@ export default function Header() {
                       </div>
                     </PopoverContent>
                   </Popover>
-                  {isAuthenticated && (
+                  {mounted && isAuthenticated && (
                     <Link
                       href="/messages"
                       className="flex items-center justify-center"

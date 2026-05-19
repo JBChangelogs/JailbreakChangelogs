@@ -16,6 +16,7 @@ interface UserAvatarProps {
   size?: number;
   cdnSize?: number;
   custom_avatar?: string;
+  forceAvatarUrl?: string;
   isOnline?: boolean;
   showBadge?: boolean;
   settings?: {
@@ -121,6 +122,7 @@ const UserAvatarImpl = ({
   size = 12,
   cdnSize,
   custom_avatar,
+  forceAvatarUrl,
   isOnline,
   showBadge = true,
   settings,
@@ -142,19 +144,45 @@ const UserAvatarImpl = ({
   })();
 
   const getAvatarSource = () => {
-    if (settings?.avatar_discord === 1 && !imageError) {
-      if (avatarHash && avatarHash !== "None") {
-        const url = `https://cdn.discordapp.com/avatars/${userId}/${avatarHash}?size=${discordCdnSize}`;
-        return {
-          src: url,
-          alt: username ? `${username}'s profile picture` : "User avatar",
-          onError: () => setImageError(true),
-        };
-      }
+    if (forceAvatarUrl && !imageError) {
+      return {
+        src: forceAvatarUrl,
+        alt: username ? `${username}'s profile picture` : "User avatar",
+        onError: () => setImageError(true),
+      };
+    }
+
+    const s = settings as unknown as Record<string, unknown> | undefined;
+
+    // New settings format: custom_avatar is a boolean (true = use custom, false = use Discord)
+    const hasNewFormat =
+      s && "custom_avatar" in s && typeof s.custom_avatar === "boolean";
+
+    // Resolve whether to use custom avatar
+    const useCustomAvatar = hasNewFormat
+      ? s!.custom_avatar === true
+      : s?.avatar_discord === 0;
+
+    // Resolve whether to use Discord avatar
+    const useDiscordAvatar = hasNewFormat
+      ? s!.custom_avatar === false
+      : s?.avatar_discord === 1;
+
+    if (
+      useDiscordAvatar &&
+      avatarHash &&
+      avatarHash !== "None" &&
+      !imageError
+    ) {
+      return {
+        src: `https://cdn.discordapp.com/avatars/${userId}/${avatarHash}?size=${discordCdnSize}`,
+        alt: username ? `${username}'s profile picture` : "User avatar",
+        onError: () => setImageError(true),
+      };
     }
 
     if (
-      settings?.avatar_discord === 0 &&
+      useCustomAvatar &&
       premiumType &&
       premiumType >= 2 &&
       custom_avatar &&
@@ -168,19 +196,13 @@ const UserAvatarImpl = ({
       };
     }
 
-    if (
-      settings?.avatar_discord === 0 &&
-      (!premiumType || premiumType < 2) &&
-      !imageError
-    ) {
-      if (avatarHash && avatarHash !== "None") {
-        const url = `https://cdn.discordapp.com/avatars/${userId}/${avatarHash}?size=${discordCdnSize}`;
-        return {
-          src: url,
-          alt: username ? `${username}'s profile picture` : "User avatar",
-          onError: () => setImageError(true),
-        };
-      }
+    // Fallback: Discord avatar regardless of settings when no custom avatar applies
+    if (avatarHash && avatarHash !== "None" && !imageError) {
+      return {
+        src: `https://cdn.discordapp.com/avatars/${userId}/${avatarHash}?size=${discordCdnSize}`,
+        alt: username ? `${username}'s profile picture` : "User avatar",
+        onError: () => setImageError(true),
+      };
     }
 
     return null;

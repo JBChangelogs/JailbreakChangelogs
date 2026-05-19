@@ -1,7 +1,13 @@
 import React from "react";
-import { Dialog, DialogPanel } from "@headlessui/react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogClose,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Icon } from "@/components/ui/IconWrapper";
 
 interface ConfirmDialogProps {
   isOpen: boolean;
@@ -20,7 +26,6 @@ interface ConfirmDialogProps {
     | "link";
   confirmDisabled?: boolean;
   closeOnConfirm?: boolean;
-  zIndexClassName?: string;
   children?: React.ReactNode;
 }
 
@@ -34,43 +39,34 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   confirmVariant = "destructive",
   confirmDisabled = false,
   closeOnConfirm = true,
-  zIndexClassName = "z-3000",
   children,
 }) => {
   return (
-    <Dialog
-      open={isOpen}
-      onClose={() => {}}
-      className={`relative ${zIndexClassName}`}
-    >
-      <div
-        className="fixed inset-0 bg-black/50 backdrop-blur-sm"
-        aria-hidden="true"
-      />
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent
+        showClose
+        aria-describedby={undefined}
+        className="bg-secondary-bg max-w-md rounded-lg p-0 backdrop-blur-none"
+      >
+        <DialogHeader className="px-6 pt-6 pb-2">
+          <DialogTitle className="text-primary-text text-left text-xl font-semibold">
+            {title}
+          </DialogTitle>
+        </DialogHeader>
 
-      <div className="fixed inset-0 flex items-center justify-center p-4">
-        <DialogPanel className="border-border-card bg-secondary-bg hover:border-border-focus relative w-full max-w-md rounded-lg border shadow-xl">
-          <div className="border-border-card flex items-center justify-between border-b p-4">
-            <h2 className="text-primary-text text-xl font-semibold">{title}</h2>
-            <button
-              type="button"
-              onClick={onClose}
-              aria-label="Close"
-              className="text-secondary-text hover:text-primary-text hover:bg-quaternary-bg focus-visible:ring-ring inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-md transition-colors focus-visible:ring-1 focus-visible:outline-none"
-            >
-              <Icon icon="heroicons:x-mark" className="h-5 w-5" />
-            </button>
-          </div>
+        <div className="px-6 pt-4 pb-6">
+          {children ? (
+            children
+          ) : (
+            <p className="text-secondary-text text-sm">{message}</p>
+          )}
 
-          <div className="p-6">
-            {children ? (
-              children
-            ) : (
-              <p className="text-secondary-text">{message}</p>
-            )}
-          </div>
-
-          <div className="border-border-card flex justify-end gap-2 border-t p-4">
+          <DialogFooter className="mt-4 gap-2 px-0 pt-2 pb-0">
+            <DialogClose asChild>
+              <Button variant="ghost" size="sm">
+                Cancel
+              </Button>
+            </DialogClose>
             <Button
               onClick={() => {
                 if (confirmDisabled) return;
@@ -83,9 +79,9 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
             >
               {confirmText}
             </Button>
-          </div>
-        </DialogPanel>
-      </div>
+          </DialogFooter>
+        </div>
+      </DialogContent>
     </Dialog>
   );
 };

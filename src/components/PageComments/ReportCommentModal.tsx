@@ -1,8 +1,8 @@
 import React, { useState } from "react";
-import { Dialog, DialogPanel } from "@headlessui/react";
-import { useAuthContext } from "@/contexts/AuthContext";
-import { toast } from "sonner";
-import { Button } from "../ui/button";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+import { UserAvatar } from "@/utils/avatar";
+import CommentTimestamp from "./CommentTimestamp";
+import { UserData } from "@/types/auth";
 
 interface ReportCommentModalProps {
   open: boolean;
@@ -13,9 +13,15 @@ interface ReportCommentModalProps {
   commentContent: string;
   commentOwner: string;
   commentId: number;
+  commentUserId: string;
+  commentAvatar?: string | null;
+  commentCustomAvatar?: string | null;
+  commentDate: string;
+  commentPremiumType?: number;
+  commentSettings?: UserData["settings"];
 }
 
-const MAX_REASON_LENGTH = 250;
+const MAX_REASON_LENGTH = 500;
 
 const ReportCommentModal: React.FC<ReportCommentModalProps> = ({
   open,
@@ -26,17 +32,16 @@ const ReportCommentModal: React.FC<ReportCommentModalProps> = ({
   commentContent,
   commentOwner,
   commentId,
+  commentUserId,
+  commentAvatar,
+  commentCustomAvatar,
+  commentDate,
+  commentPremiumType,
+  commentSettings,
 }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { isAuthenticated, setLoginModal } = useAuthContext();
 
   const handleSubmit = async () => {
-    if (!isAuthenticated) {
-      toast.error("You must be logged in to report comments");
-      setLoginModal({ open: true });
-      return;
-    }
-
     setIsSubmitting(true);
     try {
       await onSubmit(reportReason);
@@ -45,71 +50,74 @@ const ReportCommentModal: React.FC<ReportCommentModalProps> = ({
     }
   };
 
-  const handleReasonChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const value = e.target.value;
-    if (value.length <= MAX_REASON_LENGTH) {
-      setReportReason(value);
-    }
-  };
-
   return (
-    <>
-      <Dialog open={open} onClose={onClose} className="relative z-50">
-        <div
-          className="fixed inset-0 bg-black/30 backdrop-blur-sm"
-          aria-hidden="true"
-        />
-
-        <div className="fixed inset-0 flex items-center justify-center p-4">
-          <DialogPanel className="modal-container border-button-info bg-secondary-bg w-full max-w-120 min-w-[320px] rounded-lg border shadow-lg">
-            <div className="modal-header text-primary-text px-6 py-4 text-xl font-semibold">
-              Report Comment #{commentId} by {commentOwner}
-            </div>
-            <div className="modal-content p-6">
-              <div className="border-button-info bg-secondary-bg mb-4 max-h-50 cursor-not-allowed overflow-y-auto rounded border p-3">
-                <div className="text-secondary-text mb-1 text-xs tracking-wider uppercase">
-                  Comment Content
-                </div>
-                <div className="text-primary-text text-sm wrap-break-word whitespace-pre-wrap">
-                  {commentContent}
-                </div>
-              </div>
-              <div className="relative">
-                <textarea
-                  value={reportReason}
-                  onChange={handleReasonChange}
-                  placeholder="Please provide a reason for reporting this comment..."
-                  className="border-border-card bg-form-input text-primary-text hover:border-border-focus focus:border-button-info min-h-30 w-full resize-y rounded border p-3 text-sm focus:outline-none"
+    <ConfirmDialog
+      isOpen={open}
+      onClose={onClose}
+      onConfirm={() => void handleSubmit()}
+      title="Report Comment"
+      confirmText={isSubmitting ? "Submitting..." : "Submit Report"}
+      confirmVariant="destructive"
+      confirmDisabled={!reportReason.trim() || isSubmitting}
+      closeOnConfirm={false}
+    >
+      <div className="space-y-3">
+        {commentContent && (
+          <div className="border-border-card bg-tertiary-bg/50 rounded-lg border p-3">
+            <div className="flex gap-2 sm:gap-3">
+              <div className="flex shrink-0 items-center">
+                <UserAvatar
+                  userId={commentUserId}
+                  avatarHash={commentAvatar ?? null}
+                  username={commentOwner}
+                  custom_avatar={commentCustomAvatar ?? undefined}
+                  size={7}
+                  showBadge={false}
+                  settings={commentSettings}
+                  premiumType={commentPremiumType}
                 />
-                <div
-                  className={`absolute right-2 bottom-2 text-xs ${reportReason.length >= MAX_REASON_LENGTH ? "text-button-danger" : "text-secondary-text"}`}
-                >
-                  {reportReason.length}/{MAX_REASON_LENGTH}
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="flex min-w-0 flex-col pt-1.5 pb-1.5">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="text-primary-text text-sm font-semibold">
+                      {commentOwner}
+                    </span>
+                  </div>
+                  {commentDate && (
+                    <CommentTimestamp
+                      date={commentDate}
+                      commentId={commentId}
+                    />
+                  )}
                 </div>
+                <p className="text-primary-text/80 line-clamp-4 pb-1 text-sm break-words">
+                  {commentContent}
+                </p>
               </div>
             </div>
-            <div className="modal-footer flex justify-end gap-2 px-6 py-4">
-              <Button
-                variant="ghost"
-                size="md"
-                onClick={onClose}
-                disabled={isSubmitting}
-              >
-                Cancel
-              </Button>
-              <Button
-                variant="default"
-                size="md"
-                onClick={handleSubmit}
-                disabled={!reportReason.trim() || isSubmitting}
-              >
-                {isSubmitting ? "Submitting..." : "Submit Report"}
-              </Button>
-            </div>
-          </DialogPanel>
+          </div>
+        )}
+        <p className="text-secondary-text text-sm">
+          Please describe why you are reporting this comment.
+        </p>
+        <div>
+          <textarea
+            className="border-border-card bg-tertiary-bg text-primary-text placeholder:text-secondary-text focus:ring-border-focus w-full resize-none rounded-lg border px-3 py-2 text-sm focus:ring-2 focus:outline-none"
+            rows={4}
+            maxLength={MAX_REASON_LENGTH}
+            placeholder="Explain why you're reporting this comment..."
+            value={reportReason}
+            onChange={(e) => setReportReason(e.target.value)}
+          />
+          <p
+            className={`mt-1 text-right text-xs ${reportReason.length >= MAX_REASON_LENGTH ? "text-red-500" : "text-secondary-text"}`}
+          >
+            {reportReason.length}/{MAX_REASON_LENGTH}
+          </p>
         </div>
-      </Dialog>
-    </>
+      </div>
+    </ConfirmDialog>
   );
 };
 
