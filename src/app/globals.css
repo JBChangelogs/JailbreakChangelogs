@@ -562,36 +562,27 @@
   z-index: 999;
 }
 
-/* Custom Scrollbar Styles */
-/* Webkit browsers (Chrome, Safari, Edge) */
-.scrollbar-thin::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+/* Global custom scrollbar — webkit (Chrome, Edge, Safari) */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
 }
 
-.scrollbar-thin::-webkit-scrollbar-track {
+::-webkit-scrollbar-track {
   background: transparent;
 }
 
-.scrollbar-thin::-webkit-scrollbar-thumb {
+::-webkit-scrollbar-thumb {
   background-color: var(--color-border-primary);
   border-radius: 4px;
-  border: 1px solid transparent;
-  background-clip: content-box;
 }
 
-.scrollbar-thin::-webkit-scrollbar-thumb:hover {
-  background-color: var(--color-border-focus);
+::-webkit-scrollbar-thumb:hover {
+  background-color: var(--color-secondary);
 }
 
-.scrollbar-thin::-webkit-scrollbar-corner {
+::-webkit-scrollbar-corner {
   background: transparent;
-}
-
-/* Firefox */
-.scrollbar-thin {
-  scrollbar-width: thin;
-  scrollbar-color: var(--color-border-primary) transparent;
 }
 
 .tabs {
@@ -786,7 +777,8 @@
 }
 
 * {
-  scrollbar-width: auto !important;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border-primary) transparent;
 }
 
 /* Make right-position toasts exit horizontally to the right instead of vertically. */

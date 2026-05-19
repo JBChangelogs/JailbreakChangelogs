@@ -261,7 +261,7 @@ export async function POST(request: Request) {
 
     if (!response.ok) {
       const errorText = await response.text();
-      log.error("vgy.me upload failed", errorText);
+      log.error(`vgy.me upload failed: ${response.status}`);
 
       // Handle specific HTTP status codes
       if (response.status === 502) {

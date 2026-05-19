@@ -35,8 +35,7 @@ export async function GET(request: Request) {
     });
 
     if (!response.ok) {
-      const errorText = await response.text();
-      log.error(`Users batch API error: ${response.status} - ${errorText}`);
+      log.error(`Users batch API error: ${response.status}`);
       return NextResponse.json(
         { error: "Failed to fetch users" },
         { status: response.status },

@@ -25,8 +25,7 @@ export async function GET() {
     });
 
     if (!response.ok) {
-      const errorText = await response.text();
-      log.error(`Servers list API error: ${response.status} - ${errorText}`);
+      log.error(`Servers list API error: ${response.status}`);
       return NextResponse.json(
         { error: "Failed to fetch servers" },
         { status: response.status },

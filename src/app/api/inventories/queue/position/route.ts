@@ -58,8 +58,7 @@ export async function GET(request: NextRequest) {
     }
 
     if (!response.ok) {
-      const errorText = await response.text();
-      log.error(`Queue position API error: ${response.status} - ${errorText}`);
+      log.error(`Queue position API error: ${response.status}`);
       return NextResponse.json(
         { error: "Failed to fetch queue position" },
         { status: response.status },

@@ -32,8 +32,7 @@ export async function POST() {
     );
 
     if (!response.ok) {
-      const errorText = await response.text();
-      log.error("Export failed:", { status: response.status, body: errorText });
+      log.error("Export failed:", { status: response.status });
       return NextResponse.json(
         { error: "Export failed" },
         { status: response.status },

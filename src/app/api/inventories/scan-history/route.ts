@@ -39,8 +39,7 @@ export async function GET(request: NextRequest) {
         return NextResponse.json([]);
       }
 
-      const errorText = await response.text();
-      log.error(`Inventory API error: ${response.status} - ${errorText}`);
+      log.error(`Inventory API error: ${response.status}`);
       return NextResponse.json(
         { error: "Failed to fetch scan history" },
         { status: response.status },

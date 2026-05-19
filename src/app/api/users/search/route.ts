@@ -52,8 +52,7 @@ export async function GET(request: Request) {
         return NextResponse.json({ users: [] });
       }
 
-      const errorText = await response.text();
-      log.error(`Users search API error: ${response.status} - ${errorText}`);
+      log.error(`Users search API error: ${response.status}`);
       return NextResponse.json(
         { error: "Failed to search users" },
         { status: response.status },

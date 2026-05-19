@@ -44,7 +44,7 @@ export async function GET(request: Request) {
 
     if (!response.ok) {
       const errorText = await response.text();
-      log.error(`OG notify API error: ${response.status} - ${errorText}`);
+      log.error(`OG notify API error: ${response.status}`);
       let errorResponse: Record<string, unknown> = {
         error: "Failed to fetch OG notifications",
       };
@@ -107,7 +107,7 @@ export async function POST(request: Request) {
 
     if (!response.ok) {
       const errorText = await response.text();
-      log.error(`OG notify API error: ${response.status} - ${errorText}`);
+      log.error(`OG notify API error: ${response.status}`);
       let errorResponse: Record<string, unknown> = {
         error: "Failed to add OG notification",
       };
@@ -170,7 +170,7 @@ export async function DELETE(request: Request) {
 
     if (!response.ok) {
       const errorText = await response.text();
-      log.error(`OG notify API error: ${response.status} - ${errorText}`);
+      log.error(`OG notify API error: ${response.status}`);
       let errorResponse: Record<string, unknown> = {
         error: "Failed to remove OG notification",
       };
