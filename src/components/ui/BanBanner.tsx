@@ -10,7 +10,9 @@ interface BanBannerProps {
 }
 
 export function BanBanner({ ban, className }: BanBannerProps) {
-  const feature = ban.banType ? ban.banType.replace(/_/g, " ") : "this feature";
+  const feature = ban.banType
+    ? ban.banType.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())
+    : "this feature";
   const expires = ban.expiresAt ? formatFullDate(ban.expiresAt) : "Permanent";
 
   return (

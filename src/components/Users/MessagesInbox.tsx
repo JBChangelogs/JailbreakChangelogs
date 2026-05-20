@@ -4146,7 +4146,8 @@ export default function MessagesInbox() {
                       conversationId={selectedUserId}
                       placeholder={messagePlaceholder}
                       maxChars={MESSAGE_CHAR_LIMIT}
-                      isSending={isSending || !!messageBan}
+                      isSending={isSending}
+                      disabled={!!messageBan}
                       onSend={(message) => void handleSendMessage(message)}
                     />
                   </div>

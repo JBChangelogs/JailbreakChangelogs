@@ -15,6 +15,7 @@ export interface MessageComposerProps {
   placeholder: string;
   maxChars: number;
   isSending: boolean;
+  disabled?: boolean;
   onSend: (message: string) => void | Promise<void>;
 }
 
@@ -23,6 +24,7 @@ export function MessageComposer({
   placeholder,
   maxChars,
   isSending,
+  disabled = false,
   onSend,
 }: MessageComposerProps) {
   const [draft, setDraft] = React.useState("");
@@ -39,7 +41,7 @@ export function MessageComposer({
 
   const submit = React.useCallback(() => {
     const trimmed = draft.trim();
-    if (!trimmed || isSending) return;
+    if (!trimmed || isSending || disabled) return;
 
     const sanitized = sanitizeText(trimmed);
     if (sanitized.length > maxChars) {
@@ -49,7 +51,7 @@ export function MessageComposer({
 
     void onSend(draft);
     setDraft("");
-  }, [draft, isSending, maxChars, onSend]);
+  }, [draft, disabled, isSending, maxChars, onSend]);
 
   return (
     <ChatToolbarTextarea
@@ -58,6 +60,7 @@ export function MessageComposer({
       onSubmit={submit}
       placeholder={placeholder}
       maxLength={1000}
+      disabled={disabled}
       rightOverlay={
         <div className="flex items-center gap-2">
           {overLimit > 0 ? (
@@ -69,7 +72,7 @@ export function MessageComposer({
             onClick={submit}
             aria-label="Send message"
             className="hover:bg-secondary-bg/50 transition-colors"
-            disabled={!draft.trim() || isSending || overLimit > 0}
+            disabled={!draft.trim() || isSending || disabled || overLimit > 0}
           >
             {isSending ? (
               <Spinner className="h-4 w-4" />

@@ -1,4 +1,5 @@
 import { toast } from "sonner";
+import { createElement } from "react";
 
 export class BanError extends Error {
   constructor() {
@@ -26,7 +27,9 @@ export function parseBan(res: Response): BanInfo | null {
 }
 
 export function showBanToast(ban: BanInfo) {
-  const feature = ban.banType ? ban.banType.replace(/_/g, " ") : "this feature";
+  const feature = ban.banType
+    ? ban.banType.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())
+    : "this feature";
   const expires = ban.expiresAt
     ? new Date(ban.expiresAt * 1000).toLocaleDateString(undefined, {
         year: "numeric",
@@ -37,7 +40,12 @@ export function showBanToast(ban: BanInfo) {
   toast.error(
     `You have been banned${feature !== "this feature" ? ` (${feature})` : ""}.`,
     {
-      description: `Reason: ${ban.reason} · Expires: ${expires}`,
+      description: createElement(
+        "div",
+        { className: "flex flex-col gap-0.5" },
+        createElement("span", null, `Reason: ${ban.reason}`),
+        createElement("span", null, `Expires: ${expires}`),
+      ),
     },
   );
 }

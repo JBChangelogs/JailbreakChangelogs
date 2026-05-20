@@ -1095,6 +1095,7 @@ export default function ValueSuggestionsPage() {
     const banInfo = parseBan(res);
     if (banInfo) {
       setBan(banInfo);
+      setShowForm(false);
       showBanToast(banInfo);
       throw new Error("banned");
     }
@@ -1207,7 +1208,7 @@ export default function ValueSuggestionsPage() {
         </div>
 
         {/* Ban Banner */}
-        {ban && <BanBanner ban={ban} />}
+        {ban && <BanBanner ban={ban} className="mb-4" />}
 
         {/* Submit Form */}
         {showForm && isAuthenticated && !ban && (
