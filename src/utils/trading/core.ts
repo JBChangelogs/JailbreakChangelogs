@@ -4,6 +4,14 @@ import { buildApiUrlWithDevToken } from "@/utils/api/apiDevToken";
 
 const log = createLogger("UI");
 
+export class RateLimitError extends Error {
+  retryAfter: number;
+  constructor(retryAfter: number) {
+    super("rate limited");
+    this.retryAfter = retryAfter;
+  }
+}
+
 export const deleteTradeAd = async (tradeId: number): Promise<boolean> => {
   try {
     const baseUrl = process.env.NEXT_PUBLIC_API_URL;
@@ -26,6 +34,13 @@ export const deleteTradeAd = async (tradeId: number): Promise<boolean> => {
     if (!response.ok) {
       if (response.status === 401) {
         throw new Error("Unauthorized");
+      }
+      if (response.status === 429) {
+        const retryAfter = parseInt(
+          response.headers.get("retry-after") ?? "60",
+          10,
+        );
+        throw new RateLimitError(retryAfter);
       }
       throw new Error(
         await getResponseErrorMessage(response, "Failed to delete trade ad"),
@@ -82,6 +97,13 @@ export const createTradeOffer = async (
   if (!response.ok) {
     if (response.status === 401) {
       throw new Error("Unauthorized");
+    }
+    if (response.status === 429) {
+      const retryAfter = parseInt(
+        response.headers.get("retry-after") ?? "60",
+        10,
+      );
+      throw new RateLimitError(retryAfter);
     }
     throw new Error(
       await getResponseErrorMessage(response, "Failed to create trade offer"),
@@ -247,6 +269,13 @@ export const deleteTradeOfferV2 = async (
   if (!response.ok) {
     if (response.status === 401) {
       throw new Error("Unauthorized");
+    }
+    if (response.status === 429) {
+      const retryAfter = parseInt(
+        response.headers.get("retry-after") ?? "60",
+        10,
+      );
+      throw new RateLimitError(retryAfter);
     }
     throw new Error(
       await getResponseErrorMessage(response, "Failed to delete offer"),

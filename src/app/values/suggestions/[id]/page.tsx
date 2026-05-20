@@ -11,6 +11,7 @@ import { Spinner } from "@/components/ui/Spinner";
 import { UserAvatar } from "@/utils/ui/avatar";
 import { buildApiUrlWithDevToken } from "@/utils/api/apiDevToken";
 import { PUBLIC_API_URL } from "@/utils/api/api";
+import { parseBan, showBanToast } from "@/utils/api/ban";
 import { createLogger } from "@/services/logger";
 
 const log = createLogger("UI");
@@ -267,6 +268,11 @@ export default function ValueSuggestionDetailPage() {
       if (!res.ok) {
         setUserVote(prevVote);
         setVoteCounts(prevCounts);
+        const ban = parseBan(res);
+        if (ban) {
+          showBanToast(ban);
+          return;
+        }
         const data = await res.json().catch(() => ({}));
         if (res.status === 429) {
           toast.error("You're voting too fast. Please wait a moment.");

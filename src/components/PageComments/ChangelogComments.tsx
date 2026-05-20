@@ -57,6 +57,10 @@ import CommentTimestamp from "./CommentTimestamp";
 import { toast } from "sonner";
 import DOMPurify from "dompurify";
 import { Pagination } from "@/components/ui/Pagination";
+import { RateLimitBanner } from "@/components/ui/RateLimitBanner";
+import { BanBanner } from "@/components/ui/BanBanner";
+import { parseBan, showBanToast } from "@/utils/api/ban";
+import type { BanInfo } from "@/utils/api/ban";
 import { createLogger } from "@/services/logger";
 
 const log = createLogger("UI");
@@ -107,9 +111,6 @@ interface MoreItem {
   count: number;
   depth: number;
 }
-
-const formatWait = (s: number) =>
-  s >= 60 ? `${Math.floor(s / 60)}m ${s % 60}s` : `${s}s`;
 
 /**
  * Cleans up comment text by removing excess whitespace and empty lines.
@@ -369,13 +370,8 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
   );
   const [isSubmittingComment, setIsSubmittingComment] = useState(false);
   const [isRefreshingComments, setIsRefreshingComments] = useState(false);
-  const [rateLimitState, setRateLimitState] = useState<{
-    seconds: number;
-    nonce: number;
-  } | null>(null);
-  const [rateLimitSecondsLeft, setRateLimitSecondsLeft] = useState<
-    number | null
-  >(null);
+  const [rateLimitUntil, setRateLimitUntil] = useState<number | null>(null);
+  const [commentBan, setCommentBan] = useState<BanInfo | null>(null);
 
   // --- Pagination ---
   const [page, setPage] = useState(1);
@@ -472,30 +468,20 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
   );
 
   const triggerRateLimit = useCallback((seconds: number) => {
-    setRateLimitState({ seconds, nonce: Date.now() });
+    setRateLimitUntil(Date.now() + seconds * 1000);
     toast.error("Too many requests. Please try again shortly.");
   }, []);
 
   useEffect(() => {
-    if (!rateLimitState) return;
-    setRateLimitSecondsLeft(rateLimitState.seconds);
-    const id = setInterval(() => {
-      setRateLimitSecondsLeft((prev) => {
-        if (prev === null || prev <= 1) {
-          clearInterval(id);
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-    return () => clearInterval(id);
-  }, [rateLimitState]);
-
-  useEffect(() => {
-    if (rateLimitSecondsLeft !== 0) return;
-    setRateLimitSecondsLeft(null);
-    setRateLimitState(null);
-  }, [rateLimitSecondsLeft]);
+    if (!rateLimitUntil) return;
+    const ms = rateLimitUntil - Date.now();
+    if (ms <= 0) {
+      setRateLimitUntil(null);
+      return;
+    }
+    const id = setTimeout(() => setRateLimitUntil(null), ms);
+    return () => clearTimeout(id);
+  }, [rateLimitUntil]);
 
   // Set isClient to true on mount to avoid hydration mismatches for browser-only features
   useEffect(() => {
@@ -654,6 +640,12 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
       );
 
       if (!response.ok) {
+        const ban = parseBan(response);
+        if (ban) {
+          setCommentBan(ban);
+          showBanToast(ban);
+          return;
+        }
         let errorData;
         try {
           errorData = await response.json();
@@ -783,6 +775,12 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
       );
 
       if (!response.ok) {
+        const ban = parseBan(response);
+        if (ban) {
+          setCommentBan(ban);
+          showBanToast(ban);
+          return;
+        }
         let errorData;
         try {
           errorData = await response.json();
@@ -996,6 +994,12 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
       );
 
       if (!response.ok) {
+        const ban = parseBan(response);
+        if (ban) {
+          setCommentBan(ban);
+          showBanToast(ban);
+          return;
+        }
         let errorData;
         try {
           errorData = await response.json();
@@ -1140,6 +1144,13 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
       );
 
       if (!response.ok) {
+        const ban = parseBan(response);
+        if (ban) {
+          setCommentBan(ban);
+          toast.dismiss(toastId);
+          showBanToast(ban);
+          return;
+        }
         throw new Error(
           await getResponseErrorMessage(response, "Failed to submit report"),
         );
@@ -1170,8 +1181,8 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
     }
   };
 
-  const isRateLimited =
-    rateLimitSecondsLeft !== null && rateLimitSecondsLeft > 0;
+  const isRateLimited = rateLimitUntil !== null && Date.now() < rateLimitUntil;
+  const isBlocked = isRateLimited || !!commentBan;
 
   const containerBgClass =
     type === "tradev2" ? "bg-tertiary-bg" : "bg-secondary-bg";
@@ -1256,21 +1267,13 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
             </div>
           </div>
 
-          {/* Rate Limit Banner */}
-          {isRateLimited && (
-            <div className="flex items-center gap-2 rounded-lg border border-yellow-500/30 bg-yellow-500/10 px-3 py-2 text-sm">
-              <Icon
-                icon="heroicons:clock"
-                className="h-4 w-4 shrink-0 text-yellow-500"
-              />
-              <span className="text-primary-text">
-                You&apos;re posting too fast. Try again in{" "}
-                <span className="font-semibold tabular-nums">
-                  {formatWait(rateLimitSecondsLeft!)}
-                </span>
-              </span>
-            </div>
-          )}
+          {/* Rate Limit / Ban Banners */}
+          <RateLimitBanner
+            until={rateLimitUntil}
+            label="You're posting too fast."
+            className="px-3 py-2"
+          />
+          {commentBan && <BanBanner ban={commentBan} className="px-3 py-2" />}
 
           {/* New Comment Form */}
           <form id="new-comment-form" onSubmit={handleSubmitComment}>
@@ -1278,12 +1281,12 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
               /* Collapsed trigger */
               <button
                 type="button"
-                disabled={isRateLimited}
+                disabled={isBlocked}
                 className="border-border-card bg-tertiary-bg text-secondary-text hover:border-button-info w-full cursor-text rounded-lg border px-4 py-3 text-left text-sm transition-colors disabled:cursor-not-allowed disabled:opacity-60"
                 onClick={() => {
                   if (!isLoggedIn) {
                     setLoginModal({ open: true });
-                  } else if (!isRateLimited) {
+                  } else if (!isBlocked) {
                     setIsCommentFormExpanded(true);
                   }
                 }}
@@ -1301,7 +1304,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                   onChange={(e) => setNewComment(e.target.value)}
                   placeholder="Write a comment..."
                   rows={4}
-                  disabled={isRateLimited}
+                  disabled={isBlocked}
                   className="text-primary-text placeholder-secondary-text w-full resize-none bg-transparent p-3 text-sm focus:outline-none disabled:opacity-60"
                   autoCorrect="off"
                   autoComplete="off"
@@ -1317,7 +1320,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                       if (
                         newComment.trim() &&
                         !isSubmittingComment &&
-                        !isRateLimited
+                        !isBlocked
                       ) {
                         e.currentTarget.form?.requestSubmit();
                       }
@@ -1342,9 +1345,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                       type="submit"
                       size="sm"
                       disabled={
-                        !newComment.trim() ||
-                        isSubmittingComment ||
-                        isRateLimited
+                        !newComment.trim() || isSubmittingComment || isBlocked
                       }
                       data-umami-event="Post Comment"
                       data-umami-event-type={type}
@@ -1393,13 +1394,13 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                           disabled={
                             !newComment.trim() ||
                             isSubmittingComment ||
-                            isRateLimited
+                            isBlocked
                           }
                           onClick={() => {
                             if (
                               newComment.trim() &&
                               !isSubmittingComment &&
-                              !isRateLimited
+                              !isBlocked
                             ) {
                               document
                                 .querySelector<HTMLFormElement>(
@@ -1946,7 +1947,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                                 }
                                 id={`reply-textarea-${comment.id}`}
                                 rows={2}
-                                disabled={isRateLimited}
+                                disabled={isBlocked}
                                 className="text-primary-text placeholder-secondary-text w-full resize-none bg-transparent p-3 text-sm focus:outline-none disabled:opacity-60"
                                 placeholder="Write a reply..."
                                 autoCorrect="off"
@@ -1963,7 +1964,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                                     if (
                                       replyContent.trim() &&
                                       !isSubmittingComment &&
-                                      !isRateLimited
+                                      !isBlocked
                                     ) {
                                       void handleSubmitReply(comment.id);
                                     }
@@ -1988,7 +1989,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                                     disabled={
                                       !replyContent.trim() ||
                                       isSubmittingComment ||
-                                      isRateLimited
+                                      isBlocked
                                     }
                                     onClick={() =>
                                       handleSubmitReply(comment.id)
@@ -2037,7 +2038,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                                         disabled={
                                           !replyContent.trim() ||
                                           isSubmittingComment ||
-                                          isRateLimited
+                                          isBlocked
                                         }
                                         onClick={() =>
                                           void handleSubmitReply(comment.id)

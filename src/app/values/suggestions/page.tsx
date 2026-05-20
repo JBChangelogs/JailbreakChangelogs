@@ -50,6 +50,10 @@ import {
 } from "@/components/ui/tooltip";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { UserDetailsTooltip } from "@/components/ui/UserDetailsTooltip";
+import { RateLimitBanner } from "@/components/ui/RateLimitBanner";
+import { BanBanner } from "@/components/ui/BanBanner";
+import { parseBan, showBanToast } from "@/utils/api/ban";
+import type { BanInfo } from "@/utils/api/ban";
 import type { UserData } from "@/types/auth";
 import type { Item } from "@/types/index";
 
@@ -159,23 +163,17 @@ function SuggestionForm({
   const [submitting, setSubmitting] = useState(false);
   const [showItemDropdown, setShowItemDropdown] = useState(false);
   const [rateLimitUntil, setRateLimitUntil] = useState<number | null>(null);
-  const [rateLimitSecondsLeft, setRateLimitSecondsLeft] = useState(0);
   const itemSearchRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!rateLimitUntil) return;
-    const tick = () => {
-      const left = Math.ceil((rateLimitUntil - Date.now()) / 1000);
-      if (left <= 0) {
-        setRateLimitUntil(null);
-        setRateLimitSecondsLeft(0);
-      } else {
-        setRateLimitSecondsLeft(left);
-      }
-    };
-    tick();
-    const id = setInterval(tick, 1000);
-    return () => clearInterval(id);
+    const ms = rateLimitUntil - Date.now();
+    if (ms <= 0) {
+      setRateLimitUntil(null);
+      return;
+    }
+    const id = setTimeout(() => setRateLimitUntil(null), ms);
+    return () => clearTimeout(id);
   }, [rateLimitUntil]);
 
   const minChars = limits?.min_characters ?? 350;
@@ -230,7 +228,6 @@ function SuggestionForm({
     } catch (err: unknown) {
       if (err instanceof RateLimitError) {
         setRateLimitUntil(Date.now() + err.retryAfter * 1000);
-        setRateLimitSecondsLeft(err.retryAfter);
       } else if (typeof err === "object" && err !== null && "response" in err) {
         const responseErr = err as {
           response: { data: { field?: string; message?: string } };
@@ -469,59 +466,10 @@ function SuggestionForm({
           />
         </div>
 
-        {rateLimitUntil && rateLimitSecondsLeft > 0 && (
-          <div className="text-primary-text flex items-center gap-2 rounded-lg border border-yellow-500/30 bg-yellow-500/10 px-3 py-2.5 text-sm">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-4 w-4 shrink-0"
-              viewBox="0 0 24 24"
-            >
-              <g>
-                <path fill="currentColor" d="M7 3H17V7.2L12 12L7 7.2V3Z">
-                  <animate
-                    id="SVGFjnOndxt3"
-                    fill="freeze"
-                    attributeName="opacity"
-                    begin="0;SVGn6mLadge3.end"
-                    dur="2s"
-                    from="1"
-                    to="0"
-                  />
-                </path>
-                <path fill="currentColor" d="M17 21H7V16.8L12 12L17 16.8V21Z">
-                  <animate
-                    fill="freeze"
-                    attributeName="opacity"
-                    begin="0;SVGn6mLadge3.end"
-                    dur="2s"
-                    from="0"
-                    to="1"
-                  />
-                </path>
-                <path
-                  fill="currentColor"
-                  d="M6 2V8H6.01L6 8.01L10 12L6 16L6.01 16.01H6V22H18V16.01H17.99L18 16L14 12L18 8.01L17.99 8H18V2H6ZM16 16.5V20H8V16.5L12 12.5L16 16.5ZM12 11.5L8 7.5V4H16V7.5L12 11.5Z"
-                />
-                <animateTransform
-                  id="SVGn6mLadge3"
-                  attributeName="transform"
-                  attributeType="XML"
-                  begin="SVGFjnOndxt3.end"
-                  dur="0.5s"
-                  from="0 12 12"
-                  to="180 12 12"
-                  type="rotate"
-                />
-              </g>
-            </svg>
-            You&apos;re submitting too fast. Try again in{" "}
-            <span className="font-semibold tabular-nums">
-              {rateLimitSecondsLeft >= 60
-                ? `${Math.floor(rateLimitSecondsLeft / 60)}m ${rateLimitSecondsLeft % 60}s`
-                : `${rateLimitSecondsLeft}s`}
-            </span>
-          </div>
-        )}
+        <RateLimitBanner
+          until={rateLimitUntil}
+          label="You're submitting too fast."
+        />
 
         <div className="flex justify-end">
           <Button
@@ -575,7 +523,6 @@ function EditReasonModal({
   const [reason, setReason] = useState(suggestion?.reason ?? "");
   const [saving, setSaving] = useState(false);
   const [rateLimitUntil, setRateLimitUntil] = useState<number | null>(null);
-  const [rateLimitSecondsLeft, setRateLimitSecondsLeft] = useState(0);
 
   useEffect(() => {
     if (suggestion) setReason(suggestion.reason);
@@ -583,18 +530,13 @@ function EditReasonModal({
 
   useEffect(() => {
     if (!rateLimitUntil) return;
-    const tick = () => {
-      const left = Math.ceil((rateLimitUntil - Date.now()) / 1000);
-      if (left <= 0) {
-        setRateLimitUntil(null);
-        setRateLimitSecondsLeft(0);
-      } else {
-        setRateLimitSecondsLeft(left);
-      }
-    };
-    tick();
-    const id = setInterval(tick, 1000);
-    return () => clearInterval(id);
+    const ms = rateLimitUntil - Date.now();
+    if (ms <= 0) {
+      setRateLimitUntil(null);
+      return;
+    }
+    const id = setTimeout(() => setRateLimitUntil(null), ms);
+    return () => clearTimeout(id);
   }, [rateLimitUntil]);
 
   const handleSave = async () => {
@@ -608,7 +550,6 @@ function EditReasonModal({
     } catch (err) {
       if (err instanceof RateLimitError) {
         setRateLimitUntil(Date.now() + err.retryAfter * 1000);
-        setRateLimitSecondsLeft(err.retryAfter);
         toast.error(
           "You're updating too fast. Please wait before trying again.",
         );
@@ -649,59 +590,11 @@ function EditReasonModal({
             className="border-border-card bg-tertiary-bg text-primary-text placeholder:text-tertiary-text focus:border-button-info mb-4 w-full resize-none rounded-lg border px-3 py-2.5 text-sm transition-colors outline-none"
           />
 
-          {rateLimitUntil && rateLimitSecondsLeft > 0 && (
-            <div className="text-primary-text mb-4 flex items-center gap-2 rounded-lg border border-yellow-500/30 bg-yellow-500/10 px-3 py-2.5 text-sm">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-4 w-4 shrink-0"
-                viewBox="0 0 24 24"
-              >
-                <g>
-                  <path fill="currentColor" d="M7 3H17V7.2L12 12L7 7.2V3Z">
-                    <animate
-                      id="SVGEditRLa"
-                      fill="freeze"
-                      attributeName="opacity"
-                      begin="0;SVGEditRLb.end"
-                      dur="2s"
-                      from="1"
-                      to="0"
-                    />
-                  </path>
-                  <path fill="currentColor" d="M17 21H7V16.8L12 12L17 16.8V21Z">
-                    <animate
-                      fill="freeze"
-                      attributeName="opacity"
-                      begin="0;SVGEditRLb.end"
-                      dur="2s"
-                      from="0"
-                      to="1"
-                    />
-                  </path>
-                  <path
-                    fill="currentColor"
-                    d="M6 2V8H6.01L6 8.01L10 12L6 16L6.01 16.01H6V22H18V16.01H17.99L18 16L14 12L18 8.01L17.99 8H18V2H6ZM16 16.5V20H8V16.5L12 12.5L16 16.5ZM12 11.5L8 7.5V4H16V7.5L12 11.5Z"
-                  />
-                  <animateTransform
-                    id="SVGEditRLb"
-                    attributeName="transform"
-                    attributeType="XML"
-                    begin="SVGEditRLa.end"
-                    dur="0.5s"
-                    from="0 12 12"
-                    to="180 12 12"
-                    type="rotate"
-                  />
-                </g>
-              </svg>
-              You&apos;re updating too fast. Try again in{" "}
-              <span className="font-semibold tabular-nums">
-                {rateLimitSecondsLeft >= 60
-                  ? `${Math.floor(rateLimitSecondsLeft / 60)}m ${rateLimitSecondsLeft % 60}s`
-                  : `${rateLimitSecondsLeft}s`}
-              </span>
-            </div>
-          )}
+          <RateLimitBanner
+            until={rateLimitUntil}
+            label="You're updating too fast."
+            className="mb-4"
+          />
 
           <DialogFooter className="mt-0 gap-2 px-0 pt-0 pb-0">
             <DialogClose asChild>
@@ -750,7 +643,7 @@ function VoteRateLimitBanner({ until }: { until: number }) {
   if (secondsLeft === 0) return null;
 
   return (
-    <div className="border-border-card bg-tertiary-bg flex items-center justify-center gap-1.5 border-t px-3 py-1.5 text-xs text-yellow-400">
+    <div className="border-border-card bg-tertiary-bg text-primary-text flex items-center justify-center gap-1.5 border-t px-3 py-1.5 text-xs">
       <Icon
         icon="material-symbols:hourglass-empty-rounded"
         className="h-3.5 w-3.5 shrink-0"
@@ -809,6 +702,9 @@ export default function ValueSuggestionsPage() {
   // Edit reason modal state
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [editTarget, setEditTarget] = useState<Suggestion | null>(null);
+
+  // Ban state — set on first detected ban, persists for session
+  const [ban, setBan] = useState<BanInfo | null>(null);
 
   const handleVote = async (
     suggestion: Suggestion,
@@ -912,6 +808,12 @@ export default function ValueSuggestionsPage() {
         setSuggestions((prev) =>
           prev.map((s) => (s.id === suggestion.id ? suggestion : s)),
         );
+        const banInfo = parseBan(res);
+        if (banInfo) {
+          setBan(banInfo);
+          showBanToast(banInfo);
+          return;
+        }
         const data = await res.json().catch(() => ({}));
         if (res.status === 429) {
           toast.error("You're voting too fast. Please wait a moment.");
@@ -981,6 +883,13 @@ export default function ValueSuggestionsPage() {
       }),
     });
     if (!res.ok) {
+      const banInfo = parseBan(res);
+      if (banInfo) {
+        setBan(banInfo);
+        showBanToast(banInfo);
+        closeEditModal();
+        return;
+      }
       if (res.status === 429) {
         const retryAfter = parseInt(res.headers.get("Retry-After") ?? "60", 10);
         throw new RateLimitError(retryAfter);
@@ -1183,6 +1092,12 @@ export default function ValueSuggestionsPage() {
       }),
     });
 
+    const banInfo = parseBan(res);
+    if (banInfo) {
+      setBan(banInfo);
+      showBanToast(banInfo);
+      throw new Error("banned");
+    }
     const data = await res.json();
     if (!res.ok) {
       if (res.status === 429) {
@@ -1260,7 +1175,8 @@ export default function ValueSuggestionsPage() {
                 <Button
                   onClick={openForm}
                   variant={showForm ? "destructive" : "default"}
-                  className={`flex items-center gap-2 ${showForm ? "" : "bg-button-info hover:bg-button-info-hover text-form-button-text"}`}
+                  disabled={!!ban}
+                  className={`flex items-center gap-2 ${showForm ? "" : "bg-button-info hover:bg-button-info-hover text-form-button-text"} disabled:opacity-50`}
                 >
                   <Icon
                     icon={
@@ -1290,8 +1206,11 @@ export default function ValueSuggestionsPage() {
           </div>
         </div>
 
+        {/* Ban Banner */}
+        {ban && <BanBanner ban={ban} />}
+
         {/* Submit Form */}
-        {showForm && isAuthenticated && (
+        {showForm && isAuthenticated && !ban && (
           <SuggestionForm
             items={items}
             loadingItems={loadingItems}

@@ -17,7 +17,9 @@ import { TradeAdSkeleton } from "./TradeAdSkeleton";
 import { Pagination } from "@/components/ui/Pagination";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/IconWrapper";
-import { deleteTradeAd } from "@/utils/trading/core";
+import { deleteTradeAd, RateLimitError } from "@/utils/trading/core";
+import RateLimitView from "@/components/Layout/RateLimitView";
+import { RateLimitBanner } from "@/components/ui/RateLimitBanner";
 import { toast } from "sonner";
 import { TradeAdForm } from "./TradeAdForm";
 import { useAuthContext } from "@/contexts/AuthContext";
@@ -125,6 +127,11 @@ export default function TradeAds({
   );
   const [items] = useState<TradeItem[]>(initialItems);
   const [error, setError] = useState<string | null>(null);
+  const [isListRateLimited, setIsListRateLimited] = useState(false);
+  const [listRetryAfter, setListRetryAfter] = useState<number | null>(null);
+  const [deleteRateLimits, setDeleteRateLimits] = useState<Map<number, number>>(
+    new Map(),
+  );
   const [isRecentTradesUnauthorized, setIsRecentTradesUnauthorized] =
     useState(false);
   const [tabParam, setTabParam] = useQueryState("tab", {
@@ -643,6 +650,14 @@ export default function TradeAds({
         },
       );
 
+      if (response.status === 429) {
+        const retryAfter = parseInt(
+          response.headers.get("retry-after") ?? "60",
+          10,
+        );
+        throw new RateLimitError(retryAfter);
+      }
+
       if (response.status === 401 || response.status === 403) {
         let body: unknown = null;
         try {
@@ -771,6 +786,12 @@ export default function TradeAds({
         setTradeAds(response.items);
         didSucceed = true;
       } catch (err) {
+        if (err instanceof RateLimitError) {
+          setIsListRateLimited(true);
+          setListRetryAfter(err.retryAfter);
+          return false;
+        }
+
         if (
           err instanceof HttpStatusError &&
           (err.status === 401 || err.status === 403)
@@ -872,7 +893,14 @@ export default function TradeAds({
       toast.success("Trade ad deleted successfully", { id: toastId });
     } catch (error) {
       log.error("Error deleting trade ad:", error);
-      toast.error("Failed to delete trade ad", { id: toastId });
+      if (error instanceof RateLimitError) {
+        toast.dismiss(toastId);
+        setDeleteRateLimits((prev) =>
+          new Map(prev).set(tradeId, Date.now() + error.retryAfter * 1000),
+        );
+      } else {
+        toast.error("Failed to delete trade ad", { id: toastId });
+      }
       // Refresh the trade ads list to ensure consistency
       refreshTradeAds();
     }
@@ -888,6 +916,16 @@ export default function TradeAds({
     setPage(value);
     router.push(getTradingUrl(value));
   };
+
+  if (isListRateLimited) {
+    return (
+      <RateLimitView
+        retryAfter={listRetryAfter ?? undefined}
+        homeHref="/trading"
+        homeLabel="Back to Trading"
+      />
+    );
+  }
 
   if (error) {
     return (
@@ -1546,12 +1584,18 @@ export default function TradeAds({
                     })),
                   };
                   return (
-                    <TradeAdCard
-                      key={trade.id}
-                      trade={enrichedTrade}
-                      currentUserId={currentUserId}
-                      onDelete={() => handleDeleteTrade(trade.id)}
-                    />
+                    <div key={trade.id}>
+                      <TradeAdCard
+                        trade={enrichedTrade}
+                        currentUserId={currentUserId}
+                        onDelete={() => handleDeleteTrade(trade.id)}
+                      />
+                      <RateLimitBanner
+                        until={deleteRateLimits.get(trade.id) ?? null}
+                        label="You're deleting too fast."
+                        className="mt-2"
+                      />
+                    </div>
                   );
                 })}
               </div>
@@ -1645,12 +1689,18 @@ export default function TradeAds({
                     })),
                   };
                   return (
-                    <TradeAdCard
-                      key={trade.id}
-                      trade={enrichedTrade}
-                      currentUserId={currentUserId}
-                      onDelete={() => handleDeleteTrade(trade.id)}
-                    />
+                    <div key={trade.id}>
+                      <TradeAdCard
+                        trade={enrichedTrade}
+                        currentUserId={currentUserId}
+                        onDelete={() => handleDeleteTrade(trade.id)}
+                      />
+                      <RateLimitBanner
+                        until={deleteRateLimits.get(trade.id) ?? null}
+                        label="You're deleting too fast."
+                        className="mt-2"
+                      />
+                    </div>
                   );
                 })}
               </div>

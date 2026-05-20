@@ -8,12 +8,14 @@ import { UserData } from "@/types/auth";
 import { DiscordIcon } from "@/components/Icons/DiscordIcon";
 import { Icon } from "@/components/ui/IconWrapper";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
+import { RateLimitBanner } from "@/components/ui/RateLimitBanner";
 import ChangelogComments from "@/components/PageComments/ChangelogComments";
 import {
   deleteTradeAd,
   deleteTradeOfferV2,
   fetchTradeOffers,
   respondToTradeOfferV2,
+  RateLimitError,
   type TradeOfferV2,
   type TradeOfferV2User,
 } from "@/utils/trading/core";
@@ -407,6 +409,9 @@ export default function TradeDetailsClient({
   }>({ status: "idle", error: null });
   const [offerResponseState, setOfferResponseState] = useState<
     Record<number, OfferResponseAction | undefined>
+  >({});
+  const [offerRateLimits, setOfferRateLimits] = useState<
+    Record<number, number>
   >({});
   const [offerDeleteState, setOfferDeleteState] = useState<
     Record<number, boolean | undefined>
@@ -806,9 +811,17 @@ export default function TradeDetailsClient({
       toast.success("Offer deleted", { id: toastId });
       setOffersRefreshToken((prev) => prev + 1);
     } catch (err) {
-      const message =
-        err instanceof Error ? err.message : "Failed to delete offer";
-      toast.error(message, { id: toastId });
+      if (err instanceof RateLimitError) {
+        toast.dismiss(toastId);
+        setOfferRateLimits((prev) => ({
+          ...prev,
+          [offerId]: Date.now() + err.retryAfter * 1000,
+        }));
+      } else {
+        const message =
+          err instanceof Error ? err.message : "Failed to delete offer";
+        toast.error(message, { id: toastId });
+      }
     } finally {
       setOfferDeleteState((prev) => {
         const next = { ...prev };
@@ -1523,6 +1536,11 @@ export default function TradeDetailsClient({
                                     </div>
                                   )}
                                 </div>
+                                <RateLimitBanner
+                                  until={offerRateLimits[offer.id] ?? null}
+                                  label="You're deleting too fast."
+                                  className="mt-4"
+                                />
                               </div>
                             </div>
                           );

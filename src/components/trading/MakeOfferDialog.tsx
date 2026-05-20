@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -24,8 +24,10 @@ import {
 } from "@/utils/trading/tradeItems";
 import {
   createTradeOffer,
+  RateLimitError,
   CreateTradeOfferPayload,
 } from "@/utils/trading/core";
+import { RateLimitBanner } from "@/components/ui/RateLimitBanner";
 import { DefaultAvatar } from "@/utils/ui/avatar";
 import { sanitizeText } from "@/utils/ui/sanitizeText";
 import { useAuthContext } from "@/contexts/AuthContext";
@@ -182,6 +184,18 @@ export function MakeOfferDialog({
   } = useAuthContext();
   const [showCustom, setShowCustom] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [rateLimitUntil, setRateLimitUntil] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (!rateLimitUntil) return;
+    const ms = rateLimitUntil - Date.now();
+    if (ms <= 0) {
+      setRateLimitUntil(null);
+      return;
+    }
+    const id = setTimeout(() => setRateLimitUntil(null), ms);
+    return () => clearTimeout(id);
+  }, [rateLimitUntil]);
   const [note, setNote] = useState("");
   const [offeringItems, setOfferingItems] = useState<TradeItem[]>([]);
   const [requestingItems, setRequestingItems] = useState<TradeItem[]>([]);
@@ -529,8 +543,15 @@ export function MakeOfferDialog({
       resetForm();
       onClose();
     } catch (err) {
-      log.error("Error sending offer:", err);
-      toast.error(err instanceof Error ? err.message : "Failed to send offer");
+      if (err instanceof RateLimitError) {
+        setRateLimitUntil(Date.now() + err.retryAfter * 1000);
+        toast.error("You're sending offers too fast. Please wait.");
+      } else {
+        log.error("Error sending offer:", err);
+        toast.error(
+          err instanceof Error ? err.message : "Failed to send offer",
+        );
+      }
     } finally {
       setSubmitting(false);
     }
@@ -578,8 +599,15 @@ export function MakeOfferDialog({
       resetForm();
       onClose();
     } catch (err) {
-      log.error("Error sending offer:", err);
-      toast.error(err instanceof Error ? err.message : "Failed to send offer");
+      if (err instanceof RateLimitError) {
+        setRateLimitUntil(Date.now() + err.retryAfter * 1000);
+        toast.error("You're sending offers too fast. Please wait.");
+      } else {
+        log.error("Error sending offer:", err);
+        toast.error(
+          err instanceof Error ? err.message : "Failed to send offer",
+        );
+      }
     } finally {
       setSubmitting(false);
     }
@@ -649,6 +677,12 @@ export function MakeOfferDialog({
         </div>
 
         <div className="overflow-y-auto px-6 pt-4 pb-6">
+          <RateLimitBanner
+            until={rateLimitUntil}
+            label="You're sending offers too fast."
+            className="mb-4"
+          />
+
           {!showCustom && (
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div className="border-border-card bg-tertiary-bg rounded-lg border p-4">
@@ -660,7 +694,7 @@ export function MakeOfferDialog({
                 </p>
                 <Button
                   onClick={() => void sendExactOffer()}
-                  disabled={submitting}
+                  disabled={submitting || !!rateLimitUntil}
                   className="w-full"
                 >
                   {submitting ? "Sending..." : "Send Offer (As Requested)"}
@@ -696,7 +730,7 @@ export function MakeOfferDialog({
                   <div className="flex items-center gap-2">
                     <Button
                       onClick={() => void sendCustomOffer()}
-                      disabled={submitting}
+                      disabled={submitting || !!rateLimitUntil}
                       size="sm"
                     >
                       {submitting ? "Sending..." : "Send Offer"}

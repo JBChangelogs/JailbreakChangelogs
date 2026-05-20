@@ -66,6 +66,9 @@ import { decode as decodeHtmlEntities } from "he";
 import { parseJsonWithLargeIds } from "@/utils/api/parseJsonWithLargeIds";
 import type { UserData, UserFlag, UserSettingsV2 } from "@/types/auth";
 import { createLogger } from "@/services/logger";
+import { parseBan, showBanToast, BanError } from "@/utils/api/ban";
+import type { BanInfo } from "@/utils/api/ban";
+import { BanBanner } from "@/components/ui/BanBanner";
 
 const log = createLogger("UI");
 
@@ -781,6 +784,7 @@ export default function MessagesInbox() {
   const [isLoadingConversations, setIsLoadingConversations] = useState(false);
   const [isLoadingMessages, setIsLoadingMessages] = useState(false);
   const [isSending, setIsSending] = useState(false);
+  const [messageBan, setMessageBan] = useState<BanInfo | null>(null);
   const [isRealtimeConnected, setIsRealtimeConnected] = useState(false);
   const [isProcessingBlockAction, setIsProcessingBlockAction] = useState(false);
   const [isMarkingOfferComplete, setIsMarkingOfferComplete] = useState(false);
@@ -2301,6 +2305,12 @@ export default function MessagesInbox() {
             : "Failed to send message";
 
       if (!response.ok || !parsedBody?.success || !parsedBody.message) {
+        const ban = parseBan(response);
+        if (ban) {
+          setMessageBan(ban);
+          showBanToast(ban);
+          return;
+        }
         if (parsedBody?.error === "unmessageable") {
           const apiProvidedSystemMessage =
             parsedBody?.message && typeof parsedBody.message === "string"
@@ -2524,6 +2534,13 @@ export default function MessagesInbox() {
         : null;
 
       if (!response.ok || !parsedBody?.success) {
+        const ban = parseBan(response);
+        if (ban) {
+          setMessageBan(ban);
+          toast.dismiss(toastId);
+          showBanToast(ban);
+          return;
+        }
         const apiErrorMessage =
           parsedBody?.message && typeof parsedBody.message === "string"
             ? parsedBody.message
@@ -2651,6 +2668,13 @@ export default function MessagesInbox() {
       );
 
       if (!response.ok) {
+        const ban = parseBan(response);
+        if (ban) {
+          setMessageBan(ban);
+          toast.dismiss(toastId);
+          showBanToast(ban);
+          throw new BanError();
+        }
         throw new Error(
           await getResponseErrorMessage(response, "Failed to delete message"),
         );
@@ -2679,10 +2703,12 @@ export default function MessagesInbox() {
         return sortConversationsByLatestMessage(updated);
       });
       log.error("Error deleting message:", error);
-      toast.error(
-        error instanceof Error ? error.message : "Failed to delete message",
-        { id: toastId },
-      );
+      if (!(error instanceof BanError)) {
+        toast.error(
+          error instanceof Error ? error.message : "Failed to delete message",
+          { id: toastId },
+        );
+      }
     }
   };
 
@@ -2720,6 +2746,13 @@ export default function MessagesInbox() {
       );
 
       if (!response.ok) {
+        const ban = parseBan(response);
+        if (ban) {
+          setMessageBan(ban);
+          toast.dismiss(toastId);
+          showBanToast(ban);
+          return;
+        }
         throw new Error(
           await getResponseErrorMessage(response, "Failed to submit report"),
         );
@@ -4067,6 +4100,9 @@ export default function MessagesInbox() {
                 </ChatMessages>
 
                 <div className="bg-secondary-bg border-border-card sticky bottom-0 border-t p-3">
+                  {messageBan && (
+                    <BanBanner ban={messageBan} className="mb-3" />
+                  )}
                   {replyingToMessage && (
                     <div className="bg-tertiary-bg border-border-card flex w-full items-center justify-between rounded-t-md border-x border-t px-3 py-2 text-xs">
                       <div className="flex items-center gap-2 truncate">
@@ -4110,7 +4146,7 @@ export default function MessagesInbox() {
                       conversationId={selectedUserId}
                       placeholder={messagePlaceholder}
                       maxChars={MESSAGE_CHAR_LIMIT}
-                      isSending={isSending}
+                      isSending={isSending || !!messageBan}
                       onSend={(message) => void handleSendMessage(message)}
                     />
                   </div>

@@ -43,6 +43,7 @@ import {
 import { getResponseErrorMessage } from "@/utils/api/api";
 import { buildApiUrlWithDevToken } from "@/utils/api/apiDevToken";
 import { createLogger } from "@/services/logger";
+import { RateLimitBanner } from "@/components/ui/RateLimitBanner";
 
 const log = createLogger("UI");
 
@@ -116,6 +117,18 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
     "offering" | "requesting"
   >("offering");
   const [submitting, setSubmitting] = useState(false);
+  const [rateLimitUntil, setRateLimitUntil] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (!rateLimitUntil) return;
+    const ms = rateLimitUntil - Date.now();
+    if (ms <= 0) {
+      setRateLimitUntil(null);
+      return;
+    }
+    const id = setTimeout(() => setRateLimitUntil(null), ms);
+    return () => clearTimeout(id);
+  }, [rateLimitUntil]);
   const [userPremiumTier, setUserPremiumTier] = useState<UserPremiumTier>(
     PREMIUM_TIERS[0],
   );
@@ -666,6 +679,16 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
           availableItemsGrid.dispatchEvent(event);
         }
         return;
+      } else if (response.status === 429) {
+        const retryAfter = parseInt(
+          response.headers.get("retry-after") ?? "60",
+          10,
+        );
+        setRateLimitUntil(Date.now() + retryAfter * 1000);
+        toast.error("You're creating trade ads too fast. Please wait.", {
+          id: creatingToastId ?? undefined,
+        });
+        return;
       } else if (!response.ok) {
         throw new Error(
           await getResponseErrorMessage(
@@ -1162,6 +1185,12 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
             </DroppableZone>
           </div>
 
+          {/* Rate Limit Banner */}
+          <RateLimitBanner
+            until={rateLimitUntil}
+            label="You're creating trade ads too fast."
+          />
+
           {/* Submit Button */}
           <div className="flex flex-col justify-end gap-3 sm:flex-row">
             <UiButton
@@ -1188,7 +1217,7 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
                 }
                 handleSubmit();
               }}
-              disabled={submitting}
+              disabled={submitting || !!rateLimitUntil}
               className={submitting ? "cursor-progress" : undefined}
             >
               {submitting ? "Creating Trade Ad..." : "Create Trade Ad"}
