@@ -1259,10 +1259,28 @@ export interface CommentAuthor {
   flags?: Array<{ flag: string | null; enabled?: boolean }>;
 }
 
+export interface ReactionUser {
+  id: string;
+  username: string;
+  avatar?: string | null;
+  custom_avatar?: string | null;
+  roblox_avatar?: string | null;
+  roblox_display_name?: string;
+  roblox_username?: string;
+  premiumtype?: number;
+  settings?: {
+    custom_avatar?: boolean;
+    profile_public?: boolean;
+    show_recent_comments?: boolean;
+    [key: string]: unknown;
+  } | null;
+}
+
 export interface CommentReaction {
   emoji: string;
   count: number;
   user_reacted: boolean;
+  users?: ReactionUser[];
 }
 
 export interface CommentData {
@@ -1283,24 +1301,61 @@ export interface CommentData {
   depth?: number;
 }
 
-function normalizeReactions(raw: unknown): CommentReaction[] {
+function normalizeReactions(
+  raw: unknown,
+  currentUserId?: string | null,
+): CommentReaction[] {
   if (!raw) return [];
   if (Array.isArray(raw)) return raw as CommentReaction[];
   if (typeof raw === "object") {
-    return Object.entries(
-      raw as Record<string, { count: number; user_reacted: boolean }>,
-    ).map(([emoji, data]) => ({
-      emoji,
-      count: data.count ?? 0,
-      user_reacted: data.user_reacted ?? false,
-    }));
+    return Object.entries(raw as Record<string, unknown>).map(
+      ([emoji, data]) => {
+        if (Array.isArray(data)) {
+          if (
+            data.length > 0 &&
+            typeof data[0] === "object" &&
+            data[0] !== null
+          ) {
+            const users = data as ReactionUser[];
+            return {
+              emoji,
+              count: users.length,
+              user_reacted: currentUserId
+                ? users.some((u) => u.id === currentUserId)
+                : false,
+              users,
+            };
+          }
+          const userIds = data as string[];
+          return {
+            emoji,
+            count: userIds.length,
+            user_reacted: currentUserId
+              ? userIds.includes(currentUserId)
+              : false,
+            users: [],
+          };
+        }
+        const obj = data as { count: number; user_reacted: boolean };
+        return {
+          emoji,
+          count: obj.count ?? 0,
+          user_reacted: obj.user_reacted ?? false,
+          users: [],
+        };
+      },
+    );
   }
   return [];
 }
 
-function normalizeComment(raw: CommentData, keepReplies = false): CommentData {
+function normalizeComment(
+  raw: CommentData,
+  keepReplies = false,
+  currentUserId?: string | null,
+): CommentData {
   const replies = keepReplies
-    ? (raw.replies ?? []).map((r) => normalizeComment(r, false))
+    ? (raw.replies ?? []).map((r) => normalizeComment(r, false, currentUserId))
     : undefined;
   return {
     ...raw,
@@ -1308,11 +1363,14 @@ function normalizeComment(raw: CommentData, keepReplies = false): CommentData {
     author: raw.user?.username ?? "",
     owner: "",
     replies,
-    reactions: normalizeReactions(raw.reactions),
+    reactions: normalizeReactions(raw.reactions, currentUserId),
   };
 }
 
-export function flattenComments(data: { items?: CommentData[] }): {
+export function flattenComments(
+  data: { items?: CommentData[] },
+  currentUserId?: string | null,
+): {
   comments: CommentData[];
   userMap: Record<string, UserData>;
 } {
@@ -1321,7 +1379,7 @@ export function flattenComments(data: { items?: CommentData[] }): {
   const userMap: Record<string, UserData> = {};
 
   for (const item of rawItems) {
-    const normalized = normalizeComment(item, true);
+    const normalized = normalizeComment(item, true, currentUserId);
     comments.push(normalized);
 
     if (normalized.user?.id)

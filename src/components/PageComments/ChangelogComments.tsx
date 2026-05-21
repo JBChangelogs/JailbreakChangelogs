@@ -20,7 +20,7 @@
 "use client";
 
 import { Icon } from "../ui/IconWrapper";
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { Spinner } from "@/components/ui/Spinner";
 import {
   Tooltip,
@@ -39,6 +39,7 @@ import { Button } from "../ui/button";
 import {
   CommentData,
   CommentReaction,
+  ReactionUser,
   PUBLIC_API_URL,
   getResponseErrorMessage,
   flattenComments,
@@ -377,6 +378,22 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
   const [isSubmittingComment, setIsSubmittingComment] = useState(false);
   const [isRefreshingComments, setIsRefreshingComments] = useState(false);
   const [rateLimitUntil, setRateLimitUntil] = useState<number | null>(null);
+  const [rateLimitLabel, setRateLimitLabel] = useState(
+    "You're posting too fast.",
+  );
+  const [reactionRateLimitUntil, setReactionRateLimitUntil] = useState<
+    number | null
+  >(null);
+  const pendingDebounces = useRef<
+    Map<
+      string,
+      {
+        timer: ReturnType<typeof setTimeout>;
+        initialUserReacted: boolean;
+        clickCount: number;
+      }
+    >
+  >(new Map());
   const [commentBan, setCommentBan] = useState<BanInfo | null>(null);
 
   // --- Pagination ---
@@ -389,9 +406,17 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
 
   // --- Reactions ---
   const [availableEmojis, setAvailableEmojis] = useState<string[]>([]);
-  const [reactionPickerOpenId, setReactionPickerOpenId] = useState<
+  const [reactionPickerHoverOpenId, setReactionPickerHoverOpenId] = useState<
     number | null
   >(null);
+  const [reactionBreakdownOpenId, setReactionBreakdownOpenId] = useState<
+    number | null
+  >(null);
+  const [breakdownTab, setBreakdownTab] = useState<string>("all");
+  const hoverPickerTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const hoverPickerCloseTimer = useRef<ReturnType<typeof setTimeout> | null>(
+    null,
+  );
 
   // Supporter modal hook for handling tier-based restrictions
   const { modalState, closeModal, openModal, COMMENT_CHAR_LIMITS } =
@@ -479,113 +504,206 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
     [COMMENT_CHAR_LIMITS, currentUserPremiumType, openModal],
   );
 
-  const triggerRateLimit = useCallback((seconds: number) => {
-    setRateLimitUntil(Date.now() + seconds * 1000);
-    toast.error("Too many requests. Please try again shortly.");
-  }, []);
+  const triggerRateLimit = useCallback(
+    (seconds: number, action: "posting" | "reacting" = "posting") => {
+      if (action === "reacting") {
+        setReactionRateLimitUntil(Date.now() + seconds * 1000);
+      } else {
+        setRateLimitUntil(Date.now() + seconds * 1000);
+        setRateLimitLabel("You're posting too fast.");
+      }
+      toast.error("Too many requests. Please try again shortly.");
+    },
+    [],
+  );
 
   const handleReact = useCallback(
-    async (commentId: number, emoji: string) => {
+    (commentId: number, emoji: string) => {
       if (!isLoggedIn) {
         setLoginModal({ open: true });
         return;
       }
-      if (rateLimitUntil !== null && Date.now() < rateLimitUntil) return;
+      if (
+        reactionRateLimitUntil !== null &&
+        Date.now() < reactionRateLimitUntil
+      )
+        return;
 
-      const applyOptimistic = (
+      const key = `${commentId}:${emoji}`;
+      const existing = pendingDebounces.current.get(key);
+
+      // Capture server truth on the first click of a spam sequence
+      let initialUserReacted = existing?.initialUserReacted;
+      if (initialUserReacted === undefined) {
+        for (const c of comments) {
+          if (c.id === commentId) {
+            initialUserReacted =
+              c.reactions?.find((r) => r.emoji === emoji)?.user_reacted ??
+              false;
+            break;
+          }
+          const reply = c.replies?.find((r) => r.id === commentId);
+          if (reply) {
+            initialUserReacted =
+              reply.reactions?.find((r) => r.emoji === emoji)?.user_reacted ??
+              false;
+            break;
+          }
+        }
+        initialUserReacted = initialUserReacted ?? false;
+      }
+      const clickCount = (existing?.clickCount ?? 0) + 1;
+
+      // Toggle UI immediately on every click
+      const userEntry: ReactionUser | null = user
+        ? {
+            id: user.id,
+            username: user.username,
+            avatar: user.avatar ?? null,
+            custom_avatar: user.custom_avatar ?? null,
+            roblox_avatar: (user as UserData).roblox_avatar ?? null,
+            roblox_display_name: (user as UserData).roblox_display_name,
+            roblox_username: (user as UserData).roblox_username,
+            premiumtype: user.premiumtype,
+            settings: user.settings as unknown as ReactionUser["settings"],
+          }
+        : null;
+
+      const toggleReaction = (
         reactions: CommentReaction[] = [],
       ): CommentReaction[] => {
-        const existing = reactions.find((r) => r.emoji === emoji);
-        if (existing?.user_reacted) {
+        const found = reactions.find((r) => r.emoji === emoji);
+        if (found?.user_reacted) {
           return reactions
             .map((r) =>
               r.emoji === emoji
-                ? { ...r, count: r.count - 1, user_reacted: false }
+                ? {
+                    ...r,
+                    count: r.count - 1,
+                    user_reacted: false,
+                    users: (r.users ?? []).filter(
+                      (u) => u.id !== currentUserId,
+                    ),
+                  }
                 : r,
             )
             .filter((r) => r.count > 0);
-        } else if (existing) {
+        } else if (found) {
           return reactions.map((r) =>
             r.emoji === emoji
-              ? { ...r, count: r.count + 1, user_reacted: true }
+              ? {
+                  ...r,
+                  count: r.count + 1,
+                  user_reacted: true,
+                  users: userEntry
+                    ? [...(r.users ?? []), userEntry]
+                    : (r.users ?? []),
+                }
               : r,
           );
         }
-        return [...reactions, { emoji, count: 1, user_reacted: true }];
+        return [
+          ...reactions,
+          {
+            emoji,
+            count: 1,
+            user_reacted: true,
+            users: userEntry ? [userEntry] : [],
+          },
+        ];
       };
 
-      const previousComments = comments.map((c) => ({
-        ...c,
-        replies: c.replies ? [...c.replies] : undefined,
-      }));
-
-      setComments((prev) =>
+      const applyToggle = (prev: CommentData[]) =>
         prev.map((c) => {
-          if (c.id === commentId) {
-            return { ...c, reactions: applyOptimistic(c.reactions) };
-          }
+          if (c.id === commentId)
+            return { ...c, reactions: toggleReaction(c.reactions) };
           if (c.replies?.some((r) => r.id === commentId)) {
             return {
               ...c,
               replies: c.replies?.map((r) =>
                 r.id === commentId
-                  ? { ...r, reactions: applyOptimistic(r.reactions) }
+                  ? { ...r, reactions: toggleReaction(r.reactions) }
                   : r,
               ),
             };
           }
           return c;
-        }),
-      );
-
-      setReactionPickerOpenId(null);
-
-      try {
-        const baseUrl = buildApiUrlWithDevToken(
-          PUBLIC_API_URL!,
-          `/comments/${commentId}/react`,
-        );
-        const url = new URL(baseUrl);
-        url.searchParams.set("emoji", emoji);
-
-        const response = await fetch(url.toString(), {
-          method: "POST",
-          credentials: "include",
         });
 
-        if (!response.ok) {
-          setComments(previousComments);
+      setComments(applyToggle);
 
-          let errorData: CommentApiErrorData | null = null;
-          try {
-            errorData = await response.json();
-          } catch {
-            // noop
-          }
+      // Reset debounce timer
+      if (existing) clearTimeout(existing.timer);
 
-          if (response.status === 429 || errorData?.error === "rate_limit") {
-            const retryHeader = response.headers.get("Retry-After");
-            let seconds = 60;
-            if (typeof errorData?.try_again === "number") {
-              seconds = Math.max(
-                1,
-                errorData.try_again - Math.floor(Date.now() / 1000),
-              );
-            } else if (retryHeader) {
-              seconds = Math.max(1, parseInt(retryHeader, 10));
+      const timer = setTimeout(async () => {
+        pendingDebounces.current.delete(key);
+
+        // Even number of clicks = net no-op, UI already back to server state
+        if (clickCount % 2 === 0) return;
+
+        // Odd clicks = one net toggle, send the API call
+        try {
+          const baseUrl = buildApiUrlWithDevToken(
+            PUBLIC_API_URL!,
+            `/comments/${commentId}/react`,
+          );
+          const url = new URL(baseUrl);
+          url.searchParams.set("emoji", emoji);
+
+          const response = await fetch(url.toString(), {
+            method: "POST",
+            credentials: "include",
+          });
+
+          if (!response.ok) {
+            // Revert by toggling once more (odd toggles → one more = back to server state)
+            setComments(applyToggle);
+
+            let errorData: CommentApiErrorData | null = null;
+            try {
+              errorData = await response.json();
+            } catch {
+              // noop
             }
-            triggerRateLimit(seconds);
-            return;
-          }
 
-          toast.error(errorData?.message || "Failed to react");
+            if (response.status === 429 || errorData?.error === "rate_limit") {
+              const retryHeader = response.headers.get("Retry-After");
+              let seconds = 60;
+              if (typeof errorData?.try_again === "number") {
+                seconds = Math.max(
+                  1,
+                  errorData.try_again - Math.floor(Date.now() / 1000),
+                );
+              } else if (retryHeader) {
+                seconds = Math.max(1, parseInt(retryHeader, 10));
+              }
+              triggerRateLimit(seconds, "reacting");
+              return;
+            }
+
+            toast.error(errorData?.message || "Failed to react");
+          }
+        } catch {
+          setComments(applyToggle);
+          toast.error("Failed to react");
         }
-      } catch {
-        setComments(previousComments);
-        toast.error("Failed to react");
-      }
+      }, 500);
+
+      pendingDebounces.current.set(key, {
+        timer,
+        initialUserReacted,
+        clickCount,
+      });
     },
-    [comments, isLoggedIn, rateLimitUntil, setLoginModal, triggerRateLimit],
+    [
+      comments,
+      isLoggedIn,
+      reactionRateLimitUntil,
+      setLoginModal,
+      triggerRateLimit,
+      user,
+      currentUserId,
+    ],
   );
 
   useEffect(() => {
@@ -598,6 +716,17 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
     const id = setTimeout(() => setRateLimitUntil(null), ms);
     return () => clearTimeout(id);
   }, [rateLimitUntil]);
+
+  useEffect(() => {
+    if (!reactionRateLimitUntil) return;
+    const ms = reactionRateLimitUntil - Date.now();
+    if (ms <= 0) {
+      setReactionRateLimitUntil(null);
+      return;
+    }
+    const id = setTimeout(() => setReactionRateLimitUntil(null), ms);
+    return () => clearTimeout(id);
+  }, [reactionRateLimitUntil]);
 
   // Set isClient to true on mount to avoid hydration mismatches for browser-only features
   useEffect(() => {
@@ -716,7 +845,10 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
         }
 
         const data = await res.json();
-        const { comments: commentsArray, userMap } = flattenComments(data);
+        const { comments: commentsArray, userMap } = flattenComments(
+          data,
+          currentUserId,
+        );
 
         setComments(commentsArray);
         setTotalPages(data.total_pages ?? 1);
@@ -730,7 +862,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
         if (!silent) setIsRefreshingComments(false);
       }
     },
-    [changelogId, type, itemType, sortOrder],
+    [changelogId, type, itemType, sortOrder, currentUserId],
   );
 
   // Refresh comments when changelogId changes with simple debouncing
@@ -1315,8 +1447,11 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
     }
   };
 
-  const isRateLimited = rateLimitUntil !== null && Date.now() < rateLimitUntil;
-  const isBlocked = isRateLimited || !!commentBan;
+  const isRateLimited =
+    reactionRateLimitUntil !== null && Date.now() < reactionRateLimitUntil;
+  const isPostRateLimited =
+    rateLimitUntil !== null && Date.now() < rateLimitUntil;
+  const isBlocked = isPostRateLimited || !!commentBan;
 
   const containerBgClass =
     type === "tradev2" ? "bg-tertiary-bg" : "bg-secondary-bg";
@@ -1404,7 +1539,12 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
           {/* Rate Limit / Ban Banners */}
           <RateLimitBanner
             until={rateLimitUntil}
-            label="You're posting too fast."
+            label={rateLimitLabel}
+            className="px-3 py-2"
+          />
+          <RateLimitBanner
+            until={reactionRateLimitUntil}
+            label="You're reacting too fast."
             className="px-3 py-2"
           />
           {commentBan && <BanBanner ban={commentBan} className="px-3 py-2" />}
@@ -1833,18 +1973,66 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                               )}
                               {isLoggedIn && availableEmojis.length > 0 && (
                                 <Popover
-                                  open={reactionPickerOpenId === comment.id}
-                                  onOpenChange={(open) =>
-                                    setReactionPickerOpenId(
-                                      open ? comment.id : null,
-                                    )
+                                  open={
+                                    reactionPickerHoverOpenId === comment.id
                                   }
+                                  onOpenChange={(open) => {
+                                    if (!open)
+                                      setReactionPickerHoverOpenId(null);
+                                  }}
                                 >
                                   <PopoverTrigger asChild>
                                     <Button
                                       variant="ghost"
                                       size="sm"
-                                      className="text-secondary-text hover:text-primary-text hover:bg-quaternary-bg h-8 w-8 rounded-lg p-0 opacity-100 transition-all duration-200 data-[state=open]:opacity-100 lg:opacity-0 lg:group-hover:opacity-100"
+                                      disabled={isRateLimited}
+                                      onMouseEnter={() => {
+                                        if (hoverPickerCloseTimer.current) {
+                                          clearTimeout(
+                                            hoverPickerCloseTimer.current,
+                                          );
+                                          hoverPickerCloseTimer.current = null;
+                                        }
+                                        hoverPickerTimer.current = setTimeout(
+                                          () =>
+                                            setReactionPickerHoverOpenId(
+                                              comment.id,
+                                            ),
+                                          300,
+                                        );
+                                      }}
+                                      onMouseLeave={() => {
+                                        if (hoverPickerTimer.current) {
+                                          clearTimeout(
+                                            hoverPickerTimer.current,
+                                          );
+                                          hoverPickerTimer.current = null;
+                                        }
+                                        hoverPickerCloseTimer.current =
+                                          setTimeout(
+                                            () =>
+                                              setReactionPickerHoverOpenId(
+                                                (prev) =>
+                                                  prev === comment.id
+                                                    ? null
+                                                    : prev,
+                                              ),
+                                            150,
+                                          );
+                                      }}
+                                      onClick={() => {
+                                        const defaultEmoji =
+                                          availableEmojis.find(
+                                            (e) => e === "🍰",
+                                          ) ??
+                                          availableEmojis[0] ??
+                                          "🍰";
+                                        void handleReact(
+                                          comment.id,
+                                          defaultEmoji,
+                                        );
+                                      }}
+                                      className="text-secondary-text hover:text-primary-text hover:bg-quaternary-bg h-8 w-8 rounded-lg p-0 opacity-100 transition-all duration-200 lg:opacity-0 lg:group-hover:opacity-100"
                                     >
                                       <Icon
                                         icon="heroicons:face-smile"
@@ -1855,15 +2043,37 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                                   <PopoverContent
                                     className="w-auto p-2"
                                     align="end"
+                                    onMouseEnter={() => {
+                                      if (hoverPickerCloseTimer.current) {
+                                        clearTimeout(
+                                          hoverPickerCloseTimer.current,
+                                        );
+                                        hoverPickerCloseTimer.current = null;
+                                      }
+                                    }}
+                                    onMouseLeave={() => {
+                                      hoverPickerCloseTimer.current =
+                                        setTimeout(
+                                          () =>
+                                            setReactionPickerHoverOpenId(
+                                              (prev) =>
+                                                prev === comment.id
+                                                  ? null
+                                                  : prev,
+                                            ),
+                                          150,
+                                        );
+                                    }}
                                   >
                                     <div className="grid grid-cols-5 gap-1">
                                       {availableEmojis.map((emoji) => (
                                         <button
                                           key={emoji}
                                           type="button"
-                                          onClick={() =>
-                                            void handleReact(comment.id, emoji)
-                                          }
+                                          onClick={() => {
+                                            void handleReact(comment.id, emoji);
+                                            setReactionPickerHoverOpenId(null);
+                                          }}
                                           className="hover:bg-quaternary-bg flex h-8 w-8 cursor-pointer items-center justify-center rounded-md text-lg transition-colors"
                                         >
                                           {emoji}
@@ -2114,33 +2324,183 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                           </div>
 
                           {/* Reactions */}
-                          {comment.reactions &&
-                            comment.reactions.length > 0 && (
+                          {(() => {
+                            const rxns = comment.reactions;
+                            if (!rxns || rxns.length === 0) return null;
+                            const sortedRxns = [...rxns].sort(
+                              (a, b) => b.count - a.count,
+                            );
+                            const top3 = sortedRxns.slice(0, 3);
+                            const total = sortedRxns.reduce(
+                              (s, r) => s + r.count,
+                              0,
+                            );
+                            const userHasReacted = sortedRxns.some(
+                              (r) => r.user_reacted,
+                            );
+                            const tabUsers =
+                              breakdownTab === "all"
+                                ? sortedRxns.flatMap((r) =>
+                                    (r.users ?? []).map((u) => ({
+                                      user: u,
+                                      emoji: r.emoji,
+                                    })),
+                                  )
+                                : (
+                                    sortedRxns.find(
+                                      (r) => r.emoji === breakdownTab,
+                                    )?.users ?? []
+                                  ).map((u) => ({
+                                    user: u,
+                                    emoji: breakdownTab,
+                                  }));
+                            return (
                               <div className="flex flex-wrap items-center gap-1.5 pb-2">
-                                {comment.reactions.map((reaction) => (
-                                  <button
-                                    key={reaction.emoji}
-                                    type="button"
-                                    onClick={() =>
-                                      void handleReact(
-                                        comment.id,
-                                        reaction.emoji,
-                                      )
-                                    }
-                                    className={`flex cursor-pointer items-center gap-1 rounded-full border px-2 py-0.5 text-sm transition-colors ${
-                                      reaction.user_reacted
-                                        ? "border-link/30 bg-link/10 text-link"
-                                        : "border-border-card bg-quaternary-bg text-primary-text hover:border-link/30"
-                                    }`}
+                                <Popover
+                                  open={reactionBreakdownOpenId === comment.id}
+                                  onOpenChange={(open) => {
+                                    setReactionBreakdownOpenId(
+                                      open ? comment.id : null,
+                                    );
+                                    if (open) setBreakdownTab("all");
+                                  }}
+                                >
+                                  <PopoverTrigger asChild>
+                                    <button
+                                      type="button"
+                                      className={`flex cursor-pointer items-center gap-0.5 rounded-full px-2 py-1 text-sm transition-colors ${
+                                        userHasReacted
+                                          ? "border-link/30 bg-link/10 text-link border"
+                                          : "border-border-card bg-quaternary-bg text-primary-text hover:border-link/30 border"
+                                      }`}
+                                    >
+                                      <span className="flex gap-0.5">
+                                        {top3.map((r) => (
+                                          <span key={r.emoji}>{r.emoji}</span>
+                                        ))}
+                                      </span>
+                                      <span className="text-secondary-text ml-1 text-xs font-medium">
+                                        {total}
+                                      </span>
+                                    </button>
+                                  </PopoverTrigger>
+                                  <PopoverContent
+                                    className="w-64 p-0"
+                                    align="start"
                                   >
-                                    <span>{reaction.emoji}</span>
-                                    <span className="text-xs font-medium">
-                                      {reaction.count}
-                                    </span>
-                                  </button>
-                                ))}
+                                    <div className="border-border-card flex items-center gap-0.5 overflow-x-auto border-b p-1.5">
+                                      <button
+                                        type="button"
+                                        onClick={() => setBreakdownTab("all")}
+                                        className={`shrink-0 cursor-pointer rounded px-2 py-1 text-xs font-medium transition-colors ${
+                                          breakdownTab === "all"
+                                            ? "bg-link/20 text-link"
+                                            : "text-secondary-text hover:bg-quaternary-bg hover:text-primary-text"
+                                        }`}
+                                      >
+                                        All
+                                      </button>
+                                      {sortedRxns.map((r) => (
+                                        <button
+                                          key={r.emoji}
+                                          type="button"
+                                          onClick={() =>
+                                            setBreakdownTab(r.emoji)
+                                          }
+                                          className={`flex shrink-0 cursor-pointer items-center gap-0.5 rounded px-2 py-1 text-xs font-medium transition-colors ${
+                                            breakdownTab === r.emoji
+                                              ? "bg-link/20 text-link"
+                                              : "text-secondary-text hover:bg-quaternary-bg hover:text-primary-text"
+                                          }`}
+                                        >
+                                          <span>{r.emoji}</span>
+                                          <span>{r.count}</span>
+                                        </button>
+                                      ))}
+                                    </div>
+                                    {tabUsers.length > 0 ? (
+                                      <div className="max-h-48 space-y-0.5 overflow-y-auto p-1.5">
+                                        {tabUsers.map((item, idx) => {
+                                          const reactorData =
+                                            userData[item.user.id];
+                                          const displayName = isRobloxContext
+                                            ? reactorData?.roblox_display_name ||
+                                              reactorData?.roblox_username ||
+                                              reactorData?.username ||
+                                              item.user.username
+                                            : reactorData?.username ||
+                                              item.user.username;
+                                          return (
+                                            <div
+                                              key={`${item.user.id}-${item.emoji}-${idx}`}
+                                              className="hover:bg-quaternary-bg flex items-center justify-between gap-2 rounded-md px-2 py-1.5 transition-colors"
+                                            >
+                                              <div className="flex min-w-0 items-center gap-2">
+                                                <div className="shrink-0">
+                                                  <UserAvatar
+                                                    userId={item.user.id}
+                                                    avatarHash={
+                                                      reactorData?.avatar ??
+                                                      item.user.avatar ??
+                                                      null
+                                                    }
+                                                    username={displayName}
+                                                    size={6}
+                                                    cdnSize={64}
+                                                    custom_avatar={
+                                                      reactorData?.custom_avatar ??
+                                                      item.user.custom_avatar ??
+                                                      undefined
+                                                    }
+                                                    showBadge={false}
+                                                    settings={
+                                                      reactorData?.settings ??
+                                                      undefined
+                                                    }
+                                                    premiumType={
+                                                      reactorData?.premiumtype ??
+                                                      item.user.premiumtype
+                                                    }
+                                                    forceAvatarUrl={
+                                                      isRobloxContext
+                                                        ? reactorData?.roblox_avatar ||
+                                                          item.user
+                                                            .roblox_avatar ||
+                                                          undefined
+                                                        : undefined
+                                                    }
+                                                  />
+                                                </div>
+                                                <Link
+                                                  href={`/users/${item.user.id}`}
+                                                  prefetch={false}
+                                                  className="text-primary-text hover:text-link max-w-36 truncate text-sm font-medium transition-colors"
+                                                  onClick={() =>
+                                                    setReactionBreakdownOpenId(
+                                                      null,
+                                                    )
+                                                  }
+                                                >
+                                                  {displayName}
+                                                </Link>
+                                              </div>
+                                              <span className="shrink-0 text-base">
+                                                {item.emoji}
+                                              </span>
+                                            </div>
+                                          );
+                                        })}
+                                      </div>
+                                    ) : (
+                                      <div className="text-secondary-text p-3 text-center text-xs">
+                                        No reactions yet
+                                      </div>
+                                    )}
+                                  </PopoverContent>
+                                </Popover>
                               </div>
-                            )}
+                            );
+                          })()}
 
                           {/* Inline Reply Form */}
                           {isLoggedIn && replyingToId === comment.id && (
@@ -2405,20 +2765,76 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                                               {availableEmojis.length > 0 && (
                                                 <Popover
                                                   open={
-                                                    reactionPickerOpenId ===
+                                                    reactionPickerHoverOpenId ===
                                                     reply.id
                                                   }
-                                                  onOpenChange={(open) =>
-                                                    setReactionPickerOpenId(
-                                                      open ? reply.id : null,
-                                                    )
-                                                  }
+                                                  onOpenChange={(open) => {
+                                                    if (!open)
+                                                      setReactionPickerHoverOpenId(
+                                                        null,
+                                                      );
+                                                  }}
                                                 >
                                                   <PopoverTrigger asChild>
                                                     <Button
                                                       variant="ghost"
                                                       size="sm"
-                                                      className="text-secondary-text hover:text-primary-text hover:bg-quaternary-bg h-7 w-7 rounded-lg p-0 opacity-100 transition-all duration-200 data-[state=open]:opacity-100 lg:opacity-0 lg:group-hover:opacity-100"
+                                                      disabled={isRateLimited}
+                                                      onMouseEnter={() => {
+                                                        if (
+                                                          hoverPickerCloseTimer.current
+                                                        ) {
+                                                          clearTimeout(
+                                                            hoverPickerCloseTimer.current,
+                                                          );
+                                                          hoverPickerCloseTimer.current =
+                                                            null;
+                                                        }
+                                                        hoverPickerTimer.current =
+                                                          setTimeout(
+                                                            () =>
+                                                              setReactionPickerHoverOpenId(
+                                                                reply.id,
+                                                              ),
+                                                            300,
+                                                          );
+                                                      }}
+                                                      onMouseLeave={() => {
+                                                        if (
+                                                          hoverPickerTimer.current
+                                                        ) {
+                                                          clearTimeout(
+                                                            hoverPickerTimer.current,
+                                                          );
+                                                          hoverPickerTimer.current =
+                                                            null;
+                                                        }
+                                                        hoverPickerCloseTimer.current =
+                                                          setTimeout(
+                                                            () =>
+                                                              setReactionPickerHoverOpenId(
+                                                                (prev) =>
+                                                                  prev ===
+                                                                  reply.id
+                                                                    ? null
+                                                                    : prev,
+                                                              ),
+                                                            150,
+                                                          );
+                                                      }}
+                                                      onClick={() => {
+                                                        const defaultEmoji =
+                                                          availableEmojis.find(
+                                                            (e) => e === "❤️",
+                                                          ) ??
+                                                          availableEmojis[0] ??
+                                                          "❤️";
+                                                        void handleReact(
+                                                          reply.id,
+                                                          defaultEmoji,
+                                                        );
+                                                      }}
+                                                      className="text-secondary-text hover:text-primary-text hover:bg-quaternary-bg h-7 w-7 rounded-lg p-0 opacity-100 transition-all duration-200 lg:opacity-0 lg:group-hover:opacity-100"
                                                     >
                                                       <Icon
                                                         icon="heroicons:face-smile"
@@ -2429,6 +2845,31 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                                                   <PopoverContent
                                                     className="w-auto p-2"
                                                     align="end"
+                                                    onMouseEnter={() => {
+                                                      if (
+                                                        hoverPickerCloseTimer.current
+                                                      ) {
+                                                        clearTimeout(
+                                                          hoverPickerCloseTimer.current,
+                                                        );
+                                                        hoverPickerCloseTimer.current =
+                                                          null;
+                                                      }
+                                                    }}
+                                                    onMouseLeave={() => {
+                                                      hoverPickerCloseTimer.current =
+                                                        setTimeout(
+                                                          () =>
+                                                            setReactionPickerHoverOpenId(
+                                                              (prev) =>
+                                                                prev ===
+                                                                reply.id
+                                                                  ? null
+                                                                  : prev,
+                                                            ),
+                                                          150,
+                                                        );
+                                                    }}
                                                   >
                                                     <div className="grid grid-cols-5 gap-1">
                                                       {availableEmojis.map(
@@ -2436,12 +2877,15 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                                                           <button
                                                             key={emoji}
                                                             type="button"
-                                                            onClick={() =>
+                                                            onClick={() => {
                                                               void handleReact(
                                                                 reply.id,
                                                                 emoji,
-                                                              )
-                                                            }
+                                                              );
+                                                              setReactionPickerHoverOpenId(
+                                                                null,
+                                                              );
+                                                            }}
                                                             className="hover:bg-quaternary-bg flex h-8 w-8 cursor-pointer items-center justify-center rounded-md text-lg transition-colors"
                                                           >
                                                             {emoji}
@@ -2627,37 +3071,217 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                                         )}
 
                                         {/* Reply Reactions */}
-                                        {reply.reactions &&
-                                          reply.reactions.length > 0 && (
+                                        {(() => {
+                                          const rxns = reply.reactions;
+                                          if (!rxns || rxns.length === 0)
+                                            return null;
+                                          const sortedRxns = [...rxns].sort(
+                                            (a, b) => b.count - a.count,
+                                          );
+                                          const top3 = sortedRxns.slice(0, 3);
+                                          const total = sortedRxns.reduce(
+                                            (s, r) => s + r.count,
+                                            0,
+                                          );
+                                          const userHasReacted =
+                                            sortedRxns.some(
+                                              (r) => r.user_reacted,
+                                            );
+                                          const tabUsers =
+                                            breakdownTab === "all"
+                                              ? sortedRxns.flatMap((r) =>
+                                                  (r.users ?? []).map((u) => ({
+                                                    user: u,
+                                                    emoji: r.emoji,
+                                                  })),
+                                                )
+                                              : (
+                                                  sortedRxns.find(
+                                                    (r) =>
+                                                      r.emoji === breakdownTab,
+                                                  )?.users ?? []
+                                                ).map((u) => ({
+                                                  user: u,
+                                                  emoji: breakdownTab,
+                                                }));
+                                          return (
                                             <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
-                                              {reply.reactions.map(
-                                                (reaction) => (
+                                              <Popover
+                                                open={
+                                                  reactionBreakdownOpenId ===
+                                                  reply.id
+                                                }
+                                                onOpenChange={(open) => {
+                                                  setReactionBreakdownOpenId(
+                                                    open ? reply.id : null,
+                                                  );
+                                                  if (open)
+                                                    setBreakdownTab("all");
+                                                }}
+                                              >
+                                                <PopoverTrigger asChild>
                                                   <button
-                                                    key={reaction.emoji}
                                                     type="button"
-                                                    onClick={() =>
-                                                      void handleReact(
-                                                        reply.id,
-                                                        reaction.emoji,
-                                                      )
-                                                    }
-                                                    className={`flex cursor-pointer items-center gap-1 rounded-full border px-2 py-0.5 text-sm transition-colors ${
-                                                      reaction.user_reacted
+                                                    className={`flex cursor-pointer items-center gap-0.5 rounded-full border px-2 py-0.5 text-sm transition-colors ${
+                                                      userHasReacted
                                                         ? "border-link/30 bg-link/10 text-link"
                                                         : "border-border-card bg-quaternary-bg text-primary-text hover:border-link/30"
                                                     }`}
                                                   >
-                                                    <span>
-                                                      {reaction.emoji}
+                                                    <span className="flex gap-0.5">
+                                                      {top3.map((r) => (
+                                                        <span key={r.emoji}>
+                                                          {r.emoji}
+                                                        </span>
+                                                      ))}
                                                     </span>
-                                                    <span className="text-xs font-medium">
-                                                      {reaction.count}
+                                                    <span className="text-secondary-text ml-1 text-xs font-medium">
+                                                      {total}
                                                     </span>
                                                   </button>
-                                                ),
-                                              )}
+                                                </PopoverTrigger>
+                                                <PopoverContent
+                                                  className="w-64 p-0"
+                                                  align="start"
+                                                >
+                                                  <div className="border-border-card flex items-center gap-0.5 overflow-x-auto border-b p-1.5">
+                                                    <button
+                                                      type="button"
+                                                      onClick={() =>
+                                                        setBreakdownTab("all")
+                                                      }
+                                                      className={`shrink-0 rounded px-2 py-1 text-xs font-medium transition-colors ${
+                                                        breakdownTab === "all"
+                                                          ? "bg-link/20 text-link"
+                                                          : "text-secondary-text hover:bg-quaternary-bg hover:text-primary-text"
+                                                      }`}
+                                                    >
+                                                      All
+                                                    </button>
+                                                    {sortedRxns.map((r) => (
+                                                      <button
+                                                        key={r.emoji}
+                                                        type="button"
+                                                        onClick={() =>
+                                                          setBreakdownTab(
+                                                            r.emoji,
+                                                          )
+                                                        }
+                                                        className={`flex shrink-0 items-center gap-0.5 rounded px-2 py-1 text-xs font-medium transition-colors ${
+                                                          breakdownTab ===
+                                                          r.emoji
+                                                            ? "bg-link/20 text-link"
+                                                            : "text-secondary-text hover:bg-quaternary-bg hover:text-primary-text"
+                                                        }`}
+                                                      >
+                                                        <span>{r.emoji}</span>
+                                                        <span>{r.count}</span>
+                                                      </button>
+                                                    ))}
+                                                  </div>
+                                                  {tabUsers.length > 0 ? (
+                                                    <div className="max-h-48 space-y-0.5 overflow-y-auto p-1.5">
+                                                      {tabUsers.map(
+                                                        (item, idx) => {
+                                                          const reactorData =
+                                                            userData[
+                                                              item.user.id
+                                                            ];
+                                                          const displayName =
+                                                            isRobloxContext
+                                                              ? reactorData?.roblox_display_name ||
+                                                                reactorData?.roblox_username ||
+                                                                reactorData?.username ||
+                                                                item.user
+                                                                  .username
+                                                              : reactorData?.username ||
+                                                                item.user
+                                                                  .username;
+                                                          return (
+                                                            <div
+                                                              key={`${item.user.id}-${item.emoji}-${idx}`}
+                                                              className="hover:bg-quaternary-bg flex items-center justify-between gap-2 rounded-md px-2 py-1.5 transition-colors"
+                                                            >
+                                                              <div className="flex min-w-0 items-center gap-2">
+                                                                <div className="shrink-0">
+                                                                  <UserAvatar
+                                                                    userId={
+                                                                      item.user
+                                                                        .id
+                                                                    }
+                                                                    avatarHash={
+                                                                      reactorData?.avatar ??
+                                                                      item.user
+                                                                        .avatar ??
+                                                                      null
+                                                                    }
+                                                                    username={
+                                                                      displayName
+                                                                    }
+                                                                    size={6}
+                                                                    cdnSize={64}
+                                                                    custom_avatar={
+                                                                      reactorData?.custom_avatar ??
+                                                                      item.user
+                                                                        .custom_avatar ??
+                                                                      undefined
+                                                                    }
+                                                                    showBadge={
+                                                                      false
+                                                                    }
+                                                                    settings={
+                                                                      reactorData?.settings ??
+                                                                      undefined
+                                                                    }
+                                                                    premiumType={
+                                                                      reactorData?.premiumtype ??
+                                                                      item.user
+                                                                        .premiumtype
+                                                                    }
+                                                                    forceAvatarUrl={
+                                                                      isRobloxContext
+                                                                        ? reactorData?.roblox_avatar ||
+                                                                          item
+                                                                            .user
+                                                                            .roblox_avatar ||
+                                                                          undefined
+                                                                        : undefined
+                                                                    }
+                                                                  />
+                                                                </div>
+                                                                <Link
+                                                                  href={`/users/${item.user.id}`}
+                                                                  prefetch={
+                                                                    false
+                                                                  }
+                                                                  className="text-primary-text hover:text-link max-w-36 truncate text-sm font-medium transition-colors"
+                                                                  onClick={() =>
+                                                                    setReactionBreakdownOpenId(
+                                                                      null,
+                                                                    )
+                                                                  }
+                                                                >
+                                                                  {displayName}
+                                                                </Link>
+                                                              </div>
+                                                              <span className="shrink-0 text-base">
+                                                                {item.emoji}
+                                                              </span>
+                                                            </div>
+                                                          );
+                                                        },
+                                                      )}
+                                                    </div>
+                                                  ) : (
+                                                    <div className="text-secondary-text p-3 text-center text-xs">
+                                                      No reactions yet
+                                                    </div>
+                                                  )}
+                                                </PopoverContent>
+                                              </Popover>
                                             </div>
-                                          )}
+                                          );
+                                        })()}
                                       </div>
                                     </div>
                                   );
