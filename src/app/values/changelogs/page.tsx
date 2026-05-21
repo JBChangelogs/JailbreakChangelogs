@@ -49,6 +49,10 @@ interface EntryUser {
     custom_avatar?: boolean;
     hide_presence?: boolean | number;
   };
+  roblox_id?: string;
+  roblox_username?: string;
+  roblox_display_name?: string;
+  roblox_avatar?: string;
 }
 
 interface ChangelogEntry {
@@ -399,29 +403,20 @@ export default function ValuesChangelogPage() {
                                     >
                                       <UserAvatar
                                         userId={u.id}
-                                        avatarHash={u.avatar ?? null}
-                                        username={u.username ?? ""}
-                                        custom_avatar={
-                                          u.custom_avatar ?? undefined
+                                        avatarHash={null}
+                                        username={
+                                          u.roblox_username ?? u.username ?? ""
+                                        }
+                                        forceAvatarUrl={
+                                          u.roblox_avatar ?? undefined
                                         }
                                         premiumType={u.premiumtype ?? 0}
-                                        settings={
-                                          u.settings
-                                            ? {
-                                                custom_avatar:
-                                                  !!u.settings.custom_avatar,
-                                                hide_presence:
-                                                  !!u.settings.hide_presence,
-                                              }
-                                            : undefined
-                                        }
                                         size={5}
                                         showBadge={false}
                                       />
                                       <span className="text-link hover:text-link-hover text-xs font-medium transition-colors">
-                                        {(u.global_name !== "None" &&
-                                          u.global_name) ||
-                                          u.username ||
+                                        {u.roblox_display_name ||
+                                          u.roblox_username ||
                                           `User #${u.id}`}
                                       </span>
                                     </Link>

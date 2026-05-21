@@ -18,6 +18,11 @@ interface VoteUser {
   global_name?: string;
   avatar?: string | null;
   custom_avatar?: string | null;
+  roblox_id?: string;
+  roblox_username?: string;
+  roblox_display_name?: string;
+  roblox_avatar?: string;
+  premiumtype?: number;
 }
 
 interface EntryUser extends VoteUser {
@@ -60,15 +65,11 @@ interface ValueChangelogDetail {
 }
 
 function userDisplayName(user: VoteUser): string {
-  const name = user.global_name !== "None" ? user.global_name : null;
-  return name || user.username || `User #${user.id}`;
+  return user.roblox_display_name || user.roblox_username || `User #${user.id}`;
 }
 
 function userAvatarUrl(user: VoteUser): string | undefined {
-  if (user.custom_avatar) return user.custom_avatar;
-  if (user.avatar)
-    return `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}?size=128`;
-  return undefined;
+  return user.roblox_avatar || undefined;
 }
 
 function transformToChangelogGroup(data: ValueChangelogDetail) {
@@ -105,8 +106,9 @@ function transformToChangelogGroup(data: ValueChangelogDetail) {
             ...entry.votes.upvotes.map((v, i) => ({
               id: v.user.id,
               name: userDisplayName(v.user),
-              avatar: v.user.avatar ?? "",
-              avatar_hash: v.user.avatar ?? undefined,
+              avatar: v.user.roblox_avatar ?? "",
+              avatar_hash: undefined,
+              premiumtype: v.user.premiumtype ?? 0,
               vote_number: i + 1,
               vote_type: "upvote" as const,
               timestamp: v.created_at,
@@ -114,8 +116,9 @@ function transformToChangelogGroup(data: ValueChangelogDetail) {
             ...entry.votes.downvotes.map((v, i) => ({
               id: v.user.id,
               name: userDisplayName(v.user),
-              avatar: v.user.avatar ?? "",
-              avatar_hash: v.user.avatar ?? undefined,
+              avatar: v.user.roblox_avatar ?? "",
+              avatar_hash: undefined,
+              premiumtype: v.user.premiumtype ?? 0,
               vote_number: i + 1,
               vote_type: "downvote" as const,
               timestamp: v.created_at,
@@ -125,7 +128,8 @@ function transformToChangelogGroup(data: ValueChangelogDetail) {
         created_at: entry.created_at,
         metadata: {
           avatar: userAvatarUrl(entry.user),
-          avatar_hash: entry.user.avatar ?? undefined,
+          avatar_hash: undefined,
+          premiumtype: entry.user.premiumtype ?? 0,
           suggestion_type: entry.field,
         },
       },

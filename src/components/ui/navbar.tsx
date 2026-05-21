@@ -682,13 +682,6 @@ export const NavbarModern = ({
                       title="Timeline"
                       description="A simplified tree view of every update at a glance"
                     />
-                    <NavDropdownItem
-                      href="/values/changelogs"
-                      icon="material-symbols:history-rounded"
-                      title="Value Changelogs"
-                      description="Dig into every value update — the reasoning, who voted, and who made the final call"
-                      className="col-span-2"
-                    />
                   </div>
                 </NavigationMenu.Content>
               </NavigationMenu.Item>
@@ -794,6 +787,12 @@ export const NavbarModern = ({
                       description="Submit and vote on community value change suggestions"
                     />
                     <NavDropdownItem
+                      href="/values/changelogs"
+                      icon="material-symbols:history-rounded"
+                      title="Value Changelogs"
+                      description="Dig into every value update — the reasoning, who voted, and who made the final call"
+                    />
+                    <NavDropdownItem
                       href="/trading"
                       icon="material-symbols:swap-horiz-rounded"
                       title="Trade Ads"
@@ -822,6 +821,7 @@ export const NavbarModern = ({
                       icon="material-symbols:percent-rounded"
                       title="Hyperchrome Pity"
                       description="Calculate how many robberies you need for the next Hyperchrome level"
+                      className="col-span-2"
                     />
                   </div>
                 </NavigationMenu.Content>

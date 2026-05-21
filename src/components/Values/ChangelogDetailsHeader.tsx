@@ -1,6 +1,6 @@
 import React from "react";
-import Image from "next/image";
-import { DefaultAvatar } from "@/utils/ui/avatar";
+import Link from "next/link";
+import { UserAvatar } from "@/utils/ui/avatar";
 import { formatMessageDate } from "@/utils/helpers/timestamp";
 
 interface UserData {
@@ -28,6 +28,7 @@ interface ChangelogGroup {
       metadata?: {
         avatar?: string;
         avatar_hash?: string;
+        premiumtype?: number;
       };
     };
   }>;
@@ -46,7 +47,7 @@ const ChangelogDetailsHeader: React.FC<ChangelogDetailsHeaderProps> = ({
   // Only include people who made suggestions, not people who made changes
   const allContributors = new Map<
     string,
-    { name: string; avatarUrl?: string }
+    { name: string; avatarUrl?: string; premiumtype?: number }
   >();
 
   changelog.change_data.forEach((change) => {
@@ -54,7 +55,6 @@ const ChangelogDetailsHeader: React.FC<ChangelogDetailsHeaderProps> = ({
       const userId = String(change.suggestion.user_id);
       const existing = allContributors.get(userId);
 
-      // Add if new, or update if we found an avatar and they didn't have one
       if (
         !existing ||
         (!existing.avatarUrl && change.suggestion.metadata?.avatar)
@@ -62,6 +62,7 @@ const ChangelogDetailsHeader: React.FC<ChangelogDetailsHeaderProps> = ({
         allContributors.set(userId, {
           name: change.suggestion.suggestor_name,
           avatarUrl: change.suggestion.metadata?.avatar,
+          premiumtype: change.suggestion.metadata?.premiumtype,
         });
       }
     }
@@ -88,32 +89,24 @@ const ChangelogDetailsHeader: React.FC<ChangelogDetailsHeaderProps> = ({
           Contributors ({sortedContributors.length}):
         </h3>
         <div className="flex flex-wrap gap-2">
-          {sortedContributors.map(([discordId, contributorData], index) => (
-            <span key={discordId} className="flex items-center gap-1">
-              <div className="relative h-6 w-6 shrink-0 overflow-hidden rounded-full">
-                <DefaultAvatar />
-                {contributorData.avatarUrl && (
-                  <Image
-                    src={contributorData.avatarUrl}
-                    alt={contributorData.name}
-                    fill
-                    className="object-cover"
-                    onError={(e) => {
-                      (
-                        e as unknown as { currentTarget: HTMLElement }
-                      ).currentTarget.style.display = "none";
-                    }}
-                  />
-                )}
-              </div>
-              <a
-                href={`https://discord.com/users/${discordId}`}
-                target="_blank"
-                rel="noopener noreferrer"
+          {sortedContributors.map(([userId, contributorData], index) => (
+            <span key={userId} className="flex items-center gap-1">
+              <UserAvatar
+                userId={userId}
+                avatarHash={null}
+                username={contributorData.name}
+                forceAvatarUrl={contributorData.avatarUrl ?? undefined}
+                premiumType={contributorData.premiumtype ?? 0}
+                size={6}
+                showBadge={false}
+              />
+              <Link
+                href={`/users/${userId}`}
+                prefetch={false}
                 className="text-link hover:text-link-hover text-sm hover:underline"
               >
                 {contributorData.name}
-              </a>
+              </Link>
               {index < sortedContributors.length - 1 && (
                 <span className="text-secondary-text text-sm">,</span>
               )}

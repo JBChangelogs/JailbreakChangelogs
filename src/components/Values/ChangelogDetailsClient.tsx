@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/dialog";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import Image from "next/image";
-import { DefaultAvatar } from "@/utils/ui/avatar";
+import { UserAvatar } from "@/utils/ui/avatar";
 import Link from "next/link";
 import {
   getItemImagePath,
@@ -110,6 +110,7 @@ interface SuggestionData {
     channel_id?: number;
     avatar_hash?: string;
     suggestion_type?: string;
+    premiumtype?: number;
   };
 }
 
@@ -131,6 +132,7 @@ type VoteRecord = {
   name: string;
   avatar: string;
   avatar_hash?: string;
+  premiumtype?: number;
   vote_number: number;
   vote_type: string;
   timestamp: number;
@@ -701,36 +703,30 @@ export default function ChangelogDetailsClient({
                     <div className="border-border-card bg-tertiary-bg mt-2 rounded-lg border p-5 shadow-lg transition-all duration-200">
                       <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                         <div className="flex min-w-0 items-center gap-3">
-                          {change.suggestion.metadata?.avatar_hash && (
-                            <div className="relative h-8 w-8 shrink-0 overflow-hidden rounded-full">
-                              <DefaultAvatar />
-                              <Image
-                                src={`https://cdn.discordapp.com/avatars/${change.suggestion.user_id}/${change.suggestion.metadata.avatar_hash}?size=128`}
-                                alt={`${change.suggestion.suggestor_name}'s avatar`}
-                                fill
-                                className="object-cover"
-                                onError={(e) => {
-                                  (
-                                    e as unknown as {
-                                      currentTarget: HTMLElement;
-                                    }
-                                  ).currentTarget.style.display = "none";
-                                }}
-                              />
-                            </div>
-                          )}
+                          <UserAvatar
+                            userId={String(change.suggestion.user_id)}
+                            avatarHash={null}
+                            username={change.suggestion.suggestor_name}
+                            forceAvatarUrl={
+                              change.suggestion.metadata?.avatar ?? undefined
+                            }
+                            premiumType={
+                              change.suggestion.metadata?.premiumtype ?? 0
+                            }
+                            size={8}
+                            showBadge={false}
+                          />
                           <div className="flex min-w-0 flex-col">
                             <span className="text-secondary-text text-xs font-semibold tracking-wide uppercase">
                               Suggested by
                             </span>
-                            <a
-                              href={`https://discord.com/users/${change.suggestion.user_id}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
+                            <Link
+                              href={`/users/${change.suggestion.user_id}`}
+                              prefetch={false}
                               className="text-link hover:text-link-hover text-lg font-bold wrap-break-word transition-colors hover:underline"
                             >
                               {change.suggestion.suggestor_name}
-                            </a>
+                            </Link>
                           </div>
                         </div>
                         <div className="flex shrink-0 items-center justify-center">
@@ -750,8 +746,7 @@ export default function ChangelogDetailsClient({
                                   change.suggestion?.vote_data.upvotes || 0;
                                 const downCount =
                                   change.suggestion?.vote_data.downvotes || 0;
-                                if (up.length === 0 && down.length === 0)
-                                  return;
+                                if (upCount === 0 && downCount === 0) return;
                                 setActiveVoters({
                                   up,
                                   down,
@@ -788,8 +783,7 @@ export default function ChangelogDetailsClient({
                                   change.suggestion?.vote_data.upvotes || 0;
                                 const downCount =
                                   change.suggestion?.vote_data.downvotes || 0;
-                                if (up.length === 0 && down.length === 0)
-                                  return;
+                                if (upCount === 0 && downCount === 0) return;
                                 setActiveVoters({
                                   up,
                                   down,
@@ -1308,34 +1302,25 @@ export default function ChangelogDetailsClient({
                             key={voter.id}
                             className="border-border-card bg-tertiary-bg flex items-center gap-4 rounded-lg border px-4 py-3 transition-colors"
                           >
-                            <div className="relative h-10 w-10 shrink-0">
-                              <DefaultAvatar />
-                              {voter.avatar_hash && (
-                                <Image
-                                  src={`https://cdn.discordapp.com/avatars/${voter.id}/${voter.avatar_hash}?size=128`}
-                                  alt={voter.name}
-                                  fill
-                                  className="object-cover"
-                                  onError={(e) => {
-                                    (
-                                      e as unknown as {
-                                        currentTarget: HTMLElement;
-                                      }
-                                    ).currentTarget.style.display = "none";
-                                  }}
-                                />
-                              )}
-                            </div>
+                            <UserAvatar
+                              userId={String(voter.id)}
+                              avatarHash={null}
+                              username={voter.name}
+                              forceAvatarUrl={voter.avatar || undefined}
+                              premiumType={voter.premiumtype ?? 0}
+                              size={10}
+                              showBadge={false}
+                            />
                             <div className="min-w-0 flex-1">
                               <div className="text-primary-text mb-1 text-base font-bold">
-                                <a
-                                  href={`https://discord.com/users/${voter.id}`}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
+                                <Link
+                                  href={`/users/${voter.id}`}
+                                  prefetch={false}
                                   className="text-link hover:text-link-hover transition-colors hover:underline"
+                                  onClick={() => setVotersOpen(false)}
                                 >
                                   {voter.name.replace(/(.+)\1/, "$1")}
-                                </a>
+                                </Link>
                               </div>
                               <div className="text-tertiary-text text-sm font-medium">
                                 {new Date(

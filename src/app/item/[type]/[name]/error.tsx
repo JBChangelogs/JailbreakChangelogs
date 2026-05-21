@@ -1,6 +1,9 @@
 "use client";
 
 import { useEffect } from "react";
+import Image from "next/image";
+import Link from "next/link";
+import { Icon } from "@/components/ui/IconWrapper";
 import { Button } from "@/components/ui/button";
 import { createLogger } from "@/services/logger";
 
@@ -14,42 +17,62 @@ export default function ItemError({
   reset: () => void;
 }) {
   useEffect(() => {
-    log.error("Item page error", error);
+    log.error("Item details page error", error);
   }, [error]);
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="mx-auto max-w-md text-center">
-        <h2 className="mb-2 text-2xl font-bold">Failed to load item</h2>
-        <p className="text-secondary-text mb-6">
-          Something went wrong loading this item. This may be a temporary issue.
-        </p>
+    <section className="bg-primary-bg">
+      <div className="container mx-auto py-12">
+        <div className="min-h-[calc(100vh-8rem)] lg:flex lg:items-center lg:gap-12">
+          <div className="w-full lg:w-1/2">
+            <p className="text-secondary-text text-sm font-medium">
+              Item details error
+            </p>
+            <h1 className="text-primary-text mt-3 text-2xl font-semibold md:text-3xl">
+              Failed to load item details
+            </h1>
+            <p className="text-secondary-text mt-4">
+              Something went wrong while loading this item. You can try again or
+              browse all items.
+            </p>
 
-        <div className="space-y-4">
-          <Button onClick={reset} className="w-full">
-            Try Again
-          </Button>
-          <Button
-            onClick={() => (window.location.href = "/values")}
-            variant="outline"
-            className="w-full"
-          >
-            Browse items
-          </Button>
+            <div className="mt-6 flex flex-col items-center gap-3 sm:flex-row">
+              <Button
+                variant="secondary"
+                size="md"
+                onClick={reset}
+                className="w-full sm:w-auto"
+              >
+                <Icon icon="heroicons-outline:arrow-path" className="h-5 w-5" />
+                <span>Try again</span>
+              </Button>
+
+              <Button
+                variant="default"
+                size="md"
+                asChild
+                className="w-full sm:w-auto"
+              >
+                <Link href="/values">
+                  <Icon icon="heroicons-outline:home" className="h-5 w-5" />
+                  <span>Browse items</span>
+                </Link>
+              </Button>
+            </div>
+          </div>
+
+          <div className="relative mt-12 w-full lg:mt-0 lg:w-1/2">
+            <Image
+              className="w-full max-w-lg lg:mx-auto"
+              src="https://assets.jailbreakchangelogs.com/assets/images/404.svg"
+              alt="Error illustration"
+              width={500}
+              height={400}
+              loading="eager"
+            />
+          </div>
         </div>
-
-        {process.env.NODE_ENV === "development" && (
-          <details className="mt-6 text-left">
-            <summary className="text-secondary-text cursor-pointer text-sm">
-              Error Details (Development)
-            </summary>
-            <pre className="bg-tertiary-bg mt-2 overflow-auto rounded p-4 text-xs">
-              {error.message}
-              {error.stack && `\n\nStack trace:\n${error.stack}`}
-            </pre>
-          </details>
-        )}
       </div>
-    </div>
+    </section>
   );
 }

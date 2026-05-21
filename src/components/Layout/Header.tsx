@@ -641,12 +641,6 @@ export default function Header() {
             label="Timeline"
             onClick={handleDrawerToggle}
           />
-          <MobileNavItem
-            href="/values/changelogs"
-            icon="material-symbols:history-rounded"
-            label="Value Changelogs"
-            onClick={handleDrawerToggle}
-          />
         </MobileNavSection>
 
         <MobileNavSection
@@ -703,6 +697,12 @@ export default function Header() {
             href="/values/suggestions"
             icon="material-symbols:lightbulb-outline-rounded"
             label="Value Suggestions"
+            onClick={handleDrawerToggle}
+          />
+          <MobileNavItem
+            href="/values/changelogs"
+            icon="material-symbols:history-rounded"
+            label="Value Changelogs"
             onClick={handleDrawerToggle}
           />
           <MobileNavItem

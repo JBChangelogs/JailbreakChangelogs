@@ -49,12 +49,10 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { UserDetailsTooltip } from "@/components/ui/UserDetailsTooltip";
 import { RateLimitBanner } from "@/components/ui/RateLimitBanner";
 import { BanBanner } from "@/components/ui/BanBanner";
 import { parseBan, showBanToast } from "@/utils/api/ban";
 import type { BanInfo } from "@/utils/api/ban";
-import type { UserData } from "@/types/auth";
 import type { Item } from "@/types/index";
 
 interface SuggestionLimits {
@@ -86,6 +84,10 @@ interface SuggestionUser {
   premiumtype?: number;
   usernumber?: number;
   settings?: UserSettings;
+  roblox_id?: string;
+  roblox_username?: string;
+  roblox_display_name?: string;
+  roblox_avatar?: string;
 }
 
 interface Suggestion {
@@ -749,6 +751,10 @@ export default function ValueSuggestionsPage() {
                 premiumtype: user.premiumtype ?? 0,
                 usernumber: user.usernumber ?? 0,
                 settings: user.settings,
+                roblox_id: user.roblox_id,
+                roblox_username: user.roblox_username,
+                roblox_display_name: user.roblox_display_name,
+                roblox_avatar: user.roblox_avatar,
               },
             }
           : null;
@@ -1819,48 +1825,30 @@ export default function ValueSuggestionsPage() {
                       <div className="flex items-start gap-2">
                         <UserAvatar
                           userId={suggestion.user.id}
-                          avatarHash={suggestion.user.avatar ?? null}
-                          username={suggestion.user.username ?? ""}
-                          custom_avatar={
-                            suggestion.user.custom_avatar ?? undefined
+                          avatarHash={null}
+                          username={
+                            suggestion.user.roblox_username ??
+                            suggestion.user.username ??
+                            ""
+                          }
+                          forceAvatarUrl={
+                            suggestion.user.roblox_avatar ?? undefined
                           }
                           premiumType={suggestion.user.premiumtype ?? 0}
-                          settings={
-                            suggestion.user.settings
-                              ? {
-                                  custom_avatar:
-                                    !!suggestion.user.settings.custom_avatar,
-                                  hide_presence:
-                                    !!suggestion.user.settings.hide_presence,
-                                }
-                              : undefined
-                          }
                           size={6}
                           showBadge={false}
                         />
                         <div className="min-w-0 flex-1">
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <Link
-                                href={`/users/${suggestion.user.id}`}
-                                prefetch={false}
-                                className="text-link hover:text-link-hover inline-block max-w-full truncate text-sm font-medium transition-colors"
-                              >
-                                {(suggestion.user.global_name !== "None" &&
-                                  suggestion.user.global_name) ||
-                                  suggestion.user.username ||
-                                  `User #${suggestion.user.id}`}
-                              </Link>
-                            </TooltipTrigger>
-                            {suggestion.user.username && (
-                              <TooltipContent className="max-w-sm min-w-75 p-0">
-                                <UserDetailsTooltip
-                                  user={suggestion.user as unknown as UserData}
-                                />
-                              </TooltipContent>
-                            )}
-                          </Tooltip>
-                          <p className="text-secondary-text mt-1 text-xs">
+                          <Link
+                            href={`/users/${suggestion.user.id}`}
+                            prefetch={false}
+                            className="text-link hover:text-link-hover inline-block max-w-full truncate text-sm font-medium transition-colors"
+                          >
+                            {suggestion.user.roblox_display_name ||
+                              suggestion.user.roblox_username ||
+                              `User #${suggestion.user.id}`}
+                          </Link>
+                          <p className="text-secondary-text text-xs">
                             Posted on {formatMessageDate(suggestion.created_at)}
                             {suggestion.updated_at !== suggestion.created_at
                               ? " (Edited)"
@@ -1974,22 +1962,16 @@ export default function ValueSuggestionsPage() {
                             <div className="relative h-10 w-10 shrink-0">
                               <UserAvatar
                                 userId={v.user.id}
-                                avatarHash={v.user.avatar ?? null}
-                                username={v.user.username ?? ""}
-                                custom_avatar={
-                                  v.user.custom_avatar ?? undefined
+                                avatarHash={null}
+                                username={
+                                  v.user.roblox_username ??
+                                  v.user.username ??
+                                  ""
+                                }
+                                forceAvatarUrl={
+                                  v.user.roblox_avatar ?? undefined
                                 }
                                 premiumType={v.user.premiumtype ?? 0}
-                                settings={
-                                  v.user.settings
-                                    ? {
-                                        custom_avatar:
-                                          !!v.user.settings.custom_avatar,
-                                        hide_presence:
-                                          !!v.user.settings.hide_presence,
-                                      }
-                                    : undefined
-                                }
                                 size={10}
                                 showBadge={false}
                               />
@@ -2002,9 +1984,8 @@ export default function ValueSuggestionsPage() {
                                   className="text-link hover:text-link-hover transition-colors hover:underline"
                                   onClick={() => setVotersOpen(false)}
                                 >
-                                  {(v.user.global_name !== "None" &&
-                                    v.user.global_name) ||
-                                    v.user.username ||
+                                  {v.user.roblox_display_name ||
+                                    v.user.roblox_username ||
                                     `User #${v.user.id}`}
                                 </Link>
                               </div>

@@ -59,6 +59,10 @@ interface SuggestionUser {
   premiumtype?: number;
   usernumber?: number;
   settings?: UserSettings;
+  roblox_id?: string;
+  roblox_username?: string;
+  roblox_display_name?: string;
+  roblox_avatar?: string;
 }
 
 interface Suggestion {
@@ -102,18 +106,10 @@ function VoterCard({ v }: { v: { created_at: number; user: SuggestionUser } }) {
       <div className="relative h-10 w-10 shrink-0">
         <UserAvatar
           userId={v.user.id}
-          avatarHash={v.user.avatar ?? null}
-          username={v.user.username ?? ""}
-          custom_avatar={v.user.custom_avatar ?? undefined}
+          avatarHash={null}
+          username={v.user.roblox_username ?? v.user.username ?? ""}
+          forceAvatarUrl={v.user.roblox_avatar ?? undefined}
           premiumType={v.user.premiumtype ?? 0}
-          settings={
-            v.user.settings
-              ? {
-                  custom_avatar: !!v.user.settings.custom_avatar,
-                  hide_presence: !!v.user.settings.hide_presence,
-                }
-              : undefined
-          }
           size={10}
           showBadge={false}
         />
@@ -124,8 +120,8 @@ function VoterCard({ v }: { v: { created_at: number; user: SuggestionUser } }) {
           prefetch={false}
           className="text-primary-text hover:text-link block truncate text-sm font-medium transition-colors"
         >
-          {(v.user.global_name !== "None" && v.user.global_name) ||
-            v.user.username ||
+          {v.user.roblox_display_name ||
+            v.user.roblox_username ||
             `User #${v.user.id}`}
         </Link>
         <p className="text-tertiary-text mt-0.5 text-xs">
@@ -454,22 +450,16 @@ export default function ValueSuggestionDetailPage() {
                     <div className="mt-1 flex items-start gap-2">
                       <UserAvatar
                         userId={suggestion.user.id}
-                        avatarHash={suggestion.user.avatar ?? null}
-                        username={suggestion.user.username ?? ""}
-                        custom_avatar={
-                          suggestion.user.custom_avatar ?? undefined
+                        avatarHash={null}
+                        username={
+                          suggestion.user.roblox_username ??
+                          suggestion.user.username ??
+                          ""
+                        }
+                        forceAvatarUrl={
+                          suggestion.user.roblox_avatar ?? undefined
                         }
                         premiumType={suggestion.user.premiumtype ?? 0}
-                        settings={
-                          suggestion.user.settings
-                            ? {
-                                custom_avatar:
-                                  !!suggestion.user.settings.custom_avatar,
-                                hide_presence:
-                                  !!suggestion.user.settings.hide_presence,
-                              }
-                            : undefined
-                        }
                         size={5}
                         showBadge={false}
                       />
@@ -479,9 +469,8 @@ export default function ValueSuggestionDetailPage() {
                           prefetch={false}
                           className="text-link hover:text-link-hover block text-sm font-medium transition-colors"
                         >
-                          {(suggestion.user.global_name !== "None" &&
-                            suggestion.user.global_name) ||
-                            suggestion.user.username ||
+                          {suggestion.user.roblox_display_name ||
+                            suggestion.user.roblox_username ||
                             `User #${suggestion.user.id}`}
                         </Link>
                         <p className="text-secondary-text mt-1 text-xs">
