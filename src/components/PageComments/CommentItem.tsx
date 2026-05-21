@@ -61,8 +61,6 @@ export function CommentItem({ comment }: { comment: CommentData }) {
     availableEmojis,
     reactionPickerHoverOpenId,
     setReactionPickerHoverOpenId,
-    hoverPickerTimer,
-    hoverPickerCloseTimer,
     handleReact,
     handleEditComment,
     handleDeleteComment,
@@ -71,6 +69,9 @@ export function CommentItem({ comment }: { comment: CommentData }) {
     handleReportClick,
     toggleReplies,
     toggleCommentExpand,
+    setReactionBreakdownOpenId,
+    setBreakdownTab,
+    getStableReactionOrder,
   } = useCommentsContext();
 
   const commentAuthorSettings = userData[comment.user_id]?.settings;
@@ -248,7 +249,7 @@ export function CommentItem({ comment }: { comment: CommentData }) {
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="text-secondary-text hover:text-primary-text hover:bg-quaternary-bg h-8 w-8 rounded-lg p-0 opacity-100 transition-all duration-200 lg:opacity-0 lg:group-hover:opacity-100"
+                      className={`text-secondary-text hover:text-primary-text hover:bg-quaternary-bg h-8 w-8 rounded-lg p-0 opacity-100 transition-all duration-200 ${reactionPickerHoverOpenId === comment.id ? "lg:opacity-100" : "lg:opacity-0 lg:group-hover:opacity-100"}`}
                       onClick={() => {
                         if (replyingToId === comment.id) {
                           setReplyingToId(null);
@@ -274,7 +275,8 @@ export function CommentItem({ comment }: { comment: CommentData }) {
                 <Popover
                   open={reactionPickerHoverOpenId === comment.id}
                   onOpenChange={(open) => {
-                    if (!open) setReactionPickerHoverOpenId(null);
+                    if (open && isRateLimited) return;
+                    setReactionPickerHoverOpenId(open ? comment.id : null);
                   }}
                 >
                   <Tooltip>
@@ -283,38 +285,7 @@ export function CommentItem({ comment }: { comment: CommentData }) {
                         <Button
                           variant="ghost"
                           size="sm"
-                          onMouseEnter={() => {
-                            if (isRateLimited) return;
-                            if (hoverPickerCloseTimer.current) {
-                              clearTimeout(hoverPickerCloseTimer.current);
-                              hoverPickerCloseTimer.current = null;
-                            }
-                            hoverPickerTimer.current = setTimeout(
-                              () => setReactionPickerHoverOpenId(comment.id),
-                              300,
-                            );
-                          }}
-                          onMouseLeave={() => {
-                            if (hoverPickerTimer.current) {
-                              clearTimeout(hoverPickerTimer.current);
-                              hoverPickerTimer.current = null;
-                            }
-                            hoverPickerCloseTimer.current = setTimeout(
-                              () =>
-                                setReactionPickerHoverOpenId((prev) =>
-                                  prev === comment.id ? null : prev,
-                                ),
-                              150,
-                            );
-                          }}
-                          onClick={() => {
-                            const defaultEmoji =
-                              availableEmojis.find((e) => e === "🍰") ??
-                              availableEmojis[0] ??
-                              "🍰";
-                            void handleReact(comment.id, defaultEmoji);
-                          }}
-                          className={`text-secondary-text hover:text-primary-text hover:bg-quaternary-bg h-8 w-8 rounded-lg p-0 opacity-100 transition-all duration-200 lg:opacity-0 lg:group-hover:opacity-100 ${isRateLimited ? "cursor-not-allowed" : ""}`}
+                          className={`text-secondary-text hover:text-primary-text hover:bg-quaternary-bg h-8 w-8 rounded-lg p-0 opacity-100 transition-all duration-200 ${reactionPickerHoverOpenId === comment.id ? "lg:opacity-100" : "lg:opacity-0 lg:group-hover:opacity-100"} ${isRateLimited ? "cursor-not-allowed" : ""}`}
                         >
                           <Icon
                             icon="fluent:emoji-add-16-regular"
@@ -325,25 +296,7 @@ export function CommentItem({ comment }: { comment: CommentData }) {
                     </TooltipTrigger>
                     <TooltipContent>Add a reaction</TooltipContent>
                   </Tooltip>
-                  <PopoverContent
-                    className="w-auto p-2"
-                    align="end"
-                    onMouseEnter={() => {
-                      if (hoverPickerCloseTimer.current) {
-                        clearTimeout(hoverPickerCloseTimer.current);
-                        hoverPickerCloseTimer.current = null;
-                      }
-                    }}
-                    onMouseLeave={() => {
-                      hoverPickerCloseTimer.current = setTimeout(
-                        () =>
-                          setReactionPickerHoverOpenId((prev) =>
-                            prev === comment.id ? null : prev,
-                          ),
-                        150,
-                      );
-                    }}
-                  >
+                  <PopoverContent className="w-auto p-2" align="end">
                     <div className="grid grid-cols-5 gap-1">
                       {availableEmojis.map((emoji) => (
                         <button
@@ -368,7 +321,7 @@ export function CommentItem({ comment }: { comment: CommentData }) {
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="text-primary-text hover:bg-quaternary-bg h-8 w-8 rounded-lg p-0 opacity-100 transition-all duration-200 data-[state=open]:opacity-100 lg:opacity-0 lg:group-hover:opacity-100"
+                      className={`text-primary-text hover:bg-quaternary-bg h-8 w-8 rounded-lg p-0 opacity-100 transition-all duration-200 data-[state=open]:opacity-100 ${reactionPickerHoverOpenId === comment.id ? "lg:opacity-100" : "lg:opacity-0 lg:group-hover:opacity-100"}`}
                     >
                       <Icon
                         icon="heroicons:ellipsis-horizontal"
@@ -384,6 +337,24 @@ export function CommentItem({ comment }: { comment: CommentData }) {
                       }
                     }}
                   >
+                    {comment.reactions && comment.reactions.length > 0 && (
+                      <DropdownMenuItem
+                        onClick={() => {
+                          const sorted = getStableReactionOrder(
+                            comment.id,
+                            comment.reactions!,
+                          );
+                          setReactionBreakdownOpenId(comment.id);
+                          setBreakdownTab(sorted[0]?.emoji ?? "all");
+                        }}
+                      >
+                        <Icon
+                          icon="heroicons-outline:face-smile"
+                          className="mr-2 h-4 w-4"
+                        />
+                        View Reactions
+                      </DropdownMenuItem>
+                    )}
                     {currentUserId === comment.user_id ? (
                       <>
                         {/* Check if comment is still editable (within 1 hour) */}
@@ -833,8 +804,10 @@ export function CommentItem({ comment }: { comment: CommentData }) {
                                 <Popover
                                   open={reactionPickerHoverOpenId === reply.id}
                                   onOpenChange={(open) => {
-                                    if (!open)
-                                      setReactionPickerHoverOpenId(null);
+                                    if (open && isRateLimited) return;
+                                    setReactionPickerHoverOpenId(
+                                      open ? reply.id : null,
+                                    );
                                   }}
                                 >
                                   <Tooltip>
@@ -843,56 +816,7 @@ export function CommentItem({ comment }: { comment: CommentData }) {
                                         <Button
                                           variant="ghost"
                                           size="sm"
-                                          onMouseEnter={() => {
-                                            if (isRateLimited) return;
-                                            if (hoverPickerCloseTimer.current) {
-                                              clearTimeout(
-                                                hoverPickerCloseTimer.current,
-                                              );
-                                              hoverPickerCloseTimer.current =
-                                                null;
-                                            }
-                                            hoverPickerTimer.current =
-                                              setTimeout(
-                                                () =>
-                                                  setReactionPickerHoverOpenId(
-                                                    reply.id,
-                                                  ),
-                                                300,
-                                              );
-                                          }}
-                                          onMouseLeave={() => {
-                                            if (hoverPickerTimer.current) {
-                                              clearTimeout(
-                                                hoverPickerTimer.current,
-                                              );
-                                              hoverPickerTimer.current = null;
-                                            }
-                                            hoverPickerCloseTimer.current =
-                                              setTimeout(
-                                                () =>
-                                                  setReactionPickerHoverOpenId(
-                                                    (prev) =>
-                                                      prev === reply.id
-                                                        ? null
-                                                        : prev,
-                                                  ),
-                                                150,
-                                              );
-                                          }}
-                                          onClick={() => {
-                                            const defaultEmoji =
-                                              availableEmojis.find(
-                                                (e) => e === "❤️",
-                                              ) ??
-                                              availableEmojis[0] ??
-                                              "❤️";
-                                            void handleReact(
-                                              reply.id,
-                                              defaultEmoji,
-                                            );
-                                          }}
-                                          className={`text-secondary-text hover:text-primary-text hover:bg-quaternary-bg h-7 w-7 rounded-lg p-0 opacity-100 transition-all duration-200 lg:opacity-0 lg:group-hover:opacity-100 ${isRateLimited ? "cursor-not-allowed" : ""}`}
+                                          className={`text-secondary-text hover:text-primary-text hover:bg-quaternary-bg h-7 w-7 rounded-lg p-0 opacity-100 transition-all duration-200 ${reactionPickerHoverOpenId === reply.id ? "lg:opacity-100" : "lg:opacity-0 lg:group-hover:opacity-100"} ${isRateLimited ? "cursor-not-allowed" : ""}`}
                                         >
                                           <Icon
                                             icon="fluent:emoji-add-16-regular"
@@ -908,25 +832,6 @@ export function CommentItem({ comment }: { comment: CommentData }) {
                                   <PopoverContent
                                     className="w-auto p-2"
                                     align="end"
-                                    onMouseEnter={() => {
-                                      if (hoverPickerCloseTimer.current) {
-                                        clearTimeout(
-                                          hoverPickerCloseTimer.current,
-                                        );
-                                        hoverPickerCloseTimer.current = null;
-                                      }
-                                    }}
-                                    onMouseLeave={() => {
-                                      hoverPickerCloseTimer.current =
-                                        setTimeout(
-                                          () =>
-                                            setReactionPickerHoverOpenId(
-                                              (prev) =>
-                                                prev === reply.id ? null : prev,
-                                            ),
-                                          150,
-                                        );
-                                    }}
                                   >
                                     <div className="grid grid-cols-5 gap-1">
                                       {availableEmojis.map((emoji) => (
@@ -951,7 +856,7 @@ export function CommentItem({ comment }: { comment: CommentData }) {
                                   <Button
                                     variant="ghost"
                                     size="sm"
-                                    className="text-primary-text hover:bg-quaternary-bg h-7 w-7 rounded-lg p-0 opacity-100 transition-all duration-200 lg:opacity-0 lg:group-hover:opacity-100"
+                                    className={`text-primary-text hover:bg-quaternary-bg h-7 w-7 rounded-lg p-0 opacity-100 transition-all duration-200 data-[state=open]:opacity-100 ${reactionPickerHoverOpenId === reply.id ? "lg:opacity-100" : "lg:opacity-0 lg:group-hover:opacity-100"}`}
                                   >
                                     <Icon
                                       icon="heroicons:ellipsis-horizontal"
@@ -960,6 +865,27 @@ export function CommentItem({ comment }: { comment: CommentData }) {
                                   </Button>
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end">
+                                  {reply.reactions &&
+                                    reply.reactions.length > 0 && (
+                                      <DropdownMenuItem
+                                        onClick={() => {
+                                          const sorted = getStableReactionOrder(
+                                            reply.id,
+                                            reply.reactions!,
+                                          );
+                                          setReactionBreakdownOpenId(reply.id);
+                                          setBreakdownTab(
+                                            sorted[0]?.emoji ?? "all",
+                                          );
+                                        }}
+                                      >
+                                        <Icon
+                                          icon="heroicons-outline:face-smile"
+                                          className="mr-2 h-4 w-4"
+                                        />
+                                        View Reactions
+                                      </DropdownMenuItem>
+                                    )}
                                   {currentUserId === reply.user_id ? (
                                     <>
                                       {isCommentEditable(reply.date) && (
