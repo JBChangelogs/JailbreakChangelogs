@@ -1213,7 +1213,9 @@ export function useCommentState(props: ChangelogCommentsProps) {
 
   const isTester =
     (user as UserData | null)?.flags?.some(
-      (f) => f.flag === "is_tester" && f.enabled === true,
+      (f) =>
+        (f.flag === "is_tester" || f.flag === "website_moderator") &&
+        f.enabled === true,
     ) ?? false;
 
   return {
