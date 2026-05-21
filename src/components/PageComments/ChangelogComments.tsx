@@ -38,10 +38,16 @@ import {
 import { Button } from "../ui/button";
 import {
   CommentData,
+  CommentReaction,
   PUBLIC_API_URL,
   getResponseErrorMessage,
   flattenComments,
 } from "@/utils/api/api";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { buildApiUrlWithDevToken } from "@/utils/api/apiDevToken";
 import { sanitizeText } from "@/utils/ui/sanitizeText";
 import { UserAvatar } from "@/utils/ui/avatar";
@@ -381,6 +387,12 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
   // Controls whether the new comment form is expanded
   const [isCommentFormExpanded, setIsCommentFormExpanded] = useState(false);
 
+  // --- Reactions ---
+  const [availableEmojis, setAvailableEmojis] = useState<string[]>([]);
+  const [reactionPickerOpenId, setReactionPickerOpenId] = useState<
+    number | null
+  >(null);
+
   // Supporter modal hook for handling tier-based restrictions
   const { modalState, closeModal, openModal, COMMENT_CHAR_LIMITS } =
     useSupporterModal();
@@ -472,6 +484,110 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
     toast.error("Too many requests. Please try again shortly.");
   }, []);
 
+  const handleReact = useCallback(
+    async (commentId: number, emoji: string) => {
+      if (!isLoggedIn) {
+        setLoginModal({ open: true });
+        return;
+      }
+      if (rateLimitUntil !== null && Date.now() < rateLimitUntil) return;
+
+      const applyOptimistic = (
+        reactions: CommentReaction[] = [],
+      ): CommentReaction[] => {
+        const existing = reactions.find((r) => r.emoji === emoji);
+        if (existing?.user_reacted) {
+          return reactions
+            .map((r) =>
+              r.emoji === emoji
+                ? { ...r, count: r.count - 1, user_reacted: false }
+                : r,
+            )
+            .filter((r) => r.count > 0);
+        } else if (existing) {
+          return reactions.map((r) =>
+            r.emoji === emoji
+              ? { ...r, count: r.count + 1, user_reacted: true }
+              : r,
+          );
+        }
+        return [...reactions, { emoji, count: 1, user_reacted: true }];
+      };
+
+      const previousComments = comments.map((c) => ({
+        ...c,
+        replies: c.replies ? [...c.replies] : undefined,
+      }));
+
+      setComments((prev) =>
+        prev.map((c) => {
+          if (c.id === commentId) {
+            return { ...c, reactions: applyOptimistic(c.reactions) };
+          }
+          if (c.replies?.some((r) => r.id === commentId)) {
+            return {
+              ...c,
+              replies: c.replies?.map((r) =>
+                r.id === commentId
+                  ? { ...r, reactions: applyOptimistic(r.reactions) }
+                  : r,
+              ),
+            };
+          }
+          return c;
+        }),
+      );
+
+      setReactionPickerOpenId(null);
+
+      try {
+        const baseUrl = buildApiUrlWithDevToken(
+          PUBLIC_API_URL!,
+          `/comments/${commentId}/react`,
+        );
+        const url = new URL(baseUrl);
+        url.searchParams.set("emoji", emoji);
+
+        const response = await fetch(url.toString(), {
+          method: "POST",
+          credentials: "include",
+        });
+
+        if (!response.ok) {
+          setComments(previousComments);
+
+          let errorData: CommentApiErrorData | null = null;
+          try {
+            errorData = await response.json();
+          } catch {
+            // noop
+          }
+
+          if (response.status === 429 || errorData?.error === "rate_limit") {
+            const retryHeader = response.headers.get("Retry-After");
+            let seconds = 60;
+            if (typeof errorData?.try_again === "number") {
+              seconds = Math.max(
+                1,
+                errorData.try_again - Math.floor(Date.now() / 1000),
+              );
+            } else if (retryHeader) {
+              seconds = Math.max(1, parseInt(retryHeader, 10));
+            }
+            triggerRateLimit(seconds);
+            return;
+          }
+
+          toast.error(errorData?.message || "Failed to react");
+        }
+      } catch {
+        setComments(previousComments);
+        toast.error("Failed to react");
+      }
+    },
+    [comments, isLoggedIn, rateLimitUntil, setLoginModal, triggerRateLimit],
+  );
+
   useEffect(() => {
     if (!rateLimitUntil) return;
     const ms = rateLimitUntil - Date.now();
@@ -494,6 +610,24 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
       .then((data: unknown) => {
         if (Array.isArray(data) && data.every((s) => typeof s === "string")) {
           setAvailableSorts(data as string[]);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    fetch(buildApiUrlWithDevToken(PUBLIC_API_URL!, "/emojis"), {
+      credentials: "include",
+    })
+      .then((r) => r.json())
+      .then((data: unknown) => {
+        if (
+          data &&
+          typeof data === "object" &&
+          "emojis" in data &&
+          Array.isArray((data as { emojis: unknown }).emojis)
+        ) {
+          setAvailableEmojis((data as { emojis: string[] }).emojis);
         }
       })
       .catch(() => {});
@@ -1697,6 +1831,48 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                                   <TooltipContent>Reply</TooltipContent>
                                 </Tooltip>
                               )}
+                              {isLoggedIn && availableEmojis.length > 0 && (
+                                <Popover
+                                  open={reactionPickerOpenId === comment.id}
+                                  onOpenChange={(open) =>
+                                    setReactionPickerOpenId(
+                                      open ? comment.id : null,
+                                    )
+                                  }
+                                >
+                                  <PopoverTrigger asChild>
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      className="text-secondary-text hover:text-primary-text hover:bg-quaternary-bg h-8 w-8 rounded-lg p-0 opacity-100 transition-all duration-200 data-[state=open]:opacity-100 lg:opacity-0 lg:group-hover:opacity-100"
+                                    >
+                                      <Icon
+                                        icon="heroicons:face-smile"
+                                        className="h-4 w-4"
+                                      />
+                                    </Button>
+                                  </PopoverTrigger>
+                                  <PopoverContent
+                                    className="w-auto p-2"
+                                    align="end"
+                                  >
+                                    <div className="grid grid-cols-5 gap-1">
+                                      {availableEmojis.map((emoji) => (
+                                        <button
+                                          key={emoji}
+                                          type="button"
+                                          onClick={() =>
+                                            void handleReact(comment.id, emoji)
+                                          }
+                                          className="hover:bg-quaternary-bg flex h-8 w-8 cursor-pointer items-center justify-center rounded-md text-lg transition-colors"
+                                        >
+                                          {emoji}
+                                        </button>
+                                      ))}
+                                    </div>
+                                  </PopoverContent>
+                                </Popover>
+                              )}
                               {isLoggedIn && (
                                 <DropdownMenu>
                                   <DropdownMenuTrigger asChild>
@@ -1936,6 +2112,35 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                               </div>
                             )}
                           </div>
+
+                          {/* Reactions */}
+                          {comment.reactions &&
+                            comment.reactions.length > 0 && (
+                              <div className="flex flex-wrap items-center gap-1.5 pb-2">
+                                {comment.reactions.map((reaction) => (
+                                  <button
+                                    key={reaction.emoji}
+                                    type="button"
+                                    onClick={() =>
+                                      void handleReact(
+                                        comment.id,
+                                        reaction.emoji,
+                                      )
+                                    }
+                                    className={`flex cursor-pointer items-center gap-1 rounded-full border px-2 py-0.5 text-sm transition-colors ${
+                                      reaction.user_reacted
+                                        ? "border-link/30 bg-link/10 text-link"
+                                        : "border-border-card bg-quaternary-bg text-primary-text hover:border-link/30"
+                                    }`}
+                                  >
+                                    <span>{reaction.emoji}</span>
+                                    <span className="text-xs font-medium">
+                                      {reaction.count}
+                                    </span>
+                                  </button>
+                                ))}
+                              </div>
+                            )}
 
                           {/* Inline Reply Form */}
                           {isLoggedIn && replyingToId === comment.id && (
@@ -2197,6 +2402,56 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                                           {/* Reply action menu */}
                                           {isLoggedIn && (
                                             <div className="flex items-center gap-1">
+                                              {availableEmojis.length > 0 && (
+                                                <Popover
+                                                  open={
+                                                    reactionPickerOpenId ===
+                                                    reply.id
+                                                  }
+                                                  onOpenChange={(open) =>
+                                                    setReactionPickerOpenId(
+                                                      open ? reply.id : null,
+                                                    )
+                                                  }
+                                                >
+                                                  <PopoverTrigger asChild>
+                                                    <Button
+                                                      variant="ghost"
+                                                      size="sm"
+                                                      className="text-secondary-text hover:text-primary-text hover:bg-quaternary-bg h-7 w-7 rounded-lg p-0 opacity-100 transition-all duration-200 data-[state=open]:opacity-100 lg:opacity-0 lg:group-hover:opacity-100"
+                                                    >
+                                                      <Icon
+                                                        icon="heroicons:face-smile"
+                                                        className="h-3.5 w-3.5"
+                                                      />
+                                                    </Button>
+                                                  </PopoverTrigger>
+                                                  <PopoverContent
+                                                    className="w-auto p-2"
+                                                    align="end"
+                                                  >
+                                                    <div className="grid grid-cols-5 gap-1">
+                                                      {availableEmojis.map(
+                                                        (emoji) => (
+                                                          <button
+                                                            key={emoji}
+                                                            type="button"
+                                                            onClick={() =>
+                                                              void handleReact(
+                                                                reply.id,
+                                                                emoji,
+                                                              )
+                                                            }
+                                                            className="hover:bg-quaternary-bg flex h-8 w-8 cursor-pointer items-center justify-center rounded-md text-lg transition-colors"
+                                                          >
+                                                            {emoji}
+                                                          </button>
+                                                        ),
+                                                      )}
+                                                    </div>
+                                                  </PopoverContent>
+                                                </Popover>
+                                              )}
                                               <DropdownMenu>
                                                 <DropdownMenuTrigger asChild>
                                                   <Button
@@ -2370,6 +2625,39 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                                               : undefined}
                                           </p>
                                         )}
+
+                                        {/* Reply Reactions */}
+                                        {reply.reactions &&
+                                          reply.reactions.length > 0 && (
+                                            <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+                                              {reply.reactions.map(
+                                                (reaction) => (
+                                                  <button
+                                                    key={reaction.emoji}
+                                                    type="button"
+                                                    onClick={() =>
+                                                      void handleReact(
+                                                        reply.id,
+                                                        reaction.emoji,
+                                                      )
+                                                    }
+                                                    className={`flex cursor-pointer items-center gap-1 rounded-full border px-2 py-0.5 text-sm transition-colors ${
+                                                      reaction.user_reacted
+                                                        ? "border-link/30 bg-link/10 text-link"
+                                                        : "border-border-card bg-quaternary-bg text-primary-text hover:border-link/30"
+                                                    }`}
+                                                  >
+                                                    <span>
+                                                      {reaction.emoji}
+                                                    </span>
+                                                    <span className="text-xs font-medium">
+                                                      {reaction.count}
+                                                    </span>
+                                                  </button>
+                                                ),
+                                              )}
+                                            </div>
+                                          )}
                                       </div>
                                     </div>
                                   );

@@ -1259,6 +1259,12 @@ export interface CommentAuthor {
   flags?: Array<{ flag: string | null; enabled?: boolean }>;
 }
 
+export interface CommentReaction {
+  emoji: string;
+  count: number;
+  user_reacted: boolean;
+}
+
 export interface CommentData {
   id: number;
   content: string;
@@ -1269,11 +1275,27 @@ export interface CommentData {
   parent_id?: number | null;
   user: CommentAuthor;
   replies?: CommentData[];
+  reactions?: CommentReaction[];
   // normalized for component lookups
   user_id: string;
   author: string;
   owner: string;
   depth?: number;
+}
+
+function normalizeReactions(raw: unknown): CommentReaction[] {
+  if (!raw) return [];
+  if (Array.isArray(raw)) return raw as CommentReaction[];
+  if (typeof raw === "object") {
+    return Object.entries(
+      raw as Record<string, { count: number; user_reacted: boolean }>,
+    ).map(([emoji, data]) => ({
+      emoji,
+      count: data.count ?? 0,
+      user_reacted: data.user_reacted ?? false,
+    }));
+  }
+  return [];
 }
 
 function normalizeComment(raw: CommentData, keepReplies = false): CommentData {
@@ -1286,6 +1308,7 @@ function normalizeComment(raw: CommentData, keepReplies = false): CommentData {
     author: raw.user?.username ?? "",
     owner: "",
     replies,
+    reactions: normalizeReactions(raw.reactions),
   };
 }
 
