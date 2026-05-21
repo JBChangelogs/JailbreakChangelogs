@@ -35,6 +35,7 @@ import {
 } from "./commentUtils";
 import { sanitizeText } from "@/utils/ui/sanitizeText";
 import { useCommentsContext } from "./CommentsContext";
+import { toast } from "sonner";
 
 export function CommentItem({ comment }: { comment: CommentData }) {
   const {
@@ -72,6 +73,7 @@ export function CommentItem({ comment }: { comment: CommentData }) {
     setReactionBreakdownOpenId,
     setBreakdownTab,
     getStableReactionOrder,
+    isTester,
   } = useCommentsContext();
 
   const commentAuthorSettings = userData[comment.user_id]?.settings;
@@ -353,6 +355,23 @@ export function CommentItem({ comment }: { comment: CommentData }) {
                           className="mr-2 h-4 w-4"
                         />
                         View Reactions
+                      </DropdownMenuItem>
+                    )}
+                    {isTester && (
+                      <DropdownMenuItem
+                        onClick={() => {
+                          void navigator.clipboard
+                            .writeText(String(comment.id))
+                            .then(() => {
+                              toast.success(`Comment ID ${comment.id} copied`);
+                            });
+                        }}
+                      >
+                        <Icon
+                          icon="heroicons-outline:clipboard"
+                          className="mr-2 h-4 w-4"
+                        />
+                        Copy Comment ID
                       </DropdownMenuItem>
                     )}
                     {currentUserId === comment.user_id ? (
@@ -886,6 +905,25 @@ export function CommentItem({ comment }: { comment: CommentData }) {
                                         View Reactions
                                       </DropdownMenuItem>
                                     )}
+                                  {isTester && (
+                                    <DropdownMenuItem
+                                      onClick={() => {
+                                        void navigator.clipboard
+                                          .writeText(String(reply.id))
+                                          .then(() => {
+                                            toast.success(
+                                              `Comment ID ${reply.id} copied`,
+                                            );
+                                          });
+                                      }}
+                                    >
+                                      <Icon
+                                        icon="heroicons-outline:clipboard"
+                                        className="mr-2 h-4 w-4"
+                                      />
+                                      Copy Comment ID
+                                    </DropdownMenuItem>
+                                  )}
                                   {currentUserId === reply.user_id ? (
                                     <>
                                       {isCommentEditable(reply.date) && (

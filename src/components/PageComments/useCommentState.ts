@@ -1211,6 +1211,11 @@ export function useCommentState(props: ChangelogCommentsProps) {
   const containerBgClass =
     type === "tradev2" ? "bg-tertiary-bg" : "bg-secondary-bg";
 
+  const isTester =
+    (user as UserData | null)?.flags?.some(
+      (f) => f.flag === "is_tester" && f.enabled === true,
+    ) ?? false;
+
   return {
     changelogId,
     changelogTitle,
@@ -1291,5 +1296,6 @@ export function useCommentState(props: ChangelogCommentsProps) {
     toggleCommentExpand,
     getStableReactionOrder,
     setLoginModal,
+    isTester,
   };
 }
