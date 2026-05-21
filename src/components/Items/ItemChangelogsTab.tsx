@@ -1,12 +1,11 @@
 "use client";
 
-import { useState, useCallback, useEffect, useRef } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { Icon } from "@/components/ui/IconWrapper";
 import { Pagination } from "@/components/ui/Pagination";
 import { Spinner } from "@/components/ui/Spinner";
 import { Button } from "@/components/ui/button";
 import { UserAvatar } from "@/utils/ui/avatar";
-// RE-ADD: voting — import { useAuthContext } from "@/contexts/AuthContext";
 import { buildApiUrlWithDevToken } from "@/utils/api/apiDevToken";
 import { PUBLIC_API_URL } from "@/utils/api/api";
 import { formatMessageDate } from "@/utils/helpers/timestamp";
@@ -14,7 +13,6 @@ import { formatFullValue } from "@/utils/trading/values";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { createLogger } from "@/services/logger";
-// RE-ADD: voting — import { toast } from "sonner";
 import Link from "next/link";
 import {
   Tooltip,
@@ -41,7 +39,7 @@ interface UserSettings {
   [key: string]: unknown;
 }
 
-interface SuggestionUser {
+interface ChangelogUser {
   id: string;
   username?: string;
   global_name?: string;
@@ -52,9 +50,8 @@ interface SuggestionUser {
   settings?: UserSettings;
 }
 
-interface Suggestion {
+interface ValueChangelog {
   id: number;
-  item_id: number;
   field: string;
   current_value: string;
   suggested_value: string;
@@ -65,16 +62,16 @@ interface Suggestion {
   created_at: number;
   updated_at: number;
   is_vt: number;
-  user: SuggestionUser;
+  user: ChangelogUser;
   votes: {
-    upvotes: { created_at: number; user: SuggestionUser }[];
-    downvotes: { created_at: number; user: SuggestionUser }[];
+    upvotes: { created_at: number; user: ChangelogUser }[];
+    downvotes: { created_at: number; user: ChangelogUser }[];
   };
 }
 
-interface SuggestionsResponse {
+interface ChangelogsResponse {
   total: number;
-  items: Suggestion[];
+  items: ValueChangelog[];
   page: number;
   total_pages: number;
   size: number;
@@ -86,50 +83,19 @@ const fieldLabel = (field: string) =>
     .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
     .join(" ");
 
-const statusColors: Record<string, string> = {
-  pending: "bg-yellow-500/20 text-primary-text border-yellow-500/30",
-  approved: "bg-green-500/20 text-primary-text border-green-500/30",
-  rejected: "bg-red-500/20 text-primary-text border-red-500/30",
-};
-
 const badgeBase =
   "inline-flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium backdrop-blur-xl";
 
 const MAX_REASON_LENGTH = 300;
 
-// RE-ADD: voting — VoteRateLimitBanner (shown below vote buttons when rate limited)
-// function VoteRateLimitBanner({ until }: { until: number }) {
-//   const [secondsLeft, setSecondsLeft] = useState(
-//     Math.max(0, Math.ceil((until - Date.now()) / 1000)),
-//   );
-//   useEffect(() => {
-//     const tick = () =>
-//       setSecondsLeft(Math.max(0, Math.ceil((until - Date.now()) / 1000)));
-//     tick();
-//     const id = setInterval(tick, 1000);
-//     return () => clearInterval(id);
-//   }, [until]);
-//   if (secondsLeft === 0) return null;
-//   return (
-//     <div className="border-border-card bg-tertiary-bg flex items-center justify-center gap-1.5 border-t px-3 py-1.5 text-xs text-yellow-400">
-//       <Icon icon="material-symbols:hourglass-empty-rounded" className="h-3.5 w-3.5 shrink-0" inline />
-//       Too fast — wait{" "}
-//       {secondsLeft >= 60 ? `${Math.floor(secondsLeft / 60)}m ${secondsLeft % 60}s` : `${secondsLeft}s`}
-//     </div>
-//   );
-// }
-
-interface ItemSuggestionsTabProps {
+interface ItemChangelogsTabProps {
   itemId: number;
 }
 
-export default function ItemSuggestionsTab({
-  itemId,
-}: ItemSuggestionsTabProps) {
+export default function ItemChangelogsTab({ itemId }: ItemChangelogsTabProps) {
   "use no memo";
-  // RE-ADD: voting — const { isAuthenticated, user, setLoginModal } = useAuthContext();
 
-  const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
+  const [changelogs, setChangelogs] = useState<ValueChangelog[]>([]);
   const [totalPages, setTotalPages] = useState(1);
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
@@ -137,30 +103,20 @@ export default function ItemSuggestionsTab({
   const [error, setError] = useState<string | null>(null);
   const [empty, setEmpty] = useState(false);
 
-  // RE-ADD: voting state
-  // const [votingIds, setVotingIds] = useState<Set<number>>(new Set());
-  // const [voteRateLimits, setVoteRateLimits] = useState<Map<number, number>>(
-  //   new Map(),
-  // );
-
   const [expandedReasons, setExpandedReasons] = useState<Set<number>>(
     new Set(),
   );
-  const [overflowingReasons, setOverflowingReasons] = useState<Set<number>>(
-    new Set(),
-  );
-  const reasonRefs = useRef<Map<number, HTMLDivElement | null>>(new Map());
 
   const [votersOpen, setVotersOpen] = useState(false);
   const [votersTab, setVotersTab] = useState<"up" | "down">("up");
   const [activeVoters, setActiveVoters] = useState<{
-    up: { created_at: number; user: SuggestionUser }[];
-    down: { created_at: number; user: SuggestionUser }[];
+    up: { created_at: number; user: ChangelogUser }[];
+    down: { created_at: number; user: ChangelogUser }[];
     upCount: number;
     downCount: number;
   } | null>(null);
 
-  const fetchSuggestions = useCallback(
+  const fetchChangelogs = useCallback(
     async (p: number) => {
       setLoading(true);
       setError(null);
@@ -168,31 +124,31 @@ export default function ItemSuggestionsTab({
       try {
         const url = buildApiUrlWithDevToken(
           PUBLIC_API_URL!,
-          `/value-suggestions/item/${itemId}?page=${p}`,
+          `/value-changelogs/item/${itemId}?page=${p}`,
         );
         const res = await fetch(url, { credentials: "include" });
         if (res.status === 404) {
           setEmpty(true);
-          setSuggestions([]);
+          setChangelogs([]);
           setTotal(0);
           setTotalPages(1);
           return;
         }
         if (!res.ok) {
           const body = await res.json().catch(() => ({}));
-          log.error("fetch item suggestions failed", {
+          log.error("fetch item changelogs failed", {
             status: res.status,
             body,
           });
-          throw new Error("Failed to fetch suggestions");
+          throw new Error("Failed to fetch changelogs");
         }
-        const data: SuggestionsResponse = await res.json();
-        setSuggestions(data.items ?? []);
+        const data: ChangelogsResponse = await res.json();
+        setChangelogs(data.items ?? []);
         setTotal(data.total ?? 0);
         setTotalPages(data.total_pages ?? 1);
       } catch (err) {
         setError(
-          err instanceof Error ? err.message : "Failed to load suggestions",
+          err instanceof Error ? err.message : "Failed to load changelogs",
         );
       } finally {
         setLoading(false);
@@ -202,33 +158,21 @@ export default function ItemSuggestionsTab({
   );
 
   useEffect(() => {
-    fetchSuggestions(page);
-  }, [fetchSuggestions, page]);
-
-  useEffect(() => {
-    if (loading) return;
-    const next = new Set<number>();
-    for (const [id, el] of reasonRefs.current.entries()) {
-      if (el && el.scrollHeight > el.clientHeight) next.add(id);
-    }
-    setOverflowingReasons(next);
-  }, [suggestions, loading]);
-
-  // RE-ADD: voting — restore handleVote here
-  // const handleVote = async (...) => { ... };
+    fetchChangelogs(page);
+  }, [fetchChangelogs, page]);
 
   const openVotersModal = (
-    suggestion: Suggestion,
+    changelog: ValueChangelog,
     tab: "up" | "down",
     e: React.MouseEvent,
   ) => {
     e.stopPropagation();
     e.preventDefault();
     setActiveVoters({
-      up: suggestion.votes.upvotes,
-      down: suggestion.votes.downvotes,
-      upCount: suggestion.upvotes,
-      downCount: suggestion.downvotes,
+      up: changelog.votes.upvotes,
+      down: changelog.votes.downvotes,
+      upCount: changelog.upvotes,
+      downCount: changelog.downvotes,
     });
     setVotersTab(tab);
     setVotersOpen(true);
@@ -246,32 +190,40 @@ export default function ItemSuggestionsTab({
     return (
       <div className="border-border-card bg-secondary-bg rounded-lg border p-8 text-center">
         <h3 className="text-primary-text mb-2 text-xl font-semibold">
-          Failed to Load Suggestions
+          Failed to Load Changelogs
         </h3>
         <p className="text-secondary-text mb-4 text-sm">{error}</p>
-        <Button onClick={() => fetchSuggestions(page)}>Try Again</Button>
+        <Button onClick={() => fetchChangelogs(page)}>Try Again</Button>
       </div>
     );
   }
 
-  if (empty || suggestions.length === 0) {
+  if (empty || changelogs.length === 0) {
     return (
       <div className="border-border-card bg-secondary-bg rounded-lg border p-8 text-center">
         <div className="border-button-info/30 bg-button-info/20 mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full border">
-          <Icon
-            icon="material-symbols:lightbulb-outline-rounded"
+          <svg
             className="text-button-info h-8 w-8"
-          />
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+            />
+          </svg>
         </div>
         <h3 className="text-primary-text mb-2 text-xl font-semibold">
-          No Suggestions Yet
+          No Changes Yet
         </h3>
         <p className="text-secondary-text mx-auto mb-6 max-w-md text-sm leading-relaxed">
-          No value suggestions have been submitted for this item. Head to the
-          suggestions page to submit one.
+          No value changes have been recorded for this item yet.
         </p>
         <Button asChild>
-          <Link href="/values/suggestions">View All Suggestions</Link>
+          <Link href="/values/changelogs">View All Changelogs</Link>
         </Button>
       </div>
     );
@@ -282,63 +234,69 @@ export default function ItemSuggestionsTab({
       {/* Header */}
       <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
         <h3 className="text-primary-text text-2xl font-bold">
-          Item Suggestions ({total})
+          Item Changes ({total})
         </h3>
         <Button asChild size="sm" variant="default">
-          <Link href="/values/suggestions">All Suggestions</Link>
+          <Link href="/values/changelogs">All Changelogs</Link>
         </Button>
       </div>
 
-      {/* Suggestion cards */}
+      {/* Changelog cards */}
       <div className="space-y-3">
-        {suggestions.map((suggestion) => {
-          // RE-ADD: voting computed vars (userUpvoted, userDownvoted, isVoting)
-          // const userUpvoted = suggestion.votes.upvotes.some((v) => v.user.id === user?.id);
-          // const userDownvoted = suggestion.votes.downvotes.some((v) => v.user.id === user?.id);
-          // const isVoting = votingIds.has(suggestion.id) || voteRateLimits.has(suggestion.id);
+        {changelogs.map((changelog) => {
           const hasVoters =
-            suggestion.votes.upvotes.length > 0 ||
-            suggestion.votes.downvotes.length > 0;
-          const isExpanded = expandedReasons.has(suggestion.id);
-          const reasonText = suggestion.reason ?? "";
+            changelog.votes.upvotes.length > 0 ||
+            changelog.votes.downvotes.length > 0;
+          const isExpanded = expandedReasons.has(changelog.id);
+          const reasonText = changelog.reason ?? "";
           const isTruncated =
             reasonText.length > MAX_REASON_LENGTH ||
             reasonText.split("\n").length > 5;
 
           return (
             <div
-              key={suggestion.id}
+              key={changelog.id}
               className="border-border-card bg-secondary-bg overflow-hidden rounded-xl border"
             >
-              {/* Votes — static display only; RE-ADD: make interactive (onClick handleVote, disabled/isVoting, userUpvoted/userDownvoted icons) */}
+              {/* Votes */}
               <div className="border-border-card flex flex-col border-b">
                 <div className="flex items-stretch">
-                  <div className="bg-button-success/10 flex flex-1 items-center justify-center gap-1.5 py-2.5">
+                  <button
+                    type="button"
+                    onClick={(e) => openVotersModal(changelog, "up", e)}
+                    className="bg-button-success/10 hover:bg-button-success/20 flex flex-1 cursor-pointer items-center justify-center gap-1.5 py-2.5 transition-colors focus:outline-none"
+                    aria-label="View upvoters"
+                  >
                     <Icon
                       icon="material-symbols:thumb-up-outline-rounded"
                       className="text-button-success h-4 w-4"
                       inline
                     />
                     <span className="text-button-success font-bold">
-                      {suggestion.upvotes}
+                      {changelog.upvotes}
                     </span>
-                  </div>
+                  </button>
                   <div className="border-border-card border-l" />
-                  <div className="bg-button-danger/10 flex flex-1 items-center justify-center gap-1.5 py-2.5">
+                  <button
+                    type="button"
+                    onClick={(e) => openVotersModal(changelog, "down", e)}
+                    className="bg-button-danger/10 hover:bg-button-danger/20 flex flex-1 cursor-pointer items-center justify-center gap-1.5 py-2.5 transition-colors focus:outline-none"
+                    aria-label="View downvoters"
+                  >
                     <Icon
                       icon="material-symbols:thumb-down-outline-rounded"
                       className="text-button-danger h-4 w-4"
                       inline
                     />
                     <span className="text-button-danger font-bold">
-                      {suggestion.downvotes}
+                      {changelog.downvotes}
                     </span>
-                  </div>
+                  </button>
                 </div>
                 {hasVoters && (
                   <button
                     type="button"
-                    onClick={(e) => openVotersModal(suggestion, "up", e)}
+                    onClick={(e) => openVotersModal(changelog, "up", e)}
                     className="border-border-card bg-tertiary-bg text-secondary-text hover:bg-quaternary-bg hover:text-primary-text flex w-full cursor-pointer items-center justify-center gap-1.5 border-t py-1.5 text-xs transition-colors focus:outline-none"
                   >
                     <Icon
@@ -355,26 +313,14 @@ export default function ItemSuggestionsTab({
               <div className="space-y-3 p-4">
                 {/* Title + badges */}
                 <div className="space-y-2">
-                  <Link
-                    href={`/values/suggestions/${suggestion.id}`}
-                    prefetch={false}
-                    className="text-primary-text hover:text-link text-base font-bold transition-colors"
-                  >
-                    Suggestion #{suggestion.id}
-                  </Link>
+                  <p className="text-primary-text text-base font-bold">
+                    Change #{changelog.id}
+                  </p>
                   <div className="flex flex-wrap gap-1.5">
                     <span
                       className={`${badgeBase} border-border-card bg-tertiary-bg text-primary-text`}
                     >
-                      {fieldLabel(suggestion.field)}
-                    </span>
-                    <span
-                      className={`${badgeBase} capitalize ${
-                        statusColors[suggestion.status] ??
-                        "border-border-card bg-tertiary-bg/40 text-secondary-text"
-                      }`}
-                    >
-                      {suggestion.status}
+                      {fieldLabel(changelog.field)}
                     </span>
                   </div>
                 </div>
@@ -394,7 +340,7 @@ export default function ItemSuggestionsTab({
                       className="text-secondary-text text-base font-bold line-through"
                       style={{ wordBreak: "normal", overflowWrap: "anywhere" }}
                     >
-                      {formatFullValue(suggestion.current_value || "N/A")}
+                      {formatFullValue(changelog.current_value || "N/A")}
                     </div>
                   </div>
                   <div className="min-w-0 p-3">
@@ -410,7 +356,7 @@ export default function ItemSuggestionsTab({
                       className="text-primary-text text-base font-bold"
                       style={{ wordBreak: "normal", overflowWrap: "anywhere" }}
                     >
-                      {formatFullValue(suggestion.suggested_value)}
+                      {formatFullValue(changelog.suggested_value)}
                     </div>
                   </div>
                 </div>
@@ -419,9 +365,6 @@ export default function ItemSuggestionsTab({
                 {reasonText && (
                   <div>
                     <div
-                      ref={(el) => {
-                        reasonRefs.current.set(suggestion.id, el);
-                      }}
                       className={`text-secondary-text overflow-hidden text-sm leading-relaxed break-words transition-all duration-200 ${
                         isTruncated && !isExpanded ? "max-h-36" : ""
                       }`}
@@ -478,16 +421,15 @@ export default function ItemSuggestionsTab({
                         })()}
                       </ReactMarkdown>
                     </div>
-                    {(overflowingReasons.has(suggestion.id) ||
-                      (isExpanded && isTruncated)) && (
+                    {isTruncated && (
                       <button
                         onClick={() =>
                           setExpandedReasons((prev) => {
                             const next = new Set(prev);
-                            if (next.has(suggestion.id)) {
-                              next.delete(suggestion.id);
+                            if (next.has(changelog.id)) {
+                              next.delete(changelog.id);
                             } else {
-                              next.add(suggestion.id);
+                              next.add(changelog.id);
                             }
                             return next;
                           })
@@ -516,18 +458,18 @@ export default function ItemSuggestionsTab({
                   </p>
                   <div className="flex items-center gap-2">
                     <UserAvatar
-                      userId={suggestion.user.id}
-                      avatarHash={suggestion.user.avatar ?? null}
-                      username={suggestion.user.username ?? ""}
-                      custom_avatar={suggestion.user.custom_avatar ?? undefined}
-                      premiumType={suggestion.user.premiumtype ?? 0}
+                      userId={changelog.user.id}
+                      avatarHash={changelog.user.avatar ?? null}
+                      username={changelog.user.username ?? ""}
+                      custom_avatar={changelog.user.custom_avatar ?? undefined}
+                      premiumType={changelog.user.premiumtype ?? 0}
                       settings={
-                        suggestion.user.settings
+                        changelog.user.settings
                           ? {
                               custom_avatar:
-                                !!suggestion.user.settings.custom_avatar,
+                                !!changelog.user.settings.custom_avatar,
                               hide_presence:
-                                !!suggestion.user.settings.hide_presence,
+                                !!changelog.user.settings.hide_presence,
                             }
                           : undefined
                       }
@@ -538,27 +480,27 @@ export default function ItemSuggestionsTab({
                       <Tooltip>
                         <TooltipTrigger asChild>
                           <Link
-                            href={`/users/${suggestion.user.id}`}
+                            href={`/users/${changelog.user.id}`}
                             prefetch={false}
                             className="text-link hover:text-link-hover inline-block max-w-full truncate text-sm font-medium transition-colors"
                           >
-                            {(suggestion.user.global_name !== "None" &&
-                              suggestion.user.global_name) ||
-                              suggestion.user.username ||
-                              `User #${suggestion.user.id}`}
+                            {(changelog.user.global_name !== "None" &&
+                              changelog.user.global_name) ||
+                              changelog.user.username ||
+                              `User #${changelog.user.id}`}
                           </Link>
                         </TooltipTrigger>
-                        {suggestion.user.username && (
+                        {changelog.user.username && (
                           <TooltipContent className="max-w-sm min-w-75 p-0">
                             <UserDetailsTooltip
-                              user={suggestion.user as unknown as UserData}
+                              user={changelog.user as unknown as UserData}
                             />
                           </TooltipContent>
                         )}
                       </Tooltip>
                       <p className="text-secondary-text text-xs">
-                        {formatMessageDate(suggestion.created_at)}
-                        {suggestion.updated_at !== suggestion.created_at
+                        {formatMessageDate(changelog.created_at)}
+                        {changelog.updated_at !== changelog.created_at
                           ? " (Edited)"
                           : ""}
                       </p>
@@ -643,8 +585,8 @@ export default function ItemSuggestionsTab({
                           </p>
                           <p className="text-sm">
                             {tab === "up"
-                              ? "This suggestion hasn't received any upvotes yet."
-                              : "This suggestion hasn't received any downvotes yet."}
+                              ? "This change hasn't received any upvotes yet."
+                              : "This change hasn't received any downvotes yet."}
                           </p>
                         </div>
                       ) : (

@@ -34,6 +34,7 @@ import { ValueHistory } from "@/components/Items/ItemValueChart";
 import HoardersTab from "@/components/Items/HoardersTab";
 import DupesTab from "@/components/Items/DupesTab";
 import ItemSuggestionsTab from "@/components/Items/ItemSuggestionsTab";
+import ItemChangelogsTab from "@/components/Items/ItemChangelogsTab";
 import {
   handleImageError,
   getItemImagePath,
@@ -65,7 +66,6 @@ const log = createLogger("UI");
 interface ItemDetailsClientProps {
   item: ItemDetails;
   initialFavoriteCount?: number | null;
-  changelogsSlot: React.ReactNode;
   commentsSlot: React.ReactNode;
   similarItemsSlot: React.ReactNode;
   historyPromise: Promise<ValueHistory[] | null>;
@@ -119,7 +119,6 @@ const ItemDetailsTabs = React.memo(
 
 export default function ItemDetailsClient({
   item,
-  changelogsSlot,
   commentsSlot,
   similarItemsSlot,
   historyPromise,
@@ -771,7 +770,9 @@ export default function ItemDetailsClient({
             )}
 
             {activeTab === 2 && (
-              <div className="space-y-6">{changelogsSlot}</div>
+              <div className="space-y-6">
+                <ItemChangelogsTab itemId={item.id} />
+              </div>
             )}
 
             {activeTab === 3 && (

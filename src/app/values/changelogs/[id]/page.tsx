@@ -60,7 +60,8 @@ interface ValueChangelogDetail {
 }
 
 function userDisplayName(user: VoteUser): string {
-  return user.global_name || user.username || `User #${user.id}`;
+  const name = user.global_name !== "None" ? user.global_name : null;
+  return name || user.username || `User #${user.id}`;
 }
 
 function userAvatarUrl(user: VoteUser): string | undefined {

@@ -7,7 +7,6 @@ import {
 import ItemDetailsClient from "@/components/Items/ItemDetailsClient";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
-import ItemChangelogsServer from "@/components/Items/SuspenseWrapper/ItemChangelogsServer";
 import ItemCommentsServer from "@/components/Items/SuspenseWrapper/ItemCommentsServer";
 import SimilarItems from "@/components/Items/SimilarItems";
 import FavoriteButtonServer from "@/components/Items/SuspenseWrapper/FavoriteButtonWrapper";
@@ -34,16 +33,6 @@ export default async function ItemDetailsPage({ params }: Props) {
   const favoriteCountPromise = fetchItemFavorites(String(item.id));
   const similarItemsPromise = fetchItemsByType(item.type);
   const historyPromise = fetchItemHistory(String(item.id));
-
-  const changelogsSlot = (
-    <Suspense
-      fallback={
-        <div className="bg-secondary-bg h-87.5 animate-pulse rounded-lg" />
-      }
-    >
-      <ItemChangelogsServer itemId={String(item.id)} />
-    </Suspense>
-  );
 
   const commentsSlot = (
     <Suspense
@@ -91,7 +80,6 @@ export default async function ItemDetailsPage({ params }: Props) {
       <ItemDetailsClient
         item={item}
         initialFavoriteCount={null}
-        changelogsSlot={changelogsSlot}
         commentsSlot={commentsSlot}
         similarItemsSlot={similarItemsSlot}
         historyPromise={historyPromise}

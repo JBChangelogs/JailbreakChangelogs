@@ -387,9 +387,9 @@ export default function ValuesChangelogPage() {
                               }, []);
                               return (
                                 <div className="mt-3 flex flex-wrap items-center gap-2">
-                                  <span className="text-secondary-text text-xs">
+                                  <p className="text-secondary-text mb-1.5 text-xs font-semibold tracking-wide uppercase">
                                     Contributors:
-                                  </span>
+                                  </p>
                                   {contributors.map((u) => (
                                     <Link
                                       key={u.id}
@@ -419,7 +419,8 @@ export default function ValuesChangelogPage() {
                                         showBadge={false}
                                       />
                                       <span className="text-link hover:text-link-hover text-xs font-medium transition-colors">
-                                        {u.global_name ||
+                                        {(u.global_name !== "None" &&
+                                          u.global_name) ||
                                           u.username ||
                                           `User #${u.id}`}
                                       </span>

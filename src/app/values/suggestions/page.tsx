@@ -1791,10 +1791,32 @@ export default function ValueSuggestionsPage() {
 
                     {/* Footer */}
                     <div className="relative z-10 mt-auto pt-1">
-                      <span className="text-secondary-text text-xs">
-                        Suggested by
-                      </span>
-                      <div className="mt-1 flex items-start gap-2">
+                      <div className="mb-1.5 flex items-center justify-between">
+                        <p className="text-secondary-text text-xs font-semibold tracking-wide uppercase">
+                          Suggested by
+                        </p>
+                        {isAuthenticated &&
+                          user?.id === suggestion.user.id &&
+                          suggestion.status === "pending" && (
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <button
+                                  type="button"
+                                  onClick={(e) => openEditModal(suggestion, e)}
+                                  className="text-secondary-text hover:text-primary-text shrink-0 cursor-pointer rounded p-1 transition-colors"
+                                >
+                                  <Icon
+                                    icon="material-symbols:edit-outline-rounded"
+                                    className="h-4 w-4"
+                                    inline
+                                  />
+                                </button>
+                              </TooltipTrigger>
+                              <TooltipContent>Update reason</TooltipContent>
+                            </Tooltip>
+                          )}
+                      </div>
+                      <div className="flex items-start gap-2">
                         <UserAvatar
                           userId={suggestion.user.id}
                           avatarHash={suggestion.user.avatar ?? null}
@@ -1822,9 +1844,10 @@ export default function ValueSuggestionsPage() {
                               <Link
                                 href={`/users/${suggestion.user.id}`}
                                 prefetch={false}
-                                className="text-link hover:text-link-hover block truncate text-sm font-medium transition-colors"
+                                className="text-link hover:text-link-hover inline-block max-w-full truncate text-sm font-medium transition-colors"
                               >
-                                {suggestion.user.global_name ||
+                                {(suggestion.user.global_name !== "None" &&
+                                  suggestion.user.global_name) ||
                                   suggestion.user.username ||
                                   `User #${suggestion.user.id}`}
                               </Link>
@@ -1845,26 +1868,6 @@ export default function ValueSuggestionsPage() {
                           </p>
                         </div>
                       </div>
-                      {isAuthenticated &&
-                        user?.id === suggestion.user.id &&
-                        suggestion.status === "pending" && (
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <button
-                                type="button"
-                                onClick={(e) => openEditModal(suggestion, e)}
-                                className="text-secondary-text hover:text-primary-text shrink-0 cursor-pointer rounded p-1 transition-colors"
-                              >
-                                <Icon
-                                  icon="material-symbols:edit-outline-rounded"
-                                  className="h-4 w-4"
-                                  inline
-                                />
-                              </button>
-                            </TooltipTrigger>
-                            <TooltipContent>Update reason</TooltipContent>
-                          </Tooltip>
-                        )}
                     </div>
                   </div>
                 </div>
@@ -1999,7 +2002,8 @@ export default function ValueSuggestionsPage() {
                                   className="text-link hover:text-link-hover transition-colors hover:underline"
                                   onClick={() => setVotersOpen(false)}
                                 >
-                                  {v.user.global_name ||
+                                  {(v.user.global_name !== "None" &&
+                                    v.user.global_name) ||
                                     v.user.username ||
                                     `User #${v.user.id}`}
                                 </Link>

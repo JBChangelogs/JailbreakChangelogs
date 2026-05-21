@@ -124,7 +124,9 @@ function VoterCard({ v }: { v: { created_at: number; user: SuggestionUser } }) {
           prefetch={false}
           className="text-primary-text hover:text-link block truncate text-sm font-medium transition-colors"
         >
-          {v.user.global_name || v.user.username || `User #${v.user.id}`}
+          {(v.user.global_name !== "None" && v.user.global_name) ||
+            v.user.username ||
+            `User #${v.user.id}`}
         </Link>
         <p className="text-tertiary-text mt-0.5 text-xs">
           {formatMessageDate(v.created_at)}
@@ -446,9 +448,9 @@ export default function ValueSuggestionDetailPage() {
                   </div>
 
                   <div>
-                    <span className="text-secondary-text text-xs">
+                    <p className="text-secondary-text mb-1.5 text-xs font-semibold tracking-wide uppercase">
                       Suggested by
-                    </span>
+                    </p>
                     <div className="mt-1 flex items-start gap-2">
                       <UserAvatar
                         userId={suggestion.user.id}
@@ -477,7 +479,8 @@ export default function ValueSuggestionDetailPage() {
                           prefetch={false}
                           className="text-link hover:text-link-hover block text-sm font-medium transition-colors"
                         >
-                          {suggestion.user.global_name ||
+                          {(suggestion.user.global_name !== "None" &&
+                            suggestion.user.global_name) ||
                             suggestion.user.username ||
                             `User #${suggestion.user.id}`}
                         </Link>
