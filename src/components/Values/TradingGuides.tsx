@@ -212,7 +212,7 @@ export default function TradingGuides({
         onClick={() => {
           const newExpanded = !isExpanded;
           if (newExpanded) {
-            window.umami?.track("Trading Guides Expanded");
+            window.rybbit?.event("Trading Guides Expanded");
           }
           setIsExpanded(newExpanded);
         }}

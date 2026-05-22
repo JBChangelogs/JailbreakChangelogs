@@ -399,8 +399,8 @@ export default function OGFinderResults({
         <Button
           onClick={() => {
             setShowNotificationSheet(true);
-            if (typeof window !== "undefined" && window.umami) {
-              window.umami.track("Open OG Notification Sheet");
+            if (typeof window !== "undefined" && window.rybbit) {
+              window.rybbit.event("Open OG Notification Sheet");
             }
           }}
           variant="default"

@@ -688,8 +688,8 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
       refreshCommentsFromServer(true, 1);
 
       // Track comment post
-      if (typeof window !== "undefined" && window.umami) {
-        window.umami.track("Comment Posted", { type });
+      if (typeof window !== "undefined" && window.rybbit) {
+        window.rybbit.event("Comment Posted", { type });
       }
     } catch (err) {
       toast.error(
@@ -801,8 +801,8 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
       refreshCommentsFromServer(true, page);
 
       // Track comment edit
-      if (typeof window !== "undefined" && window.umami) {
-        window.umami.track("Comment Edited", { type });
+      if (typeof window !== "undefined" && window.rybbit) {
+        window.rybbit.event("Comment Edited", { type });
       }
     } catch (err) {
       toast.error(
@@ -845,8 +845,8 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
         throw new Error("Failed to delete comment");
       }
       // Comment successfully deleted, track with analytics
-      if (typeof window !== "undefined" && window.umami) {
-        window.umami.track("Comment Deleted", { type });
+      if (typeof window !== "undefined" && window.rybbit) {
+        window.rybbit.event("Comment Deleted", { type });
       }
     } catch (err) {
       // If deletion failed, restore the previous state
@@ -1237,9 +1237,9 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
                       type="submit"
                       size="sm"
                       disabled={!newComment.trim() || isSubmittingComment}
-                      data-umami-event="Post Comment"
-                      data-umami-event-type={type}
-                      data-umami-event-context-id={changelogId.toString()}
+                      data-rybbit-event="Post Comment"
+                      data-rybbit-prop-type={type}
+                      data-rybbit-prop-context-id={changelogId.toString()}
                     >
                       {isSubmittingComment ? (
                         <>

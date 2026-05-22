@@ -113,7 +113,7 @@ export const useSettings = (
       });
 
       // Track setting change
-      window.umami?.track("Update Setting", { setting: name, value: value });
+      window.rybbit?.event("Update Setting", { setting: name, value: value });
     } catch (error) {
       console.error("Error updating settings:", error);
       const errorMessage =

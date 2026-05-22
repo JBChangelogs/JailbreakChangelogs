@@ -31,8 +31,8 @@ export default function DupeSearchInput({
     if (!input) return;
 
     // Track dupe search with search term
-    if (typeof window !== "undefined" && window.umami) {
-      window.umami.track("Dupe Search", { searchTerm: input });
+    if (typeof window !== "undefined" && window.rybbit) {
+      window.rybbit.event("Dupe Search", { searchTerm: input });
     }
 
     setIsSearching(true);

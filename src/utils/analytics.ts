@@ -28,9 +28,9 @@ export function trackFilterSortEvent(
   kind: FilterSortEventKind,
   value: FilterSortEventValue,
 ) {
-  if (typeof window === "undefined" || !window.umami) return;
+  if (typeof window === "undefined" || !window.rybbit) return;
 
   const eventName = EVENT_NAMES[context][kind];
   const payloadKey = kind === "filter" ? "filter" : "sort";
-  window.umami.track(eventName, { [payloadKey]: value });
+  window.rybbit.event(eventName, { [payloadKey]: value });
 }

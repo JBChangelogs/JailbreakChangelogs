@@ -153,7 +153,7 @@ const AdBlockPrompt = () => {
           <div className="mb-4 w-full sm:mb-8">
             <Button
               onClick={handleSupporterClick}
-              data-umami-event="Adblock Prompt - Become Supporter"
+              data-rybbit-event="Adblock Prompt - Become Supporter"
               className="w-full max-w-xs tracking-wide uppercase"
             >
               Become A Supporter
@@ -163,7 +163,7 @@ const AdBlockPrompt = () => {
           {/* Dismiss Link */}
           <Button
             onClick={handleModalDismiss}
-            data-umami-event="Adblock Prompt - Remind Later"
+            data-rybbit-event="Adblock Prompt - Remind Later"
             variant="ghost"
             className="text-secondary-text hover:text-primary-text hover:bg-transparent hover:underline"
           >

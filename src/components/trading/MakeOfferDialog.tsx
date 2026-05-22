@@ -508,7 +508,7 @@ export function MakeOfferDialog({
       setSubmitting(true);
       await createTradeOffer(trade.id);
       toast.success("Offer sent");
-      window.umami?.track("Trade Offer Sent", { type: "quick" });
+      window.rybbit?.event("Trade Offer Sent", { type: "quick" });
       onOfferSent?.();
       resetForm();
       onClose();
@@ -552,7 +552,7 @@ export function MakeOfferDialog({
       if (shouldSendPayload) await createTradeOffer(trade.id, payload);
       else await createTradeOffer(trade.id);
       toast.success("Offer sent");
-      window.umami?.track("Trade Offer Sent", {
+      window.rybbit?.event("Trade Offer Sent", {
         type: "custom",
         offeringModified: !!payload.offering,
         requestingModified: !!payload.requesting,

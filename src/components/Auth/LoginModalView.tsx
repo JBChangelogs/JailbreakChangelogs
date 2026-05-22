@@ -269,7 +269,7 @@ export default function LoginModalView({
                         variant="default"
                         size="lg"
                         className="w-full"
-                        data-umami-event="Login with Discord"
+                        data-rybbit-event="Login with Discord"
                       >
                         Continue with Discord
                       </Button>
@@ -334,7 +334,7 @@ export default function LoginModalView({
                         variant="default"
                         size="lg"
                         className="w-full"
-                        data-umami-event="Login with Roblox"
+                        data-rybbit-event="Login with Roblox"
                       >
                         Continue with Roblox
                       </Button>

@@ -445,7 +445,7 @@ export default function RedeemPage() {
                 }
                 className="w-full py-6 text-lg"
                 size="lg"
-                data-umami-event="Redeem Code"
+                data-rybbit-event="Redeem Code"
               >
                 {isLoading ? (
                   <div className="flex items-center justify-center">

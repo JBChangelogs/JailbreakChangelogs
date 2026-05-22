@@ -140,9 +140,9 @@ export default function ServerBountyGroup({
                 variant="default"
                 size="sm"
                 disabled={isJoining}
-                data-umami-event="Join Server"
-                data-umami-event-tracker="Bounty_Tracker"
-                data-umami-event-term="Bounty"
+                data-rybbit-event="Join Server"
+                data-rybbit-prop-tracker="Bounty_Tracker"
+                data-rybbit-prop-term="Bounty"
                 onClick={() => {
                   setIsJoining(true);
                   const joiningToastId = toast.loading("Joining server...");

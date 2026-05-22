@@ -484,7 +484,7 @@ const AddServerModal: React.FC<AddServerModalProps> = ({
                   disabled={loading}
                   variant="default"
                   size="md"
-                  data-umami-event={
+                  data-rybbit-event={
                     editingServer ? "Edit Server" : "Add Server"
                   }
                 >

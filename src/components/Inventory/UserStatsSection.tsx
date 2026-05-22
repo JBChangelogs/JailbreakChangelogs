@@ -287,7 +287,7 @@ export default function UserStatsSection({
             onCheckedChange={(checked) => {
               const newValue = checked;
               setShowNonOgOnly(newValue);
-              window.umami?.track("Inventory UserStats Non-OG Toggle", {
+              window.rybbit?.event("Inventory UserStats Non-OG Toggle", {
                 active: newValue,
               });
             }}

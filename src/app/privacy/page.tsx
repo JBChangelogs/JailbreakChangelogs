@@ -84,17 +84,17 @@ export default function PrivacyPage() {
 
             <div>
               <h2 className="text-primary-text mb-4 text-xl font-semibold">
-                Internal Analytics & Security (Umami)
+                Internal Analytics & Security (Rybbit)
               </h2>
               <Typography className="text-secondary-text mb-4">
                 We use a self-hosted instance of{" "}
                 <a
-                  href="https://umami.is"
+                  href="https://rybbit.io"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-link hover:text-link-hover hover:underline"
                 >
-                  Umami Analytics
+                  Rybbit Analytics
                 </a>{" "}
                 as an internal tool to analyze site usage and maintain platform
                 security. Because this system is entirely first-party (hosted on

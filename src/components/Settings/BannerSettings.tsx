@@ -186,8 +186,8 @@ export const BannerSettings = ({
         });
         onBannerUpdate(result.imageUrl);
 
-        if (typeof window !== "undefined" && window.umami) {
-          window.umami.track("Custom Banner Uploaded", {
+        if (typeof window !== "undefined" && window.rybbit) {
+          window.rybbit.event("Custom Banner Uploaded", {
             url: result.imageUrl,
           });
         }
@@ -249,8 +249,8 @@ export const BannerSettings = ({
       toast.success("Custom banner updated successfully");
 
       // Track banner URL update
-      if (typeof window !== "undefined" && window.umami) {
-        window.umami.track("Custom Banner Updated", { url: customBannerUrl });
+      if (typeof window !== "undefined" && window.rybbit) {
+        window.rybbit.event("Custom Banner Updated", { url: customBannerUrl });
       }
     } catch (error) {
       console.error("Error updating banner:", error);
