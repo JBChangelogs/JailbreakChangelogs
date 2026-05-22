@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { useAuthContext } from "@/contexts/AuthContext";
-import { trackEvent } from "@/utils/analytics";
+import { trackEvent } from "@/utils/analytics/rybbit";
 import Image from "next/image";
 import {
   Sheet,

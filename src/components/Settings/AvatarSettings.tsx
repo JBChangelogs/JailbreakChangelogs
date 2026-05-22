@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import { trackEvent } from "@/utils/analytics";
+import { trackEvent } from "@/utils/analytics/rybbit";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";

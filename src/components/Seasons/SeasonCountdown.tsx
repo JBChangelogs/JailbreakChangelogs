@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { trackEvent } from "@/utils/analytics";
+import { trackEvent } from "@/utils/analytics/rybbit";
 import { Button } from "@/components/ui/button";
 
 interface Reward {

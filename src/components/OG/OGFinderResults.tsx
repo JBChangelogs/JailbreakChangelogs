@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { trackEvent } from "@/utils/analytics";
+import { trackEvent } from "@/utils/analytics/rybbit";
 import Image from "next/image";
 import Link from "next/link";
 import { RobloxUser, Item } from "@/types";

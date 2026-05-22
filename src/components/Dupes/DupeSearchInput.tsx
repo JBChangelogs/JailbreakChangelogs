@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { trackEvent } from "@/utils/analytics";
+import { trackEvent } from "@/utils/analytics/rybbit";
 import { Icon } from "@/components/ui/IconWrapper";
 import { Spinner } from "@/components/ui/Spinner";
 

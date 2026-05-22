@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { useAuthContext } from "@/contexts/AuthContext";
-import { trackIdentify } from "@/utils/analytics";
+import { trackIdentify } from "@/utils/analytics/rybbit";
 
 export default function RybbitIdentity() {
   const { user, isAuthenticated } = useAuthContext();

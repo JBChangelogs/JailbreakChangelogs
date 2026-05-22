@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useAuthContext } from "@/contexts/AuthContext";
-import { trackEvent } from "@/utils/analytics";
+import { trackEvent } from "@/utils/analytics/rybbit";
 import { TradeItem } from "@/types/trading";
 import { UserData } from "@/types/auth";
 import { ItemGrid } from "./ItemGrid";

@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { trackEvent } from "@/utils/analytics";
+import { trackEvent } from "@/utils/analytics/rybbit";
 import { RobloxUser } from "@/types";
 import OGFinderDataStreamer from "./OGFinderDataStreamer";
 import { Icon } from "@/components/ui/IconWrapper";
