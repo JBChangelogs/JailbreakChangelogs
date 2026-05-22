@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { createLogger } from "@/services/logger";
-import { trackEvent } from "@/utils/analytics/umami";
+import { trackEvent } from "@/utils/analytics/rybbit";
 
 const log = createLogger("UI");
 

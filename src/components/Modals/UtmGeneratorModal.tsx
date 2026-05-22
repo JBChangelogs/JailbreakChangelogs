@@ -6,7 +6,7 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { trackEvent } from "@/utils/analytics/umami";
+import { trackEvent } from "@/utils/analytics/rybbit";
 import { Icon } from "@/components/ui/IconWrapper";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";

@@ -6,7 +6,7 @@ import Link from "next/link";
 import { Icon } from "@/components/ui/IconWrapper";
 import { Button } from "@/components/ui/button";
 import { createLogger } from "@/services/logger";
-import { trackEvent } from "@/utils/analytics/umami";
+import { trackEvent } from "@/utils/analytics/rybbit";
 
 const log = createLogger("UI");
 

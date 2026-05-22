@@ -22,7 +22,7 @@ import {
   getFilterDisplayName,
 } from "./valuesFilterOptions";
 import { valueSortGroups, getValueSortLabel } from "./valuesSortOptions";
-import { trackFilterSortEvent } from "@/utils/analytics/umami";
+import { trackFilterSortEvent } from "@/utils/analytics/rybbit";
 
 interface ValuesSearchControlsProps {
   onDebouncedSearchChange: (term: string) => void;

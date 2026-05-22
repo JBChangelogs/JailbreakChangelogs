@@ -47,7 +47,7 @@ import {
   valueSortOptions,
 } from "@/components/Values/valuesSortOptions";
 import { useValueSortState } from "@/hooks/useValueSortState";
-import { trackFilterSortEvent } from "@/utils/analytics/umami";
+import { trackFilterSortEvent } from "@/utils/analytics/rybbit";
 
 interface AvailableItemsGridProps {
   items: TradeItem[];

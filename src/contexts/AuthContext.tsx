@@ -18,7 +18,7 @@ import {
   safeLocalStorage,
 } from "@/utils/storage/safeStorage";
 import { PUBLIC_API_URL } from "@/utils/api/api";
-import { trackEvent, trackClearUserId } from "@/utils/analytics/umami";
+import { trackEvent, trackClearUserId } from "@/utils/analytics/rybbit";
 import { toast } from "sonner";
 import { useRealtimeNotificationsWebSocket } from "@/hooks/useRealtimeNotificationsWebSocket";
 import { createLogger } from "@/services/logger";

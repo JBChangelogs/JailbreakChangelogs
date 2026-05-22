@@ -1,14 +1,14 @@
 import { createLogger } from "@/services/logger";
-import { trackEvent } from "@/utils/analytics/umami";
+import { trackEvent } from "@/utils/analytics/rybbit";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { deleteAccount } from "@/services/settingsService";
-
-const log = createLogger("UI");
 import { useAuthContext } from "@/contexts/AuthContext";
 import { Icon } from "@/components/ui/IconWrapper";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+
+const log = createLogger("UI");
 import {
   Dialog,
   DialogContent,

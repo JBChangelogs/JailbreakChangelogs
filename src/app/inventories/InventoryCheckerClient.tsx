@@ -16,7 +16,7 @@ import {
   INVENTORY_API_URL,
   PUBLIC_API_URL,
 } from "@/utils/api/api";
-import { trackEvent } from "@/utils/analytics/umami";
+import { trackEvent } from "@/utils/analytics/rybbit";
 import { buildApiUrlWithDevToken } from "@/utils/api/apiDevToken";
 import { RobloxUser, Item } from "@/types";
 import { InventoryData, InventoryItem, UserConnectionData } from "./types";
