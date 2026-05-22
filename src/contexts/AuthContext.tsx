@@ -313,7 +313,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
         error: null,
       });
 
-      // Track user status in Clarity
+      if (typeof window !== "undefined" && window.rybbit) {
+        window.rybbit.event("User Logout");
+        window.rybbit.clearUserId();
+      }
+
       router.refresh();
     } catch (err) {
       log.error("Logout error", err);
