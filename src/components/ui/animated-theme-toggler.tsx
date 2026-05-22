@@ -2,8 +2,8 @@
 
 import { useCallback, useRef } from "react";
 import { cn } from "@/lib/utils";
-import { useTheme } from "@/contexts/ThemeContext";
-import { safeLocalStorage } from "@/utils/storage/safeStorage";
+import { useTheme, AvailableThemes, Theme } from "@/contexts/ThemeContext";
+import { safeLocalStorage } from "@/utils/safeStorage";
 import {
   Tooltip,
   TooltipContent,
@@ -22,19 +22,17 @@ export const AnimatedThemeToggler = ({
   const { theme, setTheme } = useTheme();
   const buttonRef = useRef<HTMLButtonElement>(null);
 
-  const getNextTheme = useCallback(
-    (currentTheme: string): "light" | "dark" | "og" => {
-      // Cycle through: dark -> light -> dark
-      if (currentTheme === "dark") return "light";
-      if (currentTheme === "light") return "og";
-      return "dark";
-    },
-    [],
-  );
+  const getNextTheme = useCallback((currentTheme: Theme): Theme => {
+    // Cycle through AvailableThemes
+    const currThemeIdx: number = AvailableThemes.indexOf(currentTheme);
+    const nextThemeIdx: number = (currThemeIdx + 1) % AvailableThemes.length;
+    const nextTheme: Theme = AvailableThemes[nextThemeIdx];
+    return nextTheme;
+  }, []);
 
   const toggleTheme = useCallback(async () => {
     const newTheme = getNextTheme(theme);
-    document.documentElement.classList.remove("light", "dark", "og");
+    document.documentElement.classList.remove(...AvailableThemes);
     document.documentElement.classList.add(newTheme);
     safeLocalStorage.setItem("theme", newTheme);
     setTheme(newTheme);
@@ -76,9 +74,9 @@ export const AnimatedThemeToggler = ({
           <path
             fill="none"
             stroke="currentColor"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="2"
             d="M12 7h7a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2zm0 0L8 3m4 4l4-4"
           />
         </svg>
@@ -98,21 +96,13 @@ export const AnimatedThemeToggler = ({
             size === "sm" ? "h-8 w-8" : "h-10 w-10",
             className,
           )}
-          aria-label={
-            theme === "dark" ? "Switch to light mode" : "Switch to dark mode"
-          }
+          aria-label={`Switch to ${getNextTheme(theme)} mode`}
           {...props}
         >
           {getIcon()}
         </button>
       </TooltipTrigger>
-      <TooltipContent>
-        {theme === "og"
-          ? "Switch to dark mode"
-          : theme === "dark"
-            ? "Switch to light mode"
-            : "Switch to OG mode"}
-      </TooltipContent>
+      <TooltipContent>Switch to {getNextTheme(theme)} mode</TooltipContent>
     </Tooltip>
   );
 };
