@@ -24,7 +24,7 @@ export default function RailwayBadge() {
   }
 
   const logoSrc =
-    resolvedTheme === "dark"
+    resolvedTheme === "dark" || resolvedTheme === "og"
       ? "/logos/railway/railway-logotype-light.svg"
       : "/logos/railway/railway-logotype-dark.svg";
 
