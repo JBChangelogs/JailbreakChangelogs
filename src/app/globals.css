@@ -247,6 +247,157 @@
   --header-height: 0px; /* Dynamic header height, set by JS */
 }
 
+
+/* OG THEME - Applied when .og class is present */
+.og {
+  /* Background Colors - OG theme */
+  --color-primary-bg: #212a31; /* Main page background - White */
+  --color-secondary-bg: #2e3944; /* Card background - Very light gray */
+  --color-tertiary-bg: #222936; /* Elevated surfaces - Cool light gray */
+  --color-quaternary-bg: #2b3343; /* Subtle backgrounds - Slightly darker gray */
+  --color-surface-bg: #11141b; /* Surface backgrounds - White */
+  --color-overlay-bg: rgba(17, 20, 27, 0.85); /* Overlay backgrounds - White with opacity */
+  --color-newsletter-bg: #1c212c; /* Dark sections */
+
+  /* Text Colors - Light theme */
+  --color-primary-text: #d3d9d4; /* Main headings - Dark */
+  --color-secondary-text: #94a3b8; /* Body text - Medium dark */
+  --color-tertiary-text: #748d92; /* Muted text - Medium gray */
+  --color-quaternary-text: #475569; /* Disabled text - Light gray */
+  --color-card-headline: #ffffff; /* Headings within cards - Dark */
+  --color-card-paragraph: #94a3b8; /* Text within cards - Medium dark */
+
+  /* Border and Separator Colors - Light theme */
+  --color-border-primary: #2d3748; /* Primary borders - Light gray */
+  --color-border-card: #2e384d; /* Card borders - Slight contrast */
+  --color-border-secondary: #1e293b; /* Secondary borders - Very light gray */
+  --color-border-tertiary: #111827; /* Tertiary borders - Almost white */
+  --color-border-focus: #5A64EA; /* Focus borders - Same blue */
+  --color-border-error: #ef4444; /* Error borders - Same red */
+
+  /* Card Elements - Light theme */
+  --color-card-tag-bg: #2563eb; /* Tag/chip backgrounds - Same blue */
+  --color-card-tag-text: #ffffff; /* Text on tags/chips - White */
+  --color-card-highlight: #5A64EA; /* Highlighted elements - Dark */
+  --color-card-shadow: rgba(0, 0, 0, 0.4); /* Card shadows - Very light */
+
+  /* Interactive Elements - Light theme */
+  --color-link: #60a5fa; /* Primary links - Darker for contrast */
+  --color-link-hover: #93c5fd; /* Link hover states - Darker */
+  --color-link-active: #5A64EA; /* Link active states - Even darker */
+  --color-link-visited: #94a3b8; /* Visited links - Gray */
+
+  /* Button Colors - Light theme (same as dark) */
+  --color-button-info: #124e66; /* Primary buttons - Darker for better contrast */
+  --color-button-info-hover: #2563eb; /* Button hover states */
+  --color-button-info-active: #1d4ed8; /* Button active states */
+  --color-button-info-disabled: #334155; /* Disabled buttons - Light gray */
+  --color-button-success: #10b981; /* Success actions */
+  --color-button-success-hover: #059669; /* Success hover */
+  --color-button-danger: #ef4444; /* Error/destructive actions */
+  --color-button-danger-hover: #dc2626; /* Danger hover */
+  --color-button-secondary: #2d3748; /* Secondary buttons - Light gray */
+  --color-button-secondary-hover: #4a5568; /* Secondary hover - Lighter */
+  --color-form-button: #5A64EA; /* Form submit buttons - Darker for better contrast */
+  --color-form-button-text: #ffffff; /* Text on form buttons */
+
+  /* Form Elements - Light theme */
+  --color-form-input: #11141b; /* Input field backgrounds - White */
+  --color-form-input-focus: #1c212c; /* Input focus backgrounds - Very light */
+  --color-form-input-disabled: #1e293b; /* Disabled input backgrounds - Light gray */
+  --color-form-label: #ffffff; /* Form labels - Dark */
+  --color-form-placeholder: #475569; /* Placeholder text - Light gray */
+  --color-form-error: #ef4444; /* Error text - Same red */
+  --color-form-success: #10b981; /* Success text - Same green */
+
+  /* Status Colors - Light theme (same as dark) */
+  --color-status-success: #065f46; /* Success states - Even darker for better contrast */
+  --color-status-success-vibrant: #10b981; /* Vibrant green for online presence - theme independent */
+  --color-status-warning: #f59e0b; /* Warning states */
+  --color-status-error: #991b1b; /* Error states - Darker for better contrast */
+  --color-status-info: #5A64EA; /* Info states */
+  --color-status-neutral: #475569; /* Neutral states - Light gray */
+
+  /* Additional Utility Colors - Light theme */
+  --color-highlight: #124e66; /* Accent color for highlights - Same blue */
+  --color-secondary: #475569; /* Secondary accent color - Same */
+  --color-tertiary: #10b981; /* Tertiary accent color - Same */
+  --color-stroke: #000000; /* Primary stroke color - Light gray */
+
+  /* Warning Colors - Light theme (same as dark) */
+  --color-warning: #f59e0b; /* Orange for Double XP alerts */
+  --color-warning-light: #fbbf24; /* Yellow for 2 weeks left */
+  --color-warning-dark: #d97706; /* Darker warning */
+
+  /* Badge Colors - Light theme (same as dark) */
+  --color-badge-owner: linear-gradient(
+    to right,
+    #8b5cf6,
+    #6366f1
+  ); /* Purple to indigo gradient */
+  --color-badge-tester: #a78bfa; /* Purple */
+  --color-badge-vtm: linear-gradient(
+    to right,
+    #047857,
+    #065f46
+  ); /* Emerald gradient */
+  --color-badge-vt: #5A64EA; /* Blue */
+  --color-badge-partner: #f97316; /* Orange */
+  --color-badge-contributor: linear-gradient(
+    to right,
+    #0f766e,
+    #115e59
+  ); /* Teal gradient */
+  --color-badge-developer: linear-gradient(
+    to right,
+    #84cc16,
+    #65a30d
+  ); /* Lime gradient */
+  --color-badge-designer: linear-gradient(
+    to right,
+    #d946ef,
+    #ec4899
+  ); /* Pink to magenta gradient */
+  --color-badge-early-adopter: linear-gradient(
+    to right,
+    #f59e0b,
+    #d97706
+  ); /* Amber to yellow gradient */
+  --color-badge-premium-bronze: linear-gradient(
+    to right,
+    #b45309,
+    #92400e
+  ); /* Bronze gradient */
+  --color-badge-premium-silver: linear-gradient(
+    to right,
+    #94a3b8,
+    #64748b
+  ); /* Silver gradient */
+  --color-badge-premium-gold: linear-gradient(
+    to right,
+    #eab308,
+    #ca8a04
+  ); /* Gold gradient */
+
+  /* Supporter Border Colors - Light theme (same as dark) */
+  --color-supporter-bronze-border: #cd7f32; /* Bronze border for Supporter 1 */
+  --color-supporter-silver-border: #c0c0c0; /* Silver border for Supporter 2 */
+  --color-supporter-gold-border: #ffd700; /* Gold border for Supporter 3 */
+
+  /* Supporter Card Backgrounds - Light theme */
+  --color-supporter-bronze-bg: #271e17; /* Subtle bronze tint for Supporter 1 */
+  --color-supporter-silver-bg: #1e232d; /* Subtle silver tint for Supporter 2 */
+  --color-supporter-gold-bg: #2a2618; /* Subtle gold tint for Supporter 3 */
+
+  /* Opacity Variations - Light theme */
+  --color-overlay-light: rgba(22, 26, 35, 0.5); /* Light overlay - White */
+  --color-overlay-medium: rgba(22, 26, 35, 0.7); /* Medium overlay - White */
+  --color-overlay-dark: rgba(22, 26, 35, 0.9); /* Dark overlay - White */
+
+  /* Hero Overlays - Light theme */
+  --color-hero-overlay: rgba(0, 0, 0, 0.75); /* Hero overlay - Light mode (lighter) */
+}
+
 /* LIGHT THEME - Applied when .light class is present */
 .light {
   /* Background Colors - Light theme */
