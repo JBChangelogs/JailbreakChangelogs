@@ -102,6 +102,7 @@ export function useCommentState(props: ChangelogCommentsProps) {
     >
   >(new Map());
   const [commentBan, setCommentBan] = useState<BanInfo | null>(null);
+  const [reactionBan, setReactionBan] = useState<BanInfo | null>(null);
 
   // --- Pagination ---
   const [page, setPage] = useState(1);
@@ -240,6 +241,7 @@ export function useCommentState(props: ChangelogCommentsProps) {
         setLoginModal({ open: true });
         return;
       }
+      if (reactionBan) return;
       if (
         reactionRateLimitUntil !== null &&
         Date.now() < reactionRateLimitUntil
@@ -376,6 +378,13 @@ export function useCommentState(props: ChangelogCommentsProps) {
             // Revert by toggling once more (odd toggles → one more = back to server state)
             setComments(applyToggle);
 
+            const ban = parseBan(response);
+            if (ban) {
+              setReactionBan(ban);
+              showBanToast(ban);
+              return;
+            }
+
             let errorData: CommentApiErrorData | null = null;
             try {
               errorData = await response.json();
@@ -415,6 +424,7 @@ export function useCommentState(props: ChangelogCommentsProps) {
     [
       comments,
       isLoggedIn,
+      reactionBan,
       reactionRateLimitUntil,
       setLoginModal,
       triggerRateLimit,
@@ -1258,6 +1268,7 @@ export function useCommentState(props: ChangelogCommentsProps) {
     rateLimitLabel,
     reactionRateLimitUntil,
     commentBan,
+    reactionBan,
     page,
     totalPages,
     totalComments,

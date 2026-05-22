@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { Icon } from "../ui/IconWrapper";
 import { CommentReaction } from "@/utils/api/api";
 import {
@@ -30,6 +30,7 @@ export function CommentReactions({
   const {
     handleReact,
     isRateLimited,
+    reactionBan,
     availableEmojis,
     isLoggedIn,
     setReactionBreakdownOpenId,
@@ -38,6 +39,9 @@ export function CommentReactions({
     setReactionPickerInlineOpenId,
     getStableReactionOrder,
   } = useCommentsContext();
+
+  const isReactionBlocked = isRateLimited || !!reactionBan;
+  const [tooltipResetKey, setTooltipResetKey] = useState(0);
 
   if (!reactions || reactions.length === 0) {
     if (!isLoggedIn || availableEmojis.length === 0) return null;
@@ -53,6 +57,41 @@ export function CommentReactions({
     setBreakdownTab(firstEmoji ?? sortedRxns[0]?.emoji ?? "all");
   };
 
+  const formatReactionTooltip = (r: (typeof top5)[number]): React.ReactNode => {
+    const users = r.users ?? [];
+    if (users.length === 0)
+      return `${r.emoji} ${r.count} reaction${r.count !== 1 ? "s" : ""}`;
+    const MAX_NAMES = 3;
+    const names = users.slice(0, MAX_NAMES).map((u) => u.username);
+    const remaining = r.count - names.length;
+    const nameStr =
+      names.length === 1
+        ? names[0]
+        : remaining > 0
+          ? names.join(", ")
+          : names.slice(0, -1).join(", ") + " and " + names[names.length - 1];
+    return (
+      <span>
+        {r.emoji} reacted by {nameStr}
+        {remaining > 0 && (
+          <>
+            {" and "}
+            <button
+              type="button"
+              className="text-link cursor-pointer hover:underline"
+              onClick={() => {
+                setTooltipResetKey((k) => k + 1);
+                openDialog(r.emoji);
+              }}
+            >
+              {remaining} other{remaining !== 1 ? "s" : ""}
+            </button>
+          </>
+        )}
+      </span>
+    );
+  };
+
   return (
     <>
       <div
@@ -63,26 +102,30 @@ export function CommentReactions({
         }
       >
         {top5.map((r) => (
-          <button
-            key={r.emoji}
-            type="button"
-            onClick={() => void handleReact(commentId, r.emoji)}
-            className={`flex items-center gap-1 rounded-full border ${compact ? "px-2 py-0.5" : "px-2 py-1"} text-sm transition-colors ${isRateLimited ? "cursor-not-allowed" : "cursor-pointer"} ${
-              r.user_reacted
-                ? "border-link/30 bg-link/10 text-link"
-                : "border-border-card bg-quaternary-bg text-primary-text hover:border-link/30"
-            }`}
-          >
-            <span>{r.emoji}</span>
-            <span className="text-xs font-medium">{r.count}</span>
-          </button>
+          <Tooltip key={`${r.emoji}-${tooltipResetKey}`} delayDuration={500}>
+            <TooltipTrigger asChild>
+              <button
+                type="button"
+                onClick={() => void handleReact(commentId, r.emoji)}
+                className={`flex items-center gap-1 rounded-lg border ${compact ? "px-2 py-0.5" : "px-2 py-1"} text-sm transition-colors ${isReactionBlocked ? "cursor-not-allowed" : "cursor-pointer"} ${
+                  r.user_reacted
+                    ? "border-link/30 bg-link/10 text-link"
+                    : "border-border-card bg-quaternary-bg text-primary-text hover:border-link/30"
+                }`}
+              >
+                <span>{r.emoji}</span>
+                <span className="text-xs font-medium">{r.count}</span>
+              </button>
+            </TooltipTrigger>
+            <TooltipContent>{formatReactionTooltip(r)}</TooltipContent>
+          </Tooltip>
         ))}
 
         {overflow.length > 0 && (
           <button
             type="button"
             onClick={() => openDialog()}
-            className={`border-border-card bg-quaternary-bg text-secondary-text hover:border-link/30 hover:text-primary-text flex cursor-pointer items-center gap-1 rounded-full border ${compact ? "px-2 py-0.5" : "px-2 py-1"} text-xs font-medium transition-colors`}
+            className={`border-border-card bg-quaternary-bg text-secondary-text hover:border-link/30 hover:text-primary-text flex cursor-pointer items-center gap-1 rounded-lg border ${compact ? "px-2 py-0.5" : "px-2 py-1"} text-sm font-medium transition-colors`}
           >
             +{overflow.length} more
           </button>
@@ -92,7 +135,7 @@ export function CommentReactions({
           <Popover
             open={reactionPickerInlineOpenId === commentId}
             onOpenChange={(open) => {
-              if (open && isRateLimited) return;
+              if (open && isReactionBlocked) return;
               setReactionPickerInlineOpenId(open ? commentId : null);
             }}
           >
@@ -101,10 +144,10 @@ export function CommentReactions({
                 <PopoverTrigger asChild>
                   <button
                     type="button"
-                    className={`flex ${compact ? "h-6 w-6" : "h-7 w-7"} bg-quaternary-bg items-center justify-center rounded-lg transition-colors ${
-                      isRateLimited
-                        ? "text-secondary-text/40 cursor-not-allowed"
-                        : "text-primary-text cursor-pointer hover:brightness-110"
+                    className={`flex ${compact ? "h-6 w-6" : "h-7 w-7"} bg-quaternary-bg text-primary-text items-center justify-center rounded-lg transition-colors ${
+                      isReactionBlocked
+                        ? "cursor-not-allowed"
+                        : "cursor-pointer hover:brightness-110"
                     }`}
                   >
                     <Icon

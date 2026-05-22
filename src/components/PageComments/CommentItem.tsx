@@ -59,6 +59,7 @@ export function CommentItem({ comment }: { comment: CommentData }) {
     isSubmittingComment,
     isBlocked,
     isRateLimited,
+    reactionBan,
     availableEmojis,
     reactionPickerHoverOpenId,
     setReactionPickerHoverOpenId,
@@ -277,7 +278,7 @@ export function CommentItem({ comment }: { comment: CommentData }) {
                 <Popover
                   open={reactionPickerHoverOpenId === comment.id}
                   onOpenChange={(open) => {
-                    if (open && isRateLimited) return;
+                    if (open && (isRateLimited || !!reactionBan)) return;
                     setReactionPickerHoverOpenId(open ? comment.id : null);
                   }}
                 >
@@ -287,7 +288,7 @@ export function CommentItem({ comment }: { comment: CommentData }) {
                         <Button
                           variant="ghost"
                           size="sm"
-                          className={`text-secondary-text hover:text-primary-text hover:bg-quaternary-bg h-8 w-8 rounded-lg p-0 opacity-100 transition-all duration-200 ${reactionPickerHoverOpenId === comment.id ? "lg:opacity-100" : "lg:opacity-0 lg:group-hover:opacity-100"} ${isRateLimited ? "cursor-not-allowed" : ""}`}
+                          className={`text-secondary-text hover:text-primary-text hover:bg-quaternary-bg h-8 w-8 rounded-lg p-0 opacity-100 transition-all duration-200 ${reactionPickerHoverOpenId === comment.id ? "lg:opacity-100" : "lg:opacity-0 lg:group-hover:opacity-100"} ${isRateLimited || !!reactionBan ? "cursor-not-allowed" : ""}`}
                         >
                           <Icon
                             icon="fluent:emoji-add-16-regular"
@@ -823,7 +824,11 @@ export function CommentItem({ comment }: { comment: CommentData }) {
                                 <Popover
                                   open={reactionPickerHoverOpenId === reply.id}
                                   onOpenChange={(open) => {
-                                    if (open && isRateLimited) return;
+                                    if (
+                                      open &&
+                                      (isRateLimited || !!reactionBan)
+                                    )
+                                      return;
                                     setReactionPickerHoverOpenId(
                                       open ? reply.id : null,
                                     );
@@ -835,7 +840,7 @@ export function CommentItem({ comment }: { comment: CommentData }) {
                                         <Button
                                           variant="ghost"
                                           size="sm"
-                                          className={`text-secondary-text hover:text-primary-text hover:bg-quaternary-bg h-7 w-7 rounded-lg p-0 opacity-100 transition-all duration-200 ${reactionPickerHoverOpenId === reply.id ? "lg:opacity-100" : "lg:opacity-0 lg:group-hover:opacity-100"} ${isRateLimited ? "cursor-not-allowed" : ""}`}
+                                          className={`text-secondary-text hover:text-primary-text hover:bg-quaternary-bg h-7 w-7 rounded-lg p-0 opacity-100 transition-all duration-200 ${reactionPickerHoverOpenId === reply.id ? "lg:opacity-100" : "lg:opacity-0 lg:group-hover:opacity-100"} ${isRateLimited || !!reactionBan ? "cursor-not-allowed" : ""}`}
                                         >
                                           <Icon
                                             icon="fluent:emoji-add-16-regular"

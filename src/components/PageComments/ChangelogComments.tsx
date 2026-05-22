@@ -33,6 +33,7 @@ function CommentsLayout() {
     rateLimitLabel,
     reactionRateLimitUntil,
     commentBan,
+    reactionBan,
     isRefreshingComments,
     filteredComments,
     currentComments,
@@ -73,6 +74,7 @@ function CommentsLayout() {
             className="px-3 py-2"
           />
           {commentBan && <BanBanner ban={commentBan} className="px-3 py-2" />}
+          {reactionBan && <BanBanner ban={reactionBan} className="px-3 py-2" />}
 
           {/* New Comment Form */}
           <CommentForm />
