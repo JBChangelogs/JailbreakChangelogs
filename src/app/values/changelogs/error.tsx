@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { createLogger } from "@/services/logger";
+import { trackEvent } from "@/utils/analytics/umami";
 
 const log = createLogger("UI");
 
@@ -14,10 +15,7 @@ export default function Error({
 }) {
   useEffect(() => {
     log.error("Values changelogs error", error);
-
-    if (window.rybbit) {
-      window.rybbit.event("Error", { message: error.message });
-    }
+    trackEvent("Error", { message: error.message });
   }, [error]);
 
   return (

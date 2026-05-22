@@ -18,6 +18,7 @@ import {
   safeLocalStorage,
 } from "@/utils/storage/safeStorage";
 import { PUBLIC_API_URL } from "@/utils/api/api";
+import { trackEvent, trackClearUserId } from "@/utils/analytics/umami";
 import { toast } from "sonner";
 import { useRealtimeNotificationsWebSocket } from "@/hooks/useRealtimeNotificationsWebSocket";
 import { createLogger } from "@/services/logger";
@@ -313,10 +314,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
         error: null,
       });
 
-      if (typeof window !== "undefined" && window.rybbit) {
-        window.rybbit.event("User Logout");
-        window.rybbit.clearUserId();
-      }
+      trackEvent("User Logout");
+      trackClearUserId();
 
       router.refresh();
     } catch (err) {

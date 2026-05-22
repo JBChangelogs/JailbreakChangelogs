@@ -16,6 +16,7 @@ import {
   INVENTORY_API_URL,
   PUBLIC_API_URL,
 } from "@/utils/api/api";
+import { trackEvent } from "@/utils/analytics/umami";
 import { buildApiUrlWithDevToken } from "@/utils/api/apiDevToken";
 import { RobloxUser, Item } from "@/types";
 import { InventoryData, InventoryItem, UserConnectionData } from "./types";
@@ -646,9 +647,7 @@ export default function InventoryCheckerClient({
     if (!input) return;
 
     // Track inventory search with search term
-    if (typeof window !== "undefined" && window.rybbit) {
-      window.rybbit.event("Inventory Search", { searchTerm: input });
-    }
+    trackEvent("Inventory Search", { searchTerm: input });
 
     setInternalIsLoading(true);
     router.push(`/inventories/${input}`);
@@ -880,12 +879,7 @@ export default function InventoryCheckerClient({
                             <div className="flex justify-center">
                               <Button
                                 onClick={() => {
-                                  if (
-                                    typeof window !== "undefined" &&
-                                    window.rybbit
-                                  ) {
-                                    window.rybbit.event("Request Scan");
-                                  }
+                                  trackEvent("Request Scan");
                                   // Show Turnstile modal before scan
                                   if (
                                     ENABLE_WS_SCAN &&

@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Icon } from "@/components/ui/IconWrapper";
 import { Button } from "@/components/ui/button";
 import { createLogger } from "@/services/logger";
+import { trackEvent } from "@/utils/analytics/umami";
 
 const log = createLogger("UI");
 
@@ -18,6 +19,7 @@ export default function Error({
 }) {
   useEffect(() => {
     log.error("Users error", error);
+    trackEvent("Error", { message: error.message });
   }, [error]);
 
   return (

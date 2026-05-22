@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
+import { trackEvent } from "@/utils/analytics";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
@@ -185,11 +186,7 @@ export const BannerSettings = ({
         await updateUserSettings("custom_banner", true);
         onBannerUpdate(result.imageUrl);
 
-        if (typeof window !== "undefined" && window.rybbit) {
-          window.rybbit.event("Custom Banner Uploaded", {
-            url: result.imageUrl,
-          });
-        }
+        trackEvent("Custom Banner Uploaded", { url: result.imageUrl });
       } catch (saveError) {
         log.warn("Auto-save failed after upload:", saveError);
         // We still consider the upload a success if the image was uploaded
@@ -243,10 +240,7 @@ export const BannerSettings = ({
       onBannerUpdate(newBannerUrl);
       toast.success("Custom banner updated successfully");
 
-      // Track banner URL update
-      if (typeof window !== "undefined" && window.rybbit) {
-        window.rybbit.event("Custom Banner Updated", { url: customBannerUrl });
-      }
+      trackEvent("Custom Banner Updated", { url: customBannerUrl });
     } catch (error) {
       log.error("Error updating banner:", error);
       setBannerError(

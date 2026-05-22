@@ -1,9 +1,10 @@
 import { createLogger } from "@/services/logger";
+import { trackEvent } from "@/utils/analytics/umami";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { deleteAccount } from "@/services/settingsService";
 
 const log = createLogger("UI");
-import { deleteAccount } from "@/services/settingsService";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { Icon } from "@/components/ui/IconWrapper";
 import { toast } from "sonner";
@@ -53,9 +54,7 @@ export const DeleteAccount = () => {
     }
 
     try {
-      if (typeof window !== "undefined" && window.rybbit) {
-        window.rybbit.event("Delete Account");
-      }
+      trackEvent("Delete Account");
       await deleteAccount();
       await logout();
 
