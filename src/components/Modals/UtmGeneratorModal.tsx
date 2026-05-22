@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from "react";
+import { trackEvent } from "@/utils/analytics";
 import { Dialog, DialogPanel } from "@headlessui/react";
 import { Icon } from "@/components/ui/IconWrapper";
 import { Button } from "@/components/ui/button";
@@ -51,28 +52,20 @@ export const UtmGeneratorModal: React.FC<UtmGeneratorModalProps> = ({
     navigator.clipboard.writeText(generatedUrl);
     toast.success("URL copied to clipboard!");
 
-    // Track UTM URL generation with parameters
-    if (typeof window !== "undefined" && window.rybbit) {
-      try {
-        const url = new URL(generatedUrl);
-        const pathname = url.pathname;
-
-        // Build payload with used parameters
-        const payload: Record<string, string> = {
-          route: pathname,
-          generated_url: generatedUrl,
-        };
-
-        if (source) payload.utm_source = source;
-        if (medium) payload.utm_medium = medium;
-        if (campaign) payload.utm_campaign = campaign;
-        if (term) payload.utm_term = term;
-        if (content) payload.utm_content = content;
-
-        window.rybbit.event("Generate UTM Link", payload);
-      } catch (e) {
-        console.error("Error tracking UTM generation:", e);
-      }
+    try {
+      const url = new URL(generatedUrl);
+      const payload: Record<string, string> = {
+        route: url.pathname,
+        generated_url: generatedUrl,
+      };
+      if (source) payload.utm_source = source;
+      if (medium) payload.utm_medium = medium;
+      if (campaign) payload.utm_campaign = campaign;
+      if (term) payload.utm_term = term;
+      if (content) payload.utm_content = content;
+      trackEvent("Generate UTM Link", payload);
+    } catch (e) {
+      console.error("Error tracking UTM generation:", e);
     }
 
     onClose();

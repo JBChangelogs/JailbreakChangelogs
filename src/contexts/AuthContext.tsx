@@ -22,6 +22,7 @@ import {
   safeLocalStorage,
 } from "@/utils/safeStorage";
 import { PUBLIC_API_URL } from "@/utils/api";
+import { trackEvent, trackClearUserId } from "@/utils/analytics";
 import { toast } from "sonner";
 import { useRealtimeNotificationsWebSocket } from "@/hooks/useRealtimeNotificationsWebSocket";
 
@@ -349,6 +350,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
       // Track user status in Clarity
       trackUserStatus(false, "logout");
+
+      trackEvent("User Logout");
+      trackClearUserId();
+
       router.refresh();
     } catch (err) {
       console.error("Logout error:", err);

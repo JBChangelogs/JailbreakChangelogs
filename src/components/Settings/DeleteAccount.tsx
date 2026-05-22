@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { trackEvent } from "@/utils/analytics";
 import { deleteAccount } from "@/services/settingsService";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { Icon } from "@/components/ui/IconWrapper";
@@ -44,9 +45,7 @@ export const DeleteAccount = () => {
     }
 
     try {
-      if (typeof window !== "undefined" && window.rybbit) {
-        window.rybbit.event("Delete Account");
-      }
+      trackEvent("Delete Account");
       await deleteAccount();
       await logout();
 

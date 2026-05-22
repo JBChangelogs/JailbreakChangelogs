@@ -91,16 +91,21 @@ export default async function RootLayout({
 }) {
   const { isMaintenanceMode } = await checkMaintenanceMode();
   const githubUrl = getGitHubUrl();
+  const isRailwayDeployed = ["production", "testing"].includes(
+    process.env.RAILWAY_ENVIRONMENT_NAME ?? "",
+  );
   if (isMaintenanceMode) {
     return (
       <html lang="en" className={`${GeistSans.variable} ${GeistMono.variable}`}>
         <head>
           {/* Rybbit Analytics */}
-          <Script
-            src="https://rybbit-api.jailbreakchangelogs.com/api/script.js"
-            data-site-id="1"
-            defer
-          />
+          {isRailwayDeployed && (
+            <Script
+              src="https://rybbit-api.jailbreakchangelogs.com/api/script.js"
+              data-site-id="0d25b013fe3a"
+              defer
+            />
+          )}
           {/* Nitro Pay Ads & GDPR - Always load script for consent prompts */}
           <Script
             id="nitropay-init"
@@ -233,11 +238,13 @@ export default async function RootLayout({
           href="https://assets.jailbreakchangelogs.com"
         />
         {/* Rybbit Analytics */}
-        <Script
-          src="https://rybbit-api.jailbreakchangelogs.com/api/script.js"
-          data-site-id="1"
-          defer
-        />
+        {isRailwayDeployed && (
+          <Script
+            src="https://rybbit-api.jailbreakchangelogs.com/api/script.js"
+            data-site-id="0d25b013fe3a"
+            defer
+          />
+        )}
         {/* Nitro Pay Ads & GDPR - Always load script for consent prompts */}
         <Script
           id="nitropay-init"

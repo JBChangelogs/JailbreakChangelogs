@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { trackEvent } from "@/utils/analytics";
 import { RobloxUser } from "@/types";
 import OGFinderDataStreamer from "./OGFinderDataStreamer";
 import { Icon } from "@/components/ui/IconWrapper";
@@ -63,10 +64,7 @@ export default function OGFinderClient({
     const input = searchId.trim();
     if (!input) return;
 
-    // Track OG search with search term
-    if (typeof window !== "undefined" && window.rybbit) {
-      window.rybbit.event("OG Search", { searchTerm: input });
-    }
+    trackEvent("OG Search", { searchTerm: input });
 
     setIsSearching(true);
     router.push(`/og/${input}`);
@@ -157,9 +155,7 @@ export default function OGFinderClient({
         <Button
           onClick={() => {
             setShowNotificationSheet(true);
-            if (typeof window !== "undefined" && window.rybbit) {
-              window.rybbit.event("Open OG Notification Sheet");
-            }
+            trackEvent("Open OG Notification Sheet");
           }}
           variant="default"
           size="lg"

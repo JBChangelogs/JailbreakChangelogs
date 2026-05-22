@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
+import { trackEvent } from "@/utils/analytics";
 import { cn } from "@/lib/utils";
 import { Box, Typography } from "@mui/material";
 import { Button } from "@/components/ui/button";
@@ -188,11 +189,7 @@ export const AvatarSettings = ({
         });
         onAvatarUpdate(result.imageUrl);
 
-        if (typeof window !== "undefined" && window.rybbit) {
-          window.rybbit.event("Custom Avatar Uploaded", {
-            url: result.imageUrl,
-          });
-        }
+        trackEvent("Custom Avatar Uploaded", { url: result.imageUrl });
       } catch (saveError) {
         console.warn("Auto-save failed after upload:", saveError);
       }
@@ -249,10 +246,7 @@ export const AvatarSettings = ({
       onAvatarUpdate(newAvatarUrl);
       toast.success("Custom avatar updated successfully");
 
-      // Track avatar URL update
-      if (typeof window !== "undefined" && window.rybbit) {
-        window.rybbit.event("Custom Avatar Updated", { url: customAvatarUrl });
-      }
+      trackEvent("Custom Avatar Updated", { url: customAvatarUrl });
     } catch (error) {
       console.error("Error updating avatar:", error);
       setAvatarError(

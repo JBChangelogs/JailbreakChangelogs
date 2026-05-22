@@ -50,6 +50,7 @@ import { UserBadges } from "@/components/Profile/UserBadges";
 import { UserDetailsTooltip } from "@/components/ui/UserDetailsTooltip";
 import CommentTimestamp from "./CommentTimestamp";
 import { toast } from "sonner";
+import { trackEvent } from "@/utils/analytics";
 import DOMPurify from "dompurify";
 import { Pagination } from "@/components/ui/Pagination";
 
@@ -687,10 +688,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
       setPage(1);
       refreshCommentsFromServer(true, 1);
 
-      // Track comment post
-      if (typeof window !== "undefined" && window.rybbit) {
-        window.rybbit.event("Comment Posted", { type });
-      }
+      trackEvent("Comment Posted", { type });
     } catch (err) {
       toast.error(
         err instanceof Error ? err.message : "Failed to post comment",
@@ -800,10 +798,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
       // Keep local state synced with canonical backend shape for replies/comments.
       refreshCommentsFromServer(true, page);
 
-      // Track comment edit
-      if (typeof window !== "undefined" && window.rybbit) {
-        window.rybbit.event("Comment Edited", { type });
-      }
+      trackEvent("Comment Edited", { type });
     } catch (err) {
       toast.error(
         err instanceof Error ? err.message : "Failed to edit comment",
@@ -844,10 +839,7 @@ const ChangelogComments: React.FC<ChangelogCommentsProps> = ({
       if (!response.ok) {
         throw new Error("Failed to delete comment");
       }
-      // Comment successfully deleted, track with analytics
-      if (typeof window !== "undefined" && window.rybbit) {
-        window.rybbit.event("Comment Deleted", { type });
-      }
+      trackEvent("Comment Deleted", { type });
     } catch (err) {
       // If deletion failed, restore the previous state
       setComments(previousComments);

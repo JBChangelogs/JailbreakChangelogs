@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { trackEvent } from "@/utils/analytics";
 import { Button } from "@/components/ui/button";
 
 interface Reward {
@@ -312,15 +313,13 @@ const SeasonCountdown: React.FC<SeasonCountdownProps> = ({
                     target="_blank"
                     rel="noopener noreferrer"
                     onClick={() => {
-                      if (typeof window !== "undefined" && window.rybbit) {
-                        const buttonType = nextSeasonStatus.includes("close in")
-                          ? "Submit a Creation"
-                          : "View Submissions";
-                        window.rybbit.event("Season Submission Click", {
-                          buttonType,
-                          season: nextSeason?.season || "unknown",
-                        });
-                      }
+                      const buttonType = nextSeasonStatus.includes("close in")
+                        ? "Submit a Creation"
+                        : "View Submissions";
+                      trackEvent("Season Submission Click", {
+                        buttonType,
+                        season: nextSeason?.season || "unknown",
+                      });
                     }}
                   >
                     {nextSeasonStatus.includes("close in")
