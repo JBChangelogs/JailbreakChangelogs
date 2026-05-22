@@ -98,7 +98,7 @@ export default async function RootLayout({
           {/* Rybbit Analytics */}
           <Script
             src="https://rybbit-api.jailbreakchangelogs.com/api/script.js"
-            data-site-id="1"
+            data-site-id="0d25b013fe3a"
             defer
           />
           {/* Nitro Pay Ads & GDPR - Always load script for consent prompts */}
@@ -235,7 +235,7 @@ export default async function RootLayout({
         {/* Rybbit Analytics */}
         <Script
           src="https://rybbit-api.jailbreakchangelogs.com/api/script.js"
-          data-site-id="1"
+          data-site-id="0d25b013fe3a"
           defer
         />
         {/* Nitro Pay Ads & GDPR - Always load script for consent prompts */}

@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { useAuthContext } from "@/contexts/AuthContext";
+import { trackIdentify } from "@/utils/analytics";
 
 export default function RybbitIdentity() {
   const { user, isAuthenticated } = useAuthContext();
@@ -26,7 +27,7 @@ export default function RybbitIdentity() {
         traits.roblox_username = user.roblox_username;
       }
 
-      window.rybbit.identify(user.id, traits);
+      trackIdentify(user.id, traits);
       return true;
     };
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { trackEvent } from "@/utils/analytics";
 
 export default function Error({
   error,
@@ -11,10 +12,7 @@ export default function Error({
 }) {
   useEffect(() => {
     console.error(error);
-
-    if (window.rybbit) {
-      window.rybbit.event("Error", { message: error.message });
-    }
+    trackEvent("Error", { message: error.message });
   }, [error]);
 
   return (

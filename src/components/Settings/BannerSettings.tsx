@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
+import { trackEvent } from "@/utils/analytics";
 import { cn } from "@/lib/utils";
 import { Box, TextField, Typography } from "@mui/material";
 import { Button } from "@/components/ui/button";
@@ -186,11 +187,7 @@ export const BannerSettings = ({
         });
         onBannerUpdate(result.imageUrl);
 
-        if (typeof window !== "undefined" && window.rybbit) {
-          window.rybbit.event("Custom Banner Uploaded", {
-            url: result.imageUrl,
-          });
-        }
+        trackEvent("Custom Banner Uploaded", { url: result.imageUrl });
       } catch (saveError) {
         console.warn("Auto-save failed after upload:", saveError);
         // We still consider the upload a success if the image was uploaded
@@ -248,10 +245,7 @@ export const BannerSettings = ({
       onBannerUpdate(newBannerUrl);
       toast.success("Custom banner updated successfully");
 
-      // Track banner URL update
-      if (typeof window !== "undefined" && window.rybbit) {
-        window.rybbit.event("Custom Banner Updated", { url: customBannerUrl });
-      }
+      trackEvent("Custom Banner Updated", { url: customBannerUrl });
     } catch (error) {
       console.error("Error updating banner:", error);
       setBannerError(

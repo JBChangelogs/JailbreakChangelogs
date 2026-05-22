@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { trackEvent } from "@/utils/analytics";
 import Image from "next/image";
 import Link from "next/link";
 import { RobloxUser, Item } from "@/types";
@@ -399,9 +400,7 @@ export default function OGFinderResults({
         <Button
           onClick={() => {
             setShowNotificationSheet(true);
-            if (typeof window !== "undefined" && window.rybbit) {
-              window.rybbit.event("Open OG Notification Sheet");
-            }
+            trackEvent("Open OG Notification Sheet");
           }}
           variant="default"
           size="lg"

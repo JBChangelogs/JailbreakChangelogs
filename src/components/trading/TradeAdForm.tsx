@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useAuthContext } from "@/contexts/AuthContext";
+import { trackEvent } from "@/utils/analytics";
 import { TradeItem } from "@/types/trading";
 import { UserData } from "@/types/auth";
 import { ItemGrid } from "./ItemGrid";
@@ -670,10 +671,7 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
           onSuccess(responseBody);
         }
 
-        // Track successful trade ad creation
-        if (typeof window !== "undefined" && window.rybbit) {
-          window.rybbit.event("Trade Offer Posted");
-        }
+        trackEvent("Trade Offer Posted");
       }
     } catch (err) {
       console.error("Error with trade ad:", err);

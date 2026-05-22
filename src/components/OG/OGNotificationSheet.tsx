@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { useAuthContext } from "@/contexts/AuthContext";
+import { trackEvent } from "@/utils/analytics";
 import Image from "next/image";
 import {
   Sheet,
@@ -240,12 +241,10 @@ export default function OGNotificationSheet({
         });
 
         // Track analytics
-        if (typeof window !== "undefined" && window.rybbit) {
-          window.rybbit.event("Remove OG Notification", {
-            itemName: item.name,
-            itemType: item.type,
-          });
-        }
+        trackEvent("Remove OG Notification", {
+          itemName: item.name,
+          itemType: item.type,
+        });
       } else {
         setNotifiedItemIds((prev) => [...prev, itemIdStr]);
         toast.success("Notification Added", {
@@ -254,12 +253,10 @@ export default function OGNotificationSheet({
         });
 
         // Track analytics
-        if (typeof window !== "undefined" && window.rybbit) {
-          window.rybbit.event("Add OG Notification", {
-            itemName: item.name,
-            itemType: item.type,
-          });
-        }
+        trackEvent("Add OG Notification", {
+          itemName: item.name,
+          itemType: item.type,
+        });
       }
     } catch (error) {
       console.error("Error toggling notification:", error);

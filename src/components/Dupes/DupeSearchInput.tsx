@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { trackEvent } from "@/utils/analytics";
 import { Icon } from "@/components/ui/IconWrapper";
 
 interface DupeSearchInputProps {
@@ -30,10 +31,7 @@ export default function DupeSearchInput({
     const input = searchId.trim();
     if (!input) return;
 
-    // Track dupe search with search term
-    if (typeof window !== "undefined" && window.rybbit) {
-      window.rybbit.event("Dupe Search", { searchTerm: input });
-    }
+    trackEvent("Dupe Search", { searchTerm: input });
 
     setIsSearching(true);
     router.push(`/dupes/${input}`);
