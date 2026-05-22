@@ -1,19 +1,15 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 import { useAuthContext } from "@/contexts/AuthContext";
 
 export default function RybbitIdentity() {
   const { user, isAuthenticated } = useAuthContext();
-  const didIdentifyRef = useRef(false);
 
   useEffect(() => {
-    if (!isAuthenticated || !user) {
-      didIdentifyRef.current = false;
-      return;
-    }
+    if (!isAuthenticated || !user) return;
 
-    const doIdentify = () => {
+    const identify = () => {
       if (!window.rybbit) return false;
 
       const traits: Record<string, string | number> = {
@@ -30,31 +26,13 @@ export default function RybbitIdentity() {
         traits.roblox_username = user.roblox_username;
       }
 
-      try {
-        if (didIdentifyRef.current) {
-          // Already identified this session — user object updated mid-session (e.g. Roblox linked, premium changed)
-          window.rybbit.setTraits(traits);
-        } else {
-          const isNewLogin = window.rybbit.getUserId() !== user.id;
-          window.rybbit.identify(user.id, traits);
-          if (isNewLogin) {
-            window.rybbit.event("User Login");
-          }
-          didIdentifyRef.current = true;
-        }
-      } catch (error) {
-        console.error("Failed to identify user in Rybbit:", error);
-        didIdentifyRef.current = true;
-      }
-
+      window.rybbit.identify(user.id, traits);
       return true;
     };
 
-    if (!doIdentify()) {
-      const interval = setInterval(() => {
-        if (doIdentify()) clearInterval(interval);
-      }, 100);
-      return () => clearInterval(interval);
+    if (!identify()) {
+      const timer = setTimeout(identify, 500);
+      return () => clearTimeout(timer);
     }
   }, [isAuthenticated, user]);
 
