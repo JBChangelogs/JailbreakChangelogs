@@ -76,10 +76,16 @@ export default function ContributorsClient({
     {
       key: "tradingcore",
       name: "Trading Core",
-      role: "Contributor",
       username: "Trading Core",
       avatar:
         "https://assets.jailbreakchangelogs.com/assets/contributors/TradingCore_Bg_Big.webp",
+      flags: [
+        {
+          flag: "is_contributor",
+          enabled: true,
+          description: "This user is a trusted tester for Jailbreak Changelogs",
+        },
+      ],
       link: "https://discord.com/invite/jailbreaktrading",
       external: true,
     },
@@ -184,7 +190,12 @@ export default function ContributorsClient({
           {contrib.name}
         </h1>
         <p className="text-secondary-text mt-2 capitalize opacity-80 transition-colors duration-300">
-          {contrib.role}
+          <UserBadges
+            flags={contrib.flags as UserFlag[]}
+            usernumber={NaN}
+            size="md"
+            noContainer
+          />
         </p>
       </a>
     </div>
