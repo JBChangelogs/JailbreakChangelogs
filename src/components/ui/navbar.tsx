@@ -56,6 +56,7 @@ import {
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { UtmGeneratorModal } from "@/components/Modals/UtmGeneratorModal";
 import { useToastRuntimeRightOffset } from "@/hooks/useToastRuntimeRightOffset";
+import NavLogo from "../common/NavLogo";
 
 const menuTransition = {
   type: "spring" as const,
@@ -605,25 +606,7 @@ export const NavbarModern = ({
         {/* Logo */}
         <div className="flex items-center">
           <Link href="/" style={{ display: "block" }}>
-            <Image
-              src={
-                isCollabPage
-                  ? `/logos/collab/JBCL_X_TC_Logo_Long_Transparent_${resolvedTheme === "dark" ? "Dark" : "Light"}.webp`
-                  : resolvedTheme === "og"
-                    ? "/logos/OLD/JBCL_Long_Transparent.webp"
-                    : "/logos/JBCL_Long_Transparent.webp"
-              }
-              alt="Jailbreak Changelogs Logo"
-              width={213}
-              height={48}
-              quality={90}
-              fetchPriority="high"
-              loading="eager"
-              style={{
-                height: "48px",
-                width: "auto",
-              }}
-            />
+            <NavLogo theme={resolvedTheme} isCollabPage={isCollabPage} />
           </Link>
         </div>
 

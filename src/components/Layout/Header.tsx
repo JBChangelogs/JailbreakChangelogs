@@ -63,6 +63,7 @@ import {
 import { UtmGeneratorModal } from "@/components/Modals/UtmGeneratorModal";
 import { useOptimizedRealTimeRelativeDate } from "@/hooks/useSharedTimer";
 import { useToastRuntimeRightOffset } from "@/hooks/useToastRuntimeRightOffset";
+import NavLogo from "../common/NavLogo";
 
 const UnreadNotificationBadge = ({ count }: { count: number }) => {
   if (count === 0) return null;
@@ -804,22 +805,9 @@ export default function Header() {
               <Toolbar className="flex items-center justify-between">
                 <Box className="flex items-center">
                   <Link href="/" style={{ display: "block" }}>
-                    <Image
-                      src={
-                        isCollabPage
-                          ? `/logos/collab/JBCL_X_TC_Logo_Long_Transparent_${resolvedTheme === "dark" ? "Dark" : "Light"}.webp`
-                          : resolvedTheme === "og"
-                            ? "/logos/OLD/JBCL_Long_Transparent.webp"
-                            : "/logos/JBCL_Long_Transparent.webp"
-                      }
-                      alt="Jailbreak Changelogs Logo"
-                      width={213}
-                      height={48}
-                      quality={90}
-                      fetchPriority="high"
-                      loading="eager"
-                      unoptimized={false}
-                      className="h-9 w-auto sm:h-12"
+                    <NavLogo
+                      theme={resolvedTheme}
+                      isCollabPage={isCollabPage}
                     />
                   </Link>
                 </Box>
