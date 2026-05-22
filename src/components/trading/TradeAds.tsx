@@ -867,7 +867,7 @@ export default function TradeAds({
   const handleTabChange = (tab: "view" | "create" | "myads") => {
     setActiveTab(tab);
     isSyncingPageWithUrlRef.current = true;
-    setIsPageTransitionLoading(tab === "view");
+    setIsPageTransitionLoading(false);
     setPage(1); // Reset to first page when changing tabs
     const nextUrl = tab === "view" ? getTradingUrl(1) : getTradingUrl(1, tab);
     router.push(nextUrl);
