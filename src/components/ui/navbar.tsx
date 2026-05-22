@@ -608,7 +608,7 @@ export const NavbarModern = ({
             <Image
               src={
                 isCollabPage
-                  ? `/logos/collab/JBCL_X_TC_Logo_Long_Transparent_${resolvedTheme === "og" ? "Dark" : "Light"}.webp`
+                  ? `/logos/collab/JBCL_X_TC_Logo_Long_Transparent_${resolvedTheme === "dark" ? "Dark" : "Light"}.webp`
                   : resolvedTheme === "og"
                     ? "/logos/OLD/JBCL_Long_Transparent.webp"
                     : "/logos/JBCL_Long_Transparent.webp"
