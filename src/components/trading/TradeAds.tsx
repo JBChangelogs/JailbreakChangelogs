@@ -879,7 +879,7 @@ export default function TradeAds({
 
   const handleTabChange = (tab: "view" | "create" | "myads") => {
     isSyncingPageWithUrlRef.current = true;
-    setIsPageTransitionLoading(tab === "view");
+    setIsPageTransitionLoading(false);
     setPage(1);
     void setTabParam(tab === "view" ? null : tab);
   };
