@@ -856,8 +856,8 @@ const ServerList: React.FC<{
                   variant="secondary"
                   className="px-3"
                   aria-label="Copy Server Link"
-                  data-umami-event="Copy Server Link"
-                  data-umami-event-server-id={server.id}
+                  data-rybbit-event="Copy Server Link"
+                  data-rybbit-prop-server-id={server.id}
                 >
                   <Icon icon="heroicons:clipboard" className="mr-1 h-4 w-4" />
                   Copy link
@@ -867,8 +867,8 @@ const ServerList: React.FC<{
                   size="sm"
                   variant="default"
                   className="px-3"
-                  data-umami-event="Join Server"
-                  data-umami-event-server-id={server.id}
+                  data-rybbit-event="Join Server"
+                  data-rybbit-prop-server-id={server.id}
                 >
                   <a
                     href={server.link}

@@ -572,7 +572,7 @@ export default function Header() {
               type="button"
               onClick={handleLogout}
               className="hover:bg-button-danger/10 flex w-full cursor-pointer items-center gap-3 rounded-xl px-2 py-2 text-left transition-colors"
-              data-umami-event="Logout"
+              data-rybbit-event="Logout"
             >
               <div className="bg-button-danger/15 flex h-8 w-8 shrink-0 items-center justify-center rounded-md">
                 <Icon
@@ -903,7 +903,7 @@ export default function Header() {
                                         );
                                       }
                                     }}
-                                    data-umami-event={
+                                    data-rybbit-event={
                                       "Clear Notification History"
                                     }
                                     className="text-secondary-text cursor-pointer transition-colors hover:text-red-500"

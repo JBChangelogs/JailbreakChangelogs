@@ -435,9 +435,9 @@ export default function RobberyServerGroupCard({
               variant="default"
               className="w-full min-w-0"
               disabled={isJoining}
-              data-umami-event="Join Server"
-              data-umami-event-tracker="Robbery_Tracker_Grouped"
-              data-umami-event-term="Grouped_Server"
+              data-rybbit-event="Join Server"
+              data-rybbit-prop-tracker="Robbery_Tracker_Grouped"
+              data-rybbit-prop-term="Grouped_Server"
               onClick={() => {
                 setIsJoining(true);
                 setLastJoined({

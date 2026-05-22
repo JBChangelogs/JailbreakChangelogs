@@ -215,7 +215,7 @@ const FollowingModal: React.FC<FollowingModalProps> = ({
           : "Successfully followed user",
       );
 
-      window.umami?.track(
+      window.rybbit?.event(
         isCurrentlyFollowing ? "Unfollow User" : "Follow User",
         {
           location: "Following Modal",

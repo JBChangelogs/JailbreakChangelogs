@@ -240,8 +240,8 @@ export default function OGNotificationSheet({
         });
 
         // Track analytics
-        if (typeof window !== "undefined" && window.umami) {
-          window.umami.track("Remove OG Notification", {
+        if (typeof window !== "undefined" && window.rybbit) {
+          window.rybbit.event("Remove OG Notification", {
             itemName: item.name,
             itemType: item.type,
           });
@@ -254,8 +254,8 @@ export default function OGNotificationSheet({
         });
 
         // Track analytics
-        if (typeof window !== "undefined" && window.umami) {
-          window.umami.track("Add OG Notification", {
+        if (typeof window !== "undefined" && window.rybbit) {
+          window.rybbit.event("Add OG Notification", {
             itemName: item.name,
             itemType: item.type,
           });

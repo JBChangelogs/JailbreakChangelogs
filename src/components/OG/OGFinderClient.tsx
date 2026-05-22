@@ -64,8 +64,8 @@ export default function OGFinderClient({
     if (!input) return;
 
     // Track OG search with search term
-    if (typeof window !== "undefined" && window.umami) {
-      window.umami.track("OG Search", { searchTerm: input });
+    if (typeof window !== "undefined" && window.rybbit) {
+      window.rybbit.event("OG Search", { searchTerm: input });
     }
 
     setIsSearching(true);
@@ -157,8 +157,8 @@ export default function OGFinderClient({
         <Button
           onClick={() => {
             setShowNotificationSheet(true);
-            if (typeof window !== "undefined" && window.umami) {
-              window.umami.track("Open OG Notification Sheet");
+            if (typeof window !== "undefined" && window.rybbit) {
+              window.rybbit.event("Open OG Notification Sheet");
             }
           }}
           variant="default"

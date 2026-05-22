@@ -155,7 +155,7 @@ export default function OGFilters({
                   } else {
                     setSelectedCategories([val]);
                   }
-                  window.umami?.track("OG Search Category Change", {
+                  window.rybbit?.event("OG Search Category Change", {
                     category: val === "all" ? "All" : val,
                   });
                 }}
@@ -207,7 +207,7 @@ export default function OGFilters({
                 value={sortOrder}
                 onValueChange={(val) => {
                   setSortOrder(val);
-                  window.umami?.track("OG Search Sort Change", { sort: val });
+                  window.rybbit?.event("OG Search Sort Change", { sort: val });
                 }}
               >
                 {hasDuplicates && (

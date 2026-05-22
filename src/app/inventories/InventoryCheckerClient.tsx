@@ -636,8 +636,8 @@ export default function InventoryCheckerClient({
     if (!input) return;
 
     // Track inventory search with search term
-    if (typeof window !== "undefined" && window.umami) {
-      window.umami.track("Inventory Search", { searchTerm: input });
+    if (typeof window !== "undefined" && window.rybbit) {
+      window.rybbit.event("Inventory Search", { searchTerm: input });
     }
 
     setInternalIsLoading(true);
@@ -857,9 +857,9 @@ export default function InventoryCheckerClient({
                                   onClick={() => {
                                     if (
                                       typeof window !== "undefined" &&
-                                      window.umami
+                                      window.rybbit
                                     ) {
-                                      window.umami.track("Request Scan");
+                                      window.rybbit.event("Request Scan");
                                     }
                                     // Show Turnstile modal before scan
                                     if (

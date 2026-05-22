@@ -200,7 +200,7 @@ export default function SettingsPage() {
         description: `Notification preference for "${humanizedTitle}" has been ${nextEnabled ? "enabled" : "disabled"}.`,
       });
 
-      window.umami?.track("Update Notification Preference", {
+      window.rybbit?.event("Update Notification Preference", {
         preference: title,
         enabled: nextEnabled,
       });

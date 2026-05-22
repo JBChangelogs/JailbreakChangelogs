@@ -21,7 +21,7 @@ import {
   getFilterDisplayName,
 } from "./valuesFilterOptions";
 import { valueSortGroups, getValueSortLabel } from "./valuesSortOptions";
-import { trackFilterSortEvent } from "@/utils/umami";
+import { trackFilterSortEvent } from "@/utils/analytics";
 
 interface ValuesSearchControlsProps {
   searchTerm: string;

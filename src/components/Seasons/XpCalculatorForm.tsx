@@ -258,7 +258,7 @@ export default function XpCalculatorForm({
         <Button
           onClick={onCalculate}
           disabled={!currentLevel || (!includeDailyXp && !includeContracts)}
-          data-umami-event="Will I Make It Calculate"
+          data-rybbit-event="Will I Make It Calculate"
         >
           Will I Make It?
         </Button>

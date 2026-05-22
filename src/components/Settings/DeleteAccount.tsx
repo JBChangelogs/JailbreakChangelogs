@@ -44,8 +44,8 @@ export const DeleteAccount = () => {
     }
 
     try {
-      if (typeof window !== "undefined" && window.umami) {
-        window.umami.track("Delete Account");
+      if (typeof window !== "undefined" && window.rybbit) {
+        window.rybbit.event("Delete Account");
       }
       await deleteAccount();
       await logout();
