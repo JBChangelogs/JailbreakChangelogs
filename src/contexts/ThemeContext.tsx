@@ -3,21 +3,26 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { safeLocalStorage } from "@/utils/safeStorage";
 
-type Theme = "og" | "dark" | "light";
+export type Theme = "light" | "dark" | "og";
+
+// used during theme toggle to cycle through themes
+// order determines the cycle order during theme toggle.
+// first theme refers to the default.
+export const AvailableThemes: Theme[] = ["dark", "light", "og"] as const;
 
 interface ThemeContextType {
   theme: Theme;
   setTheme: (theme: Theme) => void;
-  resolvedTheme: "og" | "dark" | "light";
+  resolvedTheme: Theme;
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const getInitialTheme = (): Theme => {
-    if (typeof window === "undefined") return "og";
+    if (typeof window === "undefined") return AvailableThemes[0];
 
-    const savedTheme = safeLocalStorage.getItem("theme");
+    const savedTheme = safeLocalStorage.getItem("theme") as Theme | "system";
     // const hasBeenMigrated = safeLocalStorage.getItem(
     //   "theme-christmas-removal-migration",
     // );
@@ -42,11 +47,13 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       const migratedTheme = prefersDark ? "dark" : "light";
       safeLocalStorage.setItem("theme", migratedTheme);
       return migratedTheme;
-    } else if (savedTheme && ["light", "dark", "og"].includes(savedTheme)) {
+    }
+
+    if (savedTheme && AvailableThemes.includes(savedTheme)) {
       return savedTheme as Theme;
     }
 
-    return "dark";
+    return AvailableThemes[0];
   };
 
   const [theme, setTheme] = useState<Theme>(getInitialTheme);
@@ -54,7 +61,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const root = document.documentElement;
-    root.classList.remove("og", "dark", "light");
+    root.classList.remove(...AvailableThemes);
     root.classList.add(theme);
     safeLocalStorage.setItem("theme", theme);
   }, [theme]);
