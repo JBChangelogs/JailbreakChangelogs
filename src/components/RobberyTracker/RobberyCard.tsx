@@ -429,13 +429,13 @@ export default function RobberyCard({
                 variant="default"
                 className="w-full min-w-0"
                 disabled={isJoining}
-                data-umami-event="Join Server"
-                data-umami-event-tracker={
+                data-rybbit-event="Join Server"
+                data-rybbit-prop-tracker={
                   robbery.marker_name === "Mansion"
                     ? "Mansion_Tracker"
                     : "Robbery_Tracker"
                 }
-                data-umami-event-term={displayName}
+                data-rybbit-prop-term={displayName}
                 onClick={() => {
                   setIsJoining(true);
                   setLastJoined({

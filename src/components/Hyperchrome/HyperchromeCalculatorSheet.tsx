@@ -308,7 +308,7 @@ export default function HyperchromeCalculatorModal({
               size="md"
               type="button"
               onClick={handleCalculate}
-              data-umami-event="Hyper Pity Calculate"
+              data-rybbit-event="Hyper Pity Calculate"
               className="w-full sm:w-auto"
             >
               Calculate

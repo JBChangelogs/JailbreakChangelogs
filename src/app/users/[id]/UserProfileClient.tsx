@@ -840,7 +840,7 @@ export default function UserProfileClient({
           : "Successfully followed user",
       );
 
-      window.umami?.track(isFollowing ? "Unfollow User" : "Follow User", {
+      window.rybbit?.event(isFollowing ? "Unfollow User" : "Follow User", {
         location: "User Profile",
       });
     } catch (error) {

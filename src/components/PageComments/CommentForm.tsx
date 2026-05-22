@@ -86,9 +86,9 @@ export function CommentForm() {
                 disabled={
                   !newComment.trim() || isSubmittingComment || isBlocked
                 }
-                data-umami-event="Post Comment"
-                data-umami-event-type={type}
-                data-umami-event-context-id={changelogId.toString()}
+                data-rybbit-event="Post Comment"
+                data-rybbit-prop-type={type}
+                data-rybbit-prop-context-id={changelogId.toString()}
               >
                 {isSubmittingComment ? (
                   <>

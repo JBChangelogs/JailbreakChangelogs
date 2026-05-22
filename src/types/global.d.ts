@@ -17,18 +17,17 @@ declare global {
       [key: string]: unknown;
     };
 
-    umami?: {
-      track: {
-        (): void; // Track pageview
-        (payload: object): void; // Custom payload
-        (event_name: string): void; // Custom event
-        (event_name: string, data: object): void; // Custom event with data
-      };
-      identify: {
-        (unique_id: string): void; // Assign ID to current session
-        (unique_id: string, data: object): void; // Session data with ID
-        (data: object): void; // Session data without ID
-      };
+    rybbit?: {
+      pageview: () => void;
+      event: (
+        name: string,
+        properties?: Record<string, string | number | boolean>,
+      ) => void;
+      identify: (userId: string, traits?: Record<string, unknown>) => void;
+      setTraits: (traits: Record<string, unknown>) => void;
+      clearUserId: () => void;
+      getUserId: () => string | null;
+      trackOutbound: (url: string, text?: string, target?: string) => void;
     };
   }
 }

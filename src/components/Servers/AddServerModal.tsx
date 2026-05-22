@@ -463,7 +463,7 @@ const AddServerModal: React.FC<AddServerModalProps> = ({
                 disabled={loading}
                 variant="default"
                 size="sm"
-                data-umami-event={editingServer ? "Edit Server" : "Add Server"}
+                data-rybbit-event={editingServer ? "Edit Server" : "Add Server"}
               >
                 {loading
                   ? editingServer

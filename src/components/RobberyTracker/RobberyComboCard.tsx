@@ -226,9 +226,9 @@ export default function RobberyComboCard({
               variant="default"
               className="w-full min-w-0"
               disabled={isJoining}
-              data-umami-event="Join Server"
-              data-umami-event-tracker="Robbery_Tracker"
-              data-umami-event-term="Power Combo"
+              data-rybbit-event="Join Server"
+              data-rybbit-prop-tracker="Robbery_Tracker"
+              data-rybbit-prop-term="Power Combo"
               onClick={() => {
                 setIsJoining(true);
                 setLastJoined({

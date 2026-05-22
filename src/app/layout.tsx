@@ -23,7 +23,7 @@ import NitroVideoPlayer from "@/components/Ads/NitroVideoPlayer";
 import AdErrorBoundary from "@/components/Ads/AdErrorBoundary";
 import AdBlockRecovery from "@/components/Ads/AdBlockRecovery";
 import AdBlockPrompt from "@/components/Ads/AdBlockPrompt";
-import UmamiIdentity from "@/components/Analytics/UmamiIdentity";
+import RybbitIdentity from "@/components/Analytics/RybbitIdentity";
 import {
   checkMaintenanceMode,
   getMaintenanceMetadata,
@@ -90,13 +90,6 @@ export default async function RootLayout({
 }) {
   const { isMaintenanceMode } = await checkMaintenanceMode();
   const githubUrl = getGitHubUrl();
-  const umamiWebsiteId = process.env.NEXT_PUBLIC_UMAMI_WEBSITE_ID;
-  const umamiScriptName = process.env.NEXT_PUBLIC_UMAMI_SCRIPT_NAME
-    ? process.env.NEXT_PUBLIC_UMAMI_SCRIPT_NAME.startsWith("/")
-      ? process.env.NEXT_PUBLIC_UMAMI_SCRIPT_NAME
-      : `/${process.env.NEXT_PUBLIC_UMAMI_SCRIPT_NAME}`
-    : "/script.js";
-
   if (isMaintenanceMode) {
     return (
       <html
@@ -111,16 +104,12 @@ export default async function RootLayout({
               __html: `(function(){try{var t=localStorage.getItem('theme');if(t==='light'||t==='dark'){document.documentElement.classList.add(t);}}catch(e){}})();`,
             }}
           />
-          {/* Umami Analytics */}
-          {umamiWebsiteId ? (
-            <Script
-              defer
-              src={`https://umami.jailbreakchangelogs.com${umamiScriptName}`}
-              data-website-id={umamiWebsiteId}
-              data-performance="true"
-              data-domains="jailbreakchangelogs.com"
-            />
-          ) : null}
+          {/* Rybbit Analytics */}
+          <Script
+            src="https://rybbit-api.jailbreakchangelogs.com/api/script.js"
+            data-site-id="1"
+            defer
+          />
           {/* Nitro Pay Ads & GDPR - Always load script for consent prompts */}
           <Script
             id="nitropay-init"
@@ -193,7 +182,7 @@ export default async function RootLayout({
 
                   <AuthCheck />
                   <AuthProvider>
-                    <UmamiIdentity />
+                    <RybbitIdentity />
                     <AdBlockRecovery />
                     <AdBlockPrompt />
                     <AdErrorBoundary>
@@ -260,16 +249,12 @@ export default async function RootLayout({
           rel="dns-prefetch"
           href="https://assets.jailbreakchangelogs.com"
         />
-        {/* Umami Analytics */}
-        {umamiWebsiteId ? (
-          <Script
-            defer
-            src={`https://umami.jailbreakchangelogs.com${umamiScriptName}`}
-            data-website-id={umamiWebsiteId}
-            data-performance="true"
-            data-domains="jailbreakchangelogs.com"
-          />
-        ) : null}
+        {/* Rybbit Analytics */}
+        <Script
+          src="https://rybbit-api.jailbreakchangelogs.com/api/script.js"
+          data-site-id="1"
+          defer
+        />
         {/* Nitro Pay Ads & GDPR - Always load script for consent prompts */}
         <Script
           id="nitropay-init"
@@ -342,7 +327,7 @@ export default async function RootLayout({
 
               <AuthCheck />
               <AuthProvider>
-                <UmamiIdentity />
+                <RybbitIdentity />
                 <AdBlockRecovery />
                 <AdBlockPrompt />
                 <NitroBottomAnchor />

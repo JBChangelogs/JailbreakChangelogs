@@ -168,7 +168,7 @@ export default function InventoryFilters({
                   } else {
                     setSelectedCategories([val]);
                   }
-                  window.umami?.track("Inventory Category Change", {
+                  window.rybbit?.event("Inventory Category Change", {
                     category: val === "all" ? "All" : val,
                   });
                 }}
@@ -221,7 +221,7 @@ export default function InventoryFilters({
                 onValueChange={(val) => {
                   const nextValue = val as SortOrder;
                   setSortOrder(nextValue);
-                  window.umami?.track("Inventory Sort Change", {
+                  window.rybbit?.event("Inventory Sort Change", {
                     sort: nextValue,
                   });
                 }}
@@ -347,7 +347,7 @@ export default function InventoryFilters({
                     onChange={() => {
                       onFilterToggle(false);
                       onNonOriginalFilterToggle(false);
-                      window.umami?.track("Inventory Filter Owner Type Reset");
+                      window.rybbit?.event("Inventory Filter Owner Type Reset");
                     }}
                     className="text-button-info focus:ring-button-info h-4 w-4 cursor-pointer"
                   />
@@ -360,7 +360,7 @@ export default function InventoryFilters({
                     checked={showOnlyOriginal}
                     onChange={() => {
                       onFilterToggle(true);
-                      window.umami?.track("Inventory Filter Original Toggle", {
+                      window.rybbit?.event("Inventory Filter Original Toggle", {
                         active: true,
                       });
                     }}
@@ -375,7 +375,7 @@ export default function InventoryFilters({
                     checked={showOnlyNonOriginal}
                     onChange={() => {
                       onNonOriginalFilterToggle(true);
-                      window.umami?.track(
+                      window.rybbit?.event(
                         "Inventory Filter Non-Original Toggle",
                         { active: true },
                       );
@@ -404,7 +404,9 @@ export default function InventoryFilters({
                       onChange={() => {
                         onLimitedFilterToggle(false);
                         onSeasonalFilterToggle(false);
-                        window.umami?.track("Inventory Filter Item Type Reset");
+                        window.rybbit?.event(
+                          "Inventory Filter Item Type Reset",
+                        );
                       }}
                       className="text-button-info focus:ring-button-info h-4 w-4 cursor-pointer"
                     />
@@ -418,9 +420,12 @@ export default function InventoryFilters({
                       onChange={() => {
                         onLimitedFilterToggle(true);
                         onSeasonalFilterToggle(false);
-                        window.umami?.track("Inventory Filter Limited Toggle", {
-                          active: true,
-                        });
+                        window.rybbit?.event(
+                          "Inventory Filter Limited Toggle",
+                          {
+                            active: true,
+                          },
+                        );
                       }}
                       className="text-button-info focus:ring-button-info h-4 w-4 cursor-pointer"
                     />
@@ -436,7 +441,7 @@ export default function InventoryFilters({
                       onChange={() => {
                         onLimitedFilterToggle(false);
                         onSeasonalFilterToggle(true);
-                        window.umami?.track(
+                        window.rybbit?.event(
                           "Inventory Filter Seasonal Toggle",
                           { active: true },
                         );
@@ -463,7 +468,7 @@ export default function InventoryFilters({
                       onChange={() => {
                         onTradableFilterToggle(false);
                         onUntradableFilterToggle(false);
-                        window.umami?.track(
+                        window.rybbit?.event(
                           "Inventory Filter Tradability Reset",
                         );
                       }}
@@ -478,7 +483,7 @@ export default function InventoryFilters({
                       checked={showOnlyTradable}
                       onChange={() => {
                         onTradableFilterToggle(true);
-                        window.umami?.track(
+                        window.rybbit?.event(
                           "Inventory Filter Tradable Toggle",
                           { active: true },
                         );
@@ -496,7 +501,7 @@ export default function InventoryFilters({
                       checked={showOnlyUntradable}
                       onChange={() => {
                         onUntradableFilterToggle(true);
-                        window.umami?.track(
+                        window.rybbit?.event(
                           "Inventory Filter Untradable Toggle",
                           { active: true },
                         );
@@ -522,7 +527,7 @@ export default function InventoryFilters({
                       onChange={(e) => {
                         const checked = e.target.checked;
                         onHideDuplicatesToggle(checked);
-                        window.umami?.track(
+                        window.rybbit?.event(
                           "Inventory Filter Hide Duplicates Toggle",
                           { active: checked },
                         );
@@ -541,7 +546,7 @@ export default function InventoryFilters({
                       onChange={(e) => {
                         const checked = e.target.checked;
                         onShowMissingItemsToggle(checked);
-                        window.umami?.track(
+                        window.rybbit?.event(
                           "Inventory Filter Show Missing Items Toggle",
                           { active: checked },
                         );

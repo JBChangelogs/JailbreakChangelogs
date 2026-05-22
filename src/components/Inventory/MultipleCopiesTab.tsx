@@ -548,7 +548,7 @@ export default function DuplicatesTab({
                   onValueChange={(val) => {
                     const nextVal = val === "all" ? "" : val;
                     setSelectedLeaderboardCategory(nextVal);
-                    window.umami?.track(
+                    window.rybbit?.event(
                       "Multiple Copies Leaderboard Category Change",
                       {
                         category: val === "all" ? "All" : val,
@@ -756,7 +756,7 @@ export default function DuplicatesTab({
                 onValueChange={(val) => {
                   const nextVal = val === "all" ? "" : val;
                   setSelectedCategory(nextVal);
-                  window.umami?.track("Multiple Copies Category Change", {
+                  window.rybbit?.event("Multiple Copies Category Change", {
                     category: val === "all" ? "All" : val,
                   });
                 }}
@@ -809,7 +809,7 @@ export default function DuplicatesTab({
                 onValueChange={(val) => {
                   const nextValue = val as SortOrder;
                   setSortOrder(nextValue);
-                  window.umami?.track("Multiple Copies Sort Change", {
+                  window.rybbit?.event("Multiple Copies Sort Change", {
                     sort: nextValue,
                   });
                 }}

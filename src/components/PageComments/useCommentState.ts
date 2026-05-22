@@ -719,13 +719,7 @@ export function useCommentState(props: ChangelogCommentsProps) {
       refreshCommentsFromServer(true, 1);
 
       // Track comment post
-      if (typeof window !== "undefined" && window.umami) {
-        (
-          window as Window & {
-            umami?: { track: (e: string, p?: object) => void };
-          }
-        ).umami?.track("Comment Posted", { type });
-      }
+      window.rybbit?.event("Comment Posted", { type });
     } catch (err) {
       toast.error(
         err instanceof Error ? err.message : "Failed to post comment",
@@ -857,13 +851,7 @@ export function useCommentState(props: ChangelogCommentsProps) {
       refreshCommentsFromServer(true, page);
 
       // Track comment edit
-      if (typeof window !== "undefined" && window.umami) {
-        (
-          window as Window & {
-            umami?: { track: (e: string, p?: object) => void };
-          }
-        ).umami?.track("Comment Edited", { type });
-      }
+      window.rybbit?.event("Comment Edited", { type });
     } catch (err) {
       toast.error(
         err instanceof Error ? err.message : "Failed to edit comment",
@@ -907,13 +895,7 @@ export function useCommentState(props: ChangelogCommentsProps) {
         throw new Error("Failed to delete comment");
       }
       // Comment successfully deleted, track with analytics
-      if (typeof window !== "undefined" && window.umami) {
-        (
-          window as Window & {
-            umami?: { track: (e: string, p?: object) => void };
-          }
-        ).umami?.track("Comment Deleted", { type });
-      }
+      window.rybbit?.event("Comment Deleted", { type });
     } catch (err) {
       // If deletion failed, restore the previous state
       setComments(previousComments);

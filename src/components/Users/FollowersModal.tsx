@@ -255,7 +255,7 @@ const FollowersModal: React.FC<FollowersModalProps> = ({
       onFollowChange?.("add");
       toast.success("Successfully followed user");
 
-      window.umami?.track("Follow User", { location: "Followers Modal" });
+      window.rybbit?.event("Follow User", { location: "Followers Modal" });
 
       // Refresh followers list after successful follow
       // Trigger a refetch by toggling isOpen or calling fetchFollowers directly

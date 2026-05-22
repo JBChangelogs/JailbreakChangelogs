@@ -187,8 +187,8 @@ export const AvatarSettings = ({
         await updateUserSettings("custom_avatar", true);
         onAvatarUpdate(result.imageUrl);
 
-        if (typeof window !== "undefined" && window.umami) {
-          window.umami.track("Custom Avatar Uploaded", {
+        if (typeof window !== "undefined" && window.rybbit) {
+          window.rybbit.event("Custom Avatar Uploaded", {
             url: result.imageUrl,
           });
         }
@@ -245,8 +245,8 @@ export const AvatarSettings = ({
       toast.success("Custom avatar updated successfully");
 
       // Track avatar URL update
-      if (typeof window !== "undefined" && window.umami) {
-        window.umami.track("Custom Avatar Updated", { url: customAvatarUrl });
+      if (typeof window !== "undefined" && window.rybbit) {
+        window.rybbit.event("Custom Avatar Updated", { url: customAvatarUrl });
       }
     } catch (error) {
       log.error("Error updating avatar:", error);

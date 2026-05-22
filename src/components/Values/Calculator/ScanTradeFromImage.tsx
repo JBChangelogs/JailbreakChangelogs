@@ -198,7 +198,7 @@ export function ScanTradeFromImage({ onScanSuccess }: ScanTradeFromImageProps) {
         onScanSuccess({ offering, requesting });
         setLastErrorMessage(null);
         toast.success("Trade screenshot scanned.", { id: toastId });
-        window.umami?.track("Trade Image Scanned", {
+        window.rybbit?.event("Trade Image Scanned", {
           fileType: file.type.replace("image/", "") || "unknown",
           source,
         });

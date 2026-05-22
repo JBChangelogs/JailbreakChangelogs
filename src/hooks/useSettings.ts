@@ -145,7 +145,7 @@ export const useSettings = (
         description: `"${displayName}" has been ${value ? "enabled" : "disabled"}.`,
       });
 
-      window.umami?.track("Update Setting", { setting: name, value });
+      window.rybbit?.event("Update Setting", { setting: name, value });
     } catch (error) {
       setSettings(prevSettings);
       const errorMessage =

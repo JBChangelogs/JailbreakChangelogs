@@ -15,8 +15,8 @@ export default function Error({
   useEffect(() => {
     log.error("Values changelogs error", error);
 
-    if (window.umami) {
-      window.umami.track("Error", error);
+    if (window.rybbit) {
+      window.rybbit.event("Error", { message: error.message });
     }
   }, [error]);
 

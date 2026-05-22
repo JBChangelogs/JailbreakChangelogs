@@ -508,9 +508,9 @@ function BotStatusCard({
                     size="sm"
                     className="h-auto! px-0! py-0! text-xs font-medium"
                     disabled={isJoining}
-                    data-umami-event="Join Server"
-                    data-umami-event-tracker="Connected_Bots"
-                    data-umami-event-term={displayName}
+                    data-rybbit-event="Join Server"
+                    data-rybbit-prop-tracker="Connected_Bots"
+                    data-rybbit-prop-term={displayName}
                     onClick={() => {
                       setIsJoining(true);
                       const joiningToastId = toast.loading("Joining server...");

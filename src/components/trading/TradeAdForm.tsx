@@ -709,8 +709,8 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
         }
 
         // Track successful trade ad creation
-        if (typeof window !== "undefined" && window.umami) {
-          window.umami.track("Trade Offer Posted");
+        if (typeof window !== "undefined" && window.rybbit) {
+          window.rybbit.event("Trade Offer Posted");
         }
       }
     } catch (err) {

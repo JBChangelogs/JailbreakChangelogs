@@ -260,9 +260,9 @@ export default function AirdropCard({
                   variant="default"
                   className="w-full min-w-0"
                   disabled={isJoining}
-                  data-umami-event="Join Server"
-                  data-umami-event-tracker="Airdrop_Tracker"
-                  data-umami-event-term={`${airdrop.color} Airdrop`}
+                  data-rybbit-event="Join Server"
+                  data-rybbit-prop-tracker="Airdrop_Tracker"
+                  data-rybbit-prop-term={`${airdrop.color} Airdrop`}
                   onClick={() => {
                     setIsJoining(true);
                     setLastJoined({
@@ -297,8 +297,8 @@ export default function AirdropCard({
                 }}
                 variant="secondary"
                 className="w-full min-w-0"
-                data-umami-event="View Airdrop Map"
-                data-umami-event-location={airdrop.location}
+                data-rybbit-event="View Airdrop Map"
+                data-rybbit-prop-location={airdrop.location}
               >
                 <Icon icon="heroicons:map-pin" />
                 Location

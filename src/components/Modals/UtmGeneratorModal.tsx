@@ -61,7 +61,7 @@ export const UtmGeneratorModal: React.FC<UtmGeneratorModalProps> = ({
     toast.success("URL copied to clipboard!");
 
     // Track UTM URL generation with parameters
-    if (typeof window !== "undefined" && window.umami) {
+    if (typeof window !== "undefined" && window.rybbit) {
       try {
         const url = new URL(generatedUrl);
         const pathname = url.pathname;
@@ -78,7 +78,7 @@ export const UtmGeneratorModal: React.FC<UtmGeneratorModalProps> = ({
         if (term) payload.utm_term = term;
         if (content) payload.utm_content = content;
 
-        window.umami.track("Generate UTM Link", payload);
+        window.rybbit.event("Generate UTM Link", payload);
       } catch (e) {
         log.error("Error tracking UTM generation:", e);
       }

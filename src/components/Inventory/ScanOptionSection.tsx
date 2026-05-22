@@ -109,7 +109,7 @@ export default function ScanOptionSection({
                     const event = new CustomEvent("requestScan");
                     window.dispatchEvent(event);
                   }}
-                  data-umami-event="Request Inventory Scan"
+                  data-rybbit-event="Request Inventory Scan"
                 >
                   Request a Scan
                 </Button>

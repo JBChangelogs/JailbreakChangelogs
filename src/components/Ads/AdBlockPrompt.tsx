@@ -142,7 +142,7 @@ const AdBlockPrompt = () => {
         <DialogFooter className="mt-4 gap-2 px-6 pt-2 pb-10 sm:pb-6">
           <Button
             onClick={handleModalDismiss}
-            data-umami-event="Adblock Prompt - Remind Later"
+            data-rybbit-event="Adblock Prompt - Remind Later"
             variant="ghost"
             size="sm"
           >
@@ -150,7 +150,7 @@ const AdBlockPrompt = () => {
           </Button>
           <Button
             onClick={handleSupporterClick}
-            data-umami-event="Adblock Prompt - Become Supporter"
+            data-rybbit-event="Adblock Prompt - Become Supporter"
             size="sm"
             className="tracking-wide uppercase"
           >

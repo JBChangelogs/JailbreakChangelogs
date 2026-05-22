@@ -312,11 +312,11 @@ const SeasonCountdown: React.FC<SeasonCountdownProps> = ({
                     target="_blank"
                     rel="noopener noreferrer"
                     onClick={() => {
-                      if (typeof window !== "undefined" && window.umami) {
+                      if (typeof window !== "undefined" && window.rybbit) {
                         const buttonType = nextSeasonStatus.includes("close in")
                           ? "Submit a Creation"
                           : "View Submissions";
-                        window.umami.track("Season Submission Click", {
+                        window.rybbit.event("Season Submission Click", {
                           buttonType,
                           season: nextSeason?.season || "unknown",
                         });

@@ -111,7 +111,7 @@ export default function DupeFilters({
                 } else {
                   setSelectedCategories([val]);
                 }
-                window.umami?.track("Dupe Search Category Change", {
+                window.rybbit?.event("Dupe Search Category Change", {
                   category: val === "all" ? "All" : val,
                 });
               }}
@@ -163,7 +163,7 @@ export default function DupeFilters({
               value={sortOrder}
               onValueChange={(val) => {
                 setSortOrder(val);
-                window.umami?.track("Dupe Search Sort Change", { sort: val });
+                window.rybbit?.event("Dupe Search Sort Change", { sort: val });
               }}
             >
               {hasDuplicates && (
