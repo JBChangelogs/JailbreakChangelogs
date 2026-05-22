@@ -105,11 +105,14 @@ export default async function RootLayout({
             }}
           />
           {/* Rybbit Analytics */}
-          <Script
-            src="https://rybbit-api.jailbreakchangelogs.com/api/script.js"
-            data-site-id="0d25b013fe3a"
-            defer
-          />
+          {process.env.RAILWAY_ENVIRONMENT_NAME === "production" ||
+            (process.env.RAILWAY_ENVIRONMENT_NAME === "testing" && (
+              <Script
+                src="https://rybbit-api.jailbreakchangelogs.com/api/script.js"
+                data-site-id="0d25b013fe3a"
+                defer
+              />
+            ))}
           {/* Nitro Pay Ads & GDPR - Always load script for consent prompts */}
           <Script
             id="nitropay-init"
@@ -250,11 +253,14 @@ export default async function RootLayout({
           href="https://assets.jailbreakchangelogs.com"
         />
         {/* Rybbit Analytics */}
-        <Script
-          src="https://rybbit-api.jailbreakchangelogs.com/api/script.js"
-          data-site-id="0d25b013fe3a"
-          defer
-        />
+        {process.env.RAILWAY_ENVIRONMENT_NAME === "production" ||
+          (process.env.RAILWAY_ENVIRONMENT_NAME === "testing" && (
+            <Script
+              src="https://rybbit-api.jailbreakchangelogs.com/api/script.js"
+              data-site-id="0d25b013fe3a"
+              defer
+            />
+          ))}
         {/* Nitro Pay Ads & GDPR - Always load script for consent prompts */}
         <Script
           id="nitropay-init"
