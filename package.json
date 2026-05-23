@@ -48,6 +48,7 @@
     "@tanstack/react-virtual": "^3.13.25",
     "@types/mdx": "^2.0.13",
     "babel-plugin-react-compiler": "^1.0.0",
+    "boring-avatars": "^2.0.4",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "date-fns": "^4.2.1",
