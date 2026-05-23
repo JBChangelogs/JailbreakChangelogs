@@ -27,6 +27,7 @@ import {
 } from "@/utils/ui/images";
 import { getCategoryColor, getCategoryIcon } from "@/utils/items/categoryIcons";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import ChangelogComments from "@/components/PageComments/ChangelogComments";
 import {
   Tooltip,
   TooltipContent,
@@ -163,6 +164,7 @@ export default function ValueSuggestionDetailPage() {
   const [editReason, setEditReason] = useState("");
   const [editSaving, setEditSaving] = useState(false);
   const [reasonExpanded, setReasonExpanded] = useState(false);
+  const [suggestionUpdated, setSuggestionUpdated] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -334,6 +336,16 @@ export default function ValueSuggestionDetailPage() {
     }
   };
 
+  useEffect(() => {
+    const handler = (event: Event) => {
+      const e = event as CustomEvent<{ action?: string }>;
+      if (e.detail?.action !== "refresh_suggestion") return;
+      setSuggestionUpdated(true);
+    };
+    window.addEventListener("realtimeSuggestion", handler);
+    return () => window.removeEventListener("realtimeSuggestion", handler);
+  }, []);
+
   const categoryIcon = item ? getCategoryIcon(item.type) : null;
 
   return (
@@ -362,6 +374,28 @@ export default function ValueSuggestionDetailPage() {
             >
               Back to suggestions
             </Link>
+          </div>
+        )}
+
+        {suggestionUpdated && !loading && (
+          <div
+            className="fixed left-1/2 z-[1500] -translate-x-1/2"
+            style={{ top: "calc(var(--header-height, 64px) + 12px)" }}
+          >
+            <button
+              type="button"
+              onClick={() => {
+                window.location.reload();
+              }}
+              className="bg-button-info hover:bg-button-info-hover text-form-button-text flex cursor-pointer items-center gap-2 rounded-full px-4 py-2 text-sm font-medium whitespace-nowrap shadow-lg transition-colors"
+            >
+              <Icon
+                icon="material-symbols:refresh-rounded"
+                className="h-4 w-4"
+                inline
+              />
+              This suggestion was updated — click to refresh
+            </button>
           </div>
         )}
 
@@ -487,9 +521,9 @@ export default function ValueSuggestionDetailPage() {
             </div>
 
             {/* ── Content + Sidebar ── */}
-            <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
-              {/* Main — reason + voters */}
-              <div className="min-w-0 space-y-5 lg:col-span-2">
+            <div className="space-y-5">
+              {/* Reason — always first on every screen */}
+              <div className="min-w-0 space-y-5">
                 {/* Reason */}
                 <div className="border-border-card bg-secondary-bg rounded-xl border">
                   <div className="border-border-card flex items-center justify-between border-b px-5 py-3.5">
@@ -658,206 +692,439 @@ export default function ValueSuggestionDetailPage() {
                     )}
                   </div>
                 </div>
-
-                {/* Voters */}
-                <div className="border-border-card bg-secondary-bg rounded-xl border">
-                  <div className="border-border-card flex items-center justify-between border-b px-5 py-3">
-                    <h2 className="text-primary-text flex items-center gap-2 text-sm font-semibold">
-                      <Icon
-                        icon="material-symbols:how-to-vote-outline-rounded"
-                        className="text-secondary-text h-4 w-4"
-                        inline
-                      />
-                      Votes
-                    </h2>
-                    <div className="flex items-center gap-2">
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <button
-                            type="button"
-                            onClick={() => handleVote("upvote")}
-                            disabled={voteLoading || !!voteRateLimit}
-                            className="bg-button-success/10 hover:bg-button-success/20 flex cursor-pointer items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-60"
-                          >
-                            <Icon
-                              icon={
-                                userVote === "upvote"
-                                  ? "material-symbols:thumb-up-rounded"
-                                  : "material-symbols:thumb-up-outline-rounded"
-                              }
-                              className="text-button-success h-4 w-4"
-                              inline
-                            />
-                            <span className="text-button-success font-bold">
-                              {voteCounts.up}
-                            </span>
-                          </button>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          {userVote === "upvote" ? "Remove upvote" : "Upvote"}
-                        </TooltipContent>
-                      </Tooltip>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <button
-                            type="button"
-                            onClick={() => handleVote("downvote")}
-                            disabled={voteLoading || !!voteRateLimit}
-                            className="bg-button-danger/10 hover:bg-button-danger/20 flex cursor-pointer items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-60"
-                          >
-                            <Icon
-                              icon={
-                                userVote === "downvote"
-                                  ? "material-symbols:thumb-down-rounded"
-                                  : "material-symbols:thumb-down-outline-rounded"
-                              }
-                              className="text-button-danger h-4 w-4"
-                              inline
-                            />
-                            <span className="text-button-danger font-bold">
-                              {voteCounts.down}
-                            </span>
-                          </button>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          {userVote === "downvote"
-                            ? "Remove downvote"
-                            : "Downvote"}
-                        </TooltipContent>
-                      </Tooltip>
-                    </div>
-                  </div>
-                  {voteRateLimit && voteRateLimitSeconds > 0 && (
-                    <div className="border-border-card bg-tertiary-bg flex items-center justify-center gap-1.5 border-b px-3 py-1.5 text-xs text-yellow-400">
-                      <Icon
-                        icon="material-symbols:hourglass-empty-rounded"
-                        className="h-3.5 w-3.5 shrink-0"
-                        inline
-                      />
-                      Too fast — wait{" "}
-                      {voteRateLimitSeconds >= 60
-                        ? `${Math.floor(voteRateLimitSeconds / 60)}m ${voteRateLimitSeconds % 60}s`
-                        : `${voteRateLimitSeconds}s`}
-                    </div>
-                  )}
-                  {(suggestion.votes.upvotes.length > 0 ||
-                    suggestion.votes.downvotes.length > 0) && (
-                    <div className="p-5">
-                      <Tabs defaultValue="upvotes">
-                        <TabsList fullWidth className="mb-4">
-                          <TabsTrigger value="upvotes" fullWidth>
-                            <span className="flex items-center gap-1.5">
-                              <Icon
-                                icon="material-symbols:thumb-up-outline-rounded"
-                                className="text-button-success h-3.5 w-3.5"
-                                inline
-                              />
-                              Upvotes ({suggestion.votes.upvotes.length})
-                            </span>
-                          </TabsTrigger>
-                          <TabsTrigger value="downvotes" fullWidth>
-                            <span className="flex items-center gap-1.5">
-                              <Icon
-                                icon="material-symbols:thumb-down-outline-rounded"
-                                className="text-button-danger h-3.5 w-3.5"
-                                inline
-                              />
-                              Downvotes ({suggestion.votes.downvotes.length})
-                            </span>
-                          </TabsTrigger>
-                        </TabsList>
-                        <TabsContent value="upvotes">
-                          {suggestion.votes.upvotes.length === 0 ? (
-                            <p className="text-secondary-text py-4 text-center text-sm">
-                              No upvotes yet.
-                            </p>
-                          ) : (
-                            <div className="space-y-2">
-                              {suggestion.votes.upvotes.map((v) => (
-                                <VoterCard
-                                  key={v.user.id + v.created_at}
-                                  v={v}
-                                />
-                              ))}
-                            </div>
-                          )}
-                        </TabsContent>
-                        <TabsContent value="downvotes">
-                          {suggestion.votes.downvotes.length === 0 ? (
-                            <p className="text-secondary-text py-4 text-center text-sm">
-                              No downvotes yet.
-                            </p>
-                          ) : (
-                            <div className="space-y-2">
-                              {suggestion.votes.downvotes.map((v) => (
-                                <VoterCard
-                                  key={v.user.id + v.created_at}
-                                  v={v}
-                                />
-                              ))}
-                            </div>
-                          )}
-                        </TabsContent>
-                      </Tabs>
-                    </div>
-                  )}
-                </div>
               </div>
 
-              {/* Sidebar */}
-              <div className="space-y-5">
-                {/* Value change */}
-                <div className="border-border-card bg-secondary-bg rounded-xl border">
-                  <div className="border-border-card border-b px-5 py-3.5">
-                    <h2 className="text-primary-text flex items-center justify-center gap-2 text-sm font-semibold">
-                      <Icon
-                        icon="material-symbols:swap-vert-rounded"
-                        className="text-secondary-text h-4 w-4"
-                        inline
-                      />
-                      {fieldLabel(suggestion.field)} Suggestion
-                    </h2>
-                  </div>
-                  <div className="grid grid-cols-2 gap-2 p-5">
-                    <div className="min-w-0 p-3">
-                      <div className="text-button-danger mb-1 flex items-center gap-1.5 text-xs font-semibold tracking-wide uppercase">
-                        <Icon
-                          icon="mdi:minus-circle"
-                          className="h-3.5 w-3.5"
-                          inline
-                        />
-                        Old
+              {/* ── Mobile layout (< lg): tabs — Details | Discussion ── */}
+              <div className="lg:hidden">
+                <Tabs defaultValue="details">
+                  <TabsList fullWidth>
+                    <TabsTrigger value="details" fullWidth>
+                      Details
+                    </TabsTrigger>
+                    <TabsTrigger value="discussion" fullWidth>
+                      Discussion
+                    </TabsTrigger>
+                  </TabsList>
+                  <TabsContent value="details" className="mt-4 space-y-5">
+                    {/* Value change */}
+                    <div className="border-border-card bg-secondary-bg rounded-xl border">
+                      <div className="border-border-card border-b px-5 py-3.5">
+                        <h2 className="text-primary-text flex items-center justify-center gap-2 text-sm font-semibold">
+                          <Icon
+                            icon="material-symbols:swap-vert-rounded"
+                            className="text-secondary-text h-4 w-4"
+                            inline
+                          />
+                          {fieldLabel(suggestion.field)} Suggestion
+                        </h2>
                       </div>
-                      <div
-                        className="text-secondary-text text-lg font-bold line-through"
-                        style={{
-                          wordBreak: "normal",
-                          overflowWrap: "anywhere",
-                        }}
-                      >
-                        {formatFullValue(suggestion.current_value || "N/A")}
+                      <div className="grid grid-cols-2 gap-2 p-5">
+                        <div className="min-w-0 p-3">
+                          <div className="text-button-danger mb-1 flex items-center gap-1.5 text-xs font-semibold tracking-wide uppercase">
+                            <Icon
+                              icon="mdi:minus-circle"
+                              className="h-3.5 w-3.5"
+                              inline
+                            />
+                            Old
+                          </div>
+                          <div
+                            className="text-secondary-text text-lg font-bold line-through"
+                            style={{
+                              wordBreak: "normal",
+                              overflowWrap: "anywhere",
+                            }}
+                          >
+                            {formatFullValue(suggestion.current_value || "N/A")}
+                          </div>
+                        </div>
+                        <div className="min-w-0 p-3">
+                          <div className="text-button-success mb-1 flex items-center gap-1.5 text-xs font-semibold tracking-wide uppercase">
+                            <Icon
+                              icon="mdi:plus-circle"
+                              className="h-3.5 w-3.5"
+                              inline
+                            />
+                            New
+                          </div>
+                          <div
+                            className="text-primary-text text-lg font-bold"
+                            style={{
+                              wordBreak: "normal",
+                              overflowWrap: "anywhere",
+                            }}
+                          >
+                            {formatFullValue(suggestion.suggested_value)}
+                          </div>
+                        </div>
                       </div>
                     </div>
+                    {/* Votes */}
+                    <div className="border-border-card bg-secondary-bg rounded-xl border">
+                      <div className="border-border-card flex items-center justify-between border-b px-5 py-3">
+                        <h2 className="text-primary-text flex items-center gap-2 text-sm font-semibold">
+                          <Icon
+                            icon="material-symbols:how-to-vote-outline-rounded"
+                            className="text-secondary-text h-4 w-4"
+                            inline
+                          />
+                          Votes
+                        </h2>
+                        <div className="flex items-center gap-2">
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <button
+                                type="button"
+                                onClick={() => handleVote("upvote")}
+                                disabled={voteLoading || !!voteRateLimit}
+                                className="bg-button-success/10 hover:bg-button-success/20 flex cursor-pointer items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-60"
+                              >
+                                <Icon
+                                  icon={
+                                    userVote === "upvote"
+                                      ? "material-symbols:thumb-up-rounded"
+                                      : "material-symbols:thumb-up-outline-rounded"
+                                  }
+                                  className="text-button-success h-4 w-4"
+                                  inline
+                                />
+                                <span className="text-button-success font-bold">
+                                  {voteCounts.up}
+                                </span>
+                              </button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              {userVote === "upvote"
+                                ? "Remove upvote"
+                                : "Upvote"}
+                            </TooltipContent>
+                          </Tooltip>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <button
+                                type="button"
+                                onClick={() => handleVote("downvote")}
+                                disabled={voteLoading || !!voteRateLimit}
+                                className="bg-button-danger/10 hover:bg-button-danger/20 flex cursor-pointer items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-60"
+                              >
+                                <Icon
+                                  icon={
+                                    userVote === "downvote"
+                                      ? "material-symbols:thumb-down-rounded"
+                                      : "material-symbols:thumb-down-outline-rounded"
+                                  }
+                                  className="text-button-danger h-4 w-4"
+                                  inline
+                                />
+                                <span className="text-button-danger font-bold">
+                                  {voteCounts.down}
+                                </span>
+                              </button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              {userVote === "downvote"
+                                ? "Remove downvote"
+                                : "Downvote"}
+                            </TooltipContent>
+                          </Tooltip>
+                        </div>
+                      </div>
+                      {voteRateLimit && voteRateLimitSeconds > 0 && (
+                        <div className="border-border-card bg-tertiary-bg flex items-center justify-center gap-1.5 border-b px-3 py-1.5 text-xs text-yellow-400">
+                          <Icon
+                            icon="material-symbols:hourglass-empty-rounded"
+                            className="h-3.5 w-3.5 shrink-0"
+                            inline
+                          />
+                          Too fast — wait{" "}
+                          {voteRateLimitSeconds >= 60
+                            ? `${Math.floor(voteRateLimitSeconds / 60)}m ${voteRateLimitSeconds % 60}s`
+                            : `${voteRateLimitSeconds}s`}
+                        </div>
+                      )}
+                      {(suggestion.votes.upvotes.length > 0 ||
+                        suggestion.votes.downvotes.length > 0) && (
+                        <div className="p-5">
+                          <Tabs defaultValue="upvotes">
+                            <TabsList fullWidth className="mb-4">
+                              <TabsTrigger value="upvotes" fullWidth>
+                                <span className="flex items-center gap-1.5">
+                                  <Icon
+                                    icon="material-symbols:thumb-up-outline-rounded"
+                                    className="text-button-success h-3.5 w-3.5"
+                                    inline
+                                  />
+                                  Upvotes ({suggestion.votes.upvotes.length})
+                                </span>
+                              </TabsTrigger>
+                              <TabsTrigger value="downvotes" fullWidth>
+                                <span className="flex items-center gap-1.5">
+                                  <Icon
+                                    icon="material-symbols:thumb-down-outline-rounded"
+                                    className="text-button-danger h-3.5 w-3.5"
+                                    inline
+                                  />
+                                  Downvotes ({suggestion.votes.downvotes.length}
+                                  )
+                                </span>
+                              </TabsTrigger>
+                            </TabsList>
+                            <TabsContent value="upvotes">
+                              {suggestion.votes.upvotes.length === 0 ? (
+                                <p className="text-secondary-text py-4 text-center text-sm">
+                                  No upvotes yet.
+                                </p>
+                              ) : (
+                                <div className="space-y-2">
+                                  {suggestion.votes.upvotes.map((v) => (
+                                    <VoterCard
+                                      key={v.user.id + v.created_at}
+                                      v={v}
+                                    />
+                                  ))}
+                                </div>
+                              )}
+                            </TabsContent>
+                            <TabsContent value="downvotes">
+                              {suggestion.votes.downvotes.length === 0 ? (
+                                <p className="text-secondary-text py-4 text-center text-sm">
+                                  No downvotes yet.
+                                </p>
+                              ) : (
+                                <div className="space-y-2">
+                                  {suggestion.votes.downvotes.map((v) => (
+                                    <VoterCard
+                                      key={v.user.id + v.created_at}
+                                      v={v}
+                                    />
+                                  ))}
+                                </div>
+                              )}
+                            </TabsContent>
+                          </Tabs>
+                        </div>
+                      )}
+                    </div>
+                  </TabsContent>
+                  <TabsContent value="discussion" className="mt-4">
+                    <ChangelogComments
+                      changelogId={suggestion.id}
+                      changelogTitle={`Value Suggestion #${suggestion.id}`}
+                      type="vsuggestion"
+                    />
+                  </TabsContent>
+                </Tabs>
+              </div>
 
-                    <div className="min-w-0 p-3">
-                      <div className="text-button-success mb-1 flex items-center gap-1.5 text-xs font-semibold tracking-wide uppercase">
+              {/* ── Desktop layout (lg+): 3-col grid ── */}
+              <div className="hidden lg:grid lg:grid-cols-5 lg:gap-5">
+                {/* Main — comments */}
+                <div className="min-w-0 lg:col-span-3">
+                  <ChangelogComments
+                    changelogId={suggestion.id}
+                    changelogTitle={`Value Suggestion #${suggestion.id}`}
+                    type="vsuggestion"
+                  />
+                </div>
+
+                {/* Sidebar — value change + votes */}
+                <div className="space-y-5 lg:col-span-2">
+                  {/* Value change */}
+                  <div className="border-border-card bg-secondary-bg rounded-xl border">
+                    <div className="border-border-card border-b px-5 py-3.5">
+                      <h2 className="text-primary-text flex items-center justify-center gap-2 text-sm font-semibold">
                         <Icon
-                          icon="mdi:plus-circle"
-                          className="h-3.5 w-3.5"
+                          icon="material-symbols:swap-vert-rounded"
+                          className="text-secondary-text h-4 w-4"
                           inline
                         />
-                        New
+                        {fieldLabel(suggestion.field)} Suggestion
+                      </h2>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2 p-5">
+                      <div className="min-w-0 p-3">
+                        <div className="text-button-danger mb-1 flex items-center gap-1.5 text-xs font-semibold tracking-wide uppercase">
+                          <Icon
+                            icon="mdi:minus-circle"
+                            className="h-3.5 w-3.5"
+                            inline
+                          />
+                          Old
+                        </div>
+                        <div
+                          className="text-secondary-text text-lg font-bold line-through"
+                          style={{
+                            wordBreak: "normal",
+                            overflowWrap: "anywhere",
+                          }}
+                        >
+                          {formatFullValue(suggestion.current_value || "N/A")}
+                        </div>
                       </div>
-                      <div
-                        className="text-primary-text text-lg font-bold"
-                        style={{
-                          wordBreak: "normal",
-                          overflowWrap: "anywhere",
-                        }}
-                      >
-                        {formatFullValue(suggestion.suggested_value)}
+                      <div className="min-w-0 p-3">
+                        <div className="text-button-success mb-1 flex items-center gap-1.5 text-xs font-semibold tracking-wide uppercase">
+                          <Icon
+                            icon="mdi:plus-circle"
+                            className="h-3.5 w-3.5"
+                            inline
+                          />
+                          New
+                        </div>
+                        <div
+                          className="text-primary-text text-lg font-bold"
+                          style={{
+                            wordBreak: "normal",
+                            overflowWrap: "anywhere",
+                          }}
+                        >
+                          {formatFullValue(suggestion.suggested_value)}
+                        </div>
                       </div>
                     </div>
+                  </div>
+
+                  {/* Votes */}
+                  <div className="border-border-card bg-secondary-bg rounded-xl border">
+                    <div className="border-border-card flex items-center justify-between border-b px-5 py-3">
+                      <h2 className="text-primary-text flex items-center gap-2 text-sm font-semibold">
+                        <Icon
+                          icon="material-symbols:how-to-vote-outline-rounded"
+                          className="text-secondary-text h-4 w-4"
+                          inline
+                        />
+                        Votes
+                      </h2>
+                      <div className="flex items-center gap-2">
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <button
+                              type="button"
+                              onClick={() => handleVote("upvote")}
+                              disabled={voteLoading || !!voteRateLimit}
+                              className="bg-button-success/10 hover:bg-button-success/20 flex cursor-pointer items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-60"
+                            >
+                              <Icon
+                                icon={
+                                  userVote === "upvote"
+                                    ? "material-symbols:thumb-up-rounded"
+                                    : "material-symbols:thumb-up-outline-rounded"
+                                }
+                                className="text-button-success h-4 w-4"
+                                inline
+                              />
+                              <span className="text-button-success font-bold">
+                                {voteCounts.up}
+                              </span>
+                            </button>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            {userVote === "upvote" ? "Remove upvote" : "Upvote"}
+                          </TooltipContent>
+                        </Tooltip>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <button
+                              type="button"
+                              onClick={() => handleVote("downvote")}
+                              disabled={voteLoading || !!voteRateLimit}
+                              className="bg-button-danger/10 hover:bg-button-danger/20 flex cursor-pointer items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-60"
+                            >
+                              <Icon
+                                icon={
+                                  userVote === "downvote"
+                                    ? "material-symbols:thumb-down-rounded"
+                                    : "material-symbols:thumb-down-outline-rounded"
+                                }
+                                className="text-button-danger h-4 w-4"
+                                inline
+                              />
+                              <span className="text-button-danger font-bold">
+                                {voteCounts.down}
+                              </span>
+                            </button>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            {userVote === "downvote"
+                              ? "Remove downvote"
+                              : "Downvote"}
+                          </TooltipContent>
+                        </Tooltip>
+                      </div>
+                    </div>
+                    {voteRateLimit && voteRateLimitSeconds > 0 && (
+                      <div className="border-border-card bg-tertiary-bg flex items-center justify-center gap-1.5 border-b px-3 py-1.5 text-xs text-yellow-400">
+                        <Icon
+                          icon="material-symbols:hourglass-empty-rounded"
+                          className="h-3.5 w-3.5 shrink-0"
+                          inline
+                        />
+                        Too fast — wait{" "}
+                        {voteRateLimitSeconds >= 60
+                          ? `${Math.floor(voteRateLimitSeconds / 60)}m ${voteRateLimitSeconds % 60}s`
+                          : `${voteRateLimitSeconds}s`}
+                      </div>
+                    )}
+                    {(suggestion.votes.upvotes.length > 0 ||
+                      suggestion.votes.downvotes.length > 0) && (
+                      <div className="p-5">
+                        <Tabs defaultValue="upvotes">
+                          <TabsList fullWidth className="mb-4">
+                            <TabsTrigger value="upvotes" fullWidth>
+                              <span className="flex items-center gap-1.5">
+                                <Icon
+                                  icon="material-symbols:thumb-up-outline-rounded"
+                                  className="text-button-success h-3.5 w-3.5"
+                                  inline
+                                />
+                                Upvotes ({suggestion.votes.upvotes.length})
+                              </span>
+                            </TabsTrigger>
+                            <TabsTrigger value="downvotes" fullWidth>
+                              <span className="flex items-center gap-1.5">
+                                <Icon
+                                  icon="material-symbols:thumb-down-outline-rounded"
+                                  className="text-button-danger h-3.5 w-3.5"
+                                  inline
+                                />
+                                Downvotes ({suggestion.votes.downvotes.length})
+                              </span>
+                            </TabsTrigger>
+                          </TabsList>
+                          <TabsContent value="upvotes">
+                            {suggestion.votes.upvotes.length === 0 ? (
+                              <p className="text-secondary-text py-4 text-center text-sm">
+                                No upvotes yet.
+                              </p>
+                            ) : (
+                              <div className="space-y-2">
+                                {suggestion.votes.upvotes.map((v) => (
+                                  <VoterCard
+                                    key={v.user.id + v.created_at}
+                                    v={v}
+                                  />
+                                ))}
+                              </div>
+                            )}
+                          </TabsContent>
+                          <TabsContent value="downvotes">
+                            {suggestion.votes.downvotes.length === 0 ? (
+                              <p className="text-secondary-text py-4 text-center text-sm">
+                                No downvotes yet.
+                              </p>
+                            ) : (
+                              <div className="space-y-2">
+                                {suggestion.votes.downvotes.map((v) => (
+                                  <VoterCard
+                                    key={v.user.id + v.created_at}
+                                    v={v}
+                                  />
+                                ))}
+                              </div>
+                            )}
+                          </TabsContent>
+                        </Tabs>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>

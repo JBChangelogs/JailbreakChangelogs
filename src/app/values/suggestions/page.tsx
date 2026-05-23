@@ -1010,12 +1010,6 @@ export default function ValueSuggestionsPage() {
     new Set(suggestions.map((s) => s.field).filter(Boolean)),
   ).sort();
 
-  // field counts for breakdown
-  const fieldCounts = suggestions.reduce<Record<string, number>>((acc, s) => {
-    acc[s.field] = (acc[s.field] ?? 0) + 1;
-    return acc;
-  }, {});
-
   const fetchSuggestions = useCallback(async (p: number) => {
     setLoadingSuggestions(true);
     setSuggestionsError(null);
@@ -1230,25 +1224,11 @@ export default function ValueSuggestionsPage() {
           />
         )}
 
-        {/* Title row + field breakdown */}
-        <div className="mb-4 space-y-1.5">
+        {/* Title row */}
+        <div className="mb-4">
           <h2 className="text-primary-text font-semibold">
             {loadingSuggestions ? 0 : total} Recent Suggestions
           </h2>
-          {!loadingSuggestions && suggestionFields.length > 0 && (
-            <p className="text-secondary-text text-xs">
-              {suggestionFields.map((f, i) => {
-                const count = fieldCounts[f] ?? 0;
-                return (
-                  <span key={f}>
-                    {i > 0 && <span className="mx-1.5">·</span>}
-                    {fieldLabel(f)} ({count}{" "}
-                    {count === 1 ? "change" : "changes"})
-                  </span>
-                );
-              })}
-            </p>
-          )}
         </div>
 
         {/* Search + filter */}

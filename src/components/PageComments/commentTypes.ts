@@ -7,7 +7,13 @@ import type { UserData } from "@/types/auth";
 export interface ChangelogCommentsProps {
   changelogId: number | string;
   changelogTitle: string;
-  type: "changelog" | "season" | "item" | "tradev2" | "inventory";
+  type:
+    | "changelog"
+    | "season"
+    | "item"
+    | "tradev2"
+    | "inventory"
+    | "vsuggestion";
   itemType?: string;
   trade?: {
     author: string;

@@ -39,6 +39,8 @@ export function CommentHeader() {
           `Trade #${changelogId}`
         ) : type === "inventory" ? (
           changelogTitle
+        ) : type === "vsuggestion" ? (
+          changelogTitle
         ) : (
           <>
             {changelogTitle}{" "}

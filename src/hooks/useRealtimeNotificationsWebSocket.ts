@@ -416,6 +416,15 @@ export function useRealtimeNotificationsWebSocket(
               return;
             }
 
+            if (payload.action === "refresh_suggestion") {
+              window.dispatchEvent(
+                new CustomEvent("realtimeSuggestion", {
+                  detail: { action: "refresh_suggestion" },
+                }),
+              );
+              return;
+            }
+
             if (
               payload.action !== "notification_received" ||
               !payload.data ||

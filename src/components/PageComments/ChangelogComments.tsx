@@ -111,7 +111,9 @@ function CommentsLayout() {
                       ? "trade ad"
                       : type === "inventory"
                         ? "inventory"
-                        : "item"}
+                        : type === "vsuggestion"
+                          ? "suggestion"
+                          : "item"}
                 !
               </p>
             </div>
