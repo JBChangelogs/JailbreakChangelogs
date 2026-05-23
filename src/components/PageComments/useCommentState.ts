@@ -16,7 +16,6 @@ import { UserData } from "@/types/auth";
 import { useSupporterModal } from "@/hooks/useSupporterModal";
 import { toast } from "sonner";
 import { parseBan, showBanToast } from "@/utils/api/ban";
-import type { BanInfo } from "@/utils/api/ban";
 import { createLogger } from "@/services/logger";
 import {
   cleanCommentText,
@@ -52,7 +51,8 @@ export function useCommentState(props: ChangelogCommentsProps) {
   const [isClient, setIsClient] = useState(false);
 
   // --- Auth & User State ---
-  const { isAuthenticated, user, setLoginModal } = useAuthContext();
+  const { isAuthenticated, user, setLoginModal, bans, setBan } =
+    useAuthContext();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [currentUserPremiumType, setCurrentUserPremiumType] =
@@ -101,8 +101,8 @@ export function useCommentState(props: ChangelogCommentsProps) {
       }
     >
   >(new Map());
-  const [commentBan, setCommentBan] = useState<BanInfo | null>(null);
-  const [reactionBan, setReactionBan] = useState<BanInfo | null>(null);
+  const commentBan = bans["communication"] ?? null;
+  const reactionBan = bans["communication"] ?? null;
 
   // --- Pagination ---
   const [page, setPage] = useState(1);
@@ -380,7 +380,7 @@ export function useCommentState(props: ChangelogCommentsProps) {
 
             const ban = parseBan(response);
             if (ban) {
-              setReactionBan(ban);
+              setBan(ban);
               showBanToast(ban);
               return;
             }
@@ -430,6 +430,7 @@ export function useCommentState(props: ChangelogCommentsProps) {
       triggerRateLimit,
       user,
       currentUserId,
+      setBan,
     ],
   );
 
@@ -635,7 +636,8 @@ export function useCommentState(props: ChangelogCommentsProps) {
       if (!response.ok) {
         const ban = parseBan(response);
         if (ban) {
-          setCommentBan(ban);
+          setIsCommentFormExpanded(false);
+          setBan(ban);
           showBanToast(ban);
           return;
         }
@@ -768,7 +770,7 @@ export function useCommentState(props: ChangelogCommentsProps) {
       if (!response.ok) {
         const ban = parseBan(response);
         if (ban) {
-          setCommentBan(ban);
+          setBan(ban);
           showBanToast(ban);
           return;
         }
@@ -983,7 +985,8 @@ export function useCommentState(props: ChangelogCommentsProps) {
       if (!response.ok) {
         const ban = parseBan(response);
         if (ban) {
-          setCommentBan(ban);
+          setReplyingToId(null);
+          setBan(ban);
           showBanToast(ban);
           return;
         }
@@ -1133,7 +1136,7 @@ export function useCommentState(props: ChangelogCommentsProps) {
       if (!response.ok) {
         const ban = parseBan(response);
         if (ban) {
-          setCommentBan(ban);
+          setBan(ban);
           toast.dismiss(toastId);
           showBanToast(ban);
           return;

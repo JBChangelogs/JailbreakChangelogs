@@ -1,5 +1,6 @@
 import { toast } from "sonner";
 import { createElement } from "react";
+import { formatFullDate } from "@/utils/helpers/timestamp";
 
 export class BanError extends Error {
   constructor() {
@@ -30,13 +31,7 @@ export function showBanToast(ban: BanInfo) {
   const feature = ban.banType
     ? ban.banType.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())
     : "this feature";
-  const expires = ban.expiresAt
-    ? new Date(ban.expiresAt * 1000).toLocaleDateString(undefined, {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      })
-    : "permanently";
+  const expires = ban.expiresAt ? formatFullDate(ban.expiresAt) : "permanently";
   toast.error(
     `You have been banned${feature !== "this feature" ? ` (${feature})` : ""}.`,
     {

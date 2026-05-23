@@ -19,6 +19,7 @@ import {
 } from "@/utils/storage/safeStorage";
 import { PUBLIC_API_URL } from "@/utils/api/api";
 import { trackEvent, trackClearUserId } from "@/utils/analytics/rybbit";
+import type { BanInfo } from "@/utils/api/ban";
 import { toast } from "sonner";
 import { useRealtimeNotificationsWebSocket } from "@/hooks/useRealtimeNotificationsWebSocket";
 import { createLogger } from "@/services/logger";
@@ -34,6 +35,8 @@ interface AuthContextType extends AuthState {
   }) => void;
   showLoginModal: boolean;
   setShowLoginModal: (show: boolean) => void;
+  bans: Record<string, BanInfo>;
+  setBan: (ban: BanInfo) => void;
 }
 
 export const AuthContext = createContext<AuthContextType | undefined>(
@@ -63,6 +66,25 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [loginModalTab, setLoginModalTab] = useState<"discord" | "roblox">(
     "discord",
   );
+  const [bans, setBansMap] = useState<Record<string, BanInfo>>({});
+  const setBan = useCallback((ban: BanInfo) => {
+    if (ban.expiresAt > 0) {
+      const ms = ban.expiresAt * 1000 - Date.now();
+      if (ms <= 0) return; // already expired, don't store
+      setBansMap((prev) => ({ ...prev, [ban.banType]: ban }));
+      setTimeout(() => {
+        setBansMap((prev) => {
+          if (prev[ban.banType]?.expiresAt !== ban.expiresAt) return prev;
+          const next = { ...prev };
+          delete next[ban.banType];
+          return next;
+        });
+      }, ms);
+    } else {
+      // permanent ban
+      setBansMap((prev) => ({ ...prev, [ban.banType]: ban }));
+    }
+  }, []);
   const isUserActiveRef = useRef(true);
 
   useRealtimeNotificationsWebSocket(
@@ -313,6 +335,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         isLoading: false,
         error: null,
       });
+      setBansMap({});
 
       trackEvent("User Logout");
       trackClearUserId();
@@ -341,6 +364,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
     setLoginModal,
     showLoginModal,
     setShowLoginModal,
+    bans,
+    setBan,
   };
 
   return (

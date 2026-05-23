@@ -67,7 +67,6 @@ import { parseJsonWithLargeIds } from "@/utils/api/parseJsonWithLargeIds";
 import type { UserData, UserFlag, UserSettingsV2 } from "@/types/auth";
 import { createLogger } from "@/services/logger";
 import { parseBan, showBanToast, BanError } from "@/utils/api/ban";
-import type { BanInfo } from "@/utils/api/ban";
 import { BanBanner } from "@/components/ui/BanBanner";
 
 const log = createLogger("UI");
@@ -759,7 +758,10 @@ export default function MessagesInbox() {
     isAuthenticated,
     isLoading,
     setLoginModal,
+    bans,
+    setBan,
   } = useAuthContext();
+  const messageBan = bans["communication"] ?? null;
 
   const [conversations, setConversations] = useState<ConversationSummary[]>([]);
   const [totalConversations, setTotalConversations] = useState<number | null>(
@@ -784,7 +786,6 @@ export default function MessagesInbox() {
   const [isLoadingConversations, setIsLoadingConversations] = useState(false);
   const [isLoadingMessages, setIsLoadingMessages] = useState(false);
   const [isSending, setIsSending] = useState(false);
-  const [messageBan, setMessageBan] = useState<BanInfo | null>(null);
   const [isRealtimeConnected, setIsRealtimeConnected] = useState(false);
   const [isProcessingBlockAction, setIsProcessingBlockAction] = useState(false);
   const [isMarkingOfferComplete, setIsMarkingOfferComplete] = useState(false);
@@ -2307,7 +2308,7 @@ export default function MessagesInbox() {
       if (!response.ok || !parsedBody?.success || !parsedBody.message) {
         const ban = parseBan(response);
         if (ban) {
-          setMessageBan(ban);
+          setBan(ban);
           showBanToast(ban);
           return;
         }
@@ -2536,7 +2537,7 @@ export default function MessagesInbox() {
       if (!response.ok || !parsedBody?.success) {
         const ban = parseBan(response);
         if (ban) {
-          setMessageBan(ban);
+          setBan(ban);
           toast.dismiss(toastId);
           showBanToast(ban);
           return;
@@ -2670,7 +2671,7 @@ export default function MessagesInbox() {
       if (!response.ok) {
         const ban = parseBan(response);
         if (ban) {
-          setMessageBan(ban);
+          setBan(ban);
           toast.dismiss(toastId);
           showBanToast(ban);
           throw new BanError();
@@ -2748,7 +2749,7 @@ export default function MessagesInbox() {
       if (!response.ok) {
         const ban = parseBan(response);
         if (ban) {
-          setMessageBan(ban);
+          setBan(ban);
           toast.dismiss(toastId);
           showBanToast(ban);
           return;

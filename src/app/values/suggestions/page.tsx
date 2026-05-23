@@ -52,7 +52,6 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { RateLimitBanner } from "@/components/ui/RateLimitBanner";
 import { BanBanner } from "@/components/ui/BanBanner";
 import { parseBan, showBanToast } from "@/utils/api/ban";
-import type { BanInfo } from "@/utils/api/ban";
 import type { Item } from "@/types/index";
 
 interface SuggestionLimits {
@@ -676,7 +675,9 @@ const badgeBase =
   "inline-flex h-6 items-center rounded-lg border px-2.5 text-xs leading-none font-medium backdrop-blur-xl";
 
 export default function ValueSuggestionsPage() {
-  const { isAuthenticated, user, setLoginModal } = useAuthContext();
+  const { isAuthenticated, user, setLoginModal, bans, setBan } =
+    useAuthContext();
+  const ban = bans["value_suggestions"] ?? null;
 
   // Suggestions list state
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
@@ -705,9 +706,6 @@ export default function ValueSuggestionsPage() {
   // Edit reason modal state
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [editTarget, setEditTarget] = useState<Suggestion | null>(null);
-
-  // Ban state — set on first detected ban, persists for session
-  const [ban, setBan] = useState<BanInfo | null>(null);
 
   const handleVote = async (
     suggestion: Suggestion,
@@ -1469,8 +1467,34 @@ export default function ValueSuggestionsPage() {
             ))}
           </div>
         ) : suggestionsError ? (
-          <div className="text-button-danger py-8 text-center text-sm">
-            {suggestionsError}
+          <div className="border-border-card bg-secondary-bg rounded-lg border p-8 text-center">
+            <h3 className="text-primary-text mb-2 text-lg font-semibold">
+              Failed to load suggestions
+            </h3>
+            <p className="text-secondary-text mb-6 text-sm">
+              Something went wrong while fetching suggestions. You can try again
+              or return to the values page.
+            </p>
+            <div className="flex flex-col items-center justify-center gap-3 sm:flex-row">
+              <Button
+                variant="secondary"
+                size="md"
+                onClick={() => fetchSuggestions(page)}
+                className="flex items-center gap-2"
+              >
+                <Icon icon="heroicons-outline:arrow-path" className="h-5 w-5" />
+                Try again
+              </Button>
+              <Button variant="default" size="md" asChild>
+                <Link href="/values">
+                  <Icon
+                    icon="heroicons-outline:arrow-left"
+                    className="h-5 w-5"
+                  />
+                  Back to values
+                </Link>
+              </Button>
+            </div>
           </div>
         ) : filteredSuggestions.length === 0 ? (
           <div className="border-border-card bg-secondary-bg rounded-lg border p-8 text-center">
@@ -1554,7 +1578,8 @@ export default function ValueSuggestionsPage() {
                     );
                     const isVoting =
                       votingIds.has(suggestion.id) ||
-                      voteRateLimits.has(suggestion.id);
+                      voteRateLimits.has(suggestion.id) ||
+                      !!ban;
                     const hasVoters =
                       suggestion.votes.upvotes.length > 0 ||
                       suggestion.votes.downvotes.length > 0;

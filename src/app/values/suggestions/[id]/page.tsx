@@ -12,6 +12,7 @@ import { UserAvatar } from "@/utils/ui/avatar";
 import { buildApiUrlWithDevToken } from "@/utils/api/apiDevToken";
 import { PUBLIC_API_URL } from "@/utils/api/api";
 import { parseBan, showBanToast } from "@/utils/api/ban";
+import { BanBanner } from "@/components/ui/BanBanner";
 import { createLogger } from "@/services/logger";
 
 const log = createLogger("UI");
@@ -135,7 +136,9 @@ function VoterCard({ v }: { v: { created_at: number; user: SuggestionUser } }) {
 
 export default function ValueSuggestionDetailPage() {
   const { id } = useParams<{ id: string }>();
-  const { isAuthenticated, user, setLoginModal } = useAuthContext();
+  const { isAuthenticated, user, setLoginModal, bans, setBan } =
+    useAuthContext();
+  const ban = bans["value_suggestions"] ?? null;
 
   const [suggestion, setSuggestion] = useState<Suggestion | null>(null);
   const [item, setItem] = useState<Item | null>(null);
@@ -268,9 +271,10 @@ export default function ValueSuggestionDetailPage() {
       if (!res.ok) {
         setUserVote(prevVote);
         setVoteCounts(prevCounts);
-        const ban = parseBan(res);
-        if (ban) {
-          showBanToast(ban);
+        const banInfo = parseBan(res);
+        if (banInfo) {
+          setBan(banInfo);
+          showBanToast(banInfo);
           return;
         }
         const data = await res.json().catch(() => ({}));
@@ -352,6 +356,8 @@ export default function ValueSuggestionDetailPage() {
     <main className="min-h-screen">
       <div className="container mx-auto max-w-5xl px-4 pb-10 sm:px-6">
         <Breadcrumb />
+
+        {ban && <BanBanner ban={ban} className="mb-5" />}
 
         {loading && (
           <div className="flex items-center justify-center py-32">
@@ -776,7 +782,9 @@ export default function ValueSuggestionDetailPage() {
                               <button
                                 type="button"
                                 onClick={() => handleVote("upvote")}
-                                disabled={voteLoading || !!voteRateLimit}
+                                disabled={
+                                  voteLoading || !!voteRateLimit || !!ban
+                                }
                                 className="bg-button-success/10 hover:bg-button-success/20 flex cursor-pointer items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-60"
                               >
                                 <Icon
@@ -804,7 +812,9 @@ export default function ValueSuggestionDetailPage() {
                               <button
                                 type="button"
                                 onClick={() => handleVote("downvote")}
-                                disabled={voteLoading || !!voteRateLimit}
+                                disabled={
+                                  voteLoading || !!voteRateLimit || !!ban
+                                }
                                 className="bg-button-danger/10 hover:bg-button-danger/20 flex cursor-pointer items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-60"
                               >
                                 <Icon
@@ -1000,7 +1010,7 @@ export default function ValueSuggestionDetailPage() {
                             <button
                               type="button"
                               onClick={() => handleVote("upvote")}
-                              disabled={voteLoading || !!voteRateLimit}
+                              disabled={voteLoading || !!voteRateLimit || !!ban}
                               className="bg-button-success/10 hover:bg-button-success/20 flex cursor-pointer items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-60"
                             >
                               <Icon
@@ -1026,7 +1036,7 @@ export default function ValueSuggestionDetailPage() {
                             <button
                               type="button"
                               onClick={() => handleVote("downvote")}
-                              disabled={voteLoading || !!voteRateLimit}
+                              disabled={voteLoading || !!voteRateLimit || !!ban}
                               className="bg-button-danger/10 hover:bg-button-danger/20 flex cursor-pointer items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-60"
                             >
                               <Icon
