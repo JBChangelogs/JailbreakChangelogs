@@ -472,9 +472,24 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
       }
     };
 
+    const handlePreferences = (e: Event) => {
+      const data = (e as CustomEvent<Record<string, unknown>>).detail;
+      const value = data?.calculator_items;
+      if (typeof value === "string" && value) {
+        handlePreference(
+          new CustomEvent("realtimePreference", {
+            detail: { key: "calculator_items", value },
+          }),
+        );
+      }
+    };
+
     window.addEventListener("realtimePreference", handlePreference);
-    return () =>
+    window.addEventListener("realtimePreferences", handlePreferences);
+    return () => {
       window.removeEventListener("realtimePreference", handlePreference);
+      window.removeEventListener("realtimePreferences", handlePreferences);
+    };
   }, [initialItems]);
 
   const handleRestoreItems = () => {
@@ -731,7 +746,6 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
         title="Restore Calculator Items?"
         message="Do you want to restore your previously added items or start a new calculation?"
         confirmText="Restore Items"
-        cancelText="Start New"
         onConfirm={handleRestoreItems}
         confirmVariant="default"
       />
