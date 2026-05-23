@@ -1,9 +1,9 @@
 [build]
 builder = "railpack"
-buildCommand = "bun run build"
+buildCommand = "bun run build && cp -r public .next/standalone/ && cp -r .next/static .next/standalone/.next/"
 
 [deploy]
-startCommand = "next start -p ${PORT:-8080}"
+startCommand = "HOSTNAME=0.0.0.0 node .next/standalone/server.js"
 healthcheckPath = "/api/healthcheck"
 healthcheckTimeout = 30
 restartPolicyType = "on_failure"

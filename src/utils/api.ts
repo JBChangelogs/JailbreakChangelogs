@@ -2263,7 +2263,6 @@ export async function fetchUnreadNotifications(
     const response = await fetch(url, {
       method: "GET",
       credentials: "include",
-      cache: "no-store",
     });
 
     if (!response.ok) {
