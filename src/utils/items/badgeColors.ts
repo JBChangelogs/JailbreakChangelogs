@@ -35,6 +35,60 @@ export const getItemTypeColor = (type: string): string => {
   }
 };
 
+export const getDemandHexColor = (demand: string): string => {
+  const normalizedDemand = demand
+    .split(" ")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(" ");
+
+  switch (normalizedDemand) {
+    case "Close To None":
+      return "#4b5563";
+    case "Very Low":
+      return "#dc2626";
+    case "Low":
+      return "#b45309";
+    case "Below Average":
+      return "#b45309";
+    case "Average":
+      return "#15803d";
+    case "High":
+      return "#2563eb";
+    case "Very High":
+      return "#9333ea";
+    case "Extremely High":
+      return "#db2777";
+    default:
+      return "#4b5563";
+  }
+};
+
+export const getTrendHexColor = (trend: string): string => {
+  const normalizedTrend =
+    trend.charAt(0).toUpperCase() + trend.slice(1).toLowerCase();
+
+  switch (normalizedTrend) {
+    case "Dropping":
+      return "#e11d48";
+    case "Unstable":
+      return "#b45309";
+    case "Hoarded":
+      return "#7c3aed";
+    case "Manipulated":
+      return "#ca8a04";
+    case "Stable":
+      return "#6b7280";
+    case "Recovering":
+      return "#ea580c";
+    case "Rising":
+      return "#1d4ed8";
+    case "Hyped":
+      return "#ec4899";
+    default:
+      return "#6b7280";
+  }
+};
+
 export const getDemandColor = (demand: string): string => {
   // Normalize the demand string to handle case variations
   const normalizedDemand = demand

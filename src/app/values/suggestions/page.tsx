@@ -25,6 +25,7 @@ import {
   getVideoPath,
 } from "@/utils/ui/images";
 import { getCategoryColor, getCategoryIcon } from "@/utils/items/categoryIcons";
+import { getDemandHexColor, getTrendHexColor } from "@/utils/items/badgeColors";
 import Image from "next/image";
 import { toast } from "sonner";
 import Link from "next/link";
@@ -58,6 +59,9 @@ interface SuggestionLimits {
   min_characters: number;
   max_characters: number;
   valid_fields: string[];
+  valid_trends: string[];
+  valid_demands: string[];
+  max_cash: number;
 }
 
 interface UserSettings {
@@ -178,6 +182,7 @@ function SuggestionForm({
   }, [rateLimitUntil]);
 
   const minChars = limits?.min_characters ?? 350;
+  const maxChars = limits?.max_characters ?? 750;
   const validFields = limits?.valid_fields ?? ["cash_value", "duped_value"];
 
   const filteredItems = items.filter(
@@ -403,15 +408,69 @@ function SuggestionForm({
 
         {/* Current value display */}
         {selectedItem && (
-          <div className="border-border-card bg-tertiary-bg/50 rounded-lg border px-3 py-2.5">
-            <span className="text-secondary-text text-xs">
-              Current {fieldLabel(field)}:
-            </span>{" "}
-            <span className="text-primary-text text-sm font-medium">
-              {formatFullValue(
-                (selectedItem[field as keyof Item] as string) || "N/A",
+          <div className="border-border-card bg-tertiary-bg/50 flex items-center gap-3 overflow-hidden rounded-lg border">
+            <div className="bg-tertiary-bg relative h-16 w-24 shrink-0 overflow-hidden">
+              {isVideoItem(selectedItem.name) ? (
+                <video
+                  src={getVideoPath(selectedItem.type, selectedItem.name)}
+                  className="h-full w-full object-cover"
+                  muted
+                  loop
+                />
+              ) : (
+                <Image
+                  src={getItemImagePath(
+                    selectedItem.type,
+                    selectedItem.name,
+                    true,
+                  )}
+                  alt={selectedItem.name}
+                  fill
+                  className="object-cover"
+                  onError={handleImageError}
+                />
               )}
-            </span>
+            </div>
+            <div className="min-w-0 flex-1 py-3 pr-3">
+              <p className="text-secondary-text mb-1.5 text-xs font-semibold tracking-wide uppercase">
+                Current {fieldLabel(field)}
+              </p>
+              {field === "trend" ? (
+                (() => {
+                  const val =
+                    (selectedItem[field as keyof Item] as string) || "N/A";
+                  const hex = getTrendHexColor(val);
+                  return (
+                    <span
+                      className="bg-tertiary-bg text-primary-text inline-flex h-6 items-center rounded-lg border-2 px-2.5 text-xs leading-none font-semibold"
+                      style={{ borderColor: hex }}
+                    >
+                      {val}
+                    </span>
+                  );
+                })()
+              ) : ["demand", "duped_demand"].includes(field) ? (
+                (() => {
+                  const val =
+                    (selectedItem[field as keyof Item] as string) || "N/A";
+                  const hex = getDemandHexColor(val);
+                  return (
+                    <span
+                      className="bg-tertiary-bg text-primary-text inline-flex h-6 items-center rounded-lg border-2 px-2.5 text-xs leading-none font-semibold"
+                      style={{ borderColor: hex }}
+                    >
+                      {val}
+                    </span>
+                  );
+                })()
+              ) : (
+                <p className="text-primary-text truncate text-base font-bold">
+                  {formatFullValue(
+                    (selectedItem[field as keyof Item] as string) || "N/A",
+                  )}
+                </p>
+              )}
+            </div>
           </div>
         )}
 
@@ -420,28 +479,95 @@ function SuggestionForm({
           <label className="text-secondary-text mb-1.5 block text-sm font-medium">
             Suggested {fieldLabel(field)}
           </label>
-          <input
-            type="text"
-            placeholder={
-              ["cash_value", "duped_value"].includes(field)
-                ? "e.g. 50m, 500m, 500k, 10,000,000"
-                : `Enter suggested ${fieldLabel(field).toLowerCase()}...`
-            }
-            value={suggestedValue}
-            onChange={(e) => {
-              setSuggestedValue(e.target.value);
-              const isNumericField = ["cash_value", "duped_value"].includes(
-                field,
-              );
-              setSuggestedValueError(
-                isNumericField && e.target.value.trim()
-                  ? (parseValueInput().error ?? null)
-                  : null,
-              );
-            }}
-            required
-            className={`border-border-card bg-tertiary-bg text-primary-text placeholder:text-tertiary-text focus:border-button-info w-full rounded-lg border px-3 py-2.5 text-sm transition-colors outline-none ${suggestedValueError ? "border-red-500" : ""}`}
-          />
+          {field === "trend" ? (
+            loadingLimits ? (
+              <div className="text-secondary-text text-sm">
+                Loading options...
+              </div>
+            ) : (
+              <div className="flex flex-wrap gap-2">
+                {(limits?.valid_trends ?? []).map((t) => {
+                  const hex = getTrendHexColor(t);
+                  return (
+                    <button
+                      key={t}
+                      type="button"
+                      onClick={() => setSuggestedValue(t)}
+                      className={`bg-tertiary-bg text-primary-text cursor-pointer rounded-lg border-2 px-4 py-2 text-sm font-semibold transition-all focus:outline-none ${
+                        suggestedValue === t
+                          ? "ring-2"
+                          : "opacity-60 hover:opacity-90"
+                      }`}
+                      style={
+                        {
+                          borderColor: hex,
+                          "--tw-ring-color": hex,
+                        } as React.CSSProperties
+                      }
+                    >
+                      {t}
+                    </button>
+                  );
+                })}
+              </div>
+            )
+          ) : ["demand", "duped_demand"].includes(field) ? (
+            loadingLimits ? (
+              <div className="text-secondary-text text-sm">
+                Loading options...
+              </div>
+            ) : (
+              <div className="flex flex-wrap gap-2">
+                {(limits?.valid_demands ?? []).map((d) => {
+                  const hex = getDemandHexColor(d);
+                  return (
+                    <button
+                      key={d}
+                      type="button"
+                      onClick={() => setSuggestedValue(d)}
+                      className={`bg-tertiary-bg text-primary-text cursor-pointer rounded-lg border-2 px-4 py-2 text-sm font-semibold transition-all focus:outline-none ${
+                        suggestedValue === d
+                          ? "ring-2"
+                          : "opacity-60 hover:opacity-90"
+                      }`}
+                      style={
+                        {
+                          borderColor: hex,
+                          "--tw-ring-color": hex,
+                        } as React.CSSProperties
+                      }
+                    >
+                      {d}
+                    </button>
+                  );
+                })}
+              </div>
+            )
+          ) : (
+            <input
+              type="text"
+              placeholder={
+                ["cash_value", "duped_value"].includes(field)
+                  ? "e.g. 50m, 500m, 500k, 10,000,000"
+                  : `Enter suggested ${fieldLabel(field).toLowerCase()}...`
+              }
+              value={suggestedValue}
+              onChange={(e) => {
+                setSuggestedValue(e.target.value);
+                const isNumericField = ["cash_value", "duped_value"].includes(
+                  field,
+                );
+                setSuggestedValueError(
+                  isNumericField && e.target.value.trim()
+                    ? (parseValueInput(e.target.value, limits?.max_cash)
+                        .error ?? null)
+                    : null,
+                );
+              }}
+              required
+              className={`border-border-card bg-tertiary-bg text-primary-text placeholder:text-tertiary-text focus:border-button-info w-full rounded-lg border px-3 py-2.5 text-sm transition-colors outline-none ${suggestedValueError ? "border-red-500" : ""}`}
+            />
+          )}
           {suggestedValueError && (
             <p className="mt-1 text-xs text-red-400">{suggestedValueError}</p>
           )}
@@ -453,8 +579,10 @@ function SuggestionForm({
             <label className="text-secondary-text text-sm font-medium">
               Reason for Suggested {fieldLabel(field)}
             </label>
-            <span className="text-secondary-text text-xs">
-              {reason.length} / {minChars} min
+            <span
+              className={`text-xs ${reason.length > maxChars ? "text-red-400" : "text-secondary-text"}`}
+            >
+              {reason.length} / {minChars}–{maxChars}
             </span>
           </div>
           <textarea
@@ -480,7 +608,8 @@ function SuggestionForm({
               !!rateLimitUntil ||
               !selectedItem ||
               !suggestedValue.trim() ||
-              reason.length < minChars
+              reason.length < minChars ||
+              reason.length > maxChars
             }
             className="bg-button-info hover:bg-button-info-hover text-form-button-text flex items-center gap-2 disabled:opacity-50"
           >
@@ -512,6 +641,7 @@ interface EditReasonModalProps {
   suggestion: Suggestion | null;
   item: Item | null;
   onSave: (reason: string) => Promise<void>;
+  limits: SuggestionLimits | null;
 }
 
 function EditReasonModal({
@@ -520,10 +650,13 @@ function EditReasonModal({
   suggestion,
   item,
   onSave,
+  limits,
 }: EditReasonModalProps) {
   const [reason, setReason] = useState(suggestion?.reason ?? "");
   const [saving, setSaving] = useState(false);
   const [rateLimitUntil, setRateLimitUntil] = useState<number | null>(null);
+  const minChars = limits?.min_characters ?? 350;
+  const maxChars = limits?.max_characters ?? 750;
 
   useEffect(() => {
     if (suggestion) setReason(suggestion.reason);
@@ -541,8 +674,8 @@ function EditReasonModal({
   }, [rateLimitUntil]);
 
   const handleSave = async () => {
-    if (reason.trim().length < 350) {
-      toast.error("Reason must be at least 350 characters.");
+    if (reason.trim().length < minChars) {
+      toast.error(`Reason must be at least ${minChars} characters.`);
       return;
     }
     setSaving(true);
@@ -580,8 +713,10 @@ function EditReasonModal({
             <span className="text-secondary-text text-sm font-medium">
               Reason
             </span>
-            <span className="text-secondary-text text-xs">
-              {reason.length} / 350 min
+            <span
+              className={`text-xs ${reason.length > maxChars ? "text-red-400" : "text-secondary-text"}`}
+            >
+              {reason.length} / {minChars}–{maxChars}
             </span>
           </div>
           <textarea
@@ -607,7 +742,10 @@ function EditReasonModal({
               type="button"
               onClick={handleSave}
               disabled={
-                saving || !!rateLimitUntil || reason.trim().length < 350
+                saving ||
+                !!rateLimitUntil ||
+                reason.trim().length < minChars ||
+                reason.trim().length > maxChars
               }
               size="sm"
               className="bg-button-info hover:bg-button-info-hover text-form-button-text flex items-center gap-2 disabled:opacity-50"
@@ -658,7 +796,38 @@ function VoteRateLimitBanner({ until }: { until: number }) {
   );
 }
 
-const parseValueInput = (): { valid: boolean; error?: string } => {
+const parseValueInput = (
+  raw: string,
+  maxCash?: number,
+): { valid: boolean; error?: string } => {
+  const trimmed = raw.trim().toLowerCase().replace(/,/g, "");
+  if (!trimmed) return { valid: true };
+
+  let num: number;
+  if (trimmed.endsWith("m")) {
+    num = parseFloat(trimmed.slice(0, -1)) * 1_000_000;
+  } else if (trimmed.endsWith("k")) {
+    num = parseFloat(trimmed.slice(0, -1)) * 1_000;
+  } else {
+    num = parseFloat(trimmed);
+  }
+
+  if (isNaN(num) || num < 0)
+    return {
+      valid: false,
+      error: "Enter a valid number (e.g. 50m, 500k, 10,000,000)",
+    };
+
+  if (maxCash !== undefined && num > maxCash) {
+    const label =
+      maxCash >= 1_000_000
+        ? `${maxCash / 1_000_000}m`
+        : maxCash >= 1_000
+          ? `${maxCash / 1_000}k`
+          : maxCash.toLocaleString();
+    return { valid: false, error: `Value cannot exceed ${label}` };
+  }
+
   return { valid: true };
 };
 
@@ -1921,6 +2090,7 @@ export default function ValueSuggestionsPage() {
         suggestion={editTarget}
         item={editTarget ? (editTarget.item ?? null) : null}
         onSave={handleEditSave}
+        limits={limits}
       />
 
       {/* Voters Modal */}
