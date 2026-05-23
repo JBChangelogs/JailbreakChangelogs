@@ -37,6 +37,7 @@ import { DeleteAccount } from "@/components/Settings/DeleteAccount";
 import { RobloxConnection } from "@/components/Settings/RobloxConnection";
 import { ExportInventoryData } from "@/components/Settings/ExportInventoryData";
 import { useAuthContext } from "@/contexts/AuthContext";
+import { useTwemoji } from "@/contexts/TwemojiContext";
 import SupporterModal from "@/components/Modals/SupporterModal";
 import { useSupporterModal } from "@/hooks/useSupporterModal";
 import { safeSetJSON } from "@/utils/storage/safeStorage";
@@ -73,6 +74,7 @@ const supporterIcons: Record<number, string> = {
 
 export default function SettingsPage() {
   const { user, isLoading } = useAuthContext();
+  const { twemojiEnabled, setTwemojiEnabled } = useTwemoji();
   const { modalState, closeModal, openModal } = useSupporterModal();
   const router = useRouter();
   const [highlightParam, setHighlightParam] = useQueryState("highlight", {
@@ -886,6 +888,23 @@ export default function SettingsPage() {
                       </div>
                     );
                   })}
+                  {isAppearanceCat && (
+                    <SettingToggle
+                      name="twemoji_enabled"
+                      value={twemojiEnabled}
+                      description="Use Twemoji for emojis instead of your browser's native emoji set"
+                      displayName="Twemoji Enabled"
+                      onChange={(_name, value) => {
+                        setTwemojiEnabled(value);
+                        const displayName =
+                          formatSettingName("twemoji_enabled");
+                        toast.success("Setting Updated", {
+                          description: `"${displayName}" has been ${value ? "enabled" : "disabled"}.`,
+                        });
+                      }}
+                      userData={userData}
+                    />
+                  )}
                 </div>
                 {isAppearanceCat &&
                   (isSettingEnabled("custom_banner") ||
