@@ -1,41 +1,10 @@
 "use client";
 
-import { useEffect } from "react";
-import { useAuthContext } from "@/contexts/AuthContext";
-import { canBypassMaintenance } from "@/utils/maintenance";
 import Image from "next/image";
 import { bangers } from "@/app/fonts";
+import { Button } from "@/components/ui/button";
 
 export default function Maintenance() {
-  const { isAuthenticated, user, isLoading } = useAuthContext();
-
-  useEffect(() => {
-    if (!isLoading && isAuthenticated && user) {
-      const canBypass = canBypassMaintenance();
-      if (canBypass) {
-        window.location.href = "/";
-      }
-    }
-  }, [isAuthenticated, user, isLoading]);
-
-  const shouldShowMaintenance =
-    isLoading || !isAuthenticated || !user || !canBypassMaintenance();
-
-  if (isLoading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="text-center">
-          <div className="mx-auto mb-4 h-12 w-12 animate-spin rounded-full border-b-2 border-white"></div>
-          <p className="text-white">Checking access...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!shouldShowMaintenance) {
-    return null;
-  }
-
   return (
     <div
       className="relative flex min-h-screen items-center justify-center bg-[url(/backgrounds/v2/background16.webp)] bg-cover bg-center bg-no-repeat"
@@ -153,26 +122,15 @@ export default function Maintenance() {
             </div>
           </div>
 
-          <a
-            href="https://status.jailbreakchangelogs.com"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="rounded-lg px-6 py-2.5 text-base font-semibold shadow-[0_4px_14px_0_rgba(0,0,0,0.25)] transition-colors duration-200"
-            style={{
-              backgroundColor: "var(--color-button-info)",
-              color: "var(--color-form-button-text)",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor =
-                "var(--color-button-info-hover)";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor =
-                "var(--color-button-info)";
-            }}
-          >
-            Check Service Status
-          </a>
+          <Button asChild>
+            <a
+              href="https://status.jailbreakchangelogs.com"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Check Service Status
+            </a>
+          </Button>
         </div>
       </div>
     </div>
