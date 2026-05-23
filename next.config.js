@@ -1,4 +1,5 @@
 const nextConfig = {
+  output: "standalone",
   compress: true,
   poweredByHeader: false,
   allowedDevOrigins: [
@@ -11,7 +12,6 @@ const nextConfig = {
     compilationMode: "annotation",
   },
   experimental: {
-    webpackMemoryOptimizations: true,
     optimizePackageImports: [
       "@mui/material",
       "@mui/lab",
