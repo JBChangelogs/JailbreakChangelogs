@@ -13,9 +13,12 @@ export default function NavLogo({
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
   if (!mounted) {
+    const initialSrc = isCollabPage
+      ? "/logos/collab/JBCL_X_TC_Logo_Long_Transparent_Dark.webp"
+      : "/logos/JBCL_Long_Transparent.webp";
     return (
       <Image
-        src="/logos/JBCL_Long_Transparent.webp"
+        src={initialSrc}
         alt="Jailbreak Changelogs Logo"
         width={213}
         height={48}
