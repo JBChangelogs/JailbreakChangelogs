@@ -7,8 +7,8 @@ import { useCommentsContext } from "./CommentsContext";
 import { CommentHeader } from "./CommentHeader";
 import { CommentForm } from "./CommentForm";
 import { CommentItem } from "./CommentItem";
-import { Spinner } from "@/components/ui/Spinner";
 import { Icon } from "../ui/IconWrapper";
+import { CommentSkeletonList } from "./CommentSkeleton";
 import { Pagination } from "@/components/ui/Pagination";
 import { RateLimitBanner } from "@/components/ui/RateLimitBanner";
 import { BanBanner } from "@/components/ui/BanBanner";
@@ -85,12 +85,7 @@ function CommentsLayout() {
 
           {/* Comments List */}
           {isRefreshingComments ? (
-            <div className="flex flex-col items-center justify-center py-12 text-center sm:py-16">
-              <Spinner className="mb-4 h-10 w-10" />
-              <h3 className="text-primary-text mb-2 text-lg font-semibold sm:text-xl">
-                Fetching comments...
-              </h3>
-            </div>
+            <CommentSkeletonList />
           ) : filteredComments.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12 text-center sm:py-16">
               <div className="relative mb-6">
@@ -123,7 +118,7 @@ function CommentsLayout() {
             </div>
           ) : (
             <div className="flex flex-col">
-              <div className="flex flex-col">
+              <div className="flex flex-col space-y-3">
                 {currentComments.map((item) => {
                   if (!item) return null;
 

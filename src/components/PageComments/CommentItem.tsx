@@ -125,9 +125,9 @@ export function CommentItem({ comment }: { comment: CommentData }) {
     <div
       id={`comment-${comment.id}`}
       key={comment.id}
-      className="group relative py-2 transition-all duration-200"
+      className="relative transition-all duration-200"
     >
-      <div className="flex gap-2 sm:gap-3">
+      <div className="group/comment flex gap-2 sm:gap-3">
         {/*
            Avatar Gutter
            Left side of the comment containing the user's avatar.
@@ -252,7 +252,7 @@ export function CommentItem({ comment }: { comment: CommentData }) {
                     <Button
                       variant="ghost"
                       size="sm"
-                      className={`text-secondary-text hover:text-primary-text hover:bg-quaternary-bg h-8 w-8 rounded-lg p-0 opacity-100 transition-all duration-200 ${reactionPickerHoverOpenId === comment.id ? "lg:opacity-100" : "lg:opacity-0 lg:group-hover:opacity-100"}`}
+                      className={`text-secondary-text hover:text-primary-text hover:bg-quaternary-bg h-8 w-8 rounded-lg p-0 opacity-100 transition-all duration-200 ${reactionPickerHoverOpenId === comment.id ? "lg:opacity-100" : "lg:opacity-0 lg:group-hover/comment:opacity-100"}`}
                       onClick={() => {
                         if (replyingToId === comment.id) {
                           setReplyingToId(null);
@@ -288,7 +288,7 @@ export function CommentItem({ comment }: { comment: CommentData }) {
                         <Button
                           variant="ghost"
                           size="sm"
-                          className={`text-secondary-text hover:text-primary-text hover:bg-quaternary-bg h-8 w-8 rounded-lg p-0 opacity-100 transition-all duration-200 ${reactionPickerHoverOpenId === comment.id ? "lg:opacity-100" : "lg:opacity-0 lg:group-hover:opacity-100"} ${isRateLimited || !!reactionBan ? "cursor-not-allowed" : ""}`}
+                          className={`text-secondary-text hover:text-primary-text hover:bg-quaternary-bg h-8 w-8 rounded-lg p-0 opacity-100 transition-all duration-200 ${reactionPickerHoverOpenId === comment.id ? "lg:opacity-100" : "lg:opacity-0 lg:group-hover/comment:opacity-100"} ${isRateLimited || !!reactionBan ? "cursor-not-allowed" : ""}`}
                         >
                           <Icon
                             icon="fluent:emoji-add-16-regular"
@@ -324,7 +324,7 @@ export function CommentItem({ comment }: { comment: CommentData }) {
                     <Button
                       variant="ghost"
                       size="sm"
-                      className={`text-primary-text hover:bg-quaternary-bg h-8 w-8 rounded-lg p-0 opacity-100 transition-all duration-200 data-[state=open]:opacity-100 ${reactionPickerHoverOpenId === comment.id ? "lg:opacity-100" : "lg:opacity-0 lg:group-hover:opacity-100"}`}
+                      className={`text-primary-text hover:bg-quaternary-bg h-8 w-8 rounded-lg p-0 opacity-100 transition-all duration-200 data-[state=open]:opacity-100 ${reactionPickerHoverOpenId === comment.id ? "lg:opacity-100" : "lg:opacity-0 lg:group-hover/comment:opacity-100"}`}
                     >
                       <Icon
                         icon="heroicons:ellipsis-horizontal"
@@ -688,391 +688,391 @@ export function CommentItem({ comment }: { comment: CommentData }) {
               </div>
             </div>
           )}
+        </div>
+      </div>
 
-          {/* Reddit-style replies */}
-          {replyCount > 0 && (
-            <button
-              type="button"
-              className="text-link hover:text-link-hover mt-2 flex cursor-pointer items-center gap-1 text-xs font-medium transition-colors"
-              onClick={() => toggleReplies(comment.id)}
-            >
-              <Icon
-                icon={
-                  expandedReplies.has(comment.id)
-                    ? "heroicons:chevron-up"
-                    : "heroicons:chevron-down"
-                }
-                className="h-3.5 w-3.5"
-                inline={true}
-              />
-              {expandedReplies.has(comment.id)
-                ? "Hide replies"
-                : `${replyCount} ${replyCount === 1 ? "reply" : "replies"}`}
-            </button>
-          )}
+      <div className="ml-12 sm:ml-[3.25rem]">
+        {/* Replies - first reply shown by default; rest expand on click */}
+        {replyCount > 0 && comment.replies && (
+          <>
+            <div className="border-border-card mt-3 space-y-3 border-l-2 pl-3 sm:pl-4">
+              {(expandedReplies.has(comment.id)
+                ? comment.replies
+                : comment.replies.slice(0, 1)
+              ).map((reply) => {
+                const replyUser = userData[reply.user_id];
+                const replyHideRecent =
+                  (!replyUser?.settings?.show_recent_comments ||
+                    !replyUser?.settings?.profile_public) &&
+                  currentUserId !== reply.user_id;
+                const replyDisplayName = isRobloxContext
+                  ? replyUser?.roblox_display_name ||
+                    replyUser?.roblox_username ||
+                    replyUser?.username ||
+                    reply.author
+                  : replyUser?.username || reply.author;
+                const replyRobloxAvatarUrl =
+                  isRobloxContext && replyUser?.roblox_avatar
+                    ? replyUser.roblox_avatar
+                    : undefined;
 
-          {expandedReplies.has(comment.id) &&
-            comment.replies &&
-            comment.replies.length > 0 && (
-              <div className="border-border-card mt-3 space-y-3 border-l-2 pl-3 sm:pl-4">
-                {comment.replies.map((reply) => {
-                  const replyUser = userData[reply.user_id];
-                  const replyHideRecent =
-                    (!replyUser?.settings?.show_recent_comments ||
-                      !replyUser?.settings?.profile_public) &&
-                    currentUserId !== reply.user_id;
-                  const replyDisplayName = isRobloxContext
-                    ? replyUser?.roblox_display_name ||
-                      replyUser?.roblox_username ||
-                      replyUser?.username ||
-                      reply.author
-                    : replyUser?.username || reply.author;
-                  const replyRobloxAvatarUrl =
-                    isRobloxContext && replyUser?.roblox_avatar
-                      ? replyUser.roblox_avatar
-                      : undefined;
-
-                  return (
-                    <div
-                      id={`comment-${reply.id}`}
-                      key={reply.id}
-                      className="group flex gap-2 sm:gap-3"
-                    >
-                      {/* Reply avatar */}
-                      <div className="flex w-8 shrink-0 items-start pt-1">
-                        {replyHideRecent ? (
-                          <div className="ring-tertiary-text/20 border-border-card bg-primary-bg flex h-8 w-8 items-center justify-center rounded-full border ring-1">
-                            <svg
-                              className="text-secondary-text h-4 w-4"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                              stroke="currentColor"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
-                              />
-                            </svg>
-                          </div>
-                        ) : (
-                          <div
-                            className={
-                              replyUser?.premiumtype === 3
-                                ? "rounded-sm"
-                                : "rounded-full"
-                            }
+                return (
+                  <div
+                    id={`comment-${reply.id}`}
+                    key={reply.id}
+                    className="group/reply flex gap-2 sm:gap-3"
+                  >
+                    {/* Reply avatar */}
+                    <div className="flex w-8 shrink-0 items-start pt-1">
+                      {replyHideRecent ? (
+                        <div className="ring-tertiary-text/20 border-border-card bg-primary-bg flex h-8 w-8 items-center justify-center rounded-full border ring-1">
+                          <svg
+                            className="text-secondary-text h-4 w-4"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
                           >
-                            <UserAvatar
-                              userId={reply.user_id}
-                              avatarHash={replyUser?.avatar ?? null}
-                              username={replyDisplayName}
-                              forceAvatarUrl={replyRobloxAvatarUrl}
-                              size={8}
-                              cdnSize={256}
-                              custom_avatar={replyUser?.custom_avatar}
-                              showBadge={false}
-                              settings={replyUser?.settings}
-                              premiumType={replyUser?.premiumtype}
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
                             />
-                          </div>
-                        )}
-                      </div>
+                          </svg>
+                        </div>
+                      ) : (
+                        <div
+                          className={
+                            replyUser?.premiumtype === 3
+                              ? "rounded-sm"
+                              : "rounded-full"
+                          }
+                        >
+                          <UserAvatar
+                            userId={reply.user_id}
+                            avatarHash={replyUser?.avatar ?? null}
+                            username={replyDisplayName}
+                            forceAvatarUrl={replyRobloxAvatarUrl}
+                            size={8}
+                            cdnSize={256}
+                            custom_avatar={replyUser?.custom_avatar}
+                            showBadge={false}
+                            settings={replyUser?.settings}
+                            premiumType={replyUser?.premiumtype}
+                          />
+                        </div>
+                      )}
+                    </div>
 
-                      {/* Reply content */}
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-start justify-between gap-2 pb-1">
-                          <div className="flex min-w-0 flex-col">
-                            {replyHideRecent ? (
-                              <span className="text-primary-text text-sm font-semibold">
-                                Hidden User
-                              </span>
-                            ) : (
-                              <div className="flex flex-wrap items-center gap-1.5">
-                                <Link
-                                  href={`/users/${reply.user_id}`}
-                                  prefetch={false}
-                                  className="text-primary-text hover:text-link max-w-30 truncate text-sm font-semibold transition-colors sm:max-w-50"
-                                >
-                                  {replyDisplayName}
-                                </Link>
-                                {replyUser && (
-                                  <UserBadges
-                                    usernumber={replyUser.usernumber}
-                                    premiumType={replyUser.premiumtype}
-                                    flags={[]}
-                                    primary_guild={undefined}
-                                    size="sm"
-                                    customBgClass="bg-primary-bg/50"
-                                    noContainer={true}
-                                  />
-                                )}
-                              </div>
-                            )}
-                            <CommentTimestamp
-                              date={reply.date}
-                              editedAt={reply.edited_at}
-                              commentId={reply.id}
-                            />
-                          </div>
-
-                          {/* Reply action menu */}
-                          {isLoggedIn && (
-                            <div className="flex items-center gap-1">
-                              {availableEmojis.length > 0 && (
-                                <Popover
-                                  open={reactionPickerHoverOpenId === reply.id}
-                                  onOpenChange={(open) => {
-                                    if (
-                                      open &&
-                                      (isRateLimited || !!reactionBan)
-                                    )
-                                      return;
-                                    setReactionPickerHoverOpenId(
-                                      open ? reply.id : null,
-                                    );
-                                  }}
-                                >
-                                  <Tooltip>
-                                    <TooltipTrigger asChild>
-                                      <PopoverTrigger asChild>
-                                        <Button
-                                          variant="ghost"
-                                          size="sm"
-                                          className={`text-secondary-text hover:text-primary-text hover:bg-quaternary-bg h-7 w-7 rounded-lg p-0 opacity-100 transition-all duration-200 ${reactionPickerHoverOpenId === reply.id ? "lg:opacity-100" : "lg:opacity-0 lg:group-hover:opacity-100"} ${isRateLimited || !!reactionBan ? "cursor-not-allowed" : ""}`}
-                                        >
-                                          <Icon
-                                            icon="fluent:emoji-add-16-regular"
-                                            className="h-3.5 w-3.5"
-                                          />
-                                        </Button>
-                                      </PopoverTrigger>
-                                    </TooltipTrigger>
-                                    <TooltipContent>
-                                      Add a reaction
-                                    </TooltipContent>
-                                  </Tooltip>
-                                  <PopoverContent
-                                    className="w-auto p-2"
-                                    align="end"
-                                  >
-                                    <div className="grid grid-cols-5 gap-1">
-                                      {availableEmojis.map((emoji) => (
-                                        <button
-                                          key={emoji}
-                                          type="button"
-                                          onClick={() => {
-                                            void handleReact(reply.id, emoji);
-                                            setReactionPickerHoverOpenId(null);
-                                          }}
-                                          className="hover:bg-quaternary-bg flex h-8 w-8 cursor-pointer items-center justify-center rounded-md text-lg transition-colors"
-                                        >
-                                          {emoji}
-                                        </button>
-                                      ))}
-                                    </div>
-                                  </PopoverContent>
-                                </Popover>
+                    {/* Reply content */}
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-start justify-between gap-2 pb-1">
+                        <div className="flex min-w-0 flex-col">
+                          {replyHideRecent ? (
+                            <span className="text-primary-text text-sm font-semibold">
+                              Hidden User
+                            </span>
+                          ) : (
+                            <div className="flex flex-wrap items-center gap-1.5">
+                              <Link
+                                href={`/users/${reply.user_id}`}
+                                prefetch={false}
+                                className="text-primary-text hover:text-link max-w-30 truncate text-sm font-semibold transition-colors sm:max-w-50"
+                              >
+                                {replyDisplayName}
+                              </Link>
+                              {replyUser && (
+                                <UserBadges
+                                  usernumber={replyUser.usernumber}
+                                  premiumType={replyUser.premiumtype}
+                                  flags={[]}
+                                  primary_guild={undefined}
+                                  size="sm"
+                                  customBgClass="bg-primary-bg/50"
+                                  noContainer={true}
+                                />
                               )}
-                              <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    className={`text-primary-text hover:bg-quaternary-bg h-7 w-7 rounded-lg p-0 opacity-100 transition-all duration-200 data-[state=open]:opacity-100 ${reactionPickerHoverOpenId === reply.id ? "lg:opacity-100" : "lg:opacity-0 lg:group-hover:opacity-100"}`}
-                                  >
-                                    <Icon
-                                      icon="heroicons:ellipsis-horizontal"
-                                      className="h-4 w-4"
-                                    />
-                                  </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end">
-                                  {reply.reactions &&
-                                    reply.reactions.length > 0 && (
-                                      <DropdownMenuItem
-                                        onClick={() => {
-                                          const sorted = getStableReactionOrder(
-                                            reply.id,
-                                            reply.reactions!,
-                                          );
-                                          setReactionBreakdownOpenId(reply.id);
-                                          setBreakdownTab(
-                                            sorted[0]?.emoji ?? "all",
-                                          );
-                                        }}
+                            </div>
+                          )}
+                          <CommentTimestamp
+                            date={reply.date}
+                            editedAt={reply.edited_at}
+                            commentId={reply.id}
+                          />
+                        </div>
+
+                        {/* Reply action menu */}
+                        {isLoggedIn && (
+                          <div className="flex items-center gap-1">
+                            {availableEmojis.length > 0 && (
+                              <Popover
+                                open={reactionPickerHoverOpenId === reply.id}
+                                onOpenChange={(open) => {
+                                  if (open && (isRateLimited || !!reactionBan))
+                                    return;
+                                  setReactionPickerHoverOpenId(
+                                    open ? reply.id : null,
+                                  );
+                                }}
+                              >
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <PopoverTrigger asChild>
+                                      <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        className={`text-secondary-text hover:text-primary-text hover:bg-quaternary-bg h-7 w-7 rounded-lg p-0 opacity-100 transition-all duration-200 ${reactionPickerHoverOpenId === reply.id ? "lg:opacity-100" : "lg:opacity-0 lg:group-hover/reply:opacity-100"} ${isRateLimited || !!reactionBan ? "cursor-not-allowed" : ""}`}
                                       >
                                         <Icon
-                                          icon="heroicons-outline:face-smile"
-                                          className="mr-2 h-4 w-4"
+                                          icon="fluent:emoji-add-16-regular"
+                                          className="h-3.5 w-3.5"
                                         />
-                                        View Reactions
-                                      </DropdownMenuItem>
-                                    )}
-                                  {isTester && (
+                                      </Button>
+                                    </PopoverTrigger>
+                                  </TooltipTrigger>
+                                  <TooltipContent>
+                                    Add a reaction
+                                  </TooltipContent>
+                                </Tooltip>
+                                <PopoverContent
+                                  className="w-auto p-2"
+                                  align="end"
+                                >
+                                  <div className="grid grid-cols-5 gap-1">
+                                    {availableEmojis.map((emoji) => (
+                                      <button
+                                        key={emoji}
+                                        type="button"
+                                        onClick={() => {
+                                          void handleReact(reply.id, emoji);
+                                          setReactionPickerHoverOpenId(null);
+                                        }}
+                                        className="hover:bg-quaternary-bg flex h-8 w-8 cursor-pointer items-center justify-center rounded-md text-lg transition-colors"
+                                      >
+                                        {emoji}
+                                      </button>
+                                    ))}
+                                  </div>
+                                </PopoverContent>
+                              </Popover>
+                            )}
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className={`text-primary-text hover:bg-quaternary-bg h-7 w-7 rounded-lg p-0 opacity-100 transition-all duration-200 data-[state=open]:opacity-100 ${reactionPickerHoverOpenId === reply.id ? "lg:opacity-100" : "lg:opacity-0 lg:group-hover/reply:opacity-100"}`}
+                                >
+                                  <Icon
+                                    icon="heroicons:ellipsis-horizontal"
+                                    className="h-4 w-4"
+                                  />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end">
+                                {reply.reactions &&
+                                  reply.reactions.length > 0 && (
                                     <DropdownMenuItem
                                       onClick={() => {
-                                        void navigator.clipboard
-                                          .writeText(String(reply.id))
-                                          .then(() => {
-                                            toast.success(
-                                              `Comment ID ${reply.id} copied`,
-                                            );
-                                          });
+                                        const sorted = getStableReactionOrder(
+                                          reply.id,
+                                          reply.reactions!,
+                                        );
+                                        setReactionBreakdownOpenId(reply.id);
+                                        setBreakdownTab(
+                                          sorted[0]?.emoji ?? "all",
+                                        );
                                       }}
                                     >
                                       <Icon
-                                        icon="heroicons-outline:clipboard"
+                                        icon="heroicons-outline:face-smile"
                                         className="mr-2 h-4 w-4"
                                       />
-                                      Copy Comment ID
+                                      View Reactions
                                     </DropdownMenuItem>
                                   )}
-                                  {currentUserId === reply.user_id ? (
-                                    <>
-                                      {isCommentEditable(reply.date) && (
-                                        <DropdownMenuItem
-                                          onClick={() =>
-                                            handleEditClick(reply.id)
-                                          }
-                                        >
-                                          <Icon
-                                            icon="heroicons-outline:pencil"
-                                            className="mr-2 h-4 w-4"
-                                          />
-                                          Edit
-                                        </DropdownMenuItem>
-                                      )}
+                                {isTester && (
+                                  <DropdownMenuItem
+                                    onClick={() => {
+                                      void navigator.clipboard
+                                        .writeText(String(reply.id))
+                                        .then(() => {
+                                          toast.success(
+                                            `Comment ID ${reply.id} copied`,
+                                          );
+                                        });
+                                    }}
+                                  >
+                                    <Icon
+                                      icon="heroicons-outline:clipboard"
+                                      className="mr-2 h-4 w-4"
+                                    />
+                                    Copy Comment ID
+                                  </DropdownMenuItem>
+                                )}
+                                {currentUserId === reply.user_id ? (
+                                  <>
+                                    {isCommentEditable(reply.date) && (
                                       <DropdownMenuItem
                                         onClick={() =>
-                                          handleDeleteComment(reply.id)
+                                          handleEditClick(reply.id)
                                         }
-                                        className="text-button-danger focus:text-button-danger focus:bg-button-danger/10"
                                       >
                                         <Icon
-                                          icon="heroicons-outline:trash"
+                                          icon="heroicons-outline:pencil"
                                           className="mr-2 h-4 w-4"
                                         />
-                                        Delete
+                                        Edit
                                       </DropdownMenuItem>
-                                    </>
-                                  ) : (
+                                    )}
                                     <DropdownMenuItem
                                       onClick={() =>
-                                        handleReportClick(reply.id)
+                                        handleDeleteComment(reply.id)
                                       }
+                                      className="text-button-danger focus:text-button-danger focus:bg-button-danger/10"
                                     >
                                       <Icon
-                                        icon="heroicons-outline:flag"
+                                        icon="heroicons-outline:trash"
                                         className="mr-2 h-4 w-4"
                                       />
-                                      Report
+                                      Delete
                                     </DropdownMenuItem>
-                                  )}
-                                </DropdownMenuContent>
-                              </DropdownMenu>
-                            </div>
-                          )}
-                        </div>
-
-                        {/* Reply body or edit form */}
-                        {editingCommentId === reply.id ? (
-                          <div className="border-border-card bg-form-input focus-within:border-button-info overflow-hidden rounded-lg border transition-colors">
-                            <textarea
-                              value={editContent}
-                              onChange={(e) => setEditContent(e.target.value)}
-                              disabled={updatingCommentId === reply.id}
-                              id={`edit-textarea-${reply.id}`}
-                              rows={3}
-                              className="text-primary-text placeholder-secondary-text w-full resize-none bg-transparent p-3 text-sm focus:outline-none disabled:opacity-50"
-                              autoCorrect="off"
-                              autoComplete="off"
-                              spellCheck="false"
-                              autoCapitalize="off"
-                              onKeyDown={(e) => {
-                                if (e.key === "Escape") {
-                                  setEditingCommentId(null);
-                                  setEditContent("");
-                                }
-                                if (e.key === "Enter" && !e.shiftKey) {
-                                  e.preventDefault();
-                                  if (
-                                    editContent.trim() &&
-                                    updatingCommentId !== reply.id
-                                  )
-                                    void handleEditComment(reply.id);
-                                }
-                              }}
-                            />
-                            <div className="border-border-card flex items-center justify-end gap-2 border-t px-3 py-2">
-                              <Button
-                                size="sm"
-                                variant="ghost"
-                                disabled={updatingCommentId === reply.id}
-                                onClick={() => {
-                                  setEditingCommentId(null);
-                                  setEditContent("");
-                                }}
-                              >
-                                Cancel
-                              </Button>
-                              <Button
-                                size="sm"
-                                onClick={() => handleEditComment(reply.id)}
-                                disabled={
-                                  !editContent.trim() ||
-                                  updatingCommentId === reply.id
-                                }
-                              >
-                                {updatingCommentId === reply.id ? (
-                                  <>
-                                    <Spinner className="h-3.5 w-3.5" />{" "}
-                                    Updating...
                                   </>
                                 ) : (
-                                  "Update"
+                                  <DropdownMenuItem
+                                    onClick={() => handleReportClick(reply.id)}
+                                  >
+                                    <Icon
+                                      icon="heroicons-outline:flag"
+                                      className="mr-2 h-4 w-4"
+                                    />
+                                    Report
+                                  </DropdownMenuItem>
                                 )}
-                              </Button>
-                            </div>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
                           </div>
-                        ) : (
-                          <p
-                            className="text-primary-text text-sm leading-relaxed wrap-break-word whitespace-pre-wrap"
-                            dangerouslySetInnerHTML={
-                              isClient
-                                ? {
-                                    __html: convertUrlsToLinksHTML(
-                                      processMentions(
-                                        sanitizeHTML(
-                                          sanitizeText(reply.content || ""),
-                                        ),
+                        )}
+                      </div>
+
+                      {/* Reply body or edit form */}
+                      {editingCommentId === reply.id ? (
+                        <div className="border-border-card bg-form-input focus-within:border-button-info overflow-hidden rounded-lg border transition-colors">
+                          <textarea
+                            value={editContent}
+                            onChange={(e) => setEditContent(e.target.value)}
+                            disabled={updatingCommentId === reply.id}
+                            id={`edit-textarea-${reply.id}`}
+                            rows={3}
+                            className="text-primary-text placeholder-secondary-text w-full resize-none bg-transparent p-3 text-sm focus:outline-none disabled:opacity-50"
+                            autoCorrect="off"
+                            autoComplete="off"
+                            spellCheck="false"
+                            autoCapitalize="off"
+                            onKeyDown={(e) => {
+                              if (e.key === "Escape") {
+                                setEditingCommentId(null);
+                                setEditContent("");
+                              }
+                              if (e.key === "Enter" && !e.shiftKey) {
+                                e.preventDefault();
+                                if (
+                                  editContent.trim() &&
+                                  updatingCommentId !== reply.id
+                                )
+                                  void handleEditComment(reply.id);
+                              }
+                            }}
+                          />
+                          <div className="border-border-card flex items-center justify-end gap-2 border-t px-3 py-2">
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              disabled={updatingCommentId === reply.id}
+                              onClick={() => {
+                                setEditingCommentId(null);
+                                setEditContent("");
+                              }}
+                            >
+                              Cancel
+                            </Button>
+                            <Button
+                              size="sm"
+                              onClick={() => handleEditComment(reply.id)}
+                              disabled={
+                                !editContent.trim() ||
+                                updatingCommentId === reply.id
+                              }
+                            >
+                              {updatingCommentId === reply.id ? (
+                                <>
+                                  <Spinner className="h-3.5 w-3.5" />{" "}
+                                  Updating...
+                                </>
+                              ) : (
+                                "Update"
+                              )}
+                            </Button>
+                          </div>
+                        </div>
+                      ) : (
+                        <p
+                          className="text-primary-text text-sm leading-relaxed wrap-break-word whitespace-pre-wrap"
+                          dangerouslySetInnerHTML={
+                            isClient
+                              ? {
+                                  __html: convertUrlsToLinksHTML(
+                                    processMentions(
+                                      sanitizeHTML(
+                                        sanitizeText(reply.content || ""),
                                       ),
                                     ),
-                                  }
-                                : undefined
-                            }
-                          >
-                            {!isClient
-                              ? sanitizeText(reply.content || "")
-                              : undefined}
-                          </p>
-                        )}
+                                  ),
+                                }
+                              : undefined
+                          }
+                        >
+                          {!isClient
+                            ? sanitizeText(reply.content || "")
+                            : undefined}
+                        </p>
+                      )}
 
-                        {/* Reply Reactions */}
-                        <CommentReactions
-                          commentId={reply.id}
-                          reactions={reply.reactions}
-                          isRobloxContext={isRobloxContext}
-                          compact
-                        />
-                      </div>
+                      {/* Reply Reactions */}
+                      <CommentReactions
+                        commentId={reply.id}
+                        reactions={reply.reactions}
+                        isRobloxContext={isRobloxContext}
+                        compact
+                      />
                     </div>
-                  );
-                })}
-              </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {replyCount > 1 && (
+              <button
+                type="button"
+                className="text-link hover:text-link-hover mt-2 flex cursor-pointer items-center gap-1 text-xs font-medium transition-colors"
+                onClick={() => toggleReplies(comment.id)}
+              >
+                <Icon
+                  icon={
+                    expandedReplies.has(comment.id)
+                      ? "heroicons:chevron-up"
+                      : "heroicons:chevron-down"
+                  }
+                  className="h-3.5 w-3.5"
+                  inline={true}
+                />
+                {expandedReplies.has(comment.id)
+                  ? "Hide replies"
+                  : `View ${replyCount - 1} more ${replyCount - 1 === 1 ? "reply" : "replies"}`}
+              </button>
             )}
-        </div>
+          </>
+        )}
       </div>
     </div>
   );

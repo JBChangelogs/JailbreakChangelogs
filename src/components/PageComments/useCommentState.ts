@@ -83,7 +83,9 @@ export function useCommentState(props: ChangelogCommentsProps) {
     null,
   );
   const [isSubmittingComment, setIsSubmittingComment] = useState(false);
-  const [isRefreshingComments, setIsRefreshingComments] = useState(false);
+  const [isRefreshingComments, setIsRefreshingComments] = useState(
+    initialComments.length === 0,
+  );
   const [rateLimitUntil, setRateLimitUntil] = useState<number | null>(null);
   const [rateLimitLabel, setRateLimitLabel] = useState(
     "You're posting too fast.",
@@ -597,8 +599,8 @@ export function useCommentState(props: ChangelogCommentsProps) {
   useEffect(() => {
     if (!changelogId) return;
 
-    // Clear comments immediately when changelogId changes
     setComments([]);
+    setIsRefreshingComments(true);
     setPage(1);
 
     const timeoutId = setTimeout(() => {
