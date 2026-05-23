@@ -1,9 +1,4 @@
-import { createLogger } from "@/services/logger";
 import type { Metadata } from "next";
-import type { UserData, UserFlag } from "@/types/auth";
-import { safeGetJSON } from "@/utils/storage/safeStorage";
-
-const log = createLogger("API");
 
 export async function checkMaintenanceMode(): Promise<{
   isMaintenanceMode: boolean;
@@ -18,27 +13,6 @@ export async function checkMaintenanceMode(): Promise<{
   return {
     isMaintenanceMode,
   };
-}
-
-export function canBypassMaintenance(): boolean {
-  // This function runs on the client side to check if user can bypass maintenance
-  if (typeof window === "undefined") return false;
-
-  try {
-    const userData = safeGetJSON<UserData>("user", null);
-    if (!userData) return false;
-    const flags = userData.flags || [];
-
-    // Check if user has tester flag enabled
-    const testerFlag = flags.find(
-      (flag: UserFlag) => flag.flag === "is_tester" && flag.enabled === true,
-    );
-
-    return !!testerFlag;
-  } catch (error) {
-    log.error("Error checking maintenance bypass", error);
-    return false;
-  }
 }
 
 export async function getMaintenanceMetadata(): Promise<Metadata | null> {
