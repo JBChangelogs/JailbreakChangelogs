@@ -220,13 +220,7 @@ export default function ValuesChangelogPage() {
                             className="absolute inset-0 z-0"
                             aria-label={`View changelog #${changelog.id}`}
                           />
-                          <div
-                            className={`rounded-xl border p-4 transition-colors duration-200 ${
-                              isLatest
-                                ? "from-button-info/10 to-button-info-hover/10 shadow-button-info/20 border-button-info bg-linear-to-r shadow-lg"
-                                : "border-border-card bg-secondary-bg group-hover:border-border-focus"
-                            }`}
-                          >
+                          <div className="border-border-card bg-secondary-bg group-hover:border-border-focus rounded-xl border p-4 transition-colors duration-200">
                             {/* Header */}
                             <div className="mb-3">
                               <div className="flex items-center gap-2">
@@ -316,7 +310,7 @@ export default function ValuesChangelogPage() {
                                           className="text-button-danger h-3.5 w-3.5 shrink-0"
                                           inline
                                         />
-                                        <span className="text-secondary-text text-sm font-bold line-through">
+                                        <span className="text-secondary-text text-sm font-bold break-all line-through">
                                           {formatFullValue(
                                             entry.current_value || "N/A",
                                           )}
@@ -333,7 +327,7 @@ export default function ValuesChangelogPage() {
                                           className="text-button-success h-3.5 w-3.5 shrink-0"
                                           inline
                                         />
-                                        <span className="text-primary-text text-sm font-bold">
+                                        <span className="text-primary-text text-sm font-bold break-all">
                                           {formatFullValue(
                                             entry.suggested_value,
                                           )}
