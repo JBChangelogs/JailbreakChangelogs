@@ -28,62 +28,32 @@ export default function NavLogo({
 
   const src = (() => {
     if (isCollabPage) {
-      if (theme === "og")
+      if (theme === "og") {
         return `/logos/OLD/JBCL_X_TC_Logo_Long_Dark_Background.webp`;
+      }
       return `/logos/collab/JBCL_X_TC_Logo_Long_Transparent_${theme === "dark" ? "Dark" : "Light"}.webp`;
     }
     if (theme === "og") return `/logos/OLD/JBCL_Long_Transparent.webp`;
     return `/logos/JBCL_Long_Transparent.webp`;
   })();
-  if (theme === "og") {
-    if (isCollabPage) {
-      return (
-        <Image
-          src={src}
-          alt="Jailbreak Changelogs Logo"
-          width={213}
-          height={48}
-          quality={90}
-          fetchPriority="high"
-          loading="eager"
-          style={{
-            height: "36px",
-            width: "auto",
-          }}
-        />
-      );
-    } else {
-      return (
-        <Image
-          src={src}
-          alt="Jailbreak Changelogs Logo"
-          width={213}
-          height={48}
-          quality={90}
-          fetchPriority="high"
-          loading="eager"
-          style={{
-            height: "48px",
-            width: "auto",
-          }}
-        />
-      );
-    }
-  } else {
-    return (
-      <Image
-        src={src}
-        alt="Jailbreak Changelogs Logo"
-        width={213}
-        height={48}
-        quality={90}
-        fetchPriority="high"
-        loading="eager"
-        style={{
-          height: "48px",
-          width: "auto",
-        }}
-      />
-    );
-  }
+
+  let imageHeight = "48px";
+
+  if (theme === "og" && isCollabPage) imageHeight = "36px";
+
+  return (
+    <Image
+      src={src}
+      alt="Jailbreak Changelogs Logo"
+      width={213}
+      height={48}
+      quality={90}
+      fetchPriority="high"
+      loading="eager"
+      style={{
+        height: imageHeight,
+        width: "auto",
+      }}
+    />
+  );
 }
