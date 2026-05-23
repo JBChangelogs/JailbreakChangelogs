@@ -60,6 +60,8 @@ import {
   hasUnlockLevel,
 } from "@/utils/items/itemUnlockPresentation";
 import { createLogger } from "@/services/logger";
+import Link from "next/link";
+import { useTheme } from "@/contexts/ThemeContext";
 
 const log = createLogger("UI");
 
@@ -125,6 +127,7 @@ export default function ItemDetailsClient({
   favoriteButtonSlot,
 }: ItemDetailsClientProps) {
   "use memo";
+  const { resolvedTheme } = useTheme();
   const isBlueBird = item.id === 919;
   const blueBirdDefaultImage =
     "https://assets.jailbreakchangelogs.com/assets/images/items/vehicles/BlueBird.webp";
@@ -404,43 +407,52 @@ export default function ItemDetailsClient({
             <div className="mt-4 rounded-lg bg-linear-to-br from-[#076bb6] to-[#ca4a0d] p-0.5 shadow-lg">
               <div className="bg-tertiary-bg rounded-md p-4 text-center">
                 <div className="mb-3 flex justify-center">
-                  <a
-                    href="https://discord.com/invite/baHCsb8N5A"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="transition-transform hover:scale-105"
-                  >
-                    <Image
-                      src="https://assets.jailbreakchangelogs.com/assets/contributors/TradingCore_Transparent_Small.webp"
-                      alt="Trading Core Logo"
-                      width={120}
-                      height={120}
-                      className="rounded-lg"
-                    />
-                  </a>
+                  <Image
+                    src={`/logos/collab/JBCL_X_TC_Logo_Long_Transparent_${resolvedTheme === "dark" ? "Dark" : "Light"}.webp`}
+                    alt="Jailbreak Changelogs x Trading Core"
+                    width={220}
+                    height={48}
+                    className="h-12 w-auto"
+                  />
                 </div>
                 <h3 className="text-primary-text mb-1 text-lg font-semibold">
                   Help make a better value list
                 </h3>
                 <p className="text-secondary-text mb-3 text-sm leading-relaxed">
-                  Jailbreak Changelogs has partnered with Trading Core to build
-                  our value list through community engagement. Share your
-                  insights about this {currentItem.type} - {currentItem.name}.
+                  In partnership with Trading Core, you can suggest values for{" "}
+                  {currentItem.name} directly on the site. The community votes
+                  and our team reviews before applying changes.
                 </p>
-                <Button asChild className="gap-2">
-                  <a
-                    href="https://discord.com/invite/baHCsb8N5A"
-                    target="_blank"
-                    rel="noopener noreferrer"
+                <div className="flex flex-col gap-2 sm:flex-row sm:justify-center">
+                  <Button asChild className="w-full gap-2 sm:w-auto">
+                    <Link href="/values/suggestions">
+                      <Icon
+                        icon="material-symbols:edit-outline-rounded"
+                        className="h-4 w-4"
+                        inline={true}
+                      />
+                      Suggest a Value
+                    </Link>
+                  </Button>
+                  <Button
+                    asChild
+                    variant="secondary"
+                    className="w-full gap-2 sm:w-auto"
                   >
-                    <Icon
-                      icon="ic:baseline-discord"
-                      className="h-4 w-4"
-                      inline={true}
-                    />
-                    Join Trading Core
-                  </a>
-                </Button>
+                    <a
+                      href="https://discord.com/invite/baHCsb8N5A"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <Icon
+                        icon="ic:baseline-discord"
+                        className="h-4 w-4"
+                        inline={true}
+                      />
+                      Join the Discussion
+                    </a>
+                  </Button>
+                </div>
               </div>
             </div>
           </div>
