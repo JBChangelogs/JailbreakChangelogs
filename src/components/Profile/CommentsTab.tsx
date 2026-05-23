@@ -4,14 +4,24 @@ import { createLogger } from "@/services/logger";
 import { useState, useEffect } from "react";
 
 const log = createLogger("UI");
-import { Spinner } from "@/components/ui/Spinner";
-import { Button } from "@/components/ui/button";
 import { Pagination } from "@/components/ui/Pagination";
 import Comment from "../ProfileComments/Comments";
-import { Icon } from "@/components/ui/IconWrapper";
 import { fetchCommentDetails } from "@/app/users/[id]/actions";
 import { PUBLIC_API_URL } from "@/utils/api/api";
 import { buildApiUrlWithDevToken } from "@/utils/api/apiDevToken";
+
+interface CommentReaction {
+  emoji: string;
+  count: number;
+  users?: {
+    id: string;
+    username: string;
+    avatar?: string | null;
+    custom_avatar?: string | null;
+    premiumtype?: number;
+    settings?: { custom_avatar?: boolean } | null;
+  }[];
+}
 
 interface CommentData {
   id: number;
@@ -23,12 +33,10 @@ interface CommentData {
   user_id: string;
   edited_at: number | null;
   parent_id?: number | null;
+  reactions?: CommentReaction[];
 }
 
 interface CommentsTabProps {
-  comments: CommentData[];
-  loading: boolean;
-  error: string | null;
   currentUserId?: string | null;
   userId: string;
   settings?: {
@@ -37,18 +45,70 @@ interface CommentsTabProps {
   sharedItemDetails?: Record<string, unknown>;
 }
 
+function ProfileCommentCardSkeleton() {
+  return (
+    <div className="border-border-card bg-tertiary-bg rounded-lg border p-3 shadow-sm">
+      <div className="mb-2 flex">
+        <div className="bg-quaternary-bg mr-3 h-16 w-16 shrink-0 rounded-md md:h-[4.5rem] md:w-32" />
+        <div className="min-w-0 flex-1">
+          <div className="bg-quaternary-bg mb-2 h-4 w-3/4 rounded" />
+          <div className="bg-quaternary-bg mb-2 h-5 w-16 rounded-lg" />
+          <div className="bg-quaternary-bg h-3.5 w-full rounded" />
+          <div className="bg-quaternary-bg mt-1.5 h-3.5 w-4/5 rounded" />
+          <div className="bg-quaternary-bg mt-1.5 h-3.5 w-2/3 rounded" />
+        </div>
+      </div>
+      <hr className="border-border my-2 border-t" />
+      <div className="bg-quaternary-bg h-3 w-28 rounded" />
+    </div>
+  );
+}
+
+function ProfileCommentsSkeleton() {
+  return (
+    <div className="animate-pulse">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        {Array.from({ length: 6 }).map((_, i) => (
+          <ProfileCommentCardSkeleton key={i} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function normalizeReactions(raw: unknown): CommentReaction[] {
+  if (!raw) return [];
+  if (Array.isArray(raw)) {
+    return (raw as CommentReaction[]).map((r) => ({
+      emoji: r.emoji,
+      count: r.count,
+      users: r.users,
+    }));
+  }
+  if (typeof raw === "object") {
+    return Object.entries(raw as Record<string, unknown>)
+      .map(([emoji, users]) => ({
+        emoji,
+        count: Array.isArray(users) ? users.length : 0,
+        users: Array.isArray(users) ? (users as CommentReaction["users"]) : [],
+      }))
+      .filter((r) => r.count > 0);
+  }
+  return [];
+}
+
 export default function CommentsTab({
-  comments,
-  loading,
-  error,
   currentUserId,
   userId,
   settings,
   sharedItemDetails = {},
 }: CommentsTabProps) {
+  const [comments, setComments] = useState<CommentData[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
-  const [sortOrder, setSortOrder] = useState<"newest" | "oldest">("newest");
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalComments, setTotalComments] = useState(0);
   const [commentDetails, setCommentDetails] = useState<{
     changelogs: Record<string, unknown>;
     items: Record<string, unknown>;
@@ -57,45 +117,33 @@ export default function CommentsTab({
     inventories: Record<string, unknown>;
   }>({ changelogs: {}, items: {}, seasons: {}, trades: {}, inventories: {} });
   const [detailsLoading, setDetailsLoading] = useState(false);
-  const commentsPerPage = 6;
 
   const fetchChangelogDetailsClient = async (
     commentsForLookup: CommentData[],
   ): Promise<Record<string, unknown>> => {
-    if (!PUBLIC_API_URL) {
-      throw new Error("Missing PUBLIC_API_URL");
-    }
-    const apiBaseUrl = PUBLIC_API_URL;
+    if (!PUBLIC_API_URL) return {};
 
     const changelogIds = [
       ...new Set(
         commentsForLookup
-          .filter((comment) => comment.item_type.toLowerCase() === "changelog")
-          .map((comment) => comment.item_id.toString()),
+          .filter((c) => c.item_type.toLowerCase() === "changelog")
+          .map((c) => c.item_id.toString()),
       ),
     ];
 
-    if (changelogIds.length === 0) {
-      return {};
-    }
+    if (changelogIds.length === 0) return {};
 
-    const changelogResponses = await Promise.all(
+    const results = await Promise.all(
       changelogIds.map(async (id) => {
         try {
           const response = await fetch(
-            buildApiUrlWithDevToken(apiBaseUrl, `/changelogs/${id}`),
+            buildApiUrlWithDevToken(PUBLIC_API_URL, `/changelogs/${id}`),
             {
               credentials: "include",
-              headers: {
-                "User-Agent": "JailbreakChangelogs-Comments/1.0",
-              },
+              headers: { "User-Agent": "JailbreakChangelogs-Comments/1.0" },
             },
           );
-
-          if (!response.ok) {
-            return null;
-          }
-
+          if (!response.ok) return null;
           const data = await response.json();
           return { id, data };
         } catch {
@@ -104,140 +152,163 @@ export default function CommentsTab({
       }),
     );
 
-    return changelogResponses.reduce(
+    return results.reduce(
       (acc, entry) => {
-        if (entry) {
-          acc[entry.id] = entry.data;
-        }
+        if (entry) acc[entry.id] = entry.data;
         return acc;
       },
       {} as Record<string, unknown>,
     );
   };
 
-  // Trades are temporary, so exclude trade comments from profile history.
+  useEffect(() => {
+    if (!userId) return;
+
+    let isCancelled = false;
+    setLoading(true);
+    setError(null);
+    setCommentDetails({
+      changelogs: {},
+      items: {},
+      seasons: {},
+      trades: {},
+      inventories: {},
+    });
+
+    const fetchComments = async () => {
+      try {
+        const url = buildApiUrlWithDevToken(
+          PUBLIC_API_URL,
+          `/comments/user/${encodeURIComponent(userId)}?page=${currentPage}`,
+        );
+        const response = await fetch(url, {
+          credentials: "include",
+          headers: { "User-Agent": "JailbreakChangelogs-UserProfile/1.0" },
+        });
+
+        if (!response.ok) {
+          if (response.status === 404) {
+            if (!isCancelled) {
+              setComments([]);
+              setTotalPages(1);
+              setTotalComments(0);
+              setLoading(false);
+            }
+            return;
+          }
+          throw new Error(`Failed to fetch comments (${response.status})`);
+        }
+
+        const data = await response.json();
+        if (isCancelled) return;
+
+        const items = Array.isArray(data.items) ? data.items : [];
+        const mapped: CommentData[] = items.map(
+          (item: {
+            id: number;
+            content: string;
+            date: string;
+            item_id: number;
+            item_type: string;
+            edited_at: number | null;
+            parent_id?: number | null;
+            user: { id: string; username: string };
+            reactions?: unknown;
+          }) => ({
+            id: item.id,
+            author: item.user?.username ?? "",
+            content: item.content,
+            date: item.date,
+            item_id: item.item_id,
+            item_type: item.item_type,
+            user_id: item.user?.id ?? "",
+            edited_at: item.edited_at,
+            parent_id: item.parent_id ?? null,
+            reactions: normalizeReactions(item.reactions),
+          }),
+        );
+
+        setComments(mapped);
+        setTotalPages(data.total_pages ?? 1);
+        setTotalComments(data.total ?? 0);
+        setLoading(false);
+      } catch (err) {
+        if (isCancelled) return;
+        log.error("Error fetching comments", err);
+        setError(
+          err instanceof Error ? err.message : "Failed to load comments",
+        );
+        setLoading(false);
+      }
+    };
+
+    void fetchComments();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [userId, currentPage]);
+
+  useEffect(() => {
+    if (comments.length === 0) return;
+
+    const profileComments = comments.filter(
+      (c) => c.item_type.toLowerCase() !== "tradev2",
+    );
+    if (profileComments.length === 0) return;
+
+    const commentsNeedingDetails = profileComments.filter(
+      (c) => !sharedItemDetails[c.item_id.toString()],
+    );
+    if (commentsNeedingDetails.length === 0) return;
+
+    const fetchDetails = async () => {
+      setDetailsLoading(true);
+      try {
+        const [details, changelogDetails] = await Promise.all([
+          fetchCommentDetails(commentsNeedingDetails),
+          fetchChangelogDetailsClient(commentsNeedingDetails),
+        ]);
+        setCommentDetails({
+          changelogs: { ...sharedItemDetails, ...changelogDetails },
+          items: { ...sharedItemDetails, ...details.items },
+          seasons: { ...sharedItemDetails, ...details.seasons },
+          trades: { ...sharedItemDetails, ...details.trades },
+          inventories: { ...sharedItemDetails, ...details.inventories },
+        });
+      } catch (err) {
+        log.error("Error fetching comment details", err);
+      } finally {
+        setDetailsLoading(false);
+      }
+    };
+
+    void fetchDetails();
+  }, [comments, sharedItemDetails]);
+
   const profileComments = comments.filter(
-    (comment) => comment.item_type.toLowerCase() !== "tradev2",
+    (c) => c.item_type.toLowerCase() !== "tradev2",
   );
 
-  // Check if comments should be hidden
   const shouldHideComments =
     settings?.show_recent_comments === false && currentUserId !== userId;
 
-  // Fetch comment details when comments are loaded
-  useEffect(() => {
-    if (
-      profileComments.length > 0 &&
-      Object.keys(commentDetails.changelogs).length === 0 &&
-      Object.keys(commentDetails.items).length === 0 &&
-      Object.keys(commentDetails.seasons).length === 0 &&
-      Object.keys(commentDetails.trades).length === 0 &&
-      Object.keys(commentDetails.inventories).length === 0
-    ) {
-      // Check if we already have some item details from shared cache
-      const commentsNeedingDetails = profileComments.filter((comment) => {
-        const itemId = comment.item_id.toString();
-        return !sharedItemDetails[itemId];
-      });
+  const commentsById = new Map(profileComments.map((c) => [c.id, c]));
 
-      if (commentsNeedingDetails.length === 0) {
-        // All items are already in shared cache, no need to fetch
-        return;
-      }
-
-      // Start loading and fetch details
-      const fetchDetails = async () => {
-        setDetailsLoading(true);
-        try {
-          const [details, changelogDetails] = await Promise.all([
-            fetchCommentDetails(commentsNeedingDetails),
-            fetchChangelogDetailsClient(commentsNeedingDetails),
-          ]);
-          // Merge with shared cache
-          const mergedDetails = {
-            changelogs: { ...sharedItemDetails, ...changelogDetails },
-            items: { ...sharedItemDetails, ...details.items },
-            seasons: { ...sharedItemDetails, ...details.seasons },
-            trades: { ...sharedItemDetails, ...details.trades },
-            inventories: { ...sharedItemDetails, ...details.inventories },
-          };
-          setCommentDetails(mergedDetails);
-        } catch (error) {
-          log.error("Error fetching comment details", error);
-        } finally {
-          setDetailsLoading(false);
-        }
-      };
-
-      fetchDetails();
-    }
-  }, [profileComments, commentDetails, sharedItemDetails]);
-
-  // Sort comments based on selected order
-  const sortedComments = [...profileComments].sort((a, b) => {
-    return sortOrder === "newest"
-      ? parseInt(b.date) - parseInt(a.date)
-      : parseInt(a.date) - parseInt(b.date);
-  });
-
-  const commentsById = new Map(
-    sortedComments.map((comment) => [comment.id, comment]),
-  );
-
-  const commentTypeOptions = [
-    { value: "changelog", label: "Changelog" },
-    { value: "season", label: "Season" },
-    { value: "inventory", label: "Inventory" },
-    { value: "item", label: "Item" },
-  ];
-
-  // Filter comments based on selected types (multi-select)
-  const filteredComments =
-    selectedTypes.length > 0
-      ? sortedComments.filter((comment) =>
-          selectedTypes.some((selectedType) => {
-            const commentType = comment.item_type.toLowerCase();
-            if (selectedType === "item") {
-              return (
-                commentType !== "changelog" &&
-                commentType !== "season" &&
-                commentType !== "inventory" &&
-                commentType !== "tradev2"
-              );
-            }
-            return commentType === selectedType;
-          }),
-        )
-      : sortedComments;
-
-  // Get current page comments
-  const indexOfLastComment = currentPage * commentsPerPage;
-  const indexOfFirstComment = indexOfLastComment - commentsPerPage;
-  const currentComments = filteredComments.slice(
-    indexOfFirstComment,
-    indexOfLastComment,
-  );
-
-  // Change page
   const handlePageChange = (
-    event: React.ChangeEvent<unknown>,
+    _event: React.ChangeEvent<unknown>,
     value: number,
   ) => {
     setCurrentPage(value);
-    // Remove the scroll behavior
-  };
-
-  const toggleTypeFilter = (type: string) => {
-    setSelectedTypes((prev) =>
-      prev.includes(type) ? prev.filter((t) => t !== type) : [...prev, type],
-    );
-    setCurrentPage(1);
   };
 
   if (loading) {
     return (
-      <div className="flex min-h-[200px] items-center justify-center">
-        <Spinner className="h-8 w-8" />
+      <div className="space-y-6">
+        <div className="border-border-card rounded-t-none rounded-b-lg border p-4">
+          <div className="bg-tertiary-bg mb-4 h-6 w-40 animate-pulse rounded" />
+          <ProfileCommentsSkeleton />
+        </div>
       </div>
     );
   }
@@ -248,7 +319,7 @@ export default function CommentsTab({
         <div className="border-border-card rounded-t-none rounded-b-lg border p-4">
           <div className="mb-3 flex items-center gap-2">
             <h2 className="text-primary-text text-lg font-semibold">
-              Recent Comments [{profileComments.length}]
+              Recent Comments
             </h2>
           </div>
           <p className="text-status-error">Error: {error}</p>
@@ -290,87 +361,22 @@ export default function CommentsTab({
   return (
     <div className="space-y-6" id="comments-section">
       <div className="border-border-card rounded-t-none rounded-b-lg border p-4">
-        <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-center gap-2">
-            <h2 className="text-primary-text text-lg font-semibold">
-              Recent Comments [{filteredComments.length}]
-            </h2>
-          </div>
-          <Button
-            onClick={() =>
-              setSortOrder((prev) => (prev === "newest" ? "oldest" : "newest"))
-            }
-            variant="default"
-            size="sm"
-            className="flex items-center gap-1"
-          >
-            {sortOrder === "newest" ? (
-              <Icon icon="heroicons-outline:arrow-down" className="h-4 w-4" />
-            ) : (
-              <Icon icon="heroicons-outline:arrow-up" className="h-4 w-4" />
-            )}
-            {sortOrder === "newest" ? "Newest First" : "Oldest First"}
-          </Button>
+        <div className="mb-3 flex items-center gap-2">
+          <h2 className="text-primary-text text-lg font-semibold">
+            Recent Comments [{totalComments}]
+          </h2>
         </div>
 
-        {profileComments.length === 0 ? (
+        {totalComments === 0 ? (
           <p className="text-primary-text italic">No comments yet</p>
         ) : (
           <>
-            {/* Multi-select type filters */}
-            <div className="mb-4">
-              <div className="mb-3 flex items-center justify-between">
-                <p className="text-secondary-text text-sm font-medium">
-                  Filter by Comment Type{" "}
-                  {selectedTypes.length > 0 && (
-                    <span className="text-primary-text">
-                      ({selectedTypes.length} selected)
-                    </span>
-                  )}
-                </p>
-                {selectedTypes.length > 0 && (
-                  <button
-                    onClick={() => {
-                      setSelectedTypes([]);
-                      setCurrentPage(1);
-                    }}
-                    className="text-link hover:text-link-hover cursor-pointer text-sm font-medium transition-colors"
-                  >
-                    Clear Filters
-                  </button>
-                )}
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {commentTypeOptions.map((typeOption) => {
-                  const isSelected = selectedTypes.includes(typeOption.value);
-                  return (
-                    <Button
-                      key={typeOption.value}
-                      onClick={() => toggleTypeFilter(typeOption.value)}
-                      variant={isSelected ? "default" : "secondary"}
-                      size="sm"
-                      className="gap-2"
-                    >
-                      {isSelected && (
-                        <Icon icon="heroicons:check" className="h-4 w-4" />
-                      )}
-                      <span>{typeOption.label}</span>
-                    </Button>
-                  );
-                })}
-              </div>
-            </div>
-
             <div className="space-y-4">
-              {currentComments.length === 0 ? (
-                <p className="text-primary-text italic">
-                  {selectedTypes.length > 0
-                    ? `No comments found for selected type${selectedTypes.length > 1 ? "s" : ""}`
-                    : "No comments yet"}
-                </p>
+              {profileComments.length === 0 ? (
+                <p className="text-primary-text italic">No comments yet</p>
               ) : (
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                  {currentComments.map((comment) => (
+                  {profileComments.map((comment) => (
                     <Comment
                       key={comment.id}
                       {...comment}
@@ -398,11 +404,10 @@ export default function CommentsTab({
               )}
             </div>
 
-            {/* Pagination controls */}
-            {filteredComments.length > commentsPerPage && (
+            {totalPages > 1 && (
               <div className="mt-6 flex justify-center">
                 <Pagination
-                  count={Math.ceil(filteredComments.length / commentsPerPage)}
+                  count={totalPages}
                   page={currentPage}
                   onChange={handlePageChange}
                 />

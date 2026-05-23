@@ -15,8 +15,6 @@ export interface ProfileDataResult {
   bio: string | null;
   bioLastUpdated: number | null;
   // oxlint-disable-next-line @typescript-eslint/no-explicit-any
-  comments: any[];
-  // oxlint-disable-next-line @typescript-eslint/no-explicit-any
   privateServers: any[];
   // oxlint-disable-next-line @typescript-eslint/no-explicit-any
   favorites: any[];
@@ -25,41 +23,10 @@ export interface ProfileDataResult {
 }
 
 /**
- * Service for fetching user profile data (followers, bio, comments, servers, etc.)
+ * Service for fetching user profile data (followers, bio, servers, etc.)
  * Extracts the parallel fetching logic from UserProfileDataStreamer
  */
 export class ProfileDataService {
-  private static async fetchCommentsWithRetry(userId: string) {
-    try {
-      const response = await fetchWithRetry(
-        `${PUBLIC_API_URL}/users/comments/get?author=${userId}`,
-        undefined,
-        {
-          maxRetries: 3,
-          initialDelayMs: 800,
-          timeoutMs: 10000,
-        },
-      );
-
-      if (!response.ok) {
-        if (response.status !== 404) {
-          const body = await response.json().catch(() => ({}));
-          log.error(`Error fetching comments — /users/comments/get`, {
-            status: response.status,
-            body,
-          });
-        }
-        return [];
-      }
-
-      const commentsData = await response.json();
-      return Array.isArray(commentsData) ? commentsData : [];
-    } catch (error) {
-      log.error("Error fetching comments with retry", error);
-      return [];
-    }
-  }
-
   /**
    * Fetches all additional profile data in parallel
    */
@@ -70,7 +37,6 @@ export class ProfileDataService {
         followersResponse,
         followingResponse,
         bioResponse,
-        commentsData,
         serversResponse,
         favoritesData,
       ] = await Promise.all([
@@ -101,7 +67,6 @@ export class ProfileDataService {
             timeoutMs: 10000,
           },
         ).catch(() => null),
-        this.fetchCommentsWithRetry(userId),
         fetchWithRetry(
           `${PUBLIC_API_URL}/servers/get?owner=${userId}`,
           undefined,
@@ -137,7 +102,6 @@ export class ProfileDataService {
         followingCount: Array.isArray(followingData) ? followingData.length : 0,
         bio: bioData?.description || null,
         bioLastUpdated: bioData?.last_updated || null,
-        comments: Array.isArray(commentsData) ? commentsData : [],
         privateServers: Array.isArray(serversData) ? serversData : [],
         favorites: Array.isArray(favoritesData) ? favoritesData : [],
         favoriteItemDetails,
@@ -158,7 +122,6 @@ export class ProfileDataService {
       followingCount: 0,
       bio: null,
       bioLastUpdated: null,
-      comments: [],
       privateServers: [],
       favorites: [],
       favoriteItemDetails: {},

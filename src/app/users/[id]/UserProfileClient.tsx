@@ -166,18 +166,6 @@ const LinSuperIdol = ({ userId }: { userId: string }) => {
   );
 };
 
-interface CommentData {
-  id: number;
-  author: string;
-  content: string;
-  date: string;
-  item_id: number;
-  item_type: string;
-  user_id: string;
-  edited_at: number | null;
-  parent_id?: number | null;
-}
-
 interface Server {
   id: number;
   link: string;
@@ -244,7 +232,6 @@ interface UserProfileData {
   followingCount: number;
   bio: string | null;
   bioLastUpdated: number | null;
-  comments: CommentData[];
   privateServers: Server[];
   favorites: FavoriteItem[];
   favoriteItemDetails: Record<string, unknown>;
@@ -294,7 +281,7 @@ export default function UserProfileClient({
   initialData,
   error,
   isLoadingAdditionalData = false,
-  additionalDataError,
+  additionalDataError: _additionalDataError,
 }: UserProfileClientProps) {
   const router = useRouter();
   const { resolvedTheme } = useTheme();
@@ -320,9 +307,6 @@ export default function UserProfileClient({
   const [bioLastUpdated, setBioLastUpdated] = useState<number | null>(
     initialData?.bioLastUpdated || null,
   );
-  const [comments] = useState<CommentData[]>(initialData?.comments || []);
-  const [commentsLoading] = useState(!initialData);
-  const [commentsError] = useState<string | null>(null);
   const [isFollowersModalOpen, setIsFollowersModalOpen] = useState(false);
   const [isFollowingModalOpen, setIsFollowingModalOpen] = useState(false);
   const [privateServers] = useState<Server[]>(
@@ -1547,9 +1531,6 @@ export default function UserProfileClient({
               currentUserId={currentUserId}
               bio={bio}
               bioLastUpdated={bioLastUpdated}
-              comments={comments}
-              commentsLoading={isLoadingAdditionalData || commentsLoading}
-              commentsError={additionalDataError || commentsError}
               onBioUpdate={refreshBio}
               privateServers={privateServers}
               isLoadingAdditionalData={isLoadingAdditionalData}

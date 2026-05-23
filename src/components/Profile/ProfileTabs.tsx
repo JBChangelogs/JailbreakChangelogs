@@ -44,19 +44,6 @@ interface User {
   roblox_join_date?: number;
 }
 
-interface CommentData {
-  id: number;
-  author: string;
-  content: string;
-  date: string;
-  item_id: number;
-  item_type: string;
-  user_id: string;
-  edited_at: number | null;
-  owner?: string;
-  parent_id?: number | null;
-}
-
 interface Server {
   id: number;
   link: string;
@@ -88,9 +75,6 @@ interface ProfileTabsProps {
   currentUserId: string | null;
   bio: string | null;
   bioLastUpdated: number | null;
-  comments: CommentData[];
-  commentsLoading: boolean;
-  commentsError: string | null;
   onBioUpdate?: (newBio: string) => void;
   privateServers?: Server[];
   isLoadingAdditionalData?: boolean;
@@ -127,9 +111,6 @@ export default function ProfileTabs({
   currentUserId,
   bio,
   bioLastUpdated,
-  comments,
-  commentsLoading,
-  commentsError,
   onBioUpdate,
   privateServers = [],
   isLoadingAdditionalData = false,
@@ -207,9 +188,6 @@ export default function ProfileTabs({
       </TabPanel>
       <TabPanel value={value} index={1}>
         <CommentsTab
-          comments={comments}
-          loading={commentsLoading}
-          error={commentsError}
           currentUserId={currentUserId}
           userId={user.id}
           settings={user.settings_v2}

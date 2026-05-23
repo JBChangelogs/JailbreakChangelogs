@@ -8,18 +8,6 @@ import { createLogger } from "@/services/logger";
 const log = createLogger("API");
 import type { TradeAd } from "@/types/trading";
 
-interface CommentData {
-  id: number;
-  author: string;
-  content: string;
-  date: string;
-  item_id: number;
-  item_type: string;
-  user_id: string;
-  edited_at: number | null;
-  parent_id?: number | null;
-}
-
 interface Server {
   id: number;
   link: string;
@@ -86,7 +74,6 @@ interface UserProfileData {
   followingCount: number;
   bio: string | null;
   bioLastUpdated: number | null;
-  comments: CommentData[];
   privateServers: Server[];
   favorites: FavoriteItem[];
   favoriteItemDetails: Record<string, unknown>;
@@ -110,7 +97,6 @@ function UserProfileLoadingFallback({
         followingCount: 0,
         bio: null,
         bioLastUpdated: null,
-        comments: [],
         privateServers: [],
         favorites: [],
         favoriteItemDetails: {},
