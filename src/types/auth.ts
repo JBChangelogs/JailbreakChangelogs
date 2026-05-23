@@ -10,6 +10,7 @@ export interface UserSettings {
   hide_connections: boolean;
   hide_presence: boolean;
   dms_allowed: boolean;
+  global_dms_allowed?: boolean;
   allow_gifting: boolean;
   updated_at?: number;
 }

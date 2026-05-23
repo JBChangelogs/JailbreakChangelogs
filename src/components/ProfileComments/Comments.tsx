@@ -34,6 +34,8 @@ import { ItemDetails } from "@/types";
 import { convertUrlsToLinks } from "@/utils/ui/urlConverter";
 import { UserAvatar } from "@/utils/ui/avatar";
 import { Icon } from "@/components/ui/IconWrapper";
+import Twemoji from "react-twemoji";
+import { useTwemoji } from "@/contexts/TwemojiContext";
 
 interface ReactionUser {
   id: string;
@@ -94,6 +96,7 @@ function ProfileReactionsDialog({
   onClose: () => void;
   initialEmoji: string;
 }) {
+  const { twemojiEnabled } = useTwemoji();
   const [activeTab, setActiveTab] = useState(initialEmoji);
 
   // Sync tab when dialog opens with a new emoji
@@ -131,7 +134,13 @@ function ProfileReactionsDialog({
                     : "text-primary-text hover:bg-quaternary-bg"
                 }`}
               >
-                <span className="text-lg leading-none">{r.emoji}</span>
+                {twemojiEnabled ? (
+                  <Twemoji tag="span" options={{ className: "twemoji" }}>
+                    {r.emoji}
+                  </Twemoji>
+                ) : (
+                  <span className="text-lg leading-none">{r.emoji}</span>
+                )}
                 <span className="text-sm font-medium">{r.count}</span>
               </button>
             ))}
@@ -212,6 +221,8 @@ export default function Comment({
   seasonDetails: propSeasonDetails,
   isLoading: propIsLoading,
 }: CommentProps) {
+  const { twemojiEnabled } = useTwemoji();
+
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogEmoji, setDialogEmoji] = useState("");
   const [tooltipResetKey, setTooltipResetKey] = useState(0);
@@ -533,9 +544,17 @@ export default function Comment({
                 )}
               </div>
 
-              <p className="text-primary-text line-clamp-4 max-w-full overflow-hidden break-words wrap-break-word text-ellipsis whitespace-pre-wrap">
-                {convertUrlsToLinks(content, true)}
-              </p>
+              {twemojiEnabled ? (
+                <Twemoji options={{ className: "twemoji" }}>
+                  <p className="text-primary-text line-clamp-4 max-w-full overflow-hidden break-words wrap-break-word text-ellipsis whitespace-pre-wrap">
+                    {convertUrlsToLinks(content, true)}
+                  </p>
+                </Twemoji>
+              ) : (
+                <p className="text-primary-text line-clamp-4 max-w-full overflow-hidden break-words wrap-break-word text-ellipsis whitespace-pre-wrap">
+                  {convertUrlsToLinks(content, true)}
+                </p>
+              )}
             </div>
           </div>
         </Link>
@@ -553,7 +572,13 @@ export default function Comment({
                     onClick={(e) => openDialog(r.emoji, e)}
                     className="border-border-card bg-quaternary-bg text-primary-text hover:border-link/30 inline-flex cursor-pointer items-center gap-1 rounded-lg border px-2 py-0.5 text-xs font-medium transition-colors"
                   >
-                    <span>{r.emoji}</span>
+                    {twemojiEnabled ? (
+                      <Twemoji tag="span" options={{ className: "twemoji" }}>
+                        {r.emoji}
+                      </Twemoji>
+                    ) : (
+                      <span>{r.emoji}</span>
+                    )}
                     <span>{r.count}</span>
                   </button>
                 </TooltipTrigger>

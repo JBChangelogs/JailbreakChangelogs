@@ -35,6 +35,8 @@ import {
 } from "./commentUtils";
 import { sanitizeText } from "@/utils/ui/sanitizeText";
 import { useCommentsContext } from "./CommentsContext";
+import Twemoji from "react-twemoji";
+import { useTwemoji } from "@/contexts/TwemojiContext";
 import { toast } from "sonner";
 
 export function CommentItem({ comment }: { comment: CommentData }) {
@@ -76,6 +78,7 @@ export function CommentItem({ comment }: { comment: CommentData }) {
     getStableReactionOrder,
     isTester,
   } = useCommentsContext();
+  const { twemojiEnabled } = useTwemoji();
 
   const commentAuthorSettings = userData[comment.user_id]?.settings;
 
@@ -311,7 +314,16 @@ export function CommentItem({ comment }: { comment: CommentData }) {
                           }}
                           className="hover:bg-quaternary-bg flex h-8 w-8 cursor-pointer items-center justify-center rounded-md text-lg transition-colors"
                         >
-                          {emoji}
+                          {twemojiEnabled ? (
+                            <Twemoji
+                              tag="span"
+                              options={{ className: "twemoji" }}
+                            >
+                              {emoji}
+                            </Twemoji>
+                          ) : (
+                            emoji
+                          )}
                         </button>
                       ))}
                     </div>
@@ -527,14 +539,27 @@ export function CommentItem({ comment }: { comment: CommentData }) {
                   )}
                   <div className="prose prose-sm max-w-none">
                     {isClient ? (
-                      <p
-                        className="text-primary-text text-sm leading-relaxed wrap-break-word whitespace-pre-wrap"
-                        dangerouslySetInnerHTML={{
-                          __html: convertUrlsToLinksHTML(
-                            processMentions(sanitizeHTML(visibleContent)),
-                          ),
-                        }}
-                      />
+                      twemojiEnabled ? (
+                        <Twemoji options={{ className: "twemoji" }}>
+                          <p
+                            className="text-primary-text text-sm leading-relaxed wrap-break-word whitespace-pre-wrap"
+                            dangerouslySetInnerHTML={{
+                              __html: convertUrlsToLinksHTML(
+                                processMentions(sanitizeHTML(visibleContent)),
+                              ),
+                            }}
+                          />
+                        </Twemoji>
+                      ) : (
+                        <p
+                          className="text-primary-text text-sm leading-relaxed wrap-break-word whitespace-pre-wrap"
+                          dangerouslySetInnerHTML={{
+                            __html: convertUrlsToLinksHTML(
+                              processMentions(sanitizeHTML(visibleContent)),
+                            ),
+                          }}
+                        />
+                      )
                     ) : (
                       <p className="text-primary-text text-sm leading-relaxed wrap-break-word whitespace-pre-wrap">
                         {visibleContent}
@@ -849,7 +874,16 @@ export function CommentItem({ comment }: { comment: CommentData }) {
                                         }}
                                         className="hover:bg-quaternary-bg flex h-8 w-8 cursor-pointer items-center justify-center rounded-md text-lg transition-colors"
                                       >
-                                        {emoji}
+                                        {twemojiEnabled ? (
+                                          <Twemoji
+                                            tag="span"
+                                            options={{ className: "twemoji" }}
+                                          >
+                                            {emoji}
+                                          </Twemoji>
+                                        ) : (
+                                          emoji
+                                        )}
                                       </button>
                                     ))}
                                   </div>
@@ -1015,26 +1049,39 @@ export function CommentItem({ comment }: { comment: CommentData }) {
                             </Button>
                           </div>
                         </div>
-                      ) : (
-                        <p
-                          className="text-primary-text text-sm leading-relaxed wrap-break-word whitespace-pre-wrap"
-                          dangerouslySetInnerHTML={
-                            isClient
-                              ? {
-                                  __html: convertUrlsToLinksHTML(
-                                    processMentions(
-                                      sanitizeHTML(
-                                        sanitizeText(reply.content || ""),
-                                      ),
+                      ) : isClient ? (
+                        twemojiEnabled ? (
+                          <Twemoji options={{ className: "twemoji" }}>
+                            <p
+                              className="text-primary-text text-sm leading-relaxed wrap-break-word whitespace-pre-wrap"
+                              dangerouslySetInnerHTML={{
+                                __html: convertUrlsToLinksHTML(
+                                  processMentions(
+                                    sanitizeHTML(
+                                      sanitizeText(reply.content || ""),
                                     ),
                                   ),
-                                }
-                              : undefined
-                          }
-                        >
-                          {!isClient
-                            ? sanitizeText(reply.content || "")
-                            : undefined}
+                                ),
+                              }}
+                            />
+                          </Twemoji>
+                        ) : (
+                          <p
+                            className="text-primary-text text-sm leading-relaxed wrap-break-word whitespace-pre-wrap"
+                            dangerouslySetInnerHTML={{
+                              __html: convertUrlsToLinksHTML(
+                                processMentions(
+                                  sanitizeHTML(
+                                    sanitizeText(reply.content || ""),
+                                  ),
+                                ),
+                              ),
+                            }}
+                          />
+                        )
+                      ) : (
+                        <p className="text-primary-text text-sm leading-relaxed wrap-break-word whitespace-pre-wrap">
+                          {sanitizeText(reply.content || "")}
                         </p>
                       )}
 

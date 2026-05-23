@@ -12,7 +12,7 @@ import {
   updateUserSettings,
 } from "@/services/settingsService";
 import { toast } from "sonner";
-import { safeSetJSON } from "@/utils/storage/safeStorage";
+import { safeLocalStorage, safeSetJSON } from "@/utils/storage/safeStorage";
 import { formatSettingName } from "@/config/settings";
 
 export const useSettings = (
@@ -81,6 +81,31 @@ export const useSettings = (
 
   const handleSettingChange = async (name: string, value: boolean) => {
     if (!settings || !userData) return;
+
+    // Preferences are client-side only — no server API call
+    if (name === "twemoji_enabled") {
+      safeLocalStorage.setItem("twemoji_enabled", String(value));
+      window.dispatchEvent(
+        new CustomEvent("sendRealtimePreference", {
+          detail: { key: "twemoji_enabled", value },
+        }),
+      );
+      // Still update the local settings state so the toggle reflects correctly
+      setSettings(
+        Object.fromEntries(
+          Object.entries(settings).map(([catKey, cat]) => [
+            catKey,
+            {
+              ...cat,
+              settings: cat.settings.map((entry) =>
+                entry.name === name ? { ...entry, value } : entry,
+              ),
+            },
+          ]),
+        ),
+      );
+      return;
+    }
 
     const needsPremium =
       (name === "custom_avatar" && value === true) ||

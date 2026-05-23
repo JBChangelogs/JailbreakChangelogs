@@ -781,6 +781,14 @@
   scrollbar-color: var(--color-border-primary) transparent;
 }
 
+img.twemoji {
+  display: inline !important;
+  height: 1.1em !important;
+  width: 1.1em !important;
+  vertical-align: -0.15em;
+  margin: 0;
+}
+
 /* Make right-position toasts exit horizontally to the right instead of vertically. */
 [data-sonner-toaster] {
   transition:

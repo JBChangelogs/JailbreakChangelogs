@@ -15,6 +15,8 @@ import {
 } from "@/components/ui/tooltip";
 import { useCommentsContext } from "./CommentsContext";
 import { ReactionsDialog } from "./ReactionsDialog";
+import Twemoji from "react-twemoji";
+import { useTwemoji } from "@/contexts/TwemojiContext";
 
 export function CommentReactions({
   commentId,
@@ -39,6 +41,7 @@ export function CommentReactions({
     setReactionPickerInlineOpenId,
     getStableReactionOrder,
   } = useCommentsContext();
+  const { twemojiEnabled } = useTwemoji();
 
   const isReactionBlocked = isRateLimited || !!reactionBan;
   const [tooltipResetKey, setTooltipResetKey] = useState(0);
@@ -113,7 +116,13 @@ export function CommentReactions({
                     : "border-border-card bg-quaternary-bg text-primary-text hover:border-link/30"
                 }`}
               >
-                <span>{r.emoji}</span>
+                {twemojiEnabled ? (
+                  <Twemoji tag="span" options={{ className: "twemoji" }}>
+                    {r.emoji}
+                  </Twemoji>
+                ) : (
+                  <span>{r.emoji}</span>
+                )}
                 <span className="text-xs font-medium">{r.count}</span>
               </button>
             </TooltipTrigger>
@@ -171,7 +180,13 @@ export function CommentReactions({
                     }}
                     className="hover:bg-quaternary-bg flex h-8 w-8 cursor-pointer items-center justify-center rounded-md text-lg transition-colors"
                   >
-                    {emoji}
+                    {twemojiEnabled ? (
+                      <Twemoji tag="span" options={{ className: "twemoji" }}>
+                        {emoji}
+                      </Twemoji>
+                    ) : (
+                      emoji
+                    )}
                   </button>
                 ))}
               </div>

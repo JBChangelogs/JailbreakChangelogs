@@ -19,6 +19,8 @@ import { Icon } from "@/components/ui/IconWrapper";
 import { UserAvatar } from "@/utils/ui/avatar";
 import Link from "next/link";
 import { useCommentsContext } from "./CommentsContext";
+import Twemoji from "react-twemoji";
+import { useTwemoji } from "@/contexts/TwemojiContext";
 
 export function ReactionsDialog({
   commentId,
@@ -40,6 +42,7 @@ export function ReactionsDialog({
     currentUserId,
     isLoggedIn,
   } = useCommentsContext();
+  const { twemojiEnabled } = useTwemoji();
 
   const isOpen = reactionBreakdownOpenId === commentId;
   const sortedRxns = getStableReactionOrder(commentId, reactions);
@@ -105,7 +108,13 @@ export function ReactionsDialog({
                     : "text-primary-text hover:bg-quaternary-bg"
                 }`}
               >
-                <span className="text-lg leading-none">{r.emoji}</span>
+                {twemojiEnabled ? (
+                  <Twemoji tag="span" options={{ className: "twemoji" }}>
+                    {r.emoji}
+                  </Twemoji>
+                ) : (
+                  <span className="text-lg leading-none">{r.emoji}</span>
+                )}
                 <span className="text-sm font-medium">{r.count}</span>
               </button>
             ))}
