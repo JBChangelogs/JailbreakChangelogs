@@ -685,6 +685,7 @@ export default function ValueSuggestionsPage() {
   const [total, setTotal] = useState(0);
   const [loadingSuggestions, setLoadingSuggestions] = useState(true);
   const [suggestionsError, setSuggestionsError] = useState<string | null>(null);
+  const [newSuggestionsCount, setNewSuggestionsCount] = useState(0);
 
   // Items state (for form dropdown)
   const [items, setItems] = useState<Item[]>([]);
@@ -1018,6 +1019,7 @@ export default function ValueSuggestionsPage() {
   const fetchSuggestions = useCallback(async (p: number) => {
     setLoadingSuggestions(true);
     setSuggestionsError(null);
+    setNewSuggestionsCount(0);
     try {
       const url = buildApiUrlWithDevToken(
         PUBLIC_API_URL!,
@@ -1050,11 +1052,11 @@ export default function ValueSuggestionsPage() {
     const handler = (event: Event) => {
       const e = event as CustomEvent<{ action?: string }>;
       if (e.detail?.action !== "refresh_suggestions") return;
-      void fetchSuggestions(page);
+      setNewSuggestionsCount((prev) => prev + 1);
     };
     window.addEventListener("realtimeSuggestions", handler);
     return () => window.removeEventListener("realtimeSuggestions", handler);
-  }, [fetchSuggestions, page]);
+  }, []);
 
   useEffect(() => {
     const fetchItems = async () => {
@@ -1393,6 +1395,34 @@ export default function ValueSuggestionsPage() {
               to quickly focus the search.
             </div>
           </>
+        )}
+
+        {/* New suggestions pill — fixed so it's visible anywhere on the page */}
+        {newSuggestionsCount > 0 && !loadingSuggestions && (
+          <div
+            className="fixed left-1/2 z-[1500] -translate-x-1/2"
+            style={{ top: "calc(var(--header-height, 64px) + 12px)" }}
+          >
+            <button
+              type="button"
+              onClick={() => {
+                fetchSuggestions(1);
+                setPage(1);
+                window.scrollTo({ top: 0, behavior: "smooth" });
+              }}
+              className="bg-button-info hover:bg-button-info-hover text-form-button-text flex cursor-pointer items-center gap-2 rounded-full px-4 py-2 text-sm font-medium whitespace-nowrap shadow-lg transition-colors"
+            >
+              <Icon
+                icon="material-symbols:arrow-upward-rounded"
+                className="h-4 w-4"
+                inline
+              />
+              {newSuggestionsCount === 1
+                ? "1 new suggestion"
+                : `${newSuggestionsCount} new suggestions`}{" "}
+              — click to load
+            </button>
+          </div>
         )}
 
         {/* Cards */}
