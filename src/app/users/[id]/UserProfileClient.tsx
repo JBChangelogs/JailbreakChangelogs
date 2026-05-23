@@ -14,7 +14,7 @@ import { UserSettingsV2, FollowingData } from "@/types/auth";
 import { toast } from "sonner";
 import dynamic from "next/dynamic";
 import { PUBLIC_API_URL, getResponseErrorMessage } from "@/utils/api/api";
-import { buildApiUrlWithDevToken } from "@/utils/api/apiDevToken";
+import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
 import { createLogger } from "@/services/logger";
 
 import { UserBadges } from "@/components/Profile/UserBadges";
@@ -432,14 +432,14 @@ export default function UserProfileClient({
           throw new Error("Public API URL is not configured");
         }
 
-        const response = await fetch(
-          buildApiUrlWithDevToken(PUBLIC_API_URL, "/messages/blocked"),
-          {
-            method: "GET",
-            credentials: "include",
-            cache: "no-store",
-          },
-        );
+        const { url: blockedUrl, headers: devTokenHeaders } =
+          buildApiFetchRequest(PUBLIC_API_URL, "/messages/blocked");
+        const response = await fetch(blockedUrl, {
+          method: "GET",
+          credentials: "include",
+          cache: "no-store",
+          headers: devTokenHeaders,
+        });
 
         if (!response.ok) {
           const body = await response.json().catch(() => ({}));
@@ -503,17 +503,17 @@ export default function UserProfileClient({
           throw new Error("Public API URL is not configured");
         }
 
-        const response = await fetch(
-          buildApiUrlWithDevToken(
+        const { url: messageCheckUrl, headers: devTokenHeaders } =
+          buildApiFetchRequest(
             PUBLIC_API_URL,
             `/messages/${encodeURIComponent(user.id)}`,
-          ),
-          {
-            method: "HEAD",
-            credentials: "include",
-            cache: "no-store",
-          },
-        );
+          );
+        const response = await fetch(messageCheckUrl, {
+          method: "HEAD",
+          credentials: "include",
+          cache: "no-store",
+          headers: devTokenHeaders,
+        });
 
         if (isCancelled) return;
         setCanMessageFromProfile(response.status === 200);
@@ -577,17 +577,16 @@ export default function UserProfileClient({
         throw new Error("Public API URL is not configured");
       }
 
-      const response = await fetch(
-        buildApiUrlWithDevToken(
-          PUBLIC_API_URL,
-          `/messages/${encodeURIComponent(user.id)}/block`,
-        ),
-        {
-          method: shouldBlock ? "POST" : "DELETE",
-          credentials: "include",
-          cache: "no-store",
-        },
+      const { url: blockUrl, headers: devTokenHeaders } = buildApiFetchRequest(
+        PUBLIC_API_URL,
+        `/messages/${encodeURIComponent(user.id)}/block`,
       );
+      const response = await fetch(blockUrl, {
+        method: shouldBlock ? "POST" : "DELETE",
+        credentials: "include",
+        cache: "no-store",
+        headers: devTokenHeaders,
+      });
 
       if (!response.ok) {
         const body = await response.json().catch(() => ({}));
@@ -619,18 +618,17 @@ export default function UserProfileClient({
     setIsSubmittingDescriptionReport(true);
     const toastId = toast.loading("Submitting report...");
     try {
-      const response = await fetch(
-        buildApiUrlWithDevToken(PUBLIC_API_URL, "/users/description/report"),
-        {
-          method: "POST",
-          credentials: "include",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            user_id: user.id,
-            reason: reportDescriptionReason.trim(),
-          }),
-        },
-      );
+      const { url: reportDescUrl, headers: devTokenHeaders } =
+        buildApiFetchRequest(PUBLIC_API_URL, "/users/description/report");
+      const response = await fetch(reportDescUrl, {
+        method: "POST",
+        credentials: "include",
+        headers: { ...devTokenHeaders, "Content-Type": "application/json" },
+        body: JSON.stringify({
+          user_id: user.id,
+          reason: reportDescriptionReason.trim(),
+        }),
+      });
 
       if (!response.ok) {
         throw new Error(
@@ -658,18 +656,17 @@ export default function UserProfileClient({
     setIsSubmittingAvatarReport(true);
     const toastId = toast.loading("Submitting report...");
     try {
-      const response = await fetch(
-        buildApiUrlWithDevToken(PUBLIC_API_URL, "/users/avatar/report"),
-        {
-          method: "POST",
-          credentials: "include",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            user_id: user.id,
-            reason: reportAvatarReason.trim(),
-          }),
-        },
-      );
+      const { url: reportAvatarUrl, headers: devTokenHeaders } =
+        buildApiFetchRequest(PUBLIC_API_URL, "/users/avatar/report");
+      const response = await fetch(reportAvatarUrl, {
+        method: "POST",
+        credentials: "include",
+        headers: { ...devTokenHeaders, "Content-Type": "application/json" },
+        body: JSON.stringify({
+          user_id: user.id,
+          reason: reportAvatarReason.trim(),
+        }),
+      });
 
       if (!response.ok) {
         throw new Error(
@@ -697,18 +694,17 @@ export default function UserProfileClient({
     setIsSubmittingBannerReport(true);
     const toastId = toast.loading("Submitting report...");
     try {
-      const response = await fetch(
-        buildApiUrlWithDevToken(PUBLIC_API_URL, "/users/banner/report"),
-        {
-          method: "POST",
-          credentials: "include",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            user_id: user.id,
-            reason: reportBannerReason.trim(),
-          }),
-        },
-      );
+      const { url: reportBannerUrl, headers: devTokenHeaders } =
+        buildApiFetchRequest(PUBLIC_API_URL, "/users/banner/report");
+      const response = await fetch(reportBannerUrl, {
+        method: "POST",
+        credentials: "include",
+        headers: { ...devTokenHeaders, "Content-Type": "application/json" },
+        body: JSON.stringify({
+          user_id: user.id,
+          reason: reportBannerReason.trim(),
+        }),
+      });
 
       if (!response.ok) {
         throw new Error(
@@ -736,18 +732,17 @@ export default function UserProfileClient({
     setIsSubmittingUsernameReport(true);
     const toastId = toast.loading("Submitting report...");
     try {
-      const response = await fetch(
-        buildApiUrlWithDevToken(PUBLIC_API_URL, "/users/username/report"),
-        {
-          method: "POST",
-          credentials: "include",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            user_id: user.id,
-            reason: reportUsernameReason.trim(),
-          }),
-        },
-      );
+      const { url: reportUsernameUrl, headers: devTokenHeaders } =
+        buildApiFetchRequest(PUBLIC_API_URL, "/users/username/report");
+      const response = await fetch(reportUsernameUrl, {
+        method: "POST",
+        credentials: "include",
+        headers: { ...devTokenHeaders, "Content-Type": "application/json" },
+        body: JSON.stringify({
+          user_id: user.id,
+          reason: reportUsernameReason.trim(),
+        }),
+      });
 
       if (!response.ok) {
         throw new Error(

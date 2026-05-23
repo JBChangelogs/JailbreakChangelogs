@@ -23,7 +23,7 @@ import { RateLimitBanner } from "@/components/ui/RateLimitBanner";
 import { toast } from "sonner";
 import { TradeAdForm } from "./TradeAdForm";
 import { useAuthContext } from "@/contexts/AuthContext";
-import { buildApiUrlWithDevToken } from "@/utils/api/apiDevToken";
+import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
 import { shouldRetryResponseStatus } from "@/utils/api/fetchWithRetry";
 import {
   isCustomTradeItem,
@@ -636,19 +636,19 @@ export default function TradeAds({
         throw new Error("NEXT_PUBLIC_API_URL is not configured");
       }
 
-      const response = await fetch(
-        buildApiUrlWithDevToken(
+      const { url: recentTradesUrl, headers: recentTradesHeaders } =
+        buildApiFetchRequest(
           baseUrl,
           `/trades/v2/recent?page=${encodeURIComponent(String(targetPage))}`,
-        ),
-        {
-          cache: "no-store",
-          credentials: "include",
-          headers: {
-            "User-Agent": "JailbreakChangelogs-Trading/2.0",
-          },
+        );
+      const response = await fetch(recentTradesUrl, {
+        cache: "no-store",
+        credentials: "include",
+        headers: {
+          ...recentTradesHeaders,
+          "User-Agent": "JailbreakChangelogs-Trading/2.0",
         },
-      );
+      });
 
       if (response.status === 429) {
         const retryAfter = parseInt(

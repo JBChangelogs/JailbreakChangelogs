@@ -9,7 +9,7 @@ import {
 } from "@/utils/notifications/notificationUrl";
 import { showDesktopNotification } from "@/utils/notifications/desktopNotifications";
 import { stripNotifMarkdown } from "@/utils/notifications/notifMarkdown";
-import { buildApiUrlWithDevToken } from "@/utils/api/apiDevToken";
+import { buildApiWsUrl } from "@/utils/api/apiDevToken";
 import { createLogger } from "@/services/logger";
 import {
   setCachedPreference,
@@ -78,7 +78,7 @@ function getRealtimeWsUrl(): string | null {
   const baseUrl = WS_URL?.replace(/\/+$/, "");
   if (!baseUrl) return null;
 
-  return buildApiUrlWithDevToken(baseUrl, "/realtime", {
+  return buildApiWsUrl(baseUrl, "/realtime", {
     tokenParamName: "token",
   });
 }

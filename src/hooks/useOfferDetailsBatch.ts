@@ -1,6 +1,6 @@
 import { createLogger } from "@/services/logger";
 import { useEffect, useMemo, useState } from "react";
-import { buildApiUrlWithDevToken } from "@/utils/api/apiDevToken";
+import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
 import { parseJsonWithLargeIds } from "@/utils/api/parseJsonWithLargeIds";
 
 const log = createLogger("API");
@@ -49,19 +49,21 @@ export function useOfferDetailsBatch(events: OfferDetailsBatchEntry[]) {
 
       setStatus("loading");
       try {
-        const response = await fetch(
-          buildApiUrlWithDevToken(baseUrl, "/trades/v2/offers/batch"),
-          {
-            method: "POST",
-            cache: "no-store",
-            credentials: "include",
-            headers: {
-              "User-Agent": "JailbreakChangelogs-Messages/1.0",
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(payload),
-          },
+        const { url, headers } = buildApiFetchRequest(
+          baseUrl,
+          "/trades/v2/offers/batch",
         );
+        const response = await fetch(url, {
+          method: "POST",
+          cache: "no-store",
+          credentials: "include",
+          headers: {
+            ...headers,
+            "User-Agent": "JailbreakChangelogs-Messages/1.0",
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(payload),
+        });
 
         const raw = await response.text();
         const parsed = raw ? (parseJsonWithLargeIds(raw) as unknown) : null;

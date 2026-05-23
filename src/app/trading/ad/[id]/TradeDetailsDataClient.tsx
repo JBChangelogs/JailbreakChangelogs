@@ -5,7 +5,7 @@ import type { CommentData } from "@/utils/api/api";
 import type { UserData } from "@/types/auth";
 import type { TradeAd, TradeItem } from "@/types/trading";
 import NotFoundView from "@/components/Layout/NotFoundView";
-import { buildApiUrlWithDevToken } from "@/utils/api/apiDevToken";
+import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
 import TradeDetailsClient from "./TradeDetailsClient";
 import Loading from "./loading";
 import { createLogger } from "@/services/logger";
@@ -150,19 +150,19 @@ export default function TradeDetailsDataClient({
       }
 
       try {
-        const response = await fetch(
-          buildApiUrlWithDevToken(
+        const { url: tradeUrl, headers: devTokenHeaders } =
+          buildApiFetchRequest(
             baseUrl,
             `/trades/v2/${encodeURIComponent(tradeId)}`,
-          ),
-          {
-            cache: "no-store",
-            credentials: "include",
-            headers: {
-              "User-Agent": "JailbreakChangelogs-Trading/2.0",
-            },
+          );
+        const response = await fetch(tradeUrl, {
+          cache: "no-store",
+          credentials: "include",
+          headers: {
+            ...devTokenHeaders,
+            "User-Agent": "JailbreakChangelogs-Trading/2.0",
           },
-        );
+        });
 
         if (response.status === 404) {
           if (!isCancelled) setStatus("not_found");

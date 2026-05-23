@@ -5,7 +5,7 @@ import Breadcrumb from "@/components/Layout/Breadcrumb";
 import { Skeleton } from "@/components/ui/skeleton";
 import ValuesChangelogHeader from "@/components/Values/ValuesChangelogHeader";
 import { PUBLIC_API_URL } from "@/utils/api/api";
-import { buildApiUrlWithDevToken } from "@/utils/api/apiDevToken";
+import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
 import Link from "next/link";
 import {
   formatMessageDate,
@@ -96,11 +96,11 @@ export default function ValuesChangelogPage() {
     setLoading(true);
     setError(null);
     try {
-      const url = buildApiUrlWithDevToken(
+      const { url, headers } = buildApiFetchRequest(
         PUBLIC_API_URL!,
         `/value-changelogs?page=${p}`,
       );
-      const res = await fetch(url, { credentials: "include" });
+      const res = await fetch(url, { credentials: "include", headers });
       if (!res.ok) {
         const body = await res.json().catch(() => ({}));
         log.error("fetch value changelogs failed", {

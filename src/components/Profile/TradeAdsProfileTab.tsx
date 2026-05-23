@@ -7,7 +7,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Pagination } from "@/components/ui/Pagination";
 import { TradeAdCard } from "@/components/trading/TradeAdCard";
 import { Icon } from "@/components/ui/IconWrapper";
-import { buildApiUrlWithDevToken } from "@/utils/api/apiDevToken";
+import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
 import { createLogger } from "@/services/logger";
 
 const log = createLogger("UI");
@@ -173,20 +173,20 @@ export default function TradeAdsProfileTab({
       setIsFetchingTradeAds(true);
       setTradeAdsError(null);
       try {
-        const response = await fetch(
-          buildApiUrlWithDevToken(
+        const { url: tradeAdsUrl, headers: tradeAdsHeaders } =
+          buildApiFetchRequest(
             baseUrl,
             `/trades/v2/recent?user=${encodeURIComponent(user.id)}&page=${encodeURIComponent(String(page))}`,
-          ),
-          {
-            cache: "no-store",
-            credentials: "include",
-            signal: controller.signal,
-            headers: {
-              "User-Agent": "JailbreakChangelogs-Profile/1.0",
-            },
+          );
+        const response = await fetch(tradeAdsUrl, {
+          cache: "no-store",
+          credentials: "include",
+          signal: controller.signal,
+          headers: {
+            ...tradeAdsHeaders,
+            "User-Agent": "JailbreakChangelogs-Profile/1.0",
           },
-        );
+        });
 
         if (isCancelled) return;
 

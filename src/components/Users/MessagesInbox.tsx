@@ -57,7 +57,7 @@ import {
   searchUsers,
 } from "@/utils/api/api";
 import { respondToTradeOfferV2 } from "@/utils/trading/core";
-import { buildApiUrlWithDevToken } from "@/utils/api/apiDevToken";
+import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
 import {
   useOfferDetailsBatch,
   type TradeOfferDetails,
@@ -1386,14 +1386,16 @@ export default function MessagesInbox() {
           throw new Error("Public API URL is not configured");
         }
 
-        const response = await fetch(
-          buildApiUrlWithDevToken(PUBLIC_API_URL, "/messages?nocache=true"),
-          {
-            method: "GET",
-            credentials: "include",
-            cache: "no-store",
-          },
+        const { url: convUrl, headers: convHeaders } = buildApiFetchRequest(
+          PUBLIC_API_URL,
+          "/messages?nocache=true",
         );
+        const response = await fetch(convUrl, {
+          method: "GET",
+          credentials: "include",
+          cache: "no-store",
+          headers: convHeaders,
+        });
 
         if (!response.ok) {
           throw new Error(
@@ -1539,14 +1541,14 @@ export default function MessagesInbox() {
           throw new Error("Public API URL is not configured");
         }
 
-        const response = await fetch(
-          buildApiUrlWithDevToken(PUBLIC_API_URL, "/messages/blocked"),
-          {
-            method: "GET",
-            credentials: "include",
-            cache: "no-store",
-          },
-        );
+        const { url: blockedUrl, headers: blockedHeaders } =
+          buildApiFetchRequest(PUBLIC_API_URL, "/messages/blocked");
+        const response = await fetch(blockedUrl, {
+          method: "GET",
+          credentials: "include",
+          cache: "no-store",
+          headers: blockedHeaders,
+        });
 
         if (!response.ok) {
           const body = await response.json().catch(() => ({}));
@@ -1639,7 +1641,7 @@ export default function MessagesInbox() {
       }
 
       const pageParam = page > 1 ? `?page=${page}` : "";
-      const url = buildApiUrlWithDevToken(
+      const { url, headers } = buildApiFetchRequest(
         PUBLIC_API_URL,
         `/messages/${encodeURIComponent(userId)}${pageParam}`,
       );
@@ -1647,6 +1649,7 @@ export default function MessagesInbox() {
         method: "GET",
         credentials: "include",
         cache: "no-store",
+        headers,
       });
 
       if (!response.ok) {
@@ -2139,17 +2142,16 @@ export default function MessagesInbox() {
         throw new Error("Public API URL is not configured");
       }
 
-      const response = await fetch(
-        buildApiUrlWithDevToken(
-          PUBLIC_API_URL,
-          `/messages/${encodeURIComponent(targetUserId)}/block`,
-        ),
-        {
-          method: shouldBlock ? "POST" : "DELETE",
-          credentials: "include",
-          cache: "no-store",
-        },
+      const { url: blockUrl, headers: blockHeaders } = buildApiFetchRequest(
+        PUBLIC_API_URL,
+        `/messages/${encodeURIComponent(targetUserId)}/block`,
       );
+      const response = await fetch(blockUrl, {
+        method: shouldBlock ? "POST" : "DELETE",
+        credentials: "include",
+        cache: "no-store",
+        headers: blockHeaders,
+      });
 
       if (!response.ok) {
         const body = await response.json().catch(() => ({}));
@@ -2251,20 +2253,19 @@ export default function MessagesInbox() {
       }
       body.metadata = { client_id: optimisticId };
 
-      const response = await fetch(
-        buildApiUrlWithDevToken(
-          PUBLIC_API_URL,
-          `/messages/${encodeURIComponent(targetUserId)}`,
-        ),
-        {
-          method: "POST",
-          credentials: "include",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(body),
-        },
+      const { url: sendUrl, headers: sendHeaders } = buildApiFetchRequest(
+        PUBLIC_API_URL,
+        `/messages/${encodeURIComponent(targetUserId)}`,
       );
+      const response = await fetch(sendUrl, {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          ...sendHeaders,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(body),
+      });
 
       const rawBody = await response.text();
       const parsedBody = rawBody
@@ -2507,20 +2508,19 @@ export default function MessagesInbox() {
         throw new Error("Public API URL is not configured");
       }
 
-      const response = await fetch(
-        buildApiUrlWithDevToken(
-          PUBLIC_API_URL,
-          `/messages/${encodeURIComponent(selectedUserId)}/${encodeURIComponent(messageId)}`,
-        ),
-        {
-          method: "PATCH",
-          credentials: "include",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ content: trimmedMessage }),
-        },
+      const { url: editUrl, headers: editHeaders } = buildApiFetchRequest(
+        PUBLIC_API_URL,
+        `/messages/${encodeURIComponent(selectedUserId)}/${encodeURIComponent(messageId)}`,
       );
+      const response = await fetch(editUrl, {
+        method: "PATCH",
+        credentials: "include",
+        headers: {
+          ...editHeaders,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ content: trimmedMessage }),
+      });
 
       const rawBody = await response.text();
       const parsedBody = rawBody
@@ -2657,16 +2657,15 @@ export default function MessagesInbox() {
         throw new Error("Public API URL is not configured");
       }
 
-      const response = await fetch(
-        buildApiUrlWithDevToken(
-          PUBLIC_API_URL,
-          `/messages/${encodeURIComponent(selectedUserId)}/${encodeURIComponent(messageId)}`,
-        ),
-        {
-          method: "DELETE",
-          credentials: "include",
-        },
+      const { url: deleteUrl, headers: deleteHeaders } = buildApiFetchRequest(
+        PUBLIC_API_URL,
+        `/messages/${encodeURIComponent(selectedUserId)}/${encodeURIComponent(messageId)}`,
       );
+      const response = await fetch(deleteUrl, {
+        method: "DELETE",
+        credentials: "include",
+        headers: deleteHeaders,
+      });
 
       if (!response.ok) {
         const ban = parseBan(response);
@@ -2733,18 +2732,16 @@ export default function MessagesInbox() {
     const toastId = toast.loading("Submitting report...");
 
     try {
-      const response = await fetch(
-        buildApiUrlWithDevToken(
-          PUBLIC_API_URL,
-          `/messages/${encodeURIComponent(selectedUserId)}/${encodeURIComponent(reportingMessage.id)}/report`,
-        ),
-        {
-          method: "POST",
-          credentials: "include",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ reason: reportReason.trim() }),
-        },
+      const { url: reportUrl, headers: reportHeaders } = buildApiFetchRequest(
+        PUBLIC_API_URL,
+        `/messages/${encodeURIComponent(selectedUserId)}/${encodeURIComponent(reportingMessage.id)}/report`,
       );
+      const response = await fetch(reportUrl, {
+        method: "POST",
+        credentials: "include",
+        headers: { ...reportHeaders, "Content-Type": "application/json" },
+        body: JSON.stringify({ reason: reportReason.trim() }),
+      });
 
       if (!response.ok) {
         const ban = parseBan(response);

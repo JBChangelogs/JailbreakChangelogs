@@ -4,18 +4,22 @@ import {
   SupporterHistoryEntry,
   SupporterLevel,
 } from "@/types/auth";
-import { buildApiUrlWithDevToken } from "@/utils/api/apiDevToken";
+import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
 import { getResponseErrorMessage, PUBLIC_API_URL } from "@/utils/api/api";
 import { createLogger } from "@/services/logger";
 
 const log = createLogger("API");
 
 export const fetchUserSettings = async (): Promise<ApiSettingsResponse> => {
-  const url = buildApiUrlWithDevToken(PUBLIC_API_URL!, "/settings/me");
+  const { url, headers } = buildApiFetchRequest(
+    PUBLIC_API_URL!,
+    "/settings/me",
+  );
   const resp = await fetch(url, {
     method: "GET",
     credentials: "include",
     cache: "no-store",
+    headers,
   });
   if (!resp.ok) {
     throw new Error("Failed to fetch settings");
@@ -24,11 +28,15 @@ export const fetchUserSettings = async (): Promise<ApiSettingsResponse> => {
 };
 
 export const fetchSupporterGifts = async (): Promise<SupporterGift[]> => {
-  const url = buildApiUrlWithDevToken(PUBLIC_API_URL!, "/supporter/gifts");
+  const { url, headers } = buildApiFetchRequest(
+    PUBLIC_API_URL!,
+    "/supporter/gifts",
+  );
   const resp = await fetch(url, {
     method: "GET",
     credentials: "include",
     cache: "no-store",
+    headers,
   });
   if (!resp.ok) {
     throw new Error("Failed to fetch supporter gifts");
@@ -39,11 +47,15 @@ export const fetchSupporterGifts = async (): Promise<SupporterGift[]> => {
 export const fetchSupporterHistory = async (): Promise<
   SupporterHistoryEntry[]
 > => {
-  const url = buildApiUrlWithDevToken(PUBLIC_API_URL!, "/supporter/history");
+  const { url, headers } = buildApiFetchRequest(
+    PUBLIC_API_URL!,
+    "/supporter/history",
+  );
   const resp = await fetch(url, {
     method: "GET",
     credentials: "include",
     cache: "no-store",
+    headers,
   });
 
   if (!resp.ok) {
@@ -93,11 +105,15 @@ export const fetchSupporterHistory = async (): Promise<
 };
 
 export const revertSupporterLevel = async (level: number): Promise<void> => {
-  const url = buildApiUrlWithDevToken(PUBLIC_API_URL!, `/supporter/${level}`);
+  const { url, headers } = buildApiFetchRequest(
+    PUBLIC_API_URL!,
+    `/supporter/${level}`,
+  );
   const resp = await fetch(url, {
     method: "PATCH",
     credentials: "include",
     cache: "no-store",
+    headers,
   });
 
   if (!resp.ok) {
@@ -111,14 +127,14 @@ export const giftSupporterGift = async (
   shareId: string,
   userId: string,
 ): Promise<{ id: string }> => {
-  const url = buildApiUrlWithDevToken(
+  const { url, headers } = buildApiFetchRequest(
     PUBLIC_API_URL!,
     `/supporter/gifts/${shareId}`,
   );
   const resp = await fetch(url, {
     method: "POST",
     credentials: "include",
-    headers: { "Content-Type": "application/json" },
+    headers: { ...headers, "Content-Type": "application/json" },
     body: JSON.stringify({ user_id: userId }),
     cache: "no-store",
   });
@@ -234,11 +250,14 @@ export const updateUserSettings = async (
   name: string,
   value: boolean,
 ): Promise<void> => {
-  const url = buildApiUrlWithDevToken(PUBLIC_API_URL!, "/settings/me");
+  const { url, headers } = buildApiFetchRequest(
+    PUBLIC_API_URL!,
+    "/settings/me",
+  );
   const response = await fetch(url, {
     method: "PATCH",
     credentials: "include",
-    headers: { "Content-Type": "application/json" },
+    headers: { ...headers, "Content-Type": "application/json" },
     body: JSON.stringify({ settings: [{ name, value }] }),
   });
 

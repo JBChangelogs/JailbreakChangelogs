@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useQueryState } from "nuqs";
 import Image from "next/image";
 import { PUBLIC_API_URL } from "@/utils/api/api";
-import { buildApiUrlWithDevToken } from "@/utils/api/apiDevToken";
+import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
 import { createLogger } from "@/services/logger";
 import { Icon } from "@/components/ui/IconWrapper";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -442,13 +442,14 @@ export default function MyReports() {
     setLoading(true);
     setError(null);
     try {
-      const url = buildApiUrlWithDevToken(
+      const { url, headers } = buildApiFetchRequest(
         PUBLIC_API_URL,
         `/reports/me?page=${currentPage}`,
       );
       const response = await fetch(url, {
         credentials: "include",
         cache: "no-store",
+        headers,
       });
 
       if (!response.ok) {

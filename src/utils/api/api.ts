@@ -55,7 +55,7 @@ import {
 } from "@/types";
 import { UserData } from "@/types/auth";
 import { fetchWithRetry } from "@/utils/api/fetchWithRetry";
-import { buildApiUrlWithDevToken } from "@/utils/api/apiDevToken";
+import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
 import { createLogger } from "@/services/logger";
 
 const log = createLogger("API");
@@ -2360,7 +2360,7 @@ export async function fetchNotificationHistory(
       ? decodeURIComponent(cookieMatch[1])
       : (process.env.NEXT_PUBLIC_DEV_TOKEN ?? null);
     const tokenParam = token ? `&token=${encodeURIComponent(token)}` : "";
-    const url = buildApiUrlWithDevToken(
+    const { url, headers } = buildApiFetchRequest(
       PUBLIC_API_URL!,
       `/notifications/history?page=${page}&size=${size}${tokenParam}`,
     );
@@ -2368,6 +2368,7 @@ export async function fetchNotificationHistory(
       method: "GET",
       credentials: "include",
       cache: "no-store",
+      headers,
     });
 
     if (!response.ok) {
@@ -2409,13 +2410,14 @@ export async function fetchUnreadNotifications(
       ? decodeURIComponent(cookieMatch[1])
       : (process.env.NEXT_PUBLIC_DEV_TOKEN ?? null);
     const tokenParam = token ? `&token=${encodeURIComponent(token)}` : "";
-    const url = buildApiUrlWithDevToken(
+    const { url, headers } = buildApiFetchRequest(
       PUBLIC_API_URL!,
       `/notifications?page=${page}&size=${size}${tokenParam}`,
     );
     const response = await fetch(url, {
       method: "GET",
       credentials: "include",
+      headers,
     });
 
     if (!response.ok) {
@@ -2454,7 +2456,7 @@ export async function fetchUnreadNotificationCount(): Promise<number> {
       ? decodeURIComponent(cookieMatch[1])
       : (process.env.NEXT_PUBLIC_DEV_TOKEN ?? null);
     const tokenParam = token ? `?token=${encodeURIComponent(token)}` : "";
-    const url = buildApiUrlWithDevToken(
+    const { url, headers } = buildApiFetchRequest(
       PUBLIC_API_URL!,
       `/notifications/unread${tokenParam}`,
     );
@@ -2462,6 +2464,7 @@ export async function fetchUnreadNotificationCount(): Promise<number> {
       method: "GET",
       credentials: "include",
       cache: "no-store",
+      headers,
     });
 
     if (!response.ok) {
@@ -2480,7 +2483,7 @@ export async function fetchUnreadNotificationCount(): Promise<number> {
 
 export async function clearNotificationHistory(): Promise<boolean> {
   try {
-    const url = buildApiUrlWithDevToken(
+    const { url, headers } = buildApiFetchRequest(
       PUBLIC_API_URL!,
       "/notifications/history/clear",
     );
@@ -2494,7 +2497,7 @@ export async function clearNotificationHistory(): Promise<boolean> {
     const response = await fetch(url, {
       method: "DELETE",
       credentials: "include",
-      headers: { "Content-Type": "application/json" },
+      headers: { ...headers, "Content-Type": "application/json" },
       body: JSON.stringify({ token }),
     });
 
@@ -2519,7 +2522,7 @@ export async function fetchEmailLinkedStatus(): Promise<{ linked: boolean }> {
   try {
     const token = getClientToken();
     const tokenParam = token ? `?token=${encodeURIComponent(token)}` : "";
-    const url = buildApiUrlWithDevToken(
+    const { url, headers } = buildApiFetchRequest(
       PUBLIC_API_URL!,
       `/users/email/linked${tokenParam}`,
     );
@@ -2527,6 +2530,7 @@ export async function fetchEmailLinkedStatus(): Promise<{ linked: boolean }> {
       method: "GET",
       credentials: "include",
       cache: "no-store",
+      headers,
     });
     if (!response.ok) return { linked: false };
     return response.json();
@@ -2541,7 +2545,7 @@ export async function fetchEmailNotificationStatus(): Promise<{
   try {
     const token = getClientToken();
     const tokenParam = token ? `?token=${encodeURIComponent(token)}` : "";
-    const url = buildApiUrlWithDevToken(
+    const { url, headers } = buildApiFetchRequest(
       PUBLIC_API_URL!,
       `/notifications/emails${tokenParam}`,
     );
@@ -2549,6 +2553,7 @@ export async function fetchEmailNotificationStatus(): Promise<{
       method: "GET",
       credentials: "include",
       cache: "no-store",
+      headers,
     });
     if (!response.ok) return { enabled: false };
     return response.json();
@@ -2563,11 +2568,14 @@ export async function enableEmailNotifications(): Promise<{
   data: { message?: string; detail?: string; error?: string };
 }> {
   const token = getClientToken();
-  const url = buildApiUrlWithDevToken(PUBLIC_API_URL!, "/notifications/emails");
+  const { url, headers } = buildApiFetchRequest(
+    PUBLIC_API_URL!,
+    "/notifications/emails",
+  );
   const response = await fetch(url, {
     method: "POST",
     credentials: "include",
-    headers: { "Content-Type": "application/json" },
+    headers: { ...headers, "Content-Type": "application/json" },
     body: JSON.stringify({ token }),
     cache: "no-store",
   });
@@ -2588,11 +2596,14 @@ export async function disableEmailNotifications(): Promise<{
   data: { message?: string; detail?: string };
 }> {
   const token = getClientToken();
-  const url = buildApiUrlWithDevToken(PUBLIC_API_URL!, "/notifications/emails");
+  const { url, headers } = buildApiFetchRequest(
+    PUBLIC_API_URL!,
+    "/notifications/emails",
+  );
   const response = await fetch(url, {
     method: "DELETE",
     credentials: "include",
-    headers: { "Content-Type": "application/json" },
+    headers: { ...headers, "Content-Type": "application/json" },
     body: JSON.stringify({ token }),
     cache: "no-store",
   });
@@ -2608,11 +2619,14 @@ export async function unlinkEmail(): Promise<{
   data: { message?: string; detail?: string };
 }> {
   const token = getClientToken();
-  const url = buildApiUrlWithDevToken(PUBLIC_API_URL!, "/users/email/unlink");
+  const { url, headers } = buildApiFetchRequest(
+    PUBLIC_API_URL!,
+    "/users/email/unlink",
+  );
   const response = await fetch(url, {
     method: "DELETE",
     credentials: "include",
-    headers: { "Content-Type": "application/json" },
+    headers: { ...headers, "Content-Type": "application/json" },
     body: JSON.stringify({ token }),
     cache: "no-store",
   });

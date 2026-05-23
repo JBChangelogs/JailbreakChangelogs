@@ -9,7 +9,7 @@ import { Icon } from "@/components/ui/IconWrapper";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/Spinner";
 import { UserAvatar } from "@/utils/ui/avatar";
-import { buildApiUrlWithDevToken } from "@/utils/api/apiDevToken";
+import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
 import { PUBLIC_API_URL } from "@/utils/api/api";
 import { parseBan, showBanToast } from "@/utils/api/ban";
 import { BanBanner } from "@/components/ui/BanBanner";
@@ -177,10 +177,12 @@ export default function ValueSuggestionDetailPage() {
       setShouldShowNotFound(false);
       setRouteError(null);
       try {
-        const res = await fetch(
-          buildApiUrlWithDevToken(PUBLIC_API_URL!, `/value-suggestions/${id}`),
-          { credentials: "include" },
-        );
+        const { url: suggestionUrl, headers: devTokenHeaders } =
+          buildApiFetchRequest(PUBLIC_API_URL!, `/value-suggestions/${id}`);
+        const res = await fetch(suggestionUrl, {
+          credentials: "include",
+          headers: devTokenHeaders,
+        });
         if (!res.ok) {
           if (res.status === 404) {
             setShouldShowNotFound(true);
@@ -254,7 +256,7 @@ export default function ValueSuggestionDetailPage() {
 
     setVoteLoading(true);
     try {
-      const url = buildApiUrlWithDevToken(
+      const { url, headers } = buildApiFetchRequest(
         PUBLIC_API_URL!,
         `/value-suggestions/${id}/vote`,
       );
@@ -262,9 +264,9 @@ export default function ValueSuggestionDetailPage() {
         method: removing ? "DELETE" : "POST",
         credentials: "include",
         ...(removing
-          ? {}
+          ? { headers }
           : {
-              headers: { "Content-Type": "application/json" },
+              headers: { ...headers, "Content-Type": "application/json" },
               body: JSON.stringify({ vote_type: type }),
             }),
       });
@@ -308,14 +310,14 @@ export default function ValueSuggestionDetailPage() {
     }
     setEditSaving(true);
     try {
-      const url = buildApiUrlWithDevToken(
+      const { url, headers } = buildApiFetchRequest(
         PUBLIC_API_URL!,
         `/value-suggestions/${id}`,
       );
       const res = await fetch(url, {
         method: "PATCH",
         credentials: "include",
-        headers: { "Content-Type": "application/json" },
+        headers: { ...headers, "Content-Type": "application/json" },
         body: JSON.stringify({
           item: suggestion.item_id,
           suggestion: { reason: editReason.trim() },

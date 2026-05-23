@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import { Spinner } from "../ui/Spinner";
 import { isFeatureEnabled } from "@/utils/api/featureFlags";
 import { PUBLIC_API_URL } from "@/utils/api/api";
-import { buildApiUrlWithDevToken } from "@/utils/api/apiDevToken";
+import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
@@ -74,12 +74,12 @@ export default function ChangelogSummary({
     try {
       if (!PUBLIC_API_URL) throw new Error("Missing PUBLIC_API_URL");
 
-      const url = buildApiUrlWithDevToken(
+      const { url, headers } = buildApiFetchRequest(
         PUBLIC_API_URL,
         `/changelogs/${changelogId}/summary`,
       );
 
-      const response = await fetch(url, { credentials: "include" });
+      const response = await fetch(url, { credentials: "include", headers });
 
       if (!response.ok) {
         if (response.status === 429) {

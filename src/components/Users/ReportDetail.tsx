@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { PUBLIC_API_URL } from "@/utils/api/api";
-import { buildApiUrlWithDevToken } from "@/utils/api/apiDevToken";
+import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
 import { createLogger } from "@/services/logger";
 import { Icon } from "@/components/ui/IconWrapper";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -43,8 +43,11 @@ export default function ReportDetail({ reportId }: { reportId: string }) {
     setLoading(true);
     setError(null);
 
-    const url = buildApiUrlWithDevToken(PUBLIC_API_URL, `/reports/${reportId}`);
-    fetch(url, { credentials: "include", cache: "no-store" })
+    const { url, headers } = buildApiFetchRequest(
+      PUBLIC_API_URL,
+      `/reports/${reportId}`,
+    );
+    fetch(url, { credentials: "include", cache: "no-store", headers })
       .then(async (res) => {
         if (!res.ok) {
           const body = await res.json().catch(() => ({}));

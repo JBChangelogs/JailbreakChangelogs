@@ -1,4 +1,4 @@
-import { buildApiUrlWithDevToken } from "@/utils/api/apiDevToken";
+import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
 import { PUBLIC_API_URL } from "@/utils/api/api";
 
 export type NotificationPreferenceTitle = string;
@@ -47,7 +47,7 @@ export async function fetchAvailableNotificationPreferences(): Promise<
 export async function fetchUserNotificationPreferences(
   userId: string,
 ): Promise<NotificationPreferencesResponse> {
-  const url = buildApiUrlWithDevToken(
+  const { url, headers } = buildApiFetchRequest(
     PUBLIC_API_URL!,
     `/notifications/preferences?user_id=${encodeURIComponent(userId)}`,
   );
@@ -55,6 +55,7 @@ export async function fetchUserNotificationPreferences(
     method: "GET",
     credentials: "include",
     cache: "no-store",
+    headers,
   });
 
   if (!resp.ok) {
@@ -77,14 +78,14 @@ export async function updateUserNotificationPreferences(
   preferences: NotificationPreferenceEntry[],
 ): Promise<unknown> {
   const token = getClientToken();
-  const url = buildApiUrlWithDevToken(
+  const { url, headers } = buildApiFetchRequest(
     PUBLIC_API_URL!,
     "/notifications/preferences",
   );
   const resp = await fetch(url, {
     method: "POST",
     credentials: "include",
-    headers: { "Content-Type": "application/json" },
+    headers: { ...headers, "Content-Type": "application/json" },
     body: JSON.stringify({ token, preferences }),
   });
 

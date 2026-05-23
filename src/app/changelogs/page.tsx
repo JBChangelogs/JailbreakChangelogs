@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { PUBLIC_API_URL } from "@/utils/api/api";
-import { buildApiUrlWithDevToken } from "@/utils/api/apiDevToken";
+import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
 import RateLimitView from "@/components/Layout/RateLimitView";
 import { createLogger } from "@/services/logger";
 
@@ -24,16 +24,16 @@ export default function ChangelogsPage() {
         }
         const apiBaseUrl = PUBLIC_API_URL;
 
-        const response = await fetch(
-          buildApiUrlWithDevToken(apiBaseUrl, "/changelogs/latest"),
-          {
-            credentials: "include",
-            headers: {
-              "User-Agent": "JailbreakChangelogs-Changelogs/1.0",
-            },
-            cache: "no-store",
+        const { url: changelogsLatestUrl, headers: changelogsLatestHeaders } =
+          buildApiFetchRequest(apiBaseUrl, "/changelogs/latest");
+        const response = await fetch(changelogsLatestUrl, {
+          credentials: "include",
+          headers: {
+            ...changelogsLatestHeaders,
+            "User-Agent": "JailbreakChangelogs-Changelogs/1.0",
           },
-        );
+          cache: "no-store",
+        });
 
         if (!response.ok) {
           if (response.status === 429) {

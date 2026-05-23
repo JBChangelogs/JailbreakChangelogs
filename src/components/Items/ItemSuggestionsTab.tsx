@@ -7,7 +7,7 @@ import { Spinner } from "@/components/ui/Spinner";
 import { Button } from "@/components/ui/button";
 import { UserAvatar } from "@/utils/ui/avatar";
 // RE-ADD: voting — import { useAuthContext } from "@/contexts/AuthContext";
-import { buildApiUrlWithDevToken } from "@/utils/api/apiDevToken";
+import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
 import { PUBLIC_API_URL } from "@/utils/api/api";
 import { formatMessageDate } from "@/utils/helpers/timestamp";
 import { formatFullValue } from "@/utils/trading/values";
@@ -166,11 +166,11 @@ export default function ItemSuggestionsTab({
       setError(null);
       setEmpty(false);
       try {
-        const url = buildApiUrlWithDevToken(
+        const { url, headers } = buildApiFetchRequest(
           PUBLIC_API_URL!,
           `/value-suggestions/item/${itemId}?page=${p}`,
         );
-        const res = await fetch(url, { credentials: "include" });
+        const res = await fetch(url, { credentials: "include", headers });
         if (res.status === 404) {
           setEmpty(true);
           setSuggestions([]);

@@ -5,7 +5,7 @@ import Breadcrumb from "@/components/Layout/Breadcrumb";
 import TimelineClient from "@/components/Timeline/TimelineClient";
 import TimelineLoading from "@/app/changelogs/timeline/loading";
 import { Changelog, PUBLIC_API_URL } from "@/utils/api/api";
-import { buildApiUrlWithDevToken } from "@/utils/api/apiDevToken";
+import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
 import RateLimitView from "@/components/Layout/RateLimitView";
 import { createLogger } from "@/services/logger";
 
@@ -26,15 +26,15 @@ export default function TimelinePage() {
         }
         const apiBaseUrl = PUBLIC_API_URL;
 
-        const response = await fetch(
-          buildApiUrlWithDevToken(apiBaseUrl, "/changelogs"),
-          {
-            credentials: "include",
-            headers: {
-              "User-Agent": "JailbreakChangelogs-Changelogs/1.0",
-            },
+        const { url: changelogsUrl, headers: changelogsHeaders } =
+          buildApiFetchRequest(apiBaseUrl, "/changelogs");
+        const response = await fetch(changelogsUrl, {
+          credentials: "include",
+          headers: {
+            ...changelogsHeaders,
+            "User-Agent": "JailbreakChangelogs-Changelogs/1.0",
           },
-        );
+        });
 
         if (!response.ok) {
           if (response.status === 429) {

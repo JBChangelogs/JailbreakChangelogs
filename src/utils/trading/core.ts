@@ -1,6 +1,6 @@
 import { createLogger } from "@/services/logger";
 import { getResponseErrorMessage } from "@/utils/api/api";
-import { buildApiUrlWithDevToken } from "@/utils/api/apiDevToken";
+import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
 
 const log = createLogger("UI");
 
@@ -19,17 +19,16 @@ export const deleteTradeAd = async (tradeId: number): Promise<boolean> => {
       throw new Error("Trade API is not configured");
     }
 
-    const response = await fetch(
-      buildApiUrlWithDevToken(
-        baseUrl,
-        `/trades/v2/${encodeURIComponent(String(tradeId))}/delete`,
-      ),
-      {
-        method: "DELETE",
-        cache: "no-store",
-        credentials: "include",
-      },
+    const { url: deleteUrl, headers: deleteHeaders } = buildApiFetchRequest(
+      baseUrl,
+      `/trades/v2/${encodeURIComponent(String(tradeId))}/delete`,
     );
+    const response = await fetch(deleteUrl, {
+      method: "DELETE",
+      cache: "no-store",
+      credentials: "include",
+      headers: deleteHeaders,
+    });
 
     if (!response.ok) {
       if (response.status === 401) {
@@ -80,7 +79,7 @@ export const createTradeOffer = async (
     throw new Error("Trade API is not configured");
   }
 
-  const url = buildApiUrlWithDevToken(
+  const { url, headers } = buildApiFetchRequest(
     baseUrl,
     `/trades/v2/${encodeURIComponent(String(tradeId))}/offers`,
   );
@@ -90,7 +89,9 @@ export const createTradeOffer = async (
     method: "POST",
     cache: "no-store",
     credentials: "include",
-    headers: hasBody ? { "Content-Type": "application/json" } : undefined,
+    headers: hasBody
+      ? { ...headers, "Content-Type": "application/json" }
+      : headers,
     body: hasBody ? JSON.stringify(payload) : undefined,
   });
 
@@ -169,20 +170,19 @@ export const fetchTradeOffers = async (
     throw new Error("Trade API is not configured");
   }
 
-  const response = await fetch(
-    buildApiUrlWithDevToken(
-      baseUrl,
-      `/trades/v2/${encodeURIComponent(String(tradeId))}/offers`,
-    ),
-    {
-      method: "GET",
-      cache: "no-store",
-      credentials: "include",
-      headers: {
-        "User-Agent": "JailbreakChangelogs-Trading/2.0",
-      },
-    },
+  const { url: offersUrl, headers: offersHeaders } = buildApiFetchRequest(
+    baseUrl,
+    `/trades/v2/${encodeURIComponent(String(tradeId))}/offers`,
   );
+  const response = await fetch(offersUrl, {
+    method: "GET",
+    cache: "no-store",
+    credentials: "include",
+    headers: {
+      ...offersHeaders,
+      "User-Agent": "JailbreakChangelogs-Trading/2.0",
+    },
+  });
 
   if (!response.ok) {
     if (response.status === 401) {
@@ -217,7 +217,7 @@ export const respondToTradeOfferV2 = async (
     throw new Error("Trade API is not configured");
   }
 
-  const endpoint = buildApiUrlWithDevToken(
+  const { url: endpoint, headers: endpointHeaders } = buildApiFetchRequest(
     baseUrl,
     tradeOfferV2Path(tradeId, offerId),
   );
@@ -226,7 +226,7 @@ export const respondToTradeOfferV2 = async (
     method: "POST",
     cache: "no-store",
     credentials: "include",
-    headers: { "Content-Type": "application/json" },
+    headers: { ...endpointHeaders, "Content-Type": "application/json" },
     body: JSON.stringify({ status }),
   });
 
@@ -255,7 +255,7 @@ export const deleteTradeOfferV2 = async (
     throw new Error("Trade API is not configured");
   }
 
-  const endpoint = buildApiUrlWithDevToken(
+  const { url: endpoint, headers: endpointHeaders } = buildApiFetchRequest(
     baseUrl,
     tradeOfferV2Path(tradeId, offerId),
   );
@@ -264,6 +264,7 @@ export const deleteTradeOfferV2 = async (
     method: "DELETE",
     cache: "no-store",
     credentials: "include",
+    headers: endpointHeaders,
   });
 
   if (!response.ok) {

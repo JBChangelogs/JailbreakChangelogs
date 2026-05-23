@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Pagination } from "@/components/ui/Pagination";
 import { UserAvatar } from "@/utils/ui/avatar";
 import { useAuthContext } from "@/contexts/AuthContext";
-import { buildApiUrlWithDevToken } from "@/utils/api/apiDevToken";
+import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
 import { PUBLIC_API_URL } from "@/utils/api/api";
 import { formatMessageDate } from "@/utils/helpers/timestamp";
 import { formatFullValue } from "@/utils/trading/values";
@@ -963,7 +963,7 @@ export default function ValueSuggestionsPage() {
 
     setVotingIds((prev) => new Set(prev).add(suggestion.id));
     try {
-      const url = buildApiUrlWithDevToken(
+      const { url, headers } = buildApiFetchRequest(
         PUBLIC_API_URL!,
         `/value-suggestions/${suggestion.id}/vote`,
       );
@@ -971,9 +971,9 @@ export default function ValueSuggestionsPage() {
         method: removing ? "DELETE" : "POST",
         credentials: "include",
         ...(removing
-          ? {}
+          ? { headers }
           : {
-              headers: { "Content-Type": "application/json" },
+              headers: { ...headers, "Content-Type": "application/json" },
               body: JSON.stringify({ vote_type: type }),
             }),
       });
@@ -1043,14 +1043,14 @@ export default function ValueSuggestionsPage() {
 
   const handleEditSave = async (reason: string) => {
     if (!editTarget) return;
-    const url = buildApiUrlWithDevToken(
+    const { url, headers } = buildApiFetchRequest(
       PUBLIC_API_URL!,
       `/value-suggestions/${editTarget.id}`,
     );
     const res = await fetch(url, {
       method: "PATCH",
       credentials: "include",
-      headers: { "Content-Type": "application/json" },
+      headers: { ...headers, "Content-Type": "application/json" },
       body: JSON.stringify({
         item: editTarget.item_id,
         suggestion: { reason },
@@ -1182,11 +1182,11 @@ export default function ValueSuggestionsPage() {
     setSuggestionsError(null);
     setNewSuggestionsCount(0);
     try {
-      const url = buildApiUrlWithDevToken(
+      const { url, headers } = buildApiFetchRequest(
         PUBLIC_API_URL!,
         `/value-suggestions/recent?page=${p}`,
       );
-      const res = await fetch(url, { credentials: "include" });
+      const res = await fetch(url, { credentials: "include", headers });
       if (!res.ok) {
         const body = await res.json().catch(() => ({}));
         log.error("fetch suggestions failed", { status: res.status, body });
@@ -1222,8 +1222,11 @@ export default function ValueSuggestionsPage() {
   useEffect(() => {
     const fetchItems = async () => {
       try {
-        const url = buildApiUrlWithDevToken(PUBLIC_API_URL!, "/items/list");
-        const res = await fetch(url);
+        const { url, headers } = buildApiFetchRequest(
+          PUBLIC_API_URL!,
+          "/items/list",
+        );
+        const res = await fetch(url, { headers });
         if (!res.ok) {
           const body = await res.json().catch(() => ({}));
           log.error("fetch items failed", { status: res.status, body });
@@ -1246,11 +1249,14 @@ export default function ValueSuggestionsPage() {
     value: string;
     reason: string;
   }) => {
-    const url = buildApiUrlWithDevToken(PUBLIC_API_URL!, "/value-suggestions");
+    const { url, headers } = buildApiFetchRequest(
+      PUBLIC_API_URL!,
+      "/value-suggestions",
+    );
     const res = await fetch(url, {
       method: "POST",
       credentials: "include",
-      headers: { "Content-Type": "application/json" },
+      headers: { ...headers, "Content-Type": "application/json" },
       body: JSON.stringify({
         item: payload.item,
         suggestion: {
@@ -1298,11 +1304,11 @@ export default function ValueSuggestionsPage() {
     if (limits) return;
     setLoadingLimits(true);
     try {
-      const url = buildApiUrlWithDevToken(
+      const { url, headers } = buildApiFetchRequest(
         PUBLIC_API_URL!,
         "/value-suggestions/limits",
       );
-      const res = await fetch(url, { credentials: "include" });
+      const res = await fetch(url, { credentials: "include", headers });
       if (res.ok) {
         const data: SuggestionLimits = await res.json();
         setLimits(data);

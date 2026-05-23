@@ -16,7 +16,7 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { formatProfileDate } from "@/utils/helpers/timestamp";
 import { Season, CommentData, PUBLIC_API_URL } from "@/utils/api/api";
-import { buildApiUrlWithDevToken } from "@/utils/api/apiDevToken";
+import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
 import { UserData } from "@/types/auth";
 import SeasonRouteLoading from "@/app/seasons/[id]/loading";
 import RateLimitView from "@/components/Layout/RateLimitView";
@@ -52,15 +52,15 @@ export default function SeasonDetailsClient({
           throw new Error("Missing PUBLIC_API_URL");
         }
 
-        const response = await fetch(
-          buildApiUrlWithDevToken(PUBLIC_API_URL, "/seasons"),
-          {
-            credentials: "include",
-            headers: {
-              "User-Agent": "JailbreakChangelogs-Seasons/1.0",
-            },
+        const { url: seasonsUrl, headers: seasonsHeaders } =
+          buildApiFetchRequest(PUBLIC_API_URL, "/seasons");
+        const response = await fetch(seasonsUrl, {
+          credentials: "include",
+          headers: {
+            ...seasonsHeaders,
+            "User-Agent": "JailbreakChangelogs-Seasons/1.0",
           },
-        );
+        });
 
         if (!response.ok) {
           if (response.status === 429) {

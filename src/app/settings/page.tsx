@@ -893,7 +893,7 @@ export default function SettingsPage() {
                       name="twemoji_enabled"
                       value={twemojiEnabled}
                       description="Use Twemoji for emojis instead of your browser's native emoji set"
-                      displayName="Twemoji Enabled"
+                      displayName="Twemoji Emojis"
                       onChange={(_name, value) => {
                         setTwemojiEnabled(value);
                         const displayName =

@@ -7,7 +7,7 @@ const log = createLogger("UI");
 import ChangelogDetailsClient from "@/components/Changelogs/ChangelogDetailsClient";
 import NitroChangelogRailAd from "@/components/Ads/NitroChangelogRailAd";
 import { Changelog, CommentData, PUBLIC_API_URL } from "@/utils/api/api";
-import { buildApiUrlWithDevToken } from "@/utils/api/apiDevToken";
+import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
 import { UserData } from "@/types/auth";
 import { notFound } from "next/navigation";
 import ChangelogRouteLoading from "@/app/changelogs/[id]/loading";
@@ -42,15 +42,17 @@ export default function ChangelogDetailsPageClient({
         }
         const apiBaseUrl = PUBLIC_API_URL;
 
-        const listResponse = await fetch(
-          buildApiUrlWithDevToken(apiBaseUrl, "/changelogs"),
-          {
-            credentials: "include",
-            headers: {
-              "User-Agent": "JailbreakChangelogs-Changelogs/1.0",
-            },
-          },
+        const { url: listUrl, headers: listHeaders } = buildApiFetchRequest(
+          apiBaseUrl,
+          "/changelogs",
         );
+        const listResponse = await fetch(listUrl, {
+          credentials: "include",
+          headers: {
+            ...listHeaders,
+            "User-Agent": "JailbreakChangelogs-Changelogs/1.0",
+          },
+        });
 
         if (!listResponse.ok) {
           if (listResponse.status === 429) {

@@ -8,7 +8,7 @@ import { Pagination } from "@/components/ui/Pagination";
 import Comment from "../ProfileComments/Comments";
 import { fetchCommentDetails } from "@/app/users/[id]/actions";
 import { PUBLIC_API_URL } from "@/utils/api/api";
-import { buildApiUrlWithDevToken } from "@/utils/api/apiDevToken";
+import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
 
 interface CommentReaction {
   emoji: string;
@@ -136,13 +136,15 @@ export default function CommentsTab({
     const results = await Promise.all(
       changelogIds.map(async (id) => {
         try {
-          const response = await fetch(
-            buildApiUrlWithDevToken(PUBLIC_API_URL, `/changelogs/${id}`),
-            {
-              credentials: "include",
-              headers: { "User-Agent": "JailbreakChangelogs-Comments/1.0" },
+          const { url: changelogUrl, headers: changelogHeaders } =
+            buildApiFetchRequest(PUBLIC_API_URL, `/changelogs/${id}`);
+          const response = await fetch(changelogUrl, {
+            credentials: "include",
+            headers: {
+              ...changelogHeaders,
+              "User-Agent": "JailbreakChangelogs-Comments/1.0",
             },
-          );
+          });
           if (!response.ok) return null;
           const data = await response.json();
           return { id, data };
@@ -177,13 +179,16 @@ export default function CommentsTab({
 
     const fetchComments = async () => {
       try {
-        const url = buildApiUrlWithDevToken(
+        const { url, headers } = buildApiFetchRequest(
           PUBLIC_API_URL,
           `/comments/user/${encodeURIComponent(userId)}?page=${currentPage}`,
         );
         const response = await fetch(url, {
           credentials: "include",
-          headers: { "User-Agent": "JailbreakChangelogs-UserProfile/1.0" },
+          headers: {
+            ...headers,
+            "User-Agent": "JailbreakChangelogs-UserProfile/1.0",
+          },
         });
 
         if (!response.ok) {

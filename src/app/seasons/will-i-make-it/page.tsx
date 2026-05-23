@@ -10,7 +10,7 @@ import XpLevelRequirements from "@/components/Seasons/XpLevelRequirements";
 import WillIMakeItLoading from "@/app/seasons/will-i-make-it/loading";
 import { Season } from "@/types/seasons";
 import { PUBLIC_API_URL } from "@/utils/api/api";
-import { buildApiUrlWithDevToken } from "@/utils/api/apiDevToken";
+import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
 import NitroSeasonsCalculatorRailAd from "@/components/Ads/NitroSeasonsCalculatorRailAd";
 import RateLimitView from "@/components/Layout/RateLimitView";
 import { createLogger } from "@/services/logger";
@@ -33,15 +33,15 @@ export default function WillIMakeItPage() {
           throw new Error("Missing PUBLIC_API_URL");
         }
 
-        const res = await fetch(
-          buildApiUrlWithDevToken(PUBLIC_API_URL, "/seasons/latest"),
-          {
-            credentials: "include",
-            headers: {
-              "User-Agent": "JailbreakChangelogs-Seasons/1.0",
-            },
+        const { url: willIMakeItUrl, headers: willIMakeItHeaders } =
+          buildApiFetchRequest(PUBLIC_API_URL, "/seasons/latest");
+        const res = await fetch(willIMakeItUrl, {
+          credentials: "include",
+          headers: {
+            ...willIMakeItHeaders,
+            "User-Agent": "JailbreakChangelogs-Seasons/1.0",
           },
-        );
+        });
 
         if (!res.ok) {
           if (res.status === 429) {

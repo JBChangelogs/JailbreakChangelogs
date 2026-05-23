@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams, notFound } from "next/navigation";
 import Breadcrumb from "@/components/Layout/Breadcrumb";
 import { PUBLIC_API_URL } from "@/utils/api/api";
-import { buildApiUrlWithDevToken } from "@/utils/api/apiDevToken";
+import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
 import ChangelogDetailsClient from "@/components/Values/ChangelogDetailsClient";
 import NitroValuesChangelogsRailAd from "@/components/Ads/NitroValuesChangelogsRailAd";
 import Loading from "./loading";
@@ -149,11 +149,11 @@ export default function ChangelogDetailsPage() {
   useEffect(() => {
     const fetchChangelog = async () => {
       try {
-        const url = buildApiUrlWithDevToken(
+        const { url, headers } = buildApiFetchRequest(
           PUBLIC_API_URL!,
           `/value-changelogs/${id}`,
         );
-        const res = await fetch(url, { credentials: "include" });
+        const res = await fetch(url, { credentials: "include", headers });
         if (res.status === 404) {
           setNotFoundError(true);
           return;

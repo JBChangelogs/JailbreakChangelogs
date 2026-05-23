@@ -19,7 +19,7 @@ import {
   type TradeOfferV2,
   type TradeOfferV2User,
 } from "@/utils/trading/core";
-import { buildApiUrlWithDevToken } from "@/utils/api/apiDevToken";
+import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
 import { toast } from "sonner";
 import { TradeAd, TradeItem } from "@/types/trading";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
@@ -529,18 +529,17 @@ export default function TradeDetailsClient({
           }
         }
 
-        const response = await fetch(
-          buildApiUrlWithDevToken(
+        const { url: offerCheckUrl, headers: devTokenHeaders } =
+          buildApiFetchRequest(
             baseUrl,
             `/trades/v2/${encodeURIComponent(String(trade.id))}/offers`,
-          ),
-          {
-            method: "HEAD",
-            cache: "no-store",
-            credentials: "include",
-            headers,
-          },
-        );
+          );
+        const response = await fetch(offerCheckUrl, {
+          method: "HEAD",
+          cache: "no-store",
+          credentials: "include",
+          headers: { ...devTokenHeaders, ...headers },
+        });
 
         if (isCancelled) return;
 

@@ -14,7 +14,7 @@ import {
   INVENTORY_API_URL,
   INVENTORY_API_SOURCE_HEADER,
 } from "@/utils/api/api";
-import { buildApiUrlWithDevToken } from "@/utils/api/apiDevToken";
+import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
 import { createLogger } from "@/services/logger";
 
 const log = createLogger("UI");
@@ -40,6 +40,8 @@ export default function SeasonLeaderboardPage() {
   useEffect(() => {
     const loadData = async () => {
       try {
+        const { url: leaderboardSeasonUrl, headers: leaderboardSeasonHeaders } =
+          buildApiFetchRequest(PUBLIC_API_URL!, "/seasons/latest");
         const [leaderboardRes, seasonRes] = await Promise.all([
           fetch(`${INVENTORY_API_URL}/seasons/leaderboard`, {
             headers: {
@@ -47,9 +49,10 @@ export default function SeasonLeaderboardPage() {
               "X-Source": INVENTORY_API_SOURCE_HEADER,
             },
           }),
-          fetch(buildApiUrlWithDevToken(PUBLIC_API_URL!, "/seasons/latest"), {
+          fetch(leaderboardSeasonUrl, {
             credentials: "include",
             headers: {
+              ...leaderboardSeasonHeaders,
               "User-Agent": "JailbreakChangelogs-Seasons/1.0",
             },
           }),

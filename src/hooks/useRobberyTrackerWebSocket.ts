@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { INVENTORY_API_URL, INVENTORY_WS_URL } from "@/utils/api/api";
-import { buildApiUrlWithDevToken } from "@/utils/api/apiDevToken";
+import { buildApiWsUrl } from "@/utils/api/apiDevToken";
 import { createLogger } from "@/services/logger";
 
 const log = createLogger("WS");
@@ -127,7 +127,7 @@ export function useRobberyTrackerWebSocket(
       }
 
       try {
-        const wsUrl = buildApiUrlWithDevToken(INVENTORY_WS_URL, "/tracker", {
+        const wsUrl = buildApiWsUrl(INVENTORY_WS_URL, "/tracker", {
           tokenParamName: "token",
         });
         const ws = new WebSocket(wsUrl);

@@ -42,7 +42,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { getResponseErrorMessage } from "@/utils/api/api";
-import { buildApiUrlWithDevToken } from "@/utils/api/apiDevToken";
+import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
 import { createLogger } from "@/services/logger";
 import { RateLimitBanner } from "@/components/ui/RateLimitBanner";
 
@@ -573,7 +573,10 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
         throw new Error("Trade API is not configured");
       }
 
-      const endpoint = buildApiUrlWithDevToken(baseUrl, "/trades/v2/create");
+      const { url: endpoint, headers: devTokenHeaders } = buildApiFetchRequest(
+        baseUrl,
+        "/trades/v2/create",
+      );
       const method = "POST";
       const createPayload = {
         offering: buildV2CreateItems(offeringItems),
@@ -582,6 +585,7 @@ export const TradeAdForm: React.FC<TradeAdFormProps> = ({
         expiration: expirationHours!,
       };
       const headers: Record<string, string> = {
+        ...devTokenHeaders,
         "Content-Type": "application/json",
       };
 

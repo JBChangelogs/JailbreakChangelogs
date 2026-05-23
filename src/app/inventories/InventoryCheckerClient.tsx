@@ -17,7 +17,7 @@ import {
   PUBLIC_API_URL,
 } from "@/utils/api/api";
 import { trackEvent } from "@/utils/analytics/rybbit";
-import { buildApiUrlWithDevToken } from "@/utils/api/apiDevToken";
+import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
 import { RobloxUser, Item } from "@/types";
 import { InventoryData, InventoryItem, UserConnectionData } from "./types";
 import { useAuthContext } from "@/contexts/AuthContext";
@@ -157,13 +157,15 @@ export default function InventoryCheckerClient({
     const loadSeason = async () => {
       if (!initialData || !PUBLIC_API_URL || externalIsLoading) return;
       try {
-        const latestRes = await fetch(
-          buildApiUrlWithDevToken(PUBLIC_API_URL, "/seasons/latest"),
-          {
-            credentials: "include",
-            headers: { "User-Agent": "JailbreakChangelogs-Inventory/1.0" },
+        const { url: latestSeasonUrl, headers: latestDevTokenHeaders } =
+          buildApiFetchRequest(PUBLIC_API_URL, "/seasons/latest");
+        const latestRes = await fetch(latestSeasonUrl, {
+          credentials: "include",
+          headers: {
+            ...latestDevTokenHeaders,
+            "User-Agent": "JailbreakChangelogs-Inventory/1.0",
           },
-        );
+        });
         if (!latestRes.ok) {
           if (latestRes.status === 429) {
             const raw = latestRes.headers.get("retry-after");
@@ -199,18 +201,20 @@ export default function InventoryCheckerClient({
                 (s) => updatedAt >= s.start_date && updatedAt <= s.end_date,
               );
               if (matched && matched.season !== latest.season) {
-                const historicalRes = await fetch(
-                  buildApiUrlWithDevToken(
-                    PUBLIC_API_URL,
-                    `/seasons/${matched.season}`,
-                  ),
-                  {
-                    credentials: "include",
-                    headers: {
-                      "User-Agent": "JailbreakChangelogs-Inventory/1.0",
-                    },
-                  },
+                const {
+                  url: historicalSeasonUrl,
+                  headers: historicalDevTokenHeaders,
+                } = buildApiFetchRequest(
+                  PUBLIC_API_URL,
+                  `/seasons/${matched.season}`,
                 );
+                const historicalRes = await fetch(historicalSeasonUrl, {
+                  credentials: "include",
+                  headers: {
+                    ...historicalDevTokenHeaders,
+                    "User-Agent": "JailbreakChangelogs-Inventory/1.0",
+                  },
+                });
                 if (historicalRes.ok) {
                   const historical = await historicalRes.json();
                   let parsedXpData = historical.xp_data;

@@ -9,7 +9,7 @@ import {
   getResponseErrorMessage,
   flattenComments,
 } from "@/utils/api/api";
-import { buildApiUrlWithDevToken } from "@/utils/api/apiDevToken";
+import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
 import { sanitizeText } from "@/utils/ui/sanitizeText";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { UserData } from "@/types/auth";
@@ -364,16 +364,18 @@ export function useCommentState(props: ChangelogCommentsProps) {
 
         // Odd clicks = one net toggle, send the API call
         try {
-          const baseUrl = buildApiUrlWithDevToken(
-            PUBLIC_API_URL!,
-            `/comments/${commentId}/react`,
-          );
-          const url = new URL(baseUrl);
-          url.searchParams.set("emoji", emoji);
+          const { url: reactBaseUrl, headers: reactHeaders } =
+            buildApiFetchRequest(
+              PUBLIC_API_URL!,
+              `/comments/${commentId}/react`,
+            );
+          const reactUrl = new URL(reactBaseUrl);
+          reactUrl.searchParams.set("emoji", emoji);
 
-          const response = await fetch(url.toString(), {
+          const response = await fetch(reactUrl.toString(), {
             method: "POST",
             credentials: "include",
+            headers: reactHeaders,
           });
 
           if (!response.ok) {
@@ -475,7 +477,7 @@ export function useCommentState(props: ChangelogCommentsProps) {
   }, []);
 
   useEffect(() => {
-    fetch(buildApiUrlWithDevToken(PUBLIC_API_URL!, "/emojis"), {
+    fetch(`${PUBLIC_API_URL}/emojis`, {
       credentials: "include",
     })
       .then((r) => r.json())
@@ -555,11 +557,12 @@ export function useCommentState(props: ChangelogCommentsProps) {
       if (!silent) setIsRefreshingComments(true);
       try {
         const commentType = type === "item" ? itemType || type : type;
-        const url = buildApiUrlWithDevToken(
-          PUBLIC_API_URL!,
-          `/comments/${commentType}/${changelogId}`,
-        );
-        const urlWithPage = new URL(url);
+        const { url: commentsBaseUrl, headers: commentsHeaders } =
+          buildApiFetchRequest(
+            PUBLIC_API_URL!,
+            `/comments/${commentType}/${changelogId}`,
+          );
+        const urlWithPage = new URL(commentsBaseUrl);
         urlWithPage.searchParams.set("page", String(targetPage));
         const effectiveSort = sort ?? sortOrder;
         if (effectiveSort !== "newest") {
@@ -568,6 +571,7 @@ export function useCommentState(props: ChangelogCommentsProps) {
 
         const res = await fetch(urlWithPage.toString(), {
           credentials: "include",
+          headers: commentsHeaders,
         });
 
         if (!res.ok) {
@@ -621,19 +625,21 @@ export function useCommentState(props: ChangelogCommentsProps) {
     setIsSubmittingComment(true);
 
     try {
-      const response = await fetch(
-        buildApiUrlWithDevToken(PUBLIC_API_URL!, "/comments"),
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include",
-          body: JSON.stringify({
-            content: cleanCommentText(newComment),
-            item_id: changelogId,
-            item_type: type === "item" ? itemType : type,
-          }),
+      const { url: submitCommentUrl, headers: submitCommentHeaders } =
+        buildApiFetchRequest(PUBLIC_API_URL!, "/comments");
+      const response = await fetch(submitCommentUrl, {
+        method: "POST",
+        headers: {
+          ...submitCommentHeaders,
+          "Content-Type": "application/json",
         },
-      );
+        credentials: "include",
+        body: JSON.stringify({
+          content: cleanCommentText(newComment),
+          item_id: changelogId,
+          item_type: type === "item" ? itemType : type,
+        }),
+      });
 
       if (!response.ok) {
         const ban = parseBan(response);
@@ -759,15 +765,14 @@ export function useCommentState(props: ChangelogCommentsProps) {
     try {
       setUpdatingCommentId(commentId);
 
-      const response = await fetch(
-        buildApiUrlWithDevToken(PUBLIC_API_URL!, `/comments/${commentId}`),
-        {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include",
-          body: JSON.stringify({ content: normalizedEditContent }),
-        },
-      );
+      const { url: editCommentUrl, headers: editCommentHeaders } =
+        buildApiFetchRequest(PUBLIC_API_URL!, `/comments/${commentId}`);
+      const response = await fetch(editCommentUrl, {
+        method: "PATCH",
+        headers: { ...editCommentHeaders, "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ content: normalizedEditContent }),
+      });
 
       if (!response.ok) {
         const ban = parseBan(response);
@@ -886,13 +891,13 @@ export function useCommentState(props: ChangelogCommentsProps) {
     );
 
     try {
-      const response = await fetch(
-        buildApiUrlWithDevToken(PUBLIC_API_URL!, `/comments/${commentId}`),
-        {
-          method: "DELETE",
-          credentials: "include",
-        },
-      );
+      const { url: deleteCommentUrl, headers: deleteCommentHeaders } =
+        buildApiFetchRequest(PUBLIC_API_URL!, `/comments/${commentId}`);
+      const response = await fetch(deleteCommentUrl, {
+        method: "DELETE",
+        credentials: "include",
+        headers: deleteCommentHeaders,
+      });
       if (!response.ok) {
         const body = await response.json().catch(() => ({}));
         log.error("delete comment failed", { status: response.status, body });
@@ -969,20 +974,19 @@ export function useCommentState(props: ChangelogCommentsProps) {
     setIsSubmittingComment(true);
 
     try {
-      const response = await fetch(
-        buildApiUrlWithDevToken(PUBLIC_API_URL!, "/comments"),
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include",
-          body: JSON.stringify({
-            content: cleanCommentText(replyContent),
-            item_id: changelogId,
-            item_type: type === "item" ? itemType : type,
-            parent_id: parentId,
-          }),
-        },
-      );
+      const { url: submitReplyUrl, headers: submitReplyHeaders } =
+        buildApiFetchRequest(PUBLIC_API_URL!, "/comments");
+      const response = await fetch(submitReplyUrl, {
+        method: "POST",
+        headers: { ...submitReplyHeaders, "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          content: cleanCommentText(replyContent),
+          item_id: changelogId,
+          item_type: type === "item" ? itemType : type,
+          parent_id: parentId,
+        }),
+      });
 
       if (!response.ok) {
         const ban = parseBan(response);
@@ -1122,18 +1126,19 @@ export function useCommentState(props: ChangelogCommentsProps) {
     const toastId = toast.loading("Submitting report...");
     try {
       const sanitizedReason = sanitizeText(reason.trim());
-      const response = await fetch(
-        buildApiUrlWithDevToken(PUBLIC_API_URL, "/comments/report"),
-        {
-          method: "POST",
-          credentials: "include",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            comment_id: reportingCommentId,
-            reason: sanitizedReason,
-          }),
-        },
+      const { url: reportUrl, headers: reportHeaders } = buildApiFetchRequest(
+        PUBLIC_API_URL,
+        "/comments/report",
       );
+      const response = await fetch(reportUrl, {
+        method: "POST",
+        credentials: "include",
+        headers: { ...reportHeaders, "Content-Type": "application/json" },
+        body: JSON.stringify({
+          comment_id: reportingCommentId,
+          reason: sanitizedReason,
+        }),
+      });
 
       if (!response.ok) {
         const ban = parseBan(response);

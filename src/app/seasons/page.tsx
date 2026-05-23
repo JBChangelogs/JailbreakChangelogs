@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { PUBLIC_API_URL } from "@/utils/api/api";
-import { buildApiUrlWithDevToken } from "@/utils/api/apiDevToken";
+import { buildApiFetchRequest } from "@/utils/api/apiDevToken";
 import RateLimitView from "@/components/Layout/RateLimitView";
 import { createLogger } from "@/services/logger";
 
@@ -23,16 +23,16 @@ export default function SeasonsPage() {
           throw new Error("Missing PUBLIC_API_URL");
         }
 
-        const response = await fetch(
-          buildApiUrlWithDevToken(PUBLIC_API_URL, "/seasons/latest"),
-          {
-            credentials: "include",
-            headers: {
-              "User-Agent": "JailbreakChangelogs-Seasons/1.0",
-            },
-            cache: "no-store",
+        const { url: seasonsLatestUrl, headers: seasonsLatestHeaders } =
+          buildApiFetchRequest(PUBLIC_API_URL, "/seasons/latest");
+        const response = await fetch(seasonsLatestUrl, {
+          credentials: "include",
+          headers: {
+            ...seasonsLatestHeaders,
+            "User-Agent": "JailbreakChangelogs-Seasons/1.0",
           },
-        );
+          cache: "no-store",
+        });
 
         if (!response.ok) {
           if (response.status === 429) {
