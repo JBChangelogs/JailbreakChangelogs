@@ -58,6 +58,7 @@ import type { Item } from "@/types/index";
 interface SuggestionLimits {
   min_characters: number;
   max_characters: number;
+  max_note_length: number;
   valid_fields: string[];
   valid_trends: string[];
   valid_demands: string[];
@@ -183,6 +184,7 @@ function SuggestionForm({
 
   const minChars = limits?.min_characters ?? 350;
   const maxChars = limits?.max_characters ?? 750;
+  const maxNoteLength = limits?.max_note_length ?? 300;
   const validFields = limits?.valid_fields ?? ["cash_value", "duped_value"];
 
   const filteredItems = items.filter(
@@ -543,6 +545,24 @@ function SuggestionForm({
                 })}
               </div>
             )
+          ) : field === "notes" ? (
+            <div>
+              <div className="mb-1 flex justify-end">
+                <span
+                  className={`text-xs ${suggestedValue.length > maxNoteLength ? "text-red-400" : "text-secondary-text"}`}
+                >
+                  {suggestedValue.length} / {maxNoteLength}
+                </span>
+              </div>
+              <textarea
+                placeholder="Enter the suggested note..."
+                value={suggestedValue}
+                onChange={(e) => setSuggestedValue(e.target.value)}
+                required
+                rows={3}
+                className={`border-border-card bg-tertiary-bg text-primary-text placeholder:text-tertiary-text focus:border-button-info w-full resize-none rounded-lg border px-3 py-2.5 text-sm transition-colors outline-none ${suggestedValueError ? "border-red-500" : ""}`}
+              />
+            </div>
           ) : (
             <input
               type="text"
@@ -608,6 +628,7 @@ function SuggestionForm({
               !!rateLimitUntil ||
               !selectedItem ||
               !suggestedValue.trim() ||
+              (field === "notes" && suggestedValue.length > maxNoteLength) ||
               reason.length < minChars ||
               reason.length > maxChars
             }
