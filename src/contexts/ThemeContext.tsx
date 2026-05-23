@@ -51,12 +51,12 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   // Always start with "dark" to match the server render and avoid hydration
   // mismatches. The actual theme is read from localStorage in useEffect below.
-  const [theme, setTheme] = useState<Theme>("dark");
+  const [theme, setThemeState] = useState<Theme>("dark");
   const resolvedTheme = theme;
 
   useEffect(() => {
     const savedTheme = getInitialTheme();
-    setTheme(savedTheme);
+    setThemeState(savedTheme);
   }, []);
 
   useEffect(() => {
@@ -65,6 +65,40 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     root.classList.add(theme);
     safeLocalStorage.setItem("theme", theme);
   }, [theme]);
+
+  // Apply incoming preference syncs from other devices without re-broadcasting
+  useEffect(() => {
+    const handlePreferenceUpdate = (e: Event) => {
+      const { key, value } = (e as CustomEvent<{ key: string; value: unknown }>)
+        .detail;
+      if (key === "theme" && (value === "light" || value === "dark")) {
+        setThemeState(value);
+      }
+    };
+    const handlePreferences = (e: Event) => {
+      const prefs = (e as CustomEvent<Record<string, unknown>>).detail;
+      const incoming = prefs?.theme;
+      if (incoming === "light" || incoming === "dark") {
+        setThemeState(incoming);
+      }
+    };
+    window.addEventListener("realtimePreference", handlePreferenceUpdate);
+    window.addEventListener("realtimePreferences", handlePreferences);
+    return () => {
+      window.removeEventListener("realtimePreference", handlePreferenceUpdate);
+      window.removeEventListener("realtimePreferences", handlePreferences);
+    };
+  }, []);
+
+  // User-initiated theme change — apply locally and sync to other devices via WS
+  const setTheme = (newTheme: Theme) => {
+    setThemeState(newTheme);
+    window.dispatchEvent(
+      new CustomEvent("sendRealtimePreference", {
+        detail: { key: "theme", value: newTheme },
+      }),
+    );
+  };
 
   return (
     <ThemeContext.Provider value={{ theme, setTheme, resolvedTheme }}>

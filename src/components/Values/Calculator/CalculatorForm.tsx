@@ -20,6 +20,7 @@ import {
   INVENTORY_API_URL,
 } from "@/utils/api/api";
 import { shouldRetryResponseStatus } from "@/utils/api/fetchWithRetry";
+import { getCachedPreference } from "@/utils/preferences/realtimePreferencesCache";
 
 // Import extracted components and utilities
 import { parseValueString, formatTotalValue } from "./calculatorUtils";
@@ -99,6 +100,9 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
   const [inventoryError, setInventoryError] = useState<string | null>(null);
   const lastFetchedInventoryUserIdRef = useRef<string | null>(null);
   const inventoryFetchControllerRef = useRef<AbortController | null>(null);
+  const calcSyncDebounceRef = useRef<NodeJS.Timeout | null>(null);
+  const offeringItemsRef = useRef<TradeItem[]>([]);
+  const requestingItemsRef = useRef<TradeItem[]>([]);
 
   const robloxId = (user?.roblox_id ?? "").trim();
   const hasValidRobloxId = /^\d+$/.test(robloxId);
@@ -108,6 +112,13 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
     setPickerActiveSide(side);
     void setTabParam(null);
   };
+
+  useEffect(() => {
+    offeringItemsRef.current = offeringItems;
+  }, [offeringItems]);
+  useEffect(() => {
+    requestingItemsRef.current = requestingItems;
+  }, [requestingItems]);
 
   useEffect(() => {
     if (itemsInputMode !== "inventory") return;
@@ -289,10 +300,30 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
   useLockBodyScroll(showClearConfirmModal);
 
   /**
-   * Restore prompt on mount if previously saved items exist in localStorage.
-   * invalid JSON clears storage to avoid persistent errors.
+   * Restore prompt on mount. Checks localStorage first, then the WS preferences
+   * cache for items saved on another device. Remote items are hydrated via
+   * initialItems (fresh server values) and written to localStorage so the
+   * existing handleRestoreItems path needs no changes.
    */
   useEffect(() => {
+    const hydrateCompact = (
+      items: { id: number; isDuped: boolean }[],
+    ): TradeItem[] => {
+      const byId = new Map(initialItems.map((it) => [it.id, it]));
+      return items
+        .map(({ id, isDuped }) => {
+          const base = byId.get(id);
+          if (!base) return null;
+          return {
+            ...base,
+            isDuped,
+            isOG: false,
+            instanceId: Math.random().toString(36).substring(2, 11),
+          } as TradeItem;
+        })
+        .filter((it) => it !== null) as TradeItem[];
+    };
+
     try {
       const saved = safeGetJSON("calculatorItems", {
         offering: [],
@@ -305,6 +336,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
           (requesting && requesting.length > 0)
         ) {
           setTimeout(() => setShowRestoreModal(true), 0);
+          return;
         }
       }
     } catch (error) {
@@ -314,6 +346,24 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
       );
       safeLocalStorage.removeItem("calculatorItems");
     }
+
+    // No local items — check for items saved on another device
+    const remoteRaw = getCachedPreference("calculator_items");
+    if (typeof remoteRaw !== "string" || !remoteRaw) return;
+    try {
+      const remote = JSON.parse(remoteRaw) as {
+        offering?: { id: number; isDuped: boolean }[];
+        requesting?: { id: number; isDuped: boolean }[];
+      };
+      const hydOff = hydrateCompact(remote.offering ?? []);
+      const hydReq = hydrateCompact(remote.requesting ?? []);
+      if (hydOff.length === 0 && hydReq.length === 0) return;
+      safeSetJSON("calculatorItems", { offering: hydOff, requesting: hydReq });
+      setTimeout(() => setShowRestoreModal(true), 0);
+    } catch {
+      // ignore malformed preference
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleTabChange = (tab: "items" | "values" | "similar") => {
@@ -333,11 +383,99 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
     safeSetJSON("calculatorItems", { offering, requesting });
   };
 
+  const syncItemsToPreference = (
+    offering: TradeItem[],
+    requesting: TradeItem[],
+  ) => {
+    if (calcSyncDebounceRef.current) clearTimeout(calcSyncDebounceRef.current);
+    calcSyncDebounceRef.current = setTimeout(() => {
+      const compact = {
+        offering: offering.map((it) => ({
+          id: it.id,
+          isDuped: it.isDuped || false,
+        })),
+        requesting: requesting.map((it) => ({
+          id: it.id,
+          isDuped: it.isDuped || false,
+        })),
+      };
+      window.dispatchEvent(
+        new CustomEvent("sendRealtimePreference", {
+          detail: { key: "calculator_items", value: JSON.stringify(compact) },
+        }),
+      );
+    }, 1000);
+  };
+
   useEffect(() => {
     if (offeringItems.length > 0 || requestingItems.length > 0) {
       saveItemsToLocalStorage(offeringItems, requestingItems);
+      syncItemsToPreference(offeringItems, requestingItems);
     }
   }, [offeringItems, requestingItems]);
+
+  // Live sync: offer restore if a preference arrives while the calculator is empty
+  useEffect(() => {
+    const handlePreference = (e: Event) => {
+      const { key, value } = (e as CustomEvent<{ key: string; value: unknown }>)
+        .detail;
+      if (key !== "calculator_items" || typeof value !== "string" || !value)
+        return;
+      if (
+        offeringItemsRef.current.length > 0 ||
+        requestingItemsRef.current.length > 0
+      )
+        return;
+
+      const existing = safeGetJSON("calculatorItems", {
+        offering: [],
+        requesting: [],
+      });
+      if (
+        (existing?.offering?.length ?? 0) > 0 ||
+        (existing?.requesting?.length ?? 0) > 0
+      )
+        return;
+
+      try {
+        const remote = JSON.parse(value) as {
+          offering?: { id: number; isDuped: boolean }[];
+          requesting?: { id: number; isDuped: boolean }[];
+        };
+        const byId = new Map(initialItems.map((it) => [it.id, it]));
+        const rehydrate = (
+          items: { id: number; isDuped: boolean }[],
+        ): TradeItem[] =>
+          (items ?? [])
+            .map(({ id, isDuped }) => {
+              const base = byId.get(id);
+              if (!base) return null;
+              return {
+                ...base,
+                isDuped,
+                isOG: false,
+                instanceId: Math.random().toString(36).substring(2, 11),
+              } as TradeItem;
+            })
+            .filter((it) => it !== null) as TradeItem[];
+
+        const hydOff = rehydrate(remote.offering ?? []);
+        const hydReq = rehydrate(remote.requesting ?? []);
+        if (hydOff.length === 0 && hydReq.length === 0) return;
+        safeSetJSON("calculatorItems", {
+          offering: hydOff,
+          requesting: hydReq,
+        });
+        setShowRestoreModal(true);
+      } catch {
+        // ignore malformed
+      }
+    };
+
+    window.addEventListener("realtimePreference", handlePreference);
+    return () =>
+      window.removeEventListener("realtimePreference", handlePreference);
+  }, [initialItems]);
 
   const handleRestoreItems = () => {
     const saved = safeGetJSON("calculatorItems", {
@@ -373,6 +511,12 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({
     safeLocalStorage.removeItem("calculatorItems");
     setShowRestoreModal(false);
     setShowClearConfirmModal(false);
+    if (calcSyncDebounceRef.current) clearTimeout(calcSyncDebounceRef.current);
+    window.dispatchEvent(
+      new CustomEvent("sendRealtimePreference", {
+        detail: { key: "calculator_items", value: "" },
+      }),
+    );
   };
 
   /**

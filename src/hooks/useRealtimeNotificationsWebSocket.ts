@@ -11,6 +11,10 @@ import { showDesktopNotification } from "@/utils/notifications/desktopNotificati
 import { stripNotifMarkdown } from "@/utils/notifications/notifMarkdown";
 import { buildApiUrlWithDevToken } from "@/utils/api/apiDevToken";
 import { createLogger } from "@/services/logger";
+import {
+  setCachedPreference,
+  updatePreferencesCache,
+} from "@/utils/preferences/realtimePreferencesCache";
 
 const log = createLogger("WS");
 
@@ -26,9 +30,12 @@ interface RealtimeNotificationMessage {
   code?: number;
   message?: string;
   total_notifications?: number;
+  key?: string;
+  value?: unknown;
   data?:
     | RealtimeNotificationContent
     | RealtimeDmMessageData
+    | Record<string, unknown>
     | {
         total_notifications?: number;
         type?: string;
@@ -147,6 +154,25 @@ export function useRealtimeNotificationsWebSocket(
     }
   }, [locationPath]);
 
+  // Forward user-initiated preference changes to the server when WS is open
+  useEffect(() => {
+    const handleSendPreference = (e: Event) => {
+      const { key, value } = (e as CustomEvent<{ key: string; value: unknown }>)
+        .detail;
+      if (wsRef.current?.readyState === WebSocket.OPEN) {
+        wsRef.current.send(
+          JSON.stringify({ action: "set_preference", key, value }),
+        );
+      }
+    };
+    window.addEventListener("sendRealtimePreference", handleSendPreference);
+    return () =>
+      window.removeEventListener(
+        "sendRealtimePreference",
+        handleSendPreference,
+      );
+  }, []);
+
   useEffect(() => {
     if (!isRealtimeNotificationsEnabled) {
       if (reconnectTimeoutRef.current) {
@@ -247,6 +273,35 @@ export function useRealtimeNotificationsWebSocket(
             const rawPayload =
               typeof event.data === "string" ? event.data : String(event.data);
             const payload = parseRealtimeMessagePayload(rawPayload);
+
+            if (payload.action === "preference_updated" && payload.key) {
+              setCachedPreference(payload.key, payload.value);
+              window.dispatchEvent(
+                new CustomEvent("realtimePreference", {
+                  detail: { key: payload.key, value: payload.value },
+                }),
+              );
+              return;
+            }
+
+            if (
+              (payload.action === "preferences" ||
+                payload.action === "preferences_sync") &&
+              payload.data &&
+              typeof payload.data === "object"
+            ) {
+              updatePreferencesCache(payload.data as Record<string, unknown>);
+              window.dispatchEvent(
+                new CustomEvent("realtimePreferences", {
+                  detail: payload.data,
+                }),
+              );
+              return;
+            }
+
+            if (payload.action === "preference_deleted") return;
+            if (payload.action === "preferences_cleared") return;
+            if (payload.action === "pong") return;
 
             if (payload.action === "error" && payload.code) {
               const errorMessage =
