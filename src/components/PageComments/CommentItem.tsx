@@ -23,8 +23,8 @@ import {
 import { Button } from "../ui/button";
 import { UserAvatar } from "@/utils/ui/avatar";
 import Link from "next/link";
-import { UserBadges } from "@/components/Profile/UserBadges";
 import { UserDetailsTooltip } from "@/components/ui/UserDetailsTooltip";
+import type { UserData } from "@/types/auth";
 import CommentTimestamp from "./CommentTimestamp";
 import { CommentReactions } from "./CommentReactions";
 import {
@@ -39,6 +39,35 @@ import Twemoji from "react-twemoji";
 import { useTwemoji } from "@/contexts/TwemojiContext";
 import { toast } from "sonner";
 import { CommentTextarea } from "./CommentTextarea";
+
+function CommentAuthorName({
+  userId,
+  name,
+  user,
+  className,
+}: {
+  userId: string;
+  name: string;
+  user?: UserData;
+  className: string;
+}) {
+  const link = (
+    <Link href={`/users/${userId}`} prefetch={false} className={className}>
+      {name}
+    </Link>
+  );
+
+  if (!user) return link;
+
+  return (
+    <Tooltip delayDuration={500}>
+      <TooltipTrigger asChild>{link}</TooltipTrigger>
+      <TooltipContent className="max-w-sm min-w-75 p-0">
+        <UserDetailsTooltip user={user} />
+      </TooltipContent>
+    </Tooltip>
+  );
+}
 
 function CommentItemInner({ comment }: { comment: CommentData }) {
   const {
@@ -345,39 +374,12 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
                     </span>
                   ) : (
                     <>
-                      {/* Author Name and Hover Profile Tooltip */}
-                      <div className="flex min-w-0 items-center gap-2">
-                        <Tooltip delayDuration={500}>
-                          <TooltipTrigger asChild>
-                            <Link
-                              href={`/users/${comment.user_id}`}
-                              prefetch={false}
-                              className="text-primary-text hover:text-link block max-w-30 truncate text-sm font-semibold transition-colors duration-200 sm:max-w-50 sm:text-base"
-                            >
-                              {displayName}
-                            </Link>
-                          </TooltipTrigger>
-                          <TooltipContent className="max-w-sm min-w-75 p-0">
-                            {userData[comment.user_id] && (
-                              <UserDetailsTooltip
-                                user={userData[comment.user_id]}
-                              />
-                            )}
-                          </TooltipContent>
-                        </Tooltip>
-
-                        {userData[comment.user_id] && (
-                          <UserBadges
-                            usernumber={userData[comment.user_id].usernumber}
-                            premiumType={userData[comment.user_id].premiumtype}
-                            flags={[]}
-                            primary_guild={undefined}
-                            size="sm"
-                            customBgClass="bg-primary-bg/50"
-                            noContainer={true}
-                          />
-                        )}
-                      </div>
+                      <CommentAuthorName
+                        userId={comment.user_id}
+                        name={displayName}
+                        user={userData[comment.user_id]}
+                        className="text-primary-text hover:text-link block max-w-30 truncate text-sm font-semibold transition-colors duration-200 sm:max-w-50 sm:text-base"
+                      />
 
                       {/* Special OP badge for trade ad authors */}
                       {type === "tradev2" &&
@@ -875,49 +877,38 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
                                 Hidden User
                               </span>
                             ) : (
-                              <div className="flex flex-wrap items-center gap-1.5">
-                                <div className="flex items-center gap-1">
-                                  <Link
-                                    href={`/users/${reply.user_id}`}
-                                    prefetch={false}
-                                    className="text-primary-text hover:text-link max-w-30 truncate text-sm font-semibold transition-colors sm:max-w-50"
-                                  >
-                                    {replyDisplayName}
-                                  </Link>
-                                  {replyToTargetName && replyToTarget && (
-                                    <>
-                                      <Icon
-                                        icon="material-symbols:arrow-right"
-                                        className="text-secondary-text h-4 w-4 shrink-0"
-                                      />
-                                      <Link
-                                        href={`/users/${replyToTarget.user_id}`}
-                                        prefetch={false}
-                                        className="text-secondary-text hover:text-link max-w-30 truncate text-sm font-semibold transition-colors sm:max-w-50"
-                                      >
-                                        {replyToTargetName}
-                                      </Link>
-                                    </>
-                                  )}
+                              <>
+                                <div className="flex flex-wrap items-center gap-1.5">
+                                  <div className="flex items-center gap-1">
+                                    <CommentAuthorName
+                                      userId={reply.user_id}
+                                      name={replyDisplayName}
+                                      user={replyUser}
+                                      className="text-primary-text hover:text-link max-w-30 truncate text-sm font-semibold transition-colors sm:max-w-50"
+                                    />
+                                    {replyToTargetName && replyToTarget && (
+                                      <>
+                                        <Icon
+                                          icon="material-symbols:arrow-right"
+                                          className="text-secondary-text h-4 w-4 shrink-0"
+                                        />
+                                        <CommentAuthorName
+                                          userId={replyToTarget.user_id}
+                                          name={replyToTargetName}
+                                          user={userData[replyToTarget.user_id]}
+                                          className="text-secondary-text hover:text-link max-w-30 truncate text-sm font-semibold transition-colors sm:max-w-50"
+                                        />
+                                      </>
+                                    )}
+                                  </div>
                                 </div>
-                                {replyUser && (
-                                  <UserBadges
-                                    usernumber={replyUser.usernumber}
-                                    premiumType={replyUser.premiumtype}
-                                    flags={[]}
-                                    primary_guild={undefined}
-                                    size="sm"
-                                    customBgClass="bg-primary-bg/50"
-                                    noContainer={true}
-                                  />
-                                )}
-                              </div>
+                                <CommentTimestamp
+                                  date={reply.date}
+                                  editedAt={reply.edited_at}
+                                  commentId={reply.id}
+                                />
+                              </>
                             )}
-                            <CommentTimestamp
-                              date={reply.date}
-                              editedAt={reply.edited_at}
-                              commentId={reply.id}
-                            />
                           </div>
 
                           {/* Reply action menu */}

@@ -33,21 +33,22 @@ const CommentTimestamp: React.FC<CommentTimestampProps> = ({
   const displayRelativeTime = editedAt
     ? editedRelativeTime
     : postedRelativeTime;
-  const displayText = editedAt
-    ? `edited ${displayRelativeTime}`
-    : `posted ${displayRelativeTime}`;
+  const prefix = editedAt ? "edited " : "posted ";
 
   return (
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <span className="text-secondary-text mt-0.5 cursor-help text-xs">
-          {displayText}
-        </span>
-      </TooltipTrigger>
-      <TooltipContent>
-        {formatCustomDate(parseInt(displayTimestamp))}
-      </TooltipContent>
-    </Tooltip>
+    <span className="text-secondary-text mt-0.5 block text-xs">
+      {prefix}
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <span className="inline-block w-fit cursor-help">
+            {displayRelativeTime}
+          </span>
+        </TooltipTrigger>
+        <TooltipContent>
+          {formatCustomDate(parseInt(displayTimestamp))}
+        </TooltipContent>
+      </Tooltip>
+    </span>
   );
 };
 

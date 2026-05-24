@@ -1021,8 +1021,7 @@ export function useCommentState(props: ChangelogCommentsProps) {
           content: apiContent,
           item_id: changelogId,
           item_type: type === "item" ? itemType : type,
-          parent_id: parentId,
-          reply_to_id: replyingToReplyId ?? null,
+          parent_id: replyingToReplyId ?? parentId,
         }),
       });
 
@@ -1101,8 +1100,7 @@ export function useCommentState(props: ChangelogCommentsProps) {
         user_id: currentUserId || "",
         edited_at: null,
         owner: "",
-        parent_id: parentId,
-        reply_to_id: replyingToReplyId ?? null,
+        parent_id: replyingToReplyId ?? parentId,
         ...addedReplyData,
       };
 
