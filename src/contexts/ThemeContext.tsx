@@ -10,6 +10,13 @@ export type Theme = "light" | "dark" | "og";
 // first theme refers to the default.
 export const AvailableThemes: Theme[] = ["dark", "light", "og"] as const;
 
+// theme names that are actually visible to users in the theme toggle
+export const UIThemeNames: Record<Theme, string> = {
+  dark: "Dark",
+  light: "Light",
+  og: "OG",
+};
+
 interface ThemeContextType {
   theme: Theme;
   setTheme: (theme: Theme) => void;
