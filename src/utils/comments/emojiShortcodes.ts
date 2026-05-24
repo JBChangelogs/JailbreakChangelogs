@@ -29,6 +29,51 @@ function levenshtein(a: string, b: string): number {
   return matrix[b.length][a.length];
 }
 
+function isEscapedShortcodeStart(text: string, start: number): boolean {
+  return (
+    text[start] === "\\" && start + 1 < text.length && text[start + 1] === ":"
+  );
+}
+
+/**
+ * Skip a \:… region for autocomplete scanning (partial or complete).
+ * Prevents suggestions while typing \:eyes even before the closing colon.
+ */
+function skipEscapedShortcodeRegion(
+  text: string,
+  start: number,
+): number | null {
+  if (!isEscapedShortcodeStart(text, start)) return null;
+
+  let end = start + 2;
+  while (end < text.length && VALID_EMOJI_CHARS.includes(text[end])) {
+    end++;
+  }
+  if (end < text.length && text[end] === ":") {
+    end++;
+  }
+  return end;
+}
+
+/**
+ * Only matches a fully closed \:name: segment for literal replacement.
+ */
+function getCompleteEscapedShortcodeEnd(
+  text: string,
+  start: number,
+): number | null {
+  if (!isEscapedShortcodeStart(text, start)) return null;
+
+  let end = start + 2;
+  while (end < text.length && VALID_EMOJI_CHARS.includes(text[end])) {
+    end++;
+  }
+  if (end < text.length && text[end] === ":") {
+    return end + 1;
+  }
+  return null;
+}
+
 function scanEmojiBuffer(workspace: string): {
   buffer: string;
   inEmoji: boolean;
@@ -38,6 +83,14 @@ function scanEmojiBuffer(workspace: string): {
   let buffer = "";
 
   while (i < workspace.length) {
+    const escapedEnd = skipEscapedShortcodeRegion(workspace, i);
+    if (escapedEnd !== null) {
+      state = "DEFAULT";
+      buffer = "";
+      i = escapedEnd;
+      continue;
+    }
+
     const c = workspace[i];
 
     switch (state) {
@@ -67,13 +120,12 @@ function scanEmojiBuffer(workspace: string): {
   return { buffer, inEmoji: state === "EMOJI" };
 }
 
-/**
- * Replaces completed :shortcode: segments with emoji characters.
- * Unrecognized shortcodes are left unchanged.
- */
-export function transformEmojiShortcodes(
+type EmojiTransformMode = "live" | "submit" | "api";
+
+function transformEmojiShortcodesWithMode(
   text: string,
   emojiMap: EmojiStringMap,
+  mode: EmojiTransformMode,
 ): string {
   let i = 0;
   let state: "DEFAULT" | "EMOJI" = "DEFAULT";
@@ -81,6 +133,32 @@ export function transformEmojiShortcodes(
   let result = "";
 
   while (i < text.length) {
+    const escapedRegionEnd = skipEscapedShortcodeRegion(text, i);
+    if (escapedRegionEnd !== null) {
+      if (state === "EMOJI") {
+        result += buffer;
+        buffer = "";
+        state = "DEFAULT";
+      }
+
+      if (mode === "live") {
+        // Keep \:eyes: visible in the input while typing (Discord-style).
+        result += text.slice(i, escapedRegionEnd);
+      } else {
+        const completeEnd = getCompleteEscapedShortcodeEnd(text, i);
+        if (completeEnd !== null) {
+          // api + display: \:eyes: → :eyes: plain text for the server to store.
+          result += text.slice(i + 1, completeEnd);
+          i = completeEnd;
+          continue;
+        }
+        result += text.slice(i, escapedRegionEnd);
+      }
+
+      i = escapedRegionEnd;
+      continue;
+    }
+
     const c = text[i];
     switch (state) {
       case "DEFAULT":
@@ -96,7 +174,8 @@ export function transformEmojiShortcodes(
         if (c === ":") {
           state = "DEFAULT";
           const name = buffer.slice(1);
-          result += emojiMap[name] ?? `${buffer}:`;
+          result +=
+            mode === "api" ? `${buffer}:` : (emojiMap[name] ?? `${buffer}:`);
           buffer = "";
         } else if (!VALID_EMOJI_CHARS.includes(c)) {
           result += buffer;
@@ -116,6 +195,54 @@ export function transformEmojiShortcodes(
   }
 
   return result;
+}
+
+/**
+ * Live input transform: :shortcode: → emoji; \:shortcode: left unchanged.
+ */
+export function transformEmojiShortcodes(
+  text: string,
+  emojiMap: EmojiStringMap,
+): string {
+  return transformEmojiShortcodesWithMode(text, emojiMap, "live");
+}
+
+/**
+ * Submit transform: :shortcode: → emoji; \:shortcode: → plain :shortcode: text.
+ */
+export function transformEmojiShortcodesForSubmit(
+  text: string,
+  emojiMap: EmojiStringMap,
+): string {
+  return transformEmojiShortcodesWithMode(text, emojiMap, "submit");
+}
+
+/** Apply submit-time shortcode rules (emoji lookup + \:name: → plain :name:). */
+export function prepareEmojiShortcodeContent(
+  text: string,
+  emojiMap: EmojiStringMap,
+): string {
+  return transformEmojiShortcodesForSubmit(text, emojiMap);
+}
+
+/**
+ * API payload: send :shortcode: text for the backend to resolve; unwrap \:name: only.
+ */
+export function prepareEmojiShortcodeContentForApi(text: string): string {
+  return transformEmojiShortcodesWithMode(text, {}, "api");
+}
+
+/**
+ * Optimistic UI: same text as the API payload, then resolve shortcodes with /emojis/string.
+ */
+export function prepareEmojiShortcodeDisplayContent(
+  text: string,
+  emojiMap: EmojiStringMap,
+): string {
+  return prepareEmojiShortcodeContent(
+    prepareEmojiShortcodeContentForApi(text),
+    emojiMap,
+  );
 }
 
 export function suggestEmojiShortcodes(

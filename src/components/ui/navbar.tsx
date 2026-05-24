@@ -1152,9 +1152,9 @@ export const NavbarModern = ({
                                 {notif.title}
                               </p>
                             </div>
-                            <p className="text-secondary-text mt-1 text-xs wrap-break-word">
+                            <div className="text-secondary-text mt-1 text-xs wrap-break-word">
                               {renderNotifDescription(notif.description)}
-                            </p>
+                            </div>
                             {shouldHideViewAction ? null : urlInfo.isWhitelisted ? (
                               urlInfo.isJailbreakChangelogs &&
                               urlInfo.relativePath ? (

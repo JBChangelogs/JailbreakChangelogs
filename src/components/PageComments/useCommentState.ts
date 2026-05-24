@@ -24,7 +24,8 @@ import {
   handleCommentApiError,
 } from "./commentUtils";
 import {
-  transformEmojiShortcodes,
+  prepareEmojiShortcodeContentForApi,
+  prepareEmojiShortcodeDisplayContent,
   type EmojiStringMap,
 } from "@/utils/comments/emojiShortcodes";
 import type {
@@ -503,9 +504,18 @@ export function useCommentState(props: ChangelogCommentsProps) {
       .catch(() => {});
   }, []);
 
-  const prepareCommentContent = useCallback(
+  const prepareCommentContentForApi = useCallback(
     (text: string) =>
-      cleanCommentText(transformEmojiShortcodes(text, emojiStringMap)),
+      cleanCommentText(prepareEmojiShortcodeContentForApi(text)),
+    [],
+  );
+
+  /** Mirror backend emoji rendering in optimistic/local UI only. */
+  const prepareCommentDisplayContent = useCallback(
+    (text: string) =>
+      cleanCommentText(
+        prepareEmojiShortcodeDisplayContent(text, emojiStringMap),
+      ),
     [emojiStringMap],
   );
 
@@ -636,7 +646,8 @@ export function useCommentState(props: ChangelogCommentsProps) {
   const handleSubmitComment = async (content: string): Promise<boolean> => {
     if (!isLoggedIn || !content.trim() || isSubmittingComment) return false;
 
-    const preparedContent = prepareCommentContent(content);
+    const apiContent = prepareCommentContentForApi(content);
+    const displayContent = prepareCommentDisplayContent(content);
     setIsSubmittingComment(true);
 
     try {
@@ -650,7 +661,7 @@ export function useCommentState(props: ChangelogCommentsProps) {
         },
         credentials: "include",
         body: JSON.stringify({
-          content: preparedContent,
+          content: apiContent,
           item_id: changelogId,
           item_type: type === "item" ? itemType : type,
         }),
@@ -724,7 +735,7 @@ export function useCommentState(props: ChangelogCommentsProps) {
       const optimisticComment: CommentData = {
         id: realId || Date.now(),
         author: user?.username || "You",
-        content: preparedContent,
+        content: displayContent,
         date: Math.floor(Date.now() / 1000).toString(),
         item_id: Number(changelogId),
         item_type: type === "item" ? itemType || type : type,
@@ -770,11 +781,12 @@ export function useCommentState(props: ChangelogCommentsProps) {
       comments.flatMap((c) => c.replies ?? []).find((r) => r.id === commentId);
     if (!originalComment) return false;
 
-    const normalizedEditContent = prepareCommentContent(content);
+    const apiContent = prepareCommentContentForApi(content);
+    const displayContent = prepareCommentDisplayContent(content);
     const normalizedOriginalContent = cleanCommentText(originalComment.content);
 
     // Check if content has actually changed
-    if (normalizedEditContent === normalizedOriginalContent) {
+    if (displayContent === normalizedOriginalContent) {
       toast.error("No Changes Detected", {
         description: "Edit the comment before clicking update.",
       });
@@ -790,7 +802,7 @@ export function useCommentState(props: ChangelogCommentsProps) {
         method: "PATCH",
         headers: { ...editCommentHeaders, "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({ content: normalizedEditContent }),
+        body: JSON.stringify({ content: apiContent }),
       });
 
       if (!response.ok) {
@@ -859,7 +871,7 @@ export function useCommentState(props: ChangelogCommentsProps) {
         return {
           ...c,
           ...(normalizedUpdate || {}),
-          content: normalizedUpdate?.content ?? normalizedEditContent,
+          content: normalizedUpdate?.content ?? displayContent,
           edited_at:
             normalizedUpdate?.edited_at !== undefined
               ? normalizedUpdate.edited_at
@@ -994,7 +1006,8 @@ export function useCommentState(props: ChangelogCommentsProps) {
   ): Promise<boolean> => {
     if (!isLoggedIn || !content.trim() || isSubmittingComment) return false;
 
-    const preparedReplyContent = prepareCommentContent(content);
+    const apiContent = prepareCommentContentForApi(content);
+    const displayContent = prepareCommentDisplayContent(content);
     setIsSubmittingComment(true);
 
     try {
@@ -1005,7 +1018,7 @@ export function useCommentState(props: ChangelogCommentsProps) {
         headers: { ...submitReplyHeaders, "Content-Type": "application/json" },
         credentials: "include",
         body: JSON.stringify({
-          content: preparedReplyContent,
+          content: apiContent,
           item_id: changelogId,
           item_type: type === "item" ? itemType : type,
           parent_id: parentId,
@@ -1081,7 +1094,7 @@ export function useCommentState(props: ChangelogCommentsProps) {
       const optimisticReply: CommentData = {
         id: realId || Date.now(),
         author: user?.username || "You",
-        content: preparedReplyContent,
+        content: displayContent,
         date: Math.floor(Date.now() / 1000).toString(),
         item_id: Number(changelogId),
         item_type: type === "item" ? itemType || type : type,

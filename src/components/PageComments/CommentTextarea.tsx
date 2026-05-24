@@ -212,41 +212,49 @@ export const CommentTextarea = forwardRef<
 
   return (
     <div className="relative">
-      {showPicker && (
+      {showPicker && autocompleteContext && (
         <div
           role="listbox"
           aria-label="Emoji suggestions"
-          className="border-border-card bg-primary-bg absolute bottom-full left-0 z-20 mb-1 max-h-48 w-full min-w-[12rem] overflow-y-auto rounded-lg border shadow-lg"
+          className="border-border-card bg-primary-bg absolute bottom-full left-0 z-20 mb-1 flex max-h-56 w-full min-w-[12rem] flex-col overflow-hidden rounded-lg border shadow-lg"
         >
-          {suggestions.slice(0, 8).map((name, index) => {
-            const emoji = emojiMap[name];
-            return (
-              <button
-                key={name}
-                type="button"
-                role="option"
-                aria-selected={index === activeIndex}
-                className={cn(
-                  "text-primary-text flex w-full cursor-pointer items-center gap-2 px-3 py-2 text-left text-sm transition-colors",
-                  index === activeIndex
-                    ? "bg-quaternary-bg"
-                    : "hover:bg-quaternary-bg/70",
-                )}
-                onMouseDown={(e) => {
-                  e.preventDefault();
-                  applySuggestionAtIndex(index);
-                }}
-                onMouseEnter={() => setActiveIndex(index)}
-              >
-                <span className="flex h-6 w-6 shrink-0 items-center justify-center text-lg leading-none">
-                  {emoji}
-                </span>
-                <span className="text-secondary-text font-mono text-xs">
-                  :{name}:
-                </span>
-              </button>
-            );
-          })}
+          <p
+            className="text-secondary-text border-border-card shrink-0 border-b px-3 py-2 text-[11px] font-semibold tracking-wide uppercase"
+            aria-hidden
+          >
+            Emojis matching :{autocompleteContext.query}
+          </p>
+          <div className="max-h-48 overflow-y-auto">
+            {suggestions.slice(0, 8).map((name, index) => {
+              const emoji = emojiMap[name];
+              return (
+                <button
+                  key={name}
+                  type="button"
+                  role="option"
+                  aria-selected={index === activeIndex}
+                  className={cn(
+                    "text-primary-text flex w-full cursor-pointer items-center gap-2 px-3 py-2 text-left text-sm transition-colors",
+                    index === activeIndex
+                      ? "bg-quaternary-bg"
+                      : "hover:bg-quaternary-bg/70",
+                  )}
+                  onMouseDown={(e) => {
+                    e.preventDefault();
+                    applySuggestionAtIndex(index);
+                  }}
+                  onMouseEnter={() => setActiveIndex(index)}
+                >
+                  <span className="flex h-6 w-6 shrink-0 items-center justify-center text-lg leading-none">
+                    {emoji}
+                  </span>
+                  <span className="text-secondary-text font-mono text-xs">
+                    :{name}:
+                  </span>
+                </button>
+              );
+            })}
+          </div>
         </div>
       )}
       <textarea

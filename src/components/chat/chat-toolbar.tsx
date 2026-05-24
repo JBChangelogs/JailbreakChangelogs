@@ -29,6 +29,8 @@ import * as React from "react";
 import { cn } from "@/lib/utils";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import { CommentTextarea } from "@/components/PageComments/CommentTextarea";
+import type { EmojiStringMap } from "@/utils/comments/emojiShortcodes";
 
 export interface ChatToolbarProps extends React.ComponentProps<"div"> {
   children?: React.ReactNode;
@@ -94,6 +96,8 @@ export interface ChatToolbarTextareaProps extends React.ComponentProps<
   rightOverlayClassName?: string;
   /** Shows a top drag handle to resize the textarea vertically. */
   showResizeHandle?: boolean;
+  /** Enables `:shortcode:` emoji autocomplete when non-empty. */
+  emojiMap?: EmojiStringMap;
 }
 
 /**
@@ -128,8 +132,12 @@ export function ChatToolbarTextarea({
   onKeyDown,
   onChange,
   value,
+  emojiMap,
   ...props
 }: ChatToolbarTextareaProps) {
+  const hasEmojiAutocomplete = Boolean(
+    emojiMap && Object.keys(emojiMap).length > 0,
+  );
   const textareaRef = React.useRef<HTMLTextAreaElement | null>(null);
   const [manualHeight, setManualHeight] = React.useState<number | null>(null);
   const [isExpanded, setIsExpanded] = React.useState(false);
@@ -256,31 +264,67 @@ export function ChatToolbarTextarea({
       ) : null}
 
       <div className="relative grid">
-        <Textarea
-          id="toolbar-input"
-          placeholder="Type your message..."
-          ref={textareaRef}
-          className={cn(
-            "h-fit max-h-60 min-h-10 @md/chat:text-base",
-            "resize-none overflow-y-auto bg-transparent p-2 text-sm text-inherit shadow-none",
-            "border-none placeholder:whitespace-nowrap focus-visible:border-none focus-visible:ring-0 focus-visible:outline-none",
-            rightOverlay ? "pr-20" : "",
-            className,
-          )}
-          rows={1}
-          style={
-            manualHeight
-              ? ({ height: manualHeight } satisfies React.CSSProperties)
-              : undefined
-          }
-          value={value}
-          onChange={(event) => {
-            onChange?.(event);
-            scheduleAutosize();
-          }}
-          onKeyDown={handleKeyDown}
-          {...props}
-        />
+        {hasEmojiAutocomplete ? (
+          <CommentTextarea
+            id="toolbar-input"
+            placeholder="Type your message..."
+            ref={textareaRef}
+            value={typeof value === "string" ? value : ""}
+            onChange={(next) => {
+              onChange?.({
+                target: { value: next },
+                currentTarget: { value: next },
+              } as React.ChangeEvent<HTMLTextAreaElement>);
+              scheduleAutosize();
+            }}
+            emojiMap={emojiMap!}
+            className={cn(
+              "h-fit max-h-60 min-h-10 w-full @md/chat:text-base",
+              "resize-none overflow-y-auto bg-transparent p-2 text-sm text-inherit shadow-none",
+              "border-none placeholder:whitespace-nowrap focus:outline-none",
+              rightOverlay ? "pr-20" : "",
+              className,
+            )}
+            rows={1}
+            style={
+              manualHeight
+                ? ({ height: manualHeight } satisfies React.CSSProperties)
+                : undefined
+            }
+            onKeyDown={handleKeyDown}
+            autoCorrect="off"
+            autoComplete="off"
+            spellCheck="false"
+            autoCapitalize="off"
+            {...props}
+          />
+        ) : (
+          <Textarea
+            id="toolbar-input"
+            placeholder="Type your message..."
+            ref={textareaRef}
+            className={cn(
+              "h-fit max-h-60 min-h-10 @md/chat:text-base",
+              "resize-none overflow-y-auto bg-transparent p-2 text-sm text-inherit shadow-none",
+              "border-none placeholder:whitespace-nowrap focus-visible:border-none focus-visible:ring-0 focus-visible:outline-none",
+              rightOverlay ? "pr-20" : "",
+              className,
+            )}
+            rows={1}
+            style={
+              manualHeight
+                ? ({ height: manualHeight } satisfies React.CSSProperties)
+                : undefined
+            }
+            value={value}
+            onChange={(event) => {
+              onChange?.(event);
+              scheduleAutosize();
+            }}
+            onKeyDown={handleKeyDown}
+            {...props}
+          />
+        )}
         {rightOverlay ? (
           <div
             className={cn(

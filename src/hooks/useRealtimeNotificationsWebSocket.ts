@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef } from "react";
+import React, { useCallback, useEffect, useRef } from "react";
 import { toast } from "sonner";
 import { ENABLE_REALTIME_NOTIFICATIONS_WS, WS_URL } from "@/utils/api/api";
 import {
@@ -8,7 +8,11 @@ import {
   parseNotificationUrl,
 } from "@/utils/notifications/notificationUrl";
 import { showDesktopNotification } from "@/utils/notifications/desktopNotifications";
-import { stripNotifMarkdown } from "@/utils/notifications/notifMarkdown";
+import {
+  formatNotifPlainText,
+  normalizeNotificationText,
+  renderNotifDescription,
+} from "@/utils/notifications/notifMarkdown";
 import { buildApiWsUrl } from "@/utils/api/apiDevToken";
 import { createLogger } from "@/services/logger";
 import {
@@ -68,10 +72,10 @@ function shouldReconnectOnFocusOnly(code: number, reason: string): boolean {
 
 function toNotificationBody(value: unknown, maxLen = 140): string | undefined {
   if (typeof value !== "string") return undefined;
-  const trimmed = value.trim();
-  if (!trimmed) return undefined;
-  if (trimmed.length <= maxLen) return trimmed;
-  return `${trimmed.slice(0, maxLen - 1)}…`;
+  const formatted = formatNotifPlainText(value.trim());
+  if (!formatted) return undefined;
+  if (formatted.length <= maxLen) return formatted;
+  return `${formatted.slice(0, maxLen - 1)}…`;
 }
 
 function getRealtimeWsUrl(): string | null {
@@ -502,9 +506,12 @@ export function useRealtimeNotificationsWebSocket(
 
             const { title, description, link } = notificationData;
             const notificationTitle = title || "New notification";
-            const notificationDescription = stripNotifMarkdown(
-              description || "You received a new notification.",
-            );
+            const rawDescription =
+              description || "You received a new notification.";
+            const notificationDescription =
+              formatNotifPlainText(rawDescription);
+            const normalizedDescription =
+              normalizeNotificationText(rawDescription);
             const type = notificationPayload.type || "unknown";
             const toastId = `realtime-notification:${type}:${link || notificationTitle}`;
             const shouldHideViewAction =
@@ -539,7 +546,11 @@ export function useRealtimeNotificationsWebSocket(
 
             toast(notificationTitle, {
               id: toastId,
-              description: notificationDescription,
+              description: React.createElement(
+                "div",
+                { className: "text-muted-foreground text-sm leading-relaxed" },
+                renderNotifDescription(normalizedDescription),
+              ),
               action,
             });
 

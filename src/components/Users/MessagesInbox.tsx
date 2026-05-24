@@ -50,6 +50,11 @@ import {
 import { useOptimizedRealTimeRelativeDate } from "@/hooks/useSharedTimer";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { sanitizeText } from "@/utils/ui/sanitizeText";
+import { useEmojiStringMap } from "@/hooks/useEmojiStringMap";
+import {
+  prepareEmojiShortcodeContentForApi,
+  prepareEmojiShortcodeDisplayContent,
+} from "@/utils/comments/emojiShortcodes";
 import {
   PUBLIC_API_URL,
   getRateLimitMessage,
@@ -762,6 +767,20 @@ export default function MessagesInbox() {
     setBan,
   } = useAuthContext();
   const messageBan = bans["communication"] ?? null;
+  const emojiStringMap = useEmojiStringMap();
+
+  const prepareMessageContentForApi = useCallback(
+    (text: string) =>
+      sanitizeText(prepareEmojiShortcodeContentForApi(text.trim())),
+    [],
+  );
+
+  /** Mirror backend emoji rendering in optimistic/local UI only. */
+  const prepareMessageDisplayContent = useCallback(
+    (text: string) =>
+      sanitizeText(prepareEmojiShortcodeDisplayContent(text, emojiStringMap)),
+    [emojiStringMap],
+  );
 
   const [conversations, setConversations] = useState<ConversationSummary[]>([]);
   const [totalConversations, setTotalConversations] = useState<number | null>(
@@ -2210,9 +2229,10 @@ export default function MessagesInbox() {
     const targetUser = selectedUser;
     const replyTarget = replyingToMessage;
 
-    const trimmedMessage = sanitizeText(rawMessage.trim());
-    if (!trimmedMessage || isSending) return;
-    if (trimmedMessage.length > MESSAGE_CHAR_LIMIT) {
+    const apiContent = prepareMessageContentForApi(rawMessage);
+    const displayContent = prepareMessageDisplayContent(rawMessage);
+    if (!apiContent || isSending) return;
+    if (apiContent.length > MESSAGE_CHAR_LIMIT) {
       toast.error(`Message too long (max ${MESSAGE_CHAR_LIMIT} characters).`);
       return;
     }
@@ -2224,7 +2244,7 @@ export default function MessagesInbox() {
       parentId: replyTarget ? replyTarget.id : null,
       senderId: asId(currentUser.id),
       receiverId: asId(targetUserId),
-      content: trimmedMessage,
+      content: displayContent,
       metadata: { client_id: optimisticId },
       createdAt: Date.now(),
       status: "pending",
@@ -2247,7 +2267,7 @@ export default function MessagesInbox() {
       ]);
       setReplyingToMessage(null);
 
-      const body: Record<string, unknown> = { content: trimmedMessage };
+      const body: Record<string, unknown> = { content: apiContent };
       if (replyTarget) {
         body.parent_id = replyTarget.id;
       }
@@ -2490,11 +2510,12 @@ export default function MessagesInbox() {
   };
 
   const handleEditMessage = async (messageId: string) => {
-    const trimmedMessage = sanitizeText(editContent.trim());
-    if (!trimmedMessage || !selectedUserId || isSending) return;
+    const apiContent = prepareMessageContentForApi(editContent);
+    const displayContent = prepareMessageDisplayContent(editContent);
+    if (!apiContent || !selectedUserId || isSending) return;
 
     const originalMessage = messages.find((m) => m.id === messageId);
-    if (originalMessage?.content === trimmedMessage) {
+    if (originalMessage?.content === displayContent) {
       setEditingMessageId(null);
       setEditContent("");
       return;
@@ -2519,7 +2540,7 @@ export default function MessagesInbox() {
           ...editHeaders,
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ content: trimmedMessage }),
+        body: JSON.stringify({ content: apiContent }),
       });
 
       const rawBody = await response.text();
@@ -2569,7 +2590,7 @@ export default function MessagesInbox() {
         receiverId:
           resolvedParticipants?.receiverId ??
           asId(parsedBody.message?.recipient_id ?? originalMessage?.receiverId),
-        content: parsedBody.message?.content ?? trimmedMessage,
+        content: parsedBody.message?.content ?? displayContent,
         createdAt: originalMessage?.createdAt,
         updatedAt: parsedBody.message?.updated_at
           ? normalizeTimestamp(parsedBody.message.updated_at)

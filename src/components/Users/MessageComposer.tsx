@@ -9,6 +9,7 @@ import {
   ChatToolbarButton,
   ChatToolbarTextarea,
 } from "@/components/chat/chat-toolbar";
+import { useEmojiStringMap } from "@/hooks/useEmojiStringMap";
 
 export interface MessageComposerProps {
   conversationId: string | null;
@@ -28,6 +29,7 @@ export function MessageComposer({
   onSend,
 }: MessageComposerProps) {
   const [draft, setDraft] = React.useState("");
+  const emojiStringMap = useEmojiStringMap();
 
   React.useEffect(() => {
     setDraft("");
@@ -61,6 +63,11 @@ export function MessageComposer({
       placeholder={placeholder}
       maxLength={1000}
       disabled={disabled}
+      emojiMap={emojiStringMap}
+      autoCorrect="off"
+      autoComplete="off"
+      spellCheck="false"
+      autoCapitalize="off"
       rightOverlay={
         <div className="flex items-center gap-2">
           {overLimit > 0 ? (

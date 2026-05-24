@@ -64,6 +64,7 @@ import {
   getNotificationActionLabel,
   parseNotificationUrl,
 } from "@/utils/notifications/notificationUrl";
+import { renderNotifDescription } from "@/utils/notifications/notifMarkdown";
 import { UtmGeneratorModal } from "@/components/Modals/UtmGeneratorModal";
 import { useOptimizedRealTimeRelativeDate } from "@/hooks/useSharedTimer";
 import { useToastRuntimeRightOffset } from "@/hooks/useToastRuntimeRightOffset";
@@ -1044,9 +1045,11 @@ export default function Header() {
                                           {notif.title}
                                         </p>
                                       </div>
-                                      <p className="text-secondary-text mt-1 text-xs wrap-break-word whitespace-normal">
-                                        {notif.description}
-                                      </p>
+                                      <div className="text-secondary-text mt-1 text-xs wrap-break-word">
+                                        {renderNotifDescription(
+                                          notif.description,
+                                        )}
+                                      </div>
                                       {shouldHideViewAction ? null : urlInfo.isWhitelisted ? (
                                         urlInfo.isJailbreakChangelogs &&
                                         urlInfo.relativePath ? (
