@@ -257,7 +257,7 @@ export function CommentItem({ comment }: { comment: CommentData }) {
       key={comment.id}
       className="relative transition-all duration-200"
     >
-      <div className="group/comment flex gap-2 sm:gap-3">
+      <div className="flex gap-2 sm:gap-3">
         <div className="flex w-10 shrink-0 items-start pt-1.5">
           {hideRecent ? (
             <div className="ring-tertiary-text/20 border-border-card bg-primary-bg flex h-10 w-10 items-center justify-center rounded-full border ring-2">
@@ -377,7 +377,7 @@ export function CommentItem({ comment }: { comment: CommentData }) {
                     <Button
                       variant="ghost"
                       size="sm"
-                      className={`text-secondary-text hover:text-primary-text hover:bg-quaternary-bg h-8 w-8 rounded-lg p-0 opacity-100 transition-all duration-200 ${reactionPickerHoverOpenId === comment.id ? "lg:opacity-100" : "lg:opacity-0 lg:group-hover/comment:opacity-100"}`}
+                      className="text-secondary-text hover:text-primary-text hover:bg-quaternary-bg h-8 w-8 rounded-lg p-0 opacity-100 transition-all duration-200"
                       onClick={() => {
                         if (replyingToId === comment.id) {
                           setReplyingToId(null);
@@ -415,7 +415,7 @@ export function CommentItem({ comment }: { comment: CommentData }) {
                         <Button
                           variant="ghost"
                           size="sm"
-                          className={`text-secondary-text hover:text-primary-text hover:bg-quaternary-bg h-8 w-8 rounded-lg p-0 opacity-100 transition-all duration-200 ${reactionPickerHoverOpenId === comment.id ? "lg:opacity-100" : "lg:opacity-0 lg:group-hover/comment:opacity-100"} ${isRateLimited || !!reactionBan ? "cursor-not-allowed" : ""}`}
+                          className={`text-secondary-text hover:text-primary-text hover:bg-quaternary-bg h-8 w-8 rounded-lg p-0 opacity-100 transition-all duration-200 ${isRateLimited || !!reactionBan ? "cursor-not-allowed" : ""}`}
                         >
                           <Icon
                             icon="fluent:emoji-add-16-regular"
@@ -460,7 +460,7 @@ export function CommentItem({ comment }: { comment: CommentData }) {
                     <Button
                       variant="ghost"
                       size="sm"
-                      className={`text-primary-text hover:bg-quaternary-bg h-8 w-8 rounded-lg p-0 opacity-100 transition-all duration-200 data-[state=open]:opacity-100 ${reactionPickerHoverOpenId === comment.id ? "lg:opacity-100" : "lg:opacity-0 lg:group-hover/comment:opacity-100"}`}
+                      className="text-primary-text hover:bg-quaternary-bg h-8 w-8 rounded-lg p-0 opacity-100 transition-all duration-200"
                     >
                       <Icon
                         icon="heroicons:ellipsis-horizontal"
@@ -777,7 +777,7 @@ export function CommentItem({ comment }: { comment: CommentData }) {
                   <React.Fragment key={reply.id}>
                     <div
                       id={`comment-${reply.id}`}
-                      className="group/reply flex gap-2 sm:gap-3"
+                      className="flex gap-2 sm:gap-3"
                     >
                       {/* Reply avatar */}
                       <div className="flex w-8 shrink-0 items-start pt-1">
@@ -883,7 +883,7 @@ export function CommentItem({ comment }: { comment: CommentData }) {
                                   <Button
                                     variant="ghost"
                                     size="sm"
-                                    className={`text-secondary-text hover:text-primary-text hover:bg-quaternary-bg h-7 w-7 rounded-lg p-0 opacity-100 transition-all duration-200 ${reactionPickerHoverOpenId === reply.id ? "lg:opacity-100" : "lg:opacity-0 lg:group-hover/reply:opacity-100"}`}
+                                    className="text-secondary-text hover:text-primary-text hover:bg-quaternary-bg h-7 w-7 rounded-lg p-0 opacity-100 transition-all duration-200"
                                     onClick={() => {
                                       if (
                                         replyingToId === comment.id &&
@@ -929,7 +929,7 @@ export function CommentItem({ comment }: { comment: CommentData }) {
                                         <Button
                                           variant="ghost"
                                           size="sm"
-                                          className={`text-secondary-text hover:text-primary-text hover:bg-quaternary-bg h-7 w-7 rounded-lg p-0 opacity-100 transition-all duration-200 ${reactionPickerHoverOpenId === reply.id ? "lg:opacity-100" : "lg:opacity-0 lg:group-hover/reply:opacity-100"} ${isRateLimited || !!reactionBan ? "cursor-not-allowed" : ""}`}
+                                          className={`text-secondary-text hover:text-primary-text hover:bg-quaternary-bg h-7 w-7 rounded-lg p-0 opacity-100 transition-all duration-200 ${isRateLimited || !!reactionBan ? "cursor-not-allowed" : ""}`}
                                         >
                                           <Icon
                                             icon="fluent:emoji-add-16-regular"
@@ -978,7 +978,7 @@ export function CommentItem({ comment }: { comment: CommentData }) {
                                   <Button
                                     variant="ghost"
                                     size="sm"
-                                    className={`text-primary-text hover:bg-quaternary-bg h-7 w-7 rounded-lg p-0 opacity-100 transition-all duration-200 data-[state=open]:opacity-100 ${reactionPickerHoverOpenId === reply.id ? "lg:opacity-100" : "lg:opacity-0 lg:group-hover/reply:opacity-100"}`}
+                                    className="text-primary-text hover:bg-quaternary-bg h-7 w-7 rounded-lg p-0 opacity-100 transition-all duration-200"
                                   >
                                     <Icon
                                       icon="heroicons:ellipsis-horizontal"
