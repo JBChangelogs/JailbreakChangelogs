@@ -1291,6 +1291,7 @@ export interface CommentData {
   item_type: string;
   edited_at: string | null;
   parent_id?: number | null;
+  reply_to_id?: number | null;
   user: CommentAuthor;
   replies?: CommentData[];
   reactions?: CommentReaction[];

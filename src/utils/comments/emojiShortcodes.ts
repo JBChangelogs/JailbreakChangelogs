@@ -29,135 +29,64 @@ function levenshtein(a: string, b: string): number {
   return matrix[b.length][a.length];
 }
 
-type ParseState = {
-  state: "DEFAULT" | "EMOJI";
-  buffer: string;
-  /** Opening : was escaped — emit literal :name: on close, no emoji lookup */
-  literalSegment: boolean;
-  /** Next character is escaped by a preceding \\ */
-  escapeNext: boolean;
-};
-
-function createParseState(): ParseState {
-  return {
-    state: "DEFAULT",
-    buffer: "",
-    literalSegment: false,
-    escapeNext: false,
-  };
-}
-
-function consumeEscapedChar(
-  parse: ParseState,
-  c: string,
-  onDefaultChar: (char: string) => void,
-): void {
-  parse.escapeNext = false;
-
-  if (c === "\\") {
-    onDefaultChar("\\");
-    return;
-  }
-
-  if (c === ":") {
-    if (parse.state === "DEFAULT") {
-      parse.state = "EMOJI";
-      parse.buffer = ":";
-      parse.literalSegment = true;
-    } else {
-      parse.buffer += ":";
-    }
-    return;
-  }
-
-  onDefaultChar("\\" + c);
-}
-
 function scanEmojiBuffer(workspace: string): {
   buffer: string;
   inEmoji: boolean;
-  literalSegment: boolean;
 } {
-  const parse = createParseState();
+  let i = 0;
+  let state: "DEFAULT" | "EMOJI" = "DEFAULT";
+  let buffer = "";
 
-  for (let i = 0; i < workspace.length; i++) {
+  while (i < workspace.length) {
     const c = workspace[i];
 
-    if (parse.escapeNext) {
-      consumeEscapedChar(parse, c, () => {});
-      continue;
-    }
-
-    if (c === "\\") {
-      parse.escapeNext = true;
-      continue;
-    }
-
-    switch (parse.state) {
+    switch (state) {
       case "DEFAULT":
         if (c === ":") {
-          parse.state = "EMOJI";
-          parse.buffer = ":";
-          parse.literalSegment = false;
+          state = "EMOJI";
+          buffer = ":";
         }
         break;
 
       case "EMOJI":
         if (c === ":") {
-          parse.state = "DEFAULT";
-          parse.buffer = "";
-          parse.literalSegment = false;
+          state = "DEFAULT";
+          buffer = "";
         } else if (!VALID_EMOJI_CHARS.includes(c)) {
-          parse.state = "DEFAULT";
-          parse.buffer = "";
-          parse.literalSegment = false;
+          state = "DEFAULT";
+          buffer = "";
         } else {
-          parse.buffer += c;
+          buffer += c;
         }
         break;
     }
+
+    i++;
   }
 
-  return {
-    buffer: parse.buffer,
-    inEmoji: parse.state === "EMOJI",
-    literalSegment: parse.literalSegment,
-  };
+  return { buffer, inEmoji: state === "EMOJI" };
 }
 
 /**
  * Replaces completed :shortcode: segments with emoji characters.
- * A backslash before the opening colon (e.g. \\:eyes:) emits literal :eyes:
- * and consumes the backslash, matching Discord.
+ * Unrecognized shortcodes are left unchanged.
  */
 export function transformEmojiShortcodes(
   text: string,
   emojiMap: EmojiStringMap,
 ): string {
-  const parse = createParseState();
+  let i = 0;
+  let state: "DEFAULT" | "EMOJI" = "DEFAULT";
+  let buffer = "";
   let result = "";
 
-  for (let i = 0; i < text.length; i++) {
+  while (i < text.length) {
     const c = text[i];
-
-    if (parse.escapeNext) {
-      consumeEscapedChar(parse, c, (literal) => {
-        result += literal;
-      });
-      continue;
-    }
-
-    if (c === "\\") {
-      parse.escapeNext = true;
-      continue;
-    }
-
-    switch (parse.state) {
+    switch (state) {
       case "DEFAULT":
         if (c === ":") {
-          parse.state = "EMOJI";
-          parse.buffer = ":";
-          parse.literalSegment = false;
+          state = "EMOJI";
+          buffer = ":";
         } else {
           result += c;
         }
@@ -165,30 +94,25 @@ export function transformEmojiShortcodes(
 
       case "EMOJI":
         if (c === ":") {
-          parse.state = "DEFAULT";
-          if (parse.literalSegment) {
-            result += parse.buffer + ":";
-          } else {
-            const name = parse.buffer.slice(1);
-            result += emojiMap[name] ?? `${parse.buffer}:`;
-          }
-          parse.buffer = "";
-          parse.literalSegment = false;
+          state = "DEFAULT";
+          const name = buffer.slice(1);
+          result += emojiMap[name] ?? `${buffer}:`;
+          buffer = "";
         } else if (!VALID_EMOJI_CHARS.includes(c)) {
-          result += parse.buffer;
-          parse.buffer = "";
-          parse.state = "DEFAULT";
-          parse.literalSegment = false;
+          result += buffer;
+          buffer = "";
+          state = "DEFAULT";
           i--;
         } else {
-          parse.buffer += c;
+          buffer += c;
         }
         break;
     }
+    i++;
   }
 
-  if (parse.state === "EMOJI") {
-    result += parse.buffer;
+  if (state === "EMOJI") {
+    result += buffer;
   }
 
   return result;
@@ -200,10 +124,8 @@ export function suggestEmojiShortcodes(
   emojiMap: EmojiStringMap,
   emojiNames: string[] = Object.keys(emojiMap),
 ): string[] {
-  const { buffer, inEmoji, literalSegment } = scanEmojiBuffer(
-    text.slice(0, cursor),
-  );
-  if (!inEmoji || literalSegment) return [];
+  const { buffer, inEmoji } = scanEmojiBuffer(text.slice(0, cursor));
+  if (!inEmoji) return [];
 
   const query = buffer.slice(1);
 
@@ -236,8 +158,8 @@ export function getEmojiAutocompleteContext(
   cursor: number,
 ): EmojiAutocompleteContext | null {
   const workspace = text.slice(0, cursor);
-  const { buffer, inEmoji, literalSegment } = scanEmojiBuffer(workspace);
-  if (!inEmoji || literalSegment || buffer.length <= 1) return null;
+  const { buffer, inEmoji } = scanEmojiBuffer(workspace);
+  if (!inEmoji || buffer.length <= 1) return null;
 
   return {
     query: buffer.slice(1),

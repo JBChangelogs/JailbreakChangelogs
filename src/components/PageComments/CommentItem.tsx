@@ -803,9 +803,7 @@ function CommentItemInner({ comment }: { comment: CommentData }) {
                     ? replyUser.roblox_avatar
                     : undefined;
 
-                // Attribution for reply-to-reply: parent_id points to a reply, not the root comment
-                const replyToTargetId =
-                  reply.parent_id !== comment.id ? reply.parent_id : null;
+                const replyToTargetId = reply.reply_to_id ?? null;
                 const replyToTarget = replyToTargetId
                   ? (comment.replies?.find((r) => r.id === replyToTargetId) ??
                     null)

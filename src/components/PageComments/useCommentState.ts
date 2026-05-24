@@ -1008,7 +1008,8 @@ export function useCommentState(props: ChangelogCommentsProps) {
           content: preparedReplyContent,
           item_id: changelogId,
           item_type: type === "item" ? itemType : type,
-          parent_id: replyingToReplyId ?? parentId,
+          parent_id: parentId,
+          reply_to_id: replyingToReplyId ?? null,
         }),
       });
 
@@ -1087,15 +1088,16 @@ export function useCommentState(props: ChangelogCommentsProps) {
         user_id: currentUserId || "",
         edited_at: null,
         owner: "",
-        parent_id: replyingToReplyId ?? parentId,
+        parent_id: parentId,
+        reply_to_id: replyingToReplyId ?? null,
         ...addedReplyData,
       };
 
-      // Append optimistic reply under the parent and expand its replies
+      // Prepend only — matches API reply order (newest at index 0); no client re-sort.
       setComments((prev) =>
         prev.map((c) =>
           c.id === parentId
-            ? { ...c, replies: [...(c.replies ?? []), optimisticReply] }
+            ? { ...c, replies: [optimisticReply, ...(c.replies ?? [])] }
             : c,
         ),
       );

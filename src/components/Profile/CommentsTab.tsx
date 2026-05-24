@@ -33,6 +33,7 @@ interface CommentData {
   user_id: string;
   edited_at: number | null;
   parent_id?: number | null;
+  reply_to_id?: number | null;
   reactions?: CommentReaction[];
 }
 
@@ -217,6 +218,7 @@ export default function CommentsTab({
             item_type: string;
             edited_at: number | null;
             parent_id?: number | null;
+            reply_to_id?: number | null;
             user: { id: string; username: string };
             reactions?: unknown;
           }) => ({
@@ -229,6 +231,7 @@ export default function CommentsTab({
             user_id: item.user?.id ?? "",
             edited_at: item.edited_at,
             parent_id: item.parent_id ?? null,
+            reply_to_id: item.reply_to_id ?? null,
             reactions: normalizeReactions(item.reactions),
           }),
         );
@@ -385,11 +388,17 @@ export default function CommentsTab({
                     <Comment
                       key={comment.id}
                       {...comment}
-                      parentComment={
-                        typeof comment.parent_id === "number"
-                          ? commentsById.get(comment.parent_id) || null
-                          : null
-                      }
+                      replyToComment={(() => {
+                        const targetId = comment.reply_to_id;
+                        if (typeof targetId !== "number") return null;
+                        const target = commentsById.get(targetId);
+                        if (!target) return null;
+                        return {
+                          id: target.id,
+                          author: target.author,
+                          content: target.content,
+                        };
+                      })()}
                       changelogDetails={
                         commentDetails.changelogs[comment.item_id.toString()]
                       }

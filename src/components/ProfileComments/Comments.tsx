@@ -62,8 +62,9 @@ interface CommentProps {
   user_id: string;
   edited_at: number | null;
   parent_id?: number | null;
+  reply_to_id?: number | null;
   reactions?: CommentReaction[];
-  parentComment?: {
+  replyToComment?: {
     id: number;
     author: string;
     content: string;
@@ -214,8 +215,9 @@ export default function Comment({
   item_id,
   edited_at,
   parent_id,
+  reply_to_id: _reply_to_id,
   reactions,
-  parentComment: _parentComment,
+  replyToComment,
   changelogDetails: propChangelogDetails,
   itemDetails: propItemDetails,
   seasonDetails: propSeasonDetails,
@@ -539,7 +541,9 @@ export default function Comment({
                         d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"
                       />
                     </svg>
-                    Reply
+                    {replyToComment
+                      ? `Reply to ${replyToComment.author}`
+                      : "Reply"}
                   </span>
                 )}
               </div>
