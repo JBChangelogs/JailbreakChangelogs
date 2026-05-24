@@ -77,7 +77,7 @@ export const AnimatedThemeToggler = ({
             strokeLinecap="round"
             strokeLinejoin="round"
             strokeWidth="2"
-            d="M12 7h7a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2zm0 0L8 3m4 4l4-4"
+            d="M12 8v4l3 3M3.223 14A9 9 0 1 0 12 3a9 9 0 0 0-8.294 5.5M7 9H3V5"
           />
         </svg>
       );
