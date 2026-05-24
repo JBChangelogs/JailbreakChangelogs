@@ -61,6 +61,9 @@ export function useCommentState(props: ChangelogCommentsProps) {
   // --- UI State (Comments) ---
   const [newComment, setNewComment] = useState("");
   const [replyingToId, setReplyingToId] = useState<number | null>(null);
+  const [replyingToReplyId, setReplyingToReplyId] = useState<number | null>(
+    null,
+  );
   const [replyContent, setReplyContent] = useState("");
   const [editingCommentId, setEditingCommentId] = useState<number | null>(null);
   const [updatingCommentId, setUpdatingCommentId] = useState<number | null>(
@@ -984,7 +987,7 @@ export function useCommentState(props: ChangelogCommentsProps) {
           content: cleanCommentText(replyContent),
           item_id: changelogId,
           item_type: type === "item" ? itemType : type,
-          parent_id: parentId,
+          parent_id: replyingToReplyId ?? parentId,
         }),
       });
 
@@ -992,6 +995,7 @@ export function useCommentState(props: ChangelogCommentsProps) {
         const ban = parseBan(response);
         if (ban) {
           setReplyingToId(null);
+          setReplyingToReplyId(null);
           setBan(ban);
           showBanToast(ban);
           return;
@@ -1050,6 +1054,7 @@ export function useCommentState(props: ChangelogCommentsProps) {
 
       setReplyContent("");
       setReplyingToId(null);
+      setReplyingToReplyId(null);
 
       // Construct optimistic reply
       const optimisticReply: CommentData = {
@@ -1062,7 +1067,7 @@ export function useCommentState(props: ChangelogCommentsProps) {
         user_id: currentUserId || "",
         edited_at: null,
         owner: "",
-        parent_id: parentId,
+        parent_id: replyingToReplyId ?? parentId,
         ...addedReplyData,
       };
 
@@ -1092,6 +1097,7 @@ export function useCommentState(props: ChangelogCommentsProps) {
         .find((r) => r.id === commentId);
     if (comment) {
       setReplyingToId(null);
+      setReplyingToReplyId(null);
       setReplyContent("");
       setEditingCommentId(commentId);
       setEditContent(sanitizeText(comment.content || ""));
@@ -1237,6 +1243,8 @@ export function useCommentState(props: ChangelogCommentsProps) {
     setNewComment,
     replyingToId,
     setReplyingToId,
+    replyingToReplyId,
+    setReplyingToReplyId,
     replyContent,
     setReplyContent,
     editingCommentId,
