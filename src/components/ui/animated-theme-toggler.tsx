@@ -2,7 +2,12 @@
 
 import { useCallback, useRef } from "react";
 import { cn } from "@/lib/utils";
-import { useTheme, AvailableThemes, Theme } from "@/contexts/ThemeContext";
+import {
+  useTheme,
+  AvailableThemes,
+  Theme,
+  UIThemeNames,
+} from "@/contexts/ThemeContext";
 import { safeLocalStorage } from "@/utils/safeStorage";
 import {
   Tooltip,
@@ -96,13 +101,16 @@ export const AnimatedThemeToggler = ({
             size === "sm" ? "h-8 w-8" : "h-10 w-10",
             className,
           )}
-          aria-label={`Switch to ${getNextTheme(theme)} mode`}
+          aria-label={`Switch to ${UIThemeNames[getNextTheme(theme)] || getNextTheme(theme)} mode`}
           {...props}
         >
           {getIcon()}
         </button>
       </TooltipTrigger>
-      <TooltipContent>Switch to {getNextTheme(theme)} mode</TooltipContent>
+      <TooltipContent>
+        Switch to {UIThemeNames[getNextTheme(theme)] || getNextTheme(theme)}{" "}
+        mode
+      </TooltipContent>
     </Tooltip>
   );
 };
