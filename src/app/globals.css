@@ -268,8 +268,8 @@
   --color-card-paragraph: #94a3b8; /* Text within cards - Medium dark */
 
   /* Border and Separator Colors - Light theme */
-  --color-border-primary: #2d3748; /* Primary borders - Light gray */
-  --color-border-card: #2e384d; /* Card borders - Slight contrast */
+  --color-border-primary: #202733; /* Primary borders - Light gray */
+  --color-border-card: #1b212e; /* Card borders - Slight contrast */
   --color-border-secondary: #1e293b; /* Secondary borders - Very light gray */
   --color-border-tertiary: #111827; /* Tertiary borders - Almost white */
   --color-border-focus: #5A64EA; /* Focus borders - Same blue */

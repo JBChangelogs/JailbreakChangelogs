@@ -18,7 +18,7 @@ const faqs = [
   {
     question: "Who are the creators of Jailbreak?",
     answer:
-      'Jailbreak was created by Badimo, a development team consisting primarily of <a href="https://x.com/asimo3089" target="_blank" rel="noopener noreferrer" class="text-link hover:text-link-hover underline">asimo3089</a> and <a href="https://x.com/badccvoid" target="_blank" rel="noopener noreferrer" class="text-link hover:text-link-hover underline">badcc</a>. asimo3089 focuses on game design, while badcc handles the technical aspects of development. Together, they\'ve turned Jailbreak into one of the most popular and enduring games on the Roblox platform, continuously updating and improving it since its release in 2017.',
+      'Jailbreak was created by Badimo, a development team consisting primarily of <a href="https://x.com/asimo3089" target="_blank" rel="noopener noreferrer" class="text-link hover:text-link-hover underline">asimo3089</a>, <a href="https://x.com/badccvoid" target="_blank" rel="noopener noreferrer" class="text-link hover:text-link-hover underline">badcc</a>, and <a href="https://x.com/REAL_EpicTank" target="_blank" rel="noopener noreferrer" class="text-link hover:text-link-hover underline">Epic_Tank</a>. asimo3089 focuses on game design, while badcc and Epic_Tank handles the technical aspects of development. Together, they\'ve turned Jailbreak into one of the most popular and enduring games on the Roblox platform, continuously updating and improving it since its release in 2017.',
   },
   {
     question: "What platforms is Jailbreak available on?",
@@ -33,7 +33,7 @@ const faqs = [
   {
     question: "How often is Jailbreak updated?",
     answer:
-      "Jailbreak's update schedule has changed over time. Previously, the game received monthly updates. However, as of April 2024, Badimo announced that they would be discontinuing the monthly update cycle. The new update schedule is more flexible, allowing for both larger, less frequent updates and smaller, more frequent patches as needed. This change aims to provide higher quality content and address issues more efficiently.",
+      "Jailbreak's update schedule has changed over time. Previously, the game received monthly updates. However, as of April 2024, Badimo announced that they would be discontinuing the monthly update cycle. The new update schedule is more flexible, allowing for both larger, less frequent updates and smaller, more frequent patches as needed. This change aims to provide higher quality content and address issues more efficiently. As of The Epic Update, the game has been receiving almost monthly updates because of the arrival of their new developer, Epic Tank.",
   },
   {
     question: "What are seasons in Jailbreak?",
@@ -43,12 +43,12 @@ const faqs = [
   {
     question: "Is there a way to report bugs or issues in the game?",
     answer:
-      'Players can report bugs through the official Discord server or by using this form: <a href="https://forms.gle/FHSEsGGAknfqeSdB7" target="_blank" rel="noopener noreferrer" class="text-link hover:text-link-hover underline">Report Form</a>.',
+      'Players can report bugs through the official Discord server inside the <a href="https://discord.com/channels/305880135372898314/1417191387094585375" target="_blank" rel="noopener noreferrer" class="text-link hover:text-link-hover underline">#forms channel</a>.',
   },
   {
     question: "Is there a way to follow Jailbreak news and updates?",
     answer:
-      'Players can follow <a href="https://x.com/badimo" target="_blank" rel="noopener noreferrer" class="text-link hover:text-link-hover underline">Badimo</a>, <a href="https://x.com/asimo3089" target="_blank" rel="noopener noreferrer" class="text-link hover:text-link-hover underline">asimo3089</a>, and <a href="https://x.com/badccvoid" target="_blank" rel="noopener noreferrer" class="text-link hover:text-link-hover underline">badcc</a> on X, join the game\'s official Discord at <a href="https://discord.gg/jailbreak" target="_blank" rel="noopener noreferrer" class="text-link hover:text-link-hover underline">discord.gg/jailbreak</a>, or participate in the Reddit community at <a href="https://www.reddit.com/r/robloxjailbreak" target="_blank" rel="noopener noreferrer" class="text-link hover:text-link-hover underline">r/robloxjailbreak</a>.',
+      'Players can follow <a href="https://x.com/badimo" target="_blank" rel="noopener noreferrer" class="text-link hover:text-link-hover underline">Badimo</a>, <a href="https://x.com/asimo3089" target="_blank" rel="noopener noreferrer" class="text-link hover:text-link-hover underline">asimo3089</a>, <a href="https://x.com/badccvoid" target="_blank" rel="noopener noreferrer" class="text-link hover:text-link-hover underline">badcc</a>, and <a href="https://x.com/REAL_EpicTank" target="_blank" rel="noopener noreferrer" class="text-link hover:text-link-hover underline">Epic_Tank</a> on X, join the game\'s official Discord at <a href="https://discord.gg/jailbreak" target="_blank" rel="noopener noreferrer" class="text-link hover:text-link-hover underline">discord.gg/jailbreak</a>, or participate in the Reddit community at <a href="https://www.reddit.com/r/robloxjailbreak" target="_blank" rel="noopener noreferrer" class="text-link hover:text-link-hover underline">r/robloxjailbreak</a>.',
   },
   {
     question: "Why was the Jailbreak Changelogs website created?",
@@ -58,7 +58,7 @@ const faqs = [
   {
     question: "Where are the changelogs sourced from among the other data?",
     answer:
-      'Changelogs are sourced from the <a href="https://jailbreak.fandom.com/wiki/Jailbreak_Wiki:Home" target="_blank" rel="noopener noreferrer" class="text-link hover:text-link-hover underline">Jailbreak Wiki</a>, the official Discord changelogs channel, Twitter posts by <a href="https://x.com/badimo" target="_blank" rel="noopener noreferrer" class="text-link hover:text-link-hover underline">Badimo</a>, <a href="https://x.com/asimo3089" target="_blank" rel="noopener noreferrer" class="text-link hover:text-link-hover underline">asimo3089</a>, and <a href="https://x.com/badccvoid" target="_blank" rel="noopener noreferrer" class="text-link hover:text-link-hover underline">badcc</a>, as well as community contributions.',
+      'Changelogs are sourced from the <a href="https://jailbreak.fandom.com/wiki/Jailbreak_Wiki:Home" target="_blank" rel="noopener noreferrer" class="text-link hover:text-link-hover underline">Jailbreak Wiki</a>, the official Discord changelogs channel, Twitter posts by <a href="https://x.com/badimo" target="_blank" rel="noopener noreferrer" class="text-link hover:text-link-hover underline">Badimo</a>, <a href="https://x.com/asimo3089" target="_blank" rel="noopener noreferrer" class="text-link hover:text-link-hover underline">asimo3089</a>, <a href="https://x.com/badccvoid" target="_blank" rel="noopener noreferrer" class="text-link hover:text-link-hover underline">badcc</a>, and <a href="https://x.com/REAL_EpicTank" target="_blank" rel="noopener noreferrer" class="text-link hover:text-link-hover underline">Epic_Tank</a>, as well as community contributions.',
   },
   {
     question: "What is the Users page for?",
@@ -98,7 +98,7 @@ const faqs = [
   {
     question: "What are on-demand inventory scans?",
     answer:
-      "On-demand inventory scans allow you to request instant scans of your Roblox inventory at any time. Instead of waiting for automatic scans, you can trigger a scan manually to get the most up-to-date information about your items, including their current values and whether they are duped.<br><br>This feature is available to users who have logged in with Discord and connected their Roblox account. You can request scans from your own inventory page.",
+      "On-demand inventory scans allow you to request instant scans of your Roblox inventory at any time. Instead of waiting for automatic scans, you can trigger a scan manually to get the most up-to-date information about your items, including their current values and whether they are duped.<br><br>This feature is available to users who have logged in with Discord and connected their Roblox account, and have Supporter tier 3. You can request scans from your own inventory page.",
   },
   {
     question: "How do I request an on-demand inventory scan?",
